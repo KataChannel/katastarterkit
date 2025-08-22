@@ -1,8 +1,8 @@
 {
-  "name": "katacore-backend",
+  "name": "timonacore-backend",
   "version": "1.1.0",
-  "description": "KataCore Backend - NestJS with GraphQL, Prisma, Redis, Minio",
-  "author": "KataCore Team",
+  "description": "Timonacore Backend - NestJS with GraphQL, Prisma, Redis, Minio",
+  "author": "Timonacore Team",
   "private": true,
   "license": "MIT",
   "scripts": {

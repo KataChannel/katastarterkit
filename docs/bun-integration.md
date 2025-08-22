@@ -1,6 +1,6 @@
 # Bun.js Integration Guide
 
-Bun is a fast all-in-one JavaScript runtime & toolkit designed as a drop-in replacement for Node.js. This guide covers how to use Bun.js with KataCore for improved development experience and performance.
+Bun is a fast all-in-one JavaScript runtime & toolkit designed as a drop-in replacement for Node.js. This guide covers how to use Bun.js with Timonacore for improved development experience and performance.
 
 ## Why Bun.js?
 
@@ -54,7 +54,7 @@ bun --version
 ```bash
 # Clone and setup with Bun
 git clone <repository-url>
-cd katacore
+cd timonacore
 
 # Run setup script (will detect Bun automatically)
 ./scripts/setup.sh
@@ -110,7 +110,7 @@ The backend includes Bun-specific configurations:
 **bun.json:**
 ```json
 {
-  "name": "katacore-backend",
+  "name": "timonacore-backend",
   "module": "dist/main.js",
   "type": "module",
   "scripts": {
@@ -461,7 +461,7 @@ time bun run build:bun
 
 ## Conclusion
 
-Bun.js provides significant performance improvements for KataCore development:
+Bun.js provides significant performance improvements for Timonacore development:
 
 - **Faster development cycle** with instant hot reloads
 - **Reduced resource usage** for better development experience

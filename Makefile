@@ -1,10 +1,10 @@
-# KataCore Development Commands
+# Timonacore Development Commands
 
 .PHONY: help install dev build clean docker-up docker-down test lint
 
 # Default target
 help:
-	@echo "KataCore Development Commands"
+	@echo "Timonacore Development Commands"
 	@echo "============================="
 	@echo "install      - Install all dependencies with Bun"
 	@echo "dev          - Start development servers"

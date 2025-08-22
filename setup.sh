@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# KataCore Quick Setup Script
-# This script sets up the KataCore project with Bun.js
+# Timonacore Quick Setup Script
+# This script sets up the Timonacore project with Bun.js
 
 set -e
 
-echo "🚀 Setting up KataCore project..."
+echo "🚀 Setting up Timonacore project..."
 
 # Check if Bun is installed
 if ! command -v bun &> /dev/null; then
@@ -57,11 +57,11 @@ if command -v docker &> /dev/null && command -v docker-compose &> /dev/null; the
     cd ..
 else
     echo "⚠️ Docker not found. Please set up PostgreSQL, Redis, and Minio manually."
-    echo "Database connection string: postgresql://postgres:postgres@localhost:5432/katacore"
+    echo "Database connection string: postgresql://postgres:postgres@localhost:5432/timonacore"
 fi
 
 echo ""
-echo "🎉 KataCore setup complete!"
+echo "🎉 Timonacore setup complete!"
 echo ""
 echo "To start development:"
 echo "  bun run dev"

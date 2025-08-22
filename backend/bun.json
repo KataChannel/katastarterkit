@@ -1,5 +1,5 @@
 {
-  "name": "katacore-backend",
+  "name": "timonacore-backend",
   "module": "dist/main.js",
   "type": "module",
   "scripts": {

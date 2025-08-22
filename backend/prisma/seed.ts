@@ -9,10 +9,10 @@ async function main() {
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@katacore.dev' },
+    where: { email: 'admin@timonacore.dev' },
     update: {},
     create: {
-      email: 'admin@katacore.dev',
+      email: 'admin@timonacore.dev',
       username: 'admin',
       password: adminPassword,
       firstName: 'Admin',
@@ -24,10 +24,10 @@ async function main() {
   // Create test users
   const userPassword = await bcrypt.hash('user123', 10);
   const testUser = await prisma.user.upsert({
-    where: { email: 'user@katacore.dev' },
+    where: { email: 'user@timonacore.dev' },
     update: {},
     create: {
-      email: 'user@katacore.dev',
+      email: 'user@timonacore.dev',
       username: 'testuser',
       password: userPassword,
       firstName: 'Test',
@@ -84,10 +84,10 @@ async function main() {
   const posts = await Promise.all([
     prisma.post.create({
       data: {
-        title: 'Welcome to KataCore',
-        content: `# Welcome to KataCore
+        title: 'Welcome to Timonacore',
+        content: `# Welcome to Timonacore
 
-KataCore is an enterprise-grade fullstack starter kit built with modern technologies.
+Timonacore is an enterprise-grade fullstack starter kit built with modern technologies.
 
 ## Features
 
@@ -99,8 +99,8 @@ KataCore is an enterprise-grade fullstack starter kit built with modern technolo
 - **Docker** for containerization
 
 This starter kit provides everything you need to build scalable, production-ready applications.`,
-        excerpt: 'Learn about KataCore, the enterprise fullstack starter kit.',
-        slug: 'welcome-to-katacore',
+        excerpt: 'Learn about Timonacore, the enterprise fullstack starter kit.',
+        slug: 'welcome-to-timonacore',
         status: PostStatus.PUBLISHED,
         publishedAt: new Date(),
         authorId: admin.id,
@@ -206,7 +206,7 @@ export class PostModule {}
   await Promise.all([
     prisma.comment.create({
       data: {
-        content: 'Great introduction to KataCore! Looking forward to using it.',
+        content: 'Great introduction to Timonacore! Looking forward to using it.',
         postId: posts[0].id,
         userId: testUser.id,
       },
@@ -237,8 +237,8 @@ export class PostModule {}
   ]);
 
   console.log('✅ Seed completed successfully!');
-  console.log(`👤 Admin user: admin@katacore.dev / admin123`);
-  console.log(`👤 Test user: user@katacore.dev / user123`);
+  console.log(`👤 Admin user: admin@timonacore.dev / admin123`);
+  console.log(`👤 Test user: user@timonacore.dev / user123`);
   console.log(`📝 Created ${posts.length} posts`);
   console.log(`🏷️ Created ${tags.length} tags`);
 }

@@ -1,5 +1,5 @@
 {
-  "name": "katacore",
+  "name": "timonacore",
   "version": "1.1.0",
   "description": "Enterprise Fullstack Starter Kit with Next.js + NestJS + GraphQL + Prisma + Redis + Minio",
   "private": true,
@@ -65,7 +65,7 @@
     "modern",
     "fast"
   ],
-  "author": "KataCore Team",
+  "author": "Timonacore Team",
   "license": "MIT",
   "repository": {
     "type": "git",

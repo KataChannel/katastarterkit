@@ -1,5 +1,5 @@
 {
-  "name": "katacore-frontend",
+  "name": "timonacore-frontend",
   "module": "src/app/layout.tsx",
   "type": "module",
   "scripts": {

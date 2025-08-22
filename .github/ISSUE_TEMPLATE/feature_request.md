@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for KataCore
+about: Suggest an idea for Timonacore
 title: '[FEATURE] '
 labels: ['enhancement']
 assignees: ''

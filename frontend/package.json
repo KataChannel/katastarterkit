@@ -1,7 +1,7 @@
 {
-  "name": "katacore-frontend",
+  "name": "timonacore-frontend",
   "version": "1.1.0",
-  "description": "KataCore Frontend - Next.js with TailwindCSS and GraphQL",
+  "description": "Timonacore Frontend - Next.js with TailwindCSS and GraphQL",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# KataCore Dependency Update Script
+# Timonacore Dependency Update Script
 # This script updates all dependencies to their latest versions
 
 set -e
 
-echo "🔄 Updating KataCore dependencies to latest versions..."
+echo "🔄 Updating Timonacore dependencies to latest versions..."
 
 # Check if Bun is installed
 if ! command -v bun &> /dev/null; then

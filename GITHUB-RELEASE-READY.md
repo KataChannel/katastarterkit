@@ -1,4 +1,4 @@
-# 🎯 KataCore v1.1.0 - GitHub Starter Kit Ready!
+# 🎯 Timonacore v1.1.0 - GitHub Starter Kit Ready!
 
 **✅ Project has been optimized and cleaned up for GitHub release!**
 
@@ -18,7 +18,7 @@
 
 ### 🗂️ **Clean Project Structure**
 ```
-katacore/
+timonacore/
 ├── 📁 .github/               # GitHub templates & workflows
 │   ├── workflows/ci.yml      # CI/CD pipeline
 │   ├── ISSUE_TEMPLATE/       # Bug & feature templates  
@@ -75,13 +75,13 @@ katacore/
 1. **Push to GitHub:**
    ```bash
    git add .
-   git commit -m "feat: KataCore v1.1.0 - Modern fullstack starter kit"
+   git commit -m "feat: Timonacore v1.1.0 - Modern fullstack starter kit"
    git push origin main
    ```
 
 2. **Create GitHub Release:**
    - Tag: `v1.1.0`
-   - Title: `KataCore v1.1.0 - Modern Fullstack Starter Kit`
+   - Title: `Timonacore v1.1.0 - Modern Fullstack Starter Kit`
    - Description: Use content from CHANGELOG.md
 
 3. **Add GitHub Topics:**
@@ -98,7 +98,7 @@ katacore/
 
 ---
 
-**🎉 KataCore is now ready to be the best fullstack starter kit on GitHub!**
+**🎉 Timonacore is now ready to be the best fullstack starter kit on GitHub!**
 
 **Key Selling Points:**
 - ⚡ **Fastest** - Bun.js runtime

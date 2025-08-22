@@ -1,4 +1,4 @@
-# 🚀 KataCore - Modern Fullstack Starter Kit
+# 🚀 Timonacore - Modern Fullstack Starter Kit
 
 > A high-performance, enterprise-ready fullstack starter kit built with the latest technologies and **Bun.js** for blazing-fast development.
 
@@ -140,7 +140,7 @@ make docker-down     # Stop services
 
 2. **Update database configuration in `backend/.env`:**
    ```env
-   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/katacore"
+   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/timonacore"
    REDIS_URL="redis://localhost:6379"
    ```
 
@@ -185,6 +185,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Happy coding! 🎉**
 
-> **KataCore** - Build faster, ship smarter.
+> **Timonacore** - Build faster, ship smarter.
 
 ⭐ **If you find this project helpful, please give it a star on GitHub!**

@@ -1,8 +1,8 @@
-# 🚀 GitHub Deploy Instructions for KataCore
+# 🚀 GitHub Deploy Instructions for Timonacore
 
 ## ✅ Repository Setup Complete
 
-The KataCore project has been successfully prepared and linked to GitHub repository:
+The Timonacore project has been successfully prepared and linked to GitHub repository:
 **https://github.com/KataChannel/katastarterkit.git**
 
 ## 📋 Next Steps to Deploy
@@ -20,7 +20,7 @@ Once the repository is created on GitHub:
 
 ```bash
 # Make sure you're in the project directory
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/timonacore
 
 # Push to GitHub (after creating the repository)
 git push -u origin main
@@ -104,4 +104,4 @@ The project is fully prepared as a professional GitHub starter kit with:
 
 ---
 
-**🎉 KataCore is ready to become the best fullstack starter kit on GitHub!**
+**🎉 Timonacore is ready to become the best fullstack starter kit on GitHub!**
