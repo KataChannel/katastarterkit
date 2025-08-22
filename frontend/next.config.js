@@ -1,17 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
-  experimental: {
-    serverComponentsExternalPackages: ['@apollo/client'],
-  },
   images: {
     domains: ['localhost', 'minio'],
     remotePatterns: [
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '9000',
+        port: '19001',
         pathname: '/uploads/**',
       },
       {

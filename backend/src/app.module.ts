@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -10,16 +10,13 @@ import * as redisStore from 'cache-manager-redis-store';
 
 // Modules
 import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { PostsModule } from './posts/posts.module';
-import { CommentsModule } from './comments/comments.module';
-import { TagsModule } from './tags/tags.module';
-import { FilesModule } from './files/files.module';
-import { HealthModule } from './health/health.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
+import { EnvConfigService } from './config/env-config.service';
+
+// Resolvers
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
@@ -27,24 +24,28 @@ import { validationSchema } from './config/validation';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema,
+      envFilePath: ['.env.local', '../.env'],
     }),
 
     // GraphQL
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      sortSchema: true,
-      playground: process.env.NODE_ENV !== 'production',
-      introspection: process.env.NODE_ENV !== 'production',
-      context: ({ req, res }) => ({ req, res }),
-      subscriptions: {
-        'graphql-ws': {
-          path: '/graphql',
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        sortSchema: true,
+        playground: configService.get('NODE_ENV') !== 'production',
+        introspection: configService.get('NODE_ENV') !== 'production',
+        context: ({ req, res }) => ({ req, res }),
+        subscriptions: {
+          'graphql-ws': {
+            path: '/graphql',
+          },
+          'subscriptions-transport-ws': {
+            path: '/graphql',
+          },
         },
-        'subscriptions-transport-ws': {
-          path: '/graphql',
-        },
-      },
+      }),
     }),
 
     // Rate Limiting
@@ -56,12 +57,16 @@ import { validationSchema } from './config/validation';
     ]),
 
     // Redis Cache
-    CacheModule.register({
+    CacheModule.registerAsync({
       isGlobal: true,
-      store: redisStore,
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      ttl: 60, // 60 seconds default TTL
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        store: redisStore as any,
+        host: configService.get('REDIS_HOST'),
+        port: configService.get('REDIS_PORT'),
+        password: configService.get('REDIS_PASSWORD'),
+        ttl: 60, // 60 seconds default TTL
+      }),
     }),
 
     // Health Checks
@@ -69,13 +74,7 @@ import { validationSchema } from './config/validation';
 
     // Application Modules
     PrismaModule,
-    AuthModule,
-    UsersModule,
-    PostsModule,
-    CommentsModule,
-    TagsModule,
-    FilesModule,
-    HealthModule,
   ],
+  providers: [EnvConfigService, AppResolver],
 })
 export class AppModule {}

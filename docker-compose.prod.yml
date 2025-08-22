@@ -1,0 +1,113 @@
+# Docker Compose for Production Environment
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  # Production Backend Configuration
+  backend:
+    environment:
+      NODE_ENV: production
+      # Use production database URL
+      DATABASE_URL: ${DOCKER_DATABASE_URL}
+      # Production security settings
+      JWT_SECRET: ${JWT_SECRET}
+      # Disable development features
+      DEBUG: ""
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    # Production restart policy
+    restart: always
+    # Don't expose debug port
+    ports:
+      - "${PORT:-4000}:4000"
+    # Don't mount source code in production
+    volumes: []
+
+  # Production Frontend Configuration  
+  frontend:
+    environment:
+      NODE_ENV: production
+      # Production Next.js settings
+      NEXT_TELEMETRY_DISABLED: 1
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    # Production restart policy
+    restart: always
+    # Production ports only
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    # Don't mount source code in production
+    volumes: []
+
+  # Production Database Configuration
+  postgres:
+    environment:
+      # Production database settings
+      POSTGRES_LOG_STATEMENT: none
+      POSTGRES_SHARED_PRELOAD_LIBRARIES: pg_stat_statements
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    # Don't expose database port in production
+    ports: []
+    # Production restart policy
+    restart: always
+
+  # Production Redis Configuration
+  redis:
+    # Production redis config
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    # Don't expose redis port in production
+    ports: []
+    # Production restart policy
+    restart: always
+
+  # Production Minio Configuration
+  minio:
+    environment:
+      # Production minio settings
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      # Enable production features
+      MINIO_BROWSER_REDIRECT_URL: https://${DOMAIN}/minio
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    # Don't expose minio ports in production (use reverse proxy)
+    ports: []
+    # Production restart policy
+    restart: always

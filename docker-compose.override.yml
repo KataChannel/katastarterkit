@@ -1,0 +1,53 @@
+# Docker Compose Override for Development
+# This file is automatically loaded alongside docker-compose.yml in development
+
+services:
+  # Development-specific configurations
+  backend:
+    environment:
+      # Override for development
+      NODE_ENV: development
+      # Enable hot reload and debugging
+      DEBUG: "*"
+    volumes:
+      # Mount source code for hot reload
+      - ./backend:/app
+      - /app/node_modules
+    # Development ports
+    ports:
+      - "${PORT:-4000}:4000"
+      - "9229:9229"  # Debug port
+
+  frontend:
+    environment:
+      # Override for development
+      NODE_ENV: development
+      # Enable Next.js development features
+      NEXT_TELEMETRY_DISABLED: 1
+    volumes:
+      # Mount source code for hot reload
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    # Development ports
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+
+  # Development database with exposed ports for local access
+  postgres:
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      # Development logging
+      POSTGRES_LOG_STATEMENT: all
+
+  # Development redis with exposed ports for local access
+  redis:
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+
+  # Development minio with exposed ports for local access
+  minio:
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"

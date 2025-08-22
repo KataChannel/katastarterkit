@@ -1,14 +1,30 @@
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { PrismaService } from './prisma/prisma.service';
+import { EnvConfigService } from './config/env-config.service';
+import * as dotenv from 'dotenv';
+import { join } from 'path';
+
+// Load environment variables
+dotenv.config({ path: join(__dirname, '../.env.local') });
+dotenv.config({ path: join(__dirname, '../../.env') });
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  
+  // Log environment configuration using ConfigService directly
+  console.log('🔧 Environment Configuration:');
+  console.log(`   NODE_ENV: ${configService.get('NODE_ENV', 'development')}`);
+  console.log(`   PORT: ${configService.get('PORT', 4000)}`);
+  console.log(`   FRONTEND_URL: ${configService.get('FRONTEND_URL', 'http://localhost:3000')}`);
   
   // Enable CORS
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: configService.get('FRONTEND_URL', 'http://localhost:3000'),
     credentials: true,
   });
 
@@ -25,11 +41,11 @@ async function bootstrap() {
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);
 
-  const port = process.env.PORT || 4000;
+  const port = configService.get('PORT', 4000);
   await app.listen(port);
   
-  console.log(`🚀 Server ready at http://localhost:${port}`);
-  console.log(`🎯 GraphQL Playground: http://localhost:${port}/graphql`);
+  console.log(`🚀 Backend server running on http://localhost:${port}`);
+  console.log(`📊 GraphQL playground available at http://localhost:${port}/graphql`);
 }
 
 bootstrap();
