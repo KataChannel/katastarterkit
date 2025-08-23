@@ -1,22 +1,17 @@
 # Multi-stage Dockerfile for Next.js Frontend with Bun.js
 
-# Bun dependencies stage
-FROM oven/bun:1.1.34 AS bun-deps
+# Dependencies stage
+FROM oven/bun:1.1.34 AS deps
 WORKDIR /app
-COPY package.json bun.json ./
+# Install unzip for Cypress
+RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
+COPY package.json bun.lockb* ./
 RUN bun install --frozen-lockfile
 
-# Node.js dependencies stage (fallback)
-FROM node:22-alpine AS node-deps
-RUN apk add --no-cache libc6-compat
+# Build stage
+FROM oven/bun:1.1.34 AS builder
 WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci --frozen-lockfile
-
-# Bun build stage
-FROM oven/bun:1.1.34 AS bun-builder
-WORKDIR /app
-COPY --from=bun-deps /app/node_modules ./node_modules
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Disable Next.js telemetry
@@ -24,20 +19,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN bun --bun next build
 
-# Node.js build stage (fallback)
-FROM node:22-alpine AS node-builder
+# Production stage
+FROM node:22-alpine AS production
 WORKDIR /app
-COPY --from=node-deps /app/node_modules ./node_modules
-COPY . .
 
-# Disable Next.js telemetry
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN npm run build
-
-# Bun production stage
-FROM oven/bun:1.1.34 AS bun-production
-WORKDIR /app
+# Install curl for health checks
+RUN apk add --no-cache curl
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -45,11 +32,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=bun-builder /app/public ./public
-
-# Automatically leverage output traces to reduce image size
-COPY --from=bun-builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=bun-builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Copy the entire standalone output
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+# Copy static files to the correct location
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Copy public files
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 
@@ -60,35 +48,6 @@ ENV HOSTNAME="0.0.0.0"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD bun run health-check.js
-
-CMD ["bun", "run", "server.js"]
-
-# Node.js production stage (fallback)
-FROM node:22-alpine AS node-production
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=node-builder /app/public ./public
-
-# Automatically leverage output traces to reduce image size
-COPY --from=node-builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=node-builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
-EXPOSE 3000
-
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node health-check.js
+  CMD curl -f http://localhost:3000/ || exit 1
 
 CMD ["node", "server.js"]

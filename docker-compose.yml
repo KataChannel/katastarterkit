@@ -83,9 +83,10 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     ports:
       - "${PORT:-4000}:4000"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+    # Note: Remove volumes for production deployment  
+    # volumes:
+    #   - ./backend:/app
+    #   - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
@@ -111,10 +112,11 @@ services:
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+    # Note: Remove volumes for production deployment
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
+    #   - /app/.next
     depends_on:
       - backend
     networks:
