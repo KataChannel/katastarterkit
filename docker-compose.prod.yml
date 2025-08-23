@@ -1,113 +1,162 @@
-# Docker Compose for Production Environment
-# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+version: '3.8'
 
 services:
-  # Production Backend Configuration
-  backend:
-    environment:
-      NODE_ENV: production
-      # Use production database URL
-      DATABASE_URL: ${DOCKER_DATABASE_URL}
-      # Production security settings
-      JWT_SECRET: ${JWT_SECRET}
-      # Disable development features
-      DEBUG: ""
-    # Production resource limits
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
-    # Production restart policy
-    restart: always
-    # Don't expose debug port
-    ports:
-      - "${PORT:-4000}:4000"
-    # Don't mount source code in production
-    volumes: []
-
-  # Production Frontend Configuration  
-  frontend:
-    environment:
-      NODE_ENV: production
-      # Production Next.js settings
-      NEXT_TELEMETRY_DISABLED: 1
-    # Production resource limits
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-    # Production restart policy
-    restart: always
-    # Production ports only
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
-    # Don't mount source code in production
-    volumes: []
-
-  # Production Database Configuration
+  # Production overrides for PostgreSQL
   postgres:
-    environment:
-      # Production database settings
-      POSTGRES_LOG_STATEMENT: none
-      POSTGRES_SHARED_PRELOAD_LIBRARIES: pg_stat_statements
-    # Production resource limits
     deploy:
       resources:
         limits:
-          cpus: '2.0'
-          memory: 4G
-        reservations:
-          cpus: '0.5'
-          memory: 1G
-    # Don't expose database port in production
-    ports: []
-    # Production restart policy
-    restart: always
-
-  # Production Redis Configuration
-  redis:
-    # Production redis config
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
-    # Production resource limits
-    deploy:
-      resources:
-        limits:
+          memory: 2048M
           cpus: '1.0'
-          memory: 1G
         reservations:
-          cpus: '0.25'
-          memory: 256M
-    # Don't expose redis port in production
-    ports: []
-    # Production restart policy
-    restart: always
+          memory: 1024M
+          cpus: '0.5'
+    command: >
+      postgres
+      -c max_connections=200
+      -c shared_buffers=512MB
+      -c effective_cache_size=1536MB
+      -c maintenance_work_mem=128MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
 
-  # Production Minio Configuration
-  minio:
+  # Production overrides for Backend
+  backend:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '0.8'
+        reservations:
+          memory: 512M
+          cpus: '0.3'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     environment:
-      # Production minio settings
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
-      # Enable production features
-      MINIO_BROWSER_REDIRECT_URL: https://${DOMAIN}/minio
-    # Production resource limits
+      - NODE_ENV=production
+      - LOG_LEVEL=warn
+    volumes: []  # Remove development volumes in production
+
+  # Production overrides for Frontend
+  frontend:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.2'
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    environment:
+      - NODE_ENV=production
+    volumes: []  # Remove development volumes in production
+
+  # Production overrides for Redis
+  redis:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
           memory: 512M
-    # Don't expose minio ports in production (use reverse proxy)
-    ports: []
-    # Production restart policy
-    restart: always
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.2'
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --appendonly yes
+      --appendfsync everysec
+
+  # Production overrides for MinIO
+  minio:
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.2'
+
+  # Production monitoring overrides
+  prometheus:
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.2'
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.retention.size=10GB'
+      - '--web.enable-lifecycle'
+
+  grafana:
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.3'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+
+  # Reverse Proxy (Nginx) - Production only
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.3'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+    networks:
+      - timonacore-network
+
+volumes:
+  nginx_logs:
+    driver: local
+
+networks:
+  timonacore-network:
+    external: true

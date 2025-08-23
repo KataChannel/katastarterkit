@@ -1,0 +1,131 @@
+# Redis Cluster Configuration for Production
+# This setup creates a 6-node Redis cluster (3 masters + 3 replicas)
+
+services:
+  # Redis Node 1 (Master)
+  redis-1:
+    image: redis:7.4-alpine
+    container_name: redis-1
+    restart: unless-stopped
+    ports:
+      - "7001:6379"
+    volumes:
+      - ./docker/redis/cluster/redis-1.conf:/usr/local/etc/redis/redis.conf
+      - redis_1_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - timonacore-network
+
+  # Redis Node 2 (Master)
+  redis-2:
+    image: redis:7.4-alpine
+    container_name: redis-2
+    restart: unless-stopped
+    ports:
+      - "7002:6379"
+    volumes:
+      - ./docker/redis/cluster/redis-2.conf:/usr/local/etc/redis/redis.conf
+      - redis_2_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - timonacore-network
+
+  # Redis Node 3 (Master)
+  redis-3:
+    image: redis:7.4-alpine
+    container_name: redis-3
+    restart: unless-stopped
+    ports:
+      - "7003:6379"
+    volumes:
+      - ./docker/redis/cluster/redis-3.conf:/usr/local/etc/redis/redis.conf
+      - redis_3_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - timonacore-network
+
+  # Redis Node 4 (Replica)
+  redis-4:
+    image: redis:7.4-alpine
+    container_name: redis-4
+    restart: unless-stopped
+    ports:
+      - "7004:6379"
+    volumes:
+      - ./docker/redis/cluster/redis-4.conf:/usr/local/etc/redis/redis.conf
+      - redis_4_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - timonacore-network
+
+  # Redis Node 5 (Replica)
+  redis-5:
+    image: redis:7.4-alpine
+    container_name: redis-5
+    restart: unless-stopped
+    ports:
+      - "7005:6379"
+    volumes:
+      - ./docker/redis/cluster/redis-5.conf:/usr/local/etc/redis/redis.conf
+      - redis_5_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - timonacore-network
+
+  # Redis Node 6 (Replica)
+  redis-6:
+    image: redis:7.4-alpine
+    container_name: redis-6
+    restart: unless-stopped
+    ports:
+      - "7006:6379"
+    volumes:
+      - ./docker/redis/cluster/redis-6.conf:/usr/local/etc/redis/redis.conf
+      - redis_6_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - timonacore-network
+
+  # Redis Cluster Setup
+  redis-cluster-creator:
+    image: redis:7.4-alpine
+    container_name: redis-cluster-creator
+    command: >
+      sh -c "
+        sleep 10 &&
+        redis-cli --cluster create
+        redis-1:6379
+        redis-2:6379
+        redis-3:6379
+        redis-4:6379
+        redis-5:6379
+        redis-6:6379
+        --cluster-replicas 1 --cluster-yes
+      "
+    depends_on:
+      - redis-1
+      - redis-2
+      - redis-3
+      - redis-4
+      - redis-5
+      - redis-6
+    networks:
+      - timonacore-network
+
+volumes:
+  redis_1_data:
+    driver: local
+  redis_2_data:
+    driver: local
+  redis_3_data:
+    driver: local
+  redis_4_data:
+    driver: local
+  redis_5_data:
+    driver: local
+  redis_6_data:
+    driver: local
+
+networks:
+  timonacore-network:
+    external: true

@@ -19,8 +19,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN bun --bun next build
 
-# Production stage
-FROM node:22-alpine AS production
+# Production stage with Bun.js
+FROM oven/bun:1.1.34-alpine AS production
 WORKDIR /app
 
 # Install curl for health checks
@@ -49,4 +49,4 @@ ENV HOSTNAME="0.0.0.0"
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/ || exit 1
 
-CMD ["npm", "start"]
+CMD ["bun", "run", "start"]

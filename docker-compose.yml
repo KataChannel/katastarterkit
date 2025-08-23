@@ -37,7 +37,7 @@ services:
       timeout: 10s
       retries: 5
 
-  # Minio Object Storage
+  # Minio Object Storage with HTTPS
   minio:
     image: ${MINIO_IMAGE:-minio/minio:RELEASE.2024-08-26T15-33-07Z}
     container_name: ${MINIO_CONTAINER_NAME:-timonacore-minio}
@@ -50,11 +50,12 @@ services:
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio_data:/data
-    command: server /data --console-address ":9001"
+      - ./docker/minio/certs:/root/.minio/certs:ro
+    command: server /data --console-address ":9001" --certs-dir /root/.minio/certs
     networks:
       - timonacore-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "curl", "-f", "https://localhost:9000/minio/health/live", "-k"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -78,7 +79,7 @@ services:
       MINIO_PORT: ${MINIO_PORT:-9000}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+      MINIO_USE_SSL: ${MINIO_USE_SSL:-true}
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-uploads}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     ports:
