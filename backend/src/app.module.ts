@@ -3,13 +3,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { CacheModule } from '@nestjs/cache-manager';
 import { TerminusModule } from '@nestjs/terminus';
 import { join } from 'path';
-import * as redisStore from 'cache-manager-redis-store';
 
 // Modules
 import { PrismaModule } from './prisma/prisma.module';
+import { CacheModule } from './cache/cache.module';
+import { AuthModule } from './auth/auth.module';
+import { GraphQLResolversModule } from './graphql/graphql.module';
+import { GrokModule } from './grok/grok.module';
+import { MinioModule } from './minio/minio.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -56,24 +59,16 @@ import { AppResolver } from './app.resolver';
       },
     ]),
 
-    // Redis Cache
-    CacheModule.registerAsync({
-      isGlobal: true,
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        store: redisStore as any,
-        host: configService.get('REDIS_HOST'),
-        port: configService.get('REDIS_PORT'),
-        password: configService.get('REDIS_PASSWORD'),
-        ttl: 60, // 60 seconds default TTL
-      }),
-    }),
-
     // Health Checks
     TerminusModule,
 
     // Application Modules
     PrismaModule,
+    CacheModule,
+    AuthModule,
+    GraphQLResolversModule,
+    GrokModule,
+    MinioModule,
   ],
   providers: [EnvConfigService, AppResolver],
 })

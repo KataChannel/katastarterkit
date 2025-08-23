@@ -32,12 +32,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy the entire standalone output
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-# Copy static files to the correct location
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# Copy public files
+# Copy built application
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 
 USER nextjs
 
@@ -50,4 +49,4 @@ ENV HOSTNAME="0.0.0.0"
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/ || exit 1
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]

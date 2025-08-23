@@ -2,10 +2,210 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AuthResponse {
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+}
+
+type Comment {
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  parent: Comment
+  parentId: String
+  post: Post!
+  postId: String!
+  replies: [Comment!]!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+input CreateCommentInput {
+  content: String!
+  parentId: String
+  postId: String!
+}
+
+input CreatePostInput {
+  content: String!
+  excerpt: String
+  featuredImage: String
+  slug: String!
+  status: PostStatus! = DRAFT
+  tags: [String!]
+  title: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input LoginUserInput {
+  emailOrUsername: String!
+  password: String!
+}
+
+type Mutation {
+  createComment(input: CreateCommentInput!): Comment!
+  createPost(input: CreatePostInput!): Post!
+  deleteComment(id: String!): Boolean!
+  deletePost(id: String!): Boolean!
+  deleteUser(id: String!): Boolean!
+  generatePostSummary(postId: String!): String!
+  generateSummary(content: String!, maxLength: Float! = 200): String!
+  generateTags(content: String!, maxTags: Float! = 5): [String!]!
+  improveContent(content: String!, instruction: String!): String!
+  loginUser(input: LoginUserInput!): AuthResponse!
+  publishPost(id: String!): Post!
+  registerUser(input: RegisterUserInput!): AuthResponse!
+  updateComment(id: String!, input: UpdateCommentInput!): Comment!
+  updatePost(id: String!, input: UpdatePostInput!): Post!
+  updateUser(id: String!, input: UpdateUserInput!): User!
+}
+
+type PaginatedPosts {
+  items: [Post!]!
+  meta: PaginationMeta!
+}
+
+input PaginationInput {
+  limit: Int! = 10
+  page: Int! = 1
+  search: String
+  sortBy: String
+  sortOrder: String
+}
+
+type PaginationMeta {
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
+}
+
+type Post {
+  author: User!
+  authorId: String!
+  comments: [Comment!]!
+  commentsCount: Float!
+  content: String!
+  createdAt: DateTime!
+  excerpt: String
+  featuredImage: String
+  id: ID!
+  likesCount: Float!
+  publishedAt: DateTime
+  slug: String!
+  status: PostStatus!
+  tags: [Tag!]
+  title: String!
+  updatedAt: DateTime!
+}
+
+input PostFiltersInput {
+  authorId: String
+  search: String
+  status: PostStatus
+  tags: [String!]
+}
+
+"""Post status types"""
+enum PostStatus {
+  ARCHIVED
+  DRAFT
+  PUBLISHED
+}
+
 type Query {
+  getCommentById(id: String!): Comment!
+  getCommentsByPost(postId: String!): [Comment!]!
+  getMe: User!
+  getMyPosts: [Post!]!
+  getPostById(id: String!): Post!
+  getPostBySlug(slug: String!): Post!
+  getPosts(filters: PostFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPosts!
+  getUserById(id: String!): User!
+  getUsers: [User!]!
+
   """Hello world query"""
   hello: String!
 
   """Get API version"""
   version: String!
+}
+
+input RegisterUserInput {
+  avatar: String
+  email: String!
+  firstName: String
+  lastName: String
+  password: String!
+  username: String!
+}
+
+type Subscription {
+  newComment(postId: String): Comment!
+  postCreated: Post!
+  postUpdated: Post!
+  userRegistered: User!
+}
+
+type Tag {
+  color: String
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  name: String!
+  posts: [Post!]
+  postsCount: Float!
+  slug: String!
+  updatedAt: DateTime!
+}
+
+input UpdateCommentInput {
+  content: String
+}
+
+input UpdatePostInput {
+  content: String
+  excerpt: String
+  featuredImage: String
+  slug: String
+  status: PostStatus
+  tags: [String!]
+  title: String
+}
+
+input UpdateUserInput {
+  avatar: String
+  email: String
+  firstName: String
+  lastName: String
+  role: UserRole
+  username: String
+}
+
+type User {
+  avatar: String
+  createdAt: DateTime!
+  email: String!
+  firstName: String
+  id: ID!
+  isActive: Boolean!
+  lastName: String
+  role: UserRole!
+  updatedAt: DateTime!
+  username: String!
+}
+
+"""User role types"""
+enum UserRole {
+  ADMIN
+  MODERATOR
+  USER
 }
