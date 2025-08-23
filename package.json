@@ -31,14 +31,14 @@
     "db:studio": "cd backend && bunx prisma studio"
   },
   "devDependencies": {
-    "concurrently": "^9.0.1",
-    "prettier": "^3.3.3",
-    "@typescript-eslint/eslint-plugin": "^8.8.0",
-    "@typescript-eslint/parser": "^8.8.0",
-    "eslint": "^9.11.1",
-    "eslint-config-prettier": "^9.1.0",
-    "husky": "^9.1.6",
-    "lint-staged": "^15.2.10"
+    "concurrently": "^9.2.0",
+    "prettier": "^3.6.2",
+    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@typescript-eslint/parser": "^8.40.0",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5"
   },
   "engines": {
     "node": ">=20.0.0",

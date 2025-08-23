@@ -100,6 +100,6 @@ export class UserResolver {
   // Subscriptions
   @Subscription(() => User, { name: 'userRegistered' })
   userRegistered() {
-    return pubSub.asyncIterator('userRegistered');
+    return (pubSub as any).asyncIterator('userStatusChanged');
   }
 }

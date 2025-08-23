@@ -121,6 +121,6 @@ export class CommentResolver {
     }
   })
   newComment(@Args('postId', { nullable: true }) postId?: string) {
-    return pubSub.asyncIterator('newComment');
+    return (pubSub as any).asyncIterator('newComment');
   }
 }

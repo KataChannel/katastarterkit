@@ -158,11 +158,11 @@ export class PostResolver {
   // Subscriptions
   @Subscription(() => Post, { name: 'postCreated' })
   postCreated() {
-    return pubSub.asyncIterator('postCreated');
+    return (pubSub as any).asyncIterator('postCreated');
   }
 
   @Subscription(() => Post, { name: 'postUpdated' })
   postUpdated() {
-    return pubSub.asyncIterator('postUpdated');
+    return (pubSub as any).asyncIterator('postUpdated');
   }
 }

@@ -31,12 +31,12 @@ help: ## Show this help message
 install: ## Install all dependencies
 	@echo "$(GREEN)Installing dependencies...$(NC)"
 	@if command -v bun >/dev/null 2>&1; then \
-		echo "Installing root dependencies..."; \
-		bun install; \
-		echo "Installing backend dependencies..."; \
-		cd $(BACKEND_DIR) && bun install; \
-		echo "Installing frontend dependencies..."; \
-		cd $(FRONTEND_DIR) && bun install; \
+		echo "Installing root dependencies..." && \
+		bun install && \
+		echo "Installing backend dependencies..." && \
+		(cd $(BACKEND_DIR) && bun install) && \
+		echo "Installing frontend dependencies..." && \
+		(cd $(FRONTEND_DIR) && bun install); \
 	else \
 		echo "$(RED)Error: Bun.js is not installed. Please install it first: https://bun.sh$(NC)"; \
 		exit 1; \
@@ -46,19 +46,19 @@ install: ## Install all dependencies
 .PHONY: install-backend
 install-backend: ## Install backend dependencies only
 	@echo "$(GREEN)Installing backend dependencies...$(NC)"
-	@cd $(BACKEND_DIR) && bun install
+	@(cd $(BACKEND_DIR) && bun install)
 
 .PHONY: install-frontend
 install-frontend: ## Install frontend dependencies only
 	@echo "$(GREEN)Installing frontend dependencies...$(NC)"
-	@cd $(FRONTEND_DIR) && bun install
+	@(cd $(FRONTEND_DIR) && bun install)
 
 # Development targets
 .PHONY: dev
 dev: ## Start development servers (frontend and backend)
 	@echo "$(GREEN)Starting development environment...$(NC)"
-	@echo "Frontend: http://localhost:3000"
-	@echo "Backend GraphQL: http://localhost:4000/graphql"
+	@echo "Frontend: http://localhost:13000"
+	@echo "Backend GraphQL: http://localhost:14000/graphql"
 	@echo "Database Admin: http://localhost:5555"
 	@echo "Press Ctrl+C to stop all services"
 	@bun run dev
@@ -66,31 +66,31 @@ dev: ## Start development servers (frontend and backend)
 .PHONY: dev-backend
 dev-backend: ## Start backend development server only
 	@echo "$(GREEN)Starting backend development server...$(NC)"
-	@cd $(BACKEND_DIR) && bun run dev
+	@(cd $(BACKEND_DIR) && bun run dev)
 
 .PHONY: dev-frontend
 dev-frontend: ## Start frontend development server only
 	@echo "$(GREEN)Starting frontend development server...$(NC)"
-	@cd $(FRONTEND_DIR) && bun run dev
+	@(cd $(FRONTEND_DIR) && bun run dev)
 
 # Database targets
 .PHONY: db-setup
 db-setup: ## Setup database (migrate and seed)
 	@echo "$(GREEN)Setting up database...$(NC)"
-	@cd $(BACKEND_DIR) && bun run prisma:generate
-	@cd $(BACKEND_DIR) && bun run prisma:migrate
-	@cd $(BACKEND_DIR) && bun run prisma:seed
+	@(cd $(BACKEND_DIR) && bun run prisma:generate
+	@(cd $(BACKEND_DIR) && bun run prisma:migrate
+	@(cd $(BACKEND_DIR) && bun run prisma:seed
 	@echo "$(GREEN)✅ Database setup completed!$(NC)"
 
 .PHONY: db-migrate
 db-migrate: ## Run database migrations
 	@echo "$(GREEN)Running database migrations...$(NC)"
-	@cd $(BACKEND_DIR) && bun run prisma:migrate
+	@(cd $(BACKEND_DIR) && bun run prisma:migrate
 
 .PHONY: db-seed
 db-seed: ## Seed database with initial data
 	@echo "$(GREEN)Seeding database...$(NC)"
-	@cd $(BACKEND_DIR) && bun run prisma:seed
+	@(cd $(BACKEND_DIR) && bun run prisma:seed
 
 .PHONY: db-reset
 db-reset: ## Reset database (dangerous!)
@@ -109,26 +109,26 @@ db-reset: ## Reset database (dangerous!)
 .PHONY: db-studio
 db-studio: ## Open Prisma Studio
 	@echo "$(GREEN)Opening Prisma Studio...$(NC)"
-	@cd $(BACKEND_DIR) && bun run prisma:studio
+	@(cd $(BACKEND_DIR) && bun run prisma:studio
 
 .PHONY: db-generate
 db-generate: ## Generate Prisma client
 	@echo "$(GREEN)Generating Prisma client...$(NC)"
-	@cd $(BACKEND_DIR) && bun run prisma:generate
+	@(cd $(BACKEND_DIR) && bun run prisma:generate
 
 # Testing targets
 .PHONY: test
 test: ## Run all tests
 	@echo "$(GREEN)Running all tests...$(NC)"
 	@echo "Running backend tests..."
-	@cd $(BACKEND_DIR) && bun run test
+	@(cd $(BACKEND_DIR) && bun run test
 	@echo "Running frontend tests..."
 	@cd $(FRONTEND_DIR) && bun run test
 
 .PHONY: test-backend
 test-backend: ## Run backend tests only
 	@echo "$(GREEN)Running backend tests...$(NC)"
-	@cd $(BACKEND_DIR) && bun run test
+	@(cd $(BACKEND_DIR) && bun run test
 
 .PHONY: test-frontend
 test-frontend: ## Run frontend tests only
@@ -138,12 +138,12 @@ test-frontend: ## Run frontend tests only
 .PHONY: test-e2e
 test-e2e: ## Run end-to-end tests
 	@echo "$(GREEN)Running end-to-end tests...$(NC)"
-	@cd $(BACKEND_DIR) && bun run test:e2e
+	@(cd $(BACKEND_DIR) && bun run test:e2e
 
 .PHONY: test-coverage
 test-coverage: ## Run tests with coverage report
 	@echo "$(GREEN)Running tests with coverage...$(NC)"
-	@cd $(BACKEND_DIR) && bun run test:cov
+	@(cd $(BACKEND_DIR) && bun run test:cov
 	@cd $(FRONTEND_DIR) && bun run test:coverage
 
 # Build targets
@@ -151,7 +151,7 @@ test-coverage: ## Run tests with coverage report
 build: ## Build both frontend and backend for production
 	@echo "$(GREEN)Building for production...$(NC)"
 	@echo "Building backend..."
-	@cd $(BACKEND_DIR) && bun run build
+	@(cd $(BACKEND_DIR) && bun run build
 	@echo "Building frontend..."
 	@cd $(FRONTEND_DIR) && bun run build
 	@echo "$(GREEN)✅ Build completed successfully!$(NC)"
@@ -159,7 +159,7 @@ build: ## Build both frontend and backend for production
 .PHONY: build-backend
 build-backend: ## Build backend for production
 	@echo "$(GREEN)Building backend...$(NC)"
-	@cd $(BACKEND_DIR) && bun run build
+	@(cd $(BACKEND_DIR) && bun run build
 
 .PHONY: build-frontend
 build-frontend: ## Build frontend for production
@@ -170,32 +170,32 @@ build-frontend: ## Build frontend for production
 .PHONY: lint
 lint: ## Run linting for all code
 	@echo "$(GREEN)Running linters...$(NC)"
-	@cd $(BACKEND_DIR) && bun run lint
+	@(cd $(BACKEND_DIR) && bun run lint
 	@cd $(FRONTEND_DIR) && bun run lint
 
 .PHONY: lint-fix
 lint-fix: ## Fix linting issues automatically
 	@echo "$(GREEN)Fixing linting issues...$(NC)"
-	@cd $(BACKEND_DIR) && bun run lint:fix
+	@(cd $(BACKEND_DIR) && bun run lint:fix
 	@cd $(FRONTEND_DIR) && bun run lint:fix
 
 .PHONY: format
 format: ## Format code with Prettier
 	@echo "$(GREEN)Formatting code...$(NC)"
-	@cd $(BACKEND_DIR) && bun run format
+	@(cd $(BACKEND_DIR) && bun run format
 	@cd $(FRONTEND_DIR) && bun run format
 
 .PHONY: type-check
 type-check: ## Run TypeScript type checking
 	@echo "$(GREEN)Running type checks...$(NC)"
-	@cd $(BACKEND_DIR) && bun run type-check
+	@(cd $(BACKEND_DIR) && bun run type-check
 	@cd $(FRONTEND_DIR) && bun run type-check
 
 # Docker targets
 .PHONY: docker-up
 docker-up: ## Start Docker services
 	@echo "$(GREEN)Starting Docker services...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d
+	@docker compose -f $(COMPOSE_FILE) up -d
 	@echo "$(GREEN)✅ Docker services started!$(NC)"
 	@echo "Services available:"
 	@echo "  - PostgreSQL: localhost:5432"
@@ -205,16 +205,16 @@ docker-up: ## Start Docker services
 .PHONY: docker-down
 docker-down: ## Stop Docker services
 	@echo "$(GREEN)Stopping Docker services...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) down
+	@docker compose -f $(COMPOSE_FILE) down
 
 .PHONY: docker-logs
 docker-logs: ## View Docker service logs
-	@docker-compose -f $(COMPOSE_FILE) logs -f
+	@docker compose -f $(COMPOSE_FILE) logs -f
 
 .PHONY: docker-clean
 docker-clean: ## Clean up Docker resources
 	@echo "$(YELLOW)Cleaning up Docker resources...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) down -v --remove-orphans
+	@docker compose -f $(COMPOSE_FILE) down -v --remove-orphans
 	@docker system prune -f
 
 .PHONY: docker-build
@@ -281,7 +281,7 @@ logs: ## View application logs
 	@if command -v kubectl >/dev/null 2>&1; then \
 		kubectl logs -f deployment/backend -n katacore; \
 	else \
-		docker-compose logs -f; \
+		docker compose logs -f; \
 	fi
 
 .PHONY: monitor
@@ -333,7 +333,7 @@ backup-db: ## Backup database
 	if command -v kubectl >/dev/null 2>&1; then \
 		kubectl exec -n katacore deployment/postgres -- pg_dump -U timonacore timonacore_prod > "$$BACKUP_NAME.sql"; \
 	else \
-		docker-compose exec postgres pg_dump -U postgres timonacore > "$$BACKUP_NAME.sql"; \
+		docker compose exec postgres pg_dump -U postgres timonacore > "$$BACKUP_NAME.sql"; \
 	fi; \
 	echo "$(GREEN)✅ Database backup created: $$BACKUP_NAME.sql$(NC)"
 
@@ -341,7 +341,7 @@ backup-db: ## Backup database
 .PHONY: update-deps
 update-deps: ## Update all dependencies
 	@echo "$(GREEN)Updating dependencies...$(NC)"
-	@cd $(BACKEND_DIR) && bun update
+	@(cd $(BACKEND_DIR) && bun update
 	@cd $(FRONTEND_DIR) && bun update
 	@bun update
 	@echo "$(GREEN)✅ Dependencies updated!$(NC)"
@@ -350,7 +350,7 @@ update-deps: ## Update all dependencies
 .PHONY: security-audit
 security-audit: ## Run security audit
 	@echo "$(GREEN)Running security audit...$(NC)"
-	@cd $(BACKEND_DIR) && bun audit || echo "Backend audit completed with issues"
+	@(cd $(BACKEND_DIR) && bun audit || echo "Backend audit completed with issues"
 	@cd $(FRONTEND_DIR) && bun audit || echo "Frontend audit completed with issues"
 
 # Information targets
