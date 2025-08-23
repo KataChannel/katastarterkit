@@ -11,11 +11,27 @@ type CommentWithRelations = Comment & {
   replies?: any[];
 };
 
+// Type for GraphQL Comment (matches the GraphQL model)
+type GraphQLComment = Comment & {
+  user: any;
+  post: any;
+  parent?: any;
+  replies: any[]; // Always an array, never undefined
+};
+
 @Injectable()
 export class CommentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findById(id: string): Promise<CommentWithRelations> {
+  // Transform Prisma comment to GraphQL comment
+  private transformComment(comment: CommentWithRelations): GraphQLComment {
+    return {
+      ...comment,
+      replies: comment.replies || [], // Ensure replies is always an array
+    };
+  }
+
+  async findById(id: string): Promise<GraphQLComment> {
     const comment = await this.prisma.comment.findUnique({
       where: { id },
       include: {
@@ -34,11 +50,11 @@ export class CommentService {
       throw new NotFoundException(`Comment with ID "${id}" not found`);
     }
 
-    return comment;
+    return this.transformComment(comment);
   }
 
-  async findByPost(postId: string): Promise<CommentWithRelations[]> {
-    return this.prisma.comment.findMany({
+  async findByPost(postId: string): Promise<GraphQLComment[]> {
+    const comments = await this.prisma.comment.findMany({
       where: { 
         postId,
         parentId: null, // Only top-level comments
@@ -64,10 +80,12 @@ export class CommentService {
         createdAt: 'desc',
       },
     });
+
+    return comments.map(comment => this.transformComment(comment));
   }
 
-  async findReplies(parentId: string): Promise<CommentWithRelations[]> {
-    return this.prisma.comment.findMany({
+  async findReplies(parentId: string): Promise<GraphQLComment[]> {
+    const replies = await this.prisma.comment.findMany({
       where: { parentId },
       include: {
         user: true,
@@ -82,9 +100,11 @@ export class CommentService {
         createdAt: 'asc',
       },
     });
+
+    return replies.map(reply => this.transformComment(reply));
   }
 
-  async create(input: CreateCommentInput & { userId: string }): Promise<CommentWithRelations> {
+  async create(input: CreateCommentInput & { userId: string }): Promise<GraphQLComment> {
     // Verify post exists
     const post = await this.prisma.post.findUnique({
       where: { id: input.postId },
@@ -116,13 +136,18 @@ export class CommentService {
         user: true,
         post: true,
         parent: true,
+        replies: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 
-    return comment;
+    return this.transformComment(comment);
   }
 
-  async update(id: string, input: UpdateCommentInput): Promise<CommentWithRelations> {
+  async update(id: string, input: UpdateCommentInput): Promise<GraphQLComment> {
     await this.findById(id); // Check if comment exists
 
     const updatedComment = await this.prisma.comment.update({
@@ -132,10 +157,15 @@ export class CommentService {
         user: true,
         post: true,
         parent: true,
+        replies: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 
-    return updatedComment;
+    return this.transformComment(updatedComment);
   }
 
   async delete(id: string): Promise<void> {

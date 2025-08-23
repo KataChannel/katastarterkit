@@ -33,6 +33,6 @@ export class Comment {
   @Field(() => Comment, { nullable: true })
   parent?: Comment;
 
-  @Field(() => [Comment])
+  @Field(() => [Comment], { defaultValue: [] })
   replies: Comment[];
 }

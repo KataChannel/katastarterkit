@@ -1,0 +1,132 @@
+import {
+  ApolloClient,
+  InMemoryCache,
+  createHttpLink,
+  from,
+  split,
+} from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+import { onError } from '@apollo/client/link/error';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
+
+// HTTP Link for queries and mutations
+const httpLink = createHttpLink({
+  uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:14000/graphql',
+  credentials: 'include',
+});
+
+// WebSocket Link for subscriptions
+const wsLink = typeof window !== 'undefined' ? new GraphQLWsLink(
+  createClient({
+    url: process.env.NEXT_PUBLIC_WS_ENDPOINT || 'ws://localhost:14000/graphql',
+    connectionParams: () => {
+      const token = localStorage.getItem('token');
+      return {
+        authorization: token ? `Bearer ${token}` : '',
+      };
+    },
+  })
+) : null;
+
+// Auth Link - adds JWT token to requests
+const authLink = setContext((_, { headers }) => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+
+// Error Link - handles GraphQL and network errors
+const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+  if (graphQLErrors) {
+    graphQLErrors.forEach(({ message, locations, path }) => {
+      console.error(
+        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+      );
+    });
+  }
+
+  if (networkError) {
+    console.error(`[Network error]: ${networkError}`);
+    
+    // Handle unauthorized errors
+    if ('statusCode' in networkError && networkError.statusCode === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+  }
+});
+
+// Split link for handling subscriptions vs queries/mutations
+const splitLink = typeof window !== 'undefined' && wsLink ? split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  authLink.concat(httpLink)
+) : authLink.concat(httpLink);
+
+// Apollo Client instance
+export const apolloClient = new ApolloClient({
+  link: from([errorLink, splitLink]),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          posts: {
+            keyArgs: false,
+            merge(existing = [], incoming, { args }) {
+              if (args?.offset === 0) {
+                return incoming;
+              }
+              return [...existing, ...incoming];
+            },
+          },
+        },
+      },
+      Post: {
+        fields: {
+          comments: {
+            merge(existing = [], incoming) {
+              return incoming;
+            },
+          },
+        },
+      },
+    },
+  }),
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: 'all',
+      notifyOnNetworkStatusChange: true,
+    },
+    query: {
+      errorPolicy: 'all',
+    },
+    mutate: {
+      errorPolicy: 'all',
+    },
+  },
+});
+
+// Helper function to get authenticated client
+export const getAuthenticatedClient = () => {
+  return apolloClient;
+};
+
+// Helper function to clear cache and token
+export const logout = async () => {
+  localStorage.removeItem('token');
+  await apolloClient.clearStore();
+  window.location.href = '/login';
+};

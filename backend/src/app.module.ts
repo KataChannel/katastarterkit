@@ -4,6 +4,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TerminusModule } from '@nestjs/terminus';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { join } from 'path';
 
 // Modules
@@ -13,6 +14,8 @@ import { AuthModule } from './auth/auth.module';
 import { GraphQLResolversModule } from './graphql/graphql.module';
 import { GrokModule } from './grok/grok.module';
 import { MinioModule } from './minio/minio.module';
+import { LoggerModule } from './logger/logger.module';
+import { HealthModule } from './health/health.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -20,6 +23,9 @@ import { EnvConfigService } from './config/env-config.service';
 
 // Resolvers
 import { AppResolver } from './app.resolver';
+
+// Interceptors
+import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interceptor';
 
 @Module({
   imports: [
@@ -69,7 +75,16 @@ import { AppResolver } from './app.resolver';
     GraphQLResolversModule,
     GrokModule,
     MinioModule,
+    LoggerModule,
+    HealthModule,
   ],
-  providers: [EnvConfigService, AppResolver],
+  providers: [
+    EnvConfigService,
+    AppResolver,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GraphQLLoggingInterceptor,
+    },
+  ],
 })
 export class AppModule {}

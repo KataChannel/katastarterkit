@@ -3,18 +3,18 @@ import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { PubSub } from 'graphql-subscriptions';
-import { Comment } from '../models/comment.model';
+import { Comment as GraphQLComment } from '../models/comment.model';
 import { User } from '../models/user.model';
 import { Post } from '../models/post.model';
+import { UserRole } from '@prisma/client';
 import { CreateCommentInput, UpdateCommentInput } from '../inputs/comment.input';
 import { CommentService } from '../../services/comment.service';
 import { UserService } from '../../services/user.service';
 import { PostService } from '../../services/post.service';
-import { UserRole } from '@prisma/client';
 
 const pubSub = new PubSub();
 
-@Resolver(() => Comment)
+@Resolver(() => GraphQLComment)
 export class CommentResolver {
   constructor(
     private readonly commentService: CommentService,
@@ -23,25 +23,25 @@ export class CommentResolver {
   ) {}
 
   // Queries
-  @Query(() => [Comment], { name: 'getCommentsByPost' })
+  @Query(() => [GraphQLComment], { name: 'getCommentsByPost' })
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(60)
-  async getCommentsByPost(@Args('postId') postId: string): Promise<Comment[]> {
+  async getCommentsByPost(@Args('postId') postId: string): Promise<GraphQLComment[]> {
     return this.commentService.findByPost(postId);
   }
 
-  @Query(() => Comment, { name: 'getCommentById' })
-  async getCommentById(@Args('id') id: string): Promise<Comment> {
+  @Query(() => GraphQLComment, { name: 'getCommentById' })
+  async getCommentById(@Args('id') id: string): Promise<GraphQLComment> {
     return this.commentService.findById(id);
   }
 
   // Mutations
-  @Mutation(() => Comment, { name: 'createComment' })
+  @Mutation(() => GraphQLComment, { name: 'createComment' })
   @UseGuards(JwtAuthGuard)
   async createComment(
     @Args('input') input: CreateCommentInput,
     @Context() context: any,
-  ): Promise<Comment> {
+  ): Promise<GraphQLComment> {
     const userId = context.req.user.id;
     const comment = await this.commentService.create({ ...input, userId });
     
@@ -54,13 +54,13 @@ export class CommentResolver {
     return comment;
   }
 
-  @Mutation(() => Comment, { name: 'updateComment' })
+  @Mutation(() => GraphQLComment, { name: 'updateComment' })
   @UseGuards(JwtAuthGuard)
   async updateComment(
     @Args('id') id: string,
     @Args('input') input: UpdateCommentInput,
     @Context() context: any,
-  ): Promise<Comment> {
+  ): Promise<GraphQLComment> {
     const currentUser = context.req.user;
     const comment = await this.commentService.findById(id);
     
@@ -92,28 +92,28 @@ export class CommentResolver {
 
   // Field Resolvers
   @ResolveField(() => User)
-  async user(@Parent() comment: Comment): Promise<User> {
+  async user(@Parent() comment: GraphQLComment): Promise<User> {
     return this.userService.findById(comment.userId);
   }
 
   @ResolveField(() => Post)
-  async post(@Parent() comment: Comment): Promise<Post> {
+  async post(@Parent() comment: GraphQLComment): Promise<Post> {
     return this.postService.findById(comment.postId);
   }
 
-  @ResolveField(() => Comment, { nullable: true })
-  async parent(@Parent() comment: Comment): Promise<Comment | null> {
+  @ResolveField(() => GraphQLComment, { nullable: true })
+  async parent(@Parent() comment: GraphQLComment): Promise<GraphQLComment | null> {
     if (!comment.parentId) return null;
     return this.commentService.findById(comment.parentId);
   }
 
-  @ResolveField(() => [Comment])
-  async replies(@Parent() comment: Comment): Promise<Comment[]> {
+  @ResolveField(() => [GraphQLComment])
+  async replies(@Parent() comment: GraphQLComment): Promise<GraphQLComment[]> {
     return this.commentService.findReplies(comment.id);
   }
 
   // Subscriptions
-  @Subscription(() => Comment, { 
+  @Subscription(() => GraphQLComment, { 
     name: 'newComment',
     filter: (payload, variables) => {
       // Filter by postId if provided
