@@ -1,16 +1,16 @@
 # Security Policy
 
-## 🔒 Supported Versions
+## � Supported Versions
+
+We release patches for security vulnerabilities. Which versions are eligible for receiving such patches depends on the CVSS v3.0 Rating:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.1.x   | ✅ Fully supported |
-| 1.0.x   | ⚠️ Critical fixes only |
-| < 1.0   | ❌ Not supported   |
+| 1.x.x   | :white_check_mark: |
 
 ## 🚨 Reporting a Vulnerability
 
-We take security vulnerabilities seriously. If you discover a security issue in Timonacore, please follow these steps:
+We take security vulnerabilities seriously. If you discover a security issue in KataCore, please follow these steps:
 
 ### 📧 Report Privately
 
@@ -38,7 +38,7 @@ Instead, create a private GitHub Security Advisory at: https://github.com/KataCh
 
 ### 🛡️ Security Best Practices
 
-When using Timonacore in production:
+When using KataCore in production:
 
 1. **Environment Variables**: Never commit sensitive data to version control
 2. **Database Security**: Use strong passwords and restrict access
@@ -50,7 +50,7 @@ When using Timonacore in production:
 
 ### 🔐 Security Features
 
-Timonacore includes several security features:
+KataCore includes several security features:
 
 - JWT-based authentication
 - Input validation with class-validator

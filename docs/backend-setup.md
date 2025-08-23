@@ -1,6 +1,6 @@
 # Backend Setup Guide
 
-This guide covers the setup and configuration of the Timonacore NestJS backend.
+This guide covers the setup and configuration of the KataCore NestJS backend.
 
 ## Prerequisites
 

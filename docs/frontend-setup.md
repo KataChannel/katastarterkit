@@ -1,11 +1,11 @@
 # Frontend Setup Guide
 
-This guide covers the setup and configuration of the Timonacore Next.js frontend with TailwindCSS.
+This guide covers the setup and configuration of the KataCore Next.js frontend with TailwindCSS v4.
 
 ## Prerequisites
 
 - Node.js 18 or higher OR Bun 1.0+
-- Backend API running on port 4000
+- Backend API running on port 14000
 
 ## Installation
 

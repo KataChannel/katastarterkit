@@ -1,6 +1,6 @@
-# Contributing to Timonacore
+# Contributing to KataCore
 
-Thank you for your interest in contributing to Timonacore! 🎉
+Thank you for your interest in contributing to KataCore! 🎉
 
 ## 🚀 Quick Start for Contributors
 

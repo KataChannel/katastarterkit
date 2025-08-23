@@ -2,10 +2,10 @@ services:
   # PostgreSQL Database
   postgres:
     image: ${POSTGRES_IMAGE:-postgres:16-alpine}
-    container_name: ${POSTGRES_CONTAINER_NAME:-timonacore-postgres}
+    container_name: ${POSTGRES_CONTAINER_NAME:-katacore-postgres}
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-timonacore}
+      POSTGRES_DB: ${POSTGRES_DB:-katacore}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - timonacore-network
+      - katacore-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 30s
@@ -23,14 +23,14 @@ services:
   # Redis Cache & Pub/Sub
   redis:
     image: ${REDIS_IMAGE:-redis:7.4-alpine}
-    container_name: ${REDIS_CONTAINER_NAME:-timonacore-redis}
+    container_name: ${REDIS_CONTAINER_NAME:-katacore-redis}
     restart: unless-stopped
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     networks:
-      - timonacore-network
+      - katacore-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
@@ -40,7 +40,7 @@ services:
   # Minio Object Storage with HTTPS
   minio:
     image: ${MINIO_IMAGE:-minio/minio:RELEASE.2024-08-26T15-33-07Z}
-    container_name: ${MINIO_CONTAINER_NAME:-timonacore-minio}
+    container_name: ${MINIO_CONTAINER_NAME:-katacore-minio}
     restart: unless-stopped
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
@@ -53,7 +53,7 @@ services:
       - ./docker/minio/certs:/root/.minio/certs:ro
     command: server /data --console-address ":9001" --certs-dir /root/.minio/certs
     networks:
-      - timonacore-network
+      - katacore-network
     healthcheck:
       test: ["CMD", "curl", "-f", "https://localhost:9000/minio/health/live", "-k"]
       interval: 30s
@@ -65,11 +65,11 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: ${BACKEND_CONTAINER_NAME:-timonacore-backend}
+    container_name: ${BACKEND_CONTAINER_NAME:-katacore-backend}
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/timonacore}
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/katacore}
       REDIS_HOST: ${DOCKER_REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -96,14 +96,14 @@ services:
       minio:
         condition: service_healthy
     networks:
-      - timonacore-network
+      - katacore-network
 
   # Frontend with Bun
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: ${FRONTEND_CONTAINER_NAME:-timonacore-frontend}
+    container_name: ${FRONTEND_CONTAINER_NAME:-katacore-frontend}
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-development}
@@ -121,7 +121,7 @@ services:
     depends_on:
       - backend
     networks:
-      - timonacore-network
+      - katacore-network
 
 volumes:
   postgres_data:
@@ -132,6 +132,6 @@ volumes:
     driver: local
 
 networks:
-  timonacore-network:
+  katacore-network:
     driver: bridge
-    name: ${DOCKER_NETWORK_NAME:-timonacore-network}
+    name: ${DOCKER_NETWORK_NAME:-katacore-network}

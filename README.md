@@ -1,52 +1,42 @@
-# KataCore - Complete Fullstack Project
+# 🚀 KataCore - Modern Fullstack Starter Kit
 
-![KataCore Logo](https://img.shields.io/badge/KataCore-Production%20Ready-green)
-[![Build Status](https://github.com/katacore/katacore/workflows/CI%2FCD/badge.svg)](https://github.com/katacore/katacore/actions)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![KataCore](https://img.shields.io/badge/KataCore-Starter%20Kit-blue)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black)](https://nextjs.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-11.1.6-red)](https://nestjs.com/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.1.12-38B2AC)](https://tailwindcss.com/)
 
-KataCore is a production-ready, full-stack web application built with modern technologies including NestJS, Next.js, GraphQL, and Kubernetes. This project demonstrates best practices for enterprise-level application development with comprehensive monitoring, security, and deployment automation.
+A modern, production-ready fullstack starter kit built with the latest technologies. Get your project up and running in minutes with best practices, modern tooling, and comprehensive features out of the box.
 
-## 🏗️ Architecture Overview
+## ✨ Features
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    KataCore Architecture                         │
-├─────────────────────────────────────────────────────────────────┤
-│  Frontend (Next.js + TailwindCSS)                              │
-│  ├── React 18 with Server Components                           │
-│  ├── TailwindCSS for styling                                   │
-│  ├── TypeScript for type safety                                │
-│  └── Bun.js runtime for performance                            │
-├─────────────────────────────────────────────────────────────────┤
-│  Backend (NestJS + GraphQL)                                    │
-│  ├── GraphQL API with Apollo Server                            │
-│  ├── JWT Authentication & Authorization                        │
-│  ├── Prisma ORM for database operations                        │
-│  └── Bun.js runtime for performance                            │
-├─────────────────────────────────────────────────────────────────┤
-│  Data Layer                                                     │
-│  ├── PostgreSQL (Primary Database)                             │
-│  ├── Redis Cluster (Caching & Sessions)                        │
-│  └── MinIO (Object Storage)                                    │
-├─────────────────────────────────────────────────────────────────┤
-│  Infrastructure (Kubernetes)                                   │
-│  ├── k3s Kubernetes Distribution                               │
-│  ├── NGINX Ingress Controller                                  │
-│  ├── cert-manager for SSL/TLS                                  │
-│  └── Prometheus + Grafana monitoring                           │
-└─────────────────────────────────────────────────────────────────┘
-```
+### 🎯 **Frontend (Next.js 15 + React 19)**
+- ⚡ **Next.js 15** with App Router
+- ⚛️ **React 19** with latest features
+- 🎨 **TailwindCSS v4** with latest improvements
+- 📱 **Responsive Design** with mobile-first approach
+- 🔒 **NextAuth.js** authentication
+- 📊 **Apollo Client** for GraphQL
+- 🧪 **Comprehensive Testing** (Jest + Cypress)
 
-## 🚀 Quick Start
+### 🏗️ **Backend (NestJS + GraphQL)**
+- 🚀 **NestJS 11** with modern architecture
+- 🔗 **GraphQL API** with Apollo Server
+- 🗄️ **Prisma ORM** with PostgreSQL
+- 🔐 **JWT Authentication** & authorization
+- ⚡ **Redis** for caching and sessions
+- 📦 **File Upload** with MinIO
+- 🛡️ **Security** best practices
+- 📈 **Health Checks** and monitoring
 
-### Prerequisites
-
-- **Bun.js** >= 1.0.0
-- **Docker** >= 20.10.0
-- **Docker Compose** >= 2.0.0
-- **kubectl** >= 1.25.0 (for Kubernetes deployment)
-- **Git** >= 2.30.0
+### 🛠️ **Developer Experience**
+- 🏃‍♂️ **Bun.js** for ultra-fast package management
+- 🐳 **Docker** containerization
+- � **TypeScript** throughout the stack
+- 📝 **ESLint** and **Prettier** configured
+- 🧪 **Testing** setup for both frontend and backend
+- 📚 **Comprehensive documentation**
 
 ### Local Development Setup
 
@@ -57,68 +47,266 @@ KataCore is a production-ready, full-stack web application built with modern tec
    ```
 
 2. **Start development environment**
-   ```bash
-   # Start all services with Docker Compose
-   docker-compose up -d
-   
-   # Install dependencies
-   make install
-   
-   # Setup database
-   make db-setup
-   
-   # Start development servers
-   make dev
-   ```
+## 🏗️ Tech Stack
 
-3. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend GraphQL Playground: http://localhost:4000/graphql
-   - Database Admin: http://localhost:5555
+| Category | Technology | Version | Purpose |
+|----------|------------|---------|---------|
+| **Frontend** | Next.js | 15.5.0 | React framework |
+| **Frontend** | React | 19.1.1 | UI library |
+| **Frontend** | TailwindCSS | 4.1.12 | CSS framework |
+| **Backend** | NestJS | 11.1.6 | Node.js framework |
+| **Database** | PostgreSQL | 16+ | Primary database |
+| **Cache** | Redis | 7+ | Caching and sessions |
+| **Storage** | MinIO | Latest | Object storage |
+| **ORM** | Prisma | 6+ | Database toolkit |
+| **API** | GraphQL | 16+ | Query language |
+| **Runtime** | Bun.js | 1.0+ | JavaScript runtime |
+| **Container** | Docker | 20+ | Containerization |
 
-### Production Deployment
+## 🚀 Quick Start
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/KataChannel/katastarterkit.git
+cd katastarterkit
+```
+
+### 2. Install Dependencies
+
+```bash
+# Install root dependencies
+bun install
+
+# Install backend dependencies
+cd backend && bun install
+
+# Install frontend dependencies
+cd ../frontend && bun install && cd ..
+```
+
+### 3. Setup Environment
+
+```bash
+# Copy environment files
+cp .env.example .env
+cp backend/.env.example backend/.env.local
+cp frontend/.env.example frontend/.env.local
+
+# Edit environment variables as needed
+nano .env
+```
+
+### 4. Start Infrastructure
+
+```bash
+# Start PostgreSQL, Redis, and MinIO
+docker-compose up -d
+
+# Wait for services to be ready
+sleep 10
+```
+
+### 5. Setup Database
+
+```bash
+# Generate Prisma client
+cd backend && bunx prisma generate
+
+# Run database migrations
+bunx prisma migrate dev
+
+# Seed the database (optional)
+bunx prisma db seed
+```
+
+### 6. Start Development Servers
+
+```bash
+# Start both frontend and backend
+bun run dev
+
+# Or start them separately:
+# bun run dev:backend  # http://localhost:14000
+# bun run dev:frontend # http://localhost:13000
+```
+
+### 7. Access Your Application
+
+- **Frontend**: http://localhost:13000
+- **Backend API**: http://localhost:14000
+- **GraphQL Playground**: http://localhost:14000/graphql
+- **MinIO Console**: http://localhost:9001
 
 ## 📁 Project Structure
 
 ```
 katacore/
-├── backend/                    # NestJS GraphQL API
+├── frontend/                 # Next.js application
 │   ├── src/
-│   │   ├── app.module.ts      # Main application module
-│   │   ├── main.ts            # Application entry point
-│   │   ├── config/            # Configuration management
-│   │   └── prisma/            # Database configuration
-│   ├── prisma/
-│   │   ├── schema.prisma      # Database schema
-│   │   └── seed.ts            # Database seeding
+│   │   ├── app/             # App router pages
+│   │   ├── components/      # Reusable components
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── lib/             # Utility libraries
+│   │   └── pages/           # Pages router (optional)
+│   ├── public/              # Static assets
 │   └── package.json
-├── frontend/                   # Next.js React application
+├── backend/                  # NestJS application
 │   ├── src/
-│   │   ├── app/               # Next.js 13+ app directory
-│   │   ├── components/        # Reusable UI components
-│   │   └── lib/               # Utility libraries
-│   ├── tailwind.config.js     # TailwindCSS configuration
+│   │   ├── auth/            # Authentication module
+│   │   ├── graphql/         # GraphQL resolvers
+│   │   ├── prisma/          # Database service
+│   │   └── main.ts          # Application entry
+│   ├── prisma/              # Database schema
 │   └── package.json
-├── k8s/                       # Kubernetes manifests
-│   ├── namespace.yaml         # Kubernetes namespaces
-│   ├── configmaps/           # Application configuration
-│   ├── secrets/              # Sensitive data management
-│   ├── storage/              # Persistent volume claims
-│   ├── database/             # PostgreSQL deployment
-│   ├── redis/                # Redis cluster setup
-│   ├── minio/                # Object storage service
-│   ├── backend/              # Backend service deployment
-│   ├── frontend/             # Frontend service deployment
-│   ├── monitoring/           # Prometheus & Grafana
-│   ├── ingress/              # Load balancer & SSL
-│   └── scripts/              # Deployment automation
-├── docker/                    # Docker configurations
-├── docs/                      # Documentation
-├── scripts/                   # Utility scripts
-├── .github/workflows/         # CI/CD pipelines
-├── docker-compose.yml         # Local development setup
-├── Makefile                   # Common commands
-└── README.md
+├── docker/                   # Docker configurations
+├── docs/                     # Documentation
+├── scripts/                  # Utility scripts
+├── docker-compose.yml        # Development services
+└── package.json             # Root workspace
+```
+
+## 🛠️ Available Scripts
+
+### Root Commands
+```bash
+bun run dev          # Start both frontend and backend
+bun run build        # Build both applications
+bun run test         # Run all tests
+bun run lint         # Lint all code
+bun run format       # Format all code
+bun run clean        # Clean dependencies
+```
+
+### Backend Commands
+```bash
+cd backend
+bun run dev          # Start development server
+bun run build        # Build for production
+bun run test         # Run tests
+bun run db:migrate   # Run database migrations
+bun run db:seed      # Seed database
+bun run db:studio    # Open Prisma Studio
+```
+
+### Frontend Commands
+```bash
+cd frontend
+bun run dev          # Start development server
+bun run build        # Build for production
+bun run test         # Run tests
+bun run test:e2e     # Run E2E tests
+bun run storybook    # Start Storybook
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+The starter kit uses environment variables for configuration. Key variables include:
+
+```bash
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# JWT
+JWT_SECRET=your-secret-key
+
+# MinIO
+MINIO_ENDPOINT=localhost
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+
+# Frontend
+NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:14000/graphql
+NEXTAUTH_SECRET=your-nextauth-secret
+```
+
+### Database Schema
+
+The project includes a complete database schema with:
+- User management
+- Authentication tables
+- File upload tracking
+- Audit logs
+
+Customize the schema in `backend/prisma/schema.prisma`.
+
+## 🧪 Testing
+
+### Backend Testing
+```bash
+cd backend
+bun test              # Unit tests
+bun run test:e2e      # E2E tests
+bun run test:cov      # Coverage report
+```
+
+### Frontend Testing
+```bash
+cd frontend
+bun test              # Unit tests with Jest
+bun run test:e2e      # E2E tests with Cypress
+```
+
+## 🚀 Production Deployment
+
+### Docker Production Build
+```bash
+# Build production images
+docker-compose -f docker-compose.prod.yml build
+
+# Start production services
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Manual Deployment
+1. Build applications: `bun run build`
+2. Setup production database
+3. Configure environment variables
+4. Deploy to your hosting platform
+
+## 📚 Documentation
+
+- [**Getting Started**](docs/getting-started.md) - Detailed setup guide
+- [**Frontend Guide**](docs/frontend-setup.md) - Frontend development
+- [**Backend Guide**](docs/backend-setup.md) - Backend development
+- [**API Documentation**](docs/api.md) - GraphQL API reference
+- [**Deployment Guide**](docs/deployment.md) - Production deployment
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## ⭐ Show Your Support
+
+If this project helped you, please give it a ⭐ on GitHub!
+
+## 🔗 Links
+
+- [GitHub Repository](https://github.com/KataChannel/katastarterkit)
+- [Issue Tracker](https://github.com/KataChannel/katastarterkit/issues)
+- [Discussions](https://github.com/KataChannel/katastarterkit/discussions)
+
+---
+
+**Happy coding! 🎉**
+
+> **KataCore** - Build faster, ship smarter.
 ```
 
 ## 🛠️ Technology Stack

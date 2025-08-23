@@ -9,10 +9,10 @@ async function main() {
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@timonacore.dev' },
+    where: { email: 'admin@katacore.dev' },
     update: {},
     create: {
-      email: 'admin@timonacore.dev',
+      email: 'admin@katacore.dev',
       username: 'admin',
       password: adminPassword,
       firstName: 'Admin',
@@ -24,10 +24,10 @@ async function main() {
   // Create test users
   const userPassword = await bcrypt.hash('user123', 10);
   const testUser = await prisma.user.upsert({
-    where: { email: 'user@timonacore.dev' },
+    where: { email: 'user@katacore.dev' },
     update: {},
     create: {
-      email: 'user@timonacore.dev',
+      email: 'user@katacore.dev',
       username: 'testuser',
       password: userPassword,
       firstName: 'Test',
@@ -84,23 +84,24 @@ async function main() {
   const posts = await Promise.all([
     prisma.post.create({
       data: {
-        title: 'Welcome to Timonacore',
-        content: `# Welcome to Timonacore
+        title: 'Welcome to KataCore',
+        content: `# Welcome to KataCore
 
-Timonacore is an enterprise-grade fullstack starter kit built with modern technologies.
+KataCore is a modern fullstack starter kit built with the latest technologies.
 
 ## Features
 
-- **Next.js 14** with TypeScript
-- **NestJS** with GraphQL
+- **Next.js 15** with React 19 and TypeScript
+- **NestJS 11** with GraphQL
 - **Prisma ORM** with PostgreSQL
 - **Redis** for caching
-- **Minio** for object storage
+- **MinIO** for object storage
+- **TailwindCSS v4** for styling
 - **Docker** for containerization
 
 This starter kit provides everything you need to build scalable, production-ready applications.`,
-        excerpt: 'Learn about Timonacore, the enterprise fullstack starter kit.',
-        slug: 'welcome-to-timonacore',
+        excerpt: 'Learn about KataCore, the modern fullstack starter kit.',
+        slug: 'welcome-to-katacore',
         status: PostStatus.PUBLISHED,
         publishedAt: new Date(),
         authorId: admin.id,
@@ -206,7 +207,7 @@ export class PostModule {}
   await Promise.all([
     prisma.comment.create({
       data: {
-        content: 'Great introduction to Timonacore! Looking forward to using it.',
+        content: 'Great introduction to KataCore! Looking forward to using it.',
         postId: posts[0].id,
         userId: testUser.id,
       },
@@ -237,8 +238,8 @@ export class PostModule {}
   ]);
 
   console.log('✅ Seed completed successfully!');
-  console.log(`👤 Admin user: admin@timonacore.dev / admin123`);
-  console.log(`👤 Test user: user@timonacore.dev / user123`);
+  console.log(`👤 Admin user: admin@katacore.dev / admin123`);
+  console.log(`👤 Test user: user@katacore.dev / user123`);
   console.log(`📝 Created ${posts.length} posts`);
   console.log(`🏷️ Created ${tags.length} tags`);
 }
