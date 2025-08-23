@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: katacore
+  labels:
+    app: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      initContainers:
+      - name: wait-for-backend
+        image: curlimages/curl:latest
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for backend to be ready..."
+          until curl -f http://backend-service:4000/health; do
+            echo "Backend is not ready - sleeping"
+            sleep 5
+          done
+          echo "Backend is ready"
+      containers:
+      - name: frontend
+        image: katacore/frontend:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        # From ConfigMap
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: katacore-config
+              key: NODE_ENV
+        - name: FRONTEND_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: katacore-config
+              key: FRONTEND_PORT
+        # From Secrets
+        - name: NEXTAUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: katacore-secrets
+              key: NEXTAUTH_SECRET
+        # Computed environment variables
+        - name: NEXT_PUBLIC_GRAPHQL_ENDPOINT
+          value: "https://api.your-domain.com/graphql"
+        - name: NEXT_PUBLIC_APP_URL
+          value: "https://app.your-domain.com"
+        - name: NEXTAUTH_URL
+          value: "https://app.your-domain.com"
+        - name: NEXT_PUBLIC_MINIO_ENDPOINT
+          value: "https://minio.your-domain.com"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: katacore
+  labels:
+    app: frontend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: frontend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend-pdb
+  namespace: katacore
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: frontend
