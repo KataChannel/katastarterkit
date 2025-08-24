@@ -66,11 +66,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const { data } = await loginMutation({
-        variables: { email, password },
+        variables: { 
+          input: {
+            emailOrUsername: email,
+            password: password
+          }
+        },
       });
 
-      if (data?.login?.token) {
-        localStorage.setItem('token', data.login.token);
+      if (data?.loginUser?.accessToken) {
+        localStorage.setItem('token', data.loginUser.accessToken);
         // Refresh user data
         getCurrentUser();
         return { success: true };
@@ -85,11 +90,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (email: string, password: string, username: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const { data } = await registerMutation({
-        variables: { email, password, username },
+        variables: { 
+          input: {
+            email: email,
+            password: password,
+            username: username
+          }
+        },
       });
 
-      if (data?.register?.token) {
-        localStorage.setItem('token', data.register.token);
+      if (data?.registerUser?.accessToken) {
+        localStorage.setItem('token', data.registerUser.accessToken);
         // Refresh user data
         getCurrentUser();
         return { success: true };

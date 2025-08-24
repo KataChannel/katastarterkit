@@ -51,7 +51,7 @@
     "graphql": "^16.11.0",
     "graphql-depth-limit": "^1.1.0",
     "graphql-query-complexity": "^1.1.0",
-    "graphql-subscriptions": "^3.0.0",
+    "graphql-subscriptions": "^2.0.0",
     "graphql-upload": "^17.0.0",
     "ioredis": "^5.7.0",
     "joi": "^18.0.1",

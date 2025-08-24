@@ -2,7 +2,6 @@ import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, P
 import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
-import { PubSub } from 'graphql-subscriptions';
 import { Post } from '../models/post.model';
 import { User } from '../models/user.model';
 import { Comment } from '../models/comment.model';
@@ -12,9 +11,8 @@ import { PaginationInput } from '../models/pagination.model';
 import { PostService } from '../../services/post.service';
 import { UserService } from '../../services/user.service';
 import { CommentService } from '../../services/comment.service';
+import { PubSubService } from '../../services/pubsub.service';
 import { UserRole } from '@prisma/client';
-
-const pubSub = new PubSub();
 
 @Resolver(() => Post)
 export class PostResolver {
@@ -22,6 +20,7 @@ export class PostResolver {
     private readonly postService: PostService,
     private readonly userService: UserService,
     private readonly commentService: CommentService,
+    private readonly pubSubService: PubSubService,
   ) {}
 
   // Queries
@@ -66,8 +65,8 @@ export class PostResolver {
     const authorId = context.req.user.id;
     const post = await this.postService.create({ ...input, authorId });
     
-    // Publish new post event
-    pubSub.publish('postCreated', { postCreated: post });
+        // Publish event for real-time subscriptions
+    this.pubSubService.publishPostCreated(post);
     
     return post;
   }
@@ -90,7 +89,7 @@ export class PostResolver {
     const updatedPost = await this.postService.update(id, input);
     
     // Publish post updated event
-    pubSub.publish('postUpdated', { postUpdated: updatedPost });
+    this.pubSubService.publishPostUpdated(updatedPost);
     
     return updatedPost;
   }
@@ -112,7 +111,7 @@ export class PostResolver {
     await this.postService.delete(id);
     
     // Publish post deleted event
-    pubSub.publish('postDeleted', { postDeleted: { id } });
+    this.pubSubService.publishPostDeleted(id);
     
     return true;
   }
@@ -158,11 +157,11 @@ export class PostResolver {
   // Subscriptions
   @Subscription(() => Post, { name: 'postCreated' })
   postCreated() {
-    return (pubSub as any).asyncIterator('postCreated');
+    return this.pubSubService.getPostCreatedIterator();
   }
 
   @Subscription(() => Post, { name: 'postUpdated' })
   postUpdated() {
-    return (pubSub as any).asyncIterator('postUpdated');
+    return this.pubSubService.getPostUpdatedIterator();
   }
 }

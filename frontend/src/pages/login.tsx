@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Link from 'next/link';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { LOGIN_MUTATION } from '@/lib/graphql/queries';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Validation schema
@@ -28,6 +26,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -35,24 +34,6 @@ export default function LoginPage() {
       router.push('/dashboard');
     }
   }, [isAuthenticated, router]);
-  
-  const [loginUser, { loading }] = useMutation(LOGIN_MUTATION, {
-    onCompleted: (data) => {
-      const { accessToken, user } = data.loginUser;
-      
-      // Use auth context login method
-      login(accessToken, user);
-      
-      toast.success(`Welcome back, ${user.username}!`);
-      
-      // Redirect to dashboard or intended page
-      const returnUrl = router.query.returnUrl as string || '/dashboard';
-      router.push(returnUrl);
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Login failed. Please try again.');
-    },
-  });
 
   const {
     register,
@@ -64,18 +45,23 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    setLoading(true);
     try {
-      await loginUser({
-        variables: {
-          input: {
-            emailOrUsername: data.email,
-            password: data.password,
-          },
-        },
-      });
+      const result = await login(data.email, data.password);
+      
+      if (result.success) {
+        toast.success('Welcome back!');
+        // Redirect to dashboard or intended page
+        const returnUrl = router.query.returnUrl as string || '/dashboard';
+        router.push(returnUrl);
+      } else {
+        toast.error(result.error || 'Login failed. Please try again.');
+      }
     } catch (error) {
-      // Error handled in mutation's onError
       console.error('Login error:', error);
+      toast.error('Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 

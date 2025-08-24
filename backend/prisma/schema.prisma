@@ -36,25 +36,33 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
+  // Existing Relations
   posts    Post[]
   comments Comment[]
   likes    Like[]
+
+  // Todo Management Relations
+  tasks           Task[]
+  taskMedia       TaskMedia[]
+  tasksSharedBy   TaskShare[]    @relation("TaskSharedBy")
+  tasksSharedWith TaskShare[]    @relation("TaskSharedWith")
+  taskComments    TaskComment[]
+  notifications   Notification[]
 
   @@map("users")
 }
 
 model Post {
-  id          String     @id @default(cuid())
-  title       String
-  content     String
-  excerpt     String?
-  slug        String     @unique
+  id            String     @id @default(cuid())
+  title         String
+  content       String
+  excerpt       String?
+  slug          String     @unique
   featuredImage String?
-  status      PostStatus @default(DRAFT)
-  publishedAt DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  status        PostStatus @default(DRAFT)
+  publishedAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   // Relations
   authorId String
@@ -103,13 +111,13 @@ model Like {
 }
 
 model Tag {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
   description String?
   color       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
   posts PostTag[]
@@ -143,4 +151,164 @@ model FileUpload {
   updatedAt    DateTime @updatedAt
 
   @@map("file_uploads")
+}
+
+// Todo Management Enums
+enum TaskCategory {
+  WORK // Công việc
+  PERSONAL // Cá nhân
+  STUDY // Học tập
+}
+
+enum TaskPriority {
+  HIGH // Cao
+  MEDIUM // Trung bình
+  LOW // Thấp
+}
+
+enum TaskStatus {
+  PENDING // Đang chờ
+  IN_PROGRESS // Đang thực hiện
+  COMPLETED // Hoàn thành
+  CANCELLED // Đã hủy
+}
+
+enum SharePermission {
+  VIEW // Chỉ xem
+  EDIT // Chỉnh sửa
+  ADMIN // Quản trị viên
+}
+
+enum MediaType {
+  IMAGE // Hình ảnh
+  VIDEO // Video
+  DOCUMENT // Tài liệu
+}
+
+// Todo Management Models
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  category    TaskCategory @default(PERSONAL)
+  priority    TaskPriority @default(MEDIUM)
+  status      TaskStatus   @default(PENDING)
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Media attachments
+  attachments TaskMedia[]
+
+  // Sharing and collaboration
+  shares TaskShare[]
+
+  // Comments and collaboration
+  comments TaskComment[]
+
+  // Subtasks
+  parentId String?
+  parent   Task?   @relation("TaskSubtasks", fields: [parentId], references: [id])
+  subtasks Task[]  @relation("TaskSubtasks")
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([dueDate])
+  @@map("tasks")
+}
+
+model TaskMedia {
+  id        String    @id @default(cuid())
+  type      MediaType
+  url       String
+  filename  String
+  size      Int
+  mimeType  String
+  caption   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  uploadedBy String
+  uploader   User   @relation(fields: [uploadedBy], references: [id])
+
+  @@index([taskId])
+  @@index([type])
+  @@map("task_media")
+}
+
+model TaskShare {
+  id         String          @id @default(cuid())
+  permission SharePermission @default(VIEW)
+  shareToken String          @unique
+  expiresAt  DateTime?
+  isActive   Boolean         @default(true)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  // Relations
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  sharedBy     String
+  sharedByUser User   @relation("TaskSharedBy", fields: [sharedBy], references: [id])
+
+  sharedWith     String?
+  sharedWithUser User?   @relation("TaskSharedWith", fields: [sharedWith], references: [id])
+
+  @@index([shareToken])
+  @@index([taskId])
+  @@map("task_shares")
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Reply to comment
+  parentId String?
+  parent   TaskComment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  TaskComment[] @relation("CommentReplies")
+
+  @@index([taskId])
+  @@index([userId])
+  @@map("task_comments")
+}
+
+// Notification system
+model Notification {
+  id        String   @id @default(cuid())
+  type      String // task_created, task_updated, task_shared, etc.
+  title     String
+  message   String
+  data      Json? // Additional data (task id, etc.)
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
 }

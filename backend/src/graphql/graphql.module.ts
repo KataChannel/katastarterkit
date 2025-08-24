@@ -8,6 +8,7 @@ import { GrokResolver } from './resolvers/grok.resolver';
 import { UserService } from '../services/user.service';
 import { PostService } from '../services/post.service';
 import { CommentService } from '../services/comment.service';
+import { PubSubService } from '../services/pubsub.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
@@ -32,11 +33,13 @@ import { MinioModule } from '../minio/minio.module';
     UserService,
     PostService,
     CommentService,
+    PubSubService,
   ],
   exports: [
     UserService,
     PostService,
     CommentService,
+    PubSubService,
   ],
 })
 export class GraphQLResolversModule {}

@@ -4,21 +4,20 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
-import { PubSub } from 'graphql-subscriptions';
 import { User } from '../models/user.model';
 import { AuthResponse } from '../models/auth.model';
 import { RegisterUserInput, LoginUserInput, UpdateUserInput } from '../inputs/user.input';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../auth/auth.service';
+import { PubSubService } from '../../services/pubsub.service';
 import { UserRole } from '@prisma/client';
-
-const pubSub = new PubSub();
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly pubSubService: PubSubService,
   ) {}
 
   // Queries
@@ -53,7 +52,7 @@ export class UserResolver {
     const tokens = await this.authService.generateTokens(user);
     
     // Publish user registration event
-    pubSub.publish('userRegistered', { userRegistered: user });
+    this.pubSubService.publishUserRegistered(user);
     
     return {
       ...tokens,
@@ -100,6 +99,6 @@ export class UserResolver {
   // Subscriptions
   @Subscription(() => User, { name: 'userRegistered' })
   userRegistered() {
-    return (pubSub as any).asyncIterator('userStatusChanged');
+    return this.pubSubService.getUserRegisteredIterator();
   }
 }

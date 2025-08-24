@@ -2,7 +2,6 @@ import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, P
 import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
-import { PubSub } from 'graphql-subscriptions';
 import { Comment as GraphQLComment } from '../models/comment.model';
 import { User } from '../models/user.model';
 import { Post } from '../models/post.model';
@@ -11,8 +10,7 @@ import { CreateCommentInput, UpdateCommentInput } from '../inputs/comment.input'
 import { CommentService } from '../../services/comment.service';
 import { UserService } from '../../services/user.service';
 import { PostService } from '../../services/post.service';
-
-const pubSub = new PubSub();
+import { PubSubService } from '../../services/pubsub.service';
 
 @Resolver(() => GraphQLComment)
 export class CommentResolver {
@@ -20,6 +18,7 @@ export class CommentResolver {
     private readonly commentService: CommentService,
     private readonly userService: UserService,
     private readonly postService: PostService,
+    private readonly pubSubService: PubSubService,
   ) {}
 
   // Queries
@@ -46,10 +45,7 @@ export class CommentResolver {
     const comment = await this.commentService.create({ ...input, userId });
     
     // Publish new comment event for subscriptions
-    pubSub.publish('newComment', { 
-      newComment: comment,
-      postId: input.postId 
-    });
+    this.pubSubService.publishNewComment(comment, input.postId);
     
     return comment;
   }
@@ -121,6 +117,6 @@ export class CommentResolver {
     }
   })
   newComment(@Args('postId', { nullable: true }) postId?: string) {
-    return (pubSub as any).asyncIterator('newComment');
+    return this.pubSubService.getNewCommentIterator();
   }
 }
