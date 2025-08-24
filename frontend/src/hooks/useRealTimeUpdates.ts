@@ -24,8 +24,8 @@ export function useRealTimeUpdates({
     {
       skip: !enableNewPosts,
       onSubscriptionData: ({ subscriptionData }) => {
-        if (subscriptionData?.data?.newPost) {
-          const post = subscriptionData.data.newPost;
+        if (subscriptionData?.data?.postCreated) {
+          const post = subscriptionData.data.postCreated;
           toast.success(`New post published: ${post.title}`, {
             duration: 5000,
             icon: '📝',
@@ -76,7 +76,7 @@ export function useRealTimeUpdates({
   }, [newCommentError]);
 
   return {
-    newPost: newPostData?.newPost,
+    newPost: newPostData?.postCreated,
     newComment: newCommentData?.newComment,
     errors: {
       newPost: newPostError,

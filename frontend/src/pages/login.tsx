@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useMutation } from '@apollo/client';
 import { useForm } from 'react-hook-form';
@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { LOGIN_MUTATION } from '@/lib/graphql/queries';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Validation schema
 const loginSchema = yup.object({
@@ -25,15 +26,22 @@ type LoginFormData = yup.InferType<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
   
   const [loginUser, { loading }] = useMutation(LOGIN_MUTATION, {
     onCompleted: (data) => {
       const { accessToken, user } = data.loginUser;
       
-      // Store token in localStorage
-      localStorage.setItem('token', accessToken);
-      localStorage.setItem('user', JSON.stringify(user));
+      // Use auth context login method
+      login(accessToken, user);
       
       toast.success(`Welcome back, ${user.username}!`);
       
@@ -60,7 +68,7 @@ export default function LoginPage() {
       await loginUser({
         variables: {
           input: {
-            email: data.email,
+            emailOrUsername: data.email,
             password: data.password,
           },
         },

@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 
 // Auth Queries and Mutations
 export const LOGIN_MUTATION = gql`
-  mutation LoginUser($input: LoginInput!) {
+  mutation LoginUser($input: LoginUserInput!) {
     loginUser(input: $input) {
       user {
         id
@@ -18,7 +18,7 @@ export const LOGIN_MUTATION = gql`
 `;
 
 export const REGISTER_MUTATION = gql`
-  mutation RegisterUser($input: RegisterInput!) {
+  mutation RegisterUser($input: RegisterUserInput!) {
     registerUser(input: $input) {
       user {
         id
@@ -35,13 +35,14 @@ export const REGISTER_MUTATION = gql`
 
 export const GET_CURRENT_USER = gql`
   query GetCurrentUser {
-    getCurrentUser {
+    getMe {
       id
       email
       username
       role
       avatar
-      bio
+      firstName
+      lastName
       createdAt
       updatedAt
     }
@@ -208,8 +209,8 @@ export const GENERATE_POST_SUGGESTIONS = gql`
 
 // Subscriptions
 export const NEW_POST_SUBSCRIPTION = gql`
-  subscription NewPost {
-    newPost {
+  subscription PostCreated {
+    postCreated {
       id
       title
       excerpt

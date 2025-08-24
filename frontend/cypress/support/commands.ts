@@ -84,14 +84,14 @@ Cypress.Commands.add('setupTestUser', () => {
     url: Cypress.env('BACKEND_URL'),
     body: {
       query: `
-        mutation RegisterUser($input: RegisterInput!) {
-          register(input: $input) {
+        mutation RegisterUser($input: RegisterUserInput!) {
+          registerUser(input: $input) {
             user {
               id
               email
               username
             }
-            token
+            accessToken
           }
         }
       `,

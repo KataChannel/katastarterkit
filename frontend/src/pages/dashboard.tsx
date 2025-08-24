@@ -1,22 +1,22 @@
 import React, { useState, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { PostList } from '@/components/posts/post-list';
 import { FileUpload } from '@/components/ui/file-upload';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
+import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 export default function Dashboard() {
-  const { data: session, status } = useSession();
+  const { user, loading, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showCreatePost, setShowCreatePost] = useState(false);
 
   // Redirect if not authenticated
   React.useEffect(() => {
-    if (status === 'loading') return; // Still loading
-    if (!session) router.push('/login');
-  }, [session, status, router]);
+    if (loading) return; // Still loading
+    if (!isAuthenticated) router.push('/login');
+  }, [isAuthenticated, loading, router]);
 
   // Handle real-time updates
   const handleNewPost = useCallback((post: any) => {
@@ -29,7 +29,7 @@ export default function Dashboard() {
     enableNewPosts: true,
   });
 
-  if (status === 'loading') {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -37,9 +37,14 @@ export default function Dashboard() {
     );
   }
 
-  if (!session) {
+  if (!isAuthenticated) {
     return null; // Will redirect
   }
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -54,7 +59,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">
-                Welcome, {session.user?.name || session.user?.email}
+                Welcome, {user?.username || user?.email}
               </span>
               <button
                 onClick={() => setShowCreatePost(!showCreatePost)}
@@ -62,6 +67,12 @@ export default function Dashboard() {
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 {showCreatePost ? 'Cancel' : 'Create Post'}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Logout
               </button>
             </div>
           </div>
