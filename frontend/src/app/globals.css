@@ -59,32 +59,32 @@
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
   }
 
   .btn-secondary {
-    @apply btn bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
   }
 
   .btn-outline {
-    @apply btn border border-gray-300 bg-transparent hover:bg-gray-50 focus:ring-gray-500;
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none border border-gray-300 bg-transparent hover:bg-gray-50 focus:ring-gray-500;
   }
 
   .btn-ghost {
-    @apply btn bg-transparent hover:bg-gray-100 focus:ring-gray-500;
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-transparent hover:bg-gray-100 focus:ring-gray-500;
   }
 
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
   }
 
   /* Input styles */
   .input {
-    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm;
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm;
   }
 
   .input-error {
-    @apply input border-red-300 focus:border-red-500 focus:ring-red-500;
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border-red-300 focus:border-red-500 focus:ring-red-500;
   }
 
   /* Card styles */
@@ -110,24 +110,24 @@
   }
 
   .badge-primary {
-    @apply badge bg-primary-100 text-primary-800;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800;
   }
 
   .badge-success {
-    @apply badge bg-green-100 text-green-800;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800;
   }
 
   .badge-warning {
-    @apply badge bg-yellow-100 text-yellow-800;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800;
   }
 
   .badge-danger {
-    @apply badge bg-red-100 text-red-800;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800;
   }
 
   /* Loading spinner */
   .spinner {
-    @apply animate-spin rounded-full border-2 border-gray-300 border-t-primary-600;
+    @apply animate-spin rounded-full border-2 border-gray-300 border-t-blue-600;
   }
 }
 

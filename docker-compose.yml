@@ -39,12 +39,12 @@ services:
 
   # Minio Object Storage with HTTPS
   minio:
-    image: ${MINIO_IMAGE:-minio/minio:RELEASE.2024-08-26T15-33-07Z}
+    image: ${MINIO_IMAGE:-minio/minio:RELEASE.2025-07-23T15-54-02Z}
     container_name: ${MINIO_CONTAINER_NAME:-katacore-minio}
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-katacore-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-katacore-secret-2025}
     ports:
       - "${MINIO_PORT:-9000}:9000"
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
@@ -55,7 +55,7 @@ services:
     networks:
       - katacore-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "https://localhost:9000/minio/health/live", "-k"]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 10s
       retries: 5

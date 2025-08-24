@@ -9,25 +9,25 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    default: 'Timonacore',
-    template: '%s | Timonacore',
+    default: 'KataCore',
+    template: '%s | KataCore',
   },
   description: 'Enterprise Fullstack Starter Kit with Next.js, NestJS, GraphQL, Prisma, Redis, and Minio',
   keywords: ['fullstack', 'starter-kit', 'nextjs', 'nestjs', 'graphql', 'prisma', 'redis', 'minio'],
-  authors: [{ name: 'Timonacore Team' }],
-  creator: 'Timonacore Team',
+  authors: [{ name: 'KataCore Team' }],
+  creator: 'KataCore Team',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    title: 'Timonacore',
+    title: 'KataCore',
     description: 'Enterprise Fullstack Starter Kit',
-    siteName: 'Timonacore',
+    siteName: 'KataCore',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Timonacore',
+    title: 'KataCore',
     description: 'Enterprise Fullstack Starter Kit',
   },
   robots: {
