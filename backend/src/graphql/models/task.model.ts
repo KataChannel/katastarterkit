@@ -1,5 +1,8 @@
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { User } from './user.model';
+import { TaskMedia } from './task-media.model';
+import { TaskShare } from './task-share.model';
+import { TaskComment } from './task-comment.model';
 import { TaskCategory, TaskPriority, TaskStatus } from '@prisma/client';
 
 registerEnumType(TaskCategory, {
@@ -47,17 +50,17 @@ export class Task {
   updatedAt: Date;
 
   @Field(() => User)
-  user: User;
+  author: User;
 
   @Field()
   userId: string;
 
-  @Field(() => [String], { nullable: true })
-  mediaIds?: string[];
+  @Field(() => [TaskMedia], { nullable: true })
+  media?: TaskMedia[];
 
-  @Field(() => [String], { nullable: true })
-  shareIds?: string[];
+  @Field(() => [TaskShare], { nullable: true })
+  shares?: TaskShare[];
 
-  @Field(() => [String], { nullable: true })
-  commentIds?: string[];
+  @Field(() => [TaskComment], { nullable: true })
+  comments?: TaskComment[];
 }

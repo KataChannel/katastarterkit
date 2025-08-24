@@ -13,7 +13,7 @@ export const TASK_FRAGMENT = gql`
     createdAt
     updatedAt
     userId
-    user {
+    author {
       id
       username
       firstName
@@ -130,7 +130,7 @@ export const GET_TASK_BY_ID = gql`
   query GetTaskById($id: ID!) {
     getTaskById(id: $id) {
       ...TaskFragment
-      attachments {
+      media {
         ...TaskMediaFragment
       }
       shares {

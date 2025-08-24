@@ -38,6 +38,19 @@ input CreatePostInput {
   title: String!
 }
 
+input CreateTaskCommentInput {
+  content: String!
+  taskId: ID!
+}
+
+input CreateTaskInput {
+  category: TaskCategory!
+  description: String
+  dueDate: String
+  priority: TaskPriority!
+  title: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
@@ -48,11 +61,21 @@ input LoginUserInput {
   password: String!
 }
 
+"""The type of media file"""
+enum MediaType {
+  DOCUMENT
+  IMAGE
+  VIDEO
+}
+
 type Mutation {
   createComment(input: CreateCommentInput!): Comment!
   createPost(input: CreatePostInput!): Post!
+  createTask(input: CreateTaskInput!): Task!
+  createTaskComment(input: CreateTaskCommentInput!): TaskComment!
   deleteComment(id: String!): Boolean!
   deletePost(id: String!): Boolean!
+  deleteTask(id: String!): Boolean!
   deleteUser(id: String!): Boolean!
   generatePostSummary(postId: String!): String!
   generateSummary(content: String!, maxLength: Float! = 200): String!
@@ -61,8 +84,10 @@ type Mutation {
   loginUser(input: LoginUserInput!): AuthResponse!
   publishPost(id: String!): Post!
   registerUser(input: RegisterUserInput!): AuthResponse!
+  shareTask(input: ShareTaskInput!): TaskShare!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
   updatePost(id: String!, input: UpdatePostInput!): Post!
+  updateTask(input: UpdateTaskInput!): Task!
   updateUser(id: String!, input: UpdateUserInput!): User!
 }
 
@@ -129,6 +154,9 @@ type Query {
   getPostById(id: String!): Post!
   getPostBySlug(slug: String!): Post!
   getPosts(filters: PostFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPosts!
+  getSharedTasks(filters: TaskFilterInput): [Task!]!
+  getTaskById(id: String!): Task!
+  getTasks(filters: TaskFilterInput): [Task!]!
   getUserById(id: String!): User!
   getUsers: [User!]!
 
@@ -148,10 +176,26 @@ input RegisterUserInput {
   username: String!
 }
 
+"""The permission level for shared tasks"""
+enum SharePermission {
+  ADMIN
+  EDIT
+  VIEW
+}
+
+input ShareTaskInput {
+  permission: SharePermission!
+  sharedWithId: String!
+  taskId: ID!
+}
+
 type Subscription {
   newComment(postId: String): Comment!
   postCreated: Post!
   postUpdated: Post!
+  taskCommentCreated: TaskComment!
+  taskCreated: Task!
+  taskUpdated: Task!
   userRegistered: User!
 }
 
@@ -167,6 +211,94 @@ type Tag {
   updatedAt: DateTime!
 }
 
+type Task {
+  author: User!
+  category: TaskCategory!
+  comments: [TaskComment!]
+  createdAt: DateTime!
+  description: String
+  dueDate: DateTime
+  id: ID!
+  media: [TaskMedia!]
+  priority: TaskPriority!
+  shares: [TaskShare!]
+  status: TaskStatus!
+  title: String!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+"""The category of a task"""
+enum TaskCategory {
+  PERSONAL
+  STUDY
+  WORK
+}
+
+type TaskComment {
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  taskId: String!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+input TaskFilterInput {
+  category: TaskCategory
+  dueAfter: String
+  dueBefore: String
+  priority: TaskPriority
+  search: String
+  status: TaskStatus
+}
+
+type TaskMedia {
+  caption: String
+  createdAt: DateTime!
+  filename: String!
+  id: ID!
+  mimeType: String!
+  size: Float!
+  taskId: String!
+  type: MediaType!
+  updatedAt: DateTime!
+  uploadedBy: String!
+  uploader: User!
+  url: String!
+}
+
+"""The priority level of a task"""
+enum TaskPriority {
+  HIGH
+  LOW
+  MEDIUM
+}
+
+type TaskShare {
+  createdAt: DateTime!
+  expiresAt: DateTime
+  id: ID!
+  isActive: Boolean!
+  permission: SharePermission!
+  shareToken: String!
+  sharedBy: String!
+  sharedByUser: User!
+  sharedWith: String
+  sharedWithUser: User
+  taskId: String!
+  updatedAt: DateTime!
+}
+
+"""The status of a task"""
+enum TaskStatus {
+  CANCELLED
+  COMPLETED
+  IN_PROGRESS
+  PENDING
+}
+
 input UpdateCommentInput {
   content: String
 }
@@ -178,6 +310,16 @@ input UpdatePostInput {
   slug: String
   status: PostStatus
   tags: [String!]
+  title: String
+}
+
+input UpdateTaskInput {
+  category: TaskCategory
+  description: String
+  dueDate: String
+  id: ID!
+  priority: TaskPriority
+  status: TaskStatus
   title: String
 }
 

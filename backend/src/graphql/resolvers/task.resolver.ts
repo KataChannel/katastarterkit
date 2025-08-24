@@ -173,12 +173,12 @@ export class TaskResolver {
 
   // Field Resolvers
   @ResolveField(() => User)
-  async user(@Parent() task: Task): Promise<User> {
+  async author(@Parent() task: Task): Promise<User> {
     return this.userService.findById(task.userId);
   }
 
   @ResolveField(() => [TaskMedia])
-  async attachments(@Parent() task: Task): Promise<any[]> {
+  async media(@Parent() task: Task): Promise<any[]> {
     return this.taskMediaService.findByTaskId(task.id);
   }
 
