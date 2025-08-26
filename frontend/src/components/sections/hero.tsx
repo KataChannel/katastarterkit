@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export function Hero() {
   return (
     <div className="relative bg-white overflow-hidden">
@@ -10,24 +12,24 @@ export function Hero() {
                 <span className="block text-blue-600 xl:inline">Fullstack Kit</span>
               </h1>
               <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                A modern, production-ready starter kit with Next.js, NestJS, GraphQL, Prisma, Redis, and Minio. 
+                A modern, production-ready starter kit with Next.js 15, NestJS, GraphQL, Prisma, Redis, and Minio. 
                 Built with TypeScript and designed for scalable enterprise applications.
               </p>
               <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                 <div className="rounded-md shadow">
-                  <a
-                    href="#"
+                  <Link
+                    href="/login"
                     className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10"
                   >
                     Get Started
-                  </a>
+                  </Link>
                 </div>
                 <div className="mt-3 sm:mt-0 sm:ml-3">
                   <a
-                    href="#"
+                    href="#features"
                     className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 md:py-4 md:text-lg md:px-10"
                   >
-                    View Docs
+                    Learn More
                   </a>
                 </div>
               </div>

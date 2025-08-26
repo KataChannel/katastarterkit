@@ -1,9 +1,9 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import { User } from './user.model';
 
 @ObjectType()
 export class TaskComment {
-  @Field(() => ID)
+  @Field()
   id: string;
 
   @Field()
@@ -23,4 +23,13 @@ export class TaskComment {
 
   @Field()
   userId: string;
+
+  @Field({ nullable: true })
+  parentId?: string;
+
+  @Field(() => TaskComment, { nullable: true })
+  parent?: TaskComment;
+
+  @Field(() => [TaskComment], { nullable: true })
+  replies?: TaskComment[];
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useTaskMutations } from '../../hooks/useTodos';
 import { TaskCategory, TaskPriority, CreateTaskInput } from '../../types/todo';
@@ -25,6 +25,26 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   const { createTask, loading } = useTaskMutations();
 
+  // Handle Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent background scroll
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -44,6 +64,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
       await createTask(taskData);
       
+      toast.success('Tạo task thành công!');
+      
       // Reset form
       setFormData({
         title: '',
@@ -53,8 +75,10 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         dueDate: '',
       });
 
+      onClose();
       onTaskCreated?.();
     } catch (error: any) {
+      console.error('Create task error:', error);
       toast.error(error.message || 'Lỗi khi tạo task');
     }
   };
@@ -73,20 +97,28 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         {/* Backdrop */}
         <div 
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          className="fixed inset-0 bg-black/50 transition-opacity"
           onClick={onClose}
+          aria-hidden="true"
         ></div>
 
         {/* Modal */}
-        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        <div 
+          className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 relative z-10"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-medium text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900" id="modal-title">
               Tạo Task Mới
             </h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Đóng modal"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>

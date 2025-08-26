@@ -1,7 +1,6 @@
 import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, Parent } from '@nestjs/graphql';
-import { UseGuards, UseInterceptors } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { Post } from '../models/post.model';
 import { User } from '../models/user.model';
 import { Comment } from '../models/comment.model';
@@ -25,8 +24,6 @@ export class PostResolver {
 
   // Queries
   @Query(() => PaginatedPosts, { name: 'getPosts' })
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(60) // 60 seconds cache
   async getPosts(
     @Args('pagination', { defaultValue: { page: 1, limit: 10 } }) pagination: PaginationInput,
     @Args('filters', { nullable: true }) filters?: PostFiltersInput,
@@ -35,15 +32,11 @@ export class PostResolver {
   }
 
   @Query(() => Post, { name: 'getPostById' })
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(60)
   async getPostById(@Args('id') id: string): Promise<Post> {
     return this.postService.findById(id);
   }
 
   @Query(() => Post, { name: 'getPostBySlug' })
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(60)
   async getPostBySlug(@Args('slug') slug: string): Promise<Post> {
     return this.postService.findBySlug(slug);
   }

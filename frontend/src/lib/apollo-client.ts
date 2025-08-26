@@ -83,13 +83,16 @@ export const apolloClient = new ApolloClient({
     typePolicies: {
       Query: {
         fields: {
-          posts: {
+          getPosts: {
             keyArgs: false,
-            merge(existing = [], incoming, { args }) {
-              if (args?.offset === 0) {
+            merge(existing, incoming, { args }) {
+              if (args?.pagination?.page === 1) {
                 return incoming;
               }
-              return [...existing, ...incoming];
+              return {
+                ...incoming,
+                items: [...(existing?.items || []), ...(incoming?.items || [])],
+              };
             },
           },
         },

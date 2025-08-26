@@ -1,9 +1,8 @@
 import { Resolver, Query, Mutation, Args, Context, Subscription } from '@nestjs/graphql';
-import { UseGuards, UseInterceptors } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { User } from '../models/user.model';
 import { AuthResponse } from '../models/auth.model';
 import { RegisterUserInput, LoginUserInput, UpdateUserInput } from '../inputs/user.input';
@@ -23,8 +22,6 @@ export class UserResolver {
   // Queries
   @Query(() => User, { name: 'getUserById' })
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(60) // 60 seconds
   async getUserById(@Args('id') id: string): Promise<User> {
     return this.userService.findById(id);
   }
@@ -39,8 +36,6 @@ export class UserResolver {
   @Query(() => [User], { name: 'getUsers' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(60)
   async getUsers(): Promise<User[]> {
     return this.userService.findAll();
   }

@@ -60,7 +60,13 @@ export function PostList({
     fetchMore, 
     refetch 
   } = useQuery(GET_POSTS, {
-    variables: { limit, offset, status },
+    variables: { 
+      pagination: {
+        page: Math.floor(offset / limit) + 1,
+        limit: limit,
+      },
+      filters: status ? { status } : undefined,
+    },
     notifyOnNetworkStatusChange: true,
     errorPolicy: 'all',
   });
@@ -76,11 +82,11 @@ export function PostList({
   });
 
   useEffect(() => {
-    if (data?.posts) {
+    if (data?.getPosts?.items) {
       if (offset === 0) {
-        setPosts(data.posts);
+        setPosts(data.getPosts.items);
       } else {
-        setPosts(prev => [...prev, ...data.posts]);
+        setPosts(prev => [...prev, ...data.getPosts.items]);
       }
     }
   }, [data, offset]);

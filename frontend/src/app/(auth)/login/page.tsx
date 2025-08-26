@@ -1,5 +1,7 @@
+'use client';
+
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -24,6 +26,7 @@ type LoginFormData = yup.InferType<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -52,7 +55,7 @@ export default function LoginPage() {
       if (result.success) {
         toast.success('Welcome back!');
         // Redirect to dashboard or intended page
-        const returnUrl = router.query.returnUrl as string || '/dashboard';
+        const returnUrl = searchParams?.get('returnUrl') || '/dashboard';
         router.push(returnUrl);
       } else {
         toast.error(result.error || 'Login failed. Please try again.');

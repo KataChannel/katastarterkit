@@ -125,11 +125,18 @@ GraphQL is a query language for APIs and a runtime for fulfilling those queries 
 
 \`\`\`graphql
 query GetPosts {
-  posts {
-    id
-    title
-    author {
-      username
+  getPosts {
+    items {
+      id
+      title
+      author {
+        username
+      }
+    }
+    meta {
+      total
+      page
+      totalPages
     }
   }
 }

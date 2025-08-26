@@ -56,7 +56,11 @@ export class TaskService {
       where: { id },
       include: {
         user: true,
-        attachments: true,
+        attachments: {
+          include: {
+            uploader: true,
+          },
+        },
         shares: {
           include: {
             sharedByUser: true,
@@ -66,8 +70,28 @@ export class TaskService {
         comments: {
           include: {
             user: true,
+            replies: {
+              include: {
+                user: true,
+              },
+            },
           },
+          where: { parentId: null }, // Only top-level comments
           orderBy: { createdAt: 'desc' },
+        },
+        parent: {
+          include: {
+            user: true,
+          },
+        },
+        subtasks: {
+          include: {
+            user: true,
+          },
+          orderBy: [
+            { priority: 'desc' },
+            { createdAt: 'desc' },
+          ],
         },
       },
     });
@@ -212,5 +236,102 @@ export class TaskService {
     await this.prisma.task.delete({
       where: { id },
     });
+  }
+
+  // Subtask Management
+  async findSubtasks(parentId: string, userId: string) {
+    // Verify user has access to parent task
+    await this.findById(parentId, userId);
+    
+    return this.prisma.task.findMany({
+      where: { parentId },
+      include: {
+        user: true,
+        attachments: true,
+        shares: {
+          include: {
+            sharedByUser: true,
+            sharedWithUser: true,
+          },
+        },
+        comments: {
+          include: {
+            user: true,
+          },
+        },
+        subtasks: {
+          include: {
+            user: true,
+          },
+        },
+      },
+      orderBy: [
+        { priority: 'desc' },
+        { createdAt: 'desc' },
+      ],
+    });
+  }
+
+  async createSubtask(parentId: string, input: CreateTaskInput, userId: string) {
+    // Verify user has access to parent task
+    const parentTask = await this.findById(parentId, userId);
+    
+    // Check if user has edit permission
+    const canEdit = 
+      parentTask.userId === userId ||
+      parentTask.shares.some(share => 
+        share.sharedWith === userId && 
+        (share.permission === 'EDIT' || share.permission === 'ADMIN')
+      );
+
+    if (!canEdit) {
+      throw new ForbiddenException('You do not have permission to create subtasks for this task');
+    }
+
+    return this.prisma.task.create({
+      data: {
+        title: input.title,
+        description: input.description,
+        category: input.category,
+        priority: input.priority,
+        dueDate: input.dueDate ? new Date(input.dueDate) : null,
+        user: {
+          connect: { id: userId },
+        },
+        parent: {
+          connect: { id: parentId },
+        },
+      },
+      include: {
+        user: true,
+        parent: true,
+        attachments: true,
+        shares: true,
+        comments: true,
+        subtasks: true,
+      },
+    });
+  }
+
+  async getTaskProgress(taskId: string, userId: string) {
+    const task = await this.findById(taskId, userId);
+    
+    const subtasks = await this.prisma.task.findMany({
+      where: { parentId: taskId },
+      select: {
+        id: true,
+        status: true,
+      },
+    });
+
+    const totalSubtasks = subtasks.length;
+    const completedSubtasks = subtasks.filter(st => st.status === 'COMPLETED').length;
+    
+    return {
+      task,
+      totalSubtasks,
+      completedSubtasks,
+      progressPercentage: totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0,
+    };
   }
 }

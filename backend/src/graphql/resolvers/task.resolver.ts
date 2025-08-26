@@ -1,7 +1,6 @@
 import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, Parent } from '@nestjs/graphql';
-import { UseGuards, UseInterceptors } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { Task } from '../models/task.model';
 import { TaskMedia } from '../models/task-media.model';
 import { TaskShare } from '../models/task-share.model';
@@ -38,7 +37,7 @@ export class TaskResolver {
     @Context() context: any,
     @Args('filters', { nullable: true }) filters?: TaskFilterInput,
   ): Promise<any[]> {
-    const userId = context.req.user.sub;
+    const userId = context.req.user.id;
     return this.taskService.findByUserId(userId, filters);
   }
 
@@ -48,7 +47,7 @@ export class TaskResolver {
     @Args('id') id: string,
     @Context() context: any,
   ): Promise<any> {
-    const userId = context.req.user.sub;
+    const userId = context.req.user.id;
     return this.taskService.findById(id, userId);
   }
 
@@ -58,7 +57,7 @@ export class TaskResolver {
     @Context() context: any,
     @Args('filters', { nullable: true }) filters?: TaskFilterInput,
   ): Promise<any[]> {
-    const userId = context.req.user.sub;
+    const userId = context.req.user.id;
     return this.taskService.findSharedTasks(userId, filters);
   }
 
@@ -69,7 +68,7 @@ export class TaskResolver {
     @Args('input') input: CreateTaskInput,
     @Context() context: any,
   ): Promise<any> {
-    const userId = context.req.user.sub;
+    const userId = context.req.user.id; // Changed from .sub to .id
     const task = await this.taskService.create(input, userId);
     
     // Publish task created event
@@ -84,7 +83,7 @@ export class TaskResolver {
     @Args('input') input: UpdateTaskInput,
     @Context() context: any,
   ): Promise<any> {
-    const userId = context.req.user.sub;
+    const userId = context.req.user.id;
     const task = await this.taskService.update(input, userId);
     
     // Publish task updated event
@@ -104,7 +103,7 @@ export class TaskResolver {
     @Args('id') id: string,
     @Context() context: any,
   ): Promise<boolean> {
-    const userId = context.req.user.sub;
+    const userId = context.req.user.id;
     await this.taskService.delete(id, userId);
     
     // Publish task deleted event
@@ -119,7 +118,7 @@ export class TaskResolver {
     @Args('input') input: ShareTaskInput,
     @Context() context: any,
   ): Promise<any> {
-    const userId = context.req.user.sub;
+    const userId = context.req.user.id;
     const share = await this.taskShareService.create(input, userId);
     
     // Create notification for shared user
@@ -140,7 +139,7 @@ export class TaskResolver {
     @Args('input') input: CreateTaskCommentInput,
     @Context() context: any,
   ): Promise<any> {
-    const userId = context.req.user.sub;
+    const userId = context.req.user.id;
     const comment = await this.taskCommentService.create(input, userId);
     
     // Create notification for task owner and collaborators
@@ -153,6 +152,17 @@ export class TaskResolver {
     await this.pubSubService.publish('taskCommentCreated', { taskCommentCreated: comment });
     
     return comment;
+  }
+
+  @Mutation(() => Task, { name: 'createSubtask' })
+  @UseGuards(JwtAuthGuard)
+  async createSubtask(
+    @Args('parentId') parentId: string,
+    @Args('input') input: CreateTaskInput,
+    @Context() context: any,
+  ): Promise<any> {
+    const userId = context.req.user.id;
+    return this.taskService.createSubtask(parentId, input, userId);
   }
 
   // Subscriptions
@@ -177,6 +187,16 @@ export class TaskResolver {
     return this.userService.findById(task.userId);
   }
 
+  @ResolveField(() => Number)
+  async progress(
+    @Parent() task: Task,
+    @Context() context: any,
+  ): Promise<number> {
+    const userId = context.req.user.id;
+    const progressData = await this.taskService.getTaskProgress(task.id, userId);
+    return progressData.progressPercentage;
+  }
+
   @ResolveField(() => [TaskMedia])
   async media(@Parent() task: Task): Promise<any[]> {
     return this.taskMediaService.findByTaskId(task.id);
@@ -190,5 +210,36 @@ export class TaskResolver {
   @ResolveField(() => [TaskComment])
   async comments(@Parent() task: Task): Promise<any[]> {
     return this.taskCommentService.findByTaskId(task.id);
+  }
+
+  @ResolveField(() => [Task])
+  async subtasks(
+    @Parent() task: Task,
+    @Context() context: any,
+  ): Promise<any[]> {
+    const userId = context.req.user.id;
+    return this.taskService.findSubtasks(task.id, userId);
+  }
+
+  @ResolveField(() => Task, { nullable: true })
+  async parent(
+    @Parent() task: Task,
+    @Context() context: any,
+  ): Promise<any> {
+    if (!task.parentId) return null;
+    const userId = context.req.user.id;
+    return this.taskService.findById(task.parentId, userId);
+  }
+
+  // TaskComment field resolvers
+  @ResolveField(() => TaskComment, { nullable: true })
+  async commentParent(@Parent() comment: TaskComment): Promise<any> {
+    if (!comment.parentId) return null;
+    return this.taskCommentService.findById(comment.parentId);
+  }
+
+  @ResolveField(() => [TaskComment])
+  async commentReplies(@Parent() comment: TaskComment): Promise<any[]> {
+    return this.taskCommentService.findReplies(comment.id);
   }
 }

@@ -40,7 +40,8 @@ input CreatePostInput {
 
 input CreateTaskCommentInput {
   content: String!
-  taskId: ID!
+  parentId: String
+  taskId: String!
 }
 
 input CreateTaskInput {
@@ -71,6 +72,7 @@ enum MediaType {
 type Mutation {
   createComment(input: CreateCommentInput!): Comment!
   createPost(input: CreatePostInput!): Post!
+  createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
   deleteComment(id: String!): Boolean!
@@ -186,7 +188,7 @@ enum SharePermission {
 input ShareTaskInput {
   permission: SharePermission!
   sharedWithId: String!
-  taskId: ID!
+  taskId: String!
 }
 
 type Subscription {
@@ -214,15 +216,21 @@ type Tag {
 type Task {
   author: User!
   category: TaskCategory!
+  commentParent: TaskComment
+  commentReplies: [TaskComment!]!
   comments: [TaskComment!]
   createdAt: DateTime!
   description: String
   dueDate: DateTime
-  id: ID!
+  id: String!
   media: [TaskMedia!]
+  parent: Task
+  parentId: String
   priority: TaskPriority!
+  progress: Float
   shares: [TaskShare!]
   status: TaskStatus!
+  subtasks: [Task!]
   title: String!
   updatedAt: DateTime!
   userId: String!
@@ -238,7 +246,10 @@ enum TaskCategory {
 type TaskComment {
   content: String!
   createdAt: DateTime!
-  id: ID!
+  id: String!
+  parent: TaskComment
+  parentId: String
+  replies: [TaskComment!]
   taskId: String!
   updatedAt: DateTime!
   user: User!
@@ -317,7 +328,7 @@ input UpdateTaskInput {
   category: TaskCategory
   description: String
   dueDate: String
-  id: ID!
+  id: String!
   priority: TaskPriority
   status: TaskStatus
   title: String

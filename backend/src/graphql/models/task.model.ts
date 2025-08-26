@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
+import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
 import { User } from './user.model';
 import { TaskMedia } from './task-media.model';
 import { TaskShare } from './task-share.model';
@@ -22,7 +22,7 @@ registerEnumType(TaskStatus, {
 
 @ObjectType()
 export class Task {
-  @Field(() => ID)
+  @Field()
   id: string;
 
   @Field()
@@ -54,6 +54,18 @@ export class Task {
 
   @Field()
   userId: string;
+
+  @Field({ nullable: true })
+  parentId?: string;
+
+  @Field(() => Task, { nullable: true })
+  parent?: Task;
+
+  @Field(() => [Task], { nullable: true })
+  subtasks?: Task[];
+
+  @Field(() => Number, { nullable: true })
+  progress?: number;
 
   @Field(() => [TaskMedia], { nullable: true })
   media?: TaskMedia[];

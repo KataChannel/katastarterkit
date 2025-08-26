@@ -51,23 +51,31 @@ export const GET_CURRENT_USER = gql`
 
 // Post Queries and Mutations
 export const GET_POSTS = gql`
-  query GetPosts($limit: Int, $offset: Int, $status: PostStatus) {
-    posts(limit: $limit, offset: $offset, status: $status) {
-      id
-      title
-      excerpt
-      slug
-      status
-      publishedAt
-      createdAt
-      updatedAt
-      author {
+  query GetPosts($filters: PostFiltersInput, $pagination: PaginationInput!) {
+    getPosts(filters: $filters, pagination: $pagination) {
+      items {
         id
-        username
-        avatar
+        title
+        excerpt
+        slug
+        status
+        publishedAt
+        createdAt
+        updatedAt
+        author {
+          id
+          username
+          avatar
+        }
+        commentsCount
       }
-      _count {
-        comments
+      meta {
+        total
+        page
+        totalPages
+        hasNextPage
+        hasPrevPage
+        limit
       }
     }
   }
@@ -75,7 +83,7 @@ export const GET_POSTS = gql`
 
 export const GET_POST_BY_SLUG = gql`
   query GetPostBySlug($slug: String!) {
-    postBySlug(slug: $slug) {
+    getPostBySlug(slug: $slug) {
       id
       title
       content
@@ -89,21 +97,8 @@ export const GET_POST_BY_SLUG = gql`
         id
         username
         avatar
-        bio
       }
-      comments {
-        id
-        content
-        createdAt
-        author {
-          id
-          username
-          avatar
-        }
-      }
-      _count {
-        comments
-      }
+      commentsCount
     }
   }
 `;

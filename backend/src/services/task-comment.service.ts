@@ -28,26 +28,95 @@ export class TaskCommentService {
       throw new ForbiddenException('You do not have access to this task');
     }
 
+    // If this is a reply, check if parent comment exists
+    if (input.parentId) {
+      const parentComment = await this.prisma.taskComment.findUnique({
+        where: { id: input.parentId },
+      });
+
+      if (!parentComment || parentComment.taskId !== input.taskId) {
+        throw new NotFoundException('Parent comment not found or does not belong to this task');
+      }
+    }
+
     return this.prisma.taskComment.create({
       data: {
         content: input.content,
         task: { connect: { id: input.taskId } },
         user: { connect: { id: authorId } },
+        ...(input.parentId && { parent: { connect: { id: input.parentId } } }),
       },
       include: {
         user: true,
         task: true,
+        parent: {
+          include: {
+            user: true,
+          },
+        },
+        replies: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
   }
 
   async findByTaskId(taskId: string) {
     return this.prisma.taskComment.findMany({
-      where: { taskId },
+      where: { 
+        taskId,
+        parentId: null // Only return top-level comments
+      },
+      include: {
+        user: true,
+        replies: {
+          include: {
+            user: true,
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  async findById(id: string) {
+    return this.prisma.taskComment.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        parent: {
+          include: {
+            user: true,
+          },
+        },
+        replies: {
+          include: {
+            user: true,
+          },
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
+    });
+  }
+
+  async findReplies(parentId: string) {
+    return this.prisma.taskComment.findMany({
+      where: { parentId },
       include: {
         user: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: {
+        createdAt: 'asc',
+      },
     });
   }
 

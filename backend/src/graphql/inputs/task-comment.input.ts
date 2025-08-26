@@ -1,20 +1,25 @@
-import { InputType, Field, ID } from '@nestjs/graphql';
-import { IsString } from 'class-validator';
+import { InputType, Field } from '@nestjs/graphql';
+import { IsString, IsOptional } from 'class-validator';
 
 @InputType()
 export class CreateTaskCommentInput {
-  @Field(() => ID)
+  @Field()
   @IsString()
   taskId: string;
 
   @Field()
   @IsString()
   content: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  parentId?: string;
 }
 
 @InputType()
 export class UpdateTaskCommentInput {
-  @Field(() => ID)
+  @Field()
   @IsString()
   commentId: string;
 

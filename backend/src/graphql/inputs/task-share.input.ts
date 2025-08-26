@@ -1,10 +1,10 @@
-import { InputType, Field, ID } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
 import { IsString, IsEnum } from 'class-validator';
 import { SharePermission } from '@prisma/client';
 
 @InputType()
 export class ShareTaskInput {
-  @Field(() => ID)
+  @Field()
   @IsString()
   taskId: string;
 
@@ -19,7 +19,7 @@ export class ShareTaskInput {
 
 @InputType()
 export class UpdateTaskShareInput {
-  @Field(() => ID)
+  @Field()
   @IsString()
   shareId: string;
 

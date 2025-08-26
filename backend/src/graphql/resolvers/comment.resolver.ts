@@ -1,7 +1,6 @@
 import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, Parent } from '@nestjs/graphql';
-import { UseGuards, UseInterceptors } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { Comment as GraphQLComment } from '../models/comment.model';
 import { User } from '../models/user.model';
 import { Post } from '../models/post.model';
@@ -23,8 +22,6 @@ export class CommentResolver {
 
   // Queries
   @Query(() => [GraphQLComment], { name: 'getCommentsByPost' })
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(60)
   async getCommentsByPost(@Args('postId') postId: string): Promise<GraphQLComment[]> {
     return this.commentService.findByPost(postId);
   }

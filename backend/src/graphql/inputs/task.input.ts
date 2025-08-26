@@ -1,4 +1,4 @@
-import { InputType, Field, ID } from '@nestjs/graphql';
+import { InputType, Field } from '@nestjs/graphql';
 import { IsString, IsOptional, IsEnum, IsDateString } from 'class-validator';
 import { TaskCategory, TaskPriority, TaskStatus } from '@prisma/client';
 
@@ -29,7 +29,7 @@ export class CreateTaskInput {
 
 @InputType()
 export class UpdateTaskInput {
-  @Field(() => ID)
+  @Field()
   @IsString()
   id: string;
 
