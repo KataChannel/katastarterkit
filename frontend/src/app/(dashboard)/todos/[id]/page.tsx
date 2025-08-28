@@ -153,6 +153,8 @@ export default function TaskDetailPage() {
   }
 
   if (error || !task) {
+    console.error('Error fetching task:', error);
+    console.error('Error fetching task:', task);
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

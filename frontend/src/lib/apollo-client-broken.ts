@@ -1,6 +1,6 @@
 import {
-  ApolloClient,
-  InMemoryCache,
+  ApolloCl// WebSocket Link for subscriptions - completely disabled in development
+const wsLink = null; // Temporarily disabled due to connection issueshe,
   createHttpLink,
   from,
   split,
@@ -11,22 +11,40 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 
-// HTTP Link
+// HTTP Link for queries and mutations
 const httpLink = createHttpLink({
   uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:14000/graphql',
+  credentials: 'include',
 });
 
-// WebSocket Link for subscriptions - completely disabled in development
-const wsLink = null; // Temporarily disabled due to connection issues
+// WebSocket Link for subscriptions - conditional creation
+const wsLink = typeof window !== 'undefined' && process.env.NODE_ENV === 'production' 
+  ? new GraphQLWsLink(createClient({
+      url: process.env.NEXT_PUBLIC_WS_ENDPOINT || 'ws://localhost:14000/graphql',
+      connectionParams: () => {
+        const token = localStorage.getItem('token');
+        return token ? { authorization: `Bearer ${token}` } : {};
+      },
+      shouldRetry: (errOrCloseEvent) => {
+        console.log('🔄 WebSocket retry decision for:', errOrCloseEvent);
+        return true;
+      },
+      on: {
+        connected: () => console.log('� WebSocket connected'),
+        error: (error) => console.log('⚠️ WebSocket error:', error),
+        closed: () => console.log('❌ WebSocket closed'),
+      },
+    }))
+  : null; // Disable WebSocket in development
 
-// Auth Link - adds authorization header
+// Auth Link - adds JWT token to requests
 const authLink = setContext((_, { headers }) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   
   return {
     headers: {
       ...headers,
-      ...(token && { authorization: `Bearer ${token}` }),
+      authorization: token ? `Bearer ${token}` : '',
     },
   };
 });
@@ -46,10 +64,8 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
       
       if (message === 'Forbidden resource') {
         console.warn('🔐 Authentication issue - redirecting to login');
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
-        }
+        localStorage.removeItem('token');
+        window.location.href = '/login';
       }
     });
   }
@@ -67,14 +83,13 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
     
     // Handle unauthorized errors
     if ('statusCode' in networkError && networkError.statusCode === 401) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      }
+      localStorage.removeItem('token');
+      window.location.href = '/login';
     }
   }
 });
 
+// Split link for handling subscriptions vs queries/mutations
 // Split based on operation type - only if WebSocket is available
 const splitLink = wsLink 
   ? split(
@@ -90,31 +105,31 @@ const splitLink = wsLink
     )
   : authLink.concat(httpLink); // Fallback to HTTP only
 
-// Create Apollo Client
+// Apollo Client instance
 export const apolloClient = new ApolloClient({
   link: from([errorLink, splitLink]),
   cache: new InMemoryCache({
     typePolicies: {
       Query: {
         fields: {
-          posts: {
+          getPosts: {
+            keyArgs: false,
             merge(existing, incoming, { args }) {
-              // Simple replacement strategy
-              return incoming;
+              if (args?.pagination?.page === 1) {
+                return incoming;
+              }
+              return {
+                ...incoming,
+                items: [...(existing?.items || []), ...(incoming?.items || [])],
+              };
             },
           },
-          getPostById: {
-            merge(existing, incoming) {
-              return incoming;
-            },
-          },
-          tasks: {
+        },
+      },
+      Post: {
+        fields: {
+          comments: {
             merge(existing = [], incoming) {
-              return incoming;
-            },
-          },
-          getTask: {
-            merge(existing, incoming) {
               return incoming;
             },
           },
@@ -125,11 +140,25 @@ export const apolloClient = new ApolloClient({
   defaultOptions: {
     watchQuery: {
       errorPolicy: 'all',
+      notifyOnNetworkStatusChange: true,
     },
     query: {
+      errorPolicy: 'all',
+    },
+    mutate: {
       errorPolicy: 'all',
     },
   },
 });
 
-export default apolloClient;
+// Helper function to get authenticated client
+export const getAuthenticatedClient = () => {
+  return apolloClient;
+};
+
+// Helper function to clear cache and token
+export const logout = async () => {
+  localStorage.removeItem('token');
+  await apolloClient.clearStore();
+  window.location.href = '/login';
+};

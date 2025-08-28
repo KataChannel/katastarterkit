@@ -157,7 +157,7 @@ type Query {
   getPostBySlug(slug: String!): Post!
   getPosts(filters: PostFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPosts!
   getSharedTasks(filters: TaskFilterInput): [Task!]!
-  getTaskById(id: String!): Task!
+  getTaskById(id: ID!): Task!
   getTasks(filters: TaskFilterInput): [Task!]!
   getUserById(id: String!): User!
   getUsers: [User!]!

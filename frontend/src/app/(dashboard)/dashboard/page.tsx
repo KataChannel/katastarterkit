@@ -4,6 +4,8 @@ import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { PostList } from '@/components/posts/post-list';
 import { FileUpload } from '@/components/ui/file-upload';
+import TodoStatsWidget from '@/components/todos/TodoStatsWidget';
+import RecentTasksWidget from '@/components/todos/RecentTasksWidget';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -89,7 +91,26 @@ export default function DashboardPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          {/* Stats Grid */}
+          {/* Welcome Section */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Chào mừng trở lại, {user?.username}!
+            </h2>
+            <p className="text-gray-600">
+              Đây là tổng quan về hoạt động và tiến độ công việc của bạn.
+            </p>
+          </div>
+
+          {/* Widgets Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Todo Stats Widget */}
+            <TodoStatsWidget />
+            
+            {/* Recent Tasks Widget */}
+            <RecentTasksWidget limit={6} />
+          </div>
+
+          {/* Stats Grid - Original stats kept for reference */}
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="p-5">

@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, Parent, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { Task } from '../models/task.model';
@@ -44,7 +44,7 @@ export class TaskResolver {
   @Query(() => Task, { name: 'getTaskById' })
   @UseGuards(JwtAuthGuard)
   async getTaskById(
-    @Args('id') id: string,
+    @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
   ): Promise<any> {
     const userId = context.req.user.id;

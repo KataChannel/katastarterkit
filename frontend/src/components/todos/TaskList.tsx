@@ -8,7 +8,7 @@ import {
 import TaskCard from './TaskCard';
 import TaskFilters from './TaskFilters';
 import CreateTaskModal from './CreateTaskModal';
-import { useTasks, useTaskMutations, useTaskFilters, useTaskSubscriptions } from '../../hooks/useTodos';
+import { useTasks, useSharedTasks, useTaskMutations, useTaskFilters, useTaskSubscriptions } from '../../hooks/useTodos';
 import { Task, TaskStatus } from '../../types/todo';
 import toast from 'react-hot-toast';
 
@@ -26,7 +26,17 @@ const TaskList: React.FC<TaskListProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   
   const { filters, updateFilter, clearFilters, hasActiveFilters } = useTaskFilters();
-  const { tasks, loading, error, refetch } = useTasks(filters);
+  
+  // Use different hooks based on showSharedTasks prop
+  const { tasks: regularTasks, loading: regularLoading, error: regularError, refetch: regularRefetch } = useTasks(filters);
+  const { sharedTasks, loading: sharedLoading, error: sharedError, refetch: sharedRefetch } = useSharedTasks(filters);
+  
+  // Determine which data to use
+  const tasks = showSharedTasks ? sharedTasks : regularTasks;
+  const loading = showSharedTasks ? sharedLoading : regularLoading;
+  const error = showSharedTasks ? sharedError : regularError;
+  const refetch = showSharedTasks ? sharedRefetch : regularRefetch;
+  
   const { updateTask, deleteTask, loading: mutationLoading } = useTaskMutations();
   const { newTasks, updatedTasks, clearNotifications } = useTaskSubscriptions();
 

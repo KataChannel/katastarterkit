@@ -15,14 +15,17 @@ export function useRealTimeUpdates({
   onNewPost,
   onNewComment,
   postId,
-  enableNewPosts = true,
+  enableNewPosts = false, // Disable by default in development
   enableNewComments = false,
 }: UseRealTimeUpdatesProps) {
+  // Only enable subscriptions in production or when explicitly enabled
+  const shouldEnableSubscriptions = process.env.NODE_ENV === 'production';
+  
   // Subscribe to new posts
   const { data: newPostData, error: newPostError } = useSubscription(
     NEW_POST_SUBSCRIPTION,
     {
-      skip: !enableNewPosts,
+      skip: !enableNewPosts || !shouldEnableSubscriptions,
       onSubscriptionData: ({ subscriptionData }) => {
         if (subscriptionData?.data?.postCreated) {
           const post = subscriptionData.data.postCreated;
@@ -34,8 +37,11 @@ export function useRealTimeUpdates({
         }
       },
       onError: (error) => {
-        console.error('New post subscription error:', error);
-        toast.error('Failed to connect to real-time updates');
+        console.warn('New post subscription error (expected in development):', error.message);
+        // Don't show error toast in development
+        if (process.env.NODE_ENV === 'production') {
+          toast.error('Failed to connect to real-time updates');
+        }
       },
     }
   );
@@ -45,7 +51,7 @@ export function useRealTimeUpdates({
     NEW_COMMENT_SUBSCRIPTION,
     {
       variables: { postId },
-      skip: !enableNewComments || !postId,
+      skip: !enableNewComments || !postId || !shouldEnableSubscriptions,
       onSubscriptionData: ({ subscriptionData }) => {
         if (subscriptionData?.data?.newComment) {
           const comment = subscriptionData.data.newComment;
@@ -57,20 +63,23 @@ export function useRealTimeUpdates({
         }
       },
       onError: (error) => {
-        console.error('New comment subscription error:', error);
-        toast.error('Failed to connect to comment updates');
+        console.warn('New comment subscription error (expected in development):', error.message);
+        // Don't show error toast in development
+        if (process.env.NODE_ENV === 'production') {
+          toast.error('Failed to connect to comment updates');
+        }
       },
     }
   );
 
   useEffect(() => {
-    if (newPostError) {
+    if (newPostError && process.env.NODE_ENV === 'production') {
       console.error('Post subscription error:', newPostError);
     }
   }, [newPostError]);
 
   useEffect(() => {
-    if (newCommentError) {
+    if (newCommentError && process.env.NODE_ENV === 'production') {
       console.error('Comment subscription error:', newCommentError);
     }
   }, [newCommentError]);

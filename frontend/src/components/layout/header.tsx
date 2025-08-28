@@ -32,6 +32,9 @@ export function Header() {
                 <Link href="/todos" className="text-base font-medium text-gray-500 hover:text-gray-900">
                   Todos
                 </Link>
+                <Link href="/todos/shared" className="text-base font-medium text-gray-500 hover:text-gray-900">
+                  Shared Todos
+                </Link>
                 <a href="#" className="text-base font-medium text-gray-500 hover:text-gray-900">
                   Documentation
                 </a>
