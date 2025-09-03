@@ -25,7 +25,8 @@
     "db:studio": "npx prisma studio",
     "db:seed": "npx prisma db seed",
     "db:reset": "npx prisma migrate reset",
-    "db:generate": "npx prisma generate"
+    "db:generate": "npx prisma generate",
+    "prisma:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.2",
@@ -114,8 +115,5 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
   }
 }

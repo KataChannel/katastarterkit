@@ -97,9 +97,11 @@ export function PostList({
     try {
       await fetchMore({
         variables: {
-          offset: posts.length,
-          limit,
-          status,
+          pagination: {
+            page: Math.floor(posts.length / limit) + 1,
+            limit,
+          },
+          filters: status ? { status } : undefined,
         },
       });
       setOffset(posts.length);
@@ -325,7 +327,7 @@ export function PostList({
                     <Link href={`/posts/${post.slug}#comments`}>
                       <div className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors cursor-pointer">
                         <ChatBubbleLeftIcon className="h-5 w-5" />
-                        <span className="text-sm" data-testid="comment-count">{post._count.comments}</span>
+                        <span className="text-sm" data-testid="comment-count">{post?._count?.comments}</span>
                       </div>
                     </Link>
 

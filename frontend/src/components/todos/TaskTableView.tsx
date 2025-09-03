@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Task, TaskStatus, TaskPriority } from '@/types/todo';
 import { TodoViewProps } from '@/types/todo-views';
+import { MediaViewer } from './MediaViewer';
 import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import {
@@ -171,6 +172,9 @@ export const TaskTableView: React.FC<TodoViewProps> = ({
               <SortableHeader field="status">Trạng thái</SortableHeader>
               <SortableHeader field="priority">Độ ưu tiên</SortableHeader>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Media
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Người thực hiện
               </th>
               <SortableHeader field="dueDate">Hạn hoàn thành</SortableHeader>
@@ -219,6 +223,19 @@ export const TaskTableView: React.FC<TodoViewProps> = ({
                     {task.priority}
                   </span>
                 </td>
+                
+                {/* Media Column */}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {task.media && task.media.length > 0 ? (
+                    <MediaViewer 
+                      media={task.media} 
+                      compact={true}
+                    />
+                  ) : (
+                    <span className="text-gray-400 text-sm">Không có</span>
+                  )}
+                </td>
+                
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {task.assignedTo ? (
                     <div className="flex items-center">

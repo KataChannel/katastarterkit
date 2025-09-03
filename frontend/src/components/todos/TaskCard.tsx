@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -9,18 +9,22 @@ import {
   ChatBubbleLeftIcon,
   PaperClipIcon,
   ShareIcon,
+  EyeIcon,
 } from '@heroicons/react/24/outline';
 import {
   ExclamationTriangleIcon,
   CheckCircleIcon,
   ClockIcon as SolidClockIcon,
 } from '@heroicons/react/24/solid';
-import { Task, TaskCategory, TaskPriority, TaskStatus } from '../../types/todo';
+import { Task, TaskCategory, TaskPriority, TaskStatus, User } from '../../types/todo';
+import TaskModal from './TaskModal';
 
 interface TaskCardProps {
   task: Task;
+  currentUser?: User;
   onStatusChange?: (taskId: string, status: TaskStatus) => void;
   onDelete?: (taskId: string) => void;
+  onTaskUpdate?: (task: Task) => void;
   className?: string;
 }
 
@@ -82,10 +86,13 @@ const getStatusColor = (status: TaskStatus) => {
 
 const TaskCard: React.FC<TaskCardProps> = ({
   task,
+  currentUser,
   onStatusChange,
   onDelete,
+  onTaskUpdate,
   className = '',
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== TaskStatus.COMPLETED;
   const isDueSoon = task.dueDate && 
     new Date(task.dueDate) > new Date() && 
@@ -117,6 +124,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   return (
+    <>
     <Link href={`/todos/${task.id}`}>
       <div className={`
         group block bg-white rounded-lg border-2 p-4 hover:shadow-md transition-all duration-200 cursor-pointer
@@ -222,6 +230,18 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 <span>{task.shares.length}</span>
               </div>
             )}
+
+            {/* View Details Button */}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setIsModalOpen(true);
+              }}
+              className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <EyeIcon className="w-4 h-4" />
+              <span>Chi tiết</span>
+            </button>
           </div>
 
           {/* Created time */}
@@ -249,6 +269,16 @@ const TaskCard: React.FC<TaskCardProps> = ({
         )}
       </div>
     </Link>
+
+    {/* Task Modal */}
+    <TaskModal
+      taskId={task.id}
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      currentUser={currentUser}
+      onUpdateTask={onTaskUpdate}
+    />
+  </>
   );
 };
 

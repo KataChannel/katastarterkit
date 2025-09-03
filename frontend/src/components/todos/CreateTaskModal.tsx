@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useTaskMutations } from '../../hooks/useTodos';
 import { TaskCategory, TaskPriority, CreateTaskInput } from '../../types/todo';
+import { MediaUpload } from './MediaUpload';
+import { useMediaUpload } from '../../hooks/useMediaUpload';
 import toast from 'react-hot-toast';
 
 interface CreateTaskModalProps {
@@ -24,6 +26,18 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   });
 
   const { createTask, loading } = useTaskMutations();
+  const {
+    mediaFiles,
+    uploading,
+    uploadProgress,
+    addMediaFiles,
+    removeMediaFile,
+    clearMediaFiles,
+    uploadMedia,
+  } = useMediaUpload({
+    maxFiles: 5,
+    maxFileSize: 10, // 10MB for task creation
+  });
 
   // Handle Escape key
   useEffect(() => {
@@ -62,11 +76,23 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         dueDate: formData.dueDate || undefined,
       };
 
-      await createTask(taskData);
+      // Create task first
+      const createdTask = await createTask(taskData);
       
-      toast.success('Tạo task thành công!');
+      // Upload media if any
+      if (mediaFiles.length > 0 && createdTask?.id) {
+        try {
+          await uploadMedia(createdTask.id);
+          toast.success(`Tạo task thành công với ${mediaFiles.length} file đính kèm!`);
+        } catch (uploadError) {
+          toast.success('Tạo task thành công nhưng có lỗi khi upload file');
+          console.error('Media upload error:', uploadError);
+        }
+      } else {
+        toast.success('Tạo task thành công!');
+      }
       
-      // Reset form
+      // Reset form and media
       setFormData({
         title: '',
         description: '',
@@ -74,6 +100,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
         priority: TaskPriority.MEDIUM,
         dueDate: '',
       });
+      clearMediaFiles();
 
       onClose();
       onTaskCreated?.();
@@ -204,6 +231,34 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 onChange={(e) => handleInputChange('dueDate', e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+            </div>
+
+            {/* Media Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                File đính kèm
+              </label>
+              <MediaUpload
+                onMediaAdd={addMediaFiles}
+                onMediaRemove={removeMediaFile}
+                existingMedia={mediaFiles}
+                maxFiles={5}
+                maxFileSize={10}
+                disabled={loading.creating || uploading}
+              />
+              {uploading && (
+                <div className="mt-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Đang upload... {Math.round(uploadProgress)}%
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Actions */}

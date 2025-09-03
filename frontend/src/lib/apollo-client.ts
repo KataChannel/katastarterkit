@@ -35,7 +35,7 @@ const authLink = setContext((_, { headers }) => {
 const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path }) => {
-      console.error(
+      console.log(
         `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
       );
       
@@ -97,6 +97,20 @@ export const apolloClient = new ApolloClient({
     typePolicies: {
       Query: {
         fields: {
+          getPosts: {
+            keyArgs: ['filters'],
+            merge(existing, incoming, { args }) {
+              if (args?.pagination?.page === 1) {
+                // First page - replace existing
+                return incoming;
+              }
+              // Subsequent pages - merge items
+              return {
+                ...incoming,
+                items: [...(existing?.items || []), ...(incoming?.items || [])],
+              };
+            },
+          },
           posts: {
             merge(existing, incoming, { args }) {
               // Simple replacement strategy

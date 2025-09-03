@@ -1,6 +1,7 @@
 import React from 'react';
 import { Task, TaskStatus, TaskPriority } from '@/types/todo';
 import { TodoViewProps } from '@/types/todo-views';
+import { MediaViewer } from './MediaViewer';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import {
@@ -119,6 +120,16 @@ export const TaskListView: React.FC<TodoViewProps> = ({
                   {task.priority}
                 </span>
               </div>
+
+              {/* Media */}
+              {task.media && task.media.length > 0 && (
+                <div className="mt-3">
+                  <MediaViewer 
+                    media={task.media} 
+                    compact={true}
+                  />
+                </div>
+              )}
 
               {/* Meta Information */}
               <div className="mt-3 flex items-center space-x-4 text-sm text-gray-500">

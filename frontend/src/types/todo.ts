@@ -44,6 +44,8 @@ export interface TaskComment {
   taskId: string;
   authorId: string;
   author: User;
+  parentId?: string;
+  replies?: TaskComment[];
   createdAt: string;
   updatedAt: string;
 }

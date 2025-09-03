@@ -1,6 +1,7 @@
 import React from 'react';
 import { Task, TaskStatus, TaskPriority } from '@/types/todo';
 import { TodoViewProps } from '@/types/todo-views';
+import { MediaViewer } from './MediaViewer';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import {
@@ -170,6 +171,16 @@ export const TaskKanbanView: React.FC<TodoViewProps> = ({
                   <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                     {task.description}
                   </p>
+                )}
+
+                {/* Media */}
+                {task.media && task.media.length > 0 && (
+                  <div className="mb-3">
+                    <MediaViewer 
+                      media={task.media} 
+                      compact={true}
+                    />
+                  </div>
                 )}
 
                 {/* Task Meta */}
