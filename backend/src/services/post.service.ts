@@ -40,16 +40,10 @@ export class PostService {
             user: true,
           },
         },
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
-        likes: true,
+        tags: true,
         _count: {
           select: {
             comments: true,
-            likes: true,
           },
         },
       },
@@ -72,12 +66,7 @@ export class PostService {
             user: true,
           },
         },
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
-        likes: true,
+        tags: true,
       },
     });
 
@@ -141,14 +130,9 @@ export class PostService {
       where,
       include: {
         author: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
+        tags: true,
         _count: {
           select: {
-            likes: true,
             comments: true,
           },
         },
@@ -182,14 +166,9 @@ export class PostService {
       where: { authorId },
       include: {
         author: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
+        tags: true,
         _count: {
           select: {
-            likes: true,
             comments: true,
           },
         },
@@ -221,11 +200,7 @@ export class PostService {
       },
       include: {
         author: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
+        tags: true,
       },
     });
 

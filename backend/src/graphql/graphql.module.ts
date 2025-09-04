@@ -14,6 +14,7 @@ import { TaskShareService } from '../services/task-share.service';
 import { TaskCommentService } from '../services/task-comment.service';
 import { TaskMediaService } from '../services/task-media.service';
 import { NotificationService } from '../services/notification.service';
+import { OtpService } from '../services/otp.service';
 import { PubSubService } from '../services/pubsub.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
@@ -45,6 +46,7 @@ import { MinioModule } from '../minio/minio.module';
     TaskCommentService,
     TaskMediaService,
     NotificationService,
+    OtpService,
     PubSubService,
   ],
   exports: [

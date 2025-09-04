@@ -17,39 +17,164 @@ enum UserRole {
   MODERATOR
 }
 
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+  PHONE
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  PHONE_VERIFICATION
+  TWO_FACTOR
+}
+
 enum PostStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
 }
 
+enum TaskCategory {
+  PERSONAL
+  WORK
+  SHOPPING
+  HEALTH
+  OTHER
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+enum SharePermission {
+  VIEW
+  EDIT
+  ADMIN
+}
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  username  String   @unique
-  password  String
-  firstName String?
-  lastName  String?
-  avatar    String?
-  role      UserRole @default(USER)
-  isActive  Boolean  @default(true)
+  id          String   @id @default(uuid())
+  email       String?  @unique
+  username    String   @unique
+  password    String?
+  phone       String?  @unique
+  firstName   String?
+  lastName    String?
+  avatar      String?
+  role        UserRole @default(USER)
+  isActive    Boolean  @default(true)
+  isVerified  Boolean  @default(false)
+  
+  // Security settings
+  isTwoFactorEnabled Boolean @default(false)
+  failedLoginAttempts Int @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Existing Relations
-  posts    Post[]
-  comments Comment[]
-  likes    Like[]
-
-  // Todo Management Relations
-  tasks           Task[]
-  taskMedia       TaskMedia[]
-  tasksSharedBy   TaskShare[]    @relation("TaskSharedBy")
-  tasksSharedWith TaskShare[]    @relation("TaskSharedWith")
-  taskComments    TaskComment[]
-  notifications   Notification[]
+  // Relations
+  authMethods        AuthMethod[]
+  verificationTokens VerificationToken[]
+  sessions           UserSession[]
+  auditLogs          AuditLog[]
+  
+  // Content relations
+  posts         Post[]        @relation("PostAuthor")
+  comments      Comment[]     @relation("CommentAuthor")
+  tasks         Task[]        @relation("UserTasks")
+  taskComments  TaskComment[] @relation("TaskCommentAuthor")
+  taskMedia     TaskMedia[]   @relation("TaskMediaUploader")
+  
+  // Task sharing relations
+  tasksSharedBy   TaskShare[] @relation("TaskSharedBy")
+  tasksSharedWith TaskShare[] @relation("TaskSharedWith")
 
   @@map("users")
+}
+
+model AuthMethod {
+  id         String       @id @default(uuid())
+  userId     String
+  provider   AuthProvider
+  providerId String?      // External provider ID (Google ID, Facebook ID, etc.)
+  isVerified Boolean      @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@map("auth_methods")
+}
+
+model VerificationToken {
+  id        String    @id @default(uuid())
+  userId    String
+  token     String    @unique
+  type      TokenType
+  expiresAt DateTime
+  isUsed    Boolean   @default(false)
+  
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("verification_tokens")
+}
+
+model UserSession {
+  id          String    @id @default(uuid())
+  userId      String
+  sessionId   String    @unique
+  refreshToken String   @unique
+  ipAddress   String?
+  userAgent   String?
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
 }
 
 model Post {
@@ -61,167 +186,95 @@ model Post {
   featuredImage String?
   status        PostStatus @default(DRAFT)
   publishedAt   DateTime?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-
-  // Relations
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
   authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
+  author   User   @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  
+  // Relations
   comments Comment[]
-  likes    Like[]
-  tags     PostTag[]
+  tags     Tag[]
 
   @@map("posts")
 }
 
 model Comment {
-  id        String   @id @default(uuid())
-  content   String
+  id      String @id @default(uuid())
+  content String
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Relations
+  
   postId String
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-
+  
   userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  user   User   @relation("CommentAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  
   parentId String?
-  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id])
   replies  Comment[] @relation("CommentReplies")
 
   @@map("comments")
 }
 
-model Like {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-
-  // Relations
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  postId String
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, postId])
-  @@map("likes")
-}
-
 model Tag {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  slug        String   @unique
-  description String?
-  color       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  posts PostTag[]
+  id    String @id @default(uuid())
+  name  String @unique
+  slug  String @unique
+  color String?
+  
+  createdAt DateTime @default(now())
+  
+  posts Post[]
 
   @@map("tags")
 }
 
-model PostTag {
-  id     String @id @default(uuid())
-  postId String
-  tagId  String
-
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@unique([postId, tagId])
-  @@map("post_tags")
-}
-
-// File Upload Model
-model FileUpload {
-  id           String   @id @default(uuid())
-  filename     String
-  originalName String
-  mimetype     String
-  size         Int
-  url          String
-  bucket       String
-  path         String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@map("file_uploads")
-}
-
-// Todo Management Enums
-enum TaskCategory {
-  WORK // Công việc
-  PERSONAL // Cá nhân
-  STUDY // Học tập
-}
-
-enum TaskPriority {
-  HIGH // Cao
-  MEDIUM // Trung bình
-  LOW // Thấp
-}
-
-enum TaskStatus {
-  PENDING // Đang chờ
-  IN_PROGRESS // Đang thực hiện
-  COMPLETED // Hoàn thành
-  CANCELLED // Đã hủy
-}
-
-enum SharePermission {
-  VIEW // Chỉ xem
-  EDIT // Chỉnh sửa
-  ADMIN // Quản trị viên
-}
-
-enum MediaType {
-  IMAGE // Hình ảnh
-  VIDEO // Video
-  DOCUMENT // Tài liệu
-}
-
-// Todo Management Models
 model Task {
   id          String       @id @default(uuid())
   title       String
   description String?
-  category    TaskCategory @default(PERSONAL)
+  category    TaskCategory @default(OTHER)
   priority    TaskPriority @default(MEDIUM)
   status      TaskStatus   @default(PENDING)
   dueDate     DateTime?
   completedAt DateTime?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  // Relations
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
   userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Media attachments
-  attachments TaskMedia[]
-
-  // Sharing and collaboration
-  shares TaskShare[]
-
-  // Comments and collaboration
+  user   User   @relation("UserTasks", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relations
   comments TaskComment[]
+  media    TaskMedia[]
+  shares   TaskShare[]
 
-  // Subtasks
-  parentId String?
-  parent   Task?   @relation("TaskSubtasks", fields: [parentId], references: [id])
-  subtasks Task[]  @relation("TaskSubtasks")
-
-  @@index([userId])
-  @@index([status])
-  @@index([priority])
-  @@index([category])
-  @@index([dueDate])
   @@map("tasks")
+}
+
+model TaskComment {
+  id      String @id @default(uuid())
+  content String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  userId String
+  user   User   @relation("TaskCommentAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  
+  parentId String?
+  parent   TaskComment? @relation("TaskCommentReplies", fields: [parentId], references: [id])
+  replies  TaskComment[] @relation("TaskCommentReplies")
+
+  @@map("task_comments")
 }
 
 model TaskMedia {
@@ -232,18 +285,17 @@ model TaskMedia {
   size      Int
   mimeType  String
   caption   String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
   taskId String
   task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   uploadedBy String
-  uploader   User   @relation(fields: [uploadedBy], references: [id])
+  uploader   User   @relation("TaskMediaUploader", fields: [uploadedBy], references: [id])
 
-  @@index([taskId])
-  @@index([type])
   @@map("task_media")
 }
 
@@ -253,8 +305,9 @@ model TaskShare {
   shareToken String          @unique
   expiresAt  DateTime?
   isActive   Boolean         @default(true)
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
   taskId String
@@ -267,48 +320,5 @@ model TaskShare {
   sharedWithUser User?   @relation("TaskSharedWith", fields: [sharedWith], references: [id])
 
   @@index([shareToken])
-  @@index([taskId])
   @@map("task_shares")
-}
-
-model TaskComment {
-  id        String   @id @default(uuid())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  taskId String
-  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-
-  // Reply to comment
-  parentId String?
-  parent   TaskComment?  @relation("CommentReplies", fields: [parentId], references: [id])
-  replies  TaskComment[] @relation("CommentReplies")
-
-  @@index([taskId])
-  @@index([userId])
-  @@map("task_comments")
-}
-
-// Notification system
-model Notification {
-  id        String   @id @default(uuid())
-  type      String // task_created, task_updated, task_shared, etc.
-  title     String
-  message   String
-  data      Json? // Additional data (task id, etc.)
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  // Relations
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, isRead])
-  @@index([createdAt])
-  @@map("notifications")
 }

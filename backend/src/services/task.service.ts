@@ -8,10 +8,8 @@ export class TaskService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByUserId(userId: string, filters?: TaskFilterInput) {
-    const where: any = {
-      userId: userId,
-    };
-
+    const where: any = { userId };
+    
     if (filters?.category) where.category = filters.category;
     if (filters?.priority) where.priority = filters.priority;
     if (filters?.status) where.status = filters.status;
@@ -30,7 +28,7 @@ export class TaskService {
       where,
       include: {
         user: true,
-        attachments: true,
+        media: true,
         shares: {
           include: {
             sharedByUser: true,
@@ -56,7 +54,7 @@ export class TaskService {
       where: { id },
       include: {
         user: true,
-        attachments: {
+        media: {
           include: {
             uploader: true,
           },
@@ -140,7 +138,7 @@ export class TaskService {
       where,
       include: {
         user: true,
-        attachments: true,
+        media: true,
         shares: {
           include: {
             sharedByUser: true,
@@ -175,7 +173,7 @@ export class TaskService {
       },
       include: {
         user: true,
-        attachments: true,
+        media: true,
         shares: true,
         comments: true,
       },
@@ -218,7 +216,7 @@ export class TaskService {
       data,
       include: {
         user: true,
-        attachments: true,
+        media: true,
         shares: true,
         comments: true,
       },
@@ -247,7 +245,7 @@ export class TaskService {
       where: { parentId },
       include: {
         user: true,
-        attachments: true,
+        media: true,
         shares: {
           include: {
             sharedByUser: true,

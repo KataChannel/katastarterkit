@@ -5,9 +5,11 @@ import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
 import { User } from '../models/user.model';
 import { AuthResponse } from '../models/auth.model';
-import { RegisterUserInput, LoginUserInput, UpdateUserInput } from '../inputs/user.input';
+import { OtpResponse } from '../models/otp.model';
+import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput } from '../inputs/user.input';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../auth/auth.service';
+import { OtpService } from '../../services/otp.service';
 import { PubSubService } from '../../services/pubsub.service';
 import { UserRole } from '@prisma/client';
 
@@ -16,6 +18,7 @@ export class UserResolver {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly otpService: OtpService,
     private readonly pubSubService: PubSubService,
   ) {}
 
@@ -64,6 +67,69 @@ export class UserResolver {
       ...tokens,
       user,
     };
+  }
+
+  @Mutation(() => AuthResponse, { name: 'loginWithGoogle' })
+  async loginWithGoogle(@Args('input') input: SocialLoginInput): Promise<AuthResponse> {
+    // Verify Google token here if needed
+    const result = await this.authService.loginWithGoogle(
+      input.providerId || input.token, // Use providerId if provided, otherwise use token as ID
+      input.email,
+      {
+        firstName: input.firstName,
+        lastName: input.lastName,
+        avatar: input.avatar,
+      }
+    );
+    
+    return {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      user: result.user,
+    };
+  }
+
+  @Mutation(() => AuthResponse, { name: 'loginWithFacebook' })
+  async loginWithFacebook(@Args('input') input: SocialLoginInput): Promise<AuthResponse> {
+    // Verify Facebook token here if needed
+    const result = await this.authService.loginWithFacebook(
+      input.providerId || input.token, // Use providerId if provided, otherwise use token as ID
+      input.email,
+      {
+        firstName: input.firstName,
+        lastName: input.lastName,
+        avatar: input.avatar,
+      }
+    );
+    
+    return {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      user: result.user,
+    };
+  }
+
+  @Mutation(() => AuthResponse, { name: 'loginWithPhone' })
+  async loginWithPhone(@Args('input') input: PhoneLoginInput): Promise<AuthResponse> {
+    // Verify OTP first
+    const isValidOtp = await this.otpService.verifyOtp(input.phone, input.otp);
+    
+    if (!isValidOtp) {
+      throw new Error('Invalid or expired OTP');
+    }
+
+    const result = await this.authService.loginWithPhone(input.phone);
+    
+    return {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      user: result.user,
+    };
+  }
+
+  @Mutation(() => OtpResponse, { name: 'requestPhoneVerification' })
+  async requestPhoneVerification(@Args('input') input: RequestPhoneVerificationInput): Promise<OtpResponse> {
+    return await this.otpService.requestPhoneVerification(input.phone);
   }
 
   @Mutation(() => User, { name: 'updateUser' })
