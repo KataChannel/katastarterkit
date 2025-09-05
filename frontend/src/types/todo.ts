@@ -55,8 +55,12 @@ export interface TaskMedia {
   id: string;
   filename: string;
   fileUrl: string;
+  url?: string; // For backward compatibility
   fileSize?: number;
+  size?: number; // For backward compatibility
   mimeType: string;
+  type?: MediaType; // For backward compatibility
+  caption?: string;
   taskId: string;
   uploadedById: string;
   uploadedBy: User;
@@ -99,57 +103,6 @@ export interface Task {
   shares?: TaskShare[];
 }
 
-export interface TaskMedia {
-  id: string;
-  filename: string;
-  url: string;
-  type: MediaType;
-  size: number;
-  mimeType: string;
-  caption?: string;
-  createdAt: string;
-  updatedAt: string;
-  taskId: string;
-  uploadedBy: string;
-  uploader: User;
-}
-
-export interface TaskShare {
-  id: string;
-  permission: SharePermission;
-  shareToken: string;
-  expiresAt?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  taskId: string;
-  sharedBy: string;
-  sharedByUser: User;
-  sharedWith?: string;
-  sharedWithUser?: User;
-}
-
-export interface TaskComment {
-  id: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  taskId: string;
-  userId: string;
-  user: User;
-}
-
-export interface Notification {
-  id: string;
-  type: string;
-  title: string;
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-  userId: string;
-  user: User;
-}
-
 // Input Types
 export interface CreateTaskInput {
   title: string;
@@ -187,4 +140,15 @@ export interface ShareTaskInput {
 export interface CreateTaskCommentInput {
   taskId: string;
   content: string;
+}
+
+export interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  userId: string;
+  user: User;
 }

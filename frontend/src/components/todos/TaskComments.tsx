@@ -41,7 +41,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   depth = 0,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
-  const isOwner = currentUser?.id === comment.user.id;
+  const isOwner = currentUser?.id === comment.author.id;
   const maxDepth = 3; // Maximum nesting level
 
   return (
@@ -54,17 +54,15 @@ const CommentItem: React.FC<CommentItemProps> = ({
       <div className="flex space-x-3">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          {comment.user.avatar ? (
+                    {comment.author.avatar ? (
             <img
-              src={comment.user.avatar}
-              alt={comment.user.username}
-              className="w-8 h-8 rounded-full"
+              src={comment.author.avatar}
+              alt={comment.author.username}
+              className="h-8 w-8 rounded-full"
             />
           ) : (
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-gray-600">
-                {comment.user.username.charAt(0).toUpperCase()}
-              </span>
+            <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-medium text-gray-600">
+              {comment.author.username.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
@@ -76,9 +74,9 @@ const CommentItem: React.FC<CommentItemProps> = ({
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center space-x-2">
                 <span className="font-medium text-sm text-gray-900">
-                  {comment.user.firstName && comment.user.lastName 
-                    ? `${comment.user.firstName} ${comment.user.lastName}`
-                    : comment.user.username
+                  {comment.author.firstName && comment.author.lastName
+                    ? `${comment.author.firstName} ${comment.author.lastName}`
+                    : comment.author.username
                   }
                 </span>
                 <span className="text-xs text-gray-500">

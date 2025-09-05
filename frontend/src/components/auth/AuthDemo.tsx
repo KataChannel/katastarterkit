@@ -1,5 +1,10 @@
+'use client';
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import GoogleLoginButton from './GoogleLoginButton';
+import FacebookLoginButton from './FacebookLoginButton';
+import toast from 'react-hot-toast';
 
 const AuthDemo: React.FC = () => {
   const {
@@ -57,52 +62,6 @@ const AuthDemo: React.FC = () => {
     }
   };
 
-  // Simulate Google login
-  const loginWithGoogle = async () => {
-    // Trong thực tế, bạn sẽ sử dụng Google SDK để lấy token
-    const mockGoogleData = {
-      token: 'mock_google_token',
-      provider: 'GOOGLE' as const,
-      email: 'user@gmail.com',
-      providerId: 'google_user_id_123',
-      firstName: 'John',
-      lastName: 'Doe',
-      avatar: 'https://example.com/avatar.jpg',
-    };
-
-    const result = await handleGoogleLogin(mockGoogleData);
-    
-    if (result.success) {
-      setMessage('Đăng nhập Google thành công!');
-      console.log('User:', result.user);
-    } else {
-      setMessage(result.error);
-    }
-  };
-
-  // Simulate Facebook login
-  const loginWithFacebook = async () => {
-    // Trong thực tế, bạn sẽ sử dụng Facebook SDK để lấy token
-    const mockFacebookData = {
-      token: 'mock_facebook_token',
-      provider: 'FACEBOOK' as const,
-      email: 'user@facebook.com',
-      providerId: 'facebook_user_id_456',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      avatar: 'https://example.com/fb-avatar.jpg',
-    };
-
-    const result = await handleFacebookLogin(mockFacebookData);
-    
-    if (result.success) {
-      setMessage('Đăng nhập Facebook thành công!');
-      console.log('User:', result.user);
-    } else {
-      setMessage(result.error);
-    }
-  };
-
   return (
     <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6">Demo Authentication</h2>
@@ -112,6 +71,17 @@ const AuthDemo: React.FC = () => {
           {message}
         </div>
       )}
+
+      {/* Current Status */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <h3 className="text-sm font-semibold text-gray-700 mb-2">Current Status</h3>
+        <p className="text-sm text-gray-600">
+          User authenticated: <span className="font-medium">Not checked</span>
+        </p>
+        <p className="text-sm text-gray-600">
+          Authentication tokens are handled automatically by OAuth components
+        </p>
+      </div>
 
       {/* Phone Login Section */}
       <div className="mb-6">
@@ -157,30 +127,33 @@ const AuthDemo: React.FC = () => {
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-3">Đăng nhập mạng xã hội</h3>
         
-        <button
-          onClick={loginWithGoogle}
-          disabled={googleLoading}
-          className="w-full bg-red-500 text-white p-2 rounded mb-2 hover:bg-red-600 disabled:opacity-50"
-        >
-          {googleLoading ? 'Đang đăng nhập...' : 'Đăng nhập bằng Google'}
-        </button>
-        
-        <button
-          onClick={loginWithFacebook}
-          disabled={facebookLoading}
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {facebookLoading ? 'Đang đăng nhập...' : 'Đăng nhập bằng Facebook'}
-        </button>
+        <div className="space-y-3">
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}>
+            <GoogleLoginButton />
+          </GoogleOAuthProvider>
+          
+          <FacebookLoginButton />
+        </div>
       </div>
 
       {/* Logout */}
       <button
         onClick={logout}
-        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
+        className="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mb-6"
       >
         Đăng xuất
       </button>
+
+      {/* Demo Instructions */}
+      <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <h4 className="text-sm font-semibold text-yellow-800 mb-2">Demo Instructions</h4>
+        <ul className="text-xs text-yellow-700 space-y-1">
+          <li>• Google/Facebook OAuth buttons connect to real authentication APIs</li>
+          <li>• Phone OTP is simulated for demo purposes</li>
+          <li>• Successful logins redirect to dashboard automatically</li>
+          <li>• JWT tokens are stored in localStorage</li>
+        </ul>
+      </div>
     </div>
   );
 };

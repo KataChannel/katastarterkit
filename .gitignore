@@ -11,12 +11,13 @@ dist/
 build/
 
 # Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.production
+.env*
+
+# Frontend environment files
+frontend/.env*
+
+# Backend environment files
+backend/.env*
 
 # Database
 *.db

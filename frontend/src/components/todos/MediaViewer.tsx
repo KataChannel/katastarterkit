@@ -10,6 +10,12 @@ import {
   EyeIcon,
 } from '@heroicons/react/24/outline';
 
+const getMediaTypeFromMime = (mimeType: string): MediaType => {
+  if (mimeType.startsWith('image/')) return MediaType.IMAGE;
+  if (mimeType.startsWith('video/')) return MediaType.VIDEO;
+  return MediaType.DOCUMENT;
+};
+
 interface MediaViewerProps {
   media: TaskMedia[];
   onMediaRemove?: (mediaId: string) => void;
@@ -28,7 +34,7 @@ const MediaModal: React.FC<MediaModalProps> = ({ media, isOpen, onClose }) => {
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = media.url;
+    link.href = media.fileUrl;
     link.download = media.filename;
     link.click();
   };
@@ -40,9 +46,9 @@ const MediaModal: React.FC<MediaModalProps> = ({ media, isOpen, onClose }) => {
         <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center bg-black bg-opacity-50 rounded-lg p-2">
           <div className="text-white">
             <h3 className="font-medium">{media.filename}</h3>
-            <p className="text-sm opacity-75">
-              {formatFileSize(media.size)} • {media.type.toLowerCase()}
-            </p>
+                        <div className="text-sm text-gray-600">
+              {formatFileSize(media.fileSize || media.size || 0)} • {(media.type || getMediaTypeFromMime(media.mimeType)).toLowerCase()}
+            </div>
           </div>
           
           <div className="flex space-x-2">
@@ -65,27 +71,24 @@ const MediaModal: React.FC<MediaModalProps> = ({ media, isOpen, onClose }) => {
 
         {/* Content */}
         <div className="bg-white rounded-lg overflow-hidden max-h-[80vh] max-w-[80vw]">
-          {media.type === MediaType.IMAGE ? (
+          {(media.type || getMediaTypeFromMime(media.mimeType)) === MediaType.IMAGE ? (
             <img
-              src={media.url}
+              src={media.fileUrl || media.url}
               alt={media.filename}
-              className="max-w-full max-h-full object-contain"
+              className="w-full h-full object-cover"
             />
-          ) : media.type === MediaType.VIDEO ? (
+          ) : (media.type || getMediaTypeFromMime(media.mimeType)) === MediaType.VIDEO ? (
             <video
-              src={media.url}
+              src={media.fileUrl || media.url}
               controls
-              className="max-w-full max-h-full"
-              preload="metadata"
-            >
-              Trình duyệt không hỗ trợ video.
-            </video>
+              className="w-full h-full"
+            />
           ) : (
             <div className="p-8 text-center">
               <DocumentIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">{media.filename}</h3>
               <p className="text-sm text-gray-500 mb-4">
-                {formatFileSize(media.size)} • {media.mimeType}
+                {formatFileSize(media.fileSize || media.size || 0)} • {media.mimeType}
               </p>
               <button
                 onClick={handleDownload}
@@ -152,15 +155,15 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
             className="relative group cursor-pointer"
             onClick={() => openModal(mediaItem)}
           >
-            {mediaItem.type === MediaType.IMAGE ? (
+            {(mediaItem.type || getMediaTypeFromMime(mediaItem.mimeType)) === MediaType.IMAGE ? (
               <img
-                src={mediaItem.url}
+                src={mediaItem.fileUrl || mediaItem.url}
                 alt={mediaItem.filename}
                 className="h-12 w-12 object-cover rounded border border-gray-200 group-hover:opacity-75 transition-opacity"
               />
             ) : (
               <div className="h-12 w-12 bg-gray-100 border border-gray-200 rounded flex items-center justify-center group-hover:bg-gray-200 transition-colors">
-                {getFileIcon(mediaItem.type)}
+                {getFileIcon(mediaItem.type || getMediaTypeFromMime(mediaItem.mimeType))}
               </div>
             )}
             
@@ -200,18 +203,18 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
               className="cursor-pointer"
               onClick={() => openModal(mediaItem)}
             >
-              {mediaItem.type === MediaType.IMAGE ? (
+              {(mediaItem.type || getMediaTypeFromMime(mediaItem.mimeType)) === MediaType.IMAGE ? (
                 <div className="aspect-video bg-gray-100">
                   <img
-                    src={mediaItem.url}
+                    src={mediaItem.fileUrl || mediaItem.url}
                     alt={mediaItem.filename}
                     className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
                   />
                 </div>
-              ) : mediaItem.type === MediaType.VIDEO ? (
+              ) : (mediaItem.type || getMediaTypeFromMime(mediaItem.mimeType)) === MediaType.VIDEO ? (
                 <div className="aspect-video bg-gray-100 relative">
                   <video
-                    src={mediaItem.url}
+                    src={mediaItem.fileUrl || mediaItem.url}
                     className="w-full h-full object-cover"
                     preload="metadata"
                   />
@@ -239,7 +242,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({
                     {mediaItem.filename}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {formatFileSize(mediaItem.size)}
+                    {formatFileSize(mediaItem.fileSize || mediaItem.size || 0)}
                   </p>
                   {mediaItem.caption && (
                     <p className="text-xs text-gray-600 mt-1 italic">

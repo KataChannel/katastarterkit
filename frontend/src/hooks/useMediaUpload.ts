@@ -144,21 +144,18 @@ const simulateUpload = async (mediaFile: MediaFile, taskId: string): Promise<Tas
   return {
     id: `media-${Date.now()}-${Math.random()}`,
     filename: mediaFile.file.name,
-    url: mediaFile.url, // In real implementation, this would be the server URL
-    type: mediaFile.type,
-    size: mediaFile.size,
+    fileUrl: mediaFile.url, // In real implementation, this would be the server URL
+    fileSize: mediaFile.size,
     mimeType: mediaFile.mimeType,
-    caption: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
     taskId,
-    uploadedBy: 'current-user-id', // Replace with actual user ID
-    uploader: {
+    uploadedById: 'current-user-id', // Replace with actual user ID
+    uploadedBy: {
       id: 'current-user-id',
       username: 'current-user',
       firstName: 'Current',
       lastName: 'User',
     },
+    createdAt: new Date().toISOString(),
   };
 };
 

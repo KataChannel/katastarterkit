@@ -71,16 +71,13 @@ export class UserResolver {
 
   @Mutation(() => AuthResponse, { name: 'loginWithGoogle' })
   async loginWithGoogle(@Args('input') input: SocialLoginInput): Promise<AuthResponse> {
-    // Verify Google token here if needed
+    console.log('Input to loginWithGoogle:', input);
+    
     const result = await this.authService.loginWithGoogle(
-      input.providerId || input.token, // Use providerId if provided, otherwise use token as ID
-      input.email,
-      {
-        firstName: input.firstName,
-        lastName: input.lastName,
-        avatar: input.avatar,
-      }
+      input.token,
+      input.providerId
     );
+    console.log(result);
     
     return {
       accessToken: result.accessToken,
@@ -91,15 +88,9 @@ export class UserResolver {
 
   @Mutation(() => AuthResponse, { name: 'loginWithFacebook' })
   async loginWithFacebook(@Args('input') input: SocialLoginInput): Promise<AuthResponse> {
-    // Verify Facebook token here if needed
     const result = await this.authService.loginWithFacebook(
-      input.providerId || input.token, // Use providerId if provided, otherwise use token as ID
-      input.email,
-      {
-        firstName: input.firstName,
-        lastName: input.lastName,
-        avatar: input.avatar,
-      }
+      input.token,
+      input.providerId
     );
     
     return {
