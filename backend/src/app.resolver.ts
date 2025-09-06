@@ -4,7 +4,7 @@ import { Query, Resolver } from '@nestjs/graphql';
 export class AppResolver {
   @Query(() => String, { name: 'hello', description: 'Hello world query' })
   hello(): string {
-    return 'Hello from TimonaCore GraphQL API!';
+    return 'Hello from Katacore GraphQL API!';
   }
 
   @Query(() => String, { name: 'version', description: 'Get API version' })

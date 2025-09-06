@@ -89,11 +89,11 @@ SSL_EMAIL=admin@your-domain.com
 USE_SSL=true
 
 # Database Configuration (Production)
-POSTGRES_DB=timonacore_prod
-POSTGRES_USER=timonacore
+POSTGRES_DB=katacore_prod
+POSTGRES_USER=katacore
 POSTGRES_PASSWORD=CHANGE_THIS_STRONG_PASSWORD
 POSTGRES_PORT=5432
-DATABASE_URL=postgresql://timonacore:CHANGE_THIS_STRONG_PASSWORD@postgres:5432/timonacore_prod
+DATABASE_URL=postgresql://katacore:CHANGE_THIS_STRONG_PASSWORD@postgres:5432/katacore_prod
 
 # Redis Configuration (Production)
 REDIS_HOST=redis-cluster
@@ -218,8 +218,8 @@ deploy_prod() {
     print_step "Deploying to production..."
     
     # Create production network
-    if ! docker network ls | grep -q "timonacore-prod"; then
-        docker network create timonacore-prod
+    if ! docker network ls | grep -q "katacore-prod"; then
+        docker network create katacore-prod
         print_success "Production network created"
     fi
     
@@ -277,7 +277,7 @@ health_check() {
     fi
     
     # Check database
-    if docker exec postgres pg_isready -U timonacore &> /dev/null; then
+    if docker exec postgres pg_isready -U katacore &> /dev/null; then
         print_success "Database is ready"
     else
         print_error "Database health check failed"
@@ -324,7 +324,7 @@ backup_prod() {
     
     # Backup database
     print_step "Backing up database..."
-    docker exec postgres pg_dump -U timonacore timonacore_prod > "$backup_dir/database.sql"
+    docker exec postgres pg_dump -U katacore katacore_prod > "$backup_dir/database.sql"
     
     # Backup MinIO data
     print_step "Backing up MinIO data..."

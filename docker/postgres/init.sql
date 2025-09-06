@@ -1,5 +1,5 @@
 # Docker configurations for PostgreSQL
-CREATE DATABASE IF NOT EXISTS timonacore;
+CREATE DATABASE IF NOT EXISTS katacore;
 
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

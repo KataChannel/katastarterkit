@@ -1,6 +1,6 @@
 # Environment Variables Configuration
 
-Dự án TimonaCore sử dụng environment variables để quản lý cấu hình của ứng dụng. Tài liệu này hướng dẫn cách thiết lập và sử dụng các biến môi trường.
+Dự án Katacore sử dụng environment variables để quản lý cấu hình của ứng dụng. Tài liệu này hướng dẫn cách thiết lập và sử dụng các biến môi trường.
 
 ## 📁 Cấu trúc File Environment
 
@@ -27,7 +27,7 @@ PORT=4000
 FRONTEND_URL=http://localhost:3000
 
 # Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/timonacore"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/katacore"
 
 # Redis
 REDIS_HOST=localhost

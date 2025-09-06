@@ -546,8 +546,8 @@ npm run export
 
 ### Docker
 ```bash
-docker build -t timonacore-frontend .
-docker run -p 3000:3000 timonacore-frontend
+docker build -t katacore-frontend .
+docker run -p 3000:3000 katacore-frontend
 ```
 
 ### Vercel

@@ -74,11 +74,11 @@ generate_env() {
 NODE_ENV=development
 
 # Database Configuration
-POSTGRES_DB=timonacore
+POSTGRES_DB=katacore
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_PORT=15432
-DATABASE_URL=postgresql://postgres:postgres@localhost:15432/timonacore
+DATABASE_URL=postgresql://postgres:postgres@localhost:15432/katacore
 
 # Redis Configuration
 REDIS_HOST=localhost
@@ -142,8 +142,8 @@ generate_certs() {
 create_network() {
     print_step "Creating Docker network..."
     
-    if ! docker network ls | grep -q "timonacore-network"; then
-        docker network create timonacore-network
+    if ! docker network ls | grep -q "katacore-network"; then
+        docker network create katacore-network
         print_success "Docker network created"
     else
         print_success "Docker network already exists"

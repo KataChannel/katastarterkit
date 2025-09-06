@@ -81,12 +81,12 @@ done
 echo
 echo "🐳 Docker Configuration:"
 echo "   Container Names:"
-echo "     - Postgres: ${POSTGRES_CONTAINER_NAME:-timonacore-postgres}"
-echo "     - Redis: ${REDIS_CONTAINER_NAME:-timonacore-redis}"
-echo "     - Minio: ${MINIO_CONTAINER_NAME:-timonacore-minio}"
-echo "     - Backend: ${BACKEND_CONTAINER_NAME:-timonacore-backend}"
-echo "     - Frontend: ${FRONTEND_CONTAINER_NAME:-timonacore-frontend}"
-echo "   Network: ${DOCKER_NETWORK_NAME:-timonacore-network}"
+echo "     - Postgres: ${POSTGRES_CONTAINER_NAME:-katacore-postgres}"
+echo "     - Redis: ${REDIS_CONTAINER_NAME:-katacore-redis}"
+echo "     - Minio: ${MINIO_CONTAINER_NAME:-katacore-minio}"
+echo "     - Backend: ${BACKEND_CONTAINER_NAME:-katacore-backend}"
+echo "     - Frontend: ${FRONTEND_CONTAINER_NAME:-katacore-frontend}"
+echo "   Network: ${DOCKER_NETWORK_NAME:-katacore-network}"
 
 echo
 echo "🌐 Port Mappings:"
@@ -99,7 +99,7 @@ echo "   - Minio Console: ${MINIO_CONSOLE_PORT:-9001}:9001"
 
 echo
 echo "🔗 Internal Service URLs:"
-echo "   - Database: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/timonacore}"
+echo "   - Database: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/katacore}"
 echo "   - Redis: ${DOCKER_REDIS_HOST:-redis}:${REDIS_PORT:-6379}"
 echo "   - Minio: ${DOCKER_MINIO_ENDPOINT:-minio}:${MINIO_PORT:-9000}"
 

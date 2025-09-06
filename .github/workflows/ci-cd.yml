@@ -430,7 +430,7 @@ jobs:
     - name: Create database backup
       run: |
         BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S)"
-        kubectl exec -n katacore deployment/postgres -- pg_dump -U timonacore timonacore_prod > "${BACKUP_NAME}.sql"
+        kubectl exec -n katacore deployment/postgres -- pg_dump -U katacore katacore_prod > "${BACKUP_NAME}.sql"
         
         # Upload to backup storage (configure as needed)
         echo "Backup created: ${BACKUP_NAME}.sql"

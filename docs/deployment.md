@@ -128,10 +128,10 @@ metadata:
 type: Opaque
 stringData:
   # Database credentials
-  DATABASE_URL: "postgresql://timonacore:YOUR_DB_PASSWORD@postgres:5432/timonacore_prod"
-  POSTGRES_USER: "timonacore"
+  DATABASE_URL: "postgresql://katacore:YOUR_DB_PASSWORD@postgres:5432/katacore_prod"
+  POSTGRES_USER: "katacore"
   POSTGRES_PASSWORD: "YOUR_DB_PASSWORD"
-  POSTGRES_DB: "timonacore_prod"
+  POSTGRES_DB: "katacore_prod"
   
   # JWT secrets
   JWT_SECRET: "YOUR_JWT_SECRET_KEY"
@@ -304,13 +304,13 @@ SSL certificates are automatically managed by cert-manager with Let's Encrypt. T
 
 **Manual Backup:**
 ```bash
-kubectl exec deployment/postgres -n katacore -- pg_dump -U timonacore timonacore_prod > backup-$(date +%Y%m%d).sql
+kubectl exec deployment/postgres -n katacore -- pg_dump -U katacore katacore_prod > backup-$(date +%Y%m%d).sql
 ```
 
 **Automated Backup (recommended):**
 ```bash
 # Add to crontab
-0 2 * * * kubectl exec deployment/postgres -n katacore -- pg_dump -U timonacore timonacore_prod > /backups/katacore-$(date +%Y%m%d).sql
+0 2 * * * kubectl exec deployment/postgres -n katacore -- pg_dump -U katacore katacore_prod > /backups/katacore-$(date +%Y%m%d).sql
 ```
 
 ### Application Data Backup
@@ -379,7 +379,7 @@ kubectl logs -n cert-manager deployment/cert-manager
 
 **3. Database connection issues:**
 ```bash
-kubectl exec -it deployment/postgres -n katacore -- psql -U timonacore -d timonacore_prod
+kubectl exec -it deployment/postgres -n katacore -- psql -U katacore -d katacore_prod
 ```
 
 **4. Application not accessible:**
@@ -398,7 +398,7 @@ kubectl exec -n katacore deployment/frontend -- curl http://localhost:3000
 
 **Database Health:**
 ```bash
-kubectl exec -n katacore deployment/postgres -- pg_isready -U timonacore
+kubectl exec -n katacore deployment/postgres -- pg_isready -U katacore
 ```
 
 **Redis Health:**

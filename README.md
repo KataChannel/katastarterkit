@@ -715,6 +715,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Happy coding! 🎉**
 
-> **Timonacore** - Build faster, ship smarter.
+> **Katacore** - Build faster, ship smarter.
 
 ⭐ **If you find this project helpful, please give it a star on GitHub!**

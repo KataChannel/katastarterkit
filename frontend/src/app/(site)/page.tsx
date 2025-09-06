@@ -12,9 +12,9 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && isAuthenticated) {
-      router.push('/dashboard');
-    }
+    // if (!loading && isAuthenticated) {
+    //   router.push('/dashboard');
+    // }
   }, [isAuthenticated, loading, router]);
 
   if (loading) {

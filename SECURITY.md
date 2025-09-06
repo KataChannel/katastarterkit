@@ -67,4 +67,4 @@ KataCore includes several security features:
 
 ## 🙏 Acknowledgments
 
-We appreciate security researchers and users who responsibly disclose vulnerabilities to help keep Timonacore secure.
+We appreciate security researchers and users who responsibly disclose vulnerabilities to help keep Katacore secure.

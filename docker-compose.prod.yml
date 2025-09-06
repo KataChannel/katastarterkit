@@ -151,12 +151,12 @@ services:
           memory: 128M
           cpus: '0.1'
     networks:
-      - timonacore-network
+      - katacore-network
 
 volumes:
   nginx_logs:
     driver: local
 
 networks:
-  timonacore-network:
+  katacore-network:
     external: true

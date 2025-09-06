@@ -73,7 +73,7 @@ remove_containers() {
     print_step "Removing KataCore containers..."
     
     # Remove containers by name pattern
-    containers=$(docker ps -a --filter "name=timonacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "{{.Names}}" 2>/dev/null || true)
+    containers=$(docker ps -a --filter "name=katacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "{{.Names}}" 2>/dev/null || true)
     
     if [ -n "$containers" ]; then
         echo "$containers" | xargs docker rm -f
@@ -93,7 +93,7 @@ remove_volumes() {
         print_step "Removing volumes..."
         
         # Remove named volumes
-        volumes=$(docker volume ls --filter "name=timonacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "{{.Name}}" 2>/dev/null || true)
+        volumes=$(docker volume ls --filter "name=katacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "{{.Name}}" 2>/dev/null || true)
         
         if [ -n "$volumes" ]; then
             echo "$volumes" | xargs docker volume rm -f
@@ -110,7 +110,7 @@ remove_volumes() {
 remove_networks() {
     print_step "Removing networks..."
     
-    networks=("timonacore-network" "timonacore-prod")
+    networks=("katacore-network" "katacore-prod")
     
     for network in "${networks[@]}"; do
         if docker network ls | grep -q "$network"; then
@@ -130,7 +130,7 @@ remove_images() {
         print_step "Removing images..."
         
         # Remove KataCore images
-        images=$(docker images --filter "reference=timonacore*" --format "{{.Repository}}:{{.Tag}}" 2>/dev/null || true)
+        images=$(docker images --filter "reference=katacore*" --format "{{.Repository}}:{{.Tag}}" 2>/dev/null || true)
         
         if [ -n "$images" ]; then
             echo "$images" | xargs docker rmi -f
@@ -210,7 +210,7 @@ show_status() {
     
     echo ""
     echo "🐳 Containers:"
-    containers=$(docker ps -a --filter "name=timonacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "table {{.Names}}\t{{.Status}}" 2>/dev/null || true)
+    containers=$(docker ps -a --filter "name=katacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "table {{.Names}}\t{{.Status}}" 2>/dev/null || true)
     if [ -n "$containers" ]; then
         echo "$containers"
     else
@@ -219,7 +219,7 @@ show_status() {
     
     echo ""
     echo "📦 Volumes:"
-    volumes=$(docker volume ls --filter "name=timonacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "table {{.Name}}\t{{.Driver}}" 2>/dev/null || true)
+    volumes=$(docker volume ls --filter "name=katacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "table {{.Name}}\t{{.Driver}}" 2>/dev/null || true)
     if [ -n "$volumes" ]; then
         echo "$volumes"
     else
@@ -228,7 +228,7 @@ show_status() {
     
     echo ""
     echo "🌐 Networks:"
-    networks=$(docker network ls --filter "name=timonacore" --format "table {{.Name}}\t{{.Driver}}" 2>/dev/null || true)
+    networks=$(docker network ls --filter "name=katacore" --format "table {{.Name}}\t{{.Driver}}" 2>/dev/null || true)
     if [ -n "$networks" ]; then
         echo "$networks"
     else
@@ -237,7 +237,7 @@ show_status() {
     
     echo ""
     echo "🖼️  Images:"
-    images=$(docker images --filter "reference=timonacore*" --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" 2>/dev/null || true)
+    images=$(docker images --filter "reference=katacore*" --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" 2>/dev/null || true)
     if [ -n "$images" ]; then
         echo "$images"
     else

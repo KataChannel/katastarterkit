@@ -62,7 +62,7 @@ jobs:
         fi
         
         # Database connectivity
-        if ! kubectl exec -n katacore deployment/postgres -- pg_isready -U timonacore >/dev/null 2>&1; then
+        if ! kubectl exec -n katacore deployment/postgres -- pg_isready -U katacore >/dev/null 2>&1; then
           ENDPOINT_ERRORS="${ENDPOINT_ERRORS}Database connectivity failed\n"
         fi
         

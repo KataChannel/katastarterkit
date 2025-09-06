@@ -29,7 +29,7 @@ bun install
 Create a `.env` file in the backend directory:
 ```env
 # Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/timonacore"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/katacore"
 
 # Redis
 REDIS_HOST=localhost
@@ -236,8 +236,8 @@ MINIO_USE_SSL=true
 
 ### Docker Deployment
 ```bash
-docker build -t timonacore-backend .
-docker run -p 4000:4000 timonacore-backend
+docker build -t katacore-backend .
+docker run -p 4000:4000 katacore-backend
 ```
 
 ### Health Checks
