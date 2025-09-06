@@ -105,12 +105,11 @@ export default function GoogleLoginButton() {
       <GoogleLogin
         onSuccess={handleGoogleSuccess}
         onError={handleGoogleError}
-        width="384"
         text="continue_with"
         shape="rectangular"
         theme="outline"
         size="large"
-        logo_alignment="left"
+        logo_alignment="center"
       />
       {loading && (
         <div className="flex items-center justify-center mt-2">

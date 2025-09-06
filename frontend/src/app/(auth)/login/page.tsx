@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import Link from 'next/link';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import GoogleLoginButton from '@/components/auth/GoogleLoginButton';
-import FacebookLoginButton from '@/components/auth/FacebookLoginButton';
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import Link from "next/link";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
+import FacebookLoginButton from "@/components/auth/FacebookLoginButton";
 
 // Validation schema
 const loginSchema = yup.object({
   email: yup
     .string()
-    .email('Please enter a valid email address')
-    .required('Email is required'),
+    .email("Please enter a valid email address")
+    .required("Email is required"),
   password: yup
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .required('Password is required'),
+    .min(8, "Password must be at least 8 characters")
+    .required("Password is required"),
 });
 
 type LoginFormData = yup.InferType<typeof loginSchema>;
@@ -37,7 +37,7 @@ function LoginPageContent() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [isAuthenticated, router]);
 
@@ -47,25 +47,25 @@ function LoginPageContent() {
     formState: { errors, isValid },
   } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     try {
       const result = await login(data.email, data.password);
-      
+
       if (result.success) {
-        toast.success('Welcome back!');
+        toast.success("Welcome back!");
         // Redirect to dashboard or intended page
-        const returnUrl = searchParams?.get('returnUrl') || '/dashboard';
+        const returnUrl = searchParams?.get("returnUrl") || "/dashboard";
         router.push(returnUrl);
       } else {
-        toast.error(result.error || 'Login failed. Please try again.');
+        toast.error(result.error || "Login failed. Please try again.");
       }
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error('Login failed. Please try again.');
+      console.error("Login error:", error);
+      toast.error("Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -83,7 +83,7 @@ function LoginPageContent() {
             Sign in to your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            Or{" "}
             <Link
               href="/register"
               className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
@@ -94,44 +94,54 @@ function LoginPageContent() {
         </div>
 
         {/* Login Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)} data-testid="login-form">
+        <form
+          className="mt-8 space-y-6"
+          onSubmit={handleSubmit(onSubmit)}
+          data-testid="login-form"
+        >
           <div className="space-y-4">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <div className="mt-1">
                 <input
-                  {...register('email')}
+                  {...register("email")}
                   type="email"
                   autoComplete="email"
                   data-testid="email-input"
-                  className={`appearance-none relative block w-full px-3 py-2 border ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
+                  className={`appearance-none relative block w-full px-3 py-2 border ${errors.email ? "border-red-300" : "border-gray-300"
+                    } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
                   placeholder="Enter your email"
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
             </div>
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <div className="mt-1 relative">
                 <input
-                  {...register('password')}
-                  type={showPassword ? 'text' : 'password'}
+                  {...register("password")}
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   data-testid="password-input"
-                  className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
+                  className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${errors.password ? "border-red-300" : "border-gray-300"
+                    } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
                   placeholder="Enter your password"
                 />
                 <button
@@ -147,7 +157,9 @@ function LoginPageContent() {
                   )}
                 </button>
                 {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
             </div>
@@ -162,7 +174,10 @@ function LoginPageContent() {
                 type="checkbox"
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+              <label
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-gray-900"
+              >
                 Remember me
               </label>
             </div>
@@ -183,11 +198,10 @@ function LoginPageContent() {
               type="submit"
               data-testid="login-button"
               disabled={!isValid || loading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-all duration-200 ${
-                !isValid || loading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:scale-105'
-              }`}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-all duration-200 ${!isValid || loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:scale-105"
+                }`}
             >
               {loading ? (
                 <div className="flex items-center">
@@ -214,7 +228,7 @@ function LoginPageContent() {
                   Signing in...
                 </div>
               ) : (
-                'Sign in'
+                "Sign in"
               )}
             </button>
           </div>
@@ -226,12 +240,16 @@ function LoginPageContent() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-50 text-gray-500">Or continue with</span>
+                <span className="px-2 bg-gray-50 text-gray-500">
+                  Or continue with
+                </span>
               </div>
             </div>
 
             <div className="mt-6 space-y-3">
-              <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}>
+              <GoogleOAuthProvider
+                clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}
+              >
                 <GoogleLoginButton />
               </GoogleOAuthProvider>
               <FacebookLoginButton />
