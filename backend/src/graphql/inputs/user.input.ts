@@ -1,6 +1,9 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsPhoneNumber, IsString, IsBoolean } from 'class-validator';
+import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsPhoneNumber, IsString, IsBoolean, IsEnum } from 'class-validator';
 import { AuthProvider } from '@prisma/client';
+
+// Import to ensure AuthProvider enum is registered
+import '../models/auth-extended.model';
 
 @InputType()
 export class RegisterUserInput {
@@ -74,7 +77,8 @@ export class SocialLoginInput {
   @IsString()
   token: string;
 
-  @Field(() => String)
+  @Field(() => AuthProvider)
+  @IsEnum(AuthProvider)
   provider: AuthProvider;
 
   @Field({ nullable: true })
@@ -146,6 +150,16 @@ export class VerifyPhoneInput {
 
 @InputType()
 export class UpdateUserInput {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @MinLength(3)
+  username?: string;
+
   @Field({ nullable: true })
   @IsOptional()
   firstName?: string;

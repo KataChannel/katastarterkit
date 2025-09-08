@@ -12,14 +12,17 @@ export class User {
   @Field(() => ID)
   id: string;
 
-  @Field()
-  email: string;
+  @Field({ nullable: true })
+  email?: string;
 
   @Field()
   username: string;
 
   // Password is not exposed in GraphQL
   password?: string;
+
+  @Field({ nullable: true })
+  phone?: string;
 
   @Field({ nullable: true })
   firstName?: string;
@@ -35,6 +38,21 @@ export class User {
 
   @Field()
   isActive: boolean;
+
+  @Field()
+  isVerified: boolean;
+
+  @Field()
+  isTwoFactorEnabled: boolean;
+
+  @Field()
+  failedLoginAttempts: number;
+
+  @Field({ nullable: true })
+  lockedUntil?: Date;
+
+  @Field({ nullable: true })
+  lastLoginAt?: Date;
 
   @Field()
   createdAt: Date;

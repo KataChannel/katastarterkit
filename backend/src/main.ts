@@ -7,6 +7,7 @@ import { PrismaService } from './prisma/prisma.service';
 import { EnvConfigService } from './config/env-config.service';
 import * as dotenv from 'dotenv';
 import { join } from 'path';
+import * as express from 'express';
 
 // Load environment variables
 dotenv.config({ path: join(__dirname, '../.env.local') });
@@ -21,6 +22,10 @@ async function bootstrap() {
   console.log(`   NODE_ENV: ${configService.get('NODE_ENV', 'development')}`);
   console.log(`   PORT: ${configService.get('PORT', 4000)}`);
   console.log(`   FRONTEND_URL: ${configService.get('FRONTEND_URL', 'http://localhost:3000')}`);
+  
+  // Configure JSON body parser with larger limit for GraphQL
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '50mb' }));
   
   // Enable CORS
   app.enableCors({

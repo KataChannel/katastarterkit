@@ -46,6 +46,9 @@ import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interc
         playground: configService.get('NODE_ENV') !== 'production',
         introspection: configService.get('NODE_ENV') !== 'production',
         context: ({ req, res }) => ({ req, res }),
+        bodyParserConfig: {
+          limit: '50mb',
+        },
         subscriptions: {
           'graphql-ws': {
             path: '/graphql',

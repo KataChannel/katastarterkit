@@ -73,11 +73,8 @@ export class UserResolver {
   async loginWithGoogle(@Args('input') input: SocialLoginInput): Promise<AuthResponse> {
     console.log('Input to loginWithGoogle:', input);
     
-    const result = await this.authService.loginWithGoogle(
-      input.token,
-      input.providerId
-    );
-    console.log(result);
+    const result = await this.authService.loginWithGoogle(input);
+    console.log('Result from authService:', result);
     
     return {
       accessToken: result.accessToken,

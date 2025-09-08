@@ -42,6 +42,7 @@ export default function GoogleLoginButton() {
         variables: {
           input: {
             token: credentialResponse.credential,
+            provider: 'GOOGLE',
             email: decoded.email,
             providerId: decoded.sub,
             firstName: decoded.given_name,

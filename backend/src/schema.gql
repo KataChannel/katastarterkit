@@ -2,6 +2,13 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+enum AuthProvider {
+  FACEBOOK
+  GOOGLE
+  LOCAL
+  PHONE
+}
+
 type AuthResponse {
   accessToken: String!
   refreshToken: String!
@@ -217,7 +224,7 @@ input SocialLoginInput {
   email: String
   firstName: String
   lastName: String
-  provider: String!
+  provider: AuthProvider!
   providerId: String
   rememberMe: Boolean
   token: String!
@@ -371,24 +378,31 @@ input UpdateTaskInput {
 
 input UpdateUserInput {
   avatar: String
+  email: String
   firstName: String
   lastName: String
+  username: String
 }
 
 type User {
   avatar: String
   createdAt: DateTime!
-  email: String!
+  email: String
+  failedLoginAttempts: Float!
   firstName: String
   id: ID!
   isActive: Boolean!
+  isTwoFactorEnabled: Boolean!
+  isVerified: Boolean!
+  lastLoginAt: DateTime
   lastName: String
+  lockedUntil: DateTime
+  phone: String
   role: UserRole!
   updatedAt: DateTime!
   username: String!
 }
 
-"""User role types"""
 enum UserRole {
   ADMIN
   MODERATOR

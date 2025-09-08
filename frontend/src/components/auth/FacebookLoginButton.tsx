@@ -102,7 +102,8 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
           loginWithFacebook({
             variables: {
               input: {
-                accessToken
+                token: accessToken,
+                provider: 'FACEBOOK'
               }
             }
           });

@@ -303,7 +303,7 @@ export class TaskService {
       include: {
         user: true,
         parent: true,
-        attachments: true,
+        media: true,
         shares: true,
         comments: true,
         subtasks: true,

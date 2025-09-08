@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, AuthProvider } from '@prisma/client';
@@ -6,9 +6,28 @@ import * as bcrypt from 'bcryptjs';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { SocialLoginInput } from '../graphql/inputs/user.input';
+
+// Define interfaces for the auth service
+interface GoogleUserInfo {
+  id: string;
+  email: string;
+  given_name?: string;
+  family_name?: string;
+  picture?: string;
+  email_verified?: boolean;
+}
+
+interface AuthPayload {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -84,23 +103,26 @@ export class AuthService {
 
   // Google token verification
   async verifyGoogleToken(token: string): Promise<any> {
-    console.log('Verifying Google token:', token.substring(0, 50) + '...');
+    this.logger.log('=== VERIFYING GOOGLE TOKEN ===');
+    this.logger.log(`Token: ${token.substring(0, 50)}...`);
+    this.logger.log(`Environment GOOGLE_CLIENT_ID: ${this.configService.get('GOOGLE_CLIENT_ID')}`);
+    this.logger.log(`Process.env GOOGLE_CLIENT_ID: ${process.env.GOOGLE_CLIENT_ID}`);
     
     try {
       // For Google Sign-In, the token is an ID token (JWT)
       // Use the tokeninfo endpoint with id_token parameter
       const url = `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${token}`;
-      console.log('Making request to:', url.substring(0, 80) + '...');
+      this.logger.log(`Making request to: ${url.substring(0, 80)}...`);
       
       const response = await firstValueFrom(
         this.httpService.get(url)
       );
       
-      console.log('Google response status:', response.status);
-      console.log('Google response data:', response.data);
+      this.logger.log(`Google response status: ${response.status}`);
+      this.logger.log(`Google response data:`, response.data);
       
       if (response.data.error) {
-        console.error('Google token error:', response.data.error);
+        this.logger.error(`Google token error: ${response.data.error}`);
         throw new UnauthorizedException('Invalid Google token');
       }
 
@@ -108,10 +130,11 @@ export class AuthService {
       
       // Verify the audience (your Google Client ID)
       const expectedAudience = this.configService.get('GOOGLE_CLIENT_ID');
-      console.log('Expected audience:', expectedAudience);
-      console.log('Token audience:', tokenData.aud);
+      this.logger.log(`Expected audience: ${expectedAudience}`);
+      this.logger.log(`Token audience: ${tokenData.aud}`);
       
       if (expectedAudience && tokenData.aud !== expectedAudience) {
+        this.logger.error('Token audience mismatch!');
         throw new UnauthorizedException('Token audience mismatch');
       }
 
@@ -119,17 +142,17 @@ export class AuthService {
       const userData = {
         id: tokenData.sub,
         email: tokenData.email,
-        firstName: tokenData.given_name,
-        lastName: tokenData.family_name,
-        avatar: tokenData.picture,
-        verified: tokenData.email_verified === 'true' || tokenData.email_verified === true,
+        given_name: tokenData.given_name,
+        family_name: tokenData.family_name,
+        picture: tokenData.picture,
+        email_verified: tokenData.email_verified === 'true' || tokenData.email_verified === true,
       };
       
-      console.log('Extracted user data:', userData);
+      this.logger.log(`Extracted user data:`, userData);
       return userData;
     } catch (error) {
-      console.error('Google token verification error:', error.response?.data || error.message);
-      console.error('Full error:', error);
+      this.logger.error(`Google token verification error: ${error.response?.data || error.message}`);
+      this.logger.error('Full error:', error);
       throw new UnauthorizedException('Failed to verify Google token');
     }
   }
@@ -174,108 +197,96 @@ export class AuthService {
     }
   }
 
-  async loginWithGoogle(token: string, providerId?: string): Promise<{ user: User; accessToken: string; refreshToken: string }> {
-    // Verify Google token and get user info
-    const googleUser = await this.verifyGoogleToken(token);
-    const googleId = providerId || googleUser.id;
+  async loginWithGoogle(input: SocialLoginInput): Promise<AuthPayload> {
+    this.logger.log(`Starting Google login for token: ${input.token.substring(0, 20)}...`);
+    this.logger.log(`Environment GOOGLE_CLIENT_ID exists: ${!!process.env.GOOGLE_CLIENT_ID}`);
     
-    // 1. Kiểm tra Google ID hoặc email với hệ thống
-    let user = null;
-    
-    // Tìm user theo Google ID trong AuthMethod
-    const existingAuthMethod = await this.prisma.authMethod.findFirst({
-      where: {
-        provider: AuthProvider.GOOGLE,
-        providerId: googleId,
-      },
-      include: {
-        user: true,
-      },
-    });
-
-    if (existingAuthMethod) {
-      user = existingAuthMethod.user;
-    } else if (googleUser.email) {
-      // Tìm user theo email
-      user = await this.prisma.user.findUnique({
-        where: { email: googleUser.email },
-        include: {
-          authMethods: true,
-        },
-      });
-
-      if (user) {
-        // 2. Nếu tồn tại thì cập nhật liên kết Google ID
-        await this.prisma.authMethod.create({
-          data: {
-            userId: user.id,
-            provider: AuthProvider.GOOGLE,
-            providerId: googleId,
-            isVerified: true,
-          },
-        });
-      }
-    }
-
-    if (!user && googleUser.email) {
-      // 3. Nếu chưa tồn tại thì tạo mới thông tin
-      const username = googleUser.email.split('@')[0] + '_' + Math.random().toString(36).substring(7);
+    try {
+      this.logger.log(`Calling verifyGoogleToken...`);
+      const userInfo = await this.verifyGoogleToken(input.token);
+      this.logger.log(`Google token verified for user: ${userInfo.email}`);
       
-      user = await this.prisma.user.create({
-        data: {
-          email: googleUser.email,
-          username,
-          firstName: googleUser.firstName,
-          lastName: googleUser.lastName,
-          avatar: googleUser.avatar,
-          isActive: true,
-          isVerified: googleUser.verified || true,
-          authMethods: {
-            create: {
-              provider: AuthProvider.GOOGLE,
-              providerId: googleId,
-              isVerified: true,
-            },
-          },
-        },
-        include: {
-          authMethods: true,
-        },
+      let user = await this.prisma.user.findUnique({
+        where: { email: userInfo.email },
+        include: { authMethods: true }
       });
+      
+      if (user) {
+        this.logger.log(`Existing user found: ${user.id}`);
+        
+        // Check if Google auth method exists
+        const existingGoogleAuth = user.authMethods.find(
+          auth => auth.provider === 'GOOGLE'
+        );
+        
+        if (!existingGoogleAuth) {
+          // Link Google account to existing user
+          await this.prisma.authMethod.create({
+            data: {
+              userId: user.id,
+              provider: 'GOOGLE',
+              providerId: userInfo.id,
+              isVerified: true
+            }
+          });
+          this.logger.log(`Google auth method linked to existing user: ${user.id}`);
+        }
+      } else {
+        this.logger.log(`Creating new user for: ${userInfo.email}`);
+        
+        // Create new user with Google auth
+        user = await this.prisma.user.create({
+          data: {
+            email: userInfo.email,
+            username: userInfo.email, // Use email as username for now
+            firstName: userInfo.given_name || '',
+            lastName: userInfo.family_name || '',
+            avatar: userInfo.picture,
+            isVerified: userInfo.email_verified || false,
+            authMethods: {
+              create: {
+                provider: 'GOOGLE',
+                providerId: userInfo.id,
+                isVerified: true
+              }
+            }
+          },
+          include: { authMethods: true }
+        });
+        this.logger.log(`New user created: ${user.id}`);
+      }
+      
+      // Update last login
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() }
+      });
+      
+      // Create audit log
+      await this.prisma.auditLog.create({
+        data: {
+          userId: user.id,
+          action: 'LOGIN',
+          details: `Google login for ${user.email}`,
+          ipAddress: null,
+          userAgent: null
+        }
+      });
+      
+      const tokens = await this.generateTokens(user);
+      
+      this.logger.log(`Google login successful for user: ${user.id}`);
+      
+      return {
+        user: user as any,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken
+      };
+    } catch (error) {
+      this.logger.error(`Google login failed: ${error.message}`, error.stack);
+      this.logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
+      throw new BadRequestException(`Invalid Google token: ${error.message}`);
     }
-
-    if (!user) {
-      throw new UnauthorizedException('Unable to authenticate with Google');
-    }
-
-    // Cập nhật last login và reset failed attempts
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { 
-        lastLoginAt: new Date(),
-        failedLoginAttempts: 0,
-        lockedUntil: null,
-      },
-    });
-
-    // Create audit log
-    await this.prisma.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'GOOGLE_LOGIN',
-        details: {
-          googleId,
-          email: googleUser.email,
-        },
-      },
-    });
-
-    const tokens = await this.generateTokens(user);
-    
-    return {
-      user,
-      ...tokens,
-    };
   }
 
   async loginWithFacebook(token: string, providerId?: string): Promise<{ user: User; accessToken: string; refreshToken: string }> {
