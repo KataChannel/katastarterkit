@@ -16,6 +16,8 @@ import { GrokModule } from './grok/grok.module';
 import { MinioModule } from './minio/minio.module';
 import { LoggerModule } from './logger/logger.module';
 import { HealthModule } from './health/health.module';
+import { AiTrainingModule } from './ai-training/ai-training.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -80,6 +82,8 @@ import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interc
     MinioModule,
     LoggerModule,
     HealthModule,
+    AiTrainingModule,
+    ChatbotModule,
   ],
   providers: [
     EnvConfigService,

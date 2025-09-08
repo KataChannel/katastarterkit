@@ -112,6 +112,11 @@ model User {
   tasksSharedBy   TaskShare[] @relation("TaskSharedBy")
   tasksSharedWith TaskShare[] @relation("TaskSharedWith")
 
+  // AI Training relations
+  chatbotModels     ChatbotModel[]
+  trainingData      TrainingData[]
+  chatConversations ChatConversation[]
+
   @@map("users")
 }
 
@@ -371,4 +376,132 @@ model TaskShare {
 
   @@index([shareToken])
   @@map("task_shares")
+}
+
+// AI Training and Chatbot Models
+enum TrainingDataType {
+  DOCUMENT
+  TEXT
+  FAQ
+  CONVERSATION
+  KNOWLEDGE_BASE
+}
+
+enum TrainingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ChatbotStatus {
+  ACTIVE
+  INACTIVE
+  TRAINING
+}
+
+model ChatbotModel {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  systemPrompt String       @default("You are a helpful AI assistant.")
+  status      ChatbotStatus @default(INACTIVE)
+  
+  // Model configuration
+  temperature    Float   @default(0.7)
+  maxTokens     Int     @default(1000)
+  topP          Float   @default(1.0)
+  frequencyPenalty Float @default(0.0)
+  presencePenalty  Float @default(0.0)
+  
+  // Training metrics
+  totalTrainingTokens Int @default(0)
+  lastTrainedAt      DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  trainingData TrainingData[]
+  conversations ChatConversation[]
+  
+  @@map("chatbot_models")
+}
+
+model TrainingData {
+  id          String           @id @default(uuid())
+  title       String
+  content     String           @db.Text
+  type        TrainingDataType
+  status      TrainingStatus   @default(PENDING)
+  
+  // File information if uploaded
+  fileName    String?
+  fileSize    Int?
+  filePath    String?
+  
+  // Processing information
+  processedAt DateTime?
+  errorMessage String?
+  tokenCount  Int?
+  
+  // Embeddings for vector search
+  embeddings  Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  chatbotId   String
+  chatbot     ChatbotModel @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([chatbotId, status])
+  @@map("training_data")
+}
+
+model ChatConversation {
+  id        String   @id @default(uuid())
+  title     String?
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  chatbotId String
+  chatbot   ChatbotModel @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  messages  ChatMessage[]
+  
+  @@index([userId, chatbotId])
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  role      String   // 'user' or 'assistant'
+  
+  // Response metadata
+  tokenCount     Int?
+  responseTime   Int?     // milliseconds
+  relevantData   Json?    // references to training data used
+  
+  createdAt DateTime @default(now())
+
+  // Relations
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  @@index([conversationId, createdAt])
+  @@map("chat_messages")
 }

@@ -11,8 +11,16 @@ export class JwtAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
+    let request;
+    
+    // Check if this is a GraphQL context or REST context
+    try {
+      const gqlContext = GqlExecutionContext.create(context);
+      request = gqlContext.getContext().req;
+    } catch {
+      // If GraphQL context creation fails, it's a REST endpoint
+      request = context.switchToHttp().getRequest();
+    }
 
     const token = this.extractTokenFromHeader(request);
     if (!token) {
@@ -27,8 +35,11 @@ export class JwtAuthGuard implements CanActivate {
         return false;
       }
 
-      // Attach user to request
-      request.user = user;
+      // Attach user to request with both user object and sub for compatibility
+      request.user = {
+        ...user,
+        sub: user.id, // Ensure sub is available for the controller
+      };
       return true;
     } catch (error) {
       return false;
