@@ -8,30 +8,45 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    default: 'KataCore',
+    default: 'KataCore - AI-Powered Chatbot Platform',
     template: '%s | KataCore',
   },
-  description: 'Enterprise Fullstack Starter Kit with Next.js, NestJS, GraphQL, Prisma, Redis, and Minio',
-  keywords: ['fullstack', 'starter-kit', 'nextjs', 'nestjs', 'graphql', 'prisma', 'redis', 'minio'],
+  description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data. Built with Next.js, NestJS, GraphQL, Prisma, Redis, and Minio.',
+  keywords: ['ai', 'chatbot', 'fullstack', 'starter-kit', 'nextjs', 'nestjs', 'graphql', 'prisma', 'redis', 'minio', 'artificial intelligence', 'machine learning'],
   authors: [{ name: 'KataCore Team' }],
   creator: 'KataCore Team',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:13000'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    title: 'KataCore',
-    description: 'Enterprise Fullstack Starter Kit',
+    title: 'KataCore - AI-Powered Chatbot Platform',
+    description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data.',
     siteName: 'KataCore',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'KataCore - AI-Powered Chatbot Platform',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'KataCore',
-    description: 'Enterprise Fullstack Starter Kit',
+    title: 'KataCore - AI-Powered Chatbot Platform',
+    description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data.',
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
     follow: true,
+  },
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png',
   },
 };
 

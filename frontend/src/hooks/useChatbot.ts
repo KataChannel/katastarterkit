@@ -233,17 +233,53 @@ export function useChat(chatbotId: string | null) {
     
     setError(null);
     
-    const response = await chatbotApi.sendMessage(chatbotId, messageData);
+    // Add user message to current conversation immediately for better UX
+    if (currentConversation) {
+      const userMessage: ChatMessageResponse = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        content: messageData.message,
+        role: 'user',
+        timestamp: new Date(),
+        conversationId: currentConversation.id || '',
+      };
+      
+      setCurrentConversation(prev => ({
+        ...prev!,
+        messages: [...prev!.messages, userMessage],
+      }));
+    }
+    
+    // Send message to backend - if conversationId is empty, backend will create new conversation
+    const actualMessageData = {
+      ...messageData,
+      conversationId: currentConversation?.id || undefined, // Don't send empty string
+    };
+    
+    const response = await chatbotApi.sendMessage(chatbotId, actualMessageData);
     
     if (response.error) {
       setError(response.error);
-      return null;
-    } else if (response.data) {
-      // Update current conversation with new message
-      if (currentConversation && currentConversation.id === response.data.conversationId) {
+      // Remove the optimistically added message on error
+      if (currentConversation) {
         setCurrentConversation(prev => ({
           ...prev!,
-          messages: [...prev!.messages, response.data!],
+          messages: prev!.messages.slice(0, -1),
+        }));
+      }
+      return null;
+    } else if (response.data) {
+      // If this was a new conversation (no ID), update with the real conversation
+      if (!currentConversation?.id || currentConversation.id === '') {
+        // Load the full conversation to get proper data
+        const conversationResponse = await chatbotApi.getConversation(response.data.conversationId);
+        if (conversationResponse.data) {
+          setCurrentConversation(conversationResponse.data);
+        }
+      } else {
+        // Update existing conversation with AI response
+        setCurrentConversation(prev => ({
+          ...prev!,
+          messages: [...prev!.messages.filter(m => !m.id.startsWith('temp-')), response.data!],
         }));
       }
       
@@ -272,7 +308,14 @@ export function useChat(chatbotId: string | null) {
   }, []);
 
   const startNewConversation = useCallback(() => {
-    setCurrentConversation(null);
+    // Clear current conversation to show a fresh chat interface
+    setCurrentConversation({
+      id: '', // Temporary empty ID - will be set when first message is sent
+      title: 'New Conversation',
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
   }, []);
 
   useEffect(() => {
