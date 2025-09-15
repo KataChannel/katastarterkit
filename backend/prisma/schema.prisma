@@ -505,3 +505,166 @@ model ChatMessage {
   @@index([conversationId, createdAt])
   @@map("chat_messages")
 }
+
+model Hoadon {
+  id            String          @id @default(uuid())
+  nbmst         String
+  khmshdon      Int?
+  khhdon        String?
+  shdon         Int?
+  cqt           String?
+  cttkhac       Json?
+  dvtte         String?
+  hdon          String?
+  hsgcma        String?
+  hsgoc         String?
+  hthdon        Int?
+  htttoan       Int?
+  idtbao        String?
+  khdon         String?
+  khhdgoc       String?
+  khmshdgoc     String?
+  lhdgoc        Int?
+  mhdon         String?
+  mtdiep        String?
+  mtdtchieu     String?
+  nbdchi        String?
+  nbhdktngay    DateTime?
+  nbhdktso      String?
+  nbhdso        String?
+  nblddnbo      String?
+  nbptvchuyen   String?
+  nbstkhoan     String?
+  nbten         String?
+  nbtnhang      String?
+  nbtnvchuyen   String?
+  ncma          DateTime?
+  ncnhat        DateTime?
+  ngcnhat       String?
+  nky           DateTime?
+  nmdchi        String?
+  nmmst         String?
+  nmstkhoan     String?
+  nmten         String?
+  nmtnhang      String?
+  nmtnmua       String?
+  ntao          DateTime?
+  ntnhan        DateTime?
+  pban          String?
+  ptgui         Int?
+  shdgoc        Int?
+  tchat         Int?
+  tdlap         DateTime?
+  tgia          Int?
+  tgtcthue      Int?
+  tgtthue       Int?
+  tgtttbchu     String?
+  tgtttbso      Int?
+  thdon         String?
+  thlap         Int?
+  thttlphi      Json?
+  tlhdon        String?
+  ttcktmai      Int?
+  tthai         Int?
+  tttbao        Int?
+  ttxly         Int?
+  tvandnkntt    String?
+  mhso          String?
+  ladhddt       Int?
+  mkhang        String?
+  nbsdthoai     String?
+  nbdctdtu      String?
+  nbfax         String?
+  nbwebsite     String?
+  nbcks         String?
+  nmsdthoai     String?
+  nmdctdtu      String?
+  nmcmnd        String?
+  nmcks         String?
+  bhphap        Int?
+  hddunlap      String?
+  gchdgoc       String?
+  tbhgtngay     DateTime?
+  bhpldo        String?
+  bhpcbo        String?
+  bhpngay       DateTime?
+  tdlhdgoc      String?
+  tgtphi        Int?
+  unhiem        String?
+  mstdvnunlhdon String?
+  tdvnunlhdon   String?
+  nbmdvqhnsach  String?
+  nbsqdinh      String?
+  nbncqdinh     String?
+  nbcqcqdinh    String?
+  nbhtban       String?
+  nmmdvqhnsach  String?
+  nmddvchden    String?
+  nmtgvchdtu    String?
+  nmtgvchdden   String?
+  nbtnban       String?
+  dcdvnunlhdon  String?
+  dksbke        String?
+  dknlbke       String?
+  thtttoan      String?
+  msttcgp       String?
+  gchu          String?
+  kqcht         String?
+  hdntgia       String?
+  tgtkcthue     String?
+  tgtkhac       Int?
+  nmshchieu     String?
+  nmnchchieu    String?
+  nmnhhhchieu   String?
+  nmqtich       String?
+  ktkhthue      String?
+  hdhhdvu       String?
+  qrcode        String?
+  ttmstten      String?
+  ladhddtten    String?
+  hdxkhau       String?
+  hdxkptquan    String?
+  hdgktkhthue   String?
+  hdonLquans    Json?
+  tthdclquan    Boolean?
+  pdndungs      Json?
+  hdtbssrses    Json?
+  hdTrung       String?
+  isHDTrung     Boolean?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  HoadonChitiet HoadonChitiet[]
+}
+
+model HoadonChitiet {
+  id        String   @id @default(uuid())
+  codeId    String?
+  title     String?
+  title2    String?
+  idhdon    String
+  idhoadon  String
+  hoadon    Hoadon   @relation(fields: [idhoadon], references: [id], onDelete: Cascade)
+  dgia      Int?
+  dvtinh    String?
+  ltsuat    String?
+  sluong    Int?
+  stbchu    String?
+  stckhau   Int?
+  stt       Int?
+  tchat     Int?
+  ten       String?
+  thtcthue  Int?
+  thtien    Int?
+  tlckhau   Int?
+  tsuat     Float?
+  tthue     Int?
+  sxep      Int?
+  dvtte     String?
+  tgia      Int?
+  order     Int?     @default(1)
+  isproduct Boolean? @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([idhdon])
+}

@@ -18,6 +18,7 @@ frontend/.env*
 
 # Backend environment files
 backend/.env*
+backend/kata_json
 
 # Database
 *.db

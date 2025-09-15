@@ -26,17 +26,17 @@ export function SiteHeader() {
           {isAuthenticated ? (
             <>
               <nav className="hidden md:flex space-x-10">
-                <Link href="/dashboard" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
-                  Dashboard
-                </Link>
                 <Link href="/demo" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
                   Demo
                 </Link>
-                <a href="#features" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
-                  Features
+               <Link href="/ketoan" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                  Kế Toán
+                </Link>
+                <a href="chatbot" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                  Chat Bot
                 </a>
-                <a href="#tech-stack" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
-                  Tech Stack
+                <a href="website" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                 Website
                 </a>
               </nav>
               <div className="hidden md:flex items-center justify-end md:flex-1 lg:w-0 space-x-4">
@@ -68,8 +68,11 @@ export function SiteHeader() {
                 <Link href="/demo" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
                   Demo
                 </Link>
-                <a href="#" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
-                  Documentation
+                <a href="/chatbot" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                  Chatbot
+                </a>
+                <a href="/website" className="text-base font-medium text-gray-500 hover:text-blue-600 transition-colors">
+                  Website
                 </a>
               </nav>
               <div className="hidden md:flex items-center justify-end md:flex-1 lg:w-0">

@@ -23,11 +23,11 @@ export function AdminHeader() {
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Todos', href: '/todos', icon: ClipboardDocumentListIcon },
-    { name: 'Shared Todos', href: '/todos/shared', icon: ShareIcon },
-    { name: 'Users', href: '/users', icon: UserGroupIcon },
-    { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
+    { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
+    { name: 'Todos', href: '/admin/todos', icon: ClipboardDocumentListIcon },
+    { name: 'Shared Todos', href: '/admin/todos/shared', icon: ShareIcon },
+    { name: 'Users', href: '/admin/users', icon: UserGroupIcon },
+    { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
   ];
 
   return (
@@ -35,7 +35,7 @@ export function AdminHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-8">
-            <Link href="/dashboard" className="text-2xl font-bold text-white">
+            <Link href="/admin/dashboard" className="text-2xl font-bold text-white">
               KataCore <span className="text-blue-400">Admin</span>
             </Link>
             

@@ -60,7 +60,7 @@ export default function RootLayout({
       <body className={`${inter.className} h-full`}>
         <Providers>
           <div className="min-h-full flex flex-col">
-            <Navigation />
+            {/* <Navigation /> */}
             <main className="flex-1">
               {children}
             </main>
