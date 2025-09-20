@@ -306,7 +306,7 @@ export const CommonFragments = {
   `,
 
   TASK: gql`
-    fragment TaskFragment on Task {
+    fragment DynamicTaskFragment on Task {
       id
       title
       description

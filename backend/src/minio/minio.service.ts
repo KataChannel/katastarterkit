@@ -15,7 +15,7 @@ export class MinioService {
       accessKey: this.configService.get('MINIO_ACCESS_KEY', 'minioadmin'),
       secretKey: this.configService.get('MINIO_SECRET_KEY', 'minioadmin'),
     });
-
+    console.log('this.minioClient',this.minioClient);
     this.initializeBuckets();
   }
 

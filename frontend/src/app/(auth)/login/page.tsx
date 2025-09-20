@@ -37,7 +37,7 @@ function LoginPageContent() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/dashboard");
+      router.push("/admin");
     }
   }, [isAuthenticated, router]);
 
@@ -58,7 +58,7 @@ function LoginPageContent() {
       if (result.success) {
         toast.success("Welcome back!");
         // Redirect to dashboard or intended page
-        const returnUrl = searchParams?.get("returnUrl") || "/dashboard";
+        const returnUrl = searchParams?.get("returnUrl") || "/admin";
         router.push(returnUrl);
       } else {
         toast.error(result.error || "Login failed. Please try again.");
