@@ -31,7 +31,8 @@
     "db:seed": "cd backend && npx prisma db seed",
     "db:studio": "cd backend && npx prisma studio",
     "db:push": "cd backend && npx prisma db push",
-    "db:restore": "cd backend && npx ts-node prisma/restore.ts"
+    "db:restore": "cd backend && npx ts-node prisma/restore.ts",
+    "db:backup": "cd backend && npx ts-node prisma/backup.ts"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

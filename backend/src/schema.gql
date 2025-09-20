@@ -15,6 +15,29 @@ type AuthResponse {
   user: User!
 }
 
+"""The type of a page block"""
+enum BlockType {
+  BUTTON
+  CARD
+  COLUMN
+  CONTACT_FORM
+  DIVIDER
+  FAQ
+  GALLERY
+  HERO
+  IMAGE
+  ROW
+  SPACER
+  TESTIMONIAL
+  TEXT
+  VIDEO
+}
+
+input BulkUpdateBlockOrderInput {
+  id: ID!
+  order: Int!
+}
+
 type Comment {
   content: String!
   createdAt: DateTime!
@@ -33,6 +56,26 @@ input CreateCommentInput {
   content: String!
   parentId: String
   postId: String!
+}
+
+input CreatePageBlockInput {
+  content: JSONObject!
+  isVisible: Boolean! = true
+  order: Int! = 0
+  style: JSONObject
+  type: BlockType!
+}
+
+input CreatePageInput {
+  blocks: [CreatePageBlockInput!]
+  content: JSONObject
+  description: String
+  ogImage: String
+  seoDescription: String
+  seoTitle: String
+  slug: String!
+  status: PageStatus! = DRAFT
+  title: String!
 }
 
 input CreatePostInput {
@@ -64,6 +107,11 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
 input LoginUserInput {
   emailOrUsername: String!
   password: String!
@@ -78,15 +126,20 @@ enum MediaType {
 }
 
 type Mutation {
+  addPageBlock(input: CreatePageBlockInput!, pageId: String!): PageBlock!
   createComment(input: CreateCommentInput!): Comment!
+  createPage(input: CreatePageInput!): Page!
   createPost(input: CreatePostInput!): Post!
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
   deleteComment(id: String!): Boolean!
+  deletePage(id: String!): Page!
+  deletePageBlock(id: String!): PageBlock!
   deletePost(id: String!): Boolean!
   deleteTask(id: String!): Boolean!
   deleteUser(id: String!): Boolean!
+  duplicatePage(id: String!, slug: String, title: String): Page!
   generatePostSummary(postId: String!): String!
   generateSummary(content: String!, maxLength: Float! = 200): String!
   generateTags(content: String!, maxTags: Float! = 5): [String!]!
@@ -100,6 +153,9 @@ type Mutation {
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   shareTask(input: ShareTaskInput!): TaskShare!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
+  updatePage(id: String!, input: UpdatePageInput!): Page!
+  updatePageBlock(id: String!, input: UpdatePageBlockInput!): PageBlock!
+  updatePageBlocksOrder(pageId: String!, updates: [BulkUpdateBlockOrderInput!]!): [PageBlock!]!
   updatePost(id: String!, input: UpdatePostInput!): Post!
   updateTask(input: UpdateTaskInput!): Task!
   updateUser(id: String!, input: UpdateUserInput!): User!
@@ -108,6 +164,58 @@ type Mutation {
 type OtpResponse {
   message: String!
   success: Boolean!
+}
+
+type Page {
+  blocks: [PageBlock!]!
+  content: JSONObject
+  createdAt: DateTime!
+  createdBy: String!
+  description: String
+  id: ID!
+  ogImage: String
+  publishedAt: DateTime
+  seoDescription: String
+  seoTitle: String
+  slug: String!
+  status: PageStatus!
+  title: String!
+  updatedAt: DateTime!
+  updatedBy: String
+}
+
+type PageBlock {
+  content: JSONObject!
+  createdAt: DateTime!
+  id: ID!
+  isVisible: Boolean!
+  order: Int!
+  pageId: String!
+  style: JSONObject
+  type: BlockType!
+  updatedAt: DateTime!
+}
+
+input PageFiltersInput {
+  createdBy: String
+  slug: String
+  status: PageStatus
+  title: String
+}
+
+"""The status of a page"""
+enum PageStatus {
+  ARCHIVED
+  DRAFT
+  PUBLISHED
+}
+
+type PaginatedPages {
+  data: [Page!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
 }
 
 type PaginatedPosts {
@@ -176,9 +284,13 @@ type Query {
   getCommentsByPost(postId: String!): [Comment!]!
   getMe: User!
   getMyPosts: [Post!]!
+  getPageById(id: String!): Page!
+  getPageBySlug(slug: String!): Page!
+  getPages(filters: PageFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
   getPostById(id: String!): Post!
   getPostBySlug(slug: String!): Post!
   getPosts(filters: PostFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPosts!
+  getPublishedPages(pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
   getSharedTasks(filters: TaskFilterInput): [Task!]!
   getTaskById(id: ID!): Task!
   getTasks(filters: TaskFilterInput): [Task!]!
@@ -354,6 +466,27 @@ enum TaskStatus {
 
 input UpdateCommentInput {
   content: String
+}
+
+input UpdatePageBlockInput {
+  content: JSONObject
+  id: ID
+  isVisible: Boolean
+  order: Int
+  style: JSONObject
+  type: BlockType
+}
+
+input UpdatePageInput {
+  blocks: [UpdatePageBlockInput!]
+  content: JSONObject
+  description: String
+  ogImage: String
+  seoDescription: String
+  seoTitle: String
+  slug: String
+  status: PageStatus
+  title: String
 }
 
 input UpdatePostInput {

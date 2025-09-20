@@ -668,3 +668,75 @@ model HoadonChitiet {
 
   @@index([idhdon])
 }
+
+// Page Builder Models
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum BlockType {
+  TEXT
+  IMAGE
+  HERO
+  GALLERY
+  VIDEO
+  BUTTON
+  DIVIDER
+  SPACER
+  COLUMN
+  ROW
+  CARD
+  TESTIMONIAL
+  FAQ
+  CONTACT_FORM
+}
+
+model Page {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  description String?
+  content     Json?      // Stored as JSON for flexibility
+  status      PageStatus @default(DRAFT)
+  seoTitle    String?
+  seoDescription String?
+  ogImage     String?
+  
+  // Relationships
+  blocks      PageBlock[]
+  
+  // Timestamps and user tracking
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  publishedAt DateTime?
+  createdBy   String
+  updatedBy   String?
+  
+  // Indexing
+  @@index([slug])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PageBlock {
+  id        String    @id @default(cuid())
+  type      BlockType
+  content   Json      // Block-specific content and configuration
+  style     Json?     // CSS styles and layout properties
+  order     Int       @default(0)
+  isVisible Boolean   @default(true)
+  
+  // Page relationship
+  pageId    String
+  page      Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // Indexing for performance
+  @@index([pageId, order])
+  @@index([type])
+}
