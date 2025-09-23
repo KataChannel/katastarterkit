@@ -21,6 +21,15 @@ else
 fi
 
 # Kill process on port 13000
+PID_13000=$(sudo lsof -ti:13000)
+if [ ! -z "$PID_13000" ]; then
+    sudo kill -9 $PID_13000
+    echo "Killed process $PID_13000 on port 13000"
+else
+    echo "No process found on port 13000"
+fi
+
+
 PID_13002=$(sudo lsof -ti:13002)
 if [ ! -z "$PID_13002" ]; then
     sudo kill -9 $PID_13002

@@ -6,20 +6,46 @@ import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
 import { Page, PageStatus } from '@/types/page-builder';
 import { notFound } from 'next/navigation';
 import Head from 'next/head';
+import { useEffect, useState } from 'react';
 
 interface DynamicPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default function DynamicPage({ params }: DynamicPageProps) {
+  const [slug, setSlug] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const resolveParams = async () => {
+      try {
+        // In Next.js 13+ App Router, params is always a Promise
+        const resolvedParams = await params;
+        console.log('Rendering page for slug:', resolvedParams);
+        
+        if (resolvedParams && resolvedParams.slug) {
+          setSlug(resolvedParams.slug);
+        } else {
+          console.error('No slug found in params:', resolvedParams);
+          setSlug(''); // This will trigger notFound() in the query
+        }
+      } catch (error) {
+        console.error('Error resolving params:', error);
+        setSlug(''); // This will trigger notFound() in the query
+      }
+    };
+    
+    resolveParams();
+  }, [params]);
+
   const { data, loading, error } = useQuery<{ getPageBySlug: Page }>(GET_PAGE_BY_SLUG, {
-    variables: { slug: params.slug },
+    variables: { slug: slug || '' },
+    skip: slug === null, // Skip query until slug is resolved
     errorPolicy: 'all'
   });
 
-  if (loading) {
+  if (slug === null || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -27,7 +53,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     );
   }
 
-  if (error || !data?.getPageBySlug) {
+  if (error || !data?.getPageBySlug || slug === '') {
     return notFound();
   }
 
