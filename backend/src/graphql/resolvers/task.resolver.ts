@@ -1,6 +1,8 @@
 import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, Parent, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
+import { InputSanitizationInterceptor } from '../../common/interceptors/input-sanitization.interceptor';
 import { Task } from '../models/task.model';
 import { TaskMedia } from '../models/task-media.model';
 import { TaskShare } from '../models/task-share.model';
@@ -17,6 +19,7 @@ import { TaskMediaService } from '../../services/task-media.service';
 import { NotificationService } from '../../services/notification.service';
 import { UserService } from '../../services/user.service';
 import { PubSubService } from '../../services/pubsub.service';
+import { TaskDataLoaderService } from '../../common/data-loaders/task-data-loader.service';
 
 @Resolver(() => Task)
 export class TaskResolver {
@@ -28,11 +31,12 @@ export class TaskResolver {
     private readonly notificationService: NotificationService,
     private readonly userService: UserService,
     private readonly pubSubService: PubSubService,
+    private readonly taskDataLoaderService: TaskDataLoaderService,
   ) {}
 
   // Queries
   @Query(() => [Task], { name: 'getTasks' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
   async getTasks(
     @Context() context: any,
     @Args('filters', { nullable: true }) filters?: TaskFilterInput,
@@ -42,7 +46,7 @@ export class TaskResolver {
   }
 
   @Query(() => Task, { name: 'getTaskById' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
   async getTaskById(
     @Args('id', { type: () => ID }) id: string,
     @Context() context: any,
@@ -52,7 +56,7 @@ export class TaskResolver {
   }
 
   @Query(() => [Task], { name: 'getSharedTasks' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
   async getSharedTasks(
     @Context() context: any,
     @Args('filters', { nullable: true }) filters?: TaskFilterInput,
@@ -63,7 +67,7 @@ export class TaskResolver {
 
   // Mutations
   @Mutation(() => Task, { name: 'createTask' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
   async createTask(
     @Args('input') input: CreateTaskInput,
     @Context() context: any,
@@ -74,11 +78,14 @@ export class TaskResolver {
     // Publish task created event
     await this.pubSubService.publish('taskCreated', { taskCreated: task });
     
+    // Clear relevant caches
+    this.taskDataLoaderService.clearAll();
+    
     return task;
   }
 
   @Mutation(() => Task, { name: 'updateTask' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
   async updateTask(
     @Args('input') input: UpdateTaskInput,
     @Context() context: any,
@@ -94,11 +101,14 @@ export class TaskResolver {
       await this.notificationService.createTaskCompletedNotification(task.id, userId);
     }
     
+    // Clear relevant caches
+    this.taskDataLoaderService.clearAll();
+    
     return task;
   }
 
   @Mutation(() => Boolean, { name: 'deleteTask' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
   async deleteTask(
     @Args('id') id: string,
     @Context() context: any,
@@ -109,11 +119,14 @@ export class TaskResolver {
     // Publish task deleted event
     await this.pubSubService.publish('taskDeleted', { taskDeleted: { id } });
     
+    // Clear relevant caches
+    this.taskDataLoaderService.clearAll();
+    
     return true;
   }
 
   @Mutation(() => TaskShare, { name: 'shareTask' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
   async shareTask(
     @Args('input') input: ShareTaskInput,
     @Context() context: any,
@@ -134,7 +147,7 @@ export class TaskResolver {
   }
 
   @Mutation(() => TaskComment, { name: 'createTaskComment' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
   async createTaskComment(
     @Args('input') input: CreateTaskCommentInput,
     @Context() context: any,
@@ -151,18 +164,28 @@ export class TaskResolver {
     // Publish comment created event
     await this.pubSubService.publish('taskCommentCreated', { taskCommentCreated: comment });
     
+    // Clear comment caches for this task
+    this.taskDataLoaderService.clearComments(input.taskId);
+    this.taskDataLoaderService.clearTaskCounts(input.taskId);
+    
     return comment;
   }
 
   @Mutation(() => Task, { name: 'createSubtask' })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
   async createSubtask(
     @Args('parentId') parentId: string,
     @Args('input') input: CreateTaskInput,
     @Context() context: any,
   ): Promise<any> {
     const userId = context.req.user.id;
-    return this.taskService.createSubtask(parentId, input, userId);
+    const subtask = await this.taskService.createSubtask(parentId, input, userId);
+    
+    // Clear caches for the parent task
+    this.taskDataLoaderService.clearTaskCounts(parentId);
+    this.taskDataLoaderService.clearAll();
+    
+    return subtask;
   }
 
   // Subscriptions
@@ -184,7 +207,8 @@ export class TaskResolver {
   // Field Resolvers
   @ResolveField(() => User)
   async author(@Parent() task: Task): Promise<User> {
-    return this.userService.findById(task.userId);
+    // Use DataLoader to prevent N+1 queries
+    return this.taskDataLoaderService.loadUser(task.userId);
   }
 
   @ResolveField(() => Number)
@@ -199,7 +223,8 @@ export class TaskResolver {
 
   @ResolveField(() => [TaskMedia])
   async media(@Parent() task: Task): Promise<any[]> {
-    return this.taskMediaService.findByTaskId(task.id);
+    // Use DataLoader to prevent N+1 queries
+    return this.taskDataLoaderService.loadMedia(task.id);
   }
 
   @ResolveField(() => [TaskShare])
@@ -209,7 +234,26 @@ export class TaskResolver {
 
   @ResolveField(() => [TaskComment])
   async comments(@Parent() task: Task): Promise<any[]> {
-    return this.taskCommentService.findByTaskId(task.id);
+    // Use DataLoader to prevent N+1 queries
+    return this.taskDataLoaderService.loadComments(task.id);
+  }
+
+  @ResolveField(() => Number)
+  async commentCount(@Parent() task: Task): Promise<number> {
+    const counts = await this.taskDataLoaderService.loadTaskCounts(task.id);
+    return counts.comments;
+  }
+
+  @ResolveField(() => Number)
+  async mediaCount(@Parent() task: Task): Promise<number> {
+    const counts = await this.taskDataLoaderService.loadTaskCounts(task.id);
+    return counts.media;
+  }
+
+  @ResolveField(() => Number)
+  async subtaskCount(@Parent() task: Task): Promise<number> {
+    const counts = await this.taskDataLoaderService.loadTaskCounts(task.id);
+    return counts.subtasks;
   }
 
   @ResolveField(() => [Task])
@@ -232,6 +276,12 @@ export class TaskResolver {
   }
 
   // TaskComment field resolvers
+  @ResolveField(() => User)
+  async commentAuthor(@Parent() comment: TaskComment): Promise<User> {
+    // Use DataLoader to prevent N+1 queries for comment authors
+    return this.taskDataLoaderService.loadUser(comment.userId);
+  }
+
   @ResolveField(() => TaskComment, { nullable: true })
   async commentParent(@Parent() comment: TaskComment): Promise<any> {
     if (!comment.parentId) return null;

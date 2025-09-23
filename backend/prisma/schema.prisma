@@ -117,6 +117,11 @@ model User {
   trainingData      TrainingData[]
   chatConversations ChatConversation[]
 
+  // Performance indexes for GIAI ĐOẠN 1 optimization
+  @@index([isActive])
+  @@index([role])
+  @@index([createdAt])
+  @@index([lastLoginAt])
   @@map("users")
 }
 
@@ -309,6 +314,16 @@ model Task {
   media    TaskMedia[]
   shares   TaskShare[]
 
+  // Performance indexes for GIAI ĐOẠN 1 optimization
+  @@index([userId])
+  @@index([parentId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+  @@index([createdAt])
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([userId, dueDate])
   @@map("tasks")
 }
 
@@ -329,6 +344,12 @@ model TaskComment {
   parent   TaskComment? @relation("TaskCommentReplies", fields: [parentId], references: [id])
   replies  TaskComment[] @relation("TaskCommentReplies")
 
+  // Performance indexes for GIAI ĐOẠN 1 optimization
+  @@index([taskId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
+  @@index([taskId, createdAt])
   @@map("task_comments")
 }
 
@@ -351,6 +372,11 @@ model TaskMedia {
   uploadedBy String
   uploader   User   @relation("TaskMediaUploader", fields: [uploadedBy], references: [id])
 
+  // Performance indexes for GIAI ĐOẠN 1 optimization
+  @@index([taskId])
+  @@index([uploadedBy])
+  @@index([createdAt])
+  @@index([type])
   @@map("task_media")
 }
 

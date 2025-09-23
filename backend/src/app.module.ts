@@ -18,6 +18,7 @@ import { LoggerModule } from './logger/logger.module';
 import { HealthModule } from './health/health.module';
 import { AiTrainingModule } from './ai-training/ai-training.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { DataLoaderModule } from './common/data-loaders/data-loader.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -28,6 +29,7 @@ import { AppResolver } from './app.resolver';
 
 // Interceptors
 import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interceptor';
+import { InputSanitizationInterceptor } from './common/interceptors/input-sanitization.interceptor';
 
 @Module({
   imports: [
@@ -59,6 +61,17 @@ import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interc
             path: '/graphql',
           },
         },
+        // Security enhancements for GIAI ĐOẠN 1
+        validationRules: [
+          require('graphql-depth-limit')(10),
+        ],
+        formatError: (error) => {
+          // Log security-related errors
+          if (error.message.includes('depth') || error.message.includes('complexity')) {
+            console.warn('GraphQL security validation failed:', error.message);
+          }
+          return error;
+        },
       }),
     }),
 
@@ -77,6 +90,7 @@ import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interc
     PrismaModule,
     CacheModule,
     AuthModule,
+    DataLoaderModule,
     GraphQLResolversModule,
     GrokModule,
     MinioModule,
@@ -91,6 +105,10 @@ import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interc
     {
       provide: APP_INTERCEPTOR,
       useClass: GraphQLLoggingInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: InputSanitizationInterceptor,
     },
   ],
 })
