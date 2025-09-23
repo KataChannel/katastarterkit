@@ -21,6 +21,8 @@ import { ChatbotModule } from './chatbot/chatbot.module';
 import { DataLoaderModule } from './common/data-loaders/data-loader.module';
 import { GraphQLPerformanceModule } from './common/graphql-performance/graphql-performance.module';
 import { CommonServicesModule } from './common/common-services.module';
+import { RealTimeModule } from './realtime/real-time.module';
+import { SearchModule } from './search/search.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -103,6 +105,8 @@ import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-per
     AiTrainingModule,
     ChatbotModule,
     CommonServicesModule,
+    RealTimeModule,
+    SearchModule,
   ],
   providers: [
     EnvConfigService,
