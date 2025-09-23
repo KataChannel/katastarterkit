@@ -19,6 +19,8 @@ import { HealthModule } from './health/health.module';
 import { AiTrainingModule } from './ai-training/ai-training.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { DataLoaderModule } from './common/data-loaders/data-loader.module';
+import { GraphQLPerformanceModule } from './common/graphql-performance/graphql-performance.module';
+import { CommonServicesModule } from './common/common-services.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -30,6 +32,7 @@ import { AppResolver } from './app.resolver';
 // Interceptors
 import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interceptor';
 import { InputSanitizationInterceptor } from './common/interceptors/input-sanitization.interceptor';
+import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-performance.interceptor';
 
 @Module({
   imports: [
@@ -91,6 +94,7 @@ import { InputSanitizationInterceptor } from './common/interceptors/input-saniti
     CacheModule,
     AuthModule,
     DataLoaderModule,
+    GraphQLPerformanceModule,
     GraphQLResolversModule,
     GrokModule,
     MinioModule,
@@ -98,6 +102,7 @@ import { InputSanitizationInterceptor } from './common/interceptors/input-saniti
     HealthModule,
     AiTrainingModule,
     ChatbotModule,
+    CommonServicesModule,
   ],
   providers: [
     EnvConfigService,
@@ -109,6 +114,10 @@ import { InputSanitizationInterceptor } from './common/interceptors/input-saniti
     {
       provide: APP_INTERCEPTOR,
       useClass: InputSanitizationInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GraphQLPerformanceInterceptor,
     },
   ],
 })

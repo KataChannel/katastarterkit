@@ -20,6 +20,7 @@ import { NotificationService } from '../../services/notification.service';
 import { UserService } from '../../services/user.service';
 import { PubSubService } from '../../services/pubsub.service';
 import { TaskDataLoaderService } from '../../common/data-loaders/task-data-loader.service';
+import { CacheInvalidationService } from '../../common/services/cache-invalidation.service';
 
 @Resolver(() => Task)
 export class TaskResolver {
@@ -32,6 +33,7 @@ export class TaskResolver {
     private readonly userService: UserService,
     private readonly pubSubService: PubSubService,
     private readonly taskDataLoaderService: TaskDataLoaderService,
+    private readonly cacheInvalidationService: CacheInvalidationService,
   ) {}
 
   // Queries
@@ -78,8 +80,8 @@ export class TaskResolver {
     // Publish task created event
     await this.pubSubService.publish('taskCreated', { taskCreated: task });
     
-    // Clear relevant caches
-    this.taskDataLoaderService.clearAll();
+    // Smart cache invalidation
+    await this.cacheInvalidationService.invalidateTaskCache(task.id, userId);
     
     return task;
   }
@@ -101,8 +103,8 @@ export class TaskResolver {
       await this.notificationService.createTaskCompletedNotification(task.id, userId);
     }
     
-    // Clear relevant caches
-    this.taskDataLoaderService.clearAll();
+    // Smart cache invalidation
+    await this.cacheInvalidationService.invalidateTaskCache(task.id, userId);
     
     return task;
   }
@@ -119,8 +121,8 @@ export class TaskResolver {
     // Publish task deleted event
     await this.pubSubService.publish('taskDeleted', { taskDeleted: { id } });
     
-    // Clear relevant caches
-    this.taskDataLoaderService.clearAll();
+    // Smart cache invalidation
+    await this.cacheInvalidationService.invalidateTaskCache(id, userId);
     
     return true;
   }
@@ -164,9 +166,8 @@ export class TaskResolver {
     // Publish comment created event
     await this.pubSubService.publish('taskCommentCreated', { taskCommentCreated: comment });
     
-    // Clear comment caches for this task
-    this.taskDataLoaderService.clearComments(input.taskId);
-    this.taskDataLoaderService.clearTaskCounts(input.taskId);
+    // Smart cache invalidation for comments
+    await this.cacheInvalidationService.invalidateCommentCache(input.taskId, userId);
     
     return comment;
   }
@@ -181,9 +182,9 @@ export class TaskResolver {
     const userId = context.req.user.id;
     const subtask = await this.taskService.createSubtask(parentId, input, userId);
     
-    // Clear caches for the parent task
-    this.taskDataLoaderService.clearTaskCounts(parentId);
-    this.taskDataLoaderService.clearAll();
+    // Smart cache invalidation for parent task
+    await this.cacheInvalidationService.invalidateTaskCache(parentId, userId);
+    await this.cacheInvalidationService.invalidateTaskCache(subtask.id, userId);
     
     return subtask;
   }

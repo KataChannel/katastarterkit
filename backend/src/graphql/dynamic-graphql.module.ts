@@ -1,4 +1,5 @@
 import { Module, Global } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { DynamicCRUDService } from '../services/dynamic-crud.service';
 import { DynamicResolverService, UniversalDynamicResolver } from './resolvers/dynamic.resolver';
 import { PrismaService } from '../prisma/prisma.service';
@@ -6,6 +7,7 @@ import { setupCommonInputTypes } from './inputs/dynamic.inputs';
 
 @Global()
 @Module({
+  imports: [ConfigModule],
   providers: [
     PrismaService,
     DynamicCRUDService,
@@ -43,10 +45,14 @@ export class DynamicGraphQLModule {
         DynamicResolverService,
         UniversalDynamicResolver,
         // Register dynamic resolvers for each model
-        ...models.map(({ name, modelClass, options }) => {
-          const resolverService = new DynamicResolverService(new DynamicCRUDService(new PrismaService()));
-          return resolverService.registerResolver(name, modelClass, options);
-        })
+        ...models.map(({ name, modelClass, options }) => ({
+          provide: `DYNAMIC_RESOLVER_${name.toUpperCase()}`,
+          useFactory: (prismaService: PrismaService) => {
+            const resolverService = new DynamicResolverService(new DynamicCRUDService(prismaService));
+            return resolverService.registerResolver(name, modelClass, options);
+          },
+          inject: [PrismaService],
+        }))
       ],
       exports: [
         DynamicCRUDService,

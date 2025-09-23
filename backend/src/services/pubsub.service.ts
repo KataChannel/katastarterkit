@@ -3,7 +3,7 @@ import { PubSub } from 'graphql-subscriptions';
 
 @Injectable()
 export class PubSubService {
-  private readonly pubSub: PubSub;
+  private readonly pubSub: any;
 
   constructor() {
     this.pubSub = new PubSub();
@@ -13,7 +13,7 @@ export class PubSubService {
     this.pubSub.publish(event, payload);
   }
 
-  asyncIterator(event: string | string[]) {
+  asyncIterator(event: string | string[]): any {
     return this.pubSub.asyncIterator(event);
   }
 
