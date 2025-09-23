@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { SearchQuery, SearchResult, SearchSuggestion } from '../types/search';
+import { SearchQuery, SearchResult, SearchSuggestion } from '../../types/search';
 
 interface SearchInputProps {
   placeholder?: string;
