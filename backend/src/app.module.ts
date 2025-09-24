@@ -24,6 +24,7 @@ import { GraphQLPerformanceModule } from './common/graphql-performance/graphql-p
 import { CommonServicesModule } from './common/common-services.module';
 import { RealTimeModule } from './realtime/real-time.module';
 import { SearchModule } from './search/search.module';
+import { MonitoringModule } from './monitoring/monitoring.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -109,6 +110,7 @@ import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-per
     CommonServicesModule,
     RealTimeModule,
     SearchModule,
+    MonitoringModule,
   ],
   providers: [
     EnvConfigService,
