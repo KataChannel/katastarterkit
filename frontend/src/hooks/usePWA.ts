@@ -37,7 +37,7 @@ export function usePWA(): PWAHookReturn {
     hasNotificationSupport: false,
     hasBackgroundSync: false,
     hasPushSupport: false,
-    isOnline: navigator?.onLine ?? true,
+    isOnline: typeof window !== 'undefined' ? navigator.onLine : true,
     serviceWorkerReady: false,
   });
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -45,6 +45,9 @@ export function usePWA(): PWAHookReturn {
 
   // Initialize PWA capabilities
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     const updateCapabilities = () => {
       setCapabilities(prev => ({
         ...prev,
@@ -75,6 +78,9 @@ export function usePWA(): PWAHookReturn {
 
   // Register service worker
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+    
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
@@ -111,6 +117,9 @@ export function usePWA(): PWAHookReturn {
 
   // Listen for install prompt
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e as any);
@@ -147,7 +156,7 @@ export function usePWA(): PWAHookReturn {
 
   // Request notification permission
   const requestNotificationPermission = useCallback(async (): Promise<NotificationPermission> => {
-    if (!('Notification' in window)) {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
       throw new Error('Notifications not supported');
     }
 
@@ -202,6 +211,8 @@ export function usePWA(): PWAHookReturn {
 
   // Clear all caches
   const clearCache = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+    
     if ('caches' in window) {
       const cacheNames = await caches.keys();
       await Promise.all(cacheNames.map(name => caches.delete(name)));
@@ -216,8 +227,8 @@ export function usePWA(): PWAHookReturn {
 
   // Update app
   const updateApp = useCallback(async () => {
-    if (!serviceWorkerRegistration) {
-      throw new Error('Service worker not registered');
+    if (typeof window === 'undefined' || !serviceWorkerRegistration) {
+      throw new Error('Service worker not registered or not in browser environment');
     }
 
     const newWorker = serviceWorkerRegistration.waiting || serviceWorkerRegistration.installing;
@@ -253,6 +264,8 @@ export function usePWA(): PWAHookReturn {
 // Utility functions for PWA features
 
 export const checkPWASupport = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
   return (
     'serviceWorker' in navigator &&
     'caches' in window &&
@@ -261,6 +274,8 @@ export const checkPWASupport = (): boolean => {
 };
 
 export const isRunningStandalone = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
     (window.navigator as any).standalone === true
@@ -268,6 +283,8 @@ export const isRunningStandalone = (): boolean => {
 };
 
 export const getInstallPromptDelay = (): number => {
+  if (typeof window === 'undefined') return 0;
+  
   // Show install prompt after user has been active for some time
   const lastPromptTime = localStorage.getItem('pwa-last-prompt');
   const minDelay = 7 * 24 * 60 * 60 * 1000; // 7 days

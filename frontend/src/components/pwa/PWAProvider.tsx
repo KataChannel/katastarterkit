@@ -34,7 +34,8 @@ export function PWAProvider({
   offlineStatusPosition = 'top',
   className = ''
 }: PWAProviderProps) {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  // Fix SSR issue by checking if window is available
+  const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true);
   const [pendingActions, setPendingActions] = useState(0);
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -42,6 +43,8 @@ export function PWAProvider({
 
   // Monitor online status
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
@@ -70,6 +73,8 @@ export function PWAProvider({
 
   // PWA Installation prompt management
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if (!capabilities.canInstall || capabilities.isStandalone) {
       return;
     }
@@ -96,6 +101,8 @@ export function PWAProvider({
 
   // Register service worker and handle updates
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then(registration => {
@@ -162,7 +169,7 @@ export function PWAProvider({
     showInstallPrompt: () => setShowPrompt(true),
     hideInstallPrompt: () => setShowPrompt(false),
     requestNotificationPermission: async () => {
-      if ('Notification' in window) {
+      if (typeof window !== 'undefined' && 'Notification' in window) {
         return await Notification.requestPermission();
       }
       return 'denied';
@@ -240,7 +247,7 @@ export function usePWASync() {
   const { pendingActions, isOnline } = usePWAContext();
   
   const triggerSync = () => {
-    if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       navigator.serviceWorker.ready.then(registration => {
         return (registration as any).sync.register('background-sync');
       }).catch(console.error);

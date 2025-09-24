@@ -18,6 +18,7 @@ import { LoggerModule } from './logger/logger.module';
 import { HealthModule } from './health/health.module';
 import { AiTrainingModule } from './ai-training/ai-training.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { AiModule } from './ai/ai.module';
 import { DataLoaderModule } from './common/data-loaders/data-loader.module';
 import { GraphQLPerformanceModule } from './common/graphql-performance/graphql-performance.module';
 import { CommonServicesModule } from './common/common-services.module';
@@ -104,6 +105,7 @@ import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-per
     HealthModule,
     AiTrainingModule,
     ChatbotModule,
+    AiModule,
     CommonServicesModule,
     RealTimeModule,
     SearchModule,
