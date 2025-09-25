@@ -39,6 +39,7 @@ import { AppResolver } from './app.resolver';
 import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interceptor';
 import { InputSanitizationInterceptor } from './common/interceptors/input-sanitization.interceptor';
 import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-performance.interceptor';
+import { PerformanceInterceptor } from './interceptors/performance.interceptor';
 
 @Module({
   imports: [
@@ -130,6 +131,10 @@ import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-per
     {
       provide: APP_INTERCEPTOR,
       useClass: GraphQLPerformanceInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: PerformanceInterceptor,
     },
   ],
 })

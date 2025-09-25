@@ -16,6 +16,11 @@ export class GraphQLPerformanceInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    // Only intercept GraphQL requests
+    if (context.getType<'graphql'>() !== 'graphql') {
+      return next.handle();
+    }
+    
     const gqlContext = GqlExecutionContext.create(context);
     const info = gqlContext.getInfo();
     const request = gqlContext.getContext().req;

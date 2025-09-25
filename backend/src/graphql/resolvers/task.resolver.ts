@@ -58,6 +58,16 @@ export class TaskResolver {
     return this.taskService.findById(id, userId);
   }
 
+  @Query(() => Task, { name: 'getTask', nullable: true })
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
+  async getTask(
+    @Args('id') id: string,
+    @Context() context: any,
+  ): Promise<any> {
+    const userId = context.req.user.id;
+    return this.taskService.findById(id, userId);
+  }
+
   @Query(() => [Task], { name: 'getSharedTasks' })
   @UseGuards(JwtAuthGuard, RateLimitGuard)
   async getSharedTasks(
@@ -102,7 +112,9 @@ export class TaskResolver {
     const task = await this.taskService.create(input, userId);
     
     // Publish task created event
-    await this.pubSubService.publish('taskCreated', { taskCreated: task });
+    const taskCreatedPayload = { taskCreated: task };
+    console.log('Publishing taskCreated with payload:', taskCreatedPayload);
+    await this.pubSubService.publish('taskCreated', taskCreatedPayload);
     
     // Smart cache invalidation
     await this.cacheInvalidationService.invalidateTaskCache(task.id, userId);
@@ -120,7 +132,9 @@ export class TaskResolver {
     const task = await this.taskService.update(input, userId);
     
     // Publish task updated event
-    await this.pubSubService.publish('taskUpdated', { taskUpdated: task });
+    const taskUpdatedPayload = { taskUpdated: task };
+    console.log('Publishing taskUpdated with payload:', taskUpdatedPayload);
+    await this.pubSubService.publish('taskUpdated', taskUpdatedPayload);
     
     // Create notification if task is completed
     if (input.status === 'COMPLETED') {
@@ -188,7 +202,9 @@ export class TaskResolver {
     );
     
     // Publish comment created event
-    await this.pubSubService.publish('taskCommentCreated', { taskCommentCreated: comment });
+    const commentCreatedPayload = { taskCommentCreated: comment };
+    console.log('Publishing taskCommentCreated with payload:', commentCreatedPayload);
+    await this.pubSubService.publish('taskCommentCreated', commentCreatedPayload);
     
     // Smart cache invalidation for comments
     await this.cacheInvalidationService.invalidateCommentCache(input.taskId, userId);
@@ -216,7 +232,10 @@ export class TaskResolver {
   // Subscriptions
   @Subscription(() => Task, { 
     name: 'taskCreated',
-    resolve: (payload) => payload.taskCreated,
+    resolve: (payload) => {
+      console.log('taskCreated resolve payload:', payload);
+      return payload?.taskCreated || null;
+    },
   })
   taskCreated() {
     return this.pubSubService.asyncIterator('taskCreated');
@@ -224,7 +243,10 @@ export class TaskResolver {
 
   @Subscription(() => Task, { 
     name: 'taskUpdated',
-    resolve: (payload) => payload.taskUpdated,
+    resolve: (payload) => {
+      console.log('taskUpdated resolve payload:', payload);
+      return payload?.taskUpdated || null;
+    },
   })
   taskUpdated() {
     return this.pubSubService.asyncIterator('taskUpdated');
@@ -232,7 +254,10 @@ export class TaskResolver {
 
   @Subscription(() => TaskComment, { 
     name: 'taskCommentCreated',
-    resolve: (payload) => payload.taskCommentCreated,
+    resolve: (payload) => {
+      console.log('taskCommentCreated resolve payload:', payload);
+      return payload?.taskCommentCreated || null;
+    },
   })
   taskCommentCreated() {
     return this.pubSubService.asyncIterator('taskCommentCreated');

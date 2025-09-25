@@ -28,6 +28,23 @@ export interface AuditLogDto {
   metadata?: any;
 }
 
+export interface PerformanceAuditLogDto extends AuditLogDto {
+  method?: string;
+  endpoint?: string;
+  success?: boolean;
+  errorMessage?: string;
+  statusCode?: number;
+  responseTime?: number;
+  requestSize?: number;
+  responseSize?: number;
+  memoryUsage?: number;
+  cpuUsage?: number;
+  dbQueryTime?: number;
+  dbQueryCount?: number;
+  performanceData?: any;
+  correlationId?: string;
+}
+
 @Injectable()
 export class SecurityAuditService {
   private readonly logger = new Logger(SecurityAuditService.name);
@@ -99,6 +116,72 @@ export class SecurityAuditService {
       this.logger.error(`Failed to log audit: ${error.message}`, {
         action: auditDto.action,
         userId: auditDto.userId,
+        error: error.message,
+      });
+    }
+  }
+
+  async logAuditWithPerformance(auditDto: PerformanceAuditLogDto): Promise<void> {
+    try {
+      this.logger.debug(`Performance audit log: ${auditDto.action} by user ${auditDto.userId} - ${auditDto.responseTime}ms`);
+
+      await this.prisma.auditLog.create({
+        data: {
+          userId: auditDto.userId,
+          action: auditDto.action,
+          resourceType: auditDto.resourceType || 'api_call',
+          resourceId: auditDto.resourceId,
+          method: auditDto.method,
+          endpoint: auditDto.endpoint,
+          oldValues: auditDto.oldValue,
+          newValues: auditDto.newValue,
+          details: auditDto.details || {},
+          success: auditDto.success ?? true,
+          errorMessage: auditDto.errorMessage,
+          
+          // Performance metrics
+          responseTime: auditDto.responseTime,
+          requestSize: auditDto.requestSize,
+          responseSize: auditDto.responseSize,
+          dbQueryTime: auditDto.dbQueryTime,
+          dbQueryCount: auditDto.dbQueryCount,
+          memoryUsage: auditDto.memoryUsage,
+          cpuUsage: auditDto.cpuUsage,
+          statusCode: auditDto.statusCode,
+          performanceData: auditDto.performanceData,
+          
+          // Standard audit fields
+          ipAddress: auditDto.ipAddress,
+          userAgent: auditDto.userAgent,
+          sessionId: auditDto.sessionId,
+          correlationId: auditDto.correlationId,
+          sessionInfo: auditDto.metadata || {},
+        },
+      });
+
+      // Log performance alerts if thresholds are exceeded
+      if (auditDto.responseTime && auditDto.responseTime > 5000) {
+        this.logger.warn(`Very slow API response detected: ${auditDto.endpoint} took ${auditDto.responseTime}ms`, {
+          userId: auditDto.userId,
+          endpoint: auditDto.endpoint,
+          responseTime: auditDto.responseTime,
+          memoryUsage: auditDto.memoryUsage,
+        });
+      }
+
+      if (auditDto.memoryUsage && auditDto.memoryUsage > 100) {
+        this.logger.warn(`High memory usage detected: ${auditDto.memoryUsage}MB`, {
+          userId: auditDto.userId,
+          endpoint: auditDto.endpoint,
+          memoryUsage: auditDto.memoryUsage,
+        });
+      }
+
+    } catch (error) {
+      this.logger.error(`Failed to log performance audit: ${error.message}`, {
+        action: auditDto.action,
+        userId: auditDto.userId,
+        endpoint: auditDto.endpoint,
         error: error.message,
       });
     }

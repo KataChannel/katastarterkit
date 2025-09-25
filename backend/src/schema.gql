@@ -304,6 +304,7 @@ type Query {
   getPosts(filters: PostFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPosts!
   getPublishedPages(pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
   getSharedTasks(filters: TaskFilterInput): [Task!]!
+  getTask(id: String!): Task
   getTaskById(id: ID!): Task!
   getTasks(filters: TaskFilterInput): [Task!]!
   getTasksPaginated(filters: TaskFilterInput, limit: Int! = 10, page: Int! = 1): TasksPaginatedResult!

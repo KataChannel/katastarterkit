@@ -219,6 +219,19 @@ model AuditLog {
   success       Boolean  @default(true)
   errorMessage  String?  // Error message if action failed
   
+  // Performance Metrics
+  responseTime  Int?     // Response time in milliseconds
+  requestSize   Int?     // Request payload size in bytes
+  responseSize  Int?     // Response payload size in bytes
+  dbQueryTime   Int?     // Database query time in milliseconds
+  dbQueryCount  Int?     // Number of database queries executed
+  memoryUsage   Float?   // Memory usage in MB
+  cpuUsage      Float?   // CPU usage percentage
+  statusCode    Int?     // HTTP status code
+  
+  // Performance Context
+  performanceData Json?  // Additional performance metrics and traces
+  
   // Metadata
   correlationId String?  // For tracking related events
   sessionInfo   Json?    // Session information at time of event
@@ -233,6 +246,9 @@ model AuditLog {
   @@index([resourceType])
   @@index([timestamp])
   @@index([correlationId])
+  @@index([endpoint])
+  @@index([responseTime])
+  @@index([statusCode])
   @@map("audit_logs")
 }
 
