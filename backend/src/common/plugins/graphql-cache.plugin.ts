@@ -9,12 +9,14 @@ export class GraphQLCachePlugin implements ApolloServerPlugin {
   constructor(private readonly cacheService: GraphQLCacheService) {}
 
   async requestDidStart(): Promise<GraphQLRequestListener<any>> {
+    const cacheService = this.cacheService; // Capture in closure
+    
     return {
       async didResolveOperation(requestContext) {
         const { request } = requestContext;
         
         // Skip caching if not a query or if it shouldn't be cached
-        if (!request.query || !this.cacheService.shouldCacheQuery(request.query)) {
+        if (!request.query || !cacheService.shouldCacheQuery(request.query)) {
           return;
         }
 
@@ -22,7 +24,7 @@ export class GraphQLCachePlugin implements ApolloServerPlugin {
         const userId = requestContext.contextValue?.req?.user?.id || 'anonymous';
         
         // Generate cache key
-        const cacheKey = this.cacheService.generateCacheKey(
+        const cacheKey = cacheService.generateCacheKey(
           request.query,
           request.variables,
           request.operationName,
@@ -30,7 +32,7 @@ export class GraphQLCachePlugin implements ApolloServerPlugin {
         );
 
         // Check for cached result
-        const cachedResult = await this.cacheService.getCachedResult(cacheKey);
+        const cachedResult = await cacheService.getCachedResult(cacheKey);
         
         if (cachedResult) {
           // Return cached response
@@ -60,8 +62,8 @@ export class GraphQLCachePlugin implements ApolloServerPlugin {
           
           // Cache successful responses
           if (result && !result.errors) {
-            const ttl = this.cacheService.getTTLForQuery(requestContext.request.query || '');
-            await this.cacheService.setCachedResult(cacheKey, result, ttl);
+            const ttl = cacheService.getTTLForQuery(requestContext.request.query || '');
+            await cacheService.setCachedResult(cacheKey, result, ttl);
           }
         }
       },

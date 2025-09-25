@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import * as crypto from 'crypto';
@@ -10,19 +10,19 @@ export interface GraphQLCacheOptions {
 
 @Injectable()
 export class GraphQLCacheService {
-  private readonly redis: Redis;
   private readonly defaultTTL = 30000; // 30 seconds
   private readonly keyPrefix = 'gql:';
 
-  constructor(private readonly configService: ConfigService) {
-    this.redis = new Redis({
-      host: this.configService.get('REDIS_HOST', 'localhost'),
-      port: this.configService.get('REDIS_PORT', 6379),
-      password: this.configService.get('REDIS_PASSWORD'),
-      db: this.configService.get('REDIS_DB', 1),
-      keyPrefix: this.keyPrefix,
-      maxRetriesPerRequest: 3,
-    });
+  constructor(
+    @Inject(Redis) private readonly redis: Redis,
+    private readonly configService: ConfigService
+  ) {}
+
+  /**
+   * Add key prefix for GraphQL cache keys
+   */
+  private addPrefix(key: string): string {
+    return `${this.keyPrefix}${key}`;
   }
 
   /**
@@ -54,7 +54,7 @@ export class GraphQLCacheService {
    */
   async getCachedResult(cacheKey: string): Promise<any | null> {
     try {
-      const cached = await this.redis.get(cacheKey);
+      const cached = await this.redis.get(this.addPrefix(cacheKey));
       return cached ? JSON.parse(cached) : null;
     } catch (error) {
       console.warn('Redis cache get error:', error);
@@ -77,7 +77,7 @@ export class GraphQLCacheService {
       }
 
       await this.redis.setex(
-        cacheKey,
+        this.addPrefix(cacheKey),
         Math.floor(ttl / 1000), // Convert to seconds
         JSON.stringify(result)
       );
@@ -156,7 +156,7 @@ export class GraphQLCacheService {
     try {
       const keys = await this.redis.keys(`${this.keyPrefix}*${pattern}*`);
       if (keys.length > 0) {
-        await this.redis.del(...keys.map(key => key.replace(this.keyPrefix, '')));
+        await this.redis.del(...keys);
       }
     } catch (error) {
       console.warn('Redis cache clear error:', error);
