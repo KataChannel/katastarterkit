@@ -17,7 +17,6 @@ export const DynamicTaskDemo: React.FC<DynamicTaskDemoProps> = ({ onTaskCreated 
   let dynamicHooks;
   try {
     dynamicHooks = useDynamicTasks();
-    console.log('✅ Dynamic hooks loaded:', dynamicHooks); 
   } catch (error) {
     console.error('❌ Dynamic hooks error:', error);
     return (

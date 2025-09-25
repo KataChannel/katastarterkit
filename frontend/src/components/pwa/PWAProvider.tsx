@@ -106,7 +106,7 @@ export function PWAProvider({
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then(registration => {
-          console.log('Service Worker registered successfully:', registration);
+          // console.log('Service Worker registered successfully:', registration);
           
           // Listen for updates
           registration.addEventListener('updatefound', () => {

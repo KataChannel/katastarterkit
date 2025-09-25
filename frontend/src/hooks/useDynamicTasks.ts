@@ -41,9 +41,9 @@ export function useDynamicTasks() {
   // Handle data loading and errors with useEffect instead of deprecated callbacks
   useEffect(() => {
     if (allTasks) {
-      console.log('✅ Dynamic tasks loaded:', allTasks);
-      console.log('✅ Is array?', Array.isArray(allTasks));
-      console.log('✅ Type:', typeof allTasks);
+      // console.log('✅ Dynamic tasks loaded:', allTasks);
+      // console.log('✅ Is array?', Array.isArray(allTasks));
+      // console.log('✅ Type:', typeof allTasks);
     }
   }, [allTasks]);
 

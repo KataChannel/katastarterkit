@@ -85,7 +85,7 @@ export function usePWA(): PWAHookReturn {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
         .then((registration) => {
-          console.log('Service Worker registered successfully:', registration);
+          // console.log('Service Worker registered successfully:', registration);
           setServiceWorkerRegistration(registration);
           setCapabilities(prev => ({ ...prev, serviceWorkerReady: true }));
 
