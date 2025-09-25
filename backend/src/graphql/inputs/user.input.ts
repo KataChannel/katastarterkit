@@ -1,9 +1,11 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsPhoneNumber, IsString, IsBoolean, IsEnum } from 'class-validator';
-import { AuthProvider } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 
 // Import to ensure AuthProvider enum is registered
 import '../models/auth-extended.model';
+
+const AuthProvider = $Enums.AuthProvider;
 
 @InputType()
 export class RegisterUserInput {
@@ -79,7 +81,7 @@ export class SocialLoginInput {
 
   @Field(() => AuthProvider)
   @IsEnum(AuthProvider)
-  provider: AuthProvider;
+  provider: $Enums.AuthProvider;
 
   @Field({ nullable: true })
   @IsOptional()

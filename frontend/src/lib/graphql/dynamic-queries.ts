@@ -15,7 +15,7 @@ export class DynamicGraphQLGenerator {
     const queries = {
       // GET ALL
       [`GET_${modelName.toUpperCase()}S`]: gql`
-        query Get${modelName}s($filters: JSON) {
+        query Get${modelName}s($filters: ${modelName}FilterInput) {
           get${modelName}s(filters: $filters) {
             ${fieldsStr}
           }
@@ -24,7 +24,7 @@ export class DynamicGraphQLGenerator {
 
       // GET ALL PAGINATED
       [`GET_${modelName.toUpperCase()}S_PAGINATED`]: gql`
-        query Get${modelName}sPaginated($filters: JSON) {
+        query Get${modelName}sPaginated($filters: ${modelName}FilterInput) {
           get${modelName}sPaginated(filters: $filters) {
             data {
               ${fieldsStr}

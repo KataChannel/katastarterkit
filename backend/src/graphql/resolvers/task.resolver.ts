@@ -232,9 +232,13 @@ export class TaskResolver {
   // Subscriptions
   @Subscription(() => Task, { 
     name: 'taskCreated',
+    filter: (payload) => {
+      console.log('taskCreated filter payload:', payload);
+      return payload && payload.taskCreated !== undefined;
+    },
     resolve: (payload) => {
       console.log('taskCreated resolve payload:', payload);
-      return payload?.taskCreated || null;
+      return payload.taskCreated;
     },
   })
   taskCreated() {
@@ -243,9 +247,13 @@ export class TaskResolver {
 
   @Subscription(() => Task, { 
     name: 'taskUpdated',
+    filter: (payload) => {
+      console.log('taskUpdated filter payload:', payload);
+      return payload && payload.taskUpdated !== undefined;
+    },
     resolve: (payload) => {
       console.log('taskUpdated resolve payload:', payload);
-      return payload?.taskUpdated || null;
+      return payload.taskUpdated;
     },
   })
   taskUpdated() {
@@ -254,9 +262,13 @@ export class TaskResolver {
 
   @Subscription(() => TaskComment, { 
     name: 'taskCommentCreated',
+    filter: (payload) => {
+      console.log('taskCommentCreated filter payload:', payload);
+      return payload && payload.taskCommentCreated !== undefined;
+    },
     resolve: (payload) => {
       console.log('taskCommentCreated resolve payload:', payload);
-      return payload?.taskCommentCreated || null;
+      return payload.taskCommentCreated;
     },
   })
   taskCommentCreated() {
