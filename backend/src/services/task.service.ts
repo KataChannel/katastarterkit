@@ -311,6 +311,57 @@ export class TaskService {
     });
   }
 
+  async findPaginated(userId: string, page: number, limit: number, filters?: TaskFilterInput) {
+    const where: any = { userId };
+    
+    if (filters?.category) where.category = filters.category;
+    if (filters?.priority) where.priority = filters.priority;
+    if (filters?.status) where.status = filters.status;
+    
+    if (filters?.search) {
+      where.OR = [
+        { title: { contains: filters.search, mode: 'insensitive' } },
+        { description: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+    
+    if (filters?.dueBefore) where.dueDate = { lte: new Date(filters.dueBefore) };
+    if (filters?.dueAfter) where.dueDate = { gte: new Date(filters.dueAfter) };
+
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      this.prisma.task.findMany({
+        where,
+        include: {
+          user: true,
+          media: true,
+          shares: {
+            include: {
+              sharedByUser: true,
+              sharedWithUser: true,
+            },
+          },
+          comments: {
+            include: {
+              user: true,
+            },
+          },
+        },
+        orderBy: [
+          { priority: 'desc' },
+          { dueDate: 'asc' },
+          { createdAt: 'desc' },
+        ],
+        skip,
+        take: limit,
+      }),
+      this.prisma.task.count({ where }),
+    ]);
+
+    return { data, total };
+  }
+
   async getTaskProgress(taskId: string, userId: string) {
     const task = await this.findById(taskId, userId);
     

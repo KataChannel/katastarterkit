@@ -267,6 +267,8 @@ export class AuthService {
         data: {
           userId: user.id,
           action: 'LOGIN',
+          resourceType: 'user',
+          resourceId: user.id,
           details: `Google login for ${user.email}`,
           ipAddress: null,
           userAgent: null
@@ -378,6 +380,8 @@ export class AuthService {
       data: {
         userId: user.id,
         action: 'FACEBOOK_LOGIN',
+        resourceType: 'user',
+        resourceId: user.id,
         details: {
           facebookId,
           email: facebookUser.email,

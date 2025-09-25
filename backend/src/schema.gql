@@ -107,6 +107,9 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+"""JSON custom scalar type"""
+scalar JSON
+
 """
 The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -223,6 +226,15 @@ type PaginatedPosts {
   meta: PaginationMeta!
 }
 
+type PaginationInfo {
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
+}
+
 input PaginationInput {
   limit: Int! = 10
   page: Int! = 1
@@ -294,6 +306,7 @@ type Query {
   getSharedTasks(filters: TaskFilterInput): [Task!]!
   getTaskById(id: ID!): Task!
   getTasks(filters: TaskFilterInput): [Task!]!
+  getTasksPaginated(filters: TaskFilterInput, limit: Int! = 10, page: Int! = 1): TasksPaginatedResult!
   getUserById(id: String!): User!
   getUsers: [User!]!
 
@@ -468,6 +481,11 @@ enum TaskStatus {
   PENDING
 }
 
+type TasksPaginatedResult {
+  data: [Task!]!
+  meta: PaginationInfo!
+}
+
 input UpdateCommentInput {
   content: String
 }
@@ -535,6 +553,7 @@ type User {
   lastName: String
   lockedUntil: DateTime
   phone: String
+  role: UserRole!
   roleType: UserRole!
   updatedAt: DateTime!
   username: String!

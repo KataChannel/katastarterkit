@@ -23,6 +23,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { GrokModule } from '../grok/grok.module';
 import { MinioModule } from '../minio/minio.module';
+import { JSONScalar } from './scalars/json.scalar';
 
 @Module({
   imports: [
@@ -32,6 +33,9 @@ import { MinioModule } from '../minio/minio.module';
     MinioModule,
   ],
   providers: [
+    // Scalars
+    JSONScalar,
+    
     // Resolvers
     UserResolver,
     PostResolver,

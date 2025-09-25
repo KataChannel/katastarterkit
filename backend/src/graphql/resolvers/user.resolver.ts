@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Context, Subscription } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, Parent } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
@@ -143,6 +143,12 @@ export class UserResolver {
   async deleteUser(@Args('id') id: string): Promise<boolean> {
     await this.userService.delete(id);
     return true;
+  }
+
+  // Field resolvers
+  @ResolveField('role', () => $Enums.UserRoleType)
+  async role(@Parent() user: User): Promise<$Enums.UserRoleType> {
+    return user.roleType;
   }
 
   // Subscriptions

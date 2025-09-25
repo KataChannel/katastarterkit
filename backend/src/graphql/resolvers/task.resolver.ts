@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, Parent, ID } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context, Subscription, ResolveField, Parent, ID, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
@@ -9,6 +9,7 @@ import { TaskShare } from '../models/task-share.model';
 import { TaskComment } from '../models/task-comment.model';
 import { Notification } from '../models/notification.model';
 import { User } from '../models/user.model';
+import { TasksPaginatedResult } from '../models/paginated-result.model';
 import { CreateTaskInput, UpdateTaskInput, TaskFilterInput } from '../inputs/task.input';
 import { ShareTaskInput, UpdateTaskShareInput } from '../inputs/task-share.input';
 import { CreateTaskCommentInput, UpdateTaskCommentInput } from '../inputs/task-comment.input';
@@ -65,6 +66,29 @@ export class TaskResolver {
   ): Promise<any[]> {
     const userId = context.req.user.id;
     return this.taskService.findSharedTasks(userId, filters);
+  }
+
+  @Query(() => TasksPaginatedResult, { name: 'getTasksPaginated' })
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
+  async getTasksPaginated(
+    @Context() context: any,
+    @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+    @Args('filters', { nullable: true }) filters?: TaskFilterInput,
+  ): Promise<TasksPaginatedResult> {
+    const userId = context.req.user.id;
+    const result = await this.taskService.findPaginated(userId, page, limit, filters);
+    return {
+      data: result.data as unknown as Task[],
+      meta: {
+        total: result.total,
+        page,
+        limit,
+        totalPages: Math.ceil(result.total / limit),
+        hasNextPage: page < Math.ceil(result.total / limit),
+        hasPrevPage: page > 1,
+      },
+    };
   }
 
   // Mutations
@@ -190,17 +214,26 @@ export class TaskResolver {
   }
 
   // Subscriptions
-  @Subscription(() => Task, { name: 'taskCreated' })
+  @Subscription(() => Task, { 
+    name: 'taskCreated',
+    resolve: (payload) => payload.taskCreated,
+  })
   taskCreated() {
     return this.pubSubService.asyncIterator('taskCreated');
   }
 
-  @Subscription(() => Task, { name: 'taskUpdated' })
+  @Subscription(() => Task, { 
+    name: 'taskUpdated',
+    resolve: (payload) => payload.taskUpdated,
+  })
   taskUpdated() {
     return this.pubSubService.asyncIterator('taskUpdated');
   }
 
-  @Subscription(() => TaskComment, { name: 'taskCommentCreated' })
+  @Subscription(() => TaskComment, { 
+    name: 'taskCommentCreated',
+    resolve: (payload) => payload.taskCommentCreated,
+  })
   taskCommentCreated() {
     return this.pubSubService.asyncIterator('taskCommentCreated');
   }

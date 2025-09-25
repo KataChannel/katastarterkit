@@ -125,7 +125,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   return (
     <>
-    <Link href={`/todos/${task.id}`}>
+    <Link href={`/admin/todos/${task.id}`}>
       <div className={`
         group block bg-white rounded-lg border-2 p-4 hover:shadow-md transition-all duration-200 cursor-pointer
         ${getStatusColor(task.status)}
