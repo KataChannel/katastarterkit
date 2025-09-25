@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { Comment as GraphQLComment } from '../models/comment.model';
 import { User } from '../models/user.model';
 import { Post } from '../models/post.model';
-import { UserRole } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 import { CreateCommentInput, UpdateCommentInput } from '../inputs/comment.input';
 import { CommentService } from '../../services/comment.service';
 import { UserService } from '../../services/user.service';
@@ -58,7 +58,7 @@ export class CommentResolver {
     const comment = await this.commentService.findById(id);
     
     // Only comment author or admin can update
-    if (comment.userId !== currentUser.id && currentUser.role !== UserRole.ADMIN) {
+    if (comment.userId !== currentUser.id && currentUser.roleType !== $Enums.UserRoleType.ADMIN) {
       throw new Error('Unauthorized');
     }
     
@@ -75,7 +75,7 @@ export class CommentResolver {
     const comment = await this.commentService.findById(id);
     
     // Only comment author or admin can delete
-    if (comment.userId !== currentUser.id && currentUser.role !== UserRole.ADMIN) {
+    if (comment.userId !== currentUser.id && currentUser.roleType !== $Enums.UserRoleType.ADMIN) {
       throw new Error('Unauthorized');
     }
     

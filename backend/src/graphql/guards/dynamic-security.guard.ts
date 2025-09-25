@@ -1,14 +1,14 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Reflector } from '@nestjs/core';
-import { UserRole } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 
 // Security configuration for dynamic operations
 export interface DynamicSecurityConfig {
   modelName: string;
   allowedOperations?: Array<'CREATE' | 'READ' | 'UPDATE' | 'DELETE' | 'BULK_CREATE' | 'BULK_UPDATE' | 'BULK_DELETE'>;
   roleRequirements?: {
-    [key in 'CREATE' | 'READ' | 'UPDATE' | 'DELETE' | 'BULK_CREATE' | 'BULK_UPDATE' | 'BULK_DELETE']?: UserRole[];
+    [key in 'CREATE' | 'READ' | 'UPDATE' | 'DELETE' | 'BULK_CREATE' | 'BULK_UPDATE' | 'BULK_DELETE']?: $Enums.UserRoleType[];
   };
   ownershipCheck?: boolean; // Check if user owns the record
   maxBulkSize?: number; // Maximum number of items in bulk operations
@@ -389,11 +389,11 @@ export const ModelSecurityConfigs: { [key: string]: DynamicSecurityConfig } = {
     modelName: 'User',
     allowedOperations: ['CREATE', 'READ', 'UPDATE'],
     roleRequirements: {
-      CREATE: [UserRole.ADMIN, UserRole.MODERATOR],
-      BULK_CREATE: [UserRole.ADMIN],
-      BULK_UPDATE: [UserRole.ADMIN],
-      BULK_DELETE: [UserRole.ADMIN],
-      DELETE: [UserRole.ADMIN]
+      CREATE: [$Enums.UserRoleType.ADMIN],
+      BULK_CREATE: [$Enums.UserRoleType.ADMIN],
+      BULK_UPDATE: [$Enums.UserRoleType.ADMIN],
+      BULK_DELETE: [$Enums.UserRoleType.ADMIN],
+      DELETE: [$Enums.UserRoleType.ADMIN]
     },
     maxBulkSize: 50,
     restrictedFields: {
@@ -407,11 +407,11 @@ export const ModelSecurityConfigs: { [key: string]: DynamicSecurityConfig } = {
     modelName: 'Post',
     allowedOperations: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'BULK_CREATE', 'BULK_UPDATE'],
     roleRequirements: {
-      CREATE: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN],
-      UPDATE: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN],
-      DELETE: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN],
-      BULK_CREATE: [UserRole.MODERATOR, UserRole.ADMIN],
-      BULK_UPDATE: [UserRole.MODERATOR, UserRole.ADMIN]
+      CREATE: [$Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN],
+      UPDATE: [$Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN],
+      DELETE: [$Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN],
+      BULK_CREATE: [$Enums.UserRoleType.ADMIN],
+      BULK_UPDATE: [$Enums.UserRoleType.ADMIN]
     },
     maxBulkSize: 20,
     ownershipCheck: true
@@ -421,10 +421,10 @@ export const ModelSecurityConfigs: { [key: string]: DynamicSecurityConfig } = {
     modelName: 'Task',
     allowedOperations: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'BULK_CREATE', 'BULK_UPDATE', 'BULK_DELETE'],
     roleRequirements: {
-      READ: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN],
-      CREATE: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN],
-      UPDATE: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN],
-      DELETE: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN]
+      READ: [$Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN, $Enums.UserRoleType.ADMIN],
+      CREATE: [$Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN, $Enums.UserRoleType.ADMIN],
+      UPDATE: [$Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN, $Enums.UserRoleType.ADMIN],
+      DELETE: [$Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN, $Enums.UserRoleType.ADMIN]
     },
     maxBulkSize: 100,
     ownershipCheck: true
@@ -434,9 +434,9 @@ export const ModelSecurityConfigs: { [key: string]: DynamicSecurityConfig } = {
     modelName: 'Comment',
     allowedOperations: ['CREATE', 'READ', 'UPDATE', 'DELETE'],
     roleRequirements: {
-      CREATE: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN],
-      UPDATE: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN],
-      DELETE: [UserRole.USER, UserRole.MODERATOR, UserRole.ADMIN]
+      CREATE: [$Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN, $Enums.UserRoleType.ADMIN],
+      UPDATE: [$Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN, $Enums.UserRoleType.ADMIN],
+      DELETE: [$Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN, $Enums.UserRoleType.ADMIN]
     },
     maxBulkSize: 10,
     restrictedFields: {

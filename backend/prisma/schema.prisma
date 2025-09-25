@@ -11,10 +11,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  USER
+enum UserRoleType {
   ADMIN
-  MODERATOR
+  USER
+  GUEST
 }
 
 enum AuthProvider {
@@ -80,7 +80,7 @@ model User {
   firstName   String?
   lastName    String?
   avatar      String?
-  role        UserRole @default(USER)
+  roleType    UserRoleType @default(USER)
   isActive    Boolean  @default(true)
   isVerified  Boolean  @default(false)
   
@@ -98,6 +98,11 @@ model User {
   verificationTokens VerificationToken[]
   sessions           UserSession[]
   auditLogs          AuditLog[]
+  
+  // RBAC Relations
+  userRoles          UserRoleAssignment[]
+  userPermissions    UserPermission[]
+  resourceAccesses   ResourceAccess[]
   
   // Content relations
   posts         Post[]        @relation("PostAuthor")
@@ -117,9 +122,14 @@ model User {
   trainingData      TrainingData[]
   chatConversations ChatConversation[]
 
+  // Security relations
+  mfaSettings       UserMfaSettings?
+  devices           UserDevice[]
+  securityEvents    SecurityEvent[]
+
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
-  @@index([role])
+  @@index([roleType])
   @@index([createdAt])
   @@index([lastLoginAt])
   @@map("users")
@@ -157,35 +167,72 @@ model VerificationToken {
 }
 
 model UserSession {
-  id          String    @id @default(uuid())
-  userId      String
-  sessionId   String    @unique
-  refreshToken String   @unique
-  ipAddress   String?
-  userAgent   String?
-  isActive    Boolean   @default(true)
-  expiresAt   DateTime
+  id           String    @id @default(uuid())
+  userId       String
+  sessionId    String    @unique
+  refreshToken String?   @unique
+  deviceId     String?   // Link to user device
+  ipAddress    String?
+  userAgent    String?
+  location     String?   // Geographic location
+  isActive     Boolean   @default(true)
+  expiresAt    DateTime
+  lastActivity DateTime  @default(now())
+  
+  // MFA
+  mfaVerified  Boolean   @default(false)
+  mfaMethod    String?   // Method used for MFA verification
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device UserDevice? @relation(fields: [deviceId], references: [deviceId], onDelete: SetNull)
 
+  @@index([deviceId])
+  @@index([lastActivity])
   @@map("user_sessions")
 }
 
 model AuditLog {
-  id        String   @id @default(uuid())
-  userId    String?
-  action    String
-  details   Json?
-  ipAddress String?
-  userAgent String?
+  id            String   @id @default(uuid())
+  userId        String?
+  sessionId     String?
   
-  createdAt DateTime @default(now())
+  // Event Details
+  action        String   // Action performed (login, logout, create, update, delete, etc.)
+  resourceType  String   // Type of resource affected (user, task, project, etc.)
+  resourceId    String?  // ID of the affected resource
+  
+  // Request Details
+  ipAddress     String?
+  userAgent     String?
+  method        String?  // HTTP method
+  endpoint      String?  // API endpoint
+  
+  // Event Data
+  oldValues     Json?    // Previous values (for updates)
+  newValues     Json?    // New values (for creates/updates)
+  details       Json?    // Additional event details
+  
+  // Outcome
+  success       Boolean  @default(true)
+  errorMessage  String?  // Error message if action failed
+  
+  // Metadata
+  correlationId String?  // For tracking related events
+  sessionInfo   Json?    // Session information at time of event
+  
+  // Timestamps
+  timestamp     DateTime @default(now())
+  createdAt     DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  @@index([action])
+  @@index([resourceType])
+  @@index([timestamp])
+  @@index([correlationId])
   @@map("audit_logs")
 }
 
@@ -765,4 +812,343 @@ model PageBlock {
   // Indexing for performance
   @@index([pageId, order])
   @@index([type])
+}
+
+// MFA and Security Models
+model UserMfaSettings {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  
+  // TOTP Settings
+  totpEnabled             Boolean  @default(false)
+  totpSecret              String?  // Encrypted TOTP secret
+  
+  // SMS Settings
+  smsEnabled              Boolean  @default(false)
+  smsPhoneNumber          String?  // Encrypted phone number
+  
+  // Email Settings
+  emailEnabled            Boolean  @default(false)
+  
+  // Hardware Token Settings
+  hardwareTokenEnabled    Boolean  @default(false)
+  
+  // Backup Codes
+  backupCodes             String?  // Encrypted backup codes JSON
+  backupCodesGenerated    Boolean  @default(false)
+  backupCodesUsed         Int      @default(0)
+  
+  // Emergency Settings
+  emergencyContactEnabled Boolean  @default(false)
+  emergencyContact        String?  // Encrypted emergency contact
+  
+  // Preferences
+  preferredMethod         String   @default("totp") // totp, sms, email, hardware
+  
+  // Timestamps
+  enabledAt               DateTime?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  // Relationships
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+model UserDevice {
+  id           String    @id @default(cuid())
+  userId       String
+  deviceId     String    @unique // Generated device identifier
+  deviceName   String    // User-friendly device name
+  deviceType   String    // mobile, desktop, tablet, unknown
+  browser      String?   // Browser information
+  os           String?   // Operating system
+  ipAddress    String    // Last known IP address
+  location     String?   // Geographic location (city, country)
+  isTrusted    Boolean   @default(false)
+  
+  // Security
+  isActive     Boolean   @default(true)
+  lastUsed     DateTime  @default(now())
+  
+  // Timestamps
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  // Relationships
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions     UserSession[]
+  
+  @@index([userId])
+  @@index([deviceId])
+  @@index([lastUsed])
+}
+
+
+
+model SecurityEvent {
+  id              String    @id @default(cuid())
+  userId          String?
+  sessionId       String?
+  
+  // Event Classification
+  eventType       String    // login_attempt, mfa_failure, suspicious_activity, etc.
+  severity        String    // low, medium, high, critical
+  category        String    // authentication, authorization, data_access, etc.
+  
+  // Event Details
+  description     String
+  details         Json?     // Detailed event information
+  
+  // Source Information
+  ipAddress       String
+  userAgent       String?
+  location        String?   // Geographic location
+  
+  // Risk Assessment
+  riskScore       Float?    // Calculated risk score (0-1)
+  isBlocked       Boolean   @default(false)
+  requiresAction  Boolean   @default(false)
+  
+  // Resolution
+  isResolved      Boolean   @default(false)
+  resolvedBy      String?   // User ID who resolved the event
+  resolvedAt      DateTime?
+  resolution      String?   // Resolution details
+  
+  // Metadata
+  correlationId   String?   // For tracking related events
+  parentEventId   String?   // For linked events
+  
+  // Timestamps
+  detectedAt      DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relationships
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  parentEvent     SecurityEvent? @relation("SecurityEventHierarchy", fields: [parentEventId], references: [id], onDelete: SetNull)
+  childEvents     SecurityEvent[] @relation("SecurityEventHierarchy")
+  
+  @@index([userId])
+  @@index([eventType])
+  @@index([severity])
+  @@index([detectedAt])
+  @@index([isResolved])
+  @@index([correlationId])
+  @@index([parentEventId])
+}
+
+// RBAC (Role-Based Access Control) Models
+model Role {
+  id           String    @id @default(cuid())
+  name         String    @unique
+  displayName  String    // User-friendly role name
+  description  String?
+  
+  // Hierarchy
+  parentId     String?
+  parent       Role?     @relation("RoleHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Role[]    @relation("RoleHierarchy")
+  
+  // Role Properties
+  isSystemRole Boolean   @default(false) // System roles cannot be deleted
+  isActive     Boolean   @default(true)
+  priority     Int       @default(0) // Higher priority roles override lower ones
+  
+  // Metadata
+  metadata     Json?     // Additional role configuration
+  
+  // Timestamps
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  // Relationships
+  permissions  RolePermission[]
+  userRoles    UserRoleAssignment[]
+  
+  @@index([name])
+  @@index([parentId])
+  @@index([isActive])
+  @@index([priority])
+}
+
+model Permission {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  displayName   String    // User-friendly permission name
+  description   String?
+  
+  // Permission Details
+  resource      String    // Resource type (user, task, project, etc.)
+  action        String    // Action (create, read, update, delete, etc.)
+  scope         String?   // Scope limitation (own, team, organization, global)
+  
+  // Permission Properties
+  isSystemPerm  Boolean   @default(false) // System permissions cannot be deleted
+  isActive      Boolean   @default(true)
+  category      String    @default("general") // Permission category for organization
+  
+  // Conditions (JSON-based conditions for dynamic permissions)
+  conditions    Json?     // Dynamic permission conditions
+  
+  // Metadata
+  metadata      Json?     // Additional permission configuration
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relationships
+  rolePermissions RolePermission[]
+  userPermissions UserPermission[]
+  
+  @@unique([resource, action, scope])
+  @@index([resource])
+  @@index([action])
+  @@index([category])
+  @@index([isActive])
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  
+  // Permission Configuration
+  effect       String     @default("allow") // allow, deny
+  conditions   Json?      // Additional conditions for this role-permission pair
+  
+  // Metadata
+  grantedBy    String?    // User ID who granted this permission
+  grantedAt    DateTime   @default(now())
+  expiresAt    DateTime?  // Optional expiration
+  
+  // Timestamps
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  // Relationships
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@index([effect])
+  @@index([expiresAt])
+}
+
+model UserRoleAssignment {
+  id        String    @id @default(cuid())
+  userId    String
+  roleId    String
+  
+  // Role Assignment Properties
+  effect    String    @default("allow") // allow, deny
+  scope     String?   // Scope limitation for this user-role assignment
+  
+  // Assignment Details
+  assignedBy String?  // User ID who assigned this role
+  assignedAt DateTime @default(now())
+  expiresAt  DateTime? // Optional expiration
+  
+  // Conditions
+  conditions Json?    // Dynamic conditions for role assignment
+  
+  // Metadata
+  metadata   Json?    // Additional assignment metadata
+  
+  // Timestamps
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // Relationships
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@index([effect])
+  @@index([expiresAt])
+}
+
+model UserPermission {
+  id           String     @id @default(cuid())
+  userId       String
+  permissionId String
+  
+  // Direct Permission Assignment
+  effect       String     @default("allow") // allow, deny
+  scope        String?    // Scope limitation
+  
+  // Assignment Details
+  assignedBy   String?    // User ID who granted this permission
+  assignedAt   DateTime   @default(now())
+  expiresAt    DateTime?  // Optional expiration
+  reason       String?    // Reason for direct permission assignment
+  
+  // Conditions
+  conditions   Json?      // Dynamic conditions
+  
+  // Metadata
+  metadata     Json?      // Additional metadata
+  
+  // Timestamps
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  
+  // Relationships
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, permissionId])
+  @@index([userId])
+  @@index([permissionId])
+  @@index([effect])
+  @@index([expiresAt])
+}
+
+model ResourceAccess {
+  id           String    @id @default(cuid())
+  userId       String
+  resourceType String    // Type of resource (task, project, etc.)
+  resourceId   String    // ID of the specific resource
+  
+  // Access Details
+  accessType   String    // Type of access (owner, member, viewer, etc.)
+  permissions  Json      // Specific permissions for this resource
+  
+  // Access Properties
+  inheritedFrom String?  // ID of parent resource if access is inherited
+  isInherited   Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  
+  // Assignment Details
+  grantedBy     String?  // User ID who granted access
+  grantedAt     DateTime @default(now())
+  expiresAt     DateTime? // Optional expiration
+  
+  // Conditions
+  conditions    Json?    // Dynamic access conditions
+  
+  // Metadata
+  metadata      Json?    // Additional metadata
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relationships
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, resourceType, resourceId])
+  @@index([userId])
+  @@index([resourceType])
+  @@index([resourceId])
+  @@index([accessType])
+  @@index([isActive])
+  @@index([expiresAt])
 }

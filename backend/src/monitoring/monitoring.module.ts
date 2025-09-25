@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
+import { TerminusModule } from '@nestjs/terminus';
 import { PrismaModule } from '../prisma/prisma.module';
 import { MetricsCollectorService } from './services/metrics-collector.service';
 import { HealthCheckService } from './services/health-check.service';
@@ -10,6 +11,7 @@ import { MonitoringController } from './controllers/monitoring.controller';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+    TerminusModule,
     PrismaModule
   ],
   providers: [

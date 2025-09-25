@@ -11,7 +11,7 @@ import { PostService } from '../../services/post.service';
 import { UserService } from '../../services/user.service';
 import { CommentService } from '../../services/comment.service';
 import { PubSubService } from '../../services/pubsub.service';
-import { UserRole } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 
 @Resolver(() => Post)
 export class PostResolver {
@@ -75,7 +75,7 @@ export class PostResolver {
     const post = await this.postService.findById(id);
     
     // Only author or admin can update post
-    if (post.authorId !== currentUser.id && currentUser.role !== UserRole.ADMIN) {
+    if (post.authorId !== currentUser.id && currentUser.roleType !== $Enums.UserRoleType.ADMIN) {
       throw new Error('Unauthorized');
     }
     
@@ -97,7 +97,7 @@ export class PostResolver {
     const post = await this.postService.findById(id);
     
     // Only author or admin can delete post
-    if (post.authorId !== currentUser.id && currentUser.role !== UserRole.ADMIN) {
+    if (post.authorId !== currentUser.id && currentUser.roleType !== $Enums.UserRoleType.ADMIN) {
       throw new Error('Unauthorized');
     }
     
@@ -119,7 +119,7 @@ export class PostResolver {
     const post = await this.postService.findById(id);
     
     // Only author or admin can publish post
-    if (post.authorId !== currentUser.id && currentUser.role !== UserRole.ADMIN) {
+    if (post.authorId !== currentUser.id && currentUser.roleType !== $Enums.UserRoleType.ADMIN) {
       throw new Error('Unauthorized');
     }
     

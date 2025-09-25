@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User, UserRole } from '@prisma/client';
+import { User, $Enums } from '@prisma/client';
 import { RegisterUserInput, UpdateUserInput } from '../graphql/inputs/user.input';
 import * as bcrypt from 'bcryptjs';
 

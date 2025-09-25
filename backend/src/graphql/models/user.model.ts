@@ -1,8 +1,8 @@
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
-import { UserRole } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 
-// Register the UserRole enum
-registerEnumType(UserRole, {
+// Register the UserRoleType enum
+registerEnumType($Enums.UserRoleType, {
   name: 'UserRole',
   description: 'User role types',
 });
@@ -33,8 +33,8 @@ export class User {
   @Field({ nullable: true })
   avatar?: string;
 
-  @Field(() => UserRole)
-  role: UserRole;
+  @Field(() => $Enums.UserRoleType)
+  roleType: $Enums.UserRoleType;
 
   @Field()
   isActive: boolean;

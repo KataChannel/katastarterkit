@@ -1,15 +1,15 @@
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
-import { UserRole, AuthProvider, TokenType } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 
-registerEnumType(UserRole, {
+registerEnumType($Enums.UserRoleType, {
   name: 'UserRole',
 });
 
-registerEnumType(AuthProvider, {
+registerEnumType($Enums.AuthProvider, {
   name: 'AuthProvider',
 });
 
-registerEnumType(TokenType, {
+registerEnumType($Enums.TokenType, {
   name: 'TokenType',
 });
 
@@ -18,8 +18,8 @@ export class AuthMethod {
   @Field(() => ID)
   id: string;
 
-  @Field(() => AuthProvider)
-  provider: AuthProvider;
+  @Field(() => $Enums.AuthProvider)
+  provider: $Enums.AuthProvider;
 
   @Field({ nullable: true })
   providerId?: string;
@@ -39,8 +39,8 @@ export class VerificationToken {
   @Field()
   token: string;
 
-  @Field(() => TokenType)
-  type: TokenType;
+  @Field(() => $Enums.TokenType)
+  type: $Enums.TokenType;
 
   @Field()
   expiresAt: Date;

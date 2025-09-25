@@ -10,6 +10,7 @@ import { join } from 'path';
 // Modules
 import { PrismaModule } from './prisma/prisma.module';
 import { CacheModule } from './cache/cache.module';
+import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import { GraphQLResolversModule } from './graphql/graphql.module';
 import { GrokModule } from './grok/grok.module';
@@ -25,6 +26,7 @@ import { CommonServicesModule } from './common/common-services.module';
 import { RealTimeModule } from './realtime/real-time.module';
 import { SearchModule } from './search/search.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
+import { SecurityModule } from './security/security.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -96,6 +98,7 @@ import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-per
     // Application Modules
     PrismaModule,
     CacheModule,
+    RedisModule,
     AuthModule,
     DataLoaderModule,
     GraphQLPerformanceModule,
@@ -111,6 +114,7 @@ import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-per
     RealTimeModule,
     SearchModule,
     MonitoringModule,
+    SecurityModule,
   ],
   providers: [
     EnvConfigService,

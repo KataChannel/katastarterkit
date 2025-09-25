@@ -11,7 +11,7 @@ import { UserService } from '../../services/user.service';
 import { AuthService } from '../../auth/auth.service';
 import { OtpService } from '../../services/otp.service';
 import { PubSubService } from '../../services/pubsub.service';
-import { UserRole } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -38,7 +38,7 @@ export class UserResolver {
 
   @Query(() => [User], { name: 'getUsers' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Roles($Enums.UserRoleType.ADMIN)
   async getUsers(): Promise<User[]> {
     return this.userService.findAll();
   }
@@ -130,7 +130,7 @@ export class UserResolver {
     const currentUser = context.req.user;
     
     // Users can only update their own profile unless they're admin
-    if (currentUser.id !== id && currentUser.role !== UserRole.ADMIN) {
+    if (currentUser.id !== id && currentUser.roleType !== $Enums.UserRoleType.ADMIN) {
       throw new Error('Unauthorized');
     }
     
@@ -139,7 +139,7 @@ export class UserResolver {
 
   @Mutation(() => Boolean, { name: 'deleteUser' })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles($Enums.UserRoleType.ADMIN)
   async deleteUser(@Args('id') id: string): Promise<boolean> {
     await this.userService.delete(id);
     return true;
