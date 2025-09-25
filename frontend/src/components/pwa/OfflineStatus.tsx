@@ -15,7 +15,9 @@ export function OfflineStatus({
   position = 'top',
   showSyncStatus = true 
 }: OfflineStatusProps) {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(() => 
+    typeof window !== 'undefined' ? navigator.onLine : true
+  );
   const [pendingActions, setPendingActions] = useState(0);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
@@ -24,6 +26,11 @@ export function OfflineStatus({
 
   // Monitor online status
   useEffect(() => {
+    // Set initial online status on client mount
+    if (typeof window !== 'undefined') {
+      setIsOnline(navigator.onLine);
+    }
+
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
