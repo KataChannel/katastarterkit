@@ -27,6 +27,7 @@ import { RealTimeModule } from './realtime/real-time.module';
 import { SearchModule } from './search/search.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { SecurityModule } from './security/security.module';
+import { UnifiedDynamicModule } from './graphql/unified-dynamic.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -116,6 +117,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     SearchModule,
     MonitoringModule,
     SecurityModule,
+    UnifiedDynamicModule,
   ],
   providers: [
     EnvConfigService,

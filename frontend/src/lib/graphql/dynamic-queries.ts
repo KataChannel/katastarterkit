@@ -2,15 +2,24 @@ import { gql } from '@apollo/client';
 
 // Dynamic GraphQL query generator
 export class DynamicGraphQLGenerator {
-  // Generate basic CRUD queries for any model
-  static generateCRUDQueries(modelName: string, fields: string[] = []) {
+  // Generate basic CRUD queries for any model with support for nested fields
+  static generateCRUDQueries(modelName: string, fields: string[] = [], nestedFields: Record<string, string[]> = {}) {
     const modelNameLower = modelName.toLowerCase();
     const modelNameCamel = modelName.charAt(0).toLowerCase() + modelName.slice(1);
     const modelNamePlural = `${modelNameLower}s`;
     
     // Default fields if none provided
     const defaultFields = fields.length > 0 ? fields : ['id', 'createdAt', 'updatedAt'];
-    const fieldsStr = defaultFields.join('\n    ');
+    
+    // Build fields string with nested fields support
+    let fieldsStr = defaultFields.join('\n    ');
+    
+    // Add nested fields
+    if (Object.keys(nestedFields).length > 0) {
+      Object.entries(nestedFields).forEach(([nestedModel, nestedModelFields]) => {
+        fieldsStr += `\n    ${nestedModel} {\n      ${nestedModelFields.join('\n      ')}\n    }`;
+      });
+    }
 
     const queries = {
       // GET ALL

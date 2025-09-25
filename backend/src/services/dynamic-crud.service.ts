@@ -204,23 +204,30 @@ export class DynamicCRUDService {
     return result;
   }
 
-  // READ ALL - Multiple records with filtering, pagination, sorting
+  // Enhanced findMany with unified input (supports both old DynamicFilterInput and new unified input)
   async findMany<T>(
     modelName: string,
-    filter?: DynamicFilterInput
+    input?: DynamicFilterInput | {
+      where?: any;
+      orderBy?: any;
+      skip?: number;
+      take?: number;
+      select?: any;
+      include?: any;
+    }
   ): Promise<T[]> {
     try {
       const delegate = this.getModelDelegate(modelName);
       return await delegate.findMany({
-        where: filter?.where,
-        orderBy: filter?.orderBy,
-        skip: filter?.skip,
-        take: filter?.take,
-        select: filter?.select,
-        include: filter?.include
+        where: input?.where,
+        orderBy: input?.orderBy,
+        skip: input?.skip,
+        take: input?.take,
+        select: input?.select,
+        include: input?.include
       });
     } catch (error) {
-      throw new BadRequestException(`Failed to fetch ${modelName}: ${error.message}`);
+      throw new BadRequestException(`Failed to find many ${modelName}: ${error.message}`);
     }
   }
 
@@ -499,6 +506,238 @@ export class DynamicCRUDService {
       return result;
     } catch (error) {
       throw new BadRequestException(`Failed to upsert ${modelName}: ${error.message}`);
+    }
+  }
+
+  // Paginated findMany
+  async findManyPaginated<T>(
+    modelName: string,
+    input?: {
+      where?: any;
+      orderBy?: any;
+      page?: number;
+      limit?: number;
+      select?: any;
+      include?: any;
+    }
+  ): Promise<{
+    data: T[];
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  }> {
+    try {
+      const delegate = this.getModelDelegate(modelName);
+      const page = input?.page || 1;
+      const limit = input?.limit || 10;
+      const skip = (page - 1) * limit;
+
+      // Get total count
+      const total = await delegate.count({
+        where: input?.where
+      });
+
+      // Get data
+      const data = await delegate.findMany({
+        where: input?.where,
+        orderBy: input?.orderBy,
+        skip,
+        take: limit,
+        select: input?.select,
+        include: input?.include
+      });
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        data,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      };
+    } catch (error) {
+      throw new BadRequestException(`Failed to find paginated ${modelName}: ${error.message}`);
+    }
+  }
+
+  // Bulk create with enhanced options
+  async bulkCreate<T>(
+    modelName: string,
+    data: any[],
+    options?: {
+      skipDuplicates?: boolean;
+      select?: any;
+      include?: any;
+    }
+  ): Promise<BulkOperationResult<T>> {
+    try {
+      const delegate = this.getModelDelegate(modelName);
+      const results: T[] = [];
+      const errors: Array<{ index: number; error: string; data?: any }> = [];
+
+      // Use createMany for better performance if no select/include needed
+      if (!options?.select && !options?.include) {
+        try {
+          const result = await delegate.createMany({
+            data,
+            skipDuplicates: options?.skipDuplicates || false
+          });
+
+          this.clearModelCache(modelName);
+
+          return {
+            success: true,
+            count: result.count,
+            data: undefined, // createMany doesn't return data
+            errors: undefined
+          };
+        } catch (error) {
+          // Fall back to individual creates if createMany fails
+        }
+      }
+
+      // Individual creates for when we need select/include or createMany fails
+      for (let i = 0; i < data.length; i++) {
+        try {
+          const result = await delegate.create({
+            data: data[i],
+            select: options?.select,
+            include: options?.include
+          });
+          results.push(result);
+        } catch (error) {
+          errors.push({
+            index: i,
+            error: error.message,
+            data: data[i]
+          });
+        }
+      }
+
+      this.clearModelCache(modelName);
+
+      return {
+        success: errors.length === 0,
+        count: results.length,
+        data: results,
+        errors: errors.length > 0 ? errors : undefined
+      };
+    } catch (error) {
+      throw new BadRequestException(`Bulk create failed for ${modelName}: ${error.message}`);
+    }
+  }
+
+  // Bulk update
+  async bulkUpdate<T>(
+    modelName: string,
+    where: any,
+    data: any,
+    options?: {
+      select?: any;
+      include?: any;
+    }
+  ): Promise<BulkOperationResult<T>> {
+    try {
+      const delegate = this.getModelDelegate(modelName);
+      
+      // Use updateMany for better performance if no select/include needed
+      if (!options?.select && !options?.include) {
+        const result = await delegate.updateMany({
+          where,
+          data
+        });
+
+        this.clearModelCache(modelName);
+
+        return {
+          success: true,
+          count: result.count,
+          data: undefined, // updateMany doesn't return data
+          errors: undefined
+        };
+      }
+
+      // Individual updates for when we need select/include
+      const recordsToUpdate = await delegate.findMany({ where });
+      const results: T[] = [];
+      const errors: Array<{ index: number; error: string; data?: any }> = [];
+
+      for (let i = 0; i < recordsToUpdate.length; i++) {
+        try {
+          const result = await delegate.update({
+            where: { id: recordsToUpdate[i].id },
+            data,
+            select: options?.select,
+            include: options?.include
+          });
+          results.push(result);
+        } catch (error) {
+          errors.push({
+            index: i,
+            error: error.message,
+            data: recordsToUpdate[i]
+          });
+        }
+      }
+
+      this.clearModelCache(modelName);
+
+      return {
+        success: errors.length === 0,
+        count: results.length,
+        data: results,
+        errors: errors.length > 0 ? errors : undefined
+      };
+    } catch (error) {
+      throw new BadRequestException(`Bulk update failed for ${modelName}: ${error.message}`);
+    }
+  }
+
+  // Bulk delete
+  async bulkDelete<T>(
+    modelName: string,
+    where: any,
+    options?: {
+      select?: any;
+      include?: any;
+    }
+  ): Promise<BulkOperationResult<T>> {
+    try {
+      const delegate = this.getModelDelegate(modelName);
+      
+      // Get records before deletion if select/include needed
+      let recordsToDelete: T[] = [];
+      if (options?.select || options?.include) {
+        recordsToDelete = await delegate.findMany({
+          where,
+          select: options?.select,
+          include: options?.include
+        });
+      }
+
+      // Perform bulk delete
+      const result = await delegate.deleteMany({ where });
+
+      this.clearModelCache(modelName);
+
+      return {
+        success: true,
+        count: result.count,
+        data: recordsToDelete.length > 0 ? recordsToDelete : undefined,
+        errors: undefined
+      };
+    } catch (error) {
+      throw new BadRequestException(`Bulk delete failed for ${modelName}: ${error.message}`);
     }
   }
 }
