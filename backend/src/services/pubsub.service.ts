@@ -9,8 +9,8 @@ export class PubSubService {
     this.pubSub = new PubSub();
   }
 
-  publish(event: string, payload: any): void {
-    this.pubSub.publish(event, payload);
+  async publish(event: string, payload: any): Promise<void> {
+    return this.pubSub.publish(event, payload);
   }
 
   asyncIterator(event: string | string[]): any {
@@ -41,6 +41,19 @@ export class PubSubService {
     this.publish('userRegistered', { userRegistered: user });
   }
 
+  // Task-related helper methods
+  publishTaskCreated(task: any): void {
+    this.publish('taskCreated', { taskCreated: task });
+  }
+
+  publishTaskUpdated(task: any): void {
+    this.publish('taskUpdated', { taskUpdated: task });
+  }
+
+  publishTaskCommentCreated(comment: any): void {
+    this.publish('taskCommentCreated', { taskCommentCreated: comment });
+  }
+
   // Async iterators for subscriptions
   getPostCreatedIterator() {
     return this.asyncIterator('postCreated');
@@ -48,6 +61,18 @@ export class PubSubService {
 
   getPostUpdatedIterator() {
     return this.asyncIterator('postUpdated');
+  }
+
+  getTaskCreatedIterator() {
+    return this.asyncIterator('taskCreated');
+  }
+
+  getTaskUpdatedIterator() {
+    return this.asyncIterator('taskUpdated');
+  }
+
+  getTaskCommentCreatedIterator() {
+    return this.asyncIterator('taskCommentCreated');
   }
 
   getPostDeletedIterator() {

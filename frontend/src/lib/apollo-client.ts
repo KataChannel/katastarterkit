@@ -128,21 +128,21 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
 
     // Log based on environment
     if (isDevelopment) {
-      console.group('🔍 [GraphQL Error Details]');
-      console.error('Context:', collectErrorContext());
-      graphQLErrors.forEach((error: any) => {
-        console.error(`Error: ${error.message}`);
-        if (error.extensions) {
-          console.error('Extensions:', error.extensions);
-        }
-        if (error.path) {
-          console.error('Path:', error.path);
-        }
-        if (error.locations) {
-          console.error('Locations:', error.locations);
-        }
-      });
-      console.groupEnd();
+      // console.group('🔍 [GraphQL Error Details]');
+      // console.error('Context:', collectErrorContext());
+      // graphQLErrors.forEach((error: any) => {
+      //   console.error(`Error: ${error.message}`);
+      //   if (error.extensions) {
+      //     console.error('Extensions:', error.extensions);
+      //   }
+      //   if (error.path) {
+      //     console.error('Path:', error.path);
+      //   }
+      //   if (error.locations) {
+      //     console.error('Locations:', error.locations);
+      //   }
+      // });
+      // console.groupEnd();
     } else {
       // Production logging - summarized with context
       const errorSummary = graphQLErrors.map((err: any) => ({

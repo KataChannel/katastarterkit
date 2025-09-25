@@ -112,9 +112,8 @@ export class TaskResolver {
     const task = await this.taskService.create(input, userId);
     
     // Publish task created event
-    const taskCreatedPayload = { taskCreated: task };
-    console.log('Publishing taskCreated with payload:', taskCreatedPayload);
-    await this.pubSubService.publish('taskCreated', taskCreatedPayload);
+    console.log('Publishing taskCreated with task:', task);
+    this.pubSubService.publishTaskCreated(task);
     
     // Smart cache invalidation
     await this.cacheInvalidationService.invalidateTaskCache(task.id, userId);
@@ -132,9 +131,13 @@ export class TaskResolver {
     const task = await this.taskService.update(input, userId);
     
     // Publish task updated event
-    const taskUpdatedPayload = { taskUpdated: task };
-    console.log('Publishing taskUpdated with payload:', taskUpdatedPayload);
-    await this.pubSubService.publish('taskUpdated', taskUpdatedPayload);
+    console.log('Publishing taskUpdated with task:', task);
+    try {
+      this.pubSubService.publishTaskUpdated(task);
+      console.log('Successfully published taskUpdated event');
+    } catch (error) {
+      console.error('Failed to publish taskUpdated event:', error);
+    }
     
     // Create notification if task is completed
     if (input.status === 'COMPLETED') {
@@ -202,9 +205,13 @@ export class TaskResolver {
     );
     
     // Publish comment created event
-    const commentCreatedPayload = { taskCommentCreated: comment };
-    console.log('Publishing taskCommentCreated with payload:', commentCreatedPayload);
-    await this.pubSubService.publish('taskCommentCreated', commentCreatedPayload);
+    console.log('Publishing taskCommentCreated with comment:', comment);
+    try {
+      this.pubSubService.publishTaskCommentCreated(comment);
+      console.log('Successfully published taskCommentCreated event');
+    } catch (error) {
+      console.error('Failed to publish taskCommentCreated event:', error);
+    }
     
     // Smart cache invalidation for comments
     await this.cacheInvalidationService.invalidateCommentCache(input.taskId, userId);
@@ -230,49 +237,19 @@ export class TaskResolver {
   }
 
   // Subscriptions
-  @Subscription(() => Task, { 
-    name: 'taskCreated',
-    filter: (payload) => {
-      console.log('taskCreated filter payload:', payload);
-      return payload && payload.taskCreated !== undefined;
-    },
-    resolve: (payload) => {
-      console.log('taskCreated resolve payload:', payload);
-      return payload.taskCreated;
-    },
-  })
+  @Subscription(() => Task, { name: 'taskCreated' })
   taskCreated() {
-    return this.pubSubService.asyncIterator('taskCreated');
+    return this.pubSubService.getTaskCreatedIterator();
   }
 
-  @Subscription(() => Task, { 
-    name: 'taskUpdated',
-    filter: (payload) => {
-      console.log('taskUpdated filter payload:', payload);
-      return payload && payload.taskUpdated !== undefined;
-    },
-    resolve: (payload) => {
-      console.log('taskUpdated resolve payload:', payload);
-      return payload.taskUpdated;
-    },
-  })
+  @Subscription(() => Task, { name: 'taskUpdated' })
   taskUpdated() {
-    return this.pubSubService.asyncIterator('taskUpdated');
+    return this.pubSubService.getTaskUpdatedIterator();
   }
 
-  @Subscription(() => TaskComment, { 
-    name: 'taskCommentCreated',
-    filter: (payload) => {
-      console.log('taskCommentCreated filter payload:', payload);
-      return payload && payload.taskCommentCreated !== undefined;
-    },
-    resolve: (payload) => {
-      console.log('taskCommentCreated resolve payload:', payload);
-      return payload.taskCommentCreated;
-    },
-  })
+  @Subscription(() => TaskComment, { name: 'taskCommentCreated' })
   taskCommentCreated() {
-    return this.pubSubService.asyncIterator('taskCommentCreated');
+    return this.pubSubService.getTaskCommentCreatedIterator();
   }
 
   // Field Resolvers

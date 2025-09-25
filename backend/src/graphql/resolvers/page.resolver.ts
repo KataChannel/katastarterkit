@@ -35,6 +35,8 @@ export class PageResolver {
 
   @Query(() => Page, { name: 'getPageBySlug' })
   async getPageBySlug(@Args('slug') slug: string): Promise<Page> {
+    console.log(`Fetching page with slug: ${slug}`);
+    
     return this.pageService.findBySlug(slug);
   }
 
