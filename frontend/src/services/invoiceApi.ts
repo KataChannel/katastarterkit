@@ -1,15 +1,18 @@
 import axios, { AxiosResponse } from 'axios';
-import { InvoiceApiResponse, InvoiceApiParams, InvoiceFilter, InvoiceData } from '@/types/invoice';
+import { InvoiceApiResponse, InvoiceApiParams, InvoiceFilter, InvoiceData, AdvancedFilter, InvoiceType } from '@/types/invoice';
+import ConfigService from './configService';
+import DateService from './dateService';
 
 export class InvoiceApiService {
   private static readonly BASE_URL = 'https://hoadondientu.gdt.gov.vn:30000';
-  private static readonly BEARER_TOKEN = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1OTAwNDI4OTA0IiwidHlwZSI6MiwiZXhwIjoxNzU4OTQ2MjgxLCJpYXQiOjE3NTg4NTk4ODF9.Uo17DIposfoivAM-o6BYe0gxa6YY2rIeWn1QhthrZitU6cHDFM5A70ngBeGoe1RUPz4R9_K_CjqkB3YbDhNkbA';
 
   private static createAxiosInstance() {
+    const config = ConfigService.getValidatedConfig();
+    
     return axios.create({
       baseURL: this.BASE_URL,
       headers: {
-        'Authorization': `Bearer ${this.BEARER_TOKEN}`,
+        'Authorization': `Bearer ${config.bearerToken}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -20,15 +23,25 @@ export class InvoiceApiService {
   /**
    * Build search query string for date range and filters
    */
-  private static buildSearchQuery(filter: InvoiceFilter): string {
+  private static buildSearchQuery(filter: InvoiceFilter | AdvancedFilter): string {
     const searchParts: string[] = [];
 
-    // Add date range (required)
-    if (filter.fromDate) {
-      searchParts.push(`tdlap=ge=${filter.fromDate}T00:00:00`);
+    // Handle month/year inputs or direct date inputs
+    let fromDate = filter.fromDate;
+    let toDate = filter.toDate;
+
+    if (filter.month && filter.year) {
+      const dateRange = DateService.getMonthDateRange(filter.month, filter.year);
+      fromDate = dateRange.fromDate;
+      toDate = dateRange.toDate;
     }
-    if (filter.toDate) {
-      searchParts.push(`tdlap=le=${filter.toDate}T23:59:59`);
+
+    // Add date range (required)
+    if (fromDate) {
+      searchParts.push(`tdlap=ge=${fromDate}T00:00:00`);
+    }
+    if (toDate) {
+      searchParts.push(`tdlap=le=${toDate}T23:59:59`);
     }
 
     // Add optional filters
@@ -42,6 +55,26 @@ export class InvoiceApiService {
       searchParts.push(`tenxmua=like=${encodeURIComponent(filter.buyerName)}`);
     }
 
+    // Advanced filters
+    const advancedFilter = filter as AdvancedFilter;
+    if (advancedFilter.globalSearch) {
+      // Search across multiple fields
+      const globalTerm = encodeURIComponent(advancedFilter.globalSearch);
+      searchParts.push(`(shdon=like=${globalTerm};tenxmua=like=${globalTerm};msttcgp=like=${globalTerm})`);
+    }
+
+    if (advancedFilter.amountFrom) {
+      searchParts.push(`tgtttbso=ge=${advancedFilter.amountFrom}`);
+    }
+
+    if (advancedFilter.amountTo) {
+      searchParts.push(`tgtttbso=le=${advancedFilter.amountTo}`);
+    }
+
+    if (advancedFilter.status) {
+      searchParts.push(`tghdon=like=${encodeURIComponent(advancedFilter.status)}`);
+    }
+
     return searchParts.join(';');
   }
 
@@ -49,23 +82,26 @@ export class InvoiceApiService {
    * Fetch invoice data from external API
    */
   static async fetchInvoices(
-    filter: InvoiceFilter,
-    params: InvoiceApiParams = {}
+    filter: InvoiceFilter | AdvancedFilter,
+    params: InvoiceApiParams = {},
+    invoiceType?: InvoiceType
   ): Promise<InvoiceApiResponse> {
     try {
       const axiosInstance = this.createAxiosInstance();
+      const config = ConfigService.getValidatedConfig();
       
       const searchQuery = this.buildSearchQuery(filter);
+      const endpoint = ConfigService.getApiEndpoint(invoiceType);
       
       const queryParams = new URLSearchParams({
         sort: params.sort || 'tdlap:desc,khmshdon:asc,shdon:desc',
-        size: (params.size || 15).toString(),
+        size: (params.size || config.pageSize).toString(),
         page: (params.page || 0).toString(),
         ...(searchQuery && { search: searchQuery })
       });
 
       const response: AxiosResponse<InvoiceApiResponse> = await axiosInstance.get(
-        `/query/invoices/sold?${queryParams.toString()}`
+        `${endpoint}?${queryParams.toString()}`
       );
 
       return response.data;
@@ -75,7 +111,7 @@ export class InvoiceApiService {
       // Handle different types of errors
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
-          throw new Error('Token xác thực không hợp lệ hoặc đã hết hạn');
+          throw new Error('Token xác thực không hợp lệ hoặc đã hết hạn. Vui lòng cập nhật token trong cấu hình.');
         } else if (error.response?.status === 403) {
           throw new Error('Không có quyền truy cập dữ liệu hóa đơn');
         } else if (error.response?.status === 404) {
@@ -92,52 +128,48 @@ export class InvoiceApiService {
   }
 
   /**
-   * Get default date range (last 30 days)
+   * Get default month and year (current month)
+   */
+  static getDefaultMonthYear(): { month: number; year: number } {
+    return DateService.getCurrentMonthYear();
+  }
+
+  /**
+   * Get default date range (current month)
    */
   static getDefaultDateRange(): { fromDate: string; toDate: string } {
-    const today = new Date();
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(today.getDate() - 30);
-
-    return {
-      fromDate: this.formatDateForAPI(thirtyDaysAgo),
-      toDate: this.formatDateForAPI(today)
-    };
+    const { month, year } = DateService.getCurrentMonthYear();
+    return DateService.getMonthDateRange(month, year);
   }
 
   /**
    * Format date for API (DD/MM/YYYY format as used in the original endpoint)
    */
   private static formatDateForAPI(date: Date): string {
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    return DateService.formatDate(date);
   }
 
   /**
    * Validate date range
    */
   static validateDateRange(fromDate: string, toDate: string): { isValid: boolean; error?: string } {
-    const from = new Date(fromDate.split('/').reverse().join('-'));
-    const to = new Date(toDate.split('/').reverse().join('-'));
-    const today = new Date();
+    return DateService.validateDateRange(fromDate, toDate);
+  }
 
-    if (from > to) {
-      return { isValid: false, error: 'Ngày bắt đầu không thể lớn hơn ngày kết thúc' };
-    }
-
-    if (to > today) {
-      return { isValid: false, error: 'Ngày kết thúc không thể lớn hơn ngày hiện tại' };
-    }
-
-    // Check if date range is too large (more than 365 days)
-    const daysDiff = Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
-    if (daysDiff > 365) {
-      return { isValid: false, error: 'Khoảng thời gian không được vượt quá 365 ngày' };
-    }
-
-    return { isValid: true };
+  /**
+   * Get configuration options for UI
+   */
+  static getConfigOptions() {
+    return {
+      invoiceTypes: [
+        { value: 'banra', label: 'Hóa đơn bán ra' },
+        { value: 'muavao', label: 'Hóa đơn mua vào' }
+      ],
+      pageSizes: [10, 20, 50, 100, 200],
+      monthOptions: DateService.getMonthOptions(),
+      yearOptions: DateService.getYearOptions(),
+      dateRangeOptions: DateService.getDateRangeOptions()
+    };
   }
 }
 

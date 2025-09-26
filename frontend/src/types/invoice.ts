@@ -65,6 +65,8 @@ export interface InvoiceFilter {
   invoiceNumber?: string;  // Số hóa đơn
   taxCode?: string;  // Mã số thuế
   buyerName?: string; // Tên người mua
+  month?: number;    // Tháng (1-12)
+  year?: number;     // Năm
 }
 
 export interface ExportOptions {
@@ -72,4 +74,32 @@ export interface ExportOptions {
   includeHeaders?: boolean;
   dateFormat?: string;
   currencyFormat?: string;
+}
+
+// Configuration types
+export interface InvoiceConfig {
+  bearerToken: string;
+  pageSize: number;
+  invoiceType: 'banra' | 'muavao';
+  apiEndpoint?: string;
+}
+
+export type InvoiceType = 'banra' | 'muavao';
+
+// Enhanced filtering and search
+export interface AdvancedFilter extends InvoiceFilter {
+  globalSearch?: string;    // Search across multiple fields
+  dateRange?: string;       // Predefined date ranges
+  status?: string;          // Invoice status filter
+  amountFrom?: number;      // Minimum amount filter
+  amountTo?: number;        // Maximum amount filter
+}
+
+// Table configuration
+export interface TableConfig {
+  sortField: keyof InvoiceData;
+  sortDirection: 'asc' | 'desc';
+  currentPage: number;
+  pageSize: number;
+  filters: AdvancedFilter;
 }
