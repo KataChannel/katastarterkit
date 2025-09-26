@@ -29,6 +29,202 @@ export interface InvoiceData {
   cccd?: string;    // Căn cước công dân (Citizen ID)
 }
 
+// Database model types matching Prisma schema
+export interface ExtListhoadon {
+  id: string;
+  
+  // Basic Invoice Info
+  nbmst?: string;
+  khmshdon?: string;
+  khhdon?: string;
+  shdon?: string;
+  cqt?: string;
+  hdon?: string;
+  hthdon?: string;
+  htttoan?: string;
+  idtbao?: string;
+  khdon?: string;
+  khhdgoc?: string;
+  khmshdgoc?: string;
+  lhdgoc?: string;
+  mhdon?: string;
+  mtdiep?: string;
+  mtdtchieu?: string;
+  
+  // Seller Information
+  nbdchi?: string;
+  chma?: string;
+  chten?: string;
+  nbhdktngay?: Date;
+  nbhdktso?: string;
+  nbhdso?: string;
+  nblddnbo?: string;
+  nbptvchuyen?: string;
+  nbstkhoan?: string;
+  nbten?: string;
+  nbtnhang?: string;
+  nbtnvchuyen?: string;
+  
+  // Other Codes
+  ncma?: string;
+  ncnhat?: Date;
+  ngcnhat?: Date;
+  nky?: string;
+  
+  // Buyer Information
+  nmdchi?: string;
+  nmmst?: string;
+  nmstkhoan?: string;
+  nmten?: string;
+  nmtnhang?: string;
+  nmtnmua?: string;
+  nmttkhac?: string;
+  
+  // Process Information
+  ntao?: Date;
+  ntnhan?: Date;
+  pban?: string;
+  ptgui?: string;
+  shdgoc?: string;
+  tchat?: string;
+  tdlap?: Date;
+  tgia?: number;
+  
+  // Amounts
+  tgtcthue?: number;
+  tgtthue?: number;
+  tgtttbchu?: string;
+  tgtttbso?: number;
+  
+  // Status and Processing
+  thdon?: string;
+  thlap?: Date;
+  thttlphi?: number;
+  tlhdon?: string;
+  ttcktmai?: string;
+  tthai?: string;
+  tttbao?: string;
+  ttxly?: string;
+  tvandnkntt?: string;
+  
+  // Additional Fields
+  mhso?: string;
+  ladhddt?: boolean;
+  mkhang?: string;
+  nbsdthoai?: string;
+  nbdctdtu?: string;
+  nbfax?: string;
+  nbwebsite?: string;
+  nmsdthoai?: string;
+  nmdctdtu?: string;
+  nmcmnd?: string;
+  nmcks?: string;
+  
+  // Legal and Compliance
+  bhphap?: string;
+  hddunlap?: string;
+  gchdgoc?: string;
+  tbhgtngay?: Date;
+  bhpldo?: string;
+  bhpcbo?: string;
+  bhpngay?: Date;
+  tdlhdgoc?: Date;
+  tgtphi?: number;
+  unhiem?: string;
+  mstdvnunlhdon?: string;
+  tdvnunlhdon?: string;
+  
+  // Regulatory Information
+  nbmdvqhnsach?: string;
+  nbsqdinh?: string;
+  nbncqdinh?: string;
+  nbcqcqdinh?: string;
+  nbhtban?: string;
+  nmmdvqhnsach?: string;
+  nmddvchden?: string;
+  nmtgvchdtu?: Date;
+  nmtgvchdden?: Date;
+  nbtnban?: string;
+  dcdvnunlhdon?: string;
+  
+  // Processing Dates
+  dksbke?: Date;
+  dknlbke?: Date;
+  thtttoan?: string;
+  msttcgp?: string;
+  gchu?: string;
+  kqcht?: string;
+  hdntgia?: number;
+  tgtkcthue?: number;
+  tgtkhac?: number;
+  
+  // Reference Information
+  nmshchieu?: string;
+  nmnchchieu?: string;
+  nmnhhhchieu?: string;
+  nmqtich?: string;
+  ktkhthue?: number;
+  nmstttoan?: string;
+  nmttttoan?: string;
+  hdhhdvu?: string;
+  qrcode?: string;
+  ttmstten?: string;
+  ladhddtten?: string;
+  
+  // Export/Import
+  hdxkhau?: string;
+  hdxkptquan?: string;
+  hdgktkhthue?: number;
+  hdonLquans?: string;
+  tthdclquan?: string;
+  pdndungs?: string;
+  hdtbssrses?: string;
+  
+  // Duplicate Handling
+  hdTrung?: string;
+  isHDTrung?: boolean;
+  hdcttchinh?: string;
+  
+  // Timestamps
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Relationships
+  details?: ExtDetailhoadon[];
+}
+
+export interface ExtDetailhoadon {
+  id: string;
+  idhdon: string; // Foreign key to ext_listhoadon.id
+  
+  // Item Information
+  dgia?: number;
+  dvtinh?: string;
+  ltsuat?: number;
+  sluong?: number;
+  stbchu?: string;
+  stckhau?: number;
+  stt?: number;
+  tchat?: string;
+  ten?: string;
+  thtcthue?: number;
+  thtien?: number;
+  tlckhau?: number;
+  tsuat?: number;
+  tthue?: number;
+  sxep?: number;
+  dvtte?: string;
+  tgia?: number;
+  tthhdtrung?: string;
+  
+  // Timestamps
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // Relationships
+  invoice?: ExtListhoadon;
+}
+
 export interface InvoiceItem {
   stt: number;      // Số thứ tự (Sequential number)
   mahang?: string;  // Mã hàng (Item code)

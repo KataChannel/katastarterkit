@@ -6,6 +6,8 @@ import { CommentResolver } from './resolvers/comment.resolver';
 import { GrokResolver } from './resolvers/grok.resolver';
 import { TaskResolver } from './resolvers/task.resolver';
 import { PageResolver } from './resolvers/page.resolver';
+import { InvoiceResolver } from './resolvers/invoice.resolver';
+import { InvoiceController } from '../controllers/invoice.controller';
 
 import { UserService } from '../services/user.service';
 import { PostService } from '../services/post.service';
@@ -18,6 +20,7 @@ import { NotificationService } from '../services/notification.service';
 import { OtpService } from '../services/otp.service';
 import { PubSubService } from '../services/pubsub.service';
 import { PageService } from '../services/page.service';
+import { InvoiceService } from '../services/invoice.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
@@ -32,6 +35,9 @@ import { JSONScalar } from './scalars/json.scalar';
     GrokModule,
     MinioModule,
   ],
+  controllers: [
+    InvoiceController,
+  ],
   providers: [
     // Scalars
     JSONScalar,
@@ -43,6 +49,7 @@ import { JSONScalar } from './scalars/json.scalar';
     GrokResolver,
     TaskResolver,
     PageResolver,
+    InvoiceResolver,
     
     // Services
     UserService,
@@ -56,6 +63,7 @@ import { JSONScalar } from './scalars/json.scalar';
     OtpService,
     PubSubService,
     PageService,
+    InvoiceService,
   ],
   exports: [
     UserService,
@@ -68,6 +76,7 @@ import { JSONScalar } from './scalars/json.scalar';
     NotificationService,
     PubSubService,
     PageService,
+    InvoiceService,
   ],
 })
 export class GraphQLResolversModule {}
