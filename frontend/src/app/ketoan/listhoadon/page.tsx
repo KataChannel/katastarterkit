@@ -7,6 +7,7 @@ import InvoiceApiService from '@/services/invoiceApi';
 import ExcelExportService from '@/services/excelExport';
 import ConfigService from '@/services/configService';
 import DateService from '@/services/dateService';
+import { useInvoiceDatabase } from '@/services/invoiceDatabaseServiceNew';
 import { InvoiceData, AdvancedFilter, InvoiceApiResponse, InvoiceType } from '@/types/invoice';
 import { Search, RefreshCw, FileSpreadsheet, Settings, Calendar, Filter, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
@@ -28,6 +29,11 @@ const ListHoaDonPage = () => {
   // Configuration state
   const [config, setConfig] = useState(ConfigService.getConfig());
   const [showConfigModal, setShowConfigModal] = useState(false);
+  
+  // Database integration
+  const { syncData, searchInvoices: searchDatabaseInvoices, isLoading: dbLoading } = useInvoiceDatabase();
+  const [syncStatus, setSyncStatus] = useState<string>('');
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Filter state - now using month/year instead of direct dates
   const [selectedMonth, setSelectedMonth] = useState<number>(() => {
@@ -81,59 +87,111 @@ const ListHoaDonPage = () => {
     }));
   }, [selectedMonth, selectedYear]);
 
-  // Fetch invoice data from API
-  const fetchInvoices = async (pageNumber: number = 0, showLoading: boolean = true) => {
+  // Sync data from external API to database
+  const syncDataFromAPI = async () => {
     try {
-      if (showLoading) setLoading(true);
-      setError(null);
-
+      setIsSyncing(true);
+      setSyncStatus('Đang lấy dữ liệu từ API bên ngoài...');
+      
       // Update config in case it changed
       const currentConfig = ConfigService.getValidatedConfig();
       setConfig(currentConfig);
 
-      let dateValidation;
-      if (filter.month && filter.year) {
-        // Validate month/year combination
-        if (filter.month < 1 || filter.month > 12) {
-          toast.error('Tháng phải từ 1 đến 12');
-          return;
-        }
-      } else {
-        // Validate date range
-        dateValidation = DateService.validateDateRange(filter.fromDate, filter.toDate);
-        if (!dateValidation.isValid) {
-          toast.error(dateValidation.error || 'Khoảng thời gian không hợp lệ');
-          return;
-        }
+      // Validate month/year combination
+      if (!filter.month || !filter.year || filter.month < 1 || filter.month > 12) {
+        toast.error('Vui lòng chọn tháng và năm hợp lệ');
+        return;
       }
 
+      // Fetch data from external API
       const response: InvoiceApiResponse = await InvoiceApiService.fetchInvoices(filter, {
-        page: pageNumber,
-        size: currentConfig.pageSize,
-        sort: `${sortField}:${sortDirection},khmshdon:asc,shdon:desc`
+        page: 0,
+        size: 1000, // Get more records for sync
+        sort: `tdlap:desc,khmshdon:asc,shdon:desc`
       }, currentConfig.invoiceType);
+
+      if (response.datas && response.datas.length > 0) {
+        setSyncStatus(`Đang đồng bộ ${response.datas.length} hóa đơn vào database...`);
+        
+        // Sync to database
+        const syncResult = await syncData(response.datas, []);
+        
+        if (syncResult.success) {
+          toast.success(`Đã đồng bộ thành công ${syncResult.invoicesSaved} hóa đơn`);
+          setSyncStatus(`Đồng bộ thành công: ${syncResult.invoicesSaved} hóa đơn`);
+          
+          // Now fetch from database to display
+          await fetchFromDatabase();
+        } else {
+          toast.error(`Đồng bộ thất bại: ${syncResult.errors.join(', ')}`);
+          setSyncStatus('Đồng bộ thất bại');
+        }
+      } else {
+        toast('Không có dữ liệu mới để đồng bộ', { icon: 'ℹ️' });
+        setSyncStatus('Không có dữ liệu mới');
+        
+        // Still try to fetch from database
+        await fetchFromDatabase();
+      }
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Không thể đồng bộ dữ liệu';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setSyncStatus('Lỗi đồng bộ');
+      console.error('Error syncing data:', err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Fetch invoices from database
+  const fetchFromDatabase = async (pageNumber: number = 0, showLoading: boolean = true) => {
+    try {
+      if (showLoading) setLoading(true);
+      setError(null);
+
+      // Build search filters for database
+      const searchFilters = {
+        page: pageNumber,
+        size: config.pageSize,
+        sortBy: sortField,
+        sortOrder: sortDirection,
+        fromDate: filter.fromDate,
+        toDate: filter.toDate,
+        ...(filter.invoiceNumber && { shdon: filter.invoiceNumber }),
+        ...(filter.taxCode && { nbmst: filter.taxCode }),
+        ...(filter.buyerName && { nmten: filter.buyerName })
+      };
+
+      const result = await searchDatabaseInvoices(searchFilters);
       
-      setInvoices(response.datas || []);
+      setInvoices(result.invoices || []);
       setPagination({
-        page: response.number || 0,
-        size: response.size || currentConfig.pageSize,
-        totalElements: response.totalElements || 0,
-        totalPages: response.totalPages || 0
+        page: result.page || 0,
+        size: result.size || config.pageSize,
+        totalElements: result.total || 0,
+        totalPages: result.totalPages || 0
       });
 
-      if (response.datas && response.datas.length === 0 && pageNumber === 0) {
-        toast(`Không tìm thấy hóa đơn ${currentConfig.invoiceType === 'banra' ? 'bán ra' : 'mua vào'} nào trong khoảng thời gian đã chọn`, {
+      if ((!result.invoices || result.invoices.length === 0) && pageNumber === 0) {
+        toast(`Không tìm thấy hóa đơn nào trong database cho tháng ${selectedMonth}/${selectedYear}`, {
           icon: 'ℹ️'
         });
       }
     } catch (err: any) {
-      const errorMessage = err?.message || 'Không thể tải dữ liệu hóa đơn';
+      const errorMessage = err?.message || 'Không thể tải dữ liệu từ database';
       setError(errorMessage);
       toast.error(errorMessage);
-      console.error('Error fetching invoices:', err);
+      console.error('Error fetching from database:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Main function to load data (check database first, then sync if needed)
+  const fetchInvoices = async (pageNumber: number = 0, showLoading: boolean = true) => {
+    // First, try to fetch from database
+    await fetchFromDatabase(pageNumber, showLoading);
   };
 
   // Handle quick date range selection
@@ -362,11 +420,21 @@ const ListHoaDonPage = () => {
               <button
                 type="button"
                 onClick={() => fetchInvoices(0, true)}
-                disabled={loading}
+                disabled={loading || isSyncing}
                 className="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Làm mới
+              </button>
+              
+              <button
+                type="button"
+                onClick={syncDataFromAPI}
+                disabled={loading || isSyncing || !filter.month || !filter.year}
+                className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                {isSyncing ? 'Đang đồng bộ...' : 'Đồng bộ từ API'}
               </button>
               
               <button
@@ -381,6 +449,15 @@ const ListHoaDonPage = () => {
             </div>
           </form>
         </div>
+
+        {syncStatus && (
+          <div className="bg-purple-50 border border-purple-200 text-purple-700 px-4 py-3 rounded-lg mb-6">
+            <div className="flex items-center">
+              <span className="font-medium">Trạng thái đồng bộ:</span>
+              <span className="ml-2">{syncStatus}</span>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
