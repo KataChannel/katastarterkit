@@ -17,9 +17,10 @@ const ListHoaDonPage = () => {
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
   const [pagination, setPagination] = useState({
     page: 0,
-    size: 15,
+    size: 50,
     totalElements: 0,
     totalPages: 0
   });
@@ -62,6 +63,11 @@ const ListHoaDonPage = () => {
   // Sort state
   const [sortField, setSortField] = useState<keyof InvoiceData>('tdlap');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // Client-side hydration check
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Update filter when month/year changes
   useEffect(() => {
@@ -236,11 +242,15 @@ const ListHoaDonPage = () => {
             <div className="flex items-center space-x-4">
               <div className="bg-blue-50 px-3 py-2 rounded-lg">
                 <span className="text-sm font-medium text-blue-800">
-                  Loại: {config.invoiceType === 'banra' ? 'Hóa đơn bán ra' : 'Hóa đơn mua vào'}
+                  {isClient ? (
+                    `Loại: ${config.invoiceType === 'banra' ? 'Hóa đơn bán ra' : 'Hóa đơn mua vào'}`
+                  ) : (
+                    'Loại: Hóa đơn bán ra'
+                  )}
                 </span>
               </div>
               <div className="text-sm text-gray-600">
-                Kích thước trang: {config.pageSize}
+                Kích thước trang: {isClient ? config.pageSize : 20}
               </div>
             </div>
             
