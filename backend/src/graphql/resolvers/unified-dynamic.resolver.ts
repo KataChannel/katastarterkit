@@ -9,7 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { UseGuards, Injectable } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { DynamicCRUDService, BulkOperationResult } from '../../services/dynamic-crud.service';
+import { DynamicCRUDService } from '../../services/dynamic-crud.service';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import {
   UnifiedCreateInput,
@@ -275,7 +275,7 @@ export class UnifiedDynamicResolver {
     @Args('input', { type: () => UnifiedBulkCreateInput }) 
     input: UnifiedBulkCreateInput,
     @Context() context?: any
-  ): Promise<BulkOperationResult<any>> {
+  ): Promise<any> {
     try {
       return await this.dynamicCrud.bulkCreate(modelName, input.data, {
         skipDuplicates: input.skipDuplicates,
@@ -302,7 +302,7 @@ export class UnifiedDynamicResolver {
     @Args('input', { type: () => UnifiedBulkUpdateInput }) 
     input: UnifiedBulkUpdateInput,
     @Context() context?: any
-  ): Promise<BulkOperationResult<any>> {
+  ): Promise<any> {
     try {
       return await this.dynamicCrud.bulkUpdate(modelName, input.where, input.data, {
         select: input.select,
@@ -328,7 +328,7 @@ export class UnifiedDynamicResolver {
     @Args('input', { type: () => UnifiedBulkDeleteInput }) 
     input: UnifiedBulkDeleteInput,
     @Context() context?: any
-  ): Promise<BulkOperationResult<any>> {
+  ): Promise<any> {
     try {
       return await this.dynamicCrud.bulkDelete(modelName, input.where, {
         select: input.select,

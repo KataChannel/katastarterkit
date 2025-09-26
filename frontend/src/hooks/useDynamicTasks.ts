@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   useDynamicQuery,
   useDynamicMutation,
-  useUniversalMutation,
   useCRUD,
   BulkOperationResult,
   formatDynamicGraphQLError,
@@ -20,6 +19,33 @@ import {
   TaskCategory
 } from '@/types/todo';
 import toast from 'react-hot-toast';
+
+// Types for hook options
+interface CreateTaskOptions {
+  showToast?: boolean;
+  onCreate?: (task: Task) => void;
+  onError?: (error: any) => void;
+}
+
+interface BulkCreateOptions {
+  showToast?: boolean;
+  showProgress?: boolean;
+  onProgress?: (progress: { completed: number; total: number }) => void;
+  onCompleted?: (result: BulkOperationResult<Task>) => void;
+  onError?: (error: any) => void;
+}
+
+interface UpdateTaskOptions {
+  showToast?: boolean;
+  onUpdate?: (task: Task) => void;
+  onError?: (error: any) => void;
+}
+
+interface DeleteTaskOptions {
+  showToast?: boolean;
+  onDelete?: () => void;
+  onError?: (error: any) => void;
+}
 
 // Dynamic Task CRUD Hook với tất cả tính năng
 export function useDynamicTasks() {
@@ -101,7 +127,7 @@ export function useDynamicTasks() {
     }
   );
 
-  const [updateTasksBulk, { loading: bulkUpdating }] = useDynamicMutation<BulkOperationResult<Task>, { data: Array<{ id: string; data: Partial<UpdateTaskInput> }> }>(
+  const [updateTasksBulk, { loading: bulkUpdating }] = useDynamicMutation<BulkOperationResult<Task>, { where: any; data: Partial<UpdateTaskInput> }>(
     'UPDATE_BULK',
     'Task',
     {
@@ -110,7 +136,7 @@ export function useDynamicTasks() {
     }
   );
 
-  const [deleteTasksBulk, { loading: bulkDeleting }] = useDynamicMutation<BulkOperationResult, { ids: string[] }>(
+  const [deleteTasksBulk, { loading: bulkDeleting }] = useDynamicMutation<BulkOperationResult<Task>, { where: any }>(
     'DELETE_BULK',
     'Task',
     {
@@ -119,30 +145,9 @@ export function useDynamicTasks() {
     }
   );
 
-  // Universal mutations (sử dụng universal resolver)
-  const [universalCreate] = useUniversalMutation<Task>(
-    'CREATE',
-    { modelName: 'Task' }
-  );
-
-  const [universalUpdate] = useUniversalMutation<Task>(
-    'UPDATE',
-    { modelName: 'Task' }
-  );
-
-  const [universalDelete] = useUniversalMutation<boolean>(
-    'DELETE',
-    { modelName: 'Task' }
-  );
-
-  // Enhanced task creation với better error handling
-  const handleCreateTask = useCallback(async (taskData: CreateTaskInput, options?: {
-    useUniversal?: boolean;
-    showToast?: boolean;
-    onCreate?: (task: Task) => void;
-    onError?: (error: any) => void;
-  }) => {
-    const { useUniversal = false, showToast = true, onCreate, onError } = options || {};
+  // Enhanced task creation
+  const handleCreateTask = useCallback(async (taskData: CreateTaskInput, options: CreateTaskOptions = {}) => {
+    const { showToast = true, onCreate, onError } = options;
 
     try {
       setIsLoading(true);
@@ -160,21 +165,11 @@ export function useDynamicTasks() {
         dueDate: taskData.dueDate || undefined
       };
 
-      let result: Task | null = null;
-
-      if (useUniversal) {
-        // Sử dụng universal resolver
-        const response = await universalCreate({
-          data: sanitizedData
-        });
-        result = (response.data as any)?.dynamicCreate;
-      } else {
-        // Sử dụng specific resolver
-        const response = await createTask({
-          variables: { data: sanitizedData }
-        });
-        result = response.data || null;
-      }
+      // Sử dụng specific resolver
+      const response = await createTask({
+        variables: { data: sanitizedData }
+      });
+      const result = response.data || null;
 
       if (!result) {
         throw new Error('Không thể tạo task - response rỗng');
@@ -211,23 +206,14 @@ export function useDynamicTasks() {
     } finally {
       setIsLoading(false);
     }
-  }, [createTask, universalCreate, refetch]);
+  }, [createTask, refetch]);
 
-  // Enhanced bulk task creation
-  const handleCreateTasksBulk = useCallback(async (tasksData: CreateTaskInput[], options?: {
-    showProgress?: boolean;
-    showToast?: boolean;
-    onProgress?: (progress: { completed: number; total: number }) => void;
-    onCompleted?: (result: BulkOperationResult<Task>) => void;
-  }) => {
-    const { showProgress = true, showToast = true, onProgress, onCompleted } = options || {};
+  // Bulk task creation
+  const handleCreateTasksBulk = useCallback(async (tasksData: CreateTaskInput[], options: BulkCreateOptions = {}) => {
+    const { showToast = true, showProgress = true, onProgress, onCompleted, onError } = options;
 
     try {
       setIsLoading(true);
-
-      if (tasksData.length === 0) {
-        throw new Error('Danh sách tasks trống');
-      }
 
       // Validate all tasks
       const validatedData = tasksData.map((task, index) => {
@@ -287,6 +273,7 @@ export function useDynamicTasks() {
         toast.error(`❌ ${errorMessage}`);
       }
 
+      onError?.(error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -294,12 +281,8 @@ export function useDynamicTasks() {
   }, [createTasksBulk, refetch]);
 
   // Enhanced task update
-  const handleUpdateTask = useCallback(async (id: string, updates: Partial<UpdateTaskInput>, options?: {
-    useUniversal?: boolean;
-    showToast?: boolean;
-    onUpdate?: (task: Task) => void;
-  }) => {
-    const { useUniversal = false, showToast = true, onUpdate } = options || {};
+  const handleUpdateTask = useCallback(async (id: string, updates: Partial<UpdateTaskInput>, options: UpdateTaskOptions = {}) => {
+    const { showToast = true, onUpdate, onError } = options;
 
     try {
       setIsLoading(true);
@@ -315,19 +298,16 @@ export function useDynamicTasks() {
         return acc;
       }, {} as any);
 
-      let result: Task;
+      const response = await updateTask({
+        variables: { 
+          id, 
+          data: sanitizedUpdates 
+        }
+      });
 
-      if (useUniversal) {
-        const response = await universalUpdate({
-          id,
-          data: sanitizedUpdates
-        });
-        result = (response.data as any)?.dynamicUpdate;
-      } else {
-        const response = await updateTask({
-          variables: { id, data: sanitizedUpdates }
-        });
-        result = response.data!;
+      const result = response.data;
+      if (!result) {
+        throw new Error('Không thể cập nhật task');
       }
 
       if (showToast) {
@@ -340,7 +320,7 @@ export function useDynamicTasks() {
       return result;
 
     } catch (error: any) {
-      console.error('Error updating task:', error);
+      console.error('❌ Error updating task:', error);
       
       const errorMessage = isDynamicGraphQLError(error)
         ? formatDynamicGraphQLError(error)
@@ -350,41 +330,25 @@ export function useDynamicTasks() {
         toast.error(`❌ ${errorMessage}`);
       }
 
+      onError?.(error);
       throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [updateTask, universalUpdate, refetch]);
+  }, [updateTask, refetch]);
 
   // Enhanced task deletion
-  const handleDeleteTask = useCallback(async (id: string, options?: {
-    useUniversal?: boolean;
-    showToast?: boolean;
-    confirmMessage?: string;
-    onDelete?: () => void;
-  }) => {
-    const { useUniversal = false, showToast = true, confirmMessage, onDelete } = options || {};
+  const handleDeleteTask = useCallback(async (id: string, options: DeleteTaskOptions = {}) => {
+    const { showToast = true, onDelete, onError } = options;
 
     try {
-      if (confirmMessage && !window.confirm(confirmMessage)) {
-        return false;
-      }
-
       setIsLoading(true);
 
-      let success: boolean;
+      const response = await deleteTask({
+        variables: { id }
+      });
 
-      if (useUniversal) {
-        const response = await universalDelete({
-          id
-        });
-        success = (response.data as any)?.dynamicDelete || false;
-      } else {
-        const response = await deleteTask({
-          variables: { id }
-        });
-        success = response.data!;
-      }
+      const success = response.data;
 
       if (showToast && success) {
         toast.success('✅ Xóa task thành công!');
@@ -396,7 +360,7 @@ export function useDynamicTasks() {
       return success;
 
     } catch (error: any) {
-      console.error('Error deleting task:', error);
+      console.error('❌ Error deleting task:', error);
       
       const errorMessage = isDynamicGraphQLError(error)
         ? formatDynamicGraphQLError(error)
@@ -406,57 +370,48 @@ export function useDynamicTasks() {
         toast.error(`❌ ${errorMessage}`);
       }
 
+      onError?.(error);
       throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [deleteTask, universalDelete, refetch]);
+  }, [deleteTask, refetch]);
+
+  // Statistics and computed values
+  const statistics = useMemo(() => {
+    if (!Array.isArray(allTasks)) return {
+      total: 0,
+      completed: 0,
+      pending: 0,
+      overdue: 0
+    };
+
+    const completed = allTasks.filter(t => t.status === TaskStatus.COMPLETED).length;
+    const pending = allTasks.filter(t => t.status !== TaskStatus.COMPLETED).length;
+    const overdue = allTasks.filter(t => {
+      return t.dueDate && new Date(t.dueDate) < new Date() && t.status !== TaskStatus.COMPLETED;
+    }).length;
+
+    return {
+      total: allTasks.length,
+      completed,
+      pending,
+      overdue
+    };
+  }, [allTasks]);
 
   // Quick actions
   const quickActions = useMemo(() => ({
     markAsCompleted: (id: string) => handleUpdateTask(id, { status: TaskStatus.COMPLETED }),
-    markAsInProgress: (id: string) => handleUpdateTask(id, { status: TaskStatus.IN_PROGRESS }),
     markAsPending: (id: string) => handleUpdateTask(id, { status: TaskStatus.PENDING }),
-    markAsCancelled: (id: string) => handleUpdateTask(id, { status: TaskStatus.CANCELLED }),
-    setHighPriority: (id: string) => handleUpdateTask(id, { priority: TaskPriority.HIGH }),
-    setMediumPriority: (id: string) => handleUpdateTask(id, { priority: TaskPriority.MEDIUM }),
-    setLowPriority: (id: string) => handleUpdateTask(id, { priority: TaskPriority.LOW }),
+    markAsInProgress: (id: string) => handleUpdateTask(id, { status: TaskStatus.IN_PROGRESS }),
+    setPriority: (id: string, priority: TaskPriority) => handleUpdateTask(id, { priority }),
+    setDueDate: (id: string, dueDate: Date) => handleUpdateTask(id, { dueDate: dueDate.toISOString() })
   }), [handleUpdateTask]);
 
-  // Statistics với safe array check
-  const statistics = useMemo(() => {
-    // Đảm bảo tasks là array
-    const tasks = Array.isArray(allTasks) ? allTasks : [];
-    
-    if (tasks.length === 0) {
-      return {
-        total: 0,
-        completed: 0,
-        inProgress: 0,
-        pending: 0,
-        cancelled: 0,
-        highPriority: 0,
-        overdue: 0
-      };
-    }
-
-    return {
-      total: tasks.length,
-      completed: tasks.filter(t => t?.status === TaskStatus.COMPLETED).length,
-      inProgress: tasks.filter(t => t?.status === TaskStatus.IN_PROGRESS).length,
-      pending: tasks.filter(t => t?.status === TaskStatus.PENDING).length,
-      cancelled: tasks.filter(t => t?.status === TaskStatus.CANCELLED).length,
-      highPriority: tasks.filter(t => t?.priority === TaskPriority.HIGH).length,
-      overdue: tasks.filter(t => {
-        if (!t?.dueDate) return false;
-        return new Date(t.dueDate) < new Date() && t.status !== TaskStatus.COMPLETED;
-      }).length
-    };
-  }, [allTasks]);
-
-  // Memoize the return object to prevent unnecessary re-renders
-  const returnValue = useMemo(() => ({
-    // Data - Đảm bảo luôn return array
+  // Return all functionality
+  return {
+    // Data
     tasks: Array.isArray(allTasks) ? allTasks : [],
     tasksPaginated,
     statistics,
@@ -470,10 +425,10 @@ export function useDynamicTasks() {
     bulkUpdating,
     bulkDeleting,
 
-    // Errors
+    // Error state
     error: tasksError,
 
-    // Actions
+    // CRUD operations
     createTask: handleCreateTask,
     createTasksBulk: handleCreateTasksBulk,
     updateTask: handleUpdateTask,
@@ -484,34 +439,7 @@ export function useDynamicTasks() {
     // Quick actions
     quickActions,
 
-    // CRUD operations (raw)
+    // Raw CRUD hook for advanced usage
     crud: taskCRUD
-  }), [
-    allTasks, tasksPaginated, statistics, tasksLoading, paginatedLoading, isLoading,
-    creating, updating, deleting, bulkCreating, bulkUpdating, bulkDeleting, tasksError,
-    handleCreateTask, handleCreateTasksBulk, handleUpdateTask, handleDeleteTask,
-    refetch, refetchPaginated, quickActions, taskCRUD
-  ]);
-
-  return returnValue;
-}
-
-// Hook for single task operations
-export function useDynamicTask(taskId?: string) {
-  const { data: task, loading, error, refetch } = useDynamicQuery<Task>(
-    'GET_BY_ID',
-    'Task',
-    {
-      variables: { id: taskId },
-      skip: !taskId,
-      fetchPolicy: 'cache-and-network'
-    }
-  );
-
-  return {
-    task,
-    loading,
-    error,
-    refetch
   };
 }

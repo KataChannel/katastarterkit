@@ -15,8 +15,7 @@ import {
   DynamicFilterInput, 
   BulkCreateInput, 
   BulkUpdateInput, 
-  BulkDeleteInput,
-  BulkOperationResult 
+  BulkDeleteInput
 } from '../../services/dynamic-crud.service';
 import { GraphQLScalarType } from 'graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
@@ -126,7 +125,7 @@ export function createDynamicResolver<TModel>(
       @Args('options', { type: () => GraphQLJSONObject, nullable: true }) 
       options?: { select?: any; include?: any },
       @Context() context?: any
-    ): Promise<BulkOperationResult<TModel>> {
+    ): Promise<any> {
       // Add user context to each item if authenticated
       if (context?.req?.user && input.data) {
         input.data = input.data.map(item => ({
@@ -164,7 +163,7 @@ export function createDynamicResolver<TModel>(
       @Args('options', { type: () => GraphQLJSONObject, nullable: true }) 
       options?: { select?: any; include?: any },
       @Context() context?: any
-    ): Promise<BulkOperationResult<TModel>> {
+    ): Promise<any> {
       // Add update context
       if (context?.req?.user && input.data) {
         input.data.updatedBy = input.data.updatedBy || context.req.user.id;
@@ -193,7 +192,7 @@ export function createDynamicResolver<TModel>(
       @Args('options', { type: () => GraphQLJSONObject, nullable: true }) 
       options?: { select?: any; include?: any },
       @Context() context?: any
-    ): Promise<BulkOperationResult<TModel>> {
+    ): Promise<any> {
       return await this.dynamicCRUDService.deleteBulk<TModel>(modelName, input, options);
     }
 
@@ -360,7 +359,7 @@ export class UniversalDynamicResolver {
     @Args('options', { type: () => GraphQLJSONObject, nullable: true }) 
     options?: { select?: any; include?: any },
     @Context() context?: any
-  ): Promise<BulkOperationResult<any>> {
+  ): Promise<any> {
     if (context?.req?.user && input.data) {
       input.data = input.data.map(item => ({
         ...item,
@@ -379,7 +378,7 @@ export class UniversalDynamicResolver {
     @Args('options', { type: () => GraphQLJSONObject, nullable: true }) 
     options?: { select?: any; include?: any },
     @Context() context?: any
-  ): Promise<BulkOperationResult<any>> {
+  ): Promise<any> {
     if (context?.req?.user && input.data) {
       input.data.updatedBy = input.data.updatedBy || context.req.user.id;
       input.data.updatedAt = new Date();
@@ -395,7 +394,7 @@ export class UniversalDynamicResolver {
     @Args('options', { type: () => GraphQLJSONObject, nullable: true }) 
     options?: { select?: any; include?: any },
     @Context() context?: any
-  ): Promise<BulkOperationResult<any>> {
+  ): Promise<any> {
     return await this.dynamicCRUDService.deleteBulk(modelName, input, options);
   }
 }

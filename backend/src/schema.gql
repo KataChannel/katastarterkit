@@ -131,12 +131,24 @@ enum MediaType {
 type Mutation {
   addPageBlock(input: CreatePageBlockInput!, pageId: String!): PageBlock!
   createComment(input: CreateCommentInput!): Comment!
+
+  """Create multiple records in a single operation"""
+  createMany(input: UnifiedBulkCreateInput!, modelName: String!): JSONObject!
+
+  """Create a single record with Prisma-like syntax"""
+  createOne(input: UnifiedCreateInput!, modelName: String!): JSONObject!
   createPage(input: CreatePageInput!): Page!
   createPost(input: CreatePostInput!): Post!
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
   deleteComment(id: String!): Boolean!
+
+  """Delete multiple records matching criteria"""
+  deleteMany(input: UnifiedBulkDeleteInput!, modelName: String!): JSONObject!
+
+  """Delete a single record by ID"""
+  deleteOne(input: UnifiedDeleteInput!, modelName: String!): JSONObject!
   deletePage(id: String!): Page!
   deletePageBlock(id: String!): PageBlock!
   deletePost(id: String!): Boolean!
@@ -156,12 +168,21 @@ type Mutation {
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   shareTask(input: ShareTaskInput!): TaskShare!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
+
+  """Update multiple records matching criteria"""
+  updateMany(input: UnifiedBulkUpdateInput!, modelName: String!): JSONObject!
+
+  """Update a single record by ID"""
+  updateOne(input: UnifiedUpdateInput!, modelName: String!): JSONObject!
   updatePage(id: String!, input: UpdatePageInput!): Page!
   updatePageBlock(id: String!, input: UpdatePageBlockInput!): PageBlock!
   updatePageBlocksOrder(pageId: String!, updates: [BulkUpdateBlockOrderInput!]!): [PageBlock!]!
   updatePost(id: String!, input: UpdatePostInput!): Post!
   updateTask(input: UpdateTaskInput!): Task!
   updateUser(id: String!, input: UpdateUserInput!): User!
+
+  """Create or update a record based on criteria"""
+  upsert(create: JSONObject!, include: JSONObject, modelName: String!, select: JSONObject, update: JSONObject!, where: JSONObject!): JSONObject!
 }
 
 type OtpResponse {
@@ -292,6 +313,20 @@ enum PostStatus {
 }
 
 type Query {
+  """Count records matching the criteria"""
+  count(modelName: String!, where: JSONObject): Float!
+
+  """Check if a record exists matching the criteria"""
+  exists(modelName: String!, where: JSONObject!): Boolean!
+
+  """Find a unique record by ID"""
+  findById(input: UnifiedFindByIdInput!, modelName: String!): JSONObject!
+
+  """Find all records for a model with Prisma-like syntax"""
+  findMany(input: UnifiedFindManyInput, modelName: String!): JSONObject!
+
+  """Find records with pagination"""
+  findManyPaginated(input: UnifiedPaginatedInput, modelName: String!): JSONObject!
   getCommentById(id: String!): Comment!
   getCommentsByPost(postId: String!): [Comment!]!
   getMe: User!
@@ -485,6 +520,132 @@ enum TaskStatus {
 type TasksPaginatedResult {
   data: [Task!]!
   meta: PaginationInfo!
+}
+
+input UnifiedBulkCreateInput {
+  """Array of data objects for bulk creation"""
+  data: [JSONObject!]!
+
+  """Include related data in results (Prisma include clause)"""
+  include: JSONObject
+
+  """Select specific fields from results (Prisma select clause)"""
+  select: JSONObject
+
+  """Skip duplicate records during bulk creation"""
+  skipDuplicates: Boolean = false
+}
+
+input UnifiedBulkDeleteInput {
+  """Include related data from deleted records (Prisma include clause)"""
+  include: JSONObject
+
+  """Select specific fields from deleted records (Prisma select clause)"""
+  select: JSONObject
+
+  """Filter conditions for records to delete (Prisma where clause)"""
+  where: JSONObject!
+}
+
+input UnifiedBulkUpdateInput {
+  """Data for bulk update (Prisma data clause)"""
+  data: JSONObject!
+
+  """Include related data in results (Prisma include clause)"""
+  include: JSONObject
+
+  """Select specific fields from results (Prisma select clause)"""
+  select: JSONObject
+
+  """Filter conditions for records to update (Prisma where clause)"""
+  where: JSONObject!
+}
+
+input UnifiedCreateInput {
+  """Data for record creation (Prisma data clause)"""
+  data: JSONObject!
+
+  """Include related data in result (Prisma include clause)"""
+  include: JSONObject
+
+  """Select specific fields from result (Prisma select clause)"""
+  select: JSONObject
+}
+
+input UnifiedDeleteInput {
+  """Unique identifier of the record to delete"""
+  id: ID!
+
+  """Include related data from deleted record (Prisma include clause)"""
+  include: JSONObject
+
+  """Select specific fields from deleted record (Prisma select clause)"""
+  select: JSONObject
+}
+
+input UnifiedFindByIdInput {
+  """Unique identifier of the record"""
+  id: ID!
+
+  """Include related data (Prisma include clause)"""
+  include: JSONObject
+
+  """Select specific fields (Prisma select clause)"""
+  select: JSONObject
+}
+
+input UnifiedFindManyInput {
+  """Include related data (Prisma include clause)"""
+  include: JSONObject
+
+  """Order by fields (Prisma orderBy clause)"""
+  orderBy: JSONObject
+
+  """Select specific fields (Prisma select clause)"""
+  select: JSONObject
+
+  """Number of records to skip"""
+  skip: Int
+
+  """Maximum number of records to return"""
+  take: Int
+
+  """Filter conditions (Prisma where clause)"""
+  where: JSONObject
+}
+
+input UnifiedPaginatedInput {
+  """Include related data (Prisma include clause)"""
+  include: JSONObject
+
+  """Number of records per page"""
+  limit: Int! = 10
+
+  """Order by fields (Prisma orderBy clause)"""
+  orderBy: JSONObject
+
+  """Page number (starts from 1)"""
+  page: Int! = 1
+
+  """Select specific fields (Prisma select clause)"""
+  select: JSONObject
+
+  """Filter conditions (Prisma where clause)"""
+  where: JSONObject
+}
+
+input UnifiedUpdateInput {
+  """Data for record update (Prisma data clause)"""
+  data: JSONObject!
+
+  """Unique identifier of the record to update"""
+  id: ID!
+
+  """Include related data in result (Prisma include clause)"""
+  include: JSONObject
+
+  """Select specific fields from result (Prisma select clause)"""
+  select: JSONObject
 }
 
 input UpdateCommentInput {

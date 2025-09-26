@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { UnifiedDynamicResolver } from './resolvers/unified-dynamic.resolver';
 import { DynamicCRUDService } from '../services/dynamic-crud.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../services/user.service';
 
 /**
  * Unified Dynamic GraphQL Module
@@ -119,10 +121,17 @@ import { PrismaService } from '../prisma/prisma.service';
  * ```
  */
 @Module({
+  imports: [
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'your-secret-key',
+      signOptions: { expiresIn: '24h' },
+    })
+  ],
   providers: [
     UnifiedDynamicResolver,
     DynamicCRUDService,
-    PrismaService
+    PrismaService,
+    UserService
   ],
   exports: [
     UnifiedDynamicResolver,
@@ -133,7 +142,7 @@ export class UnifiedDynamicModule {}
 
 // Export all the types and classes for use in other modules
 export { UnifiedDynamicResolver } from './resolvers/unified-dynamic.resolver';
-export { DynamicCRUDService, BulkOperationResult } from '../services/dynamic-crud.service';
+export { DynamicCRUDService } from '../services/dynamic-crud.service';
 export * from './inputs/unified-dynamic.inputs';
 
 // Model enum for reference
