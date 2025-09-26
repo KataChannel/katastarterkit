@@ -137,9 +137,13 @@ export default function TodosPage() {
   // Enhanced task delete với dynamic GraphQL
   const handleTaskDelete = async (taskId: string) => {
     try {
+      // Confirm before delete
+      if (!confirm('Bạn có chắc chắn muốn xóa task này?')) {
+        return;
+      }
+      
       await dynamicDeleteTask(taskId, {
         showToast: true,
-        confirmMessage: 'Bạn có chắc chắn muốn xóa task này?',
         onDelete: () => {
           console.log('✅ Task deleted via Dynamic GraphQL');
         }
@@ -171,7 +175,7 @@ export default function TodosPage() {
           await quickActions.markAsPending(taskId);
           break;
         case TaskStatus.CANCELLED:
-          await quickActions.markAsCancelled(taskId);
+          await handleTaskUpdate(taskId, { status });
           break;
         default:
           await handleTaskUpdate(taskId, { status });
@@ -206,7 +210,6 @@ export default function TodosPage() {
               <div className="mt-2 flex items-center text-sm text-gray-500 space-x-4">
                 <span>📊 Tổng: {statistics.total}</span>
                 <span>✅ Hoàn thành: {statistics.completed}</span>
-                <span>🔄 Đang làm: {statistics.inProgress}</span>
                 <span>⏳ Chờ: {statistics.pending}</span>
                 {statistics.overdue > 0 && (
                   <span className="text-red-600">⚠️ Quá hạn: {statistics.overdue}</span>

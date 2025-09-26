@@ -151,7 +151,7 @@ export const DynamicTaskDemo: React.FC<DynamicTaskDemoProps> = ({ onTaskCreated 
           toast.success('🔄 Marked as In Progress');
           
           setTimeout(async () => {
-            await quickActions.setHighPriority(demoTask.id);
+            await quickActions.setPriority(demoTask.id, TaskPriority.HIGH);
             toast.success('🚨 Set to High Priority');
             
             setTimeout(async () => {
@@ -195,8 +195,8 @@ export const DynamicTaskDemo: React.FC<DynamicTaskDemoProps> = ({ onTaskCreated 
               <div className="text-gray-500">Hoàn thành</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">{statistics.inProgress || 0}</div>
-              <div className="text-gray-500">Đang làm</div>
+              <div className="text-2xl font-bold text-yellow-600">{statistics.pending || 0}</div>
+              <div className="text-gray-500">Chờ xử lý</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-red-600">{statistics.overdue || 0}</div>
