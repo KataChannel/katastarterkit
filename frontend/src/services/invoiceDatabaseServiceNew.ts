@@ -24,15 +24,15 @@ class InvoiceDatabaseService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:14000';
   }
 
   /**
    * Get authentication headers
    */
   private getAuthHeaders(): HeadersInit {
-    // In a real app, you'd get the JWT token from your auth service
-    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    // Get the JWT token from the auth service (using token as per useAuth hook)
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     
     return {
       'Content-Type': 'application/json',
@@ -168,7 +168,8 @@ class InvoiceDatabaseService {
           queryParams.append(key, value.toString());
         }
       });
-
+      console.log('Searching invoices with params:', queryParams.toString());
+      
       const response = await fetch(`${this.baseUrl}/api/invoices?${queryParams}`, {
         method: 'GET',
         headers: this.getAuthHeaders(),

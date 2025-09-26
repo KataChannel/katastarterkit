@@ -19,6 +19,125 @@ export class InvoiceService {
   }
 
   /**
+   * Normalize invoice data to ensure proper types for database schema
+   */
+  private normalizeInvoiceData(data: any): any {
+    if (!data) return data;
+    
+    // Helper function to safely convert to string
+    const toStringOrNull = (value: any): string | null => {
+      if (value === null || value === undefined) return null;
+      return String(value);
+    };
+    
+    return {
+      ...data,
+      // Convert all string fields that might receive integers or other types
+      khmshdon: toStringOrNull(data.khmshdon),
+      khhdon: toStringOrNull(data.khhdon), 
+      shdon: toStringOrNull(data.shdon),
+      cqt: toStringOrNull(data.cqt),
+      hdon: toStringOrNull(data.hdon),
+      hthdon: toStringOrNull(data.hthdon), // This was causing the current error
+      htttoan: toStringOrNull(data.htttoan),
+      idtbao: toStringOrNull(data.idtbao),
+      khdon: toStringOrNull(data.khdon),
+      khhdgoc: toStringOrNull(data.khhdgoc),
+      khmshdgoc: toStringOrNull(data.khmshdgoc),
+      lhdgoc: toStringOrNull(data.lhdgoc),
+      mhdon: toStringOrNull(data.mhdon),
+      mtdiep: toStringOrNull(data.mtdiep),
+      mtdtchieu: toStringOrNull(data.mtdtchieu),
+      nbdchi: toStringOrNull(data.nbdchi),
+      chma: toStringOrNull(data.chma),
+      chten: toStringOrNull(data.chten),
+      nbhdktso: toStringOrNull(data.nbhdktso),
+      nbhdso: toStringOrNull(data.nbhdso),
+      nblddnbo: toStringOrNull(data.nblddnbo),
+      nbptvchuyen: toStringOrNull(data.nbptvchuyen),
+      nbstkhoan: toStringOrNull(data.nbstkhoan),
+      nbten: toStringOrNull(data.nbten),
+      nbtnhang: toStringOrNull(data.nbtnhang),
+      nbtnvchuyen: toStringOrNull(data.nbtnvchuyen),
+      ncma: toStringOrNull(data.ncma),
+      nky: toStringOrNull(data.nky),
+      nmdchi: toStringOrNull(data.nmdchi),
+      nmmst: toStringOrNull(data.nmmst),
+      nmstkhoan: toStringOrNull(data.nmstkhoan),
+      nmten: toStringOrNull(data.nmten),
+      nmtnhang: toStringOrNull(data.nmtnhang),
+      nmtnmua: toStringOrNull(data.nmtnmua),
+      nmttkhac: toStringOrNull(data.nmttkhac),
+      pban: toStringOrNull(data.pban),
+      ptgui: toStringOrNull(data.ptgui),
+      shdgoc: toStringOrNull(data.shdgoc),
+      tchat: toStringOrNull(data.tchat),
+      tgtttbchu: toStringOrNull(data.tgtttbchu),
+      thdon: toStringOrNull(data.thdon),
+      tlhdon: toStringOrNull(data.tlhdon),
+      ttcktmai: toStringOrNull(data.ttcktmai),
+      tthai: toStringOrNull(data.tthai),
+      tttbao: toStringOrNull(data.tttbao),
+      ttxly: toStringOrNull(data.ttxly),
+      tvandnkntt: toStringOrNull(data.tvandnkntt),
+      mhso: toStringOrNull(data.mhso),
+      mkhang: toStringOrNull(data.mkhang),
+      nbsdthoai: toStringOrNull(data.nbsdthoai),
+      nbdctdtu: toStringOrNull(data.nbdctdtu),
+      nbfax: toStringOrNull(data.nbfax),
+      nbwebsite: toStringOrNull(data.nbwebsite),
+      nmsdthoai: toStringOrNull(data.nmsdthoai),
+      nmdctdtu: toStringOrNull(data.nmdctdtu),
+      nmcmnd: toStringOrNull(data.nmcmnd),
+      nmcks: toStringOrNull(data.nmcks),
+      bhphap: toStringOrNull(data.bhphap),
+      hddunlap: toStringOrNull(data.hddunlap),
+      gchdgoc: toStringOrNull(data.gchdgoc),
+      bhpldo: toStringOrNull(data.bhpldo),
+      bhpcbo: toStringOrNull(data.bhpcbo),
+      unhiem: toStringOrNull(data.unhiem),
+      mstdvnunlhdon: toStringOrNull(data.mstdvnunlhdon),
+      tdvnunlhdon: toStringOrNull(data.tdvnunlhdon),
+      nbmdvqhnsach: toStringOrNull(data.nbmdvqhnsach),
+      nbsqdinh: toStringOrNull(data.nbsqdinh),
+      nbncqdinh: toStringOrNull(data.nbncqdinh),
+      nbcqcqdinh: toStringOrNull(data.nbcqcqdinh),
+      nbhtban: toStringOrNull(data.nbhtban),
+      nmmdvqhnsach: toStringOrNull(data.nmmdvqhnsach),
+      nmddvchden: toStringOrNull(data.nmddvchden),
+      nbtnban: toStringOrNull(data.nbtnban),
+      dcdvnunlhdon: toStringOrNull(data.dcdvnunlhdon),
+      thtttoan: toStringOrNull(data.thtttoan),
+      msttcgp: toStringOrNull(data.msttcgp),
+      gchu: toStringOrNull(data.gchu),
+      kqcht: toStringOrNull(data.kqcht),
+      nmshchieu: toStringOrNull(data.nmshchieu),
+      nmnchchieu: toStringOrNull(data.nmnchchieu),
+      nmnhhhchieu: toStringOrNull(data.nmnhhhchieu),
+      nmqtich: toStringOrNull(data.nmqtich),
+      nmstttoan: toStringOrNull(data.nmstttoan),
+      nmttttoan: toStringOrNull(data.nmttttoan),
+      hdhhdvu: toStringOrNull(data.hdhhdvu),
+      qrcode: toStringOrNull(data.qrcode),
+      ttmstten: toStringOrNull(data.ttmstten),
+      ladhddtten: toStringOrNull(data.ladhddtten),
+      hdxkhau: toStringOrNull(data.hdxkhau),
+      hdxkptquan: toStringOrNull(data.hdxkptquan),
+      hdonLquans: toStringOrNull(data.hdonLquans),
+      tthdclquan: toStringOrNull(data.tthdclquan),
+      pdndungs: toStringOrNull(data.pdndungs),
+      hdtbssrses: toStringOrNull(data.hdtbssrses),
+      hdTrung: toStringOrNull(data.hdTrung),
+      hdcttchinh: toStringOrNull(data.hdcttchinh),
+      
+      // Ensure other fields maintain their original types
+      // Decimal fields should remain as numbers/decimals
+      // DateTime fields should remain as Date objects
+      // Boolean fields should remain as booleans
+    };
+  }
+
+  /**
    * Convert Prisma invoice to GraphQL model
    */
   private convertInvoice(invoice: any): ExtListhoadon {
@@ -27,7 +146,6 @@ export class InvoiceService {
       tgia: this.decimalToNumber(invoice.tgia),
       tgtcthue: this.decimalToNumber(invoice.tgtcthue),
       tgtthue: this.decimalToNumber(invoice.tgtthue),
-      tgtttsach: this.decimalToNumber(invoice.tgtttsach),
       tgtttbso: this.decimalToNumber(invoice.tgtttbso),
       details: invoice.details ? invoice.details.map((detail: any) => this.convertDetail(detail)) : [],
     };
@@ -56,11 +174,12 @@ export class InvoiceService {
     try {
       // Check for existing invoice to prevent duplicates
       if (data.nbmst && data.khmshdon && data.shdon) {
+        const normalizedData = this.normalizeInvoiceData(data);
         const existing = await this.prisma.ext_listhoadon.findFirst({
           where: {
             nbmst: data.nbmst,
-            khmshdon: data.khmshdon,
-            shdon: data.shdon,
+            khmshdon: normalizedData.khmshdon,
+            shdon: normalizedData.shdon,
           },
         });
 
@@ -70,12 +189,15 @@ export class InvoiceService {
         }
       }
 
+      // Transform data to ensure proper types for Prisma schema
+      const transformedData = {
+        ...this.normalizeInvoiceData(data),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
       const invoice = await this.prisma.ext_listhoadon.create({
-        data: {
-          ...data,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        data: transformedData,
         include: {
           details: true,
         },
@@ -157,6 +279,17 @@ export class InvoiceService {
     try {
       const { page = 0, size = 20, sortBy = 'tdlap', sortOrder = 'desc', ...filters } = input;
 
+      // Log input for debugging
+      this.logger.debug('Invoice search input:', {
+        page,
+        size,
+        sortBy,
+        sortOrder,
+        fromDate: filters.fromDate?.toISOString(),
+        toDate: filters.toDate?.toISOString(),
+        otherFilters: { ...filters, fromDate: undefined, toDate: undefined }
+      });
+
       // Build where clause
       const where: any = {};
 
@@ -182,10 +315,12 @@ export class InvoiceService {
 
       if (filters.fromDate || filters.toDate) {
         where.tdlap = {};
-        if (filters.fromDate) {
+        
+        if (filters.fromDate && !isNaN(filters.fromDate.getTime())) {
           where.tdlap.gte = filters.fromDate;
         }
-        if (filters.toDate) {
+        
+        if (filters.toDate && !isNaN(filters.toDate.getTime())) {
           where.tdlap.lte = filters.toDate;
         }
       }
@@ -259,7 +394,11 @@ export class InvoiceService {
         try {
           // Skip existing if requested
           if (input.skipExisting && invoiceData.nbmst && invoiceData.khmshdon && invoiceData.shdon) {
-            const exists = await this.invoiceExists(invoiceData.nbmst, invoiceData.khmshdon, invoiceData.shdon);
+            const exists = await this.invoiceExists(
+              invoiceData.nbmst, 
+              String(invoiceData.khmshdon), 
+              String(invoiceData.shdon)
+            );
             if (exists) {
               continue;
             }
@@ -346,7 +485,7 @@ export class InvoiceService {
       const invoice = await this.prisma.ext_listhoadon.update({
         where: { id },
         data: {
-          ...data,
+          ...this.normalizeInvoiceData(data),
           updatedAt: new Date(),
         },
         include: {

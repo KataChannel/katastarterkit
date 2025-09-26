@@ -68,6 +68,16 @@ export class InvoiceController {
   @Roles($Enums.UserRoleType.ADMIN, $Enums.UserRoleType.USER)
   async searchInvoices(@Query() query: any) {
     try {
+      // Helper function to parse and validate dates
+      const parseDate = (dateString: string): Date | undefined => {
+        if (!dateString || dateString.trim() === '') {
+          return undefined;
+        }
+        
+        const parsed = new Date(dateString);
+        return isNaN(parsed.getTime()) ? undefined : parsed;
+      };
+
       // Convert query parameters to search input
       const input: InvoiceSearchInput = {
         page: parseInt(query.page) || 0,
@@ -79,8 +89,8 @@ export class InvoiceController {
         khmshdon: query.khmshdon,
         shdon: query.shdon,
         tthai: query.tthai,
-        fromDate: query.fromDate ? new Date(query.fromDate) : undefined,
-        toDate: query.toDate ? new Date(query.toDate) : undefined,
+        fromDate: parseDate(query.fromDate),
+        toDate: parseDate(query.toDate),
       };
 
       this.logger.log('REST: Searching invoices');
@@ -161,7 +171,6 @@ export class InvoiceController {
         tgia: invoice.tgia || 0,
         tgtcthue: invoice.tgtcthue || 0,
         tgtthue: invoice.tgtthue || 0,
-        tgtttsach: invoice.tgtttsach || 0,
         tgtttbso: invoice.tgtttbso || 0,
         tthai: invoice.tthai,
         // Add other fields as needed from the external API
