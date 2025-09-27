@@ -6,10 +6,12 @@ import { Decimal } from '@prisma/client/runtime/library';
 import axios from 'axios';
 import https from 'https';
 import { BackendConfigService } from './backend-config.service';
+import { FileLoggerService } from './file-logger.service';
 
 @Injectable()
 export class InvoiceService {
   private readonly logger = new Logger(InvoiceService.name);
+  private readonly fileLogger = new FileLoggerService();
 
   constructor(
     private readonly prisma: PrismaService,
@@ -17,6 +19,13 @@ export class InvoiceService {
   ) {
     // Validate configuration on startup
     this.configService.validateConfiguration();
+    
+    // Log service initialization
+    this.fileLogger.log('InvoiceService initialized', 'InvoiceService');
+    this.fileLogger.logWithData('log', 'Service startup', {
+      timestamp: new Date().toISOString(),
+      configValid: true
+    }, 'InvoiceService');
   }
 
   /**
@@ -35,12 +44,14 @@ export class InvoiceService {
       const khmshdon = invoice.khmshdon;
 
       if (!nbmst || !khhdon || !shdon || !khmshdon) {
-        this.logger.warn('Missing required parameters for detail fetching:', {
+        const missingParams = {
           nbmst: !!nbmst,
           khhdon: !!khhdon,
           shdon: !!shdon,
           khmshdon: !!khmshdon
-        });
+        };
+        this.logger.warn('Missing required parameters for detail fetching:', missingParams);
+        this.fileLogger.logWithData('warn', 'Missing required parameters for detail fetching', missingParams, 'InvoiceService');
         return null;
       }
 
@@ -81,8 +92,18 @@ export class InvoiceService {
       });
 
       const url = `${this.configService.getDetailApiEndpoint()}?${queryParams.toString()}`;
+      const tokenSource = bearerToken ? 'frontend' : 'environment';
+      
       this.logger.log(`Fetching invoice details from: ${url}`);
-      this.logger.log(`Using token from: ${bearerToken ? 'frontend' : 'environment'}`);
+      this.logger.log(`Using token from: ${tokenSource}`);
+      
+      // Log API call details to file
+      this.fileLogger.logWithData('log', 'Starting invoice detail fetch', {
+        url,
+        params,
+        tokenSource,
+        hasToken: !!effectiveToken
+      }, 'InvoiceService');
       
       // Create HTTPS agent to handle SSL certificate issues
       const httpsAgent = new https.Agent({
@@ -106,16 +127,25 @@ export class InvoiceService {
       });
 
       if (response.data && response.data.datas) {
+        this.fileLogger.logWithData('log', 'Invoice details fetched successfully', {
+          count: response.data.datas.length,
+          params,
+          responseTime: Date.now() - Date.now() // Will be updated with actual timing
+        }, 'InvoiceService');
         return response.data.datas;
       }
 
+      this.fileLogger.logWithData('warn', 'No invoice details found in response', {
+        params,
+        responseData: response.data
+      }, 'InvoiceService');
       return [];
     } catch (error: any) {
       const effectiveToken = bearerToken || this.configService.getBearerToken();
       const tokenSource = bearerToken ? 'frontend' : 'environment';
       const hasValidToken = effectiveToken && effectiveToken.length > 0;
       
-      this.logger.error('Error fetching invoice details:', {
+      const errorDetails = {
         error: error.message,
         status: error.response?.status,
         statusText: error.response?.statusText,
@@ -123,7 +153,11 @@ export class InvoiceService {
         tokenSource,
         endpoint: this.configService.getDetailApiEndpoint(),
         params
-      });
+      };
+      
+      this.logger.error('Error fetching invoice details:', errorDetails);
+      this.fileLogger.logApiError('GET', this.configService.getDetailApiEndpoint(), error, 'InvoiceService');
+      this.fileLogger.logWithData('error', 'Invoice detail fetch failed', errorDetails, 'InvoiceService');
       
       // Specific error handling for different types of errors
       if (error.message?.includes('unable to verify the first certificate')) {
@@ -221,7 +255,14 @@ export class InvoiceService {
         }
       }
 
+      const saveResult = {
+        saved: savedDetails.length,
+        total: details.length,
+        invoiceId: invoiceIdServer
+      };
+      
       this.logger.log(`Successfully saved ${savedDetails.length} out of ${details.length} details`);
+      this.fileLogger.logWithData('log', 'Invoice details saved to database', saveResult, 'InvoiceService');
       return savedDetails.length;
     } catch (error: any) {
       this.logger.error('Error saving invoice details:', error);
@@ -251,6 +292,10 @@ export class InvoiceService {
       // Save details to database
       const savedCount = await this.saveInvoiceDetails(invoice.idServer, details);
       this.logger.log(`Auto-saved ${savedCount} details for invoice ${invoice.shdon}`);
+      this.fileLogger.logInvoiceOperation('auto-fetch-details', invoice.shdon, {
+        detailsSaved: savedCount,
+        tokenSource: bearerToken ? 'frontend' : 'environment'
+      });
       
       return savedCount;
     } catch (error: any) {
@@ -460,6 +505,12 @@ export class InvoiceService {
       });
 
       this.logger.log(`Created invoice: ${invoice.id}`);
+      this.fileLogger.logInvoiceOperation('create', invoice.id, {
+        idServer: invoice.idServer,
+        nbmst: invoice.nbmst,
+        khmshdon: invoice.khmshdon,
+        shdon: invoice.shdon
+      });
       return this.convertInvoice(invoice);
     } catch (error) {
       this.logger.error('Error creating invoice:', error);
@@ -541,15 +592,15 @@ export class InvoiceService {
       const { page = 0, size = 20, sortBy = 'tdlap', sortOrder = 'desc', ...filters } = input;
 
       // Log input for debugging
-      this.logger.debug('Invoice search input:', {
-        page,
-        size,
-        sortBy,
-        sortOrder,
-        fromDate: filters.fromDate?.toISOString(),
-        toDate: filters.toDate?.toISOString(),
-        otherFilters: { ...filters, fromDate: undefined, toDate: undefined }
-      });
+      // this.logger.debug('Invoice search input:', {
+      //   page,
+      //   size,
+      //   sortBy,
+      //   sortOrder,
+      //   fromDate: filters.fromDate?.toISOString(),
+      //   toDate: filters.toDate?.toISOString(),
+      //   otherFilters: { ...filters, fromDate: undefined, toDate: undefined }
+      // });
 
       // Build where clause
       const where: any = {};
@@ -667,6 +718,21 @@ export class InvoiceService {
     try {
       this.logger.log(`Starting bulk creation of ${input.invoices.length} invoices with rate limiting`);
       this.logger.log(`Rate limiting config - Batch size: ${BATCH_SIZE}, Delay between batches: ${DELAY_BETWEEN_BATCHES}ms, Detail call delay: ${DELAY_BETWEEN_DETAIL_CALLS}ms, Max retries: ${MAX_RETRIES}`);
+      
+      // Log bulk operation start
+      this.fileLogger.logWithData('log', 'Bulk invoice creation started', {
+        totalInvoices: input.invoices.length,
+        includeDetails: input.includeDetails,
+        skipExisting: input.skipExisting,
+        hasToken: !!input.bearerToken,
+        tokenSource: input.bearerToken ? 'frontend' : 'environment',
+        rateLimitConfig: {
+          batchSize: BATCH_SIZE,
+          delayBetweenBatches: DELAY_BETWEEN_BATCHES,
+          delayBetweenCalls: DELAY_BETWEEN_DETAIL_CALLS,
+          maxRetries: MAX_RETRIES
+        }
+      }, 'InvoiceService');
 
       // Process invoices in batches to prevent server overload
       for (let i = 0; i < input.invoices.length; i += BATCH_SIZE) {
@@ -768,6 +834,17 @@ export class InvoiceService {
         : `Created ${result.invoicesSaved} invoices with ${result.errors.length} errors`;
 
       this.logger.log(`Bulk operation completed: ${result.message}`);
+      
+      // Log bulk operation completion
+      this.fileLogger.logWithData('log', 'Bulk invoice creation completed', {
+        success: result.success,
+        invoicesSaved: result.invoicesSaved,
+        detailsSaved: result.detailsSaved,
+        errorsCount: result.errors.length,
+        errors: result.errors.slice(0, 5), // Log first 5 errors only
+        message: result.message
+      }, 'InvoiceService');
+      
       return result;
     } catch (error) {
       this.logger.error('Error in bulk create operation:', error);

@@ -33,6 +33,9 @@ import { UnifiedDynamicModule } from './graphql/unified-dynamic.module';
 import { validationSchema } from './config/validation';
 import { EnvConfigService } from './config/env-config.service';
 
+// Controllers
+import { LogController } from './controllers/log.controller';
+
 // Resolvers
 import { AppResolver } from './app.resolver';
 
@@ -118,6 +121,9 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     MonitoringModule,
     SecurityModule,
     UnifiedDynamicModule,
+  ],
+  controllers: [
+    LogController,
   ],
   providers: [
     EnvConfigService,

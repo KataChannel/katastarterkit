@@ -27,6 +27,9 @@ async function bootstrap() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
   
+  // Serve static files for log viewer
+  app.use('/logs', express.static(join(__dirname, '../public')));
+  
   // Enable CORS
   app.enableCors({
     origin: configService.get('FRONTEND_URL', 'http://localhost:3000'),
