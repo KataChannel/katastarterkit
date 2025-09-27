@@ -3,10 +3,11 @@ import InvoiceApiService from './invoiceApi';
 import InvoiceDatabaseService, { DatabaseSyncResult } from './invoiceDatabaseService';
 
 export interface SyncOptions {
-  includeDetails?: boolean;
-  batchSize?: number;
-  maxRetries?: number;
-  skipExisting?: boolean;
+  includeDetails?: boolean; // Default: true - Automatically fetch details after syncing invoices
+  batchSize?: number;       // Default: 10 - Number of invoices to process per batch
+  maxRetries?: number;      // Default: 3 - Number of retry attempts for failed operations
+  skipExisting?: boolean;   // Default: true - Skip invoices that already exist in database
+  bearerToken?: string;     // Bearer Token from frontend config for detail API authentication
 }
 
 export interface SyncProgress {
@@ -37,10 +38,11 @@ export class InvoiceSyncService {
     }
 
     const {
-      includeDetails = false,
+      includeDetails = true, // Default to true for automatic detail fetching
       batchSize = 10,
       maxRetries = 3,
-      skipExisting = true
+      skipExisting = true,
+      bearerToken
     } = options;
 
     this.syncInProgress = true;
@@ -111,7 +113,8 @@ export class InvoiceSyncService {
       const result = await InvoiceDatabaseService.syncInvoicesBatch(
         invoicesToSync,
         includeDetails,
-        batchSize
+        batchSize,
+        bearerToken
       );
 
       this.currentProgress.processedInvoices = invoicesToSync.length;
@@ -141,7 +144,7 @@ export class InvoiceSyncService {
    */
   static async syncSpecificInvoices(
     invoiceIdentifiers: Array<{ nbmst: string; khmshdon: string; shdon: string }>,
-    includeDetails: boolean = false
+    includeDetails: boolean = true // Default to true for automatic detail fetching
   ): Promise<DatabaseSyncResult> {
     const result: DatabaseSyncResult = {
       success: true,

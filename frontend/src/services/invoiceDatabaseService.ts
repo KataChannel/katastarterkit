@@ -136,11 +136,74 @@ export class InvoiceDatabaseService {
   }
 
   /**
-   * Sync multiple invoices with database
+   * Automatically fetch and save invoice details for a successfully synced invoice
+   */
+  static async fetchAndSaveInvoiceDetails(
+    invoiceId: string,
+    apiInvoice: InvoiceData
+  ): Promise<{ success: boolean; detailCount: number; error?: string }> {
+    try {
+      console.log(`Auto-fetching details for invoice ${apiInvoice.shdon}...`);
+      
+      // Extract detail parameters from invoice
+      const detailParams = InvoiceDetailApiService.extractDetailParamsFromInvoice(apiInvoice);
+      
+      if (!detailParams) {
+        return { 
+          success: false, 
+          detailCount: 0, 
+          error: `Could not extract detail parameters for invoice ${apiInvoice.shdon}` 
+        };
+      }
+
+      // Validate parameters
+      const validation = InvoiceDetailApiService.validateDetailParams(detailParams);
+      
+      if (!validation.isValid) {
+        return { 
+          success: false, 
+          detailCount: 0, 
+          error: `Invalid detail parameters for invoice ${apiInvoice.shdon}: ${validation.error}` 
+        };
+      }
+
+      // Fetch details from external API
+      const detailResponse = await InvoiceDetailApiService.fetchInvoiceDetails(detailParams);
+      
+      if (!detailResponse.success || !detailResponse.datas || detailResponse.datas.length === 0) {
+        console.log(`No details found for invoice ${apiInvoice.shdon}`);
+        return { success: true, detailCount: 0 }; // Not an error, just no details available
+      }
+
+      // Save details to database
+      const detailsResult = await this.saveInvoiceDetails(invoiceId, detailResponse.datas);
+      
+      if (detailsResult.success) {
+        console.log(`Successfully auto-saved ${detailsResult.count} details for invoice ${apiInvoice.shdon}`);
+        return { success: true, detailCount: detailsResult.count };
+      } else {
+        return { 
+          success: false, 
+          detailCount: 0, 
+          error: `Failed to save details for invoice ${apiInvoice.shdon}: ${detailsResult.error}` 
+        };
+      }
+    } catch (error: any) {
+      console.error(`Error auto-fetching details for invoice ${apiInvoice.shdon}:`, error);
+      return { 
+        success: false, 
+        detailCount: 0, 
+        error: `Auto-fetch details error for invoice ${apiInvoice.shdon}: ${error.message}` 
+      };
+    }
+  }
+
+  /**
+   * Sync multiple invoices with database and automatically fetch details
    */
   static async syncInvoices(
     apiInvoices: InvoiceData[],
-    includeDetails: boolean = false
+    includeDetails: boolean = true
   ): Promise<DatabaseSyncResult> {
     const result: DatabaseSyncResult = {
       success: true,
@@ -173,44 +236,14 @@ export class InvoiceDatabaseService {
           result.invoicesSaved++;
           console.log(`Successfully saved invoice ${apiInvoice.shdon} with ID: ${invoiceResult.id}`);
           
-          // Fetch and save details if requested
+          // Automatically fetch and save details after successful invoice sync
           if (includeDetails) {
-            try {
-              // Extract detail parameters from invoice
-              const detailParams = InvoiceDetailApiService.extractDetailParamsFromInvoice(apiInvoice);
-              
-              if (detailParams) {
-                // Validate parameters
-                const validation = InvoiceDetailApiService.validateDetailParams(detailParams);
-                
-                if (validation.isValid) {
-                  console.log(`Fetching details for invoice ${apiInvoice.shdon}...`);
-                  
-                  // Fetch details from external API
-                  const detailResponse = await InvoiceDetailApiService.fetchInvoiceDetails(detailParams);
-                  
-                  if (detailResponse.success && detailResponse.datas && detailResponse.datas.length > 0) {
-                    // Save details to database
-                    const detailsResult = await this.saveInvoiceDetails(invoiceResult.id, detailResponse.datas);
-                    
-                    if (detailsResult.success) {
-                      result.detailsSaved += detailsResult.count;
-                      console.log(`Successfully saved ${detailsResult.count} details for invoice ${apiInvoice.shdon}`);
-                    } else {
-                      result.errors.push(`Failed to save details for invoice ${apiInvoice.shdon}: ${detailsResult.error}`);
-                    }
-                  } else {
-                    console.log(`No details found for invoice ${apiInvoice.shdon}`);
-                  }
-                } else {
-                  result.errors.push(`Invalid detail parameters for invoice ${apiInvoice.shdon}: ${validation.error}`);
-                }
-              } else {
-                result.errors.push(`Could not extract detail parameters for invoice ${apiInvoice.shdon}`);
-              }
-            } catch (detailError: any) {
-              console.error(`Error fetching/saving details for invoice ${apiInvoice.shdon}:`, detailError);
-              result.errors.push(`Details error for invoice ${apiInvoice.shdon}: ${detailError.message}`);
+            const detailResult = await this.fetchAndSaveInvoiceDetails(invoiceResult.id, apiInvoice);
+            
+            if (detailResult.success) {
+              result.detailsSaved += detailResult.detailCount;
+            } else if (detailResult.error) {
+              result.errors.push(detailResult.error);
             }
           }
         } else {
@@ -230,6 +263,20 @@ export class InvoiceDatabaseService {
 
     console.log('Sync completed:', result);
     return result;
+  }
+
+  /**
+   * Sync invoices with automatic detail fetching and Bearer Token (simplified wrapper)
+   */
+  static async syncInvoicesWithDetails(apiInvoices: InvoiceData[], bearerToken?: string): Promise<DatabaseSyncResult> {
+    return this.syncInvoicesGraphQL(apiInvoices, true, bearerToken);
+  }
+
+  /**
+   * Sync invoices without details (for backward compatibility)
+   */
+  static async syncInvoicesOnly(apiInvoices: InvoiceData[], bearerToken?: string): Promise<DatabaseSyncResult> {
+    return this.syncInvoicesGraphQL(apiInvoices, false, bearerToken);
   }
 
   /**
@@ -345,12 +392,94 @@ export class InvoiceDatabaseService {
   }
 
   /**
-   * Sync invoices in batches for better performance
+   * Sync invoices using GraphQL with Bearer Token support
+   */
+  static async syncInvoicesGraphQL(
+    apiInvoices: InvoiceData[],
+    includeDetails: boolean = true,
+    bearerToken?: string
+  ): Promise<DatabaseSyncResult> {
+    try {
+      // Get GraphQL endpoint
+      const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3001/graphql';
+      
+      console.log(`Syncing ${apiInvoices.length} invoices via GraphQL with Bearer Token: ${bearerToken ? 'Yes' : 'No'}`);
+
+      // Prepare GraphQL mutation
+      const mutation = `
+        mutation BulkCreateInvoices($input: BulkInvoiceInput!) {
+          bulkCreateInvoices(input: $input) {
+            success
+            invoicesSaved
+            detailsSaved
+            errors
+            message
+          }
+        }
+      `;
+
+      // Prepare variables
+      const variables = {
+        input: {
+          invoices: apiInvoices.map(invoice => ({
+            ...invoice,
+            // Ensure proper data types for common fields
+            tdlap: invoice.tdlap ? new Date(invoice.tdlap).toISOString() : null,
+            tgtttbso: invoice.tgtttbso ? parseFloat(invoice.tgtttbso.toString()) : null,
+            tgtthue: invoice.tgtthue ? parseFloat(invoice.tgtthue.toString()) : null,
+            tgtcthue: invoice.tgtcthue ? parseFloat(invoice.tgtcthue.toString()) : null,
+          })),
+          skipExisting: true,
+          includeDetails,
+          bearerToken // Pass Bearer Token to backend
+        }
+      };
+
+      // Make GraphQL request
+      const response = await fetch(graphqlUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: mutation,
+          variables
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`GraphQL request failed: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (result.errors) {
+        console.error('GraphQL errors:', result.errors);
+        throw new Error(`GraphQL errors: ${result.errors.map((e: any) => e.message).join(', ')}`);
+      }
+
+      return result.data.bulkCreateInvoices;
+
+    } catch (error: any) {
+      console.error('Error in GraphQL sync:', error);
+      return {
+        success: false,
+        invoicesSaved: 0,
+        detailsSaved: 0,
+        errors: [error.message],
+        message: `GraphQL sync failed: ${error.message}`
+      };
+    }
+  }
+
+  /**
+   * Sync invoices in batches for better performance with Bearer Token
    */
   static async syncInvoicesBatch(
     apiInvoices: InvoiceData[],
-    includeDetails: boolean = false,
-    batchSize: number = 10
+    includeDetails: boolean = true,
+    batchSize: number = 10,
+    bearerToken?: string
   ): Promise<DatabaseSyncResult> {
     const totalResult: DatabaseSyncResult = {
       success: true,
@@ -360,7 +489,8 @@ export class InvoiceDatabaseService {
       message: ''
     };
 
-    console.log(`Starting batch sync of ${apiInvoices.length} invoices in batches of ${batchSize}`);
+    const tokenInfo = bearerToken ? 'with Bearer Token from frontend' : 'using environment token';
+    console.log(`Starting batch sync of ${apiInvoices.length} invoices in batches of ${batchSize} ${tokenInfo}`);
 
     // Process invoices in batches
     for (let i = 0; i < apiInvoices.length; i += batchSize) {
@@ -368,7 +498,7 @@ export class InvoiceDatabaseService {
       console.log(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(apiInvoices.length / batchSize)}`);
 
       try {
-        const batchResult = await this.syncInvoices(batch, includeDetails);
+        const batchResult = await this.syncInvoicesGraphQL(batch, includeDetails, bearerToken);
         
         // Accumulate results
         totalResult.invoicesSaved += batchResult.invoicesSaved;

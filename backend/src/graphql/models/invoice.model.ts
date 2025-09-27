@@ -5,6 +5,9 @@ export class ExtListhoadon {
   @Field(() => ID)
   id: string;
 
+  @Field(() => String, { nullable: true })
+  idServer?: string;
+
   // Basic Invoice Info
   @Field(() => String, { nullable: true })
   nbmst?: string;

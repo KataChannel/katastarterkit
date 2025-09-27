@@ -34,7 +34,8 @@ enum BlockType {
 }
 
 input BulkInvoiceInput {
-  includeDetails: Boolean = false
+  bearerToken: String
+  includeDetails: Boolean = true
   invoices: [CreateInvoiceInput!]!
   skipExisting: Boolean = false
 }
@@ -81,6 +82,7 @@ input CreateInvoiceInput {
   gchu: String
   hthdon: String
   htttoan: String
+  idServer: String
   khhdon: String
   khmshdon: String
   ladhddt: Boolean
@@ -195,6 +197,7 @@ type ExtListhoadon {
   hthdon: String
   htttoan: String
   id: ID!
+  idServer: String
   isHDTrung: Boolean
   khhdon: String
   khmshdon: String

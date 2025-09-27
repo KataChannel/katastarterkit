@@ -3,12 +3,225 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvoiceInput, CreateInvoiceDetailInput, InvoiceSearchInput, BulkInvoiceInput } from '../graphql/inputs/invoice.input';
 import { ExtListhoadon, ExtDetailhoadon, InvoiceSearchResult, DatabaseSyncResult, InvoiceStats } from '../graphql/models/invoice.model';
 import { Decimal } from '@prisma/client/runtime/library';
+import axios from 'axios';
+import { BackendConfigService } from './backend-config.service';
 
 @Injectable()
 export class InvoiceService {
   private readonly logger = new Logger(InvoiceService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: BackendConfigService
+  ) {
+    // Validate configuration on startup
+    this.configService.validateConfiguration();
+  }
+
+  /**
+   * Extract detail parameters from invoice data
+   */
+  private extractDetailParams(invoice: any): {
+    nbmst: string;
+    khhdon: string;
+    shdon: string;
+    khmshdon: string;
+  } | null {
+    try {
+      const nbmst = invoice.nbmst || invoice.msttcgp;
+      const khhdon = invoice.khhdon || invoice.khmshdon;
+      const shdon = invoice.shdon;
+      const khmshdon = invoice.khmshdon;
+
+      if (!nbmst || !khhdon || !shdon || !khmshdon) {
+        this.logger.warn('Missing required parameters for detail fetching:', {
+          nbmst: !!nbmst,
+          khhdon: !!khhdon,
+          shdon: !!shdon,
+          khmshdon: !!khmshdon
+        });
+        return null;
+      }
+
+      return { nbmst, khhdon, shdon, khmshdon };
+    } catch (error) {
+      this.logger.error('Error extracting detail params:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Fetch invoice details from external API
+   */
+  private async fetchInvoiceDetails(
+    params: {
+      nbmst: string;
+      khhdon: string;
+      shdon: string;
+      khmshdon: string;
+    },
+    bearerToken?: string
+  ): Promise<any[]> {
+    try {
+      // Use provided bearerToken or fallback to environment config
+      const effectiveToken = bearerToken || this.configService.getBearerToken();
+      const config = this.configService.getInvoiceConfig();
+      
+      if (!effectiveToken || effectiveToken.length === 0) {
+        this.logger.warn('No Bearer Token provided from frontend or environment');
+        this.logger.warn('Invoice detail fetching will likely fail due to authentication');
+      }
+      
+      const queryParams = new URLSearchParams({
+        nbmst: params.nbmst,
+        khhdon: params.khhdon,
+        shdon: params.shdon,
+        khmshdon: params.khmshdon
+      });
+
+      const url = `${this.configService.getDetailApiEndpoint()}?${queryParams.toString()}`;
+      this.logger.log(`Fetching invoice details from: ${url}`);
+      this.logger.log(`Using token from: ${bearerToken ? 'frontend' : 'environment'}`);
+      
+      const response = await axios.get(url, {
+        timeout: config.timeout,
+        headers: {
+          'Authorization': `Bearer ${effectiveToken}`,
+          'User-Agent': 'Mozilla/5.0 (compatible; InvoiceService/1.0)',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.data && response.data.datas) {
+        return response.data.datas;
+      }
+
+      return [];
+    } catch (error: any) {
+      const effectiveToken = bearerToken || this.configService.getBearerToken();
+      const tokenSource = bearerToken ? 'frontend' : 'environment';
+      const hasValidToken = effectiveToken && effectiveToken.length > 0;
+      
+      this.logger.error('Error fetching invoice details:', {
+        error: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        hasValidToken,
+        tokenSource,
+        endpoint: this.configService.getDetailApiEndpoint(),
+        params
+      });
+      
+      // Specific error handling for authentication issues
+      if (error.response?.status === 401) {
+        this.logger.error('🔐 Authentication failed - Bearer Token may be invalid or expired');
+        if (tokenSource === 'frontend') {
+          this.logger.error('💡 Please check the Bearer Token in your frontend configuration (ketoan/listhoadon)');
+        } else {
+          this.logger.error('💡 Please check INVOICE_API_BEARER_TOKEN in your .env file');
+        }
+      } else if (error.response?.status === 403) {
+        this.logger.error('🚫 Access forbidden - Bearer Token may not have sufficient permissions');
+      } else if (error.response?.status === 404) {
+        this.logger.warn('📋 No details found for this invoice');
+      } else if (error.code === 'ECONNABORTED') {
+        this.logger.error('⏱️  Request timeout - External API is not responding');
+      } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+        this.logger.error('🌐 Network error - Cannot reach external API');
+      }
+      
+      return [];
+    }
+  }
+
+  /**
+   * Save invoice details to database
+   */
+  private async saveInvoiceDetails(invoiceIdServer: string, details: any[]): Promise<number> {
+    try {
+      if (!details || details.length === 0) {
+        this.logger.log('No details to save');
+        return 0;
+      }
+
+      const savedDetails = [];
+      for (const detail of details) {
+        try {
+          const detailData = {
+            idServer: detail.id || `${invoiceIdServer}_${detail.stt || Math.random()}`,
+            idhdonServer: invoiceIdServer,
+            dgia: detail.dgia ? new Decimal(detail.dgia) : null,
+            dvtinh: detail.dvtinh || null,
+            ltsuat: detail.ltsuat ? new Decimal(detail.ltsuat) : null,
+            sluong: detail.sluong ? new Decimal(detail.sluong) : null,
+            stbchu: detail.stbchu || null,
+            stckhau: detail.stckhau ? new Decimal(detail.stckhau) : null,
+            stt: detail.stt ? parseInt(detail.stt) : null,
+            tchat: detail.tchat || null,
+            ten: detail.ten || null,
+            thtcthue: detail.thtcthue ? new Decimal(detail.thtcthue) : null,
+            thtien: detail.thtien ? new Decimal(detail.thtien) : null,
+            tlckhau: detail.tlckhau ? new Decimal(detail.tlckhau) : null,
+            tsuat: detail.tsuat ? new Decimal(detail.tsuat) : null,
+            tthue: detail.tthue ? new Decimal(detail.tthue) : null,
+            sxep: detail.sxep ? parseInt(detail.sxep) : null,
+            dvtte: detail.dvtte || null,
+            tgia: detail.tgia ? new Decimal(detail.tgia) : null,
+            tthhdtrung: detail.tthhdtrung || null,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+
+          const savedDetail = await this.prisma.ext_detailhoadon.create({
+            data: detailData
+          });
+
+          savedDetails.push(savedDetail);
+        } catch (detailError: any) {
+          this.logger.error('Error saving individual detail:', {
+            error: detailError.message,
+            detail: detail.stt || 'unknown'
+          });
+        }
+      }
+
+      this.logger.log(`Successfully saved ${savedDetails.length} out of ${details.length} details`);
+      return savedDetails.length;
+    } catch (error: any) {
+      this.logger.error('Error saving invoice details:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Automatically fetch and save invoice details
+   */
+  private async autoFetchAndSaveDetails(invoice: any, bearerToken?: string): Promise<number> {
+    try {
+      // Extract parameters from invoice
+      const detailParams = this.extractDetailParams(invoice);
+      if (!detailParams) {
+        this.logger.warn(`Cannot extract detail parameters for invoice ${invoice.shdon}`);
+        return 0;
+      }
+
+      // Fetch details from external API using provided bearerToken
+      const details = await this.fetchInvoiceDetails(detailParams, bearerToken);
+      if (details.length === 0) {
+        this.logger.log(`No details found for invoice ${invoice.shdon}`);
+        return 0;
+      }
+
+      // Save details to database
+      const savedCount = await this.saveInvoiceDetails(invoice.idServer, details);
+      this.logger.log(`Auto-saved ${savedCount} details for invoice ${invoice.shdon}`);
+      
+      return savedCount;
+    } catch (error: any) {
+      this.logger.error(`Error auto-fetching details for invoice ${invoice.shdon}:`, error);
+      return 0;
+    }
+  }
 
   /**
    * Convert Decimal to number safely
@@ -189,9 +402,16 @@ export class InvoiceService {
         }
       }
 
+      // Generate idServer if not provided
+      const idServer = data.idServer || 
+        (data.nbmst && data.khmshdon && data.shdon ? 
+          `${data.nbmst}_${data.khmshdon}_${data.shdon}` : 
+          undefined);
+
       // Transform data to ensure proper types for Prisma schema
       const transformedData = {
         ...this.normalizeInvoiceData(data),
+        idServer,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -216,6 +436,8 @@ export class InvoiceService {
    */
   async createInvoiceDetails(invoiceId: string, details: CreateInvoiceDetailInput[]): Promise<ExtDetailhoadon[]> {
     try {
+      console.log('Creating details for invoice:', invoiceId, details);
+      
       // Verify invoice exists
       const invoice = await this.prisma.ext_listhoadon.findUnique({
         where: { id: invoiceId },
@@ -231,7 +453,10 @@ export class InvoiceService {
           this.prisma.ext_detailhoadon.create({
             data: {
               ...detail,
-              idhdon: invoiceId,
+              idServer: invoiceId, // Add the required idServer field
+              invoice: {
+                connect: { id: invoiceId }
+              },
               createdAt: new Date(),
               updatedAt: new Date(),
             },
@@ -405,6 +630,28 @@ export class InvoiceService {
           }
 
           const invoice = await this.createInvoice(invoiceData);
+          this.logger.log('Created invoice in bulk:', {
+            id: invoice.id,
+            idServer: invoice.idServer,
+            shdon: invoice.shdon
+          });
+          
+          // Automatically fetch and save invoice details using bearerToken from frontend
+          if (input.includeDetails !== false) {
+            try {
+              const detailsSaved = await this.autoFetchAndSaveDetails(invoice, input.bearerToken);
+              result.detailsSaved += detailsSaved;
+              
+              if (detailsSaved > 0) {
+                const tokenSource = input.bearerToken ? 'frontend' : 'environment';
+                this.logger.log(`Auto-fetched ${detailsSaved} details for invoice ${invoice.shdon} using token from ${tokenSource}`);
+              }
+            } catch (detailError: any) {
+              this.logger.error(`Failed to auto-fetch details for invoice ${invoice.shdon}:`, detailError);
+              result.errors.push(`Failed to fetch details for invoice ${invoice.shdon}: ${detailError.message}`);
+            }
+          }
+
           result.invoicesSaved++;
 
           // Note: Details would be handled separately via the detail creation endpoint

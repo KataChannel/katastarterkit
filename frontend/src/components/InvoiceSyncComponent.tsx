@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useSyncInvoices from '@/hooks/useSyncInvoices';
 import { InvoiceFilter, InvoiceType } from '@/types/invoice';
+import ConfigService from '@/services/configService';
 
 interface InvoiceSyncComponentProps {
   filter?: InvoiceFilter;
@@ -67,11 +68,16 @@ const InvoiceSyncComponent: React.FC<InvoiceSyncComponentProps> = ({
       return;
     }
 
+    // Get Bearer Token from config for detail API authentication
+    const config = ConfigService.getConfig();
+    const bearerToken = config.bearerToken;
+
     const options = {
       includeDetails,
       batchSize,
       maxRetries: 3,
-      skipExisting: true
+      skipExisting: true,
+      bearerToken // Pass Bearer Token from frontend config
     };
 
     await startSync(filter, invoiceType, options);

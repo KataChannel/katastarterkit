@@ -21,6 +21,7 @@ import { OtpService } from '../services/otp.service';
 import { PubSubService } from '../services/pubsub.service';
 import { PageService } from '../services/page.service';
 import { InvoiceService } from '../services/invoice.service';
+import { BackendConfigService } from '../services/backend-config.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
@@ -64,6 +65,7 @@ import { JSONScalar } from './scalars/json.scalar';
     PubSubService,
     PageService,
     InvoiceService,
+    BackendConfigService,
   ],
   exports: [
     UserService,
@@ -77,6 +79,7 @@ import { JSONScalar } from './scalars/json.scalar';
     PubSubService,
     PageService,
     InvoiceService,
+    BackendConfigService,
   ],
 })
 export class GraphQLResolversModule {}

@@ -19,7 +19,7 @@ export interface UseSyncInvoicesReturn {
   
   syncSpecificInvoices: (
     invoiceIdentifiers: Array<{ nbmst: string; khmshdon: string; shdon: string }>,
-    includeDetails?: boolean
+    includeDetails?: boolean // Default: true - Automatically fetch details after syncing invoices
   ) => Promise<void>;
   
   syncDetailsForExisting: (invoiceIds: string[]) => Promise<void>;
@@ -94,7 +94,7 @@ export function useSyncInvoices(): UseSyncInvoicesReturn {
 
   const syncSpecificInvoices = useCallback(async (
     invoiceIdentifiers: Array<{ nbmst: string; khmshdon: string; shdon: string }>,
-    includeDetails: boolean = false
+    includeDetails: boolean = true // Default to true for automatic detail fetching
   ) => {
     try {
       setIsLoading(true);

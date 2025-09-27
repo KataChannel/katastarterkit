@@ -89,14 +89,20 @@ export class InvoiceResolver {
   }
 
   /**
-   * Bulk create invoices
+   * Bulk create invoices with optional Bearer Token from frontend
    */
   @Mutation(() => DatabaseSyncResult)
   @Roles($Enums.UserRoleType.ADMIN, $Enums.UserRoleType.USER)
   async bulkCreateInvoices(
     @Args('input') input: BulkInvoiceInput,
   ): Promise<DatabaseSyncResult> {
-    this.logger.log(`Bulk creating ${input.invoices.length} invoices`);
+    const tokenInfo = input.bearerToken ? 
+      `with Bearer Token from frontend (${input.bearerToken.substring(0, 10)}...)` : 
+      'using environment token (if configured)';
+    
+    this.logger.log(`Bulk creating ${input.invoices.length} invoices ${tokenInfo}`);
+    this.logger.log(`Include details: ${input.includeDetails}, Skip existing: ${input.skipExisting}`);
+    
     return this.invoiceService.bulkCreateInvoices(input);
   }
 

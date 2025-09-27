@@ -188,8 +188,7 @@ export class InvoiceController {
         this.logger.log(`Processing ${detailsData.length} invoice details`);
         // Details would need to be linked to created invoices
         // This would require more complex mapping logic
-      }
-
+      }      
       return syncResult;
     } catch (error) {
       this.logger.error('REST: Error syncing invoices:', error.message);

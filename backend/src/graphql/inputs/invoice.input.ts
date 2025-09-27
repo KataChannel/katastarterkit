@@ -2,6 +2,9 @@ import { InputType, Field, Float, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CreateInvoiceInput {
+  @Field(() => String, { nullable: true })
+  idServer?: string;
+
   // Basic Invoice Info
   @Field(() => String, { nullable: true })
   nbmst?: string;
@@ -152,6 +155,9 @@ export class BulkInvoiceInput {
   @Field(() => Boolean, { nullable: true, defaultValue: false })
   skipExisting?: boolean;
 
-  @Field(() => Boolean, { nullable: true, defaultValue: false })
+  @Field(() => Boolean, { nullable: true, defaultValue: true })
   includeDetails?: boolean;
+
+  @Field(() => String, { nullable: true })
+  bearerToken?: string;
 }
