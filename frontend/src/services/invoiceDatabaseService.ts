@@ -1,4 +1,5 @@
 import { InvoiceData, ExtListhoadon, ExtDetailhoadon } from '@/types/invoice';
+import InvoiceDetailApiService, { InvoiceDetailParams } from './invoiceDetailApi';
 
 export interface DatabaseSyncResult {
   success: boolean;
@@ -149,22 +150,66 @@ export class InvoiceDatabaseService {
       message: ''
     };
 
+    console.log(`Starting sync of ${apiInvoices.length} invoices, includeDetails: ${includeDetails}`);
+
     for (const apiInvoice of apiInvoices) {
       try {
+        // Check if invoice already exists
+        const exists = await this.invoiceExists(
+          apiInvoice.nbmst || apiInvoice.msttcgp,
+          apiInvoice.khmshdon,
+          apiInvoice.shdon
+        );
+
+        if (exists) {
+          console.log(`Invoice ${apiInvoice.shdon} already exists, skipping...`);
+          continue;
+        }
+
         // Save invoice
         const invoiceResult = await this.saveInvoice(apiInvoice);
         
         if (invoiceResult.success && invoiceResult.id) {
           result.invoicesSaved++;
+          console.log(`Successfully saved invoice ${apiInvoice.shdon} with ID: ${invoiceResult.id}`);
           
-          // Optionally save details
+          // Fetch and save details if requested
           if (includeDetails) {
             try {
-              // We would need to fetch details first
-              // This is a placeholder for the detail fetching logic
-              // In practice, you'd call InvoiceDetailApiService here
-              result.detailsSaved += 0; // Placeholder
+              // Extract detail parameters from invoice
+              const detailParams = InvoiceDetailApiService.extractDetailParamsFromInvoice(apiInvoice);
+              
+              if (detailParams) {
+                // Validate parameters
+                const validation = InvoiceDetailApiService.validateDetailParams(detailParams);
+                
+                if (validation.isValid) {
+                  console.log(`Fetching details for invoice ${apiInvoice.shdon}...`);
+                  
+                  // Fetch details from external API
+                  const detailResponse = await InvoiceDetailApiService.fetchInvoiceDetails(detailParams);
+                  
+                  if (detailResponse.success && detailResponse.datas && detailResponse.datas.length > 0) {
+                    // Save details to database
+                    const detailsResult = await this.saveInvoiceDetails(invoiceResult.id, detailResponse.datas);
+                    
+                    if (detailsResult.success) {
+                      result.detailsSaved += detailsResult.count;
+                      console.log(`Successfully saved ${detailsResult.count} details for invoice ${apiInvoice.shdon}`);
+                    } else {
+                      result.errors.push(`Failed to save details for invoice ${apiInvoice.shdon}: ${detailsResult.error}`);
+                    }
+                  } else {
+                    console.log(`No details found for invoice ${apiInvoice.shdon}`);
+                  }
+                } else {
+                  result.errors.push(`Invalid detail parameters for invoice ${apiInvoice.shdon}: ${validation.error}`);
+                }
+              } else {
+                result.errors.push(`Could not extract detail parameters for invoice ${apiInvoice.shdon}`);
+              }
             } catch (detailError: any) {
+              console.error(`Error fetching/saving details for invoice ${apiInvoice.shdon}:`, detailError);
               result.errors.push(`Details error for invoice ${apiInvoice.shdon}: ${detailError.message}`);
             }
           }
@@ -172,6 +217,7 @@ export class InvoiceDatabaseService {
           result.errors.push(`Failed to save invoice ${apiInvoice.shdon}: ${invoiceResult.error}`);
         }
       } catch (error: any) {
+        console.error(`Error processing invoice ${apiInvoice.shdon}:`, error);
         result.errors.push(`Error processing invoice ${apiInvoice.shdon}: ${error.message}`);
       }
     }
@@ -179,9 +225,10 @@ export class InvoiceDatabaseService {
     // Set overall success based on results
     result.success = result.errors.length === 0;
     result.message = result.success 
-      ? `Successfully synced ${result.invoicesSaved} invoices`
-      : `Synced ${result.invoicesSaved} invoices with ${result.errors.length} errors`;
+      ? `Successfully synced ${result.invoicesSaved} invoices${includeDetails ? ` with ${result.detailsSaved} details` : ''}`
+      : `Synced ${result.invoicesSaved} invoices${includeDetails ? ` with ${result.detailsSaved} details` : ''} with ${result.errors.length} errors`;
 
+    console.log('Sync completed:', result);
     return result;
   }
 
@@ -294,6 +341,165 @@ export class InvoiceDatabaseService {
     } catch (error) {
       console.error('Error fetching database stats:', error);
       return { totalInvoices: 0, totalDetails: 0 };
+    }
+  }
+
+  /**
+   * Sync invoices in batches for better performance
+   */
+  static async syncInvoicesBatch(
+    apiInvoices: InvoiceData[],
+    includeDetails: boolean = false,
+    batchSize: number = 10
+  ): Promise<DatabaseSyncResult> {
+    const totalResult: DatabaseSyncResult = {
+      success: true,
+      invoicesSaved: 0,
+      detailsSaved: 0,
+      errors: [],
+      message: ''
+    };
+
+    console.log(`Starting batch sync of ${apiInvoices.length} invoices in batches of ${batchSize}`);
+
+    // Process invoices in batches
+    for (let i = 0; i < apiInvoices.length; i += batchSize) {
+      const batch = apiInvoices.slice(i, i + batchSize);
+      console.log(`Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(apiInvoices.length / batchSize)}`);
+
+      try {
+        const batchResult = await this.syncInvoices(batch, includeDetails);
+        
+        // Accumulate results
+        totalResult.invoicesSaved += batchResult.invoicesSaved;
+        totalResult.detailsSaved += batchResult.detailsSaved;
+        totalResult.errors.push(...batchResult.errors);
+
+        // Small delay between batches to avoid overwhelming the API
+        if (i + batchSize < apiInvoices.length) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      } catch (error: any) {
+        console.error(`Error processing batch ${Math.floor(i / batchSize) + 1}:`, error);
+        totalResult.errors.push(`Batch ${Math.floor(i / batchSize) + 1} error: ${error.message}`);
+      }
+    }
+
+    // Set overall success
+    totalResult.success = totalResult.errors.length === 0;
+    totalResult.message = totalResult.success 
+      ? `Successfully synced ${totalResult.invoicesSaved} invoices${includeDetails ? ` with ${totalResult.detailsSaved} details` : ''} in ${Math.ceil(apiInvoices.length / batchSize)} batches`
+      : `Synced ${totalResult.invoicesSaved} invoices${includeDetails ? ` with ${totalResult.detailsSaved} details` : ''} with ${totalResult.errors.length} errors`;
+
+    return totalResult;
+  }
+
+  /**
+   * Sync single invoice with retry logic
+   */
+  static async syncSingleInvoiceWithRetry(
+    apiInvoice: InvoiceData,
+    includeDetails: boolean = false,
+    maxRetries: number = 3
+  ): Promise<{ success: boolean; id?: string; detailsSaved?: number; error?: string }> {
+    let lastError: string = '';
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Attempting to sync invoice ${apiInvoice.shdon} (attempt ${attempt}/${maxRetries})`);
+
+        // Check if invoice already exists
+        const exists = await this.invoiceExists(
+          apiInvoice.nbmst || apiInvoice.msttcgp,
+          apiInvoice.khmshdon,
+          apiInvoice.shdon
+        );
+
+        if (exists) {
+          return { success: true, error: 'Invoice already exists' };
+        }
+
+        // Save invoice
+        const invoiceResult = await this.saveInvoice(apiInvoice);
+        
+        if (!invoiceResult.success || !invoiceResult.id) {
+          throw new Error(invoiceResult.error || 'Failed to save invoice');
+        }
+
+        let detailsSaved = 0;
+
+        // Fetch and save details if requested
+        if (includeDetails) {
+          const detailParams = InvoiceDetailApiService.extractDetailParamsFromInvoice(apiInvoice);
+          
+          if (detailParams) {
+            const validation = InvoiceDetailApiService.validateDetailParams(detailParams);
+            
+            if (validation.isValid) {
+              const detailResponse = await InvoiceDetailApiService.fetchInvoiceDetails(detailParams);
+              
+              if (detailResponse.success && detailResponse.datas && detailResponse.datas.length > 0) {
+                const detailsResult = await this.saveInvoiceDetails(invoiceResult.id, detailResponse.datas);
+                
+                if (detailsResult.success) {
+                  detailsSaved = detailsResult.count;
+                }
+              }
+            }
+          }
+        }
+
+        return { 
+          success: true, 
+          id: invoiceResult.id, 
+          detailsSaved: includeDetails ? detailsSaved : undefined 
+        };
+
+      } catch (error: any) {
+        lastError = error.message;
+        console.error(`Attempt ${attempt} failed for invoice ${apiInvoice.shdon}:`, error);
+        
+        if (attempt < maxRetries) {
+          // Wait before retrying (exponential backoff)
+          const delay = Math.pow(2, attempt) * 1000;
+          console.log(`Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+
+    return { success: false, error: `Failed after ${maxRetries} attempts: ${lastError}` };
+  }
+
+  /**
+   * Sync invoice details only (for invoices already in database)
+   */
+  static async syncInvoiceDetailsOnly(
+    invoiceId: string,
+    detailParams: InvoiceDetailParams
+  ): Promise<{ success: boolean; count: number; error?: string }> {
+    try {
+      // Validate parameters
+      const validation = InvoiceDetailApiService.validateDetailParams(detailParams);
+      
+      if (!validation.isValid) {
+        return { success: false, count: 0, error: validation.error };
+      }
+
+      // Fetch details from external API
+      const detailResponse = await InvoiceDetailApiService.fetchInvoiceDetails(detailParams);
+      
+      if (!detailResponse.success || !detailResponse.datas || detailResponse.datas.length === 0) {
+        return { success: false, count: 0, error: 'No details found from external API' };
+      }
+
+      // Save details to database
+      const result = await this.saveInvoiceDetails(invoiceId, detailResponse.datas);
+      
+      return result;
+    } catch (error: any) {
+      console.error('Error syncing invoice details only:', error);
+      return { success: false, count: 0, error: error.message };
     }
   }
 }
