@@ -15,3 +15,29 @@ frontend detailhoadon
 enpoint
 chitiet : https://hoadondientu.gdt.gov.vn:30000/query/invoices/detail?nbmst=0304475742&khhdon=C25TVP&shdon=53271&khmshdon=1
 
+
+cập nhật code ketoan/listhoadon
+xuất excel với lựa chọn thời gian từ ngày đến ngày.
+lấy dữ liệu từ database ext_listhoadon kết hợp ext_detailhoadon
+dữ liệu excel xuất ra sẽ có cấu trúc 
+
+ext_listhoadon.shdon
+ext_listhoadon.nbten
+ext_listhoadon.nmten
+ext_listhoadon.ntao
+ext_listhoadon.tdlap
+ext_listhoadon.tgtcthue
+ext_listhoadon.tgtthue
+ext_listhoadon.tgtttbso
+ext_listhoadon.tgtttbso
+ext_listhoadon.thlap
+ext_listhoadon.ttxly
+
+ext_detailhoadon.ten
+ext_detailhoadon.dvtinh
+ext_detailhoadon.sluong
+ext_detailhoadon.dgia
+ext_detailhoadon.thtien
+ext_detailhoadon.tsuat
+
+
