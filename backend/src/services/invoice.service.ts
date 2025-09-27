@@ -266,7 +266,7 @@ export class InvoiceService {
             sxep: this.toIntSafe(detail.sxep),
             dvtte: this.toStringSafe(detail.dvtte),
             tgia: this.toDecimalSafe(detail.tgia),
-            tthhdtrung: this.toArraySafe(detail.tthhdtrung)
+            tthhdtrung: this.toStringSafe(detail.tthhdtrung)
           };
 
           const savedDetail = await this.prisma.ext_detailhoadon.create({
