@@ -51,6 +51,13 @@ export class SecurityAuditService {
 
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Converts 'anonymous' userId to null to avoid foreign key constraint violations
+   */
+  private normalizeUserId(userId?: string): string | null {
+    return userId === 'anonymous' ? null : (userId || null);
+  }
+
   // ========== Security Event Logging ==========
 
   async logSecurityEvent(eventDto: SecurityEventDto): Promise<void> {
@@ -59,7 +66,7 @@ export class SecurityAuditService {
 
       await this.prisma.securityEvent.create({
         data: {
-          userId: eventDto.userId,
+          userId: this.normalizeUserId(eventDto.userId),
           eventType: eventDto.eventType,
           description: `${eventDto.eventType} - ${eventDto.resourceType || 'system'}`,
           category: eventDto.resourceType || 'system',
@@ -99,7 +106,7 @@ export class SecurityAuditService {
 
       await this.prisma.auditLog.create({
         data: {
-          userId: auditDto.userId,
+          userId: auditDto.userId === 'anonymous' ? null : auditDto.userId,
           action: auditDto.action,
           resourceType: auditDto.resourceType || 'unknown',
           resourceId: auditDto.resourceId,
@@ -127,7 +134,7 @@ export class SecurityAuditService {
 
       await this.prisma.auditLog.create({
         data: {
-          userId: auditDto.userId,
+          userId: this.normalizeUserId(auditDto.userId),
           action: auditDto.action,
           resourceType: auditDto.resourceType || 'api_call',
           resourceId: auditDto.resourceId,

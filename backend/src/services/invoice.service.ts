@@ -246,29 +246,27 @@ export class InvoiceService {
       
       for (const detail of details) {
         try {
-          const detailData = {
+          const detailData: any = {
             idServer: detail.id || `${invoiceIdServer}_${detail.stt || Math.random()}`,
             idhdonServer: invoiceIdServer,
-            dgia: detail.dgia ? new Decimal(detail.dgia) : null,
-            dvtinh: detail.dvtinh || null,
-            ltsuat: detail.ltsuat ? new Decimal(detail.ltsuat) : null,
-            sluong: detail.sluong ? new Decimal(detail.sluong) : null,
-            stbchu: detail.stbchu || null,
-            stckhau: detail.stckhau ? new Decimal(detail.stckhau) : null,
-            stt: detail.stt ? parseInt(detail.stt) : null,
-            tchat: detail.tchat || null,
-            ten: detail.ten || null,
-            thtcthue: detail.thtcthue ? new Decimal(detail.thtcthue) : null,
-            thtien: detail.thtien ? new Decimal(detail.thtien) : null,
-            tlckhau: detail.tlckhau ? new Decimal(detail.tlckhau) : null,
-            tsuat: detail.tsuat ? new Decimal(detail.tsuat) : null,
-            tthue: detail.tthue ? new Decimal(detail.tthue) : null,
-            sxep: detail.sxep ? parseInt(detail.sxep) : null,
-            dvtte: detail.dvtte || null,
-            tgia: detail.tgia ? new Decimal(detail.tgia) : null,
-            tthhdtrung: detail.tthhdtrung || null,
-            createdAt: new Date(),
-            updatedAt: new Date()
+            dgia: this.toDecimalSafe(detail.dgia),
+            dvtinh: this.toStringSafe(detail.dvtinh),
+            ltsuat: this.toDecimalSafe(detail.ltsuat),
+            sluong: this.toDecimalSafe(detail.sluong),
+            stbchu: this.toStringSafe(detail.stbchu),
+            stckhau: this.toDecimalSafe(detail.stckhau),
+            stt: this.toIntSafe(detail.stt),
+            tchat: this.toStringSafe(detail.tchat),
+            ten: this.toStringSafe(detail.ten),
+            thtcthue: this.toDecimalSafe(detail.thtcthue),
+            thtien: this.toDecimalSafe(detail.thtien),
+            tlckhau: this.toDecimalSafe(detail.tlckhau),
+            tsuat: this.toDecimalSafe(detail.tsuat),
+            tthue: this.toDecimalSafe(detail.tthue),
+            sxep: this.toIntSafe(detail.sxep),
+            dvtte: this.toStringSafe(detail.dvtte),
+            tgia: this.toDecimalSafe(detail.tgia),
+            tthhdtrung: this.toArraySafe(detail.tthhdtrung)
           };
 
           const savedDetail = await this.prisma.ext_detailhoadon.create({
@@ -281,7 +279,27 @@ export class InvoiceService {
             error: detailError.message,
             detail: detail.stt || 'unknown',
             detailId: detail.id,
-            invoiceId: invoiceIdServer
+            invoiceId: invoiceIdServer,
+            rawDetailData: {
+              dgia: detail.dgia,
+              ltsuat: detail.ltsuat,
+              sluong: detail.sluong,
+              stckhau: detail.stckhau,
+              tsuat: detail.tsuat,
+              tthue: detail.tthue,
+              thtcthue: detail.thtcthue,
+              thtien: detail.thtien,
+              tlckhau: detail.tlckhau,
+              tgia: detail.tgia,
+              stt: detail.stt,
+              sxep: detail.sxep,
+              tchat: detail.tchat,
+              ten: detail.ten,
+              dvtinh: detail.dvtinh,
+              stbchu: detail.stbchu,
+              dvtte: detail.dvtte,
+              tthhdtrung: detail.tthhdtrung
+            }
           };
           
           this.logger.error('Error saving individual detail:', errorInfo);
@@ -424,6 +442,109 @@ export class InvoiceService {
   private decimalToNumber(value: Decimal | null | undefined): number {
     if (!value) return 0;
     return value instanceof Decimal ? value.toNumber() : Number(value);
+  }
+
+  /**
+   * Safely convert value to Decimal, handling percentage strings and invalid formats
+   */
+  private toDecimalSafe(value: any): Decimal | null {
+    if (!value) return null;
+    
+    try {
+      // Convert to string first
+      let stringValue = String(value).trim();
+      
+      // Handle empty or null values
+      if (!stringValue || stringValue === 'null' || stringValue === 'undefined') {
+        return null;
+      }
+      
+      // Remove percentage signs and other non-numeric characters except decimal point and minus
+      stringValue = stringValue.replace(/%/g, '').replace(/[^0-9.-]/g, '');
+      
+      // Handle empty string after cleaning
+      if (!stringValue) {
+        return null;
+      }
+      
+      // Validate that it's a valid number format
+      if (!/^-?\d*\.?\d+$/.test(stringValue)) {
+        this.logger.warn(`Invalid numeric format after cleaning: '${stringValue}' (original: '${value}')`);
+        return null;
+      }
+      
+      return new Decimal(stringValue);
+    } catch (error: any) {
+      this.logger.warn(`Failed to convert to Decimal: '${value}' - ${error.message}`);
+      this.fileLogger.logWithData('warn', 'Decimal conversion failed', {
+        originalValue: value,
+        error: error.message
+      }, 'InvoiceService');
+      return null;
+    }
+  }
+
+  /**
+   * Safely convert value to integer
+   */
+  private toIntSafe(value: any): number | null {
+    if (!value) return null;
+    
+    try {
+      const stringValue = String(value).trim().replace(/[^0-9-]/g, '');
+      if (!stringValue) return null;
+      
+      const intValue = parseInt(stringValue, 10);
+      return isNaN(intValue) ? null : intValue;
+    } catch (error: any) {
+      this.logger.warn(`Failed to convert to integer: '${value}' - ${error.message}`);
+      return null;
+    }
+  }
+
+  /**
+   * Safely convert value to string
+   */
+  private toStringSafe(value: any): string | null {
+    if (value === null || value === undefined) return null;
+    
+    try {
+      const stringValue = String(value).trim();
+      return stringValue === '' ? null : stringValue;
+    } catch (error: any) {
+      this.logger.warn(`Failed to convert to string: '${value}' - ${error.message}`);
+      return null;
+    }
+  }
+
+  /**
+   * Safely convert array or object to proper format
+   */
+  private toArraySafe(value: any): any[] | null {
+    if (!value) return null;
+    
+    try {
+      if (Array.isArray(value)) {
+        return value;
+      }
+      
+      if (typeof value === 'string') {
+        // Try to parse as JSON if it's a string
+        try {
+          const parsed = JSON.parse(value);
+          return Array.isArray(parsed) ? parsed : [parsed];
+        } catch {
+          // If not JSON, return as single-item array
+          return [value];
+        }
+      }
+      
+      // For other types, convert to array
+      return [value];
+    } catch (error: any) {
+      this.logger.warn(`Failed to convert to array: '${value}' - ${error.message}`);
+      return null;
+    }
   }
 
   /**
