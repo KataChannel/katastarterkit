@@ -4,16 +4,13 @@ import React, { useState, useEffect } from 'react';
 import InvoiceTable from '@/components/InvoiceTable';
 import ConfigModal from '@/components/ConfigModal';
 import InvoiceApiService from '@/services/invoiceApi';
-import ExcelExportService from '@/services/excelExport';
-import BackendExcelExportService from '@/services/backendExcelExport';
 import ConfigService from '@/services/configService';
 import DateService from '@/services/dateService';
 import { useInvoiceDatabase } from '@/services/invoiceDatabaseServiceNew';
 import { InvoiceData, AdvancedFilter, InvoiceApiResponse, InvoiceType } from '@/types/invoice';
 import { Search, RefreshCw, FileSpreadsheet, Settings, Calendar, Filter, ChevronDown } from 'lucide-react';
-import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
 import toast from 'react-hot-toast';
+import BackendExcelExportService from '@/services/backendExcelExport';
 
 const ListHoaDonPage = () => {
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
@@ -264,18 +261,28 @@ const ListHoaDonPage = () => {
       // Validate date range first
       const validation = BackendExcelExportService.validateDateRange(filter.fromDate, filter.toDate);
       if (!validation.isValid) {
-        toast.error(validation.message || 'Khoảng thời gian không hợp lệ');
+        toast.error(validation.message || 'Dữ liệu ngày không hợp lệ');
         return;
       }
 
+      // Check server connection first
+      toast.loading('Kiểm tra kết nối server...', { id: 'excel-export' });
+      const connection = await BackendExcelExportService.checkServerConnection();
+      
+      if (!connection.connected) {
+        toast.error(connection.message, { id: 'excel-export' });
+        console.error('❌ Server connection failed:', connection.message);
+        return;
+      }
+      
+      console.log('✅ Server connection OK:', connection.message);
       toast.loading('Đang xuất file Excel từ server...', { id: 'excel-export' });
       
-      // Use backend API for Excel export with date range and invoice type
-      await BackendExcelExportService.exportToExcel({
-        fromDate: filter.fromDate,
-        toDate: filter.toDate,
-        invoiceType: config.invoiceType as 'banra' | 'muavao'
-      });
+      // Use backend API for Excel export with date range
+      await BackendExcelExportService.exportToExcel(
+        filter.fromDate,
+        filter.toDate
+      );
 
       // Success toast is handled in the service
     } catch (error: any) {

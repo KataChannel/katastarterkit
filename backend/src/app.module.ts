@@ -29,6 +29,7 @@ import { MonitoringModule } from './monitoring/monitoring.module';
 import { SecurityModule } from './security/security.module';
 import { UnifiedDynamicModule } from './graphql/unified-dynamic.module';
 import { KetoAnModule } from './ketoan/ketoan.module';
+import { TestController } from './test.controller';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -126,6 +127,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
   ],
   controllers: [
     LogController,
+    TestController,
   ],
   providers: [
     EnvConfigService,

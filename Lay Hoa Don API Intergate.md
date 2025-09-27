@@ -19,7 +19,7 @@ chitiet : https://hoadondientu.gdt.gov.vn:30000/query/invoices/detail?nbmst=0304
 cập nhật code ketoan/listhoadon
 xuất excel với lựa chọn thời gian từ ngày đến ngày.
 lấy dữ liệu từ database ext_listhoadon kết hợp ext_detailhoadon
-dữ liệu excel xuất ra sẽ có cấu trúc 
+dữ liệu excel xuất ra bảng tổng hợp sẽ có cấu trúc 
 
 ext_listhoadon.shdon
 ext_listhoadon.nbten

@@ -2,6 +2,7 @@ import { Controller, Get, Query, Res, BadRequestException } from '@nestjs/common
 import type { Response } from 'express';
 import { InvoiceExportService } from './invoice-export.service';
 
+
 @Controller('ketoan/listhoadon')
 export class InvoiceExportController {
   constructor(private readonly invoiceExportService: InvoiceExportService) {}
@@ -75,23 +76,45 @@ export class InvoiceExportController {
     }
   }
 
+  @Get('test')
+  async testEndpoint() {
+    try {
+      return {
+        success: true,
+        message: 'Ketoan endpoint is working',
+        timestamp: new Date().toISOString(),
+        service: !!this.invoiceExportService
+      };
+    } catch (error) {
+      console.error('❌ Test endpoint error:', error);
+      return {
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
   @Get('preview')
   async previewData(
     @Query('fromDate') fromDate: string,
     @Query('toDate') toDate: string,
     @Query('invoiceType') invoiceType: 'banra' | 'muavao' | undefined,
-    @Query('limit') limit = 10,
+    @Query('limit') limit = '10',
   ) {
     try {
       if (!this.isValidDate(fromDate) || !this.isValidDate(toDate)) {
         throw new BadRequestException('Invalid date format. Use YYYY-MM-DD format.');
       }
 
+      const limitNumber = parseInt(limit) || 10;
+      console.log('🔍 Preview request:', { fromDate, toDate, invoiceType, limit: limitNumber });
+
       const data = await this.invoiceExportService.getInvoiceData(
         fromDate,
         toDate,
         invoiceType,
-        limit
+        limitNumber
       );
 
       return {
