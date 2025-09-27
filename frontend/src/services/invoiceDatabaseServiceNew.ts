@@ -176,6 +176,12 @@ class InvoiceDatabaseService {
       });
 
       if (!response.ok) {
+        if(response.status === 403) {
+          // Clear token and redirect to login
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          throw new Error('Unauthorized. Please log in again.');
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 

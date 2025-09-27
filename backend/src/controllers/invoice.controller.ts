@@ -148,6 +148,7 @@ export class InvoiceController {
       
       // Convert API data to our input format
       const convertedInvoices: CreateInvoiceInput[] = invoiceData.map(invoice => ({
+        idServer: invoice.id,  // Assuming 'id' is the unique identifier from external API
         nbmst: invoice.nbmst,
         khmshdon: invoice.khmshdon,
         khhdon: invoice.khhdon,

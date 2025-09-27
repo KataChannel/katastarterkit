@@ -28,6 +28,7 @@
     "setup": "bun install && cd backend && bun install && cd ../frontend && bun install",
     "clean": "rm -rf node_modules backend/node_modules frontend/node_modules bun.lockb backend/bun.lockb frontend/bun.lockb",
     "db:migrate": "cd backend && npx prisma migrate dev",
+    "db:reset": "cd backend && npx prisma migrate reset",
     "db:seed": "cd backend && npx prisma db seed",
     "db:studio": "cd backend && npx prisma studio",
     "db:push": "cd backend && npx prisma db push --force-reset",

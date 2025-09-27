@@ -783,7 +783,7 @@ enum BlockType {
 }
 
 model Page {
-  id          String     @id @default(cuid())
+  id          String     @id @default(uuid())
   title       String
   slug        String     @unique
   description String?
@@ -810,7 +810,7 @@ model Page {
 }
 
 model PageBlock {
-  id        String    @id @default(cuid())
+  id        String    @id @default(uuid())
   type      BlockType
   content   Json      // Block-specific content and configuration
   style     Json?     // CSS styles and layout properties
@@ -832,7 +832,7 @@ model PageBlock {
 
 // MFA and Security Models
 model UserMfaSettings {
-  id                      String   @id @default(cuid())
+  id                      String   @id @default(uuid())
   userId                  String   @unique
   
   // TOTP Settings
@@ -873,7 +873,7 @@ model UserMfaSettings {
 }
 
 model UserDevice {
-  id           String    @id @default(cuid())
+  id           String    @id @default(uuid())
   userId       String
   deviceId     String    @unique // Generated device identifier
   deviceName   String    // User-friendly device name
@@ -904,7 +904,7 @@ model UserDevice {
 
 
 model SecurityEvent {
-  id              String    @id @default(cuid())
+  id              String    @id @default(uuid())
   userId          String?
   sessionId       String?
   
@@ -958,7 +958,7 @@ model SecurityEvent {
 
 // RBAC (Role-Based Access Control) Models
 model Role {
-  id           String    @id @default(cuid())
+  id           String    @id @default(uuid())
   name         String    @unique
   displayName  String    // User-friendly role name
   description  String?
@@ -991,7 +991,7 @@ model Role {
 }
 
 model Permission {
-  id            String    @id @default(cuid())
+  id            String    @id @default(uuid())
   name          String    @unique
   displayName   String    // User-friendly permission name
   description   String?
@@ -1028,7 +1028,7 @@ model Permission {
 }
 
 model RolePermission {
-  id           String     @id @default(cuid())
+  id           String     @id @default(uuid())
   roleId       String
   permissionId String
   
@@ -1057,7 +1057,7 @@ model RolePermission {
 }
 
 model UserRoleAssignment {
-  id        String    @id @default(cuid())
+  id        String    @id @default(uuid())
   userId    String
   roleId    String
   
@@ -1092,7 +1092,7 @@ model UserRoleAssignment {
 }
 
 model UserPermission {
-  id           String     @id @default(cuid())
+  id           String     @id @default(uuid())
   userId       String
   permissionId String
   
@@ -1128,7 +1128,7 @@ model UserPermission {
 }
 
 model ResourceAccess {
-  id           String    @id @default(cuid())
+  id           String    @id @default(uuid())
   userId       String
   resourceType String    // Type of resource (task, project, etc.)
   resourceId   String    // ID of the specific resource
@@ -1172,9 +1172,8 @@ model ResourceAccess {
 // External Invoice System Models
 
 model ext_listhoadon {
-  id              String   @id @default(cuid())
-  
-  // Basic Invoice Info
+  id              String   @id @default(uuid())
+  idServer        String?   @unique  // Basic Invoice Info
   nbmst           String?  // Mã số thuế người bán
   khmshdon        String?  // Ký hiệu mẫu số hóa đơn
   khhdon          String?  // Ký hiệu hóa đơn
@@ -1344,11 +1343,11 @@ model ext_listhoadon {
 }
 
 model ext_detailhoadon {
-  id            String   @id @default(cuid())
+  id            String   @id @default(uuid())
   
   // Reference to parent invoice
-  idhdon        String   // Foreign key to ext_listhoadon.id
-  
+  idServer        String   
+  idhdonServer    String   // Foreign key to ext_listhoadon.id
   // Item Information
   dgia          Decimal? // Đơn giá
   dvtinh        String?  // Đơn vị tính
@@ -1374,10 +1373,10 @@ model ext_detailhoadon {
   updatedAt     DateTime @updatedAt
   
   // Relationships
-  invoice       ext_listhoadon @relation(fields: [idhdon], references: [id], onDelete: Cascade)
+  invoice       ext_listhoadon @relation(fields: [idhdonServer], references: [idServer], onDelete: Cascade)
   
   // Indexes
-  @@index([idhdon])
+  @@index([idhdonServer])
   @@index([stt])
   @@index([createdAt])
 }
