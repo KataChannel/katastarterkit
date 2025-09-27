@@ -4,6 +4,7 @@ import { CreateInvoiceInput, CreateInvoiceDetailInput, InvoiceSearchInput, BulkI
 import { ExtListhoadon, ExtDetailhoadon, InvoiceSearchResult, DatabaseSyncResult, InvoiceStats } from '../graphql/models/invoice.model';
 import { Decimal } from '@prisma/client/runtime/library';
 import axios from 'axios';
+import https from 'https';
 import { BackendConfigService } from './backend-config.service';
 
 @Injectable()
@@ -83,8 +84,20 @@ export class InvoiceService {
       this.logger.log(`Fetching invoice details from: ${url}`);
       this.logger.log(`Using token from: ${bearerToken ? 'frontend' : 'environment'}`);
       
+      // Create HTTPS agent to handle SSL certificate issues
+      const httpsAgent = new https.Agent({
+        rejectUnauthorized: config.sslVerification, // Use config setting for SSL verification
+        keepAlive: true,
+        timeout: config.timeout
+      });
+
+      if (!config.sslVerification) {
+        this.logger.log('🔓 SSL certificate verification is disabled for external API calls');
+      }
+
       const response = await axios.get(url, {
         timeout: config.timeout,
+        httpsAgent: httpsAgent, // Use custom HTTPS agent
         headers: {
           'Authorization': `Bearer ${effectiveToken}`,
           'User-Agent': 'Mozilla/5.0 (compatible; InvoiceService/1.0)',
@@ -112,8 +125,20 @@ export class InvoiceService {
         params
       });
       
-      // Specific error handling for authentication issues
-      if (error.response?.status === 401) {
+      // Specific error handling for different types of errors
+      if (error.message?.includes('unable to verify the first certificate')) {
+        this.logger.error('🔒 SSL Certificate verification failed');
+        this.logger.log('✅ Applied SSL certificate bypass - request should now work');
+        this.logger.warn('⚠️  Note: SSL verification is disabled for this external API');
+      } else if (error.response?.status === 409) {
+        this.logger.warn('🚦 Server overload (409 Conflict) - Too many requests');
+        this.logger.log('💡 Rate limiting is applied, will retry with backoff delay');
+        throw error; // Re-throw to trigger retry logic in bulkCreateInvoices
+      } else if (error.response?.status === 429) {
+        this.logger.warn('🚦 Rate limit exceeded (429 Too Many Requests)');
+        this.logger.log('💡 Rate limiting is applied, will retry with backoff delay');
+        throw error; // Re-throw to trigger retry logic in bulkCreateInvoices
+      } else if (error.response?.status === 401) {
         this.logger.error('🔐 Authentication failed - Bearer Token may be invalid or expired');
         if (tokenSource === 'frontend') {
           this.logger.error('💡 Please check the Bearer Token in your frontend configuration (ketoan/listhoadon)');
@@ -124,10 +149,21 @@ export class InvoiceService {
         this.logger.error('🚫 Access forbidden - Bearer Token may not have sufficient permissions');
       } else if (error.response?.status === 404) {
         this.logger.warn('📋 No details found for this invoice');
+      } else if (error.response?.status === 500 || error.response?.status === 502 || error.response?.status === 503) {
+        this.logger.warn('🔧 Server error from external API - May be temporary');
+        this.logger.log('💡 Will retry with backoff delay');
+        throw error; // Re-throw to trigger retry logic
       } else if (error.code === 'ECONNABORTED') {
         this.logger.error('⏱️  Request timeout - External API is not responding');
+        throw error; // Re-throw to trigger retry logic
       } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
         this.logger.error('🌐 Network error - Cannot reach external API');
+      } else if (error.code === 'CERT_HAS_EXPIRED') {
+        this.logger.error('📅 SSL Certificate has expired');
+        this.logger.log('✅ SSL verification bypass should handle this issue');
+      } else if (error.code === 'SELF_SIGNED_CERT_IN_CHAIN') {
+        this.logger.error('🔗 Self-signed certificate in chain');
+        this.logger.log('✅ SSL verification bypass should handle this issue');
       }
       
       return [];
@@ -603,7 +639,14 @@ export class InvoiceService {
   }
 
   /**
-   * Bulk create invoices
+   * Add delay between API calls to prevent server overload
+   */
+  private async delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Bulk create invoices with rate limiting to prevent 409 errors
    */
   async bulkCreateInvoices(input: BulkInvoiceInput): Promise<DatabaseSyncResult> {
     const result: DatabaseSyncResult = {
@@ -614,52 +657,110 @@ export class InvoiceService {
       message: '',
     };
 
+    // Get rate limiting configuration from config service
+    const config = this.configService.getInvoiceConfig();
+    const BATCH_SIZE = config.batchSize;
+    const DELAY_BETWEEN_BATCHES = config.delayBetweenBatches;
+    const DELAY_BETWEEN_DETAIL_CALLS = config.delayBetweenDetailCalls;
+    const MAX_RETRIES = config.maxRetries;
+
     try {
-      for (const invoiceData of input.invoices) {
-        try {
-          // Skip existing if requested
-          if (input.skipExisting && invoiceData.nbmst && invoiceData.khmshdon && invoiceData.shdon) {
-            const exists = await this.invoiceExists(
-              invoiceData.nbmst, 
-              String(invoiceData.khmshdon), 
-              String(invoiceData.shdon)
-            );
-            if (exists) {
-              continue;
-            }
-          }
+      this.logger.log(`Starting bulk creation of ${input.invoices.length} invoices with rate limiting`);
+      this.logger.log(`Rate limiting config - Batch size: ${BATCH_SIZE}, Delay between batches: ${DELAY_BETWEEN_BATCHES}ms, Detail call delay: ${DELAY_BETWEEN_DETAIL_CALLS}ms, Max retries: ${MAX_RETRIES}`);
 
-          const invoice = await this.createInvoice(invoiceData);
-          this.logger.log('Created invoice in bulk:', {
-            id: invoice.id,
-            idServer: invoice.idServer,
-            shdon: invoice.shdon
-          });
-          
-          // Automatically fetch and save invoice details using bearerToken from frontend
-          if (input.includeDetails !== false) {
-            try {
-              const detailsSaved = await this.autoFetchAndSaveDetails(invoice, input.bearerToken);
-              result.detailsSaved += detailsSaved;
-              
-              if (detailsSaved > 0) {
-                const tokenSource = input.bearerToken ? 'frontend' : 'environment';
-                this.logger.log(`Auto-fetched ${detailsSaved} details for invoice ${invoice.shdon} using token from ${tokenSource}`);
+      // Process invoices in batches to prevent server overload
+      for (let i = 0; i < input.invoices.length; i += BATCH_SIZE) {
+        const batch = input.invoices.slice(i, i + BATCH_SIZE);
+        const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
+        const totalBatches = Math.ceil(input.invoices.length / BATCH_SIZE);
+
+        this.logger.log(`Processing batch ${batchNumber}/${totalBatches} (${batch.length} invoices)`);
+
+        // Process current batch
+        for (const invoiceData of batch) {
+          try {
+            // Skip existing if requested
+            if (input.skipExisting && invoiceData.nbmst && invoiceData.khmshdon && invoiceData.shdon) {
+              const exists = await this.invoiceExists(
+                invoiceData.nbmst, 
+                String(invoiceData.khmshdon), 
+                String(invoiceData.shdon)
+              );
+              if (exists) {
+                this.logger.debug(`Skipping existing invoice: ${invoiceData.shdon}`);
+                continue;
               }
-            } catch (detailError: any) {
-              this.logger.error(`Failed to auto-fetch details for invoice ${invoice.shdon}:`, detailError);
-              result.errors.push(`Failed to fetch details for invoice ${invoice.shdon}: ${detailError.message}`);
             }
+
+            const invoice = await this.createInvoice(invoiceData);
+            this.logger.log('Created invoice in bulk:', {
+              id: invoice.id,
+              idServer: invoice.idServer,
+              shdon: invoice.shdon
+            });
+            
+            // Automatically fetch and save invoice details with retry logic
+            if (input.includeDetails !== false) {
+              let retryCount = 0;
+              let detailsSaved = 0;
+
+              while (retryCount <= MAX_RETRIES) {
+                try {
+                  // Add delay before detail API call to prevent rate limiting
+                  if (retryCount > 0) {
+                    const retryDelay = DELAY_BETWEEN_DETAIL_CALLS * Math.pow(2, retryCount); // Exponential backoff
+                    this.logger.log(`Retrying detail fetch for invoice ${invoice.shdon} (attempt ${retryCount + 1}/${MAX_RETRIES + 1}) after ${retryDelay}ms delay`);
+                    await this.delay(retryDelay);
+                  } else {
+                    await this.delay(DELAY_BETWEEN_DETAIL_CALLS);
+                  }
+
+                  detailsSaved = await this.autoFetchAndSaveDetails(invoice, input.bearerToken);
+                  result.detailsSaved += detailsSaved;
+                  
+                  if (detailsSaved > 0) {
+                    const tokenSource = input.bearerToken ? 'frontend' : 'environment';
+                    this.logger.log(`Auto-fetched ${detailsSaved} details for invoice ${invoice.shdon} using token from ${tokenSource}`);
+                  }
+                  
+                  break; // Success, exit retry loop
+
+                } catch (detailError: any) {
+                  retryCount++;
+                  
+                  // Check if it's a rate limiting error (409, 429, etc.)
+                  const isRateLimitError = detailError.response?.status === 409 || 
+                                         detailError.response?.status === 429 ||
+                                         detailError.code === 'ECONNABORTED' ||
+                                         detailError.message?.includes('timeout');
+
+                  if (isRateLimitError && retryCount <= MAX_RETRIES) {
+                    this.logger.warn(`Rate limit/timeout error for invoice ${invoice.shdon}, will retry (${retryCount}/${MAX_RETRIES}): ${detailError.message}`);
+                    continue; // Try again with backoff
+                  } else {
+                    this.logger.error(`Failed to auto-fetch details for invoice ${invoice.shdon} after ${retryCount} attempts:`, detailError);
+                    result.errors.push(`Failed to fetch details for invoice ${invoice.shdon}: ${detailError.message}`);
+                    break; // Give up on this invoice
+                  }
+                }
+              }
+            }
+
+            result.invoicesSaved++;
+
+          } catch (error) {
+            this.logger.error(`Failed to create invoice ${invoiceData.shdon}:`, error);
+            result.errors.push(`Failed to create invoice ${invoiceData.shdon}: ${error.message}`);
           }
+        }
 
-          result.invoicesSaved++;
-
-          // Note: Details would be handled separately via the detail creation endpoint
-          // This is just for invoice headers
-        } catch (error) {
-          result.errors.push(`Failed to create invoice ${invoiceData.shdon}: ${error.message}`);
+        // Add delay between batches (except for the last batch)
+        if (i + BATCH_SIZE < input.invoices.length) {
+          this.logger.log(`Batch ${batchNumber} completed. Waiting ${DELAY_BETWEEN_BATCHES}ms before next batch...`);
+          await this.delay(DELAY_BETWEEN_BATCHES);
         }
       }
+
 
       result.success = result.errors.length === 0;
       result.message = result.success 

@@ -4,6 +4,12 @@ export interface BackendInvoiceConfig {
   bearerToken: string;
   apiBaseUrl: string;
   timeout: number;
+  sslVerification: boolean;
+  // Rate limiting configuration
+  batchSize: number;
+  delayBetweenBatches: number;
+  delayBetweenDetailCalls: number;
+  maxRetries: number;
 }
 
 @Injectable()
@@ -17,11 +23,23 @@ export class BackendConfigService {
     const bearerToken = this.getBearerToken();
     const apiBaseUrl = process.env.INVOICE_API_BASE_URL || 'https://hoadondientu.gdt.gov.vn:30000';
     const timeout = parseInt(process.env.INVOICE_API_TIMEOUT || '30000');
+    const sslVerification = process.env.INVOICE_API_SSL_VERIFICATION !== 'false'; // Default to true, set to false in .env to disable
+    
+    // Rate limiting configuration
+    const batchSize = parseInt(process.env.INVOICE_API_BATCH_SIZE || '5');
+    const delayBetweenBatches = parseInt(process.env.INVOICE_API_DELAY_BETWEEN_BATCHES || '2000');
+    const delayBetweenDetailCalls = parseInt(process.env.INVOICE_API_DELAY_BETWEEN_CALLS || '500');
+    const maxRetries = parseInt(process.env.INVOICE_API_MAX_RETRIES || '3');
 
     return {
       bearerToken,
       apiBaseUrl,
-      timeout
+      timeout,
+      sslVerification,
+      batchSize,
+      delayBetweenBatches,
+      delayBetweenDetailCalls,
+      maxRetries
     };
   }
 
