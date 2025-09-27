@@ -106,7 +106,7 @@ const ListHoaDonPage = () => {
       // Fetch data from external API
       const response: InvoiceApiResponse = await InvoiceApiService.fetchInvoices(filter, {
         page: 0,
-        size: 50, // Get more records for sync
+        size: 1, // Get more records for sync
         sort: `tdlap:desc,khmshdon:asc,shdon:desc`
       }, currentConfig.invoiceType);
 

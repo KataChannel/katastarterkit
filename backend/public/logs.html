@@ -224,9 +224,27 @@
             color: #9c27b0;
             margin-right: 0.5rem;
         }
+        
+        .file-name {
+            color: #888;
+            font-size: 0.8em;
+            font-style: italic;
+        }
 
         .message {
             color: #e0e0e0;
+        }
+        
+        .json-content {
+            color: #ffc107;
+            font-style: italic;
+            padding-left: 2rem;
+        }
+        
+        .log-line.json-data {
+            background: #2d2d1f;
+            border-left: 2px solid #ffc107;
+            margin-left: 1rem;
         }
 
         .loading {
@@ -375,7 +393,7 @@
     <script>
         let currentFile = null;
         let autoRefreshInterval = null;
-        const API_BASE = '/backend/logs';
+        const API_BASE = '/api/logs';
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -513,24 +531,42 @@
             div.className = 'log-line';
             
             // Parse log line for styling
-            const match = line.match(/\[([^\]]+)\]\s*\[([^\]]+)\]\s*\[([^\]]+)\]\s*(.*)/);
+            const match = line.match(/^\[([^\]]+)\]\s*\[([^\]]+)\]\s*\[([^\]]+)\]\s*(.*)/);
             
             if (match) {
                 const [, timestamp, level, context, message] = match;
-                div.classList.add(level.toLowerCase());
+                const logLevel = level.toLowerCase();
+                div.classList.add(logLevel);
+                
+                // Escape HTML in message
+                const escapedMessage = escapeHtml(message);
                 
                 div.innerHTML = `
                     <span class="timestamp">[${timestamp}]</span>
                     <span class="level ${level}">[${level}]</span>
                     <span class="context">[${context}]</span>
-                    <span class="message">${message}</span>
+                    <span class="message">${escapedMessage}</span>
                     ${filename ? `<span class="file-name"> (${filename})</span>` : ''}
                 `;
             } else {
-                div.innerHTML = `<span class="message">${line}</span>`;
+                // Handle continuation lines (JSON data, etc.)
+                const trimmedLine = line.trim();
+                if (trimmedLine.startsWith('{') || trimmedLine.startsWith('}') || trimmedLine.includes('":') || trimmedLine.startsWith('"')) {
+                    div.classList.add('json-data');
+                    div.innerHTML = `<span class="json-content">${escapeHtml(line)}</span>`;
+                } else {
+                    div.innerHTML = `<span class="message">${escapeHtml(line)}</span>`;
+                }
             }
             
             return div;
+        }
+        
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Setup search functionality
@@ -566,7 +602,8 @@
                             data.results.forEach(result => {
                                 const div = document.createElement('div');
                                 div.className = 'search-result';
-                                div.innerHTML = `<strong>${result.filename}</strong>: ${result.line.substring(0, 100)}...`;
+                                const truncatedLine = result.line.length > 100 ? result.line.substring(0, 100) + '...' : result.line;
+                                div.innerHTML = `<strong>${escapeHtml(result.filename)}</strong>: ${escapeHtml(truncatedLine)}`;
                                 div.onclick = () => {
                                     selectFile(result.filename);
                                     searchResults.style.display = 'none';

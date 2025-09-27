@@ -74,6 +74,8 @@ export class InvoiceService {
     },
     bearerToken?: string
   ): Promise<any[]> {
+    const startTime = Date.now();
+    
     try {
       // Use provided bearerToken or fallback to environment config
       const effectiveToken = bearerToken || this.configService.getBearerToken();
@@ -82,6 +84,10 @@ export class InvoiceService {
       if (!effectiveToken || effectiveToken.length === 0) {
         this.logger.warn('No Bearer Token provided from frontend or environment');
         this.logger.warn('Invoice detail fetching will likely fail due to authentication');
+        this.fileLogger.logWithData('warn', 'No Bearer Token available', {
+          tokenSource: bearerToken ? 'frontend' : 'environment',
+          params
+        }, 'InvoiceService');
       }
       
       const queryParams = new URLSearchParams({
@@ -102,7 +108,8 @@ export class InvoiceService {
         url,
         params,
         tokenSource,
-        hasToken: !!effectiveToken
+        hasToken: !!effectiveToken,
+        timestamp: new Date().toISOString()
       }, 'InvoiceService');
       
       // Create HTTPS agent to handle SSL certificate issues
@@ -126,17 +133,25 @@ export class InvoiceService {
         }
       });
 
-      if (response.data && response.data.datas) {
+      const responseTime = Date.now() - startTime;
+
+      if (response.data && response.data.hdhhdvu) {
         this.fileLogger.logWithData('log', 'Invoice details fetched successfully', {
-          count: response.data.datas.length,
+          count: response.data.hdhhdvu.length,
           params,
-          responseTime: Date.now() - Date.now() // Will be updated with actual timing
+          responseTime,
+          status: response.status,
+          tokenSource
         }, 'InvoiceService');
-        return response.data.datas;
+        
+        this.fileLogger.logApiCall('GET', url, response.status, responseTime, 'InvoiceService');
+        return response.data.hdhhdvu;
       }
 
       this.fileLogger.logWithData('warn', 'No invoice details found in response', {
         params,
+        responseTime,
+        status: response.status,
         responseData: response.data
       }, 'InvoiceService');
       return [];
@@ -208,13 +223,27 @@ export class InvoiceService {
    * Save invoice details to database
    */
   private async saveInvoiceDetails(invoiceIdServer: string, details: any[]): Promise<number> {
+    const startTime = Date.now();
+    
     try {
       if (!details || details.length === 0) {
         this.logger.log('No details to save');
+        this.fileLogger.logWithData('warn', 'No invoice details to save', {
+          invoiceId: invoiceIdServer,
+          detailsCount: 0
+        }, 'InvoiceService');
         return 0;
       }
 
+      this.fileLogger.logWithData('log', 'Starting to save invoice details', {
+        invoiceId: invoiceIdServer,
+        detailsCount: details.length,
+        timestamp: new Date().toISOString()
+      }, 'InvoiceService');
+
       const savedDetails = [];
+      const errors = [];
+      
       for (const detail of details) {
         try {
           const detailData = {
@@ -248,24 +277,52 @@ export class InvoiceService {
 
           savedDetails.push(savedDetail);
         } catch (detailError: any) {
-          this.logger.error('Error saving individual detail:', {
+          const errorInfo = {
             error: detailError.message,
-            detail: detail.stt || 'unknown'
-          });
+            detail: detail.stt || 'unknown',
+            detailId: detail.id,
+            invoiceId: invoiceIdServer
+          };
+          
+          this.logger.error('Error saving individual detail:', errorInfo);
+          this.fileLogger.logWithData('error', 'Failed to save detail item', errorInfo, 'InvoiceService');
+          errors.push(errorInfo);
         }
       }
 
       const saveResult = {
         saved: savedDetails.length,
         total: details.length,
-        invoiceId: invoiceIdServer
+        errors: errors.length,
+        invoiceId: invoiceIdServer,
+        duration: Date.now() - startTime,
+        success: savedDetails.length > 0
       };
       
       this.logger.log(`Successfully saved ${savedDetails.length} out of ${details.length} details`);
-      this.fileLogger.logWithData('log', 'Invoice details saved to database', saveResult, 'InvoiceService');
+      
+      if (errors.length > 0) {
+        this.fileLogger.logWithData('warn', 'Invoice details saved with some errors', {
+          ...saveResult,
+          errorList: errors
+        }, 'InvoiceService');
+      } else {
+        this.fileLogger.logWithData('log', 'Invoice details saved successfully', saveResult, 'InvoiceService');
+      }
+      
       return savedDetails.length;
     } catch (error: any) {
+      const duration = Date.now() - startTime;
       this.logger.error('Error saving invoice details:', error);
+      
+      this.fileLogger.logWithData('error', 'Failed to save invoice details', {
+        error: error.message,
+        stack: error.stack,
+        invoiceId: invoiceIdServer,
+        detailsCount: details?.length || 0,
+        duration
+      }, 'InvoiceService');
+      
       return 0;
     }
   }
@@ -274,32 +331,89 @@ export class InvoiceService {
    * Automatically fetch and save invoice details
    */
   private async autoFetchAndSaveDetails(invoice: any, bearerToken?: string): Promise<number> {
+    const startTime = Date.now();
+    const invoiceRef = invoice.shdon || invoice.idServer || 'unknown';
+    
     try {
+      // Log start of operation
+      this.fileLogger.logWithData('log', 'Starting auto-fetch and save details', {
+        invoiceRef,
+        hasToken: !!bearerToken,
+        tokenSource: bearerToken ? 'frontend' : 'environment',
+        timestamp: new Date().toISOString()
+      }, 'InvoiceService');
+
       // Extract parameters from invoice
       const detailParams = this.extractDetailParams(invoice);
       if (!detailParams) {
-        this.logger.warn(`Cannot extract detail parameters for invoice ${invoice.shdon}`);
+        this.logger.warn(`Cannot extract detail parameters for invoice ${invoiceRef}`);
+        this.fileLogger.logInvoiceError('extract-params', invoiceRef, {
+          error: 'Missing required parameters',
+          invoice: {
+            nbmst: invoice.nbmst,
+            khhdon: invoice.khhdon,
+            shdon: invoice.shdon,
+            khmshdon: invoice.khmshdon
+          }
+        });
         return 0;
       }
+
+      this.fileLogger.logWithData('log', 'Parameters extracted successfully', {
+        invoiceRef,
+        params: detailParams
+      }, 'InvoiceService');
 
       // Fetch details from external API using provided bearerToken
+      this.fileLogger.log(`Fetching details from external API for invoice ${invoiceRef}`, 'InvoiceService');
       const details = await this.fetchInvoiceDetails(detailParams, bearerToken);
+      
       if (details.length === 0) {
-        this.logger.log(`No details found for invoice ${invoice.shdon}`);
+        this.logger.log(`No details found for invoice ${invoiceRef}`);
+        this.fileLogger.logWithData('warn', 'No details found from external API', {
+          invoiceRef,
+          params: detailParams,
+          duration: Date.now() - startTime
+        }, 'InvoiceService');
         return 0;
       }
 
+      this.fileLogger.logWithData('log', 'Details fetched from external API', {
+        invoiceRef,
+        detailsCount: details.length,
+        duration: Date.now() - startTime
+      }, 'InvoiceService');
+
       // Save details to database
+      this.fileLogger.log(`Saving ${details.length} details to database for invoice ${invoiceRef}`, 'InvoiceService');
       const savedCount = await this.saveInvoiceDetails(invoice.idServer, details);
-      this.logger.log(`Auto-saved ${savedCount} details for invoice ${invoice.shdon}`);
-      this.fileLogger.logInvoiceOperation('auto-fetch-details', invoice.shdon, {
+      
+      const totalDuration = Date.now() - startTime;
+      this.logger.log(`Auto-saved ${savedCount} details for invoice ${invoiceRef}`);
+      
+      // Log successful completion
+      this.fileLogger.logInvoiceOperation('auto-fetch-details', invoiceRef, {
         detailsSaved: savedCount,
-        tokenSource: bearerToken ? 'frontend' : 'environment'
+        detailsFetched: details.length,
+        tokenSource: bearerToken ? 'frontend' : 'environment',
+        duration: totalDuration,
+        success: true
       });
       
       return savedCount;
     } catch (error: any) {
-      this.logger.error(`Error auto-fetching details for invoice ${invoice.shdon}:`, error);
+      const totalDuration = Date.now() - startTime;
+      this.logger.error(`Error auto-fetching details for invoice ${invoiceRef}:`, error);
+      
+      // Log detailed error information
+      this.fileLogger.logInvoiceError('auto-fetch-details', invoiceRef, {
+        error: error.message,
+        stack: error.stack,
+        duration: totalDuration,
+        tokenSource: bearerToken ? 'frontend' : 'environment',
+        step: 'auto-fetch-and-save'
+      });
+      
       return 0;
     }
   }
