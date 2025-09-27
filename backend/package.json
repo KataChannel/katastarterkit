@@ -27,6 +27,8 @@
     "db:seed": "npx prisma db seed",
     "db:reset": "npx prisma migrate reset",
     "db:generate": "npx prisma generate",
+    "db:backup": "npx ts-node prisma/backup.ts",
+    "db:restore": "npx ts-node prisma/restore.ts",
     "prisma:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {

@@ -5,6 +5,117 @@ import * as path from 'path';
 const prisma = new PrismaClient();
 const BACKUP_ROOT_DIR = './kata_json';
 
+/**
+ * Parse schema.prisma file to extract all model names and their table mappings
+ */
+function parseSchemaModels(): { modelName: string; tableName: string }[] {
+  try {
+    const schemaPath = path.join(__dirname, 'schema.prisma');
+    const schemaContent = fs.readFileSync(schemaPath, 'utf8');
+    
+    // Extract model blocks using regex
+    const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*)\}/gm;
+    const models: { modelName: string; tableName: string }[] = [];
+    let match;
+    
+    while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
+      const modelName = match[1];
+      const modelBody = match[2];
+      
+      // Look for @@map directive in the model body
+      const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
+      const tableName = mapMatch ? mapMatch[1] : convertModelToTableName(modelName);
+      
+      models.push({ modelName, tableName });
+    }
+    
+    console.log(`📋 Found ${models.length} models in schema.prisma:`);
+    console.log(`   ${models.map(m => `${m.modelName} → ${m.tableName}`).join(', ')}`);
+    return models;
+  } catch (error) {
+    console.error('❌ Error parsing schema.prisma:', error);
+    return [];
+  }
+}
+
+/**
+ * Convert Prisma model names to database table names
+ * Based on Prisma's naming conventions and @@map directives
+ */
+function convertModelToTableName(modelName: string): string {
+  // Handle special cases where model name != table name (snake_case conversion)
+  const specialMappings: { [key: string]: string } = {
+    'User': 'users',
+    'AuthMethod': 'auth_methods',
+    'VerificationToken': 'verification_tokens', 
+    'UserSession': 'user_sessions',
+    'AuditLog': 'audit_logs',
+    'Post': 'posts',
+    'Comment': 'comments',
+    'Tag': 'tags',
+    'Like': 'likes',
+    'PostTag': 'post_tags',
+    'Notification': 'notifications',
+    'Task': 'tasks',
+    'TaskComment': 'task_comments',
+    'TaskMedia': 'task_media',
+    'TaskShare': 'task_shares',
+    'ChatbotModel': 'chatbot_models',
+    'TrainingData': 'training_data',
+    'ChatConversation': 'chat_conversations',
+    'ChatMessage': 'chat_messages',
+    'Page': 'Page',
+    'PageBlock': 'PageBlock', 
+    'UserMfaSettings': 'UserMfaSettings',
+    'UserDevice': 'UserDevice',
+    'SecurityEvent': 'SecurityEvent',
+    'Role': 'Role',
+    'Permission': 'Permission',
+    'RolePermission': 'RolePermission',
+    'UserRoleAssignment': 'UserRoleAssignment',
+    'UserPermission': 'UserPermission',
+    'ResourceAccess': 'ResourceAccess'
+  };
+  
+  // Return mapped name or original name for models that match table names exactly
+  return specialMappings[modelName] || modelName;
+}
+
+/**
+ * Check if a table exists in the database
+ */
+async function tableExists(tableName: string): Promise<boolean> {
+  try {
+    await prisma.$queryRawUnsafe(`SELECT 1 FROM "${tableName}" LIMIT 1`);
+    return true;
+  } catch (error: any) {
+    // Check for table not exists error codes
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      return false;
+    }
+    // For other errors (like empty table), assume table exists
+    return true;
+  }
+}
+
+/**
+ * Get list of existing tables from database
+ */
+async function getExistingTables(): Promise<string[]> {
+  try {
+    const result: any[] = await prisma.$queryRaw`
+      SELECT tablename 
+      FROM pg_tables 
+      WHERE schemaname = 'public'
+      ORDER BY tablename
+    `;
+    return result.map(row => row.tablename);
+  } catch (error) {
+    console.error('❌ Error getting existing tables:', error);
+    return [];
+  }
+}
+
 interface RestoreStats {
   tablesProcessed: number;
   recordsRestored: number;
@@ -43,13 +154,22 @@ async function cleanupBeforeRestore(): Promise<void> {
   
   try {
     // Delete in reverse dependency order to avoid FK constraint issues
+    // Using dynamic table detection but with safe cleanup order
+    const availableTables = await getTables();
     const cleanupOrder = [
-      'hoadonChitiet', 'hoadon',
-      'chatMessage', 'chatConversation', 'trainingData', 'chatbotModel',
-      'taskShare', 'taskMedia', 'taskComment', 'task',
-      'postTag', 'like', 'comment', 'post', 'notification', 'tag',
-      'auditLog', 'userSession', 'verificationToken', 'authMethod', 'user'
-    ];
+      // Dependencies first (child → parent)
+      'ext_detailhoadon', 'ext_listhoadon',
+      'HoadonChitiet', 'Hoadon',
+      'chat_messages', 'chat_conversations', 'training_data', 'chatbot_models',
+      'task_shares', 'task_media', 'task_comments', 'tasks',
+      'post_tags', 'likes', 'comments', 'posts', 'notifications', 'tags',
+      'RolePermission', 'UserRoleAssignment', 'UserPermission', 'ResourceAccess',
+      'Permission', 'Role', 'SecurityEvent', 'UserDevice', 'UserMfaSettings',
+      'PageBlock', 'Page',
+      'audit_logs', 'user_sessions', 'verification_tokens', 'auth_methods', 'users'
+    ].filter(table => availableTables.includes(table)); // Only cleanup tables that exist
+    
+    console.log(`🧹 Cleanup order: ${cleanupOrder.join(' → ')}`);
     
     let totalDeleted = 0;
     for (const table of cleanupOrder) {
@@ -77,19 +197,49 @@ async function cleanupBeforeRestore(): Promise<void> {
 }
 
 
+// Helper function to convert table name to camelCase for Prisma model
+/**
+ * Get all tables that should be restored
+ */
 async function getTables(): Promise<string[]> {
-  // Return all table names from current schema in dependency order
-  return [
-    'users', 'tags',
-    'auth_methods', 'verification_tokens', 'user_sessions', 'audit_logs',
-    'posts', 'comments', 'likes', 'post_tags', 'notifications',
-    'tasks', 'task_comments', 'task_media', 'task_shares',
-    'chatbot_models', 'training_data', 'chat_conversations', 'chat_messages',
-    'Hoadon', 'HoadonChitiet'
-  ];
+  console.log('🔍 Parsing schema.prisma to get all models...');
+  const models = parseSchemaModels();
+  
+  if (models.length === 0) {
+    console.log('⚠️  No models found in schema.prisma, using fallback list');
+    // Fallback to manual list if parsing fails
+    return [
+      'users', 'auth_methods', 'verification_tokens', 'user_sessions', 'audit_logs',
+      'posts', 'comments', 'tags', 'likes', 'post_tags', 'notifications',
+      'tasks', 'task_comments', 'task_media', 'task_shares',
+      'chatbot_models', 'training_data', 'chat_conversations', 'chat_messages',
+      'Hoadon', 'HoadonChitiet',
+      'ext_listhoadon', 'ext_detailhoadon'
+    ];
+  }
+  
+  const allTableNames = models.map(model => model.tableName);
+  console.log(`🗂️  Parsed ${allTableNames.length} table names from schema`);
+  
+  // Get existing tables from database
+  console.log('🔍 Checking which tables actually exist in database...');
+  const existingTables = await getExistingTables();
+  console.log(`📋 Found ${existingTables.length} existing tables in database`);
+  
+  // Filter to only include tables that exist
+  const validTables = allTableNames.filter(tableName => {
+    const exists = existingTables.includes(tableName);
+    if (!exists) {
+      console.log(`   ⚠️  Table '${tableName}' from schema not found in database`);
+    }
+    return exists;
+  });
+  
+  console.log(`✅ Final table list for restore (${validTables.length} tables):`);
+  console.log(`   ${validTables.join(', ')}`);
+  return validTables;
 }
 
-// Helper function to convert table name to camelCase for Prisma model
 function toCamelCase(tableName: string): string {
   const mapping: { [key: string]: string } = {
     'users': 'user', 'auth_methods': 'authMethod', 'verification_tokens': 'verificationToken',
@@ -98,7 +248,12 @@ function toCamelCase(tableName: string): string {
     'notifications': 'notification', 'tasks': 'task', 'task_comments': 'taskComment',
     'task_media': 'taskMedia', 'task_shares': 'taskShare', 'chatbot_models': 'chatbotModel',
     'training_data': 'trainingData', 'chat_conversations': 'chatConversation',
-    'chat_messages': 'chatMessage', 'Hoadon': 'hoadon', 'HoadonChitiet': 'hoadonChitiet'
+    'chat_messages': 'chatMessage', 'Hoadon': 'hoadon', 'HoadonChitiet': 'hoadonChitiet',
+    'Page': 'page', 'PageBlock': 'pageBlock', 'UserMfaSettings': 'userMfaSettings',
+    'UserDevice': 'userDevice', 'SecurityEvent': 'securityEvent',
+    'Role': 'role', 'Permission': 'permission', 'RolePermission': 'rolePermission',
+    'UserRoleAssignment': 'userRoleAssignment', 'UserPermission': 'userPermission',
+    'ResourceAccess': 'resourceAccess', 'ext_listhoadon': 'ext_listhoadon', 'ext_detailhoadon': 'ext_detailhoadon'
   };
   
   return mapping[tableName] || tableName;
@@ -111,6 +266,14 @@ async function restoreTableFromJson(table: string, backupFolder: string): Promis
     if (!fs.existsSync(filePath)) {
       console.log(`⚠️  Backup file not found for table ${table}, skipping.`);
       stats.warnings.push(`Backup file does not exist for table ${table}`);
+      return;
+    }
+    
+    // Check if table exists in database
+    const exists = await tableExists(table);
+    if (!exists) {
+      console.log(`⚠️  Table ${table} does not exist in database, skipping...`);
+      stats.warnings.push(`Table ${table} does not exist in database`);
       return;
     }
     

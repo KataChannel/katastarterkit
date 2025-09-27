@@ -13,47 +13,168 @@ function getFormattedDate(): string {
 
 const BACKUP_DIR = path.join(BACKUP_ROOT_DIR, getFormattedDate());
 
+/**
+ * Check if a table exists in the database
+ */
+async function tableExists(tableName: string): Promise<boolean> {
+  try {
+    await prisma.$queryRawUnsafe(`SELECT 1 FROM "${tableName}" LIMIT 1`);
+    return true;
+  } catch (error: any) {
+    // Check for table not exists error codes
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      return false;
+    }
+    // For other errors (like empty table), assume table exists
+    return true;
+  }
+}
+
+/**
+ * Get list of existing tables from database
+ */
+async function getExistingTables(): Promise<string[]> {
+  try {
+    const result: any[] = await prisma.$queryRaw`
+      SELECT tablename 
+      FROM pg_tables 
+      WHERE schemaname = 'public'
+      ORDER BY tablename
+    `;
+    return result.map(row => row.tablename);
+  } catch (error) {
+    console.error('❌ Error getting existing tables:', error);
+    return [];
+  }
+}
+
+/**
+ * Parse schema.prisma file to extract all model names and their table mappings
+ */
+function parseSchemaModels(): { modelName: string; tableName: string }[] {
+  try {
+    const schemaPath = path.join(__dirname, 'schema.prisma');
+    const schemaContent = fs.readFileSync(schemaPath, 'utf8');
+    
+    // Extract model blocks using regex
+    const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*)\}/gm;
+    const models: { modelName: string; tableName: string }[] = [];
+    let match;
+    
+    while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
+      const modelName = match[1];
+      const modelBody = match[2];
+      
+      // Look for @@map directive in the model body
+      const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
+      const tableName = mapMatch ? mapMatch[1] : convertModelToTableName(modelName);
+      
+      models.push({ modelName, tableName });
+    }
+    
+    console.log(`📋 Found ${models.length} models in schema.prisma:`);
+    console.log(`   ${models.map(m => `${m.modelName} → ${m.tableName}`).join(', ')}`);
+    return models;
+  } catch (error) {
+    console.error('❌ Error parsing schema.prisma:', error);
+    // Fallback to empty array if parsing fails
+    return [];
+  }
+}
+
+/**
+ * Convert Prisma model names to database table names
+ * Based on Prisma's naming conventions and @@map directives
+ */
+function convertModelToTableName(modelName: string): string {
+  // Handle special cases where model name != table name (snake_case conversion)
+  const specialMappings: { [key: string]: string } = {
+    'User': 'users',
+    'AuthMethod': 'auth_methods',
+    'VerificationToken': 'verification_tokens', 
+    'UserSession': 'user_sessions',
+    'AuditLog': 'audit_logs',
+    'Post': 'posts',
+    'Comment': 'comments',
+    'Tag': 'tags',
+    'Like': 'likes',
+    'PostTag': 'post_tags',
+    'Notification': 'notifications',
+    'Task': 'tasks',
+    'TaskComment': 'task_comments',
+    'TaskMedia': 'task_media',
+    'TaskShare': 'task_shares',
+    'ChatbotModel': 'chatbot_models',
+    'TrainingData': 'training_data',
+    'ChatConversation': 'chat_conversations',
+    'ChatMessage': 'chat_messages',
+    'Page': 'Page',
+    'PageBlock': 'PageBlock', 
+    'UserMfaSettings': 'UserMfaSettings',
+    'UserDevice': 'UserDevice',
+    'SecurityEvent': 'SecurityEvent',
+    'Role': 'Role',
+    'Permission': 'Permission',
+    'RolePermission': 'RolePermission',
+    'UserRoleAssignment': 'UserRoleAssignment',
+    'UserPermission': 'UserPermission',
+    'ResourceAccess': 'ResourceAccess'
+  };
+  
+  // Return mapped name or original name for models that match table names exactly
+  return specialMappings[modelName] || modelName;
+}
+
 async function getTables(): Promise<string[]> {
-  // Return all table names from the current schema based on Prisma models
-  return [
-    // User system tables
-    'users',
-    'auth_methods', 
-    'verification_tokens',
-    'user_sessions',
-    'audit_logs',
-    
-    // Content system tables
-    'posts',
-    'comments',
-    'tags',
-    'likes',
-    'post_tags',
-    'notifications',
-    
-    // Task system tables
-    'tasks',
-    'task_comments',
-    'task_media',
-    'task_shares',
-    
-    // AI/Chatbot system tables
-    'chatbot_models',
-    'training_data',
-    'chat_conversations',
-    'chat_messages',
-    
-    // Invoice system tables
-    'Hoadon',
-    'HoadonChitiet',
-    'ext_listhoadon',
-    'ext_detailhoadon'
-  ];
+  console.log('🔍 Parsing schema.prisma to get all models...');
+  const models = parseSchemaModels();
+  
+  if (models.length === 0) {
+    console.log('⚠️  No models found in schema.prisma, using fallback list');
+    // Fallback to manual list if parsing fails
+    return [
+      'users', 'auth_methods', 'verification_tokens', 'user_sessions', 'audit_logs',
+      'posts', 'comments', 'tags', 'likes', 'post_tags', 'notifications',
+      'tasks', 'task_comments', 'task_media', 'task_shares',
+      'chatbot_models', 'training_data', 'chat_conversations', 'chat_messages',
+      'Hoadon', 'HoadonChitiet',
+      'ext_listhoadon', 'ext_detailhoadon'
+    ];
+  }
+  
+  const allTableNames = models.map(model => model.tableName);
+  console.log(`🗂️  Parsed ${allTableNames.length} table names from schema`);
+  
+  // Get existing tables from database
+  console.log('🔍 Checking which tables actually exist in database...');
+  const existingTables = await getExistingTables();
+  console.log(`📋 Found ${existingTables.length} existing tables in database`);
+  
+  // Filter to only include tables that exist
+  const validTables = allTableNames.filter(tableName => {
+    const exists = existingTables.includes(tableName);
+    if (!exists) {
+      console.log(`   ⚠️  Table '${tableName}' from schema not found in database`);
+    }
+    return exists;
+  });
+  
+  console.log(`✅ Final table list (${validTables.length} tables):`);
+  console.log(`   ${validTables.join(', ')}`);
+  return validTables;
 }
 
 async function backupTableToJson(table: string): Promise<void> {
   try {
     console.log(`🔄 Backing up table: ${table}`);
+    
+    // Check if table exists first
+    const exists = await tableExists(table);
+    if (!exists) {
+      console.log(`⚠️  Table ${table} does not exist in database, skipping...`);
+      return;
+    }
+    
     const data: any[] = await prisma.$queryRawUnsafe(`SELECT * FROM "${table}"`);
     
     if (data.length === 0) {
@@ -64,8 +185,12 @@ async function backupTableToJson(table: string): Promise<void> {
     const filePath: string = path.join(BACKUP_DIR, `${table}.json`);
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     console.log(`✅ Backup JSON successful: ${filePath} (${data.length} records)`);
-  } catch (error) {
-    console.error(`❌ Error backing up table ${table}:`, error);
+  } catch (error: any) {
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      console.log(`⚠️  Table ${table} does not exist in database, skipping...`);
+    } else {
+      console.error(`❌ Error backing up table ${table}:`, error.message || error);
+    }
   }
 }
 
