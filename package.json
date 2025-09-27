@@ -31,7 +31,8 @@
     "db:reset": "cd backend && npx prisma migrate reset",
     "db:seed": "cd backend && npx prisma db seed",
     "db:studio": "cd backend && npx prisma studio",
-    "db:push": "cd backend && npx prisma db push --force-reset",
+    "db:pushforce": "cd backend && npx prisma db push --force-reset",
+    "db:push": "cd backend && npx prisma db push",
     "db:restore": "cd backend && npx ts-node prisma/restore.ts",
     "db:backup": "cd backend && npx ts-node prisma/backup.ts"
   },

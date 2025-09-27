@@ -232,7 +232,7 @@ type ExtListhoadon {
   tgtttbchu: String
   tgtttbso: Float
   thdon: String
-  thlap: DateTime
+  thlap: String
   tlhdon: String
   tthai: String
   tttbao: String

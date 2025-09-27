@@ -1238,7 +1238,7 @@ model ext_listhoadon {
   
   // Status and Processing
   thdon           String?  // Trạng thái hóa đơn
-  thlap           DateTime? // Thời điểm lập
+  thlap           String?  // Thời điểm lập
   thttlphi        Decimal? // Thành tiền lệ phí
   tlhdon          String?  // Loại hóa đơn
   ttcktmai        String?  // Trạng thái chấp nhận mã

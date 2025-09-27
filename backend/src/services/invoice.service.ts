@@ -603,6 +603,7 @@ export class InvoiceService {
       tchat: toStringOrNull(data.tchat),
       tgtttbchu: toStringOrNull(data.tgtttbchu),
       thdon: toStringOrNull(data.thdon),
+      thlap: toStringOrNull(data.thlap),
       tlhdon: toStringOrNull(data.tlhdon),
       ttcktmai: toStringOrNull(data.ttcktmai),
       tthai: toStringOrNull(data.tthai),

@@ -110,8 +110,8 @@ export class ExtListhoadon {
   @Field(() => String, { nullable: true })
   thdon?: string;
 
-  @Field(() => Date, { nullable: true })
-  thlap?: Date;
+  @Field(() => String, { nullable: true })
+  thlap?: string;
 
   @Field(() => String, { nullable: true })
   tlhdon?: string;

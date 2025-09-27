@@ -98,7 +98,7 @@ export interface ExtListhoadon {
   
   // Status and Processing
   thdon?: string;
-  thlap?: Date;
+  thlap?: string;
   thttlphi?: number;
   tlhdon?: string;
   ttcktmai?: string;
