@@ -28,6 +28,7 @@ import { SearchModule } from './search/search.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { SecurityModule } from './security/security.module';
 import { UnifiedDynamicModule } from './graphql/unified-dynamic.module';
+import { KetoAnModule } from './ketoan/ketoan.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -121,6 +122,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     MonitoringModule,
     SecurityModule,
     UnifiedDynamicModule,
+    KetoAnModule,
   ],
   controllers: [
     LogController,

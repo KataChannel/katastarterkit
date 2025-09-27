@@ -148,7 +148,7 @@ export class DateService {
 
       return { isValid: true };
     } catch (error) {
-      return { isValid: false, error: 'Định dạng ngày không hợp lệ' };
+      return { isValid: false, error: 'Định dạng ngày không hợp lệ 123' };
     }
   }
 

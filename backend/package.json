@@ -55,6 +55,7 @@
     "class-validator": "^0.14.2",
     "dataloader": "^2.2.3",
     "dotenv": "^17.2.1",
+    "exceljs": "^4.4.0",
     "graphql": "^16.11.0",
     "graphql-depth-limit": "^1.1.0",
     "graphql-query-complexity": "^1.1.0",

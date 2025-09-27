@@ -5,6 +5,7 @@ import InvoiceTable from '@/components/InvoiceTable';
 import ConfigModal from '@/components/ConfigModal';
 import InvoiceApiService from '@/services/invoiceApi';
 import ExcelExportService from '@/services/excelExport';
+import BackendExcelExportService from '@/services/backendExcelExport';
 import ConfigService from '@/services/configService';
 import DateService from '@/services/dateService';
 import { useInvoiceDatabase } from '@/services/invoiceDatabaseServiceNew';
@@ -260,20 +261,28 @@ const ListHoaDonPage = () => {
   // Export to Excel
   const handleExportExcel = async () => {
     try {
-      if (!invoices || invoices.length === 0) {
-        toast.error('Không có dữ liệu để xuất');
+      // Validate date range first
+      const validation = BackendExcelExportService.validateDateRange(filter.fromDate, filter.toDate);
+      if (!validation.isValid) {
+        toast.error(validation.message || 'Khoảng thời gian không hợp lệ');
         return;
       }
 
-      toast.loading('Đang xuất file Excel...', { id: 'excel-export' });
+      toast.loading('Đang xuất file Excel từ server...', { id: 'excel-export' });
       
-      ExcelExportService.exportToExcel(invoices, {
-        filename: `DanhSachHoaDon_${format(new Date(), 'yyyyMMdd_HHmmss')}.xlsx`
+      // Use backend API for Excel export with date range and invoice type
+      await BackendExcelExportService.exportToExcel({
+        fromDate: filter.fromDate,
+        toDate: filter.toDate,
+        invoiceType: config.invoiceType as 'banra' | 'muavao'
       });
 
-      toast.success('Đã xuất file Excel thành công', { id: 'excel-export' });
+      // Success toast is handled in the service
     } catch (error: any) {
-      toast.error(error?.message || 'Không thể xuất file Excel', { id: 'excel-export' });
+      console.error('Excel export error:', error);
+      // Error toast is handled in the service
+    } finally {
+      toast.dismiss('excel-export');
     }
   };
 
@@ -440,11 +449,15 @@ const ListHoaDonPage = () => {
               <button
                 type="button"
                 onClick={handleExportExcel}
-                disabled={!invoices || invoices.length === 0}
+                disabled={!filter.fromDate || !filter.toDate}
                 className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                title={`Xuất Excel từ ${filter.fromDate} đến ${filter.toDate}`}
               >
                 <FileSpreadsheet className="w-4 h-4 mr-2" />
                 Xuất Excel
+                <span className="ml-1 text-xs opacity-75">
+                  ({filter.fromDate} - {filter.toDate})
+                </span>
               </button>
             </div>
           </form>
