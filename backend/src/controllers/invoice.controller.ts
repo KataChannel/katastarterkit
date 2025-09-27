@@ -104,21 +104,21 @@ export class InvoiceController {
   /**
    * Check if invoice exists
    */
-  @Get('exists/:nbmst/:khmshdon/:shdon')
-  @Roles($Enums.UserRoleType.ADMIN, $Enums.UserRoleType.USER)
-  async invoiceExists(
-    @Param('nbmst') nbmst: string,
-    @Param('khmshdon') khmshdon: string,
-    @Param('shdon') shdon: string
-  ) {
-    try {
-      this.logger.log(`REST: Checking invoice existence: ${nbmst}-${khmshdon}-${shdon}`);
-      return { exists: await this.invoiceService.invoiceExists(nbmst, khmshdon, shdon) };
-    } catch (error) {
-      this.logger.error('REST: Error checking invoice existence:', error.message);
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
-  }
+  // @Get('exists/:nbmst/:khmshdon/:shdon')
+  // @Roles($Enums.UserRoleType.ADMIN, $Enums.UserRoleType.USER)
+  // async invoiceExists(
+  //   @Param('nbmst') nbmst: string,
+  //   @Param('khmshdon') khmshdon: string,
+  //   @Param('shdon') shdon: string
+  // ) {
+  //   try {
+  //     this.logger.log(`REST: Checking invoice existence: ${nbmst}-${khmshdon}-${shdon}`);
+  //     return { exists: await this.invoiceService.invoiceExists(nbmst, khmshdon, shdon) };
+  //   } catch (error) {
+  //     this.logger.error('REST: Error checking invoice existence:', error.message);
+  //     throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 
   /**
    * Bulk create invoices

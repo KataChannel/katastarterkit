@@ -908,13 +908,14 @@ export class InvoiceService {
   /**
    * Check if invoice exists
    */
-  async invoiceExists(nbmst: string, khmshdon: string, shdon: string): Promise<boolean> {
+  async invoiceExists(idServer: string, nbmst: string, khmshdon: string, shdon: string): Promise<boolean> {
     try {
       const count = await this.prisma.ext_listhoadon.count({
         where: {
-          nbmst,
-          khmshdon,
-          shdon,
+          idServer,
+          // nbmst,
+          // khmshdon,
+          // shdon,
         },
       });
 
@@ -982,23 +983,37 @@ export class InvoiceService {
         for (const invoiceData of batch) {
           try {
             // Skip existing if requested
-            if (input.skipExisting && invoiceData.nbmst && invoiceData.khmshdon && invoiceData.shdon) {
+            if (input.skipExisting && invoiceData.idServer) {
               const exists = await this.invoiceExists(
+                invoiceData.idServer,
                 invoiceData.nbmst, 
                 String(invoiceData.khmshdon), 
                 String(invoiceData.shdon)
               );
               if (exists) {
                 this.logger.debug(`Skipping existing invoice: ${invoiceData.shdon}`);
+                this.fileLogger.logWithData('log', 'Invoice skipped - already exists', {
+                  idServer: invoiceData.idServer,
+                  nbmst: invoiceData.nbmst,
+                  khmshdon: String(invoiceData.khmshdon),
+                  shdon: String(invoiceData.shdon),
+                  skipReason: 'Invoice already exists in database',
+                  batchNumber,
+                  totalBatches,
+                  timestamp: new Date().toISOString()
+                }, 'InvoiceService');
                 continue;
               }
             }
 
             const invoice = await this.createInvoice(invoiceData);
-            this.logger.log('Created invoice in bulk:', {
-              id: invoice.id,
+            this.fileLogger.logInvoiceOperation('bulk-create', invoice.id, {
               idServer: invoice.idServer,
-              shdon: invoice.shdon
+              shdon: invoice.shdon,
+              nbmst: invoice.nbmst,
+              khmshdon: invoice.khmshdon,
+              batchNumber,
+              totalBatches
             });
             
             // Automatically fetch and save invoice details with retry logic
