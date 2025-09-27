@@ -45,7 +45,9 @@ async function getTables(): Promise<string[]> {
     
     // Invoice system tables
     'Hoadon',
-    'HoadonChitiet'
+    'HoadonChitiet',
+    'ext_listhoadon',
+    'ext_detailhoadon'
   ];
 }
 

@@ -6,11 +6,14 @@ export interface InvoiceExportData {
   // Từ ext_listhoadon  
   id: string;
   nbmst?: string;     // Mã số thuế người bán
+  nbten?: string;     // Tên người bán
+  nbdchi?: string;    // Địa chỉ người bán
   nmmst?: string;     // Mã số thuế người mua
   khhdon?: string;    // Ký hiệu hóa đơn
   shdon?: string;     // Số hóa đơn  
   khmshdon?: string;  // Ký hiệu mẫu số hóa đơn
   tdlap?: Date;       // Thời điểm lập
+  thlap?: string;     // Thời hạn lập
   tthai?: string;     // Trạng thái
   tlhdon?: string;    // Loại hóa đơn
   nmdchi?: string;    // Địa chỉ người mua
@@ -128,11 +131,14 @@ export class InvoiceExportService {
         return {
           id: invoice.id,
           nbmst: invoice.nbmst || '',
+          nbten: invoice.nbten || '',
+          nbdchi: invoice.nbdchi || '',
           nmmst: invoice.nmmst || '',
           khhdon: invoice.khhdon || '',
           shdon: invoice.shdon || '',
           khmshdon: invoice.khmshdon || '',
           tdlap: invoice.tdlap,
+          thlap: invoice.thlap ? String(invoice.thlap) : '',
           tthai: invoice.tthai || '',
           tlhdon: invoice.tlhdon || '',
           nmdchi: invoice.nmdchi || '',
@@ -156,14 +162,18 @@ export class InvoiceExportService {
     // Định nghĩa headers
     const headers = [
       'STT',
-      'Mã số thuế',
+      'Mã số thuế NB',
+      'Tên người bán',
+      'Địa chỉ người bán',
+      'Mã số thuế NM',
       'Ký hiệu hóa đơn',
       'Số hóa đơn',
       'Ký hiệu mẫu số hóa đơn',
       'Ngày lập',
+      'Thời hạn lập',
       'Trạng thái',
       'Loại hóa đơn',
-      'Địa chỉ',
+      'Địa chỉ NM',
       'Tên khách hàng',
       'Tên sản phẩm',
       'Đơn vị tính',
@@ -190,7 +200,7 @@ export class InvoiceExportService {
     };
 
     // Set column widths
-    const columnWidths = [5, 15, 12, 12, 15, 12, 10, 12, 30, 25, 30, 10, 10, 15, 15, 10, 15, 15, 15, 15];
+    const columnWidths = [5, 15, 25, 30, 15, 12, 12, 15, 12, 12, 10, 12, 30, 25, 30, 10, 10, 15, 15, 10, 15, 15, 15, 15];
     columnWidths.forEach((width, index) => {
       worksheet.getColumn(index + 1).width = width;
     });
@@ -213,13 +223,17 @@ export class InvoiceExportService {
 
           const row = [
             rowIndex - 1, // STT
-            isFirstDetail ? invoice.nbmst : '', // Chỉ hiện thông tin hóa đơn ở dòng đầu 
-            isFirstDetail ? invoice.khhdon : '',
-            isFirstDetail ? invoice.shdon : '',
-            isFirstDetail ? invoice.khmshdon : '',
-            isFirstDetail ? this.formatDate(invoice.tdlap) : '',
-            isFirstDetail ? invoice.tthai : '',
-            isFirstDetail ? invoice.tlhdon : '',
+            isFirstDetail ? invoice.nbmst : '', // Mã số thuế người bán
+            isFirstDetail ? invoice.nbten : '', // Tên người bán
+            isFirstDetail ? invoice.nbdchi : '', // Địa chỉ người bán
+            isFirstDetail ? invoice.nmmst : '', // Mã số thuế người mua
+            isFirstDetail ? invoice.khhdon : '', // Ký hiệu hóa đơn
+            isFirstDetail ? invoice.shdon : '', // Số hóa đơn
+            isFirstDetail ? invoice.khmshdon : '', // Ký hiệu mẫu số hóa đơn
+            isFirstDetail ? this.formatDate(invoice.tdlap) : '', // Ngày lập
+            isFirstDetail ? invoice.thlap : '', // Thời hạn lập
+            isFirstDetail ? invoice.tthai : '', // Trạng thái
+            isFirstDetail ? invoice.tlhdon : '', // Loại hóa đơn
             isFirstDetail ? invoice.nmdchi : '',  // Địa chỉ người mua
             isFirstDetail ? invoice.nmten : '',   // Tên người mua
             detail.ten, // Tên sản phẩm
@@ -241,10 +255,14 @@ export class InvoiceExportService {
         const row = [
           rowIndex - 1,
           invoice.nbmst,
+          invoice.nbten,
+          invoice.nbdchi,
+          invoice.nmmst,
           invoice.khhdon,
           invoice.shdon,
           invoice.khmshdon,
           this.formatDate(invoice.tdlap),
+          invoice.thlap,
           invoice.tthai,
           invoice.tlhdon,
           invoice.nmdchi,
@@ -279,7 +297,7 @@ export class InvoiceExportService {
         };
 
         // Alignment
-        if (colNumber >= 13 && colNumber <= 20) { // Số columns
+        if (colNumber >= 17 && colNumber <= 24) { // Số columns (điều chỉnh cho cột mới)
           cell.alignment = { horizontal: 'right' };
           cell.numFmt = '#,##0';
         } else {
@@ -287,7 +305,7 @@ export class InvoiceExportService {
         }
 
         // Date formatting
-        if (colNumber === 6 && rowNumber > 1) { // Ngày lập column
+        if (colNumber === 9 && rowNumber > 1) { // Ngày lập column (điều chỉnh cho cột mới)
           cell.numFmt = 'dd/mm/yyyy';
         }
       });
