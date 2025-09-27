@@ -97,14 +97,23 @@ export class InvoiceApiService {
         sort: params.sort || 'tdlap:desc,khmshdon:asc,shdon:desc',
         size: (params.size || config.pageSize).toString(),
         page: (params.page || 0).toString(),
-        ...(searchQuery && { search: searchQuery })
+        ...(searchQuery && { search: searchQuery }),
+        ...(params.state && { state: params.state })
       });
 
       const response: AxiosResponse<InvoiceApiResponse> = await axiosInstance.get(
         `${endpoint}?${queryParams.toString()}`
       );
 
-      return response.data;
+      const responseData = response.data;
+      
+      // Check if we need to fetch more data (when total > 50)
+      if (responseData.total && responseData.total > 50 && responseData.state && !params.state) {
+        console.log(`Total records: ${responseData.total}, fetching all pages...`);
+        return await this.fetchAllInvoices(filter, params, invoiceType, responseData);
+      }
+
+      return responseData;
     } catch (error) {
       console.error('Error fetching invoice data:', error);
       
@@ -125,6 +134,173 @@ export class InvoiceApiService {
       
       throw new Error('Không thể tải dữ liệu hóa đơn. Vui lòng kiểm tra kết nối internet và thử lại.');
     }
+  }
+
+  /**
+   * Fetch all invoices when total > 50 using state-based pagination
+   */
+  private static async fetchAllInvoices(
+    filter: InvoiceFilter | AdvancedFilter,
+    params: InvoiceApiParams,
+    invoiceType?: InvoiceType,
+    initialResponse?: InvoiceApiResponse
+  ): Promise<InvoiceApiResponse> {
+    const allData: InvoiceData[] = [];
+    let currentState: string | undefined = initialResponse?.state;
+    let totalFetched = 0;
+    const totalRecords = initialResponse?.total || 0;
+    let pageCount = 1;
+    
+    // Add initial response data if provided
+    if (initialResponse?.datas) {
+      allData.push(...initialResponse.datas);
+      totalFetched = initialResponse.datas.length;
+    }
+    
+    console.log(`🔄 Starting pagination fetch: ${totalFetched}/${totalRecords} records (${Math.ceil(totalRecords / 50)} estimated pages)`);
+    
+    // Continue fetching while we have a state and haven't reached the total
+    while (currentState && totalFetched < totalRecords) {
+      try {
+        const statePreview = currentState.length > 50 ? `${currentState.substring(0, 50)}...` : currentState;
+        console.log(`📄 Fetching page ${pageCount + 1} with state: ${statePreview}`);
+        
+        const nextResponse = await this.fetchInvoices(
+          filter,
+          { ...params, state: currentState },
+          invoiceType
+        );
+        
+        if (nextResponse.datas && nextResponse.datas.length > 0) {
+          allData.push(...nextResponse.datas);
+          totalFetched += nextResponse.datas.length;
+          const progress = Math.round((totalFetched / totalRecords) * 100);
+          console.log(`✅ Page ${pageCount + 1}: ${nextResponse.datas.length} records | Total: ${totalFetched}/${totalRecords} (${progress}%)`);
+        } else {
+          console.log(`⚠️ Page ${pageCount + 1}: No data returned`);
+        }
+        
+        // Update state for next iteration
+        currentState = nextResponse.state;
+        pageCount++;
+        
+        // Break if no more state (reached end)
+        if (!currentState) {
+          console.log('🏁 No more state token, pagination complete');
+          break;
+        }
+        
+        // Safety check to prevent infinite loops
+        if (totalFetched >= totalRecords) {
+          console.log('🎯 Reached total record count, stopping pagination');
+          break;
+        }
+        
+        // Safety check for excessive pages (prevent runaway pagination)
+        if (pageCount > 100) {
+          console.warn('⚠️ Exceeded 100 pages, stopping pagination for safety');
+          break;
+        }
+        
+        // Add a small delay to prevent overwhelming the API
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+      } catch (error) {
+        console.error(`❌ Error during pagination fetch (page ${pageCount + 1}):`, error);
+        // If pagination fails, return what we have so far
+        break;
+      }
+    }
+    
+    const successRate = Math.round((allData.length / totalRecords) * 100);
+    console.log(`🎉 Pagination complete: fetched ${allData.length} records out of ${totalRecords} total (${successRate}% success rate)`);
+    
+    // Return combined result
+    return {
+      datas: allData,
+      totalElements: totalRecords,
+      totalPages: Math.ceil(totalRecords / (params.size || 50)),
+      size: allData.length,
+      number: 0,
+      numberOfElements: allData.length,
+      first: true,
+      last: true,
+      total: totalRecords,
+      state: undefined // Clear state since we've fetched everything
+    };
+  }
+
+  /**
+   * Fetch invoices with progress callback for UI updates
+   */
+  static async fetchInvoicesWithProgress(
+    filter: InvoiceFilter | AdvancedFilter,
+    params: InvoiceApiParams = {},
+    invoiceType?: InvoiceType,
+    onProgress?: (current: number, total: number, percentage: number) => void
+  ): Promise<InvoiceApiResponse> {
+    // First, get initial response to check total count
+    const initialResponse = await this.fetchInvoices(filter, params, invoiceType);
+    
+    // If total <= 50 or no state, return as is
+    if (!initialResponse.total || initialResponse.total <= 50 || !initialResponse.state) {
+      onProgress?.(initialResponse.datas.length, initialResponse.total || initialResponse.datas.length, 100);
+      return initialResponse;
+    }
+    
+    // For large datasets, use pagination with progress tracking
+    const allData: InvoiceData[] = [];
+    let currentState: string | undefined = initialResponse.state;
+    let totalFetched = 0;
+    const totalRecords = initialResponse.total;
+    
+    // Add initial data
+    if (initialResponse.datas) {
+      allData.push(...initialResponse.datas);
+      totalFetched = initialResponse.datas.length;
+      onProgress?.(totalFetched, totalRecords, Math.round((totalFetched / totalRecords) * 100));
+    }
+    
+    // Continue fetching with progress updates
+    while (currentState && totalFetched < totalRecords) {
+      try {
+        const nextResponse = await this.fetchInvoices(
+          filter,
+          { ...params, state: currentState },
+          invoiceType
+        );
+        
+        if (nextResponse.datas && nextResponse.datas.length > 0) {
+          allData.push(...nextResponse.datas);
+          totalFetched += nextResponse.datas.length;
+          const percentage = Math.round((totalFetched / totalRecords) * 100);
+          onProgress?.(totalFetched, totalRecords, percentage);
+        }
+        
+        currentState = nextResponse.state;
+        
+        if (!currentState || totalFetched >= totalRecords) break;
+        
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+      } catch (error) {
+        console.error('Error during progress fetch:', error);
+        break;
+      }
+    }
+    
+    return {
+      datas: allData,
+      totalElements: totalRecords,
+      totalPages: Math.ceil(totalRecords / (params.size || 50)),
+      size: allData.length,
+      number: 0,
+      numberOfElements: allData.length,
+      first: true,
+      last: true,
+      total: totalRecords,
+      state: undefined
+    };
   }
 
   /**

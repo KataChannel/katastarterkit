@@ -246,6 +246,9 @@ export interface InvoiceApiResponse {
   numberOfElements: number;
   first: boolean;
   last: boolean;
+  // New fields for pagination with state
+  total?: number;    // Total number of records available
+  state?: string;    // State token for pagination continuation
 }
 
 export interface InvoiceApiParams {
@@ -253,6 +256,7 @@ export interface InvoiceApiParams {
   size?: number;    // Page size
   page?: number;    // Page number
   search?: string;  // Search query with date range and filters
+  state?: string;   // State token for pagination continuation
 }
 
 export interface InvoiceFilter {
