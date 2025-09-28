@@ -293,6 +293,7 @@ export interface AdvancedFilter extends InvoiceFilter {
   status?: string;          // Invoice status filter
   amountFrom?: number;      // Minimum amount filter
   amountTo?: number;        // Maximum amount filter
+  thlap?: string;           // Thời điểm lập filter (Creation time filter)
 }
 
 // Table configuration

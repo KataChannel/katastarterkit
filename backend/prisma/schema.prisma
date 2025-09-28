@@ -1346,7 +1346,7 @@ model ext_detailhoadon {
   id            String   @id @default(uuid())
   
   // Reference to parent invoice
-  idServer        String   
+  idServer        String?   @unique  // Basic Invoice Info
   idhdonServer    String   // Foreign key to ext_listhoadon.id
   // Item Information
   dgia          Decimal? // Đơn giá

@@ -247,7 +247,7 @@ export class InvoiceService {
       for (const detail of details) {
         try {
           const detailData: any = {
-            idServer: detail.id || `${invoiceIdServer}_${detail.stt || Math.random()}`,
+            idServer: invoiceIdServer+''+detail.id,
             idhdonServer: invoiceIdServer,
             dgia: this.toDecimalSafe(detail.dgia),
             dvtinh: this.toStringSafe(detail.dvtinh),
@@ -350,7 +350,7 @@ export class InvoiceService {
    */
   private async autoFetchAndSaveDetails(invoice: any, bearerToken?: string): Promise<number> {
     const startTime = Date.now();
-    const invoiceRef = invoice.shdon || invoice.idServer || 'unknown';
+    const invoiceRef = invoice.idServer;
     
     try {
       // Log start of operation
@@ -371,7 +371,7 @@ export class InvoiceService {
             nbmst: invoice.nbmst,
             khhdon: invoice.khhdon,
             shdon: invoice.shdon,
-            khmshdon: invoice.khmshdon
+            khmshdon: invoice.khmshdon,
           }
         });
         return 0;
@@ -703,13 +703,14 @@ export class InvoiceService {
   async createInvoice(data: CreateInvoiceInput): Promise<ExtListhoadon> {
     try {
       // Check for existing invoice to prevent duplicates
-      if (data.nbmst && data.khmshdon && data.shdon) {
+      if (data.nbmst && data.khmshdon && data.shdon && data.idServer) {
         const normalizedData = this.normalizeInvoiceData(data);
         const existing = await this.prisma.ext_listhoadon.findFirst({
           where: {
             nbmst: data.nbmst,
             khmshdon: normalizedData.khmshdon,
             shdon: normalizedData.shdon,
+            idServer: data.idServer,
           },
         });
 
@@ -913,9 +914,9 @@ export class InvoiceService {
       const count = await this.prisma.ext_listhoadon.count({
         where: {
           idServer,
-          // nbmst,
-          // khmshdon,
-          // shdon,
+          nbmst,
+          khmshdon,
+          shdon,
         },
       });
 

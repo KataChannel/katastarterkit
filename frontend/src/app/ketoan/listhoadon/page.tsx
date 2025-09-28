@@ -158,7 +158,8 @@ const ListHoaDonPage = () => {
         toDate: filter.toDate,
         ...(filter.invoiceNumber && { shdon: filter.invoiceNumber }),
         ...(filter.taxCode && { nbmst: filter.taxCode }),
-        ...(filter.buyerName && { nmten: filter.buyerName })
+        ...(filter.buyerName && { nmten: filter.buyerName }),
+        ...(filter.thlap && { thlap: filter.thlap })
       };
 
       const result = await searchDatabaseInvoices(searchFilters);

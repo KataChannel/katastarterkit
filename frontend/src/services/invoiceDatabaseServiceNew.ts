@@ -159,6 +159,7 @@ class InvoiceDatabaseService {
     tthai?: string;
     fromDate?: string;
     toDate?: string;
+    thlap?: string;
   }) {
     try {
       const queryParams = new URLSearchParams();

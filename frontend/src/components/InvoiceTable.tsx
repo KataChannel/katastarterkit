@@ -111,7 +111,8 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       invoice.tentcgp?.toLowerCase().includes(searchTerm) ||
       invoice.tenxmua?.toLowerCase().includes(searchTerm) ||
       invoice.msttcgp?.toLowerCase().includes(searchTerm) ||
-      invoice.msttmua?.toLowerCase().includes(searchTerm)
+      invoice.msttmua?.toLowerCase().includes(searchTerm) ||
+      (invoice as any).thlap?.toLowerCase().includes(searchTerm)
     );
   }, [invoices, localFilter.globalSearch]);
 
@@ -228,6 +229,19 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Thời điểm lập
+              </label>
+              <input
+                type="text"
+                placeholder="Nhập thời điểm lập"
+                value={localFilter.thlap || ''}
+                onChange={(e) => handleFilterChange('thlap', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              />
+            </div>
           </div>
         )}
       </div>
@@ -289,6 +303,9 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
               </div>
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Thời điểm lập
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Người bán
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -340,6 +357,9 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
               </td>
               <td className="px-4 py-4 text-sm text-gray-600">
                 {formatDate(invoice.tdlap)}
+              </td>
+              <td className="px-4 py-4 text-sm text-gray-600">
+                {(invoice as any).thlap || 'N/A'}
               </td>
               <td className="px-4 py-4 text-sm">
                 <div>
