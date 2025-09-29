@@ -826,7 +826,7 @@ export class InvoiceService {
    */
   async searchInvoices(input: InvoiceSearchInput): Promise<InvoiceSearchResult> {
     try {
-      const { page = 0, size = 20, sortBy = 'tdlap', sortOrder = 'desc', ...filters } = input;
+      const { page = 0, size = 20, sortBy = 'nky', sortOrder = 'desc', ...filters } = input;
 
       // Log input for debugging
       // this.logger.debug('Invoice search input:', {
@@ -863,14 +863,14 @@ export class InvoiceService {
       }
 
       if (filters.fromDate || filters.toDate) {
-        where.tdlap = {};
+        where.nky = {};
         
         if (filters.fromDate && !isNaN(filters.fromDate.getTime())) {
-          where.tdlap.gte = filters.fromDate;
+          where.nky.gte = filters.fromDate;
         }
         
         if (filters.toDate && !isNaN(filters.toDate.getTime())) {
-          where.tdlap.lte = filters.toDate;
+          where.nky.lte = filters.toDate;
         }
       }
 

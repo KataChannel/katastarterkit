@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, PostStatus } from '@prisma/client';
+import { PrismaClient, UserRoleType, PostStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -8,16 +8,17 @@ async function main() {
 
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
-  const admin = await prisma.user.upsert({
+    const adminUser = await prisma.user.upsert({
     where: { email: 'admin@katacore.dev' },
     update: {},
     create: {
       email: 'admin@katacore.dev',
       username: 'admin',
-      password: adminPassword,
       firstName: 'Admin',
       lastName: 'User',
-      role: UserRole.ADMIN,
+      password: adminPassword,
+      roleType: 'ADMIN',
+      isActive: true,
     },
   });
 
@@ -32,7 +33,7 @@ async function main() {
       password: userPassword,
       firstName: 'Test',
       lastName: 'User',
-      role: UserRole.USER,
+      roleType: 'USER',
     },
   });
 
@@ -44,7 +45,6 @@ async function main() {
       create: {
         name: 'Next.js',
         slug: 'nextjs',
-        description: 'The React Framework for Production',
         color: '#000000',
       },
     }),
@@ -54,7 +54,6 @@ async function main() {
       create: {
         name: 'NestJS',
         slug: 'nestjs',
-        description: 'A progressive Node.js framework',
         color: '#ea2845',
       },
     }),
@@ -64,7 +63,6 @@ async function main() {
       create: {
         name: 'GraphQL',
         slug: 'graphql',
-        description: 'A query language for APIs',
         color: '#e10098',
       },
     }),
@@ -74,7 +72,6 @@ async function main() {
       create: {
         name: 'Prisma',
         slug: 'prisma',
-        description: 'Next-generation ORM',
         color: '#2d3748',
       },
     }),
@@ -104,7 +101,7 @@ This starter kit provides everything you need to build scalable, production-read
         slug: 'welcome-to-katacore',
         status: PostStatus.PUBLISHED,
         publishedAt: new Date(),
-        authorId: admin.id,
+        authorId: adminUser.id,
       },
     }),
     prisma.post.create({
@@ -177,7 +174,7 @@ export class PostModule {}
         excerpt: 'Discover how to build scalable applications using NestJS framework.',
         slug: 'building-scalable-applications-with-nestjs',
         status: PostStatus.DRAFT,
-        authorId: admin.id,
+        authorId: adminUser.id,
       },
     }),
   ]);
@@ -223,7 +220,7 @@ export class PostModule {}
       data: {
         content: 'Very helpful GraphQL tutorial. Thanks for sharing!',
         postId: posts[1].id,
-        userId: admin.id,
+        userId: adminUser.id,
       },
     }),
   ]);
@@ -239,7 +236,7 @@ export class PostModule {}
     prisma.like.create({
       data: {
         postId: posts[1].id,
-        userId: admin.id,
+        userId: adminUser.id,
       },
     }),
   ]);

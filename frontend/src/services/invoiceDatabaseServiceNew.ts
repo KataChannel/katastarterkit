@@ -246,7 +246,7 @@ export function useInvoiceDatabase() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const syncData = async (invoiceData: any[], detailsData?: any[]) => {
+  const syncData:any = async (invoiceData: any[], detailsData?: any[]) => {
     setIsLoading(true);
     setError(null);
     
