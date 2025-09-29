@@ -28,6 +28,34 @@ input AdminUpdateUserInput {
   username: String
 }
 
+input AssignRolePermissionInput {
+  conditions: JSON
+  effect: String! = "allow"
+  expiresAt: DateTime
+  permissionIds: [String!]!
+  roleId: String!
+}
+
+input AssignUserPermissionInput {
+  conditions: JSON
+  effect: String! = "allow"
+  expiresAt: DateTime
+  permissionIds: [String!]!
+  reason: String
+  scope: String
+  userId: String!
+}
+
+input AssignUserRoleInput {
+  conditions: JSON
+  effect: String! = "allow"
+  expiresAt: DateTime
+  reason: String
+  roleIds: [String!]!
+  scope: String
+  userId: String!
+}
+
 enum AuthProvider {
   FACEBOOK
   GOOGLE
@@ -163,6 +191,18 @@ input CreatePageInput {
   title: String!
 }
 
+input CreatePermissionInput {
+  action: String!
+  category: String! = "general"
+  conditions: JSON
+  description: String
+  displayName: String!
+  metadata: JSON
+  name: String!
+  resource: String!
+  scope: String
+}
+
 input CreatePostInput {
   content: String!
   excerpt: String
@@ -171,6 +211,16 @@ input CreatePostInput {
   status: PostStatus! = DRAFT
   tags: [String!]
   title: String!
+}
+
+input CreateRoleInput {
+  description: String
+  displayName: String!
+  metadata: JSON
+  name: String!
+  parentId: String
+  permissionIds: [String!]
+  priority: Int! = 0
 }
 
 input CreateTaskCommentInput {
@@ -309,7 +359,9 @@ type InvoiceStats {
   totalTax: Float!
 }
 
-"""JSON custom scalar type"""
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
 scalar JSON
 
 """
@@ -334,6 +386,9 @@ type Mutation {
   addPageBlock(input: CreatePageBlockInput!, pageId: String!): PageBlock!
   adminCreateUser(input: AdminCreateUserInput!): User!
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
+  assignRolePermissions(input: AssignRolePermissionInput!): Boolean!
+  assignUserPermissions(input: AssignUserPermissionInput!): Boolean!
+  assignUserRoles(input: AssignUserRoleInput!): Boolean!
   bulkCreateInvoices(input: BulkInvoiceInput!): DatabaseSyncResult!
   bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!
   createComment(input: CreateCommentInput!): Comment!
@@ -346,7 +401,9 @@ type Mutation {
   """Create a single record with Prisma-like syntax"""
   createOne(input: UnifiedCreateInput!, modelName: String!): JSONObject!
   createPage(input: CreatePageInput!): Page!
+  createPermission(input: CreatePermissionInput!): Permission!
   createPost(input: CreatePostInput!): Post!
+  createRole(input: CreateRoleInput!): Role!
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
@@ -360,7 +417,9 @@ type Mutation {
   deleteOne(input: UnifiedDeleteInput!, modelName: String!): JSONObject!
   deletePage(id: String!): Page!
   deletePageBlock(id: String!): PageBlock!
+  deletePermission(id: String!): Boolean!
   deletePost(id: String!): Boolean!
+  deleteRole(id: String!): Boolean!
   deleteTask(id: String!): Boolean!
   deleteUser(id: String!): Boolean!
   duplicatePage(id: String!, slug: String, title: String): Page!
@@ -387,7 +446,9 @@ type Mutation {
   updatePage(id: String!, input: UpdatePageInput!): Page!
   updatePageBlock(id: String!, input: UpdatePageBlockInput!): PageBlock!
   updatePageBlocksOrder(pageId: String!, updates: [BulkUpdateBlockOrderInput!]!): [PageBlock!]!
+  updatePermission(id: String!, input: UpdatePermissionInput!): Permission!
   updatePost(id: String!, input: UpdatePostInput!): Post!
+  updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateTask(input: UpdateTaskInput!): Task!
   updateUser(id: String!, input: UpdateUserInput!): User!
 
@@ -483,6 +544,43 @@ type PaginationMeta {
   totalPages: Int!
 }
 
+type Permission {
+  action: String!
+  category: String!
+  conditions: JSON
+  createdAt: DateTime!
+  description: String
+  displayName: String!
+  id: ID!
+  isActive: Boolean!
+  isSystemPerm: Boolean!
+  metadata: JSON
+  name: String!
+  resource: String!
+  scope: String
+  updatedAt: DateTime!
+}
+
+input PermissionSearchInput {
+  action: String
+  category: String
+  isActive: Boolean
+  page: Int = 0
+  resource: String
+  search: String
+  size: Int = 20
+  sortBy: String = "name"
+  sortOrder: String = "asc"
+}
+
+type PermissionSearchResult {
+  page: Int!
+  permissions: [Permission!]!
+  size: Int!
+  total: Int!
+  totalPages: Int!
+}
+
 input PhoneLoginInput {
   otp: String!
   phone: String!
@@ -546,16 +644,19 @@ type Query {
   getPageById(id: String!): Page!
   getPageBySlug(slug: String!): Page!
   getPages(filters: PageFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
+  getPermissionById(id: String!): Permission!
   getPostById(id: String!): Post!
   getPostBySlug(slug: String!): Post!
   getPosts(filters: PostFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPosts!
   getPublishedPages(pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
+  getRoleById(id: String!): Role!
   getSharedTasks(filters: TaskFilterInput): [Task!]!
   getTask(id: String!): Task
   getTaskById(id: ID!): Task!
   getTasks(filters: TaskFilterInput): [Task!]!
   getTasksPaginated(filters: TaskFilterInput, limit: Int! = 10, page: Int! = 1): TasksPaginatedResult!
   getUserById(id: String!): User!
+  getUserRolePermissions(userId: String!): UserRolePermissionSummary!
   getUserStats: UserStats!
   getUsers: [User!]!
 
@@ -563,6 +664,8 @@ type Query {
   hello: String!
   invoiceExists(khmshdon: String!, nbmst: String!, shdon: String!): Boolean!
   searchInvoices(input: InvoiceSearchInput!): InvoiceSearchResult!
+  searchPermissions(input: PermissionSearchInput!): PermissionSearchResult!
+  searchRoles(input: RoleSearchInput!): RoleSearchResult!
   searchUsers(input: UserSearchInput!): UserSearchResult!
 
   """Get API version"""
@@ -581,6 +684,41 @@ input RegisterUserInput {
 
 input RequestPhoneVerificationInput {
   phone: String!
+}
+
+type Role {
+  children: [Role!]!
+  createdAt: DateTime!
+  description: String
+  displayName: String!
+  id: ID!
+  isActive: Boolean!
+  isSystemRole: Boolean!
+  metadata: JSON
+  name: String!
+  parent: Role
+  parentId: String
+  permissions: [Permission!]!
+  priority: Int!
+  updatedAt: DateTime!
+}
+
+input RoleSearchInput {
+  isActive: Boolean
+  page: Int = 0
+  parentId: String
+  search: String
+  size: Int = 20
+  sortBy: String = "name"
+  sortOrder: String = "asc"
+}
+
+type RoleSearchResult {
+  page: Int!
+  roles: [Role!]!
+  size: Int!
+  total: Int!
+  totalPages: Int!
 }
 
 """The permission level for shared tasks"""
@@ -640,7 +778,7 @@ type Task {
   createdAt: DateTime!
   description: String
   dueDate: DateTime
-  id: String!
+  id: ID!
   media: [TaskMedia!]
   mediaCount: Float!
   parent: Task
@@ -668,7 +806,7 @@ enum TaskCategory {
 type TaskComment {
   content: String!
   createdAt: DateTime!
-  id: String!
+  id: ID!
   parent: TaskComment
   parentId: String
   replies: [TaskComment!]
@@ -889,6 +1027,16 @@ input UpdatePageInput {
   title: String
 }
 
+input UpdatePermissionInput {
+  category: String
+  conditions: JSON
+  description: String
+  displayName: String
+  isActive: Boolean
+  metadata: JSON
+  scope: String
+}
+
 input UpdatePostInput {
   content: String
   excerpt: String
@@ -897,6 +1045,15 @@ input UpdatePostInput {
   status: PostStatus
   tags: [String!]
   title: String
+}
+
+input UpdateRoleInput {
+  description: String
+  displayName: String
+  isActive: Boolean
+  metadata: JSON
+  parentId: String
+  priority: Int
 }
 
 input UpdateTaskInput {
@@ -935,6 +1092,45 @@ type User {
   roleType: UserRoleType!
   updatedAt: DateTime!
   username: String!
+}
+
+type UserPermission {
+  assignedAt: DateTime!
+  assignedBy: String
+  conditions: JSON
+  createdAt: DateTime!
+  effect: String!
+  expiresAt: DateTime
+  id: ID!
+  metadata: JSON
+  permission: Permission!
+  permissionId: String!
+  reason: String
+  scope: String
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type UserRoleAssignment {
+  assignedAt: DateTime!
+  assignedBy: String
+  conditions: JSON
+  createdAt: DateTime!
+  effect: String!
+  expiresAt: DateTime
+  id: ID!
+  metadata: JSON
+  role: Role!
+  roleId: String!
+  scope: String
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type UserRolePermissionSummary {
+  directPermissions: [UserPermission!]!
+  effectivePermissions: [Permission!]!
+  roleAssignments: [UserRoleAssignment!]!
 }
 
 enum UserRoleType {

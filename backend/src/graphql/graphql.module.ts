@@ -29,7 +29,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { GrokModule } from '../grok/grok.module';
 import { MinioModule } from '../minio/minio.module';
-import { JSONScalar } from './scalars/json.scalar';
+// JSON scalar handled by graphql-type-json directly
 
 @Module({
   imports: [
@@ -42,8 +42,7 @@ import { JSONScalar } from './scalars/json.scalar';
     InvoiceController,
   ],
   providers: [
-    // Scalars
-    JSONScalar,
+    // Scalars handled by graphql-type-json directly
     
     // Resolvers
     UserResolver,
@@ -53,6 +52,7 @@ import { JSONScalar } from './scalars/json.scalar';
     TaskResolver,
     PageResolver,
     InvoiceResolver,
+    // RBAC resolvers
     PermissionResolver,
     RoleResolver,
     UserRbacResolver,

@@ -1,4 +1,4 @@
-import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
+import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { User } from './user.model';
 import { TaskMedia } from './task-media.model';
 import { TaskShare } from './task-share.model';
@@ -22,7 +22,7 @@ registerEnumType(TaskStatus, {
 
 @ObjectType()
 export class Task {
-  @Field()
+  @Field(() => ID)
   id: string;
 
   @Field()

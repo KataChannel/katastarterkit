@@ -218,6 +218,13 @@ export class GraphQLCacheService {
    * Cleanup on module destroy
    */
   async onModuleDestroy(): Promise<void> {
-    await this.redis.quit();
+    try {
+      if (this.redis.status === 'ready') {
+        await this.redis.quit();
+      }
+    } catch (error) {
+      // Ignore errors during cleanup
+      console.warn('Error during GraphQL cache Redis cleanup:', error.message);
+    }
   }
 }

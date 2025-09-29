@@ -1,9 +1,9 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { User } from './user.model';
 
 @ObjectType()
 export class TaskComment {
-  @Field()
+  @Field(() => ID)
   id: string;
 
   @Field()

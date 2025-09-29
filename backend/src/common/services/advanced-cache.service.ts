@@ -417,7 +417,16 @@ export class AdvancedCacheService implements OnModuleInit {
    * Cleanup on module destroy
    */
   async onModuleDestroy(): Promise<void> {
-    const promises = Object.values(this.redisCluster).map(redis => redis.quit());
+    const promises = Object.values(this.redisCluster).map(async redis => {
+      try {
+        if (redis.status === 'ready') {
+          await redis.quit();
+        }
+      } catch (error) {
+        // Ignore errors during cleanup
+        console.warn('Error during Redis cleanup:', error.message);
+      }
+    });
     await Promise.all(promises);
   }
 
