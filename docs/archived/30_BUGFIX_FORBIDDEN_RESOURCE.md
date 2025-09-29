@@ -18,7 +18,7 @@ The chatbot frontend was showing "Error loading chatbots: Forbidden resource" be
 const token = localStorage.getItem('authToken');
 
 // After (correct)
-const token = localStorage.getItem('token');
+const token = localStorage.getItem('accessToken');
 ```
 
 ### 2. Added Authentication Protection to Chatbot Page

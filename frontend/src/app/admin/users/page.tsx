@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { useSearchUsers, useUserStats, useBulkUserAction } from '@/lib/hooks/useUserManagement';
 import { UserTable } from '../../../components/admin/users/UserTable';
 import { UserFilters } from '../../../components/admin/users/UserFilters';
@@ -28,6 +30,22 @@ interface UserSearchFilters {
 }
 
 export default function AdminUsersPage() {
+  const { user, loading, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  // Redirect if not authenticated or not admin
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      console.log('AdminUsersPage: Not authenticated, redirecting to login');
+      router.push('/login');
+    } else if (!loading && isAuthenticated && user?.roleType !== 'ADMIN') {
+      console.log('AdminUsersPage: User is not admin, redirecting to dashboard', { 
+        roleType: user?.roleType 
+      });
+      router.push('/dashboard');
+    }
+  }, [loading, isAuthenticated, user, router]);
+
   // State management
   const [filters, setFilters] = useState<UserSearchFilters>({
     search: '',
@@ -73,9 +91,10 @@ export default function AdminUsersPage() {
     return input;
   }, [filters]);
 
-  // GraphQL hooks
-  const { data: usersData, loading: usersLoading, error: usersError, refetch: refetchUsers } = useSearchUsers(searchInput);
-  const { data: statsData, loading: statsLoading } = useUserStats();
+  // GraphQL hooks - only call when authenticated and user is admin
+  const isAdmin = isAuthenticated && user?.roleType === 'ADMIN';
+  const { data: usersData, loading: usersLoading, error: usersError, refetch: refetchUsers } = useSearchUsers(searchInput, { skip: !isAdmin });
+  const { data: statsData, loading: statsLoading } = useUserStats({ skip: !isAdmin });
   const [bulkUserAction, { loading: bulkActionLoading }] = useBulkUserAction();
 
   // Handle filter changes
@@ -175,7 +194,50 @@ export default function AdminUsersPage() {
     });
   };
 
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8">
+        <Card>
+          <CardContent className="flex items-center justify-center py-8">
+            <div className="flex items-center space-x-3">
+              <Loader2 className="w-6 h-6 animate-spin" />
+              <span>Loading...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show access denied for non-admin users
+  if (isAuthenticated && user?.roleType !== 'ADMIN') {
+    return (
+      <div className="container mx-auto py-8">
+        <Card>
+          <CardContent className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-red-600 mb-2">Access Denied</h3>
+              <p className="text-gray-600 mb-4">
+                You need ADMIN role to access this page. Your current role: {user?.roleType || 'Unknown'}
+              </p>
+              <Button onClick={() => router.push('/dashboard')} variant="outline">
+                Go to Dashboard
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated (will be handled by useEffect)
+  if (!isAuthenticated) {
+    return null;
+  }
+
   if (usersError) {
+    console.error('AdminUsersPage - Users query error:', usersError);
     return (
       <div className="container mx-auto py-8">
         <Card>

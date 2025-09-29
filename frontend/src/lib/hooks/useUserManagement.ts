@@ -52,18 +52,20 @@ interface UpdateUserInput {
 }
 
 // Query hooks
-export function useSearchUsers(input: UserSearchInput) {
+export function useSearchUsers(input: UserSearchInput, options?: { skip?: boolean }) {
   return useQuery(SEARCH_USERS, {
     variables: { input },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
+    skip: options?.skip,
   });
 }
 
-export function useUserStats() {
+export function useUserStats(options?: { skip?: boolean }) {
   return useQuery(GET_USER_STATS, {
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
+    skip: options?.skip,
   });
 }
 

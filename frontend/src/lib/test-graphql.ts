@@ -9,7 +9,7 @@ const httpLink = createHttpLink({
 
 const authLink = setContext((_, { headers }) => {
   // Get the authentication token from local storage if it exists
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken');
   // Return the headers to the context so httpLink can read them
   return {
     headers: {
@@ -95,7 +95,7 @@ async function testRegister() {
     });
     
     console.log('Register success:', result.data);
-    localStorage.setItem('token', result.data.register.access_token);
+    localStorage.setItem('accessToken', result.data.register.access_token);
     return result.data;
   } catch (error) {
     console.error('Register error:', error);
@@ -116,7 +116,7 @@ async function testLogin() {
     });
     
     console.log('Login success:', result.data);
-    localStorage.setItem('token', result.data.login.access_token);
+    localStorage.setItem('accessToken', result.data.login.access_token);
     return result.data;
   } catch (error) {
     console.error('Login error:', error);

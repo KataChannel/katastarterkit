@@ -76,7 +76,7 @@ const wsLink = null; // Temporarily disabled due to connection issues
 
 // Auth Link - adds authorization header
 const authLink = setContext((_, { headers }) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
   
   return {
     headers: {
@@ -106,10 +106,14 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
       }
       
       if (message === 'Forbidden resource' || message.includes('Forbidden')) {
-        logError('warn', '🔐 Authentication issue - redirecting to login', { message, path });
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
+        logError('warn', '🔐 Authentication issue - checking if token should be removed', { message, path });
+        // Only remove token and redirect for specific authentication errors
+        // Let AuthContext handle this instead of doing it here
+        if (extensions?.code === 'UNAUTHENTICATED' || message.includes('jwt') || message.includes('accessToken')) {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('accessToken');
+            window.location.href = '/login';
+          }
         }
       }
       
@@ -210,7 +214,7 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
     if ('statusCode' in networkError && networkError.statusCode === 401) {
       console.warn('🔐 Unauthorized access - redirecting to login');
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
         window.location.href = '/login';
       }
     }

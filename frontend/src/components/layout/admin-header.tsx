@@ -80,7 +80,7 @@ export function AdminHeader() {
                 </div>
                 <div className="hidden md:block">
                   <p className="text-white text-sm font-medium">{user?.username}</p>
-                  <p className="text-gray-400 text-xs">Administrator</p>
+                  <p className="text-gray-400 text-xs">{user?.roleType || 'User'}</p>
                 </div>
               </div>
               

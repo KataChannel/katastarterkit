@@ -6,6 +6,7 @@ interface User {
   id: string;
   email: string;
   username: string;
+  roleType?: string;
   createdAt?: string;
 }
 
@@ -46,16 +47,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(currentUserData.getMe);
       setLoading(false);
     } else if (currentUserError) {
-      // If there's an error fetching user data, clear the token and user
-      localStorage.removeItem('token');
-      setUser(null);
+      console.error('AuthContext - getCurrentUser error:', currentUserError);
+      
+      // Only remove token for authentication-related errors
+      const networkError = currentUserError.networkError as any;
+      const isAuthError = networkError?.statusCode === 401 ||
+                         networkError?.status === 401 ||
+                         currentUserError.graphQLErrors?.some(err => 
+                           err.extensions?.code === 'UNAUTHENTICATED' || 
+                           err.extensions?.code === 'FORBIDDEN' ||
+                           err.message?.includes('Unauthorized') ||
+                           err.message?.includes('jwt') ||
+                           err.message?.includes('accessToken')
+                         );
+
+      if (isAuthError) {
+        console.log('Authentication error detected, removing token');
+        localStorage.removeItem('accessToken');
+        setUser(null);
+      } else {
+        console.log('Non-authentication error, keeping token');
+        // For network errors or other issues, don't remove token
+        // but still set loading to false
+      }
       setLoading(false);
     }
   }, [currentUserData, currentUserError]);
 
   // Check for existing token on mount
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (token) {
       getCurrentUser();
     } else {
@@ -75,7 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (data?.loginUser?.accessToken) {
-        localStorage.setItem('token', data.loginUser.accessToken);
+        localStorage.setItem('accessToken', data.loginUser.accessToken);
         // Refresh user data
         getCurrentUser();
         return { success: true };
@@ -100,7 +121,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (data?.registerUser?.accessToken) {
-        localStorage.setItem('token', data.registerUser.accessToken);
+        localStorage.setItem('accessToken', data.registerUser.accessToken);
         // Refresh user data
         getCurrentUser();
         return { success: true };
@@ -113,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     setUser(null);
   };
 

@@ -32,7 +32,7 @@ class InvoiceDatabaseService {
    */
   private getAuthHeaders(): HeadersInit {
     // Get the JWT token from the auth service (using token as per useAuth hook)
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     
     return {
       'Content-Type': 'application/json',
@@ -179,7 +179,7 @@ class InvoiceDatabaseService {
       if (!response.ok) {
         if(response.status === 403) {
           // Clear token and redirect to login
-          localStorage.removeItem('token');
+          localStorage.removeItem('accessToken');
           window.location.href = '/login';
           throw new Error('Unauthorized. Please log in again.');
         }

@@ -58,7 +58,7 @@ export default function GoogleLoginButton() {
         const { accessToken, refreshToken, user } = data.loginWithGoogle;
         
         // Store tokens in localStorage
-        localStorage.setItem('token', accessToken);
+        localStorage.setItem('accessToken', accessToken);
         if (refreshToken) {
           localStorage.setItem('refreshToken', refreshToken);
         }

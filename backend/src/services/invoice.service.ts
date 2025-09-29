@@ -703,14 +703,13 @@ export class InvoiceService {
   async createInvoice(data: CreateInvoiceInput): Promise<ExtListhoadon> {
     try {
       // Check for existing invoice to prevent duplicates
-      if (data.nbmst && data.khmshdon && data.shdon && data.idServer) {
+      if (data.nbmst && data.khmshdon && data.shdon) {
         const normalizedData = this.normalizeInvoiceData(data);
         const existing = await this.prisma.ext_listhoadon.findFirst({
           where: {
             nbmst: data.nbmst,
             khmshdon: normalizedData.khmshdon,
             shdon: normalizedData.shdon,
-            idServer: data.idServer,
           },
         });
 
@@ -826,7 +825,7 @@ export class InvoiceService {
    */
   async searchInvoices(input: InvoiceSearchInput): Promise<InvoiceSearchResult> {
     try {
-      const { page = 0, size = 20, sortBy = 'nky', sortOrder = 'desc', ...filters } = input;
+      const { page = 0, size = 20, sortBy = 'ntao', sortOrder = 'desc', ...filters } = input;
 
       // Log input for debugging
       // this.logger.debug('Invoice search input:', {
@@ -863,14 +862,14 @@ export class InvoiceService {
       }
 
       if (filters.fromDate || filters.toDate) {
-        where.nky = {};
+        where.ntao = {};
         
         if (filters.fromDate && !isNaN(filters.fromDate.getTime())) {
-          where.nky.gte = filters.fromDate;
+          where.ntao.gte = filters.fromDate;
         }
         
         if (filters.toDate && !isNaN(filters.toDate.getTime())) {
-          where.nky.lte = filters.toDate;
+          where.ntao.lte = filters.toDate;
         }
       }
 

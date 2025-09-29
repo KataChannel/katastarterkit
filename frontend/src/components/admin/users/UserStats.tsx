@@ -52,7 +52,7 @@ export function UserStats({ data, loading }: UserStatsProps) {
   const stats = [
     {
       title: 'Total Users',
-      value: data.totalUsers.toLocaleString(),
+      value: data.totalUsers,
       description: 'All registered users',
       icon: Users,
       color: 'text-blue-600',
@@ -60,7 +60,7 @@ export function UserStats({ data, loading }: UserStatsProps) {
     },
     {
       title: 'Active Users',
-      value: data.activeUsers.toLocaleString(),
+      value: data.activeUsers,
       description: `${((data.activeUsers / data.totalUsers) * 100).toFixed(1)}% active`,
       icon: UserCheck,
       color: 'text-green-600',
@@ -68,7 +68,7 @@ export function UserStats({ data, loading }: UserStatsProps) {
     },
     {
       title: 'Verified Users',
-      value: data.verifiedUsers.toLocaleString(),
+      value: data.verifiedUsers,
       description: `${((data.verifiedUsers / data.totalUsers) * 100).toFixed(1)}% verified`,
       icon: Shield,
       color: 'text-purple-600',
@@ -76,7 +76,7 @@ export function UserStats({ data, loading }: UserStatsProps) {
     },
     {
       title: 'New This Month',
-      value: data.newUsersThisMonth.toLocaleString(),
+      value: data.newUsersThisMonth,
       description: 'Recent registrations',
       icon: TrendingUp,
       color: 'text-orange-600',
@@ -147,7 +147,7 @@ export function UserStats({ data, loading }: UserStatsProps) {
                 <div key={role.title} className="flex items-center gap-2">
                   <Badge variant="secondary" className={`${role.color} flex items-center gap-1`}>
                     <RoleIcon className="h-3 w-3" />
-                    {role.title}: {role.value.toLocaleString()}
+                    {role.title}: {role.value}
                   </Badge>
                 </div>
               );

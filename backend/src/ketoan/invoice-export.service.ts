@@ -85,7 +85,7 @@ export class InvoiceExportService {
     try {
       // Build where condition
       const whereCondition: any = {
-        tdlap: {
+        ntao: {
           gte: startDate,
           lte: endDate,
         },
