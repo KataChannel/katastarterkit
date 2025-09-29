@@ -7,6 +7,7 @@ import { GrokResolver } from './resolvers/grok.resolver';
 import { TaskResolver } from './resolvers/task.resolver';
 import { PageResolver } from './resolvers/page.resolver';
 import { InvoiceResolver } from './resolvers/invoice.resolver';
+import { PermissionResolver, RoleResolver, UserRbacResolver } from './resolvers/rbac.resolver';
 import { InvoiceController } from '../controllers/invoice.controller';
 
 import { UserService } from '../services/user.service';
@@ -22,6 +23,7 @@ import { PubSubService } from '../services/pubsub.service';
 import { PageService } from '../services/page.service';
 import { InvoiceService } from '../services/invoice.service';
 import { BackendConfigService } from '../services/backend-config.service';
+import { RbacService } from '../services/rbac.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
@@ -51,6 +53,9 @@ import { JSONScalar } from './scalars/json.scalar';
     TaskResolver,
     PageResolver,
     InvoiceResolver,
+    PermissionResolver,
+    RoleResolver,
+    UserRbacResolver,
     
     // Services
     UserService,
@@ -66,6 +71,7 @@ import { JSONScalar } from './scalars/json.scalar';
     PageService,
     InvoiceService,
     BackendConfigService,
+    RbacService,
   ],
   exports: [
     UserService,
@@ -80,6 +86,7 @@ import { JSONScalar } from './scalars/json.scalar';
     PageService,
     InvoiceService,
     BackendConfigService,
+    RbacService,
   ],
 })
 export class GraphQLResolversModule {}

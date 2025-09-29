@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, $Enums } from '@prisma/client';
-import { RegisterUserInput, UpdateUserInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput } from '../graphql/inputs/user.input';
+import { RegisterUserInput, UpdateUserInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput, AdminCreateUserInput } from '../graphql/inputs/user.input';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -360,6 +360,51 @@ export class UserService {
       data: {
         ...input,
         updatedAt: new Date(),
+      },
+      include: {
+        posts: {
+          select: { id: true },
+        },
+        comments: {
+          select: { id: true },
+        },
+      },
+    });
+  }
+
+  async adminCreateUser(input: AdminCreateUserInput): Promise<User> {
+    // Check if email or username already exists
+    if (input.email) {
+      const existingUserByEmail = await this.prisma.user.findUnique({
+        where: { email: input.email },
+      });
+      if (existingUserByEmail) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+
+    const existingUserByUsername = await this.prisma.user.findUnique({
+      where: { username: input.username },
+    });
+    if (existingUserByUsername) {
+      throw new ConflictException('Username already exists');
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(input.password, 10);
+
+    return this.prisma.user.create({
+      data: {
+        username: input.username,
+        email: input.email,
+        password: hashedPassword,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        phone: input.phone,
+        roleType: input.roleType || $Enums.UserRoleType.USER,
+        isActive: input.isActive ?? true,
+        isVerified: input.isVerified ?? false,
+        avatar: input.avatar,
       },
       include: {
         posts: {

@@ -10,12 +10,13 @@ import { UserStats } from '../../../components/admin/users/UserStats';
 import { BulkActions } from '../../../components/admin/users/BulkActions';
 import { CreateUserModal } from '../../../components/admin/users/CreateUserModal';
 import { EditUserModal } from '../../../components/admin/users/EditUserModal';
+import RbacManagement from '../../../components/admin/rbac/RbacManagement';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, Search, Filter, Download, RefreshCw } from 'lucide-react';
+import { Loader2, Plus, Search, Filter, Download, RefreshCw, Users, Shield } from 'lucide-react';
 import { toast } from '../../../hooks/use-toast';
 
 interface UserSearchFilters {
@@ -62,6 +63,7 @@ export default function AdminUsersPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [activeTab, setActiveTab] = useState<'users' | 'rbac'>('users');
 
   // Build search input for GraphQL
   const searchInput = useMemo(() => {
@@ -261,37 +263,60 @@ export default function AdminUsersPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">User Management</h1>
-          <p className="text-gray-600 mt-1">Manage and monitor user accounts</p>
+          <h1 className="text-3xl font-bold">Admin Panel</h1>
+          <p className="text-gray-600 mt-1">Manage users, roles, and permissions</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
+            variant={activeTab === 'users' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('users')}
           >
-            <Filter className="w-4 h-4 mr-2" />
-            Filters
+            <Users className="w-4 h-4 mr-2" />
+            Users
           </Button>
           <Button
-            variant="outline"
-            onClick={handleExport}
+            variant={activeTab === 'rbac' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('rbac')}
           >
-            <Download className="w-4 h-4 mr-2" />
-            Export
-          </Button>
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add User
+            <Shield className="w-4 h-4 mr-2" />
+            RBAC
           </Button>
         </div>
       </div>
 
-      {/* User Statistics */}
-      <UserStats data={statsData} loading={statsLoading} />
+      {activeTab === 'users' && (
+        <>
+          {/* User Statistics */}
+          <UserStats data={statsData} loading={statsLoading} />
 
-      {/* Search and Filters */}
+          {/* User Management Header */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">User Management</h2>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleExport}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add User
+              </Button>
+            </div>
+          </div>
+
+          {/* Search and Filters */}
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center gap-4 mb-4">
@@ -377,25 +402,31 @@ export default function AdminUsersPage() {
         </CardContent>
       </Card>
 
-      {/* Modals */}
-      <CreateUserModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={() => {
-          setIsCreateModalOpen(false);
-          refetchUsers();
-        }}
-      />
+          {/* Modals */}
+          <CreateUserModal
+            isOpen={isCreateModalOpen}
+            onClose={() => setIsCreateModalOpen(false)}
+            onSuccess={() => {
+              setIsCreateModalOpen(false);
+              refetchUsers();
+            }}
+          />
 
-      <EditUserModal
-        user={editingUser}
-        isOpen={!!editingUser}
-        onClose={() => setEditingUser(null)}
-        onSuccess={() => {
-          setEditingUser(null);
-          refetchUsers();
-        }}
-      />
+          <EditUserModal
+            user={editingUser}
+            isOpen={!!editingUser}
+            onClose={() => setEditingUser(null)}
+            onSuccess={() => {
+              setEditingUser(null);
+              refetchUsers();
+            }}
+          />
+        </>
+      )}
+
+      {activeTab === 'rbac' && (
+        <RbacManagement />
+      )}
     </div>
   );
 }

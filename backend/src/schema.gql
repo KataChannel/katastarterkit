@@ -2,6 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AdminCreateUserInput {
+  avatar: String
+  email: String
+  firstName: String
+  isActive: Boolean = true
+  isVerified: Boolean = false
+  lastName: String
+  password: String!
+  phone: String
+  roleType: UserRoleType = USER
+  username: String!
+}
+
 input AdminUpdateUserInput {
   avatar: String
   email: String
@@ -319,6 +332,7 @@ enum MediaType {
 
 type Mutation {
   addPageBlock(input: CreatePageBlockInput!, pageId: String!): PageBlock!
+  adminCreateUser(input: AdminCreateUserInput!): User!
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
   bulkCreateInvoices(input: BulkInvoiceInput!): DatabaseSyncResult!
   bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!

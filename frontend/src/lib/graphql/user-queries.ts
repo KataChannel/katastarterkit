@@ -91,6 +91,15 @@ export const BULK_USER_ACTION = gql`
   }
 `;
 
+export const ADMIN_CREATE_USER = gql`
+  mutation AdminCreateUser($input: AdminCreateUserInput!) {
+    adminCreateUser(input: $input) {
+      ...UserFragment
+    }
+  }
+  ${USER_FRAGMENT}
+`;
+
 export const DELETE_USER = gql`
   mutation DeleteUser($id: String!) {
     deleteUser(id: $id)

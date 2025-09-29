@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useAdminCreateUser } from '@/lib/hooks/useUserManagement';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,6 +17,8 @@ interface CreateUserModalProps {
 }
 
 export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalProps) {
+  const [adminCreateUser, { loading, error }] = useAdminCreateUser();
+  
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -27,35 +31,78 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
     isVerified: false,
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
+    setSubmitError(null);
+
+    // Basic validation
+    if (!formData.username.trim()) {
+      setSubmitError('Username is required');
+      return;
+    }
+    
+    if (!formData.password.trim()) {
+      setSubmitError('Password is required');
+      return;
+    }
+    
+    if (formData.password.length < 6) {
+      setSubmitError('Password must be at least 6 characters');
+      return;
+    }
 
     try {
-      // This would typically use a GraphQL mutation or API call
-      // For now, we'll simulate success
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      onSuccess();
-      setFormData({
-        username: '',
-        email: '',
-        firstName: '',
-        lastName: '',
-        phone: '',
-        password: '',
-        roleType: 'USER',
-        isActive: true,
-        isVerified: false,
+      const result = await adminCreateUser({
+        variables: {
+          input: {
+            username: formData.username,
+            email: formData.email || undefined,
+            password: formData.password,
+            firstName: formData.firstName || undefined,
+            lastName: formData.lastName || undefined,
+            phone: formData.phone || undefined,
+            roleType: formData.roleType as 'ADMIN' | 'USER' | 'GUEST',
+            isActive: formData.isActive,
+            isVerified: formData.isVerified,
+          }
+        }
       });
+
+      if (result.data?.adminCreateUser) {
+        // Success
+        toast({
+          title: 'Success',
+          description: `User "${result.data.adminCreateUser.username}" created successfully.`,
+          type: 'success',
+        });
+
+        onSuccess();
+        onClose();
+        
+        // Reset form
+        setFormData({
+          username: '',
+          email: '',
+          firstName: '',
+          lastName: '',
+          phone: '',
+          password: '',
+          roleType: 'USER',
+          isActive: true,
+          isVerified: false,
+        });
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to create user');
-    } finally {
-      setLoading(false);
+      const errorMessage = err.message || 'Failed to create user';
+      setSubmitError(errorMessage);
+      
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        type: 'error',
+      });
     }
   };
 
@@ -178,9 +225,9 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
               </div>
             </div>
 
-            {error && (
+            {(submitError || error) && (
               <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-                Error creating user: {error}
+                Error creating user: {submitError || error?.message}
               </div>
             )}
 

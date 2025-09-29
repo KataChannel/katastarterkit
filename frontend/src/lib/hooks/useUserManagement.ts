@@ -5,6 +5,7 @@ import {
   GET_USER_BY_ID,
   GET_ALL_USERS,
   ADMIN_UPDATE_USER,
+  ADMIN_CREATE_USER,
   BULK_USER_ACTION,
   DELETE_USER,
   UPDATE_USER,
@@ -40,6 +41,19 @@ interface AdminUpdateUserInput {
   isActive?: boolean;
   isVerified?: boolean;
   isTwoFactorEnabled?: boolean;
+  avatar?: string;
+}
+
+interface AdminCreateUserInput {
+  username: string;
+  email?: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  roleType?: 'ADMIN' | 'USER' | 'GUEST';
+  isActive?: boolean;
+  isVerified?: boolean;
   avatar?: string;
 }
 
@@ -89,6 +103,20 @@ export function useAdminUpdateUser() {
   const client = useApolloClient();
   
   return useMutation(ADMIN_UPDATE_USER, {
+    onCompleted: () => {
+      // Refetch queries to update cache
+      client.refetchQueries({
+        include: [SEARCH_USERS, GET_ALL_USERS, GET_USER_STATS],
+      });
+    },
+    errorPolicy: 'all',
+  });
+}
+
+export function useAdminCreateUser() {
+  const client = useApolloClient();
+  
+  return useMutation(ADMIN_CREATE_USER, {
     onCompleted: () => {
       // Refetch queries to update cache
       client.refetchQueries({

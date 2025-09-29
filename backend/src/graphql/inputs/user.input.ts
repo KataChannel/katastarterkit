@@ -324,3 +324,53 @@ export class AdminUpdateUserInput {
   @IsString()
   avatar?: string;
 }
+
+@InputType()
+export class AdminCreateUserInput {
+  @Field()
+  @IsNotEmpty()
+  username: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @Field()
+  @IsNotEmpty()
+  @MinLength(6)
+  password: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  firstName?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  lastName?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsPhoneNumber()
+  phone?: string;
+
+  @Field(() => $Enums.UserRoleType, { nullable: true, defaultValue: $Enums.UserRoleType.USER })
+  @IsOptional()
+  @IsEnum($Enums.UserRoleType)
+  roleType?: $Enums.UserRoleType;
+
+  @Field({ nullable: true, defaultValue: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @Field({ nullable: true, defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
+  isVerified?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+}

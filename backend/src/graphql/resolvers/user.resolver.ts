@@ -6,7 +6,7 @@ import { Roles } from '../../auth/roles.decorator';
 import { User, UserSearchResult, UserStats, BulkUserActionResult } from '../models/user.model';
 import { AuthResponse } from '../models/auth.model';
 import { OtpResponse } from '../models/otp.model';
-import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput } from '../inputs/user.input';
+import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput, AdminCreateUserInput } from '../inputs/user.input';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../auth/auth.service';
 import { OtpService } from '../../services/otp.service';
@@ -175,6 +175,13 @@ export class UserResolver {
     @Args('input') input: AdminUpdateUserInput,
   ): Promise<User> {
     return this.userService.adminUpdateUser(id, input);
+  }
+
+  @Mutation(() => User, { name: 'adminCreateUser' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.ADMIN)
+  async adminCreateUser(@Args('input') input: AdminCreateUserInput): Promise<User> {
+    return this.userService.adminCreateUser(input);
   }
 
   // Field resolvers
