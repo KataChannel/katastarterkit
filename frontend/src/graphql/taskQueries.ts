@@ -2,43 +2,8 @@
 
 import { gql } from '@apollo/client';
 
-// Comment queries and mutations
-export const GET_TASK_COMMENTS = gql`
-  query GetTaskComments($taskId: String!) {
-    getTaskComments(taskId: $taskId) {
-      id
-      content
-      taskId
-      authorId
-      parentId
-      author {
-        id
-        username
-        firstName
-        lastName
-        avatar
-      }
-      replies {
-        id
-        content
-        taskId
-        authorId
-        parentId
-        author {
-          id
-          username
-          firstName
-          lastName
-          avatar
-        }
-        createdAt
-        updatedAt
-      }
-      createdAt
-      updatedAt
-    }
-  }
-`;
+// Note: Task comments and media are fetched through the main getTask query
+// Individual queries for comments and media are available through the task relationships
 
 export const CREATE_TASK_COMMENT = gql`
   mutation CreateTaskComment($input: CreateTaskCommentInput!) {
@@ -46,9 +11,9 @@ export const CREATE_TASK_COMMENT = gql`
       id
       content
       taskId
-      authorId
+      userId
       parentId
-      author {
+      user {
         id
         username
         firstName
@@ -67,9 +32,9 @@ export const UPDATE_TASK_COMMENT = gql`
       id
       content
       taskId
-      authorId
+      userId
       parentId
-      author {
+      user {
         id
         username
         firstName
@@ -90,62 +55,12 @@ export const DELETE_TASK_COMMENT = gql`
   }
 `;
 
-// Media queries and mutations
-export const GET_TASK_MEDIA = gql`
-  query GetTaskMedia($taskId: String!) {
-    getTaskMedia(taskId: $taskId) {
-      id
-      filename
-      fileUrl
-      fileSize
-      mimeType
-      taskId
-      uploadedById
-      uploadedBy {
-        id
-        username
-        firstName
-        lastName
-        avatar
-      }
-      createdAt
-    }
-  }
-`;
-
-export const UPLOAD_TASK_MEDIA = gql`
-  mutation UploadTaskMedia($input: UploadTaskMediaInput!) {
-    uploadTaskMedia(input: $input) {
-      id
-      filename
-      fileUrl
-      fileSize
-      mimeType
-      taskId
-      uploadedById
-      uploadedBy {
-        id
-        username
-        firstName
-        lastName
-        avatar
-      }
-      createdAt
-    }
-  }
-`;
-
-export const DELETE_TASK_MEDIA = gql`
-  mutation DeleteTaskMedia($id: String!) {
-    deleteTaskMedia(id: $id) {
-      id
-    }
-  }
-`;
+// Note: Task media mutations are not currently available in the backend
+// Media files are handled through the task relationships
 
 // Combined query for task with comments and media
 export const GET_TASK_WITH_DETAILS = gql`
-  query GetTaskWithDetails($id: String!) {
+  query ($id: String!) {
     getTask(id: $id) {
       id
       title
@@ -154,7 +69,7 @@ export const GET_TASK_WITH_DETAILS = gql`
       priority
       dueDate
       category
-      authorId
+      userId
       author {
         id
         username
@@ -166,9 +81,9 @@ export const GET_TASK_WITH_DETAILS = gql`
         id
         content
         taskId
-        authorId
+        userId
         parentId
-        author {
+        user {
           id
           username
           firstName
@@ -179,9 +94,9 @@ export const GET_TASK_WITH_DETAILS = gql`
           id
           content
           taskId
-          authorId
+          userId
           parentId
-          author {
+          user {
             id
             username
             firstName
@@ -197,12 +112,12 @@ export const GET_TASK_WITH_DETAILS = gql`
       media {
         id
         filename
-        fileUrl
-        fileSize
+        url
+        size
         mimeType
         taskId
-        uploadedById
-        uploadedBy {
+        uploadedBy
+        uploader {
           id
           username
           firstName
@@ -214,17 +129,17 @@ export const GET_TASK_WITH_DETAILS = gql`
       shares {
         id
         taskId
-        userId
-        user {
+        permission
+        sharedBy
+        sharedWith
+        sharedByUser {
           id
           username
           firstName
           lastName
           avatar
         }
-        permission
-        sharedById
-        sharedBy {
+        sharedWithUser {
           id
           username
           firstName

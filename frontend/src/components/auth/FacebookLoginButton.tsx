@@ -40,7 +40,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
       }
       
       // Redirect to dashboard or home
-      router.push('/dashboard');
+      router.push('/admin');
     },
     onError: (error) => {
       console.error('Facebook login error:', error);

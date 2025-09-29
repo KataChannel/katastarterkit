@@ -75,7 +75,7 @@ export default function GoogleLoginButton() {
         }
         
         // Redirect to dashboard
-        router.push('/dashboard');
+        router.push('/admin');
       } else {
         toast.error('Google login failed. Please try again.');
       }

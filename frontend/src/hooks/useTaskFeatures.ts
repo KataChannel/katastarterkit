@@ -2,26 +2,36 @@
 
 import { useMutation, useQuery } from '@apollo/client';
 import {
-  GET_TASK_COMMENTS,
   CREATE_TASK_COMMENT,
   UPDATE_TASK_COMMENT,
   DELETE_TASK_COMMENT,
-  GET_TASK_MEDIA,
-  UPLOAD_TASK_MEDIA,
-  DELETE_TASK_MEDIA,
   GET_TASK_WITH_DETAILS,
 } from '../graphql/taskQueries';
 import { TaskComment, TaskMedia, Task } from '../types/todo';
 
-// Comment hooks
-export const useTaskComments = (taskId: string) => {
-  const { data, loading, error, refetch } = useQuery(GET_TASK_COMMENTS, {
-    variables: { taskId },
+// Combined hook for task with details (includes comments and media)
+export const useTaskWithDetails = (taskId: string) => {
+  const { data, loading, error, refetch } = useQuery(GET_TASK_WITH_DETAILS, {
+    variables: { id: taskId },
     skip: !taskId,
   });
 
   return {
-    comments: (data?.getTaskComments || []) as TaskComment[],
+    task: data?.getTask as Task,
+    comments: (data?.getTask?.comments || []) as TaskComment[],
+    media: (data?.getTask?.media || []) as TaskMedia[],
+    loading,
+    error,
+    refetch,
+  };
+};
+
+// Comment hooks (using the main task query for data)
+export const useTaskComments = (taskId: string) => {
+  const { task, loading, error, refetch } = useTaskWithDetails(taskId);
+
+  return {
+    comments: (task?.comments || []) as TaskComment[],
     loading,
     error,
     refetch,
@@ -30,7 +40,7 @@ export const useTaskComments = (taskId: string) => {
 
 export const useCreateComment = () => {
   const [createComment, { loading, error }] = useMutation(CREATE_TASK_COMMENT, {
-    refetchQueries: [GET_TASK_COMMENTS, GET_TASK_WITH_DETAILS],
+    refetchQueries: [GET_TASK_WITH_DETAILS],
   });
 
   const handleCreateComment = async (taskId: string, content: string, parentId?: string) => {
@@ -59,7 +69,7 @@ export const useCreateComment = () => {
 
 export const useUpdateComment = () => {
   const [updateComment, { loading, error }] = useMutation(UPDATE_TASK_COMMENT, {
-    refetchQueries: [GET_TASK_COMMENTS, GET_TASK_WITH_DETAILS],
+    refetchQueries: [GET_TASK_WITH_DETAILS],
   });
 
   const handleUpdateComment = async (commentId: string, content: string) => {
@@ -87,7 +97,7 @@ export const useUpdateComment = () => {
 
 export const useDeleteComment = () => {
   const [deleteComment, { loading, error }] = useMutation(DELETE_TASK_COMMENT, {
-    refetchQueries: [GET_TASK_COMMENTS, GET_TASK_WITH_DETAILS],
+    refetchQueries: [GET_TASK_WITH_DETAILS],
   });
 
   const handleDeleteComment = async (commentId: string) => {
@@ -110,102 +120,32 @@ export const useDeleteComment = () => {
   };
 };
 
-// Media hooks
+// Media hooks (using the main task query for data)
 export const useTaskMedia = (taskId: string) => {
-  const { data, loading, error, refetch } = useQuery(GET_TASK_MEDIA, {
-    variables: { taskId },
-    skip: !taskId,
-  });
+  const { task, loading, error, refetch } = useTaskWithDetails(taskId);
 
   return {
-    media: (data?.getTaskMedia || []) as TaskMedia[],
+    media: (task?.media || []) as TaskMedia[],
     loading,
     error,
     refetch,
   };
 };
 
+// Note: Media upload/delete mutations are not currently available in the backend
+// These would need to be implemented in the backend first
 export const useUploadMedia = () => {
-  const [uploadMedia, { loading, error }] = useMutation(UPLOAD_TASK_MEDIA, {
-    refetchQueries: [GET_TASK_MEDIA, GET_TASK_WITH_DETAILS],
-  });
-
-  const handleUploadMedia = async (taskId: string, files: FileList) => {
-    try {
-      const uploadPromises = Array.from(files).map(async (file) => {
-        // Create FormData for file upload
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('taskId', taskId);
-
-        // In a real implementation, you might need to upload to a file service first
-        // and get the URL, then use that URL in the GraphQL mutation
-        // For now, we'll assume the backend handles file upload directly
-        
-        const result = await uploadMedia({
-          variables: {
-            input: {
-              taskId,
-              filename: file.name,
-              fileSize: file.size,
-              mimeType: file.type,
-              // fileUrl would be set by the backend after upload
-            },
-          },
-        });
-        return result.data?.uploadTaskMedia;
-      });
-
-      const results = await Promise.all(uploadPromises);
-      return results;
-    } catch (err) {
-      throw err;
-    }
-  };
-
   return {
-    uploadMedia: handleUploadMedia,
-    loading,
-    error,
+    uploadMedia: () => Promise.reject(new Error('Media upload not implemented')),
+    loading: false,
+    error: new Error('Media upload functionality is not available'),
   };
 };
 
 export const useDeleteMedia = () => {
-  const [deleteMedia, { loading, error }] = useMutation(DELETE_TASK_MEDIA, {
-    refetchQueries: [GET_TASK_MEDIA, GET_TASK_WITH_DETAILS],
-  });
-
-  const handleDeleteMedia = async (mediaId: string) => {
-    try {
-      const result = await deleteMedia({
-        variables: {
-          id: mediaId,
-        },
-      });
-      return result.data?.deleteTaskMedia;
-    } catch (err) {
-      throw err;
-    }
-  };
-
   return {
-    deleteMedia: handleDeleteMedia,
-    loading,
-    error,
-  };
-};
-
-// Combined hook for task with details
-export const useTaskWithDetails = (taskId: string) => {
-  const { data, loading, error, refetch } = useQuery(GET_TASK_WITH_DETAILS, {
-    variables: { id: taskId },
-    skip: !taskId,
-  });
-
-  return {
-    task: data?.getTask as Task,
-    loading,
-    error,
-    refetch,
+    deleteMedia: () => Promise.reject(new Error('Media delete not implemented')),
+    loading: false,
+    error: new Error('Media delete functionality is not available'),
   };
 };
