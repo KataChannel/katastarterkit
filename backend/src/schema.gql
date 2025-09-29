@@ -2,6 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AdminUpdateUserInput {
+  avatar: String
+  email: String
+  firstName: String
+  isActive: Boolean
+  isTwoFactorEnabled: Boolean
+  isVerified: Boolean
+  lastName: String
+  phone: String
+  roleType: UserRoleType
+  username: String
+}
+
 enum AuthProvider {
   FACEBOOK
   GOOGLE
@@ -43,6 +56,19 @@ input BulkInvoiceInput {
 input BulkUpdateBlockOrderInput {
   id: ID!
   order: Int!
+}
+
+input BulkUserActionInput {
+  action: String!
+  newRole: UserRoleType
+  userIds: [String!]!
+}
+
+type BulkUserActionResult {
+  affectedCount: Float!
+  errors: [String!]!
+  message: String!
+  success: Boolean!
 }
 
 type Comment {
@@ -293,7 +319,9 @@ enum MediaType {
 
 type Mutation {
   addPageBlock(input: CreatePageBlockInput!, pageId: String!): PageBlock!
+  adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
   bulkCreateInvoices(input: BulkInvoiceInput!): DatabaseSyncResult!
+  bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!
   createComment(input: CreateCommentInput!): Comment!
   createInvoice(input: CreateInvoiceInput!): ExtListhoadon!
   createInvoiceDetails(details: [CreateInvoiceDetailInput!]!, invoiceId: ID!): [ExtDetailhoadon!]!
@@ -514,12 +542,14 @@ type Query {
   getTasks(filters: TaskFilterInput): [Task!]!
   getTasksPaginated(filters: TaskFilterInput, limit: Int! = 10, page: Int! = 1): TasksPaginatedResult!
   getUserById(id: String!): User!
+  getUserStats: UserStats!
   getUsers: [User!]!
 
   """Hello world query"""
   hello: String!
   invoiceExists(khmshdon: String!, nbmst: String!, shdon: String!): Boolean!
   searchInvoices(input: InvoiceSearchInput!): InvoiceSearchResult!
+  searchUsers(input: UserSearchInput!): UserSearchResult!
 
   """Get API version"""
   version: String!
@@ -887,14 +917,45 @@ type User {
   lastName: String
   lockedUntil: DateTime
   phone: String
-  role: UserRole!
-  roleType: UserRole!
+  role: UserRoleType!
+  roleType: UserRoleType!
   updatedAt: DateTime!
   username: String!
 }
 
-enum UserRole {
+enum UserRoleType {
   ADMIN
   GUEST
   USER
+}
+
+input UserSearchInput {
+  createdAfter: String
+  createdBefore: String
+  isActive: Boolean
+  isVerified: Boolean
+  page: Int = 0
+  roleType: UserRoleType
+  search: String
+  size: Int = 20
+  sortBy: String = "createdAt"
+  sortOrder: String = "desc"
+}
+
+type UserSearchResult {
+  page: Float!
+  size: Float!
+  total: Float!
+  totalPages: Float!
+  users: [User!]!
+}
+
+type UserStats {
+  activeUsers: Float!
+  adminUsers: Float!
+  guestUsers: Float!
+  newUsersThisMonth: Float!
+  regularUsers: Float!
+  totalUsers: Float!
+  verifiedUsers: Float!
 }

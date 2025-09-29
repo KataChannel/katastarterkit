@@ -1,11 +1,16 @@
-import { InputType, Field } from '@nestjs/graphql';
-import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsPhoneNumber, IsString, IsBoolean, IsEnum } from 'class-validator';
+import { InputType, Field, Int, registerEnumType } from '@nestjs/graphql';
+import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsPhoneNumber, IsString, IsBoolean, IsEnum, IsArray, ArrayMinSize, IsUUID, IsInt, Min, Max } from 'class-validator';
 import { $Enums } from '@prisma/client';
 
 // Import to ensure AuthProvider enum is registered
 import '../models/auth-extended.model';
 
 const AuthProvider = $Enums.AuthProvider;
+
+// Register enum for GraphQL
+registerEnumType($Enums.UserRoleType, {
+  name: 'UserRoleType',
+});
 
 @InputType()
 export class RegisterUserInput {
@@ -191,4 +196,131 @@ export class RequestPhoneVerificationInput {
   @Field()
   @IsPhoneNumber()
   phone: string;
+}
+
+@InputType()
+export class UserSearchInput {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @Field(() => $Enums.UserRoleType, { nullable: true })
+  @IsOptional()
+  @IsEnum($Enums.UserRoleType)
+  roleType?: $Enums.UserRoleType;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isVerified?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  createdAfter?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  createdBefore?: string;
+
+  @Field(() => Int, { nullable: true, defaultValue: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  page?: number;
+
+  @Field(() => Int, { nullable: true, defaultValue: 20 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  size?: number;
+
+  @Field({ nullable: true, defaultValue: 'createdAt' })
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
+
+  @Field({ nullable: true, defaultValue: 'desc' })
+  @IsOptional()
+  @IsString()
+  sortOrder?: string;
+}
+
+@InputType()
+export class BulkUserActionInput {
+  @Field(() => [String])
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsUUID('4', { each: true })
+  userIds: string[];
+
+  @Field()
+  @IsString()
+  action: string; // 'activate', 'deactivate', 'delete', 'verify', 'changeRole'
+
+  @Field(() => $Enums.UserRoleType, { nullable: true })
+  @IsOptional()
+  @IsEnum($Enums.UserRoleType)
+  newRole?: $Enums.UserRoleType;
+}
+
+@InputType()
+export class AdminUpdateUserInput {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  username?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @Field(() => $Enums.UserRoleType, { nullable: true })
+  @IsOptional()
+  @IsEnum($Enums.UserRoleType)
+  roleType?: $Enums.UserRoleType;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isVerified?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isTwoFactorEnabled?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
 }

@@ -3,10 +3,10 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
-import { User } from '../models/user.model';
+import { User, UserSearchResult, UserStats, BulkUserActionResult } from '../models/user.model';
 import { AuthResponse } from '../models/auth.model';
 import { OtpResponse } from '../models/otp.model';
-import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput } from '../inputs/user.input';
+import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput } from '../inputs/user.input';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../auth/auth.service';
 import { OtpService } from '../../services/otp.service';
@@ -143,6 +143,38 @@ export class UserResolver {
   async deleteUser(@Args('id') id: string): Promise<boolean> {
     await this.userService.delete(id);
     return true;
+  }
+
+  // Admin-specific queries and mutations
+  @Query(() => UserSearchResult, { name: 'searchUsers' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.ADMIN)
+  async searchUsers(@Args('input') input: UserSearchInput): Promise<UserSearchResult> {
+    return this.userService.searchUsers(input);
+  }
+
+  @Query(() => UserStats, { name: 'getUserStats' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.ADMIN)
+  async getUserStats(): Promise<UserStats> {
+    return this.userService.getUserStats();
+  }
+
+  @Mutation(() => BulkUserActionResult, { name: 'bulkUserAction' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.ADMIN)
+  async bulkUserAction(@Args('input') input: BulkUserActionInput): Promise<BulkUserActionResult> {
+    return this.userService.bulkUserAction(input);
+  }
+
+  @Mutation(() => User, { name: 'adminUpdateUser' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.ADMIN)
+  async adminUpdateUser(
+    @Args('id') id: string,
+    @Args('input') input: AdminUpdateUserInput,
+  ): Promise<User> {
+    return this.userService.adminUpdateUser(id, input);
   }
 
   // Field resolvers

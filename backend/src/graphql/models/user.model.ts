@@ -64,3 +64,60 @@ export class User {
   posts?: any[];
   comments?: any[];
 }
+
+@ObjectType()
+export class UserSearchResult {
+  @Field(() => [User])
+  users: User[];
+
+  @Field()
+  total: number;
+
+  @Field()
+  page: number;
+
+  @Field()
+  size: number;
+
+  @Field()
+  totalPages: number;
+}
+
+@ObjectType()
+export class UserStats {
+  @Field()
+  totalUsers: number;
+
+  @Field()
+  activeUsers: number;
+
+  @Field()
+  verifiedUsers: number;
+
+  @Field()
+  newUsersThisMonth: number;
+
+  @Field()
+  adminUsers: number;
+
+  @Field()
+  regularUsers: number;
+
+  @Field()
+  guestUsers: number;
+}
+
+@ObjectType()
+export class BulkUserActionResult {
+  @Field()
+  success: boolean;
+
+  @Field()
+  affectedCount: number;
+
+  @Field(() => [String])
+  errors: string[];
+
+  @Field()
+  message: string;
+}

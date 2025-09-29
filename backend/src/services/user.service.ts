@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, $Enums } from '@prisma/client';
-import { RegisterUserInput, UpdateUserInput } from '../graphql/inputs/user.input';
+import { RegisterUserInput, UpdateUserInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput } from '../graphql/inputs/user.input';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -135,5 +135,240 @@ export class UserService {
 
   async verifyPassword(user: User, password: string): Promise<boolean> {
     return bcrypt.compare(password, user.password);
+  }
+
+  // Advanced user management methods for admin
+
+  async searchUsers(searchInput: any): Promise<any> {
+    const {
+      search,
+      roleType,
+      isActive,
+      isVerified,
+      createdAfter,
+      createdBefore,
+      page = 0,
+      size = 20,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = searchInput;
+
+    // Build where clause
+    const where: any = {};
+
+    if (search) {
+      where.OR = [
+        { username: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (roleType !== undefined) {
+      where.roleType = roleType;
+    }
+
+    if (isActive !== undefined) {
+      where.isActive = isActive;
+    }
+
+    if (isVerified !== undefined) {
+      where.isVerified = isVerified;
+    }
+
+    if (createdAfter || createdBefore) {
+      where.createdAt = {};
+      if (createdAfter) {
+        where.createdAt.gte = new Date(createdAfter);
+      }
+      if (createdBefore) {
+        where.createdAt.lte = new Date(createdBefore);
+      }
+    }
+
+    // Execute queries
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip: page * size,
+        take: size,
+        orderBy: { [sortBy]: sortOrder },
+        include: {
+          posts: {
+            select: { id: true },
+          },
+          comments: {
+            select: { id: true },
+          },
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      users,
+      total,
+      page,
+      size,
+      totalPages: Math.ceil(total / size),
+    };
+  }
+
+  async getUserStats(): Promise<any> {
+    const [
+      totalUsers,
+      activeUsers,
+      verifiedUsers,
+      newUsersThisMonth,
+      adminUsers,
+      regularUsers,
+      guestUsers,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.user.count({ where: { isActive: true } }),
+      this.prisma.user.count({ where: { isVerified: true } }),
+      this.prisma.user.count({
+        where: {
+          createdAt: {
+            gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+          },
+        },
+      }),
+      this.prisma.user.count({ where: { roleType: $Enums.UserRoleType.ADMIN } }),
+      this.prisma.user.count({ where: { roleType: $Enums.UserRoleType.USER } }),
+      this.prisma.user.count({ where: { roleType: $Enums.UserRoleType.GUEST } }),
+    ]);
+
+    return {
+      totalUsers,
+      activeUsers,
+      verifiedUsers,
+      newUsersThisMonth,
+      adminUsers,
+      regularUsers,
+      guestUsers,
+    };
+  }
+
+  async bulkUserAction(actionInput: any): Promise<any> {
+    const { userIds, action, newRole } = actionInput;
+    const errors: string[] = [];
+    let affectedCount = 0;
+
+    try {
+      switch (action) {
+        case 'activate':
+          const activateResult = await this.prisma.user.updateMany({
+            where: { id: { in: userIds } },
+            data: { isActive: true },
+          });
+          affectedCount = activateResult.count;
+          break;
+
+        case 'deactivate':
+          const deactivateResult = await this.prisma.user.updateMany({
+            where: { id: { in: userIds } },
+            data: { isActive: false },
+          });
+          affectedCount = deactivateResult.count;
+          break;
+
+        case 'verify':
+          const verifyResult = await this.prisma.user.updateMany({
+            where: { id: { in: userIds } },
+            data: { isVerified: true },
+          });
+          affectedCount = verifyResult.count;
+          break;
+
+        case 'changeRole':
+          if (!newRole) {
+            errors.push('New role is required for role change action');
+            break;
+          }
+          const roleResult = await this.prisma.user.updateMany({
+            where: { id: { in: userIds } },
+            data: { roleType: newRole },
+          });
+          affectedCount = roleResult.count;
+          break;
+
+        case 'delete':
+          // Soft delete by deactivating instead of hard delete to preserve data integrity
+          const deleteResult = await this.prisma.user.updateMany({
+            where: { id: { in: userIds } },
+            data: { isActive: false },
+          });
+          affectedCount = deleteResult.count;
+          break;
+
+        default:
+          errors.push(`Unknown action: ${action}`);
+      }
+
+      return {
+        success: errors.length === 0,
+        affectedCount,
+        errors,
+        message: errors.length === 0 
+          ? `Successfully ${action}d ${affectedCount} user(s)` 
+          : `Action failed with ${errors.length} error(s)`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        affectedCount: 0,
+        errors: [error.message || 'Unknown error occurred'],
+        message: 'Bulk action failed',
+      };
+    }
+  }
+
+  async adminUpdateUser(id: string, input: any): Promise<User> {
+    // Check if user exists
+    const existingUser = await this.findById(id);
+
+    // Check for email/username conflicts
+    if (input.email || input.username) {
+      const conflictUser = await this.prisma.user.findFirst({
+        where: {
+          AND: [
+            { id: { not: id } },
+            {
+              OR: [
+                input.email ? { email: input.email } : {},
+                input.username ? { username: input.username } : {},
+              ].filter(obj => Object.keys(obj).length > 0),
+            },
+          ],
+        },
+      });
+
+      if (conflictUser) {
+        if (conflictUser.email === input.email) {
+          throw new ConflictException('Email already exists');
+        }
+        if (conflictUser.username === input.username) {
+          throw new ConflictException('Username already exists');
+        }
+      }
+    }
+
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        ...input,
+        updatedAt: new Date(),
+      },
+      include: {
+        posts: {
+          select: { id: true },
+        },
+        comments: {
+          select: { id: true },
+        },
+      },
+    });
   }
 }
