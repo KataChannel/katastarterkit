@@ -116,15 +116,13 @@ export const SEARCH_ROLES = gql`
         updatedAt
         permissions {
           id
-          effect
-          permission {
-            id
-            name
-            displayName
-            resource
-            action
-            scope
-          }
+          name
+          displayName
+          resource
+          action
+          scope
+          description
+          isActive
         }
         children {
           id
@@ -288,19 +286,26 @@ export const GET_USER_ROLE_PERMISSIONS = gql`
           displayName
           permissions {
             id
-            effect
-            permission {
-              id
-              name
-              displayName
-              resource
-              action
-              scope
-            }
+            name
+            displayName
+            resource
+            action
+            scope
+            description
+            isActive
           }
         }
       }
-      effectivePermissions
+      effectivePermissions {
+        id
+        name
+        displayName
+        resource
+        action
+        scope
+        description
+        isActive
+      }
       summary {
         totalDirectPermissions
         totalRoleAssignments

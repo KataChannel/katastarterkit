@@ -1131,6 +1131,8 @@ type UserRolePermissionSummary {
   directPermissions: [UserPermission!]!
   effectivePermissions: [Permission!]!
   roleAssignments: [UserRoleAssignment!]!
+  summary: UserSummary!
+  userId: String!
 }
 
 enum UserRoleType {
@@ -1168,4 +1170,11 @@ type UserStats {
   regularUsers: Float!
   totalUsers: Float!
   verifiedUsers: Float!
+}
+
+type UserSummary {
+  lastUpdated: DateTime!
+  totalDirectPermissions: Int!
+  totalEffectivePermissions: Int!
+  totalRoleAssignments: Int!
 }

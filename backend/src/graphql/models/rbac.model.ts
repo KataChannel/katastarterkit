@@ -215,7 +215,25 @@ export class PermissionSearchResult {
 }
 
 @ObjectType()
+export class UserSummary {
+  @Field(() => Int)
+  totalDirectPermissions: number;
+
+  @Field(() => Int)
+  totalRoleAssignments: number;
+
+  @Field(() => Int)
+  totalEffectivePermissions: number;
+
+  @Field()
+  lastUpdated: Date;
+}
+
+@ObjectType()
 export class UserRolePermissionSummary {
+  @Field()
+  userId: string;
+
   @Field(() => [UserRoleAssignment])
   roleAssignments: UserRoleAssignment[];
 
@@ -224,4 +242,7 @@ export class UserRolePermissionSummary {
 
   @Field(() => [Permission])
   effectivePermissions: Permission[];
+
+  @Field(() => UserSummary)
+  summary: UserSummary;
 }
