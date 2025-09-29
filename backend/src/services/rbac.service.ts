@@ -131,7 +131,7 @@ export class RbacService {
 
   // Role Management
   async getRoleById(id: string): Promise<any> {
-    const role = await this.prisma.role.findUnique({
+    const roleData = await this.prisma.role.findUnique({
       where: { id },
       include: {
         permissions: {
@@ -142,10 +142,15 @@ export class RbacService {
         children: true,
       },
     });
-    if (!role) {
+    if (!roleData) {
       throw new NotFoundException(`Role not found with id: ${id}`);
     }
-    return role;
+    
+    // Transform the data to match GraphQL schema expectations
+    return {
+      ...roleData,
+      permissions: roleData.permissions.map(rp => rp.permission).filter(p => p !== null)
+    };
   }
 
   async createRole(input: CreateRoleInput): Promise<any> {
@@ -200,7 +205,24 @@ export class RbacService {
         });
       }
 
-      return role;
+      // Fetch updated role with permissions
+      const updatedRole = await tx.role.findUnique({
+        where: { id: role.id },
+        include: {
+          permissions: {
+            include: {
+              permission: true,
+            },
+          },
+          children: true,
+        },
+      });
+
+      // Transform the data to match GraphQL schema expectations
+      return {
+        ...updatedRole,
+        permissions: updatedRole.permissions.map(rp => rp.permission).filter(p => p !== null)
+      };
     });
   }
 
@@ -224,7 +246,7 @@ export class RbacService {
       }
     }
 
-    return this.prisma.role.update({
+    const roleData = await this.prisma.role.update({
       where: { id },
       data: input,
       include: {
@@ -236,6 +258,12 @@ export class RbacService {
         children: true,
       },
     });
+    
+    // Transform the data to match GraphQL schema expectations
+    return {
+      ...roleData,
+      permissions: roleData.permissions.map(rp => rp.permission).filter(p => p !== null)
+    };
   }
 
   async deleteRole(id: string): Promise<boolean> {
@@ -266,7 +294,7 @@ export class RbacService {
     if (input.isActive !== undefined) where.isActive = input.isActive;
     if (input.parentId) where.parentId = input.parentId;
 
-    const [roles, total] = await Promise.all([
+    const [rolesData, total] = await Promise.all([
       this.prisma.role.findMany({
         where,
         skip: (input.page || 0) * (input.size || 20),
@@ -286,6 +314,12 @@ export class RbacService {
       }),
       this.prisma.role.count({ where }),
     ]);
+
+    // Transform the data to match GraphQL schema expectations
+    const roles = rolesData.map(role => ({
+      ...role,
+      permissions: role.permissions.map(rp => rp.permission).filter(p => p !== null)
+    }));
 
     return {
       roles,
@@ -376,7 +410,7 @@ export class RbacService {
 
   // Get User's Effective Permissions
   async getUserEffectivePermissions(userId: string): Promise<any> {
-    const [roleAssignments, directPermissions] = await Promise.all([
+    const [roleAssignmentsData, directPermissions] = await Promise.all([
       this.prisma.userRoleAssignment.findMany({
         where: { userId, effect: 'allow' },
         include: {
@@ -399,15 +433,24 @@ export class RbacService {
       }),
     ]);
 
+    // Transform role assignments to match GraphQL schema expectations
+    const roleAssignments = roleAssignmentsData.map(assignment => ({
+      ...assignment,
+      role: {
+        ...assignment.role,
+        permissions: assignment.role.permissions.map(rp => rp.permission).filter(p => p !== null)
+      }
+    }));
+
     // Collect all permissions from roles
     const rolePermissions = roleAssignments.flatMap((assignment) =>
-      assignment.role.permissions.map((rp) => rp.permission)
+      assignment.role.permissions
     );
 
     // Combine with direct permissions
     const allPermissions = [
       ...rolePermissions,
-      ...directPermissions.map((up) => up.permission),
+      ...directPermissions.map((up) => up.permission).filter(p => p !== null),
     ];
 
     // Remove duplicates
@@ -417,9 +460,16 @@ export class RbacService {
     );
 
     return {
+      userId,
       roleAssignments,
       directPermissions,
       effectivePermissions: uniquePermissions,
+      summary: {
+        totalDirectPermissions: directPermissions.length,
+        totalRoleAssignments: roleAssignments.length,
+        totalEffectivePermissions: uniquePermissions.length,
+        lastUpdated: new Date(),
+      },
     };
   }
 
