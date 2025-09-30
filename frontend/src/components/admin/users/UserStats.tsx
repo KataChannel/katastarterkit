@@ -61,7 +61,7 @@ export function UserStats({ data, loading }: UserStatsProps) {
     {
       title: 'Active Users',
       value: data.activeUsers,
-      description: `${((data.activeUsers / data.totalUsers) * 100).toFixed(1)}% active`,
+      description: `${((data.activeUsers / data.totalUsers) * 100).toFixed(1)} % active`,
       icon: UserCheck,
       color: 'text-green-600',
       bgColor: 'bg-green-100',

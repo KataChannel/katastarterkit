@@ -91,6 +91,10 @@ export class CreatePageInput {
   @IsString()
   seoDescription?: string;
 
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  seoKeywords?: string[];
+
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
@@ -136,6 +140,10 @@ export class UpdatePageInput {
   @IsOptional()
   @IsString()
   seoDescription?: string;
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  seoKeywords?: string[];
 
   @Field(() => String, { nullable: true })
   @IsOptional()

@@ -43,7 +43,7 @@ export default function AdminUsersPage() {
       console.log('AdminUsersPage: User is not admin, redirecting to dashboard', { 
         roleType: user?.roleType 
       });
-      router.push('/dashboard');
+      router.push('/admin');
     }
   }, [loading, isAuthenticated, user, router]);
 
@@ -97,6 +97,9 @@ export default function AdminUsersPage() {
   const isAdmin = isAuthenticated && user?.roleType === 'ADMIN';
   const { data: usersData, loading: usersLoading, error: usersError, refetch: refetchUsers } = useSearchUsers(searchInput, { skip: !isAdmin });
   const { data: statsData, loading: statsLoading } = useUserStats({ skip: !isAdmin });
+  console.log('AdminUsersPage: usersData', usersData);
+  console.log('AdminUsersPage: statsData', statsData);
+  
   const [bulkUserAction, { loading: bulkActionLoading }] = useBulkUserAction();
 
   // Handle filter changes
@@ -287,7 +290,7 @@ export default function AdminUsersPage() {
       {activeTab === 'users' && (
         <>
           {/* User Statistics */}
-          <UserStats data={statsData} loading={statsLoading} />
+          <UserStats data={statsData?.getUserStats} loading={statsLoading} />
 
           {/* User Management Header */}
           <div className="flex items-center justify-between">

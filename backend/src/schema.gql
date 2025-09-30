@@ -185,6 +185,7 @@ input CreatePageInput {
   description: String
   ogImage: String
   seoDescription: String
+  seoKeywords: [String!]
   seoTitle: String
   slug: String!
   status: PageStatus! = DRAFT
@@ -471,6 +472,7 @@ type Page {
   ogImage: String
   publishedAt: DateTime
   seoDescription: String
+  seoKeywords: [String!]
   seoTitle: String
   slug: String!
   status: PageStatus!
@@ -1021,6 +1023,7 @@ input UpdatePageInput {
   description: String
   ogImage: String
   seoDescription: String
+  seoKeywords: [String!]
   seoTitle: String
   slug: String
   status: PageStatus

@@ -73,6 +73,10 @@ interface UserTableProps {
   onSort: (sortBy: string, sortOrder: string) => void;
   onPageChange: (page: number) => void;
   onEditUser: (user: User) => void;
+  onViewUser?: (user: User) => void;
+  onActivateUser?: (user: User) => void;
+  onDeactivateUser?: (user: User) => void;
+  onDeleteUser?: (user: User) => void;
   sortBy: string;
   sortOrder: string;
 }
@@ -86,6 +90,10 @@ export function UserTable({
   onSort,
   onPageChange,
   onEditUser,
+  onViewUser,
+  onActivateUser,
+  onDeactivateUser,
+  onDeleteUser,
   sortBy,
   sortOrder,
 }: UserTableProps) {
@@ -302,12 +310,17 @@ export function UserTable({
                       <Edit className="w-4 h-4 mr-2" />
                       Edit User
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onViewUser && onViewUser(user)}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => user.isActive 
+                        ? onDeactivateUser && onDeactivateUser(user)
+                        : onActivateUser && onActivateUser(user)
+                      }
+                    >
                       {user.isActive ? (
                         <>
                           <UserX className="w-4 h-4 mr-2" />
@@ -321,7 +334,10 @@ export function UserTable({
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">
+                    <DropdownMenuItem 
+                      className="text-red-600"
+                      onClick={() => onDeleteUser && onDeleteUser(user)}
+                    >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete User
                     </DropdownMenuItem>

@@ -49,7 +49,7 @@ function RegisterPageContent() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.push('/admin');
     }
   }, [isAuthenticated, router]);
 
@@ -71,7 +71,7 @@ function RegisterPageContent() {
       
       if (result.success) {
         toast.success('Account created successfully!');
-        router.push('/dashboard');
+        router.push('/admin');
       } else {
         toast.error(result.error || 'Registration failed');
       }

@@ -791,6 +791,7 @@ model Page {
   status      PageStatus @default(DRAFT)
   seoTitle    String?
   seoDescription String?
+  seoKeywords Json?      // Stored as JSON array of keywords
   ogImage     String?
   
   // Relationships

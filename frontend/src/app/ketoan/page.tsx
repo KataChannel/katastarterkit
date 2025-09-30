@@ -13,7 +13,7 @@ export default function HomePage() {
 
   useEffect(() => {
     // if (!loading && isAuthenticated) {
-    //   router.push('/dashboard');
+    //   router.push('/admin');
     // }
   }, [isAuthenticated, loading, router]);
 

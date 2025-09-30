@@ -92,6 +92,9 @@ export class Page {
   @Field(() => String, { nullable: true })
   seoDescription?: string;
 
+  @Field(() => [String], { nullable: true })
+  seoKeywords?: string[];
+
   @Field(() => String, { nullable: true })
   ogImage?: string;
 
