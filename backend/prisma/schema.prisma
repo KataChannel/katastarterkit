@@ -104,6 +104,10 @@ model User {
   userPermissions    UserPermission[]
   resourceAccesses   ResourceAccess[]
   
+  // RBAC Creation relations
+  rolesCreated       Role[]             @relation("RoleCreator")
+  permissionsCreated Permission[]       @relation("PermissionCreator")
+  
   // Content relations
   posts         Post[]        @relation("PostAuthor")
   comments      Comment[]     @relation("CommentAuthor")
@@ -113,6 +117,9 @@ model User {
   taskComments  TaskComment[] @relation("TaskCommentAuthor")
   taskMedia     TaskMedia[]   @relation("TaskMediaUploader")
   
+  // Tag relations
+  tagsCreated   Tag[]         @relation("TagCreator")
+  
   // Task sharing relations
   tasksSharedBy   TaskShare[] @relation("TaskSharedBy")
   tasksSharedWith TaskShare[] @relation("TaskSharedWith")
@@ -121,6 +128,7 @@ model User {
   chatbotModels     ChatbotModel[]
   trainingData      TrainingData[]
   chatConversations ChatConversation[]
+  chatMessages      ChatMessage[]     @relation("ChatMessageSender")
 
   // Security relations
   mfaSettings       UserMfaSettings?
@@ -215,9 +223,25 @@ model AuditLog {
   newValues     Json?    // New values (for creates/updates)
   details       Json?    // Additional event details
   
+  // Enhanced Tracking
+  entityName    String?  // Name/title of the affected entity
+  parentResourceType String? // Parent resource type for nested resources
+  parentResourceId   String? // Parent resource ID
+  
+  // Operation Context
+  operationType String?  // CRUD, AUTH, PERMISSION, etc.
+  severity      String   @default("info") // debug, info, warn, error, critical
+  tags          String[] // Searchable tags for categorization
+  
+  // Batch Operation Support
+  batchId       String?  // For grouping related operations
+  batchSize     Int?     // Number of items in batch
+  batchIndex    Int?     // Position in batch
+  
   // Outcome
   success       Boolean  @default(true)
   errorMessage  String?  // Error message if action failed
+  errorCode     String?  // Error code for categorization
   
   // Performance Metrics
   responseTime  Int?     // Response time in milliseconds
@@ -232,9 +256,15 @@ model AuditLog {
   // Performance Context
   performanceData Json?  // Additional performance metrics and traces
   
+  // Compliance & Security
+  requiresReview  Boolean @default(false) // Flag for manual review
+  sensitiveData   Boolean @default(false) // Contains sensitive information
+  retentionPeriod Int?    // Days to retain this log entry
+  
   // Metadata
   correlationId String?  // For tracking related events
   sessionInfo   Json?    // Session information at time of event
+  clientInfo    Json?    // Client application information
   
   // Timestamps
   timestamp     DateTime @default(now())
@@ -249,6 +279,13 @@ model AuditLog {
   @@index([endpoint])
   @@index([responseTime])
   @@index([statusCode])
+  @@index([userId, timestamp])
+  @@index([operationType])
+  @@index([severity])
+  @@index([batchId])
+  @@index([parentResourceType, parentResourceId])
+  @@index([requiresReview])
+  @@index([sensitiveData])
   @@map("audit_logs")
 }
 
@@ -304,8 +341,14 @@ model Tag {
   
   createdAt DateTime @default(now())
   
+  // Relations
   posts PostTag[] @relation("TagPosts")
+  
+  // User who created this tag
+  createdBy String
+  creator   User   @relation("TagCreator", fields: [createdBy], references: [id], onDelete: Cascade)
 
+  @@index([createdBy])
   @@map("tags")
 }
 
@@ -591,7 +634,12 @@ model ChatMessage {
   conversationId String
   conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   
+  // User who sent this message (for user messages)
+  userId String?
+  user   User?   @relation("ChatMessageSender", fields: [userId], references: [id], onDelete: SetNull)
+  
   @@index([conversationId, createdAt])
+  @@index([userId])
   @@map("chat_messages")
 }
 
@@ -984,11 +1032,16 @@ model Role {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   
+  // User who created this role
+  createdBy    String?
+  creator      User?     @relation("RoleCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  
   // Relationships
   permissions  RolePermission[]
   userRoles    UserRoleAssignment[]
   
   @@index([name])
+  @@index([createdBy])
   @@index([parentId])
   @@index([isActive])
   @@index([priority])
@@ -1020,6 +1073,10 @@ model Permission {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
+  // User who created this permission
+  createdBy     String?
+  creator       User?     @relation("PermissionCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  
   // Relationships
   rolePermissions RolePermission[]
   userPermissions UserPermission[]
@@ -1029,6 +1086,7 @@ model Permission {
   @@index([action])
   @@index([category])
   @@index([isActive])
+  @@index([createdBy])
 }
 
 model RolePermission {

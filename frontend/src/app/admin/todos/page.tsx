@@ -7,6 +7,7 @@ import { TaskDashboardView } from '@/components/todos/TaskDashboardView';
 import { TaskListView } from '@/components/todos/TaskListView';
 import { TaskTableView } from '@/components/todos/TaskTableView';
 import { TaskKanbanView } from '@/components/todos/TaskKanbanView';
+import { TaskGanttView } from '@/components/todos/TaskGanttView';
 import { ViewModeSelector } from '@/components/todos/ViewModeSelector';
 
 import CreateTaskModal from '@/components/todos/CreateTaskModal';
@@ -216,8 +217,7 @@ export default function TodosPage() {
       case TodoViewMode.KANBAN:
         return <TaskKanbanView {...commonProps} />;
       case TodoViewMode.GANTT:
-        // Gantt view might not be implemented yet, fallback to dashboard
-        return <TaskDashboardView {...commonProps} />;
+        return <TaskGanttView {...commonProps} />;
       case TodoViewMode.DASHBOARD:
       default:
         return <TaskDashboardView {...commonProps} />;
