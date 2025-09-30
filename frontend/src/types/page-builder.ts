@@ -6,6 +6,9 @@ export enum BlockType {
   BUTTON = 'BUTTON',
   DIVIDER = 'DIVIDER',
   SPACER = 'SPACER',
+  TEAM = 'TEAM',
+  STATS = 'STATS',
+  CONTACT_INFO = 'CONTACT_INFO',
 }
 
 export enum PageStatus {
@@ -136,15 +139,59 @@ export interface FAQBlockContent {
 export interface ContactFormBlockContent {
   title?: string;
   description?: string;
-  fields: {
+  fields: Array<{
     name: string;
-    type: 'text' | 'email' | 'tel' | 'textarea';
     label: string;
+    type: 'text' | 'email' | 'tel' | 'textarea';
+    required: boolean;
     placeholder?: string;
-    required?: boolean;
-  }[];
+  }>;
   submitText?: string;
   successMessage?: string;
+}
+
+export interface TeamBlockContent {
+  title?: string;
+  subtitle?: string;
+  members: Array<{
+    name: string;
+    position: string;
+    bio?: string;
+    image?: string;
+    social?: {
+      linkedin?: string;
+      twitter?: string;
+      email?: string;
+    };
+  }>;
+  layout?: 'grid' | 'carousel';
+  columns?: number;
+}
+
+export interface StatsBlockContent {
+  title?: string;
+  subtitle?: string;
+  stats: Array<{
+    value: string;
+    label: string;
+    description?: string;
+    icon?: string;
+  }>;
+  layout?: 'horizontal' | 'grid';
+  animated?: boolean;
+}
+
+export interface ContactInfoBlockContent {
+  title?: string;
+  subtitle?: string;
+  contacts: Array<{
+    type: 'address' | 'phone' | 'email' | 'hours';
+    label: string;
+    value: string;
+    icon?: string;
+  }>;
+  showMap?: boolean;
+  mapEmbedUrl?: string;
 }
 
 // Block style interface

@@ -6,6 +6,9 @@ import { HeroBlock } from './HeroBlock';
 import { ButtonBlock } from './ButtonBlock';
 import { DividerBlock } from './DividerBlock';
 import { SpacerBlock } from './SpacerBlock';
+import { TeamBlock } from './TeamBlock';
+import { StatsBlock } from './StatsBlock';
+import { ContactInfoBlock } from './ContactInfoBlock';
 
 export interface BlockRendererProps {
   block: PageBlock;
@@ -40,6 +43,12 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       return <DividerBlock {...commonProps} />;
     case BlockType.SPACER:
       return <SpacerBlock {...commonProps} />;
+    case BlockType.TEAM:
+      return <TeamBlock {...commonProps} />;
+    case BlockType.STATS:
+      return <StatsBlock {...commonProps} />;
+    case BlockType.CONTACT_INFO:
+      return <ContactInfoBlock {...commonProps} />;
     default:
       return (
         <div className="p-4 border border-red-300 bg-red-50 text-red-600 rounded">

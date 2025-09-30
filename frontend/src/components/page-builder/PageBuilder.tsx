@@ -26,7 +26,10 @@ import {
   Image,
   Square,
   Minus,
-  Space
+  Space,
+  Users,
+  TrendingUp,
+  Phone
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -52,6 +55,9 @@ const BLOCK_TYPES = [
   { type: BlockType.IMAGE, label: 'Image Block', icon: Image, color: 'bg-green-100 text-green-600' },
   { type: BlockType.HERO, label: 'Hero Section', icon: Layout, color: 'bg-purple-100 text-purple-600' },
   { type: BlockType.BUTTON, label: 'Button', icon: Square, color: 'bg-orange-100 text-orange-600' },
+  { type: BlockType.TEAM, label: 'Team Section', icon: Users, color: 'bg-indigo-100 text-indigo-600' },
+  { type: BlockType.STATS, label: 'Stats Section', icon: TrendingUp, color: 'bg-emerald-100 text-emerald-600' },
+  { type: BlockType.CONTACT_INFO, label: 'Contact Info', icon: Phone, color: 'bg-cyan-100 text-cyan-600' },
   { type: BlockType.DIVIDER, label: 'Divider', icon: Minus, color: 'bg-gray-100 text-gray-600' },
   { type: BlockType.SPACER, label: 'Spacer', icon: Space, color: 'bg-yellow-100 text-yellow-600' },
 ];
@@ -70,6 +76,46 @@ const DEFAULT_BLOCK_CONTENT = {
     href: '#', 
     variant: 'primary', 
     style: {} 
+  },
+  [BlockType.TEAM]: {
+    title: 'Our Team',
+    subtitle: 'Meet the amazing people behind our success',
+    members: [
+      {
+        name: 'John Doe',
+        position: 'CEO & Founder',
+        bio: 'Passionate about creating innovative solutions.',
+        image: '',
+        social: {}
+      }
+    ],
+    layout: 'grid',
+    columns: 3,
+    style: {}
+  },
+  [BlockType.STATS]: {
+    title: 'Our Achievements',
+    subtitle: 'Numbers that speak for themselves',
+    stats: [
+      { value: '100+', label: 'Happy Customers', description: '', icon: 'users' },
+      { value: '50+', label: 'Projects Completed', description: '', icon: 'target' },
+      { value: '5+', label: 'Years Experience', description: '', icon: 'star' }
+    ],
+    layout: 'grid',
+    animated: true,
+    style: {}
+  },
+  [BlockType.CONTACT_INFO]: {
+    title: 'Contact Us',
+    subtitle: 'Get in touch with us',
+    contacts: [
+      { type: 'address', label: 'Address', value: '123 Main St, City, Country', icon: 'address' },
+      { type: 'phone', label: 'Phone', value: '+1 (555) 123-4567', icon: 'phone' },
+      { type: 'email', label: 'Email', value: 'contact@example.com', icon: 'email' }
+    ],
+    showMap: false,
+    mapEmbedUrl: '',
+    style: {}
   },
   [BlockType.DIVIDER]: { style: {} },
   [BlockType.SPACER]: { height: 40, style: {} },

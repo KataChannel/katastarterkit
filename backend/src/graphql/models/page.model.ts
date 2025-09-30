@@ -23,6 +23,9 @@ export enum BlockType {
   TESTIMONIAL = 'TESTIMONIAL',
   FAQ = 'FAQ',
   CONTACT_FORM = 'CONTACT_FORM',
+  TEAM = 'TEAM',
+  STATS = 'STATS',
+  CONTACT_INFO = 'CONTACT_INFO',
 }
 
 // Register enums for GraphQL
@@ -118,19 +121,28 @@ export class Page {
 }
 
 @ObjectType()
-export class PaginatedPages {
-  @Field(() => [Page])
-  data: Page[];
-
+export class PagePaginationInfo {
   @Field(() => Int)
-  total: number;
-
-  @Field(() => Int)
-  page: number;
-
-  @Field(() => Int)
-  limit: number;
+  currentPage: number;
 
   @Field(() => Int)
   totalPages: number;
+
+  @Field(() => Int)
+  totalItems: number;
+
+  @Field(() => Boolean)
+  hasNextPage: boolean;
+
+  @Field(() => Boolean)
+  hasPreviousPage: boolean;
+}
+
+@ObjectType()
+export class PaginatedPages {
+  @Field(() => [Page])
+  items: Page[];
+
+  @Field(() => PagePaginationInfo)
+  pagination: PagePaginationInfo;
 }

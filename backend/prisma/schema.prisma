@@ -780,6 +780,9 @@ enum BlockType {
   TESTIMONIAL
   FAQ
   CONTACT_FORM
+  TEAM
+  STATS
+  CONTACT_INFO
 }
 
 model Page {

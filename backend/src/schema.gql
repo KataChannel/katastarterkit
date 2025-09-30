@@ -75,6 +75,7 @@ enum BlockType {
   CARD
   COLUMN
   CONTACT_FORM
+  CONTACT_INFO
   DIVIDER
   FAQ
   GALLERY
@@ -82,6 +83,8 @@ enum BlockType {
   IMAGE
   ROW
   SPACER
+  STATS
+  TEAM
   TESTIMONIAL
   TEXT
   VIDEO
@@ -500,6 +503,14 @@ input PageFiltersInput {
   title: String
 }
 
+type PagePaginationInfo {
+  currentPage: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  totalItems: Int!
+  totalPages: Int!
+}
+
 """The status of a page"""
 enum PageStatus {
   ARCHIVED
@@ -508,11 +519,8 @@ enum PageStatus {
 }
 
 type PaginatedPages {
-  data: [Page!]!
-  limit: Int!
-  page: Int!
-  total: Int!
-  totalPages: Int!
+  items: [Page!]!
+  pagination: PagePaginationInfo!
 }
 
 type PaginatedPosts {

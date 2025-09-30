@@ -92,41 +92,25 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       </Head>
 
       <div className="min-h-screen bg-white">
-        {/* Page Header (optional, can be customized) */}
-        {page.title && (
-          <div className="bg-gray-50 border-b">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                {page.title}
-              </h1>
-              {page.content && (
-                <p className="text-xl text-gray-600 max-w-3xl">
-                  {page.content}
-                </p>
-              )}
+        {/* Page Content - Full width for blocks to handle their own layouts */}
+        <main className="w-full">
+          {page.blocks && page.blocks.length > 0 ? (
+            <div>
+              {page.blocks
+                .sort((a, b) => (a.order || 0) - (b.order || 0))
+                .map((block) => (
+                  <div key={block.id} className="w-full">
+                    <BlockRenderer
+                      block={block}
+                      isEditing={false}
+                      onUpdate={() => {}} // No editing in public view
+                      onDelete={() => {}} // No deletion in public view
+                    />
+                  </div>
+                ))}
             </div>
-          </div>
-        )}
-
-        {/* Page Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-8">
-            {page.blocks && page.blocks.length > 0 ? (
-              <div className="space-y-8">
-                {page.blocks
-                  .sort((a, b) => (a.order || 0) - (b.order || 0))
-                  .map((block) => (
-                    <div key={block.id} className="w-full">
-                      <BlockRenderer
-                        block={block}
-                        isEditing={false}
-                        onUpdate={() => {}} // No editing in public view
-                        onDelete={() => {}} // No deletion in public view
-                      />
-                    </div>
-                  ))}
-              </div>
-            ) : (
+          ) : (
+            <div className="min-h-screen flex items-center justify-center">
               <div className="text-center py-12">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                   Page Content Coming Soon
@@ -135,18 +119,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
                   This page is currently being built. Please check back later.
                 </p>
               </div>
-            )}
-          </div>
-        </main>
-
-        {/* Page Footer (optional) */}
-        <footer className="bg-gray-50 border-t mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center text-gray-500 text-sm">
-              <p>Last updated: {new Date(page.updatedAt).toLocaleDateString('vi-VN')}</p>
             </div>
-          </div>
-        </footer>
+          )}
+        </main>
       </div>
     </>
   );

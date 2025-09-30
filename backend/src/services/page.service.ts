@@ -8,7 +8,7 @@ import {
   CreatePageBlockInput,
   UpdatePageBlockInput
 } from '../graphql/inputs/page.input';
-import { Page, PageBlock, PaginatedPages, PageStatus } from '../graphql/models/page.model';
+import { Page, PageBlock, PaginatedPages, PagePaginationInfo, PageStatus } from '../graphql/models/page.model';
 import { PaginationInput } from '../graphql/models/pagination.model';
 
 @Injectable()
@@ -92,11 +92,14 @@ export class PageService {
     ]);
 
     return {
-      data: pages as Page[],
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit)
+      items: pages as Page[],
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        hasNextPage: page < Math.ceil(total / limit),
+        hasPreviousPage: page > 1
+      }
     };
   }
 
