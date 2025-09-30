@@ -33,7 +33,7 @@ export interface Page {
   id: string;
   title: string;
   slug: string;
-  content?: string;
+  content?: any;
   status: PageStatus;
   seoTitle?: string;
   seoDescription?: string;
@@ -233,7 +233,7 @@ export interface BlockStyle {
 export interface CreatePageInput {
   title: string;
   slug: string;
-  content?: string;
+  content?: any;
   status: PageStatus;
   seoTitle?: string;
   seoDescription?: string;
@@ -243,7 +243,7 @@ export interface CreatePageInput {
 export interface UpdatePageInput {
   title?: string;
   slug?: string;
-  content?: string;
+  content?: any;
   status?: PageStatus;
   seoTitle?: string;
   seoDescription?: string;

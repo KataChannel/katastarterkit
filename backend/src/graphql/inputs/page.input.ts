@@ -9,21 +9,24 @@ export class CreatePageBlockInput {
   @IsEnum(BlockType)
   type: BlockType;
 
-  @Field(() => GraphQLJSONObject)
-  content: any;
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  content?: any;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
   @IsOptional()
   style?: any;
 
   @Field(() => Int, { defaultValue: 0 })
+  @IsOptional()
   @IsInt()
   @Min(0)
-  order: number;
+  order?: number;
 
   @Field(() => Boolean, { defaultValue: true })
+  @IsOptional()
   @IsBoolean()
-  isVisible: boolean;
+  isVisible?: boolean;
 }
 
 @InputType()

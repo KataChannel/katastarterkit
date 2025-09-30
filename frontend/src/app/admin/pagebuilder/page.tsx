@@ -201,7 +201,7 @@ function PageBuilderContent() {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-full flex flex-col">
       {/* Back Button */}
       <div className="bg-white border-b px-4 py-2">
         <Button

@@ -166,13 +166,15 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
         const input: CreatePageInput = {
           title: editingPage.title,
           slug: editingPage.slug,
-          content: editingPage.content || '',
+          content: editingPage.content || null,
           status: editingPage.status,
           seoTitle: editingPage.seoTitle,
           seoDescription: editingPage.seoDescription,
           seoKeywords: editingPage.seoKeywords || [],
         };
         const newPage = await createPage(input);
+        console.log('Created new page:', newPage);
+        
         if (newPage) {
           setIsNewPageMode(false);
           window.history.replaceState(null, '', `/admin/pagebuilder?pageId=${newPage.id}`);
@@ -207,13 +209,18 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
       content: DEFAULT_BLOCK_CONTENT[blockType],
       style: {},
       order: blocks.length,
+      isVisible: true,
     };
 
     try {
-      await addBlock(input);
-      await refetch();
-    } catch (error) {
+      const newBlock = await addBlock(input);
+      if (newBlock) {
+        await refetch();
+        toast.success('Block added successfully!');
+      }
+    } catch (error: any) {
       console.error('Failed to add block:', error);
+      toast.error(error.message || 'Failed to add block');
     }
   };
 

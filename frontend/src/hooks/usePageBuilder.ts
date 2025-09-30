@@ -62,6 +62,7 @@ export const usePageOperations = () => {
 
   const handleCreatePage = async (input: CreatePageInput) => {
     try {
+      console.log('Creating new page:', input);
       const { data } = await createPage({
         variables: { input },
         refetchQueries: [GET_PAGES]

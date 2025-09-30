@@ -58,7 +58,8 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   }
 
   const page = data.getPageBySlug;
-
+  console.log('Fetched page data:', page);
+  
   // Don't show draft or archived pages in production
   if (process.env.NODE_ENV === 'production' && page.status !== PageStatus.PUBLISHED) {
     return notFound();
@@ -96,7 +97,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         <main className="w-full">
           {page.blocks && page.blocks.length > 0 ? (
             <div>
-              {page.blocks
+              {[...page.blocks]
                 .sort((a, b) => (a.order || 0) - (b.order || 0))
                 .map((block) => (
                   <div key={block.id} className="w-full">

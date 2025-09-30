@@ -175,7 +175,7 @@ input CreateInvoiceInput {
 }
 
 input CreatePageBlockInput {
-  content: JSONObject!
+  content: JSONObject
   isVisible: Boolean! = true
   order: Int! = 0
   style: JSONObject
