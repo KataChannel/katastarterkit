@@ -240,7 +240,7 @@ function formatSyncTime(date: Date): string {
 
 // Compact offline indicator for mobile
 export function CompactOfflineStatus({ className = '' }: { className?: string }) {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true);
   const [pendingActions, setPendingActions] = useState(0);
 
   useEffect(() => {

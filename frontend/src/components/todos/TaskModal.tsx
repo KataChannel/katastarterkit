@@ -85,8 +85,9 @@ const TaskModal: React.FC<TaskModalProps> = ({
   // Handle media operations
   const handleUploadMedia = async (files: FileList) => {
     try {
-      await uploadMedia(taskId, files);
-      await refetch(); // Refresh task data
+      // Note: Media upload functionality is not yet implemented in the backend
+      console.log('Upload media requested for task:', taskId, 'with files:', files);
+      throw new Error('Media upload functionality is not yet implemented');
     } catch (error) {
       console.error('Error uploading media:', error);
       throw error;
@@ -95,8 +96,9 @@ const TaskModal: React.FC<TaskModalProps> = ({
 
   const handleDeleteMedia = async (mediaId: string) => {
     try {
-      await deleteMedia(mediaId);
-      await refetch(); // Refresh task data
+      // Note: Media delete functionality is not yet implemented in the backend
+      console.log('Delete media requested for mediaId:', mediaId);
+      throw new Error('Media delete functionality is not yet implemented');
     } catch (error) {
       console.error('Error deleting media:', error);
       throw error;

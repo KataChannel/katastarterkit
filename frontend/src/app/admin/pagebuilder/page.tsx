@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import PageBuilder from '@/components/page-builder/PageBuilder';
 import { usePages } from '@/hooks/usePageBuilder';
@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { PageStatus } from '@/types/page-builder';
 
-export default function AdminPageBuilderPage() {
+function PageBuilderContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pageId = searchParams.get('pageId');
@@ -218,5 +218,13 @@ export default function AdminPageBuilderPage() {
         <PageBuilder pageId={pageId || undefined} />
       </div>
     </div>
+  );
+}
+
+export default function AdminPageBuilderPage() {
+  return (
+    <Suspense fallback={<div className="p-4">Loading page builder...</div>}>
+      <PageBuilderContent />
+    </Suspense>
   );
 }
