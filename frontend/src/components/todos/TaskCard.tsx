@@ -17,10 +17,25 @@ import {
   ClockIcon as SolidClockIcon,
 } from '@heroicons/react/24/solid';
 import { Task, TaskCategory, TaskPriority, TaskStatus, User } from '../../types/todo';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import TaskModal from './TaskModal';
 
+// Extended task interface to include shared information
+interface ExtendedTask extends Task {
+  isShared?: boolean;
+  sharedBy?: {
+    id: string;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
+  };
+  sharePermission?: 'VIEW' | 'EDIT' | 'ADMIN';
+}
+
 interface TaskCardProps {
-  task: Task;
+  task: ExtendedTask;
   currentUser?: User;
   onStatusChange?: (taskId: string, status: TaskStatus) => void;
   onDelete?: (taskId: string) => void;
@@ -131,6 +146,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         ${getStatusColor(task.status)}
         ${isOverdue ? 'border-red-300 bg-red-50' : ''}
         ${isDueSoon ? 'border-yellow-300 bg-yellow-50' : ''}
+        ${task.isShared ? 'border-l-4 border-l-blue-500' : ''}
         ${className}
       `}>
         {/* Header */}
@@ -148,6 +164,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
             }`}>
               {task.title}
             </h3>
+            {task.isShared && (
+              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
+                <ShareIcon className="h-3 w-3" />
+                Shared
+              </Badge>
+            )}
           </div>
           
           <div className="flex items-center space-x-2">
@@ -160,6 +182,37 @@ const TaskCard: React.FC<TaskCardProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Shared by info */}
+        {task.isShared && task.sharedBy && (
+          <div className="flex items-center gap-2 mb-3 p-2 bg-blue-50 rounded-md border border-blue-200">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src={task.sharedBy.avatar} />
+              <AvatarFallback className="text-xs bg-blue-200 text-blue-800">
+                {task.sharedBy.firstName && task.sharedBy.lastName 
+                  ? `${task.sharedBy.firstName[0]}${task.sharedBy.lastName[0]}`.toUpperCase()
+                  : task.sharedBy.username?.slice(0, 2).toUpperCase() || 'UN'
+                }
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-blue-700">
+                Được chia sẻ bởi{' '}
+                <span className="font-medium">
+                  {task.sharedBy.firstName && task.sharedBy.lastName 
+                    ? `${task.sharedBy.firstName} ${task.sharedBy.lastName}`
+                    : task.sharedBy.username || 'Unknown User'
+                  }
+                </span>
+              </p>
+            </div>
+            {task.sharePermission && (
+              <Badge variant="outline" className="text-xs">
+                {task.sharePermission}
+              </Badge>
+            )}
+          </div>
+        )}
 
         {/* Description */}
         {task.description && (

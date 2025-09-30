@@ -25,7 +25,7 @@ export function AdminHeader() {
   const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
     { name: 'Todos', href: '/admin/todos', icon: ClipboardDocumentListIcon },
-    { name: 'Shared Todos', href: '/admin/todos/shared', icon: ShareIcon },
+    // Removed - Shared todos are now integrated into main todos page
     { name: 'Users', href: '/admin/users', icon: UserGroupIcon },
     { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
   ];

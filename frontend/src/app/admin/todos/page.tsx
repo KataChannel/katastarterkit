@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { TaskDashboardView } from '@/components/todos/TaskDashboardView';
@@ -10,18 +10,34 @@ import { TaskKanbanView } from '@/components/todos/TaskKanbanView';
 import { ViewModeSelector } from '@/components/todos/ViewModeSelector';
 
 import CreateTaskModal from '@/components/todos/CreateTaskModal';
-import { useTasks, useTaskMutations } from '@/hooks/useTodos';
+import { useTasks, useSharedTasks, useTaskMutations } from '@/hooks/useTodos';
 import { useDynamicTasks } from '@/hooks/useDynamicTasks';
 import { TaskStatus, TaskPriority, TaskCategory, Task, CreateTaskInput, UpdateTaskInput } from '@/types/todo';
 import { TodoViewMode } from '@/types/todo-views';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ShareIcon, FolderIcon } from '@heroicons/react/24/outline';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import toast from 'react-hot-toast';
+
+// Extended task interface to include shared information
+interface ExtendedTask extends Task {
+  isShared?: boolean;
+  sharedBy?: {
+    id: string;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
+  };
+  sharePermission?: 'VIEW' | 'EDIT' | 'ADMIN';
+}
 
 export default function TodosPage() {
   const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
   const [viewMode, setViewMode] = useState<TodoViewMode>(TodoViewMode.DASHBOARD);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'all' | 'my' | 'shared'>('all');
 
   // Dynamic GraphQL hooks
   const {
@@ -33,18 +49,62 @@ export default function TodosPage() {
     refetch: dynamicRefetch
   } = useDynamicTasks();
 
-  // Fallback hooks
+  // Regular tasks hooks
   const { tasks, loading: tasksLoading, refetch } = useTasks();
   const { updateTask, deleteTask } = useTaskMutations();
 
-  const finalTasks = dynamicTasks?.length > 0 ? dynamicTasks : (tasks || []);
-  const finalLoading = dynamicLoading || tasksLoading;
+  // Shared tasks hooks
+  const { sharedTasks, loading: sharedTasksLoading, refetch: refetchShared } = useSharedTasks();
+
+  // Process and combine tasks
+  const myTasks = useMemo(() => {
+    const baseTasks = dynamicTasks?.length > 0 ? dynamicTasks : (tasks || []);
+    return baseTasks.map((task: Task): ExtendedTask => ({
+      ...task,
+      isShared: false
+    }));
+  }, [dynamicTasks, tasks]);
+
+  const processedSharedTasks = useMemo(() => {
+    return (sharedTasks || []).map((task: Task): ExtendedTask => ({
+      ...task,
+      isShared: true,
+      sharedBy: task.author,
+      sharePermission: 'VIEW' as const // Default, could be enhanced with actual permission from shares array
+    }));
+  }, [sharedTasks]);
+
+  const allTasks = useMemo(() => {
+    return [...myTasks, ...processedSharedTasks];
+  }, [myTasks, processedSharedTasks]);
+
+  const finalTasks = useMemo(() => {
+    switch (activeTab) {
+      case 'my':
+        return myTasks;
+      case 'shared':
+        return processedSharedTasks;
+      default:
+        return allTasks;
+    }
+  }, [activeTab, myTasks, processedSharedTasks, allTasks]);
+
+  const finalLoading = dynamicLoading || tasksLoading || sharedTasksLoading;
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push('/login');
     }
   }, [isAuthenticated, loading, router]);
+
+  // Enhanced refetch function for all data
+  const refetchAllTasks = async () => {
+    await Promise.all([
+      dynamicRefetch(),
+      refetch(),
+      refetchShared()
+    ]);
+  };
 
   // 🚀 ENHANCED TASK CREATE với Dynamic GraphQL - TÍNH NĂNG CHÍNH
   const handleTaskCreate = async (initialData?: Partial<CreateTaskInput>) => {
@@ -179,13 +239,11 @@ export default function TodosPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Task Management</h1>
-            <p className="text-gray-600">Quản lý công việc hiệu quả</p>
+            <p className="text-gray-600">Quản lý công việc cá nhân và được chia sẻ</p>
           </div>
           <button
             onClick={() => handleTaskCreate()}
@@ -196,16 +254,107 @@ export default function TodosPage() {
           </button>
         </div>
 
+        {/* Task Tabs */}
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'all' | 'my' | 'shared')} className="mb-6">
+          <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsTrigger value="all" className="flex items-center gap-2">
+              <FolderIcon className="h-4 w-4" />
+              Tất cả ({allTasks.length})
+            </TabsTrigger>
+            <TabsTrigger value="my" className="flex items-center gap-2">
+              <FolderIcon className="h-4 w-4" />
+              Của tôi ({myTasks.length})
+            </TabsTrigger>
+            <TabsTrigger value="shared" className="flex items-center gap-2">
+              <ShareIcon className="h-4 w-4" />
+              Được chia sẻ ({processedSharedTasks.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="mt-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Tất cả công việc</h3>
+              <p className="text-sm text-gray-600">Bao gồm công việc cá nhân và được chia sẻ từ người khác</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="my" className="mt-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Công việc của tôi</h3>
+              <p className="text-sm text-gray-600">Các công việc do bạn tạo ra</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="shared" className="mt-6">
+            <div className="mb-4 flex items-center gap-2">
+              <ShareIcon className="h-5 w-5 text-blue-600" />
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Công việc được chia sẻ</h3>
+                <p className="text-sm text-gray-600">Các công việc mà người khác đã chia sẻ với bạn</p>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+
         {/* View Mode Selector */}
-        <div className="mt-6">
+        <div className="mb-6">
           <ViewModeSelector
             currentMode={viewMode}
             onModeChange={setViewMode}
           />
         </div>
 
+        {/* Task Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Tổng cộng</p>
+                <p className="text-2xl font-bold text-gray-900">{finalTasks.length}</p>
+              </div>
+              <FolderIcon className="h-8 w-8 text-gray-400" />
+            </div>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Của tôi</p>
+                <p className="text-2xl font-bold text-blue-600">{myTasks.length}</p>
+              </div>
+              <div className="flex items-center">
+                <Badge variant="outline" className="text-xs">Own</Badge>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Được chia sẻ</p>
+                <p className="text-2xl font-bold text-green-600">{processedSharedTasks.length}</p>
+              </div>
+              <div className="flex items-center">
+                <ShareIcon className="h-6 w-6 text-green-500" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Hoàn thành</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {finalTasks.filter((task: ExtendedTask) => task.status === TaskStatus.COMPLETED).length}
+                </p>
+              </div>
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+
         {/* Main Task View */}
-        <div className="mt-8">
+        <div className="bg-white rounded-lg border border-gray-200">
           {renderTaskView()}
         </div>
       </div>
@@ -215,8 +364,7 @@ export default function TodosPage() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onTaskCreated={() => {
-          dynamicRefetch();
-          refetch();
+          refetchAllTasks();
         }}
       />
     </div>
