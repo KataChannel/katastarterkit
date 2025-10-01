@@ -1,11 +1,16 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { RbacService } from './rbac.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class RbacSeederService implements OnModuleInit {
   private readonly logger = new Logger(RbacSeederService.name);
 
-  constructor(private rbacService: RbacService) {}
+  constructor(
+    private rbacService: RbacService,
+    private prisma: PrismaService
+  ) {}
 
   async onModuleInit() {
     await this.seedDefaultRolesAndPermissions();
@@ -20,6 +25,9 @@ export class RbacSeederService implements OnModuleInit {
 
       // Create default roles
       await this.createDefaultRoles();
+
+      // Create default admin user
+      await this.seedDefaultAdminUser();
 
       this.logger.log('RBAC seeding completed successfully');
     } catch (error) {
@@ -228,6 +236,101 @@ export class RbacSeederService implements OnModuleInit {
           this.logger.error(`Failed to create role ${roleData.name}: ${error.message}`);
         }
       }
+    }
+  }
+
+  private async seedDefaultAdminUser() {
+    try {
+      const adminEmail = 'katachanneloffical@gmail.com';
+      const adminPhone = '0977272967';
+      const adminName = 'Phạm Chí Kiệt';
+      const defaultPassword = 'Admin@123456'; // You should change this in production
+
+      // Check if admin user already exists
+      const existingUser = await this.prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: adminEmail },
+            { phone: adminPhone }
+          ]
+        }
+      });
+
+      if (existingUser) {
+        this.logger.debug(`Admin user already exists: ${existingUser.email}`);
+        
+        // Ensure user has super_admin role
+        const superAdminRole = await this.prisma.role.findUnique({
+          where: { name: 'super_admin' }
+        });
+
+        if (superAdminRole) {
+          const existingRoleAssignment = await this.prisma.userRoleAssignment.findUnique({
+            where: {
+              userId_roleId: {
+                userId: existingUser.id,
+                roleId: superAdminRole.id
+              }
+            }
+          });
+
+          if (!existingRoleAssignment) {
+            await this.rbacService.assignRoleToUser({
+              userId: existingUser.id,
+              roleId: superAdminRole.id
+            }, 'system');
+            this.logger.debug(`Assigned super_admin role to existing user: ${existingUser.email}`);
+          }
+        }
+        return;
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(defaultPassword, 12);
+
+      // Create admin user
+      const adminUser = await this.prisma.user.create({
+        data: {
+          username: 'admin_kataofficial',
+          email: adminEmail,
+          phone: adminPhone,
+          firstName: 'Phạm Chí',
+          lastName: 'Kiệt',
+          password: hashedPassword,
+          isVerified: true,
+          roleType: 'ADMIN',
+          isActive: true
+        }
+      });
+
+      this.logger.log(`Created admin user: ${adminUser.email}`);
+
+      // Get super_admin role
+      const superAdminRole = await this.prisma.role.findUnique({
+        where: { name: 'super_admin' }
+      });
+
+      if (superAdminRole) {
+        // Assign super_admin role to user
+        await this.rbacService.assignRoleToUser({
+          userId: adminUser.id,
+          roleId: superAdminRole.id
+        }, 'system');
+        this.logger.log(`Assigned super_admin role to user: ${adminUser.email}`);
+      } else {
+        this.logger.error('Super admin role not found!');
+      }
+
+      this.logger.log(`✅ Default admin user created successfully:`);
+      this.logger.log(`   Email: ${adminEmail}`);
+      this.logger.log(`   Phone: ${adminPhone}`);
+      this.logger.log(`   Name: ${adminName}`);
+      this.logger.log(`   Default Password: ${defaultPassword}`);
+      this.logger.log(`   🔒 Please change the default password after first login!`);
+      
+    } catch (error) {
+      this.logger.error(`Failed to create default admin user: ${error.message}`);
+      throw error;
     }
   }
 }
