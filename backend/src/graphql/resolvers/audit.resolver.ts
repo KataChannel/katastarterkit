@@ -1,10 +1,11 @@
 import { Resolver, Query, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { EnhancedAuditService } from '../services/enhanced-audit.service';
-import { AuditLog, AuditLogFilter, AuditLogStats, PaginatedAuditLogs } from './audit-log.types';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { EnhancedAuditService } from 'src/services/enhanced-audit.service';
+import { AuditLog, PaginatedAuditLogs, AuditLogFilter, AuditLogStats } from './audit-log.types';
+
 
 @Resolver(() => AuditLog)
 @UseGuards(JwtAuthGuard, RolesGuard)

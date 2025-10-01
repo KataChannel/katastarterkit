@@ -1,10 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTaskMutations } from '../../hooks/useTodos';
 import { TaskCategory, TaskPriority, CreateTaskInput } from '../../types/todo';
 import { MediaUpload } from './MediaUpload';
 import { useMediaUpload } from '../../hooks/useMediaUpload';
 import toast from 'react-hot-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/dialog';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -39,25 +55,17 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     maxFileSize: 10, // 10MB for task creation
   });
 
-  // Handle Escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      // Prevent background scroll
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
+  // Reset form function
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      category: TaskCategory.PERSONAL,
+      priority: TaskPriority.MEDIUM,
+      dueDate: '',
+    });
+    clearMediaFiles();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,17 +99,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       } else {
         toast.success('Tạo task thành công!');
       }
-      
-      // Reset form and media
-      setFormData({
-        title: '',
-        description: '',
-        category: TaskCategory.PERSONAL,
-        priority: TaskPriority.MEDIUM,
-        dueDate: '',
-      });
-      clearMediaFiles();
 
+      resetForm();
       onClose();
       onTaskCreated?.();
     } catch (error: any) {
@@ -117,127 +116,98 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     }));
   };
 
-  if (!isOpen) return null;
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      resetForm();
+    }
+    onClose();
+  };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Backdrop */}
-        <div 
-          className="fixed inset-0 bg-black/50 transition-opacity"
-          onClick={onClose}
-          aria-hidden="true"
-        ></div>
-
-        {/* Modal */}
-        <div 
-          className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 relative z-10"
-          onClick={(e) => e.stopPropagation()}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-title"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-medium text-gray-900" id="modal-title">
-              Tạo Task Mới
-            </h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="Đóng modal"
-            >
-              <XMarkIcon className="w-6 h-6" />
-            </button>
-          </div>
-
-          {/* Form */}
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Tạo Task Mới</DialogTitle>
+        </DialogHeader>
+        
+        {/* Scrollable Form Container */}
+        <div className="flex-1 overflow-y-auto p-4">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title */}
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Tiêu đề *
-              </label>
-              <input
-                type="text"
+            <div className="space-y-2">
+              <Label htmlFor="title">Tiêu đề *</Label>
+              <Input
                 id="title"
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 placeholder="Nhập tiêu đề task..."
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
             </div>
 
             {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Mô tả
-              </label>
-              <textarea
+            <div className="space-y-2">
+              <Label htmlFor="description">Mô tả</Label>
+              <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 placeholder="Nhập mô tả chi tiết..."
                 rows={3}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             {/* Category & Priority */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                  Danh mục
-                </label>
-                <select
-                  id="category"
+              <div className="space-y-2">
+                <Label htmlFor="category">Danh mục</Label>
+                <Select
                   value={formData.category}
-                  onChange={(e) => handleInputChange('category', e.target.value as TaskCategory)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onValueChange={(value) => handleInputChange('category', value as TaskCategory)}
                 >
-                  <option value={TaskCategory.WORK}>Công việc</option>
-                  <option value={TaskCategory.PERSONAL}>Cá nhân</option>
-                  <option value={TaskCategory.STUDY}>Học tập</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn danh mục" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={TaskCategory.WORK}>Công việc</SelectItem>
+                    <SelectItem value={TaskCategory.PERSONAL}>Cá nhân</SelectItem>
+                    <SelectItem value={TaskCategory.STUDY}>Học tập</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2">
-                  Độ ưu tiên
-                </label>
-                <select
-                  id="priority"
+              <div className="space-y-2">
+                <Label htmlFor="priority">Độ ưu tiên</Label>
+                <Select
                   value={formData.priority}
-                  onChange={(e) => handleInputChange('priority', e.target.value as TaskPriority)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onValueChange={(value) => handleInputChange('priority', value as TaskPriority)}
                 >
-                  <option value={TaskPriority.LOW}>Thấp</option>
-                  <option value={TaskPriority.MEDIUM}>Trung bình</option>
-                  <option value={TaskPriority.HIGH}>Cao</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn độ ưu tiên" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={TaskPriority.LOW}>Thấp</SelectItem>
+                    <SelectItem value={TaskPriority.MEDIUM}>Trung bình</SelectItem>
+                    <SelectItem value={TaskPriority.HIGH}>Cao</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             {/* Due Date */}
-            <div>
-              <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-2">
-                Hạn chót
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="dueDate">Hạn chót</Label>
+              <Input
                 type="datetime-local"
                 id="dueDate"
                 value={formData.dueDate}
                 onChange={(e) => handleInputChange('dueDate', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             {/* Media Upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                File đính kèm
-              </label>
+            <div className="space-y-2">
+              <Label>File đính kèm</Label>
               <MediaUpload
                 onMediaAdd={addMediaFiles}
                 onMediaRemove={removeMediaFile}
@@ -260,29 +230,32 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
                 </div>
               )}
             </div>
-
-            {/* Actions */}
-            <div className="flex justify-end space-x-3 pt-6 border-t">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                disabled={loading.creating}
-              >
-                Hủy
-              </button>
-              <button
-                type="submit"
-                disabled={loading.creating || !formData.title.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading.creating ? 'Đang tạo...' : 'Tạo Task'}
-              </button>
-            </div>
           </form>
         </div>
-      </div>
-    </div>
+
+        {/* Actions - Fixed at bottom */}
+        <div className="flex justify-end space-x-3 pt-6 border-t bg-white">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              resetForm();
+              onClose();
+            }}
+            disabled={loading.creating}
+          >
+            Hủy
+          </Button>
+          <Button
+            type="submit"
+            onClick={handleSubmit}
+            disabled={loading.creating || !formData.title.trim()}
+          >
+            {loading.creating ? 'Đang tạo...' : 'Tạo Task'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
