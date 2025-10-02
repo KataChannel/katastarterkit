@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
+import { useMutation } from '@apollo/client';
 import { TaskMedia, MediaType } from '@/types/todo';
+import { UPLOAD_TASK_MEDIA } from '@/graphql/taskQueries';
 import toast from 'react-hot-toast';
 
 interface MediaFile {
@@ -32,6 +34,8 @@ export const useMediaUpload = (options: UseMediaUploadOptions = {}) => {
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  
+  const [uploadMediaMutation] = useMutation(UPLOAD_TASK_MEDIA);
 
   const addMediaFiles = useCallback((newFiles: MediaFile[]) => {
     setMediaFiles(prev => {
@@ -60,14 +64,16 @@ export const useMediaUpload = (options: UseMediaUploadOptions = {}) => {
 
   const clearMediaFiles = useCallback(() => {
     // Cleanup all object URLs
-    mediaFiles.forEach(file => {
-      URL.revokeObjectURL(file.url);
-      if (file.preview) {
-        URL.revokeObjectURL(file.preview);
-      }
+    setMediaFiles(prev => {
+      prev.forEach(file => {
+        URL.revokeObjectURL(file.url);
+        if (file.preview) {
+          URL.revokeObjectURL(file.preview);
+        }
+      });
+      return [];
     });
-    setMediaFiles([]);
-  }, [mediaFiles]);
+  }, []);
 
   const uploadMedia = useCallback(async (taskId: string): Promise<TaskMedia[]> => {
     if (mediaFiles.length === 0) {
@@ -83,33 +89,50 @@ export const useMediaUpload = (options: UseMediaUploadOptions = {}) => {
 
       for (let i = 0; i < mediaFiles.length; i++) {
         const mediaFile = mediaFiles[i];
-        const formData = new FormData();
-        formData.append('file', mediaFile.file);
-        formData.append('taskId', taskId);
-        formData.append('type', mediaFile.type);
 
         try {
-          // Simulate upload progress
+          // Update progress
           const progressStep = (i + 1) / totalFiles * 100;
           setUploadProgress(progressStep);
           onUploadProgress?.(progressStep);
 
-          // Here you would make the actual API call to upload the file
-          // For now, we'll simulate the response
-          const response = await simulateUpload(mediaFile, taskId);
-          uploadedMedia.push(response);
+          // In a real implementation, you would upload the file to a storage service first
+          // For now, we'll create a temporary URL
+          const tempUrl = `temp://media/${Date.now()}-${mediaFile.file.name}`;
+
+          // Call the GraphQL mutation
+          const result = await uploadMediaMutation({
+            variables: {
+              input: {
+                taskId,
+                filename: mediaFile.file.name,
+                mimeType: mediaFile.mimeType,
+                size: mediaFile.size,
+                type: mediaFile.type,
+                url: tempUrl,
+              },
+            },
+          });
+
+          if (result.data?.uploadTaskMedia) {
+            uploadedMedia.push(result.data.uploadTaskMedia);
+          }
 
         } catch (error) {
           const errorMessage = `Lỗi upload file ${mediaFile.file.name}: ${error}`;
           toast.error(errorMessage);
           onUploadError?.(errorMessage);
+          console.error('Upload error:', error);
         }
       }
 
       // Cleanup after successful upload
       clearMediaFiles();
       onUploadComplete?.(uploadedMedia);
-      toast.success(`Đã upload thành công ${uploadedMedia.length} file`);
+      
+      if (uploadedMedia.length > 0) {
+        toast.success(`Đã upload thành công ${uploadedMedia.length} file`);
+      }
 
       return uploadedMedia;
 

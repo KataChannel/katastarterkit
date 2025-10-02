@@ -49,9 +49,38 @@ export const UPDATE_TASK_COMMENT = gql`
 
 export const DELETE_TASK_COMMENT = gql`
   mutation DeleteTaskComment($id: String!) {
-    deleteTaskComment(id: $id) {
+    deleteTaskComment(id: $id)
+  }
+`;
+
+export const UPLOAD_TASK_MEDIA = gql`
+  mutation UploadTaskMedia($input: UploadTaskMediaInput!) {
+    uploadTaskMedia(input: $input) {
       id
+      filename
+      url
+      type
+      size
+      mimeType
+      caption
+      taskId
+      uploadedBy
+      uploader {
+        id
+        username
+        firstName
+        lastName
+        avatar
+      }
+      createdAt
+      updatedAt
     }
+  }
+`;
+
+export const DELETE_TASK_MEDIA = gql`
+  mutation DeleteTaskMedia($mediaId: String!) {
+    deleteTaskMedia(mediaId: $mediaId)
   }
 `;
 

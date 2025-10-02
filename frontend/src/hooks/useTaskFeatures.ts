@@ -6,6 +6,8 @@ import {
   UPDATE_TASK_COMMENT,
   DELETE_TASK_COMMENT,
   GET_TASK_WITH_DETAILS,
+  UPLOAD_TASK_MEDIA,
+  DELETE_TASK_MEDIA,
 } from '../graphql/taskQueries';
 import { TaskComment, TaskMedia, Task } from '../types/todo';
 
@@ -132,20 +134,54 @@ export const useTaskMedia = (taskId: string) => {
   };
 };
 
-// Note: Media upload/delete mutations are not currently available in the backend
-// These would need to be implemented in the backend first
+// Media upload/delete hooks with real GraphQL mutations
 export const useUploadMedia = () => {
+  const [uploadMedia, { loading, error }] = useMutation(UPLOAD_TASK_MEDIA, {
+    refetchQueries: [GET_TASK_WITH_DETAILS],
+  });
+
+  const handleUploadMedia = async (taskId: string, mediaData: any) => {
+    try {
+      const result = await uploadMedia({
+        variables: {
+          input: {
+            taskId,
+            ...mediaData,
+          },
+        },
+      });
+      return result.data?.uploadTaskMedia;
+    } catch (err) {
+      throw err;
+    }
+  };
+
   return {
-    uploadMedia: () => Promise.reject(new Error('Media upload not implemented')),
-    loading: false,
-    error: new Error('Media upload functionality is not available'),
+    uploadMedia: handleUploadMedia,
+    loading,
+    error,
   };
 };
 
 export const useDeleteMedia = () => {
+  const [deleteMedia, { loading, error }] = useMutation(DELETE_TASK_MEDIA, {
+    refetchQueries: [GET_TASK_WITH_DETAILS],
+  });
+
+  const handleDeleteMedia = async (mediaId: string) => {
+    try {
+      const result = await deleteMedia({
+        variables: { mediaId },
+      });
+      return result.data?.deleteTaskMedia;
+    } catch (err) {
+      throw err;
+    }
+  };
+
   return {
-    deleteMedia: () => Promise.reject(new Error('Media delete not implemented')),
-    loading: false,
-    error: new Error('Media delete functionality is not available'),
+    deleteMedia: handleDeleteMedia,
+    loading,
+    error,
   };
 };

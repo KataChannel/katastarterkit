@@ -425,6 +425,7 @@ type Mutation {
   deletePost(id: String!): Boolean!
   deleteRole(id: String!): Boolean!
   deleteTask(id: String!): Boolean!
+  deleteTaskMedia(mediaId: String!): Boolean!
   deleteUser(id: String!): Boolean!
   duplicatePage(id: String!, slug: String, title: String): Page!
   generatePostSummary(postId: String!): String!
@@ -455,6 +456,7 @@ type Mutation {
   updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateTask(input: UpdateTaskInput!): Task!
   updateUser(id: String!, input: UpdateUserInput!): User!
+  uploadTaskMedia(input: UploadTaskMediaInput!): TaskMedia!
 
   """Create or update a record based on criteria"""
   upsert(create: JSONObject!, include: JSONObject, modelName: String!, select: JSONObject, update: JSONObject!, where: JSONObject!): JSONObject!
@@ -756,12 +758,12 @@ input SocialLoginInput {
 }
 
 type Subscription {
-  newComment(postId: String): Comment!
-  postCreated: Post!
-  postUpdated: Post!
-  taskCommentCreated: TaskComment!
-  taskCreated: Task!
-  taskUpdated: Task!
+  newComment(postId: String): Comment
+  postCreated: Post
+  postUpdated: Post
+  taskCommentCreated: TaskComment
+  taskCreated: Task
+  taskUpdated: Task
   userRegistered: User!
 }
 
@@ -1083,6 +1085,16 @@ input UpdateUserInput {
   firstName: String
   lastName: String
   username: String
+}
+
+input UploadTaskMediaInput {
+  caption: String
+  filename: String!
+  mimeType: String!
+  size: Float!
+  taskId: String!
+  type: String!
+  url: String!
 }
 
 type User {

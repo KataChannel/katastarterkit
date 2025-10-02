@@ -1236,6 +1236,7 @@ model ResourceAccess {
 model ext_listhoadon {
   id              String   @id @default(uuid())
   idServer        String?   @unique  // Basic Invoice Info
+  brandname       String?  // Tên nhãn hàng
   nbmst           String?  // Mã số thuế người bán
   khmshdon        String?  // Ký hiệu mẫu số hóa đơn
   khhdon          String?  // Ký hiệu hóa đơn

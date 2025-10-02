@@ -148,12 +148,12 @@ export class PostResolver {
   }
 
   // Subscriptions
-  @Subscription(() => Post, { name: 'postCreated' })
+  @Subscription(() => Post, { name: 'postCreated', nullable: true })
   postCreated() {
     return this.pubSubService.getPostCreatedIterator();
   }
 
-  @Subscription(() => Post, { name: 'postUpdated' })
+  @Subscription(() => Post, { name: 'postUpdated', nullable: true })
   postUpdated() {
     return this.pubSubService.getPostUpdatedIterator();
   }

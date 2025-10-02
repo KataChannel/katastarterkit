@@ -108,6 +108,7 @@ export class CommentResolver {
   // Subscriptions
   @Subscription(() => GraphQLComment, { 
     name: 'newComment',
+    nullable: true,
     filter: (payload, variables) => {
       // Filter by postId if provided
       return !variables.postId || payload.postId === variables.postId;

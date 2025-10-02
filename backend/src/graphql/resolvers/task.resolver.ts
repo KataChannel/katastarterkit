@@ -13,6 +13,7 @@ import { TasksPaginatedResult } from '../models/paginated-result.model';
 import { CreateTaskInput, UpdateTaskInput, TaskFilterInput } from '../inputs/task.input';
 import { ShareTaskInput, UpdateTaskShareInput } from '../inputs/task-share.input';
 import { CreateTaskCommentInput, UpdateTaskCommentInput } from '../inputs/task-comment.input';
+import { UploadTaskMediaInput } from '../inputs/task-media.input';
 import { TaskService } from '../../services/task.service';
 import { TaskShareService } from '../../services/task-share.service';
 import { TaskCommentService } from '../../services/task-comment.service';
@@ -236,18 +237,56 @@ export class TaskResolver {
     return subtask;
   }
 
+  @Mutation(() => TaskMedia, { name: 'uploadTaskMedia' })
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
+  async uploadTaskMedia(
+    @Args('input') input: UploadTaskMediaInput,
+    @Context() context: any,
+  ): Promise<any> {
+    const userId = context.req.user.id;
+    
+    const mediaData = {
+      type: input.type,
+      url: input.url,
+      filename: input.filename,
+      size: input.size,
+      mimeType: input.mimeType,
+      caption: input.caption,
+    };
+    
+    const media = await this.taskMediaService.create(input.taskId, userId, mediaData);
+    
+    // Smart cache invalidation
+    await this.cacheInvalidationService.invalidateTaskCache(input.taskId, userId);
+    
+    return media;
+  }
+
+  @Mutation(() => Boolean, { name: 'deleteTaskMedia' })
+  @UseGuards(JwtAuthGuard, RateLimitGuard)
+  async deleteTaskMedia(
+    @Args('mediaId') mediaId: string,
+    @Context() context: any,
+  ): Promise<boolean> {
+    const userId = context.req.user.id;
+    
+    await this.taskMediaService.delete(mediaId, userId);
+    
+    return true;
+  }
+
   // Subscriptions
-  @Subscription(() => Task, { name: 'taskCreated' })
+  @Subscription(() => Task, { name: 'taskCreated', nullable: true })
   taskCreated() {
     return this.pubSubService.getTaskCreatedIterator();
   }
 
-  @Subscription(() => Task, { name: 'taskUpdated' })
+  @Subscription(() => Task, { name: 'taskUpdated', nullable: true })
   taskUpdated() {
     return this.pubSubService.getTaskUpdatedIterator();
   }
 
-  @Subscription(() => TaskComment, { name: 'taskCommentCreated' })
+  @Subscription(() => TaskComment, { name: 'taskCommentCreated', nullable: true })
   taskCommentCreated() {
     return this.pubSubService.getTaskCommentCreatedIterator();
   }
