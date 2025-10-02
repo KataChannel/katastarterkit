@@ -140,11 +140,13 @@ export class InvoiceController {
    */
   @Post('sync')
   @Roles($Enums.UserRoleType.ADMIN, $Enums.UserRoleType.USER)
-  async syncInvoices(@Body() body: { invoiceData: any[], detailsData: any[] }) {
+  async syncInvoices(@Body() body: { invoiceData: any[], detailsData: any[], bearerToken?: string }) {
     try {
+      const startTime = Date.now();
       this.logger.log('REST: Starting invoice sync from external API');
+      this.logger.log(`Total invoices to sync: ${body.invoiceData?.length || 0}`);
       
-      const { invoiceData, detailsData } = body;
+      const { invoiceData, detailsData, bearerToken } = body;
       
       // Convert API data to our input format
       const convertedInvoices: CreateInvoiceInput[] = invoiceData.map(invoice => ({
@@ -281,19 +283,52 @@ export class InvoiceController {
         // Add other fields as needed from the external API
       }));
 
-      // Create invoices and their details
+      // Create invoices and their details with progress tracking
+      this.logger.log('Starting bulk invoice creation with detailed progress tracking...');
+      
+      // Track progress for logging
+      let lastProgressLog = 0;
+      const progressCallback = (progress: { processed: number; total: number; saved: number; skipped: number; failed: number; detailsSaved: number }) => {
+        // Log progress every 10% or every 5 invoices
+        const progressPercent = (progress.processed / progress.total) * 100;
+        if (progressPercent - lastProgressLog >= 10 || progress.processed % 5 === 0) {
+          this.logger.log(`📊 Progress: ${progress.processed}/${progress.total} (${progressPercent.toFixed(1)}%) | Saved: ${progress.saved} | Details: ${progress.detailsSaved}`);
+          lastProgressLog = progressPercent;
+        }
+      };
+      
       const syncResult = await this.invoiceService.bulkCreateInvoices({
         invoices: convertedInvoices,
         skipExisting: true,
-      });
+        includeDetails: true,
+        bearerToken: bearerToken,
+      }, progressCallback);
 
-      // Handle details separately if needed
-      if (detailsData && detailsData.length > 0) {
-        this.logger.log(`Processing ${detailsData.length} invoice details`);
-        // Details would need to be linked to created invoices
-        // This would require more complex mapping logic
-      }      
-      return syncResult;
+      const duration = Date.now() - startTime;
+      const durationMinutes = (duration / 1000 / 60).toFixed(2);
+      
+      this.logger.log('='.repeat(80));
+      this.logger.log('SYNC OPERATION COMPLETED');
+      this.logger.log('='.repeat(80));
+      this.logger.log(`Total Duration: ${durationMinutes} minutes (${(duration / 1000).toFixed(2)}s)`);
+      this.logger.log(`Invoices Processed: ${syncResult.invoicesSaved}/${convertedInvoices.length}`);
+      this.logger.log(`Details Fetched: ${syncResult.detailsSaved}`);
+      this.logger.log(`Errors: ${syncResult.errors.length}`);
+      this.logger.log(`Success Rate: ${((syncResult.invoicesSaved / convertedInvoices.length) * 100).toFixed(2)}%`);
+      this.logger.log('='.repeat(80));
+      
+      // Enhance result with additional metadata
+      return {
+        ...syncResult,
+        metadata: {
+          totalProcessed: convertedInvoices.length,
+          durationMs: duration,
+          durationMinutes: parseFloat(durationMinutes),
+          successRate: parseFloat(((syncResult.invoicesSaved / convertedInvoices.length) * 100).toFixed(2)),
+          startTime: new Date(startTime).toISOString(),
+          endTime: new Date().toISOString(),
+        }
+      };
     } catch (error) {
       this.logger.error('REST: Error syncing invoices:', error.message);
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);

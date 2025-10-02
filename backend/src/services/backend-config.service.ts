@@ -27,11 +27,11 @@ export class BackendConfigService {
     const sslVerification = process.env.INVOICE_SSL_VERIFICATION !== 'false';
     const brandname = process.env.INVOICE_BRANDNAME || '';
     
-    // Rate limiting configuration
-    const batchSize = parseInt(process.env.INVOICE_BATCH_SIZE || '10', 10);
-    const delayBetweenBatches = parseInt(process.env.INVOICE_DELAY_BETWEEN_BATCHES || '1000', 10);
-    const delayBetweenDetailCalls = parseInt(process.env.INVOICE_DELAY_BETWEEN_DETAIL_CALLS || '500', 10);
-    const maxRetries = parseInt(process.env.INVOICE_MAX_RETRIES || '3', 10);
+    // Rate limiting configuration - Updated to prevent 429 errors
+    const batchSize = parseInt(process.env.INVOICE_BATCH_SIZE || '3', 10); // Reduced from 10 to 3
+    const delayBetweenBatches = parseInt(process.env.INVOICE_DELAY_BETWEEN_BATCHES || '3000', 10); // Increased from 1000 to 3000
+    const delayBetweenDetailCalls = parseInt(process.env.INVOICE_DELAY_BETWEEN_DETAIL_CALLS || '2000', 10); // Increased from 500 to 2000
+    const maxRetries = parseInt(process.env.INVOICE_MAX_RETRIES || '5', 10); // Increased from 3 to 5
 
     return {
       bearerToken,

@@ -676,7 +676,7 @@ type Query {
 
   """Hello world query"""
   hello: String!
-  invoiceExists(khmshdon: String!, nbmst: String!, shdon: String!): Boolean!
+  invoiceExists(idServer: String!, khmshdon: String!, nbmst: String!, shdon: String!): Boolean!
   searchInvoices(input: InvoiceSearchInput!): InvoiceSearchResult!
   searchPermissions(input: PermissionSearchInput!): PermissionSearchResult!
   searchRoles(input: RoleSearchInput!): RoleSearchResult!

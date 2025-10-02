@@ -939,7 +939,10 @@ export class InvoiceService {
   /**
    * Bulk create invoices with rate limiting to prevent 409 errors
    */
-  async bulkCreateInvoices(input: BulkInvoiceInput): Promise<DatabaseSyncResult> {
+  async bulkCreateInvoices(
+    input: BulkInvoiceInput,
+    onProgress?: (progress: { processed: number; total: number; saved: number; skipped: number; failed: number; detailsSaved: number }) => void
+  ): Promise<DatabaseSyncResult> {
     const result: DatabaseSyncResult = {
       success: true,
       invoicesSaved: 0,
@@ -964,8 +967,21 @@ export class InvoiceService {
     const MAX_RETRIES = config.maxRetries;
 
     try {
-      this.logger.log(`Starting bulk creation of ${input.invoices.length} invoices with rate limiting`);
-      this.logger.log(`Rate limiting config - Batch size: ${BATCH_SIZE}, Delay between batches: ${DELAY_BETWEEN_BATCHES}ms, Detail call delay: ${DELAY_BETWEEN_DETAIL_CALLS}ms, Max retries: ${MAX_RETRIES}`);
+      const operationStartTime = Date.now();
+      
+      this.logger.log('\n' + '='.repeat(80));
+      this.logger.log('BULK INVOICE SYNC OPERATION STARTED');
+      this.logger.log('='.repeat(80));
+      this.logger.log(`Total Invoices: ${input.invoices.length}`);
+      this.logger.log(`Include Details: ${input.includeDetails !== false ? 'Yes' : 'No'}`);
+      this.logger.log(`Skip Existing: ${input.skipExisting ? 'Yes' : 'No'}`);
+      this.logger.log(`Bearer Token: ${input.bearerToken ? 'Provided from frontend' : 'Using environment variable'}`);
+      this.logger.log(`\nRate Limiting Configuration:`);
+      this.logger.log(`  - Batch Size: ${BATCH_SIZE} invoices per batch`);
+      this.logger.log(`  - Delay Between Batches: ${DELAY_BETWEEN_BATCHES}ms`);
+      this.logger.log(`  - Delay Between Detail Calls: ${DELAY_BETWEEN_DETAIL_CALLS}ms`);
+      this.logger.log(`  - Max Retries: ${MAX_RETRIES}`);
+      this.logger.log('='.repeat(80) + '\n');
       
       // Log bulk operation start
       this.fileLogger.logWithData('log', 'Bulk invoice creation started', {
@@ -987,8 +1003,12 @@ export class InvoiceService {
         const batch = input.invoices.slice(i, i + BATCH_SIZE);
         const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
         const totalBatches = Math.ceil(input.invoices.length / BATCH_SIZE);
+        const batchStartTime = Date.now();
+        const progressPercent = ((i / input.invoices.length) * 100).toFixed(1);
 
-        this.logger.log(`Processing batch ${batchNumber}/${totalBatches} (${batch.length} invoices)`);
+        this.logger.log('\n' + '-'.repeat(80));
+        this.logger.log(`📦 BATCH ${batchNumber}/${totalBatches} | Progress: ${progressPercent}% | Invoices: ${i + 1}-${Math.min(i + BATCH_SIZE, input.invoices.length)}/${input.invoices.length}`);
+        this.logger.log('-'.repeat(80));
 
         // Process current batch
         for (const invoiceData of batch) {
@@ -1002,7 +1022,7 @@ export class InvoiceService {
                 String(invoiceData.shdon)
               );
               if (exists) {
-                this.logger.debug(`Skipping existing invoice: ${invoiceData.shdon}`);
+                this.logger.log(`  ⏭️  Skipped (exists): Invoice ${invoiceData.shdon}`);
                 this.fileLogger.logWithData('log', 'Invoice skipped - already exists', {
                   idServer: invoiceData.idServer,
                   nbmst: invoiceData.nbmst,
@@ -1018,6 +1038,7 @@ export class InvoiceService {
             }
 
             const invoice = await this.createInvoice(invoiceData);
+            this.logger.log(`  ✅ Created: Invoice ${invoice.shdon} (ID: ${invoice.idServer})`);
             this.fileLogger.logInvoiceOperation('bulk-create', invoice.id, {
               idServer: invoice.idServer,
               shdon: invoice.shdon,
@@ -1036,8 +1057,14 @@ export class InvoiceService {
                 try {
                   // Add delay before detail API call to prevent rate limiting
                   if (retryCount > 0) {
-                    const retryDelay = DELAY_BETWEEN_DETAIL_CALLS * Math.pow(2, retryCount); // Exponential backoff
-                    this.logger.log(`Retrying detail fetch for invoice ${invoice.shdon} (attempt ${retryCount + 1}/${MAX_RETRIES + 1}) after ${retryDelay}ms delay`);
+                    // Enhanced exponential backoff: base_delay * 2^retry + random jitter
+                    const baseDelay = DELAY_BETWEEN_DETAIL_CALLS * 2; // Double base delay for retries
+                    const exponentialDelay = baseDelay * Math.pow(2, retryCount);
+                    const jitter = Math.random() * 1000; // Add up to 1 second random jitter
+                    const retryDelay = Math.min(exponentialDelay + jitter, 60000); // Cap at 60 seconds
+                    
+                    this.logger.log(`     🔄 Retry ${retryCount}/${MAX_RETRIES} for ${invoice.shdon} (delay: ${Math.round(retryDelay)}ms)`);
+                    this.logger.log(`Retrying detail fetch for invoice ${invoice.shdon} (attempt ${retryCount + 1}/${MAX_RETRIES + 1}) after ${Math.round(retryDelay)}ms delay`);
                     await this.delay(retryDelay);
                   } else {
                     await this.delay(DELAY_BETWEEN_DETAIL_CALLS);
@@ -1048,7 +1075,9 @@ export class InvoiceService {
                   
                   if (detailsSaved > 0) {
                     const tokenSource = input.bearerToken ? 'frontend' : 'environment';
-                    this.logger.log(`Auto-fetched ${detailsSaved} details for invoice ${invoice.shdon} using token from ${tokenSource}`);
+                    this.logger.log(`     📄 Fetched ${detailsSaved} details (token: ${tokenSource})`);
+                  } else {
+                    this.logger.log(`     ⚠️  No details found or fetch failed`);
                   }
                   
                   break; // Success, exit retry loop
@@ -1063,7 +1092,8 @@ export class InvoiceService {
                                          detailError.message?.includes('timeout');
 
                   if (isRateLimitError && retryCount <= MAX_RETRIES) {
-                    this.logger.warn(`Rate limit/timeout error for invoice ${invoice.shdon}, will retry (${retryCount}/${MAX_RETRIES}): ${detailError.message}`);
+                    this.logger.warn(`🚦 Rate limit/timeout error for invoice ${invoice.shdon}, will retry (${retryCount}/${MAX_RETRIES}): ${detailError.message}`);
+                    this.logger.warn(`⏳ Server is overloaded (${detailError.response?.status || 'timeout'}), backing off...`);
                     continue; // Try again with backoff
                   } else {
                     this.logger.error(`Failed to auto-fetch details for invoice ${invoice.shdon} after ${retryCount} attempts:`, detailError);
@@ -1075,16 +1105,36 @@ export class InvoiceService {
             }
 
             result.invoicesSaved++;
+            
+            // Emit progress update to frontend
+            if (onProgress) {
+              onProgress({
+                processed: i + batch.indexOf(invoiceData) + 1,
+                total: input.invoices.length,
+                saved: result.invoicesSaved,
+                skipped: 0, // Will calculate later
+                failed: result.errors.length,
+                detailsSaved: result.detailsSaved
+              });
+            }
 
           } catch (error) {
-            this.logger.error(`Failed to create invoice ${invoiceData.shdon}:`, error);
+            this.logger.error(`  ❌ Failed: Invoice ${invoiceData.shdon}`);
+            this.logger.error(`     Error: ${error.message}`);
             result.errors.push(`Failed to create invoice ${invoiceData.shdon}: ${error.message}`);
           }
         }
 
+        // Batch completion summary
+        const batchDuration = Date.now() - batchStartTime;
+        const batchSuccessRate = batch.length > 0 ? ((result.invoicesSaved / (batchNumber * BATCH_SIZE)) * 100).toFixed(1) : '0';
+        this.logger.log('-'.repeat(80));
+        this.logger.log(`✓ Batch ${batchNumber} completed in ${(batchDuration / 1000).toFixed(2)}s | Success rate: ${batchSuccessRate}%`);
+        this.logger.log('-'.repeat(80));
+        
         // Add delay between batches (except for the last batch)
         if (i + BATCH_SIZE < input.invoices.length) {
-          this.logger.log(`Batch ${batchNumber} completed. Waiting ${DELAY_BETWEEN_BATCHES}ms before next batch...`);
+          this.logger.log(`⏳ Waiting ${DELAY_BETWEEN_BATCHES}ms before next batch...\n`);
           await this.delay(DELAY_BETWEEN_BATCHES);
         }
       }

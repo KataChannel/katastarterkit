@@ -6,6 +6,14 @@ export interface DatabaseSyncResult {
   detailsSaved: number;
   errors: string[];
   message: string;
+  metadata?: {
+    totalProcessed: number;
+    durationMs: number;
+    durationMinutes: number;
+    successRate: number;
+    startTime: string;
+    endTime: string;
+  };
 }
 
 export interface InvoiceStats {
@@ -45,13 +53,50 @@ class InvoiceDatabaseService {
    */
   async syncInvoiceData(
     invoiceData: any[],
-    detailsData?: any[]
+    detailsData?: any[],
+    bearerToken?: string,
+    onProgress?: (progress: { processed: number; total: number; current: string }) => void
   ): Promise<DatabaseSyncResult> {
     try {
       console.log('Syncing invoice data to database:', {
         invoiceCount: invoiceData.length,
         detailsCount: detailsData?.length || 0,
+        hasBearerToken: !!bearerToken,
       });
+
+      // Notify progress start
+      if (onProgress) {
+        onProgress({ processed: 0, total: invoiceData.length, current: 'Bắt đầu đồng bộ...' });
+      }
+
+      // Simulate progress updates since REST API doesn't support streaming
+      // Estimate: 3 invoices per batch, 3s between batches, 2s per detail fetch
+      let progressInterval: NodeJS.Timeout | null = null;
+      if (onProgress) {
+        const estimatedTimePerInvoice = 2500; // 2.5 seconds per invoice (with delays)
+        const totalEstimatedTime = invoiceData.length * estimatedTimePerInvoice;
+        const updateIntervalMs = 1000; // Update every 1 second
+        const totalUpdates = Math.floor(totalEstimatedTime / updateIntervalMs);
+        let currentUpdate = 0;
+
+        progressInterval = setInterval(() => {
+          currentUpdate++;
+          const estimatedProgress = Math.min(
+            Math.floor((currentUpdate / totalUpdates) * invoiceData.length),
+            invoiceData.length - 1 // Don't reach 100% until actual completion
+          );
+          
+          onProgress({
+            processed: estimatedProgress,
+            total: invoiceData.length,
+            current: `Đang xử lý hóa đơn ${estimatedProgress + 1}/${invoiceData.length}...`
+          });
+
+          if (currentUpdate >= totalUpdates) {
+            if (progressInterval) clearInterval(progressInterval);
+          }
+        }, updateIntervalMs);
+      }
 
       const response = await fetch(`${this.baseUrl}/api/invoices/sync`, {
         method: 'POST',
@@ -59,14 +104,34 @@ class InvoiceDatabaseService {
         body: JSON.stringify({
           invoiceData,
           detailsData: detailsData || [],
+          bearerToken: bearerToken || undefined,
         }),
       });
+
+      // Clear progress interval when request completes
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+
+      // Clear progress interval when request completes
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result: DatabaseSyncResult = await response.json();
+      
+      // Send final progress update with actual results
+      if (onProgress && result.success) {
+        onProgress({
+          processed: invoiceData.length,
+          total: invoiceData.length,
+          current: `Hoàn thành: ${result.invoicesSaved} hóa đơn, ${result.detailsSaved} chi tiết`
+        });
+      }
       
       console.log('Database sync result:', result);
       return result;
@@ -246,12 +311,22 @@ export function useInvoiceDatabase() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const syncData:any = async (invoiceData: any[], detailsData?: any[]) => {
+  const syncData:any = async (
+    invoiceData: any[], 
+    detailsData?: any[], 
+    bearerToken?: string,
+    onProgress?: (progress: { processed: number; total: number; current: string }) => void
+  ) => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const result = await invoiceDatabaseService.syncInvoiceData(invoiceData, detailsData);
+      const result = await invoiceDatabaseService.syncInvoiceData(
+        invoiceData, 
+        detailsData, 
+        bearerToken,
+        onProgress
+      );
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';

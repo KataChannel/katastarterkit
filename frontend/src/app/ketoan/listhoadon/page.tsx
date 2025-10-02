@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceTable from '@/components/InvoiceTable';
 import ConfigModal from '@/components/ConfigModal';
+import SyncProgressDisplay, { SyncProgress } from '@/components/SyncProgressDisplay';
 import InvoiceApiService from '@/services/invoiceApi';
 import ConfigService from '@/services/configService';
 import DateService from '@/services/dateService';
@@ -32,6 +33,19 @@ const ListHoaDonPage = () => {
   const { syncData, searchInvoices: searchDatabaseInvoices, isLoading: dbLoading } = useInvoiceDatabase();
   const [syncStatus, setSyncStatus] = useState<string>('');
   const [isSyncing, setIsSyncing] = useState(false);
+  
+  // Sync progress state
+  const [syncProgress, setSyncProgress] = useState<SyncProgress>({
+    status: 'idle',
+    currentStep: 'Chưa bắt đầu',
+    totalInvoices: 0,
+    processedInvoices: 0,
+    savedInvoices: 0,
+    skippedInvoices: 0,
+    failedInvoices: 0,
+    detailsFetched: 0,
+    errors: [],
+  });
 
   // Filter state - now using month/year instead of direct dates
   const [selectedMonth, setSelectedMonth] = useState<number>(() => {
@@ -91,6 +105,20 @@ const ListHoaDonPage = () => {
       setIsSyncing(true);
       setSyncStatus('Đang lấy dữ liệu từ API bên ngoài...');
       
+      // Reset progress
+      setSyncProgress({
+        status: 'fetching',
+        currentStep: 'Đang lấy dữ liệu từ API bên ngoài...',
+        totalInvoices: 0,
+        processedInvoices: 0,
+        savedInvoices: 0,
+        skippedInvoices: 0,
+        failedInvoices: 0,
+        detailsFetched: 0,
+        errors: [],
+        startTime: new Date(),
+      });
+      
       // Update config in case it changed
       const currentConfig = ConfigService.getValidatedConfig();
       setConfig(currentConfig);
@@ -98,6 +126,12 @@ const ListHoaDonPage = () => {
       // Validate month/year combination
       if (!filter.month || !filter.year || filter.month < 1 || filter.month > 12) {
         toast.error('Vui lòng chọn tháng và năm hợp lệ');
+        setSyncProgress(prev => ({
+          ...prev,
+          status: 'error',
+          currentStep: 'Lỗi: Tháng/năm không hợp lệ',
+          errors: ['Vui lòng chọn tháng và năm hợp lệ'],
+        }));
         return;
       }
 
@@ -111,22 +145,77 @@ const ListHoaDonPage = () => {
       if (response.datas && response.datas.length > 0) {
         setSyncStatus(`Đang đồng bộ ${response.datas.length} hóa đơn vào database...`);
         
-        // Sync to database
-        const syncResult = await syncData(response.datas, []);
+        // Update progress with total count
+        setSyncProgress(prev => ({
+          ...prev,
+          status: 'syncing',
+          currentStep: `Đang đồng bộ ${response.datas.length} hóa đơn...`,
+          totalInvoices: response.datas.length,
+        }));
+        
+        // Get bearer token from config
+        const bearerToken = currentConfig.bearerToken || undefined;
+        
+        // Sync to database with progress callback
+        const syncResult = await syncData(
+          response.datas, 
+          [],
+          bearerToken,
+          (progress: { processed: number; total: number; current: string }) => {
+            setSyncProgress(prev => ({
+              ...prev,
+              processedInvoices: progress.processed,
+              currentStep: progress.current,
+            }));
+          }
+        );
         
         if (syncResult.success) {
           toast.success(`Đã đồng bộ thành công ${syncResult.invoicesSaved} hóa đơn`);
           setSyncStatus(`Đồng bộ thành công: ${syncResult.invoicesSaved} hóa đơn`);
+          
+          // Calculate skipped invoices
+          const skipped = response.datas.length - syncResult.invoicesSaved - syncResult.errors.length;
+          
+          // Update final progress
+          setSyncProgress(prev => ({
+            ...prev,
+            status: 'completed',
+            currentStep: 'Hoàn thành đồng bộ',
+            processedInvoices: response.datas.length,
+            savedInvoices: syncResult.invoicesSaved,
+            skippedInvoices: skipped > 0 ? skipped : 0,
+            failedInvoices: syncResult.errors.length,
+            detailsFetched: syncResult.detailsSaved,
+            errors: syncResult.errors,
+            endTime: new Date(),
+            metadata: syncResult.metadata,
+          }));
           
           // Now fetch from database to display
           await fetchFromDatabase();
         } else {
           toast.error(`Đồng bộ thất bại: ${syncResult.errors.join(', ')}`);
           setSyncStatus('Đồng bộ thất bại');
+          
+          setSyncProgress(prev => ({
+            ...prev,
+            status: 'error',
+            currentStep: 'Đồng bộ thất bại',
+            errors: syncResult.errors,
+            endTime: new Date(),
+          }));
         }
       } else {
         toast('Không có dữ liệu mới để đồng bộ', { icon: 'ℹ️' });
         setSyncStatus('Không có dữ liệu mới');
+        
+        setSyncProgress(prev => ({
+          ...prev,
+          status: 'completed',
+          currentStep: 'Không có dữ liệu mới',
+          endTime: new Date(),
+        }));
         
         // Still try to fetch from database
         await fetchFromDatabase();
@@ -136,6 +225,15 @@ const ListHoaDonPage = () => {
       setError(errorMessage);
       toast.error(errorMessage);
       setSyncStatus('Lỗi đồng bộ');
+      
+      setSyncProgress(prev => ({
+        ...prev,
+        status: 'error',
+        currentStep: 'Lỗi đồng bộ',
+        errors: [errorMessage],
+        endTime: new Date(),
+      }));
+      
       console.error('Error syncing data:', err);
     } finally {
       setIsSyncing(false);
@@ -471,7 +569,17 @@ const ListHoaDonPage = () => {
           </form>
         </div>
 
-        {syncStatus && (
+        {/* Sync Progress Display */}
+        {(isSyncing || syncProgress.status === 'completed' || syncProgress.status === 'error') && syncProgress.totalInvoices > 0 && (
+          <div className="mb-6">
+            <SyncProgressDisplay 
+              progress={syncProgress}
+              onClose={() => setSyncProgress(prev => ({ ...prev, status: 'idle', totalInvoices: 0 }))}
+            />
+          </div>
+        )}
+
+        {syncStatus && !isSyncing && syncProgress.status === 'idle' && (
           <div className="bg-purple-50 border border-purple-200 text-purple-700 px-4 py-3 rounded-lg mb-6">
             <div className="flex items-center">
               <span className="font-medium">Trạng thái đồng bộ:</span>

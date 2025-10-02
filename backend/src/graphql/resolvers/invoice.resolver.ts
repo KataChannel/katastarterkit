@@ -81,11 +81,12 @@ export class InvoiceResolver {
   @Query(() => Boolean)
   @Roles($Enums.UserRoleType.ADMIN, $Enums.UserRoleType.USER)
   async invoiceExists(
+    @Args('idServer') idServer: string,
     @Args('nbmst') nbmst: string,
     @Args('khmshdon') khmshdon: string,
     @Args('shdon') shdon: string,
   ): Promise<boolean> {
-    return this.invoiceService.invoiceExists(nbmst, khmshdon, shdon);
+    return this.invoiceService.invoiceExists(idServer, nbmst, khmshdon, shdon);
   }
 
   /**
@@ -103,7 +104,8 @@ export class InvoiceResolver {
     this.logger.log(`Bulk creating ${input.invoices.length} invoices ${tokenInfo}`);
     this.logger.log(`Include details: ${input.includeDetails}, Skip existing: ${input.skipExisting}`);
     
-    return this.invoiceService.bulkCreateInvoices(input);
+    // GraphQL resolver doesn't need progress callback (logs to console only)
+    return this.invoiceService.bulkCreateInvoices(input, undefined);
   }
 
   /**
