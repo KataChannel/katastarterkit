@@ -292,7 +292,7 @@ export class PostService {
     });
   }
 
-  private async updatePostTags(postId: string, tagSlugs: string[]): Promise<void> {
+  private async updatePostTags(postId: string, tagSlugs: string[], creatorId?: string): Promise<void> {
     // Remove existing tags
     await this.prisma.postTag.deleteMany({
       where: { postId },
@@ -306,10 +306,22 @@ export class PostService {
       });
 
       if (!tag) {
+        // Get post author if creator not provided
+        if (!creatorId) {
+          const post = await this.prisma.post.findUnique({
+            where: { id: postId },
+            select: { authorId: true }
+          });
+          creatorId = post?.authorId || 'system';
+        }
+
         tag = await this.prisma.tag.create({
           data: {
             name: tagSlug.charAt(0).toUpperCase() + tagSlug.slice(1),
             slug: tagSlug,
+            creator: {
+              connect: { id: creatorId }
+            }
           },
         });
       }

@@ -5,7 +5,8 @@ export class ConfigService {
   private static readonly DEFAULT_CONFIG: InvoiceConfig = {
     bearerToken: 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1OTAwNDI4OTA0IiwidHlwZSI6MiwiZXhwIjoxNzU4OTQ2MjgxLCJpYXQiOjE3NTg4NTk4ODF9.Uo17DIposfoivAM-o6BYe0gxa6YY2rIeWn1QhthrZitU6cHDFM5A70ngBeGoe1RUPz4R9_K_CjqkB3YbDhNkbA',
     pageSize: 50,
-    invoiceType: 'banra'
+    invoiceType: 'banra',
+    brandname: ''
   };
 
   /**
@@ -72,6 +73,13 @@ export class ConfigService {
   }
 
   /**
+   * Update brandname
+   */
+  static setBrandname(brandname: string): void {
+    this.setConfig({ brandname });
+  }
+
+  /**
    * Get API endpoint based on invoice type
    */
   static getApiEndpoint(type?: InvoiceType): string {
@@ -122,6 +130,11 @@ export class ConfigService {
     // Validate page size
     if (!config.pageSize || config.pageSize < 1 || config.pageSize > 1000) {
       config.pageSize = this.DEFAULT_CONFIG.pageSize;
+    }
+    
+    // Validate brandname (optional, but ensure it's a string)
+    if (config.brandname !== undefined && typeof config.brandname !== 'string') {
+      config.brandname = this.DEFAULT_CONFIG.brandname;
     }
     
     return config;

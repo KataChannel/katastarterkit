@@ -1,5 +1,6 @@
 import { InvoiceData, ExtListhoadon, ExtDetailhoadon } from '@/types/invoice';
 import InvoiceDetailApiService, { InvoiceDetailParams } from './invoiceDetailApi';
+import ConfigService from './configService';
 
 export interface DatabaseSyncResult {
   success: boolean;
@@ -45,6 +46,9 @@ export class InvoiceDatabaseService {
       // Additional fields - using correct database field names
       htttoan: apiInvoice.pthuc,
       gchu: apiInvoice.mtdieu,
+      
+      // Brand name from configuration
+      brandname: ConfigService.getConfig().brandname || '',
       
       // Meta fields
       ladhddt: true, // This is always electronic invoice
@@ -418,6 +422,9 @@ export class InvoiceDatabaseService {
         }
       `;
 
+      // Get brandname from ConfigService
+      const config = ConfigService.getConfig();
+
       // Prepare variables
       const variables = {
         input: {
@@ -428,6 +435,8 @@ export class InvoiceDatabaseService {
             tgtttbso: invoice.tgtttbso ? parseFloat(invoice.tgtttbso.toString()) : null,
             tgtthue: invoice.tgtthue ? parseFloat(invoice.tgtthue.toString()) : null,
             tgtcthue: invoice.tgtcthue ? parseFloat(invoice.tgtcthue.toString()) : null,
+            // Add brandname from configuration
+            brandname: config.brandname || '',
           })),
           skipExisting: true,
           includeDetails,

@@ -148,6 +148,7 @@ input CreateInvoiceDetailInput {
 }
 
 input CreateInvoiceInput {
+  brandname: String
   cqt: String
   gchu: String
   hthdon: String
@@ -281,6 +282,7 @@ type ExtDetailhoadon {
 }
 
 type ExtListhoadon {
+  brandname: String
   cqt: String
   createdAt: DateTime!
   details: [ExtDetailhoadon!]

@@ -78,7 +78,7 @@ export class InvoiceService {
     
     try {
       // Use provided bearerToken or fallback to environment config
-      const effectiveToken = bearerToken || this.configService.getBearerToken();
+      const effectiveToken = bearerToken || this.configService.getBearerTokenSafe();
       const config = this.configService.getInvoiceConfig();
       
       if (!effectiveToken || effectiveToken.length === 0) {
@@ -156,7 +156,7 @@ export class InvoiceService {
       }, 'InvoiceService');
       return [];
     } catch (error: any) {
-      const effectiveToken = bearerToken || this.configService.getBearerToken();
+      const effectiveToken = bearerToken || this.configService.getBearerTokenSafe();
       const tokenSource = bearerToken ? 'frontend' : 'environment';
       const hasValidToken = effectiveToken && effectiveToken.length > 0;
       
@@ -660,6 +660,9 @@ export class InvoiceService {
       hdTrung: toStringOrNull(data.hdTrung),
       hdcttchinh: toStringOrNull(data.hdcttchinh),
       
+      // Brand name field from config
+      brandname: toStringOrNull(data.brandname),
+      
       // Ensure other fields maintain their original types
       // Decimal fields should remain as numbers/decimals
       // DateTime fields should remain as Date objects
@@ -947,6 +950,14 @@ export class InvoiceService {
 
     // Get rate limiting configuration from config service
     const config = this.configService.getInvoiceConfig();
+    
+    // Inject brandname from configuration if not provided in each invoice
+    if (config.brandname) {
+      input.invoices = input.invoices.map(invoice => ({
+        ...invoice,
+        brandname: invoice.brandname || config.brandname
+      }));
+    }
     const BATCH_SIZE = config.batchSize;
     const DELAY_BETWEEN_BATCHES = config.delayBetweenBatches;
     const DELAY_BETWEEN_DETAIL_CALLS = config.delayBetweenDetailCalls;

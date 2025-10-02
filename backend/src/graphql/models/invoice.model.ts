@@ -144,6 +144,10 @@ export class ExtListhoadon {
   @Field(() => String, { nullable: true })
   msttcgp?: string;
 
+  // Brand name from configuration
+  @Field(() => String, { nullable: true })
+  brandname?: string;
+
   // Duplicate Handling
   @Field(() => String, { nullable: true })
   hdTrung?: string;

@@ -79,6 +79,10 @@ export class CreateInvoiceInput {
 
   @Field(() => Boolean, { nullable: true })
   ladhddt?: boolean;
+
+  // Brand name from configuration
+  @Field(() => String, { nullable: true })
+  brandname?: string;
 }
 
 @InputType()

@@ -185,6 +185,9 @@ export interface ExtListhoadon {
   isHDTrung?: boolean;
   hdcttchinh?: string;
   
+  // Brand name from configuration
+  brandname?: string;
+  
   // Timestamps
   createdAt: Date;
   updatedAt: Date;
@@ -281,6 +284,7 @@ export interface InvoiceConfig {
   bearerToken: string;
   pageSize: number;
   invoiceType: 'banra' | 'muavao';
+  brandname?: string;  // Tên nhãn hàng
   apiEndpoint?: string;
 }
 

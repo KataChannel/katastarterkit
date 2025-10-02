@@ -134,6 +134,23 @@ const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose, onConfigChan
             </p>
           </div>
 
+          {/* Brand Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tên nhãn hàng
+            </label>
+            <input
+              type="text"
+              value={config.brandname || ''}
+              onChange={(e) => setConfig({ ...config, brandname: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Nhập tên nhãn hàng"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Tên nhãn hàng sẽ được lưu cùng với thông tin hóa đơn
+            </p>
+          </div>
+
           {/* Page Size */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
