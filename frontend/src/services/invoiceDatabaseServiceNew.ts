@@ -55,6 +55,7 @@ class InvoiceDatabaseService {
     invoiceData: any[],
     detailsData?: any[],
     bearerToken?: string,
+    brandname?: string,
     onProgress?: (progress: { processed: number; total: number; current: string }) => void
   ): Promise<DatabaseSyncResult> {
     try {
@@ -105,6 +106,7 @@ class InvoiceDatabaseService {
           invoiceData,
           detailsData: detailsData || [],
           bearerToken: bearerToken || undefined,
+          brandname: brandname || undefined,
         }),
       });
 
@@ -315,6 +317,7 @@ export function useInvoiceDatabase() {
     invoiceData: any[], 
     detailsData?: any[], 
     bearerToken?: string,
+    brandname?: string,
     onProgress?: (progress: { processed: number; total: number; current: string }) => void
   ) => {
     setIsLoading(true);
@@ -325,6 +328,7 @@ export function useInvoiceDatabase() {
         invoiceData, 
         detailsData, 
         bearerToken,
+        brandname,
         onProgress
       );
       return result;

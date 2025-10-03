@@ -140,13 +140,16 @@ export class InvoiceController {
    */
   @Post('sync')
   @Roles($Enums.UserRoleType.ADMIN, $Enums.UserRoleType.USER)
-  async syncInvoices(@Body() body: { invoiceData: any[], detailsData: any[], bearerToken?: string }) {
+  async syncInvoices(@Body() body: { invoiceData: any[], detailsData: any[], bearerToken?: string, brandname?: string }) {
     try {
       const startTime = Date.now();
       this.logger.log('REST: Starting invoice sync from external API');
       this.logger.log(`Total invoices to sync: ${body.invoiceData?.length || 0}`);
+      if (body.brandname) {
+        this.logger.log(`Using brandname filter: ${body.brandname}`);
+      }
       
-      const { invoiceData, detailsData, bearerToken } = body;
+      const { invoiceData, detailsData, bearerToken, brandname } = body;
       
       // Convert API data to our input format
       const convertedInvoices: CreateInvoiceInput[] = invoiceData.map(invoice => ({
@@ -280,6 +283,7 @@ export class InvoiceController {
         shddauky: invoice.shddauky,
         shdkmdauky: invoice.shdkmdauky,
         nmsdt: invoice.nmsdt,
+        brandname: brandname || invoice.brandname,  // Use config brandname or preserve from API data
         // Add other fields as needed from the external API
       }));
 

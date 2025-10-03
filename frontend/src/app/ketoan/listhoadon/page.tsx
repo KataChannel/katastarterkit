@@ -135,12 +135,24 @@ const ListHoaDonPage = () => {
         return;
       }
 
-      // Fetch data from external API
+      // Fetch data from external API with controlled batch size
+      // Limit to 30 invoices per sync to prevent 429 errors and server overload
+      const SAFE_BATCH_SIZE = 50;
       const response: InvoiceApiResponse = await InvoiceApiService.fetchInvoices(filter, {
         page: 0,
-        size: 50, // Get more records for sync
+        size: SAFE_BATCH_SIZE, // Reduced from 50 to 30 to prevent server overload
         sort: `tdlap:desc,khmshdon:asc,shdon:desc`
       }, currentConfig.invoiceType);
+      
+      // Warn user if there are more invoices available
+      if (response.totalElements && response.totalElements > SAFE_BATCH_SIZE) {
+        const remaining = response.totalElements - SAFE_BATCH_SIZE;
+        toast(`⚠️ Có ${response.totalElements} hóa đơn. Đang đồng bộ ${SAFE_BATCH_SIZE} đầu tiên. Còn ${remaining} hóa đơn.`, {
+          duration: 5000,
+          icon: 'ℹ️'
+        });
+        console.log(`📊 Total invoices available: ${response.totalElements}, Syncing: ${SAFE_BATCH_SIZE}, Remaining: ${remaining}`);
+      }
 
       if (response.datas && response.datas.length > 0) {
         setSyncStatus(`Đang đồng bộ ${response.datas.length} hóa đơn vào database...`);
@@ -153,14 +165,16 @@ const ListHoaDonPage = () => {
           totalInvoices: response.datas.length,
         }));
         
-        // Get bearer token from config
+        // Get bearer token and brandname from config
         const bearerToken = currentConfig.bearerToken || undefined;
+        const brandname = currentConfig.brandname || undefined;
         
         // Sync to database with progress callback
         const syncResult = await syncData(
           response.datas, 
           [],
           bearerToken,
+          brandname,
           (progress: { processed: number; total: number; current: string }) => {
             setSyncProgress(prev => ({
               ...prev,
