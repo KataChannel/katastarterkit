@@ -831,15 +831,15 @@ export class InvoiceService {
       const { page = 0, size = 20, sortBy = 'ntao', sortOrder = 'desc', ...filters } = input;
 
       // Log input for debugging
-      // this.logger.debug('Invoice search input:', {
-      //   page,
-      //   size,
-      //   sortBy,
-      //   sortOrder,
-      //   fromDate: filters.fromDate?.toISOString(),
-      //   toDate: filters.toDate?.toISOString(),
-      //   otherFilters: { ...filters, fromDate: undefined, toDate: undefined }
-      // });
+      this.logger.debug('Invoice search input:', {
+        page,
+        size,
+        sortBy,
+        sortOrder,
+        fromDate: filters.fromDate?.toISOString(),
+        toDate: filters.toDate?.toISOString(),
+        otherFilters: { ...filters, fromDate: undefined, toDate: undefined }
+      });
 
       // Build where clause
       const where: any = {};
@@ -865,14 +865,20 @@ export class InvoiceService {
       }
 
       if (filters.fromDate || filters.toDate) {
-        where.ntao = {};
+        where.tdlap = {};
         
         if (filters.fromDate && !isNaN(filters.fromDate.getTime())) {
-          where.ntao.gte = filters.fromDate;
+          // Set to start of day
+          const startDate = new Date(filters.fromDate);
+          startDate.setHours(0, 0, 0, 0);
+          where.tdlap.gte = startDate;
         }
         
         if (filters.toDate && !isNaN(filters.toDate.getTime())) {
-          where.ntao.lte = filters.toDate;
+          // Set to end of day
+          const endDate = new Date(filters.toDate);
+          endDate.setHours(23, 59, 59, 999);
+          where.tdlap.lte = endDate;
         }
       }
 
@@ -892,6 +898,8 @@ export class InvoiceService {
         }),
         this.prisma.ext_listhoadon.count({ where }),
       ]);
+
+      this.logger.debug(`Found ${total} invoices matching criteria (page ${page}, size ${size})`);
 
       const totalPages = Math.ceil(total / size);
 

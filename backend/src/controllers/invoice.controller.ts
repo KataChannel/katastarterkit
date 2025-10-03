@@ -68,12 +68,25 @@ export class InvoiceController {
   @Roles($Enums.UserRoleType.ADMIN, $Enums.UserRoleType.USER)
   async searchInvoices(@Query() query: any) {
     try {
-      // Helper function to parse and validate dates
+      // Helper function to parse and validate dates (supports DD/MM/YYYY format)
       const parseDate = (dateString: string): Date | undefined => {
         if (!dateString || dateString.trim() === '') {
           return undefined;
         }
         
+        // Check if format is DD/MM/YYYY
+        if (dateString.includes('/')) {
+          const parts = dateString.split('/');
+          if (parts.length === 3) {
+            const [day, month, year] = parts;
+            // Create date as YYYY-MM-DD for proper parsing
+            const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            const parsed = new Date(isoDate);
+            return isNaN(parsed.getTime()) ? undefined : parsed;
+          }
+        }
+        
+        // Fallback to default Date parsing
         const parsed = new Date(dateString);
         return isNaN(parsed.getTime()) ? undefined : parsed;
       };
@@ -93,7 +106,16 @@ export class InvoiceController {
         toDate: parseDate(query.toDate),
       };
 
-      this.logger.log('REST: Searching invoices');
+      this.logger.log('REST: Searching invoices with params:', {
+        page: input.page,
+        size: input.size,
+        sortBy: input.sortBy,
+        sortOrder: input.sortOrder,
+        fromDate: input.fromDate?.toISOString(),
+        toDate: input.toDate?.toISOString(),
+        filters: { nbmst: query.nbmst, nmmst: query.nmmst, shdon: query.shdon }
+      });
+      
       return await this.invoiceService.searchInvoices(input);
     } catch (error) {
       this.logger.error('REST: Error searching invoices:', error.message);
