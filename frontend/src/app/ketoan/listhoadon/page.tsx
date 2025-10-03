@@ -275,6 +275,7 @@ const ListHoaDonPage = () => {
       };
 
       const result = await searchDatabaseInvoices(searchFilters);
+      console.log('Database search result:', result);
       
       setInvoices(result.invoices || []);
       setPagination({
@@ -332,10 +333,11 @@ const ListHoaDonPage = () => {
     toast.success(`Đã chuyển sang hóa đơn ${newConfig.invoiceType === 'banra' ? 'bán ra' : 'mua vào'}`);
   };
 
-  // Handle search form submission
+  // Handle search form submission - search directly from database
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchInvoices(0, true);
+    // Search directly from database with current filter params
+    fetchFromDatabase(0, true);
   };
 
   // Handle sorting
@@ -539,31 +541,34 @@ const ListHoaDonPage = () => {
             <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || dbLoading}
                 className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                title="Tìm kiếm hóa đơn trong database theo điều kiện lọc"
               >
                 <Search className="w-4 h-4 mr-2" />
-                {loading ? 'Đang tìm...' : 'Tìm kiếm'}
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => fetchInvoices(0, true)}
-                disabled={loading || isSyncing}
-                className="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Làm mới
+                {loading || dbLoading ? 'Đang tìm...' : 'Tìm trong Database'}
               </button>
               
               <button
                 type="button"
                 onClick={syncDataFromAPI}
-                disabled={loading || isSyncing || !filter.month || !filter.year}
+                disabled={loading || isSyncing || dbLoading || !filter.month || !filter.year}
                 className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                title="Đồng bộ hóa đơn từ API bên ngoài vào database"
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
                 {isSyncing ? 'Đang đồng bộ...' : 'Đồng bộ từ API'}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => fetchFromDatabase(0, true)}
+                disabled={loading || isSyncing || dbLoading}
+                className="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                title="Làm mới danh sách từ database"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Làm mới
               </button>
               
               <button
