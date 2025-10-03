@@ -15,7 +15,7 @@ import { useTasks, useSharedTasks, useTaskMutations } from '@/hooks/useTodos';
 import { useDynamicTasks } from '@/hooks/useDynamicTasks';
 import { TaskStatus, TaskPriority, TaskCategory, Task, CreateTaskInput, UpdateTaskInput } from '@/types/todo';
 import { TodoViewMode } from '@/types/todo-views';
-import { PlusIcon, ShareIcon, FolderIcon } from '@heroicons/react/24/outline';
+import { Plus, Share, Folder } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import toast from 'react-hot-toast';
@@ -249,7 +249,7 @@ export default function TodosPage() {
             onClick={() => handleTaskCreate()}
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
           >
-            <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+            <Plus className="-ml-1 mr-2 h-5 w-5" />
             Tạo Task
           </button>
         </div>
@@ -258,15 +258,15 @@ export default function TodosPage() {
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'all' | 'my' | 'shared')} className="mb-6">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="all" className="flex items-center gap-2">
-              <FolderIcon className="h-4 w-4" />
+              <Folder className="h-4 w-4" />
               Tất cả ({allTasks.length})
             </TabsTrigger>
             <TabsTrigger value="my" className="flex items-center gap-2">
-              <FolderIcon className="h-4 w-4" />
+              <Folder className="h-4 w-4" />
               Của tôi ({myTasks.length})
             </TabsTrigger>
             <TabsTrigger value="shared" className="flex items-center gap-2">
-              <ShareIcon className="h-4 w-4" />
+              <Share className="h-4 w-4" />
               Được chia sẻ ({processedSharedTasks.length})
             </TabsTrigger>
           </TabsList>
@@ -287,7 +287,7 @@ export default function TodosPage() {
 
           <TabsContent value="shared" className="mt-6">
             <div className="mb-4 flex items-center gap-2">
-              <ShareIcon className="h-5 w-5 text-blue-600" />
+              <Share className="h-5 w-5 text-blue-600" />
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Công việc được chia sẻ</h3>
                 <p className="text-sm text-gray-600">Các công việc mà người khác đã chia sẻ với bạn</p>
@@ -312,7 +312,7 @@ export default function TodosPage() {
                 <p className="text-sm font-medium text-gray-600">Tổng cộng</p>
                 <p className="text-2xl font-bold text-gray-900">{finalTasks.length}</p>
               </div>
-              <FolderIcon className="h-8 w-8 text-gray-400" />
+              <Folder className="h-8 w-8 text-gray-400" />
             </div>
           </div>
           
@@ -335,7 +335,7 @@ export default function TodosPage() {
                 <p className="text-2xl font-bold text-green-600">{processedSharedTasks.length}</p>
               </div>
               <div className="flex items-center">
-                <ShareIcon className="h-6 w-6 text-green-500" />
+                <Share className="h-6 w-6 text-green-500" />
               </div>
             </div>
           </div>

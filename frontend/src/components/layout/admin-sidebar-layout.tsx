@@ -27,9 +27,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { ScrollArea } from '@radix-ui/react-scroll-area';
 
 interface AdminSidebarLayoutProps {
   children: React.ReactNode;
@@ -86,11 +86,11 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
       {/* Sidebar for desktop */}
       <aside
         className={cn(
-          'hidden md:flex md:flex-col md:fixed md:inset-y-0 z-50 transition-all duration-300',
+          'hidden md:flex md:flex-col md:fixed md:inset-y-0 z-50 transition-all duration-300 bg-card border-r',
           collapsed ? 'md:w-16' : 'md:w-64'
         )}
       >
-        <div className="flex flex-col flex-1 min-h-0 border-r bg-card">
+        <div className="flex flex-col flex-1 min-h-0">
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-4 border-b">
             {!collapsed && (
@@ -170,7 +170,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 bg-popover border shadow-lg z-[100]">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
@@ -206,8 +206,8 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
           />
           
           {/* Sidebar */}
-          <aside className="fixed inset-y-0 left-0 w-64 z-50 md:hidden">
-            <div className="flex flex-col h-full bg-card border-r">
+          <aside className="fixed inset-y-0 left-0 w-64 z-50 md:hidden bg-card border-r shadow-xl">
+            <div className="flex flex-col h-full">
               {/* Logo */}
               <div className="flex items-center justify-between h-16 px-4 border-b">
                 <Link href="/admin/dashboard" className="flex items-center space-x-2">
@@ -268,10 +268,10 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                   </div>
                 </div>
                 <Button
-                  variant="outline"
+                  variant="destructive"
                   size="sm"
                   onClick={handleLogout}
-                  className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
+                  className="w-full justify-start"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
@@ -320,7 +320,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
-                  <span className="absolute top-1 right-1 h-2 w-2 bg-red-600 rounded-full" />
+                  <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
                 </Button>
 
                 {/* Mobile user menu */}
@@ -333,7 +333,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuContent align="end" className="w-56 bg-popover border shadow-lg z-[100]">
                       <DropdownMenuLabel>
                         <div className="flex flex-col">
                           <span className="text-sm font-medium">{user?.username || 'User'}</span>

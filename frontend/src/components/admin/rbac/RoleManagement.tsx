@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusIcon, PencilIcon, TrashIcon, UsersIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { Plus, Pencil, Trash2, Users, ShieldCheck } from 'lucide-react';
 import { useSearchRoles, useDeleteRole } from '../../../hooks/useRbac';
 import { Role, RoleSearchInput } from '../../../types/rbac.types';
 import AssignRolePermissionsModal from './AssignRolePermissionsModal';
@@ -102,7 +102,7 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
             onClick={() => setShowCreateModal(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+            <Plus className="-ml-1 mr-2 h-5 w-5" />
             New Role
           </button>
         </div>
@@ -183,7 +183,7 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">
                       <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                        <UsersIcon className="h-5 w-5 text-gray-600" />
+                        <Users className="h-5 w-5 text-gray-600" />
                       </div>
                     </div>
                     <div className="ml-4">
@@ -238,14 +238,14 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
                       className="text-blue-600 hover:text-blue-900"
                       title="Manage Permissions"
                     >
-                      <ShieldCheckIcon className="h-4 w-4" />
+                      <ShieldCheck className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setEditingRole(role)}
                       className="text-indigo-600 hover:text-indigo-900"
                       title="Edit Role"
                     >
-                      <PencilIcon className="h-4 w-4" />
+                      <Pencil className="h-4 w-4" />
                     </button>
                     {!role.isSystemRole && (
                       <button
@@ -253,7 +253,7 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
                         className="text-red-600 hover:text-red-900"
                         title="Delete Role"
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     )}
                   </div>

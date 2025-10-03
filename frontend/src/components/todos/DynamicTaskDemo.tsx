@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useDynamicTasks } from '@/hooks/useDynamicTasks';
 import { TaskCategory, TaskPriority, CreateTaskInput } from '@/types/todo';
-import { PlusIcon, DocumentDuplicateIcon, PlayIcon } from '@heroicons/react/24/outline';
+import { Plus, Copy, Play } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface DynamicTaskDemoProps {
@@ -218,7 +218,7 @@ export const DynamicTaskDemo: React.FC<DynamicTaskDemoProps> = ({ onTaskCreated 
             {isDemo ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
             ) : (
-              <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+              <Plus className="-ml-1 mr-2 h-5 w-5" />
             )}
             Single Task Demo
           </button>
@@ -232,7 +232,7 @@ export const DynamicTaskDemo: React.FC<DynamicTaskDemoProps> = ({ onTaskCreated 
             {isDemo ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
             ) : (
-              <DocumentDuplicateIcon className="-ml-1 mr-2 h-5 w-5" />
+              <Copy className="-ml-1 mr-2 h-5 w-5" />
             )}
             Bulk Tasks Demo (5)
           </button>
@@ -246,7 +246,7 @@ export const DynamicTaskDemo: React.FC<DynamicTaskDemoProps> = ({ onTaskCreated 
             {isDemo ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
             ) : (
-              <PlayIcon className="-ml-1 mr-2 h-5 w-5" />
+              <Play className="-ml-1 mr-2 h-5 w-5" />
             )}
             Quick Actions Demo
           </button>

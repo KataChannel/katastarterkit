@@ -1,5 +1,5 @@
 import React from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { X } from 'lucide-react';
 import { TaskCategory, TaskPriority, TaskStatus, TaskFilterInput } from '../../types/todo';
 
 interface TaskFiltersProps {
@@ -47,7 +47,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
             onClick={onClearFilters}
             className="flex items-center space-x-1 text-sm text-red-600 hover:text-red-800"
           >
-            <XMarkIcon className="w-4 h-4" />
+            <X className="w-4 h-4" />
             <span>Xóa tất cả</span>
           </button>
         )}
@@ -146,7 +146,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
                   onClick={() => onFilterChange('category', undefined)}
                   className="ml-2 hover:text-blue-900"
                 >
-                  <XMarkIcon className="w-3 h-3" />
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             )}
@@ -158,7 +158,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
                   onClick={() => onFilterChange('priority', undefined)}
                   className="ml-2 hover:text-blue-900"
                 >
-                  <XMarkIcon className="w-3 h-3" />
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             )}
@@ -170,7 +170,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
                   onClick={() => onFilterChange('status', undefined)}
                   className="ml-2 hover:text-blue-900"
                 >
-                  <XMarkIcon className="w-3 h-3" />
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             )}
@@ -182,7 +182,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
                   onClick={() => onFilterChange('dueAfter', undefined)}
                   className="ml-2 hover:text-blue-900"
                 >
-                  <XMarkIcon className="w-3 h-3" />
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             )}
@@ -194,7 +194,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
                   onClick={() => onFilterChange('dueBefore', undefined)}
                   className="ml-2 hover:text-blue-900"
                 >
-                  <XMarkIcon className="w-3 h-3" />
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             )}

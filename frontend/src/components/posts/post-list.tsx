@@ -4,13 +4,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
 import { 
-  ChatBubbleLeftIcon, 
-  HeartIcon, 
-  ShareIcon,
-  EyeIcon,
-  SparklesIcon 
-} from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+  MessageCircle, 
+  Heart, 
+  Share2,
+  Eye,
+  Sparkles 
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { 
   GET_POSTS, 
@@ -292,7 +291,7 @@ export function PostList({
                 {showAISummaries && summaries[post.id] && (
                   <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
                     <div className="flex items-center space-x-2 mb-2">
-                      <SparklesIcon className="h-5 w-5 text-purple-600" />
+                      <Sparkles className="h-5 w-5 text-purple-600" />
                       <span className="text-sm font-medium text-purple-800">AI Summary</span>
                     </div>
                     <p className="text-sm text-gray-700 mb-2">
@@ -316,9 +315,9 @@ export function PostList({
                       className="flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors"
                     >
                       {likedPosts.has(post.id) ? (
-                        <HeartSolidIcon className="h-5 w-5 text-red-500" />
+                        <Heart fill="currentColor" className="h-5 w-5 text-red-500" />
                       ) : (
-                        <HeartIcon className="h-5 w-5" />
+                        <Heart className="h-5 w-5" />
                       )}
                       <span className="text-sm" data-testid="like-count">Like</span>
                     </button>
@@ -326,7 +325,7 @@ export function PostList({
                     {/* Comments */}
                     <Link href={`/posts/${post.slug}#comments`}>
                       <div className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors cursor-pointer">
-                        <ChatBubbleLeftIcon className="h-5 w-5" />
+                        <MessageCircle className="h-5 w-5" />
                         <span className="text-sm" data-testid="comment-count">{post?._count?.comments}</span>
                       </div>
                     </Link>
@@ -337,7 +336,7 @@ export function PostList({
                       data-testid="share-button"
                       className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors"
                     >
-                      <ShareIcon className="h-5 w-5" />
+                      <Share2 className="h-5 w-5" />
                       <span className="text-sm">Share</span>
                     </button>
                   </div>
@@ -353,7 +352,7 @@ export function PostList({
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      <SparklesIcon className="h-4 w-4" />
+                      <Sparkles className="h-4 w-4" />
                       <span>{summaries[post.id] ? 'Hide Summary' : 'AI Summary'}</span>
                     </button>
                   )}
@@ -412,7 +411,7 @@ export function PostList({
         <div className="text-center py-12">
           <div className="max-w-md mx-auto">
             <div className="bg-gray-50 rounded-lg p-8">
-              <EyeIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <Eye className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No posts found
               </h3>

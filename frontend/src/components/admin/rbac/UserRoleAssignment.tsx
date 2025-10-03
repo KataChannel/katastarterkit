@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MagnifyingGlassIcon, UserIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { Search, User, ShieldCheck } from 'lucide-react';
 import { useSearchUsers } from '../../../lib/hooks/useUserManagement';
 import { useGetUserRolePermissions, useAssignUserRoles, useAssignUserPermissions } from '../../../hooks/useRbac';
 import UserRolePermissionModal from './UserRolePermissionModal';
@@ -47,7 +47,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ className = '' 
           {/* Search */}
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search users..."
@@ -84,7 +84,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ className = '' 
                           />
                         ) : (
                           <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                            <UserIcon className="h-5 w-5 text-gray-600" />
+                            <User className="h-5 w-5 text-gray-600" />
                           </div>
                         )}
                       </div>
@@ -140,7 +140,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ className = '' 
                   onClick={() => setSelectedUser(selectedUser)}
                   className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  <ShieldCheckIcon className="-ml-0.5 mr-2 h-4 w-4" />
+                  <ShieldCheck className="-ml-0.5 mr-2 h-4 w-4" />
                   Manage Access
                 </button>
               )}
@@ -152,7 +152,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ className = '' 
               <UserRolePermissionPreview user={selectedUser} />
             ) : (
               <div className="text-center py-12">
-                <UserIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <User className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No user selected</h3>
                 <p className="mt-1 text-sm text-gray-500">
                   Select a user from the list to view their role and permission details.
@@ -226,7 +226,7 @@ const UserRolePermissionPreview: React.FC<{ user: any }> = ({ user }) => {
               <div key={assignment.id} className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 h-6 w-6 bg-blue-100 rounded-full flex items-center justify-center">
-                    <UserIcon className="h-3 w-3 text-blue-600" />
+                    <User className="h-3 w-3 text-blue-600" />
                   </div>
                   <div className="ml-2">
                     <p className="text-sm text-gray-900">{assignment.role.displayName}</p>
@@ -261,7 +261,7 @@ const UserRolePermissionPreview: React.FC<{ user: any }> = ({ user }) => {
               <div key={permission.id} className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="flex-shrink-0 h-6 w-6 bg-green-100 rounded-full flex items-center justify-center">
-                    <ShieldCheckIcon className="h-3 w-3 text-green-600" />
+                    <ShieldCheck className="h-3 w-3 text-green-600" />
                   </div>
                   <div className="ml-2">
                     <p className="text-sm text-gray-900">{permission.permission.displayName}</p>

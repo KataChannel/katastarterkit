@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { X } from 'lucide-react';
 import { useCreateRole, useSearchPermissions } from '../../../hooks/useRbac';
 import { CreateRoleInput } from '../../../types/rbac.types';
 
@@ -78,7 +78,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                   onClick={onClose}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <XMarkIcon className="h-6 w-6" />
+                  <X className="h-6 w-6" />
                 </button>
               </div>
 

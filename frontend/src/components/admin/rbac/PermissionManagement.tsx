@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusIcon, PencilIcon, TrashIcon, KeyIcon } from '@heroicons/react/24/outline';
+import { Plus, Pencil, Trash2, Key } from 'lucide-react';
 import { useSearchPermissions, useDeletePermission } from '../../../hooks/useRbac';
 import { Permission, PermissionSearchInput } from '../../../types/rbac.types';
 import CreatePermissionModal from './CreatePermissionModal';
@@ -95,7 +95,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
             onClick={() => setShowCreateModal(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
+            <Plus className="-ml-1 mr-2 h-5 w-5" />
             New Permission
           </button>
         </div>
@@ -177,7 +177,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">
                       <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                        <KeyIcon className="h-5 w-5 text-gray-600" />
+                        <Key className="h-5 w-5 text-gray-600" />
                       </div>
                     </div>
                     <div className="ml-4">
@@ -232,7 +232,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
                       className="text-indigo-600 hover:text-indigo-900"
                       title="Edit Permission"
                     >
-                      <PencilIcon className="h-4 w-4" />
+                      <Pencil className="h-4 w-4" />
                     </button>
                     {!permission.isSystemPerm && (
                       <button
@@ -240,7 +240,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
                         className="text-red-600 hover:text-red-900"
                         title="Delete Permission"
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     )}
                   </div>
