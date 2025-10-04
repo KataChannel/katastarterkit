@@ -4,25 +4,75 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
 
-import { AffUser, AffCampaign, AffLink, AffPaymentRequest } from '../models/affiliate.model';
+import { AffUser, AffCampaign, AffLink, AffPaymentRequest, AffConversionsResponse, AffEarningsReport } from '../models/affiliate.model';
+import { $Enums } from '@prisma/client';
 import { 
   CreateAffUserInput, 
   UpdateAffUserInput,
-  CreateCampaignInput 
+  CreateCampaignInput,
+  UpdateCampaignInput,
+  CreateAffLinkInput,
+  CreatePaymentRequestInput,
+  CampaignSearchInput,
+  AffLinkSearchInput,
+  AffConversionSearchInput,
+  AffPaymentRequestSearchInput
 } from '../inputs/affiliate.input';
 
-import { AffiliateUserService } from '../../services/affiliate.service';
-import { AffiliateCampaignService } from '../../services/affiliate.service';
+import { AffiliateUserService, AffiliateCampaignService } from '../../services/affiliate.service';
 import { AffiliateTrackingService } from '../../services/affiliate-tracking.service';
 import { AffiliatePaymentService } from '../../services/affiliate-payment.service';
+
+// Helper function to map Decimal to number
+const mapDecimalFields = (data: any): any => {
+  if (!data) return data;
+  const mapped = { ...data };
+  
+  // Convert Decimal fields to numbers
+  if (mapped.commissionRate) mapped.commissionRate = Number(mapped.commissionRate);
+  if (mapped.fixedAmount) mapped.fixedAmount = Number(mapped.fixedAmount);
+  if (mapped.totalRevenue) mapped.totalRevenue = Number(mapped.totalRevenue);
+  if (mapped.totalCommission) mapped.totalCommission = Number(mapped.totalCommission);
+  if (mapped.totalEarnings) mapped.totalEarnings = Number(mapped.totalEarnings);
+  if (mapped.saleAmount) mapped.saleAmount = Number(mapped.saleAmount);
+  if (mapped.commission) mapped.commission = Number(mapped.commission);
+  if (mapped.amount) mapped.amount = Number(mapped.amount);
+  
+  return mapped;
+};
 
 @Resolver(() => AffUser)
 export class AffiliateUserResolver {
   constructor(private affiliateUserService: AffiliateUserService) {}
 
-  @Query(() => String)
-  affiliateUserTest() {
-    return 'Working';
+  @Mutation(() => AffUser, { name: 'createAffiliateUser' })
+  @UseGuards(JwtAuthGuard)
+  async createAffiliateUser(
+    @Args('input') input: CreateAffUserInput,
+    @Context() context: any,
+  ): Promise<AffUser> {
+    const userId = context.req.user.id;
+    const result = await this.affiliateUserService.createAffiliateUser(userId, input);
+    return mapDecimalFields(result);
+  }
+
+  @Query(() => AffUser, { name: 'affiliateUser', nullable: true })
+  @UseGuards(JwtAuthGuard)
+  async getAffiliateUser(@Context() context: any): Promise<AffUser | null> {
+    const userId = context.req.user.id;
+    const result = await this.affiliateUserService.getAffiliateUser(userId);
+    return result ? mapDecimalFields(result) : null;
+  }
+
+  @Mutation(() => AffUser, { name: 'updateAffiliateUser' })
+  @UseGuards(JwtAuthGuard)
+  async updateAffiliateUser(
+    @Args('input') input: UpdateAffUserInput,
+    @Context() context: any,
+  ): Promise<AffUser> {
+    const userId = context.req.user.id;
+    const result = await this.affiliateUserService.updateAffiliateUser(userId, input);
+    return mapDecimalFields(result);
   }
 }
 
@@ -30,9 +80,45 @@ export class AffiliateUserResolver {
 export class AffiliateCampaignResolver {
   constructor(private campaignService: AffiliateCampaignService) {}
 
-  @Query(() => String)
-  affiliateCampaignTest() {
-    return 'Working';
+  @Mutation(() => AffCampaign, { name: 'createAffiliateCampaign' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN)
+  async createCampaign(
+    @Args('input') input: CreateCampaignInput,
+    @Context() context: any,
+  ): Promise<AffCampaign> {
+    const userId = context.req.user.id;
+    const result = await this.campaignService.createCampaign(userId, input);
+    return mapDecimalFields(result);
+  }
+
+  @Query(() => [AffCampaign], { name: 'affiliateCampaigns' })
+  @UseGuards(JwtAuthGuard)
+  async getCampaigns(
+    @Args('search', { nullable: true }) search?: CampaignSearchInput,
+  ): Promise<AffCampaign[]> {
+    const results = await this.campaignService.searchCampaigns(search);
+    return results.campaigns.map(mapDecimalFields);
+  }
+
+  @Query(() => AffCampaign, { name: 'affiliateCampaign', nullable: true })
+  @UseGuards(JwtAuthGuard)
+  async getCampaign(@Args('id') id: string): Promise<AffCampaign | null> {
+    const result = await this.campaignService.getCampaign(id);
+    return result ? mapDecimalFields(result) : null;
+  }
+
+  @Mutation(() => AffCampaign, { name: 'updateAffiliateCampaign' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN)
+  async updateCampaign(
+    @Args('id') id: string,
+    @Args('input') input: UpdateCampaignInput,
+    @Context() context: any,
+  ): Promise<AffCampaign> {
+    const userId = context.req.user.id;
+    const result = await this.campaignService.updateCampaign(id, userId, input);
+    return mapDecimalFields(result);
   }
 }
 
@@ -40,9 +126,43 @@ export class AffiliateCampaignResolver {
 export class AffiliateTrackingResolver {
   constructor(private trackingService: AffiliateTrackingService) {}
 
-  @Query(() => String)
-  affiliateTrackingTest() {
-    return 'Working';
+  @Mutation(() => AffLink, { name: 'createAffiliateLink' })
+  @UseGuards(JwtAuthGuard)
+  async createLink(
+    @Args('input') input: CreateAffLinkInput,
+    @Context() context: any,
+  ): Promise<AffLink> {
+    const userId = context.req.user.id;
+    const result = await this.trackingService.createAffiliateLink(userId, input);
+    return mapDecimalFields(result);
+  }
+
+  @Query(() => [AffLink], { name: 'affiliateLinks' })
+  @UseGuards(JwtAuthGuard)
+  async getLinks(
+    @Args('search', { nullable: true }) search?: AffLinkSearchInput,
+    @Context() context?: any
+  ): Promise<AffLink[]> {
+    const userId = context?.req?.user?.id;
+    const results = await this.trackingService.getAffiliateLinks(userId, search);
+    return results.links.map(mapDecimalFields);
+  }
+
+  @Query(() => AffConversionsResponse, { name: 'affiliateConversions' })
+  @UseGuards(JwtAuthGuard)
+  async getConversions(
+    @Args('search', { nullable: true }) search?: AffConversionSearchInput,
+    @Context() context?: any
+  ): Promise<AffConversionsResponse> {
+    const userId = context?.req?.user?.id;
+    const results = await this.trackingService.getConversions(search, undefined, userId);
+    return {
+      conversions: results.conversions.map(mapDecimalFields),
+      total: results.total,
+      page: results.page,
+      size: results.size,
+      totalPages: results.totalPages
+    };
   }
 }
 
@@ -50,8 +170,51 @@ export class AffiliateTrackingResolver {
 export class AffiliatePaymentResolver {
   constructor(private paymentService: AffiliatePaymentService) {}
 
-  @Query(() => String)
-  affiliatePaymentTest() {
-    return 'Working';
+  @Mutation(() => AffPaymentRequest, { name: 'createPaymentRequest' })
+  @UseGuards(JwtAuthGuard)
+  async createPaymentRequest(
+    @Args('input') input: CreatePaymentRequestInput,
+    @Context() context: any,
+  ): Promise<AffPaymentRequest> {
+    const userId = context.req.user.id;
+    const result = await this.paymentService.createPaymentRequest(userId, input);
+    return mapDecimalFields(result);
+  }
+
+  @Query(() => [AffPaymentRequest], { name: 'affiliatePaymentRequests' })
+  @UseGuards(JwtAuthGuard)
+  async getPaymentRequests(
+    @Args('search', { nullable: true }) search?: AffPaymentRequestSearchInput,
+    @Context() context?: any
+  ): Promise<AffPaymentRequest[]> {
+    const userId = context?.req?.user?.id;
+    const results = await this.paymentService.getPaymentRequests(search, undefined, userId);
+    return results.requests.map(mapDecimalFields);
+  }
+
+  @Query(() => AffEarningsReport, { name: 'affiliateEarningsReport' })
+  @UseGuards(JwtAuthGuard)
+  async getEarningsReport(
+    @Args('startDate', { nullable: true }) startDate?: Date,
+    @Args('endDate', { nullable: true }) endDate?: Date,
+    @Context() context?: any
+  ): Promise<AffEarningsReport> {
+    const userId = context?.req?.user?.id;
+    const dateRange = startDate && endDate ? { startDate, endDate } : undefined;
+    const result = await this.paymentService.getAffiliateEarnings(userId, dateRange);
+    return mapDecimalFields(result);
+  }
+
+  @Mutation(() => AffPaymentRequest, { name: 'processPaymentRequest' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.ADMIN)
+  async processPaymentRequest(
+    @Args('id') id: string,
+    @Args('status') status: string,
+    @Context() context: any,
+  ): Promise<AffPaymentRequest> {
+    const adminId = context.req.user.id;
+    const result = await this.paymentService.processPaymentRequest(adminId, { paymentRequestId: id, status: status as any });
+    return mapDecimalFields(result);
   }
 }

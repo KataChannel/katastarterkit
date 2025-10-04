@@ -546,6 +546,54 @@ export class AffCampaignSearchResult {
 }
 
 @ObjectType()
+export class AffConversionsResponse {
+  @Field(() => [AffConversion])
+  conversions: AffConversion[];
+
+  @Field(() => Int)
+  total: number;
+
+  @Field(() => Int)
+  page: number;
+
+  @Field(() => Int)
+  size: number;
+
+  @Field(() => Int)
+  totalPages: number;
+}
+
+@ObjectType()
+export class AffEarningsReport {
+  @Field(() => Float)
+  totalEarnings: number;
+
+  @Field(() => Int)
+  totalConversions: number;
+
+  @Field(() => Float)
+  approvedEarnings: number;
+
+  @Field(() => Int)
+  approvedConversions: number;
+
+  @Field(() => Float)
+  paidEarnings: number;
+
+  @Field(() => Int)
+  paidConversions: number;
+
+  @Field(() => Float)
+  pendingEarnings: number;
+
+  @Field(() => Int)
+  pendingConversions: number;
+
+  @Field(() => Float)
+  availableForWithdrawal: number;
+}
+
+@ObjectType()
 export class AffTrackingUrl {
   @Field()
   trackingUrl: string;

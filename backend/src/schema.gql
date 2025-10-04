@@ -28,6 +28,260 @@ input AdminUpdateUserInput {
   username: String
 }
 
+type AffCampaign {
+  affiliates: [AffCampaignAffiliate!]
+  commissionRate: Float!
+  commissionType: String!
+  conversions: [AffConversion!]
+  createdAt: DateTime!
+  creator: AffUser
+  creatorId: String!
+  description: String
+  endDate: DateTime
+  fixedAmount: Float
+  id: ID!
+  links: [AffLink!]
+  maxAffiliates: Int
+  name: String!
+  productImage: String
+  productName: String!
+  productUrl: String!
+  requireApproval: Boolean!
+  startDate: DateTime
+  status: AffCampaignStatus!
+  totalClicks: Int!
+  totalCommission: Float!
+  totalConversions: Int!
+  totalRevenue: Float!
+  updatedAt: DateTime!
+}
+
+type AffCampaignAffiliate {
+  affiliate: AffUser
+  affiliateId: String!
+  appliedAt: DateTime!
+  approvedAt: DateTime
+  campaign: AffCampaign
+  campaignId: String!
+  createdAt: DateTime!
+  id: ID!
+  reason: String
+  rejectedAt: DateTime
+  status: String!
+  totalClicks: Int!
+  totalConversions: Int!
+  totalEarnings: Float!
+  updatedAt: DateTime!
+}
+
+"""Affiliate campaign status"""
+enum AffCampaignStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+  DRAFT
+  PAUSED
+}
+
+type AffClick {
+  browser: String
+  city: String
+  clickedAt: DateTime!
+  country: String
+  device: String
+  id: ID!
+  ipAddress: String
+  link: AffLink
+  linkId: String!
+  referer: String
+  sessionId: String
+  userAgent: String
+  visitorId: String
+}
+
+type AffConversion {
+  affiliate: AffUser
+  affiliateId: String!
+  approvedAt: DateTime
+  campaign: AffCampaign
+  campaignId: String!
+  clickId: String
+  commission: Float!
+  conversionType: String!
+  convertedAt: DateTime!
+  createdAt: DateTime!
+  currency: String!
+  customerEmail: String
+  id: ID!
+  link: AffLink
+  linkId: String!
+  notes: String
+  orderId: String
+  paidAt: DateTime
+  rejectedAt: DateTime
+  saleAmount: Float!
+  status: AffConversionStatus!
+  updatedAt: DateTime!
+  validatedBy: String
+}
+
+input AffConversionSearchInput {
+  affiliateId: String
+  campaignId: String
+  dateRange: AffDateRangeInput
+  pagination: AffPaginationInput
+  status: AffConversionStatus
+}
+
+"""Affiliate conversion status"""
+enum AffConversionStatus {
+  APPROVED
+  PAID
+  PENDING
+  REJECTED
+}
+
+type AffConversionsResponse {
+  conversions: [AffConversion!]!
+  page: Int!
+  size: Int!
+  total: Int!
+  totalPages: Int!
+}
+
+input AffDateRangeInput {
+  endDate: DateTime!
+  startDate: DateTime!
+}
+
+type AffEarningsReport {
+  approvedConversions: Int!
+  approvedEarnings: Float!
+  availableForWithdrawal: Float!
+  paidConversions: Int!
+  paidEarnings: Float!
+  pendingConversions: Int!
+  pendingEarnings: Float!
+  totalConversions: Int!
+  totalEarnings: Float!
+}
+
+type AffLink {
+  affiliate: AffUser
+  affiliateId: String!
+  campaign: AffCampaign
+  campaignId: String!
+  clicks: [AffClick!]
+  conversions: [AffConversion!]
+  createdAt: DateTime!
+  expiresAt: DateTime
+  id: ID!
+  isActive: Boolean!
+  originalUrl: String!
+  shortUrl: String
+  totalClicks: Int!
+  totalConversions: Int!
+  totalEarnings: Float!
+  trackingCode: String!
+  updatedAt: DateTime!
+  utmCampaign: String
+  utmContent: String
+  utmMedium: String
+  utmSource: String
+}
+
+input AffLinkSearchInput {
+  campaignId: String
+  isActive: Boolean
+  pagination: AffPaginationInput
+}
+
+input AffPaginationInput {
+  page: Int! = 1
+  size: Int! = 20
+  sortBy: String
+  sortOrder: String
+}
+
+"""Affiliate payment methods"""
+enum AffPaymentMethod {
+  BANK_TRANSFER
+  MOMO
+  OTHER
+  PAYPAL
+  ZALOPAY
+}
+
+type AffPaymentRequest {
+  accountDetails: String
+  adminNotes: String
+  affiliate: AffUser
+  affiliateId: String!
+  amount: Float!
+  completedAt: DateTime
+  createdAt: DateTime!
+  currency: String!
+  failedAt: DateTime
+  id: ID!
+  notes: String
+  paymentMethod: AffPaymentMethod!
+  periodEnd: DateTime!
+  periodStart: DateTime!
+  processedAt: DateTime
+  processedBy: String
+  requestedAt: DateTime!
+  status: AffPaymentStatus!
+  transactionId: String
+  updatedAt: DateTime!
+}
+
+input AffPaymentRequestSearchInput {
+  affiliateId: String
+  dateRange: AffDateRangeInput
+  pagination: AffPaginationInput
+  status: AffPaymentStatus
+}
+
+"""Affiliate payment status"""
+enum AffPaymentStatus {
+  CANCELLED
+  COMPLETED
+  FAILED
+  PENDING
+  PROCESSING
+}
+
+type AffUser {
+  bankAccount: String
+  businessType: String
+  campaignJoins: [AffCampaignAffiliate!]
+  campaignsCreated: [AffCampaign!]
+  companyName: String
+  conversions: [AffConversion!]
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  isActive: Boolean!
+  joinedAt: DateTime!
+  lastActiveAt: DateTime
+  links: [AffLink!]
+  paymentMethod: AffPaymentMethod
+  paymentRequests: [AffPaymentRequest!]
+  paypalEmail: String
+  role: AffUserRole!
+  taxId: String
+  updatedAt: DateTime!
+  userId: String!
+  website: String
+}
+
+"""Affiliate user roles"""
+enum AffUserRole {
+  ADMIN
+  AFFILIATE
+  MERCHANT
+}
+
 input AssignRolePermissionInput {
   conditions: JSON
   effect: String! = "allow"
@@ -115,6 +369,18 @@ type BulkUserActionResult {
   success: Boolean!
 }
 
+input CampaignSearchInput {
+  creatorId: String
+  maxCommissionRate: Float
+  minCommissionRate: Float
+  page: Int! = 1
+  query: String
+  size: Int! = 20
+  sortBy: String
+  sortOrder: String
+  status: AffCampaignStatus
+}
+
 type Comment {
   content: String!
   createdAt: DateTime!
@@ -127,6 +393,42 @@ type Comment {
   updatedAt: DateTime!
   user: User!
   userId: String!
+}
+
+input CreateAffLinkInput {
+  campaignId: String!
+  expiresAt: DateTime
+  utmCampaign: String
+  utmContent: String
+  utmMedium: String
+  utmSource: String
+}
+
+input CreateAffUserInput {
+  bankAccount: String
+  businessType: String
+  companyName: String
+  description: String
+  paymentMethod: AffPaymentMethod
+  paypalEmail: String
+  role: AffUserRole!
+  taxId: String
+  website: String
+}
+
+input CreateCampaignInput {
+  commissionRate: Float!
+  commissionType: String! = "percentage"
+  description: String
+  endDate: DateTime
+  fixedAmount: Float
+  maxAffiliates: Int
+  name: String!
+  productImage: String
+  productName: String!
+  productUrl: String!
+  requireApproval: Boolean! = true
+  startDate: DateTime
 }
 
 input CreateCommentInput {
@@ -220,6 +522,15 @@ input CreatePageInput {
   slug: String!
   status: PageStatus! = DRAFT
   title: String!
+}
+
+input CreatePaymentRequestInput {
+  accountDetails: String
+  amount: Float!
+  notes: String
+  paymentMethod: AffPaymentMethod!
+  periodEnd: DateTime!
+  periodStart: DateTime!
 }
 
 input CreatePermissionInput {
@@ -480,6 +791,9 @@ type Mutation {
   assignUserRoles(input: AssignUserRoleInput!): Boolean!
   bulkCreateInvoices(input: BulkInvoiceInput!): DatabaseSyncResult!
   bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!
+  createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
+  createAffiliateLink(input: CreateAffLinkInput!): AffLink!
+  createAffiliateUser(input: CreateAffUserInput!): AffUser!
   createComment(input: CreateCommentInput!): Comment!
   createInvoice(input: CreateInvoiceInput!): ExtListhoadon!
   createInvoiceDetails(details: [CreateInvoiceDetailInput!]!, invoiceId: ID!): [ExtDetailhoadon!]!
@@ -491,6 +805,7 @@ type Mutation {
   """Create a single record with Prisma-like syntax"""
   createOne(input: UnifiedCreateInput!, modelName: String!): JSONObject!
   createPage(input: CreatePageInput!): Page!
+  createPaymentRequest(input: CreatePaymentRequestInput!): AffPaymentRequest!
   createPermission(input: CreatePermissionInput!): Permission!
   createPost(input: CreatePostInput!): Post!
   createRole(input: CreateRoleInput!): Role!
@@ -524,6 +839,7 @@ type Mutation {
   loginWithGoogle(input: SocialLoginInput!): AuthResponse!
   loginWithPhone(input: PhoneLoginInput!): AuthResponse!
   moveMenu(menuId: ID!, newOrder: Float, newParentId: ID): MenuResponseDto!
+  processPaymentRequest(id: String!, status: String!): AffPaymentRequest!
   publishPost(id: String!): Post!
   registerUser(input: RegisterUserInput!): AuthResponse!
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
@@ -531,6 +847,8 @@ type Mutation {
   shareTask(input: ShareTaskInput!): TaskShare!
   toggleMenuActive(id: ID!): MenuResponseDto!
   toggleMenuVisibility(id: ID!): MenuResponseDto!
+  updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
+  updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
   updateInvoice(id: ID!, input: CreateInvoiceInput!): ExtListhoadon!
 
@@ -725,6 +1043,14 @@ enum PostStatus {
 }
 
 type Query {
+  affiliateCampaign(id: String!): AffCampaign
+  affiliateCampaigns(search: CampaignSearchInput): [AffCampaign!]!
+  affiliateConversions(search: AffConversionSearchInput): AffConversionsResponse!
+  affiliateEarningsReport(endDate: DateTime, startDate: DateTime): AffEarningsReport!
+  affiliateLinks(search: AffLinkSearchInput): [AffLink!]!
+  affiliatePaymentRequests(search: AffPaymentRequestSearchInput): [AffPaymentRequest!]!
+  affiliateUser: AffUser
+
   """Count records matching the criteria"""
   count(modelName: String!, where: JSONObject): Float!
 
@@ -1113,6 +1439,34 @@ input UnifiedUpdateInput {
 
   """Select specific fields from result (Prisma select clause)"""
   select: JSONObject
+}
+
+input UpdateAffUserInput {
+  bankAccount: String
+  businessType: String
+  companyName: String
+  description: String
+  isActive: Boolean
+  paymentMethod: AffPaymentMethod
+  paypalEmail: String
+  taxId: String
+  website: String
+}
+
+input UpdateCampaignInput {
+  commissionRate: Float
+  commissionType: String
+  description: String
+  endDate: DateTime
+  fixedAmount: Float
+  maxAffiliates: Int
+  name: String
+  productImage: String
+  productName: String
+  productUrl: String
+  requireApproval: Boolean
+  startDate: DateTime
+  status: AffCampaignStatus
 }
 
 input UpdateCommentInput {
