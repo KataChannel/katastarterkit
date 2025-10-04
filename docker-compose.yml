@@ -54,6 +54,32 @@ services:
       timeout: 10s
       retries: 5
 
+  # Elasticsearch for Search
+  elasticsearch:
+    image: ${ELASTICSEARCH_IMAGE:-docker.elastic.co/elasticsearch/elasticsearch:8.15.0}
+    container_name: ${ELASTICSEARCH_CONTAINER_NAME:-katacore-elasticsearch}
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    ports:
+      - "${ELASTICSEARCH_PORT:-9200}:9200"
+      - "${ELASTICSEARCH_TRANSPORT_PORT:-9300}:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - katacore-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
   # Minio Object Storage with HTTPS
   minio:
     image: ${MINIO_IMAGE:-minio/minio:RELEASE.2025-07-23T15-54-02Z}
@@ -146,6 +172,8 @@ volumes:
   pgadmin_data:
     driver: local
   redis_data:
+    driver: local
+  elasticsearch_data:
     driver: local
   minio_data:
     driver: local

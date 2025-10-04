@@ -48,6 +48,7 @@ export class ElasticsearchService {
   private client: Client;
   private readonly logger = new Logger(ElasticsearchService.name);
   private readonly indexPrefix: string;
+  private isConnected: boolean = false;
 
   constructor(private configService: ConfigService) {
     this.indexPrefix = this.configService.get('ELASTICSEARCH_INDEX_PREFIX', 'katacore');
@@ -72,10 +73,18 @@ export class ElasticsearchService {
     try {
       await this.client.ping();
       this.logger.log('Elasticsearch client connected successfully');
+      this.isConnected = true;
       await this.createIndicesIfNotExist();
     } catch (error) {
-      this.logger.error('Failed to connect to Elasticsearch:', error);
+      this.logger.warn('Failed to connect to Elasticsearch:', error.message);
+      this.logger.warn('Search functionality will be limited without Elasticsearch');
+      this.isConnected = false;
+      // Don't throw error - allow app to start without Elasticsearch
     }
+  }
+
+  public getConnectionStatus(): boolean {
+    return this.isConnected;
   }
 
   private async createIndicesIfNotExist() {
