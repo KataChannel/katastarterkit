@@ -8,10 +8,10 @@ import {
   usePWANetworkStatus,
   usePWAInstallation,
   usePWASync
-} from '../../components/pwa';
-import { usePWA } from '../../hooks/usePWA';
-import { offlineDataService } from '../../services/offlineDataService';
-import { Task } from '../../types/task';
+} from '@/components/pwa';
+import { usePWA } from '@/hooks/usePWA';
+import { offlineDataService } from '@/services/offlineDataService';
+import { Task } from '@/types/task';
 
 export default function PWADemoPage() {
   const [tasks, setTasks] = useState<Task[]>([]);

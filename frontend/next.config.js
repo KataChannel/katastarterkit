@@ -8,8 +8,12 @@ const nextConfig = {
       '@headlessui/react',
       '@apollo/client',
       'react-hook-form',
-      'react-hot-toast'
+      'react-hot-toast',
+      'lucide-react',
+      '@radix-ui/react-icons'
     ],
+    // Enable React Server Components optimizations
+    serverComponentsExternalPackages: ['graphql'],
   },
   images: {
     domains: ['localhost', 'minio'],
