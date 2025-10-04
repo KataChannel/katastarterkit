@@ -35,7 +35,10 @@ export function AdminHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-8">
-            <Link href="/admin/dashboard" className="text-2xl font-bold text-white">
+            <Link
+              href="/admin/dashboard"
+              className="text-2xl font-bold text-white"
+              legacyBehavior>
               KataCore <span className="text-blue-400">Admin</span>
             </Link>
             
@@ -53,7 +56,7 @@ export function AdminHeader() {
                         : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                       }
                     `}
-                  >
+                    legacyBehavior>
                     <item.icon className="h-4 w-4" />
                     <span>{item.name}</span>
                   </Link>

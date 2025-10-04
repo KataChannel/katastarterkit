@@ -175,10 +175,10 @@ export default function TaskDetailPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center space-x-4">
-              <Link 
+              <Link
                 href="/todos"
                 className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
-              >
+                legacyBehavior>
                 <ArrowLeftIcon className="w-5 h-5" />
                 <span>Quay lại</span>
               </Link>
@@ -206,7 +206,6 @@ export default function TaskDetailPage() {
           </div>
         </div>
       </div>
-
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

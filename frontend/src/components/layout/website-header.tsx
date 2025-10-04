@@ -38,7 +38,7 @@ const ListItem = React.forwardRef<
             className
           )}
           {...props}
-        >
+          legacyBehavior>
           <div className="text-sm font-medium leading-none">{title}</div>
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
@@ -46,7 +46,7 @@ const ListItem = React.forwardRef<
         </Link>
       </NavigationMenuLink>
     </li>
-  )
+  );
 });
 ListItem.displayName = "ListItem";
 
@@ -180,11 +180,13 @@ export function WebsiteHeader() {
           ))}
         </div>
       </div>
-
       <div className="w-full mx-auto">
         <div className="bg-[#57A345] grid grid-cols-6 items-center py-2">
           <div className="bg-white col-span-2 flex justify-end p-4 rounded-e-full pe-8">
-            <Link href="/website" className="text-2xl font-bold text-blue-600">
+            <Link
+              href="/website"
+              className="text-2xl font-bold text-blue-600"
+              legacyBehavior>
               <img src="https://shop.rausachtrangia.com/assets/images/logo-full.png" alt="Logo" className="max-h-20" />
             </Link>
           </div>  

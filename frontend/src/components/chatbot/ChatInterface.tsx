@@ -123,7 +123,6 @@ export function ChatInterface({ chatbot, onBack }: ChatInterfaceProps) {
           </div>
         </div>
       </div>
-
       {/* Chat Area */}
       <div className="flex-1 flex flex-col">
         {currentConversation ? (
@@ -132,7 +131,7 @@ export function ChatInterface({ chatbot, onBack }: ChatInterfaceProps) {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {currentConversation.messages.length === 0 ? (
                 /* New Conversation State */
-                <div className="flex items-center justify-center h-full">
+                (<div className="flex items-center justify-center h-full">
                   <div className="text-center max-w-md">
                     <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                       <MessageSquare className="h-6 w-6 text-blue-600" />
@@ -144,10 +143,10 @@ export function ChatInterface({ chatbot, onBack }: ChatInterfaceProps) {
                       Start chatting with {chatbot.name}. Type your message below to begin.
                     </p>
                   </div>
-                </div>
+                </div>)
               ) : (
                 /* Existing Messages */
-                currentConversation.messages.map((msg) => (
+                (currentConversation.messages.map((msg) => (
                   <div
                     key={msg.id}
                     className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -179,7 +178,7 @@ export function ChatInterface({ chatbot, onBack }: ChatInterfaceProps) {
                       </div>
                     )}
                   </div>
-                ))
+                )))
               )}
               
               {sending && (
@@ -228,7 +227,7 @@ export function ChatInterface({ chatbot, onBack }: ChatInterfaceProps) {
           </>
         ) : (
           /* Welcome Screen */
-          <div className="flex-1 flex items-center justify-center p-8">
+          (<div className="flex-1 flex items-center justify-center p-8">
             <div className="text-center max-w-md">
               <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Bot className="h-8 w-8 text-blue-600" />
@@ -247,7 +246,7 @@ export function ChatInterface({ chatbot, onBack }: ChatInterfaceProps) {
                 Start New Conversation
               </button>
             </div>
-          </div>
+          </div>)
         )}
       </div>
     </div>

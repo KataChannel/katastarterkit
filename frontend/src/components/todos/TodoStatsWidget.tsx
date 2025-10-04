@@ -95,10 +95,10 @@ const TodoStatsWidget: React.FC<TodoStatsWidgetProps> = ({ className = '' }) => 
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-900">Thống kê Task</h3>
-          <Link 
+          <Link
             href="/todos"
             className="text-sm text-blue-600 hover:text-blue-500 flex items-center space-x-1"
-          >
+            legacyBehavior>
             <span>Xem tất cả</span>
             <ArrowRightIcon className="w-4 h-4" />
           </Link>

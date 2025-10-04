@@ -56,7 +56,6 @@ export function SearchResults({
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
         <h3 className="text-sm font-medium text-gray-900 mb-4">Filter Results</h3>
-        
         <div className="space-y-4">
           {Object.entries(results.facets).map(([facetKey, facetValues]) => (
             <div key={facetKey}>

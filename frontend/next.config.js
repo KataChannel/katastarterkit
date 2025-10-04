@@ -12,9 +12,9 @@ const nextConfig = {
       'lucide-react',
       '@radix-ui/react-icons'
     ],
-    // Enable React Server Components optimizations
-    serverComponentsExternalPackages: ['graphql'],
   },
+  // Moved from experimental.serverComponentsExternalPackages
+  serverExternalPackages: ['graphql'],
   images: {
     domains: ['localhost', 'minio'],
     remotePatterns: [

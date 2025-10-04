@@ -74,7 +74,10 @@ export function SiteFooter() {
                 <ul className="mt-4 space-y-4">
                   {footerLinks.product.map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href} className="text-base text-gray-400 hover:text-white transition-colors">
+                      <Link
+                        href={item.href}
+                        className="text-base text-gray-400 hover:text-white transition-colors"
+                        legacyBehavior>
                         {item.name}
                       </Link>
                     </li>
@@ -88,7 +91,10 @@ export function SiteFooter() {
                 <ul className="mt-4 space-y-4">
                   {footerLinks.support.map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href} className="text-base text-gray-400 hover:text-white transition-colors">
+                      <Link
+                        href={item.href}
+                        className="text-base text-gray-400 hover:text-white transition-colors"
+                        legacyBehavior>
                         {item.name}
                       </Link>
                     </li>
@@ -104,7 +110,10 @@ export function SiteFooter() {
                 <ul className="mt-4 space-y-4">
                   {footerLinks.company.map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href} className="text-base text-gray-400 hover:text-white transition-colors">
+                      <Link
+                        href={item.href}
+                        className="text-base text-gray-400 hover:text-white transition-colors"
+                        legacyBehavior>
                         {item.name}
                       </Link>
                     </li>
@@ -118,7 +127,10 @@ export function SiteFooter() {
                 <ul className="mt-4 space-y-4">
                   {footerLinks.legal.map((item) => (
                     <li key={item.name}>
-                      <Link href={item.href} className="text-base text-gray-400 hover:text-white transition-colors">
+                      <Link
+                        href={item.href}
+                        className="text-base text-gray-400 hover:text-white transition-colors"
+                        legacyBehavior>
                         {item.name}
                       </Link>
                     </li>

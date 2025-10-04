@@ -451,7 +451,7 @@ class OfflineDataService {
     pendingActions: number;
     isOnline: boolean;
   }> {
-    const lastSync = await this.getSyncMeta('lastSync') || 0;
+    const lastSync = (await this.getSyncMeta('lastSync')) || 0;
     const actions = await this.getPendingActions();
     
     return {

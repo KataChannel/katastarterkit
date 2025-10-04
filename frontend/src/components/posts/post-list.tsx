@@ -208,7 +208,6 @@ export function PostList({
           Discover the latest insights and stories from our community
         </p>
       </div>
-
       {/* Loading State */}
       {loading && posts.length === 0 && (
         <div className="space-y-6" data-testid="posts-loading">
@@ -237,7 +236,6 @@ export function PostList({
           ))}
         </div>
       )}
-
       {/* Posts Grid */}
       {posts.length > 0 && (
         <div className="space-y-6">
@@ -277,7 +275,7 @@ export function PostList({
 
                 {/* Post Content */}
                 <div className="mb-4">
-                  <Link href={`/posts/${post.slug}`}>
+                  <Link href={`/posts/${post.slug}`} legacyBehavior>
                     <h2 className="text-xl font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors cursor-pointer">
                       {post.title}
                     </h2>
@@ -323,7 +321,7 @@ export function PostList({
                     </button>
 
                     {/* Comments */}
-                    <Link href={`/posts/${post.slug}#comments`}>
+                    <Link href={`/posts/${post.slug}#comments`} legacyBehavior>
                       <div className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors cursor-pointer">
                         <MessageCircle className="h-5 w-5" />
                         <span className="text-sm" data-testid="comment-count">{post?._count?.comments}</span>
@@ -362,7 +360,6 @@ export function PostList({
           ))}
         </div>
       )}
-
       {/* Load More Button */}
       {posts.length > 0 && data?.posts?.length === limit && (
         <div className="text-center py-8">
@@ -405,7 +402,6 @@ export function PostList({
           </button>
         </div>
       )}
-
       {/* Empty State */}
       {!loading && posts.length === 0 && (
         <div className="text-center py-12">
@@ -418,7 +414,7 @@ export function PostList({
               <p className="text-gray-600 mb-4">
                 There are no posts to display at the moment.
               </p>
-              <Link href="/create-post">
+              <Link href="/create-post" legacyBehavior>
                 <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
                   Create First Post
                 </button>
