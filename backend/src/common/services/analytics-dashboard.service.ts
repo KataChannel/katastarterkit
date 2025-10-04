@@ -316,7 +316,7 @@ export class AnalyticsDashboardService {
     recommendations: string[];
   }> {
     const historical = this.getHistoricalData(timeRange);
-    const latest = historical[historical.length - 1] || await this.collectCurrentMetrics();
+    const latest = historical[historical.length - 1] || (await this.collectCurrentMetrics());
 
     return {
       period: timeRange,

@@ -275,7 +275,7 @@ export function PostList({
 
                 {/* Post Content */}
                 <div className="mb-4">
-                  <Link href={`/posts/${post.slug}`} legacyBehavior>
+                  <Link href={`/posts/${post.slug}`} >
                     <h2 className="text-xl font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors cursor-pointer">
                       {post.title}
                     </h2>
@@ -321,7 +321,7 @@ export function PostList({
                     </button>
 
                     {/* Comments */}
-                    <Link href={`/posts/${post.slug}#comments`} legacyBehavior>
+                    <Link href={`/posts/${post.slug}#comments`} >
                       <div className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors cursor-pointer">
                         <MessageCircle className="h-5 w-5" />
                         <span className="text-sm" data-testid="comment-count">{post?._count?.comments}</span>
@@ -414,7 +414,7 @@ export function PostList({
               <p className="text-gray-600 mb-4">
                 There are no posts to display at the moment.
               </p>
-              <Link href="/create-post" legacyBehavior>
+              <Link href="/create-post" >
                 <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
                   Create First Post
                 </button>

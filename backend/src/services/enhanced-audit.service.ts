@@ -270,12 +270,12 @@ export class EnhancedAuditService {
       ...(filters.batchId && { batchId: filters.batchId }),
       ...(filters.sensitiveData !== undefined && { sensitiveData: filters.sensitiveData }),
       ...(filters.requiresReview !== undefined && { requiresReview: filters.requiresReview }),
-      ...(filters.dateFrom || filters.dateTo) && {
+      ...((filters.dateFrom || filters.dateTo) && {
         timestamp: {
           ...(filters.dateFrom && { gte: filters.dateFrom }),
           ...(filters.dateTo && { lte: filters.dateTo })
         }
-      }
+      })
     };
 
     const page = filters.page || 1;
@@ -324,12 +324,12 @@ export class EnhancedAuditService {
   }) {
     const where: Prisma.AuditLogWhereInput = {
       ...(filters.userId && { userId: filters.userId }),
-      ...(filters.dateFrom || filters.dateTo) && {
+      ...((filters.dateFrom || filters.dateTo) && {
         timestamp: {
           ...(filters.dateFrom && { gte: filters.dateFrom }),
           ...(filters.dateTo && { lte: filters.dateTo })
         }
-      }
+      })
     };
 
     const [

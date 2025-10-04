@@ -98,7 +98,7 @@ const TodoStatsWidget: React.FC<TodoStatsWidgetProps> = ({ className = '' }) => 
           <Link
             href="/todos"
             className="text-sm text-blue-600 hover:text-blue-500 flex items-center space-x-1"
-            legacyBehavior>
+            >
             <span>Xem tất cả</span>
             <ArrowRightIcon className="w-4 h-4" />
           </Link>

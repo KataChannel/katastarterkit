@@ -454,7 +454,7 @@ export class AlertManagerService {
     const conditionMet = this.evaluateCondition(rule.condition, metricValue);
     
     // Check if condition has been met for required duration
-    if (conditionMet && await this.isConditionPersistent(rule)) {
+    if (conditionMet && (await this.isConditionPersistent(rule))) {
       // Check cooldown period
       if (rule.lastTriggered && 
           Date.now() - rule.lastTriggered.getTime() < rule.cooldownPeriod * 60 * 1000) {

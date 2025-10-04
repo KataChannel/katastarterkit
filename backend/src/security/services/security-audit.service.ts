@@ -71,7 +71,7 @@ export class SecurityAuditService {
           description: `${eventDto.eventType} - ${eventDto.resourceType || 'system'}`,
           category: eventDto.resourceType || 'system',
           details: {
-            ...eventDto.details || {},
+            ...(eventDto.details || {}),
             resourceType: eventDto.resourceType,
             resourceId: eventDto.resourceId,
           },

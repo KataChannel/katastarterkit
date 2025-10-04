@@ -60,10 +60,10 @@ export class IntelligentSuggestionsService {
     const userTasks = await this.getUserTaskData(userId);
     
     // Generate different types of suggestions
-    suggestions.push(...await this.generateTaskOptimizationSuggestions(userTasks, userId));
-    suggestions.push(...await this.generateWorkloadBalanceSuggestions(userTasks, userId));
-    suggestions.push(...await this.generateDeadlineAdjustmentSuggestions(userTasks, userId));
-    suggestions.push(...await this.generateProcessImprovementSuggestions(userTasks, userId));
+    suggestions.push(...(await this.generateTaskOptimizationSuggestions(userTasks, userId)));
+    suggestions.push(...(await this.generateWorkloadBalanceSuggestions(userTasks, userId)));
+    suggestions.push(...(await this.generateDeadlineAdjustmentSuggestions(userTasks, userId)));
+    suggestions.push(...(await this.generateProcessImprovementSuggestions(userTasks, userId)));
 
     // Sort by confidence and impact
     return suggestions

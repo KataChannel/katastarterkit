@@ -38,7 +38,7 @@ export function AdminHeader() {
             <Link
               href="/admin/dashboard"
               className="text-2xl font-bold text-white"
-              legacyBehavior>
+              >
               KataCore <span className="text-blue-400">Admin</span>
             </Link>
             
@@ -56,7 +56,7 @@ export function AdminHeader() {
                         : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                       }
                     `}
-                    legacyBehavior>
+                    >
                     <item.icon className="h-4 w-4" />
                     <span>{item.name}</span>
                   </Link>

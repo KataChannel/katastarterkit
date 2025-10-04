@@ -97,7 +97,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
               <Link
                 href="/admin/dashboard"
                 className="flex items-center space-x-2"
-                legacyBehavior>
+                >
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                   <span className="text-primary-foreground font-bold text-lg">K</span>
                 </div>
@@ -138,7 +138,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                       collapsed && 'justify-center'
                     )}
                     title={collapsed ? item.name : undefined}
-                    legacyBehavior>
+                    >
                     <Icon className="h-5 w-5 flex-shrink-0" />
                     {!collapsed && <span>{item.name}</span>}
                   </Link>
@@ -177,13 +177,13 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/profile" className="cursor-pointer" legacyBehavior>
+                  <Link href="/admin/profile" className="cursor-pointer" >
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/settings" className="cursor-pointer" legacyBehavior>
+                  <Link href="/admin/settings" className="cursor-pointer" >
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </Link>
@@ -215,7 +215,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                 <Link
                   href="/admin/dashboard"
                   className="flex items-center space-x-2"
-                  legacyBehavior>
+                  >
                   <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                     <span className="text-primary-foreground font-bold text-lg">K</span>
                   </div>
@@ -248,7 +248,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                             ? 'bg-accent text-accent-foreground'
                             : 'text-muted-foreground hover:text-foreground'
                         )}
-                        legacyBehavior>
+                        >
                         <Icon className="h-5 w-5 flex-shrink-0" />
                         <span>{item.name}</span>
                       </Link>
@@ -348,13 +348,13 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/admin/profile" className="cursor-pointer" legacyBehavior>
+                        <Link href="/admin/profile" className="cursor-pointer" >
                           <User className="mr-2 h-4 w-4" />
                           <span>Profile</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/admin/settings" className="cursor-pointer" legacyBehavior>
+                        <Link href="/admin/settings" className="cursor-pointer" >
                           <Settings className="mr-2 h-4 w-4" />
                           <span>Settings</span>
                         </Link>

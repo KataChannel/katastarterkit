@@ -783,11 +783,11 @@ export class RbacController {
   async getUserRoleInfo(@Request() req: any, @Param('userId') userId: string) {
     try {
       // Check if user has permission to view user role info (self or admin)
-      const canViewRoleInfo = req.user.id === userId || await this.rbacService.checkPermission({
+      const canViewRoleInfo = req.user.id === userId || (await this.rbacService.checkPermission({
         userId: req.user.id,
         resource: 'user',
         action: 'read',
-      });
+      }));
 
       if (!canViewRoleInfo) {
         throw new ForbiddenException('Insufficient permissions to view user role information');

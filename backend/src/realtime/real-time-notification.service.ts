@@ -495,7 +495,7 @@ export class RealTimeNotificationService {
   private async cacheNotification(event: NotificationEvent): Promise<void> {
     // Add to user's notification history
     const historyKey = `notification:history:${event.userId}`;
-    const existing = await this.cacheService.get<NotificationEvent[]>(historyKey, { layer: 'L3_SLOW' }) || [];
+    const existing = (await this.cacheService.get<NotificationEvent[]>(historyKey, { layer: 'L3_SLOW' })) || [];
     
     existing.unshift(event);
     

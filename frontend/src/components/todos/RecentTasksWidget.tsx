@@ -110,7 +110,7 @@ const RecentTasksWidget: React.FC<RecentTasksWidgetProps> = ({
           <Link
             href="/todos"
             className="text-sm text-blue-600 hover:text-blue-500 flex items-center space-x-1"
-            legacyBehavior>
+            >
             <span>Xem tất cả</span>
             <ArrowRightIcon className="w-4 h-4" />
           </Link>
@@ -137,7 +137,7 @@ const RecentTasksWidget: React.FC<RecentTasksWidgetProps> = ({
                 key={task.id}
                 href={`/todos/${task.id}`}
                 className="block hover:bg-gray-50 rounded-lg p-3 transition-colors"
-                legacyBehavior>
+                >
                 <div className="flex items-start space-x-3">
                   {/* Status Icon */}
                   <div className="flex-shrink-0 mt-0.5">

@@ -38,7 +38,7 @@ const ListItem = React.forwardRef<
             className
           )}
           {...props}
-          legacyBehavior>
+          >
           <div className="text-sm font-medium leading-none">{title}</div>
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
@@ -186,7 +186,7 @@ export function WebsiteHeader() {
             <Link
               href="/website"
               className="text-2xl font-bold text-blue-600"
-              legacyBehavior>
+              >
               <img src="https://shop.rausachtrangia.com/assets/images/logo-full.png" alt="Logo" className="max-h-20" />
             </Link>
           </div>  

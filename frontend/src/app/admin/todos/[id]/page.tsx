@@ -178,7 +178,7 @@ export default function TaskDetailPage() {
               <Link
                 href="/todos"
                 className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
-                legacyBehavior>
+                >
                 <ArrowLeftIcon className="w-5 h-5" />
                 <span>Quay lại</span>
               </Link>

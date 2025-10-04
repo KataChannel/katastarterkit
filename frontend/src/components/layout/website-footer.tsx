@@ -77,7 +77,7 @@ export function WebsiteFooter() {
                       <Link
                         href={item.href}
                         className="text-base text-gray-400 hover:text-white transition-colors"
-                        legacyBehavior>
+                        >
                         {item.name}
                       </Link>
                     </li>
@@ -94,7 +94,7 @@ export function WebsiteFooter() {
                       <Link
                         href={item.href}
                         className="text-base text-gray-400 hover:text-white transition-colors"
-                        legacyBehavior>
+                        >
                         {item.name}
                       </Link>
                     </li>
@@ -113,7 +113,7 @@ export function WebsiteFooter() {
                       <Link
                         href={item.href}
                         className="text-base text-gray-400 hover:text-white transition-colors"
-                        legacyBehavior>
+                        >
                         {item.name}
                       </Link>
                     </li>
@@ -130,7 +130,7 @@ export function WebsiteFooter() {
                       <Link
                         href={item.href}
                         className="text-base text-gray-400 hover:text-white transition-colors"
-                        legacyBehavior>
+                        >
                         {item.name}
                       </Link>
                     </li>

@@ -21,14 +21,14 @@ export function Navigation() {
               <Link
                 href="/"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 border-b-2 border-transparent hover:border-gray-300 transition-colors"
-                legacyBehavior>
+                >
                 <Home className="h-4 w-4 mr-1" />
                 Home
               </Link>
               <Link
                 href="/chatbot"
                 className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700 transition-colors"
-                legacyBehavior>
+                >
                 <Bot className="h-4 w-4 mr-1" />
                 Chatbots
               </Link>
@@ -54,7 +54,7 @@ export function Navigation() {
               <Link
                 href="/login"
                 className="inline-flex items-center px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-                legacyBehavior>
+                >
                 <LogIn className="h-4 w-4 mr-1" />
                 Login
               </Link>
