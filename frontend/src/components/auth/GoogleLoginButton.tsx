@@ -74,8 +74,11 @@ export default function GoogleLoginButton() {
           toast.success(`Welcome back, ${user.firstName || user.username}!`);
         }
         
-        // Redirect to dashboard
-        router.push('/admin');
+        // Small delay to ensure toast is shown, then redirect
+        setTimeout(() => {
+          // Use window.location for hard navigation to ensure new auth state
+          window.location.href = '/admin';
+        }, 500);
       } else {
         toast.error('Google login failed. Please try again.');
       }

@@ -175,6 +175,32 @@ input CreateInvoiceInput {
   tthai: String
 }
 
+input CreateMenuDto {
+  badge: String
+  badgeColor: String
+  cssClass: String
+  customData: JSON
+  description: String
+  externalUrl: String
+  icon: String
+  iconType: String
+  image: String
+  isActive: Boolean
+  isPublic: Boolean
+  isVisible: Boolean
+  metadata: JSON
+  order: Int
+  parentId: String
+  requiredPermissions: [String!]
+  requiredRoles: [String!]
+  route: String
+  slug: String!
+  target: String
+  title: String!
+  type: String
+  url: String
+}
+
 input CreatePageBlockInput {
   content: JSONObject
   isVisible: Boolean! = true
@@ -388,6 +414,63 @@ enum MediaType {
   VIDEO
 }
 
+input MenuFilterDto {
+  isActive: Boolean
+  isPublic: Boolean
+  isVisible: Boolean
+  parentId: String
+  search: String
+  type: String
+}
+
+input MenuOrderDto {
+  """Menu ID"""
+  id: ID!
+
+  """New order/position"""
+  order: Int!
+}
+
+type MenuPaginationResponseDto {
+  hasMore: Boolean!
+  items: [MenuResponseDto!]!
+  page: Int!
+  pageSize: Int!
+  total: Int!
+  totalPages: Int!
+}
+
+type MenuResponseDto {
+  badge: String
+  badgeColor: String
+  createdAt: DateTime!
+  createdBy: String
+  description: String
+  externalUrl: String
+  icon: String
+  iconType: String
+  id: String!
+  image: String
+  isActive: Boolean!
+  isProtected: Boolean!
+  isPublic: Boolean!
+  isVisible: Boolean!
+  level: Int!
+  order: Int!
+  parentId: String
+  path: String
+  requiredPermissions: [String!]!
+  requiredRoles: [String!]!
+  route: String
+  slug: String!
+  target: String!
+  title: String!
+  type: String!
+  updatedAt: DateTime!
+  updatedBy: String
+  url: String
+}
+
 type Mutation {
   addPageBlock(input: CreatePageBlockInput!, pageId: String!): PageBlock!
   adminCreateUser(input: AdminCreateUserInput!): User!
@@ -403,6 +486,7 @@ type Mutation {
 
   """Create multiple records in a single operation"""
   createMany(input: UnifiedBulkCreateInput!, modelName: String!): JSONObject!
+  createMenu(input: CreateMenuDto!): MenuResponseDto!
 
   """Create a single record with Prisma-like syntax"""
   createOne(input: UnifiedCreateInput!, modelName: String!): JSONObject!
@@ -418,6 +502,7 @@ type Mutation {
 
   """Delete multiple records matching criteria"""
   deleteMany(input: UnifiedBulkDeleteInput!, modelName: String!): JSONObject!
+  deleteMenu(id: ID!): Boolean!
 
   """Delete a single record by ID"""
   deleteOne(input: UnifiedDeleteInput!, modelName: String!): JSONObject!
@@ -438,15 +523,20 @@ type Mutation {
   loginWithFacebook(input: SocialLoginInput!): AuthResponse!
   loginWithGoogle(input: SocialLoginInput!): AuthResponse!
   loginWithPhone(input: PhoneLoginInput!): AuthResponse!
+  moveMenu(menuId: ID!, newOrder: Float, newParentId: ID): MenuResponseDto!
   publishPost(id: String!): Post!
   registerUser(input: RegisterUserInput!): AuthResponse!
+  reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   shareTask(input: ShareTaskInput!): TaskShare!
+  toggleMenuActive(id: ID!): MenuResponseDto!
+  toggleMenuVisibility(id: ID!): MenuResponseDto!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
   updateInvoice(id: ID!, input: CreateInvoiceInput!): ExtListhoadon!
 
   """Update multiple records matching criteria"""
   updateMany(input: UnifiedBulkUpdateInput!, modelName: String!): JSONObject!
+  updateMenu(id: ID!, input: UpdateMenuDto!): MenuResponseDto!
 
   """Update a single record by ID"""
   updateOne(input: UnifiedUpdateInput!, modelName: String!): JSONObject!
@@ -649,6 +739,7 @@ type Query {
 
   """Find records with pagination"""
   findManyPaginated(input: UnifiedPaginatedInput, modelName: String!): JSONObject!
+  footerMenus: [MenuResponseDto!]!
   getCommentById(id: String!): Comment!
   getCommentsByPost(postId: String!): [Comment!]!
   getInvoice(id: ID!): ExtListhoadon!
@@ -673,14 +764,22 @@ type Query {
   getUserRolePermissions(userId: String!): UserRolePermissionSummary!
   getUserStats: UserStats!
   getUsers: [User!]!
+  headerMenus: [MenuResponseDto!]!
 
   """Hello world query"""
   hello: String!
   invoiceExists(idServer: String!, khmshdon: String!, nbmst: String!, shdon: String!): Boolean!
+  menu(id: ID!): MenuResponseDto
+  menuBySlug(slug: String!): MenuResponseDto
+  menuTree(parentId: String, type: String): [MenuResponseDto!]!
+  menus(direction: String, filter: MenuFilterDto, limit: Float, orderBy: String, page: Float): MenuPaginationResponseDto!
+  mobileMenus: [MenuResponseDto!]!
+  myMenus(type: String): [MenuResponseDto!]!
   searchInvoices(input: InvoiceSearchInput!): InvoiceSearchResult!
   searchPermissions(input: PermissionSearchInput!): PermissionSearchResult!
   searchRoles(input: RoleSearchInput!): RoleSearchResult!
   searchUsers(input: UserSearchInput!): UserSearchResult!
+  sidebarMenus: [MenuResponseDto!]!
 
   """Get API version"""
   version: String!
@@ -1018,6 +1117,33 @@ input UnifiedUpdateInput {
 
 input UpdateCommentInput {
   content: String
+}
+
+input UpdateMenuDto {
+  badge: String
+  badgeColor: String
+  cssClass: String
+  customData: JSON
+  description: String
+  externalUrl: String
+  icon: String
+  iconType: String
+  image: String
+  isActive: Boolean
+  isProtected: Boolean
+  isPublic: Boolean
+  isVisible: Boolean
+  metadata: JSON
+  order: Int
+  parentId: String
+  requiredPermissions: [String!]
+  requiredRoles: [String!]
+  route: String
+  slug: String
+  target: String
+  title: String
+  type: String
+  url: String
 }
 
 input UpdatePageBlockInput {

@@ -21,7 +21,7 @@ import {
   UnifiedFindManyInput,
   UnifiedFindByIdInput,
   UnifiedPaginatedInput
-} from '../inputs/unified-dynamic.inputs.js';
+} from '../inputs/unified-dynamic.inputs';
 
 // Enum for supported models (can be extended)
 export enum SupportedModel {

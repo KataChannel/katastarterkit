@@ -135,6 +135,10 @@ model User {
   devices           UserDevice[]
   securityEvents    SecurityEvent[]
 
+  // Menu relations
+  menusCreated      Menu[]        @relation("MenuCreator")
+  menusUpdated      Menu[]        @relation("MenuUpdater")
+
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
   @@index([roleType])
@@ -1442,4 +1446,88 @@ model ext_detailhoadon {
   @@index([idhdonServer])
   @@index([stt])
   @@index([createdAt])
+}
+
+// =====================================================
+// Menu Management System
+// =====================================================
+
+enum MenuType {
+  SIDEBAR    // Menu in sidebar navigation
+  HEADER     // Menu in header/top navigation
+  FOOTER     // Menu in footer
+  MOBILE     // Mobile-specific menu
+  CUSTOM     // Custom menu type
+}
+
+enum MenuTarget {
+  SELF       // Open in same tab
+  BLANK      // Open in new tab
+  MODAL      // Open in modal
+}
+
+model Menu {
+  id            String      @id @default(uuid())
+  
+  // Basic Info
+  title         String      // Menu display title
+  slug          String      @unique // URL-friendly identifier
+  description   String?     // Menu description
+  type          MenuType    @default(SIDEBAR) // Menu type
+  
+  // Hierarchy
+  parentId      String?     // Parent menu ID for nested menus
+  parent        Menu?       @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children      Menu[]      @relation("MenuHierarchy")
+  order         Int         @default(0) // Display order
+  level         Int         @default(0) // Depth level in hierarchy
+  path          String?     // Full path from root (e.g., "/parent/child")
+  
+  // Navigation
+  url           String?     // Menu link URL
+  route         String?     // Internal route path
+  externalUrl   String?     // External URL
+  target        MenuTarget  @default(SELF) // Link target
+  
+  // Display
+  icon          String?     // Icon name/class (lucide-react icon name)
+  iconType      String?     @default("lucide") // Icon library type
+  badge         String?     // Badge text
+  badgeColor    String?     // Badge color
+  image         String?     // Image URL for menu item
+  
+  // Permissions & Access
+  requiredPermissions String[] // Required permissions to view (JSON array)
+  requiredRoles      String[] // Required roles to view
+  isPublic      Boolean     @default(false) // Accessible without auth
+  
+  // State
+  isActive      Boolean     @default(true) // Active/inactive
+  isVisible     Boolean     @default(true) // Visible/hidden
+  isProtected   Boolean     @default(false) // Protected from deletion
+  
+  // Metadata
+  metadata      Json?       // Additional metadata (JSON)
+  cssClass      String?     // Custom CSS class
+  customData    Json?       // Custom data storage
+  
+  // Timestamps
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  createdBy     String?     // User ID who created
+  updatedBy     String?     // User ID who last updated
+  
+  // Relations
+  creator       User?       @relation("MenuCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater       User?       @relation("MenuUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  
+  // Indexes
+  @@index([parentId])
+  @@index([type])
+  @@index([order])
+  @@index([isActive])
+  @@index([isVisible])
+  @@index([createdAt])
+  @@index([slug])
+  @@map("menus")
 }

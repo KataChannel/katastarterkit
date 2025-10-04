@@ -29,6 +29,9 @@ export class RbacSeederService implements OnModuleInit {
       // Create default admin user
       await this.seedDefaultAdminUser();
 
+      // Create default menus
+      await this.seedDefaultMenus();
+
       this.logger.log('RBAC seeding completed successfully');
     } catch (error) {
       this.logger.error(`RBAC seeding failed: ${error.message}`);
@@ -330,6 +333,280 @@ export class RbacSeederService implements OnModuleInit {
       
     } catch (error) {
       this.logger.error(`Failed to create default admin user: ${error.message}`);
+      throw error;
+    }
+  }
+
+  private async seedDefaultMenus() {
+    try {
+      this.logger.log('Seeding default menus...');
+
+      const menus = [
+        // ==================== SIDEBAR MENUS ====================
+        {
+          title: 'Dashboard',
+          slug: 'dashboard',
+          description: 'Main dashboard',
+          type: 'SIDEBAR',
+          route: '/admin',
+          icon: 'LayoutDashboard',
+          order: 1,
+          isPublic: false,
+          requiredRoles: ['super_admin', 'admin', 'manager'],
+          isProtected: true,
+        },
+        {
+          title: 'Users',
+          slug: 'users',
+          description: 'User management',
+          type: 'SIDEBAR',
+          route: '/admin/users',
+          icon: 'Users',
+          order: 2,
+          requiredPermissions: ['users:read'],
+          requiredRoles: ['super_admin', 'admin'],
+          isProtected: true,
+        },
+        {
+          title: 'Roles & Permissions',
+          slug: 'roles-permissions',
+          description: 'Role and permission management',
+          type: 'SIDEBAR',
+          route: '/admin/roles',
+          icon: 'Shield',
+          order: 3,
+          requiredPermissions: ['roles:read', 'permissions:read'],
+          requiredRoles: ['super_admin', 'admin'],
+          isProtected: true,
+        },
+        {
+          title: 'Content',
+          slug: 'content',
+          description: 'Content management',
+          type: 'SIDEBAR',
+          icon: 'FileText',
+          order: 4,
+          requiredPermissions: ['content:read'],
+        },
+        {
+          title: 'Posts',
+          slug: 'posts',
+          description: 'Manage posts',
+          type: 'SIDEBAR',
+          parentSlug: 'content',
+          route: '/admin/posts',
+          icon: 'FileEdit',
+          order: 1,
+          requiredPermissions: ['content:read'],
+        },
+        {
+          title: 'Categories',
+          slug: 'categories',
+          description: 'Manage categories',
+          type: 'SIDEBAR',
+          parentSlug: 'content',
+          route: '/admin/categories',
+          icon: 'FolderTree',
+          order: 2,
+          requiredPermissions: ['content:read'],
+        },
+        {
+          title: 'Tags',
+          slug: 'tags',
+          description: 'Manage tags',
+          type: 'SIDEBAR',
+          parentSlug: 'content',
+          route: '/admin/tags',
+          icon: 'Tag',
+          order: 3,
+          requiredPermissions: ['content:read'],
+        },
+        {
+          title: 'Projects',
+          slug: 'projects',
+          description: 'Project management',
+          type: 'SIDEBAR',
+          route: '/admin/projects',
+          icon: 'Briefcase',
+          order: 5,
+          requiredPermissions: ['projects:read'],
+        },
+        {
+          title: 'Tasks',
+          slug: 'tasks',
+          description: 'Task management',
+          type: 'SIDEBAR',
+          route: '/admin/tasks',
+          icon: 'CheckSquare',
+          order: 6,
+          requiredPermissions: ['tasks:read'],
+        },
+        {
+          title: 'Menus',
+          slug: 'menus',
+          description: 'Menu management',
+          type: 'SIDEBAR',
+          route: '/admin/menu',
+          icon: 'Menu',
+          order: 7,
+          requiredPermissions: ['content:manage'],
+          requiredRoles: ['super_admin', 'admin'],
+          isProtected: true,
+        },
+        {
+          title: 'Analytics',
+          slug: 'analytics',
+          description: 'Analytics and reports',
+          type: 'SIDEBAR',
+          route: '/admin/analytics',
+          icon: 'BarChart',
+          order: 8,
+          requiredPermissions: ['analytics:read'],
+        },
+        {
+          title: 'Settings',
+          slug: 'settings',
+          description: 'System settings',
+          type: 'SIDEBAR',
+          icon: 'Settings',
+          order: 9,
+          requiredRoles: ['super_admin', 'admin'],
+        },
+        {
+          title: 'General',
+          slug: 'settings-general',
+          description: 'General settings',
+          type: 'SIDEBAR',
+          parentSlug: 'settings',
+          route: '/admin/settings/general',
+          icon: 'Sliders',
+          order: 1,
+          requiredRoles: ['super_admin', 'admin'],
+        },
+        {
+          title: 'Security',
+          slug: 'settings-security',
+          description: 'Security settings',
+          type: 'SIDEBAR',
+          parentSlug: 'settings',
+          route: '/admin/settings/security',
+          icon: 'Lock',
+          order: 2,
+          requiredRoles: ['super_admin'],
+          isProtected: true,
+        },
+        {
+          title: 'Audit Logs',
+          slug: 'audit-logs',
+          description: 'System audit logs',
+          type: 'SIDEBAR',
+          route: '/admin/audit-logs',
+          icon: 'FileSearch',
+          order: 10,
+          requiredPermissions: ['security:audit'],
+          requiredRoles: ['super_admin', 'admin'],
+        },
+
+        // ==================== HEADER MENUS ====================
+        {
+          title: 'Home',
+          slug: 'home',
+          description: 'Homepage',
+          type: 'HEADER',
+          route: '/',
+          order: 1,
+          isPublic: true,
+        },
+        {
+          title: 'About',
+          slug: 'about',
+          description: 'About us',
+          type: 'HEADER',
+          route: '/about',
+          order: 2,
+          isPublic: true,
+        },
+        {
+          title: 'Services',
+          slug: 'services',
+          description: 'Our services',
+          type: 'HEADER',
+          route: '/services',
+          order: 3,
+          isPublic: true,
+        },
+        {
+          title: 'Contact',
+          slug: 'contact',
+          description: 'Contact us',
+          type: 'HEADER',
+          route: '/contact',
+          order: 4,
+          isPublic: true,
+        },
+      ];
+
+      for (const menuData of menus) {
+        try {
+          // Check if menu already exists
+          const existingMenu = await this.prisma.menu.findUnique({
+            where: { slug: menuData.slug },
+          });
+
+          if (existingMenu) {
+            this.logger.debug(`Menu already exists: ${menuData.slug}`);
+            continue;
+          }
+
+          // Get parent if specified
+          let parentId: string | undefined;
+          let level = 0;
+          let path = `/${menuData.slug}`;
+
+          if ('parentSlug' in menuData && menuData.parentSlug) {
+            const parent = await this.prisma.menu.findUnique({
+              where: { slug: menuData.parentSlug },
+            });
+
+            if (parent) {
+              parentId = parent.id;
+              level = parent.level + 1;
+              path = `${parent.path}/${menuData.slug}`;
+            }
+          }
+
+          // Create menu
+          await this.prisma.menu.create({
+            data: {
+              title: menuData.title,
+              slug: menuData.slug,
+              description: menuData.description,
+              type: menuData.type as any,
+              parentId,
+              route: menuData.route,
+              icon: menuData.icon,
+              iconType: 'lucide',
+              order: menuData.order,
+              level,
+              path,
+              requiredPermissions: (menuData as any).requiredPermissions || [],
+              requiredRoles: (menuData as any).requiredRoles || [],
+              isPublic: (menuData as any).isPublic || false,
+              isProtected: (menuData as any).isProtected || false,
+              isActive: true,
+              isVisible: true,
+            },
+          });
+
+          this.logger.debug(`Created menu: ${menuData.title}`);
+        } catch (error) {
+          this.logger.error(`Failed to create menu ${menuData.slug}: ${error.message}`);
+        }
+      }
+
+      this.logger.log('✅ Default menus created successfully');
+    } catch (error) {
+      this.logger.error(`Failed to seed default menus: ${error.message}`);
       throw error;
     }
   }

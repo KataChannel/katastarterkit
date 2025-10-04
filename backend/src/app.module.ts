@@ -29,6 +29,7 @@ import { MonitoringModule } from './monitoring/monitoring.module';
 import { SecurityModule } from './security/security.module';
 import { UnifiedDynamicModule } from './graphql/unified-dynamic.module';
 import { KetoAnModule } from './ketoan/ketoan.module';
+import { MenuModule } from './menu/menu.module';
 import { TestController } from './test.controller';
 
 // Configuration
@@ -124,6 +125,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     SecurityModule,
     UnifiedDynamicModule,
     KetoAnModule,
+    MenuModule,
   ],
   controllers: [
     LogController,

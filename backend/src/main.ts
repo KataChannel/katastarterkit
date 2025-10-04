@@ -1,4 +1,15 @@
 import 'reflect-metadata';
+
+// Polyfill File API for Node < 20 (fix undici issue)
+if (typeof global.File === 'undefined') {
+  (global as any).File = class File extends Blob {
+    constructor(parts: any[], name: string, options?: any) {
+      super(parts, options);
+      Object.defineProperty(this, 'name', { value: name });
+    }
+  };
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
