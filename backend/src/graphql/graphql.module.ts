@@ -8,7 +8,14 @@ import { TaskResolver } from './resolvers/task.resolver';
 import { PageResolver } from './resolvers/page.resolver';
 import { InvoiceResolver } from './resolvers/invoice.resolver';
 import { PermissionResolver, RoleResolver, UserRbacResolver } from './resolvers/rbac.resolver';
+import { 
+  AffiliateUserResolver, 
+  AffiliateCampaignResolver, 
+  AffiliateTrackingResolver, 
+  AffiliatePaymentResolver 
+} from './resolvers/affiliate.resolver';
 import { InvoiceController } from '../controllers/invoice.controller';
+import { AffiliateController } from '../controllers/affiliate.controller';
 
 import { UserService } from '../services/user.service';
 import { PostService } from '../services/post.service';
@@ -24,6 +31,9 @@ import { PageService } from '../services/page.service';
 import { InvoiceService } from '../services/invoice.service';
 import { BackendConfigService } from '../services/backend-config.service';
 import { RbacService } from '../services/rbac.service';
+import { AffiliateUserService, AffiliateCampaignService } from '../services/affiliate.service';
+import { AffiliateTrackingService } from '../services/affiliate-tracking.service';
+import { AffiliatePaymentService } from '../services/affiliate-payment.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
@@ -40,6 +50,7 @@ import { MinioModule } from '../minio/minio.module';
   ],
   controllers: [
     InvoiceController,
+    AffiliateController,
   ],
   providers: [
     // Scalars handled by graphql-type-json directly
@@ -57,6 +68,12 @@ import { MinioModule } from '../minio/minio.module';
     RoleResolver,
     UserRbacResolver,
     
+    // Affiliate resolvers
+    AffiliateUserResolver,
+    AffiliateCampaignResolver,
+    AffiliateTrackingResolver,
+    AffiliatePaymentResolver,
+    
     // Services
     UserService,
     PostService,
@@ -72,6 +89,12 @@ import { MinioModule } from '../minio/minio.module';
     InvoiceService,
     BackendConfigService,
     RbacService,
+    
+    // Affiliate services
+    AffiliateUserService,
+    AffiliateCampaignService,
+    AffiliateTrackingService,
+    AffiliatePaymentService,
   ],
   exports: [
     UserService,
@@ -87,6 +110,12 @@ import { MinioModule } from '../minio/minio.module';
     InvoiceService,
     BackendConfigService,
     RbacService,
+    
+    // Affiliate services
+    AffiliateUserService,
+    AffiliateCampaignService,
+    AffiliateTrackingService,
+    AffiliatePaymentService,
   ],
 })
 export class GraphQLResolversModule {}

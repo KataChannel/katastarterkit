@@ -49,7 +49,7 @@ export class SecurityController {
   }> {
     try {
       const userId = req.user.id;
-      const totpSetup = await this.mfaService.setupTotp(userId, setupDto.deviceInfo);
+      const totpSetup = await this.mfaService.setupTotp(userId, setupDto.deviceInfo as any);
       
       return {
         success: true,

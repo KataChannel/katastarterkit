@@ -186,7 +186,7 @@ export class ElasticsearchService {
       analysis: {
         analyzer: {
           custom_search_analyzer: {
-            type: 'custom',
+            type: 'custom' as const,
             tokenizer: 'standard',
             filter: ['lowercase', 'stop', 'snowball']
           }
@@ -277,7 +277,7 @@ export class ElasticsearchService {
         id
       });
       
-      return result.body._source;
+      return result._source;
     } catch (error) {
       if (error.meta?.statusCode === 404) {
         return null;
@@ -434,17 +434,17 @@ export class ElasticsearchService {
       });
 
       // Process results
-      const items = result.body.hits.hits.map((hit: any) => ({
+      const items = result.hits.hits.map((hit: any) => ({
         ...hit._source,
         _score: hit._score,
         _highlight: hit.highlight
       }));
 
       const processedFacets: Record<string, Array<{ key: string; count: number }>> = {};
-      if (result.body.aggregations) {
-        Object.keys(result.body.aggregations).forEach(key => {
-          const agg = result.body.aggregations[key];
-          processedFacets[key] = agg.buckets.map((bucket: any) => ({
+      if (result.aggregations) {
+        Object.keys(result.aggregations).forEach(key => {
+          const agg = result.aggregations[key];
+          processedFacets[key] = (agg as any).buckets?.map((bucket: any) => ({
             key: bucket.key,
             count: bucket.doc_count
           }));
@@ -453,10 +453,10 @@ export class ElasticsearchService {
 
       return {
         items,
-        total: result.body.hits.total.value || result.body.hits.total,
-        took: result.body.took,
+        total: typeof result.hits.total === 'object' ? result.hits.total.value : result.hits.total,
+        took: result.took,
         facets: Object.keys(processedFacets).length > 0 ? processedFacets : undefined,
-        aggregations: result.body.aggregations
+        aggregations: result.aggregations
       };
     } catch (error) {
       this.logger.error(`Search error in ${index}:`, error);
@@ -502,22 +502,28 @@ export class ElasticsearchService {
       const suggestions: SearchSuggestion[] = [];
 
       // Process completion suggestions
-      result.body.suggest.completion_suggest?.[0]?.options?.forEach((option: any) => {
-        suggestions.push({
-          text: option.text,
-          score: option._score,
-          type: 'completion'
+      const completionOptions = result.suggest.completion_suggest?.[0]?.options;
+      if (Array.isArray(completionOptions)) {
+        completionOptions.forEach((option: any) => {
+          suggestions.push({
+            text: option.text,
+            score: option._score,
+            type: 'completion'
+          });
         });
-      });
+      }
 
       // Process phrase suggestions
-      result.body.suggest.phrase_suggest?.[0]?.options?.forEach((option: any) => {
-        suggestions.push({
-          text: option.text,
-          score: option.score,
-          type: 'phrase'
+      const phraseOptions = result.suggest.phrase_suggest?.[0]?.options;
+      if (Array.isArray(phraseOptions)) {
+        phraseOptions.forEach((option: any) => {
+          suggestions.push({
+            text: option.text,
+            score: option.score,
+            type: 'phrase'
+          });
         });
-      });
+      }
 
       return suggestions.sort((a, b) => b.score - a.score);
     } catch (error) {
@@ -549,12 +555,12 @@ export class ElasticsearchService {
       }
 
       const result = await this.client.bulk({
-        body,
+        operations: body,
         refresh: 'wait_for'
       });
 
-      if (result.body.errors) {
-        this.logger.error('Bulk index errors:', result.body.items);
+      if (result.errors) {
+        this.logger.error('Bulk index errors:', result.items);
       } else {
         this.logger.debug(`Bulk indexed ${documents.length} documents in ${indexName}`);
       }
@@ -602,7 +608,7 @@ export class ElasticsearchService {
         }
       });
 
-      return result.body.aggregations;
+      return result.aggregations;
     } catch (error) {
       this.logger.error('Error getting search analytics:', error);
       return null;
@@ -635,7 +641,7 @@ export class ElasticsearchService {
       const health = await this.client.cluster.health();
       return {
         status: 'healthy',
-        cluster: health.body
+        cluster: health
       };
     } catch (error) {
       this.logger.error('Elasticsearch health check failed:', error);

@@ -35,6 +35,7 @@ export class PageService {
         blocks: blocks ? {
           create: blocks.map((block, index) => ({
             ...block,
+            content: block.content || {},
             order: block.order ?? index,
           }))
         } : undefined
@@ -254,7 +255,8 @@ export class PageService {
     const block = await this.prisma.pageBlock.create({
       data: {
         ...input,
-        pageId
+        content: input.content || {},
+        page: { connect: { id: pageId } }
       }
     });
 

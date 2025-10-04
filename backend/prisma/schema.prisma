@@ -139,6 +139,9 @@ model User {
   menusCreated      Menu[]        @relation("MenuCreator")
   menusUpdated      Menu[]        @relation("MenuUpdater")
 
+  // Affiliate relations
+  affiliateProfile  AffUser?
+
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
   @@index([roleType])
@@ -1531,3 +1534,325 @@ model Menu {
   @@index([slug])
   @@map("menus")
 }
+
+// ===== AFFILIATE SYSTEM MODELS =====
+
+enum AffUserRole {
+  AFFILIATE
+  MERCHANT
+  ADMIN
+}
+
+enum AffCampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum AffConversionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum AffPaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum AffPaymentMethod {
+  BANK_TRANSFER
+  PAYPAL
+  MOMO
+  ZALOPAY
+  OTHER
+}
+
+model AffUser {
+  id          String      @id @default(uuid())
+  userId      String      // Reference to main User table
+  role        AffUserRole
+  
+  // Profile info
+  companyName    String?
+  businessType   String?
+  website        String?
+  description    String?
+  
+  // Payment info
+  paymentMethod  AffPaymentMethod?
+  bankAccount    String?
+  paypalEmail    String?
+  taxId          String?
+  
+  // Settings
+  isActive       Boolean   @default(true)
+  joinedAt       DateTime  @default(now())
+  lastActiveAt   DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // For Merchants
+  campaignsCreated AffCampaign[] @relation("CampaignCreator")
+  
+  // For Affiliates
+  campaignJoins    AffCampaignAffiliate[]
+  links            AffLink[]
+  conversions      AffConversion[]
+  paymentRequests  AffPaymentRequest[]
+
+  @@unique([userId])
+  @@index([role])
+  @@index([isActive])
+  @@index([joinedAt])
+  @@map("aff_users")
+}
+
+model AffCampaign {
+  id          String            @id @default(uuid())
+  name        String
+  description String?
+  
+  // Product info
+  productName     String
+  productUrl      String
+  productImage    String?
+  
+  // Commission settings
+  commissionRate  Decimal       @db.Decimal(5,2) // Percentage (0.00 to 100.00)
+  commissionType  String        @default("percentage") // percentage, fixed
+  fixedAmount     Decimal?      @db.Decimal(10,2)
+  
+  // Campaign settings
+  status          AffCampaignStatus @default(DRAFT)
+  startDate       DateTime?
+  endDate         DateTime?
+  maxAffiliates   Int?
+  requireApproval Boolean       @default(true)
+  
+  // Tracking
+  totalClicks     Int           @default(0)
+  totalConversions Int          @default(0)
+  totalRevenue    Decimal       @default(0) @db.Decimal(15,2)
+  totalCommission Decimal       @default(0) @db.Decimal(15,2)
+  
+  // Creator info
+  creatorId       String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  creator         AffUser       @relation("CampaignCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  affiliates      AffCampaignAffiliate[]
+  links           AffLink[]
+  conversions     AffConversion[]
+
+  @@index([status])
+  @@index([creatorId])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([createdAt])
+  @@map("aff_campaigns")
+}
+
+model AffCampaignAffiliate {
+  id            String    @id @default(uuid())
+  campaignId    String
+  affiliateId   String
+  
+  // Join status
+  status        String    @default("pending") // pending, approved, rejected
+  appliedAt     DateTime  @default(now())
+  approvedAt    DateTime?
+  rejectedAt    DateTime?
+  reason        String?   // For rejection or notes
+  
+  // Performance tracking
+  totalClicks     Int       @default(0)
+  totalConversions Int      @default(0)
+  totalEarnings   Decimal   @default(0) @db.Decimal(10,2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  campaign    AffCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  affiliate   AffUser     @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, affiliateId])
+  @@index([status])
+  @@index([appliedAt])
+  @@map("aff_campaign_affiliates")
+}
+
+model AffLink {
+  id          String    @id @default(uuid())
+  campaignId  String
+  affiliateId String
+  
+  // Link details
+  trackingCode String   @unique // Unique tracking identifier
+  originalUrl  String   // The merchant's product URL
+  shortUrl     String?  // Optional shortened URL
+  
+  // UTM and tracking parameters
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  utmContent   String?
+  
+  // Performance
+  totalClicks     Int       @default(0)
+  totalConversions Int      @default(0)
+  totalEarnings   Decimal   @default(0) @db.Decimal(10,2)
+  
+  // Settings
+  isActive     Boolean   @default(true)
+  expiresAt    DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  campaign    AffCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  affiliate   AffUser     @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  clicks      AffClick[]
+  conversions AffConversion[]
+
+  @@index([trackingCode])
+  @@index([campaignId])
+  @@index([affiliateId])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("aff_links")
+}
+
+model AffClick {
+  id         String    @id @default(uuid())
+  linkId     String
+  
+  // Tracking info
+  ipAddress   String?
+  userAgent   String?
+  referer     String?
+  country     String?
+  city        String?
+  device      String?
+  browser     String?
+  
+  // Session tracking
+  sessionId   String?
+  visitorId   String?   // For unique visitor tracking
+  
+  clickedAt   DateTime  @default(now())
+
+  // Relations
+  link        AffLink   @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId])
+  @@index([clickedAt])
+  @@index([ipAddress])
+  @@index([visitorId])
+  @@map("aff_clicks")
+}
+
+model AffConversion {
+  id          String              @id @default(uuid())
+  linkId      String
+  campaignId  String
+  affiliateId String
+  
+  // Conversion details
+  orderId      String?    // Merchant's order ID
+  customerEmail String?
+  saleAmount   Decimal    @db.Decimal(15,2)
+  commission   Decimal    @db.Decimal(10,2)
+  
+  // Tracking
+  clickId      String?    // Link to the click that generated this conversion
+  conversionType String   @default("sale") // sale, lead, signup, etc.
+  
+  // Status and validation
+  status       AffConversionStatus @default(PENDING)
+  currency     String     @default("VND")
+  
+  // Timestamps
+  convertedAt  DateTime   @default(now())
+  approvedAt   DateTime?
+  rejectedAt   DateTime?
+  paidAt       DateTime?
+  
+  // Notes and validation
+  notes        String?
+  validatedBy  String?    // Admin who validated
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  link        AffLink     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  campaign    AffCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  affiliate   AffUser     @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([convertedAt])
+  @@index([affiliateId])
+  @@index([campaignId])
+  @@index([orderId])
+  @@map("aff_conversions")
+}
+
+model AffPaymentRequest {
+  id            String           @id @default(uuid())
+  affiliateId   String
+  
+  // Payment details
+  amount        Decimal          @db.Decimal(10,2)
+  currency      String           @default("VND")
+  status        AffPaymentStatus @default(PENDING)
+  
+  // Payment method details
+  paymentMethod AffPaymentMethod
+  accountDetails String?         // JSON string with payment account details
+  
+  // Processing info
+  requestedAt   DateTime         @default(now())
+  processedAt   DateTime?
+  completedAt   DateTime?
+  failedAt      DateTime?
+  
+  // Reference and notes
+  transactionId String?          // Payment processor transaction ID
+  notes         String?
+  adminNotes    String?
+  processedBy   String?          // Admin who processed
+  
+  // Period info (what period this payment covers)
+  periodStart   DateTime
+  periodEnd     DateTime
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  affiliate   AffUser @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([affiliateId])
+  @@index([requestedAt])
+  @@index([periodStart, periodEnd])
+  @@map("aff_payment_requests")
+}
+
+
