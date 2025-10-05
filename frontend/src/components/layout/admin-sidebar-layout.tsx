@@ -15,6 +15,10 @@ import {
   User,
   Bell,
   Search,
+  TrendingUp,
+  Target,
+  Link as LinkIcon,
+  DollarSign,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -30,6 +34,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { NavigationMenu } from './NavigationMenu';
 
 interface AdminSidebarLayoutProps {
   children: React.ReactNode;
@@ -40,6 +45,33 @@ const navigation = [
     name: 'Dashboard',
     href: '/admin/dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    name: 'Affiliate',
+    href: '/admin/affiliate',
+    icon: TrendingUp,
+    children: [
+      {
+        name: 'Overview',
+        href: '/admin/affiliate',
+        icon: LayoutDashboard,
+      },
+      {
+        name: 'Campaigns',
+        href: '/admin/affiliate/campaigns',
+        icon: Target,
+      },
+      {
+        name: 'Links',
+        href: '/admin/affiliate/links',
+        icon: LinkIcon,
+      },
+      {
+        name: 'Payments',
+        href: '/admin/affiliate/payments',
+        icon: DollarSign,
+      },
+    ],
   },
   {
     name: 'Todos',
@@ -121,30 +153,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
 
           {/* Navigation */}
           <ScrollArea className="flex-1 py-4">
-            <nav className="flex flex-col gap-1 px-2">
-              {navigation.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-                const Icon = item.icon;
-                
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent',
-                      isActive
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-muted-foreground hover:text-foreground',
-                      collapsed && 'justify-center'
-                    )}
-                    title={collapsed ? item.name : undefined}
-                    >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    {!collapsed && <span>{item.name}</span>}
-                  </Link>
-                );
-              })}
-            </nav>
+            <NavigationMenu navigation={navigation} collapsed={collapsed} />
           </ScrollArea>
 
           {/* User profile */}
@@ -232,29 +241,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
 
               {/* Navigation */}
               <ScrollArea className="flex-1 py-4">
-                <nav className="flex flex-col gap-1 px-2">
-                  {navigation.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-                    const Icon = item.icon;
-                    
-                    return (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        onClick={() => setMobileOpen(false)}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent',
-                          isActive
-                            ? 'bg-accent text-accent-foreground'
-                            : 'text-muted-foreground hover:text-foreground'
-                        )}
-                        >
-                        <Icon className="h-5 w-5 flex-shrink-0" />
-                        <span>{item.name}</span>
-                      </Link>
-                    );
-                  })}
-                </nav>
+                <NavigationMenu navigation={navigation} collapsed={false} onItemClick={() => setMobileOpen(false)} />
               </ScrollArea>
 
               {/* User profile */}
