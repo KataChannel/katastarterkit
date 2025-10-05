@@ -842,6 +842,9 @@ type Mutation {
   processPaymentRequest(id: String!, status: String!): AffPaymentRequest!
   publishPost(id: String!): Post!
   registerUser(input: RegisterUserInput!): AuthResponse!
+
+  """Reindex all data from database into Orama search indexes"""
+  reindexAllData: ReindexResult!
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   shareTask(input: ShareTaskInput!): TaskShare!
@@ -870,6 +873,42 @@ type Mutation {
 
   """Create or update a record based on criteria"""
   upsert(create: JSONObject!, include: JSONObject, modelName: String!, select: JSONObject, update: JSONObject!, where: JSONObject!): JSONObject!
+}
+
+type OramaElapsed {
+  formatted: String!
+}
+
+type OramaHealthCheck {
+  indexes: [String!]!
+  status: String!
+}
+
+type OramaSearchHit {
+  document: JSON!
+  id: String!
+  score: Float!
+}
+
+input OramaSearchInput {
+  facets: JSON
+  limit: Int = 20
+  offset: Int = 0
+  sortBy: OramaSortInput
+  term: String
+  where: JSON
+}
+
+type OramaSearchResult {
+  count: Int!
+  elapsed: OramaElapsed!
+  facets: JSON
+  hits: [OramaSearchHit!]!
+}
+
+input OramaSortInput {
+  order: SortOrder!
+  property: String!
 }
 
 type OtpResponse {
@@ -1101,11 +1140,33 @@ type Query {
   menus(direction: String, filter: MenuFilterDto, limit: Float, orderBy: String, page: Float): MenuPaginationResponseDto!
   mobileMenus: [MenuResponseDto!]!
   myMenus(type: String): [MenuResponseDto!]!
+
+  """Check Orama search engine health status"""
+  oramaHealthCheck: OramaHealthCheck!
+
+  """Search affiliate campaigns using Orama full-text search engine"""
+  searchAffiliateCampaigns(input: OramaSearchInput!): OramaSearchResult!
+
+  """Search affiliate links using Orama full-text search engine"""
+  searchAffiliateLinks(input: OramaSearchInput!): OramaSearchResult!
   searchInvoices(input: InvoiceSearchInput!): InvoiceSearchResult!
   searchPermissions(input: PermissionSearchInput!): PermissionSearchResult!
+
+  """Search projects using Orama full-text search engine"""
+  searchProjects(input: OramaSearchInput!): OramaSearchResult!
   searchRoles(input: RoleSearchInput!): RoleSearchResult!
-  searchUsers(input: UserSearchInput!): UserSearchResult!
+
+  """Search tasks using Orama full-text search engine"""
+  searchTasks(input: OramaSearchInput!): OramaSearchResult!
+
+  """Search users using Orama full-text search engine"""
+  searchUsers(input: OramaSearchInput!): OramaSearchResult!
   sidebarMenus: [MenuResponseDto!]!
+
+  """
+  Search across all entity types (tasks, users, projects, affiliate campaigns, affiliate links)
+  """
+  universalSearch(input: OramaSearchInput!): UniversalSearchResult!
 
   """Get API version"""
   version: String!
@@ -1119,6 +1180,12 @@ input RegisterUserInput {
   password: String
   phone: String
   username: String!
+}
+
+type ReindexResult {
+  message: String!
+  success: Boolean!
+  totalIndexed: Int
 }
 
 input RequestPhoneVerificationInput {
@@ -1182,6 +1249,12 @@ input SocialLoginInput {
   providerId: String
   rememberMe: Boolean
   token: String!
+}
+
+"""Sort order for search results"""
+enum SortOrder {
+  ASC
+  DESC
 }
 
 type Subscription {
@@ -1441,6 +1514,14 @@ input UnifiedUpdateInput {
   select: JSONObject
 }
 
+type UniversalSearchResult {
+  affiliateCampaigns: OramaSearchResult!
+  affiliateLinks: OramaSearchResult!
+  projects: OramaSearchResult!
+  tasks: OramaSearchResult!
+  users: OramaSearchResult!
+}
+
 input UpdateAffUserInput {
   bankAccount: String
   businessType: String
@@ -1644,19 +1725,6 @@ enum UserRoleType {
   ADMIN
   GUEST
   USER
-}
-
-input UserSearchInput {
-  createdAfter: String
-  createdBefore: String
-  isActive: Boolean
-  isVerified: Boolean
-  page: Int = 0
-  roleType: UserRoleType
-  search: String
-  size: Int = 20
-  sortBy: String = "createdAt"
-  sortOrder: String = "desc"
 }
 
 type UserSearchResult {

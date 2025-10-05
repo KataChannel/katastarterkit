@@ -14,7 +14,6 @@ import {
   LogOut,
   User,
   Bell,
-  Search,
   TrendingUp,
   Target,
   Link as LinkIcon,
@@ -30,11 +29,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { NavigationMenu } from './NavigationMenu';
+import { UniversalSearch } from '@/components/search/universal-search';
 
 interface AdminSidebarLayoutProps {
   children: React.ReactNode;
@@ -297,14 +296,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
             {/* Search */}
             <div className="flex-1 flex items-center justify-between gap-4">
               <div className="w-full max-w-sm hidden sm:block">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search..."
-                    className="pl-8 w-full"
-                  />
-                </div>
+                <UniversalSearch />
               </div>
 
               {/* Right side actions */}

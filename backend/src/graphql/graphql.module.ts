@@ -8,6 +8,7 @@ import { TaskResolver } from './resolvers/task.resolver';
 import { PageResolver } from './resolvers/page.resolver';
 import { InvoiceResolver } from './resolvers/invoice.resolver';
 import { PermissionResolver, RoleResolver, UserRbacResolver } from './resolvers/rbac.resolver';
+import { OramaSearchResolver } from './resolvers/orama-search.resolver';
 
 import { InvoiceController } from '../controllers/invoice.controller';
 import { AffiliateController } from '../controllers/affiliate.controller';
@@ -34,6 +35,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { GrokModule } from '../grok/grok.module';
 import { MinioModule } from '../minio/minio.module';
+import { SearchModule } from '../search/search.module';
 import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingResolver, AffiliatePaymentResolver } from './resolvers/affiliate.resolver';
 // JSON scalar handled by graphql-type-json directly
 
@@ -43,6 +45,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     AuthModule,
     GrokModule,
     MinioModule,
+    SearchModule,
   ],
   controllers: [
     InvoiceController,
@@ -69,6 +72,9 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     AffiliateCampaignResolver,
     AffiliateTrackingResolver,
     AffiliatePaymentResolver,
+    
+    // Search resolver
+    OramaSearchResolver,
     
     // Services
     UserService,
@@ -115,3 +121,4 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
   ],
 })
 export class GraphQLResolversModule {}
+
