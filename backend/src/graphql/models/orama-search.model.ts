@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int, Float, InputType, registerEnumType } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
+import { IsString, IsOptional, IsInt, Min, Max, IsEnum } from 'class-validator';
 
 // Search result hit
 @ObjectType()
@@ -57,13 +58,13 @@ export class UniversalSearchResult {
 }
 
 // Sort order enum
-export enum SortOrder {
+export enum OramaSortOrder {
   ASC = 'ASC',
   DESC = 'DESC',
 }
 
-registerEnumType(SortOrder, {
-  name: 'SortOrder',
+registerEnumType(OramaSortOrder, {
+  name: 'OramaSortOrder',
   description: 'Sort order for search results',
 });
 
@@ -71,31 +72,45 @@ registerEnumType(SortOrder, {
 @InputType()
 export class OramaSortInput {
   @Field()
+  @IsString()
   property: string;
 
-  @Field(() => SortOrder)
-  order: SortOrder;
+  @Field(() => OramaSortOrder)
+  @IsEnum(OramaSortOrder)
+  order: OramaSortOrder;
 }
 
 // Search query input
 @InputType()
 export class OramaSearchInput {
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   term?: string;
 
   @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
   where?: any;
 
   @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
   facets?: any;
 
   @Field(() => OramaSortInput, { nullable: true })
+  @IsOptional()
   sortBy?: OramaSortInput;
 
   @Field(() => Int, { nullable: true, defaultValue: 20 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
   limit?: number;
 
   @Field(() => Int, { nullable: true, defaultValue: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
   offset?: number;
 }
 
