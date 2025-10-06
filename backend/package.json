@@ -31,6 +31,7 @@
     "db:backup": "npx ts-node prisma/backup.ts",
     "db:restore": "npx ts-node prisma/restore.ts",
     "prisma:seed": "ts-node prisma/seed.ts",
+    "seed:comprehensive": "ts-node src/scripts/run-comprehensive-seeder.ts",
     "orama:reindex": "bun scripts/orama-reindex.ts"
   },
   "dependencies": {

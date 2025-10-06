@@ -30,9 +30,13 @@ input AdminUpdateUserInput {
 
 type AffCampaign {
   affiliates: [AffCampaignAffiliate!]
+  averageOrderValue: Float
+  categories: [String!]
   commissionRate: Float!
   commissionType: String!
+  conversionRate: Float
   conversions: [AffConversion!]
+  cookieDuration: Int
   createdAt: DateTime!
   creator: AffUser
   creatorId: String!
@@ -42,6 +46,8 @@ type AffCampaign {
   id: ID!
   links: [AffLink!]
   maxAffiliates: Int
+  maxPayoutAmount: Float
+  minPayoutAmount: Float
   name: String!
   productImage: String
   productName: String!
@@ -49,10 +55,12 @@ type AffCampaign {
   requireApproval: Boolean!
   startDate: DateTime
   status: AffCampaignStatus!
+  targetCountries: [String!]
   totalClicks: Int!
   totalCommission: Float!
   totalConversions: Int!
   totalRevenue: Float!
+  type: String
   updatedAt: DateTime!
 }
 
@@ -282,6 +290,16 @@ enum AffUserRole {
   MERCHANT
 }
 
+input AggregateInput {
+  _avg: JSONObject
+  _count: JSONObject
+  _max: JSONObject
+  _min: JSONObject
+  _sum: JSONObject
+  model: String!
+  where: JSONObject
+}
+
 input AssignRolePermissionInput {
   conditions: JSON
   effect: String! = "allow"
@@ -395,6 +413,11 @@ type Comment {
   userId: String!
 }
 
+input CountInput {
+  model: String!
+  where: JSONObject
+}
+
 input CreateAffLinkInput {
   campaignId: String!
   expiresAt: DateTime
@@ -437,6 +460,13 @@ input CreateCommentInput {
   postId: String!
 }
 
+input CreateInput {
+  data: JSONObject!
+  include: JSONObject
+  model: String!
+  select: JSONObject
+}
+
 input CreateInvoiceDetailInput {
   dgia: Float
   dvtinh: String
@@ -475,6 +505,12 @@ input CreateInvoiceInput {
   tgtttbchu: String
   tgtttbso: Float
   tthai: String
+}
+
+input CreateManyInput {
+  data: [JSONObject!]!
+  model: String!
+  skipDuplicates: Boolean! = false
 }
 
 input CreateMenuDto {
@@ -592,6 +628,18 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input DeleteInput {
+  include: JSONObject
+  model: String!
+  select: JSONObject
+  where: JSONObject!
+}
+
+input DeleteManyInput {
+  model: String!
+  where: JSONObject!
+}
+
 type ExtDetailhoadon {
   createdAt: DateTime!
   dgia: Float
@@ -670,6 +718,37 @@ type ExtListhoadon {
   tttbao: String
   ttxly: String
   updatedAt: DateTime!
+}
+
+input FindManyInput {
+  include: JSONObject
+  model: String!
+  orderBy: JSONObject
+  pagination: PaginationQueryInput
+  select: JSONObject
+  where: JSONObject
+}
+
+input FindUniqueInput {
+  include: JSONObject
+  model: String!
+  select: JSONObject
+  where: JSONObject!
+}
+
+input GroupByInput {
+  _avg: JSONObject
+  _count: JSONObject
+  _max: JSONObject
+  _min: JSONObject
+  _sum: JSONObject
+  by: [String!]!
+  having: JSONObject
+  model: String!
+  orderBy: JSONObject
+  skip: Int
+  take: Int
+  where: JSONObject
 }
 
 input InvoiceSearchInput {
@@ -830,6 +909,27 @@ type Mutation {
   deleteTaskMedia(mediaId: String!): Boolean!
   deleteUser(id: String!): Boolean!
   duplicatePage(id: String!, slug: String, title: String): Page!
+
+  """Create a new record"""
+  dynamicCreate(input: CreateInput!): JSONObject!
+
+  """Create multiple records in bulk"""
+  dynamicCreateMany(input: CreateManyInput!): JSONObject!
+
+  """Delete a single record"""
+  dynamicDelete(input: DeleteInput!): JSONObject!
+
+  """Delete multiple records in bulk"""
+  dynamicDeleteMany(input: DeleteManyInput!): JSONObject!
+
+  """Update a single record"""
+  dynamicUpdate(input: UpdateInput!): JSONObject!
+
+  """Update multiple records in bulk"""
+  dynamicUpdateMany(input: UpdateManyInput!): JSONObject!
+
+  """Create or update a record (upsert)"""
+  dynamicUpsert(input: UpsertInput!): JSONObject!
   generatePostSummary(postId: String!): String!
   generateSummary(content: String!, maxLength: Float! = 200): String!
   generateTags(content: String!, maxTags: Float! = 5): [String!]!
@@ -850,6 +950,9 @@ type Mutation {
   shareTask(input: ShareTaskInput!): TaskShare!
   toggleMenuActive(id: ID!): MenuResponseDto!
   toggleMenuVisibility(id: ID!): MenuResponseDto!
+
+  """Execute any Prisma mutation operation dynamically"""
+  universalMutation(input: UniversalQueryInput!): JSONObject!
   updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
   updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
@@ -1011,6 +1114,13 @@ type PaginationMeta {
   totalPages: Int!
 }
 
+input PaginationQueryInput {
+  limit: Int! = 20
+  page: Int! = 1
+  sortBy: String
+  sortOrder: String! = "desc"
+}
+
 type Permission {
   action: String!
   category: String!
@@ -1099,6 +1209,24 @@ type Query {
   """Count records matching the criteria"""
   count(modelName: String!, where: JSONObject): Float!
 
+  """Compute aggregations (sum, avg, min, max, count)"""
+  dynamicAggregate(input: AggregateInput!): JSONObject!
+
+  """Count records matching criteria"""
+  dynamicCount(input: CountInput!): JSONObject!
+
+  """Find first matching record"""
+  dynamicFindFirst(input: FindManyInput!): JSONObject!
+
+  """Find many records with pagination and filters"""
+  dynamicFindMany(input: FindManyInput!): JSONObject!
+
+  """Find unique record by identifier"""
+  dynamicFindUnique(input: FindUniqueInput!): JSONObject!
+
+  """Group records and compute aggregations"""
+  dynamicGroupBy(input: GroupByInput!): JSONObject!
+
   """Check if a record exists matching the criteria"""
   exists(modelName: String!, where: JSONObject!): Boolean!
 
@@ -1140,6 +1268,9 @@ type Query {
   """Hello world query"""
   hello: String!
   invoiceExists(idServer: String!, khmshdon: String!, nbmst: String!, shdon: String!): Boolean!
+
+  """Get list of all available Prisma models"""
+  listAvailableModels: [String!]!
   menu(id: ID!): MenuResponseDto
   menuBySlug(slug: String!): MenuResponseDto
   menuTree(parentId: String, type: String): [MenuResponseDto!]!
@@ -1168,6 +1299,9 @@ type Query {
   """Search users using Orama full-text search engine"""
   searchUsers(input: OramaSearchInput!): OramaSearchResult!
   sidebarMenus: [MenuResponseDto!]!
+
+  """Execute any Prisma query operation dynamically"""
+  universalQuery(input: UniversalQueryInput!): JSONObject!
 
   """
   Search across all entity types (tasks, users, projects, affiliate campaigns, affiliate links)
@@ -1514,6 +1648,20 @@ input UnifiedUpdateInput {
   select: JSONObject
 }
 
+input UniversalQueryInput {
+  cursor: JSONObject
+  data: JSONObject
+  distinct: [String!]
+  include: JSONObject
+  model: String!
+  operation: String!
+  orderBy: JSONObject
+  select: JSONObject
+  skip: Int
+  take: Int
+  where: JSONObject
+}
+
 type UniversalSearchResult {
   affiliateCampaigns: OramaSearchResult!
   affiliateLinks: OramaSearchResult!
@@ -1552,6 +1700,20 @@ input UpdateCampaignInput {
 
 input UpdateCommentInput {
   content: String
+}
+
+input UpdateInput {
+  data: JSONObject!
+  include: JSONObject
+  model: String!
+  select: JSONObject
+  where: JSONObject!
+}
+
+input UpdateManyInput {
+  data: JSONObject!
+  model: String!
+  where: JSONObject!
 }
 
 input UpdateMenuDto {
@@ -1658,6 +1820,15 @@ input UploadTaskMediaInput {
   taskId: String!
   type: String!
   url: String!
+}
+
+input UpsertInput {
+  create: JSONObject!
+  include: JSONObject
+  model: String!
+  select: JSONObject
+  update: JSONObject!
+  where: JSONObject!
 }
 
 type User {

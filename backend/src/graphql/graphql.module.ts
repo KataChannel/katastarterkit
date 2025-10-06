@@ -9,6 +9,7 @@ import { PageResolver } from './resolvers/page.resolver';
 import { InvoiceResolver } from './resolvers/invoice.resolver';
 import { PermissionResolver, RoleResolver, UserRbacResolver } from './resolvers/rbac.resolver';
 import { OramaSearchResolver } from './resolvers/orama-search.resolver';
+import { UniversalQueryResolver } from './resolvers/universal-query.resolver';
 
 import { InvoiceController } from '../controllers/invoice.controller';
 import { AffiliateController } from '../controllers/affiliate.controller';
@@ -30,6 +31,7 @@ import { RbacService } from '../services/rbac.service';
 import { AffiliateUserService, AffiliateCampaignService } from '../services/affiliate.service';
 import { AffiliateTrackingService } from '../services/affiliate-tracking.service';
 import { AffiliatePaymentService } from '../services/affiliate-payment.service';
+import { DynamicQueryGeneratorService } from './services/dynamic-query-generator.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
@@ -76,6 +78,9 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     // Search resolver
     OramaSearchResolver,
     
+    // Universal Dynamic Query resolver
+    UniversalQueryResolver,
+    
     // Services
     UserService,
     PostService,
@@ -97,6 +102,9 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     AffiliateCampaignService,
     AffiliateTrackingService,
     AffiliatePaymentService,
+    
+    // Dynamic Query service
+    DynamicQueryGeneratorService,
   ],
   exports: [
     UserService,

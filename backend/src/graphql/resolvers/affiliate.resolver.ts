@@ -23,7 +23,7 @@ import { AffiliateUserService, AffiliateCampaignService } from '../../services/a
 import { AffiliateTrackingService } from '../../services/affiliate-tracking.service';
 import { AffiliatePaymentService } from '../../services/affiliate-payment.service';
 
-// Helper function to map Decimal to number
+// Helper function to map Decimal to number and compute additional fields
 const mapDecimalFields = (data: any): any => {
   if (!data) return data;
   const mapped = { ...data };
@@ -37,6 +37,26 @@ const mapDecimalFields = (data: any): any => {
   if (mapped.saleAmount) mapped.saleAmount = Number(mapped.saleAmount);
   if (mapped.commission) mapped.commission = Number(mapped.commission);
   if (mapped.amount) mapped.amount = Number(mapped.amount);
+  
+  // Compute additional fields for AffCampaign
+  if (data.totalClicks !== undefined && data.totalConversions !== undefined) {
+    // Compute conversion rate as percentage
+    mapped.conversionRate = data.totalClicks > 0 
+      ? Number(((data.totalConversions / data.totalClicks) * 100).toFixed(2))
+      : 0;
+    
+    // Compute average order value
+    mapped.averageOrderValue = data.totalConversions > 0
+      ? Number((Number(data.totalRevenue || 0) / data.totalConversions).toFixed(2))
+      : 0;
+  }
+  
+  // Set default values for optional fields
+  if (mapped.type === undefined) mapped.type = 'standard';
+  if (mapped.cookieDuration === undefined) mapped.cookieDuration = 30; // 30 days default
+  if (mapped.minPayoutAmount === undefined) mapped.minPayoutAmount = 50; // $50 minimum
+  if (mapped.categories === undefined) mapped.categories = [];
+  if (mapped.targetCountries === undefined) mapped.targetCountries = [];
   
   return mapped;
 };

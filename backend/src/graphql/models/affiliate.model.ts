@@ -159,6 +159,31 @@ export class AffCampaign {
   @Field()
   updatedAt: Date;
 
+  // Additional computed/optional fields for frontend compatibility
+  @Field({ nullable: true })
+  type?: string;
+
+  @Field(() => Int, { nullable: true })
+  cookieDuration?: number;
+
+  @Field(() => Float, { nullable: true })
+  minPayoutAmount?: number;
+
+  @Field(() => Float, { nullable: true })
+  maxPayoutAmount?: number;
+
+  @Field(() => Float, { nullable: true })
+  conversionRate?: number;
+
+  @Field(() => Float, { nullable: true })
+  averageOrderValue?: number;
+
+  @Field(() => [String], { nullable: true })
+  categories?: string[];
+
+  @Field(() => [String], { nullable: true })
+  targetCountries?: string[];
+
   // Relations
   @Field(() => AffUser, { nullable: true })
   creator?: AffUser;
