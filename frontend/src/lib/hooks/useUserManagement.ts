@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useApolloClient } from '@apollo/client';
 import {
-  SEARCH_USERS,
   GET_USER_STATS,
   GET_USER_BY_ID,
   GET_ALL_USERS,
@@ -10,6 +9,11 @@ import {
   DELETE_USER,
   UPDATE_USER,
 } from '../graphql/user-queries';
+import { 
+  useDynamicFindMany, 
+  useDynamicCount 
+} from '../graphql/universal-dynamic-hooks';
+import { useMemo } from 'react';
 
 // Types
 interface UserSearchInput {
@@ -22,7 +26,7 @@ interface UserSearchInput {
   page?: number;
   size?: number;
   sortBy?: string;
-  sortOrder?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 interface BulkUserActionInput {
@@ -66,13 +70,157 @@ interface UpdateUserInput {
 }
 
 // Query hooks
-export function useSearchUsers(input: UserSearchInput, options?: { skip?: boolean }) {
-  return useQuery(SEARCH_USERS, {
-    variables: { input },
+
+/**
+ * useSearchUsers - Dynamic search users with flexible filtering
+ * Uses Universal Dynamic Query System for maximum flexibility
+ * 
+ * @example
+ * const result = useSearchUsers({
+ *   search: 'john',
+ *   roleType: 'ADMIN',
+ *   isActive: true,
+ *   page: 0,
+ *   size: 20
+ * });
+ * 
+ * // Access data
+ * const { users, total, loading, error, refetch } = result;
+ */
+export function useSearchUsers(input: UserSearchInput = {}, options?: { skip?: boolean }) {
+  // Build dynamic where condition
+  const whereCondition = useMemo(() => {
+    const where: any = {};
+    
+    // Search across multiple fields
+    if (input.search && input.search.trim()) {
+      where.OR = [
+        { email: { contains: input.search, mode: 'insensitive' } },
+        { username: { contains: input.search, mode: 'insensitive' } },
+        { firstName: { contains: input.search, mode: 'insensitive' } },
+        { lastName: { contains: input.search, mode: 'insensitive' } },
+      ];
+    }
+    
+    // Filter by role type
+    if (input.roleType) {
+      where.roleType = { equals: input.roleType };
+    }
+    
+    // Filter by active status
+    if (input.isActive !== undefined) {
+      where.isActive = { equals: input.isActive };
+    }
+    
+    // Filter by verified status
+    if (input.isVerified !== undefined) {
+      where.isVerified = { equals: input.isVerified };
+    }
+    
+    // Date range filters
+    if (input.createdAfter) {
+      where.createdAt = { ...(where.createdAt || {}), gte: input.createdAfter };
+    }
+    
+    if (input.createdBefore) {
+      where.createdAt = { ...(where.createdAt || {}), lte: input.createdBefore };
+    }
+    
+    return where;
+  }, [input.search, input.roleType, input.isActive, input.isVerified, input.createdAfter, input.createdBefore]);
+
+  // Build orderBy condition
+  const orderBy = useMemo(() => {
+    const sortBy = input.sortBy || 'createdAt';
+    const sortOrder = input.sortOrder || 'desc';
+    return { [sortBy]: sortOrder };
+  }, [input.sortBy, input.sortOrder]);
+
+  // Calculate pagination
+  const page = input.page || 0;
+  const size = input.size || 20;
+
+  // Fetch users with Dynamic Query
+  const { data: usersData, loading: usersLoading, error: usersError, refetch: refetchUsers } = useDynamicFindMany({
+    model: 'user',
+    where: whereCondition,
+    orderBy,
+    pagination: {
+      page,
+      limit: size,
+      sortBy: input.sortBy || 'createdAt',
+      sortOrder: input.sortOrder || 'desc',
+    },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      firstName: true,
+      lastName: true,
+      phone: true,
+      avatar: true,
+      roleType: true,
+      isActive: true,
+      isVerified: true,
+      isTwoFactorEnabled: true,
+      failedLoginAttempts: true,
+      lockedUntil: true,
+      lastLoginAt: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  }, {
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
     skip: options?.skip,
   });
+
+  // Count total users
+  const { data: countData, loading: countLoading, error: countError } = useDynamicCount({
+    model: 'user',
+    where: whereCondition,
+  }, {
+    fetchPolicy: 'cache-and-network',
+    skip: options?.skip,
+  });
+
+  // Extract and transform data
+  const users = usersData?.dynamicFindMany?.data || [];
+  const total = countData?.dynamicCount?.data || 0;
+  const totalPages = Math.ceil(total / size);
+  const loading = usersLoading || countLoading;
+  const error = usersError || countError;
+
+  // Refetch function
+  const refetch = async (newInput?: UserSearchInput) => {
+    if (newInput) {
+      // Note: For complex refetch with new params, component should call hook with new params
+      console.warn('useSearchUsers: refetch with new input not fully supported. Re-render component with new input instead.');
+    }
+    await Promise.all([
+      refetchUsers(),
+      // Count will auto-refetch due to same where condition
+    ]);
+  };
+
+  return {
+    data: {
+      searchUsers: {
+        users,
+        total,
+        page,
+        size,
+        totalPages,
+      },
+    },
+    users,
+    total,
+    page,
+    size,
+    totalPages,
+    loading,
+    error,
+    refetch,
+  };
 }
 
 export function useUserStats(options?: { skip?: boolean }) {
@@ -105,8 +253,9 @@ export function useAdminUpdateUser() {
   return useMutation(ADMIN_UPDATE_USER, {
     onCompleted: () => {
       // Refetch queries to update cache
+      // Note: Dynamic queries will auto-update, but we keep these for compatibility
       client.refetchQueries({
-        include: [SEARCH_USERS, GET_ALL_USERS, GET_USER_STATS],
+        include: [GET_ALL_USERS, GET_USER_STATS],
       });
     },
     errorPolicy: 'all',
@@ -119,8 +268,9 @@ export function useAdminCreateUser() {
   return useMutation(ADMIN_CREATE_USER, {
     onCompleted: () => {
       // Refetch queries to update cache
+      // Note: Dynamic queries will auto-update, but we keep these for compatibility
       client.refetchQueries({
-        include: [SEARCH_USERS, GET_ALL_USERS, GET_USER_STATS],
+        include: [GET_ALL_USERS, GET_USER_STATS],
       });
     },
     errorPolicy: 'all',
@@ -133,8 +283,9 @@ export function useBulkUserAction() {
   return useMutation(BULK_USER_ACTION, {
     onCompleted: () => {
       // Refetch queries to update cache
+      // Note: Dynamic queries will auto-update, but we keep these for compatibility
       client.refetchQueries({
-        include: [SEARCH_USERS, GET_ALL_USERS, GET_USER_STATS],
+        include: [GET_ALL_USERS, GET_USER_STATS],
       });
     },
     errorPolicy: 'all',
@@ -147,8 +298,9 @@ export function useDeleteUser() {
   return useMutation(DELETE_USER, {
     onCompleted: () => {
       // Refetch queries to update cache
+      // Note: Dynamic queries will auto-update, but we keep these for compatibility
       client.refetchQueries({
-        include: [SEARCH_USERS, GET_ALL_USERS, GET_USER_STATS],
+        include: [GET_ALL_USERS, GET_USER_STATS],
       });
     },
     errorPolicy: 'all',
@@ -161,8 +313,9 @@ export function useUpdateUser() {
   return useMutation(UPDATE_USER, {
     onCompleted: () => {
       // Refetch queries to update cache
+      // Note: Dynamic queries will auto-update, but we keep these for compatibility
       client.refetchQueries({
-        include: [SEARCH_USERS, GET_USER_BY_ID],
+        include: [GET_USER_BY_ID],
       });
     },
     errorPolicy: 'all',

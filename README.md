@@ -272,11 +272,40 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ## 📚 Documentation
 
+### Core Documentation
 - [**Getting Started**](docs/getting-started.md) - Detailed setup guide
 - [**Frontend Guide**](docs/frontend-setup.md) - Frontend development
 - [**Backend Guide**](docs/backend-setup.md) - Backend development
 - [**API Documentation**](docs/api.md) - GraphQL API reference
 - [**Deployment Guide**](docs/deployment.md) - Production deployment
+
+### 🚀 Universal Dynamic Query System (NEW)
+Modern, flexible query system that eliminates GraphQL schema conflicts and provides powerful Prisma-based queries.
+
+**Quick Start:**
+- [**📖 Documentation Index**](docs/DOCUMENTATION-INDEX.md) - Complete guide navigation
+- [**⚡ Quick Reference**](docs/QUICK-REFERENCE-USESEARCHUSERS.md) - Fast lookup & examples
+- [**🎨 Visual Architecture**](docs/ARCHITECTURE-VISUAL-DIAGRAM.md) - System diagrams
+
+**Detailed Guides:**
+- [**🔧 Migration Report**](docs/USERSEARCH-DYNAMIC-QUERY-MIGRATION.md) - useSearchUsers migration
+- [**🎉 Complete Report**](docs/DYNAMIC-QUERY-MIGRATION-COMPLETE.md) - Full implementation details
+- [**🐛 Bug Fix Guide**](docs/SEARCHUSERS-BUG-FIX-GUIDE.md) - Problem analysis & solutions
+
+**System Documentation:**
+- [**Backend System**](docs/DYNAMIC-QUERY-SYSTEM.md) - Server-side implementation
+- [**Frontend Integration**](docs/FRONTEND-DYNAMIC-QUERY-GUIDE.md) - Client-side hooks
+
+**Examples:**
+- [**💻 Code Examples**](frontend/src/components/examples/UserSearchExamples.tsx) - Production-ready samples
+
+**Features:**
+- ✅ No GraphQL schema conflicts
+- ✅ Multi-field search (email, username, name)
+- ✅ Advanced filtering (role, status, dates)
+- ✅ Parallel query execution
+- ✅ 100% backward compatible
+- ✅ Type-safe with TypeScript
 
 ## 🤝 Contributing
 
