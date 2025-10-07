@@ -31,6 +31,8 @@ interface NavigationItem {
     iconType?: string;
     cssClass?: string;
     customData?: any;
+    externalUrl?: string | null;
+    isExternal?: boolean;
     [key: string]: any;
   };
 }
@@ -80,7 +82,8 @@ export function NavigationMenu({ navigation, collapsed, onItemClick }: Navigatio
     
     // Get icon component (handles both string and component types)
     const IconComponent = getIconComponent(item.icon);
-
+    console.log('IconComponent:', item);
+    
     if (hasChildren) {
       return (
         <div key={itemKey}>
@@ -126,13 +129,13 @@ export function NavigationMenu({ navigation, collapsed, onItemClick }: Navigatio
       );
     }
 
+    // Check if this is an external URL
+
     return (
       <Link
         key={itemKey}
         href={item.href}
         onClick={onItemClick}
-        target={item.target === 'BLANK' ? '_blank' : undefined}
-        rel={item.target === 'BLANK' ? 'noopener noreferrer' : undefined}
         className={cn(
           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-accent',
           isActive

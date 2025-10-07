@@ -113,9 +113,10 @@ export function useAdminMenus() {
   const transformMenu = useCallback((menu: MenuTreeNode): any => {
     if (!menu) return null;
 
-    // Determine href priority: route > url > path > /slug
-    const href = menu.route || menu.url || menu.path || `/${menu.slug}`;
-
+    // Determine href priority: externalUrl > route > url > path > /slug
+    // If externalUrl exists, use it; otherwise fall back to internal routes
+    const href = menu.externalUrl || menu.route || menu.url || menu.path || `/${menu.slug}`;
+    const isExternal = !!menu.externalUrl;
     return {
       name: menu.title,
       href: href,
@@ -138,6 +139,8 @@ export function useAdminMenus() {
         iconType: menu.iconType,
         cssClass: menu.cssClass,
         customData: menu.customData,
+        externalUrl: menu.externalUrl,
+        isExternal: isExternal,
         ...menu.metadata, // Merge any additional metadata from database
       },
     };

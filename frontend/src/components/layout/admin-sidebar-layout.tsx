@@ -105,14 +105,12 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
 
   // Use dynamic menus if loaded, otherwise use static navigation
   const navigation = React.useMemo(() => {
-      console.log('staticNavigation:', staticNavigation);
-    console.log('dynamicMenus:', dynamicMenus);
     if (menusLoading || !dynamicMenus || dynamicMenus.length === 0) {
       return staticNavigation;
     }    
     return dynamicMenus;
   }, [dynamicMenus, menusLoading]);
-
+  
   const handleLogout = async () => {
     await logout();
     router.push('/');
