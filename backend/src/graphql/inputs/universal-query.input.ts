@@ -1,5 +1,6 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
+import { IsString, IsOptional, IsObject, IsNumber } from 'class-validator';
 
 /**
  * Universal Dynamic Query Input
@@ -65,21 +66,31 @@ export class PaginationQueryInput {
 @InputType()
 export class FindManyInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   where?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   select?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   include?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   orderBy?: Record<string, any>;
 
   @Field(() => PaginationQueryInput, { nullable: true })
+  @IsOptional()
   pagination?: PaginationQueryInput;
 }
 
@@ -89,15 +100,21 @@ export class FindManyInput {
 @InputType()
 export class FindUniqueInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   where: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   select?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   include?: Record<string, any>;
 }
 
@@ -107,15 +124,21 @@ export class FindUniqueInput {
 @InputType()
 export class CreateInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   data: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   select?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   include?: Record<string, any>;
 }
 
@@ -125,12 +148,15 @@ export class CreateInput {
 @InputType()
 export class CreateManyInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => [GraphQLJSONObject])
+  @IsObject({ each: true })
   data: Array<Record<string, any>>;
 
   @Field(() => Boolean, { defaultValue: false })
+  @IsOptional()
   skipDuplicates: boolean;
 }
 
@@ -140,18 +166,25 @@ export class CreateManyInput {
 @InputType()
 export class UpdateInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   where: Record<string, any>;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   data: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   select?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   include?: Record<string, any>;
 }
 
@@ -161,12 +194,15 @@ export class UpdateInput {
 @InputType()
 export class UpdateManyInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   where: Record<string, any>;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   data: Record<string, any>;
 }
 
@@ -176,21 +212,29 @@ export class UpdateManyInput {
 @InputType()
 export class UpsertInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   where: Record<string, any>;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   create: Record<string, any>;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   update: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   select?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   include?: Record<string, any>;
 }
 
@@ -200,15 +244,21 @@ export class UpsertInput {
 @InputType()
 export class DeleteInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   where: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   select?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   include?: Record<string, any>;
 }
 
@@ -218,9 +268,11 @@ export class DeleteInput {
 @InputType()
 export class DeleteManyInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => GraphQLJSONObject)
+  @IsObject()
   where: Record<string, any>;
 }
 
@@ -230,9 +282,12 @@ export class DeleteManyInput {
 @InputType()
 export class CountInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   where?: Record<string, any>;
 }
 
@@ -242,24 +297,37 @@ export class CountInput {
 @InputType()
 export class AggregateInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   where?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   _count?: Record<string, boolean> | boolean;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   _sum?: Record<string, boolean>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   _avg?: Record<string, boolean>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   _min?: Record<string, boolean>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   _max?: Record<string, boolean>;
 }
 
@@ -269,39 +337,61 @@ export class AggregateInput {
 @InputType()
 export class GroupByInput {
   @Field(() => String)
+  @IsString()
   model: string;
 
   @Field(() => [String])
+  @IsString({ each: true })
   by: string[];
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   where?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   having?: Record<string, any>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   orderBy?: Record<string, any>;
 
   @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsNumber()
   skip?: number;
 
   @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsNumber()
   take?: number;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   _count?: Record<string, boolean> | boolean;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   _sum?: Record<string, boolean>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   _avg?: Record<string, boolean>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   _min?: Record<string, boolean>;
 
   @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  @IsObject()
   _max?: Record<string, boolean>;
 }
 
@@ -311,8 +401,10 @@ export class GroupByInput {
 @InputType()
 export class RawQueryInput {
   @Field(() => String)
+  @IsString()
   query: string;
 
   @Field(() => [GraphQLJSONObject], { nullable: true })
+  @IsOptional()
   params?: any[];
 }

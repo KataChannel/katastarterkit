@@ -180,7 +180,8 @@ export class UniversalQueryResolver {
 
     if (input.pagination) {
       const { page, limit, sortBy, sortOrder } = input.pagination;
-      params.skip = (page - 1) * limit;
+      // page is 0-indexed from frontend, so skip = page * limit
+      params.skip = page * limit;
       params.take = limit;
 
       if (sortBy) {
@@ -344,7 +345,8 @@ export class UniversalQueryResolver {
     @Args('input') input: CountInput,
   ): Promise<any> {
     this.logger.log(`Dynamic Count: ${input.model}`);
-    return this.dynamicQueryService.count(input.model, input);
+    const count = await this.dynamicQueryService.count(input.model, input.where);
+    return { data: count };
   }
 
   /**
