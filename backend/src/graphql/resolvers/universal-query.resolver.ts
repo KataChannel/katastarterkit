@@ -233,7 +233,10 @@ export class UniversalQueryResolver {
     @Args('input') input: CreateInput,
   ): Promise<any> {
     this.logger.log(`Dynamic Create: ${input.model}`);
-    return this.dynamicQueryService.create(input.model, input);
+    return this.dynamicQueryService.create(input.model, input.data, {
+      select: input.select,
+      include: input.include,
+    });
   }
 
   /**
