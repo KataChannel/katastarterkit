@@ -97,7 +97,7 @@ export function useMyMenus(type?: string) {
 
 /**
  * Hook to get sidebar menus for authenticated users
- * Builds tree structure from flat array
+ * Builds tree structure from flat array and transforms to NavigationItem format
  */
 export function useAdminMenus() {
   const input = buildMenuFindManyInput({
@@ -109,24 +109,36 @@ export function useAdminMenus() {
   const { data, loading, error, refetch } = useDynamicFindMany<Menu[]>(input, {
     fetchPolicy: 'cache-and-network',
   });  
+  
   const transformMenu = useCallback((menu: MenuTreeNode): any => {
-    console.log('menu:', menu);
-    
     if (!menu) return null;
+
+    // Determine href priority: route > url > path > /slug
+    const href = menu.route || menu.url || menu.path || `/${menu.slug}`;
 
     return {
       name: menu.title,
-      href: menu.path || menu.url || menu.route || `/${menu.slug}`,
-      icon: menu.icon,
+      href: href,
+      icon: menu.icon || undefined, // Icon string (e.g., "LayoutDashboard")
       children: menu.children?.map(transformMenu).filter(Boolean) || undefined,
-      badge: menu.badge,
-      target: menu.target,
+      badge: menu.badge || undefined,
+      badgeColor: menu.badgeColor || undefined,
+      target: menu.target || 'SELF',
       metadata: {
         id: menu.id,
         type: menu.type,
         order: menu.order,
         level: menu.level,
         isProtected: menu.isProtected,
+        isActive: menu.isActive,
+        isVisible: menu.isVisible,
+        isPublic: menu.isPublic,
+        slug: menu.slug,
+        description: menu.description,
+        iconType: menu.iconType,
+        cssClass: menu.cssClass,
+        customData: menu.customData,
+        ...menu.metadata, // Merge any additional metadata from database
       },
     };
   }, []);
@@ -138,7 +150,7 @@ export function useAdminMenus() {
     // Build tree from flat array
     const tree = buildMenuTree(result);
     
-    // Transform to sidebar format
+    // Transform to sidebar format (NavigationItem[])
     return tree.map(transformMenu).filter(Boolean);
   }, [data, transformMenu]);
   

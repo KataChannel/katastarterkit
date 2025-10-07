@@ -20,31 +20,52 @@ export interface Menu {
   id: string;
   title: string;
   slug: string;
-  description?: string;
-  type: string;
-  parentId?: string;
+  description?: string | null;
+  type: string; // MenuType enum: SIDEBAR, HEADER, FOOTER, MOBILE, CUSTOM
+  
+  // Hierarchy
+  parentId?: string | null;
   order: number;
   level: number;
-  path?: string;
-  url?: string;
-  route?: string;
-  externalUrl?: string;
-  target?: string;
-  icon?: string;
-  iconType?: string;
-  badge?: string;
-  badgeColor?: string;
-  image?: string;
-  requiredPermissions?: string[];
-  requiredRoles?: string[];
+  path?: string | null;
+  
+  // Navigation
+  url?: string | null;
+  route?: string | null;
+  externalUrl?: string | null;
+  target?: string; // MenuTarget enum: SELF, BLANK, MODAL
+  
+  // Display
+  icon?: string | null;
+  iconType?: string | null;
+  badge?: string | null;
+  badgeColor?: string | null;
+  image?: string | null;
+  
+  // Permissions & Access
+  requiredPermissions: string[];
+  requiredRoles: string[];
   isPublic: boolean;
+  
+  // State
   isActive: boolean;
   isVisible: boolean;
   isProtected: boolean;
+  
+  // Metadata
+  metadata?: any | null;
+  cssClass?: string | null;
+  customData?: any | null;
+  
+  // Timestamps
   createdAt: string;
   updatedAt: string;
-  createdBy?: string;
-  updatedBy?: string;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  
+  // Relations (for GraphQL responses)
+  parent?: Menu | null;
+  children?: Menu[] | null;
 }
 
 export interface MenuTreeNode extends Menu {
@@ -320,7 +341,7 @@ export function getMenuPath(menus: Menu[], targetId: string): Menu[] {
 }
 
 /**
- * Default menu select fields
+ * Default select fields for Menu queries
  */
 export const DEFAULT_MENU_SELECT = {
   id: true,
@@ -347,6 +368,11 @@ export const DEFAULT_MENU_SELECT = {
   isActive: true,
   isVisible: true,
   isProtected: true,
+  metadata: true,
+  cssClass: true,
+  customData: true,
   createdAt: true,
   updatedAt: true,
+  createdBy: true,
+  updatedBy: true,
 };

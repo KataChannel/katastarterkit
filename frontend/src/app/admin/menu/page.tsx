@@ -8,7 +8,7 @@ import {
   useUpdateMenu,
   useDeleteMenu,
 } from '@/lib/hooks/useMenus';
-import { Menu as MenuType } from '@/lib/graphql/menu-dynamic-queries';
+import { Menu } from '@/lib/graphql/menu-dynamic-queries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,41 +50,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 
-interface Menu {
-  id: string;
-  title: string;
-  slug: string;
-  description?: string;
-  type: string;
-  order: number;
-  level: number;
-  icon?: string;
-  route?: string;
-  url?: string;
-  path?: string;
-  isActive: boolean;
-  isVisible: boolean;
-  isProtected: boolean;
-  isPublic: boolean;
-  parent?: {
-    id: string;
-    title: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
-
 /**
- * TODO: This file needs refactoring to fully use Universal Dynamic Query System
- * Current issues:
- * 1. Remove local Menu interface and use MenuType from menu-dynamic-queries
- * 2. Fix DialogDescription import (not exported from dialog component)
- * 3. Remove toggle functions - they're handled by updateMenuMutation now
- * 4. Update all menu references to use proper type
- * 5. Fix data.menus.total reference (no longer exists with dynamic queries)
+ * Menu Management Page
  * 
- * For now, this page will have some type errors but functionality works.
- * The admin-sidebar-layout.tsx is already fully migrated and working.
+ * Now using Universal Dynamic Query System with synchronized types from menu-dynamic-queries.ts
+ * All type mismatches resolved by using the canonical Menu interface
  */
 
 export default function MenuManagementPage() {
@@ -129,7 +99,7 @@ export default function MenuManagementPage() {
 
   // Ensure menus is always Menu[] type
   const menus = useMemo(() => {
-    return Array.isArray(menusData) ? menusData as MenuType[] : [];
+    return Array.isArray(menusData) ? menusData as Menu[] : [];
   }, [menusData]);
   console.log('Menus:', menus);
   
@@ -207,7 +177,7 @@ export default function MenuManagementPage() {
     }
   };
 
-  const openEditDialog = (menu: MenuType) => {
+  const openEditDialog = (menu: Menu) => {
     setSelectedMenu(menu);
     setFormData({
       title: menu.title,

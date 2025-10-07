@@ -315,7 +315,10 @@ export class UniversalQueryResolver {
     @Args('input') input: DeleteInput,
   ): Promise<any> {
     this.logger.log(`Dynamic Delete: ${input.model}`);
-    return this.dynamicQueryService.delete(input.model, input);
+    return this.dynamicQueryService.delete(input.model, input.where, {
+      select: input.select,
+      include: input.include,
+    });
   }
 
   /**
@@ -329,7 +332,7 @@ export class UniversalQueryResolver {
     @Args('input') input: DeleteManyInput,
   ): Promise<any> {
     this.logger.log(`Dynamic Delete Many: ${input.model}`);
-    return this.dynamicQueryService.deleteMany(input.model, input);
+    return this.dynamicQueryService.deleteMany(input.model, input.where);
   }
 
   // ==================== AGGREGATION QUERIES ====================

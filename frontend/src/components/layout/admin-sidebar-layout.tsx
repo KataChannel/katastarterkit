@@ -53,54 +53,54 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
   const { menus: dynamicMenus, loading: menusLoading, error: menusError } = useAdminMenus();
 
   // Fallback static navigation (used while loading or on error)
-  const staticNavigation = [
-    {
-      name: 'Dashboard',
-      href: '/admin/dashboard',
-      icon: LayoutDashboard,
-    },
-    {
-      name: 'Affiliate',
-      href: '/admin/affiliate',
-      icon: TrendingUp,
-      children: [
-        {
-          name: 'Overview',
-          href: '/admin/affiliate',
-          icon: LayoutDashboard,
-        },
-        {
-          name: 'Campaigns',
-          href: '/admin/affiliate/campaigns',
-          icon: Target,
-        },
-        {
-          name: 'Links',
-          href: '/admin/affiliate/links',
-          icon: LinkIcon,
-        },
-        {
-          name: 'Payments',
-          href: '/admin/affiliate/payments',
-          icon: DollarSign,
-        },
-      ],
-    },
-    {
-      name: 'Todos',
-      href: '/admin/todos',
-      icon: ClipboardList,
-    },
-    {
-      name: 'Users',
-      href: '/admin/users',
-      icon: Users,
-    },
-    {
-      name: 'Settings',
-      href: '/admin/settings',
-      icon: Settings,
-    },
+  const staticNavigation:any[] = [
+    // {
+    //   name: 'Dashboard',
+    //   href: '/admin/dashboard',
+    //   icon: LayoutDashboard,
+    // },
+    // {
+    //   name: 'Affiliate',
+    //   href: '/admin/affiliate',
+    //   icon: TrendingUp,
+    //   children: [
+    //     {
+    //       name: 'Overview',
+    //       href: '/admin/affiliate',
+    //       icon: LayoutDashboard,
+    //     },
+    //     {
+    //       name: 'Campaigns',
+    //       href: '/admin/affiliate/campaigns',
+    //       icon: Target,
+    //     },
+    //     {
+    //       name: 'Links',
+    //       href: '/admin/affiliate/links',
+    //       icon: LinkIcon,
+    //     },
+    //     {
+    //       name: 'Payments',
+    //       href: '/admin/affiliate/payments',
+    //       icon: DollarSign,
+    //     },
+    //   ],
+    // },
+    // {
+    //   name: 'Todos',
+    //   href: '/admin/todos',
+    //   icon: ClipboardList,
+    // },
+    // {
+    //   name: 'Users',
+    //   href: '/admin/users',
+    //   icon: Users,
+    // },
+    // {
+    //   name: 'Settings',
+    //   href: '/admin/settings',
+    //   icon: Settings,
+    // },
   ];
 
   // Use dynamic menus if loaded, otherwise use static navigation
