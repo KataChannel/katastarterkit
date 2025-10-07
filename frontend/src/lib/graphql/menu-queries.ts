@@ -5,7 +5,7 @@ import { gql } from '@apollo/client';
 // =====================================================
 
 export const MENU_FRAGMENT = gql`
-  fragment MenuFields on Menu {
+  fragment MenuFields on MenuResponseDto {
     id
     title
     slug
@@ -30,9 +30,6 @@ export const MENU_FRAGMENT = gql`
     isActive
     isVisible
     isProtected
-    metadata
-    cssClass
-    customData
     createdAt
     updatedAt
     createdBy
@@ -40,37 +37,27 @@ export const MENU_FRAGMENT = gql`
   }
 `;
 
-export const MENU_WITH_RELATIONS_FRAGMENT = gql`
-  ${MENU_FRAGMENT}
-  fragment MenuWithRelations on Menu {
-    ...MenuFields
-    parent {
-      ...MenuFields
-    }
-    children {
-      ...MenuFields
-    }
-  }
-`;
+// MenuResponseDto doesn't have children/parent fields
+// Use parentId to build tree structure on frontend
 
 // =====================================================
 // QUERIES
 // =====================================================
 
 export const GET_MENU = gql`
-  ${MENU_WITH_RELATIONS_FRAGMENT}
+  ${MENU_FRAGMENT}
   query GetMenu($id: ID!) {
     menu(id: $id) {
-      ...MenuWithRelations
+      ...MenuFields
     }
   }
 `;
 
 export const GET_MENU_BY_SLUG = gql`
-  ${MENU_WITH_RELATIONS_FRAGMENT}
+  ${MENU_FRAGMENT}
   query GetMenuBySlug($slug: String!) {
     menuBySlug(slug: $slug) {
-      ...MenuWithRelations
+      ...MenuFields
     }
   }
 `;
@@ -103,15 +90,9 @@ export const GET_MENUS = gql`
 
 export const GET_MENU_TREE = gql`
   ${MENU_FRAGMENT}
-  query GetMenuTree($type: MenuType, $parentId: String) {
+  query GetMenuTree($type: String, $parentId: String) {
     menuTree(type: $type, parentId: $parentId) {
       ...MenuFields
-      children {
-        ...MenuFields
-        children {
-          ...MenuFields
-        }
-      }
     }
   }
 `;
@@ -121,21 +102,15 @@ export const GET_SIDEBAR_MENUS = gql`
   query GetSidebarMenus {
     sidebarMenus {
       ...MenuFields
-      children {
-        ...MenuFields
-      }
     }
   }
 `;
 
 export const GET_MY_MENUS = gql`
   ${MENU_FRAGMENT}
-  query GetMyMenus($type: MenuType) {
+  query GetMyMenus($type: String) {
     myMenus(type: $type) {
       ...MenuFields
-      children {
-        ...MenuFields
-      }
     }
   }
 `;
@@ -145,19 +120,19 @@ export const GET_MY_MENUS = gql`
 // =====================================================
 
 export const CREATE_MENU = gql`
-  ${MENU_WITH_RELATIONS_FRAGMENT}
+  ${MENU_FRAGMENT}
   mutation CreateMenu($input: CreateMenuInput!) {
     createMenu(input: $input) {
-      ...MenuWithRelations
+      ...MenuFields
     }
   }
 `;
 
 export const UPDATE_MENU = gql`
-  ${MENU_WITH_RELATIONS_FRAGMENT}
+  ${MENU_FRAGMENT}
   mutation UpdateMenu($id: ID!, $input: UpdateMenuInput!) {
     updateMenu(id: $id, input: $input) {
-      ...MenuWithRelations
+      ...MenuFields
     }
   }
 `;
@@ -211,10 +186,10 @@ export const REORDER_MENUS = gql`
 `;
 
 export const MOVE_MENU = gql`
-  ${MENU_WITH_RELATIONS_FRAGMENT}
+  ${MENU_FRAGMENT}
   mutation MoveMenu($id: ID!, $newParentId: String, $newOrder: Int) {
     moveMenu(id: $id, newParentId: $newParentId, newOrder: $newOrder) {
-      ...MenuWithRelations
+      ...MenuFields
     }
   }
 `;

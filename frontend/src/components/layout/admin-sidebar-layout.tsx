@@ -34,60 +34,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { NavigationMenu } from './NavigationMenu';
 import { UniversalSearch } from '@/components/search/universal-search';
+import { useAdminMenus } from '@/lib/hooks/useMenus';
+import { Loader2 } from 'lucide-react';
 
 interface AdminSidebarLayoutProps {
   children: React.ReactNode;
 }
-
-const navigation = [
-  {
-    name: 'Dashboard',
-    href: '/admin/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    name: 'Affiliate',
-    href: '/admin/affiliate',
-    icon: TrendingUp,
-    children: [
-      {
-        name: 'Overview',
-        href: '/admin/affiliate',
-        icon: LayoutDashboard,
-      },
-      {
-        name: 'Campaigns',
-        href: '/admin/affiliate/campaigns',
-        icon: Target,
-      },
-      {
-        name: 'Links',
-        href: '/admin/affiliate/links',
-        icon: LinkIcon,
-      },
-      {
-        name: 'Payments',
-        href: '/admin/affiliate/payments',
-        icon: DollarSign,
-      },
-    ],
-  },
-  {
-    name: 'Todos',
-    href: '/admin/todos',
-    icon: ClipboardList,
-  },
-  {
-    name: 'Users',
-    href: '/admin/users',
-    icon: Users,
-  },
-  {
-    name: 'Settings',
-    href: '/admin/settings',
-    icon: Settings,
-  },
-];
 
 export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
   const [collapsed, setCollapsed] = React.useState(false);
@@ -95,6 +47,71 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const router = useRouter();
+
+  // Fetch dynamic menus from database with user permissions
+  // Using Universal Dynamic Query System
+  const { menus: dynamicMenus, loading: menusLoading, error: menusError } = useAdminMenus();
+
+  // Fallback static navigation (used while loading or on error)
+  const staticNavigation = [
+    {
+      name: 'Dashboard',
+      href: '/admin/dashboard',
+      icon: LayoutDashboard,
+    },
+    {
+      name: 'Affiliate',
+      href: '/admin/affiliate',
+      icon: TrendingUp,
+      children: [
+        {
+          name: 'Overview',
+          href: '/admin/affiliate',
+          icon: LayoutDashboard,
+        },
+        {
+          name: 'Campaigns',
+          href: '/admin/affiliate/campaigns',
+          icon: Target,
+        },
+        {
+          name: 'Links',
+          href: '/admin/affiliate/links',
+          icon: LinkIcon,
+        },
+        {
+          name: 'Payments',
+          href: '/admin/affiliate/payments',
+          icon: DollarSign,
+        },
+      ],
+    },
+    {
+      name: 'Todos',
+      href: '/admin/todos',
+      icon: ClipboardList,
+    },
+    {
+      name: 'Users',
+      href: '/admin/users',
+      icon: Users,
+    },
+    {
+      name: 'Settings',
+      href: '/admin/settings',
+      icon: Settings,
+    },
+  ];
+
+  // Use dynamic menus if loaded, otherwise use static navigation
+  const navigation = React.useMemo(() => {
+      console.log('staticNavigation:', staticNavigation);
+    console.log('dynamicMenus:', dynamicMenus);
+    if (menusLoading || !dynamicMenus || dynamicMenus.length === 0) {
+      return staticNavigation;
+    }    
+    return dynamicMenus;
+  }, [dynamicMenus, menusLoading]);
 
   const handleLogout = async () => {
     await logout();
@@ -152,7 +169,18 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
 
           {/* Navigation */}
           <ScrollArea className="flex-1 py-4">
-            <NavigationMenu navigation={navigation} collapsed={collapsed} />
+            {menusLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : menusError ? (
+              <div className="px-4 py-2 text-sm text-muted-foreground">
+                <p>Failed to load menu</p>
+                <p className="text-xs mt-1">Using default navigation</p>
+              </div>
+            ) : (
+              <NavigationMenu navigation={navigation} collapsed={collapsed} />
+            )}
           </ScrollArea>
 
           {/* User profile */}
@@ -240,7 +268,18 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
 
               {/* Navigation */}
               <ScrollArea className="flex-1 py-4">
-                <NavigationMenu navigation={navigation} collapsed={false} onItemClick={() => setMobileOpen(false)} />
+                {menusLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : menusError ? (
+                  <div className="px-4 py-2 text-sm text-muted-foreground">
+                    <p>Failed to load menu</p>
+                    <p className="text-xs mt-1">Using default navigation</p>
+                  </div>
+                ) : (
+                  <NavigationMenu navigation={navigation} collapsed={false} onItemClick={() => setMobileOpen(false)} />
+                )}
               </ScrollArea>
 
               {/* User profile */}

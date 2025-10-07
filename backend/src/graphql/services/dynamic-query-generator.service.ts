@@ -159,7 +159,22 @@ export class DynamicQueryGeneratorService {
       if (select) queryOptions.select = select;
       if (where) queryOptions.where = where;
       if (include) queryOptions.include = include;
-      if (orderBy) queryOptions.orderBy = orderBy;
+      
+      // Normalize orderBy: convert object with multiple keys to array
+      if (orderBy) {
+        if (Array.isArray(orderBy)) {
+          queryOptions.orderBy = orderBy;
+        } else if (typeof orderBy === 'object') {
+          // If object has multiple keys, convert to array
+          const keys = Object.keys(orderBy);
+          if (keys.length > 1) {
+            queryOptions.orderBy = keys.map(key => ({ [key]: orderBy[key] }));
+          } else {
+            queryOptions.orderBy = orderBy;
+          }
+        }
+      }
+      
       if (skip !== undefined) queryOptions.skip = skip;
       if (take !== undefined) queryOptions.take = take;
       if (distinct) queryOptions.distinct = distinct;

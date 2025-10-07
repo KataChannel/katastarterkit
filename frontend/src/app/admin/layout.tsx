@@ -36,6 +36,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return null;
   }
 
+  // return <AdminSidebarLayout>{children}</AdminSidebarLayout>;
   return <AdminSidebarLayout>{children}</AdminSidebarLayout>;
 }
 
