@@ -72,24 +72,24 @@ enum SharePermission {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  email       String?  @unique
-  username    String   @unique
-  password    String?
-  phone       String?  @unique
-  firstName   String?
-  lastName    String?
-  avatar      String?
-  roleType    UserRoleType @default(USER)
-  isActive    Boolean  @default(true)
-  isVerified  Boolean  @default(false)
-  
+  id         String       @id @default(uuid())
+  email      String?      @unique
+  username   String       @unique
+  password   String?
+  phone      String?      @unique
+  firstName  String?
+  lastName   String?
+  avatar     String?
+  roleType   UserRoleType @default(USER)
+  isActive   Boolean      @default(true)
+  isVerified Boolean      @default(false)
+
   // Security settings
-  isTwoFactorEnabled Boolean @default(false)
-  failedLoginAttempts Int @default(0)
+  isTwoFactorEnabled  Boolean   @default(false)
+  failedLoginAttempts Int       @default(0)
   lockedUntil         DateTime?
   lastLoginAt         DateTime?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -98,28 +98,28 @@ model User {
   verificationTokens VerificationToken[]
   sessions           UserSession[]
   auditLogs          AuditLog[]
-  
+
   // RBAC Relations
-  userRoles          UserRoleAssignment[]
-  userPermissions    UserPermission[]
-  resourceAccesses   ResourceAccess[]
-  
+  userRoles        UserRoleAssignment[]
+  userPermissions  UserPermission[]
+  resourceAccesses ResourceAccess[]
+
   // RBAC Creation relations
-  rolesCreated       Role[]             @relation("RoleCreator")
-  permissionsCreated Permission[]       @relation("PermissionCreator")
-  
+  rolesCreated       Role[]       @relation("RoleCreator")
+  permissionsCreated Permission[] @relation("PermissionCreator")
+
   // Content relations
-  posts         Post[]        @relation("PostAuthor")
-  comments      Comment[]     @relation("CommentAuthor")
-  likes         Like[]        @relation("UserLikes")
+  posts         Post[]         @relation("PostAuthor")
+  comments      Comment[]      @relation("CommentAuthor")
+  likes         Like[]         @relation("UserLikes")
   notifications Notification[] @relation("UserNotifications")
-  tasks         Task[]        @relation("UserTasks")
-  taskComments  TaskComment[] @relation("TaskCommentAuthor")
-  taskMedia     TaskMedia[]   @relation("TaskMediaUploader")
-  
+  tasks         Task[]         @relation("UserTasks")
+  taskComments  TaskComment[]  @relation("TaskCommentAuthor")
+  taskMedia     TaskMedia[]    @relation("TaskMediaUploader")
+
   // Tag relations
-  tagsCreated   Tag[]         @relation("TagCreator")
-  
+  tagsCreated Tag[] @relation("TagCreator")
+
   // Task sharing relations
   tasksSharedBy   TaskShare[] @relation("TaskSharedBy")
   tasksSharedWith TaskShare[] @relation("TaskSharedWith")
@@ -128,19 +128,23 @@ model User {
   chatbotModels     ChatbotModel[]
   trainingData      TrainingData[]
   chatConversations ChatConversation[]
-  chatMessages      ChatMessage[]     @relation("ChatMessageSender")
+  chatMessages      ChatMessage[]      @relation("ChatMessageSender")
 
   // Security relations
-  mfaSettings       UserMfaSettings?
-  devices           UserDevice[]
-  securityEvents    SecurityEvent[]
+  mfaSettings    UserMfaSettings?
+  devices        UserDevice[]
+  securityEvents SecurityEvent[]
 
   // Menu relations
-  menusCreated      Menu[]        @relation("MenuCreator")
-  menusUpdated      Menu[]        @relation("MenuUpdater")
+  menusCreated Menu[] @relation("MenuCreator")
+  menusUpdated Menu[] @relation("MenuUpdater")
+
+  // File management relations
+  files   File[]       @relation("UserFiles")
+  folders FileFolder[] @relation("UserFolders")
 
   // Affiliate relations
-  affiliateProfile  AffUser?
+  affiliateProfile AffUser?
 
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
@@ -154,9 +158,9 @@ model AuthMethod {
   id         String       @id @default(uuid())
   userId     String
   provider   AuthProvider
-  providerId String?      // External provider ID (Google ID, Facebook ID, etc.)
+  providerId String? // External provider ID (Google ID, Facebook ID, etc.)
   isVerified Boolean      @default(false)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -173,7 +177,7 @@ model VerificationToken {
   type      TokenType
   expiresAt DateTime
   isUsed    Boolean   @default(false)
-  
+
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -182,22 +186,22 @@ model VerificationToken {
 }
 
 model UserSession {
-  id           String    @id @default(uuid())
+  id           String   @id @default(uuid())
   userId       String
-  sessionId    String    @unique
-  refreshToken String?   @unique
-  deviceId     String?   // Link to user device
+  sessionId    String   @unique
+  refreshToken String?  @unique
+  deviceId     String? // Link to user device
   ipAddress    String?
   userAgent    String?
-  location     String?   // Geographic location
-  isActive     Boolean   @default(true)
+  location     String? // Geographic location
+  isActive     Boolean  @default(true)
   expiresAt    DateTime
-  lastActivity DateTime  @default(now())
-  
+  lastActivity DateTime @default(now())
+
   // MFA
-  mfaVerified  Boolean   @default(false)
-  mfaMethod    String?   // Method used for MFA verification
-  
+  mfaVerified Boolean @default(false)
+  mfaMethod   String? // Method used for MFA verification
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -210,72 +214,72 @@ model UserSession {
 }
 
 model AuditLog {
-  id            String   @id @default(uuid())
-  userId        String?
-  sessionId     String?
-  
+  id        String  @id @default(uuid())
+  userId    String?
+  sessionId String?
+
   // Event Details
-  action        String   // Action performed (login, logout, create, update, delete, etc.)
-  resourceType  String   // Type of resource affected (user, task, project, etc.)
-  resourceId    String?  // ID of the affected resource
-  
+  action       String // Action performed (login, logout, create, update, delete, etc.)
+  resourceType String // Type of resource affected (user, task, project, etc.)
+  resourceId   String? // ID of the affected resource
+
   // Request Details
-  ipAddress     String?
-  userAgent     String?
-  method        String?  // HTTP method
-  endpoint      String?  // API endpoint
-  
+  ipAddress String?
+  userAgent String?
+  method    String? // HTTP method
+  endpoint  String? // API endpoint
+
   // Event Data
-  oldValues     Json?    // Previous values (for updates)
-  newValues     Json?    // New values (for creates/updates)
-  details       Json?    // Additional event details
-  
+  oldValues Json? // Previous values (for updates)
+  newValues Json? // New values (for creates/updates)
+  details   Json? // Additional event details
+
   // Enhanced Tracking
-  entityName    String?  // Name/title of the affected entity
+  entityName         String? // Name/title of the affected entity
   parentResourceType String? // Parent resource type for nested resources
   parentResourceId   String? // Parent resource ID
-  
+
   // Operation Context
-  operationType String?  // CRUD, AUTH, PERMISSION, etc.
+  operationType String? // CRUD, AUTH, PERMISSION, etc.
   severity      String   @default("info") // debug, info, warn, error, critical
   tags          String[] // Searchable tags for categorization
-  
+
   // Batch Operation Support
-  batchId       String?  // For grouping related operations
-  batchSize     Int?     // Number of items in batch
-  batchIndex    Int?     // Position in batch
-  
+  batchId    String? // For grouping related operations
+  batchSize  Int? // Number of items in batch
+  batchIndex Int? // Position in batch
+
   // Outcome
-  success       Boolean  @default(true)
-  errorMessage  String?  // Error message if action failed
-  errorCode     String?  // Error code for categorization
-  
+  success      Boolean @default(true)
+  errorMessage String? // Error message if action failed
+  errorCode    String? // Error code for categorization
+
   // Performance Metrics
-  responseTime  Int?     // Response time in milliseconds
-  requestSize   Int?     // Request payload size in bytes
-  responseSize  Int?     // Response payload size in bytes
-  dbQueryTime   Int?     // Database query time in milliseconds
-  dbQueryCount  Int?     // Number of database queries executed
-  memoryUsage   Float?   // Memory usage in MB
-  cpuUsage      Float?   // CPU usage percentage
-  statusCode    Int?     // HTTP status code
-  
+  responseTime Int? // Response time in milliseconds
+  requestSize  Int? // Request payload size in bytes
+  responseSize Int? // Response payload size in bytes
+  dbQueryTime  Int? // Database query time in milliseconds
+  dbQueryCount Int? // Number of database queries executed
+  memoryUsage  Float? // Memory usage in MB
+  cpuUsage     Float? // CPU usage percentage
+  statusCode   Int? // HTTP status code
+
   // Performance Context
-  performanceData Json?  // Additional performance metrics and traces
-  
+  performanceData Json? // Additional performance metrics and traces
+
   // Compliance & Security
   requiresReview  Boolean @default(false) // Flag for manual review
   sensitiveData   Boolean @default(false) // Contains sensitive information
-  retentionPeriod Int?    // Days to retain this log entry
-  
+  retentionPeriod Int? // Days to retain this log entry
+
   // Metadata
-  correlationId String?  // For tracking related events
-  sessionInfo   Json?    // Session information at time of event
-  clientInfo    Json?    // Client application information
-  
+  correlationId String? // For tracking related events
+  sessionInfo   Json? // Session information at time of event
+  clientInfo    Json? // Client application information
+
   // Timestamps
-  timestamp     DateTime @default(now())
-  createdAt     DateTime @default(now())
+  timestamp DateTime @default(now())
+  createdAt DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
@@ -305,13 +309,13 @@ model Post {
   featuredImage String?
   status        PostStatus @default(DRAFT)
   publishedAt   DateTime?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   authorId String
   author   User   @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  
+
   // Relations
   comments Comment[]
   likes    Like[]
@@ -323,34 +327,34 @@ model Post {
 model Comment {
   id      String @id @default(uuid())
   content String
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   postId String
   post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  
+
   userId String
   user   User   @relation("CommentAuthor", fields: [userId], references: [id], onDelete: Cascade)
-  
+
   parentId String?
-  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
   replies  Comment[] @relation("CommentReplies")
 
   @@map("comments")
 }
 
 model Tag {
-  id    String @id @default(uuid())
-  name  String @unique
-  slug  String @unique
+  id    String  @id @default(uuid())
+  name  String  @unique
+  slug  String  @unique
   color String?
-  
+
   createdAt DateTime @default(now())
-  
+
   // Relations
   posts PostTag[] @relation("TagPosts")
-  
+
   // User who created this tag
   createdBy String
   creator   User   @relation("TagCreator", fields: [createdBy], references: [id], onDelete: Cascade)
@@ -363,7 +367,7 @@ model Like {
   id     String @id @default(uuid())
   postId String
   userId String
-  
+
   createdAt DateTime @default(now())
 
   post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -376,7 +380,7 @@ model Like {
 model PostTag {
   postId String
   tagId  String
-  
+
   post Post @relation("PostTags", fields: [postId], references: [id], onDelete: Cascade)
   tag  Tag  @relation("TagPosts", fields: [tagId], references: [id], onDelete: Cascade)
 
@@ -385,14 +389,14 @@ model PostTag {
 }
 
 model Notification {
-  id        String  @id @default(uuid())
-  userId    String
-  title     String
-  message   String
-  type      String
-  isRead    Boolean @default(false)
-  data      Json?
-  
+  id      String  @id @default(uuid())
+  userId  String
+  title   String
+  message String
+  type    String
+  isRead  Boolean @default(false)
+  data    Json?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -410,18 +414,18 @@ model Task {
   status      TaskStatus   @default(PENDING)
   dueDate     DateTime?
   completedAt DateTime?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   userId String
   user   User   @relation("UserTasks", fields: [userId], references: [id], onDelete: Cascade)
-  
+
   // Hierarchical relations
-  parentId  String?
-  parent    Task?   @relation("TaskSubtasks", fields: [parentId], references: [id])
-  subtasks  Task[]  @relation("TaskSubtasks")
-  
+  parentId String?
+  parent   Task?   @relation("TaskSubtasks", fields: [parentId], references: [id])
+  subtasks Task[]  @relation("TaskSubtasks")
+
   // Relations
   comments TaskComment[]
   media    TaskMedia[]
@@ -443,18 +447,18 @@ model Task {
 model TaskComment {
   id      String @id @default(uuid())
   content String
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   taskId String
   task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  
+
   userId String
   user   User   @relation("TaskCommentAuthor", fields: [userId], references: [id], onDelete: Cascade)
-  
+
   parentId String?
-  parent   TaskComment? @relation("TaskCommentReplies", fields: [parentId], references: [id])
+  parent   TaskComment?  @relation("TaskCommentReplies", fields: [parentId], references: [id])
   replies  TaskComment[] @relation("TaskCommentReplies")
 
   // Performance indexes for GIAI ĐOẠN 1 optimization
@@ -467,14 +471,14 @@ model TaskComment {
 }
 
 model TaskMedia {
-  id        String    @id @default(uuid())
-  type      MediaType
-  url       String
-  filename  String
-  size      Int
-  mimeType  String
-  caption   String?
-  
+  id       String    @id @default(uuid())
+  type     MediaType
+  url      String
+  filename String
+  size     Int
+  mimeType String
+  caption  String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -499,7 +503,7 @@ model TaskShare {
   shareToken String          @unique
   expiresAt  DateTime?
   isActive   Boolean         @default(true)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -540,111 +544,111 @@ enum ChatbotStatus {
 }
 
 model ChatbotModel {
-  id          String        @id @default(uuid())
-  name        String
-  description String?
-  systemPrompt String       @default("You are a helpful AI assistant.")
-  status      ChatbotStatus @default(INACTIVE)
-  
+  id           String        @id @default(uuid())
+  name         String
+  description  String?
+  systemPrompt String        @default("You are a helpful AI assistant.")
+  status       ChatbotStatus @default(INACTIVE)
+
   // Model configuration
-  temperature    Float   @default(0.7)
-  maxTokens     Int     @default(1000)
-  topP          Float   @default(1.0)
+  temperature      Float @default(0.7)
+  maxTokens        Int   @default(1000)
+  topP             Float @default(1.0)
   frequencyPenalty Float @default(0.0)
   presencePenalty  Float @default(0.0)
-  
+
   // Training metrics
-  totalTrainingTokens Int @default(0)
-  lastTrainedAt      DateTime?
-  
+  totalTrainingTokens Int       @default(0)
+  lastTrainedAt       DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  userId      String
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  trainingData TrainingData[]
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  trainingData  TrainingData[]
   conversations ChatConversation[]
-  
+
   @@map("chatbot_models")
 }
 
 model TrainingData {
-  id          String           @id @default(uuid())
-  title       String
-  content     String           @db.Text
-  type        TrainingDataType
-  status      TrainingStatus   @default(PENDING)
-  
+  id      String           @id @default(uuid())
+  title   String
+  content String           @db.Text
+  type    TrainingDataType
+  status  TrainingStatus   @default(PENDING)
+
   // File information if uploaded
-  fileName    String?
-  fileSize    Int?
-  filePath    String?
-  
+  fileName String?
+  fileSize Int?
+  filePath String?
+
   // Processing information
-  processedAt DateTime?
+  processedAt  DateTime?
   errorMessage String?
-  tokenCount  Int?
-  
+  tokenCount   Int?
+
   // Embeddings for vector search
-  embeddings  Json?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  embeddings Json?
 
-  // Relations
-  chatbotId   String
-  chatbot     ChatbotModel @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
-  
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@index([chatbotId, status])
-  @@map("training_data")
-}
-
-model ChatConversation {
-  id        String   @id @default(uuid())
-  title     String?
-  isActive  Boolean  @default(true)
-  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
   chatbotId String
   chatbot   ChatbotModel @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
-  
-  userId    String
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  messages  ChatMessage[]
-  
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([chatbotId, status])
+  @@map("training_data")
+}
+
+model ChatConversation {
+  id       String  @id @default(uuid())
+  title    String?
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  chatbotId String
+  chatbot   ChatbotModel @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages ChatMessage[]
+
   @@index([userId, chatbotId])
   @@map("chat_conversations")
 }
 
 model ChatMessage {
-  id        String   @id @default(uuid())
-  content   String   @db.Text
-  role      String   // 'user' or 'assistant'
-  
+  id      String @id @default(uuid())
+  content String @db.Text
+  role    String // 'user' or 'assistant'
+
   // Response metadata
-  tokenCount     Int?
-  responseTime   Int?     // milliseconds
-  relevantData   Json?    // references to training data used
-  
+  tokenCount   Int?
+  responseTime Int? // milliseconds
+  relevantData Json? // references to training data used
+
   createdAt DateTime @default(now())
 
   // Relations
   conversationId String
   conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  
+
   // User who sent this message (for user messages)
   userId String?
   user   User?   @relation("ChatMessageSender", fields: [userId], references: [id], onDelete: SetNull)
-  
+
   @@index([conversationId, createdAt])
   @@index([userId])
   @@map("chat_messages")
@@ -842,27 +846,27 @@ enum BlockType {
 }
 
 model Page {
-  id          String     @id @default(uuid())
-  title       String
-  slug        String     @unique
-  description String?
-  content     Json?      // Stored as JSON for flexibility
-  status      PageStatus @default(DRAFT)
-  seoTitle    String?
+  id             String     @id @default(uuid())
+  title          String
+  slug           String     @unique
+  description    String?
+  content        Json? // Stored as JSON for flexibility
+  status         PageStatus @default(DRAFT)
+  seoTitle       String?
   seoDescription String?
-  seoKeywords Json?      // Stored as JSON array of keywords
-  ogImage     String?
-  
+  seoKeywords    Json? // Stored as JSON array of keywords
+  ogImage        String?
+
   // Relationships
-  blocks      PageBlock[]
-  
+  blocks PageBlock[]
+
   // Timestamps and user tracking
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   publishedAt DateTime?
   createdBy   String
   updatedBy   String?
-  
+
   // Indexing
   @@index([slug])
   @@index([status])
@@ -872,141 +876,267 @@ model Page {
 model PageBlock {
   id        String    @id @default(uuid())
   type      BlockType
-  content   Json      // Block-specific content and configuration
-  style     Json?     // CSS styles and layout properties
+  content   Json // Block-specific content and configuration
+  style     Json? // CSS styles and layout properties
   order     Int       @default(0)
   isVisible Boolean   @default(true)
-  
+
   // Page relationship
-  pageId    String
-  page      Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
-  
+  pageId String
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
   // Timestamps
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Indexing for performance
   @@index([pageId, order])
   @@index([type])
 }
 
+// File Management Models
+enum FileType {
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+  ARCHIVE
+  OTHER
+}
+
+enum FileVisibility {
+  PUBLIC
+  PRIVATE
+  SHARED
+}
+
+model FileFolder {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  parentId    String?
+  parent      FileFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    FileFolder[] @relation("FolderHierarchy")
+  path        String // Full path for quick access (e.g., "/root/subfolder1/subfolder2")
+
+  // Ownership
+  userId String
+  user   User   @relation("UserFolders", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Files in this folder
+  files File[]
+
+  // Metadata
+  color    String? // Hex color for UI
+  icon     String? // Icon name/emoji
+  isSystem Boolean @default(false) // System folders can't be deleted
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([parentId])
+  @@index([path])
+}
+
+model File {
+  id String @id @default(uuid())
+
+  // File information
+  filename     String // Generated unique filename
+  originalName String // Original uploaded filename
+  mimeType     String
+  size         Int // Size in bytes
+  fileType     FileType
+
+  // Storage information
+  url    String // Public URL to access file
+  bucket String // MinIO bucket name
+  path   String // Full path in MinIO (e.g., "images/2024/01/file.jpg")
+  etag   String? // MinIO ETag for integrity
+
+  // Organization
+  folderId String?
+  folder   FileFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  // Ownership and permissions
+  userId     String
+  user       User           @relation("UserFiles", fields: [userId], references: [id], onDelete: Cascade)
+  visibility FileVisibility @default(PRIVATE)
+
+  // Metadata
+  title       String?
+  description String?
+  alt         String? // Alt text for images
+  tags        String[] // Array of tags for searching
+  metadata    Json? // Additional metadata (dimensions, duration, etc.)
+
+  // Image-specific
+  width        Int?
+  height       Int?
+  thumbnailUrl String? // URL to thumbnail version
+
+  // Usage tracking
+  downloadCount Int @default(0)
+  viewCount     Int @default(0)
+
+  // Sharing
+  shares FileShare[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([folderId])
+  @@index([fileType])
+  @@index([mimeType])
+  @@index([createdAt])
+  @@index([path])
+}
+
+model FileShare {
+  id String @id @default(uuid())
+
+  fileId String
+  file   File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  sharedBy   String
+  sharedWith String? // Null means public link
+
+  token     String    @unique // Unique token for share link
+  expiresAt DateTime?
+  password  String? // Optional password protection
+
+  // Permissions
+  canDownload Boolean @default(true)
+  canView     Boolean @default(true)
+
+  // Analytics
+  accessCount Int       @default(0)
+  lastAccess  DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([fileId])
+  @@index([token])
+  @@index([sharedBy])
+}
+
 // MFA and Security Models
 model UserMfaSettings {
-  id                      String   @id @default(uuid())
-  userId                  String   @unique
-  
+  id     String @id @default(uuid())
+  userId String @unique
+
   // TOTP Settings
-  totpEnabled             Boolean  @default(false)
-  totpSecret              String?  // Encrypted TOTP secret
-  
+  totpEnabled Boolean @default(false)
+  totpSecret  String? // Encrypted TOTP secret
+
   // SMS Settings
-  smsEnabled              Boolean  @default(false)
-  smsPhoneNumber          String?  // Encrypted phone number
-  
+  smsEnabled     Boolean @default(false)
+  smsPhoneNumber String? // Encrypted phone number
+
   // Email Settings
-  emailEnabled            Boolean  @default(false)
-  
+  emailEnabled Boolean @default(false)
+
   // Hardware Token Settings
-  hardwareTokenEnabled    Boolean  @default(false)
-  
+  hardwareTokenEnabled Boolean @default(false)
+
   // Backup Codes
-  backupCodes             String?  // Encrypted backup codes JSON
-  backupCodesGenerated    Boolean  @default(false)
-  backupCodesUsed         Int      @default(0)
-  
+  backupCodes          String? // Encrypted backup codes JSON
+  backupCodesGenerated Boolean @default(false)
+  backupCodesUsed      Int     @default(0)
+
   // Emergency Settings
-  emergencyContactEnabled Boolean  @default(false)
-  emergencyContact        String?  // Encrypted emergency contact
-  
+  emergencyContactEnabled Boolean @default(false)
+  emergencyContact        String? // Encrypted emergency contact
+
   // Preferences
-  preferredMethod         String   @default("totp") // totp, sms, email, hardware
-  
+  preferredMethod String @default("totp") // totp, sms, email, hardware
+
   // Timestamps
-  enabledAt               DateTime?
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-  
+  enabledAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
   // Relationships
-  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
 model UserDevice {
-  id           String    @id @default(uuid())
-  userId       String
-  deviceId     String    @unique // Generated device identifier
-  deviceName   String    // User-friendly device name
-  deviceType   String    // mobile, desktop, tablet, unknown
-  browser      String?   // Browser information
-  os           String?   // Operating system
-  ipAddress    String    // Last known IP address
-  location     String?   // Geographic location (city, country)
-  isTrusted    Boolean   @default(false)
-  
+  id         String  @id @default(uuid())
+  userId     String
+  deviceId   String  @unique // Generated device identifier
+  deviceName String // User-friendly device name
+  deviceType String // mobile, desktop, tablet, unknown
+  browser    String? // Browser information
+  os         String? // Operating system
+  ipAddress  String // Last known IP address
+  location   String? // Geographic location (city, country)
+  isTrusted  Boolean @default(false)
+
   // Security
-  isActive     Boolean   @default(true)
-  lastUsed     DateTime  @default(now())
-  
+  isActive Boolean  @default(true)
+  lastUsed DateTime @default(now())
+
   // Timestamps
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relationships
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sessions     UserSession[]
-  
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions UserSession[]
+
   @@index([userId])
   @@index([deviceId])
   @@index([lastUsed])
 }
 
-
-
 model SecurityEvent {
-  id              String    @id @default(uuid())
-  userId          String?
-  sessionId       String?
-  
+  id        String  @id @default(uuid())
+  userId    String?
+  sessionId String?
+
   // Event Classification
-  eventType       String    // login_attempt, mfa_failure, suspicious_activity, etc.
-  severity        String    // low, medium, high, critical
-  category        String    // authentication, authorization, data_access, etc.
-  
+  eventType String // login_attempt, mfa_failure, suspicious_activity, etc.
+  severity  String // low, medium, high, critical
+  category  String // authentication, authorization, data_access, etc.
+
   // Event Details
-  description     String
-  details         Json?     // Detailed event information
-  
+  description String
+  details     Json? // Detailed event information
+
   // Source Information
-  ipAddress       String
-  userAgent       String?
-  location        String?   // Geographic location
-  
+  ipAddress String
+  userAgent String?
+  location  String? // Geographic location
+
   // Risk Assessment
-  riskScore       Float?    // Calculated risk score (0-1)
-  isBlocked       Boolean   @default(false)
-  requiresAction  Boolean   @default(false)
-  
+  riskScore      Float? // Calculated risk score (0-1)
+  isBlocked      Boolean @default(false)
+  requiresAction Boolean @default(false)
+
   // Resolution
-  isResolved      Boolean   @default(false)
-  resolvedBy      String?   // User ID who resolved the event
-  resolvedAt      DateTime?
-  resolution      String?   // Resolution details
-  
+  isResolved Boolean   @default(false)
+  resolvedBy String? // User ID who resolved the event
+  resolvedAt DateTime?
+  resolution String? // Resolution details
+
   // Metadata
-  correlationId   String?   // For tracking related events
-  parentEventId   String?   // For linked events
-  
+  correlationId String? // For tracking related events
+  parentEventId String? // For linked events
+
   // Timestamps
-  detectedAt      DateTime  @default(now())
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  detectedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   // Relationships
-  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  parentEvent     SecurityEvent? @relation("SecurityEventHierarchy", fields: [parentEventId], references: [id], onDelete: SetNull)
-  childEvents     SecurityEvent[] @relation("SecurityEventHierarchy")
-  
+  user        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  parentEvent SecurityEvent?  @relation("SecurityEventHierarchy", fields: [parentEventId], references: [id], onDelete: SetNull)
+  childEvents SecurityEvent[] @relation("SecurityEventHierarchy")
+
   @@index([userId])
   @@index([eventType])
   @@index([severity])
@@ -1018,36 +1148,36 @@ model SecurityEvent {
 
 // RBAC (Role-Based Access Control) Models
 model Role {
-  id           String    @id @default(uuid())
-  name         String    @unique
-  displayName  String    // User-friendly role name
-  description  String?
-  
+  id          String  @id @default(uuid())
+  name        String  @unique
+  displayName String // User-friendly role name
+  description String?
+
   // Hierarchy
-  parentId     String?
-  parent       Role?     @relation("RoleHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children     Role[]    @relation("RoleHierarchy")
-  
+  parentId String?
+  parent   Role?   @relation("RoleHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Role[]  @relation("RoleHierarchy")
+
   // Role Properties
-  isSystemRole Boolean   @default(false) // System roles cannot be deleted
-  isActive     Boolean   @default(true)
-  priority     Int       @default(0) // Higher priority roles override lower ones
-  
+  isSystemRole Boolean @default(false) // System roles cannot be deleted
+  isActive     Boolean @default(true)
+  priority     Int     @default(0) // Higher priority roles override lower ones
+
   // Metadata
-  metadata     Json?     // Additional role configuration
-  
+  metadata Json? // Additional role configuration
+
   // Timestamps
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // User who created this role
-  createdBy    String?
-  creator      User?     @relation("RoleCreator", fields: [createdBy], references: [id], onDelete: SetNull)
-  
+  createdBy String?
+  creator   User?   @relation("RoleCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+
   // Relationships
-  permissions  RolePermission[]
-  userRoles    UserRoleAssignment[]
-  
+  permissions RolePermission[]
+  userRoles   UserRoleAssignment[]
+
   @@index([name])
   @@index([createdBy])
   @@index([parentId])
@@ -1056,39 +1186,39 @@ model Role {
 }
 
 model Permission {
-  id            String    @id @default(uuid())
-  name          String    @unique
-  displayName   String    // User-friendly permission name
-  description   String?
-  
+  id          String  @id @default(uuid())
+  name        String  @unique
+  displayName String // User-friendly permission name
+  description String?
+
   // Permission Details
-  resource      String    // Resource type (user, task, project, etc.)
-  action        String    // Action (create, read, update, delete, etc.)
-  scope         String?   // Scope limitation (own, team, organization, global)
-  
+  resource String // Resource type (user, task, project, etc.)
+  action   String // Action (create, read, update, delete, etc.)
+  scope    String? // Scope limitation (own, team, organization, global)
+
   // Permission Properties
-  isSystemPerm  Boolean   @default(false) // System permissions cannot be deleted
-  isActive      Boolean   @default(true)
-  category      String    @default("general") // Permission category for organization
-  
+  isSystemPerm Boolean @default(false) // System permissions cannot be deleted
+  isActive     Boolean @default(true)
+  category     String  @default("general") // Permission category for organization
+
   // Conditions (JSON-based conditions for dynamic permissions)
-  conditions    Json?     // Dynamic permission conditions
-  
+  conditions Json? // Dynamic permission conditions
+
   // Metadata
-  metadata      Json?     // Additional permission configuration
-  
+  metadata Json? // Additional permission configuration
+
   // Timestamps
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // User who created this permission
-  createdBy     String?
-  creator       User?     @relation("PermissionCreator", fields: [createdBy], references: [id], onDelete: SetNull)
-  
+  createdBy String?
+  creator   User?   @relation("PermissionCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+
   // Relationships
   rolePermissions RolePermission[]
   userPermissions UserPermission[]
-  
+
   @@unique([resource, action, scope])
   @@index([resource])
   @@index([action])
@@ -1098,27 +1228,27 @@ model Permission {
 }
 
 model RolePermission {
-  id           String     @id @default(uuid())
+  id           String @id @default(uuid())
   roleId       String
   permissionId String
-  
+
   // Permission Configuration
-  effect       String     @default("allow") // allow, deny
-  conditions   Json?      // Additional conditions for this role-permission pair
-  
+  effect     String @default("allow") // allow, deny
+  conditions Json? // Additional conditions for this role-permission pair
+
   // Metadata
-  grantedBy    String?    // User ID who granted this permission
-  grantedAt    DateTime   @default(now())
-  expiresAt    DateTime?  // Optional expiration
-  
+  grantedBy String? // User ID who granted this permission
+  grantedAt DateTime  @default(now())
+  expiresAt DateTime? // Optional expiration
+
   // Timestamps
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relationships
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
   @@unique([roleId, permissionId])
   @@index([roleId])
   @@index([permissionId])
@@ -1127,33 +1257,33 @@ model RolePermission {
 }
 
 model UserRoleAssignment {
-  id        String    @id @default(uuid())
-  userId    String
-  roleId    String
-  
+  id     String @id @default(uuid())
+  userId String
+  roleId String
+
   // Role Assignment Properties
-  effect    String    @default("allow") // allow, deny
-  scope     String?   // Scope limitation for this user-role assignment
-  
+  effect String  @default("allow") // allow, deny
+  scope  String? // Scope limitation for this user-role assignment
+
   // Assignment Details
-  assignedBy String?  // User ID who assigned this role
-  assignedAt DateTime @default(now())
+  assignedBy String? // User ID who assigned this role
+  assignedAt DateTime  @default(now())
   expiresAt  DateTime? // Optional expiration
-  
+
   // Conditions
-  conditions Json?    // Dynamic conditions for role assignment
-  
+  conditions Json? // Dynamic conditions for role assignment
+
   // Metadata
-  metadata   Json?    // Additional assignment metadata
-  
+  metadata Json? // Additional assignment metadata
+
   // Timestamps
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relationships
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
   @@unique([userId, roleId])
   @@index([userId])
   @@index([roleId])
@@ -1162,34 +1292,34 @@ model UserRoleAssignment {
 }
 
 model UserPermission {
-  id           String     @id @default(uuid())
+  id           String @id @default(uuid())
   userId       String
   permissionId String
-  
+
   // Direct Permission Assignment
-  effect       String     @default("allow") // allow, deny
-  scope        String?    // Scope limitation
-  
+  effect String  @default("allow") // allow, deny
+  scope  String? // Scope limitation
+
   // Assignment Details
-  assignedBy   String?    // User ID who granted this permission
-  assignedAt   DateTime   @default(now())
-  expiresAt    DateTime?  // Optional expiration
-  reason       String?    // Reason for direct permission assignment
-  
+  assignedBy String? // User ID who granted this permission
+  assignedAt DateTime  @default(now())
+  expiresAt  DateTime? // Optional expiration
+  reason     String? // Reason for direct permission assignment
+
   // Conditions
-  conditions   Json?      // Dynamic conditions
-  
+  conditions Json? // Dynamic conditions
+
   // Metadata
-  metadata     Json?      // Additional metadata
-  
+  metadata Json? // Additional metadata
+
   // Timestamps
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relationships
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
   @@unique([userId, permissionId])
   @@index([userId])
   @@index([permissionId])
@@ -1198,38 +1328,38 @@ model UserPermission {
 }
 
 model ResourceAccess {
-  id           String    @id @default(uuid())
+  id           String @id @default(uuid())
   userId       String
-  resourceType String    // Type of resource (task, project, etc.)
-  resourceId   String    // ID of the specific resource
-  
+  resourceType String // Type of resource (task, project, etc.)
+  resourceId   String // ID of the specific resource
+
   // Access Details
-  accessType   String    // Type of access (owner, member, viewer, etc.)
-  permissions  Json      // Specific permissions for this resource
-  
+  accessType  String // Type of access (owner, member, viewer, etc.)
+  permissions Json // Specific permissions for this resource
+
   // Access Properties
-  inheritedFrom String?  // ID of parent resource if access is inherited
-  isInherited   Boolean  @default(false)
-  isActive      Boolean  @default(true)
-  
+  inheritedFrom String? // ID of parent resource if access is inherited
+  isInherited   Boolean @default(false)
+  isActive      Boolean @default(true)
+
   // Assignment Details
-  grantedBy     String?  // User ID who granted access
-  grantedAt     DateTime @default(now())
-  expiresAt     DateTime? // Optional expiration
-  
+  grantedBy String? // User ID who granted access
+  grantedAt DateTime  @default(now())
+  expiresAt DateTime? // Optional expiration
+
   // Conditions
-  conditions    Json?    // Dynamic access conditions
-  
+  conditions Json? // Dynamic access conditions
+
   // Metadata
-  metadata      Json?    // Additional metadata
-  
+  metadata Json? // Additional metadata
+
   // Timestamps
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relationships
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, resourceType, resourceId])
   @@index([userId])
   @@index([resourceType])
@@ -1242,167 +1372,168 @@ model ResourceAccess {
 // External Invoice System Models
 
 model ext_listhoadon {
-  id              String   @id @default(uuid())
-  idServer        String?   @unique  // Basic Invoice Info
-  brandname       String?  // Tên nhãn hàng
-  nbmst           String?  // Mã số thuế người bán
-  khmshdon        String?  // Ký hiệu mẫu số hóa đơn
-  khhdon          String?  // Ký hiệu hóa đơn
-  shdon           String?  // Số hóa đơn
-  cqt             String?  // Cơ quan thuế
-  hdon            String?  // Hóa đơn
-  hthdon          String?  // Hình thức hóa đơn
-  htttoan         String?  // Hình thức thanh toán
-  idtbao          String?  // ID thông báo
-  khdon           String?  // Khách hàng hóa đơn
-  khhdgoc         String?  // Ký hiệu hóa đơn gốc
-  khmshdgoc       String?  // Ký hiệu mẫu số hóa đơn gốc
-  lhdgoc          String?  // Loại hóa đơn gốc
-  mhdon           String?  // Mã hóa đơn
-  mtdiep          String?  // Mã thông điệp
-  mtdtchieu       String?  // Mã thông điệp tham chiếu
-  
+  id        String  @id @default(uuid())
+  idServer  String? @unique // Basic Invoice Info
+  brandname String? // Tên nhãn hàng
+  nbmst     String? // Mã số thuế người bán
+  khmshdon  String? // Ký hiệu mẫu số hóa đơn
+  khhdon    String? // Ký hiệu hóa đơn
+  shdon     String? // Số hóa đơn
+  cqt       String? // Cơ quan thuế
+  hdon      String? // Hóa đơn
+  hthdon    String? // Hình thức hóa đơn
+  htttoan   String? // Hình thức thanh toán
+  idtbao    String? // ID thông báo
+  khdon     String? // Khách hàng hóa đơn
+  khhdgoc   String? // Ký hiệu hóa đơn gốc
+  khmshdgoc String? // Ký hiệu mẫu số hóa đơn gốc
+  lhdgoc    String? // Loại hóa đơn gốc
+  mhdon     String? // Mã hóa đơn
+  mtdiep    String? // Mã thông điệp
+  mtdtchieu String? // Mã thông điệp tham chiếu
+
   // Seller Information
-  nbdchi          String?  // Địa chỉ người bán
-  chma            String?  // Chữ ký mã
-  chten           String?  // Chữ ký tên
-  nbhdktngay      DateTime? // Ngày ký hợp đồng người bán
-  nbhdktso        String?  // Số ký hợp đồng người bán
-  nbhdso          String?  // Số hợp đồng người bán
-  nblddnbo        String?  // Người bán lãnh đạo đại diện bộ
-  nbptvchuyen     String?  // Người bán phương thức vận chuyển
-  nbstkhoan       String?  // Số tài khoản người bán
-  nbten           String?  // Tên người bán
-  nbtnhang        String?  // Tên nhãn hàng người bán
-  nbtnvchuyen     String?  // Tên nhà vận chuyển người bán
-  
+  nbdchi      String? // Địa chỉ người bán
+  chma        String? // Chữ ký mã
+  chten       String? // Chữ ký tên
+  nbhdktngay  DateTime? // Ngày ký hợp đồng người bán
+  nbhdktso    String? // Số ký hợp đồng người bán
+  nbhdso      String? // Số hợp đồng người bán
+  nblddnbo    String? // Người bán lãnh đạo đại diện bộ
+  nbptvchuyen String? // Người bán phương thức vận chuyển
+  nbstkhoan   String? // Số tài khoản người bán
+  nbten       String? // Tên người bán
+  nbtnhang    String? // Tên nhãn hàng người bán
+  nbtnvchuyen String? // Tên nhà vận chuyển người bán
+
   // Other Codes
-  ncma            String?  // Mã người cung cấp
-  ncnhat          DateTime? // Ngày cập nhật người cung cấp
-  ngcnhat         DateTime? // Ngày cập nhật
-  nky             String?  // Người ký
-  
+  ncma    String? // Mã người cung cấp
+  ncnhat  DateTime? // Ngày cập nhật người cung cấp
+  ngcnhat DateTime? // Ngày cập nhật
+  nky     String? // Người ký
+
   // Buyer Information
-  nmdchi          String?  // Địa chỉ người mua
-  nmmst           String?  // Mã số thuế người mua
-  nmstkhoan       String?  // Số tài khoản người mua
-  nmten           String?  // Tên người mua
-  nmtnhang        String?  // Tên nhãn hàng người mua
-  nmtnmua         String?  // Tên người mua thực tế
-  nmttkhac        String?  // Thông tin khác người mua
-  
+  nmdchi    String? // Địa chỉ người mua
+  nmmst     String? // Mã số thuế người mua
+  nmstkhoan String? // Số tài khoản người mua
+  nmten     String? // Tên người mua
+  nmtnhang  String? // Tên nhãn hàng người mua
+  nmtnmua   String? // Tên người mua thực tế
+  nmttkhac  String? // Thông tin khác người mua
+
   // Process Information
-  ntao            DateTime? // Ngày tạo
-  ntnhan          DateTime? // Ngày nhận
-  pban            String?  // Phiên bản
-  ptgui           String?  // Phương thức gửi
-  shdgoc          String?  // Số hóa đơn gốc
-  tchat           String?  // Tính chất
-  tdlap           DateTime? // Thời điểm lập
-  tgia            Decimal? // Tiền gia
-  
+  ntao   DateTime? // Ngày tạo
+  ntnhan DateTime? // Ngày nhận
+  pban   String? // Phiên bản
+  ptgui  String? // Phương thức gửi
+  shdgoc String? // Số hóa đơn gốc
+  tchat  String? // Tính chất
+  tdlap  DateTime? // Thời điểm lập
+  tgia   Decimal? // Tiền gia
+
   // Amounts
-  tgtcthue        Decimal? // Tổng giá trị chưa thuế
-  tgtthue         Decimal? // Tổng giá trị thuế
-  tgtttbchu       String?  // Tổng giá trị thanh toán bằng chữ
-  tgtttbso        Decimal? // Tổng giá trị thanh toán bằng số
-  
+  tgtcthue  Decimal? // Tổng giá trị chưa thuế
+  tgtthue   Decimal? // Tổng giá trị thuế
+  tgtttbchu String? // Tổng giá trị thanh toán bằng chữ
+  tgtttbso  Decimal? // Tổng giá trị thanh toán bằng số
+
   // Status and Processing
-  thdon           String?  // Trạng thái hóa đơn
-  thlap           String?  // Thời điểm lập
-  thttlphi        Decimal? // Thành tiền lệ phí
-  tlhdon          String?  // Loại hóa đơn
-  ttcktmai        String?  // Trạng thái chấp nhận mã
-  tthai           String?  // Trạng thái
-  tttbao          String?  // Trạng thái thông báo
-  ttxly           String?  // Trạng thái xử lý
-  tvandnkntt      String?  // Thông tin vận đơn kiện nhận thông tin
-  
+  thdon      String? // Trạng thái hóa đơn
+  thlap      String? // Thời điểm lập
+  thttlphi   Decimal? // Thành tiền lệ phí
+  tlhdon     String? // Loại hóa đơn
+  ttcktmai   String? // Trạng thái chấp nhận mã
+  tthai      String? // Trạng thái
+  tttbao     String? // Trạng thái thông báo
+  ttxly      String? // Trạng thái xử lý
+  tvandnkntt String? // Thông tin vận đơn kiện nhận thông tin
+
   // Additional Fields
-  mhso            String?  // Mã hiệu số
-  ladhddt         Boolean? // Là hóa đơn điện tử
-  mkhang          String?  // Mã khách hàng
-  nbsdthoai       String?  // Số điện thoại người bán
-  nbdctdtu        String?  // Địa chỉ thư điện tử người bán
-  nbfax           String?  // Fax người bán
-  nbwebsite       String?  // Website người bán
-  nmsdthoai       String?  // Số điện thoại người mua
-  nmdctdtu        String?  // Địa chỉ thư điện tử người mua
-  nmcmnd          String?  // CMND người mua
-  nmcks           String?  // Chữ ký số người mua
-  
+  mhso      String? // Mã hiệu số
+  ladhddt   Boolean? // Là hóa đơn điện tử
+  mkhang    String? // Mã khách hàng
+  nbsdthoai String? // Số điện thoại người bán
+  nbdctdtu  String? // Địa chỉ thư điện tử người bán
+  nbfax     String? // Fax người bán
+  nbwebsite String? // Website người bán
+  nmsdthoai String? // Số điện thoại người mua
+  nmdctdtu  String? // Địa chỉ thư điện tử người mua
+  nmcmnd    String? // CMND người mua
+  nmcks     String? // Chữ ký số người mua
+
   // Legal and Compliance
-  bhphap          String?  // Bảo hộ pháp lý
-  hddunlap        String?  // Hóa đơn dự án lập
-  gchdgoc         String?  // Ghi chú hóa đơn gốc
-  tbhgtngay       DateTime? // Thông báo hạn giao thời gian
-  bhpldo          String?  // Bảo hộ pháp lý do
-  bhpcbo          String?  // Bảo hộ pháp lý cơ bộ
-  bhpngay         DateTime? // Bảo hộ pháp lý ngày
-  tdlhdgoc        DateTime? // Thời điểm lập hóa đơn gốc
-  tgtphi          Decimal? // Tổng giá trị phí
-  unhiem          String?  // Ủy nhiệm
-  mstdvnunlhdon   String?  // Mã số thuế đơn vị ủy nhiệm lập hóa đơn
-  tdvnunlhdon     String?  // Tên đơn vị ủy nhiệm lập hóa đơn
-  
+  bhphap        String? // Bảo hộ pháp lý
+  hddunlap      String? // Hóa đơn dự án lập
+  gchdgoc       String? // Ghi chú hóa đơn gốc
+  tbhgtngay     DateTime? // Thông báo hạn giao thời gian
+  bhpldo        String? // Bảo hộ pháp lý do
+  bhpcbo        String? // Bảo hộ pháp lý cơ bộ
+  bhpngay       DateTime? // Bảo hộ pháp lý ngày
+  tdlhdgoc      DateTime? // Thời điểm lập hóa đơn gốc
+  tgtphi        Decimal? // Tổng giá trị phí
+  unhiem        String? // Ủy nhiệm
+  mstdvnunlhdon String? // Mã số thuế đơn vị ủy nhiệm lập hóa đơn
+  tdvnunlhdon   String? // Tên đơn vị ủy nhiệm lập hóa đơn
+
   // Regulatory Information
-  nbmdvqhnsach    String?  // Người bán mã đơn vị quản hành sách
-  nbsqdinh        String?  // Người bán số quy định
-  nbncqdinh       String?  // Người bán ngày có quy định
-  nbcqcqdinh      String?  // Người bán cơ quan có quy định
-  nbhtban         String?  // Người bán hình thức bán
-  nmmdvqhnsach    String?  // Người mua mã đơn vị quản hành sách
-  nmddvchden      String?  // Người mua địa điểm vận chuyển đến
-  nmtgvchdtu      DateTime? // Người mua thời gian vận chuyển đầu
-  nmtgvchdden     DateTime? // Người mua thời gian vận chuyển đến
-  nbtnban         String?  // Người bán tên nhân bán
-  dcdvnunlhdon    String?  // Địa chỉ đơn vị ủy nhiệm lập hóa đơn
-  
+  nbmdvqhnsach String? // Người bán mã đơn vị quản hành sách
+  nbsqdinh     String? // Người bán số quy định
+  nbncqdinh    String? // Người bán ngày có quy định
+  nbcqcqdinh   String? // Người bán cơ quan có quy định
+  nbhtban      String? // Người bán hình thức bán
+  nmmdvqhnsach String? // Người mua mã đơn vị quản hành sách
+  nmddvchden   String? // Người mua địa điểm vận chuyển đến
+  nmtgvchdtu   DateTime? // Người mua thời gian vận chuyển đầu
+  nmtgvchdden  DateTime? // Người mua thời gian vận chuyển đến
+  nbtnban      String? // Người bán tên nhân bán
+  dcdvnunlhdon String? // Địa chỉ đơn vị ủy nhiệm lập hóa đơn
+
   // Processing Dates
-  dksbke          DateTime? // Đăng ký sổ bán kê
-  dknlbke         DateTime? // Đăng ký nhật lý bán kê
-  thtttoan        String?  // Trạng thái thanh toán
-  msttcgp         String?  // Mã số thuế TCGp
-  gchu            String?  // Ghi chú
-  kqcht           String?  // Kết quả chuyển hóa
-  hdntgia         Decimal? // Hóa đơn nội tệ giá
-  tgtkcthue       Decimal? // Tổng giá trị không chính thuế
-  tgtkhac         Decimal? // Tổng giá trị khác
-  
+  dksbke    DateTime? // Đăng ký sổ bán kê
+  dknlbke   DateTime? // Đăng ký nhật lý bán kê
+  thtttoan  String? // Trạng thái thanh toán
+  msttcgp   String? // Mã số thuế TCGp
+  gchu      String? // Ghi chú
+  kqcht     String? // Kết quả chuyển hóa
+  hdntgia   Decimal? // Hóa đơn nội tệ giá
+  tgtkcthue Decimal? // Tổng giá trị không chính thuế
+  tgtkhac   Decimal? // Tổng giá trị khác
+
   // Reference Information
-  nmshchieu       String?  // Người mua số hóa chiếu
-  nmnchchieu      String?  // Người mua ngân chứng chiếu
-  nmnhhhchieu     String?  // Người mua nhà hàng hóa chiếu
-  nmqtich         String?  // Người mua quốc tịch
-  ktkhthue        Decimal? // Kết toán khấu trừ thuế
-  nmstttoan       String?  // Người mua số tài khoản thanh toán
-  nmttttoan       String?  // Người mua thông tin thanh toán
-  hdhhdvu         String?  // Hóa đơn hàng hóa dịch vụ
-  qrcode          String?  // QR Code
-  ttmstten        String?  // Thông tin mã số tên
-  ladhddtten      String?  // Là hóa đơn điện tử tên
-  
+  nmshchieu   String? // Người mua số hóa chiếu
+  nmnchchieu  String? // Người mua ngân chứng chiếu
+  nmnhhhchieu String? // Người mua nhà hàng hóa chiếu
+  nmqtich     String? // Người mua quốc tịch
+  ktkhthue    Decimal? // Kết toán khấu trừ thuế
+  nmstttoan   String? // Người mua số tài khoản thanh toán
+  nmttttoan   String? // Người mua thông tin thanh toán
+  hdhhdvu     String? // Hóa đơn hàng hóa dịch vụ
+  qrcode      String? // QR Code
+  ttmstten    String? // Thông tin mã số tên
+  ladhddtten  String? // Là hóa đơn điện tử tên
+
   // Export/Import
-  hdxkhau         String?  // Hóa đơn xuất khẩu
-  hdxkptquan      String?  // Hóa đơn xuất khẩu phương tiện quân
-  hdgktkhthue     Decimal? // Hóa đơn giá kê khai thuế
-  hdonLquans      String?  // Hóa đơn liên quan
-  tthdclquan      String?  // Thông tin hóa đơn chính liên quan
-  pdndungs        String?  // Phần dùng đúng số
-  hdtbssrses      String?  // Hóa đơn thông báo số sáng rộng ses
-  
+  hdxkhau     String? // Hóa đơn xuất khẩu
+  hdxkptquan  String? // Hóa đơn xuất khẩu phương tiện quân
+  hdgktkhthue Decimal? // Hóa đơn giá kê khai thuế
+  hdonLquans  String? // Hóa đơn liên quan
+  tthdclquan  String? // Thông tin hóa đơn chính liên quan
+  pdndungs    String? // Phần dùng đúng số
+  hdtbssrses  String? // Hóa đơn thông báo số sáng rộng ses
+
   // Duplicate Handling
-  hdTrung         String?  // Hóa đơn trùng
-  isHDTrung       Boolean? // Có phải hóa đơn trùng
-  hdcttchinh      String?  // Hóa đơn chính thức chính
-  
+  hdTrung    String? // Hóa đơn trùng
+  isHDTrung  Boolean? // Có phải hóa đơn trùng
+  hdcttchinh String? // Hóa đơn chính thức chính
+
   // Timestamps
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relationships
-  details         ext_detailhoadon[]
-  
+  details ext_detailhoadon[]
+
+  @@unique([nbmst, khmshdon, shdon, khhdon])
   // Indexes for performance
   @@index([nbmst])
   @@index([khmshdon, shdon])
@@ -1410,42 +1541,41 @@ model ext_listhoadon {
   @@index([nmmst])
   @@index([tthai])
   @@index([createdAt])
-  @@unique([nbmst, khmshdon, shdon, khhdon])
 }
 
 model ext_detailhoadon {
-  id            String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Reference to parent invoice
-  idServer        String?   @unique  // Basic Invoice Info
-  idhdonServer    String   // Foreign key to ext_listhoadon.id
+  idServer     String?  @unique // Basic Invoice Info
+  idhdonServer String // Foreign key to ext_listhoadon.id
   // Item Information
-  dgia          Decimal? // Đơn giá
-  dvtinh        String?  // Đơn vị tính
-  ltsuat        Decimal? // Lũy tiến suất
-  sluong        Decimal? // Số lượng
-  stbchu        String?  // Số thứ bằng chữ
-  stckhau       Decimal? // Số tiền chiết khấu
-  stt           Int?     // Số thứ tự
-  tchat         String?  // Tính chất
-  ten           String?  // Tên hàng hóa/dịch vụ
-  thtcthue      Decimal? // Thành tiền chưa thuế
-  thtien        Decimal? // Thành tiền
-  tlckhau       Decimal? // Tỷ lệ chiết khấu
-  tsuat         Decimal? // Thuế suất
-  tthue         Decimal? // Tiền thuế
-  sxep          Int?     // Sắp xếp
-  dvtte         String?  // Đơn vị tiền tệ
-  tgia          Decimal? // Tiền gia
-  tthhdtrung    String?  // Thông tin hàng hóa trùng
-  
+  dgia         Decimal? // Đơn giá
+  dvtinh       String? // Đơn vị tính
+  ltsuat       Decimal? // Lũy tiến suất
+  sluong       Decimal? // Số lượng
+  stbchu       String? // Số thứ bằng chữ
+  stckhau      Decimal? // Số tiền chiết khấu
+  stt          Int? // Số thứ tự
+  tchat        String? // Tính chất
+  ten          String? // Tên hàng hóa/dịch vụ
+  thtcthue     Decimal? // Thành tiền chưa thuế
+  thtien       Decimal? // Thành tiền
+  tlckhau      Decimal? // Tỷ lệ chiết khấu
+  tsuat        Decimal? // Thuế suất
+  tthue        Decimal? // Tiền thuế
+  sxep         Int? // Sắp xếp
+  dvtte        String? // Đơn vị tiền tệ
+  tgia         Decimal? // Tiền gia
+  tthhdtrung   String? // Thông tin hàng hóa trùng
+
   // Timestamps
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relationships
-  invoice       ext_listhoadon @relation(fields: [idhdonServer], references: [idServer], onDelete: Cascade)
-  
+  invoice ext_listhoadon @relation(fields: [idhdonServer], references: [idServer], onDelete: Cascade)
+
   // Indexes
   @@index([idhdonServer])
   @@index([stt])
@@ -1457,74 +1587,74 @@ model ext_detailhoadon {
 // =====================================================
 
 enum MenuType {
-  SIDEBAR    // Menu in sidebar navigation
-  HEADER     // Menu in header/top navigation
-  FOOTER     // Menu in footer
-  MOBILE     // Mobile-specific menu
-  CUSTOM     // Custom menu type
+  SIDEBAR // Menu in sidebar navigation
+  HEADER // Menu in header/top navigation
+  FOOTER // Menu in footer
+  MOBILE // Mobile-specific menu
+  CUSTOM // Custom menu type
 }
 
 enum MenuTarget {
-  SELF       // Open in same tab
-  BLANK      // Open in new tab
-  MODAL      // Open in modal
+  SELF // Open in same tab
+  BLANK // Open in new tab
+  MODAL // Open in modal
 }
 
 model Menu {
-  id            String      @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Basic Info
-  title         String      // Menu display title
-  slug          String      @unique // URL-friendly identifier
-  description   String?     // Menu description
-  type          MenuType    @default(SIDEBAR) // Menu type
-  
+  title       String // Menu display title
+  slug        String   @unique // URL-friendly identifier
+  description String? // Menu description
+  type        MenuType @default(SIDEBAR) // Menu type
+
   // Hierarchy
-  parentId      String?     // Parent menu ID for nested menus
-  parent        Menu?       @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children      Menu[]      @relation("MenuHierarchy")
-  order         Int         @default(0) // Display order
-  level         Int         @default(0) // Depth level in hierarchy
-  path          String?     // Full path from root (e.g., "/parent/child")
-  
+  parentId String? // Parent menu ID for nested menus
+  parent   Menu?   @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Menu[]  @relation("MenuHierarchy")
+  order    Int     @default(0) // Display order
+  level    Int     @default(0) // Depth level in hierarchy
+  path     String? // Full path from root (e.g., "/parent/child")
+
   // Navigation
-  url           String?     // Menu link URL
-  route         String?     // Internal route path
-  externalUrl   String?     // External URL
-  target        MenuTarget  @default(SELF) // Link target
-  
+  url         String? // Menu link URL
+  route       String? // Internal route path
+  externalUrl String? // External URL
+  target      MenuTarget @default(SELF) // Link target
+
   // Display
-  icon          String?     // Icon name/class (lucide-react icon name)
-  iconType      String?     @default("lucide") // Icon library type
-  badge         String?     // Badge text
-  badgeColor    String?     // Badge color
-  image         String?     // Image URL for menu item
-  
+  icon       String? // Icon name/class (lucide-react icon name)
+  iconType   String? @default("lucide") // Icon library type
+  badge      String? // Badge text
+  badgeColor String? // Badge color
+  image      String? // Image URL for menu item
+
   // Permissions & Access
   requiredPermissions String[] // Required permissions to view (JSON array)
-  requiredRoles      String[] // Required roles to view
-  isPublic      Boolean     @default(false) // Accessible without auth
-  
+  requiredRoles       String[] // Required roles to view
+  isPublic            Boolean  @default(false) // Accessible without auth
+
   // State
-  isActive      Boolean     @default(true) // Active/inactive
-  isVisible     Boolean     @default(true) // Visible/hidden
-  isProtected   Boolean     @default(false) // Protected from deletion
-  
+  isActive    Boolean @default(true) // Active/inactive
+  isVisible   Boolean @default(true) // Visible/hidden
+  isProtected Boolean @default(false) // Protected from deletion
+
   // Metadata
-  metadata      Json?       // Additional metadata (JSON)
-  cssClass      String?     // Custom CSS class
-  customData    Json?       // Custom data storage
-  
+  metadata   Json? // Additional metadata (JSON)
+  cssClass   String? // Custom CSS class
+  customData Json? // Custom data storage
+
   // Timestamps
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  createdBy     String?     // User ID who created
-  updatedBy     String?     // User ID who last updated
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String? // User ID who created
+  updatedBy String? // User ID who last updated
+
   // Relations
-  creator       User?       @relation("MenuCreator", fields: [createdBy], references: [id], onDelete: SetNull)
-  updater       User?       @relation("MenuUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
-  
+  creator User? @relation("MenuCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater User? @relation("MenuUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
   // Indexes
   @@index([parentId])
   @@index([type])
@@ -1576,41 +1706,41 @@ enum AffPaymentMethod {
 }
 
 model AffUser {
-  id          String      @id @default(uuid())
-  userId      String      // Reference to main User table
-  role        AffUserRole
-  
+  id     String      @id @default(uuid())
+  userId String // Reference to main User table
+  role   AffUserRole
+
   // Profile info
-  companyName    String?
-  businessType   String?
-  website        String?
-  description    String?
-  
+  companyName  String?
+  businessType String?
+  website      String?
+  description  String?
+
   // Payment info
-  paymentMethod  AffPaymentMethod?
-  bankAccount    String?
-  paypalEmail    String?
-  taxId          String?
-  
+  paymentMethod AffPaymentMethod?
+  bankAccount   String?
+  paypalEmail   String?
+  taxId         String?
+
   // Settings
-  isActive       Boolean   @default(true)
-  joinedAt       DateTime  @default(now())
-  lastActiveAt   DateTime?
-  
+  isActive     Boolean   @default(true)
+  joinedAt     DateTime  @default(now())
+  lastActiveAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // For Merchants
   campaignsCreated AffCampaign[] @relation("CampaignCreator")
-  
+
   // For Affiliates
-  campaignJoins    AffCampaignAffiliate[]
-  links            AffLink[]
-  conversions      AffConversion[]
-  paymentRequests  AffPaymentRequest[]
+  campaignJoins   AffCampaignAffiliate[]
+  links           AffLink[]
+  conversions     AffConversion[]
+  paymentRequests AffPaymentRequest[]
 
   @@unique([userId])
   @@index([role])
@@ -1620,44 +1750,44 @@ model AffUser {
 }
 
 model AffCampaign {
-  id          String            @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
-  
+
   // Product info
-  productName     String
-  productUrl      String
-  productImage    String?
-  
+  productName  String
+  productUrl   String
+  productImage String?
+
   // Commission settings
-  commissionRate  Decimal       @db.Decimal(5,2) // Percentage (0.00 to 100.00)
-  commissionType  String        @default("percentage") // percentage, fixed
-  fixedAmount     Decimal?      @db.Decimal(10,2)
-  
+  commissionRate Decimal  @db.Decimal(5, 2) // Percentage (0.00 to 100.00)
+  commissionType String   @default("percentage") // percentage, fixed
+  fixedAmount    Decimal? @db.Decimal(10, 2)
+
   // Campaign settings
   status          AffCampaignStatus @default(DRAFT)
   startDate       DateTime?
   endDate         DateTime?
   maxAffiliates   Int?
-  requireApproval Boolean       @default(true)
-  
+  requireApproval Boolean           @default(true)
+
   // Tracking
-  totalClicks     Int           @default(0)
-  totalConversions Int          @default(0)
-  totalRevenue    Decimal       @default(0) @db.Decimal(15,2)
-  totalCommission Decimal       @default(0) @db.Decimal(15,2)
-  
+  totalClicks      Int     @default(0)
+  totalConversions Int     @default(0)
+  totalRevenue     Decimal @default(0) @db.Decimal(15, 2)
+  totalCommission  Decimal @default(0) @db.Decimal(15, 2)
+
   // Creator info
-  creatorId       String
-  
+  creatorId String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  creator         AffUser       @relation("CampaignCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  affiliates      AffCampaignAffiliate[]
-  links           AffLink[]
-  conversions     AffConversion[]
+  creator     AffUser                @relation("CampaignCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  affiliates  AffCampaignAffiliate[]
+  links       AffLink[]
+  conversions AffConversion[]
 
   @@index([status])
   @@index([creatorId])
@@ -1668,28 +1798,28 @@ model AffCampaign {
 }
 
 model AffCampaignAffiliate {
-  id            String    @id @default(uuid())
-  campaignId    String
-  affiliateId   String
-  
+  id          String @id @default(uuid())
+  campaignId  String
+  affiliateId String
+
   // Join status
-  status        String    @default("pending") // pending, approved, rejected
-  appliedAt     DateTime  @default(now())
-  approvedAt    DateTime?
-  rejectedAt    DateTime?
-  reason        String?   // For rejection or notes
-  
+  status     String    @default("pending") // pending, approved, rejected
+  appliedAt  DateTime  @default(now())
+  approvedAt DateTime?
+  rejectedAt DateTime?
+  reason     String? // For rejection or notes
+
   // Performance tracking
-  totalClicks     Int       @default(0)
-  totalConversions Int      @default(0)
-  totalEarnings   Decimal   @default(0) @db.Decimal(10,2)
+  totalClicks      Int     @default(0)
+  totalConversions Int     @default(0)
+  totalEarnings    Decimal @default(0) @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  campaign    AffCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  affiliate   AffUser     @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  campaign  AffCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  affiliate AffUser     @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
 
   @@unique([campaignId, affiliateId])
   @@index([status])
@@ -1698,36 +1828,36 @@ model AffCampaignAffiliate {
 }
 
 model AffLink {
-  id          String    @id @default(uuid())
+  id          String @id @default(uuid())
   campaignId  String
   affiliateId String
-  
+
   // Link details
-  trackingCode String   @unique // Unique tracking identifier
-  originalUrl  String   // The merchant's product URL
-  shortUrl     String?  // Optional shortened URL
-  
+  trackingCode String  @unique // Unique tracking identifier
+  originalUrl  String // The merchant's product URL
+  shortUrl     String? // Optional shortened URL
+
   // UTM and tracking parameters
-  utmSource    String?
-  utmMedium    String?
-  utmCampaign  String?
-  utmContent   String?
-  
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+
   // Performance
-  totalClicks     Int       @default(0)
-  totalConversions Int      @default(0)
-  totalEarnings   Decimal   @default(0) @db.Decimal(10,2)
-  
+  totalClicks      Int     @default(0)
+  totalConversions Int     @default(0)
+  totalEarnings    Decimal @default(0) @db.Decimal(10, 2)
+
   // Settings
-  isActive     Boolean   @default(true)
-  expiresAt    DateTime?
-  
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  campaign    AffCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  affiliate   AffUser     @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  campaign    AffCampaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  affiliate   AffUser         @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
   clicks      AffClick[]
   conversions AffConversion[]
 
@@ -1740,26 +1870,26 @@ model AffLink {
 }
 
 model AffClick {
-  id         String    @id @default(uuid())
-  linkId     String
-  
+  id     String @id @default(uuid())
+  linkId String
+
   // Tracking info
-  ipAddress   String?
-  userAgent   String?
-  referer     String?
-  country     String?
-  city        String?
-  device      String?
-  browser     String?
-  
+  ipAddress String?
+  userAgent String?
+  referer   String?
+  country   String?
+  city      String?
+  device    String?
+  browser   String?
+
   // Session tracking
-  sessionId   String?
-  visitorId   String?   // For unique visitor tracking
-  
-  clickedAt   DateTime  @default(now())
+  sessionId String?
+  visitorId String? // For unique visitor tracking
+
+  clickedAt DateTime @default(now())
 
   // Relations
-  link        AffLink   @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  link AffLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
 
   @@index([linkId])
   @@index([clickedAt])
@@ -1769,42 +1899,42 @@ model AffClick {
 }
 
 model AffConversion {
-  id          String              @id @default(uuid())
+  id          String @id @default(uuid())
   linkId      String
   campaignId  String
   affiliateId String
-  
+
   // Conversion details
-  orderId      String?    // Merchant's order ID
+  orderId       String? // Merchant's order ID
   customerEmail String?
-  saleAmount   Decimal    @db.Decimal(15,2)
-  commission   Decimal    @db.Decimal(10,2)
-  
+  saleAmount    Decimal @db.Decimal(15, 2)
+  commission    Decimal @db.Decimal(10, 2)
+
   // Tracking
-  clickId      String?    // Link to the click that generated this conversion
-  conversionType String   @default("sale") // sale, lead, signup, etc.
-  
+  clickId        String? // Link to the click that generated this conversion
+  conversionType String  @default("sale") // sale, lead, signup, etc.
+
   // Status and validation
-  status       AffConversionStatus @default(PENDING)
-  currency     String     @default("VND")
-  
+  status   AffConversionStatus @default(PENDING)
+  currency String              @default("VND")
+
   // Timestamps
-  convertedAt  DateTime   @default(now())
-  approvedAt   DateTime?
-  rejectedAt   DateTime?
-  paidAt       DateTime?
-  
+  convertedAt DateTime  @default(now())
+  approvedAt  DateTime?
+  rejectedAt  DateTime?
+  paidAt      DateTime?
+
   // Notes and validation
-  notes        String?
-  validatedBy  String?    // Admin who validated
-  
+  notes       String?
+  validatedBy String? // Admin who validated
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  link        AffLink     @relation(fields: [linkId], references: [id], onDelete: Cascade)
-  campaign    AffCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  affiliate   AffUser     @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  link      AffLink     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  campaign  AffCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  affiliate AffUser     @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([convertedAt])
@@ -1815,39 +1945,39 @@ model AffConversion {
 }
 
 model AffPaymentRequest {
-  id            String           @id @default(uuid())
-  affiliateId   String
-  
+  id          String @id @default(uuid())
+  affiliateId String
+
   // Payment details
-  amount        Decimal          @db.Decimal(10,2)
-  currency      String           @default("VND")
-  status        AffPaymentStatus @default(PENDING)
-  
+  amount   Decimal          @db.Decimal(10, 2)
+  currency String           @default("VND")
+  status   AffPaymentStatus @default(PENDING)
+
   // Payment method details
-  paymentMethod AffPaymentMethod
-  accountDetails String?         // JSON string with payment account details
-  
+  paymentMethod  AffPaymentMethod
+  accountDetails String? // JSON string with payment account details
+
   // Processing info
-  requestedAt   DateTime         @default(now())
-  processedAt   DateTime?
-  completedAt   DateTime?
-  failedAt      DateTime?
-  
+  requestedAt DateTime  @default(now())
+  processedAt DateTime?
+  completedAt DateTime?
+  failedAt    DateTime?
+
   // Reference and notes
-  transactionId String?          // Payment processor transaction ID
+  transactionId String? // Payment processor transaction ID
   notes         String?
   adminNotes    String?
-  processedBy   String?          // Admin who processed
-  
+  processedBy   String? // Admin who processed
+
   // Period info (what period this payment covers)
-  periodStart   DateTime
-  periodEnd     DateTime
-  
+  periodStart DateTime
+  periodEnd   DateTime
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  affiliate   AffUser @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  affiliate AffUser @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([affiliateId])
@@ -1855,5 +1985,3 @@ model AffPaymentRequest {
   @@index([periodStart, periodEnd])
   @@map("aff_payment_requests")
 }
-
-

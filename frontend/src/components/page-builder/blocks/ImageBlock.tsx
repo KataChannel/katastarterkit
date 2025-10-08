@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Edit3, Trash2, Upload } from 'lucide-react';
+import { Edit3, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 import { PageBlock, ImageBlockContent } from '@/types/page-builder';
+import { FilePicker } from '@/components/file-manager/FilePicker';
+import { File as FileType, FileType as FileTypeEnum } from '@/types/file';
+import { Button } from '@/components/ui/button';
 
 interface ImageBlockProps {
   block: PageBlock;
@@ -18,6 +21,7 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState<ImageBlockContent>(block.content);
   const [isUploading, setIsUploading] = useState(false);
+  const [showFilePicker, setShowFilePicker] = useState(false);
 
   const handleSave = () => {
     onUpdate?.(content, block.style);
@@ -27,6 +31,16 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
   const handleCancel = () => {
     setContent(block.content);
     setIsEditing(false);
+  };
+
+  const handleFileSelection = (fileOrUrl: FileType | string) => {
+    if (typeof fileOrUrl === 'string') {
+      // URL input
+      setContent(prev => ({ ...prev, src: fileOrUrl }));
+    } else {
+      // File from MinIO
+      setContent(prev => ({ ...prev, src: fileOrUrl.url, alt: fileOrUrl.originalName }));
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,19 +85,18 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
     return (
       <div className="relative border-2 border-blue-500 rounded-lg p-4">
         <div className="space-y-4">
-          {/* Upload Section */}
+          {/* File Picker Button */}
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-            <label className="block text-sm font-medium mb-2">Upload Hình Ảnh</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-              disabled={isUploading}
-              className="w-full p-2 border rounded text-sm"
-            />
-            {isUploading && (
-              <p className="text-xs text-blue-500 mt-1">Đang upload...</p>
-            )}
+            <label className="block text-sm font-medium mb-2">Chọn Hình Ảnh</label>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowFilePicker(true)}
+              className="w-full"
+            >
+              <ImageIcon className="w-4 h-4 mr-2" />
+              Chọn từ thư viện hoặc nhập URL
+            </Button>
             {content.src && (
               <div className="mt-2">
                 <img 
@@ -95,9 +108,9 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
             )}
           </div>
 
-          {/* URL Input (Alternative) */}
+          {/* Direct URL Input (Alternative) */}
           <div>
-            <label className="block text-sm font-medium mb-1">Hoặc nhập URL hình ảnh</label>
+            <label className="block text-sm font-medium mb-1">Hoặc nhập trực tiếp URL hình ảnh</label>
             <input
               type="url"
               value={content.src || ''}
@@ -261,6 +274,15 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
           </div>
         </div>
       )}
+
+      {/* FilePicker Modal */}
+      <FilePicker
+        open={showFilePicker}
+        onOpenChange={setShowFilePicker}
+        onSelect={handleFileSelection}
+        fileTypes={[FileTypeEnum.IMAGE]}
+        allowUrl={true}
+      />
     </div>
   );
 };
