@@ -104,14 +104,26 @@ export default function FileManagerPage() {
     });
 
     try {
-      const response = await fetch('/api/files/upload/bulk', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:14000';
+      
+      // Get JWT token from localStorage
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      
+      const headers: HeadersInit = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`${apiUrl}/api/files/upload/bulk`, {
         method: 'POST',
+        headers,
         body: formData,
         credentials: 'include',
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Upload failed with status ${response.status}`);
       }
 
       const result = await response.json();

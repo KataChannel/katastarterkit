@@ -39,6 +39,7 @@ import { EnvConfigService } from './config/env-config.service';
 
 // Controllers
 import { LogController } from './controllers/log.controller';
+import { FileController } from './controllers/file.controller';
 
 // Resolvers
 import { AppResolver } from './app.resolver';
@@ -132,6 +133,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
   controllers: [
     LogController,
     TestController,
+    FileController,
   ],
   providers: [
     EnvConfigService,
