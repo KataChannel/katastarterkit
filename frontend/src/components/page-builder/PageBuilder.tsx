@@ -29,7 +29,8 @@ import {
   Space,
   Users,
   TrendingUp,
-  Phone
+  Phone,
+  CheckCircle2
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -58,6 +59,7 @@ const BLOCK_TYPES = [
   { type: BlockType.TEAM, label: 'Team Section', icon: Users, color: 'bg-indigo-100 text-indigo-600' },
   { type: BlockType.STATS, label: 'Stats Section', icon: TrendingUp, color: 'bg-emerald-100 text-emerald-600' },
   { type: BlockType.CONTACT_INFO, label: 'Contact Info', icon: Phone, color: 'bg-cyan-100 text-cyan-600' },
+  { type: BlockType.COMPLETED_TASKS, label: 'Completed Tasks', icon: CheckCircle2, color: 'bg-green-100 text-green-600' },
   { type: BlockType.DIVIDER, label: 'Divider', icon: Minus, color: 'bg-gray-100 text-gray-600' },
   { type: BlockType.SPACER, label: 'Spacer', icon: Space, color: 'bg-yellow-100 text-yellow-600' },
 ];
@@ -115,6 +117,16 @@ const DEFAULT_BLOCK_CONTENT = {
     ],
     showMap: false,
     mapEmbedUrl: '',
+    style: {}
+  },
+  [BlockType.COMPLETED_TASKS]: {
+    title: 'Completed Tasks',
+    subtitle: 'Our recent achievements',
+    limit: 10,
+    showDate: true,
+    showAssignee: true,
+    layout: 'list',
+    sortBy: 'completedDate',
     style: {}
   },
   [BlockType.DIVIDER]: { style: {} },

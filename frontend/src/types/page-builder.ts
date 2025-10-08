@@ -9,6 +9,7 @@ export enum BlockType {
   TEAM = 'TEAM',
   STATS = 'STATS',
   CONTACT_INFO = 'CONTACT_INFO',
+  COMPLETED_TASKS = 'COMPLETED_TASKS',
 }
 
 export enum PageStatus {
@@ -192,6 +193,17 @@ export interface ContactInfoBlockContent {
   }>;
   showMap?: boolean;
   mapEmbedUrl?: string;
+}
+
+export interface CompletedTasksBlockContent {
+  title?: string;
+  subtitle?: string;
+  limit?: number;
+  showDate?: boolean;
+  showAssignee?: boolean;
+  layout?: 'list' | 'grid' | 'timeline';
+  filterByProject?: string;
+  sortBy?: 'completedDate' | 'priority' | 'title';
 }
 
 // Block style interface

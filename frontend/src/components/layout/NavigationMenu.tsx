@@ -82,8 +82,6 @@ export function NavigationMenu({ navigation, collapsed, onItemClick }: Navigatio
     
     // Get icon component (handles both string and component types)
     const IconComponent = getIconComponent(item.icon);
-    console.log('IconComponent:', item);
-    
     if (hasChildren) {
       return (
         <div key={itemKey}>

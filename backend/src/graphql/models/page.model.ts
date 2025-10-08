@@ -26,6 +26,7 @@ export enum BlockType {
   TEAM = 'TEAM',
   STATS = 'STATS',
   CONTACT_INFO = 'CONTACT_INFO',
+  COMPLETED_TASKS = 'COMPLETED_TASKS',
 }
 
 // Register enums for GraphQL

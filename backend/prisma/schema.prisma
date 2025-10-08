@@ -838,6 +838,7 @@ enum BlockType {
   TEAM
   STATS
   CONTACT_INFO
+  COMPLETED_TASKS
 }
 
 model Page {

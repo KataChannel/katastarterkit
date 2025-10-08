@@ -128,8 +128,11 @@ export const UPDATE_PAGE_BLOCK = gql`
 
 // Delete a page block
 export const DELETE_PAGE_BLOCK = gql`
+  ${PAGE_BLOCK_FRAGMENT}
   mutation DeletePageBlock($id: String!) {
-    deletePageBlock(id: $id)
+    deletePageBlock(id: $id) {
+      ...PageBlockFields
+    }
   }
 `;
 
