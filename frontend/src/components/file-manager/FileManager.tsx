@@ -37,11 +37,26 @@ import { useToast } from '@/hooks/use-toast';
 
 type ViewMode = 'grid' | 'list';
 
+interface SortOption {
+  field: 'name' | 'date' | 'size' | 'type';
+  order: 'asc' | 'desc';
+}
+
+interface FilterOption {
+  type?: FileType;
+}
+
 interface FileManagerProps {
   onSelect?: (file: File) => void;
   allowMultiple?: boolean;
   folderId?: string;
   fileTypes?: FileType[];
+  // New props for enhanced version
+  viewMode?: ViewMode;
+  sortBy?: SortOption;
+  searchQuery?: string;
+  filter?: FilterOption;
+  limit?: number;
 }
 
 export function FileManager({
@@ -49,24 +64,35 @@ export function FileManager({
   allowMultiple = false,
   folderId,
   fileTypes,
+  viewMode: externalViewMode,
+  sortBy: externalSortBy,
+  searchQuery: externalSearchQuery,
+  filter,
+  limit = 20,
 }: FileManagerProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [internalViewMode, setInternalViewMode] = useState<ViewMode>('grid');
+  const [internalSearchQuery, setInternalSearchQuery] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const { toast } = useToast();
 
+  // Use external props if provided, otherwise use internal state
+  const viewMode = externalViewMode || internalViewMode;
+  const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery;
+  const sortBy = externalSortBy || { field: 'date' as const, order: 'desc' as const };
+
   // Build query input
   const queryInput: GetFilesInput = {
     page,
-    limit: 20,
+    limit,
     filters: {
       ...(folderId && { folderId }),
       ...(searchQuery && { search: searchQuery }),
-      ...(fileTypes && fileTypes.length > 0 && { fileType: fileTypes[0] }),
+      ...(filter?.type && { fileType: filter.type }),
+      ...(fileTypes && fileTypes.length > 0 && !filter?.type && { fileType: fileTypes[0] }),
     },
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
+    sortBy: sortBy.field === 'name' ? 'filename' : sortBy.field === 'date' ? 'createdAt' : 'size',
+    sortOrder: sortBy.order,
   };
 
   const { files, loading, refetch } = useFiles(queryInput);
@@ -211,81 +237,83 @@ export function FileManager({
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* Toolbar */}
-      <Card className="mb-4">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-4">
-            {/* Search */}
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Search files..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+      {/* Toolbar - only show if not controlled externally */}
+      {externalViewMode === undefined && externalSearchQuery === undefined && (
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-4">
+              {/* Search */}
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Search files..."
+                    value={internalSearchQuery}
+                    onChange={(e) => setInternalSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                {/* Upload */}
+                <label>
+                  <input
+                    type="file"
+                    multiple
+                    onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                    className="hidden"
+                  />
+                  <Button variant="default" size="sm" disabled={uploading} asChild>
+                    <span className="cursor-pointer">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload
+                    </span>
+                  </Button>
+                </label>
+
+                {/* Bulk Delete */}
+                {selectedFiles.size > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleBulkDelete}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete ({selectedFiles.size})
+                  </Button>
+                )}
+
+                {/* Refresh */}
+                <Button variant="outline" size="sm" onClick={() => refetch()}>
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+
+                {/* View Mode */}
+                <div className="flex border rounded-md">
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setInternalViewMode('grid')}
+                    className="rounded-r-none"
+                  >
+                    <Grid3x3 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setInternalViewMode('list')}
+                    className="rounded-l-none"
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-              {/* Upload */}
-              <label>
-                <input
-                  type="file"
-                  multiple
-                  onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-                  className="hidden"
-                />
-                <Button variant="default" size="sm" disabled={uploading} asChild>
-                  <span className="cursor-pointer">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload
-                  </span>
-                </Button>
-              </label>
-
-              {/* Bulk Delete */}
-              {selectedFiles.size > 0 && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleBulkDelete}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete ({selectedFiles.size})
-                </Button>
-              )}
-
-              {/* Refresh */}
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-
-              {/* View Mode */}
-              <div className="flex border rounded-md">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="rounded-r-none"
-                >
-                  <Grid3x3 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="rounded-l-none"
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Drop Zone */}
       <div

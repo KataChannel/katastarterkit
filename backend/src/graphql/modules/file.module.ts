@@ -7,6 +7,7 @@ import { UploadScalar } from '../scalars/upload.scalar';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FileController } from '../../controllers/file.controller';
 import { AuthModule } from '../../auth/auth.module';
+import { UserService } from '../../services/user.service';
 
 @Module({
   imports: [AuthModule],
@@ -18,6 +19,7 @@ import { AuthModule } from '../../auth/auth.module';
     FolderResolver,
     UploadScalar,
     PrismaService,
+    UserService, // Add UserService for JwtAuthGuard
   ],
   exports: [FileService, MinioService],
 })

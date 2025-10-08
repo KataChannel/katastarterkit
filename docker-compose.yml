@@ -80,9 +80,9 @@ services:
       retries: 5
       start_period: 60s
 
-  # Minio Object Storage with HTTPS
+  # Minio Object Storage
   minio:
-    image: ${MINIO_IMAGE:-minio/minio:RELEASE.2025-07-23T15-54-02Z}
+    image: ${MINIO_IMAGE:-minio/minio:RELEASE.2024-08-26T15-33-07Z}
     container_name: ${MINIO_CONTAINER_NAME:-katacore-minio}
     restart: unless-stopped
     environment:
@@ -93,15 +93,15 @@ services:
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio_data:/data
-      - ./docker/minio/certs:/root/.minio/certs:ro
-    command: server /data --console-address ":9001" --certs-dir /root/.minio/certs
+    command: server /data --console-address ":9001"
     networks:
       - katacore-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "mc", "ready", "local"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 3
+      start_period: 10s
 
   # Backend with Bun
   backend:

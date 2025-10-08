@@ -363,6 +363,10 @@ enum BlockType {
   VIDEO
 }
 
+input BulkDeleteFilesInput {
+  fileIds: [ID!]!
+}
+
 input BulkInvoiceInput {
   bearerToken: String
   includeDetails: Boolean = true
@@ -373,6 +377,13 @@ input BulkInvoiceInput {
 input BulkUpdateBlockOrderInput {
   id: ID!
   order: Int!
+}
+
+input BulkUpdateFilesInput {
+  fileIds: [ID!]!
+  folderId: ID
+  tags: [String!]
+  visibility: FileVisibility
 }
 
 input BulkUserActionInput {
@@ -459,6 +470,23 @@ input CreateCommentInput {
   content: String!
   parentId: String
   postId: String!
+}
+
+input CreateFileShareInput {
+  canDownload: Boolean! = true
+  canView: Boolean! = true
+  expiresAt: DateTime
+  fileId: ID!
+  password: String
+  sharedWith: String
+}
+
+input CreateFolderInput {
+  color: String
+  description: String
+  icon: String
+  name: String!
+  parentId: ID
 }
 
 input CreateInput {
@@ -721,6 +749,115 @@ type ExtListhoadon {
   updatedAt: DateTime!
 }
 
+type File {
+  alt: String
+  bucket: String!
+  createdAt: DateTime!
+  description: String
+  downloadCount: Int!
+  etag: String
+  fileType: FileType!
+  filename: String!
+  folder: FileFolder
+  folderId: ID
+  height: Int
+  id: ID!
+  metadata: JSON
+  mimeType: String!
+  originalName: String!
+  path: String!
+  shares: [FileShare!]!
+  size: Int!
+  tags: [String!]!
+  thumbnailUrl: String
+  title: String
+  updatedAt: DateTime!
+  url: String!
+  userId: ID!
+  viewCount: Int!
+  visibility: FileVisibility!
+  width: Int
+}
+
+input FileFiltersInput {
+  fileType: FileType
+  folderId: ID
+  mimeType: String
+  search: String
+  tags: [String!]
+  visibility: FileVisibility
+}
+
+type FileFolder {
+  children: [FileFolder!]!
+  color: String
+  createdAt: DateTime!
+  description: String
+  files: [File!]!
+  icon: String
+  id: ID!
+  isSystem: Boolean!
+  name: String!
+  parent: FileFolder
+  parentId: ID
+  path: String!
+  updatedAt: DateTime!
+  userId: ID!
+}
+
+type FileShare {
+  accessCount: Int!
+  canDownload: Boolean!
+  canView: Boolean!
+  createdAt: DateTime!
+  expiresAt: DateTime
+  file: File!
+  fileId: ID!
+  id: ID!
+  lastAccess: DateTime
+  password: String
+  sharedBy: String!
+  sharedWith: String
+  token: String!
+}
+
+type FileStorageStats {
+  filesByType: [FileTypeCount!]!
+  filesByVisibility: [VisibilityCount!]!
+  totalFiles: Int!
+  totalFolders: Int!
+  totalSize: Int!
+}
+
+"""Type of file"""
+enum FileType {
+  ARCHIVE
+  AUDIO
+  DOCUMENT
+  IMAGE
+  OTHER
+  VIDEO
+}
+
+type FileTypeCount {
+  count: Int!
+  totalSize: Int!
+  type: FileType!
+}
+
+type FileUploadResponse {
+  file: File!
+  message: String
+  success: Boolean!
+}
+
+"""Visibility level of the file"""
+enum FileVisibility {
+  PRIVATE
+  PUBLIC
+  SHARED
+}
+
 input FindManyInput {
   include: JSONObject
   model: String!
@@ -735,6 +872,14 @@ input FindUniqueInput {
   model: String!
   select: JSONObject
   where: JSONObject!
+}
+
+input GetFilesInput {
+  filters: FileFiltersInput
+  limit: Int! = 20
+  page: Int! = 1
+  sortBy: String
+  sortOrder: String
 }
 
 input GroupByInput {
@@ -862,6 +1007,11 @@ type MenuResponseDto {
   url: String
 }
 
+input MoveFilesInput {
+  fileIds: [ID!]!
+  targetFolderId: ID
+}
+
 type Mutation {
   addPageBlock(input: CreatePageBlockInput!, pageId: String!): PageBlock!
   adminCreateUser(input: AdminCreateUserInput!): User!
@@ -870,11 +1020,15 @@ type Mutation {
   assignUserPermissions(input: AssignUserPermissionInput!): Boolean!
   assignUserRoles(input: AssignUserRoleInput!): Boolean!
   bulkCreateInvoices(input: BulkInvoiceInput!): DatabaseSyncResult!
+  bulkDeleteFiles(input: BulkDeleteFilesInput!): Int!
+  bulkUpdateFiles(input: BulkUpdateFilesInput!): [File!]!
   bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
   createAffiliateLink(input: CreateAffLinkInput!): AffLink!
   createAffiliateUser(input: CreateAffUserInput!): AffUser!
   createComment(input: CreateCommentInput!): Comment!
+  createFileShare(input: CreateFileShareInput!): FileShare!
+  createFolder(input: CreateFolderInput!): FileFolder!
   createInvoice(input: CreateInvoiceInput!): ExtListhoadon!
   createInvoiceDetails(details: [CreateInvoiceDetailInput!]!, invoiceId: ID!): [ExtDetailhoadon!]!
 
@@ -893,6 +1047,8 @@ type Mutation {
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
   deleteComment(id: String!): Boolean!
+  deleteFile(id: ID!): Boolean!
+  deleteFolder(id: ID!): Boolean!
   deleteInvoice(id: ID!): Boolean!
 
   """Delete multiple records matching criteria"""
@@ -939,6 +1095,7 @@ type Mutation {
   loginWithFacebook(input: SocialLoginInput!): AuthResponse!
   loginWithGoogle(input: SocialLoginInput!): AuthResponse!
   loginWithPhone(input: PhoneLoginInput!): AuthResponse!
+  moveFiles(input: MoveFilesInput!): [File!]!
   moveMenu(menuId: ID!, newOrder: Float, newParentId: ID): MenuResponseDto!
   processPaymentRequest(id: String!, status: String!): AffPaymentRequest!
   publishPost(id: String!): Post!
@@ -957,6 +1114,8 @@ type Mutation {
   updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
   updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
+  updateFile(input: UpdateFileInput!): File!
+  updateFolder(input: UpdateFolderInput!): FileFolder!
   updateInvoice(id: ID!, input: CreateInvoiceInput!): ExtListhoadon!
 
   """Update multiple records matching criteria"""
@@ -973,6 +1132,7 @@ type Mutation {
   updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateTask(input: UpdateTaskInput!): Task!
   updateUser(id: String!, input: UpdateUserInput!): User!
+  uploadFile(file: JSON!, folderId: ID, metadata: JSON): FileUploadResponse!
   uploadTaskMedia(input: UploadTaskMediaInput!): TaskMedia!
 
   """Create or update a record based on criteria"""
@@ -1077,6 +1237,16 @@ enum PageStatus {
   ARCHIVED
   DRAFT
   PUBLISHED
+}
+
+type PaginatedFiles {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  items: [File!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
 }
 
 type PaginatedPages {
@@ -1230,6 +1400,9 @@ type Query {
 
   """Check if a record exists matching the criteria"""
   exists(modelName: String!, where: JSONObject!): Boolean!
+  file(id: ID!): File!
+  fileStorageStats: FileStorageStats!
+  files(input: GetFilesInput): PaginatedFiles!
 
   """Find a unique record by ID"""
   findById(input: UnifiedFindByIdInput!, modelName: String!): JSONObject!
@@ -1239,6 +1412,8 @@ type Query {
 
   """Find records with pagination"""
   findManyPaginated(input: UnifiedPaginatedInput, modelName: String!): JSONObject!
+  folder(id: ID!): FileFolder!
+  folders: [FileFolder!]!
   footerMenus: [MenuResponseDto!]!
   getCommentById(id: String!): Comment!
   getCommentsByPost(postId: String!): [Comment!]!
@@ -1703,6 +1878,26 @@ input UpdateCommentInput {
   content: String
 }
 
+input UpdateFileInput {
+  alt: String
+  description: String
+  folderId: ID
+  id: ID!
+  metadata: JSON
+  tags: [String!]
+  title: String
+  visibility: FileVisibility
+}
+
+input UpdateFolderInput {
+  color: String
+  description: String
+  icon: String
+  id: ID!
+  name: String
+  parentId: ID
+}
+
 input UpdateInput {
   data: JSONObject!
   include: JSONObject
@@ -1813,6 +2008,9 @@ input UpdateUserInput {
   username: String
 }
 
+"""Upload custom scalar type for file uploads"""
+scalar Upload
+
 input UploadTaskMediaInput {
   caption: String
   filename: String!
@@ -1922,4 +2120,9 @@ type UserSummary {
   totalDirectPermissions: Int!
   totalEffectivePermissions: Int!
   totalRoleAssignments: Int!
+}
+
+type VisibilityCount {
+  count: Int!
+  visibility: FileVisibility!
 }
