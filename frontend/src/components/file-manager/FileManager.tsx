@@ -2,11 +2,13 @@
 
 import React, { useState, useCallback } from 'react';
 import { useFiles, useFileUpload, useDeleteFile, useBulkDeleteFiles } from '@/hooks/useFiles';
-import { File, FileType, GetFilesInput } from '@/types/file';
+import type { File } from '@/types/file';
+import { FileType, GetFilesInput } from '@/types/file';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { UploadDialog } from '@/components/file-manager/UploadDialog';
 import {
   Upload,
   Grid3x3,
@@ -74,6 +76,7 @@ export function FileManager({
   const [internalSearchQuery, setInternalSearchQuery] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const { toast } = useToast();
 
   // Use external props if provided, otherwise use internal state
@@ -102,7 +105,7 @@ export function FileManager({
 
   // File upload handler
   const handleFileUpload = useCallback(
-    async (uploadedFiles: FileList) => {
+    async (uploadedFiles: FileList | globalThis.File[]) => {
       try {
         const fileArray = Array.from(uploadedFiles);
         
@@ -119,6 +122,7 @@ export function FileManager({
         });
         
         refetch();
+        setUploadDialogOpen(false);
       } catch (error: any) {
         toast({
           type: 'error',
@@ -258,21 +262,10 @@ export function FileManager({
               {/* Actions */}
               <div className="flex items-center gap-2">
                 {/* Upload */}
-                <label>
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-                    className="hidden"
-                  />
-                  <Button variant="default" size="sm" disabled={uploading} asChild>
-                    <span className="cursor-pointer">
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload
-                    </span>
-                  </Button>
-                </label>
-
+                <Button variant="default" size="sm" disabled={uploading} onClick={() => setUploadDialogOpen(true)}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload
+                </Button>
                 {/* Bulk Delete */}
                 {selectedFiles.size > 0 && (
                   <Button
@@ -284,12 +277,10 @@ export function FileManager({
                     Delete ({selectedFiles.size})
                   </Button>
                 )}
-
                 {/* Refresh */}
                 <Button variant="outline" size="sm" onClick={() => refetch()}>
                   <RefreshCw className="w-4 h-4" />
                 </Button>
-
                 {/* View Mode */}
                 <div className="flex border rounded-md">
                   <Button
@@ -315,6 +306,14 @@ export function FileManager({
         </Card>
       )}
 
+      {/* Upload Dialog */}
+      <UploadDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        onUpload={handleFileUpload}
+        onUploadSuccess={() => { refetch(); setUploadDialogOpen(false); }}
+        folderId={folderId}
+      />
       {/* Drop Zone */}
       <div
         onDrop={handleDrop}
