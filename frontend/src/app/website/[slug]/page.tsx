@@ -25,7 +25,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         console.log('Rendering page for slug:', resolvedParams);
         
         if (resolvedParams && resolvedParams.slug) {
-          setSlug(resolvedParams.slug);
+          // Prepend 'website/' to match the database slug format
+          const fullSlug = `website/${resolvedParams.slug}`;
+          setSlug(fullSlug);
         } else {
           console.error('No slug found in params:', resolvedParams);
           setSlug(''); // This will trigger notFound() in the query
