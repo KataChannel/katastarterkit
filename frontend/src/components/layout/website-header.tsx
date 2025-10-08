@@ -195,11 +195,11 @@ export function WebsiteHeader() {
           <NavigationMenu className="w-full p-4">
             <NavigationMenuList className="flex justify-evenly space-x-1 lg:space-x-2 w-full">
               <NavigationMenuItem>
-                <Link href="/website" legacyBehavior passHref>
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4")}>
+                <NavigationMenuLink asChild>
+                  <Link href="/website" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4")}>
                     Trang Chủ
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
@@ -246,29 +246,29 @@ export function WebsiteHeader() {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/website/san-pham" legacyBehavior passHref>
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4")}>
+                <NavigationMenuLink asChild>
+                  <Link href="/website/san-pham" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4")}>
                     Sản Phẩm
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/website/dia-diem-phan-phoi" legacyBehavior passHref>
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-1 lg:px-4")}>
+                <NavigationMenuLink asChild>
+                  <Link href="/website/dia-diem-phan-phoi" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-1 lg:px-4")}>
                     <span className="hidden lg:inline">Địa Điểm Phân Phối</span>
                     <span className="lg:hidden">Phân Phối</span>
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/website/huong-dan-su-dung" legacyBehavior passHref>
-                  <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-1 lg:px-4")}>
+                <NavigationMenuLink asChild>
+                  <Link href="/website/huong-dan-su-dung" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-1 lg:px-4")}>
                     <span className="hidden lg:inline">Hướng Dẫn Sử Dụng</span>
                     <span className="lg:hidden">Hướng Dẫn</span>
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>

@@ -145,7 +145,7 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
         id: '',
         title: '',
         slug: '',
-        content: '',
+        content: undefined,
         status: PageStatus.DRAFT,
         seoTitle: '',
         seoDescription: '',
@@ -184,7 +184,7 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
         const input: UpdatePageInput = {
           title: editingPage.title,
           slug: editingPage.slug,
-          content: editingPage.content,
+          content: editingPage.content && typeof editingPage.content === 'object' ? editingPage.content : undefined,
           status: editingPage.status,
           seoTitle: editingPage.seoTitle,
           seoDescription: editingPage.seoDescription,
@@ -430,7 +430,7 @@ function PageSettingsForm({ page, onUpdate }: { page: Page; onUpdate: (page: Pag
   const [formData, setFormData] = useState({
     title: page.title || '',
     slug: page.slug || '',
-    content: page.content || '',
+    content: (page.content && typeof page.content === 'string') ? page.content : '',
     status: page.status,
     seoTitle: page.seoTitle || '',
     seoDescription: page.seoDescription || '',
@@ -442,11 +442,14 @@ function PageSettingsForm({ page, onUpdate }: { page: Page; onUpdate: (page: Pag
     setFormData(newFormData);
     
     // Update parent immediately
-    onUpdate({
+    // For content field, if it's empty string, set to undefined to avoid JSONObject validation error
+    const updatedPage = {
       ...page,
       ...newFormData,
+      content: field === 'content' && !value ? undefined : (field === 'content' ? value : page.content),
       seoKeywords: field === 'seoKeywords' ? value.split(',').map(k => k.trim()).filter(Boolean) : page.seoKeywords,
-    });
+    };
+    onUpdate(updatedPage);
   };
 
   const generateSlugFromTitle = () => {
