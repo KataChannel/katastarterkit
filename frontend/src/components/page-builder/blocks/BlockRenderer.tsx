@@ -26,7 +26,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 }) => {
   const commonProps = {
     block,
-    isEditing,
+    isEditable: isEditing,
     onUpdate: (content: any, style?: any) => onUpdate(content, style),
     onDelete,
   };
@@ -51,7 +51,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     case BlockType.CONTACT_INFO:
       return <ContactInfoBlock {...commonProps} />;
     case BlockType.COMPLETED_TASKS:
-      return <CompletedTasksBlock content={block.content} style={block.style} isEditing={isEditing} />;
+      return <CompletedTasksBlock {...commonProps} isEditable={isEditing} />;
     default:
       return (
         <div className="p-4 border border-red-300 bg-red-50 text-red-600 rounded">

@@ -204,6 +204,7 @@ export interface CompletedTasksBlockContent {
   layout?: 'list' | 'grid' | 'timeline';
   filterByProject?: string;
   sortBy?: 'completedDate' | 'priority' | 'title';
+  statusFilter?: string[]; // Support multiple statuses: PENDING, IN_PROGRESS, COMPLETED, CANCELLED
 }
 
 // Block style interface

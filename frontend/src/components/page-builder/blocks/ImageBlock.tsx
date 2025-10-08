@@ -17,6 +17,7 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState<ImageBlockContent>(block.content);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleSave = () => {
     onUpdate?.(content, block.style);
@@ -28,12 +29,75 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
     setIsEditing(false);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn file hình ảnh');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Kích thước file không được vượt quá 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setContent(prev => ({ ...prev, src: base64String }));
+        setIsUploading(false);
+      };
+      reader.onerror = () => {
+        alert('Lỗi khi đọc file');
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Lỗi khi upload hình ảnh');
+      setIsUploading(false);
+    }
+  };
+
   if (isEditing && isEditable) {
     return (
       <div className="relative border-2 border-blue-500 rounded-lg p-4">
         <div className="space-y-4">
+          {/* Upload Section */}
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+            <label className="block text-sm font-medium mb-2">Upload Hình Ảnh</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              disabled={isUploading}
+              className="w-full p-2 border rounded text-sm"
+            />
+            {isUploading && (
+              <p className="text-xs text-blue-500 mt-1">Đang upload...</p>
+            )}
+            {content.src && (
+              <div className="mt-2">
+                <img 
+                  src={content.src} 
+                  alt="Preview" 
+                  className="max-w-full h-32 object-contain rounded border"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* URL Input (Alternative) */}
           <div>
-            <label className="block text-sm font-medium mb-1">Image URL</label>
+            <label className="block text-sm font-medium mb-1">Hoặc nhập URL hình ảnh</label>
             <input
               type="url"
               value={content.src || ''}
@@ -50,55 +114,63 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
               value={content.alt || ''}
               onChange={(e) => setContent(prev => ({ ...prev, alt: e.target.value }))}
               className="w-full p-2 border rounded"
-              placeholder="Describe the image..."
+              placeholder="Mô tả hình ảnh..."
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-1">Caption (Optional)</label>
+            <label className="block text-sm font-medium mb-1">Caption (Tùy chọn)</label>
             <input
               type="text"
               value={content.caption || ''}
               onChange={(e) => setContent(prev => ({ ...prev, caption: e.target.value }))}
               className="w-full p-2 border rounded"
-              placeholder="Image caption..."
+              placeholder="Chú thích hình ảnh..."
             />
           </div>
           
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">Width</label>
-              <input
-                type="number"
-                value={content.width || ''}
-                onChange={(e) => setContent(prev => ({ ...prev, width: parseInt(e.target.value) || undefined }))}
-                className="w-full p-1 border rounded text-sm"
-                placeholder="Auto"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">Height</label>
-              <input
-                type="number"
-                value={content.height || ''}
-                onChange={(e) => setContent(prev => ({ ...prev, height: parseInt(e.target.value) || undefined }))}
-                className="w-full p-1 border rounded text-sm"
-                placeholder="Auto"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">Fit</label>
-              <select
-                value={content.objectFit || 'cover'}
-                onChange={(e) => setContent(prev => ({ ...prev, objectFit: e.target.value as any }))}
-                className="w-full p-1 border rounded text-sm"
-              >
-                <option value="cover">Cover</option>
-                <option value="contain">Contain</option>
-                <option value="fill">Fill</option>
-              </select>
+          {/* Dimension Controls */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Kích Thước Hình Ảnh</label>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Chiều rộng (px)</label>
+                <input
+                  type="number"
+                  value={content.width || ''}
+                  onChange={(e) => setContent(prev => ({ ...prev, width: parseInt(e.target.value) || undefined }))}
+                  className="w-full p-2 border rounded text-sm"
+                  placeholder="Auto"
+                  min="1"
+                  max="2000"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Chiều cao (px)</label>
+                <input
+                  type="number"
+                  value={content.height || ''}
+                  onChange={(e) => setContent(prev => ({ ...prev, height: parseInt(e.target.value) || undefined }))}
+                  className="w-full p-2 border rounded text-sm"
+                  placeholder="Auto"
+                  min="1"
+                  max="2000"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Object Fit</label>
+                <select
+                  value={content.objectFit || 'cover'}
+                  onChange={(e) => setContent(prev => ({ ...prev, objectFit: e.target.value as any }))}
+                  className="w-full p-2 border rounded text-sm"
+                >
+                  <option value="cover">Cover</option>
+                  <option value="contain">Contain</option>
+                  <option value="fill">Fill</option>
+                </select>
+              </div>
             </div>
           </div>
           

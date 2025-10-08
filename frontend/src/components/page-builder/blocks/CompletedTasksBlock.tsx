@@ -1,18 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Calendar, User } from 'lucide-react';
-import { CompletedTasksBlockContent } from '@/types/page-builder';
+import { CheckCircle2, Calendar, User, Edit3, Trash2 } from 'lucide-react';
+import { CompletedTasksBlockContent, PageBlock } from '@/types/page-builder';
 
-// GraphQL Query to fetch completed tasks
-const GET_COMPLETED_TASKS = gql`
-  query GetCompletedTasks($page: Int!, $limit: Int!) {
+// GraphQL Query to fetch tasks with dynamic status filter
+const GET_TASKS_BY_STATUS = gql`
+  query GetTasksByStatus($page: Int!, $limit: Int!, $status: TaskStatus!) {
     getTasksPaginated(
       page: $page
       limit: $limit
-      filters: { status: COMPLETED }
+      filters: { status: $status }
     ) {
       data {
         id
@@ -38,12 +39,16 @@ const GET_COMPLETED_TASKS = gql`
 `;
 
 interface CompletedTasksBlockProps {
-  content: CompletedTasksBlockContent;
-  style?: any;
-  isEditing?: boolean;
+  block: PageBlock;
+  isEditable?: boolean;
+  onUpdate?: (content: any, style?: any) => void;
+  onDelete?: () => void;
 }
 
-export function CompletedTasksBlock({ content, style, isEditing = false }: CompletedTasksBlockProps) {
+export function CompletedTasksBlock({ block, isEditable = false, onUpdate, onDelete }: CompletedTasksBlockProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [content, setContent] = useState<CompletedTasksBlockContent>(block.content);
+
   const {
     title = 'Completed Tasks',
     subtitle = 'Our recent achievements',
@@ -52,30 +57,181 @@ export function CompletedTasksBlock({ content, style, isEditing = false }: Compl
     showAssignee = true,
     layout = 'list',
     filterByProject,
-    sortBy = 'completedDate'
+    sortBy = 'completedDate',
+    statusFilter = ['COMPLETED']
   } = content;
 
-  const { data, loading, error } = useQuery(GET_COMPLETED_TASKS, {
-    variables: { page: 1, limit },
-    skip: isEditing, // Don't fetch data in editing mode
-  });
+  const handleSave = () => {
+    onUpdate?.(content, block.style);
+    setIsEditing(false);
+  };
 
-  if (isEditing) {
+  const handleCancel = () => {
+    setContent(block.content);
+    setIsEditing(false);
+  };
+
+  const toggleStatus = (status: string) => {
+    const currentStatuses = content.statusFilter || ['COMPLETED'];
+    if (currentStatuses.includes(status)) {
+      // Remove if already selected
+      setContent(prev => ({
+        ...prev,
+        statusFilter: currentStatuses.filter(s => s !== status)
+      }));
+    } else {
+      // Add if not selected
+      setContent(prev => ({
+        ...prev,
+        statusFilter: [...currentStatuses, status]
+      }));
+    }
+  };
+
+  // Get first status for single query (backend only supports single status filter)
+  const primaryStatus = (statusFilter && statusFilter.length > 0) ? statusFilter[0] : 'COMPLETED';
+
+  // Editing Mode UI
+  if (isEditing && isEditable) {
     return (
-      <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-        <CheckCircle2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">Completed Tasks Block</h3>
-        <p className="text-sm text-gray-500">
-          Will display {limit} completed tasks in {layout} layout
-        </p>
-        {filterByProject && (
-          <Badge variant="outline" className="mt-2">
-            Filtered by project: {filterByProject}
-          </Badge>
-        )}
+      <div className="relative border-2 border-blue-500 rounded-lg p-6">
+        <div className="space-y-4">
+          {/* Title & Subtitle */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Tiêu đề</label>
+            <input
+              type="text"
+              value={content.title || 'Completed Tasks'}
+              onChange={(e) => setContent(prev => ({ ...prev, title: e.target.value }))}
+              className="w-full p-2 border rounded"
+              placeholder="Tiêu đề block..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Mô tả</label>
+            <input
+              type="text"
+              value={content.subtitle || ''}
+              onChange={(e) => setContent(prev => ({ ...prev, subtitle: e.target.value }))}
+              className="w-full p-2 border rounded"
+              placeholder="Mô tả ngắn..."
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Trạng thái hiển thị</label>
+            <div className="flex flex-wrap gap-2">
+              {['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'].map(status => (
+                <button
+                  key={status}
+                  onClick={() => toggleStatus(status)}
+                  className={`px-3 py-1 rounded text-sm ${
+                    (content.statusFilter || ['COMPLETED']).includes(status)
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  {status === 'PENDING' && '⏳ Chờ xử lý'}
+                  {status === 'IN_PROGRESS' && '🔄 Đang thực hiện'}
+                  {status === 'COMPLETED' && '✅ Hoàn thành'}
+                  {status === 'CANCELLED' && '❌ Đã hủy'}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Hiện tại: {(content.statusFilter || ['COMPLETED']).join(', ')}
+            </p>
+          </div>
+
+          {/* Limit Control */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Số lượng hiển thị</label>
+            <input
+              type="number"
+              value={content.limit || 10}
+              onChange={(e) => setContent(prev => ({ ...prev, limit: parseInt(e.target.value) || 10 }))}
+              className="w-full p-2 border rounded"
+              min="1"
+              max="100"
+              placeholder="10"
+            />
+          </div>
+
+          {/* Layout Selection */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Kiểu hiển thị</label>
+            <div className="flex gap-2">
+              {[
+                { value: 'list', label: '📋 Danh sách' },
+                { value: 'grid', label: '🔲 Lưới' },
+                { value: 'timeline', label: '⏱️ Timeline' }
+              ].map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setContent(prev => ({ ...prev, layout: value as any }))}
+                  className={`px-3 py-1 rounded text-sm ${
+                    (content.layout || 'list') === value
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Display Options */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Tùy chọn hiển thị</label>
+            <div className="space-y-2">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={content.showDate !== false}
+                  onChange={(e) => setContent(prev => ({ ...prev, showDate: e.target.checked }))}
+                  className="mr-2"
+                />
+                <span className="text-sm">Hiển thị ngày hoàn thành</span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={content.showAssignee !== false}
+                  onChange={(e) => setContent(prev => ({ ...prev, showAssignee: e.target.checked }))}
+                  className="mr-2"
+                />
+                <span className="text-sm">Hiển thị người được giao</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Save/Cancel Buttons */}
+          <div className="flex gap-2 pt-4">
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Lưu
+            </button>
+            <button
+              onClick={handleCancel}
+              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+            >
+              Hủy
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
+
+  const { data, loading, error } = useQuery(GET_TASKS_BY_STATUS, {
+    variables: { page: 1, limit, status: primaryStatus },
+    skip: isEditing,
+  });
 
   if (loading) {
     return (
@@ -106,7 +262,29 @@ export function CompletedTasksBlock({ content, style, isEditing = false }: Compl
   }
 
   return (
-    <section className="w-full py-12 px-4" style={style}>
+    <section className={`relative w-full py-12 px-4 ${isEditable ? 'group' : ''}`} style={block.style}>
+      {/* Edit/Delete buttons for editable mode */}
+      {isEditable && (
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <div className="flex gap-1">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="p-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+              title="Chỉnh sửa"
+            >
+              <Edit3 size={12} />
+            </button>
+            <button
+              onClick={onDelete}
+              className="p-1 bg-red-500 text-white rounded hover:bg-red-600"
+              title="Xóa"
+            >
+              <Trash2 size={12} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

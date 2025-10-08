@@ -127,6 +127,7 @@ const DEFAULT_BLOCK_CONTENT = {
     showAssignee: true,
     layout: 'list',
     sortBy: 'completedDate',
+    statusFilter: ['COMPLETED'], // Default to show only completed tasks
     style: {}
   },
   [BlockType.DIVIDER]: { style: {} },
