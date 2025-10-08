@@ -17,7 +17,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
-import { Search, ShoppingCart, User } from 'lucide-react';
+import { Phone, Search, ShoppingCart, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import React from 'react';
@@ -61,10 +61,10 @@ export function WebsiteHeader() {
       title: "Khuyến Mãi Đặc Biệt",
       subtitle: "Giảm giá lên đến 50% cho tất cả sản phẩm",
       description: "Ưu đãi có thời hạn - Nhanh tay đặt hàng!",
-      image: "https://placehold.co/1920x200/png/white?text=No+Image",
+      image: "https://shop.rausachtrangia.com/assets/images/tunongtraidenbanan.jpg",
       cta: "Mua Ngay",
       badge: "HOT",
-      bgColor: "bg-gradient-to-r from-red-500 to-pink-600"
+      bgColor: ""
     },
     // {
     //   id: 2,
@@ -143,8 +143,8 @@ export function WebsiteHeader() {
                   <Card className="border-0 rounded-none">
                     <CardContent className={`relative p-0 ${item.bgColor} overflow-hidden`}>
                       <div className="relative z-10 h-full flex items-center">
-                        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="hidden lg:block w-96 h-56 rounded-xl overflow-hidden shadow-2xl ml-8 flex-shrink-0">
+                        <div className="mx-auto">
+                            <div className="hidden lg:block w-full h-52 overflow-hidden shadow-2xl flex-shrink-0">
                               <img 
                                 src={item.image} 
                                 alt={item.title}
@@ -181,7 +181,7 @@ export function WebsiteHeader() {
         </div>
       </div>
       <div className="w-full mx-auto">
-        <div className="bg-[#57A345] grid grid-cols-6 items-center py-2">
+        <div className="bg-[#57A345] grid grid-cols-6 items-center">
           <div className="bg-white col-span-2 flex justify-end p-4 rounded-e-full pe-8">
             <Link
               href="/website"
@@ -274,7 +274,9 @@ export function WebsiteHeader() {
           </NavigationMenu>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-lg mx-8">
+          <div className="flex flex-row items-center max-w-lg mx-8 mb-2 space-x-4">
+            <Phone className="w-8 h-8 text-[#FAA61A]" />
+            <a href="tel:0865770009" className="text-[#FAA61A] font-bold text-lg">0865.77.0009</a>
             <div className="relative">
               <Input
                 type="text"

@@ -28,9 +28,7 @@ export default function HomePage() {
   // Show landing page for non-authenticated users
   return (
     <div className="space-y-16">
-      <Hero />
-      <Features />
-      <TechStack />
+        Demo
     </div>
   );
 }
