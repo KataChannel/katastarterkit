@@ -598,3 +598,118 @@ export const GET_HR_STATISTICS = gql`
     }
   }
 `;
+
+// ============================================
+// EMPLOYEE DOCUMENT QUERIES
+// ============================================
+
+export const GET_EMPLOYEE_DOCUMENT = gql`
+  query GetEmployeeDocument($id: ID!) {
+    employeeDocument(id: $id) {
+      id
+      employeeProfileId
+      userId
+      documentType
+      title
+      description
+      fileId
+      fileName
+      fileUrl
+      fileSize
+      fileMimeType
+      documentNumber
+      issueDate
+      expiryDate
+      issuingAuthority
+      isVerified
+      verifiedBy
+      verifiedAt
+      notes
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const LIST_EMPLOYEE_DOCUMENTS = gql`
+  query ListEmployeeDocuments($employeeProfileId: ID!, $documentType: DocumentType, $skip: Int, $take: Int) {
+    employeeDocuments(employeeProfileId: $employeeProfileId, documentType: $documentType, skip: $skip, take: $take) {
+      documents {
+        id
+        employeeProfileId
+        userId
+        documentType
+        title
+        description
+        fileId
+        fileName
+        fileUrl
+        fileSize
+        fileMimeType
+        documentNumber
+        issueDate
+        expiryDate
+        issuingAuthority
+        isVerified
+        verifiedBy
+        verifiedAt
+        createdAt
+        updatedAt
+      }
+      total
+      hasMore
+    }
+  }
+`;
+
+// ============================================
+// EMPLOYEE DOCUMENT MUTATIONS
+// ============================================
+
+export const CREATE_EMPLOYEE_DOCUMENT = gql`
+  mutation CreateEmployeeDocument($input: CreateEmployeeDocumentInput!) {
+    createEmployeeDocument(input: $input) {
+      id
+      employeeProfileId
+      documentType
+      title
+      description
+      fileId
+      fileName
+      fileUrl
+      fileSize
+      fileMimeType
+      documentNumber
+      issueDate
+      expiryDate
+      issuingAuthority
+      isVerified
+      createdAt
+    }
+  }
+`;
+
+export const UPDATE_EMPLOYEE_DOCUMENT = gql`
+  mutation UpdateEmployeeDocument($id: ID!, $input: UpdateEmployeeDocumentInput!) {
+    updateEmployeeDocument(id: $id, input: $input) {
+      id
+      title
+      description
+      documentNumber
+      issueDate
+      expiryDate
+      issuingAuthority
+      isVerified
+      verifiedBy
+      verifiedAt
+      notes
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_EMPLOYEE_DOCUMENT = gql`
+  mutation DeleteEmployeeDocument($id: ID!) {
+    deleteEmployeeDocument(id: $id)
+  }
+`;

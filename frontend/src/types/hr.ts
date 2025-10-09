@@ -716,6 +716,12 @@ export interface OffboardingListResponse {
   hasMore: boolean;
 }
 
+export interface EmployeeDocumentListResponse {
+  documents: EmployeeDocument[];
+  total: number;
+  hasMore: boolean;
+}
+
 export interface HRStatistics {
   totalEmployees: number;
   activeEmployees: number;
@@ -730,4 +736,35 @@ export interface HRStatistics {
     inProgress: number;
     total: number;
   };
+}
+
+// ============================================
+// INPUT TYPES
+// ============================================
+
+export interface CreateEmployeeDocumentInput {
+  employeeProfileId: string;
+  documentType: DocumentType;
+  title: string;
+  description?: string;
+  fileId: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize?: number;
+  fileMimeType?: string;
+  documentNumber?: string;
+  issueDate?: string;
+  expiryDate?: string;
+  issuingAuthority?: string;
+}
+
+export interface UpdateEmployeeDocumentInput {
+  title?: string;
+  description?: string;
+  documentNumber?: string;
+  issueDate?: string;
+  expiryDate?: string;
+  issuingAuthority?: string;
+  isVerified?: boolean;
+  notes?: string;
 }

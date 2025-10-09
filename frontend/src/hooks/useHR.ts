@@ -20,6 +20,11 @@ import {
   UPDATE_OFFBOARDING_PROCESS,
   COMPLETE_OFFBOARDING,
   GET_HR_STATISTICS,
+  GET_EMPLOYEE_DOCUMENT,
+  LIST_EMPLOYEE_DOCUMENTS,
+  CREATE_EMPLOYEE_DOCUMENT,
+  UPDATE_EMPLOYEE_DOCUMENT,
+  DELETE_EMPLOYEE_DOCUMENT,
 } from '../graphql/hr/queries';
 import {
   EmployeeProfile,
@@ -39,6 +44,11 @@ import {
   OffboardingStatus,
   ClearanceStatus,
   HRStatistics,
+  EmployeeDocument,
+  EmployeeDocumentListResponse,
+  CreateEmployeeDocumentInput,
+  UpdateEmployeeDocumentInput,
+  DocumentType,
 } from '../types/hr';
 
 // ============================================
@@ -514,5 +524,139 @@ export const useHRStatistics = () => {
     loading,
     error,
     refetch,
+  };
+};
+
+// ============================================
+// EMPLOYEE DOCUMENT HOOKS
+// ============================================
+
+export const useEmployeeDocument = (id: string) => {
+  const { data, loading, error, refetch } = useQuery<{ employeeDocument: EmployeeDocument }>(
+    GET_EMPLOYEE_DOCUMENT,
+    { variables: { id }, skip: !id }
+  );
+
+  return {
+    document: data?.employeeDocument,
+    loading,
+    error,
+    refetch,
+  };
+};
+
+export const useEmployeeDocuments = (employeeProfileId: string, options?: { documentType?: DocumentType; skip?: number; take?: number }) => {
+  const { data, loading, error, refetch, fetchMore } = useQuery<{ employeeDocuments: EmployeeDocumentListResponse }>(
+    LIST_EMPLOYEE_DOCUMENTS,
+    {
+      variables: {
+        employeeProfileId,
+        documentType: options?.documentType,
+        skip: options?.skip || 0,
+        take: options?.take || 50,
+      },
+      skip: !employeeProfileId,
+    }
+  );
+
+  const loadMore = useCallback(async () => {
+    if (data?.employeeDocuments.hasMore) {
+      await fetchMore({
+        variables: {
+          skip: data.employeeDocuments.documents.length,
+        },
+      });
+    }
+  }, [fetchMore, data]);
+
+  return {
+    documents: data?.employeeDocuments.documents || [],
+    total: data?.employeeDocuments.total || 0,
+    hasMore: data?.employeeDocuments.hasMore || false,
+    loading,
+    error,
+    refetch,
+    loadMore,
+  };
+};
+
+export const useCreateEmployeeDocument = () => {
+  const [create, { loading, error }] = useMutation<
+    { createEmployeeDocument: EmployeeDocument },
+    { input: CreateEmployeeDocumentInput }
+  >(CREATE_EMPLOYEE_DOCUMENT, {
+    refetchQueries: [LIST_EMPLOYEE_DOCUMENTS],
+  });
+
+  const createDocument = useCallback(
+    async (input: CreateEmployeeDocumentInput) => {
+      try {
+        const result = await create({ variables: { input } });
+        return result.data?.createEmployeeDocument;
+      } catch (err) {
+        throw err;
+      }
+    },
+    [create]
+  );
+
+  return {
+    createDocument,
+    loading,
+    error,
+  };
+};
+
+export const useUpdateEmployeeDocument = () => {
+  const [update, { loading, error }] = useMutation<
+    { updateEmployeeDocument: EmployeeDocument },
+    { id: string; input: UpdateEmployeeDocumentInput }
+  >(UPDATE_EMPLOYEE_DOCUMENT, {
+    refetchQueries: [LIST_EMPLOYEE_DOCUMENTS, GET_EMPLOYEE_DOCUMENT],
+  });
+
+  const updateDocument = useCallback(
+    async (id: string, input: UpdateEmployeeDocumentInput) => {
+      try {
+        const result = await update({ variables: { id, input } });
+        return result.data?.updateEmployeeDocument;
+      } catch (err) {
+        throw err;
+      }
+    },
+    [update]
+  );
+
+  return {
+    updateDocument,
+    loading,
+    error,
+  };
+};
+
+export const useDeleteEmployeeDocument = () => {
+  const [deleteDoc, { loading, error }] = useMutation<
+    { deleteEmployeeDocument: boolean },
+    { id: string }
+  >(DELETE_EMPLOYEE_DOCUMENT, {
+    refetchQueries: [LIST_EMPLOYEE_DOCUMENTS],
+  });
+
+  const deleteDocument = useCallback(
+    async (id: string) => {
+      try {
+        const result = await deleteDoc({ variables: { id } });
+        return result.data?.deleteEmployeeDocument;
+      } catch (err) {
+        throw err;
+      }
+    },
+    [deleteDoc]
+  );
+
+  return {
+    deleteDocument,
+    loading,
+    error,
   };
 };

@@ -114,6 +114,12 @@ export default function EmployeeDetailPage() {
           </div>
         </div>
         <div className="flex space-x-2">
+          <Link href={`/admin/hr/employee/${id}/documents`}>
+            <Button variant="outline">
+              <FileText className="mr-2 h-4 w-4" />
+              Tài liệu
+            </Button>
+          </Link>
           <Link href={`/admin/hr/employee/${id}/edit`}>
             <Button variant="outline">
               <Edit className="mr-2 h-4 w-4" />
