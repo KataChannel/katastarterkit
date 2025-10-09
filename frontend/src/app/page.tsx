@@ -116,17 +116,33 @@ const quickStats = [
 
 export default function Home() {
   const [selectedVote, setSelectedVote] = React.useState<number | null>(null);
-  const [currentQuote] = React.useState(
-    motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
-  );
-  const [currentTime, setCurrentTime] = React.useState(new Date());
+  const [currentQuote, setCurrentQuote] = React.useState(motivationalQuotes[0]); // Default first quote
+  const [currentTime, setCurrentTime] = React.useState<Date | null>(null); // Null for SSR
+  const [mounted, setMounted] = React.useState(false);
 
+  // Set random quote only on client side
   React.useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    setMounted(true);
+    setCurrentQuote(
+      motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
+    );
+    setCurrentTime(new Date());
   }, []);
 
+  // Update time every second (only on client)
+  React.useEffect(() => {
+    if (!mounted) return;
+    
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, [mounted]);
+
   const getGreeting = () => {
+    if (!currentTime) {
+      // Default for SSR
+      return { text: 'Chào buổi sáng', icon: Sun };
+    }
+    
     const hour = currentTime.getHours();
     if (hour < 12) return { text: 'Chào buổi sáng', icon: Sun };
     if (hour < 18) return { text: 'Chào buổi chiều', icon: Sun };
@@ -139,6 +155,25 @@ export default function Home() {
   const handleVote = (optionId: number) => {
     setSelectedVote(optionId);
     // TODO: Send vote to backend
+  };
+
+  // Format time safely for SSR
+  const formatTime = () => {
+    if (!currentTime || !mounted) return '--:--';
+    return currentTime.toLocaleTimeString('vi-VN', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const formatDate = () => {
+    if (!currentTime || !mounted) return 'Đang tải...';
+    return currentTime.toLocaleDateString('vi-VN', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
   };
 
   return (
@@ -194,18 +229,10 @@ export default function Home() {
               {/* Right Section - Clock */}
               <div className="text-left lg:text-right w-full lg:w-auto lg:ml-4">
                 <div className="text-4xl sm:text-5xl md:text-6xl font-bold">
-                  {currentTime.toLocaleTimeString('vi-VN', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
+                  {formatTime()}
                 </div>
                 <div className="text-blue-100 text-sm sm:text-base mt-1">
-                  {currentTime.toLocaleDateString('vi-VN', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
+                  {formatDate()}
                 </div>
               </div>
             </div>
