@@ -21,6 +21,24 @@ app.use(cors());
 // Middleware để parse JSON body
 app.use(express.json());
 
+// Helper function để map error code Zalo sang message
+function getZaloErrorMessage(errorCode) {
+    const errorMessages = {
+        0: 'Thành công',
+        [-108]: 'Số điện thoại không hợp lệ',
+        [-118]: 'Tài khoản Zalo không tồn tại',
+        [-124]: 'Access token không hợp lệ hoặc đã hết hạn',
+        [-131]: 'Template ZNS chưa được duyệt',
+        [-132]: 'Template ZNS không tồn tại',
+        [-201]: 'Thiếu tham số bắt buộc',
+        [-216]: 'Quota ZNS đã hết',
+        [-217]: 'Template data không hợp lệ',
+        [-218]: 'Template data thiếu tham số',
+    };
+    
+    return errorMessages[errorCode] || `Lỗi Zalo API: ${errorCode}`;
+}
+
 // Endpoint để gửi ZNS
 app.post('/sendzns', async (req, res) => {
     try {
@@ -56,11 +74,25 @@ app.post('/sendzns', async (req, res) => {
             data: data
         };
 
+        
         const response = await axios.request(config);
+        
+        // Kiểm tra response từ Zalo API
+        const zaloResponse = response.data;
+        
+        // Zalo trả về error code trong response.data
+        if (zaloResponse.error && zaloResponse.error !== 0) {
+            return res.status(400).json({
+                success: false,
+                error: getZaloErrorMessage(zaloResponse.error),
+                errorCode: zaloResponse.error,
+                details: zaloResponse
+            });
+        }
         
         res.json({
             success: true,
-            data: response.data
+            data: zaloResponse
         });
 
     } catch (error) {
@@ -154,16 +186,32 @@ app.post('/sendzns/bulk', upload.single('file'), async (req, res) => {
 
                 const response = await axios.request(config);
                 
-                results.push({
-                    row: i + 1,
-                    phone: row.phone,
-                    customer_name: row.customer_name,
-                    customer_id: row.customer_id,
-                    status: 'success',
-                    response: response.data
-                });
+                // Kiểm tra response từ Zalo
+                const zaloResponse = response.data;
                 
-                successCount++;
+                if (zaloResponse.error && zaloResponse.error !== 0) {
+                    results.push({
+                        row: i + 1,
+                        phone: row.phone,
+                        customer_name: row.customer_name,
+                        customer_id: row.customer_id,
+                        status: 'failed',
+                        error: getZaloErrorMessage(zaloResponse.error),
+                        errorCode: zaloResponse.error,
+                        details: zaloResponse
+                    });
+                    failCount++;
+                } else {
+                    results.push({
+                        row: i + 1,
+                        phone: row.phone,
+                        customer_name: row.customer_name,
+                        customer_id: row.customer_id,
+                        status: 'success',
+                        response: zaloResponse
+                    });
+                    successCount++;
+                }
 
                 // Delay nhỏ để tránh rate limit (100ms)
                 await new Promise(resolve => setTimeout(resolve, 100));
