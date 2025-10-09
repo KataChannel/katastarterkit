@@ -30,9 +30,9 @@ export function CategoryCard({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {category.imageUrl ? (
+                {category.image ? (
                   <img
-                    src={category.imageUrl}
+                    src={category.image}
                     alt={category.name}
                     className="w-10 h-10 rounded object-cover"
                   />
@@ -67,9 +67,9 @@ export function CategoryCard({
             className
           )}
         >
-          {category.imageUrl ? (
+          {category.image ? (
             <img
-              src={category.imageUrl}
+              src={category.image}
               alt={category.name}
               className="w-16 h-16 rounded-full object-cover mb-3"
             />
@@ -98,9 +98,9 @@ export function CategoryCard({
         onMouseLeave={() => setIsHovered(false)}
       >
         <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
-          {category.imageUrl ? (
+          {category.image ? (
             <img
-              src={category.imageUrl}
+              src={category.image}
               alt={category.name}
               className={cn(
                 'w-full h-full object-cover transition-transform duration-300',

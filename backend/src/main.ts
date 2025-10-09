@@ -51,8 +51,11 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false, // ✅ Allow extra properties (GraphQL will validate)
       transform: true,
+      transformOptions: {
+        enableImplicitConversion: true, // ✅ Auto-convert types
+      },
     }),
   );
 

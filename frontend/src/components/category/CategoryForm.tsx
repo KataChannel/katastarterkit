@@ -61,7 +61,7 @@ export function CategoryForm({
       ? {
           name: category.name,
           description: category.description || '',
-          imageUrl: category.imageUrl || '',
+          imageUrl: category.image || '',
           parentId: category.parent?.id || '',
           displayOrder: category.displayOrder || 0,
           isActive: category.isActive,
@@ -98,13 +98,15 @@ export function CategoryForm({
   );
 
   const handleFormSubmit = async (data: CategoryFormData) => {
-    // Remove empty parentId
+    // Remove empty parentId and map imageUrl to image
     const submitData = {
       ...data,
       parentId: data.parentId || undefined,
-      imageUrl: data.imageUrl || undefined,
+      image: data.imageUrl || undefined,
       description: data.description || undefined,
     };
+    // Remove imageUrl from submitData as it's renamed to image
+    delete (submitData as any).imageUrl;
     await onSubmit(submitData as any);
   };
 

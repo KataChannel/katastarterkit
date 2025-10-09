@@ -24,16 +24,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
   Plus,
   Search,
   Edit,
@@ -73,8 +63,6 @@ export default function ProductsPage() {
     filters: {},
   });
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [productToDelete, setProductToDelete] = React.useState<Product | null>(null);
 
   const { products, pagination, loading, error, refetch } = useProducts(filters);
   const { categories } = useActiveCategories();
@@ -117,19 +105,10 @@ export default function ProductsPage() {
     setFilters((prev) => ({ ...prev, page: newPage }));
   };
 
-  const handleDeleteClick = (product: Product) => {
-    setProductToDelete(product);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!productToDelete) return;
-
+  const handleDeleteClick = async (product: Product) => {
     try {
-      await deleteProduct(productToDelete.id);
-      toast.success(`Đã xóa sản phẩm "${productToDelete.name}"`);
-      setDeleteDialogOpen(false);
-      setProductToDelete(null);
+      await deleteProduct(product.id);
+      toast.success(`Đã xóa sản phẩm "${product.name}"`);
       refetch();
     } catch (error) {
       toast.error('Lỗi khi xóa sản phẩm');
@@ -412,33 +391,6 @@ export default function ProductsPage() {
           )}
         </CardContent>
       </Card>
-
-      {/* Delete Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa sản phẩm</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa sản phẩm "{productToDelete?.name}"? Hành động này
-              không thể hoàn tác.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Hủy</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                handleDeleteConfirm();
-              }}
-              disabled={deleting}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Xóa
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

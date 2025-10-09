@@ -123,6 +123,7 @@ function CategoryTreeItem({
       >
         {/* Expand/Collapse Button */}
         <button
+          type="button"
           onClick={handleToggle}
           className={cn(
             'flex-shrink-0 w-5 h-5 flex items-center justify-center hover:bg-accent-foreground/10 rounded transition-colors',
@@ -147,9 +148,9 @@ function CategoryTreeItem({
         </div>
 
         {/* Category Image (if available) */}
-        {category.imageUrl && (
+        {category.image && (
           <img
-            src={category.imageUrl}
+            src={category.image}
             alt={category.name}
             className="w-6 h-6 rounded object-cover flex-shrink-0"
           />
@@ -178,6 +179,7 @@ function CategoryTreeItem({
         {showActions && (
           <div className="flex-shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
+              type="button"
               size="icon"
               variant="ghost"
               className="h-7 w-7"
@@ -187,6 +189,7 @@ function CategoryTreeItem({
               <Plus className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               size="icon"
               variant="ghost"
               className="h-7 w-7"
@@ -196,6 +199,7 @@ function CategoryTreeItem({
               <Edit className="h-4 w-4" />
             </Button>
             <Button
+              type="button"
               size="icon"
               variant="ghost"
               className="h-7 w-7 text-red-500 hover:text-red-600"
@@ -257,9 +261,9 @@ export function CategoryList({
           )}
         >
           <div className="flex items-center gap-3">
-            {category.imageUrl ? (
+            {category.image ? (
               <img
-                src={category.imageUrl}
+                src={category.image}
                 alt={category.name}
                 className="w-10 h-10 rounded object-cover"
               />

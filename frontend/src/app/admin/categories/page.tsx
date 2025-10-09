@@ -19,16 +19,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Plus, Loader2, FolderTree } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -39,8 +29,6 @@ export default function CategoriesPage() {
   const [dialogMode, setDialogMode] = React.useState<DialogMode>(null);
   const [selectedCategory, setSelectedCategory] = React.useState<Category | null>(null);
   const [parentCategory, setParentCategory] = React.useState<Category | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [categoryToDelete, setCategoryToDelete] = React.useState<Category | null>(null);
 
   const { categoryTree, loading, error, refetch } = useCategoryTree();
   const { createCategory, loading: creating } = useCreateCategory();
@@ -64,19 +52,10 @@ export default function CategoriesPage() {
     setDialogMode('create-child');
   };
 
-  const handleDeleteClick = (category: Category) => {
-    setCategoryToDelete(category);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!categoryToDelete) return;
-
+  const handleDeleteClick = async (category: Category) => {
     try {
-      await deleteCategory(categoryToDelete.id);
-      toast.success(`Đã xóa danh mục "${categoryToDelete.name}"`);
-      setDeleteDialogOpen(false);
-      setCategoryToDelete(null);
+      await deleteCategory(category.id);
+      toast.success(`Đã xóa danh mục "${category.name}"`);
       refetch();
     } catch (error: any) {
       toast.error(error.message || 'Lỗi khi xóa danh mục');
@@ -251,44 +230,6 @@ export default function CategoriesPage() {
           />
         </DialogContent>
       </Dialog>
-
-      {/* Delete Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa danh mục</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa danh mục "{categoryToDelete?.name}"?
-              {categoryToDelete?.productCount && categoryToDelete.productCount > 0 && (
-                <span className="block mt-2 text-red-500 font-medium">
-                  Cảnh báo: Danh mục này có {categoryToDelete.productCount} sản phẩm.
-                </span>
-              )}
-              {categoryToDelete?.children && categoryToDelete.children.length > 0 && (
-                <span className="block mt-2 text-red-500 font-medium">
-                  Cảnh báo: Danh mục này có {categoryToDelete.children.length} danh mục
-                  con.
-                </span>
-              )}
-              <span className="block mt-2">Hành động này không thể hoàn tác.</span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Hủy</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                handleDeleteConfirm();
-              }}
-              disabled={deleting}
-              className="bg-red-500 hover:bg-red-600"
-            >
-              {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Xóa
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
