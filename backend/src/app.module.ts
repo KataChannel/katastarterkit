@@ -31,6 +31,7 @@ import { UnifiedDynamicModule } from './graphql/unified-dynamic.module';
 import { KetoAnModule } from './ketoan/ketoan.module';
 import { MenuModule } from './menu/menu.module';
 import { FileModule } from './graphql/modules/file.module';
+import { HRModule } from './graphql/modules/hr.module';
 import { TestController } from './test.controller';
 
 // Configuration
@@ -129,6 +130,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     KetoAnModule,
     MenuModule,
     FileModule,
+    HRModule,
   ],
   controllers: [
     LogController,

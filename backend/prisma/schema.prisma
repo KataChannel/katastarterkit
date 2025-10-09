@@ -146,6 +146,13 @@ model User {
   // Affiliate relations
   affiliateProfile AffUser?
 
+  // HR Relations
+  employeeProfile      EmployeeProfile?
+  employmentHistory    EmploymentHistory[]
+  documents            EmployeeDocument[]
+  onboardingChecklist  OnboardingChecklist?
+  offboardingProcesses OffboardingProcess[]
+
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
   @@index([roleType])
@@ -1984,4 +1991,435 @@ model AffPaymentRequest {
   @@index([requestedAt])
   @@index([periodStart, periodEnd])
   @@map("aff_payment_requests")
+}
+
+// ============================================
+// HR MANAGEMENT MODELS - Onboarding/Offboarding
+// ============================================
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+enum EmploymentEventType {
+  ONBOARDING
+  PROMOTION
+  TRANSFER
+  SALARY_CHANGE
+  POSITION_CHANGE
+  DEPARTMENT_CHANGE
+  OFFBOARDING
+}
+
+enum ContractType {
+  PROBATION
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+}
+
+enum TerminationType {
+  RESIGNATION
+  TERMINATION
+  RETIREMENT
+  CONTRACT_END
+  MUTUAL_AGREEMENT
+}
+
+enum DocumentType {
+  CV
+  CONTRACT
+  ID_CARD
+  PASSPORT
+  DEGREE
+  CERTIFICATE
+  PHOTO
+  BANK_INFO
+  HEALTH_CERTIFICATE
+  OTHER
+}
+
+enum OnboardingStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum OffboardingStatus {
+  INITIATED
+  IN_PROGRESS
+  PENDING_APPROVAL
+  APPROVED
+  COMPLETED
+  CANCELLED
+}
+
+enum ClearanceStatus {
+  PENDING
+  PARTIAL
+  COMPLETE
+}
+
+model EmployeeProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Employee Code
+  employeeCode String @unique
+
+  // Personal Information
+  fullName            String
+  displayName         String?
+  citizenId           String?   @unique // CCCD/CMND
+  citizenIdIssueDate  DateTime?
+  citizenIdIssuePlace String?
+  passportNumber      String?   @unique
+  passportIssueDate   DateTime?
+  passportExpiryDate  DateTime?
+
+  dateOfBirth   DateTime?
+  placeOfBirth  String?
+  gender        Gender?
+  maritalStatus MaritalStatus?
+  nationality   String?        @default("Vietnam")
+
+  // Contact Information
+  personalEmail    String?
+  personalPhone    String?
+  permanentAddress String?
+  currentAddress   String?
+  city             String?
+  district         String?
+  ward             String?
+  postalCode       String?
+
+  // Emergency Contact
+  emergencyContactName         String?
+  emergencyContactRelationship String?
+  emergencyContactPhone        String?
+  emergencyContactAddress      String?
+
+  // Education & Professional
+  education      Json? // [{degree, school, major, year, gpa}]
+  certifications Json? // [{name, issuer, date, expiryDate, fileId}]
+  skills         String[]
+  languages      Json? // [{language, proficiency}]
+
+  // Banking Information
+  bankName          String?
+  bankAccountNumber String?
+  bankAccountName   String?
+  bankBranch        String?
+
+  // Tax & Insurance
+  taxCode               String? @unique
+  socialInsuranceNumber String? @unique
+  healthInsuranceNumber String? @unique
+
+  // Employment Information
+  department    String?
+  position      String?
+  level         String?
+  team          String?
+  directManager String? // User ID
+
+  startDate        DateTime?
+  probationEndDate DateTime?
+  contractType     ContractType?
+  workLocation     String?
+
+  // Salary (encrypted or reference to separate salary table)
+  salaryGrade String?
+
+  // Status
+  isActive Boolean @default(true)
+
+  // Metadata
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  employmentHistory    EmploymentHistory[]
+  documents            EmployeeDocument[]
+  onboardingChecklist  OnboardingChecklist?
+  offboardingProcesses OffboardingProcess[]
+
+  @@index([employeeCode])
+  @@index([citizenId])
+  @@index([department])
+  @@index([position])
+  @@index([isActive])
+  @@index([startDate])
+  @@map("employee_profiles")
+}
+
+model EmploymentHistory {
+  id                String          @id @default(cuid())
+  employeeProfileId String
+  employeeProfile   EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  eventType     EmploymentEventType
+  eventDate     DateTime
+  effectiveDate DateTime
+
+  // Event Details
+  previousValue Json? // Store previous state
+  newValue      Json? // Store new state
+
+  // Position & Department
+  fromPosition   String?
+  toPosition     String?
+  fromDepartment String?
+  toDepartment   String?
+  fromLevel      String?
+  toLevel        String?
+
+  // Contract
+  contractType      ContractType?
+  contractNumber    String?
+  contractStartDate DateTime?
+  contractEndDate   DateTime?
+
+  // Salary Change (if applicable)
+  salaryChangePercentage Float?
+  newSalaryGrade         String?
+
+  // Offboarding Specific
+  terminationType   TerminationType?
+  terminationReason String?
+  lastWorkingDay    DateTime?
+  noticePeriodDays  Int?
+
+  // Documents & Approvals
+  documentIds    String[] // References to EmployeeDocument or File IDs
+  approvalStatus String?
+  approvedBy     String? // User ID
+  approvedAt     DateTime?
+
+  // Notes
+  notes         String?
+  internalNotes String? // Only visible to HR/Admin
+
+  // Metadata
+  processedBy String? // User ID who created/processed this record
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([employeeProfileId])
+  @@index([eventType])
+  @@index([eventDate])
+  @@index([effectiveDate])
+  @@map("employment_history")
+}
+
+model EmployeeDocument {
+  id                String          @id @default(cuid())
+  employeeProfileId String
+  employeeProfile   EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  documentType DocumentType
+  title        String
+  description  String?
+
+  // File Reference (from FileManager)
+  fileId       String
+  fileName     String
+  fileUrl      String
+  fileSize     Int?
+  fileMimeType String?
+
+  // Document Metadata
+  documentNumber   String? // Contract number, certificate number, etc.
+  issueDate        DateTime?
+  expiryDate       DateTime?
+  issuingAuthority String?
+
+  // Verification & Validation
+  isVerified        Boolean   @default(false)
+  verifiedBy        String? // User ID
+  verifiedAt        DateTime?
+  verificationNotes String?
+
+  // Access Control
+  isConfidential Boolean  @default(false)
+  accessibleBy   String[] // User IDs who can access
+
+  // Metadata
+  uploadedBy String
+  uploadedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([employeeProfileId])
+  @@index([documentType])
+  @@index([isVerified])
+  @@index([expiryDate])
+  @@map("employee_documents")
+}
+
+model OnboardingChecklist {
+  id                String          @id @default(cuid())
+  employeeProfileId String          @unique
+  employeeProfile   EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Checklist Configuration
+  checklistTemplate String? // Reference to template used
+
+  // Checklist Items (JSON for flexibility)
+  tasks Json // [{id, category, title, description, required, completed, completedAt, completedBy, order}]
+
+  // Categories might include:
+  // - Documentation (ID, contracts, certificates)
+  // - IT Setup (email, accounts, equipment)
+  // - Training (orientation, safety, systems)
+  // - Administrative (bank setup, insurance, parking)
+  // - Introduction (team meeting, buddy assignment)
+
+  // Progress Tracking
+  totalTasks         Int   @default(0)
+  completedTasks     Int   @default(0)
+  progressPercentage Float @default(0)
+
+  // Status & Timeline
+  status               OnboardingStatus @default(PENDING)
+  startDate            DateTime
+  targetDate           DateTime?
+  actualCompletionDate DateTime?
+
+  // Assignments
+  assignedTo String? // HR manager/coordinator User ID
+  buddyId    String? // Assigned buddy/mentor User ID
+
+  // Notifications
+  remindersSent  Int       @default(0)
+  lastReminderAt DateTime?
+
+  // Feedback
+  employeeFeedback String?
+  managerFeedback  String?
+  hrNotes          String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+
+  @@index([status])
+  @@index([startDate])
+  @@index([targetDate])
+  @@index([assignedTo])
+  @@map("onboarding_checklists")
+}
+
+model OffboardingProcess {
+  id                String          @id @default(cuid())
+  employeeProfileId String
+  employeeProfile   EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Exit Information
+  lastWorkingDay    DateTime
+  effectiveDate     DateTime?
+  exitReason        String
+  exitType          TerminationType
+  resignationLetter String? // File ID or text
+
+  // Notice Period
+  noticePeriodDays Int?
+  noticeGivenDate  DateTime?
+  noticeRequired   Boolean   @default(true)
+
+  // Checklist Items
+  assetReturnChecklist  Json? // [{asset, assetId, category, returned, returnedDate, returnedTo, condition, notes}]
+  knowledgeTransferPlan Json? // [{task, area, assignedTo, status, completedDate, notes}]
+  accessRevocationList  Json? // [{system, access, revoked, revokedDate, revokedBy}]
+
+  // Exit Interview
+  exitInterviewScheduled Boolean   @default(false)
+  exitInterviewDate      DateTime?
+  exitInterviewBy        String? // HR manager User ID
+  exitInterviewNotes     String?
+  exitInterviewForm      Json? // Structured responses
+
+  // Final Settlement
+  finalSalaryAmount Float?
+  unusedLeaveDays   Int?
+  leavePayoutAmount Float?
+  bonusAmount       Float?
+  deductions        Json? // [{type, amount, reason}]
+  totalSettlement   Float?
+  paymentDate       DateTime?
+  paymentStatus     String?
+
+  // Clearance
+  clearanceStatus ClearanceStatus @default(PENDING)
+  clearanceSteps  Json? // [{department, clearedBy, clearedAt, notes}]
+
+  // References & Documents
+  referenceLetterRequested Boolean  @default(false)
+  referenceLetterProvided  Boolean  @default(false)
+  experienceCertificate    String? // File ID
+  finalDocuments           String[] // File IDs
+
+  // Rehire Eligibility
+  eligibleForRehire Boolean?
+  rehireNotes       String?
+
+  // Process Status
+  status OffboardingStatus @default(INITIATED)
+
+  // Approvals
+  approvalWorkflow Json? // [{step, approver, status, date, comments}]
+  finalApprovedBy  String?
+  finalApprovedAt  DateTime?
+
+  // Assignment
+  initiatedBy  String // User ID who initiated
+  processOwner String? // HR manager handling the process
+
+  // Completion
+  completedAt DateTime?
+  completedBy String?
+
+  // Notes & Comments
+  hrNotes          String?
+  managerComments  String?
+  employeeComments String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeProfileId])
+  @@index([status])
+  @@index([exitType])
+  @@index([lastWorkingDay])
+  @@index([clearanceStatus])
+  @@map("offboarding_processes")
 }
