@@ -411,6 +411,13 @@ input CampaignSearchInput {
   status: AffCampaignStatus
 }
 
+"""Clearance status for offboarding"""
+enum ClearanceStatus {
+  COMPLETE
+  PARTIAL
+  PENDING
+}
+
 type Comment {
   content: String!
   createdAt: DateTime!
@@ -423,6 +430,16 @@ type Comment {
   updatedAt: DateTime!
   user: User!
   userId: String!
+}
+
+"""Employment contract types"""
+enum ContractType {
+  CONTRACT
+  FREELANCE
+  FULL_TIME
+  INTERNSHIP
+  PART_TIME
+  PROBATION
 }
 
 input CountInput {
@@ -470,6 +487,91 @@ input CreateCommentInput {
   content: String!
   parentId: String
   postId: String!
+}
+
+input CreateEmployeeProfileInput {
+  bankAccountName: String
+  bankAccountNumber: String
+  bankBranch: String
+  bankName: String
+  certifications: JSON
+  citizenId: String
+  citizenIdIssueDate: String
+  citizenIdIssuePlace: String
+  city: String
+  contractType: ContractType
+  currentAddress: String
+  dateOfBirth: String
+  department: String
+  directManager: String
+  displayName: String
+  district: String
+  education: JSON
+  emergencyContactAddress: String
+  emergencyContactName: String
+  emergencyContactPhone: String
+  emergencyContactRelationship: String
+  employeeCode: String!
+  fullName: String!
+  gender: Gender
+  healthInsuranceNumber: String
+  languages: JSON
+  level: String
+  maritalStatus: MaritalStatus
+  nationality: String = "Vietnam"
+  notes: String
+  passportExpiryDate: String
+  passportIssueDate: String
+  passportNumber: String
+  permanentAddress: String
+  personalEmail: String
+  personalPhone: String
+  placeOfBirth: String
+  position: String
+  postalCode: String
+  probationEndDate: String
+  salaryGrade: String
+  skills: [String!]
+  socialInsuranceNumber: String
+  startDate: String
+  taxCode: String
+  team: String
+  userId: String!
+  ward: String
+  workLocation: String
+}
+
+input CreateEmploymentHistoryInput {
+  approvalStatus: String
+  approvedAt: String
+  approvedBy: String
+  contractEndDate: String
+  contractNumber: String
+  contractStartDate: String
+  contractType: ContractType
+  documentIds: [String!]
+  effectiveDate: String!
+  employeeProfileId: String!
+  eventDate: String!
+  eventType: EmploymentEventType!
+  fromDepartment: String
+  fromLevel: String
+  fromPosition: String
+  internalNotes: String
+  lastWorkingDay: String
+  newSalaryGrade: String
+  newValue: JSON
+  notes: String
+  noticePeriodDays: Int
+  previousValue: JSON
+  processedBy: String
+  salaryChangePercentage: Float
+  terminationReason: String
+  terminationType: TerminationType
+  toDepartment: String
+  toLevel: String
+  toPosition: String
+  userId: String!
 }
 
 input CreateFileShareInput {
@@ -566,6 +668,49 @@ input CreateMenuDto {
   title: String!
   type: String
   url: String
+}
+
+input CreateOffboardingProcessInput {
+  accessRevocationList: JSON
+  assetReturnChecklist: JSON
+  effectiveDate: String
+  eligibleForRehire: Boolean
+  employeeComments: String
+  employeeProfileId: String!
+  exitInterviewBy: String
+  exitInterviewDate: String
+  exitInterviewForm: JSON
+  exitInterviewNotes: String
+  exitInterviewScheduled: Boolean! = false
+  exitReason: String!
+  exitType: TerminationType!
+  hrNotes: String
+  initiatedBy: String!
+  knowledgeTransferPlan: JSON
+  lastWorkingDay: String!
+  managerComments: String
+  noticeGivenDate: String
+  noticePeriodDays: Int
+  noticeRequired: Boolean! = true
+  processOwner: String
+  referenceLetterRequested: Boolean! = false
+  rehireNotes: String
+  resignationLetter: String
+  userId: String!
+}
+
+input CreateOnboardingChecklistInput {
+  assignedTo: String
+  buddyId: String
+  checklistTemplate: String
+  createdBy: String
+  employeeProfileId: String!
+  hrNotes: String
+  startDate: String!
+  targetDate: String
+  tasks: JSON!
+  totalTasks: Int! = 0
+  userId: String!
 }
 
 input CreatePageBlockInput {
@@ -667,6 +812,122 @@ input DeleteInput {
 input DeleteManyInput {
   model: String!
   where: JSONObject!
+}
+
+type DeleteResponse {
+  message: String!
+  success: Boolean!
+}
+
+type EmployeeListResponse {
+  employees: [EmployeeProfile!]!
+  hasMore: Boolean!
+  total: Int!
+}
+
+type EmployeeProfile {
+  bankAccountName: String
+  bankAccountNumber: String
+  bankBranch: String
+  bankName: String
+  certifications: JSON
+  citizenId: String
+  citizenIdIssueDate: DateTime
+  citizenIdIssuePlace: String
+  city: String
+  contractType: ContractType
+  createdAt: DateTime!
+  createdBy: String
+  currentAddress: String
+  dateOfBirth: DateTime
+  department: String
+  directManager: String
+  displayName: String
+  district: String
+  education: JSON
+  emergencyContactAddress: String
+  emergencyContactName: String
+  emergencyContactPhone: String
+  emergencyContactRelationship: String
+  employeeCode: String!
+  fullName: String!
+  gender: Gender
+  healthInsuranceNumber: String
+  id: ID!
+  isActive: Boolean!
+  languages: JSON
+  level: String
+  maritalStatus: MaritalStatus
+  nationality: String
+  notes: String
+  passportExpiryDate: DateTime
+  passportIssueDate: DateTime
+  passportNumber: String
+  permanentAddress: String
+  personalEmail: String
+  personalPhone: String
+  placeOfBirth: String
+  position: String
+  postalCode: String
+  probationEndDate: DateTime
+  salaryGrade: String
+  skills: [String!]
+  socialInsuranceNumber: String
+  startDate: DateTime
+  taxCode: String
+  team: String
+  updatedAt: DateTime!
+  updatedBy: String
+  userId: String!
+  ward: String
+  workLocation: String
+}
+
+"""Employment event types for tracking employment history"""
+enum EmploymentEventType {
+  DEPARTMENT_CHANGE
+  OFFBOARDING
+  ONBOARDING
+  POSITION_CHANGE
+  PROMOTION
+  SALARY_CHANGE
+  TRANSFER
+}
+
+type EmploymentHistory {
+  approvalStatus: String
+  approvedAt: DateTime
+  approvedBy: String
+  contractEndDate: DateTime
+  contractNumber: String
+  contractStartDate: DateTime
+  contractType: ContractType
+  createdAt: DateTime!
+  documentIds: [String!]
+  effectiveDate: DateTime!
+  employeeProfileId: String!
+  eventDate: DateTime!
+  eventType: EmploymentEventType!
+  fromDepartment: String
+  fromLevel: String
+  fromPosition: String
+  id: ID!
+  internalNotes: String
+  lastWorkingDay: DateTime
+  newSalaryGrade: String
+  newValue: JSON
+  notes: String
+  noticePeriodDays: Int
+  previousValue: JSON
+  processedBy: String
+  salaryChangePercentage: Float
+  terminationReason: String
+  terminationType: TerminationType
+  toDepartment: String
+  toLevel: String
+  toPosition: String
+  updatedAt: DateTime!
+  userId: String!
 }
 
 type ExtDetailhoadon {
@@ -874,6 +1135,13 @@ input FindUniqueInput {
   where: JSONObject!
 }
 
+"""Gender types"""
+enum Gender {
+  FEMALE
+  MALE
+  OTHER
+}
+
 input GetFilesInput {
   filters: FileFiltersInput
   limit: Int! = 20
@@ -895,6 +1163,14 @@ input GroupByInput {
   skip: Int
   take: Int
   where: JSONObject
+}
+
+type HRStatistics {
+  activeEmployees: Int!
+  inactiveEmployees: Int!
+  offboarding: OffboardingStats!
+  onboarding: OnboardingStats!
+  totalEmployees: Int!
 }
 
 input InvoiceSearchInput {
@@ -941,6 +1217,14 @@ input LoginUserInput {
   emailOrUsername: String!
   password: String!
   rememberMe: Boolean
+}
+
+"""Marital status types"""
+enum MaritalStatus {
+  DIVORCED
+  MARRIED
+  SINGLE
+  WIDOWED
 }
 
 """The type of media file"""
@@ -1023,10 +1307,14 @@ type Mutation {
   bulkDeleteFiles(input: BulkDeleteFilesInput!): Int!
   bulkUpdateFiles(input: BulkUpdateFilesInput!): [File!]!
   bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!
+  completeOffboarding(id: ID!): OffboardingProcess!
+  completeOnboardingTask(checklistId: ID!, taskId: ID!): OnboardingChecklist!
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
   createAffiliateLink(input: CreateAffLinkInput!): AffLink!
   createAffiliateUser(input: CreateAffUserInput!): AffUser!
   createComment(input: CreateCommentInput!): Comment!
+  createEmployeeProfile(input: CreateEmployeeProfileInput!): EmployeeProfile!
+  createEmploymentHistory(input: CreateEmploymentHistoryInput!): EmploymentHistory!
   createFileShare(input: CreateFileShareInput!): FileShare!
   createFolder(input: CreateFolderInput!): FileFolder!
   createInvoice(input: CreateInvoiceInput!): ExtListhoadon!
@@ -1035,6 +1323,8 @@ type Mutation {
   """Create multiple records in a single operation"""
   createMany(input: UnifiedBulkCreateInput!, modelName: String!): JSONObject!
   createMenu(input: CreateMenuDto!): MenuResponseDto!
+  createOffboardingProcess(input: CreateOffboardingProcessInput!): OffboardingProcess!
+  createOnboardingChecklist(input: CreateOnboardingChecklistInput!): OnboardingChecklist!
 
   """Create a single record with Prisma-like syntax"""
   createOne(input: UnifiedCreateInput!, modelName: String!): JSONObject!
@@ -1047,6 +1337,7 @@ type Mutation {
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
   deleteComment(id: String!): Boolean!
+  deleteEmployeeProfile(id: ID!): DeleteResponse!
   deleteFile(id: ID!): Boolean!
   deleteFolder(id: ID!): Boolean!
   deleteInvoice(id: ID!): Boolean!
@@ -1114,6 +1405,8 @@ type Mutation {
   updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
   updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
+  updateEmployeeProfile(id: ID!, input: UpdateEmployeeProfileInput!): EmployeeProfile!
+  updateEmploymentHistory(id: ID!, input: UpdateEmploymentHistoryInput!): EmploymentHistory!
   updateFile(input: UpdateFileInput!): File!
   updateFolder(input: UpdateFolderInput!): FileFolder!
   updateInvoice(id: ID!, input: CreateInvoiceInput!): ExtListhoadon!
@@ -1121,6 +1414,8 @@ type Mutation {
   """Update multiple records matching criteria"""
   updateMany(input: UnifiedBulkUpdateInput!, modelName: String!): JSONObject!
   updateMenu(id: ID!, input: UpdateMenuDto!): MenuResponseDto!
+  updateOffboardingProcess(id: ID!, input: UpdateOffboardingProcessInput!): OffboardingProcess!
+  updateOnboardingChecklist(id: ID!, input: UpdateOnboardingChecklistInput!): OnboardingChecklist!
 
   """Update a single record by ID"""
   updateOne(input: UnifiedUpdateInput!, modelName: String!): JSONObject!
@@ -1137,6 +1432,124 @@ type Mutation {
 
   """Create or update a record based on criteria"""
   upsert(create: JSONObject!, include: JSONObject, modelName: String!, select: JSONObject, update: JSONObject!, where: JSONObject!): JSONObject!
+}
+
+type OffboardingListResponse {
+  hasMore: Boolean!
+  processes: [OffboardingProcess!]!
+  total: Int!
+}
+
+type OffboardingProcess {
+  accessRevocationList: JSON
+  approvalWorkflow: JSON
+  assetReturnChecklist: JSON
+  bonusAmount: Float
+  clearanceStatus: ClearanceStatus!
+  clearanceSteps: JSON
+  completedAt: DateTime
+  completedBy: String
+  createdAt: DateTime!
+  deductions: JSON
+  effectiveDate: DateTime
+  eligibleForRehire: Boolean
+  employeeComments: String
+  employeeProfileId: String!
+  exitInterviewBy: String
+  exitInterviewDate: DateTime
+  exitInterviewForm: JSON
+  exitInterviewNotes: String
+  exitInterviewScheduled: Boolean!
+  exitReason: String!
+  exitType: TerminationType!
+  experienceCertificate: String
+  finalApprovedAt: DateTime
+  finalApprovedBy: String
+  finalDocuments: [String!]
+  finalSalaryAmount: Float
+  hrNotes: String
+  id: ID!
+  initiatedBy: String!
+  knowledgeTransferPlan: JSON
+  lastWorkingDay: DateTime!
+  leavePayoutAmount: Float
+  managerComments: String
+  noticeGivenDate: DateTime
+  noticePeriodDays: Int
+  noticeRequired: Boolean!
+  paymentDate: DateTime
+  paymentStatus: String
+  processOwner: String
+  referenceLetterProvided: Boolean!
+  referenceLetterRequested: Boolean!
+  rehireNotes: String
+  resignationLetter: String
+  status: OffboardingStatus!
+  totalSettlement: Float
+  unusedLeaveDays: Int
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type OffboardingStats {
+  inProgress: Int!
+  pending: Int!
+  total: Int!
+}
+
+"""Offboarding process status"""
+enum OffboardingStatus {
+  APPROVED
+  CANCELLED
+  COMPLETED
+  INITIATED
+  IN_PROGRESS
+  PENDING_APPROVAL
+}
+
+type OnboardingChecklist {
+  actualCompletionDate: DateTime
+  assignedTo: String
+  buddyId: String
+  checklistTemplate: String
+  completedTasks: Int!
+  createdAt: DateTime!
+  createdBy: String
+  employeeFeedback: String
+  employeeProfileId: String!
+  hrNotes: String
+  id: ID!
+  lastReminderAt: DateTime
+  managerFeedback: String
+  progressPercentage: Float!
+  remindersSent: Int!
+  startDate: DateTime!
+  status: OnboardingStatus!
+  targetDate: DateTime
+  tasks: JSON!
+  totalTasks: Int!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type OnboardingListResponse {
+  checklists: [OnboardingChecklist!]!
+  hasMore: Boolean!
+  total: Int!
+}
+
+type OnboardingStats {
+  inProgress: Int!
+  pending: Int!
+  total: Int!
+}
+
+"""Onboarding process status"""
+enum OnboardingStatus {
+  CANCELLED
+  COMPLETED
+  IN_PROGRESS
+  PENDING
 }
 
 type OramaElapsed {
@@ -1397,6 +1810,10 @@ type Query {
 
   """Group records and compute aggregations"""
   dynamicGroupBy(input: GroupByInput!): JSONObject!
+  employeeProfile(id: ID!): EmployeeProfile!
+  employeeProfileByCode(employeeCode: String!): EmployeeProfile!
+  employeeProfileByUserId(userId: ID!): EmployeeProfile!
+  employmentHistory(employeeProfileId: ID!): [EmploymentHistory!]!
 
   """Check if a record exists matching the criteria"""
   exists(modelName: String!, where: JSONObject!): Boolean!
@@ -1443,16 +1860,23 @@ type Query {
 
   """Hello world query"""
   hello: String!
+  hrStatistics: HRStatistics!
   invoiceExists(idServer: String!, khmshdon: String!, nbmst: String!, shdon: String!): Boolean!
 
   """Get list of all available Prisma models"""
   listAvailableModels: [String!]!
+  listEmployeeProfiles(department: String, isActive: Boolean, position: String, skip: Float, take: Float): EmployeeListResponse!
+  listOffboardingProcesses(clearanceStatus: ClearanceStatus, skip: Int, status: OffboardingStatus, take: Int): OffboardingListResponse!
+  listOnboardingChecklists(skip: Int, status: OnboardingStatus, take: Int): OnboardingListResponse!
   menu(id: ID!): MenuResponseDto
   menuBySlug(slug: String!): MenuResponseDto
   menuTree(parentId: String, type: String): [MenuResponseDto!]!
   menus(direction: String, filter: MenuFilterDto, limit: Float, orderBy: String, page: Float): MenuPaginationResponseDto!
   mobileMenus: [MenuResponseDto!]!
   myMenus(type: String): [MenuResponseDto!]!
+  offboardingProcess(id: ID!): OffboardingProcess!
+  onboardingChecklist(id: ID!): OnboardingChecklist!
+  onboardingChecklistByEmployee(employeeProfileId: ID!): OnboardingChecklist!
 
   """Check Orama search engine health status"""
   oramaHealthCheck: OramaHealthCheck!
@@ -1698,6 +2122,15 @@ type TasksPaginatedResult {
   meta: PaginationInfo!
 }
 
+"""Employment termination types"""
+enum TerminationType {
+  CONTRACT_END
+  MUTUAL_AGREEMENT
+  RESIGNATION
+  RETIREMENT
+  TERMINATION
+}
+
 input UnifiedBulkCreateInput {
   """Array of data objects for bulk creation"""
   data: [JSONObject!]!
@@ -1878,6 +2311,87 @@ input UpdateCommentInput {
   content: String
 }
 
+input UpdateEmployeeProfileInput {
+  bankAccountName: String
+  bankAccountNumber: String
+  bankBranch: String
+  bankName: String
+  certifications: JSON
+  citizenId: String
+  citizenIdIssueDate: String
+  citizenIdIssuePlace: String
+  city: String
+  contractType: ContractType
+  currentAddress: String
+  dateOfBirth: String
+  department: String
+  directManager: String
+  displayName: String
+  district: String
+  education: JSON
+  emergencyContactAddress: String
+  emergencyContactName: String
+  emergencyContactPhone: String
+  emergencyContactRelationship: String
+  fullName: String
+  gender: Gender
+  healthInsuranceNumber: String
+  isActive: Boolean
+  languages: JSON
+  level: String
+  maritalStatus: MaritalStatus
+  nationality: String
+  notes: String
+  passportExpiryDate: String
+  passportIssueDate: String
+  passportNumber: String
+  permanentAddress: String
+  personalEmail: String
+  personalPhone: String
+  placeOfBirth: String
+  position: String
+  postalCode: String
+  probationEndDate: String
+  salaryGrade: String
+  skills: [String!]
+  socialInsuranceNumber: String
+  startDate: String
+  taxCode: String
+  team: String
+  ward: String
+  workLocation: String
+}
+
+input UpdateEmploymentHistoryInput {
+  approvalStatus: String
+  approvedAt: String
+  approvedBy: String
+  contractEndDate: String
+  contractNumber: String
+  contractStartDate: String
+  contractType: ContractType
+  documentIds: [String!]
+  effectiveDate: String
+  eventDate: String
+  eventType: EmploymentEventType
+  fromDepartment: String
+  fromLevel: String
+  fromPosition: String
+  internalNotes: String
+  lastWorkingDay: String
+  newSalaryGrade: String
+  newValue: JSON
+  notes: String
+  noticePeriodDays: Int
+  previousValue: JSON
+  salaryChangePercentage: Float
+  terminationReason: String
+  terminationType: TerminationType
+  toDepartment: String
+  toLevel: String
+  toPosition: String
+}
+
 input UpdateFileInput {
   alt: String
   description: String
@@ -1937,6 +2451,68 @@ input UpdateMenuDto {
   title: String
   type: String
   url: String
+}
+
+input UpdateOffboardingProcessInput {
+  accessRevocationList: JSON
+  approvalWorkflow: JSON
+  assetReturnChecklist: JSON
+  bonusAmount: Float
+  clearanceStatus: ClearanceStatus
+  clearanceSteps: JSON
+  completedAt: String
+  completedBy: String
+  deductions: JSON
+  effectiveDate: String
+  eligibleForRehire: Boolean
+  employeeComments: String
+  exitInterviewBy: String
+  exitInterviewDate: String
+  exitInterviewForm: JSON
+  exitInterviewNotes: String
+  exitInterviewScheduled: Boolean
+  exitReason: String
+  exitType: TerminationType
+  experienceCertificate: String
+  finalApprovedAt: String
+  finalApprovedBy: String
+  finalDocuments: [String!]
+  finalSalaryAmount: Float
+  hrNotes: String
+  knowledgeTransferPlan: JSON
+  lastWorkingDay: String
+  leavePayoutAmount: Float
+  managerComments: String
+  noticeGivenDate: String
+  noticePeriodDays: Int
+  noticeRequired: Boolean
+  paymentDate: String
+  paymentStatus: String
+  processOwner: String
+  referenceLetterProvided: Boolean
+  referenceLetterRequested: Boolean
+  rehireNotes: String
+  resignationLetter: String
+  status: OffboardingStatus
+  totalSettlement: Float
+  unusedLeaveDays: Int
+}
+
+input UpdateOnboardingChecklistInput {
+  actualCompletionDate: String
+  assignedTo: String
+  buddyId: String
+  checklistTemplate: String
+  completedTasks: Int
+  employeeFeedback: String
+  hrNotes: String
+  managerFeedback: String
+  progressPercentage: Float
+  startDate: String
+  status: OnboardingStatus
+  targetDate: String
+  tasks: JSON
+  totalTasks: Int
 }
 
 input UpdatePageBlockInput {
