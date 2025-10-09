@@ -6,6 +6,30 @@
 - **Gửi đơn lẻ**: Gửi 1 tin nhắn đến 1 số điện thoại
 - **Gửi hàng loạt**: Upload file Excel để gửi nhiều tin nhắn cùng lúc (xử lý Excel tại Frontend)
 
+## ✨ Tính năng mới (v2.0)
+
+### 📊 Báo cáo và Xuất dữ liệu
+Sau khi gửi hàng loạt, hệ thống cung cấp:
+
+1. **Phân tích lỗi chi tiết**
+   - Thống kê số lượng từng loại lỗi
+   - Tỷ lệ phần trăm từng lỗi
+   - Biểu đồ trực quan (bar chart) phân bố lỗi
+   - Sắp xếp theo số lượng giảm dần
+
+2. **Xuất báo cáo đa định dạng**
+   - **Excel (.xlsx)**: 2 sheet (Tổng quan + Chi tiết) với phân tích lỗi
+   - **CSV (.csv)**: Format CSV với UTF-8 BOM cho tiếng Việt
+   - **JSON (.json)**: Dữ liệu đầy đủ cho xử lý lập trình
+   - **In (Print)**: Định dạng in ấn chuyên nghiệp
+
+3. **Thông tin trong báo cáo**
+   - Timestamp tạo báo cáo
+   - Template ID đã sử dụng
+   - Tổng kết: Tổng/Thành công/Thất bại/Tỷ lệ
+   - Phân tích lỗi: Mã lỗi, số lượng, mô tả
+   - Chi tiết từng tin nhắn: Phone, tên KH, trạng thái, message ID, quota...
+
 ## 🚀 Khởi động
 
 ### 1. Cài đặt dependencies (nếu chưa có)

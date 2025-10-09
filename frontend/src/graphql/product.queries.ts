@@ -1,0 +1,436 @@
+import { gql } from '@apollo/client';
+
+// ============================================================================
+// FRAGMENTS
+// ============================================================================
+
+export const PRODUCT_IMAGE_FRAGMENT = gql`
+  fragment ProductImageFields on ProductImageType {
+    id
+    url
+    alt
+    isPrimary
+    displayOrder
+    createdAt
+  }
+`;
+
+export const PRODUCT_VARIANT_FRAGMENT = gql`
+  fragment ProductVariantFields on ProductVariantType {
+    id
+    name
+    sku
+    price
+    originalPrice
+    stock
+    weight
+    unit
+    isDefault
+    displayOrder
+    createdAt
+  }
+`;
+
+export const CATEGORY_BASIC_FRAGMENT = gql`
+  fragment CategoryBasicFields on CategoryType {
+    id
+    name
+    slug
+    description
+    image
+    displayOrder
+    isActive
+  }
+`;
+
+export const PRODUCT_BASIC_FRAGMENT = gql`
+  fragment ProductBasicFields on ProductType {
+    id
+    name
+    slug
+    description
+    shortDesc
+    sku
+    barcode
+    price
+    originalPrice
+    costPrice
+    unit
+    stock
+    minStock
+    status
+    thumbnail
+    origin
+    createdAt
+    updatedAt
+  }
+`;
+
+export const PRODUCT_FULL_FRAGMENT = gql`
+  ${PRODUCT_BASIC_FRAGMENT}
+  ${PRODUCT_IMAGE_FRAGMENT}
+  ${PRODUCT_VARIANT_FRAGMENT}
+  ${CATEGORY_BASIC_FRAGMENT}
+  fragment ProductFullFields on ProductType {
+    ...ProductBasicFields
+    category {
+      ...CategoryBasicFields
+    }
+    images {
+      ...ProductImageFields
+    }
+    variants {
+      ...ProductVariantFields
+    }
+    isFeatured
+    isNewArrival
+    isBestSeller
+    isOnSale
+    weight
+    attributes
+    metaTitle
+    metaDescription
+    metaKeywords
+  }
+`;
+
+// ============================================================================
+// QUERIES
+// ============================================================================
+
+export const GET_PRODUCTS = gql`
+  ${PRODUCT_BASIC_FRAGMENT}
+  ${CATEGORY_BASIC_FRAGMENT}
+  query GetProducts($input: GetProductsInput) {
+    products(input: $input) {
+      items {
+        ...ProductBasicFields
+        category {
+          ...CategoryBasicFields
+        }
+        isFeatured
+        isNewArrival
+        isBestSeller
+        isOnSale
+      }
+      total
+      page
+      limit
+      totalPages
+    }
+  }
+`;
+
+export const GET_PRODUCT = gql`
+  ${PRODUCT_FULL_FRAGMENT}
+  query GetProduct($id: String!) {
+    product(id: $id) {
+      ...ProductFullFields
+    }
+  }
+`;
+
+export const GET_PRODUCT_BY_SLUG = gql`
+  ${PRODUCT_FULL_FRAGMENT}
+  query GetProductBySlug($slug: String!) {
+    productBySlug(slug: $slug) {
+      ...ProductFullFields
+    }
+  }
+`;
+
+export const GET_PRODUCTS_BY_CATEGORY = gql`
+  ${PRODUCT_BASIC_FRAGMENT}
+  query GetProductsByCategory($categoryId: String!, $input: GetProductsInput) {
+    productsByCategory(categoryId: $categoryId, input: $input) {
+      items {
+        ...ProductBasicFields
+        isFeatured
+        isNewArrival
+        isBestSeller
+        isOnSale
+      }
+      total
+      page
+      limit
+      totalPages
+    }
+  }
+`;
+
+export const GET_FEATURED_PRODUCTS = gql`
+  ${PRODUCT_BASIC_FRAGMENT}
+  ${CATEGORY_BASIC_FRAGMENT}
+  query GetFeaturedProducts($limit: Int) {
+    products(input: { 
+      filters: { isFeatured: true }
+      limit: $limit
+      sortBy: "createdAt"
+      sortOrder: DESC
+    }) {
+      items {
+        ...ProductBasicFields
+        category {
+          ...CategoryBasicFields
+        }
+        discountPercentage
+      }
+      total
+    }
+  }
+`;
+
+export const SEARCH_PRODUCTS = gql`
+  ${PRODUCT_BASIC_FRAGMENT}
+  ${CATEGORY_BASIC_FRAGMENT}
+  query SearchProducts($search: String!, $limit: Int, $page: Int) {
+    products(input: { 
+      filters: { search: $search }
+      limit: $limit
+      page: $page
+    }) {
+      items {
+        ...ProductBasicFields
+        category {
+          ...CategoryBasicFields
+        }
+        discountPercentage
+      }
+      total
+      page
+      limit
+      totalPages
+    }
+  }
+`;
+
+// ============================================================================
+// MUTATIONS
+// ============================================================================
+
+export const CREATE_PRODUCT = gql`
+  ${PRODUCT_FULL_FRAGMENT}
+  mutation CreateProduct($input: CreateProductInput!) {
+    createProduct(input: $input) {
+      ...ProductFullFields
+    }
+  }
+`;
+
+export const UPDATE_PRODUCT = gql`
+  ${PRODUCT_FULL_FRAGMENT}
+  mutation UpdateProduct($id: String!, $input: UpdateProductInput!) {
+    updateProduct(id: $id, input: $input) {
+      ...ProductFullFields
+    }
+  }
+`;
+
+export const DELETE_PRODUCT = gql`
+  mutation DeleteProduct($id: String!) {
+    deleteProduct(id: $id)
+  }
+`;
+
+export const UPDATE_PRODUCT_STOCK = gql`
+  ${PRODUCT_BASIC_FRAGMENT}
+  mutation UpdateProductStock($id: String!, $quantity: Float!) {
+    updateProductStock(id: $id, quantity: $quantity) {
+      ...ProductBasicFields
+    }
+  }
+`;
+
+export const ADD_PRODUCT_IMAGE = gql`
+  ${PRODUCT_IMAGE_FRAGMENT}
+  mutation AddProductImage($productId: String!, $input: CreateProductImageInput!) {
+    addProductImage(productId: $productId, input: $input) {
+      ...ProductImageFields
+    }
+  }
+`;
+
+export const DELETE_PRODUCT_IMAGE = gql`
+  mutation DeleteProductImage($id: String!) {
+    deleteProductImage(id: $id)
+  }
+`;
+
+export const ADD_PRODUCT_VARIANT = gql`
+  ${PRODUCT_VARIANT_FRAGMENT}
+  mutation AddProductVariant($productId: String!, $input: CreateProductVariantInput!) {
+    addProductVariant(productId: $productId, input: $input) {
+      ...ProductVariantFields
+    }
+  }
+`;
+
+export const UPDATE_PRODUCT_VARIANT = gql`
+  ${PRODUCT_VARIANT_FRAGMENT}
+  mutation UpdateProductVariant($id: String!, $input: UpdateProductVariantInput!) {
+    updateProductVariant(id: $id, input: $input) {
+      ...ProductVariantFields
+    }
+  }
+`;
+
+export const DELETE_PRODUCT_VARIANT = gql`
+  mutation DeleteProductVariant($id: String!) {
+    deleteProductVariant(id: $id)
+  }
+`;
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export interface ProductImage {
+  id: string;
+  url: string;
+  alt?: string;
+  isPrimary: boolean;
+  displayOrder: number;
+  createdAt: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  name: string;
+  sku: string;
+  price: number;
+  originalPrice?: number;
+  stock: number;
+  weight?: number;
+  unit: string;
+  isDefault: boolean;
+  displayOrder: number;
+  createdAt: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image?: string;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  shortDesc?: string;
+  sku?: string;
+  barcode?: string;
+  price: number;
+  originalPrice?: number;
+  costPrice?: number;
+  unit: string;
+  stock: number;
+  minStock: number;
+  status: string;
+  thumbnail?: string;
+  origin?: string;
+  category?: Category;
+  images?: ProductImage[];
+  variants?: ProductVariant[];
+  isFeatured?: boolean;
+  isNewArrival?: boolean;
+  isBestSeller?: boolean;
+  isOnSale?: boolean;
+  weight?: number;
+  attributes?: Record<string, any>;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginatedProducts {
+  items: Product[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ProductFilters {
+  search?: string;
+  categoryId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  status?: string;
+  isFeatured?: boolean;
+  isNewArrival?: boolean;
+  isBestSeller?: boolean;
+  isOnSale?: boolean;
+  unit?: string;
+  origin?: string;
+  inStock?: boolean;
+}
+
+export interface GetProductsInput {
+  filters?: ProductFilters;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface CreateProductInput {
+  name: string;
+  categoryId: string;
+  description?: string;
+  shortDesc?: string;
+  sku?: string;
+  barcode?: string;
+  price: number;
+  originalPrice?: number;
+  costPrice?: number;
+  unit: string;
+  stock: number;
+  minStock?: number;
+  status?: string;
+  thumbnail?: string;
+  origin?: string;
+  isFeatured?: boolean;
+  isNewArrival?: boolean;
+  isBestSeller?: boolean;
+  isOnSale?: boolean;
+  weight?: number;
+  attributes?: Record<string, any>;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+}
+
+export interface UpdateProductInput {
+  name?: string;
+  categoryId?: string;
+  description?: string;
+  shortDesc?: string;
+  sku?: string;
+  barcode?: string;
+  price?: number;
+  originalPrice?: number;
+  costPrice?: number;
+  unit?: string;
+  stock?: number;
+  minStock?: number;
+  status?: string;
+  thumbnail?: string;
+  origin?: string;
+  isFeatured?: boolean;
+  isNewArrival?: boolean;
+  isBestSeller?: boolean;
+  isOnSale?: boolean;
+  weight?: number;
+  attributes?: Record<string, any>;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+}

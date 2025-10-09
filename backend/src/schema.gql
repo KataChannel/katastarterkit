@@ -411,6 +411,38 @@ input CampaignSearchInput {
   status: AffCampaignStatus
 }
 
+input CategoryFiltersInput {
+  hasProducts: Boolean
+  isActive: Boolean
+  isFeatured: Boolean
+  parentId: ID
+  search: String
+}
+
+type CategoryType {
+  children: [CategoryType!]
+  createdAt: DateTime!
+  createdBy: String
+  description: String
+  displayOrder: Int!
+  icon: String
+  id: ID!
+  image: String
+  isActive: Boolean!
+  isFeatured: Boolean!
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  name: String!
+  parent: CategoryType
+  parentId: String
+  productCount: Int
+  products: [ProductType!]
+  slug: String!
+  updatedAt: DateTime!
+  updatedBy: String
+}
+
 """Clearance status for offboarding"""
 enum ClearanceStatus {
   COMPLETE
@@ -481,6 +513,21 @@ input CreateCampaignInput {
   productUrl: String!
   requireApproval: Boolean! = true
   startDate: DateTime
+}
+
+input CreateCategoryInput {
+  description: String
+  displayOrder: Int! = 0
+  icon: String
+  isActive: Boolean! = true
+  isFeatured: Boolean! = false
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  name: String!
+  parentId: ID
+  slug: String!
+  thumbnail: String
 }
 
 input CreateCommentInput {
@@ -763,6 +810,57 @@ input CreatePostInput {
   status: PostStatus! = DRAFT
   tags: [String!]
   title: String!
+}
+
+input CreateProductImageInput {
+  alt: String
+  isPrimary: Boolean! = false
+  order: Int! = 0
+  productId: ID!
+  title: String
+  url: String!
+}
+
+input CreateProductInput {
+  attributes: JSON
+  barcode: String
+  categoryId: ID!
+  costPrice: Float
+  description: String
+  displayOrder: Int! = 0
+  isBestSeller: Boolean! = false
+  isFeatured: Boolean! = false
+  isNewArrival: Boolean! = false
+  isOnSale: Boolean! = false
+  maxStock: Int
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  minStock: Int! = 0
+  name: String!
+  origin: String
+  originalPrice: Float
+  price: Float!
+  shortDesc: String
+  sku: String
+  slug: String!
+  status: ProductStatus! = ACTIVE
+  stock: Int! = 0
+  thumbnail: String
+  unit: ProductUnit! = KG
+  weight: Float
+}
+
+input CreateProductVariantInput {
+  attributes: JSON
+  barcode: String
+  isActive: Boolean! = true
+  name: String!
+  order: Int! = 0
+  price: Float!
+  productId: ID!
+  sku: String
+  stock: Int! = 0
 }
 
 input CreateRoleInput {
@@ -1142,12 +1240,29 @@ enum Gender {
   OTHER
 }
 
+input GetCategoriesInput {
+  filters: CategoryFiltersInput
+  includeChildren: Boolean = false
+  limit: Int = 50
+  page: Int = 1
+  sortBy: String = "displayOrder"
+  sortOrder: String = "asc"
+}
+
 input GetFilesInput {
   filters: FileFiltersInput
   limit: Int! = 20
   page: Int! = 1
   sortBy: String
   sortOrder: String
+}
+
+input GetProductsInput {
+  filters: ProductFiltersInput
+  limit: Int = 20
+  page: Int = 1
+  sortBy: String = "createdAt"
+  sortOrder: String = "desc"
 }
 
 input GroupByInput {
@@ -1298,6 +1413,8 @@ input MoveFilesInput {
 
 type Mutation {
   addPageBlock(input: CreatePageBlockInput!, pageId: String!): PageBlock!
+  addProductImage(input: CreateProductImageInput!): ProductType!
+  addProductVariant(input: CreateProductVariantInput!): ProductType!
   adminCreateUser(input: AdminCreateUserInput!): User!
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
   assignRolePermissions(input: AssignRolePermissionInput!): Boolean!
@@ -1312,6 +1429,7 @@ type Mutation {
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
   createAffiliateLink(input: CreateAffLinkInput!): AffLink!
   createAffiliateUser(input: CreateAffUserInput!): AffUser!
+  createCategory(input: CreateCategoryInput!): CategoryType!
   createComment(input: CreateCommentInput!): Comment!
   createEmployeeProfile(input: CreateEmployeeProfileInput!): EmployeeProfile!
   createEmploymentHistory(input: CreateEmploymentHistoryInput!): EmploymentHistory!
@@ -1332,10 +1450,12 @@ type Mutation {
   createPaymentRequest(input: CreatePaymentRequestInput!): AffPaymentRequest!
   createPermission(input: CreatePermissionInput!): Permission!
   createPost(input: CreatePostInput!): Post!
+  createProduct(input: CreateProductInput!): ProductType!
   createRole(input: CreateRoleInput!): Role!
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
+  deleteCategory(deleteProducts: Boolean! = false, id: ID!): CategoryType!
   deleteComment(id: String!): Boolean!
   deleteEmployeeProfile(id: ID!): DeleteResponse!
   deleteFile(id: ID!): Boolean!
@@ -1352,6 +1472,9 @@ type Mutation {
   deletePageBlock(id: String!): PageBlock!
   deletePermission(id: String!): Boolean!
   deletePost(id: String!): Boolean!
+  deleteProduct(id: ID!): ProductType!
+  deleteProductImage(id: ID!): Boolean!
+  deleteProductVariant(id: ID!): Boolean!
   deleteRole(id: String!): Boolean!
   deleteTask(id: String!): Boolean!
   deleteTaskMedia(mediaId: String!): Boolean!
@@ -1404,6 +1527,7 @@ type Mutation {
   universalMutation(input: UniversalQueryInput!): JSONObject!
   updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
   updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
+  updateCategory(input: UpdateCategoryInput!): CategoryType!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
   updateEmployeeProfile(id: ID!, input: UpdateEmployeeProfileInput!): EmployeeProfile!
   updateEmploymentHistory(id: ID!, input: UpdateEmploymentHistoryInput!): EmploymentHistory!
@@ -1424,6 +1548,9 @@ type Mutation {
   updatePageBlocksOrder(pageId: String!, updates: [BulkUpdateBlockOrderInput!]!): [PageBlock!]!
   updatePermission(id: String!, input: UpdatePermissionInput!): Permission!
   updatePost(id: String!, input: UpdatePostInput!): Post!
+  updateProduct(input: UpdateProductInput!): ProductType!
+  updateProductStock(id: ID!, quantity: Float!): ProductType!
+  updateProductVariant(input: UpdateProductVariantInput!): ProductType!
   updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateTask(input: UpdateTaskInput!): Task!
   updateUser(id: String!, input: UpdateUserInput!): User!
@@ -1652,6 +1779,15 @@ enum PageStatus {
   PUBLISHED
 }
 
+type PaginatedCategories {
+  hasMore: Boolean!
+  items: [CategoryType!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
+}
+
 type PaginatedFiles {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
@@ -1670,6 +1806,15 @@ type PaginatedPages {
 type PaginatedPosts {
   items: [Post!]!
   meta: PaginationMeta!
+}
+
+type PaginatedProducts {
+  hasMore: Boolean!
+  items: [ProductType!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
 }
 
 type PaginationInfo {
@@ -1781,6 +1926,110 @@ enum PostStatus {
   PUBLISHED
 }
 
+input ProductFiltersInput {
+  categoryId: ID
+  inStock: Boolean
+  isBestSeller: Boolean
+  isFeatured: Boolean
+  isNewArrival: Boolean
+  isOnSale: Boolean
+  maxPrice: Float
+  minPrice: Float
+  origin: String
+  search: String
+  status: ProductStatus
+  units: [ProductUnit!]
+}
+
+type ProductImageType {
+  alt: String
+  createdAt: DateTime!
+  id: ID!
+  isPrimary: Boolean!
+  order: Int!
+  productId: String!
+  title: String
+  updatedAt: DateTime!
+  url: String!
+}
+
+"""Trạng thái sản phẩm"""
+enum ProductStatus {
+  ACTIVE
+  DISCONTINUED
+  DRAFT
+  INACTIVE
+  OUT_OF_STOCK
+}
+
+type ProductType {
+  attributes: JSON
+  barcode: String
+  category: CategoryType
+  categoryId: String!
+  costPrice: Float
+  createdAt: DateTime!
+  createdBy: String
+  description: String
+  discountPercentage: Float
+  displayOrder: Int!
+  id: ID!
+  images: [ProductImageType!]
+  isBestSeller: Boolean!
+  isFeatured: Boolean!
+  isNewArrival: Boolean!
+  isOnSale: Boolean!
+  maxStock: Int
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  minStock: Int!
+  name: String!
+  origin: String
+  originalPrice: Float
+  price: Float!
+  profitMargin: Float
+  publishedAt: DateTime
+  shortDesc: String
+  sku: String
+  slug: String!
+  soldCount: Int!
+  status: ProductStatus!
+  stock: Int!
+  thumbnail: String
+  unit: ProductUnit!
+  updatedAt: DateTime!
+  updatedBy: String
+  variants: [ProductVariantType!]
+  viewCount: Int!
+  weight: Float
+}
+
+"""Đơn vị tính sản phẩm"""
+enum ProductUnit {
+  BAG
+  BOX
+  BUNDLE
+  G
+  KG
+  PIECE
+}
+
+type ProductVariantType {
+  attributes: JSON
+  barcode: String
+  createdAt: DateTime!
+  id: ID!
+  isActive: Boolean!
+  name: String!
+  order: Int!
+  price: Float!
+  productId: String!
+  sku: String
+  stock: Int!
+  updatedAt: DateTime!
+}
+
 type Query {
   affiliateCampaign(id: String!): AffCampaign
   affiliateCampaigns(search: CampaignSearchInput): [AffCampaign!]!
@@ -1789,6 +2038,10 @@ type Query {
   affiliateLinks(search: AffLinkSearchInput): [AffLink!]!
   affiliatePaymentRequests(search: AffPaymentRequestSearchInput): [AffPaymentRequest!]!
   affiliateUser: AffUser
+  categories(input: GetCategoriesInput): PaginatedCategories!
+  category(id: ID!): CategoryType!
+  categoryBySlug(slug: String!): CategoryType!
+  categoryTree: [CategoryType!]!
 
   """Count records matching the criteria"""
   count(modelName: String!, where: JSONObject): Float!
@@ -1880,6 +2133,10 @@ type Query {
 
   """Check Orama search engine health status"""
   oramaHealthCheck: OramaHealthCheck!
+  product(id: ID!): ProductType!
+  productBySlug(slug: String!): ProductType!
+  products(input: GetProductsInput): PaginatedProducts!
+  productsByCategory(categoryId: ID!, input: GetProductsInput): PaginatedProducts!
 
   """Search affiliate campaigns using Orama full-text search engine"""
   searchAffiliateCampaigns(input: OramaSearchInput!): OramaSearchResult!
@@ -2307,6 +2564,22 @@ input UpdateCampaignInput {
   status: AffCampaignStatus
 }
 
+input UpdateCategoryInput {
+  description: String
+  displayOrder: Int
+  icon: String
+  id: ID!
+  isActive: Boolean
+  isFeatured: Boolean
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  name: String
+  parentId: ID
+  slug: String
+  thumbnail: String
+}
+
 input UpdateCommentInput {
   content: String
 }
@@ -2555,6 +2828,49 @@ input UpdatePostInput {
   status: PostStatus
   tags: [String!]
   title: String
+}
+
+input UpdateProductInput {
+  attributes: JSON
+  barcode: String
+  categoryId: ID
+  costPrice: Float
+  description: String
+  displayOrder: Int
+  id: ID!
+  isBestSeller: Boolean
+  isFeatured: Boolean
+  isNewArrival: Boolean
+  isOnSale: Boolean
+  maxStock: Int
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  minStock: Int
+  name: String
+  origin: String
+  originalPrice: Float
+  price: Float
+  shortDesc: String
+  sku: String
+  slug: String
+  status: ProductStatus
+  stock: Int
+  thumbnail: String
+  unit: ProductUnit
+  weight: Float
+}
+
+input UpdateProductVariantInput {
+  attributes: JSON
+  barcode: String
+  id: ID!
+  isActive: Boolean
+  name: String
+  order: Int
+  price: Float
+  sku: String
+  stock: Int
 }
 
 input UpdateRoleInput {

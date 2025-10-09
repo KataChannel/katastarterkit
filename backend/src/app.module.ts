@@ -32,6 +32,7 @@ import { KetoAnModule } from './ketoan/ketoan.module';
 import { MenuModule } from './menu/menu.module';
 import { FileModule } from './graphql/modules/file.module';
 import { HRModule } from './graphql/modules/hr.module';
+import { ProductModule } from './graphql/modules/product.module';
 import { TestController } from './test.controller';
 
 // Configuration
@@ -131,6 +132,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     MenuModule,
     FileModule,
     HRModule,
+    ProductModule,
   ],
   controllers: [
     LogController,

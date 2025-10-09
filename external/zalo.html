@@ -32,6 +32,47 @@
         .animate-fade-in {
             animation: fadeIn 0.3s ease-out;
         }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background: white !important;
+            }
+            
+            /* Hide non-essential elements when printing */
+            button, .no-print {
+                display: none !important;
+            }
+            
+            /* Show only the results table */
+            .bg-green-50 {
+                background: white !important;
+                border: 1px solid #ccc !important;
+            }
+            
+            table {
+                page-break-inside: auto;
+            }
+            
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            
+            thead {
+                display: table-header-group;
+            }
+            
+            /* Add header for print */
+            .bg-green-50::before {
+                content: "BÁO CÁO GỬI ZNS HÀNG LOẠT";
+                display: block;
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -66,6 +107,13 @@
             const [searchTerm, setSearchTerm] = useState('');
             const [currentPage, setCurrentPage] = useState(1);
             const itemsPerPage = 10;
+            const [sendingProgress, setSendingProgress] = useState(null);
+            const [rateConfig, setRateConfig] = useState({
+                batchSize: 50,
+                delayBetweenRequests: 250,
+                delayBetweenBatches: 2000,
+                concurrentRequests: 3
+            });
 
             const handleChange = (e) => {
                 const { name, value } = e.target;
@@ -376,7 +424,7 @@
 
             const fillBulkDemoData = () => {
                 setBulkFormData({
-                    template_id: '298745',
+                    template_id: '492946',
                     access_token: 'your_access_token_here'
                 });
             };
@@ -415,6 +463,143 @@
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, 'Customers');
                 XLSX.writeFile(wb, 'sample_customers.xlsx');
+            };
+
+            // Export report functions
+            const exportReportExcel = () => {
+                if (!response || !response.results) return;
+
+                const timestamp = new Date().toLocaleString('vi-VN').replace(/[/:]/g, '-');
+                
+                // Calculate error breakdown
+                const errorCounts = {};
+                response.results.forEach(result => {
+                    if (result.status === 'failed' && result.errorCode) {
+                        errorCounts[result.errorCode] = (errorCounts[result.errorCode] || 0) + 1;
+                    }
+                });
+
+                const errorNames = {
+                    '-108': 'SĐT không hợp lệ',
+                    '-118': 'Tài khoản Zalo không tồn tại',
+                    '-124': 'Token hết hạn',
+                    '-131': 'Template chưa duyệt',
+                    '-132': 'Template không tồn tại',
+                    '-201': 'Thiếu tham số',
+                    '-216': 'Quota đã hết',
+                    '-217': 'Dữ liệu template sai',
+                    '-218': 'Thiếu tham số template'
+                };
+                
+                // Prepare data for export
+                const exportData = response.results.map(result => ({
+                    'Dòng': result.row,
+                    'Số điện thoại': result.phone,
+                    'Tên khách hàng': result.customer_name,
+                    'Mã khách hàng': result.customer_id,
+                    'Trạng thái': result.status === 'success' ? 'Thành công' : 'Thất bại',
+                    'Message ID': result.response?.data?.msg_id || '',
+                    'Thời gian gửi': result.response?.data?.sent_time 
+                        ? new Date(parseInt(result.response.data.sent_time)).toLocaleString('vi-VN')
+                        : '',
+                    'Quota còn lại': result.response?.data?.quota?.remainingQuota || '',
+                    'Lỗi': result.error || '',
+                    'Mã lỗi': result.errorCode || ''
+                }));
+
+                // Create summary sheet
+                const summaryData = [
+                    ['BÁO CÁO GỬI ZNS HÀNG LOẠT'],
+                    ['Thời gian tạo báo cáo:', new Date().toLocaleString('vi-VN')],
+                    [],
+                    ['TỔNG KẾT'],
+                    ['Tổng số tin:', response.summary.total],
+                    ['Thành công:', response.summary.success],
+                    ['Thất bại:', response.summary.failed],
+                    ['Tỷ lệ thành công:', response.summary.successRate],
+                    [],
+                    ['THÔNG TIN TEMPLATE'],
+                    ['Template ID:', bulkFormData.template_id],
+                ];
+
+                // Add error breakdown to summary if there are errors
+                if (Object.keys(errorCounts).length > 0) {
+                    summaryData.push([]);
+                    summaryData.push(['PHÂN TÍCH LỖI']);
+                    summaryData.push(['Mã lỗi', 'Số lượng', 'Mô tả']);
+                    Object.entries(errorCounts).forEach(([code, count]) => {
+                        summaryData.push([code, count, errorNames[code] || 'Không xác định']);
+                    });
+                }
+
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                
+                // Summary sheet
+                const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+                XLSX.utils.book_append_sheet(wb, wsSummary, 'Tổng quan');
+                
+                // Details sheet
+                const wsDetails = XLSX.utils.json_to_sheet(exportData);
+                XLSX.utils.book_append_sheet(wb, wsDetails, 'Chi tiết');
+                
+                // Download
+                XLSX.writeFile(wb, `ZNS_Report_${timestamp}.xlsx`);
+            };
+
+            const exportReportCSV = () => {
+                if (!response || !response.results) return;
+
+                const timestamp = new Date().toLocaleString('vi-VN').replace(/[/:]/g, '-');
+                
+                // Prepare CSV content
+                const headers = ['Dòng', 'Số điện thoại', 'Tên khách hàng', 'Mã khách hàng', 'Trạng thái', 'Message ID', 'Lỗi', 'Mã lỗi'];
+                const rows = response.results.map(result => [
+                    result.row,
+                    result.phone,
+                    result.customer_name,
+                    result.customer_id,
+                    result.status === 'success' ? 'Thành công' : 'Thất bại',
+                    result.response?.data?.msg_id || '',
+                    result.error || '',
+                    result.errorCode || ''
+                ]);
+
+                // Create CSV
+                const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+                const csv = XLSX.utils.sheet_to_csv(ws);
+                
+                // Download
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `ZNS_Report_${timestamp}.csv`;
+                link.click();
+            };
+
+            const exportReportJSON = () => {
+                if (!response) return;
+
+                const timestamp = new Date().toLocaleString('vi-VN').replace(/[/:]/g, '-');
+                
+                const reportData = {
+                    metadata: {
+                        exportTime: new Date().toISOString(),
+                        templateId: bulkFormData.template_id,
+                    },
+                    summary: response.summary,
+                    results: response.results
+                };
+
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `ZNS_Report_${timestamp}.json`;
+                link.click();
+            };
+
+            const printReport = () => {
+                window.print();
             };
 
             return (
@@ -917,7 +1102,56 @@
                         {/* Bulk Success Response */}
                         {response && response.success && activeTab === 'bulk' && (
                             <div className="bg-green-50 border-l-4 border-green-500 rounded-lg p-6 mb-6 animate-fade-in">
-                                <h3 className="text-lg font-semibold text-green-800 mb-3">✅ Hoàn thành gửi hàng loạt!</h3>
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-semibold text-green-800">✅ Hoàn thành gửi hàng loạt!</h3>
+                                    
+                                    {/* Export Buttons */}
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={exportReportExcel}
+                                            className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition"
+                                            title="Xuất báo cáo Excel"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            Excel
+                                        </button>
+
+                                        <button
+                                            onClick={exportReportCSV}
+                                            className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition"
+                                            title="Xuất báo cáo CSV"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            CSV
+                                        </button>
+
+                                        <button
+                                            onClick={exportReportJSON}
+                                            className="inline-flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium transition"
+                                            title="Xuất báo cáo JSON"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                            </svg>
+                                            JSON
+                                        </button>
+
+                                        <button
+                                            onClick={printReport}
+                                            className="inline-flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium transition"
+                                            title="In báo cáo"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                            </svg>
+                                            In
+                                        </button>
+                                    </div>
+                                </div>
                                 
                                 {/* Summary */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -938,6 +1172,77 @@
                                         <p className="text-xs text-gray-600">Tỷ lệ</p>
                                     </div>
                                 </div>
+
+                                {/* Error Analysis */}
+                                {response.summary.failed > 0 && (
+                                    <div className="mb-4 p-4 bg-white rounded-lg">
+                                        <h4 className="text-sm font-semibold text-gray-900 mb-3">📊 Phân tích lỗi</h4>
+                                        
+                                        {(() => {
+                                            const errorCounts = {};
+                                            response.results.forEach(result => {
+                                                if (result.status === 'failed' && result.errorCode) {
+                                                    errorCounts[result.errorCode] = (errorCounts[result.errorCode] || 0) + 1;
+                                                }
+                                            });
+                                            
+                                            const errorNames = {
+                                                '-108': 'SĐT không hợp lệ',
+                                                '-118': 'Tài khoản Zalo không tồn tại',
+                                                '-124': 'Token hết hạn',
+                                                '-131': 'Template chưa duyệt',
+                                                '-132': 'Template không tồn tại',
+                                                '-201': 'Thiếu tham số',
+                                                '-216': 'Quota đã hết',
+                                                '-217': 'Dữ liệu template sai',
+                                                '-218': 'Thiếu tham số template'
+                                            };
+                                            
+                                            const maxCount = Math.max(...Object.values(errorCounts));
+                                            
+                                            return (
+                                                <>
+                                                    {/* Error Count Cards */}
+                                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                                                        {Object.entries(errorCounts).map(([code, count]) => (
+                                                            <div key={code} className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                                                <div className="flex items-center justify-between mb-1">
+                                                                    <div className="text-lg font-bold text-red-700">{count}</div>
+                                                                    <div className="text-xs text-red-500 font-mono">{code}</div>
+                                                                </div>
+                                                                <div className="text-xs text-red-600 leading-tight">{errorNames[code] || `Lỗi ${code}`}</div>
+                                                                <div className="text-xs text-red-400 mt-1">
+                                                                    {((count / response.summary.failed) * 100).toFixed(1)}% lỗi
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    
+                                                    {/* Visual Bar Chart */}
+                                                    <div className="space-y-2">
+                                                        <h5 className="text-xs font-semibold text-gray-700 mb-2">Biểu đồ phân bố lỗi</h5>
+                                                        {Object.entries(errorCounts).sort((a, b) => b[1] - a[1]).map(([code, count]) => (
+                                                            <div key={code} className="flex items-center gap-2">
+                                                                <div className="text-xs font-mono text-gray-600 w-12">{code}</div>
+                                                                <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+                                                                    <div 
+                                                                        className="bg-gradient-to-r from-red-500 to-red-600 h-full flex items-center px-2 transition-all duration-500"
+                                                                        style={{ width: `${(count / maxCount) * 100}%` }}
+                                                                    >
+                                                                        <span className="text-xs font-semibold text-white whitespace-nowrap">
+                                                                            {count} lần
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-xs text-gray-600 w-32 truncate">{errorNames[code]}</div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </>
+                                            );
+                                        })()}
+                                    </div>
+                                )}
 
                                 {/* Results Table */}
                                 <div className="bg-white rounded-lg p-4 overflow-x-auto">

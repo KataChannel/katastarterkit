@@ -2423,3 +2423,188 @@ model OffboardingProcess {
   @@index([clearanceStatus])
   @@map("offboarding_processes")
 }
+
+// ============================================================================
+// PRODUCT & CATEGORY SYSTEM
+// ============================================================================
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+  DISCONTINUED
+}
+
+enum ProductUnit {
+  KG        // Kilogram
+  G         // Gram
+  BUNDLE    // Bó
+  PIECE     // Củ/Quả
+  BAG       // Túi
+  BOX       // Hộp
+}
+
+// Category Model - Danh mục sản phẩm
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  image       String?
+  icon        String?
+  
+  // Hierarchy - hỗ trợ danh mục con
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Category[] @relation("CategoryHierarchy")
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  
+  // Display
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+  
+  // Relations
+  products Product[]
+  
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+  
+  @@index([slug])
+  @@index([parentId])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([displayOrder])
+  @@map("categories")
+}
+
+// Product Model - Sản phẩm
+model Product {
+  id          String        @id @default(uuid())
+  name        String
+  slug        String        @unique
+  description String?
+  shortDesc   String?       // Mô tả ngắn
+  
+  // Pricing
+  price          Float
+  originalPrice  Float?      // Giá gốc (để hiển thị giảm giá)
+  costPrice      Float?      // Giá vốn
+  
+  // Inventory
+  sku            String?     @unique
+  barcode        String?     @unique
+  stock          Int         @default(0)
+  minStock       Int         @default(0)  // Ngưỡng tồn kho tối thiểu
+  maxStock       Int?                     // Tồn kho tối đa
+  
+  // Product details
+  unit           ProductUnit @default(KG)
+  weight         Float?                   // Trọng lượng (gram)
+  origin         String?                  // Xuất xứ (VD: Đà Lạt, Lâm Đồng)
+  status         ProductStatus @default(ACTIVE)
+  
+  // Category
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  // Images
+  images      ProductImage[]
+  thumbnail   String?                    // Ảnh đại diện
+  
+  // Variants (sizes, colors, etc.)
+  variants    ProductVariant[]
+  
+  // Attributes - JSON field for flexible attributes
+  // VD: {"organic": true, "pesticide_free": true, "harvest_date": "2025-01-08"}
+  attributes  Json?
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  
+  // Display & Features
+  isFeatured      Boolean @default(false)
+  isNewArrival    Boolean @default(false)
+  isBestSeller    Boolean @default(false)
+  isOnSale        Boolean @default(false)
+  displayOrder    Int     @default(0)
+  
+  // Statistics
+  viewCount       Int     @default(0)
+  soldCount       Int     @default(0)
+  
+  // Dates
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   String?
+  updatedBy   String?
+  
+  @@index([slug])
+  @@index([categoryId])
+  @@index([status])
+  @@index([isFeatured])
+  @@index([isNewArrival])
+  @@index([isBestSeller])
+  @@index([isOnSale])
+  @@index([price])
+  @@index([publishedAt])
+  @@map("products")
+}
+
+// Product Images
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  url       String
+  alt       String?
+  title     String?
+  isPrimary Boolean  @default(false)
+  order     Int      @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([productId])
+  @@index([isPrimary])
+  @@map("product_images")
+}
+
+// Product Variants - Biến thể sản phẩm (VD: size, màu)
+model ProductVariant {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  name      String  // VD: "1kg", "500g", "Túi 2kg"
+  sku       String? @unique
+  barcode   String? @unique
+  
+  price     Float
+  stock     Int     @default(0)
+  
+  // Variant details
+  attributes Json?  // VD: {"size": "1kg", "color": "green"}
+  
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([productId])
+  @@index([isActive])
+  @@map("product_variants")
+}
