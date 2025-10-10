@@ -108,14 +108,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       width: 200,
       filterable: true,
       resizable: true,
-      cellRenderer: ({ data }) => {
-        const value = (data as any).nbdchi || 'N/A';
-        return (
-          <div className="truncate" title={value}>
-            {value}
-          </div>
-        );
-      }
+      cellRenderer: ({ data }) => (data as any).nbdchi || 'N/A'
     },
     {
       field: 'nbten' as keyof InvoiceRowData,
@@ -123,14 +116,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       width: 200,
       filterable: true,
       resizable: true,
-      cellRenderer: ({ data }) => {
-        const value = (data as any).nbten || 'N/A';
-        return (
-          <div className="truncate" title={value}>
-            {value}
-          </div>
-        );
-      }
+      cellRenderer: ({ data }) => (data as any).nbten || 'N/A'
     },
     {
       field: 'nmdchi' as keyof InvoiceRowData,
@@ -138,14 +124,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       width: 200,
       filterable: true,
       resizable: true,
-      cellRenderer: ({ data }) => {
-        const value = (data as any).nmdchi || 'N/A';
-        return (
-          <div className="truncate" title={value}>
-            {value}
-          </div>
-        );
-      }
+      cellRenderer: ({ data }) => (data as any).nmdchi || 'N/A'
     },
     {
       field: 'nmmst' as keyof InvoiceRowData,
@@ -161,14 +140,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       width: 200,
       filterable: true,
       resizable: true,
-      cellRenderer: ({ data }) => {
-        const value = (data as any).nmten || 'N/A';
-        return (
-          <div className="truncate" title={value}>
-            {value}
-          </div>
-        );
-      }
+      cellRenderer: ({ data }) => (data as any).nmten || 'N/A'
     },
     {
       field: 'nmtnmua' as keyof InvoiceRowData,
@@ -176,14 +148,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       width: 200,
       filterable: true,
       resizable: true,
-      cellRenderer: ({ data }) => {
-        const value = (data as any).nmtnmua || 'N/A';
-        return (
-          <div className="truncate" title={value}>
-            {value}
-          </div>
-        );
-      }
+      cellRenderer: ({ data }) => (data as any).nmtnmua || 'N/A'
     },
     {
       field: 'tgtcthue',
@@ -233,14 +198,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       headerName: 'Tổng TT (chữ)',
       width: 200,
       resizable: true,
-      cellRenderer: ({ data }) => {
-        const value = (data as any).tgtttbchu || 'N/A';
-        return (
-          <div className="truncate" title={value}>
-            {value}
-          </div>
-        );
-      }
+      cellRenderer: ({ data }) => (data as any).tgtttbchu || 'N/A'
     },
     {
       field: 'thlap' as keyof InvoiceRowData,

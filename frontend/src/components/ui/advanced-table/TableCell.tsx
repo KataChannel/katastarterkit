@@ -77,13 +77,21 @@ export function TableCell<T extends RowData>({
 
   const renderValue = () => {
     if (column.cellRenderer) {
-      return column.cellRenderer({
+      const rendered = column.cellRenderer({
         value,
         data,
         field: column.field,
         rowIndex,
         colDef: column
       });
+      
+      // If cellRenderer returns a simple value (string, number), wrap it properly
+      if (typeof rendered === 'string' || typeof rendered === 'number') {
+        return <span className="truncate block">{rendered}</span>;
+      }
+      
+      // Otherwise return as-is (React element)
+      return rendered;
     }
 
     if (column.valueGetter) {
@@ -317,7 +325,7 @@ export function TableCell<T extends RowData>({
   return (
     <div
       className={cn(
-        'h-full px-3 py-2 border-r border-gray-200 bg-white cursor-default flex items-center',
+        'h-full px-3 py-2 border-r border-gray-200 bg-white cursor-default flex items-center overflow-hidden',
         column.editable && 'hover:bg-gray-50 cursor-pointer',
         isSelected && 'bg-blue-50',
         cellClass,
@@ -327,7 +335,7 @@ export function TableCell<T extends RowData>({
       onDoubleClick={column.editable ? onStartEdit : undefined}
       title={getDisplayText()}
     >
-      <div className="truncate w-full">
+      <div className="truncate w-full min-w-0">
         {renderValue()}
       </div>
     </div>
