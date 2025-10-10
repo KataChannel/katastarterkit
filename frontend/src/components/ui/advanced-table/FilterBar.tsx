@@ -102,12 +102,12 @@ export function FilterBar<T>({
           value={filter.value}
           onValueChange={(value) => updateFilter(index, { value })}
         >
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-full sm:w-32 text-xs sm:text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {column.filterOptions.map(option => (
-              <SelectItem key={option} value={option}>
+              <SelectItem key={option} value={option} className="text-xs sm:text-sm">
                 {option}
               </SelectItem>
             ))}
@@ -122,24 +122,24 @@ export function FilterBar<T>({
           value={String(filter.value)}
           onValueChange={(value) => updateFilter(index, { value: value === 'true' })}
         >
-          <SelectTrigger className="w-24">
+          <SelectTrigger className="w-full sm:w-24 text-xs sm:text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="true">True</SelectItem>
-            <SelectItem value="false">False</SelectItem>
+            <SelectItem value="true" className="text-xs sm:text-sm">True</SelectItem>
+            <SelectItem value="false" className="text-xs sm:text-sm">False</SelectItem>
           </SelectContent>
         </Select>
       );
     }
 
     return (
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Input
           type={type === 'number' ? 'number' : type === 'date' ? 'date' : 'text'}
           value={filter.value || ''}
           onChange={(e) => updateFilter(index, { value: e.target.value })}
-          className="w-32"
+          className="w-full sm:w-32 text-xs sm:text-sm"
           placeholder="Value"
         />
         {filter.operator === 'between' && (
@@ -147,7 +147,7 @@ export function FilterBar<T>({
             type={type === 'number' ? 'number' : type === 'date' ? 'date' : 'text'}
             value={filter.value2 || ''}
             onChange={(e) => updateFilter(index, { value2: e.target.value })}
-            className="w-32"
+            className="w-full sm:w-32 text-xs sm:text-sm"
             placeholder="To"
           />
         )}
@@ -156,38 +156,38 @@ export function FilterBar<T>({
   };
 
   return (
-    <div className="space-y-4 p-4 border-b bg-gray-50">
-      {/* Global Search */}
-      <div className="flex items-center gap-4">
+    <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border-b bg-gray-50">
+      {/* Global Search - Responsive */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
         <Input
           placeholder="Global search..."
           value={globalSearch}
           onChange={(e) => onGlobalSearchChange(e.target.value)}
-          className="max-w-md"
+          className="flex-1 sm:max-w-md text-sm"
         />
         
         <Popover open={isAddingFilter} onOpenChange={setIsAddingFilter}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
+              <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Add Filter
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-96">
-            <div className="space-y-4">
-              <h4 className="font-medium">Add Filter</h4>
+          <PopoverContent className="w-[95vw] sm:w-96 max-w-md">
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="font-medium text-sm sm:text-base">Add Filter</h4>
               
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <Select
                   value={newFilter.field}
                   onValueChange={(value) => setNewFilter({ ...newFilter, field: value, operator: undefined, value: undefined })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="text-xs sm:text-sm">
                     <SelectValue placeholder="Column" />
                   </SelectTrigger>
                   <SelectContent>
                     {filterableColumns.map(col => (
-                      <SelectItem key={String(col.field)} value={String(col.field)}>
+                      <SelectItem key={String(col.field)} value={String(col.field)} className="text-xs sm:text-sm">
                         {col.headerName}
                       </SelectItem>
                     ))}
@@ -199,12 +199,12 @@ export function FilterBar<T>({
                     value={newFilter.operator}
                     onValueChange={(value) => setNewFilter({ ...newFilter, operator: value as any, value: undefined })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-xs sm:text-sm">
                       <SelectValue placeholder="Operator" />
                     </SelectTrigger>
                     <SelectContent>
                       {getOperators(getColumnType(newFilter.field)).map(op => (
-                        <SelectItem key={op.value} value={op.value}>
+                        <SelectItem key={op.value} value={op.value} className="text-xs sm:text-sm">
                           {op.label}
                         </SelectItem>
                       ))}
@@ -219,11 +219,12 @@ export function FilterBar<T>({
                 </div>
               )}
 
-              <div className="flex justify-end gap-2">
+              <div className="flex flex-col sm:flex-row justify-end gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setIsAddingFilter(false)}
+                  className="w-full sm:w-auto text-xs sm:text-sm"
                 >
                   Cancel
                 </Button>
@@ -231,6 +232,7 @@ export function FilterBar<T>({
                   size="sm"
                   onClick={addFilter}
                   disabled={!newFilter.field || !newFilter.operator || newFilter.value === undefined}
+                  className="w-full sm:w-auto text-xs sm:text-sm"
                 >
                   Add
                 </Button>
@@ -240,28 +242,28 @@ export function FilterBar<T>({
         </Popover>
       </div>
 
-      {/* Active Filters */}
+      {/* Active Filters - Responsive */}
       {filters.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          <span className="text-sm text-gray-600 flex items-center">
-            <Filter className="w-4 h-4 mr-1" />
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center">
+          <span className="text-xs sm:text-sm text-gray-600 flex items-center flex-shrink-0">
+            <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
             Filters:
           </span>
           {filters.map((filter, index) => {
             const column = columns.find(col => col.field === filter.field);
             return (
-              <Badge key={index} variant="secondary" className="flex items-center gap-1">
+              <Badge key={index} variant="secondary" className="flex items-center gap-1 text-[10px] sm:text-xs">
                 <span className="font-medium">{column?.headerName}</span>
-                <span className="text-xs opacity-75">
+                <span className="opacity-75 hidden sm:inline">
                   {OPERATORS[getColumnType(filter.field)]?.find(op => op.value === filter.operator)?.label}
                 </span>
-                <span>{String(filter.value)}</span>
-                {filter.value2 && <span>- {String(filter.value2)}</span>}
+                <span className="truncate max-w-[80px] sm:max-w-none">{String(filter.value)}</span>
+                {filter.value2 && <span className="hidden sm:inline">- {String(filter.value2)}</span>}
                 <button
                   onClick={() => removeFilter(index)}
                   className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 </button>
               </Badge>
             );
@@ -271,7 +273,7 @@ export function FilterBar<T>({
               variant="ghost"
               size="sm"
               onClick={() => onFiltersChange([])}
-              className="h-6 px-2 text-xs"
+              className="h-5 sm:h-6 px-1.5 sm:px-2 text-[10px] sm:text-xs"
             >
               Clear All
             </Button>

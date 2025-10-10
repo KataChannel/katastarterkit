@@ -211,17 +211,19 @@ export function AdvancedTable<T extends RowData>({
       
       return (
         <div key={String(column.field)} className="flex flex-col">
-          <ColumnHeader
-            column={column}
-            sortDirection={sortConfig?.direction}
-            sortPriority={sortConfig?.priority}
-            onSort={(direction) => handleSort(column.field, direction)}
-            onPin={(position) => handleColumnPin(column.field, position)}
-            onHide={() => handleColumnHide(column.field)}
-            onAutoSize={() => handleAutoSizeColumn(column.field)}
-            onResize={(newWidth) => handleColumnResize(column.field, newWidth)}
-            width={width}
-          />
+          <div style={{ height: headerHeight }}>
+            <ColumnHeader
+              column={column}
+              sortDirection={sortConfig?.direction}
+              sortPriority={sortConfig?.priority}
+              onSort={(direction) => handleSort(column.field, direction)}
+              onPin={(position) => handleColumnPin(column.field, position)}
+              onHide={() => handleColumnHide(column.field)}
+              onAutoSize={() => handleAutoSizeColumn(column.field)}
+              onResize={(newWidth) => handleColumnResize(column.field, newWidth)}
+              width={width}
+            />
+          </div>
           
           {processedData.map((row, rowIndex) => {
             const value = column.valueGetter ? column.valueGetter(row) : row[column.field];
@@ -229,18 +231,19 @@ export function AdvancedTable<T extends RowData>({
             const isSelected = selectedRows.has(row.id);
             
             return (
-              <TableCell
-                key={`${row.id}-${String(column.field)}`}
-                column={column}
-                data={row}
-                value={value}
-                rowIndex={rowIndex}
-                isEditing={isEditing}
-                isSelected={isSelected}
-                onStartEdit={() => setEditingCell({ rowId: row.id, field: column.field })}
-                onSave={(newValue) => handleCellEdit(row.id, column.field, newValue)}
-                onCancel={() => setEditingCell(null)}
-              />
+              <div key={`${row.id}-${String(column.field)}`} style={{ height: rowHeight }}>
+                <TableCell
+                  column={column}
+                  data={row}
+                  value={value}
+                  rowIndex={rowIndex}
+                  isEditing={isEditing}
+                  isSelected={isSelected}
+                  onStartEdit={() => setEditingCell({ rowId: row.id, field: column.field })}
+                  onSave={(newValue) => handleCellEdit(row.id, column.field, newValue)}
+                  onCancel={() => setEditingCell(null)}
+                />
+              </div>
             );
           })}
         </div>
@@ -258,13 +261,13 @@ export function AdvancedTable<T extends RowData>({
 
   return (
     <div className={cn('border rounded-lg overflow-hidden bg-white', className)}>
-      {/* Toolbar */}
+      {/* Toolbar - Responsive */}
       {showToolbar && (
-        <div className="flex items-center justify-between p-4 border-b bg-gray-50">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-4 border-b bg-gray-50">
+          <div className="flex items-center gap-2 flex-wrap">
             {enableRowSelection && selectedRows.size > 0 && (
               <>
-                <Badge variant="secondary">
+                <Badge variant="secondary" className="text-xs sm:text-sm">
                   {selectedRows.size} selected
                 </Badge>
                 {enableRowDeletion && (
@@ -272,36 +275,41 @@ export function AdvancedTable<T extends RowData>({
                     variant="destructive"
                     size="sm"
                     onClick={() => setShowDeleteDialog(true)}
+                    className="text-xs sm:text-sm"
                   >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    Delete
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                    <span className="hidden sm:inline">Delete</span>
+                    <span className="sm:hidden">Del</span>
                   </Button>
                 )}
               </>
             )}
             {onRowCreate && (
-              <Button size="sm" onClick={() => onRowCreate({} as Partial<T>)}>
-                <Plus className="w-4 h-4 mr-1" />
-                Add Row
+              <Button size="sm" onClick={() => onRowCreate({} as Partial<T>)} className="text-xs sm:text-sm">
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <span className="hidden sm:inline">Add Row</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             )}
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="w-4 h-4 mr-1" />
-              Export
+          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={handleExport} className="text-xs sm:text-sm flex-1 sm:flex-none">
+              <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              <span className="hidden sm:inline">Export</span>
+              <span className="sm:hidden">CSV</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={handleAutoSizeAllColumns}>
-              <Maximize2 className="w-4 h-4 mr-1" />
+            <Button variant="outline" size="sm" onClick={handleAutoSizeAllColumns} className="text-xs sm:text-sm hidden md:flex">
+              <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               Auto Size All
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowColumnSettings(true)}
+              className="text-xs sm:text-sm flex-1 sm:flex-none"
             >
-              <Settings className="w-4 h-4 mr-1" />
+              <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               Columns
             </Button>
           </div>
@@ -322,12 +330,12 @@ export function AdvancedTable<T extends RowData>({
         />
       )}
 
-      {/* Table */}
+      {/* Table - Responsive with horizontal scroll */}
       <div 
-        className="overflow-auto"
+        className="overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
         style={{ height: height - (showToolbar ? 60 : 0) - (enableFiltering ? 80 : 0) }}
       >
-        <div className="flex">
+        <div className="flex min-w-full">{/* Ensure min-width for mobile scroll */}
           {/* Selection Column */}
           {enableRowSelection && (
             <div className="flex flex-col flex-shrink-0">
@@ -395,16 +403,45 @@ export function AdvancedTable<T extends RowData>({
         </DialogContent>
       </Dialog>
 
-      {/* Column Settings Dialog */}
+      {/* Column Settings Dialog - Responsive */}
       <Dialog open={showColumnSettings} onOpenChange={setShowColumnSettings}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md w-[95vw] sm:w-full max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>Column Settings</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">Column Settings</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2 max-h-96 overflow-auto">
+          
+          {/* Select All / Deselect All - Responsive */}
+          <div className="flex items-center gap-2 pb-2 border-b flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setColumns(prev => prev.map(col => ({ ...col, hide: false })));
+              }}
+              className="text-xs sm:text-sm flex-1 sm:flex-none"
+            >
+              <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              <span className="hidden sm:inline">Show All</span>
+              <span className="sm:hidden">All</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setColumns(prev => prev.map(col => ({ ...col, hide: true })));
+              }}
+              className="text-xs sm:text-sm flex-1 sm:flex-none"
+            >
+              <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              <span className="hidden sm:inline">Hide All</span>
+              <span className="sm:hidden">None</span>
+            </Button>
+          </div>
+          
+          <div className="space-y-2 overflow-auto flex-1 pr-2">
             {columns.map(column => (
-              <div key={String(column.field)} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div key={String(column.field)} className="flex items-center justify-between py-1">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <Checkbox
                     checked={!column.hide}
                     onCheckedChange={(checked) => {
@@ -413,27 +450,28 @@ export function AdvancedTable<T extends RowData>({
                       ));
                     }}
                   />
-                  <span className="text-sm">{column.headerName}</span>
+                  <span className="text-xs sm:text-sm truncate">{column.headerName}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  {column.pinned === 'left' && <Badge variant="outline" className="text-xs">Left</Badge>}
-                  {column.pinned === 'right' && <Badge variant="outline" className="text-xs">Right</Badge>}
+                <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                  {column.pinned === 'left' && <Badge variant="outline" className="text-[10px] sm:text-xs">Left</Badge>}
+                  {column.pinned === 'right' && <Badge variant="outline" className="text-[10px] sm:text-xs">Right</Badge>}
                 </div>
               </div>
             ))}
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-shrink-0 flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={() => {
                 setColumns(initialColumns);
                 setShowColumnSettings(false);
               }}
+              className="w-full sm:w-auto text-xs sm:text-sm"
             >
-              <RotateCcw className="w-4 h-4 mr-1" />
+              <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
               Reset
             </Button>
-            <Button onClick={() => setShowColumnSettings(false)}>
+            <Button onClick={() => setShowColumnSettings(false)} className="w-full sm:w-auto text-xs sm:text-sm">
               Done
             </Button>
           </DialogFooter>

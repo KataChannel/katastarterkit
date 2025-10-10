@@ -228,16 +228,16 @@ export function TableCell<T extends RowData>({
   if (isEditing) {
     return (
       <div className={cn(
-        'px-3 py-2 border-r border-gray-200 bg-white relative',
+        'h-full px-3 py-2 border-r border-gray-200 bg-white relative flex items-center',
         isSelected && 'bg-blue-50',
         cellClass,
         className
       )}>
-        <div className="flex items-center gap-1">
-          <div className="flex-1">
+        <div className="flex items-center gap-1 w-full">
+          <div className="flex-1 min-w-0">
             {renderEditor()}
           </div>
-          <div className="flex gap-1 ml-2">
+          <div className="flex gap-1 ml-2 flex-shrink-0">
             <Button
               size="sm"
               variant="ghost"
@@ -268,7 +268,7 @@ export function TableCell<T extends RowData>({
   return (
     <div
       className={cn(
-        'px-3 py-2 border-r border-gray-200 bg-white cursor-default',
+        'h-full px-3 py-2 border-r border-gray-200 bg-white cursor-default flex items-center',
         column.editable && 'hover:bg-gray-50 cursor-pointer',
         isSelected && 'bg-blue-50',
         cellClass,
@@ -277,7 +277,9 @@ export function TableCell<T extends RowData>({
       onClick={column.editable ? onStartEdit : undefined}
       onDoubleClick={column.editable ? onStartEdit : undefined}
     >
-      {renderValue()}
+      <div className="truncate w-full">
+        {renderValue()}
+      </div>
     </div>
   );
 }
