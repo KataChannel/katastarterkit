@@ -5,14 +5,16 @@ import InvoiceTableAdvanced from '@/components/InvoiceTableAdvanced';
 import InvoiceDetailModal from '@/components/InvoiceDetailModal';
 import ConfigModal from '@/components/ConfigModal';
 import SyncProgressDisplay, { SyncProgress } from '@/components/SyncProgressDisplay';
+import { ExcelPreviewDialog } from '@/components/ExcelPreviewDialog';
 import InvoiceApiService from '@/services/invoiceApi';
 import ConfigService from '@/services/configService';
 import DateService from '@/services/dateService';
 import { useInvoiceDatabase } from '@/services/invoiceDatabaseServiceNew';
 import { InvoiceData, AdvancedFilter, InvoiceApiResponse, InvoiceType } from '@/types/invoice';
-import { Search, RefreshCw, FileSpreadsheet, Settings, Calendar, Filter, ChevronDown } from 'lucide-react';
+import { Search, RefreshCw, FileSpreadsheet, Settings, Calendar, Filter, ChevronDown, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import BackendExcelExportService from '@/services/backendExcelExport';
+import FrontendExcelExportService, { InvoiceExportData } from '@/services/frontendExcelExport';
 
 const ListHoaDonPage = () => {
   const [invoices, setInvoices] = useState<InvoiceData[]>([]);
@@ -31,6 +33,9 @@ const ListHoaDonPage = () => {
   // Configuration state
   const [config, setConfig] = useState(ConfigService.getConfig());
   const [showConfigModal, setShowConfigModal] = useState(false);
+  
+  // Excel Preview state
+  const [showExcelPreview, setShowExcelPreview] = useState(false);
   
   // Database integration
   const { syncData, searchInvoices: searchDatabaseInvoices, isLoading: dbLoading } = useInvoiceDatabase();
@@ -411,7 +416,46 @@ const ListHoaDonPage = () => {
     }
   };
 
-  // Initial load
+  // Frontend Excel Export with Preview
+  const handleFrontendExportExcel = () => {
+    try {
+      if (invoices.length === 0) {
+        toast.error('Không có dữ liệu để xuất');
+        return;
+      }
+
+      // Convert InvoiceData to InvoiceExportData
+      const exportData: InvoiceExportData[] = invoices.map(inv => ({
+        nbmst: inv.nbmst || inv.msttcgp,
+        khmshdon: inv.khmshdon,
+        khhdon: inv.khmshdon, // Using same as khmshdon for now
+        shdon: inv.shdon,
+        cqt: '', // Not in InvoiceData
+        nbdchi: inv.dchi || inv.dctcgp,
+        nbten: inv.nten || inv.tentcgp,
+        nmdchi: inv.dcxmua,
+        nmmst: inv.msttmua,
+        nmten: inv.tenxmua,
+        nmtnmua: inv.tenxmua,
+        tgtcthue: inv.tgtcthue,
+        tgtthue: inv.tgtthue,
+        tgtttbso: inv.tgtttbso,
+        tgtttbchu: inv.tgtttchu,
+        thlap: inv.tdlap,
+        ttcktmai: '', // Not in InvoiceData
+        tthai: inv.tghdon || '',
+        tttbao: '', // Not in InvoiceData
+        ttxly: '', // Not in InvoiceData
+      }));
+
+      console.log('📊 Opening preview for', exportData.length, 'invoices');
+      setShowExcelPreview(true);
+      
+    } catch (error) {
+      console.error('❌ Error preparing export:', error);
+      toast.error('Lỗi khi chuẩn bị xuất Excel');
+    }
+  };  // Initial load
   useEffect(() => {
     fetchInvoices();
   }, []);
@@ -585,12 +629,23 @@ const ListHoaDonPage = () => {
                 onClick={handleExportExcel}
                 disabled={!filter.fromDate || !filter.toDate}
                 className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-                title={`Xuất Excel từ ${filter.fromDate} đến ${filter.toDate}`}
+                title={`Xuất Excel từ server: ${filter.fromDate} đến ${filter.toDate}`}
               >
                 <FileSpreadsheet className="w-4 h-4 mr-2" />
-                Xuất Excel
+                Xuất từ Server
+              </button>
+
+              <button
+                type="button"
+                onClick={handleFrontendExportExcel}
+                disabled={invoices.length === 0}
+                className="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                title={`Xuất Excel với xem trước (${invoices.length} hóa đơn)`}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Xuất với Xem trước
                 <span className="ml-1 text-xs opacity-75">
-                  ({filter.fromDate} - {filter.toDate})
+                  ({invoices.length})
                 </span>
               </button>
             </div>
@@ -648,6 +703,36 @@ const ListHoaDonPage = () => {
           isOpen={showConfigModal}
           onClose={() => setShowConfigModal(false)}
           onConfigChanged={handleConfigChanged}
+        />
+
+        {/* Excel Preview Dialog */}
+        <ExcelPreviewDialog
+          open={showExcelPreview}
+          onOpenChange={setShowExcelPreview}
+          invoices={invoices.map(inv => ({
+            nbmst: inv.nbmst || inv.msttcgp,
+            khmshdon: inv.khmshdon,
+            khhdon: inv.khmshdon,
+            shdon: inv.shdon,
+            cqt: '',
+            nbdchi: inv.dchi || inv.dctcgp,
+            nbten: inv.nten || inv.tentcgp,
+            nmdchi: inv.dcxmua,
+            nmmst: inv.msttmua,
+            nmten: inv.tenxmua,
+            nmtnmua: inv.tenxmua,
+            tgtcthue: inv.tgtcthue,
+            tgtthue: inv.tgtthue,
+            tgtttbso: inv.tgtttbso,
+            tgtttbchu: inv.tgtttchu,
+            thlap: inv.tdlap,
+            ttcktmai: '',
+            tthai: inv.tghdon || '',
+            tttbao: '',
+            ttxly: '',
+          }))}
+          fromDate={filter.fromDate}
+          toDate={filter.toDate}
         />
       </div>
     </div>
