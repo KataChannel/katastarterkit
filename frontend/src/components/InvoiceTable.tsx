@@ -22,6 +22,7 @@ interface InvoiceTableProps {
   filter?: AdvancedFilter;
   onFilterChange?: (filter: AdvancedFilter) => void;
   showAdvancedFilter?: boolean;
+  onRowClick?: (invoice: InvoiceData) => void;
 }
 
 const InvoiceTable: React.FC<InvoiceTableProps> = ({
@@ -35,7 +36,8 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
   onPageSizeChange,
   filter,
   onFilterChange,
-  showAdvancedFilter = false
+  showAdvancedFilter = false,
+  onRowClick
 }) => {
   const [localFilter, setLocalFilter] = useState<AdvancedFilter>(filter || {} as AdvancedFilter);
   const [showFilter, setShowFilter] = useState(showAdvancedFilter);
@@ -276,43 +278,62 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
         <thead className="bg-gray-50">
           <tr>
             <th
-              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-              onClick={() => handleSort('shdon')}
+              className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={() => handleSort('nbmst')}
             >
               <div className="flex items-center space-x-1">
-                <span>Số hóa đơn</span>
-                <span className="text-gray-400">{getSortIcon('shdon')}</span>
+                <span>MST Người bán</span>
+                <span className="text-gray-400">{getSortIcon('nbmst')}</span>
               </div>
             </th>
             <th
-              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSort('khmshdon')}
             >
               <div className="flex items-center space-x-1">
-                <span>Ký hiệu</span>
+                <span>Ký hiệu mẫu</span>
                 <span className="text-gray-400">{getSortIcon('khmshdon')}</span>
               </div>
             </th>
             <th
-              className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
-              onClick={() => handleSort('tdlap')}
+              className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              <div className="flex items-center space-x-1">
-                <span>Ngày lập</span>
-                <span className="text-gray-400">{getSortIcon('tdlap')}</span>
-              </div>
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Thời điểm lập
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Người bán
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Người mua
+              Ký hiệu HĐ
             </th>
             <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={() => handleSort('shdon')}
+            >
+              <div className="flex items-center space-x-1">
+                <span>Số HĐ</span>
+                <span className="text-gray-400">{getSortIcon('shdon')}</span>
+              </div>
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              CQT
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Địa chỉ NB
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Tên NB
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Địa chỉ NM
+            </th>
+            <th
+              className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              MST NM
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Tên NM
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Tên NM mua
+            </th>
+            <th
+              className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSort('tgtcthue')}
             >
               <div className="flex items-center justify-end space-x-1">
@@ -321,7 +342,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
               </div>
             </th>
             <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSort('tgtthue')}
             >
               <div className="flex items-center justify-end space-x-1">
@@ -330,16 +351,31 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
               </div>
             </th>
             <th
-              className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+              className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSort('tgtttbso')}
             >
               <div className="flex items-center justify-end space-x-1">
-                <span>Tổng thanh toán</span>
+                <span>Tổng TT (số)</span>
                 <span className="text-gray-400">{getSortIcon('tgtttbso')}</span>
               </div>
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Tổng TT (chữ)
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Thời điểm lập
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              CKTM
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Trạng thái
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              TT Báo
+            </th>
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              TT Xử lý
             </th>
           </tr>
         </thead>
@@ -347,63 +383,90 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
           {invoices.map((invoice, index) => (
             <tr 
               key={invoice.id || `${invoice.shdon}-${invoice.khmshdon}-${index}`}
-              className="hover:bg-gray-50 transition-colors"
+              className="hover:bg-gray-50 transition-colors cursor-pointer"
+              onClick={() => onRowClick?.(invoice)}
             >
-              <td className="px-4 py-4 text-sm font-medium text-gray-900">
+              <td className="px-3 py-3 text-sm text-gray-600">
+                {(invoice as any).nbmst || 'N/A'}
+              </td>
+              <td className="px-3 py-3 text-sm text-gray-600">
+                {invoice.khmshdon || 'N/A'}
+              </td>
+              <td className="px-3 py-3 text-sm text-gray-600">
+                {(invoice as any).khhdon || 'N/A'}
+              </td>
+              <td className="px-3 py-3 text-sm font-medium text-gray-900">
                 {invoice.shdon}
               </td>
-              <td className="px-4 py-4 text-sm text-gray-600">
-                {invoice.khmshdon}
+              <td className="px-3 py-3 text-sm text-gray-600">
+                {(invoice as any).cqt || 'N/A'}
               </td>
-              <td className="px-4 py-4 text-sm text-gray-600">
-                {formatDate(invoice.tdlap)}
-              </td>
-              <td className="px-4 py-4 text-sm text-gray-600">
-                {(invoice as any).thlap || 'N/A'}
-              </td>
-              <td className="px-4 py-4 text-sm">
-                <div>
-                  <div className="font-medium text-gray-900 truncate max-w-[200px]" title={invoice.tentcgp}>
-                    {invoice.tentcgp}
-                  </div>
-                  <div className="text-gray-500 text-xs">
-                    MST: {invoice.msttcgp}
-                  </div>
+              <td className="px-3 py-3 text-sm text-gray-600">
+                <div className="truncate max-w-[150px]" title={(invoice as any).nbdchi}>
+                  {(invoice as any).nbdchi || 'N/A'}
                 </div>
               </td>
-              <td className="px-4 py-4 text-sm">
-                <div>
-                  <div className="font-medium text-gray-900 truncate max-w-[200px]" title={invoice.tenxmua || 'N/A'}>
-                    {invoice.tenxmua || 'N/A'}
-                  </div>
-                  {invoice.msttmua && (
-                    <div className="text-gray-500 text-xs">
-                      MST: {invoice.msttmua}
-                    </div>
-                  )}
+              <td className="px-3 py-3 text-sm text-gray-600">
+                <div className="truncate max-w-[150px]" title={(invoice as any).nbten}>
+                  {(invoice as any).nbten || 'N/A'}
                 </div>
               </td>
-              <td className="px-4 py-4 text-sm text-right text-gray-900 font-medium">
+              <td className="px-3 py-3 text-sm text-gray-600">
+                <div className="truncate max-w-[150px]" title={(invoice as any).nmdchi}>
+                  {(invoice as any).nmdchi || 'N/A'}
+                </div>
+              </td>
+              <td className="px-3 py-3 text-sm text-gray-600">
+                {(invoice as any).nmmst || 'N/A'}
+              </td>
+              <td className="px-3 py-3 text-sm text-gray-600">
+                <div className="truncate max-w-[150px]" title={(invoice as any).nmten}>
+                  {(invoice as any).nmten || 'N/A'}
+                </div>
+              </td>
+              <td className="px-3 py-3 text-sm text-gray-600">
+                <div className="truncate max-w-[150px]" title={(invoice as any).nmtnmua}>
+                  {(invoice as any).nmtnmua || 'N/A'}
+                </div>
+              </td>
+              <td className="px-3 py-3 text-sm text-right text-gray-900 font-medium">
                 {formatCurrency(invoice.tgtcthue)}
               </td>
-              <td className="px-4 py-4 text-sm text-right text-gray-900 font-medium">
+              <td className="px-3 py-3 text-sm text-right text-gray-900 font-medium">
                 {formatCurrency(invoice.tgtthue)}
               </td>
-              <td className="px-4 py-4 text-sm text-right text-gray-900 font-bold">
+              <td className="px-3 py-3 text-sm text-right text-gray-900 font-bold">
                 {formatCurrency(invoice.tgtttbso)}
               </td>
-              <td className="px-4 py-4 text-sm">
+              <td className="px-3 py-3 text-sm text-gray-600">
+                <div className="truncate max-w-[150px]" title={(invoice as any).tgtttbchu}>
+                  {(invoice as any).tgtttbchu || 'N/A'}
+                </div>
+              </td>
+              <td className="px-3 py-3 text-sm text-gray-600">
+                {(invoice as any).thlap || 'N/A'}
+              </td>
+              <td className="px-3 py-3 text-sm text-gray-600">
+                {(invoice as any).ttcktmai || 'N/A'}
+              </td>
+              <td className="px-3 py-3 text-sm">
                 <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                  invoice.tghdon === 'active' || !invoice.tghdon
+                  (invoice as any).tthai === '1' || (invoice as any).tthai === 'active'
                     ? 'bg-green-100 text-green-800' 
-                    : invoice.tghdon === 'cancelled'
+                    : (invoice as any).tthai === '0' || (invoice as any).tthai === 'cancelled'
                     ? 'bg-red-100 text-red-800'
                     : 'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {invoice.tghdon === 'active' || !invoice.tghdon ? 'Hợp lệ' : 
-                   invoice.tghdon === 'cancelled' ? 'Đã hủy' : 
-                   invoice.tghdon || 'Không xác định'}
+                  {(invoice as any).tthai === '1' || (invoice as any).tthai === 'active' ? 'Hợp lệ' : 
+                   (invoice as any).tthai === '0' || (invoice as any).tthai === 'cancelled' ? 'Đã hủy' : 
+                   (invoice as any).tthai || 'N/A'}
                 </span>
+              </td>
+              <td className="px-3 py-3 text-sm text-gray-600">
+                {(invoice as any).tttbao || 'N/A'}
+              </td>
+              <td className="px-3 py-3 text-sm text-gray-600">
+                {(invoice as any).ttxly || 'N/A'}
               </td>
             </tr>
           ))}

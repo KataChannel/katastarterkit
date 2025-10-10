@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import InvoiceTable from '@/components/InvoiceTable';
+import InvoiceTableAdvanced from '@/components/InvoiceTableAdvanced';
+import InvoiceDetailModal from '@/components/InvoiceDetailModal';
 import ConfigModal from '@/components/ConfigModal';
 import SyncProgressDisplay, { SyncProgress } from '@/components/SyncProgressDisplay';
 import InvoiceApiService from '@/services/invoiceApi';
@@ -18,6 +19,8 @@ const ListHoaDonPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [pagination, setPagination] = useState({
     page: 0,
     size: 50,
@@ -413,6 +416,12 @@ const ListHoaDonPage = () => {
     fetchInvoices();
   }, []);
 
+  // Handle invoice selection to show detail
+  const handleInvoiceSelect = (invoice: InvoiceData) => {
+    setSelectedInvoice(invoice);
+    setShowDetailModal(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -616,19 +625,22 @@ const ListHoaDonPage = () => {
           </div>
         )}
 
-        {/* Enhanced Invoice Table */}
-        <InvoiceTable
+        {/* Enhanced Invoice Table with Advanced Table */}
+        <InvoiceTableAdvanced
           invoices={invoices}
           loading={loading}
-          onSort={handleSort}
-          sortField={sortField}
-          sortDirection={sortDirection}
-          pagination={pagination}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-          filter={filter}
-          onFilterChange={handleFilterChange}
-          showAdvancedFilter={true}
+          onRowClick={handleInvoiceSelect}
+          height={700}
+        />
+
+        {/* Invoice Detail Modal */}
+        <InvoiceDetailModal
+          invoice={selectedInvoice}
+          isOpen={showDetailModal}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedInvoice(null);
+          }}
         />
 
         {/* Configuration Modal */}
