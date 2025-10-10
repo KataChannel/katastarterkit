@@ -118,7 +118,56 @@ export function TableCell<T extends RowData>({
       case 'number':
         return typeof val === 'number' ? val.toLocaleString() : val;
       default:
+        // Return string for display with title attribute
         return String(val);
+    }
+  };
+
+  // Get display text for title attribute
+  const getDisplayText = (): string => {
+    if (value === null || value === undefined) {
+      return '';
+    }
+
+    if (column.valueGetter) {
+      const displayValue = column.valueGetter(data);
+      if (displayValue === null || displayValue === undefined) return '';
+      
+      switch (column.type) {
+        case 'boolean':
+          return Boolean(displayValue) ? 'True' : 'False';
+        case 'date':
+          if (displayValue instanceof Date) {
+            return displayValue.toLocaleDateString();
+          }
+          if (typeof displayValue === 'string') {
+            const date = new Date(displayValue);
+            return isNaN(date.getTime()) ? displayValue : date.toLocaleDateString();
+          }
+          return String(displayValue);
+        case 'number':
+          return typeof displayValue === 'number' ? displayValue.toLocaleString() : String(displayValue);
+        default:
+          return String(displayValue);
+      }
+    }
+
+    switch (column.type) {
+      case 'boolean':
+        return Boolean(value) ? 'True' : 'False';
+      case 'date':
+        if (value instanceof Date) {
+          return value.toLocaleDateString();
+        }
+        if (typeof value === 'string') {
+          const date = new Date(value);
+          return isNaN(date.getTime()) ? value : date.toLocaleDateString();
+        }
+        return String(value);
+      case 'number':
+        return typeof value === 'number' ? value.toLocaleString() : String(value);
+      default:
+        return String(value);
     }
   };
 
@@ -276,6 +325,7 @@ export function TableCell<T extends RowData>({
       )}
       onClick={column.editable ? onStartEdit : undefined}
       onDoubleClick={column.editable ? onStartEdit : undefined}
+      title={getDisplayText()}
     >
       <div className="truncate w-full">
         {renderValue()}

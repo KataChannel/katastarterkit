@@ -62,6 +62,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       width: 130,
       sortable: true,
       filterable: true,
+      resizable: true,
       pinned: 'left',
       cellRenderer: ({ data }) => (data as any).nbmst || 'N/A'
     },
@@ -71,6 +72,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       width: 120,
       sortable: true,
       filterable: true,
+      resizable: true,
       pinned: 'left',
       cellRenderer: ({ data }) => data.khmshdon || 'N/A'
     },
@@ -79,6 +81,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       headerName: 'Ký hiệu HĐ',
       width: 120,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => (data as any).khhdon || 'N/A'
     },
     {
@@ -87,6 +90,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       width: 100,
       sortable: true,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => data.shdon || 'N/A',
       cellClass: 'font-medium'
     },
@@ -95,6 +99,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       headerName: 'CQT',
       width: 80,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => (data as any).cqt || 'N/A'
     },
     {
@@ -102,6 +107,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       headerName: 'Địa chỉ NB',
       width: 200,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => {
         const value = (data as any).nbdchi || 'N/A';
         return (
@@ -116,6 +122,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       headerName: 'Tên NB',
       width: 200,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => {
         const value = (data as any).nbten || 'N/A';
         return (
@@ -130,6 +137,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       headerName: 'Địa chỉ NM',
       width: 200,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => {
         const value = (data as any).nmdchi || 'N/A';
         return (
@@ -144,6 +152,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       headerName: 'MST NM',
       width: 130,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => (data as any).nmmst || 'N/A'
     },
     {
@@ -151,6 +160,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       headerName: 'Tên NM',
       width: 200,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => {
         const value = (data as any).nmten || 'N/A';
         return (
@@ -165,6 +175,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       headerName: 'Tên NM mua',
       width: 200,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => {
         const value = (data as any).nmtnmua || 'N/A';
         return (
@@ -181,6 +192,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       type: 'number',
       sortable: true,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => (
         <div className="text-right font-medium">
           {formatCurrency(data.tgtcthue)}
@@ -194,6 +206,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       type: 'number',
       sortable: true,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => (
         <div className="text-right font-medium">
           {formatCurrency(data.tgtthue)}
@@ -207,6 +220,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       type: 'number',
       sortable: true,
       filterable: true,
+      resizable: true,
       pinned: 'right',
       cellRenderer: ({ data }) => (
         <div className="text-right font-bold text-blue-600">
@@ -218,6 +232,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       field: 'tgtttbchu' as keyof InvoiceRowData,
       headerName: 'Tổng TT (chữ)',
       width: 200,
+      resizable: true,
       cellRenderer: ({ data }) => {
         const value = (data as any).tgtttbchu || 'N/A';
         return (
@@ -233,12 +248,14 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       width: 150,
       sortable: true,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => (data as any).thlap || 'N/A'
     },
     {
       field: 'ttcktmai' as keyof InvoiceRowData,
       headerName: 'CKTM',
       width: 100,
+      resizable: true,
       cellRenderer: ({ data }) => (data as any).ttcktmai || 'N/A'
     },
     {
@@ -246,6 +263,7 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       headerName: 'Trạng thái',
       width: 120,
       filterable: true,
+      resizable: true,
       cellRenderer: ({ data }) => {
         const status = (data as any).tthai;
         let bgColor = 'bg-yellow-100 text-yellow-800';
@@ -270,12 +288,14 @@ const InvoiceTableAdvanced: React.FC<InvoiceTableAdvancedProps> = ({
       field: 'tttbao' as keyof InvoiceRowData,
       headerName: 'TT Báo',
       width: 100,
+      resizable: true,
       cellRenderer: ({ data }) => (data as any).tttbao || 'N/A'
     },
     {
       field: 'ttxly' as keyof InvoiceRowData,
       headerName: 'TT Xử lý',
       width: 100,
+      resizable: true,
       cellRenderer: ({ data }) => (data as any).ttxly || 'N/A'
     }
   ], []);

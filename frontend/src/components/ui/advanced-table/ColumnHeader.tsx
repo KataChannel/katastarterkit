@@ -112,7 +112,7 @@ export function ColumnHeader<T>({
   return (
     <div
       className={cn(
-        'relative flex items-center h-full px-3 border-r border-gray-200 bg-gray-50 select-none',
+        'group relative flex items-center h-full px-3 border-r border-gray-200 bg-gray-50 select-none',
         column.headerClass,
         column.sortable && 'cursor-pointer hover:bg-gray-100',
         column.pinned === 'left' && 'border-r-2 border-blue-200 bg-blue-50',
@@ -200,10 +200,11 @@ export function ColumnHeader<T>({
         <div
           ref={resizeRef}
           className={cn(
-            'absolute right-0 top-0 w-1 h-full cursor-col-resize hover:bg-blue-400',
+            'absolute right-0 top-0 w-1 h-full cursor-col-resize hover:bg-blue-400 z-10',
             isDragging && 'bg-blue-500'
           )}
           onMouseDown={handleMouseDown}
+          onClick={(e) => e.stopPropagation()}
         />
       )}
     </div>
