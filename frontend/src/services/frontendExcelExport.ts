@@ -2,37 +2,34 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
 export interface InvoiceExportData {
-  // Invoice header fields
-  nbmst?: string;      // MST Người bán
-  khmshdon?: string;   // Ký hiệu mẫu
-  khhdon?: string;     // Ký hiệu HĐ
-  shdon?: string;      // Số HĐ
-  cqt?: string;        // CQT
-  nbdchi?: string;     // Địa chỉ NB
-  nbten?: string;      // Tên NB
-  nmdchi?: string;     // Địa chỉ NM
-  nmmst?: string;      // MST NM
-  nmten?: string;      // Tên NM
-  nmtnmua?: string;    // Tên NM mua
-  tgtcthue?: number;   // Tiền chưa thuế
-  tgtthue?: number;    // Tiền thuế
-  tgtttbso?: number;   // Tổng TT (số)
-  tgtttbchu?: string;  // Tổng TT (chữ)
-  thlap?: string;      // Thời điểm lập
-  ttcktmai?: string;   // CKTM
-  tthai?: string;      // Trạng thái
-  tttbao?: string;     // TT Báo
-  ttxly?: string;      // TT Xử lý
+  // Invoice header fields - matching exact JSON structure from backend
+  nbmst?: string | null;      // MST Người bán
+  khmshdon?: string | null;   // Ký hiệu mẫu
+  khhdon?: string | null;     // Ký hiệu HĐ
+  shdon?: string | null;      // Số HĐ
+  cqt?: string | null;        // CQT
+  tgtcthue?: number | null;   // Tổng tiền chưa thuế (invoice level)
+  tgtthue?: number | null;    // Tổng tiền thuế (invoice level)
+  tgtttbso?: number | null;   // Tổng thanh toán bằng số
+  thlap?: string | null;      // Thời điểm lập (ISO date string)
+  ttcktmai?: string | null;   // Trạng thái chiết khấu thương mại
+  tthai?: string | null;      // Trạng thái hóa đơn
+  tttbao?: string | null;     // Trạng thái thông báo
+  ttxly?: string | null;      // Trạng thái xử lý
   
-  // Detail item fields (when flatmapped)
-  stt?: number;        // STT mặt hàng
-  ten?: string;        // Tên hàng hóa
-  dvtinh?: string;     // Đơn vị tính
-  sluong?: number;     // Số lượng
-  dgia?: number;       // Đơn giá
-  thtien?: number;     // Thành tiền
-  tsuat?: number;      // Thuế suất
-  tthue?: number;      // Tiền thuế
+  // Detail item fields (when flatmapped by invoice details)
+  dgia?: number | null;       // Đơn giá (detail)
+  dvtinh?: string | null;     // Đơn vị tính (detail)
+  ltsuat?: string | null;     // Loại thuế suất (detail)
+  sluong?: number | null;     // Số lượng (detail)
+  ten?: string | null;        // Tên hàng hóa/dịch vụ (detail)
+  thtcthue?: number | null;   // Thành tiền trước thuế (detail)
+  thtien?: number | null;     // Thành tiền (detail)
+  tlckhau?: number | null;    // Tỷ lệ chiết khấu (detail)
+  tsuat?: string | null;      // Thuế suất % (detail)
+  tthue?: number | null;      // Tiền thuế (detail)
+  tgia?: number | null;       // Thành giá sau chiết khấu (detail)
+  // Note: tgtcthue and tgthue at detail level removed to avoid conflict
 }
 
 export interface ExcelPreviewData {
@@ -93,7 +90,7 @@ class FrontendExcelExportService {
   }
 
   /**
-   * Define Excel column headers (flatmap version with details)
+   * Define Excel column headers (matching flatmapped JSON structure)
    */
   private static getHeaders(): string[] {
     return [
@@ -103,35 +100,31 @@ class FrontendExcelExportService {
       'Ký hiệu HĐ',
       'Số HĐ',
       'CQT',
-      'Địa chỉ NB',
-      'Tên NB',
-      'Địa chỉ NM',
-      'MST NM',
-      'Tên NM',
-      'Tên NM mua',
-      'Tiền chưa thuế',
-      'Tiền thuế',
+      'Tổng tiền chưa thuế',
+      'Tổng tiền thuế',
       'Tổng thanh toán',
-      'Tổng TT (chữ)',
       'Thời điểm lập',
-      'CKTM',
+      'TT CKTM',
       'Trạng thái',
       'TT Báo',
       'TT Xử lý',
-      // Detail columns
-      'STT MH',
-      'Tên hàng hóa',
+      // Detail columns (when flatmapped)
+      'Tên hàng hóa/DV',
       'Đơn vị tính',
       'Số lượng',
       'Đơn giá',
+      'Thành tiền trước thuế',
       'Thành tiền',
+      'Tỷ lệ CK (%)',
+      'Loại thuế suất',
       'Thuế suất (%)',
-      'Tiền thuế MH'
+      'Tiền thuế',
+      'Thành giá'
     ];
   }
 
   /**
-   * Convert invoice data to Excel row (with detail fields)
+   * Convert invoice data to Excel row (matching JSON structure)
    */
   private static invoiceToRow(invoice: InvoiceExportData, index: number): any[] {
     return [
@@ -141,30 +134,26 @@ class FrontendExcelExportService {
       invoice.khhdon || '',                                 // Ký hiệu HĐ
       invoice.shdon || '',                                  // Số HĐ
       invoice.cqt || '',                                    // CQT
-      invoice.nbdchi || '',                                 // Địa chỉ NB
-      invoice.nbten || '',                                  // Tên NB
-      invoice.nmdchi || '',                                 // Địa chỉ NM
-      invoice.nmmst || '',                                  // MST NM
-      invoice.nmten || '',                                  // Tên NM
-      invoice.nmtnmua || '',                                // Tên NM mua
-      this.formatCurrency(invoice.tgtcthue),                // Tiền chưa thuế
-      this.formatCurrency(invoice.tgtthue),                 // Tiền thuế
+      this.formatCurrency(invoice.tgtcthue),                // Tổng tiền chưa thuế
+      this.formatCurrency(invoice.tgtthue),                 // Tổng tiền thuế
       this.formatCurrency(invoice.tgtttbso),                // Tổng thanh toán
-      invoice.tgtttbchu || '',                              // Tổng TT (chữ)
       this.formatDate(invoice.thlap),                       // Thời điểm lập
-      invoice.ttcktmai || '',                               // CKTM
+      invoice.ttcktmai || '',                               // TT CKTM
       this.formatStatus(invoice.tthai),                     // Trạng thái
       invoice.tttbao || '',                                 // TT Báo
       invoice.ttxly || '',                                  // TT Xử lý
-      // Detail fields
-      invoice.stt || '',                                    // STT mặt hàng
-      invoice.ten || '',                                    // Tên hàng hóa
+      // Detail fields (flatmapped from invoice.details)
+      invoice.ten || '',                                    // Tên hàng hóa/DV
       invoice.dvtinh || '',                                 // Đơn vị tính
       invoice.sluong || '',                                 // Số lượng
       this.formatCurrency(invoice.dgia),                    // Đơn giá
+      this.formatCurrency(invoice.thtcthue),                // Thành tiền trước thuế
       this.formatCurrency(invoice.thtien),                  // Thành tiền
-      invoice.tsuat || '',                                  // Thuế suất
-      this.formatCurrency(invoice.tthue)                    // Tiền thuế MH
+      invoice.tlckhau || '',                                // Tỷ lệ CK
+      invoice.ltsuat || '',                                 // Loại thuế suất
+      invoice.tsuat || '',                                  // Thuế suất %
+      this.formatCurrency(invoice.tthue),                   // Tiền thuế
+      this.formatCurrency(invoice.tgia)                     // Thành giá
     ];
   }
 
@@ -202,29 +191,34 @@ class FrontendExcelExportService {
     const wsData = [headers, ...rows];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     
-    // Set column widths
+    // Set column widths (matching new header structure)
     const columnWidths = [
       { wch: 5 },   // STT
       { wch: 15 },  // MST Người bán
-      { wch: 15 },  // Ký hiệu mẫu
-      { wch: 15 },  // Ký hiệu HĐ
-      { wch: 12 },  // Số HĐ
+      { wch: 12 },  // Ký hiệu mẫu
+      { wch: 12 },  // Ký hiệu HĐ
+      { wch: 10 },  // Số HĐ
       { wch: 8 },   // CQT
-      { wch: 30 },  // Địa chỉ NB
-      { wch: 25 },  // Tên NB
-      { wch: 30 },  // Địa chỉ NM
-      { wch: 15 },  // MST NM
-      { wch: 25 },  // Tên NM
-      { wch: 25 },  // Tên NM mua
-      { wch: 18 },  // Tiền chưa thuế
-      { wch: 15 },  // Tiền thuế
+      { wch: 18 },  // Tổng tiền chưa thuế
+      { wch: 15 },  // Tổng tiền thuế
       { wch: 18 },  // Tổng thanh toán
-      { wch: 35 },  // Tổng TT (chữ)
       { wch: 18 },  // Thời điểm lập
-      { wch: 10 },  // CKTM
+      { wch: 10 },  // TT CKTM
       { wch: 12 },  // Trạng thái
       { wch: 10 },  // TT Báo
-      { wch: 10 }   // TT Xử lý
+      { wch: 10 },  // TT Xử lý
+      // Detail columns
+      { wch: 30 },  // Tên hàng hóa/DV
+      { wch: 12 },  // Đơn vị tính
+      { wch: 10 },  // Số lượng
+      { wch: 15 },  // Đơn giá
+      { wch: 18 },  // Thành tiền trước thuế
+      { wch: 18 },  // Thành tiền
+      { wch: 10 },  // Tỷ lệ CK
+      { wch: 12 },  // Loại thuế suất
+      { wch: 10 },  // Thuế suất %
+      { wch: 15 },  // Tiền thuế
+      { wch: 18 }   // Thành giá
     ];
     ws['!cols'] = columnWidths;
     

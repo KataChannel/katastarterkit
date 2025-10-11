@@ -36,6 +36,7 @@ const ListHoaDonPage = () => {
   
   // Excel Preview state
   const [showExcelPreview, setShowExcelPreview] = useState(false);
+  const [exportData, setExportData] = useState<InvoiceExportData[]>([]);
   
   // Database integration
   const { syncData, searchInvoices: searchDatabaseInvoices, isLoading: dbLoading } = useInvoiceDatabase();
@@ -474,7 +475,21 @@ const handleFrontendExportExcel = () => {
         return invoice.details.map((detail: any) => {
           const { details, ...invoiceWithoutDetails } = invoice;
           return {
-            ...invoiceWithoutDetails,
+            // Invoice header fields (matching JSON structure)
+            nbmst: invoiceWithoutDetails.nbmst || invoiceWithoutDetails.msttcgp,
+            khmshdon: invoiceWithoutDetails.khmshdon,
+            khhdon: invoiceWithoutDetails.khmshdon,
+            shdon: invoiceWithoutDetails.shdon,
+            cqt: '',
+            tgtcthue: invoiceWithoutDetails.tgtcthue,
+            tgtthue: invoiceWithoutDetails.tgtthue,
+            tgtttbso: invoiceWithoutDetails.tgtttbso,
+            thlap: invoiceWithoutDetails.tdlap,
+            ttcktmai: '',
+            tthai: invoiceWithoutDetails.tghdon || '',
+            tttbao: '',
+            ttxly: '',
+            // Detail fields from current detail item
             dgia: detail.dgia,
             dvtinh: detail.dvtinh,
             ltsuat: detail.ltsuat,
@@ -485,9 +500,7 @@ const handleFrontendExportExcel = () => {
             tlckhau: detail.tlckhau,
             tsuat: detail.tsuat,
             tthue: detail.tthue,
-            tgia: detail.tgia,
-            tgtcthue: detail.tgtcthue,
-            tgthue: detail.tgthue
+            tgia: detail.tgia
           };
         });
       }
@@ -495,7 +508,21 @@ const handleFrontendExportExcel = () => {
       // If no details, create single row with null detail fields
       const { details, ...invoiceWithoutDetails } = invoice;
       return [{
-        ...invoiceWithoutDetails,
+        // Invoice header fields
+        nbmst: invoiceWithoutDetails.nbmst || invoiceWithoutDetails.msttcgp,
+        khmshdon: invoiceWithoutDetails.khmshdon,
+        khhdon: invoiceWithoutDetails.khmshdon,
+        shdon: invoiceWithoutDetails.shdon,
+        cqt: '',
+        tgtcthue: invoiceWithoutDetails.tgtcthue,
+        tgtthue: invoiceWithoutDetails.tgtthue,
+        tgtttbso: invoiceWithoutDetails.tgtttbso,
+        thlap: invoiceWithoutDetails.tdlap,
+        ttcktmai: '',
+        tthai: invoiceWithoutDetails.tghdon || '',
+        tttbao: '',
+        ttxly: '',
+        // Detail fields - all null
         dgia: null,
         dvtinh: null,
         ltsuat: null,
@@ -506,14 +533,15 @@ const handleFrontendExportExcel = () => {
         tlckhau: null,
         tsuat: null,
         tthue: null,
-        tgia: null,
-        tgtcthue: null,
-        tgthue: null
+        tgia: null
       }];
     });
 
     toast.success(`✅ Đã chuẩn bị ${exportData.length} dòng dữ liệu`, { id: 'export-prep' });
-    console.log('📊 Opening', exportData, 'rows (flatmapped by details)');
+    console.log('📊 Export data prepared:', exportData.length, 'rows (flatmapped by details)');
+    
+    // Store export data in state
+    setExportData(exportData);
     setShowExcelPreview(true);
     
   } catch (error) {
@@ -776,28 +804,7 @@ const handleFrontendExportExcel = () => {
         <ExcelPreviewDialog
           open={showExcelPreview}
           onOpenChange={setShowExcelPreview}
-          invoices={invoices.map(inv => ({
-            nbmst: inv.nbmst || inv.msttcgp,
-            khmshdon: inv.khmshdon,
-            khhdon: inv.khmshdon,
-            shdon: inv.shdon,
-            cqt: '',
-            nbdchi: inv.dchi || inv.dctcgp,
-            nbten: inv.nten || inv.tentcgp,
-            nmdchi: inv.dcxmua,
-            nmmst: inv.msttmua,
-            nmten: inv.tenxmua,
-            nmtnmua: inv.tenxmua,
-            tgtcthue: inv.tgtcthue,
-            tgtthue: inv.tgtthue,
-            tgtttbso: inv.tgtttbso,
-            tgtttbchu: inv.tgtttchu,
-            thlap: inv.tdlap,
-            ttcktmai: '',
-            tthai: inv.tghdon || '',
-            tttbao: '',
-            ttxly: '',
-          }))}
+          invoices={exportData}
           fromDate={filter.fromDate}
           toDate={filter.toDate}
         />
