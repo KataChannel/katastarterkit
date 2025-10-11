@@ -27,6 +27,18 @@ export interface InvoiceData {
   nh?: string;      // Ngân hàng (Bank)
   fkey?: string;    // File key
   cccd?: string;    // Căn cước công dân (Citizen ID)
+  
+  // Details (if already loaded from database)
+  details?: Array<{
+    stt?: number;
+    ten?: string;
+    dvtinh?: string;
+    sluong?: number;
+    dgia?: number;
+    thtien?: number;
+    tsuat?: number;
+    tthue?: number;
+  }>;
 }
 
 // Database model types matching Prisma schema

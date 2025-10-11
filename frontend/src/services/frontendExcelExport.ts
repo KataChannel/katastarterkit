@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
 export interface InvoiceExportData {
+  // Invoice header fields
   nbmst?: string;      // MST Người bán
   khmshdon?: string;   // Ký hiệu mẫu
   khhdon?: string;     // Ký hiệu HĐ
@@ -22,6 +23,16 @@ export interface InvoiceExportData {
   tthai?: string;      // Trạng thái
   tttbao?: string;     // TT Báo
   ttxly?: string;      // TT Xử lý
+  
+  // Detail item fields (when flatmapped)
+  stt?: number;        // STT mặt hàng
+  ten?: string;        // Tên hàng hóa
+  dvtinh?: string;     // Đơn vị tính
+  sluong?: number;     // Số lượng
+  dgia?: number;       // Đơn giá
+  thtien?: number;     // Thành tiền
+  tsuat?: number;      // Thuế suất
+  tthue?: number;      // Tiền thuế
 }
 
 export interface ExcelPreviewData {
@@ -82,7 +93,7 @@ class FrontendExcelExportService {
   }
 
   /**
-   * Define Excel column headers
+   * Define Excel column headers (flatmap version with details)
    */
   private static getHeaders(): string[] {
     return [
@@ -106,12 +117,21 @@ class FrontendExcelExportService {
       'CKTM',
       'Trạng thái',
       'TT Báo',
-      'TT Xử lý'
+      'TT Xử lý',
+      // Detail columns
+      'STT MH',
+      'Tên hàng hóa',
+      'Đơn vị tính',
+      'Số lượng',
+      'Đơn giá',
+      'Thành tiền',
+      'Thuế suất (%)',
+      'Tiền thuế MH'
     ];
   }
 
   /**
-   * Convert invoice data to Excel row
+   * Convert invoice data to Excel row (with detail fields)
    */
   private static invoiceToRow(invoice: InvoiceExportData, index: number): any[] {
     return [
@@ -135,7 +155,16 @@ class FrontendExcelExportService {
       invoice.ttcktmai || '',                               // CKTM
       this.formatStatus(invoice.tthai),                     // Trạng thái
       invoice.tttbao || '',                                 // TT Báo
-      invoice.ttxly || ''                                   // TT Xử lý
+      invoice.ttxly || '',                                  // TT Xử lý
+      // Detail fields
+      invoice.stt || '',                                    // STT mặt hàng
+      invoice.ten || '',                                    // Tên hàng hóa
+      invoice.dvtinh || '',                                 // Đơn vị tính
+      invoice.sluong || '',                                 // Số lượng
+      this.formatCurrency(invoice.dgia),                    // Đơn giá
+      this.formatCurrency(invoice.thtien),                  // Thành tiền
+      invoice.tsuat || '',                                  // Thuế suất
+      this.formatCurrency(invoice.tthue)                    // Tiền thuế MH
     ];
   }
 

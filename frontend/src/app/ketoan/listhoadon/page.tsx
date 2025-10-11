@@ -416,46 +416,72 @@ const ListHoaDonPage = () => {
     }
   };
 
-  // Frontend Excel Export with Preview
-  const handleFrontendExportExcel = () => {
-    try {
-      if (invoices.length === 0) {
-        toast.error('Không có dữ liệu để xuất');
-        return;
-      }
-
-      // Convert InvoiceData to InvoiceExportData
-      const exportData: InvoiceExportData[] = invoices.map(inv => ({
-        nbmst: inv.nbmst || inv.msttcgp,
-        khmshdon: inv.khmshdon,
-        khhdon: inv.khmshdon, // Using same as khmshdon for now
-        shdon: inv.shdon,
-        cqt: '', // Not in InvoiceData
-        nbdchi: inv.dchi || inv.dctcgp,
-        nbten: inv.nten || inv.tentcgp,
-        nmdchi: inv.dcxmua,
-        nmmst: inv.msttmua,
-        nmten: inv.tenxmua,
-        nmtnmua: inv.tenxmua,
-        tgtcthue: inv.tgtcthue,
-        tgtthue: inv.tgtthue,
-        tgtttbso: inv.tgtttbso,
-        tgtttbchu: inv.tgtttchu,
-        thlap: inv.tdlap,
-        ttcktmai: '', // Not in InvoiceData
-        tthai: inv.tghdon || '',
-        tttbao: '', // Not in InvoiceData
-        ttxly: '', // Not in InvoiceData
-      }));
-
-      console.log('📊 Opening preview for', exportData.length, 'invoices');
-      setShowExcelPreview(true);
-      
-    } catch (error) {
-      console.error('❌ Error preparing export:', error);
-      toast.error('Lỗi khi chuẩn bị xuất Excel');
+// Frontend Excel Export with Preview - FlatMap by Details
+const handleFrontendExportExcel = () => {
+  try {
+    if (invoices.length === 0) {
+      toast.error('Không có dữ liệu để xuất');
+      return;
     }
-  };  // Initial load
+
+    // Show loading toast
+    toast.loading('🔄 Đang chuẩn bị dữ liệu chi tiết...', { id: 'export-prep' });
+
+    // FlatMap: Create one row per detail item (use existing inv.details)
+    console.log('📊 Preparing export data for', invoices.length, 'invoices');
+
+    const exportData = invoices.flatMap((item: any) => {
+        if (item.details && item.details.length > 0) {
+            return item.details.map((detail: any) => {
+                return {
+                    ...item,
+                dgia: detail.dgia,
+                dvtinh: detail.dvtinh,
+                ltsuat: detail.ltsuat,
+                sluong: detail.sluong,
+                ten: detail.ten,
+                thtcthue: detail.thtcthue,
+                thtien: detail.thtien,
+                tlckhau: detail.tlckhau,
+                tsuat: detail.tsuat,
+                tthue: detail.tthue,
+                tgia: detail.tgia,
+                tgtcthue: detail.tgtcthue,
+                tgthue: detail.tgthue
+            }
+        })
+    } else {
+        return [{
+            ...item,
+            dgia: null,
+            dvtinh: null,
+            ltsuat: null,
+            sluong: null,
+            ten: null,
+            thtcthue: null,
+            thtien: null,
+            tlckhau: null,
+            tsuat: null,
+            tthue: null,
+            tgia: null,
+            tgtcthue: null,
+            tgthue: null
+        }]
+    }
+})
+
+    toast.success(`✅ Đã chuẩn bị ${exportData.length} dòng dữ liệu`, { id: 'export-prep' });
+    console.log('📊 Opening preview for', exportData.length, 'rows (flatmapped by details)');
+    console.log('📊 Opening', exportData, 'rows (flatmapped by details)');
+    setShowExcelPreview(true);
+    
+  } catch (error) {
+    console.error('❌ Error preparing export:', error);
+    toast.error('Lỗi khi chuẩn bị xuất Excel', { id: 'export-prep' });
+  }
+}; 
+  
+  // Initial load
   useEffect(() => {
     fetchInvoices();
   }, []);
