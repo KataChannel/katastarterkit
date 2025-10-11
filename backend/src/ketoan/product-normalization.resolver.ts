@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProductNormalizationService } from './product-normalization.service';
@@ -370,89 +370,197 @@ export class ProductNormalizationResolver {
 
 // GraphQL Types
 
+@ObjectType()
 class SimilarProduct {
+  @Field()
   id: string;
+  
+  @Field()
   ten: string;
+  
+  @Field({ nullable: true })
   ten2: string | null;
+  
+  @Field({ nullable: true })
   ma: string | null;
+  
+  @Field(() => Float)
   similarityScore: number;
 }
 
+@ObjectType()
 class ProductGroup {
+  @Field()
   ten2: string;
+  
+  @Field(() => Int)
   count: number;
+  
+  @Field(() => [ProductSummary])
   products: ProductSummary[];
 }
 
+@ObjectType()
 class ProductSummary {
+  @Field()
   id: string;
+  
+  @Field()
   ten: string;
+  
+  @Field({ nullable: true })
   ma: string | null;
-  dgia: any;
+  
+  @Field(() => Float, { nullable: true })
+  dgia: number | null;
 }
 
+@ObjectType()
 class DuplicateGroup {
+  @Field()
   ten2: string;
+  
+  @Field(() => Int)
   count: number;
+  
+  @Field(() => [String])
   productIds: string[];
 }
 
+@ObjectType()
 class NormalizationStats {
+  @Field(() => Int)
   updated: number;
+  
+  @Field(() => Int)
   skipped: number;
+  
+  @Field(() => Int)
   errors: number;
 }
 
 // Advanced GraphQL Types
 
+@ObjectType()
 class SimilarProductAdvanced {
+  @Field()
   id: string;
+  
+  @Field()
   ten: string;
+  
+  @Field({ nullable: true })
   ten2: string | null;
+  
+  @Field({ nullable: true })
   ma: string | null;
+  
+  @Field({ nullable: true })
   dvt: string | null;
-  dgia: any;
+  
+  @Field(() => Float, { nullable: true })
+  dgia: number | null;
+  
+  @Field(() => Float)
   similarityScore: number;
+  
+  @Field(() => Float, { nullable: true })
   priceDiffPercent: number | null;
+  
+  @Field()
   dvtMatch: boolean;
 }
 
+@ObjectType()
 class CanonicalNameAdvanced {
+  @Field()
   canonicalName: string;
+  
+  @Field({ nullable: true })
   canonicalDvt: string | null;
+  
+  @Field(() => Float, { nullable: true })
   canonicalPrice: number | null;
+  
+  @Field(() => Int)
   matchCount: number;
+  
+  @Field(() => Float, { nullable: true })
   avgPrice: number | null;
 }
 
+@ObjectType()
 class ProductGroupAdvanced {
+  @Field()
   ten2: string;
+  
+  @Field()
   dvt: string;
+  
+  @Field(() => Int)
   product_count: number;
+  
+  @Field(() => Float)
   min_price: number;
+  
+  @Field(() => Float)
   max_price: number;
+  
+  @Field(() => Float)
   avg_price: number;
+  
+  @Field(() => Float)
   price_variance: number;
 }
 
+@ObjectType()
 class DuplicateGroupAdvanced {
+  @Field()
   ten2: string;
+  
+  @Field()
   dvt: string;
+  
+  @Field(() => Int)
   product_count: number;
+  
+  @Field()
   price_range: string;
+  
+  @Field(() => [String])
   product_ids: string[];
 }
 
+@ObjectType()
 class ProductSimilarityTest {
+  @Field()
   product1Name: string;
+  
+  @Field()
   product2Name: string;
+  
+  @Field(() => Float)
   nameSimilarity: number;
+  
+  @Field()
   dvtMatch: boolean;
+  
+  @Field({ nullable: true })
   product1Dvt: string | null;
+  
+  @Field({ nullable: true })
   product2Dvt: string | null;
+  
+  @Field(() => Float)
   priceDiffPercent: number;
+  
+  @Field(() => Float)
   product1Price: number;
+  
+  @Field(() => Float)
   product2Price: number;
+  
+  @Field()
   isDuplicate: boolean;
 }
 

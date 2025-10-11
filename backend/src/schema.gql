@@ -411,6 +411,14 @@ input CampaignSearchInput {
   status: AffCampaignStatus
 }
 
+type CanonicalNameAdvanced {
+  avgPrice: Float
+  canonicalDvt: String
+  canonicalName: String!
+  canonicalPrice: Float
+  matchCount: Int!
+}
+
 input CategoryFiltersInput {
   hasProducts: Boolean
   isActive: Boolean
@@ -915,6 +923,20 @@ input DeleteManyInput {
 type DeleteResponse {
   message: String!
   success: Boolean!
+}
+
+type DuplicateGroup {
+  count: Int!
+  productIds: [String!]!
+  ten2: String!
+}
+
+type DuplicateGroupAdvanced {
+  dvt: String!
+  price_range: String!
+  product_count: Int!
+  product_ids: [String!]!
+  ten2: String!
 }
 
 type EmployeeListResponse {
@@ -1509,8 +1531,24 @@ type Mutation {
   loginWithFacebook(input: SocialLoginInput!): AuthResponse!
   loginWithGoogle(input: SocialLoginInput!): AuthResponse!
   loginWithPhone(input: PhoneLoginInput!): AuthResponse!
+
+  """Merge duplicate products (keep one, delete rest)"""
+  mergeDuplicates(
+    """Optional: ID of product to keep"""
+    keepId: String
+
+    """Normalized name of products to merge"""
+    ten2: String!
+  ): Float!
   moveFiles(input: MoveFilesInput!): [File!]!
   moveMenu(menuId: ID!, newOrder: Float, newParentId: ID): MenuResponseDto!
+
+  """Batch normalize products"""
+  normalizeProducts(
+    """Optional: specific product IDs to normalize"""
+    productIds: [String!]
+    threshold: Float! = 0.6
+  ): NormalizationStats!
   processPaymentRequest(id: String!, status: String!): AffPaymentRequest!
   publishPost(id: String!): Post!
   registerUser(input: RegisterUserInput!): AuthResponse!
@@ -1559,6 +1597,12 @@ type Mutation {
 
   """Create or update a record based on criteria"""
   upsert(create: JSONObject!, include: JSONObject, modelName: String!, select: JSONObject, update: JSONObject!, where: JSONObject!): JSONObject!
+}
+
+type NormalizationStats {
+  errors: Int!
+  skipped: Int!
+  updated: Int!
 }
 
 type OffboardingListResponse {
@@ -1941,6 +1985,22 @@ input ProductFiltersInput {
   units: [ProductUnit!]
 }
 
+type ProductGroup {
+  count: Int!
+  products: [ProductSummary!]!
+  ten2: String!
+}
+
+type ProductGroupAdvanced {
+  avg_price: Float!
+  dvt: String!
+  max_price: Float!
+  min_price: Float!
+  price_variance: Float!
+  product_count: Int!
+  ten2: String!
+}
+
 type ProductImageType {
   alt: String
   createdAt: DateTime!
@@ -1953,6 +2013,19 @@ type ProductImageType {
   url: String!
 }
 
+type ProductSimilarityTest {
+  dvtMatch: Boolean!
+  isDuplicate: Boolean!
+  nameSimilarity: Float!
+  priceDiffPercent: Float!
+  product1Dvt: String
+  product1Name: String!
+  product1Price: Float!
+  product2Dvt: String
+  product2Name: String!
+  product2Price: Float!
+}
+
 """Trạng thái sản phẩm"""
 enum ProductStatus {
   ACTIVE
@@ -1960,6 +2033,13 @@ enum ProductStatus {
   DRAFT
   INACTIVE
   OUT_OF_STOCK
+}
+
+type ProductSummary {
+  dgia: Float
+  id: String!
+  ma: String
+  ten: String!
 }
 
 type ProductType {
@@ -2077,11 +2157,47 @@ type Query {
   """Find a unique record by ID"""
   findById(input: UnifiedFindByIdInput!, modelName: String!): JSONObject!
 
+  """Find canonical (normalized) name for a product"""
+  findCanonicalName(productName: String!, threshold: Float! = 0.6): String
+
+  """Find canonical name with DVT and price"""
+  findCanonicalNameAdvanced(priceTolerance: Float! = 10, productDvt: String, productName: String!, productPrice: Float, threshold: Float! = 0.6): CanonicalNameAdvanced
+
+  """Find duplicate products (same ten2)"""
+  findDuplicates: [DuplicateGroup!]!
+
+  """Find duplicates with DVT and price matching"""
+  findDuplicatesAdvanced(priceTolerance: Float! = 10): [DuplicateGroupAdvanced!]!
+
   """Find all records for a model with Prisma-like syntax"""
   findMany(input: UnifiedFindManyInput, modelName: String!): JSONObject!
 
   """Find records with pagination"""
   findManyPaginated(input: UnifiedPaginatedInput, modelName: String!): JSONObject!
+
+  """Find products similar to search text using fuzzy matching"""
+  findSimilarProducts(
+    searchText: String!
+
+    """Similarity threshold (0.0-1.0)"""
+    threshold: Float! = 0.3
+  ): [SimilarProduct!]!
+
+  """Find similar products with DVT and price matching"""
+  findSimilarProductsAdvanced(
+    """Price tolerance percentage (default 10%)"""
+    priceTolerance: Float! = 10
+
+    """Đơn vị tính (optional)"""
+    searchDvt: String
+
+    """Đơn giá (optional)"""
+    searchPrice: Float
+    searchText: String!
+
+    """Similarity threshold (0.0-1.0)"""
+    threshold: Float! = 0.3
+  ): [SimilarProductAdvanced!]!
   folder(id: ID!): FileFolder!
   folders: [FileFolder!]!
   footerMenus: [MenuResponseDto!]!
@@ -2098,6 +2214,15 @@ type Query {
   getPostById(id: String!): Post!
   getPostBySlug(slug: String!): Post!
   getPosts(filters: PostFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPosts!
+
+  """Get product groups by normalized name (ten2)"""
+  getProductGroups(
+    """Minimum products per group"""
+    minGroupSize: Float! = 2
+  ): [ProductGroup!]!
+
+  """Get product groups with DVT and price statistics"""
+  getProductGroupsAdvanced(minGroupSize: Float! = 2, priceTolerance: Float! = 10): [ProductGroupAdvanced!]!
   getPublishedPages(pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
   getRoleById(id: String!): Role!
   getSharedTasks(filters: TaskFilterInput): [Task!]!
@@ -2127,6 +2252,12 @@ type Query {
   menus(direction: String, filter: MenuFilterDto, limit: Float, orderBy: String, page: Float): MenuPaginationResponseDto!
   mobileMenus: [MenuResponseDto!]!
   myMenus(type: String): [MenuResponseDto!]!
+
+  """Normalize a product name"""
+  normalizeProductName(productName: String!, threshold: Float! = 0.6): String!
+
+  """Normalize product name with DVT and price"""
+  normalizeProductNameAdvanced(priceTolerance: Float! = 10, productDvt: String, productName: String!, productPrice: Float, threshold: Float! = 0.6): String!
   offboardingProcess(id: ID!): OffboardingProcess!
   onboardingChecklist(id: ID!): OnboardingChecklist!
   onboardingChecklistByEmployee(employeeProfileId: ID!): OnboardingChecklist!
@@ -2156,6 +2287,12 @@ type Query {
   """Search users using Orama full-text search engine"""
   searchUsers(input: OramaSearchInput!): OramaSearchResult!
   sidebarMenus: [MenuResponseDto!]!
+
+  """Test similarity between two products"""
+  testProductSimilarity(productId1: String!, productId2: String!): ProductSimilarityTest
+
+  """Test similarity between two strings"""
+  testSimilarity(text1: String!, text2: String!): Float!
 
   """Execute any Prisma query operation dynamically"""
   universalQuery(input: UniversalQueryInput!): JSONObject!
@@ -2235,6 +2372,26 @@ input ShareTaskInput {
   permission: SharePermission!
   sharedWithId: String!
   taskId: String!
+}
+
+type SimilarProduct {
+  id: String!
+  ma: String
+  similarityScore: Float!
+  ten: String!
+  ten2: String
+}
+
+type SimilarProductAdvanced {
+  dgia: Float
+  dvt: String
+  dvtMatch: Boolean!
+  id: String!
+  ma: String
+  priceDiffPercent: Float
+  similarityScore: Float!
+  ten: String!
+  ten2: String
 }
 
 input SocialLoginInput {
