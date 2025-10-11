@@ -64,6 +64,64 @@ function generateProductCode(name) {
 }
 
 /**
+ * Create normalized name from raw name
+ * Same logic as ProductNormalizationService
+ * @param {string} rawName - Raw product name
+ * @returns {string} Normalized name
+ */
+function createNormalizedName(rawName) {
+  if (!rawName) return '';
+  
+  return rawName
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ') // Multiple spaces → single space
+    .replace(/[^\w\sÀ-ỹ]/g, '') // Remove special chars, keep Vietnamese
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Find canonical name using pg_trgm similarity
+ * @param {string} productName - Product name to search
+ * @param {number} threshold - Similarity threshold (default 0.6)
+ * @returns {Promise<string|null>} Canonical name or null
+ */
+async function findCanonicalName(productName, threshold = 0.6) {
+  try {
+    const result = await prisma.$queryRaw`
+      SELECT find_canonical_name(${productName}, ${threshold}::real)
+    `;
+    
+    return result[0]?.find_canonical_name || null;
+  } catch (error) {
+    // If function doesn't exist or error, return null
+    return null;
+  }
+}
+
+/**
+ * Normalize product name using fuzzy matching
+ * @param {string} productName - Raw product name
+ * @returns {Promise<string>} Normalized name (ten2)
+ */
+async function normalizeProductName(productName) {
+  if (!productName || productName.trim() === '') {
+    return '';
+  }
+
+  // Try to find canonical name from similar products
+  const canonical = await findCanonicalName(productName, 0.6);
+  if (canonical) {
+    return canonical;
+  }
+
+  // If not found, create new normalized name
+  return createNormalizedName(productName);
+}
+
+/**
  * Create or update sanphamhoadon from detailhoadon
  * @param {object} detail - DetailHoaDon record
  * @returns {Promise<object>} Result of operation
@@ -92,10 +150,13 @@ async function upsertSanPhamHoaDon(detail) {
       where: { iddetailhoadon: detail.id }
     });
 
+    // Auto-normalize product name using fuzzy matching
+    const normalizedName = await normalizeProductName(detail.ten);
+
     const productData = {
       iddetailhoadon: detail.id,
       ten: detail.ten?.trim() || null,
-      ten2: null, // Can be populated later if needed
+      ten2: normalizedName || null, // Auto-populated with normalized name
       ma: generateProductCode(detail.ten),
       dvt: detail.dvtinh?.trim() || null,
       dgia: detail.dgia || null,
