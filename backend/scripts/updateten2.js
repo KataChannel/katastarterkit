@@ -143,20 +143,21 @@ async function findCanonicalNameAdvanced(
   similarityThreshold
 ) {
   try {
-    // Build SQL with optional parameters
+    // Parse price to proper number
+    const priceNum = productPrice ? parseFloat(productPrice) : null;
     const dvtParam = productDvt || null;
-    const priceParam = productPrice ? `${productPrice}::decimal` : 'NULL';
     const priceToleranceParam = priceTol !== null ? priceTol : 10;
 
-    const result = await prisma.$queryRaw`
+    // Call function with proper parameter handling
+    const result = await prisma.$queryRawUnsafe(`
       SELECT canonical_name FROM find_canonical_name_advanced(
-        ${productName},
-        ${dvtParam},
-        ${priceParam}::decimal,
-        ${priceToleranceParam}::decimal,
-        ${similarityThreshold}::real
+        $1::text,
+        $2::text,
+        $3::decimal,
+        $4::decimal,
+        $5::real
       )
-    `;
+    `, productName, dvtParam, priceNum, priceToleranceParam, similarityThreshold);
 
     return result[0]?.canonical_name || null;
   } catch (error) {
