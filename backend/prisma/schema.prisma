@@ -1587,6 +1587,26 @@ model ext_detailhoadon {
   @@index([idhdonServer])
   @@index([stt])
   @@index([createdAt])
+  ext_sanphamhoadon ext_sanphamhoadon[]
+}
+
+model ext_sanphamhoadon {
+  id String @id @default(uuid())
+  iddetailhoadon String? // Foreign key to ext_detailhoadon.id
+  ten String? // Tên sản phẩm
+  ten2 String? // Tên sản phẩm 2
+  ma  String? // Mã sản phẩm
+  dvt String? // Đơn vị tính
+  dgia Decimal? // Đơn giá
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // Relationships
+  detailhoadon ext_detailhoadon? @relation(fields: [iddetailhoadon], references: [id], onDelete: Cascade)
+  // Indexes
+  @@index([iddetailhoadon])
+  @@index([ma])
+  @@index([createdAt])
 }
 
 // =====================================================
