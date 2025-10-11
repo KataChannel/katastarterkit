@@ -3,6 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
+import { CurrentUser } from '../../auth/current-user.decorator';
 import { User, UserSearchResult, UserStats, BulkUserActionResult } from '../models/user.model';
 import { AuthResponse } from '../models/auth.model';
 import { OtpResponse } from '../models/otp.model';
@@ -31,9 +32,10 @@ export class UserResolver {
 
   @Query(() => User, { name: 'getMe' })
   @UseGuards(JwtAuthGuard)
-  async getMe(@Context() context: any): Promise<User> {
-    const userId = context.req.user.id;
-    return this.userService.findById(userId);
+  async getMe(@CurrentUser() user: User): Promise<User> {
+    // User is already attached by JwtAuthGuard and extracted by CurrentUser decorator
+    // Just return the full user object from database to ensure all fields are populated
+    return this.userService.findById(user.id);
   }
 
   @Query(() => [User], { name: 'getUsers' })

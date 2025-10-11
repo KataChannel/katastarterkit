@@ -283,9 +283,47 @@ const ListHoaDonPage = () => {
       };
 
       const result = await searchDatabaseInvoices(searchFilters);
-      console.log('Database search result:', result);
+      // console.log('Database search result:', result);
+      const transferData = result.invoices.map((inv:any) => ({
+            nbmst: inv.nbmst || inv.msttcgp,
+            khmshdon: inv.khmshdon,
+            khhdon: inv.khmshdon,
+            shdon: inv.shdon,
+            cqt: '',
+            nbdchi: inv.dchi || inv.dctcgp,
+            nbten: inv.nten || inv.tentcgp,
+            nmdchi: inv.dcxmua,
+            nmmst: inv.msttmua,
+            nmten: inv.tenxmua,
+            nmtnmua: inv.tenxmua,
+            tgtcthue: inv.tgtcthue,
+            tgtthue: inv.tgtthue,
+            tgtttbso: inv.tgtttbso,
+            tgtttbchu: inv.tgtttchu,
+            thlap: inv.tdlap,
+            ttcktmai: '',
+            tthai: inv.tghdon || '',
+            tttbao: '',
+            ttxly: '',
+            details: inv.details.map((detail:any) => ({
+              dgia: detail.dgia,
+              dvtinh: detail.dvtinh,
+              ltsuat: detail.ltsuat,
+              sluong: detail.sluong,
+              ten: detail.ten,
+              thtcthue: detail.thtcthue,
+              thtien: detail.thtien,
+              tlckhau: detail.tlckhau,
+              tsuat: detail.tsuat,
+              tthue: detail.tthue,
+              tgia: detail.tgia,
+              tgtcthue: detail.tgtcthue,
+              tgthue: detail.tgthue
+            })) || [],
+      }));
+      setInvoices(transferData || []);
+      console.log('Fetched invoices from database:', transferData);
       
-      setInvoices(result.invoices || []);
       setPagination({
         page: result.page || 0,
         size: result.size || config.pageSize,
@@ -293,7 +331,7 @@ const ListHoaDonPage = () => {
         totalPages: result.totalPages || 0
       });
 
-      if ((!result.invoices || result.invoices.length === 0) && pageNumber === 0) {
+      if ((!transferData || transferData.length === 0) && pageNumber === 0) {
         toast(`Không tìm thấy hóa đơn nào trong database cho tháng ${selectedMonth}/${selectedYear}`, {
           icon: 'ℹ️'
         });
@@ -428,50 +466,53 @@ const handleFrontendExportExcel = () => {
     toast.loading('🔄 Đang chuẩn bị dữ liệu chi tiết...', { id: 'export-prep' });
 
     // FlatMap: Create one row per detail item (use existing inv.details)
-    console.log('📊 Preparing export data for', invoices.length, 'invoices');
+    console.log('📊 Preparing export data for', invoices, 'invoices');
 
-    const exportData = invoices.flatMap((item: any) => {
-        if (item.details && item.details.length > 0) {
-            return item.details.map((detail: any) => {
-                return {
-                    ...item,
-                dgia: detail.dgia,
-                dvtinh: detail.dvtinh,
-                ltsuat: detail.ltsuat,
-                sluong: detail.sluong,
-                ten: detail.ten,
-                thtcthue: detail.thtcthue,
-                thtien: detail.thtien,
-                tlckhau: detail.tlckhau,
-                tsuat: detail.tsuat,
-                tthue: detail.tthue,
-                tgia: detail.tgia,
-                tgtcthue: detail.tgtcthue,
-                tgthue: detail.tgthue
-            }
-        })
-    } else {
-        return [{
-            ...item,
-            dgia: null,
-            dvtinh: null,
-            ltsuat: null,
-            sluong: null,
-            ten: null,
-            thtcthue: null,
-            thtien: null,
-            tlckhau: null,
-            tsuat: null,
-            tthue: null,
-            tgia: null,
-            tgtcthue: null,
-            tgthue: null
-        }]
-    }
-})
+    const exportData: InvoiceExportData[] = invoices.flatMap((invoice: any) => {
+      // If invoice has details, create one row per detail
+      if (invoice.details && invoice.details.length > 0) {
+        return invoice.details.map((detail: any) => {
+          const { details, ...invoiceWithoutDetails } = invoice;
+          return {
+            ...invoiceWithoutDetails,
+            dgia: detail.dgia,
+            dvtinh: detail.dvtinh,
+            ltsuat: detail.ltsuat,
+            sluong: detail.sluong,
+            ten: detail.ten,
+            thtcthue: detail.thtcthue,
+            thtien: detail.thtien,
+            tlckhau: detail.tlckhau,
+            tsuat: detail.tsuat,
+            tthue: detail.tthue,
+            tgia: detail.tgia,
+            tgtcthue: detail.tgtcthue,
+            tgthue: detail.tgthue
+          };
+        });
+      }
+      
+      // If no details, create single row with null detail fields
+      const { details, ...invoiceWithoutDetails } = invoice;
+      return [{
+        ...invoiceWithoutDetails,
+        dgia: null,
+        dvtinh: null,
+        ltsuat: null,
+        sluong: null,
+        ten: null,
+        thtcthue: null,
+        thtien: null,
+        tlckhau: null,
+        tsuat: null,
+        tthue: null,
+        tgia: null,
+        tgtcthue: null,
+        tgthue: null
+      }];
+    });
 
     toast.success(`✅ Đã chuẩn bị ${exportData.length} dòng dữ liệu`, { id: 'export-prep' });
-    console.log('📊 Opening preview for', exportData.length, 'rows (flatmapped by details)');
     console.log('📊 Opening', exportData, 'rows (flatmapped by details)');
     setShowExcelPreview(true);
     
