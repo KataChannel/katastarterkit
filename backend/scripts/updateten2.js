@@ -9,21 +9,30 @@
  * Features:
  * - Fuzzy matching using PostgreSQL pg_trgm
  * - Auto-find canonical names from similar products
+ * - DVT (unit) matching support
+ * - Price tolerance matching support
  * - Batch processing for performance
  * - Progress tracking
  * - Dry-run mode for preview
  * 
  * Usage:
- *   node updateten2.js                    # Update all products
- *   node updateten2.js --dry-run          # Preview changes
- *   node updateten2.js --limit=100        # Update first 100
- *   node updateten2.js --threshold=0.7    # Use stricter matching
- *   node updateten2.js --force            # Re-normalize all (even with ten2)
+ *   node updateten2.js                       # Update all products (name only)
+ *   node updateten2.js --dry-run             # Preview changes
+ *   node updateten2.js --limit=100           # Update first 100
+ *   node updateten2.js --threshold=0.7       # Use stricter matching
+ *   node updateten2.js --force               # Re-normalize all (even with ten2)
+ *   node updateten2.js --match-dvt           # Enable DVT matching
+ *   node updateten2.js --price-tolerance=15  # Enable price matching (15% tolerance)
  * 
- * Examples:
- *   node updateten2.js --dry-run --limit=10
- *   node updateten2.js --threshold=0.6
- *   node updateten2.js --force --limit=1000
+ * Advanced Examples:
+ *   # Match by name + DVT
+ *   node updateten2.js --match-dvt --dry-run --limit=10
+ *   
+ *   # Match by name + DVT + price (10% tolerance)
+ *   node updateten2.js --match-dvt --price-tolerance=10
+ *   
+ *   # Strict matching with all criteria
+ *   node updateten2.js --threshold=0.7 --match-dvt --price-tolerance=5
  */
 
 const { PrismaClient } = require('@prisma/client');
@@ -39,9 +48,11 @@ const prisma = new PrismaClient({
 const args = process.argv.slice(2);
 const isDryRun = args.includes('--dry-run');
 const forceUpdate = args.includes('--force');
+const matchDvt = args.includes('--match-dvt');
 
 let limit = null;
 let threshold = 0.6; // Default threshold (balanced)
+let priceTolerance = null; // null = disabled, number = % tolerance
 
 for (const arg of args) {
   if (arg.startsWith('--limit=')) {
@@ -50,11 +61,20 @@ for (const arg of args) {
   if (arg.startsWith('--threshold=')) {
     threshold = parseFloat(arg.split('=')[1]);
   }
+  if (arg.startsWith('--price-tolerance=')) {
+    priceTolerance = parseFloat(arg.split('=')[1]);
+  }
 }
 
 // Validate threshold
 if (threshold < 0 || threshold > 1) {
   console.error('❌ Error: threshold must be between 0.0 and 1.0');
+  process.exit(1);
+}
+
+// Validate price tolerance
+if (priceTolerance !== null && (priceTolerance < 0 || priceTolerance > 100)) {
+  console.error('❌ Error: price-tolerance must be between 0 and 100 (percentage)');
   process.exit(1);
 }
 
@@ -113,22 +133,77 @@ async function findCanonicalName(productName, similarityThreshold) {
 }
 
 /**
+ * Find canonical name with advanced matching (DVT + Price)
+ */
+async function findCanonicalNameAdvanced(
+  productName, 
+  productDvt, 
+  productPrice, 
+  priceTol, 
+  similarityThreshold
+) {
+  try {
+    // Build SQL with optional parameters
+    const dvtParam = productDvt || null;
+    const priceParam = productPrice ? `${productPrice}::decimal` : 'NULL';
+    const priceToleranceParam = priceTol !== null ? priceTol : 10;
+
+    const result = await prisma.$queryRaw`
+      SELECT canonical_name FROM find_canonical_name_advanced(
+        ${productName},
+        ${dvtParam},
+        ${priceParam}::decimal,
+        ${priceToleranceParam}::decimal,
+        ${similarityThreshold}::real
+      )
+    `;
+
+    return result[0]?.canonical_name || null;
+  } catch (error) {
+    // If function doesn't exist or error, fallback to basic
+    console.error(`⚠️  Warning: find_canonical_name_advanced() error:`, error.message);
+    return null;
+  }
+}
+
+/**
  * Normalize product name using fuzzy matching
  * 
  * Logic:
  * 1. Try to find canonical name from similar products (reuse)
  * 2. If not found, create new normalized name
  */
-async function normalizeProductName(productName, similarityThreshold) {
+async function normalizeProductName(
+  productName, 
+  productDvt, 
+  productPrice, 
+  similarityThreshold
+) {
   if (!productName || productName.trim() === '') {
     return '';
   }
 
-  // Step 1: Try to find existing canonical name
-  const canonical = await findCanonicalName(productName, similarityThreshold);
-  if (canonical) {
-    stats.reused++;
-    return canonical;
+  // Use advanced matching if DVT or price tolerance enabled
+  if (matchDvt || priceTolerance !== null) {
+    const canonical = await findCanonicalNameAdvanced(
+      productName,
+      productDvt,
+      productPrice,
+      priceTolerance,
+      similarityThreshold
+    );
+    
+    if (canonical) {
+      stats.reused++;
+      return canonical;
+    }
+  } else {
+    // Use basic matching (name only)
+    const canonical = await findCanonicalName(productName, similarityThreshold);
+    if (canonical) {
+      stats.reused++;
+      return canonical;
+    }
   }
 
   // Step 2: Create new normalized name
@@ -152,9 +227,11 @@ async function updateProductTen2(product, similarityThreshold, dryRun) {
       return { skipped: 'Already has ten2' };
     }
 
-    // Normalize the product name
+    // Normalize the product name (with DVT and price if enabled)
     const normalizedName = await normalizeProductName(
       product.ten,
+      product.dvt,
+      product.dgia,
       similarityThreshold
     );
 
@@ -176,6 +253,8 @@ async function updateProductTen2(product, similarityThreshold, dryRun) {
     return {
       updated: true,
       ten: product.ten,
+      dvt: product.dvt,
+      dgia: product.dgia,
       ten2_old: product.ten2,
       ten2_new: normalizedName,
       reused: stats.reused > 0,
@@ -202,6 +281,8 @@ async function main() {
   console.log(`Mode: ${isDryRun ? '🔍 DRY RUN (preview only)' : '✍️  LIVE UPDATE'}`);
   console.log(`Threshold: ${threshold} (similarity matching)`);
   console.log(`Force: ${forceUpdate ? 'Yes (re-normalize all)' : 'No (skip if ten2 exists)'}`);
+  console.log(`DVT Matching: ${matchDvt ? '✅ Enabled' : '❌ Disabled'}`);
+  console.log(`Price Matching: ${priceTolerance !== null ? `✅ Enabled (±${priceTolerance}%)` : '❌ Disabled'}`);
   if (limit) console.log(`Limit: ${limit} products`);
   console.log('');
 
@@ -241,6 +322,8 @@ async function main() {
       ten: true,
       ten2: true,
       ma: true,
+      dvt: true,
+      dgia: true,
     },
     take: limit || undefined,
     orderBy: { createdAt: 'asc' },
@@ -268,9 +351,20 @@ async function main() {
         const prefix = isDryRun ? '[DRY]' : '✅';
         const reuseFlag = result.reused ? '♻️' : '🆕';
         
-        console.log(
-          `${prefix} ${reuseFlag} [${stats.processed}/${products.length}] "${result.ten}" → "${result.ten2_new}"`
-        );
+        let displayText = `${prefix} ${reuseFlag} [${stats.processed}/${products.length}] "${result.ten}" → "${result.ten2_new}"`;
+        
+        // Show DVT and price if enabled
+        if (matchDvt && result.dvt) {
+          displayText += ` [${result.dvt}]`;
+        }
+        if (priceTolerance !== null && result.dgia) {
+          const price = parseFloat(result.dgia);
+          if (!isNaN(price)) {
+            displayText += ` [$${price.toLocaleString()}]`;
+          }
+        }
+        
+        console.log(displayText);
         
         if (result.ten2_old) {
           console.log(`      (was: "${result.ten2_old}")`);

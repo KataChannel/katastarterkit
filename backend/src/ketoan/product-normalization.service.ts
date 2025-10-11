@@ -330,4 +330,277 @@ export class ProductNormalizationService {
 
     return result[0]?.similarity || 0;
   }
+
+  /* ========================================
+   * ADVANCED MATCHING METHODS (DVT + PRICE)
+   * ========================================*/
+
+  /**
+   * Tìm sản phẩm tương tự với advanced matching (DVT + DGIA)
+   * 
+   * @param searchText - Tên sản phẩm cần tìm
+   * @param searchDvt - Đơn vị tính (optional)
+   * @param searchPrice - Đơn giá (optional)
+   * @param priceTolerance - % chênh lệch giá cho phép (default 10%)
+   * @param threshold - Ngưỡng similarity (0.0-1.0), mặc định 0.3
+   * @returns Danh sách sản phẩm tương tự với điểm similarity, dvt_match, price_diff
+   */
+  async findSimilarProductsAdvanced(
+    searchText: string,
+    searchDvt?: string | null,
+    searchPrice?: number | null,
+    priceTolerance: number = 10,
+    threshold: number = 0.3,
+  ): Promise<
+    Array<{
+      id: string;
+      ten: string;
+      ten2: string | null;
+      ma: string | null;
+      dvt: string | null;
+      dgia: any;
+      similarity_score: number;
+      price_diff_percent: number | null;
+      dvt_match: boolean;
+    }>
+  > {
+    if (!searchText || searchText.trim() === '') {
+      return [];
+    }
+
+    // Convert null to undefined for SQL
+    const dvt = searchDvt || null;
+    const price = searchPrice ? Prisma.sql`${searchPrice}::decimal` : Prisma.sql`NULL`;
+
+    const result = await this.prisma.$queryRaw<
+      Array<{
+        id: string;
+        ten: string;
+        ten2: string | null;
+        ma: string | null;
+        dvt: string | null;
+        dgia: any;
+        similarity_score: number;
+        price_diff_percent: number | null;
+        dvt_match: boolean;
+      }>
+    >`
+      SELECT * FROM get_similar_products_advanced(
+        ${searchText},
+        ${dvt},
+        ${price},
+        ${priceTolerance}::decimal,
+        ${threshold}::real
+      )
+    `;
+
+    return result;
+  }
+
+  /**
+   * Tìm tên chuẩn (canonical name) với DVT và DGIA
+   * 
+   * @param productName - Tên sản phẩm
+   * @param productDvt - Đơn vị tính (optional)
+   * @param productPrice - Đơn giá (optional)
+   * @param priceTolerance - % chênh lệch giá cho phép (default 10%)
+   * @param threshold - Ngưỡng similarity, mặc định 0.6
+   * @returns Object với canonical_name, canonical_dvt, canonical_price
+   */
+  async findCanonicalNameAdvanced(
+    productName: string,
+    productDvt?: string | null,
+    productPrice?: number | null,
+    priceTolerance: number = 10,
+    threshold: number = 0.6,
+  ): Promise<{
+    canonical_name: string;
+    canonical_dvt: string | null;
+    canonical_price: number | null;
+    match_count: number;
+    avg_price: number | null;
+  } | null> {
+    if (!productName || productName.trim() === '') {
+      return null;
+    }
+
+    const dvt = productDvt || null;
+    const price = productPrice ? Prisma.sql`${productPrice}::decimal` : Prisma.sql`NULL`;
+
+    const result = await this.prisma.$queryRaw<
+      Array<{
+        canonical_name: string;
+        canonical_dvt: string | null;
+        canonical_price: number | null;
+        match_count: number;
+        avg_price: number | null;
+      }>
+    >`
+      SELECT * FROM find_canonical_name_advanced(
+        ${productName},
+        ${dvt},
+        ${price},
+        ${priceTolerance}::decimal,
+        ${threshold}::real
+      )
+    `;
+
+    return result[0] || null;
+  }
+
+  /**
+   * Normalize product name với DVT và DGIA
+   * 
+   * @param productName - Tên sản phẩm
+   * @param productDvt - Đơn vị tính
+   * @param productPrice - Đơn giá
+   * @param priceTolerance - % chênh lệch giá
+   * @param threshold - Ngưỡng similarity
+   * @returns Tên đã chuẩn hóa
+   */
+  async normalizeProductNameAdvanced(
+    productName: string,
+    productDvt?: string | null,
+    productPrice?: number | null,
+    priceTolerance: number = 10,
+    threshold: number = 0.6,
+  ): Promise<string> {
+    if (!productName || productName.trim() === '') {
+      return '';
+    }
+
+    // Tìm canonical name advanced
+    const canonical = await this.findCanonicalNameAdvanced(
+      productName,
+      productDvt,
+      productPrice,
+      priceTolerance,
+      threshold,
+    );
+
+    if (canonical && canonical.canonical_name) {
+      return canonical.canonical_name;
+    }
+
+    // Fallback to basic normalization
+    const normalized = this.createNormalizedName(productName);
+    return normalized;
+  }
+
+  /**
+   * Group products by ten2 + DVT với price statistics
+   * 
+   * @param minGroupSize - Chỉ trả về nhóm có ít nhất N sản phẩm
+   * @param priceTolerance - % chênh lệch giá cho phép
+   * @returns Array of groups with DVT and price info
+   */
+  async getProductGroupsAdvanced(
+    minGroupSize: number = 2,
+    priceTolerance: number = 10,
+  ): Promise<
+    Array<{
+      ten2: string;
+      dvt: string;
+      product_count: number;
+      min_price: number;
+      max_price: number;
+      avg_price: number;
+      price_variance: number;
+    }>
+  > {
+    const result = await this.prisma.$queryRaw<
+      Array<{
+        ten2: string;
+        dvt: string;
+        product_count: number;
+        min_price: number;
+        max_price: number;
+        avg_price: number;
+        price_variance: number;
+      }>
+    >`
+      SELECT * FROM get_product_groups_advanced(
+        ${minGroupSize},
+        ${priceTolerance}::decimal
+      )
+      ORDER BY product_count DESC
+    `;
+
+    return result;
+  }
+
+  /**
+   * Tìm duplicate products với DVT và price tolerance
+   * 
+   * @param priceTolerance - % chênh lệch giá cho phép
+   * @returns Array of duplicate groups
+   */
+  async findDuplicatesAdvanced(
+    priceTolerance: number = 10,
+  ): Promise<
+    Array<{
+      ten2: string;
+      dvt: string;
+      product_count: number;
+      price_range: string;
+      product_ids: string[];
+    }>
+  > {
+    const result = await this.prisma.$queryRaw<
+      Array<{
+        ten2: string;
+        dvt: string;
+        product_count: number;
+        price_range: string;
+        product_ids: string[];
+      }>
+    >`
+      SELECT * FROM find_duplicates_advanced(${priceTolerance}::decimal)
+      ORDER BY product_count DESC
+    `;
+
+    return result;
+  }
+
+  /**
+   * Test similarity giữa 2 sản phẩm (bao gồm DVT và DGIA)
+   * 
+   * @param productId1 - ID sản phẩm 1
+   * @param productId2 - ID sản phẩm 2
+   * @returns Similarity metrics
+   */
+  async testProductSimilarity(
+    productId1: string,
+    productId2: string,
+  ): Promise<{
+    product1_name: string;
+    product2_name: string;
+    name_similarity: number;
+    dvt_match: boolean;
+    product1_dvt: string | null;
+    product2_dvt: string | null;
+    price_diff_percent: number;
+    product1_price: number;
+    product2_price: number;
+    is_duplicate: boolean;
+  } | null> {
+    const result = await this.prisma.$queryRaw<
+      Array<{
+        product1_name: string;
+        product2_name: string;
+        name_similarity: number;
+        dvt_match: boolean;
+        product1_dvt: string | null;
+        product2_dvt: string | null;
+        price_diff_percent: number;
+        product1_price: number;
+        product2_price: number;
+        is_duplicate: boolean;
+      }>
+    >`
+      SELECT * FROM test_product_similarity(${productId1}, ${productId2})
+    `;
+
+    return result[0] || null;
+  }
 }

@@ -165,6 +165,207 @@ export class ProductNormalizationResolver {
   ): Promise<number> {
     return this.normalizationService.mergeDuplicates(ten2, keepId);
   }
+
+  /* ========================================
+   * ADVANCED QUERIES (DVT + PRICE)
+   * ========================================*/
+
+  @Query(() => [SimilarProductAdvanced], {
+    description: 'Find similar products with DVT and price matching',
+  })
+  async findSimilarProductsAdvanced(
+    @Args('searchText', { type: () => String }) searchText: string,
+    @Args('searchDvt', {
+      type: () => String,
+      nullable: true,
+      description: 'Đơn vị tính (optional)',
+    })
+    searchDvt?: string,
+    @Args('searchPrice', {
+      type: () => Number,
+      nullable: true,
+      description: 'Đơn giá (optional)',
+    })
+    searchPrice?: number,
+    @Args('priceTolerance', {
+      type: () => Number,
+      defaultValue: 10,
+      description: 'Price tolerance percentage (default 10%)',
+    })
+    priceTolerance?: number,
+    @Args('threshold', {
+      type: () => Number,
+      defaultValue: 0.3,
+      description: 'Similarity threshold (0.0-1.0)',
+    })
+    threshold?: number,
+  ): Promise<SimilarProductAdvanced[]> {
+    const results =
+      await this.normalizationService.findSimilarProductsAdvanced(
+        searchText,
+        searchDvt,
+        searchPrice,
+        priceTolerance,
+        threshold,
+      );
+
+    return results.map((r) => ({
+      id: r.id,
+      ten: r.ten,
+      ten2: r.ten2,
+      ma: r.ma,
+      dvt: r.dvt,
+      dgia: r.dgia,
+      similarityScore: r.similarity_score,
+      priceDiffPercent: r.price_diff_percent,
+      dvtMatch: r.dvt_match,
+    }));
+  }
+
+  @Query(() => CanonicalNameAdvanced, {
+    nullable: true,
+    description: 'Find canonical name with DVT and price',
+  })
+  async findCanonicalNameAdvanced(
+    @Args('productName', { type: () => String }) productName: string,
+    @Args('productDvt', {
+      type: () => String,
+      nullable: true,
+    })
+    productDvt?: string,
+    @Args('productPrice', {
+      type: () => Number,
+      nullable: true,
+    })
+    productPrice?: number,
+    @Args('priceTolerance', {
+      type: () => Number,
+      defaultValue: 10,
+    })
+    priceTolerance?: number,
+    @Args('threshold', {
+      type: () => Number,
+      defaultValue: 0.6,
+    })
+    threshold?: number,
+  ): Promise<CanonicalNameAdvanced | null> {
+    const result =
+      await this.normalizationService.findCanonicalNameAdvanced(
+        productName,
+        productDvt,
+        productPrice,
+        priceTolerance,
+        threshold,
+      );
+
+    if (!result) return null;
+
+    return {
+      canonicalName: result.canonical_name,
+      canonicalDvt: result.canonical_dvt,
+      canonicalPrice: result.canonical_price,
+      matchCount: result.match_count,
+      avgPrice: result.avg_price,
+    };
+  }
+
+  @Query(() => String, {
+    description: 'Normalize product name with DVT and price',
+  })
+  async normalizeProductNameAdvanced(
+    @Args('productName', { type: () => String }) productName: string,
+    @Args('productDvt', {
+      type: () => String,
+      nullable: true,
+    })
+    productDvt?: string,
+    @Args('productPrice', {
+      type: () => Number,
+      nullable: true,
+    })
+    productPrice?: number,
+    @Args('priceTolerance', {
+      type: () => Number,
+      defaultValue: 10,
+    })
+    priceTolerance?: number,
+    @Args('threshold', {
+      type: () => Number,
+      defaultValue: 0.6,
+    })
+    threshold?: number,
+  ): Promise<string> {
+    return this.normalizationService.normalizeProductNameAdvanced(
+      productName,
+      productDvt,
+      productPrice,
+      priceTolerance,
+      threshold,
+    );
+  }
+
+  @Query(() => [ProductGroupAdvanced], {
+    description: 'Get product groups with DVT and price statistics',
+  })
+  async getProductGroupsAdvanced(
+    @Args('minGroupSize', {
+      type: () => Number,
+      defaultValue: 2,
+    })
+    minGroupSize?: number,
+    @Args('priceTolerance', {
+      type: () => Number,
+      defaultValue: 10,
+    })
+    priceTolerance?: number,
+  ): Promise<ProductGroupAdvanced[]> {
+    return this.normalizationService.getProductGroupsAdvanced(
+      minGroupSize,
+      priceTolerance,
+    );
+  }
+
+  @Query(() => [DuplicateGroupAdvanced], {
+    description: 'Find duplicates with DVT and price matching',
+  })
+  async findDuplicatesAdvanced(
+    @Args('priceTolerance', {
+      type: () => Number,
+      defaultValue: 10,
+    })
+    priceTolerance?: number,
+  ): Promise<DuplicateGroupAdvanced[]> {
+    return this.normalizationService.findDuplicatesAdvanced(priceTolerance);
+  }
+
+  @Query(() => ProductSimilarityTest, {
+    nullable: true,
+    description: 'Test similarity between two products',
+  })
+  async testProductSimilarity(
+    @Args('productId1', { type: () => String }) productId1: string,
+    @Args('productId2', { type: () => String }) productId2: string,
+  ): Promise<ProductSimilarityTest | null> {
+    const result = await this.normalizationService.testProductSimilarity(
+      productId1,
+      productId2,
+    );
+
+    if (!result) return null;
+
+    return {
+      product1Name: result.product1_name,
+      product2Name: result.product2_name,
+      nameSimilarity: result.name_similarity,
+      dvtMatch: result.dvt_match,
+      product1Dvt: result.product1_dvt,
+      product2Dvt: result.product2_dvt,
+      priceDiffPercent: result.price_diff_percent,
+      product1Price: result.product1_price,
+      product2Price: result.product2_price,
+      isDuplicate: result.is_duplicate,
+    };
+  }
 }
 
 // GraphQL Types
@@ -201,3 +402,57 @@ class NormalizationStats {
   skipped: number;
   errors: number;
 }
+
+// Advanced GraphQL Types
+
+class SimilarProductAdvanced {
+  id: string;
+  ten: string;
+  ten2: string | null;
+  ma: string | null;
+  dvt: string | null;
+  dgia: any;
+  similarityScore: number;
+  priceDiffPercent: number | null;
+  dvtMatch: boolean;
+}
+
+class CanonicalNameAdvanced {
+  canonicalName: string;
+  canonicalDvt: string | null;
+  canonicalPrice: number | null;
+  matchCount: number;
+  avgPrice: number | null;
+}
+
+class ProductGroupAdvanced {
+  ten2: string;
+  dvt: string;
+  product_count: number;
+  min_price: number;
+  max_price: number;
+  avg_price: number;
+  price_variance: number;
+}
+
+class DuplicateGroupAdvanced {
+  ten2: string;
+  dvt: string;
+  product_count: number;
+  price_range: string;
+  product_ids: string[];
+}
+
+class ProductSimilarityTest {
+  product1Name: string;
+  product2Name: string;
+  nameSimilarity: number;
+  dvtMatch: boolean;
+  product1Dvt: string | null;
+  product2Dvt: string | null;
+  priceDiffPercent: number;
+  product1Price: number;
+  product2Price: number;
+  isDuplicate: boolean;
+}
+

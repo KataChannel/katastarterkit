@@ -1,0 +1,718 @@
+# Advanced Product Matching - GraphQL Queries
+
+Complete collection of GraphQL queries for advanced product matching with DVT and price tolerance.
+
+---
+
+## 🔍 Find Similar Products Advanced
+
+### Example 1: Name Only (Basic)
+```graphql
+query FindSimilarProductsByName {
+  findSimilarProductsAdvanced(
+    searchText: "laptop dell"
+    threshold: 0.6
+  ) {
+    id
+    ten
+    ten2
+    ma
+    dvt
+    dgia
+    similarityScore
+    priceDiffPercent
+    dvtMatch
+  }
+}
+```
+
+### Example 2: Name + DVT
+```graphql
+query FindSimilarProductsByNameAndDvt {
+  findSimilarProductsAdvanced(
+    searchText: "laptop dell"
+    searchDvt: "Chiếc"
+    threshold: 0.6
+  ) {
+    id
+    ten
+    ten2
+    dvt
+    dgia
+    similarityScore
+    dvtMatch
+  }
+}
+```
+
+### Example 3: Name + DVT + Price (Full Advanced Matching)
+```graphql
+query FindSimilarProductsAdvancedFull {
+  findSimilarProductsAdvanced(
+    searchText: "laptop dell inspiron"
+    searchDvt: "Chiếc"
+    searchPrice: 15000000
+    priceTolerance: 10
+    threshold: 0.6
+  ) {
+    id
+    ten
+    ten2
+    ma
+    dvt
+    dgia
+    similarityScore
+    priceDiffPercent
+    dvtMatch
+  }
+}
+```
+
+### Example 4: Strict Price Matching (5% tolerance)
+```graphql
+query StrictPriceMatching {
+  findSimilarProductsAdvanced(
+    searchText: "sữa vinamilk"
+    searchDvt: "Hộp"
+    searchPrice: 8000
+    priceTolerance: 5
+    threshold: 0.7
+  ) {
+    ten
+    dvt
+    dgia
+    similarityScore
+    priceDiffPercent
+  }
+}
+```
+
+---
+
+## 🎯 Find Canonical Name Advanced
+
+### Example 1: Basic Canonical Name
+```graphql
+query FindCanonicalBasic {
+  findCanonicalNameAdvanced(
+    productName: "main bo mạch asus i7300"
+    threshold: 0.6
+  ) {
+    canonicalName
+    canonicalDvt
+    canonicalPrice
+    matchCount
+    avgPrice
+  }
+}
+```
+
+### Example 2: With DVT and Price
+```graphql
+query FindCanonicalWithDvtPrice {
+  findCanonicalNameAdvanced(
+    productName: "laptop asus rog"
+    productDvt: "Chiếc"
+    productPrice: 25000000
+    priceTolerance: 10
+    threshold: 0.6
+  ) {
+    canonicalName
+    canonicalDvt
+    canonicalPrice
+    matchCount
+    avgPrice
+  }
+}
+```
+
+### Example 3: Strict Matching
+```graphql
+query FindCanonicalStrict {
+  findCanonicalNameAdvanced(
+    productName: "VS XXTT Heo 70 - cây 70g"
+    productDvt: "Kg"
+    productPrice: 94000
+    priceTolerance: 5
+    threshold: 0.7
+  ) {
+    canonicalName
+    canonicalDvt
+    canonicalPrice
+    matchCount
+    avgPrice
+  }
+}
+```
+
+---
+
+## ✏️ Normalize Product Name Advanced
+
+### Example 1: Name Only
+```graphql
+query NormalizeNameOnly {
+  normalizeProductNameAdvanced(
+    productName: "main asus i7 mã 12345"
+    threshold: 0.6
+  )
+}
+```
+
+### Example 2: With DVT
+```graphql
+query NormalizeWithDvt {
+  normalizeProductNameAdvanced(
+    productName: "sữa tươi vinamilk có đường"
+    productDvt: "Hộp"
+    threshold: 0.6
+  )
+}
+```
+
+### Example 3: Full Advanced (Name + DVT + Price)
+```graphql
+query NormalizeFull {
+  normalizeProductNameAdvanced(
+    productName: "laptop dell inspiron 3520"
+    productDvt: "Chiếc"
+    productPrice: 12500000
+    priceTolerance: 10
+    threshold: 0.6
+  )
+}
+```
+
+---
+
+## 📊 Get Product Groups Advanced
+
+### Example 1: All Groups (min 2 products)
+```graphql
+query GetAllProductGroups {
+  getProductGroupsAdvanced(
+    minGroupSize: 2
+    priceTolerance: 10
+  ) {
+    ten2
+    dvt
+    product_count
+    min_price
+    max_price
+    avg_price
+    price_variance
+  }
+}
+```
+
+### Example 2: Large Groups Only (min 10 products)
+```graphql
+query GetLargeProductGroups {
+  getProductGroupsAdvanced(
+    minGroupSize: 10
+    priceTolerance: 10
+  ) {
+    ten2
+    dvt
+    product_count
+    min_price
+    max_price
+    avg_price
+    price_variance
+  }
+}
+```
+
+### Example 3: Tight Price Tolerance (5%)
+```graphql
+query GetTightPriceGroups {
+  getProductGroupsAdvanced(
+    minGroupSize: 5
+    priceTolerance: 5
+  ) {
+    ten2
+    dvt
+    product_count
+    min_price
+    max_price
+    avg_price
+    price_variance
+  }
+}
+```
+
+---
+
+## 🔍 Find Duplicates Advanced
+
+### Example 1: All Duplicates (10% tolerance)
+```graphql
+query FindAllDuplicates {
+  findDuplicatesAdvanced(
+    priceTolerance: 10
+  ) {
+    ten2
+    dvt
+    product_count
+    price_range
+    product_ids
+  }
+}
+```
+
+### Example 2: Strict Duplicates (5% tolerance)
+```graphql
+query FindStrictDuplicates {
+  findDuplicatesAdvanced(
+    priceTolerance: 5
+  ) {
+    ten2
+    dvt
+    product_count
+    price_range
+    product_ids
+  }
+}
+```
+
+### Example 3: Loose Duplicates (20% tolerance)
+```graphql
+query FindLooseDuplicates {
+  findDuplicatesAdvanced(
+    priceTolerance: 20
+  ) {
+    ten2
+    dvt
+    product_count
+    price_range
+    product_ids
+  }
+}
+```
+
+---
+
+## 🧪 Test Product Similarity
+
+### Example 1: Compare Two Products
+```graphql
+query TestTwoProducts {
+  testProductSimilarity(
+    productId1: "827e5d6f-c771-46ce-bcbd-050c8bbe015a"
+    productId2: "f4e36dd9-3a59-41f4-82ba-9a093e10a24a"
+  ) {
+    product1Name
+    product2Name
+    nameSimilarity
+    dvtMatch
+    product1Dvt
+    product2Dvt
+    priceDiffPercent
+    product1Price
+    product2Price
+    isDuplicate
+  }
+}
+```
+
+### Example 2: With Variables
+```graphql
+query TestProductSimilarityWithVars($id1: String!, $id2: String!) {
+  testProductSimilarity(
+    productId1: $id1
+    productId2: $id2
+  ) {
+    product1Name
+    product2Name
+    nameSimilarity
+    dvtMatch
+    priceDiffPercent
+    isDuplicate
+  }
+}
+
+# Variables:
+{
+  "id1": "product-uuid-1",
+  "id2": "product-uuid-2"
+}
+```
+
+---
+
+## 🔗 Combined Queries
+
+### Example 1: Full Product Analysis
+```graphql
+query FullProductAnalysis($productName: String!, $dvt: String, $price: Float) {
+  # Find similar products
+  similar: findSimilarProductsAdvanced(
+    searchText: $productName
+    searchDvt: $dvt
+    searchPrice: $price
+    priceTolerance: 10
+    threshold: 0.6
+  ) {
+    id
+    ten
+    dvt
+    dgia
+    similarityScore
+    priceDiffPercent
+    dvtMatch
+  }
+  
+  # Get canonical name
+  canonical: findCanonicalNameAdvanced(
+    productName: $productName
+    productDvt: $dvt
+    productPrice: $price
+    priceTolerance: 10
+    threshold: 0.6
+  ) {
+    canonicalName
+    canonicalDvt
+    canonicalPrice
+    matchCount
+    avgPrice
+  }
+  
+  # Get normalized name
+  normalized: normalizeProductNameAdvanced(
+    productName: $productName
+    productDvt: $dvt
+    productPrice: $price
+    priceTolerance: 10
+    threshold: 0.6
+  )
+}
+
+# Variables:
+{
+  "productName": "laptop dell inspiron",
+  "dvt": "Chiếc",
+  "price": 15000000
+}
+```
+
+### Example 2: Product Quality Report
+```graphql
+query ProductQualityReport {
+  # Get all groups
+  groups: getProductGroupsAdvanced(
+    minGroupSize: 5
+    priceTolerance: 10
+  ) {
+    ten2
+    dvt
+    product_count
+    avg_price
+    price_variance
+  }
+  
+  # Find duplicates
+  duplicates: findDuplicatesAdvanced(
+    priceTolerance: 10
+  ) {
+    ten2
+    dvt
+    product_count
+    price_range
+  }
+}
+```
+
+---
+
+## 📈 Analytics Queries
+
+### Example 1: Price Variance Analysis
+```graphql
+query PriceVarianceAnalysis {
+  getProductGroupsAdvanced(
+    minGroupSize: 3
+    priceTolerance: 10
+  ) {
+    ten2
+    dvt
+    product_count
+    min_price
+    max_price
+    avg_price
+    price_variance
+  }
+}
+```
+
+### Example 2: Duplicate Detection Report
+```graphql
+query DuplicateDetectionReport {
+  findDuplicatesAdvanced(priceTolerance: 10) {
+    ten2
+    dvt
+    product_count
+    price_range
+    product_ids
+  }
+}
+```
+
+---
+
+## 🎯 Real-World Use Cases
+
+### Use Case 1: Search Product with Price Range
+```graphql
+query SearchProductWithPriceRange {
+  findSimilarProductsAdvanced(
+    searchText: "laptop dell"
+    searchDvt: "Chiếc"
+    searchPrice: 15000000
+    priceTolerance: 15
+    threshold: 0.5
+  ) {
+    id
+    ten
+    dvt
+    dgia
+    ten2
+    similarityScore
+    priceDiffPercent
+    dvtMatch
+  }
+}
+```
+
+**Use**: Find laptops similar to "Dell" around 15M VND (±15%)
+
+---
+
+### Use Case 2: Product Consolidation
+```graphql
+query ProductConsolidation($productName: String!) {
+  # Step 1: Find canonical
+  canonical: findCanonicalNameAdvanced(
+    productName: $productName
+    threshold: 0.6
+  ) {
+    canonicalName
+    matchCount
+  }
+  
+  # Step 2: Find all variants
+  variants: findSimilarProductsAdvanced(
+    searchText: $productName
+    threshold: 0.6
+  ) {
+    id
+    ten
+    ten2
+    dvt
+    dgia
+  }
+}
+
+# Variables:
+{
+  "productName": "main asus i7"
+}
+```
+
+**Use**: Consolidate product variants under canonical name
+
+---
+
+### Use Case 3: Pricing Audit
+```graphql
+query PricingAudit($productName: String!, $dvt: String!) {
+  findSimilarProductsAdvanced(
+    searchText: $productName
+    searchDvt: $dvt
+    priceTolerance: 20
+    threshold: 0.7
+  ) {
+    ten
+    dgia
+    priceDiffPercent
+    dvtMatch
+  }
+}
+
+# Variables:
+{
+  "productName": "sữa vinamilk",
+  "dvt": "Hộp"
+}
+```
+
+**Use**: Find price anomalies for same product
+
+---
+
+### Use Case 4: Duplicate Cleanup Workflow
+```graphql
+# Step 1: Find duplicates
+query FindDuplicatesForCleanup {
+  findDuplicatesAdvanced(priceTolerance: 10) {
+    ten2
+    dvt
+    product_count
+    price_range
+    product_ids
+  }
+}
+
+# Step 2: Compare specific duplicates
+query CompareDuplicates($id1: String!, $id2: String!) {
+  testProductSimilarity(
+    productId1: $id1
+    productId2: $id2
+  ) {
+    product1Name
+    product2Name
+    nameSimilarity
+    dvtMatch
+    priceDiffPercent
+    isDuplicate
+  }
+}
+```
+
+**Use**: Find and merge duplicate products
+
+---
+
+## 🔧 Testing Queries
+
+### Test Query 1: Verify Advanced Matching Works
+```graphql
+query TestAdvancedMatching {
+  findSimilarProductsAdvanced(
+    searchText: "test product"
+    searchDvt: "Chiếc"
+    searchPrice: 100000
+    priceTolerance: 10
+    threshold: 0.3
+  ) {
+    ten
+    dvt
+    dgia
+    similarityScore
+    dvtMatch
+    priceDiffPercent
+  }
+}
+```
+
+### Test Query 2: Verify Canonical Name Advanced
+```graphql
+query TestCanonicalNameAdvanced {
+  findCanonicalNameAdvanced(
+    productName: "test product"
+    productDvt: "Chiếc"
+    productPrice: 100000
+    priceTolerance: 10
+    threshold: 0.6
+  ) {
+    canonicalName
+    canonicalDvt
+    canonicalPrice
+    matchCount
+    avgPrice
+  }
+}
+```
+
+### Test Query 3: Verify Product Groups
+```graphql
+query TestProductGroups {
+  getProductGroupsAdvanced(
+    minGroupSize: 2
+    priceTolerance: 10
+  ) {
+    ten2
+    dvt
+    product_count
+    avg_price
+    price_variance
+  }
+}
+```
+
+---
+
+## 📝 Tips & Best Practices
+
+### 1. Threshold Selection
+```graphql
+# Loose matching (discovery)
+findSimilarProductsAdvanced(searchText: "laptop", threshold: 0.3)
+
+# Balanced (recommended)
+findSimilarProductsAdvanced(searchText: "laptop", threshold: 0.6)
+
+# Strict (avoid false positives)
+findSimilarProductsAdvanced(searchText: "laptop", threshold: 0.8)
+```
+
+### 2. Price Tolerance Selection
+```graphql
+# Tight grouping
+findSimilarProductsAdvanced(searchPrice: 100000, priceTolerance: 5)
+
+# Standard (recommended)
+findSimilarProductsAdvanced(searchPrice: 100000, priceTolerance: 10)
+
+# Loose grouping
+findSimilarProductsAdvanced(searchPrice: 100000, priceTolerance: 20)
+```
+
+### 3. Progressive Matching
+```graphql
+# Step 1: Name only
+query Step1 { 
+  findSimilarProductsAdvanced(searchText: "laptop") { ... } 
+}
+
+# Step 2: Name + DVT
+query Step2 { 
+  findSimilarProductsAdvanced(searchText: "laptop", searchDvt: "Chiếc") { ... } 
+}
+
+# Step 3: Name + DVT + Price
+query Step3 { 
+  findSimilarProductsAdvanced(
+    searchText: "laptop", 
+    searchDvt: "Chiếc",
+    searchPrice: 15000000,
+    priceTolerance: 10
+  ) { ... } 
+}
+```
+
+---
+
+## 🚀 Quick Reference
+
+### All Available Queries
+1. `findSimilarProductsAdvanced` - Find similar products
+2. `findCanonicalNameAdvanced` - Get canonical name
+3. `normalizeProductNameAdvanced` - Normalize product name
+4. `getProductGroupsAdvanced` - Group products
+5. `findDuplicatesAdvanced` - Find duplicates
+6. `testProductSimilarity` - Compare two products
+
+### Common Parameters
+- `searchText / productName`: Product name (required)
+- `searchDvt / productDvt`: Unit type (optional)
+- `searchPrice / productPrice`: Price (optional)
+- `priceTolerance`: % price variance (default 10)
+- `threshold`: Similarity 0.0-1.0 (default 0.3-0.6)
+- `minGroupSize`: Minimum products per group (default 2)
+
+---
+
+**See Also**:
+- [ADVANCED_MATCHING_GUIDE.md](./ADVANCED_MATCHING_GUIDE.md) - Complete guide
+- [ADVANCED_MATCHING_SUMMARY.md](./ADVANCED_MATCHING_SUMMARY.md) - Quick summary
+- [PRODUCT_NORMALIZATION_QUERIES.graphql](./PRODUCT_NORMALIZATION_QUERIES.graphql) - Basic queries
