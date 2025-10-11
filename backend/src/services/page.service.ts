@@ -110,7 +110,21 @@ export class PageService {
       where: { id },
       include: {
         blocks: {
-          orderBy: { order: 'asc' }
+          where: { parentId: null }, // Only get root-level blocks
+          orderBy: { order: 'asc' },
+          include: {
+            children: {
+              orderBy: { order: 'asc' },
+              include: {
+                children: {
+                  orderBy: { order: 'asc' },
+                  include: {
+                    children: true // Support up to 4 levels of nesting
+                  }
+                }
+              }
+            }
+          }
         }
       }
     });
@@ -128,8 +142,25 @@ export class PageService {
       where: { slug },
       include: {
         blocks: {
-          where: { isVisible: true },
-          orderBy: { order: 'asc' }
+          where: { isVisible: true, parentId: null },
+          orderBy: { order: 'asc' },
+          include: {
+            children: {
+              where: { isVisible: true },
+              orderBy: { order: 'asc' },
+              include: {
+                children: {
+                  where: { isVisible: true },
+                  orderBy: { order: 'asc' },
+                  include: {
+                    children: {
+                      where: { isVisible: true }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     });
@@ -252,11 +283,17 @@ export class PageService {
       throw new NotFoundException(`Page with ID "${pageId}" not found`);
     }
 
+    // Remove children from input as we'll handle them separately
+    const { children, ...blockData } = input;
+
     const block = await this.prisma.pageBlock.create({
       data: {
-        ...input,
-        content: input.content || {},
-        page: { connect: { id: pageId } }
+        ...blockData,
+        content: blockData.content || {},
+        page: { connect: { id: pageId } },
+        depth: blockData.depth || 0,
+        parentId: blockData.parentId || null,
+        config: blockData.config || null,
       }
     });
 

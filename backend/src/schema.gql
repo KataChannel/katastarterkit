@@ -349,12 +349,18 @@ enum BlockType {
   COMPLETED_TASKS
   CONTACT_FORM
   CONTACT_INFO
+  CONTAINER
   DIVIDER
+  DYNAMIC
   FAQ
+  FLEX_COLUMN
+  FLEX_ROW
   GALLERY
+  GRID
   HERO
   IMAGE
   ROW
+  SECTION
   SPACER
   STATS
   TEAM
@@ -769,9 +775,13 @@ input CreateOnboardingChecklistInput {
 }
 
 input CreatePageBlockInput {
+  children: [CreatePageBlockInput!]
+  config: JSONObject
   content: JSONObject
+  depth: Int! = 0
   isVisible: Boolean! = true
   order: Int! = 0
+  parentId: String
   style: JSONObject
   type: BlockType!
 }
@@ -1790,12 +1800,16 @@ type Page {
 }
 
 type PageBlock {
+  children: [PageBlock!]
+  config: JSONObject
   content: JSONObject!
   createdAt: DateTime!
+  depth: Int!
   id: ID!
   isVisible: Boolean!
   order: Int!
   pageId: String!
+  parentId: String
   style: JSONObject
   type: BlockType!
   updatedAt: DateTime!
@@ -2946,10 +2960,14 @@ input UpdateOnboardingChecklistInput {
 }
 
 input UpdatePageBlockInput {
+  children: [UpdatePageBlockInput!]
+  config: JSONObject
   content: JSONObject
+  depth: Int
   id: ID
   isVisible: Boolean
   order: Int
+  parentId: String
   style: JSONObject
   type: BlockType
 }

@@ -299,6 +299,31 @@ Modern, flexible query system that eliminates GraphQL schema conflicts and provi
 **Examples:**
 - [**💻 Code Examples**](frontend/src/components/examples/UserSearchExamples.tsx) - Production-ready samples
 
+### 🎨 Advanced Page Builder System (NEW)
+Modern, nested block-based page builder with dynamic content and advanced layouts.
+
+**Quick Start:**
+- [**🚀 Quick Start Guide**](PAGE_BUILDER_QUICK_START.md) - Get started in 5 minutes
+- [**📖 Complete Implementation**](PAGE_BUILDER_IMPLEMENTATION_COMPLETE.md) - Full system overview
+- [**🇻🇳 Vietnamese Guide**](PAGE_BUILDER_COMPLETE_VIETNAMESE_SUMMARY.md) - Hướng dẫn tiếng Việt
+
+**Core Documentation:**
+- [**🏗️ Implementation Guide**](PAGE_BUILDER_NESTED_BLOCKS_IMPLEMENTATION.md) - Architecture & components
+- [**🔧 Hook API Reference**](docs/NESTED_BLOCK_HOOK_GUIDE.md) - useNestedBlockOperations guide
+- [**✅ Task 9 Report**](TASK_9_COMPLETION_REPORT.md) - Hook implementation details
+
+**Features:**
+- ✨ **Nested Blocks**: Unlimited nesting depth (recommended max: 4 levels)
+- 📦 **5 Container Types**: Container, Section, Grid, FlexRow, FlexColumn
+- ⚡ **Dynamic Blocks**: Data fetching from API/GraphQL with templates
+- 🎯 **10 Hook Operations**: Complete nested block management
+- 🔄 **Recursive Rendering**: Automatic nested structure rendering
+- 📊 **GraphQL API**: Full nested queries and mutations
+
+**Example Component:**
+- [**💻 Example Implementation**](frontend/src/components/page-builder/NestedPageBuilder.example.tsx) - Full UI example
+
+
 **Features:**
 - ✅ No GraphQL schema conflicts
 - ✅ Multi-field search (email, username, name)

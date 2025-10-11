@@ -27,6 +27,26 @@ export class CreatePageBlockInput {
   @IsOptional()
   @IsBoolean()
   isVisible?: boolean;
+
+  // Nested blocks support
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  parentId?: string;
+
+  @Field(() => Int, { defaultValue: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  depth?: number;
+
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  config?: any;
+
+  @Field(() => [CreatePageBlockInput], { nullable: true })
+  @IsOptional()
+  children?: CreatePageBlockInput[];
 }
 
 @InputType()
@@ -59,6 +79,26 @@ export class UpdatePageBlockInput {
   @IsOptional()
   @IsBoolean()
   isVisible?: boolean;
+
+  // Nested blocks support
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  parentId?: string;
+
+  @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  depth?: number;
+
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  config?: any;
+
+  @Field(() => [UpdatePageBlockInput], { nullable: true })
+  @IsOptional()
+  children?: UpdatePageBlockInput[];
 }
 
 @InputType()

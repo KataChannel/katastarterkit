@@ -14,6 +14,7 @@ import { ContainerBlock } from './ContainerBlock';
 import { SectionBlock } from './SectionBlock';
 import { GridBlock } from './GridBlock';
 import { FlexBlock } from './FlexBlock';
+import { DynamicBlock } from './DynamicBlock';
 
 export interface BlockRendererProps {
   block: PageBlock;
@@ -108,6 +109,8 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       return <FlexBlock {...containerProps} />;
     case BlockType.FLEX_COLUMN:
       return <FlexBlock {...containerProps} />;
+    case BlockType.DYNAMIC:
+      return <DynamicBlock {...commonProps} />;
     default:
       return (
         <div className="p-4 border border-red-300 bg-red-50 text-red-600 rounded">

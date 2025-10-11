@@ -9,6 +9,7 @@ export enum PageStatus {
 }
 
 export enum BlockType {
+  // Content Blocks
   TEXT = 'TEXT',
   IMAGE = 'IMAGE',
   HERO = 'HERO',
@@ -27,6 +28,16 @@ export enum BlockType {
   STATS = 'STATS',
   CONTACT_INFO = 'CONTACT_INFO',
   COMPLETED_TASKS = 'COMPLETED_TASKS',
+  
+  // Container/Layout Blocks
+  CONTAINER = 'CONTAINER',
+  SECTION = 'SECTION',
+  GRID = 'GRID',
+  FLEX_ROW = 'FLEX_ROW',
+  FLEX_COLUMN = 'FLEX_COLUMN',
+  
+  // Dynamic Block
+  DYNAMIC = 'DYNAMIC',
 }
 
 // Register enums for GraphQL
@@ -62,6 +73,20 @@ export class PageBlock {
 
   @Field(() => String)
   pageId: string;
+
+  // Nested blocks support
+  @Field(() => String, { nullable: true })
+  parentId?: string;
+
+  @Field(() => [PageBlock], { nullable: true })
+  children?: PageBlock[];
+
+  @Field(() => Int, { defaultValue: 0 })
+  depth: number;
+
+  // Dynamic configuration
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  config?: any;
 
   @Field(() => Date)
   createdAt: Date;

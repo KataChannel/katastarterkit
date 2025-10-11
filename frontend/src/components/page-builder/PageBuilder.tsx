@@ -30,7 +30,13 @@ import {
   Users,
   TrendingUp,
   Phone,
-  CheckCircle2
+  CheckCircle2,
+  Box,
+  Columns,
+  Grid3x3,
+  ArrowRightLeft,
+  ArrowUpDown,
+  Code
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -52,6 +58,7 @@ interface PageBuilderProps {
 }
 
 const BLOCK_TYPES = [
+  // Content Blocks
   { type: BlockType.TEXT, label: 'Text Block', icon: Type, color: 'bg-blue-100 text-blue-600' },
   { type: BlockType.IMAGE, label: 'Image Block', icon: Image, color: 'bg-green-100 text-green-600' },
   { type: BlockType.HERO, label: 'Hero Section', icon: Layout, color: 'bg-purple-100 text-purple-600' },
@@ -62,6 +69,16 @@ const BLOCK_TYPES = [
   { type: BlockType.COMPLETED_TASKS, label: 'Completed Tasks', icon: CheckCircle2, color: 'bg-green-100 text-green-600' },
   { type: BlockType.DIVIDER, label: 'Divider', icon: Minus, color: 'bg-gray-100 text-gray-600' },
   { type: BlockType.SPACER, label: 'Spacer', icon: Space, color: 'bg-yellow-100 text-yellow-600' },
+  
+  // Container/Layout Blocks
+  { type: BlockType.CONTAINER, label: 'Container', icon: Box, color: 'bg-violet-100 text-violet-600' },
+  { type: BlockType.SECTION, label: 'Section', icon: Columns, color: 'bg-fuchsia-100 text-fuchsia-600' },
+  { type: BlockType.GRID, label: 'Grid Layout', icon: Grid3x3, color: 'bg-pink-100 text-pink-600' },
+  { type: BlockType.FLEX_ROW, label: 'Flex Row', icon: ArrowRightLeft, color: 'bg-rose-100 text-rose-600' },
+  { type: BlockType.FLEX_COLUMN, label: 'Flex Column', icon: ArrowUpDown, color: 'bg-amber-100 text-amber-600' },
+  
+  // Dynamic Block
+  { type: BlockType.DYNAMIC, label: 'Dynamic Block', icon: Code, color: 'bg-purple-100 text-purple-600' },
 ];
 
 const DEFAULT_BLOCK_CONTENT = {
@@ -132,6 +149,56 @@ const DEFAULT_BLOCK_CONTENT = {
   },
   [BlockType.DIVIDER]: { style: {} },
   [BlockType.SPACER]: { height: 40, style: {} },
+  
+  // Container/Layout Blocks
+  [BlockType.CONTAINER]: {
+    layout: 'stack',
+    gap: 16,
+    padding: 16,
+    backgroundColor: 'transparent',
+    maxWidth: '100%',
+    alignment: 'left',
+    style: {}
+  },
+  [BlockType.SECTION]: {
+    fullWidth: false,
+    containerWidth: 'lg',
+    backgroundColor: 'transparent',
+    padding: { top: 60, bottom: 60 },
+    style: {}
+  },
+  [BlockType.GRID]: {
+    columns: 3,
+    gap: 16,
+    responsive: { sm: 1, md: 2, lg: 3 },
+    style: {}
+  },
+  [BlockType.FLEX_ROW]: {
+    direction: 'row',
+    justifyContent: 'start',
+    alignItems: 'start',
+    wrap: false,
+    gap: 16,
+    style: {}
+  },
+  [BlockType.FLEX_COLUMN]: {
+    direction: 'column',
+    justifyContent: 'start',
+    alignItems: 'start',
+    wrap: false,
+    gap: 16,
+    style: {}
+  },
+  
+  // Dynamic Block
+  [BlockType.DYNAMIC]: {
+    templateName: 'default',
+    dataSource: {
+      type: 'static',
+      staticData: { message: 'Configure data source in settings' }
+    },
+    style: {}
+  },
 };
 
 export default function PageBuilder({ pageId }: PageBuilderProps) {
@@ -219,7 +286,7 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
 
     const input: CreatePageBlockInput = {
       type: blockType,
-      content: DEFAULT_BLOCK_CONTENT[blockType],
+      content: (DEFAULT_BLOCK_CONTENT as any)[blockType] || {},
       style: {},
       order: blocks.length,
       isVisible: true,
