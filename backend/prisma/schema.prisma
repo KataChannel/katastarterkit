@@ -832,6 +832,7 @@ enum PageStatus {
 }
 
 enum BlockType {
+  // Content Blocks
   TEXT
   IMAGE
   HERO
@@ -850,6 +851,16 @@ enum BlockType {
   STATS
   CONTACT_INFO
   COMPLETED_TASKS
+  
+  // Container/Layout Blocks (for nested children)
+  CONTAINER
+  SECTION
+  GRID
+  FLEX_ROW
+  FLEX_COLUMN
+  
+  // Dynamic Blocks
+  DYNAMIC
 }
 
 model Page {
@@ -892,6 +903,17 @@ model PageBlock {
   pageId String
   page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
+  // Nested blocks support (self-relation)
+  parentId String?
+  parent   PageBlock?  @relation("BlockChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children PageBlock[] @relation("BlockChildren")
+  
+  // Nesting depth (0 = top level, 1 = first level child, etc.)
+  depth    Int         @default(0)
+  
+  // Dynamic configuration
+  config   Json? // Dynamic block configuration (templates, data sources, etc.)
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -899,6 +921,7 @@ model PageBlock {
   // Indexing for performance
   @@index([pageId, order])
   @@index([type])
+  @@index([parentId])
 }
 
 // File Management Models

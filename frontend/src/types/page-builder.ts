@@ -1,21 +1,121 @@
 // Block types and interfaces
 export enum BlockType {
+  // Content Blocks
   TEXT = 'TEXT',
-  IMAGE = 'IMAGE', 
+  IMAGE = 'IMAGE',
+  VIDEO = 'VIDEO',
+  GALLERY = 'GALLERY',
   HERO = 'HERO',
   BUTTON = 'BUTTON',
+  CARD = 'CARD',
+  TESTIMONIAL = 'TESTIMONIAL',
+  FAQ = 'FAQ',
+  CONTACT_FORM = 'CONTACT_FORM',
   DIVIDER = 'DIVIDER',
   SPACER = 'SPACER',
   TEAM = 'TEAM',
   STATS = 'STATS',
   CONTACT_INFO = 'CONTACT_INFO',
   COMPLETED_TASKS = 'COMPLETED_TASKS',
+  
+  // Container/Layout Blocks (for nested children)
+  CONTAINER = 'CONTAINER',
+  SECTION = 'SECTION',
+  GRID = 'GRID',
+  FLEX_ROW = 'FLEX_ROW',
+  FLEX_COLUMN = 'FLEX_COLUMN',
+  
+  // Dynamic Blocks
+  DYNAMIC = 'DYNAMIC',
 }
 
 export enum PageStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
   ARCHIVED = 'ARCHIVED',
+}
+
+// Dynamic Block Configuration Interface
+export interface DynamicBlockConfig {
+  // Template-based rendering
+  templateId?: string;
+  templateName?: string;
+  
+  // Data source configuration
+  dataSource?: {
+    type: 'api' | 'graphql' | 'static' | 'database';
+    endpoint?: string;
+    query?: string;
+    variables?: Record<string, any>;
+    staticData?: any;
+  };
+  
+  // Runtime variables
+  variables?: Record<string, any>;
+  
+  // Conditional rendering
+  conditions?: Array<{
+    field: string;
+    operator: 'equals' | 'notEquals' | 'contains' | 'greaterThan' | 'lessThan' | 'exists';
+    value: any;
+    logic?: 'AND' | 'OR';
+  }>;
+  
+  // Event handlers
+  events?: {
+    onClick?: string;
+    onLoad?: string;
+    onChange?: string;
+  };
+  
+  // Repeater configuration (for dynamic lists)
+  repeater?: {
+    enabled: boolean;
+    dataPath?: string;
+    itemTemplate?: any;
+    limit?: number;
+  };
+}
+
+// Container Block Content (for layout blocks with children)
+export interface ContainerBlockContent {
+  layout?: 'stack' | 'wrap' | 'scroll';
+  gap?: number;
+  padding?: number;
+  backgroundColor?: string;
+  maxWidth?: string;
+  alignment?: 'left' | 'center' | 'right';
+}
+
+export interface SectionBlockContent {
+  fullWidth?: boolean;
+  containerWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  backgroundColor?: string;
+  backgroundImage?: string;
+  padding?: {
+    top?: number;
+    bottom?: number;
+  };
+}
+
+export interface GridBlockContent {
+  columns?: number;
+  gap?: number;
+  columnTemplate?: string;
+  rowTemplate?: string;
+  responsive?: {
+    sm?: number;
+    md?: number;
+    lg?: number;
+  };
+}
+
+export interface FlexBlockContent {
+  direction?: 'row' | 'column';
+  justifyContent?: 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
+  alignItems?: 'start' | 'center' | 'end' | 'stretch';
+  wrap?: boolean;
+  gap?: number;
 }
 
 export interface PageBlock {
@@ -26,6 +126,15 @@ export interface PageBlock {
   order: number;
   isVisible: boolean;
   pageId: string;
+  
+  // Nested block support
+  children?: PageBlock[];
+  parentId?: string | null;
+  depth?: number;
+  
+  // Dynamic configuration
+  config?: DynamicBlockConfig;
+  
   createdAt: string;
   updatedAt: string;
 }
@@ -269,6 +378,10 @@ export interface CreatePageBlockInput {
   style?: BlockStyle;
   order: number;
   isVisible?: boolean;
+  parentId?: string | null;
+  depth?: number;
+  config?: DynamicBlockConfig;
+  children?: CreatePageBlockInput[];
 }
 
 export interface UpdatePageBlockInput {
@@ -278,6 +391,10 @@ export interface UpdatePageBlockInput {
   style?: BlockStyle;
   order?: number;
   isVisible?: boolean;
+  parentId?: string | null;
+  depth?: number;
+  config?: DynamicBlockConfig;
+  children?: UpdatePageBlockInput[];
 }
 
 export interface PageFiltersInput {
