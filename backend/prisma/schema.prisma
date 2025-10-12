@@ -850,7 +850,6 @@ enum BlockType {
   TEAM
   STATS
   CONTACT_INFO
-  COMPLETED_TASKS
   
   // Container/Layout Blocks (for nested children)
   CONTAINER

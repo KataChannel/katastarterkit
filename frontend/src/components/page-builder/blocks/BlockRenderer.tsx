@@ -9,7 +9,6 @@ import { SpacerBlock } from './SpacerBlock';
 import { TeamBlock } from './TeamBlock';
 import { StatsBlock } from './StatsBlock';
 import { ContactInfoBlock } from './ContactInfoBlock';
-import { CompletedTasksBlock } from './CompletedTasksBlock';
 import { ContainerBlock } from './ContainerBlock';
 import { SectionBlock } from './SectionBlock';
 import { GridBlock } from './GridBlock';
@@ -98,8 +97,6 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       return <StatsBlock {...commonProps} />;
     case BlockType.CONTACT_INFO:
       return <ContactInfoBlock {...commonProps} />;
-    case BlockType.COMPLETED_TASKS:
-      return <CompletedTasksBlock {...commonProps} isEditable={isEditing} />;
     case BlockType.CONTAINER:
       return <ContainerBlock {...containerProps} />;
     case BlockType.SECTION:

@@ -279,7 +279,7 @@ export class PageService {
     return updatedPage as Page;
   }
 
-  // Delete page
+  // Delete paDrop blocks here or click "Add Block" to add child blocksge
   async delete(id: string): Promise<Page> {
     const page = await this.prisma.page.findUnique({
       where: { id },

@@ -16,7 +16,6 @@ export enum BlockType {
   TEAM = 'TEAM',
   STATS = 'STATS',
   CONTACT_INFO = 'CONTACT_INFO',
-  COMPLETED_TASKS = 'COMPLETED_TASKS',
   
   // Container/Layout Blocks (for nested children)
   CONTAINER = 'CONTAINER',
@@ -302,18 +301,6 @@ export interface ContactInfoBlockContent {
   }>;
   showMap?: boolean;
   mapEmbedUrl?: string;
-}
-
-export interface CompletedTasksBlockContent {
-  title?: string;
-  subtitle?: string;
-  limit?: number;
-  showDate?: boolean;
-  showAssignee?: boolean;
-  layout?: 'list' | 'grid' | 'timeline';
-  filterByProject?: string;
-  sortBy?: 'completedDate' | 'priority' | 'title';
-  statusFilter?: string[]; // Support multiple statuses: PENDING, IN_PROGRESS, COMPLETED, CANCELLED
 }
 
 // Block style interface
