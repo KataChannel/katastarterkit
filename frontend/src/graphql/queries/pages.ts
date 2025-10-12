@@ -16,7 +16,7 @@ const PAGE_FRAGMENT = gql`
   }
 `;
 
-// Fragment for page block fields
+// Fragment for page block fields (with nested children support)
 const PAGE_BLOCK_FRAGMENT = gql`
   fragment PageBlockFields on PageBlock {
     id
@@ -24,6 +24,39 @@ const PAGE_BLOCK_FRAGMENT = gql`
     content
     style
     order
+    parentId
+    depth
+    isVisible
+    children {
+      id
+      type
+      content
+      style
+      order
+      parentId
+      depth
+      isVisible
+      children {
+        id
+        type
+        content
+        style
+        order
+        parentId
+        depth
+        isVisible
+        children {
+          id
+          type
+          content
+          style
+          order
+          parentId
+          depth
+          isVisible
+        }
+      }
+    }
   }
 `;
 

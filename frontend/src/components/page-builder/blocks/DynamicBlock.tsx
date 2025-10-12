@@ -38,23 +38,26 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
       setError(null);
 
       try {
-        if (config.dataSource.type === 'static') {
-          setData(config.dataSource.staticData);
-        } else if (config.dataSource.type === 'api') {
-          const response = await fetch(config.dataSource.endpoint || '', {
+        const dataSource = config.dataSource;
+        if (!dataSource) return;
+
+        if (dataSource.type === 'static') {
+          setData(dataSource.staticData);
+        } else if (dataSource.type === 'api') {
+          const response = await fetch(dataSource.endpoint || '', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(config.dataSource.variables || {}),
+            body: JSON.stringify(dataSource.variables || {}),
           });
           const result = await response.json();
           setData(result);
-        } else if (config.dataSource.type === 'graphql') {
-          const response = await fetch(config.dataSource.endpoint || '/graphql', {
+        } else if (dataSource.type === 'graphql') {
+          const response = await fetch(dataSource.endpoint || '/graphql', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              query: config.dataSource.query,
-              variables: config.dataSource.variables,
+              query: dataSource.query,
+              variables: dataSource.variables,
             }),
           });
           const result = await response.json();
@@ -100,7 +103,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
       }
 
       // Handle logic operators (AND/OR)
-      if (index > 0 && config.conditions[index - 1]?.logic === 'OR') {
+      if (index > 0 && config.conditions && config.conditions[index - 1]?.logic === 'OR') {
         return result; // OR logic - any true condition passes
       }
       return result; // Default AND logic
@@ -165,7 +168,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
       }
 
       const filteredItems = items.filter(evaluateConditions);
-      const limitedItems = config.repeater.limit 
+      const limitedItems = config.repeater?.limit 
         ? filteredItems.slice(0, config.repeater.limit)
         : filteredItems;
 
@@ -173,7 +176,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
         <div className="grid gap-4">
           {limitedItems.map((item, index) => (
             <Card key={index} className="p-4">
-              {config.repeater.itemTemplate ? (
+              {config.repeater?.itemTemplate ? (
                 <div>
                   <h3 className="font-bold">
                     {replaceVariables(config.repeater.itemTemplate.content?.title || '', item)}
@@ -286,7 +289,11 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       value={editConfig.dataSource?.endpoint || ''}
                       onChange={(e) => setEditConfig({
                         ...editConfig,
-                        dataSource: { ...editConfig.dataSource, endpoint: e.target.value }
+                        dataSource: { 
+                          type: editConfig.dataSource?.type || 'api',
+                          ...editConfig.dataSource, 
+                          endpoint: e.target.value 
+                        }
                       })}
                     />
                   </div>
@@ -300,7 +307,11 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       value={editConfig.dataSource?.query || ''}
                       onChange={(e) => setEditConfig({
                         ...editConfig,
-                        dataSource: { ...editConfig.dataSource, query: e.target.value }
+                        dataSource: { 
+                          type: editConfig.dataSource?.type || 'graphql',
+                          ...editConfig.dataSource, 
+                          query: e.target.value 
+                        }
                       })}
                       rows={3}
                     />
@@ -318,7 +329,11 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                           const parsed = JSON.parse(e.target.value);
                           setEditConfig({
                             ...editConfig,
-                            dataSource: { ...editConfig.dataSource, staticData: parsed }
+                            dataSource: { 
+                              type: 'static',
+                              ...editConfig.dataSource, 
+                              staticData: parsed 
+                            }
                           });
                         } catch (err) {
                           // Invalid JSON, ignore
@@ -354,7 +369,11 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       value={editConfig.repeater?.dataPath || ''}
                       onChange={(e) => setEditConfig({
                         ...editConfig,
-                        repeater: { ...editConfig.repeater, dataPath: e.target.value }
+                        repeater: { 
+                          enabled: editConfig.repeater?.enabled || false,
+                          ...editConfig.repeater, 
+                          dataPath: e.target.value 
+                        }
                       })}
                     />
                   </div>
@@ -367,7 +386,11 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       value={editConfig.repeater?.limit || ''}
                       onChange={(e) => setEditConfig({
                         ...editConfig,
-                        repeater: { ...editConfig.repeater, limit: parseInt(e.target.value) }
+                        repeater: { 
+                          enabled: editConfig.repeater?.enabled || false,
+                          ...editConfig.repeater, 
+                          limit: parseInt(e.target.value) 
+                        }
                       })}
                     />
                   </div>

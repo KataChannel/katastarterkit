@@ -42,7 +42,7 @@ import { toast } from 'react-hot-toast';
 
 import { SortableBlock } from '@/components/page-builder/SortableBlock';
 import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
-import { usePage, usePageOperations, useBlockOperations } from '@/hooks/usePageBuilder';
+import { usePage, usePageOperations, useBlockOperations, useNestedBlockOperations } from '@/hooks/usePageBuilder';
 import { 
   BlockType, 
   Page, 
@@ -208,16 +208,22 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
   const [draggedBlock, setDraggedBlock] = useState<PageBlock | null>(null);
   const [showPageSettings, setShowPageSettings] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [addChildParentId, setAddChildParentId] = useState<string | null>(null);
+  const [showAddChildDialog, setShowAddChildDialog] = useState(false);
 
   const { page, loading, refetch } = usePage(pageId || '');
   const { createPage, updatePage, deletePage } = usePageOperations();
   const { addBlock, updateBlock, deleteBlock, updateBlocksOrder } = useBlockOperations(pageId || '');
+  const nestedOps = useNestedBlockOperations(pageId || '');
 
   // Initialize data
   useEffect(() => {
     if (page) {
       setEditingPage(page);
-      setBlocks(page.blocks || []);
+      // Only show root level blocks (parentId = null or undefined)
+      // Children will be rendered recursively by BlockRenderer
+      const rootBlocks = (page.blocks || []).filter(block => !block.parentId);
+      setBlocks(rootBlocks);
       setIsNewPageMode(false);
     } else if (!pageId) {
       setIsNewPageMode(true);
@@ -318,6 +324,30 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
       await refetch();
     } catch (error) {
       console.error('Failed to delete block:', error);
+    }
+  };
+
+  const handleAddChild = (parentId: string) => {
+    if (!editingPage?.id && isNewPageMode) {
+      toast.error('Please save the page first before adding blocks');
+      return;
+    }
+    setAddChildParentId(parentId);
+    setShowAddChildDialog(true);
+  };
+
+  const handleAddChildBlock = async (blockType: BlockType) => {
+    if (!addChildParentId) return;
+
+    try {
+      const content = (DEFAULT_BLOCK_CONTENT as any)[blockType] || {};
+      await nestedOps.addChildBlock(addChildParentId, blockType, content, {});
+      setShowAddChildDialog(false);
+      setAddChildParentId(null);
+      toast.success('Child block added successfully!');
+    } catch (error: any) {
+      console.error('Failed to add child block:', error);
+      toast.error(error.message || 'Failed to add child block');
     }
   };
 
@@ -474,11 +504,16 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
                         </Card>
                       ) : (
                         blocks.map(block => (
-                          <SortableBlock
+                          <BlockRenderer
                             key={block.id}
                             block={block}
-                            onUpdate={handleBlockUpdate}
-                            onDelete={handleBlockDelete}
+                            isEditing={true}
+                            onUpdate={(content, style) => handleBlockUpdate(block.id, content, style)}
+                            onDelete={() => handleBlockDelete(block.id)}
+                            onAddChild={handleAddChild}
+                            onUpdateChild={handleBlockUpdate}
+                            onDeleteChild={handleBlockDelete}
+                            depth={0}
                           />
                         ))
                       )}
@@ -501,6 +536,30 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
           </div>
         </div>
       </div>
+
+      {/* Add Child Block Dialog */}
+      <Dialog open={showAddChildDialog} onOpenChange={setShowAddChildDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add Child Block</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 py-4">
+            {BLOCK_TYPES.map(({ type, label, icon: Icon, color }) => (
+              <Button
+                key={type}
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center justify-center space-y-2 hover:border-blue-500"
+                onClick={() => handleAddChildBlock(type)}
+              >
+                <div className={`p-3 rounded-lg ${color}`}>
+                  <Icon size={24} />
+                </div>
+                <span className="text-sm font-medium text-center">{label}</span>
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

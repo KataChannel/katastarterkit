@@ -55,7 +55,8 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   const renderChildren = () => {
     if (!block.children || block.children.length === 0) return null;
 
-    return block.children
+    // Create a copy of children array before sorting (GraphQL returns read-only array)
+    return [...block.children]
       .sort((a, b) => a.order - b.order)
       .map((childBlock) => (
         <BlockRenderer
