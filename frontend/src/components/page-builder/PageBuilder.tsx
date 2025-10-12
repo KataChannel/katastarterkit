@@ -211,6 +211,8 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
   const [showPreview, setShowPreview] = useState(false);
   const [addChildParentId, setAddChildParentId] = useState<string | null>(null);
   const [showAddChildDialog, setShowAddChildDialog] = useState(false);
+  const [templateSearchQuery, setTemplateSearchQuery] = useState('');
+  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState<string>('all');
 
   const { page, loading, refetch } = usePage(pageId || '');
   const { createPage, updatePage, deletePage } = usePageOperations();
@@ -418,6 +420,17 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
     }
   };
 
+  // Filter templates based on search and category
+  const filteredTemplates = BLOCK_TEMPLATES.filter(template => {
+    const matchesSearch = template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()) ||
+                         template.description.toLowerCase().includes(templateSearchQuery.toLowerCase());
+    const matchesCategory = selectedTemplateCategory === 'all' || template.category === selectedTemplateCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  // Get unique categories
+  const templateCategories = ['all', ...Array.from(new Set(BLOCK_TEMPLATES.map(t => t.category)))];
+
   const handleDragStart = (event: DragStartEvent) => {
     const activeBlock = blocks.find(block => block.id === event.active.id);
     setDraggedBlock(activeBlock || null);
@@ -541,24 +554,54 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
             </TabsContent>
             
             <TabsContent value="templates" className="mt-0">
+              {/* Search and Filter */}
+              <div className="space-y-3 mb-4">
+                <Input
+                  type="text"
+                  placeholder="Tìm kiếm template..."
+                  value={templateSearchQuery}
+                  onChange={(e) => setTemplateSearchQuery(e.target.value)}
+                  className="w-full"
+                />
+                <Select value={selectedTemplateCategory} onValueChange={setSelectedTemplateCategory}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn danh mục" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templateCategories.map(category => (
+                      <SelectItem key={category} value={category}>
+                        {category === 'all' ? 'Tất cả' : category.charAt(0).toUpperCase() + category.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Template Cards */}
               <div className="space-y-3">
-                {BLOCK_TEMPLATES.map(template => (
-                  <Card
-                    key={template.id}
-                    className="p-3 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
-                    onClick={() => handleApplyTemplate(template)}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-semibold text-sm">{template.name}</h4>
-                      <Badge variant="outline" className="text-xs">
-                        {template.category}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-gray-600 leading-relaxed">
-                      {template.description}
-                    </p>
+                {filteredTemplates.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <p className="text-gray-500">Không tìm thấy template phù hợp</p>
                   </Card>
-                ))}
+                ) : (
+                  filteredTemplates.map(template => (
+                    <Card
+                      key={template.id}
+                      className="p-3 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
+                      onClick={() => handleApplyTemplate(template)}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-semibold text-sm">{template.name}</h4>
+                        <Badge variant="outline" className="text-xs">
+                          {template.category}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-gray-600 leading-relaxed">
+                        {template.description}
+                      </p>
+                    </Card>
+                  ))
+                )}
               </div>
             </TabsContent>
           </Tabs>

@@ -653,6 +653,634 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
         ]
       }
     ]
+  },
+  
+  // Template 5: Team Section
+  {
+    id: 'team-3members',
+    name: 'Team 3 Members',
+    description: 'Giới thiệu đội ngũ với 3 thành viên, ảnh đại diện và thông tin liên hệ',
+    category: 'team',
+    blocks: [
+      {
+        type: BlockType.SECTION,
+        order: 0,
+        depth: 0,
+        content: {
+          fullWidth: false,
+          containerWidth: 'lg',
+          backgroundColor: 'white',
+          padding: { top: 80, bottom: 80 }
+        },
+        children: [
+          {
+            type: BlockType.CONTAINER,
+            order: 0,
+            depth: 1,
+            content: {
+              alignment: 'center',
+              maxWidth: '1200px',
+              style: {}
+            },
+            children: [
+              {
+                type: BlockType.TEXT,
+                order: 0,
+                depth: 2,
+                content: {
+                  content: '<h2 style="font-size: 2.5rem; font-weight: bold; text-align: center; margin-bottom: 1rem;">Đội Ngũ Của Chúng Tôi</h2><p style="text-align: center; color: #64748b; font-size: 1.125rem; max-width: 600px; margin: 0 auto;">Gặp gỡ những con người tài năng đằng sau thành công của chúng tôi</p>',
+                  style: {}
+                }
+              },
+              {
+                type: BlockType.GRID,
+                order: 1,
+                depth: 2,
+                content: {
+                  columns: 3,
+                  gap: 32,
+                  responsive: { sm: 1, md: 2, lg: 3 },
+                  style: { marginTop: '48px' }
+                },
+                children: [
+                  // Member 1
+                  {
+                    type: BlockType.CONTAINER,
+                    order: 0,
+                    depth: 3,
+                    content: {
+                      layout: 'stack',
+                      gap: 16,
+                      padding: 24,
+                      backgroundColor: '#f9fafb',
+                      alignment: 'center',
+                      style: { borderRadius: '12px' }
+                    },
+                    children: [
+                      {
+                        type: BlockType.IMAGE,
+                        order: 0,
+                        depth: 4,
+                        content: {
+                          src: 'https://via.placeholder.com/200x200',
+                          alt: 'Team Member 1',
+                          style: { 
+                            width: '150px', 
+                            height: '150px', 
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            margin: '0 auto'
+                          }
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 1,
+                        depth: 4,
+                        content: {
+                          content: '<h3 style="font-size: 1.5rem; font-weight: bold; text-align: center; margin-bottom: 0.5rem;">Nguyễn Văn A</h3><p style="text-align: center; color: #3b82f6; font-weight: 600; margin-bottom: 1rem;">CEO & Founder</p><p style="text-align: center; color: #64748b; font-size: 0.875rem;">Chuyên gia với hơn 10 năm kinh nghiệm trong lĩnh vực công nghệ và quản lý.</p>',
+                          style: {}
+                        }
+                      }
+                    ]
+                  },
+                  // Member 2
+                  {
+                    type: BlockType.CONTAINER,
+                    order: 1,
+                    depth: 3,
+                    content: {
+                      layout: 'stack',
+                      gap: 16,
+                      padding: 24,
+                      backgroundColor: '#f9fafb',
+                      alignment: 'center',
+                      style: { borderRadius: '12px' }
+                    },
+                    children: [
+                      {
+                        type: BlockType.IMAGE,
+                        order: 0,
+                        depth: 4,
+                        content: {
+                          src: 'https://via.placeholder.com/200x200',
+                          alt: 'Team Member 2',
+                          style: { 
+                            width: '150px', 
+                            height: '150px', 
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            margin: '0 auto'
+                          }
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 1,
+                        depth: 4,
+                        content: {
+                          content: '<h3 style="font-size: 1.5rem; font-weight: bold; text-align: center; margin-bottom: 0.5rem;">Trần Thị B</h3><p style="text-align: center; color: #3b82f6; font-weight: 600; margin-bottom: 1rem;">CTO</p><p style="text-align: center; color: #64748b; font-size: 0.875rem;">Kiến trúc sư phần mềm hàng đầu với đam mê xây dựng sản phẩm chất lượng.</p>',
+                          style: {}
+                        }
+                      }
+                    ]
+                  },
+                  // Member 3
+                  {
+                    type: BlockType.CONTAINER,
+                    order: 2,
+                    depth: 3,
+                    content: {
+                      layout: 'stack',
+                      gap: 16,
+                      padding: 24,
+                      backgroundColor: '#f9fafb',
+                      alignment: 'center',
+                      style: { borderRadius: '12px' }
+                    },
+                    children: [
+                      {
+                        type: BlockType.IMAGE,
+                        order: 0,
+                        depth: 4,
+                        content: {
+                          src: 'https://via.placeholder.com/200x200',
+                          alt: 'Team Member 3',
+                          style: { 
+                            width: '150px', 
+                            height: '150px', 
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            margin: '0 auto'
+                          }
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 1,
+                        depth: 4,
+                        content: {
+                          content: '<h3 style="font-size: 1.5rem; font-weight: bold; text-align: center; margin-bottom: 0.5rem;">Lê Văn C</h3><p style="text-align: center; color: #3b82f6; font-weight: 600; margin-bottom: 1rem;">Head of Design</p><p style="text-align: center; color: #64748b; font-size: 0.875rem;">Nhà thiết kế sáng tạo với tầm nhìn thẩm mỹ độc đáo và tinh tế.</p>',
+                          style: {}
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  
+  // Template 6: Contact Section
+  {
+    id: 'contact-form',
+    name: 'Contact Form & Info',
+    description: 'Form liên hệ kết hợp với thông tin liên lạc và bản đồ',
+    category: 'contact',
+    blocks: [
+      {
+        type: BlockType.SECTION,
+        order: 0,
+        depth: 0,
+        content: {
+          fullWidth: false,
+          containerWidth: 'lg',
+          backgroundColor: '#f9fafb',
+          padding: { top: 80, bottom: 80 }
+        },
+        children: [
+          {
+            type: BlockType.CONTAINER,
+            order: 0,
+            depth: 1,
+            content: {
+              alignment: 'center',
+              maxWidth: '1200px',
+              style: {}
+            },
+            children: [
+              {
+                type: BlockType.TEXT,
+                order: 0,
+                depth: 2,
+                content: {
+                  content: '<h2 style="font-size: 2.5rem; font-weight: bold; text-align: center; margin-bottom: 1rem;">Liên Hệ Với Chúng Tôi</h2><p style="text-align: center; color: #64748b; font-size: 1.125rem; max-width: 600px; margin: 0 auto;">Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn</p>',
+                  style: {}
+                }
+              },
+              {
+                type: BlockType.GRID,
+                order: 1,
+                depth: 2,
+                content: {
+                  columns: 2,
+                  gap: 48,
+                  responsive: { sm: 1, md: 2, lg: 2 },
+                  style: { marginTop: '48px' }
+                },
+                children: [
+                  // Contact Info
+                  {
+                    type: BlockType.CONTAINER,
+                    order: 0,
+                    depth: 3,
+                    content: {
+                      layout: 'stack',
+                      gap: 32,
+                      padding: 32,
+                      backgroundColor: 'white',
+                      style: { borderRadius: '12px' }
+                    },
+                    children: [
+                      {
+                        type: BlockType.TEXT,
+                        order: 0,
+                        depth: 4,
+                        content: {
+                          content: '<h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1.5rem;">Thông Tin Liên Hệ</h3>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 1,
+                        depth: 4,
+                        content: {
+                          content: '<div style="display: flex; align-items: start; gap: 16px; margin-bottom: 20px;"><div style="width: 40px; height: 40px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">📍</div><div><strong style="display: block; margin-bottom: 4px;">Địa chỉ</strong><span style="color: #64748b;">123 Đường ABC, Quận 1, TP.HCM</span></div></div>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 2,
+                        depth: 4,
+                        content: {
+                          content: '<div style="display: flex; align-items: start; gap: 16px; margin-bottom: 20px;"><div style="width: 40px; height: 40px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">📞</div><div><strong style="display: block; margin-bottom: 4px;">Điện thoại</strong><span style="color: #64748b;">+84 123 456 789</span></div></div>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 3,
+                        depth: 4,
+                        content: {
+                          content: '<div style="display: flex; align-items: start; gap: 16px;"><div style="width: 40px; height: 40px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">✉️</div><div><strong style="display: block; margin-bottom: 4px;">Email</strong><span style="color: #64748b;">contact@example.com</span></div></div>',
+                          style: {}
+                        }
+                      }
+                    ]
+                  },
+                  // Contact Form Placeholder
+                  {
+                    type: BlockType.CONTAINER,
+                    order: 1,
+                    depth: 3,
+                    content: {
+                      layout: 'stack',
+                      gap: 20,
+                      padding: 32,
+                      backgroundColor: 'white',
+                      style: { borderRadius: '12px' }
+                    },
+                    children: [
+                      {
+                        type: BlockType.TEXT,
+                        order: 0,
+                        depth: 4,
+                        content: {
+                          content: '<h3 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem;">Gửi Tin Nhắn</h3><p style="color: #64748b; margin-bottom: 1.5rem;">Điền thông tin bên dưới để gửi tin nhắn cho chúng tôi</p>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 1,
+                        depth: 4,
+                        content: {
+                          content: '<div style="margin-bottom: 16px;"><label style="display: block; margin-bottom: 8px; font-weight: 600;">Họ và tên</label><input type="text" placeholder="Nhập họ và tên" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem;" /></div>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 2,
+                        depth: 4,
+                        content: {
+                          content: '<div style="margin-bottom: 16px;"><label style="display: block; margin-bottom: 8px; font-weight: 600;">Email</label><input type="email" placeholder="Nhập email" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem;" /></div>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 3,
+                        depth: 4,
+                        content: {
+                          content: '<div style="margin-bottom: 16px;"><label style="display: block; margin-bottom: 8px; font-weight: 600;">Tin nhắn</label><textarea placeholder="Nhập tin nhắn của bạn" rows="4" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea></div>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.BUTTON,
+                        order: 4,
+                        depth: 4,
+                        content: {
+                          text: 'Gửi tin nhắn',
+                          href: '#',
+                          variant: 'primary',
+                          style: {
+                            width: '100%',
+                            padding: '14px 24px',
+                            backgroundColor: '#3b82f6',
+                            color: 'white',
+                            borderRadius: '8px',
+                            fontSize: '1rem',
+                            fontWeight: 'bold'
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  
+  // Template 7: Testimonials
+  {
+    id: 'testimonials-3col',
+    name: 'Testimonials 3 Reviews',
+    description: 'Phần đánh giá của khách hàng với 3 reviews và rating',
+    category: 'custom',
+    blocks: [
+      {
+        type: BlockType.SECTION,
+        order: 0,
+        depth: 0,
+        content: {
+          fullWidth: false,
+          containerWidth: 'lg',
+          backgroundColor: 'white',
+          padding: { top: 80, bottom: 80 }
+        },
+        children: [
+          {
+            type: BlockType.CONTAINER,
+            order: 0,
+            depth: 1,
+            content: {
+              alignment: 'center',
+              maxWidth: '1200px',
+              style: {}
+            },
+            children: [
+              {
+                type: BlockType.TEXT,
+                order: 0,
+                depth: 2,
+                content: {
+                  content: '<h2 style="font-size: 2.5rem; font-weight: bold; text-align: center; margin-bottom: 1rem;">Khách Hàng Nói Gì Về Chúng Tôi</h2><p style="text-align: center; color: #64748b; font-size: 1.125rem; max-width: 600px; margin: 0 auto;">Hàng ngàn khách hàng hài lòng đã tin tưởng và sử dụng dịch vụ của chúng tôi</p>',
+                  style: {}
+                }
+              },
+              {
+                type: BlockType.GRID,
+                order: 1,
+                depth: 2,
+                content: {
+                  columns: 3,
+                  gap: 32,
+                  responsive: { sm: 1, md: 2, lg: 3 },
+                  style: { marginTop: '48px' }
+                },
+                children: [
+                  // Review 1
+                  {
+                    type: BlockType.CONTAINER,
+                    order: 0,
+                    depth: 3,
+                    content: {
+                      layout: 'stack',
+                      gap: 20,
+                      padding: 32,
+                      backgroundColor: '#f9fafb',
+                      style: { borderRadius: '12px' }
+                    },
+                    children: [
+                      {
+                        type: BlockType.TEXT,
+                        order: 0,
+                        depth: 4,
+                        content: {
+                          content: '<div style="color: #fbbf24; font-size: 1.5rem; margin-bottom: 16px;">⭐⭐⭐⭐⭐</div>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 1,
+                        depth: 4,
+                        content: {
+                          content: '<p style="color: #334155; font-size: 1rem; line-height: 1.7; margin-bottom: 20px;">"Sản phẩm tuyệt vời! Giúp công việc của tôi hiệu quả hơn rất nhiều. Đội ngũ hỗ trợ cũng rất tận tình."</p>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.FLEX_ROW,
+                        order: 2,
+                        depth: 4,
+                        content: {
+                          direction: 'row',
+                          justifyContent: 'start',
+                          alignItems: 'center',
+                          gap: 12,
+                          style: {}
+                        },
+                        children: [
+                          {
+                            type: BlockType.IMAGE,
+                            order: 0,
+                            depth: 5,
+                            content: {
+                              src: 'https://via.placeholder.com/50x50',
+                              alt: 'Customer 1',
+                              style: { 
+                                width: '50px', 
+                                height: '50px', 
+                                borderRadius: '50%',
+                                objectFit: 'cover'
+                              }
+                            }
+                          },
+                          {
+                            type: BlockType.TEXT,
+                            order: 1,
+                            depth: 5,
+                            content: {
+                              content: '<div><strong style="display: block; font-size: 1rem;">Nguyễn Minh A</strong><span style="color: #64748b; font-size: 0.875rem;">CEO tại ABC Corp</span></div>',
+                              style: {}
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  // Review 2
+                  {
+                    type: BlockType.CONTAINER,
+                    order: 1,
+                    depth: 3,
+                    content: {
+                      layout: 'stack',
+                      gap: 20,
+                      padding: 32,
+                      backgroundColor: '#f9fafb',
+                      style: { borderRadius: '12px' }
+                    },
+                    children: [
+                      {
+                        type: BlockType.TEXT,
+                        order: 0,
+                        depth: 4,
+                        content: {
+                          content: '<div style="color: #fbbf24; font-size: 1.5rem; margin-bottom: 16px;">⭐⭐⭐⭐⭐</div>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 1,
+                        depth: 4,
+                        content: {
+                          content: '<p style="color: #334155; font-size: 1rem; line-height: 1.7; margin-bottom: 20px;">"Giao diện đẹp, dễ sử dụng và tính năng đầy đủ. Tôi đã giới thiệu cho nhiều đồng nghiệp."</p>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.FLEX_ROW,
+                        order: 2,
+                        depth: 4,
+                        content: {
+                          direction: 'row',
+                          justifyContent: 'start',
+                          alignItems: 'center',
+                          gap: 12,
+                          style: {}
+                        },
+                        children: [
+                          {
+                            type: BlockType.IMAGE,
+                            order: 0,
+                            depth: 5,
+                            content: {
+                              src: 'https://via.placeholder.com/50x50',
+                              alt: 'Customer 2',
+                              style: { 
+                                width: '50px', 
+                                height: '50px', 
+                                borderRadius: '50%',
+                                objectFit: 'cover'
+                              }
+                            }
+                          },
+                          {
+                            type: BlockType.TEXT,
+                            order: 1,
+                            depth: 5,
+                            content: {
+                              content: '<div><strong style="display: block; font-size: 1rem;">Trần Thị B</strong><span style="color: #64748b; font-size: 0.875rem;">Marketing Manager</span></div>',
+                              style: {}
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  // Review 3
+                  {
+                    type: BlockType.CONTAINER,
+                    order: 2,
+                    depth: 3,
+                    content: {
+                      layout: 'stack',
+                      gap: 20,
+                      padding: 32,
+                      backgroundColor: '#f9fafb',
+                      style: { borderRadius: '12px' }
+                    },
+                    children: [
+                      {
+                        type: BlockType.TEXT,
+                        order: 0,
+                        depth: 4,
+                        content: {
+                          content: '<div style="color: #fbbf24; font-size: 1.5rem; margin-bottom: 16px;">⭐⭐⭐⭐⭐</div>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.TEXT,
+                        order: 1,
+                        depth: 4,
+                        content: {
+                          content: '<p style="color: #334155; font-size: 1rem; line-height: 1.7; margin-bottom: 20px;">"ROI tuyệt vời! Chỉ sau 2 tháng sử dụng, doanh thu của chúng tôi đã tăng 30%."</p>',
+                          style: {}
+                        }
+                      },
+                      {
+                        type: BlockType.FLEX_ROW,
+                        order: 2,
+                        depth: 4,
+                        content: {
+                          direction: 'row',
+                          justifyContent: 'start',
+                          alignItems: 'center',
+                          gap: 12,
+                          style: {}
+                        },
+                        children: [
+                          {
+                            type: BlockType.IMAGE,
+                            order: 0,
+                            depth: 5,
+                            content: {
+                              src: 'https://via.placeholder.com/50x50',
+                              alt: 'Customer 3',
+                              style: { 
+                                width: '50px', 
+                                height: '50px', 
+                                borderRadius: '50%',
+                                objectFit: 'cover'
+                              }
+                            }
+                          },
+                          {
+                            type: BlockType.TEXT,
+                            order: 1,
+                            depth: 5,
+                            content: {
+                              content: '<div><strong style="display: block; font-size: 1rem;">Lê Văn C</strong><span style="color: #64748b; font-size: 0.875rem;">Founder tại XYZ Startup</span></div>',
+                              style: {}
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 ];
 
