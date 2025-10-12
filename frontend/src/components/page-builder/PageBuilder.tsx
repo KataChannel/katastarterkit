@@ -43,6 +43,7 @@ import { toast } from 'react-hot-toast';
 import { SortableBlock } from '@/components/page-builder/SortableBlock';
 import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
 import { usePage, usePageOperations, useBlockOperations, useNestedBlockOperations } from '@/hooks/usePageBuilder';
+import { BLOCK_TEMPLATES, BlockTemplate } from '@/data/blockTemplates';
 import { 
   BlockType, 
   Page, 
@@ -351,6 +352,72 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
     }
   };
 
+  const handleApplyTemplate = async (template: BlockTemplate) => {
+    if (!editingPage?.id && isNewPageMode) {
+      toast.error('Please save the page first before applying templates');
+      return;
+    }
+
+    try {
+      // Show loading toast
+      const loadingToast = toast.loading(`Applying template: ${template.name}...`);
+      
+      // Recursively create all blocks from template
+      for (const blockDef of template.blocks) {
+        await createBlockFromTemplate(blockDef, null, blocks.length);
+      }
+      
+      // Refetch page to get updated blocks
+      await refetch();
+      
+      toast.dismiss(loadingToast);
+      toast.success(`Template "${template.name}" applied successfully!`);
+    } catch (error: any) {
+      console.error('Failed to apply template:', error);
+      toast.error(error.message || 'Failed to apply template');
+    }
+  };
+
+  const createBlockFromTemplate = async (
+    blockDef: any,
+    parentId: string | null,
+    currentOrder: number
+  ): Promise<PageBlock | null> => {
+    try {
+      const input: CreatePageBlockInput = {
+        type: blockDef.type,
+        content: blockDef.content || {},
+        style: blockDef.style || {},
+        parentId: parentId || undefined,
+        depth: blockDef.depth || 0,
+        order: currentOrder,
+        isVisible: true,
+      };
+      
+      const createdBlock = await addBlock(input);
+      
+      if (!createdBlock) {
+        throw new Error('Failed to create block');
+      }
+      
+      // Recursively create children
+      if (blockDef.children && blockDef.children.length > 0) {
+        for (let i = 0; i < blockDef.children.length; i++) {
+          await createBlockFromTemplate(
+            blockDef.children[i],
+            createdBlock.id,
+            i
+          );
+        }
+      }
+      
+      return createdBlock;
+    } catch (error) {
+      console.error('Failed to create block from template:', error);
+      throw error;
+    }
+  };
+
   const handleDragStart = (event: DragStartEvent) => {
     const activeBlock = blocks.find(block => block.id === event.active.id);
     setDraggedBlock(activeBlock || null);
@@ -446,25 +513,55 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
       </div>
 
       <div className="flex-1 flex">
-        {/* Block Palette */}
-        <div className="w-64 border-r bg-gray-50 p-4">
-          <h3 className="font-semibold text-gray-900 mb-4">Add Blocks</h3>
-          <div className="space-y-2">
-            {BLOCK_TYPES.map(blockType => (
-              <Button
-                key={blockType.type}
-                variant="outline"
-                className="w-full justify-start h-auto p-3"
-                onClick={() => handleAddBlock(blockType.type)}
-                disabled={isNewPageMode && !editingPage?.id}
-              >
-                <div className={`p-2 rounded mr-3 ${blockType.color}`}>
-                  <blockType.icon size={16} />
-                </div>
-                <span>{blockType.label}</span>
-              </Button>
-            ))}
-          </div>
+        {/* Block Palette & Templates */}
+        <div className="w-80 border-r bg-gray-50 p-4 overflow-y-auto">
+          <Tabs defaultValue="blocks" className="w-full">
+            <TabsList className="w-full mb-4">
+              <TabsTrigger value="blocks" className="flex-1">Blocks</TabsTrigger>
+              <TabsTrigger value="templates" className="flex-1">Templates</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="blocks" className="mt-0">
+              <div className="space-y-2">
+                {BLOCK_TYPES.map(blockType => (
+                  <Button
+                    key={blockType.type}
+                    variant="outline"
+                    className="w-full justify-start h-auto p-3"
+                    onClick={() => handleAddBlock(blockType.type)}
+                    disabled={isNewPageMode && !editingPage?.id}
+                  >
+                    <div className={`p-2 rounded mr-3 ${blockType.color}`}>
+                      <blockType.icon size={16} />
+                    </div>
+                    <span className="text-sm">{blockType.label}</span>
+                  </Button>
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="templates" className="mt-0">
+              <div className="space-y-3">
+                {BLOCK_TEMPLATES.map(template => (
+                  <Card
+                    key={template.id}
+                    className="p-3 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
+                    onClick={() => handleApplyTemplate(template)}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-semibold text-sm">{template.name}</h4>
+                      <Badge variant="outline" className="text-xs">
+                        {template.category}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      {template.description}
+                    </p>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Main Content Area */}
