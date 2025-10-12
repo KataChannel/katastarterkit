@@ -42,8 +42,16 @@ import { toast } from 'sonner';
 
 import { SortableBlock } from '@/components/page-builder/SortableBlock';
 import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
+import { TemplatePreviewModal } from '@/components/page-builder/TemplatePreviewModal';
+import { SaveTemplateDialog } from '@/components/page-builder/SaveTemplateDialog';
 import { usePage, usePageOperations, useBlockOperations, useNestedBlockOperations } from '@/hooks/usePageBuilder';
 import { BLOCK_TEMPLATES, BlockTemplate } from '@/data/blockTemplates';
+import { 
+  getCustomTemplates, 
+  saveCustomTemplate, 
+  deleteCustomTemplate,
+  CustomTemplate 
+} from '@/utils/customTemplates';
 import { 
   BlockType, 
   Page, 
@@ -213,11 +221,33 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
   const [showAddChildDialog, setShowAddChildDialog] = useState(false);
   const [templateSearchQuery, setTemplateSearchQuery] = useState('');
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState<string>('all');
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<BlockTemplate | null>(null);
+  const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
+  const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
+  const [allTemplates, setAllTemplates] = useState<BlockTemplate[]>(BLOCK_TEMPLATES);
 
   const { page, loading, refetch } = usePage(pageId || '');
   const { createPage, updatePage, deletePage } = usePageOperations();
   const { addBlock, updateBlock, deleteBlock, updateBlocksOrder } = useBlockOperations(pageId || '');
   const nestedOps = useNestedBlockOperations(pageId || '');
+
+  // Load custom templates on mount
+  useEffect(() => {
+    const loadCustomTemplates = () => {
+      const custom = getCustomTemplates();
+      setCustomTemplates(custom);
+      setAllTemplates([...BLOCK_TEMPLATES, ...custom]);
+    };
+    
+    loadCustomTemplates();
+    
+    // Listen for storage changes (in case templates are modified in another tab)
+    window.addEventListener('storage', loadCustomTemplates);
+    return () => window.removeEventListener('storage', loadCustomTemplates);
+  }, []);
 
   // Initialize data
   useEffect(() => {
@@ -360,25 +390,33 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
       return;
     }
 
-    // Use toast.promise for better UX with Sonner
-    toast.promise(
-      async () => {
-        // Recursively create all blocks from template
-        for (const blockDef of template.blocks) {
-          await createBlockFromTemplate(blockDef, null, blocks.length);
-        }
-        
-        // Refetch page to get updated blocks
-        await refetch();
-        
-        return template.name;
-      },
-      {
-        loading: `Applying template: ${template.name}...`,
-        success: (name) => `Template "${name}" applied successfully!`,
-        error: (error) => error?.message || 'Failed to apply template',
+    setIsApplyingTemplate(true);
+
+    try {
+      // Recursively create all blocks from template
+      for (const blockDef of template.blocks) {
+        await createBlockFromTemplate(blockDef, null, blocks.length);
       }
-    );
+      
+      // Refetch page to get updated blocks
+      await refetch();
+      
+      toast.success(`Template "${template.name}" applied successfully!`);
+      
+      // Close preview modal if open
+      setShowPreviewModal(false);
+      setSelectedTemplate(null);
+    } catch (error: any) {
+      console.error('Failed to apply template:', error);
+      toast.error(error?.message || 'Failed to apply template');
+    } finally {
+      setIsApplyingTemplate(false);
+    }
+  };
+
+  const handlePreviewTemplate = (template: BlockTemplate) => {
+    setSelectedTemplate(template);
+    setShowPreviewModal(true);
   };
 
   const createBlockFromTemplate = async (
@@ -422,7 +460,7 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
   };
 
   // Filter templates based on search and category
-  const filteredTemplates = BLOCK_TEMPLATES.filter(template => {
+  const filteredTemplates = allTemplates.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()) ||
                          template.description.toLowerCase().includes(templateSearchQuery.toLowerCase());
     const matchesCategory = selectedTemplateCategory === 'all' || template.category === selectedTemplateCategory;
@@ -430,7 +468,58 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
   });
 
   // Get unique categories
-  const templateCategories = ['all', ...Array.from(new Set(BLOCK_TEMPLATES.map(t => t.category)))];
+  const templateCategories = ['all', ...Array.from(new Set(allTemplates.map(t => t.category)))];
+
+  const handleSaveAsTemplate = async (template: Omit<BlockTemplate, 'id' | 'thumbnail'>) => {
+    try {
+      setIsSavingTemplate(true);
+      
+      // Save to localStorage
+      const savedTemplate = saveCustomTemplate(template);
+      
+      // Update state
+      const updatedCustom = getCustomTemplates();
+      setCustomTemplates(updatedCustom);
+      setAllTemplates([...BLOCK_TEMPLATES, ...updatedCustom]);
+      
+      toast.success(`Template "${savedTemplate.name}" saved successfully!`, {
+        description: 'You can now use this template on any page.',
+      });
+      
+      setShowSaveTemplateDialog(false);
+    } catch (error: any) {
+      console.error('Failed to save template:', error);
+      toast.error('Failed to save template', {
+        description: error?.message || 'An error occurred while saving the template.',
+      });
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  };
+
+  const handleDeleteCustomTemplate = async (templateId: string) => {
+    try {
+      const template = customTemplates.find(t => t.id === templateId);
+      if (!template) return;
+      
+      const confirmed = window.confirm(`Are you sure you want to delete "${template.name}"?`);
+      if (!confirmed) return;
+      
+      deleteCustomTemplate(templateId);
+      
+      // Update state
+      const updatedCustom = getCustomTemplates();
+      setCustomTemplates(updatedCustom);
+      setAllTemplates([...BLOCK_TEMPLATES, ...updatedCustom]);
+      
+      toast.success(`Template "${template.name}" deleted successfully!`);
+    } catch (error: any) {
+      console.error('Failed to delete template:', error);
+      toast.error('Failed to delete template', {
+        description: error?.message || 'An error occurred while deleting the template.',
+      });
+    }
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     const activeBlock = blocks.find(block => block.id === event.active.id);
@@ -492,6 +581,18 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
         </div>
         
         <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSaveTemplateDialog(true)}
+            className="flex items-center space-x-2"
+            disabled={blocks.length === 0}
+            title={blocks.length === 0 ? 'Add blocks to save as template' : 'Save current blocks as template'}
+          >
+            <Save size={16} />
+            <span>Save as Template</span>
+          </Button>
+          
           <Button
             variant="outline"
             size="sm"
@@ -585,23 +686,83 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
                     <p className="text-gray-500">Không tìm thấy template phù hợp</p>
                   </Card>
                 ) : (
-                  filteredTemplates.map(template => (
-                    <Card
-                      key={template.id}
-                      className="p-3 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
-                      onClick={() => handleApplyTemplate(template)}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-sm">{template.name}</h4>
-                        <Badge variant="outline" className="text-xs">
-                          {template.category}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-gray-600 leading-relaxed">
-                        {template.description}
-                      </p>
-                    </Card>
-                  ))
+                  filteredTemplates.map(template => {
+                    const isCustom = customTemplates.some(t => t.id === template.id);
+                    
+                    return (
+                      <Card
+                        key={template.id}
+                        className="overflow-hidden hover:border-blue-500 hover:shadow-md transition-all"
+                      >
+                        {/* Thumbnail */}
+                        {template.thumbnail && (
+                          <div className="relative w-full h-32 bg-gray-50 border-b overflow-hidden">
+                            <img
+                              src={template.thumbnail}
+                              alt={template.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute top-2 right-2 flex gap-1">
+                              <Badge 
+                                variant="secondary" 
+                                className="text-xs backdrop-blur-sm bg-white/90"
+                              >
+                                {template.category}
+                              </Badge>
+                              {isCustom && (
+                                <Badge 
+                                  variant="default"
+                                  className="text-xs backdrop-blur-sm bg-green-600"
+                                >
+                                  Custom
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Content */}
+                        <div className="p-3">
+                          <div className="mb-2">
+                            <h4 className="font-semibold text-sm">{template.name}</h4>
+                            <p className="text-xs text-gray-600 leading-relaxed mt-1">
+                              {template.description}
+                            </p>
+                          </div>
+                          <div className="flex gap-2 mt-3">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1"
+                              onClick={() => handlePreviewTemplate(template)}
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Preview
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => handleApplyTemplate(template)}
+                              disabled={isApplyingTemplate}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Apply
+                            </Button>
+                            {isCustom && (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteCustomTemplate(template.id)}
+                                title="Delete custom template"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })
                 )}
               </div>
             </TabsContent>
@@ -701,6 +862,24 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Template Preview Modal */}
+      <TemplatePreviewModal
+        open={showPreviewModal}
+        onOpenChange={setShowPreviewModal}
+        template={selectedTemplate}
+        onApply={() => selectedTemplate && handleApplyTemplate(selectedTemplate)}
+        isApplying={isApplyingTemplate}
+      />
+
+      {/* Save Template Dialog */}
+      <SaveTemplateDialog
+        open={showSaveTemplateDialog}
+        onOpenChange={setShowSaveTemplateDialog}
+        blocks={blocks}
+        onSave={handleSaveAsTemplate}
+        isSaving={isSavingTemplate}
+      />
     </div>
   );
 }

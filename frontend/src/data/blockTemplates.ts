@@ -1,4 +1,10 @@
 import { BlockType, CreatePageBlockInput } from '@/types/page-builder';
+import { getThumbnailDataURL } from '@/utils/templateThumbnails';
+
+/**
+ * Template Category Type
+ */
+export type TemplateCategory = 'hero' | 'features' | 'pricing' | 'team' | 'contact' | 'testimonials' | 'cta' | 'faq' | 'footer' | 'newsletter' | 'custom';
 
 /**
  * Block Template Interface
@@ -7,7 +13,7 @@ export interface BlockTemplate {
   id: string;
   name: string;
   description: string;
-  category: 'hero' | 'features' | 'pricing' | 'team' | 'contact' | 'custom';
+  category: TemplateCategory;
   thumbnail?: string;
   blocks: TemplateBlockDefinition[];
 }
@@ -32,6 +38,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
     name: 'Centered Hero',
     description: 'Hero section với tiêu đề, mô tả và CTA button ở giữa',
     category: 'hero',
+    thumbnail: getThumbnailDataURL('hero-centered'),
     blocks: [
       {
         type: BlockType.SECTION,
@@ -107,6 +114,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
     name: 'Features 3 Columns',
     description: '3 tính năng nổi bật với icon, tiêu đề và mô tả',
     category: 'features',
+    thumbnail: getThumbnailDataURL('features-3col'),
     blocks: [
       {
         type: BlockType.SECTION,
@@ -298,6 +306,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
     name: 'Pricing 3 Tiers',
     description: 'Bảng giá 3 gói với highlight gói phổ biến',
     category: 'pricing',
+    thumbnail: getThumbnailDataURL('pricing-3tier'),
     blocks: [
       {
         type: BlockType.SECTION,
@@ -552,6 +561,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
     name: 'Centered CTA',
     description: 'Call-to-action section với background màu và buttons',
     category: 'custom',
+    thumbnail: getThumbnailDataURL('cta-centered'),
     blocks: [
       {
         type: BlockType.SECTION,
@@ -661,6 +671,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
     name: 'Team 3 Members',
     description: 'Giới thiệu đội ngũ với 3 thành viên, ảnh đại diện và thông tin liên hệ',
     category: 'team',
+    thumbnail: getThumbnailDataURL('team-3members'),
     blocks: [
       {
         type: BlockType.SECTION,
@@ -841,6 +852,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
     name: 'Contact Form & Info',
     description: 'Form liên hệ kết hợp với thông tin liên lạc và bản đồ',
     category: 'contact',
+    thumbnail: getThumbnailDataURL('contact-form'),
     blocks: [
       {
         type: BlockType.SECTION,
@@ -1019,6 +1031,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
     name: 'Testimonials 3 Reviews',
     description: 'Phần đánh giá của khách hàng với 3 reviews và rating',
     category: 'custom',
+    thumbnail: getThumbnailDataURL('testimonials-3col'),
     blocks: [
       {
         type: BlockType.SECTION,
