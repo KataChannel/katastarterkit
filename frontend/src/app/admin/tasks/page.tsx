@@ -11,7 +11,7 @@ import CreateTaskModal from '@/components/todos/CreateTaskModal';
 import { useTasks, useSharedTasks } from '@/hooks/useTodos';
 import { useDynamicTasks } from '@/hooks/useDynamicTasks';
 import { TaskStatus, TaskPriority, TaskCategory, Task, CreateTaskInput } from '@/types/todo';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 // Extended task interface to include shared information

@@ -3,7 +3,7 @@
 import { useMutation } from '@apollo/client';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { LOGIN_WITH_GOOGLE } from '../../lib/graphql/auth-queries';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { jwtDecode } from 'jwt-decode';

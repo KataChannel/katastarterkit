@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useMutation } from '@apollo/client';
 import { TaskMedia, MediaType } from '@/types/todo';
 import { UPLOAD_TASK_MEDIA } from '@/graphql/taskQueries';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface MediaFile {
   id: string;

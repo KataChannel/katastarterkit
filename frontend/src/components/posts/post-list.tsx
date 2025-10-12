@@ -10,7 +10,7 @@ import {
   Eye,
   Sparkles 
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { 
   GET_POSTS, 
   NEW_POST_SUBSCRIPTION,

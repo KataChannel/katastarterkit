@@ -10,7 +10,7 @@ import TaskFilters from './TaskFilters';
 import CreateTaskModal from './CreateTaskModal';
 import { useTasks, useSharedTasks, useTaskMutations, useTaskFilters, useTaskSubscriptions } from '../../hooks/useTodos';
 import { Task, TaskStatus } from '../../types/todo';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface TaskListProps {
   showSharedTasks?: boolean;

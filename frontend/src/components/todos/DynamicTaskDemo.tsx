@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useDynamicTasks } from '@/hooks/useDynamicTasks';
 import { TaskCategory, TaskPriority, CreateTaskInput } from '@/types/todo';
 import { Plus, Copy, Play } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface DynamicTaskDemoProps {
   onTaskCreated?: () => void;

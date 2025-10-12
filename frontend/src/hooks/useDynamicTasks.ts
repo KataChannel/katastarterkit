@@ -18,7 +18,7 @@ import {
   TaskPriority,
   TaskCategory
 } from '@/types/todo';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 // Types for hook options
 interface CreateTaskOptions {

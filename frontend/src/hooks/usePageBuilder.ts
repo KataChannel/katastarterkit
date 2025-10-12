@@ -21,7 +21,7 @@ import {
   PageFiltersInput
 } from '@/types/page-builder';
 import { PaginationInput } from '@/types/common';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 // Hook for managing pages
 export const usePages = (pagination?: PaginationInput, filters?: PageFiltersInput) => {

@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Plus, Loader2, FolderTree } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 type DialogMode = 'create' | 'edit' | 'create-child' | null;
 

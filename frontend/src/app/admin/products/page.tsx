@@ -34,7 +34,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useActiveCategories } from '@/hooks/useCategories';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const STATUS_LABELS: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   DRAFT: { label: 'Nháp', variant: 'secondary' },

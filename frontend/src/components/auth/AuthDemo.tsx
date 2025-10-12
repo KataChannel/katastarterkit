@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import GoogleLoginButton from './GoogleLoginButton';
 import FacebookLoginButton from './FacebookLoginButton';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const AuthDemo: React.FC = () => {
   const {

@@ -11,7 +11,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { TaskComment, User } from '../../types/todo';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface TaskCommentsProps {
   taskId: string;

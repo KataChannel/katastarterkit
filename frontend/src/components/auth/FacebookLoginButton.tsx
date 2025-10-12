@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { LOGIN_WITH_FACEBOOK } from '@/lib/graphql/mutations/auth';
 
 declare global {

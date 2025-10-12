@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { ApolloProvider } from '@apollo/client';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from 'sonner';
 import { apolloClient } from '@/lib/apollo-client';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -16,29 +16,11 @@ export function Providers({ children }: ProvidersProps) {
     <ErrorBoundary>
       <ApolloProvider client={apolloClient}>
         <AuthProvider>
-          <Toaster
+          <Toaster 
             position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#363636',
-                color: '#fff',
-              },
-              success: {
-                duration: 3000,
-                iconTheme: {
-                  primary: '#4ade80',
-                  secondary: '#fff',
-                },
-              },
-              error: {
-                duration: 4000,
-                iconTheme: {
-                  primary: '#ef4444',
-                  secondary: '#fff',
-                },
-              },
-            }}
+            expand={true}
+            richColors
+            closeButton
           />
           {children}
         </AuthProvider>

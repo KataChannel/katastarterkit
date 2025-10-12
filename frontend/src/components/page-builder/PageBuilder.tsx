@@ -38,7 +38,7 @@ import {
   ArrowUpDown,
   Code
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 import { SortableBlock } from '@/components/page-builder/SortableBlock';
 import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
@@ -360,24 +360,25 @@ export default function PageBuilder({ pageId }: PageBuilderProps) {
       return;
     }
 
-    try {
-      // Show loading toast
-      const loadingToast = toast.loading(`Applying template: ${template.name}...`);
-      
-      // Recursively create all blocks from template
-      for (const blockDef of template.blocks) {
-        await createBlockFromTemplate(blockDef, null, blocks.length);
+    // Use toast.promise for better UX with Sonner
+    toast.promise(
+      async () => {
+        // Recursively create all blocks from template
+        for (const blockDef of template.blocks) {
+          await createBlockFromTemplate(blockDef, null, blocks.length);
+        }
+        
+        // Refetch page to get updated blocks
+        await refetch();
+        
+        return template.name;
+      },
+      {
+        loading: `Applying template: ${template.name}...`,
+        success: (name) => `Template "${name}" applied successfully!`,
+        error: (error) => error?.message || 'Failed to apply template',
       }
-      
-      // Refetch page to get updated blocks
-      await refetch();
-      
-      toast.dismiss(loadingToast);
-      toast.success(`Template "${template.name}" applied successfully!`);
-    } catch (error: any) {
-      console.error('Failed to apply template:', error);
-      toast.error(error.message || 'Failed to apply template');
-    }
+    );
   };
 
   const createBlockFromTemplate = async (

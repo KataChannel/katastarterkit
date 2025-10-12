@@ -18,7 +18,7 @@ import { TodoViewMode } from '@/types/todo-views';
 import { Plus, Share, Folder } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 // Extended task interface to include shared information
 interface ExtendedTask extends Task {

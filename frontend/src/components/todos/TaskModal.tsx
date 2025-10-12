@@ -22,7 +22,7 @@ import {
   useUploadMedia,
   useDeleteMedia,
 } from '../../hooks/useTaskFeatures';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface TaskModalProps {
   taskId: string;

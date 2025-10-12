@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { useNestedBlockOperations } from '@/hooks/usePageBuilder';
 import { BlockType } from '@/types/page-builder';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface NestedPageBuilderProps {
   pageId: string;

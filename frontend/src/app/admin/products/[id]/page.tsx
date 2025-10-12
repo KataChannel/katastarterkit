@@ -8,7 +8,7 @@ import { UpdateProductInput } from '@/graphql/product.queries';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronLeft, Loader2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function EditProductPage() {
   const router = useRouter();

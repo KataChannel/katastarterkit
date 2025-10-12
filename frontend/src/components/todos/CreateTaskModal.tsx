@@ -3,7 +3,7 @@ import { useTaskMutations } from '../../hooks/useTodos';
 import { TaskCategory, TaskPriority, CreateTaskInput } from '../../types/todo';
 import { MediaUpload } from './MediaUpload';
 import { useMediaUpload } from '../../hooks/useMediaUpload';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,

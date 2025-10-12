@@ -7,7 +7,7 @@ import { ProductForm } from '@/components/product';
 import { CreateProductInput } from '@/graphql/product.queries';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function CreateProductPage() {
   const router = useRouter();

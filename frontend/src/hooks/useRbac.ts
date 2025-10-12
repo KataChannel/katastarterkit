@@ -15,7 +15,7 @@ import {
   ASSIGN_USER_ROLES,
   ASSIGN_USER_PERMISSIONS
 } from '../graphql/rbac.queries';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 // Permission hooks
 export const useSearchPermissions = (input: any) => {

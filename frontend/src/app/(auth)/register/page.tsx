@@ -7,7 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import GoogleLoginButton from '@/components/auth/GoogleLoginButton';

@@ -5,7 +5,7 @@ import { InvoiceConfig, InvoiceType } from '@/types/invoice';
 import ConfigService from '@/services/configService';
 import InvoiceApiService from '@/services/invoiceApi';
 import { Settings, Save, RotateCcw, Eye, EyeOff } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface ConfigModalProps {
   isOpen: boolean;

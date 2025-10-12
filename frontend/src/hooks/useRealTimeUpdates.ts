@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSubscription } from '@apollo/client';
 import { NEW_POST_SUBSCRIPTION, NEW_COMMENT_SUBSCRIPTION } from '@/lib/graphql/queries';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface UseRealTimeUpdatesProps {
   onNewPost?: (post: any) => void;
