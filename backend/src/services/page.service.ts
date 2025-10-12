@@ -15,6 +15,35 @@ import { PaginationInput } from '../graphql/models/pagination.model';
 export class PageService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // Helper function to convert block input to Prisma create format
+  private convertBlocksToPrismaFormat(blocks: CreatePageBlockInput[]): any[] {
+    return blocks.map((block, index) => {
+      const { children, parentId, ...blockData } = block;
+      
+      const prismaBlock: any = {
+        ...blockData,
+        content: blockData.content || {},
+        order: blockData.order ?? index,
+        depth: blockData.depth ?? 0,
+        config: blockData.config || null,
+      };
+
+      // Handle parent relationship
+      if (parentId) {
+        prismaBlock.parent = { connect: { id: parentId } };
+      }
+
+      // Recursively handle children
+      if (children && children.length > 0) {
+        prismaBlock.children = {
+          create: this.convertBlocksToPrismaFormat(children)
+        };
+      }
+
+      return prismaBlock;
+    });
+  }
+
   // Create a new page
   async create(input: CreatePageInput, userId: string): Promise<Page> {
     // Check if slug already exists
@@ -32,12 +61,8 @@ export class PageService {
       data: {
         ...pageData,
         createdBy: userId,
-        blocks: blocks ? {
-          create: blocks.map((block, index) => ({
-            ...block,
-            content: block.content || {},
-            order: block.order ?? index,
-          }))
+        blocks: blocks && blocks.length > 0 ? {
+          create: this.convertBlocksToPrismaFormat(blocks)
         } : undefined
       },
       include: {
@@ -284,17 +309,24 @@ export class PageService {
     }
 
     // Remove children from input as we'll handle them separately
-    const { children, ...blockData } = input;
+    const { children, parentId, ...blockData } = input;
+
+    // Build the data object for Prisma create
+    const createData: any = {
+      ...blockData,
+      content: blockData.content || {},
+      page: { connect: { id: pageId } },
+      depth: blockData.depth || 0,
+      config: blockData.config || null,
+    };
+
+    // Handle parent relationship - use connect instead of parentId
+    if (parentId) {
+      createData.parent = { connect: { id: parentId } };
+    }
 
     const block = await this.prisma.pageBlock.create({
-      data: {
-        ...blockData,
-        content: blockData.content || {},
-        page: { connect: { id: pageId } },
-        depth: blockData.depth || 0,
-        parentId: blockData.parentId || null,
-        config: blockData.config || null,
-      }
+      data: createData
     });
 
     return block as PageBlock;
@@ -310,9 +342,26 @@ export class PageService {
       throw new NotFoundException(`Block with ID "${id}" not found`);
     }
 
+    // Extract parentId from input and handle it separately
+    const { parentId, ...updateData } = input;
+
+    // Build the data object for Prisma update
+    const prismaUpdateData: any = { ...updateData };
+
+    // Handle parent relationship - use connect/disconnect instead of parentId
+    if (parentId !== undefined) {
+      if (parentId === null) {
+        // Disconnect from parent (move to root level)
+        prismaUpdateData.parent = { disconnect: true };
+      } else {
+        // Connect to new parent
+        prismaUpdateData.parent = { connect: { id: parentId } };
+      }
+    }
+
     const updatedBlock = await this.prisma.pageBlock.update({
       where: { id },
-      data: input
+      data: prismaUpdateData
     });
 
     return updatedBlock as PageBlock;
