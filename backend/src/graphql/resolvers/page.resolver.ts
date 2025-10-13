@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context, ResolveField, Parent } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { Page, PageBlock, PaginatedPages } from '../models/page.model';
@@ -112,7 +112,7 @@ export class PageResolver {
     return this.pageService.deleteBlock(id);
   }
 
-  @Mutation(() => [PageBlock], { name: 'updatePageBlocksOrder' })
+    @Mutation(() => [PageBlock], { name: 'updatePageBlocksOrder' })
   @UseGuards(JwtAuthGuard)
   async updatePageBlocksOrder(
     @Args('pageId') pageId: string,
@@ -120,5 +120,42 @@ export class PageResolver {
     updates: BulkUpdateBlockOrderInput[]
   ): Promise<PageBlock[]> {
     return this.pageService.updateBlocksOrder(pageId, updates);
+  }
+
+  // Field Resolvers
+  @ResolveField(() => [String], { nullable: true })
+  seoKeywords(@Parent() page: Page): string[] | null {
+    // Transform Json field to array
+    if (!page.seoKeywords) {
+      return null;
+    }
+
+    // If it's already an array, return it
+    if (Array.isArray(page.seoKeywords)) {
+      return page.seoKeywords;
+    }
+
+    // If it's a string, try to parse it as JSON
+    if (typeof page.seoKeywords === 'string') {
+      try {
+        const parsed = JSON.parse(page.seoKeywords);
+        return Array.isArray(parsed) ? parsed : [page.seoKeywords];
+      } catch {
+        // If JSON parse fails, treat as single keyword
+        return [page.seoKeywords];
+      }
+    }
+
+    // If it's an object (from Prisma Json type), check if it has array properties
+    if (typeof page.seoKeywords === 'object') {
+      // Check if it's array-like
+      if ('length' in page.seoKeywords) {
+        return Object.values(page.seoKeywords).filter(v => typeof v === 'string') as string[];
+      }
+      // Try to extract values
+      return Object.values(page.seoKeywords).filter(v => typeof v === 'string') as string[];
+    }
+
+    return null;
   }
 }

@@ -34,6 +34,7 @@ import { FileModule } from './graphql/modules/file.module';
 import { HRModule } from './graphql/modules/hr.module';
 import { ProductModule } from './graphql/modules/product.module';
 import { TestController } from './test.controller';
+import { SeedModule } from './seed/seed.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -133,6 +134,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     FileModule,
     HRModule,
     ProductModule,
+    SeedModule,
   ],
   controllers: [
     LogController,
