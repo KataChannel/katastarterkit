@@ -146,6 +146,12 @@ export interface PageLayoutSettings {
   footerMenuId?: string | null;
   headerStyle?: 'default' | 'transparent' | 'fixed' | 'sticky';
   footerStyle?: 'default' | 'minimal' | 'extended';
+  
+  // Custom header/footer configuration
+  headerVariant?: 'default' | 'minimal' | 'centered' | 'mega';
+  footerVariant?: 'default' | 'minimal' | 'extended' | 'newsletter';
+  headerConfig?: any; // HeaderProps from /types/layout
+  footerConfig?: any; // FooterProps from /types/layout
 }
 
 export interface Page {

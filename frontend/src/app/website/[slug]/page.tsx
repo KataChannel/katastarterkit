@@ -6,6 +6,8 @@ import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
 import { Page, PageStatus } from '@/types/page-builder';
 import { WebsiteHeader } from '@/components/layout/website-header';
 import { WebsiteFooter } from '@/components/layout/website-footer';
+import { CustomHeader } from '@/components/layout/CustomHeader';
+import { CustomFooter } from '@/components/layout/CustomFooter';
 import { notFound } from 'next/navigation';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
@@ -123,7 +125,14 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         {/* Conditional Header */}
         {layoutSettings.hasHeader && (
           <div className={getHeaderClass()}>
-            <WebsiteHeader />
+            {layoutSettings.headerConfig || layoutSettings.headerVariant ? (
+              <CustomHeader
+                variant={layoutSettings.headerVariant}
+                {...(layoutSettings.headerConfig || {})}
+              />
+            ) : (
+              <WebsiteHeader />
+            )}
           </div>
         )}
         
@@ -164,7 +173,16 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         </main>
         
         {/* Conditional Footer */}
-        {layoutSettings.hasFooter && <WebsiteFooter />}
+        {layoutSettings.hasFooter && (
+          layoutSettings.footerConfig || layoutSettings.footerVariant ? (
+            <CustomFooter
+              variant={layoutSettings.footerVariant}
+              {...(layoutSettings.footerConfig || {})}
+            />
+          ) : (
+            <WebsiteFooter />
+          )
+        )}
       </div>
     </>
   );
