@@ -2651,3 +2651,135 @@ model ProductVariant {
   @@index([isActive])
   @@map("product_variants")
 }
+
+// ============================================================================
+// CALL CENTER INTEGRATION
+// ============================================================================
+
+enum CallDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CallStatus {
+  ANSWER
+  CANCELED
+  BUSY
+  NO_ANSWER
+  FAILED
+}
+
+enum CallCenterSyncMode {
+  MANUAL
+  SCHEDULED
+}
+
+model CallCenterRecord {
+  id          String   @id @default(uuid())
+  
+  // External API fields
+  externalUuid            String  @unique // uuid from external API
+  direction               CallDirection
+  callerIdNumber          String?
+  outboundCallerIdNumber  String?
+  destinationNumber       String?
+  
+  // Time fields (stored as epoch timestamps)
+  startEpoch    String?
+  endEpoch      String?
+  answerEpoch   String?
+  
+  // Duration fields (in seconds)
+  duration      String?  // Total call duration
+  billsec       String?  // Billable seconds
+  
+  // Call disposition
+  sipHangupDisposition String?
+  callStatus           CallStatus
+  
+  // Recording
+  recordPath    String?
+  
+  // Metadata
+  domain        String?  // PBX domain
+  rawData       Json?    // Full raw response for debugging
+  
+  // Sync tracking
+  syncedAt      DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([externalUuid])
+  @@index([direction])
+  @@index([callStatus])
+  @@index([callerIdNumber])
+  @@index([destinationNumber])
+  @@index([startEpoch])
+  @@index([syncedAt])
+  @@map("call_center_records")
+}
+
+model CallCenterConfig {
+  id            String   @id @default(uuid())
+  
+  // API Configuration
+  apiUrl        String   // Base API URL
+  domain        String   // PBX domain
+  apiKey        String?  // Optional API key for authentication
+  
+  // Sync Configuration
+  syncMode      CallCenterSyncMode @default(MANUAL)
+  cronExpression String? // For scheduled sync (e.g., "0 */5 * * * *")
+  isActive      Boolean  @default(true)
+  
+  // Sync Range
+  defaultDaysBack Int @default(30) // How many days back to sync
+  
+  // Pagination
+  batchSize     Int @default(200) // Records per API request
+  
+  // Last sync info
+  lastSyncAt    DateTime?
+  lastSyncStatus String?  // "success", "error", "partial"
+  lastSyncError  String?
+  totalRecordsSynced Int @default(0)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("call_center_config")
+}
+
+model CallCenterSyncLog {
+  id              String   @id @default(uuid())
+  
+  configId        String?  // Reference to config used
+  
+  // Sync details
+  syncType        CallCenterSyncMode
+  status          String   // "running", "success", "error"
+  
+  // Sync parameters
+  fromDate        DateTime
+  toDate          DateTime
+  offset          Int      @default(0)
+  
+  // Results
+  recordsFetched  Int      @default(0)
+  recordsCreated  Int      @default(0)
+  recordsUpdated  Int      @default(0)
+  recordsSkipped  Int      @default(0)
+  
+  // Error tracking
+  errorMessage    String?
+  errorDetails    Json?
+  
+  // Timing
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+  duration        Int?     // Duration in milliseconds
+  
+  @@index([configId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("call_center_sync_logs")
+}
