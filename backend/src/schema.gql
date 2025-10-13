@@ -491,6 +491,7 @@ enum CallCenterSyncMode {
 """Direction of the call"""
 enum CallDirection {
   INBOUND
+  LOCAL
   OUTBOUND
 }
 

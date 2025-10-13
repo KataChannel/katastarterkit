@@ -74,11 +74,22 @@ export class CallCenterService {
 
   async updateConfig(id: string, input: UpdateCallCenterConfigInput) {
     this.logger.log(`Updating call center config: ${id}`);
+    this.logger.log(`Update input received: ${JSON.stringify(input)}`);
 
-    return this.prisma.callCenterConfig.update({
+    // Filter out undefined values to ensure boolean false is preserved
+    const updateData = Object.fromEntries(
+      Object.entries(input).filter(([_, value]) => value !== undefined)
+    );
+
+    this.logger.log(`Update data after filtering: ${JSON.stringify(updateData)}`);
+
+    const updated = await this.prisma.callCenterConfig.update({
       where: { id },
-      data: input,
+      data: updateData,
     });
+
+    this.logger.log(`Updated config result: ${JSON.stringify(updated)}`);
+    return updated;
   }
 
   async deleteConfig(id: string) {

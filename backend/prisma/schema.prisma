@@ -2659,6 +2659,7 @@ model ProductVariant {
 enum CallDirection {
   INBOUND
   OUTBOUND
+  LOCAL
 }
 
 enum CallStatus {

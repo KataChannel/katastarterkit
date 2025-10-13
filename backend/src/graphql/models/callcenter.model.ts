@@ -5,6 +5,7 @@ import { GraphQLJSONObject } from 'graphql-type-json';
 export enum CallDirection {
   INBOUND = 'INBOUND',
   OUTBOUND = 'OUTBOUND',
+  LOCAL = 'LOCAL',
 }
 
 export enum CallStatus {

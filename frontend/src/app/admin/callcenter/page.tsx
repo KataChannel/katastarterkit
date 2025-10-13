@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -152,6 +152,21 @@ const UPDATE_CALLCENTER_CONFIG = gql`
   }
 `;
 
+const CREATE_CALLCENTER_CONFIG = gql`
+  mutation CreateCallCenterConfig($input: CreateCallCenterConfigInput!) {
+    createCallCenterConfig(input: $input) {
+      id
+      apiUrl
+      domain
+      syncMode
+      cronExpression
+      isActive
+      defaultDaysBack
+      batchSize
+    }
+  }
+`;
+
 export default function CallCenterPage() {
   const [activeTab, setActiveTab] = useState('records');
   const [showConfigDialog, setShowConfigDialog] = useState(false);
@@ -175,6 +190,7 @@ export default function CallCenterPage() {
   // Mutations
   const [syncData, { loading: syncing }] = useMutation(SYNC_CALLCENTER_DATA);
   const [updateConfig, { loading: updating }] = useMutation(UPDATE_CALLCENTER_CONFIG);
+  const [createConfig, { loading: creating }] = useMutation(CREATE_CALLCENTER_CONFIG);
 
   const config = configData?.getCallCenterConfig;
   const records = recordsData?.getCallCenterRecords;
@@ -245,17 +261,39 @@ export default function CallCenterPage() {
 
   const handleUpdateConfig = async (newConfig: any) => {
     try {
-      await updateConfig({
-        variables: {
-          id: config.id,
-          input: newConfig,
-        },
-      });
-      toast.success('Cập nhật config thành công');
-      refetchConfig();
+      if (config?.id) {
+        // Update existing config
+        const result = await updateConfig({
+          variables: {
+            id: config.id,
+            input: newConfig,
+          },
+          refetchQueries: [{ query: GET_CALLCENTER_CONFIG }],
+          awaitRefetchQueries: true,
+        });
+        toast.success('Cập nhật config thành công');
+        console.log('Update result:', result.data);
+      } else {
+        // Create new config
+        const result = await createConfig({
+          variables: {
+            input: {
+              apiUrl: 'https://pbx01.onepos.vn:8080/api/v2/cdrs',
+              domain: 'tazaspa102019',
+              ...newConfig,
+            },
+          },
+          refetchQueries: [{ query: GET_CALLCENTER_CONFIG }],
+          awaitRefetchQueries: true,
+        });
+        toast.success('Tạo config thành công');
+        console.log('Create result:', result.data);
+      }
+      await refetchConfig();
       setShowConfigDialog(false);
     } catch (error: any) {
-      toast.error('Update failed', {
+      console.error('Config operation error:', error);
+      toast.error('Config operation failed', {
         description: error.message,
       });
     }
@@ -303,8 +341,32 @@ export default function CallCenterPage() {
         </div>
       </div>
 
+      {/* Warning if config not active */}
+      {config && !config.isActive && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardHeader>
+            <CardTitle className="text-orange-800 flex items-center gap-2">
+              <XCircle className="h-5 w-5" />
+              Chưa kích hoạt
+            </CardTitle>
+            <CardDescription className="text-orange-700">
+              Call Center chưa được kích hoạt. Vui lòng bật trong phần cấu hình để sử dụng tính năng đồng bộ.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      {/* Loading state */}
+      {configLoading && (
+        <Card>
+          <CardContent className="flex justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Cards */}
-      {config && (
+      {config && config.isActive && (
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -757,22 +819,43 @@ function ConfigDialog({ open, onClose, config, onSave, loading }: any) {
   const [formData, setFormData] = useState({
     syncMode: config?.syncMode || 'MANUAL',
     cronExpression: config?.cronExpression || '',
-    isActive: config?.isActive || false,
+    isActive: config?.isActive || true,
     defaultDaysBack: config?.defaultDaysBack || 30,
     batchSize: config?.batchSize || 200,
   });
+
+  // Sync formData with config when config changes or dialog opens
+  useEffect(() => {
+    if (open && config) {
+      console.log('Syncing formData with config:', config);
+      setFormData({
+        syncMode: config.syncMode || 'MANUAL',
+        cronExpression: config.cronExpression || '',
+        isActive: config.isActive ?? true,  // Use ?? instead of || to handle false correctly
+        defaultDaysBack: config.defaultDaysBack || 30,
+        batchSize: config.batchSize || 200,
+      });
+    }
+  }, [open, config]);
 
   const handleSave = () => {
     onSave(formData);
   };
 
+  const isNewConfig = !config?.id;
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Cấu hình Call Center</DialogTitle>
+          <DialogTitle>
+            {isNewConfig ? 'Tạo cấu hình Call Center' : 'Cập nhật cấu hình Call Center'}
+          </DialogTitle>
           <DialogDescription>
-            Cài đặt đồng bộ dữ liệu từ PBX
+            {isNewConfig 
+              ? 'Thiết lập cấu hình đồng bộ dữ liệu từ PBX lần đầu'
+              : 'Cài đặt đồng bộ dữ liệu từ PBX'
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -785,6 +868,14 @@ function ConfigDialog({ open, onClose, config, onSave, loading }: any) {
               onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
             />
           </div>
+
+          {!formData.isActive && (
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-sm text-yellow-800">
+                ⚠️ Bật "Kích hoạt" để sử dụng tính năng đồng bộ
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Chế độ đồng bộ</Label>
@@ -841,7 +932,7 @@ function ConfigDialog({ open, onClose, config, onSave, loading }: any) {
           </Button>
           <Button onClick={handleSave} disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Lưu
+            {isNewConfig ? 'Tạo' : 'Lưu'}
           </Button>
         </DialogFooter>
       </DialogContent>
