@@ -173,230 +173,10 @@ const CREATE_CALLCENTER_CONFIG = gql`
   }
 `;
 
-// Audio Player Component
-function AudioPlayer({ recordPath, domain }: { recordPath: string | null, domain: string }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  if (!recordPath) {
-    return <span className="text-muted-foreground text-sm">Không có recording</span>;
-  }
-
-  // Build recording URL
-  const recordingUrl = `https://pbx01.onepos.vn:8080/recordings${recordPath}`;
-
-  const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  return (
-    <div className="flex items-center gap-2">
-      <Button
-        size="sm"
-        variant="ghost"
-        onClick={togglePlay}
-        className="h-8 w-8 p-0"
-      >
-        {isPlaying ? (
-          <Pause className="h-4 w-4" />
-        ) : (
-          <Play className="h-4 w-4" />
-        )}
-      </Button>
-      <audio
-        ref={audioRef}
-        src={recordingUrl}
-        onEnded={() => setIsPlaying(false)}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      />
-      <a
-        href={recordingUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-xs text-blue-600 hover:underline"
-      >
-        Tải về
-      </a>
-    </div>
-  );
-}
-
-// Sync Progress Dialog
-function SyncProgressDialog({ 
-  open, 
-  onClose, 
-  syncLogId,
-  initialStats
-}: { 
-  open: boolean; 
-  onClose: () => void;
-  syncLogId: string | null;
-  initialStats?: any;
-}) {
-  const [logs, setLogs] = useState<string[]>([]);
-  const [stats, setStats] = useState(initialStats || {
-    recordsFetched: 0,
-    recordsCreated: 0,
-    recordsUpdated: 0,
-    recordsSkipped: 0,
-  });
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const pollingInterval = useRef<NodeJS.Timeout | null>(null);
-
-  // Query để lấy sync log progress
-  const { data: logData, startPolling, stopPolling } = useQuery(GET_SYNC_LOGS, {
-    variables: { pagination: { page: 1, limit: 1 } },
-    skip: !syncLogId,
-  });
-
-  useEffect(() => {
-    if (open && syncLogId) {
-      // Poll every 500ms
-      startPolling(500);
-      
-      // Simulate logs
-      const logMessages = [
-        'Bắt đầu đồng bộ dữ liệu...',
-        'Kết nối đến PBX API...',
-        'Đang tải dữ liệu (batch 1)...',
-      ];
-      
-      logMessages.forEach((msg, i) => {
-        setTimeout(() => {
-          setLogs(prev => [...prev, `[${new Date().toLocaleTimeString('vi-VN')}] ${msg}`]);
-        }, i * 1000);
-      });
-    } else {
-      stopPolling();
-      setLogs([]);
-    }
-
-    return () => {
-      stopPolling();
-      if (pollingInterval.current) {
-        clearInterval(pollingInterval.current);
-      }
-    };
-  }, [open, syncLogId, startPolling, stopPolling]);
-
-  // Auto scroll to bottom
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [logs]);
-
-  // Update stats from poll data
-  useEffect(() => {
-    if (logData?.getCallCenterSyncLogs?.[0]) {
-      const log = logData.getCallCenterSyncLogs[0];
-      setStats({
-        recordsFetched: log.recordsFetched || 0,
-        recordsCreated: log.recordsCreated || 0,
-        recordsUpdated: log.recordsUpdated || 0,
-        recordsSkipped: log.recordsSkipped || 0,
-      });
-
-      // Add progress logs
-      if (log.recordsFetched > stats.recordsFetched) {
-        setLogs(prev => [
-          ...prev,
-          `[${new Date().toLocaleTimeString('vi-VN')}] Đã tải ${log.recordsFetched} records...`
-        ]);
-      }
-    }
-  }, [logData]);
-
-  const progress = stats.recordsFetched > 0 
-    ? ((stats.recordsCreated + stats.recordsUpdated) / stats.recordsFetched) * 100 
-    : 0;
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Tiến trình đồng bộ</DialogTitle>
-          <DialogDescription>
-            Đang đồng bộ dữ liệu từ PBX API...
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          {/* Progress Bar */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Tiến trình</span>
-              <span>{Math.round(progress)}%</span>
-            </div>
-            <Progress value={progress} />
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-700">{stats.recordsFetched}</div>
-              <div className="text-xs text-blue-600">Đã tải</div>
-            </div>
-            <div className="p-3 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-700">{stats.recordsCreated}</div>
-              <div className="text-xs text-green-600">Tạo mới</div>
-            </div>
-            <div className="p-3 bg-yellow-50 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-700">{stats.recordsUpdated}</div>
-              <div className="text-xs text-yellow-600">Cập nhật</div>
-            </div>
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-gray-700">{stats.recordsSkipped}</div>
-              <div className="text-xs text-gray-600">Bỏ qua</div>
-            </div>
-          </div>
-
-          {/* Logs */}
-          <div className="space-y-2">
-            <Label>Logs</Label>
-            <ScrollArea 
-              ref={scrollRef}
-              className="h-[200px] w-full rounded-md border bg-slate-950 p-4"
-            >
-              {logs.map((log, i) => (
-                <div key={i} className="text-xs text-green-400 font-mono mb-1">
-                  {log}
-                </div>
-              ))}
-              {logs.length === 0 && (
-                <div className="text-xs text-gray-500 font-mono">
-                  Chờ logs...
-                </div>
-              )}
-            </ScrollArea>
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button onClick={onClose}>
-            Đóng
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 export default function CallCenterPage() {
   const [activeTab, setActiveTab] = useState('records');
   const [showConfigDialog, setShowConfigDialog] = useState(false);
   const [showDateRangeDialog, setShowDateRangeDialog] = useState(false);
-  const [showSyncProgress, setShowSyncProgress] = useState(false);
-  const [currentSyncLogId, setCurrentSyncLogId] = useState<string | null>(null);
-  const [syncStats, setSyncStats] = useState<any>(null);
   const [filters, setFilters] = useState<any>({});
   const [pagination, setPagination] = useState({ page: 1, limit: 20 });
   const [dateRange, setDateRange] = useState({
@@ -424,8 +204,6 @@ export default function CallCenterPage() {
 
   const handleManualSync = async () => {
     try {
-      setShowSyncProgress(true);
-      
       const result = await syncData({
         variables: {
           input: {},
@@ -433,35 +211,21 @@ export default function CallCenterPage() {
       });
 
       if (result.data.syncCallCenterData.success) {
-        setCurrentSyncLogId(result.data.syncCallCenterData.syncLogId);
-        setSyncStats({
-          recordsFetched: result.data.syncCallCenterData.recordsFetched,
-          recordsCreated: result.data.syncCallCenterData.recordsCreated,
-          recordsUpdated: result.data.syncCallCenterData.recordsUpdated,
-          recordsSkipped: 0,
-        });
-        
         toast.success('Sync thành công!', {
           description: `${result.data.syncCallCenterData.recordsCreated} records mới đã được tạo`,
         });
-        
-        setTimeout(() => {
-          refetchRecords();
-          refetchLogs();
-          refetchConfig();
-          setShowSyncProgress(false);
-        }, 2000);
+        refetchRecords();
+        refetchLogs();
+        refetchConfig();
       } else {
         toast.error('Sync thất bại', {
           description: result.data.syncCallCenterData.error,
         });
-        setShowSyncProgress(false);
       }
     } catch (error: any) {
       toast.error('Sync error', {
         description: error.message,
       });
-      setShowSyncProgress(false);
     }
   };
 
@@ -472,9 +236,6 @@ export default function CallCenterPage() {
     }
 
     try {
-      setShowDateRangeDialog(false);
-      setShowSyncProgress(true);
-      
       const result = await syncData({
         variables: {
           input: {
@@ -485,42 +246,30 @@ export default function CallCenterPage() {
       });
 
       if (result.data.syncCallCenterData.success) {
-        setCurrentSyncLogId(result.data.syncCallCenterData.syncLogId);
-        setSyncStats({
-          recordsFetched: result.data.syncCallCenterData.recordsFetched,
-          recordsCreated: result.data.syncCallCenterData.recordsCreated,
-          recordsUpdated: result.data.syncCallCenterData.recordsUpdated,
-          recordsSkipped: 0,
-        });
-        
         toast.success('Sync thành công!', {
           description: `${result.data.syncCallCenterData.recordsCreated} records mới đã được tạo`,
         });
-        
-        setTimeout(() => {
-          refetchRecords();
-          refetchLogs();
-          refetchConfig();
-          setShowSyncProgress(false);
-        }, 2000);
+        refetchRecords();
+        refetchLogs();
+        refetchConfig();
+        setShowDateRangeDialog(false);
       } else {
         toast.error('Sync thất bại', {
           description: result.data.syncCallCenterData.error,
         });
-        setShowSyncProgress(false);
       }
     } catch (error: any) {
       toast.error('Sync error', {
         description: error.message,
       });
-      setShowSyncProgress(false);
     }
   };
 
   const handleUpdateConfig = async (newConfig: any) => {
     try {
       if (config?.id) {
-        await updateConfig({
+        // Update existing config
+        const result = await updateConfig({
           variables: {
             id: config.id,
             input: newConfig,
@@ -529,8 +278,10 @@ export default function CallCenterPage() {
           awaitRefetchQueries: true,
         });
         toast.success('Cập nhật config thành công');
+        console.log('Update result:', result.data);
       } else {
-        await createConfig({
+        // Create new config
+        const result = await createConfig({
           variables: {
             input: {
               apiUrl: 'https://pbx01.onepos.vn:8080/api/v2/cdrs',
@@ -542,6 +293,7 @@ export default function CallCenterPage() {
           awaitRefetchQueries: true,
         });
         toast.success('Tạo config thành công');
+        console.log('Create result:', result.data);
       }
       await refetchConfig();
       setShowConfigDialog(false);
@@ -556,7 +308,7 @@ export default function CallCenterPage() {
   const formatEpoch = (epoch: string) => {
     if (!epoch || epoch === '0') return 'N/A';
     const date = new Date(parseInt(epoch) * 1000);
-    return format(date, 'dd/MM/yyyy HH:mm:ss', { locale: vi });
+    return date.toLocaleString('vi-VN');
   };
 
   const formatDuration = (seconds: string) => {
@@ -565,33 +317,6 @@ export default function CallCenterPage() {
     const mins = Math.floor(sec / 60);
     const secs = sec % 60;
     return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-  };
-
-  const getDirectionIcon = (direction: string) => {
-    switch (direction) {
-      case 'INBOUND':
-        return <PhoneIncoming className="h-4 w-4 text-blue-600" />;
-      case 'OUTBOUND':
-        return <PhoneOutgoing className="h-4 w-4 text-green-600" />;
-      case 'LOCAL':
-        return <Phone className="h-4 w-4 text-purple-600" />;
-      default:
-        return <Phone className="h-4 w-4" />;
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: any; label: string }> = {
-      ANSWER: { variant: 'default' as const, label: 'Answered' },
-      CANCELED: { variant: 'secondary' as const, label: 'Canceled' },
-      BUSY: { variant: 'destructive' as const, label: 'Busy' },
-      NO_ANSWER: { variant: 'outline' as const, label: 'No Answer' },
-      FAILED: { variant: 'destructive' as const, label: 'Failed' },
-      UNKNOWN: { variant: 'outline' as const, label: 'Unknown' },
-    };
-    
-    const config = variants[status] || { variant: 'outline' as const, label: status };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   return (
@@ -634,6 +359,15 @@ export default function CallCenterPage() {
               Call Center chưa được kích hoạt. Vui lòng bật trong phần cấu hình để sử dụng tính năng đồng bộ.
             </CardDescription>
           </CardHeader>
+        </Card>
+      )}
+
+      {/* Loading state */}
+      {configLoading && (
+        <Card>
+          <CardContent className="flex justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </CardContent>
         </Card>
       )}
 
@@ -700,13 +434,76 @@ export default function CallCenterPage() {
           <TabsTrigger value="logs">Sync Logs</TabsTrigger>
         </TabsList>
 
-        {/* Call Records Tab - ADVANCED TABLE */}
+        {/* Call Records Tab */}
         <TabsContent value="records" className="space-y-4">
+          {/* Filters */}
           <Card>
             <CardHeader>
-              <CardTitle>Danh sách cuộc gọi</CardTitle>
+              <CardTitle className="text-sm flex items-center">
+                <Filter className="mr-2 h-4 w-4" />
+                Lọc dữ liệu
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-4">
+              <div>
+                <Label>Direction</Label>
+                <Select 
+                  value={filters.direction || 'all'} 
+                  onValueChange={(val) => setFilters({...filters, direction: val === 'all' ? undefined : val})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="INBOUND">Inbound</SelectItem>
+                    <SelectItem value="OUTBOUND">Outbound</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Status</Label>
+                <Select 
+                  value={filters.callStatus || 'all'} 
+                  onValueChange={(val) => setFilters({...filters, callStatus: val === 'all' ? undefined : val})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="ANSWER">Answered</SelectItem>
+                    <SelectItem value="CANCELED">Canceled</SelectItem>
+                    <SelectItem value="BUSY">Busy</SelectItem>
+                    <SelectItem value="NO_ANSWER">No Answer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Tìm kiếm</Label>
+                <Input 
+                  placeholder="Số điện thoại..." 
+                  value={filters.search || ''}
+                  onChange={(e) => setFilters({...filters, search: e.target.value})}
+                />
+              </div>
+
+              <div className="flex items-end">
+                <Button onClick={() => refetchRecords()} className="w-full">
+                  Áp dụng
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Records Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Call Records</CardTitle>
               <CardDescription>
-                Hiển thị {records?.pagination.totalItems || 0} cuộc gọi
+                {records?.pagination.totalItems || 0} records
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -715,100 +512,110 @@ export default function CallCenterPage() {
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : (
-                <>
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">Direction</TableHead>
-                          <TableHead>Caller</TableHead>
-                          <TableHead>Destination</TableHead>
-                          <TableHead>Start Time</TableHead>
-                          <TableHead>Duration</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Recording</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {records?.items.map((record: any) => (
-                          <TableRow key={record.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                {getDirectionIcon(record.direction)}
-                                <span className="text-xs">{record.direction}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-mono text-sm">{record.callerIdNumber}</div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-mono text-sm">{record.destinationNumber}</div>
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              {formatEpoch(record.startEpoch)}
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              <div className="flex flex-col gap-1">
-                                <span>Total: {formatDuration(record.duration)}</span>
-                                <span className="text-xs text-muted-foreground">
-                                  Talk: {formatDuration(record.billsec)}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {getStatusBadge(record.callStatus)}
-                            </TableCell>
-                            <TableCell>
-                              <AudioPlayer 
-                                recordPath={record.recordPath} 
-                                domain={record.domain}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Direction</TableHead>
+                      <TableHead>Caller</TableHead>
+                      <TableHead>Destination</TableHead>
+                      <TableHead>Start Time</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Billsec</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Recording</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {records?.items.map((record: any) => (
+                      <TableRow key={record.id}>
+                        <TableCell>
+                          {record.direction === 'INBOUND' ? (
+                            <Badge variant="secondary" className="gap-1">
+                              <PhoneIncoming className="h-3 w-3" />
+                              Inbound
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="gap-1">
+                              <PhoneOutgoing className="h-3 w-3" />
+                              Outbound
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {record.callerIdNumber || 'N/A'}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {record.destinationNumber || 'N/A'}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {formatEpoch(record.startEpoch)}
+                        </TableCell>
+                        <TableCell>{formatDuration(record.duration)}</TableCell>
+                        <TableCell>{formatDuration(record.billsec)}</TableCell>
+                        <TableCell>
+                          {record.callStatus === 'ANSWER' ? (
+                            <Badge variant="default" className="gap-1">
+                              <CheckCircle className="h-3 w-3" />
+                              Answered
+                            </Badge>
+                          ) : (
+                            <Badge variant="destructive" className="gap-1">
+                              <XCircle className="h-3 w-3" />
+                              {record.callStatus}
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {record.recordPath ? (
+                            <Button size="sm" variant="ghost">
+                              <Play className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">No recording</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
 
-                  {/* Pagination */}
-                  {records?.pagination && (
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="text-sm text-muted-foreground">
-                        Trang {records.pagination.currentPage} / {records.pagination.totalPages}
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
-                          disabled={!records.pagination.hasPreviousPage}
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                          Trước
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
-                          disabled={!records.pagination.hasNextPage}
-                        >
-                          Sau
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </>
+              {/* Pagination */}
+              {records && records.pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Page {records.pagination.currentPage} of {records.pagination.totalPages}
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+                      disabled={!records.pagination.hasPreviousPage}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+                      disabled={!records.pagination.hasNextPage}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* Sync Logs Tab */}
-        <TabsContent value="logs" className="space-y-4">
+        <TabsContent value="logs">
           <Card>
             <CardHeader>
-              <CardTitle>Lịch sử đồng bộ</CardTitle>
+              <CardTitle>Sync History</CardTitle>
+              <CardDescription>Lịch sử đồng bộ dữ liệu</CardDescription>
             </CardHeader>
             <CardContent>
               {logsLoading ? (
@@ -816,98 +623,93 @@ export default function CallCenterPage() {
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {logs?.map((log: any) => (
-                    <Card key={log.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <div className="font-semibold">{log.syncType}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {format(new Date(log.startedAt), 'dd/MM/yyyy HH:mm:ss', { locale: vi })}
-                            </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date Range</TableHead>
+                      <TableHead>Records</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Started At</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {logs?.map((log: any) => (
+                      <TableRow key={log.id}>
+                        <TableCell>
+                          <Badge variant="outline">{log.syncType}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          {log.status === 'success' ? (
+                            <Badge variant="default">Success</Badge>
+                          ) : log.status === 'error' ? (
+                            <Badge variant="destructive">Error</Badge>
+                          ) : (
+                            <Badge variant="secondary">Running</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {new Date(log.fromDate).toLocaleDateString()} - {new Date(log.toDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm space-y-1">
+                            <div>Fetched: {log.recordsFetched}</div>
+                            <div className="text-green-600">Created: {log.recordsCreated}</div>
+                            <div className="text-blue-600">Updated: {log.recordsUpdated}</div>
                           </div>
-                          <Badge variant={log.status === 'success' ? 'default' : 'destructive'}>
-                            {log.status}
-                          </Badge>
-                        </div>
-                        <div className="grid grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <div className="text-muted-foreground">Fetched</div>
-                            <div className="font-semibold">{log.recordsFetched}</div>
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground">Created</div>
-                            <div className="font-semibold text-green-600">{log.recordsCreated}</div>
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground">Updated</div>
-                            <div className="font-semibold text-blue-600">{log.recordsUpdated}</div>
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground">Skipped</div>
-                            <div className="font-semibold text-gray-600">{log.recordsSkipped}</div>
-                          </div>
-                        </div>
-                        {log.duration && (
-                          <div className="mt-2 text-xs text-muted-foreground">
-                            Duration: {(log.duration / 1000).toFixed(2)}s
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </TableCell>
+                        <TableCell>
+                          {log.duration ? `${(log.duration / 1000).toFixed(2)}s` : 'N/A'}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {formatDistanceToNow(new Date(log.startedAt), { addSuffix: true, locale: vi })}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Dialogs */}
-      <DateRangeDialog
-        open={showDateRangeDialog}
-        onClose={() => setShowDateRangeDialog(false)}
-        dateRange={dateRange}
-        setDateRange={setDateRange}
-        onSync={handleSyncWithDateRange}
-        loading={syncing}
-      />
-
+      {/* Config Dialog */}
       <ConfigDialog
         open={showConfigDialog}
         onClose={() => setShowConfigDialog(false)}
         config={config}
         onSave={handleUpdateConfig}
-        loading={updating || creating}
+        loading={updating}
       />
 
-      <SyncProgressDialog
-        open={showSyncProgress}
-        onClose={() => setShowSyncProgress(false)}
-        syncLogId={currentSyncLogId}
-        initialStats={syncStats}
+      {/* Date Range Dialog */}
+      <DateRangeDialog
+        open={showDateRangeDialog}
+        onClose={() => setShowDateRangeDialog(false)}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+        onSync={handleSyncWithDateRange}
+        loading={syncing}
       />
     </div>
   );
 }
 
 // Date Range Dialog Component
-function DateRangeDialog({ open, onClose, dateRange, setDateRange, onSync, loading }: any) {
-  const quickSelects = [
-    { label: '1 ngày qua', days: 1 },
-    { label: '7 ngày qua', days: 7 },
-    { label: '15 ngày qua', days: 15 },
-    { label: '30 ngày qua', days: 30 },
-    { label: '90 ngày qua', days: 90 },
-  ];
+function DateRangeDialog({ open, onClose, dateRange, onDateRangeChange, onSync, loading }: any) {
+  const handleDateChange = (field: 'fromDate' | 'toDate', value: string) => {
+    onDateRangeChange({ ...dateRange, [field]: value });
+  };
 
-  const handleQuickSelect = (days: number) => {
+  // Set default date range (last 7 days)
+  const setDefaultRange = (days: number) => {
     const toDate = new Date();
     const fromDate = new Date();
     fromDate.setDate(fromDate.getDate() - days);
 
-    setDateRange({
+    onDateRangeChange({
       fromDate: fromDate.toISOString().split('T')[0],
       toDate: toDate.toISOString().split('T')[0],
     });
@@ -917,53 +719,84 @@ function DateRangeDialog({ open, onClose, dateRange, setDateRange, onSync, loadi
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Chọn khoảng thời gian đồng bộ</DialogTitle>
+          <DialogTitle>Chọn khoảng ngày đồng bộ</DialogTitle>
           <DialogDescription>
-            Chọn khoảng ngày để lấy dữ liệu cuộc gọi từ PBX
+            Chọn khoảng thời gian để lấy dữ liệu cuộc gọi từ PBX
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Quick select buttons */}
           <div className="space-y-2">
-            <Label>Quick Select</Label>
-            <div className="flex flex-wrap gap-2">
-              {quickSelects.map((item) => (
-                <Button
-                  key={item.days}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleQuickSelect(item.days)}
-                >
-                  {item.label}
-                </Button>
-              ))}
+            <Label>Chọn nhanh</Label>
+            <div className="flex gap-2 flex-wrap">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setDefaultRange(1)}
+              >
+                Hôm qua
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setDefaultRange(7)}
+              >
+                7 ngày
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setDefaultRange(15)}
+              >
+                15 ngày
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setDefaultRange(30)}
+              >
+                30 ngày
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setDefaultRange(90)}
+              >
+                90 ngày
+              </Button>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Từ ngày</Label>
-              <Input
-                type="date"
-                value={dateRange.fromDate}
-                onChange={(e) => setDateRange({ ...dateRange, fromDate: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Đến ngày</Label>
-              <Input
-                type="date"
-                value={dateRange.toDate}
-                onChange={(e) => setDateRange({ ...dateRange, toDate: e.target.value })}
-              />
-            </div>
+          {/* From Date */}
+          <div className="space-y-2">
+            <Label htmlFor="fromDate">Từ ngày</Label>
+            <Input
+              id="fromDate"
+              type="date"
+              value={dateRange.fromDate}
+              onChange={(e) => handleDateChange('fromDate', e.target.value)}
+            />
           </div>
 
+          {/* To Date */}
+          <div className="space-y-2">
+            <Label htmlFor="toDate">Đến ngày</Label>
+            <Input
+              id="toDate"
+              type="date"
+              value={dateRange.toDate}
+              onChange={(e) => handleDateChange('toDate', e.target.value)}
+              min={dateRange.fromDate}
+            />
+          </div>
+
+          {/* Info */}
           {dateRange.fromDate && dateRange.toDate && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-800">
-                Sẽ đồng bộ dữ liệu từ {format(new Date(dateRange.fromDate), 'dd/MM/yyyy', { locale: vi })} đến{' '}
-                {format(new Date(dateRange.toDate), 'dd/MM/yyyy', { locale: vi })}
+            <div className="p-3 bg-muted rounded-md">
+              <p className="text-sm text-muted-foreground">
+                <Calendar className="inline h-4 w-4 mr-1" />
+                Sẽ đồng bộ dữ liệu từ <strong>{new Date(dateRange.fromDate).toLocaleDateString('vi-VN')}</strong> đến <strong>{new Date(dateRange.toDate).toLocaleDateString('vi-VN')}</strong>
               </p>
             </div>
           )}
@@ -992,17 +825,19 @@ function ConfigDialog({ open, onClose, config, onSave, loading }: any) {
   const [formData, setFormData] = useState({
     syncMode: config?.syncMode || 'MANUAL',
     cronExpression: config?.cronExpression || '',
-    isActive: config?.isActive ?? true,
+    isActive: config?.isActive || true,
     defaultDaysBack: config?.defaultDaysBack || 30,
     batchSize: config?.batchSize || 200,
   });
 
+  // Sync formData with config when config changes or dialog opens
   useEffect(() => {
     if (open && config) {
+      console.log('Syncing formData with config:', config);
       setFormData({
         syncMode: config.syncMode || 'MANUAL',
         cronExpression: config.cronExpression || '',
-        isActive: config.isActive ?? true,
+        isActive: config.isActive ?? true,  // Use ?? instead of || to handle false correctly
         defaultDaysBack: config.defaultDaysBack || 30,
         batchSize: config.batchSize || 200,
       });
