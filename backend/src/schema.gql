@@ -502,6 +502,7 @@ enum CallStatus {
   CANCELED
   FAILED
   NO_ANSWER
+  UNKNOWN
 }
 
 input CampaignSearchInput {

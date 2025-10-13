@@ -14,6 +14,7 @@ export enum CallStatus {
   BUSY = 'BUSY',
   NO_ANSWER = 'NO_ANSWER',
   FAILED = 'FAILED',
+  UNKNOWN = 'UNKNOWN',
 }
 
 export enum CallCenterSyncMode {

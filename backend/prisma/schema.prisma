@@ -2668,6 +2668,7 @@ enum CallStatus {
   BUSY
   NO_ANSWER
   FAILED
+  UNKNOWN
 }
 
 enum CallCenterSyncMode {
