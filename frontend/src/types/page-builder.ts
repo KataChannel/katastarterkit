@@ -138,6 +138,16 @@ export interface PageBlock {
   updatedAt: string;
 }
 
+// Layout settings for page header/footer
+export interface PageLayoutSettings {
+  hasHeader?: boolean;
+  hasFooter?: boolean;
+  headerMenuId?: string | null;
+  footerMenuId?: string | null;
+  headerStyle?: 'default' | 'transparent' | 'fixed' | 'sticky';
+  footerStyle?: 'default' | 'minimal' | 'extended';
+}
+
 export interface Page {
   id: string;
   title: string;
@@ -148,6 +158,7 @@ export interface Page {
   seoDescription?: string;
   seoKeywords?: string[];
   blocks?: PageBlock[];
+  layoutSettings?: PageLayoutSettings;
   createdAt: string;
   updatedAt: string;
 }
@@ -347,6 +358,7 @@ export interface CreatePageInput {
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string[];
+  layoutSettings?: PageLayoutSettings;
 }
 
 export interface UpdatePageInput {
@@ -357,6 +369,7 @@ export interface UpdatePageInput {
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string[];
+  layoutSettings?: PageLayoutSettings;
 }
 
 export interface CreatePageBlockInput {

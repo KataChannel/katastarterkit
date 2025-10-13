@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { Page, PageStatus } from '@/types/page-builder';
 
 /**
@@ -15,6 +16,7 @@ import { Page, PageStatus } from '@/types/page-builder';
  * Form for editing page metadata:
  * - General: Title, slug, status, description
  * - SEO: SEO title, description, keywords
+ * - Layout: Header/Footer settings
  */
 interface PageSettingsFormProps {
   page: Page;
@@ -30,9 +32,17 @@ export default function PageSettingsForm({ page, onUpdate }: PageSettingsFormPro
     seoTitle: page.seoTitle || '',
     seoDescription: page.seoDescription || '',
     seoKeywords: (page.seoKeywords || []).join(', '),
+    layoutSettings: {
+      hasHeader: page.layoutSettings?.hasHeader ?? true,
+      hasFooter: page.layoutSettings?.hasFooter ?? true,
+      headerMenuId: page.layoutSettings?.headerMenuId || null,
+      footerMenuId: page.layoutSettings?.footerMenuId || null,
+      headerStyle: page.layoutSettings?.headerStyle || 'default',
+      footerStyle: page.layoutSettings?.footerStyle || 'default',
+    },
   });
 
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
+  const handleInputChange = (field: keyof typeof formData, value: any) => {
     const newFormData = { ...formData, [field]: value };
     setFormData(newFormData);
     
@@ -41,7 +51,20 @@ export default function PageSettingsForm({ page, onUpdate }: PageSettingsFormPro
       ...page,
       ...newFormData,
       content: field === 'content' && !value ? undefined : (field === 'content' ? value : page.content),
-      seoKeywords: field === 'seoKeywords' ? value.split(',').map(k => k.trim()).filter(Boolean) : page.seoKeywords,
+      seoKeywords: field === 'seoKeywords' ? value.split(',').map((k: string) => k.trim()).filter(Boolean) : page.seoKeywords,
+    };
+    onUpdate(updatedPage);
+  };
+
+  const handleLayoutChange = (field: string, value: any) => {
+    const newLayoutSettings = { ...formData.layoutSettings, [field]: value };
+    setFormData({ ...formData, layoutSettings: newLayoutSettings });
+    
+    const updatedPage = {
+      ...page,
+      ...formData,
+      layoutSettings: newLayoutSettings,
+      seoKeywords: formData.seoKeywords.split(',').map((k: string) => k.trim()).filter(Boolean),
     };
     onUpdate(updatedPage);
   };
@@ -58,8 +81,9 @@ export default function PageSettingsForm({ page, onUpdate }: PageSettingsFormPro
 
   return (
     <Tabs defaultValue="general" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="general">General</TabsTrigger>
+        <TabsTrigger value="layout">Layout</TabsTrigger>
         <TabsTrigger value="seo">SEO</TabsTrigger>
       </TabsList>
       
@@ -115,6 +139,115 @@ export default function PageSettingsForm({ page, onUpdate }: PageSettingsFormPro
             placeholder="Optional page description"
             rows={3}
           />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="layout" className="space-y-6">
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-gray-900">Header Settings</h3>
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="hasHeader">Show Header</Label>
+              <p className="text-xs text-gray-500">Display website header on this page</p>
+            </div>
+            <Switch
+              id="hasHeader"
+              checked={formData.layoutSettings.hasHeader}
+              onCheckedChange={(checked) => handleLayoutChange('hasHeader', checked)}
+            />
+          </div>
+          
+          {formData.layoutSettings.hasHeader && (
+            <>
+              <div>
+                <Label htmlFor="headerStyle">Header Style</Label>
+                <Select 
+                  value={formData.layoutSettings.headerStyle} 
+                  onValueChange={(value) => handleLayoutChange('headerStyle', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">Default</SelectItem>
+                    <SelectItem value="transparent">Transparent</SelectItem>
+                    <SelectItem value="fixed">Fixed Top</SelectItem>
+                    <SelectItem value="sticky">Sticky</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Default: Normal header | Transparent: Overlay on hero | Fixed/Sticky: Stay on scroll
+                </p>
+              </div>
+              
+              <div>
+                <Label htmlFor="headerMenuId">Header Menu (Optional)</Label>
+                <Input
+                  id="headerMenuId"
+                  value={formData.layoutSettings.headerMenuId || ''}
+                  onChange={(e) => handleLayoutChange('headerMenuId', e.target.value || null)}
+                  placeholder="Leave empty for default menu"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Custom menu ID to use for this page's header
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+        
+        <div className="border-t pt-6 space-y-4">
+          <h3 className="text-sm font-semibold text-gray-900">Footer Settings</h3>
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="hasFooter">Show Footer</Label>
+              <p className="text-xs text-gray-500">Display website footer on this page</p>
+            </div>
+            <Switch
+              id="hasFooter"
+              checked={formData.layoutSettings.hasFooter}
+              onCheckedChange={(checked) => handleLayoutChange('hasFooter', checked)}
+            />
+          </div>
+          
+          {formData.layoutSettings.hasFooter && (
+            <>
+              <div>
+                <Label htmlFor="footerStyle">Footer Style</Label>
+                <Select 
+                  value={formData.layoutSettings.footerStyle} 
+                  onValueChange={(value) => handleLayoutChange('footerStyle', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">Default</SelectItem>
+                    <SelectItem value="minimal">Minimal</SelectItem>
+                    <SelectItem value="extended">Extended</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Default: Standard footer | Minimal: Compact | Extended: Full with columns
+                </p>
+              </div>
+              
+              <div>
+                <Label htmlFor="footerMenuId">Footer Menu (Optional)</Label>
+                <Input
+                  id="footerMenuId"
+                  value={formData.layoutSettings.footerMenuId || ''}
+                  onChange={(e) => handleLayoutChange('footerMenuId', e.target.value || null)}
+                  placeholder="Leave empty for default menu"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Custom menu ID to use for this page's footer
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </TabsContent>
       

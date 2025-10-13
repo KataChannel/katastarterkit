@@ -4,9 +4,12 @@ import { useQuery } from '@apollo/client';
 import { GET_PAGE_BY_SLUG } from '@/graphql/queries/pages';
 import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
 import { Page, PageStatus } from '@/types/page-builder';
+import { WebsiteHeader } from '@/components/layout/website-header';
+import { WebsiteFooter } from '@/components/layout/website-footer';
 import { notFound } from 'next/navigation';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface DynamicPageProps {
   params: Promise<{
@@ -71,6 +74,28 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   const seoDescription = page.seoDescription || page.content;
   const seoKeywords = page.seoKeywords?.join(', ');
 
+  // Layout settings with defaults
+  const layoutSettings = page.layoutSettings || {
+    hasHeader: true,
+    hasFooter: true,
+    headerStyle: 'default',
+    footerStyle: 'default',
+  };
+
+  // Header class based on style
+  const getHeaderClass = () => {
+    switch (layoutSettings.headerStyle) {
+      case 'transparent':
+        return 'absolute top-0 left-0 right-0 z-50 bg-transparent';
+      case 'fixed':
+        return 'fixed top-0 left-0 right-0 z-50 bg-white shadow-sm';
+      case 'sticky':
+        return 'sticky top-0 z-50 bg-white shadow-sm';
+      default:
+        return '';
+    }
+  };
+
   return (
     <>
       <Head>
@@ -95,8 +120,20 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       </Head>
 
       <div className="min-h-screen bg-white">
+        {/* Conditional Header */}
+        {layoutSettings.hasHeader && (
+          <div className={getHeaderClass()}>
+            <WebsiteHeader />
+          </div>
+        )}
+        
         {/* Page Content - Full width for blocks to handle their own layouts */}
-        <main className="w-full">
+        <main className={cn(
+          "w-full",
+          layoutSettings.headerStyle === 'transparent' && "pt-0",
+          layoutSettings.headerStyle === 'fixed' && "pt-20",
+          layoutSettings.headerStyle === 'sticky' && "pt-0"
+        )}>
           {page.blocks && page.blocks.length > 0 ? (
             <div>
               {[...page.blocks]
@@ -125,6 +162,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
             </div>
           )}
         </main>
+        
+        {/* Conditional Footer */}
+        {layoutSettings.hasFooter && <WebsiteFooter />}
       </div>
     </>
   );

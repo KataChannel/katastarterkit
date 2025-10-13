@@ -873,6 +873,7 @@ model Page {
   seoDescription String?
   seoKeywords    Json? // Stored as JSON array of keywords
   ogImage        String?
+  layoutSettings Json? // Layout configuration: hasHeader, hasFooter, headerMenuId, footerMenuId, headerStyle, footerStyle
 
   // Relationships
   blocks PageBlock[]
