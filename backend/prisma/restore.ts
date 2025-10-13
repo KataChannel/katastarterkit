@@ -74,7 +74,24 @@ function convertModelToTableName(modelName: string): string {
     'RolePermission': 'RolePermission',
     'UserRoleAssignment': 'UserRoleAssignment',
     'UserPermission': 'UserPermission',
-    'ResourceAccess': 'ResourceAccess'
+    'ResourceAccess': 'ResourceAccess',
+    'Menu': 'menus',
+    'AffUser': 'aff_users',
+    'AffCampaign': 'aff_campaigns',
+    'AffCampaignAffiliate': 'aff_campaign_affiliates',
+    'AffLink': 'aff_links',
+    'AffClick': 'aff_clicks',
+    'AffConversion': 'aff_conversions',
+    'AffPaymentRequest': 'aff_payment_requests',
+    'EmployeeProfile': 'employee_profiles',
+    'EmploymentHistory': 'employment_history',
+    'EmployeeDocument': 'employee_documents',
+    'OnboardingChecklist': 'onboarding_checklists',
+    'OffboardingProcess': 'offboarding_processes',
+    'Category': 'categories',
+    'Product': 'products',
+    'ProductImage': 'product_images',
+    'ProductVariant': 'product_variants',
   };
   
   // Return mapped name or original name for models that match table names exactly
@@ -253,7 +270,16 @@ function toCamelCase(tableName: string): string {
     'UserDevice': 'userDevice', 'SecurityEvent': 'securityEvent',
     'Role': 'role', 'Permission': 'permission', 'RolePermission': 'rolePermission',
     'UserRoleAssignment': 'userRoleAssignment', 'UserPermission': 'userPermission',
-    'ResourceAccess': 'resourceAccess', 'ext_listhoadon': 'ext_listhoadon', 'ext_detailhoadon': 'ext_detailhoadon'
+    'ResourceAccess': 'resourceAccess', 'ext_listhoadon': 'ext_listhoadon', 
+    'ext_detailhoadon': 'ext_detailhoadon', 'menus': 'menu',
+    'aff_users': 'affUser', 'aff_campaigns': 'affCampaign', 
+    'aff_campaign_affiliates': 'affCampaignAffiliate', 'aff_links': 'affLink',
+    'aff_clicks': 'affClick', 'aff_conversions': 'affConversion',
+    'aff_payment_requests': 'affPaymentRequest', 'employee_profiles': 'employeeProfile',
+    'employment_history': 'employmentHistory', 'employee_documents': 'employeeDocument',
+    'onboarding_checklists': 'onboardingChecklist', 'offboarding_processes': 'offboardingProcess',
+    'categories': 'category', 'products': 'product', 'product_images': 'productImage',
+    'product_variants': 'productVariant'
   };
   
   return mapping[tableName] || tableName;

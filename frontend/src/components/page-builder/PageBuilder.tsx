@@ -13,7 +13,7 @@ import { PageBuilderProvider, usePageBuilderContext } from './PageBuilderProvide
 import { PageBuilderHeader } from './PageBuilderHeader';
 import { PageBuilderSidebar } from './PageBuilderSidebar';
 import { PageBuilderCanvas } from './PageBuilderCanvas';
-import { BlockType } from '@/lib/graphql/generated';
+import { BlockType } from '@/types/page-builder';
 
 /**
  * Block type definitions for the Add Child Dialog

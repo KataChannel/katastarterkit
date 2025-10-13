@@ -4,7 +4,6 @@ import {
   Box, Columns, Grid3x3, ArrowRightLeft, ArrowUpDown, Code,
   Eye, Plus, Trash2
 } from 'lucide-react';
-import { BlockType } from '@/lib/graphql/generated';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePageBuilderContext } from './PageBuilderProvider';
+import { BlockType } from '@/types/page-builder';
 
 /**
  * Block type definitions with icons and colors

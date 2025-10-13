@@ -14,7 +14,8 @@ import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifi
 import { Layout, GripVertical } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { usePageBuilderContext } from './PageBuilderProvider';
-import BlockRenderer from './BlockRenderer';
+import { BlockRenderer } from './blocks/BlockRenderer';
+
 
 /**
  * PageBuilderCanvas Component
