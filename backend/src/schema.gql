@@ -405,6 +405,104 @@ type BulkUserActionResult {
   success: Boolean!
 }
 
+type CallCenterConfig {
+  apiKey: String
+  apiUrl: String!
+  batchSize: Int!
+  createdAt: DateTime!
+  cronExpression: String
+  defaultDaysBack: Int!
+  domain: String!
+  id: ID!
+  isActive: Boolean!
+  lastSyncAt: DateTime
+  lastSyncError: String
+  lastSyncStatus: String
+  syncMode: CallCenterSyncMode!
+  totalRecordsSynced: Int!
+  updatedAt: DateTime!
+}
+
+type CallCenterRecord {
+  answerEpoch: String
+  billsec: String
+  callStatus: CallStatus!
+  callerIdNumber: String
+  destinationNumber: String
+  direction: CallDirection!
+  domain: String
+  duration: String
+  endEpoch: String
+  externalUuid: String!
+  id: ID!
+  outboundCallerIdNumber: String
+  rawData: JSONObject
+  recordPath: String
+  sipHangupDisposition: String
+  startEpoch: String
+  syncedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CallCenterRecordFiltersInput {
+  callStatus: CallStatus
+  callerIdNumber: String
+  destinationNumber: String
+  direction: CallDirection
+  domain: String
+  search: String
+  startDateFrom: DateTime
+  startDateTo: DateTime
+}
+
+type CallCenterRecordPaginationInfo {
+  currentPage: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  totalItems: Int!
+  totalPages: Int!
+}
+
+type CallCenterSyncLog {
+  completedAt: DateTime
+  configId: String
+  duration: Int
+  errorDetails: JSONObject
+  errorMessage: String
+  fromDate: DateTime!
+  id: ID!
+  offset: Int!
+  recordsCreated: Int!
+  recordsFetched: Int!
+  recordsSkipped: Int!
+  recordsUpdated: Int!
+  startedAt: DateTime!
+  status: String!
+  syncType: CallCenterSyncMode!
+  toDate: DateTime!
+}
+
+"""Sync mode for call center data"""
+enum CallCenterSyncMode {
+  MANUAL
+  SCHEDULED
+}
+
+"""Direction of the call"""
+enum CallDirection {
+  INBOUND
+  OUTBOUND
+}
+
+"""Status of the call"""
+enum CallStatus {
+  ANSWER
+  BUSY
+  CANCELED
+  FAILED
+  NO_ANSWER
+}
+
 input CampaignSearchInput {
   creatorId: String
   maxCommissionRate: Float
@@ -512,6 +610,17 @@ input CreateAffUserInput {
   role: AffUserRole!
   taxId: String
   website: String
+}
+
+input CreateCallCenterConfigInput {
+  apiKey: String
+  apiUrl: String!
+  batchSize: Int! = 200
+  cronExpression: String
+  defaultDaysBack: Int! = 30
+  domain: String!
+  isActive: Boolean! = true
+  syncMode: CallCenterSyncMode! = MANUAL
 }
 
 input CreateCampaignInput {
@@ -1461,6 +1570,7 @@ type Mutation {
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
   createAffiliateLink(input: CreateAffLinkInput!): AffLink!
   createAffiliateUser(input: CreateAffUserInput!): AffUser!
+  createCallCenterConfig(input: CreateCallCenterConfigInput!): CallCenterConfig!
   createCategory(input: CreateCategoryInput!): CategoryType!
   createComment(input: CreateCommentInput!): Comment!
   createEmployeeProfile(input: CreateEmployeeProfileInput!): EmployeeProfile!
@@ -1487,6 +1597,7 @@ type Mutation {
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
+  deleteCallCenterConfig(id: String!): CallCenterConfig!
   deleteCategory(deleteProducts: Boolean! = false, id: ID!): CategoryType!
   deleteComment(id: String!): Boolean!
   deleteEmployeeProfile(id: ID!): DeleteResponse!
@@ -1568,6 +1679,7 @@ type Mutation {
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   shareTask(input: ShareTaskInput!): TaskShare!
+  syncCallCenterData(input: SyncCallCenterInput): SyncCallCenterResponse!
   toggleMenuActive(id: ID!): MenuResponseDto!
   toggleMenuVisibility(id: ID!): MenuResponseDto!
 
@@ -1575,6 +1687,7 @@ type Mutation {
   universalMutation(input: UniversalQueryInput!): JSONObject!
   updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
   updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
+  updateCallCenterConfig(id: String!, input: UpdateCallCenterConfigInput!): CallCenterConfig!
   updateCategory(input: UpdateCategoryInput!): CategoryType!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
   updateEmployeeProfile(id: ID!, input: UpdateEmployeeProfileInput!): EmployeeProfile!
@@ -1835,6 +1948,11 @@ enum PageStatus {
   ARCHIVED
   DRAFT
   PUBLISHED
+}
+
+type PaginatedCallCenterRecords {
+  items: [CallCenterRecord!]!
+  pagination: CallCenterRecordPaginationInfo!
 }
 
 type PaginatedCategories {
@@ -2215,6 +2333,10 @@ type Query {
   folder(id: ID!): FileFolder!
   folders: [FileFolder!]!
   footerMenus: [MenuResponseDto!]!
+  getCallCenterConfig: CallCenterConfig!
+  getCallCenterRecordById(id: String!): CallCenterRecord!
+  getCallCenterRecords(filters: CallCenterRecordFiltersInput, pagination: PaginationInput! = {limit: 20, page: 1}): PaginatedCallCenterRecords!
+  getCallCenterSyncLogs(pagination: PaginationInput! = {limit: 20, page: 1}): [CallCenterSyncLog!]!
   getCommentById(id: String!): Comment!
   getCommentsByPost(postId: String!): [Comment!]!
   getInvoice(id: ID!): ExtListhoadon!
@@ -2427,6 +2549,23 @@ type Subscription {
   taskCreated: Task
   taskUpdated: Task
   userRegistered: User!
+}
+
+input SyncCallCenterInput {
+  configId: String
+  fromDate: DateTime
+  fullSync: Boolean! = false
+  toDate: DateTime
+}
+
+type SyncCallCenterResponse {
+  error: String
+  message: String!
+  recordsCreated: Int!
+  recordsFetched: Int!
+  recordsUpdated: Int!
+  success: Boolean!
+  syncLogId: String
 }
 
 type Tag {
@@ -2717,6 +2856,17 @@ input UpdateAffUserInput {
   paypalEmail: String
   taxId: String
   website: String
+}
+
+input UpdateCallCenterConfigInput {
+  apiKey: String
+  apiUrl: String
+  batchSize: Int
+  cronExpression: String
+  defaultDaysBack: Int
+  domain: String
+  isActive: Boolean
+  syncMode: CallCenterSyncMode
 }
 
 input UpdateCampaignInput {

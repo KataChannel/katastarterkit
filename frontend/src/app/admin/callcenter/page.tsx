@@ -155,8 +155,13 @@ const UPDATE_CALLCENTER_CONFIG = gql`
 export default function CallCenterPage() {
   const [activeTab, setActiveTab] = useState('records');
   const [showConfigDialog, setShowConfigDialog] = useState(false);
+  const [showDateRangeDialog, setShowDateRangeDialog] = useState(false);
   const [filters, setFilters] = useState<any>({});
   const [pagination, setPagination] = useState({ page: 1, limit: 20 });
+  const [dateRange, setDateRange] = useState({
+    fromDate: '',
+    toDate: '',
+  });
 
   // Queries
   const { data: configData, loading: configLoading, refetch: refetchConfig } = useQuery(GET_CALLCENTER_CONFIG);
@@ -190,6 +195,42 @@ export default function CallCenterPage() {
         refetchRecords();
         refetchLogs();
         refetchConfig();
+      } else {
+        toast.error('Sync thất bại', {
+          description: result.data.syncCallCenterData.error,
+        });
+      }
+    } catch (error: any) {
+      toast.error('Sync error', {
+        description: error.message,
+      });
+    }
+  };
+
+  const handleSyncWithDateRange = async () => {
+    if (!dateRange.fromDate || !dateRange.toDate) {
+      toast.error('Vui lòng chọn khoảng ngày');
+      return;
+    }
+
+    try {
+      const result = await syncData({
+        variables: {
+          input: {
+            fromDate: dateRange.fromDate,
+            toDate: dateRange.toDate,
+          },
+        },
+      });
+
+      if (result.data.syncCallCenterData.success) {
+        toast.success('Sync thành công!', {
+          description: `${result.data.syncCallCenterData.recordsCreated} records mới đã được tạo`,
+        });
+        refetchRecords();
+        refetchLogs();
+        refetchConfig();
+        setShowDateRangeDialog(false);
       } else {
         toast.error('Sync thất bại', {
           description: result.data.syncCallCenterData.error,
@@ -246,6 +287,10 @@ export default function CallCenterPage() {
           <Button variant="outline" onClick={() => setShowConfigDialog(true)}>
             <Settings className="mr-2 h-4 w-4" />
             Cấu hình
+          </Button>
+          <Button variant="outline" onClick={() => setShowDateRangeDialog(true)} disabled={!config?.isActive}>
+            <Calendar className="mr-2 h-4 w-4" />
+            Chọn ngày sync
           </Button>
           <Button onClick={handleManualSync} disabled={syncing || !config?.isActive}>
             {syncing ? (
@@ -570,7 +615,140 @@ export default function CallCenterPage() {
         onSave={handleUpdateConfig}
         loading={updating}
       />
+
+      {/* Date Range Dialog */}
+      <DateRangeDialog
+        open={showDateRangeDialog}
+        onClose={() => setShowDateRangeDialog(false)}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+        onSync={handleSyncWithDateRange}
+        loading={syncing}
+      />
     </div>
+  );
+}
+
+// Date Range Dialog Component
+function DateRangeDialog({ open, onClose, dateRange, onDateRangeChange, onSync, loading }: any) {
+  const handleDateChange = (field: 'fromDate' | 'toDate', value: string) => {
+    onDateRangeChange({ ...dateRange, [field]: value });
+  };
+
+  // Set default date range (last 7 days)
+  const setDefaultRange = (days: number) => {
+    const toDate = new Date();
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - days);
+
+    onDateRangeChange({
+      fromDate: fromDate.toISOString().split('T')[0],
+      toDate: toDate.toISOString().split('T')[0],
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Chọn khoảng ngày đồng bộ</DialogTitle>
+          <DialogDescription>
+            Chọn khoảng thời gian để lấy dữ liệu cuộc gọi từ PBX
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          {/* Quick select buttons */}
+          <div className="space-y-2">
+            <Label>Chọn nhanh</Label>
+            <div className="flex gap-2 flex-wrap">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setDefaultRange(1)}
+              >
+                Hôm qua
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setDefaultRange(7)}
+              >
+                7 ngày
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setDefaultRange(15)}
+              >
+                15 ngày
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setDefaultRange(30)}
+              >
+                30 ngày
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setDefaultRange(90)}
+              >
+                90 ngày
+              </Button>
+            </div>
+          </div>
+
+          {/* From Date */}
+          <div className="space-y-2">
+            <Label htmlFor="fromDate">Từ ngày</Label>
+            <Input
+              id="fromDate"
+              type="date"
+              value={dateRange.fromDate}
+              onChange={(e) => handleDateChange('fromDate', e.target.value)}
+            />
+          </div>
+
+          {/* To Date */}
+          <div className="space-y-2">
+            <Label htmlFor="toDate">Đến ngày</Label>
+            <Input
+              id="toDate"
+              type="date"
+              value={dateRange.toDate}
+              onChange={(e) => handleDateChange('toDate', e.target.value)}
+              min={dateRange.fromDate}
+            />
+          </div>
+
+          {/* Info */}
+          {dateRange.fromDate && dateRange.toDate && (
+            <div className="p-3 bg-muted rounded-md">
+              <p className="text-sm text-muted-foreground">
+                <Calendar className="inline h-4 w-4 mr-1" />
+                Sẽ đồng bộ dữ liệu từ <strong>{new Date(dateRange.fromDate).toLocaleDateString('vi-VN')}</strong> đến <strong>{new Date(dateRange.toDate).toLocaleDateString('vi-VN')}</strong>
+              </p>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Hủy
+          </Button>
+          <Button 
+            onClick={onSync} 
+            disabled={loading || !dateRange.fromDate || !dateRange.toDate}
+          >
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Đồng bộ
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
