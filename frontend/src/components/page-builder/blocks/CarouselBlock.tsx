@@ -5,8 +5,10 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
+import { Plus, Settings, Pencil, Trash2, MoveUp, MoveDown } from 'lucide-react';
 import type { PageBlock } from '@/types/page-builder';
+import { CarouselSettingsDialog } from './CarouselSettingsDialog';
+import { SlideEditorDialog } from './SlideEditorDialog';
 
 interface CarouselSlide {
   id: string;
@@ -20,6 +22,10 @@ interface CarouselSlide {
   };
   badge?: string;
   bgColor?: string;
+  textColor?: string;
+  imagePosition?: 'left' | 'right' | 'top' | 'bottom' | 'background';
+  imageOverlay?: number; // 0-100
+  animation?: 'fade' | 'slide' | 'zoom' | 'none';
 }
 
 interface CarouselBlockProps {
@@ -31,6 +37,9 @@ interface CarouselBlockProps {
 export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBlockProps) {
   const [api, setApi] = useState<any>();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showSlideEditor, setShowSlideEditor] = useState(false);
+  const [editingSlideIndex, setEditingSlideIndex] = useState<number | null>(null);
 
   const content = block.content || {};
   const slides: CarouselSlide[] = content.slides || [];
@@ -39,6 +48,10 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
   const showIndicators = content.showIndicators !== false; // Default true
   const showArrows = content.showArrows !== false; // Default true
   const loop = content.loop !== false; // Default true
+  const height = content.height || 'auto'; // auto, sm, md, lg, xl
+  const transition = content.transition || 'slide'; // slide, fade, zoom
+  const indicatorStyle = content.indicatorStyle || 'dots'; // dots, lines, numbers, thumbnails
+  const arrowStyle = content.arrowStyle || 'default'; // default, circle, square, minimal
 
   // Auto-slide functionality
   useEffect(() => {
@@ -68,10 +81,159 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
   }, [api]);
 
   const handleEdit = () => {
-    if (onUpdate) {
-      // Open edit dialog or inline editor
-      // For now, we'll just log
-      console.log('Edit carousel:', block.id);
+    setShowSettings(true);
+  };
+
+  const handleAddSlide = () => {
+    const newSlide: CarouselSlide = {
+      id: `slide-${Date.now()}`,
+      title: 'New Slide',
+      subtitle: '',
+      description: '',
+      image: '',
+      bgColor: 'bg-gradient-to-r from-blue-500 to-purple-600',
+      textColor: 'text-white',
+      imagePosition: 'right',
+      animation: 'slide',
+    };
+    
+    const updatedSlides = [...slides, newSlide];
+    onUpdate?.(block.id, { ...content, slides: updatedSlides }, block.style);
+  };
+
+  const handleEditSlide = (index: number) => {
+    setEditingSlideIndex(index);
+    setShowSlideEditor(true);
+  };
+
+  const handleDeleteSlide = (index: number) => {
+    const updatedSlides = slides.filter((_, i) => i !== index);
+    onUpdate?.(block.id, { ...content, slides: updatedSlides }, block.style);
+  };
+
+  const handleMoveSlide = (index: number, direction: 'up' | 'down') => {
+    if (
+      (direction === 'up' && index === 0) ||
+      (direction === 'down' && index === slides.length - 1)
+    ) {
+      return;
+    }
+
+    const newSlides = [...slides];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    [newSlides[index], newSlides[newIndex]] = [newSlides[newIndex], newSlides[index]];
+    
+    onUpdate?.(block.id, { ...content, slides: newSlides }, block.style);
+  };
+
+  const handleSaveSlide = (slideData: CarouselSlide) => {
+    if (editingSlideIndex === null) return;
+    
+    const updatedSlides = [...slides];
+    updatedSlides[editingSlideIndex] = slideData;
+    onUpdate?.(block.id, { ...content, slides: updatedSlides }, block.style);
+    setShowSlideEditor(false);
+    setEditingSlideIndex(null);
+  };
+
+  const handleSaveSettings = (settings: any) => {
+    onUpdate?.(block.id, { ...content, ...settings }, block.style);
+    setShowSettings(false);
+  };
+
+  const getHeightClass = () => {
+    switch (height) {
+      case 'sm': return 'h-[300px]';
+      case 'md': return 'h-[400px]';
+      case 'lg': return 'h-[500px]';
+      case 'xl': return 'h-[600px]';
+      default: return 'min-h-[400px]';
+    }
+  };
+
+  const getIndicatorComponent = () => {
+    if (!showIndicators || slides.length <= 1) return null;
+
+    switch (indicatorStyle) {
+      case 'lines':
+        return (
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  index === currentSlide ? 'bg-white w-8' : 'bg-white/50 w-6'
+                }`}
+                onClick={() => api?.scrollTo(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        );
+      
+      case 'numbers':
+        return (
+          <div className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-4 py-2 rounded-full backdrop-blur-sm">
+            <span className="font-semibold">{currentSlide + 1}</span>
+            <span className="mx-1">/</span>
+            <span>{slides.length}</span>
+          </div>
+        );
+      
+      case 'thumbnails':
+        return (
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10 max-w-full overflow-x-auto px-4">
+            {slides.map((slide, index) => (
+              <button
+                key={index}
+                className={`w-16 h-12 rounded overflow-hidden border-2 transition-all ${
+                  index === currentSlide ? 'border-white scale-110' : 'border-white/50 opacity-70'
+                }`}
+                onClick={() => api?.scrollTo(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              >
+                {slide.image ? (
+                  <img src={slide.image} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gray-300 flex items-center justify-center text-xs">
+                    {index + 1}
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        );
+      
+      default: // dots
+        return (
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentSlide ? 'bg-white w-6' : 'bg-white/50'
+                }`}
+                onClick={() => api?.scrollTo(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        );
+    }
+  };
+
+  const getArrowClasses = () => {
+    const baseClasses = "transition-all duration-300 backdrop-blur-sm";
+    
+    switch (arrowStyle) {
+      case 'circle':
+        return `${baseClasses} rounded-full bg-white/20 border-white/30 text-white hover:bg-white/40`;
+      case 'square':
+        return `${baseClasses} rounded-none bg-white/20 border-white/30 text-white hover:bg-white/40`;
+      case 'minimal':
+        return `${baseClasses} bg-transparent border-transparent text-white hover:bg-white/20`;
+      default:
+        return `${baseClasses} bg-white/20 border-white/30 text-white hover:bg-white/40`;
     }
   };
 
@@ -82,12 +244,18 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
         className="relative p-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 min-h-[300px] flex items-center justify-center"
         style={block.style}
       >
-        <div className="text-center">
+        <div className="text-center space-y-4">
           <p className="text-gray-500 mb-4">Carousel Block - No slides added</p>
-          <Button onClick={handleEdit} size="sm">
-            <Pencil className="w-4 h-4 mr-2" />
-            Add Slides
-          </Button>
+          <div className="flex gap-2 justify-center">
+            <Button onClick={handleAddSlide} size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Add First Slide
+            </Button>
+            <Button onClick={handleEdit} size="sm" variant="outline">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -99,130 +267,283 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
   }
 
   return (
-    <div className="relative" style={block.style}>
-      {isEditing && (
-        <Button
-          onClick={handleEdit}
-          size="sm"
-          variant="outline"
-          className="absolute top-2 right-2 z-10 bg-white"
-        >
-          <Pencil className="w-4 h-4 mr-2" />
-          Edit Carousel
-        </Button>
-      )}
+    <>
+      <div className={`relative ${getHeightClass()}`} style={block.style}>
+        {isEditing && (
+          <div className="absolute top-2 right-2 z-20 flex gap-2">
+            <Button
+              onClick={handleAddSlide}
+              size="sm"
+              variant="outline"
+              className="bg-white shadow-lg"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Slide
+            </Button>
+            <Button
+              onClick={handleEdit}
+              size="sm"
+              variant="outline"
+              className="bg-white shadow-lg"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </Button>
+          </div>
+        )}
 
-      <Carousel 
-        className="w-full mx-auto"
-        setApi={setApi}
-        opts={{
-          align: "start",
-          loop: loop,
-        }}
-      >
-        <CarouselContent>
-          {slides.map((slide, index) => (
-            <CarouselItem key={slide.id || index}>
-              <Card className="border-0 rounded-lg overflow-hidden">
-                <CardContent className={`relative p-0 ${slide.bgColor || 'bg-gradient-to-r from-blue-500 to-purple-600'} overflow-hidden`}>
-                  <div className="relative z-10 h-full flex items-center">
-                    <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">
-                      <div className="grid md:grid-cols-2 gap-8 items-center">
-                        {/* Text Content */}
-                        <div className="text-white space-y-4">
-                          {slide.badge && (
-                            <Badge variant="secondary" className="mb-2 text-sm font-semibold">
-                              {slide.badge}
-                            </Badge>
-                          )}
-                          
-                          {slide.title && (
-                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                              {slide.title}
-                            </h2>
-                          )}
-                          
-                          {slide.subtitle && (
-                            <p className="text-xl md:text-2xl font-semibold">
-                              {slide.subtitle}
-                            </p>
-                          )}
-                          
-                          {slide.description && (
-                            <p className="text-base md:text-lg opacity-90">
-                              {slide.description}
-                            </p>
-                          )}
-                          
-                          {slide.cta && (
-                            <div className="pt-4">
-                              <Button 
-                                size="lg" 
-                                variant="secondary"
-                                className="font-semibold hover:scale-105 transition-transform"
-                                onClick={() => {
-                                  if (slide.cta?.link && !isEditing) {
-                                    window.location.href = slide.cta.link;
-                                  }
-                                }}
-                              >
-                                {slide.cta.text}
-                              </Button>
+        <Carousel 
+          className="w-full h-full"
+          setApi={setApi}
+          opts={{
+            align: "start",
+            loop: loop,
+          }}
+        >
+          <CarouselContent className="h-full">
+            {slides.map((slide, index) => {
+              const slideTextColor = slide.textColor || 'text-white';
+              const imagePos = (slide.imagePosition || 'right') as 'left' | 'right' | 'top' | 'bottom' | 'background';
+              
+              return (
+                <CarouselItem key={slide.id || index} className="h-full">
+                  <Card className="border-0 rounded-lg overflow-hidden h-full">
+                    <CardContent className={`relative p-0 ${slide.bgColor || 'bg-gradient-to-r from-blue-500 to-purple-600'} overflow-hidden h-full`}>
+                      {/* Background Image with Overlay */}
+                      {imagePos === 'background' && slide.image && (
+                        <>
+                          <div 
+                            className="absolute inset-0 bg-cover bg-center"
+                            style={{ backgroundImage: `url(${slide.image})` }}
+                          />
+                          <div 
+                            className="absolute inset-0 bg-black"
+                            style={{ opacity: (slide.imageOverlay || 50) / 100 }}
+                          />
+                        </>
+                      )}
+
+                      <div className="relative z-10 h-full flex items-center">
+                        <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">
+                          {/* Dynamic Layout based on image position */}
+                          {imagePos === 'top' || imagePos === 'bottom' ? (
+                            <div className={`space-y-6 ${imagePos === 'top' ? 'flex flex-col' : 'flex flex-col-reverse'}`}>
+                              {/* Image */}
+                              {slide.image && imagePos !== 'background' && (
+                                <div className="w-full">
+                                  <div className="w-full h-48 md:h-64 overflow-hidden rounded-lg shadow-2xl">
+                                    <img 
+                                      src={slide.image} 
+                                      alt={slide.title || 'Carousel slide'}
+                                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Text Content */}
+                              <div className={`${slideTextColor} space-y-4 text-center`}>
+                                {slide.badge && (
+                                  <Badge variant="secondary" className="mb-2 text-sm font-semibold">
+                                    {slide.badge}
+                                  </Badge>
+                                )}
+                                
+                                {slide.title && (
+                                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                                    {slide.title}
+                                  </h2>
+                                )}
+                                
+                                {slide.subtitle && (
+                                  <p className="text-xl md:text-2xl font-semibold">
+                                    {slide.subtitle}
+                                  </p>
+                                )}
+                                
+                                {slide.description && (
+                                  <p className="text-base md:text-lg opacity-90 max-w-2xl mx-auto">
+                                    {slide.description}
+                                  </p>
+                                )}
+                                
+                                {slide.cta && (
+                                  <div className="pt-4">
+                                    <Button 
+                                      size="lg" 
+                                      variant="secondary"
+                                      className="font-semibold hover:scale-105 transition-transform"
+                                      onClick={() => {
+                                        if (slide.cta?.link && !isEditing) {
+                                          window.location.href = slide.cta.link;
+                                        }
+                                      }}
+                                    >
+                                      {slide.cta.text}
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className={`grid md:grid-cols-2 gap-8 items-center ${imagePos === 'left' ? 'md:flex-row-reverse' : ''}`}>
+                              {/* Text Content */}
+                              <div className={`${slideTextColor} space-y-4 ${imagePos === 'left' ? 'md:order-2' : ''}`}>
+                                {slide.badge && (
+                                  <Badge variant="secondary" className="mb-2 text-sm font-semibold">
+                                    {slide.badge}
+                                  </Badge>
+                                )}
+                                
+                                {slide.title && (
+                                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                                    {slide.title}
+                                  </h2>
+                                )}
+                                
+                                {slide.subtitle && (
+                                  <p className="text-xl md:text-2xl font-semibold">
+                                    {slide.subtitle}
+                                  </p>
+                                )}
+                                
+                                {slide.description && (
+                                  <p className="text-base md:text-lg opacity-90">
+                                    {slide.description}
+                                  </p>
+                                )}
+                                
+                                {slide.cta && (
+                                  <div className="pt-4">
+                                    <Button 
+                                      size="lg" 
+                                      variant="secondary"
+                                      className="font-semibold hover:scale-105 transition-transform"
+                                      onClick={() => {
+                                        if (slide.cta?.link && !isEditing) {
+                                          window.location.href = slide.cta.link;
+                                        }
+                                      }}
+                                    >
+                                      {slide.cta.text}
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Image */}
+                              {slide.image && imagePos !== 'background' && (
+                                <div className={`hidden md:block ${imagePos === 'left' ? 'md:order-1' : ''}`}>
+                                  <div className="w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg shadow-2xl">
+                                    <img 
+                                      src={slide.image} 
+                                      alt={slide.title || 'Carousel slide'}
+                                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
+                                    />
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-
-                        {/* Image */}
-                        {slide.image && (
-                          <div className="hidden md:block">
-                            <div className="w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg shadow-2xl flex-shrink-0">
-                              <img 
-                                src={slide.image} 
-                                alt={slide.title || 'Carousel slide'}
-                                className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
-                              />
-                            </div>
-                          </div>
-                        )}
                       </div>
-                    </div>
-                  </div>
-                  
-                  {/* Background Pattern/Overlay */}
-                  <div className="absolute inset-0 bg-black/10 z-0" />
-                </CardContent>
-              </Card>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
+                      
+                      {/* Edit Controls in Editing Mode */}
+                      {isEditing && (
+                        <div className="absolute top-2 left-2 z-20 flex gap-2">
+                          <Button
+                            onClick={() => handleEditSlide(index)}
+                            size="sm"
+                            variant="outline"
+                            className="bg-white shadow-lg"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          {slides.length > 1 && (
+                            <>
+                              {index > 0 && (
+                                <Button
+                                  onClick={() => handleMoveSlide(index, 'up')}
+                                  size="sm"
+                                  variant="outline"
+                                  className="bg-white shadow-lg"
+                                >
+                                  <MoveUp className="w-4 h-4" />
+                                </Button>
+                              )}
+                              {index < slides.length - 1 && (
+                                <Button
+                                  onClick={() => handleMoveSlide(index, 'down')}
+                                  size="sm"
+                                  variant="outline"
+                                  className="bg-white shadow-lg"
+                                >
+                                  <MoveDown className="w-4 h-4" />
+                                </Button>
+                              )}
+                              <Button
+                                onClick={() => handleDeleteSlide(index)}
+                                size="sm"
+                                variant="destructive"
+                                className="bg-red-500 shadow-lg"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Background Pattern/Overlay for non-background images */}
+                      {imagePos !== 'background' && (
+                        <div className="absolute inset-0 bg-black/10 z-0" />
+                      )}
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+          
+          {showArrows && slides.length > 1 && (
+            <>
+              <CarouselPrevious className={`left-4 ${getArrowClasses()}`} />
+              <CarouselNext className={`right-4 ${getArrowClasses()}`} />
+            </>
+          )}
+        </Carousel>
         
-        {showArrows && slides.length > 1 && (
-          <>
-            <CarouselPrevious className="left-4 bg-white/20 border-white/30 text-white hover:bg-white/40 transition-all duration-300 backdrop-blur-sm" />
-            <CarouselNext className="right-4 bg-white/20 border-white/30 text-white hover:bg-white/40 transition-all duration-300 backdrop-blur-sm" />
-          </>
-        )}
-      </Carousel>
-      
-      {/* Slide Indicators */}
-      {showIndicators && slides.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentSlide ? 'bg-white w-6' : 'bg-white/50'
-              }`}
-              onClick={() => {
-                if (api) {
-                  api.scrollTo(index);
-                }
-              }}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
+        {/* Slide Indicators */}
+        {getIndicatorComponent()}
+      </div>
+
+      {/* Settings Dialog */}
+      <CarouselSettingsDialog
+        open={showSettings}
+        onOpenChange={setShowSettings}
+        settings={{
+          autoPlay,
+          autoPlayInterval,
+          showIndicators,
+          showArrows,
+          loop,
+          height,
+          transition,
+          indicatorStyle,
+          arrowStyle,
+        }}
+        onSave={handleSaveSettings}
+      />
+
+      {/* Slide Editor Dialog */}
+      {editingSlideIndex !== null && (
+        <SlideEditorDialog
+          open={showSlideEditor}
+          onOpenChange={setShowSlideEditor}
+          slide={slides[editingSlideIndex]}
+          onSave={handleSaveSlide}
+        />
       )}
-    </div>
+    </>
   );
 }
