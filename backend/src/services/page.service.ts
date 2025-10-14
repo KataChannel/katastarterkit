@@ -247,7 +247,7 @@ export class PageService {
           this.prisma.pageBlock.update({
             where: { id: block.id! },
             data: {
-              type: block.type,
+              type: block.type as any,
               content: block.content,
               style: block.style,
               order: block.order,

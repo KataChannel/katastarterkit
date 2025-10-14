@@ -1294,6 +1294,71 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
         ]
       }
     ]
+  },
+
+  // Carousel Template
+  {
+    id: 'carousel-hero',
+    name: 'Hero Carousel',
+    description: 'Carousel với 3 slides hero section, tự động chuyển slide',
+    category: 'hero',
+    thumbnail: getThumbnailDataURL('carousel-hero'),
+    blocks: [
+      {
+        type: BlockType.CAROUSEL,
+        order: 0,
+        depth: 0,
+        content: {
+          slides: [
+            {
+              id: '1',
+              title: 'Khuyến Mãi Đặc Biệt',
+              subtitle: 'Giảm giá lên đến 50% cho tất cả sản phẩm',
+              description: 'Ưu đãi có thời hạn - Nhanh tay đặt hàng ngay hôm nay!',
+              image: 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&h=400&fit=crop',
+              cta: { 
+                text: 'Mua Ngay', 
+                link: '#products' 
+              },
+              badge: 'HOT',
+              bgColor: 'bg-gradient-to-r from-red-500 to-pink-600'
+            },
+            {
+              id: '2',
+              title: 'Sản Phẩm Mới 2024',
+              subtitle: 'Bộ sưu tập mới nhất',
+              description: 'Khám phá những sản phẩm chất lượng cao với thiết kế hiện đại',
+              image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=400&fit=crop',
+              cta: { 
+                text: 'Khám Phá', 
+                link: '#new-arrivals' 
+              },
+              badge: 'NEW',
+              bgColor: 'bg-gradient-to-r from-blue-500 to-cyan-600'
+            },
+            {
+              id: '3',
+              title: 'Chất Lượng Đảm Bảo',
+              subtitle: 'Cam kết 100% chính hãng',
+              description: 'Tất cả sản phẩm đều được kiểm định chất lượng nghiêm ngặt',
+              image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=400&fit=crop',
+              cta: { 
+                text: 'Tìm Hiểu Thêm', 
+                link: '#quality' 
+              },
+              badge: 'QUALITY',
+              bgColor: 'bg-gradient-to-r from-green-500 to-emerald-600'
+            }
+          ],
+          autoPlay: true,
+          autoPlayInterval: 5000,
+          showIndicators: true,
+          showArrows: true,
+          loop: true,
+          style: {}
+        }
+      }
+    ]
   }
 ];
 

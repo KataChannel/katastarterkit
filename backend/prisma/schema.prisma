@@ -844,6 +844,7 @@ enum BlockType {
   COLUMN
   ROW
   CARD
+  CAROUSEL
   TESTIMONIAL
   FAQ
   CONTACT_FORM

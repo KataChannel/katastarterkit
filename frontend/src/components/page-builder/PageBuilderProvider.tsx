@@ -38,6 +38,26 @@ export const DEFAULT_BLOCK_CONTENT = {
     variant: 'primary', 
     style: {} 
   },
+  [BlockType.CAROUSEL]: {
+    slides: [
+      {
+        id: '1',
+        title: 'Slide 1',
+        subtitle: 'Welcome to our carousel',
+        description: 'This is the first slide',
+        image: 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&h=400&fit=crop',
+        cta: { text: 'Learn More', link: '#' },
+        badge: 'NEW',
+        bgColor: 'bg-gradient-to-r from-blue-500 to-purple-600'
+      }
+    ],
+    autoPlay: true,
+    autoPlayInterval: 5000,
+    showIndicators: true,
+    showArrows: true,
+    loop: true,
+    style: {}
+  },
   [BlockType.TEAM]: { 
     title: 'Our Team',
     members: [],

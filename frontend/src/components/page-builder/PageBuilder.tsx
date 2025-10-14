@@ -3,7 +3,7 @@
 import React from 'react';
 import {
   Type, Image, Layout, Square, Users, TrendingUp, Phone, Minus, Space,
-  Box, Columns, Grid3x3, ArrowRightLeft, ArrowUpDown, Code
+  Box, Columns, Grid3x3, ArrowRightLeft, ArrowUpDown, Code, Presentation
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -22,6 +22,7 @@ const BLOCK_TYPES = [
   // Content Blocks
   { type: BlockType.TEXT, label: 'Text Block', icon: Type, color: 'bg-blue-100 text-blue-600' },
   { type: BlockType.IMAGE, label: 'Image Block', icon: Image, color: 'bg-green-100 text-green-600' },
+  { type: BlockType.CAROUSEL, label: 'Carousel', icon: Presentation, color: 'bg-teal-100 text-teal-600' },
   { type: BlockType.HERO, label: 'Hero Section', icon: Layout, color: 'bg-purple-100 text-purple-600' },
   { type: BlockType.BUTTON, label: 'Button', icon: Square, color: 'bg-orange-100 text-orange-600' },
   { type: BlockType.TEAM, label: 'Team Section', icon: Users, color: 'bg-indigo-100 text-indigo-600' },

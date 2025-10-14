@@ -75,7 +75,7 @@ export class SeedService implements OnModuleInit {
             seoTitle: pageData.seoTitle,
             seoDescription: pageData.seoDescription,
             seoKeywords: pageData.seoKeywords,
-            status: pageData.status || 'PUBLISHED',
+            status: (pageData.status || 'PUBLISHED') as any,
             layoutSettings: pageData.layoutSettings || {},
             createdBy: 'system', // Auto-seeded by system
           }

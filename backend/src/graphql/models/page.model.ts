@@ -14,6 +14,7 @@ export enum BlockType {
   IMAGE = 'IMAGE',
   HERO = 'HERO',
   GALLERY = 'GALLERY',
+  CAROUSEL = 'CAROUSEL',
   VIDEO = 'VIDEO',
   BUTTON = 'BUTTON',
   DIVIDER = 'DIVIDER',

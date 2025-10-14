@@ -171,7 +171,7 @@ export function ProductForm({ product, onSubmit, onCancel, loading = false }: Pr
                     {categoriesLoading ? (
                       <div className="p-2 text-center">Đang tải...</div>
                     ) : (
-                      categories.map((category) => (
+                      categories.map((category:any) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
                         </SelectItem>

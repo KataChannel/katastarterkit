@@ -14,6 +14,7 @@ import { SectionBlock } from './SectionBlock';
 import { GridBlock } from './GridBlock';
 import { FlexBlock } from './FlexBlock';
 import { DynamicBlock } from './DynamicBlock';
+import CarouselBlock from './CarouselBlock';
 
 export interface BlockRendererProps {
   block: PageBlock;
@@ -83,6 +84,8 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       return <TextBlock {...commonProps} />;
     case BlockType.IMAGE:
       return <ImageBlock {...commonProps} />;
+    case BlockType.CAROUSEL:
+      return <CarouselBlock {...commonProps} />;
     case BlockType.HERO:
       return <HeroBlock {...commonProps} />;
     case BlockType.BUTTON:

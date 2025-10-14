@@ -345,6 +345,7 @@ type AuthResponse {
 enum BlockType {
   BUTTON
   CARD
+  CAROUSEL
   COLUMN
   COMPLETED_TASKS
   CONTACT_FORM
