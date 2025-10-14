@@ -17,7 +17,13 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
-import { Phone, Search, ShoppingCart, User } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Phone, Search, ShoppingCart, User, LogIn } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import React from 'react';
@@ -295,18 +301,39 @@ export function WebsiteHeader() {
         </div>                 
          <div className="flex items-center space-x-3 text-white">
                   {/* User Profile */}
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full p-0 text-white"
-                    >
-                      <User className="w-4 h-4" />
-                    </Button>
-                    <span className="text-white font-medium text-sm hidden md:inline">
-                      {user?.username || 'Guest'}
-                    </span>
-                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center space-x-2">
+                          {isAuthenticated && user ? (
+                            // Đã đăng nhập: Hiện chữ cái đầu của email
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full p-0 text-white font-semibold"
+                              onClick={() => router.push('/admin')}
+                            >
+                              {user.email?.charAt(0).toUpperCase() || 'U'}
+                            </Button>
+                          ) : (
+                            // Chưa đăng nhập: Hiện icon Login
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="flex items-center space-x-1 px-3 py-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
+                              onClick={() => router.push('/auth/login')}
+                            >
+                              <LogIn className="w-4 h-4" />
+                              <span className="text-sm font-medium hidden md:inline">Đăng nhập</span>
+                            </Button>
+                          )}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isAuthenticated && user ? user.email : 'Đăng nhập để tiếp tục'}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   
                   {/* Shopping Cart */}
                   <Button

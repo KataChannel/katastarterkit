@@ -16,6 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -49,8 +57,6 @@ import {
 import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { AdvancedTable } from '@/components/ui/advanced-table/AdvancedTable';
-import type { ColumnDef } from '@/components/ui/advanced-table/types';
 
 // GraphQL Queries
 const GET_CALLCENTER_CONFIG = gql`
@@ -124,27 +130,6 @@ const GET_SYNC_LOGS = gql`
   }
 `;
 
-const GET_SYNC_LOG_BY_ID = gql`
-  query GetCallCenterSyncLogById($id: String!) {
-    getCallCenterSyncLogById(id: $id) {
-      id
-      syncType
-      status
-      fromDate
-      toDate
-      recordsFetched
-      recordsCreated
-      recordsUpdated
-      recordsSkipped
-      offset
-      errorMessage
-      startedAt
-      completedAt
-      duration
-    }
-  }
-`;
-
 // GraphQL Mutations
 const SYNC_CALLCENTER_DATA = gql`
   mutation SyncCallCenterData($input: SyncCallCenterInput) {
@@ -188,35 +173,16 @@ const CREATE_CALLCENTER_CONFIG = gql`
   }
 `;
 
-// Audio Player Component với time display
+// Audio Player Component
 function AudioPlayer({ recordPath, domain }: { recordPath: string | null, domain: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
-    
-    audio.addEventListener('timeupdate', updateTime);
-    audio.addEventListener('loadedmetadata', updateDuration);
-    audio.addEventListener('durationchange', updateDuration);
-
-    return () => {
-      audio.removeEventListener('timeupdate', updateTime);
-      audio.removeEventListener('loadedmetadata', updateDuration);
-      audio.removeEventListener('durationchange', updateDuration);
-    };
-  }, []);
 
   if (!recordPath) {
     return <span className="text-muted-foreground text-sm">Không có recording</span>;
   }
 
+  // Build recording URL
   const recordingUrl = `https://pbx01.onepos.vn:8080/recordings${recordPath}`;
 
   const togglePlay = () => {
@@ -230,54 +196,40 @@ function AudioPlayer({ recordPath, domain }: { recordPath: string | null, domain
     }
   };
 
-  const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   return (
-    <div className="flex flex-col gap-1 min-w-[120px]">
-      <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={togglePlay}
-          className="h-8 w-8 p-0"
-        >
-          {isPlaying ? (
-            <Pause className="h-4 w-4" />
-          ) : (
-            <Play className="h-4 w-4" />
-          )}
-        </Button>
-        <audio
-          ref={audioRef}
-          src={recordingUrl}
-          onEnded={() => setIsPlaying(false)}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-        />
-        <a
-          href={recordingUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs text-blue-600 hover:underline"
-        >
-          Tải về
-        </a>
-      </div>
-      {duration > 0 && (
-        <div className="text-xs text-muted-foreground font-mono">
-          {formatTime(currentTime)} / {formatTime(duration)}
-        </div>
-      )}
+    <div className="flex items-center gap-2">
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={togglePlay}
+        className="h-8 w-8 p-0"
+      >
+        {isPlaying ? (
+          <Pause className="h-4 w-4" />
+        ) : (
+          <Play className="h-4 w-4" />
+        )}
+      </Button>
+      <audio
+        ref={audioRef}
+        src={recordingUrl}
+        onEnded={() => setIsPlaying(false)}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
+      <a
+        href={recordingUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-xs text-blue-600 hover:underline"
+      >
+        Tải về
+      </a>
     </div>
   );
 }
 
-// Sync Progress Dialog với REAL-TIME polling
+// Sync Progress Dialog
 function SyncProgressDialog({ 
   open, 
   onClose, 
@@ -295,38 +247,43 @@ function SyncProgressDialog({
     recordsCreated: 0,
     recordsUpdated: 0,
     recordsSkipped: 0,
-    status: 'running',
   });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const pollingInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Query để lấy sync log progress với REAL POLLING
-  const { data: logData, startPolling, stopPolling } = useQuery(GET_SYNC_LOG_BY_ID, {
-    variables: { id: syncLogId || '' },
-    skip: !syncLogId || !open,
-    fetchPolicy: 'network-only', // IMPORTANT: Always fetch from network
+  // Query để lấy sync log progress
+  const { data: logData, startPolling, stopPolling } = useQuery(GET_SYNC_LOGS, {
+    variables: { pagination: { page: 1, limit: 1 } },
+    skip: !syncLogId,
   });
 
   useEffect(() => {
     if (open && syncLogId) {
-      // Start với initial message
-      setLogs([`[${new Date().toLocaleTimeString('vi-VN')}] Bắt đầu đồng bộ dữ liệu...`]);
+      // Poll every 500ms
+      startPolling(500);
       
-      // Poll mỗi 1 giây
-      startPolling(1000);
+      // Simulate logs
+      const logMessages = [
+        'Bắt đầu đồng bộ dữ liệu...',
+        'Kết nối đến PBX API...',
+        'Đang tải dữ liệu (batch 1)...',
+      ];
+      
+      logMessages.forEach((msg, i) => {
+        setTimeout(() => {
+          setLogs(prev => [...prev, `[${new Date().toLocaleTimeString('vi-VN')}] ${msg}`]);
+        }, i * 1000);
+      });
     } else {
       stopPolling();
       setLogs([]);
-      setStats({
-        recordsFetched: 0,
-        recordsCreated: 0,
-        recordsUpdated: 0,
-        recordsSkipped: 0,
-        status: 'running',
-      });
     }
 
     return () => {
       stopPolling();
+      if (pollingInterval.current) {
+        clearInterval(pollingInterval.current);
+      }
     };
   }, [open, syncLogId, startPolling, stopPolling]);
 
@@ -337,59 +294,24 @@ function SyncProgressDialog({
     }
   }, [logs]);
 
-  // Update stats từ poll data
+  // Update stats from poll data
   useEffect(() => {
-    if (logData?.getCallCenterSyncLogById) {
-      const log = logData.getCallCenterSyncLogById;
-      
-      const newStats = {
+    if (logData?.getCallCenterSyncLogs?.[0]) {
+      const log = logData.getCallCenterSyncLogs[0];
+      setStats({
         recordsFetched: log.recordsFetched || 0,
         recordsCreated: log.recordsCreated || 0,
         recordsUpdated: log.recordsUpdated || 0,
         recordsSkipped: log.recordsSkipped || 0,
-        status: log.status || 'running',
-      };
+      });
 
-      // Add logs khi có update
-      const prevFetched = stats.recordsFetched;
-      if (log.recordsFetched > prevFetched) {
+      // Add progress logs
+      if (log.recordsFetched > stats.recordsFetched) {
         setLogs(prev => [
           ...prev,
-          `[${new Date().toLocaleTimeString('vi-VN')}] Đã tải ${log.recordsFetched} records từ PBX API...`
+          `[${new Date().toLocaleTimeString('vi-VN')}] Đã tải ${log.recordsFetched} records...`
         ]);
       }
-
-      if (log.recordsCreated > stats.recordsCreated) {
-        setLogs(prev => [
-          ...prev,
-          `[${new Date().toLocaleTimeString('vi-VN')}] ✅ Tạo mới ${log.recordsCreated} records...`
-        ]);
-      }
-
-      if (log.recordsUpdated > stats.recordsUpdated) {
-        setLogs(prev => [
-          ...prev,
-          `[${new Date().toLocaleTimeString('vi-VN')}] 🔄 Cập nhật ${log.recordsUpdated} records...`
-        ]);
-      }
-
-      if (log.status === 'success' && stats.status !== 'success') {
-        setLogs(prev => [
-          ...prev,
-          `[${new Date().toLocaleTimeString('vi-VN')}] ✨ Đồng bộ hoàn thành thành công!`
-        ]);
-        stopPolling();
-      }
-
-      if (log.status === 'failed' && stats.status !== 'failed') {
-        setLogs(prev => [
-          ...prev,
-          `[${new Date().toLocaleTimeString('vi-VN')}] ❌ Đồng bộ thất bại: ${log.errorMessage || 'Unknown error'}`
-        ]);
-        stopPolling();
-      }
-
-      setStats(newStats);
     }
   }, [logData]);
 
@@ -397,22 +319,13 @@ function SyncProgressDialog({
     ? ((stats.recordsCreated + stats.recordsUpdated) / stats.recordsFetched) * 100 
     : 0;
 
-  const isCompleted = stats.status === 'success' || stats.status === 'failed';
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {!isCompleted && <Loader2 className="h-4 w-4 animate-spin" />}
-            {stats.status === 'success' && <CheckCircle className="h-4 w-4 text-green-600" />}
-            {stats.status === 'failed' && <XCircle className="h-4 w-4 text-red-600" />}
-            Tiến trình đồng bộ
-          </DialogTitle>
+          <DialogTitle>Tiến trình đồng bộ</DialogTitle>
           <DialogDescription>
-            {stats.status === 'running' && 'Đang đồng bộ dữ liệu từ PBX API...'}
-            {stats.status === 'success' && 'Đồng bộ hoàn thành thành công!'}
-            {stats.status === 'failed' && 'Đồng bộ thất bại!'}
+            Đang đồng bộ dữ liệu từ PBX API...
           </DialogDescription>
         </DialogHeader>
 
@@ -421,34 +334,34 @@ function SyncProgressDialog({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Tiến trình</span>
-              <span className="font-semibold">{Math.round(progress)}%</span>
+              <span>{Math.round(progress)}%</span>
             </div>
             <Progress value={progress} />
           </div>
 
-          {/* Stats Grid - REAL-TIME UPDATE */}
+          {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="p-3 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-700">{stats.recordsFetched}</div>
-              <div className="text-xs text-blue-600">Đã tải từ API</div>
+              <div className="text-xs text-blue-600">Đã tải</div>
             </div>
-            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+            <div className="p-3 bg-green-50 rounded-lg">
               <div className="text-2xl font-bold text-green-700">{stats.recordsCreated}</div>
               <div className="text-xs text-green-600">Tạo mới</div>
             </div>
-            <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+            <div className="p-3 bg-yellow-50 rounded-lg">
               <div className="text-2xl font-bold text-yellow-700">{stats.recordsUpdated}</div>
               <div className="text-xs text-yellow-600">Cập nhật</div>
             </div>
-            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="p-3 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold text-gray-700">{stats.recordsSkipped}</div>
               <div className="text-xs text-gray-600">Bỏ qua</div>
             </div>
           </div>
 
-          {/* Logs Terminal - REAL-TIME */}
+          {/* Logs */}
           <div className="space-y-2">
-            <Label>Logs (Real-time)</Label>
+            <Label>Logs</Label>
             <ScrollArea 
               ref={scrollRef}
               className="h-[200px] w-full rounded-md border bg-slate-950 p-4"
@@ -460,7 +373,7 @@ function SyncProgressDialog({
               ))}
               {logs.length === 0 && (
                 <div className="text-xs text-gray-500 font-mono">
-                  Đang chờ logs...
+                  Chờ logs...
                 </div>
               )}
             </ScrollArea>
@@ -468,11 +381,8 @@ function SyncProgressDialog({
         </div>
 
         <DialogFooter>
-          <Button 
-            onClick={onClose}
-            variant={isCompleted ? 'default' : 'outline'}
-          >
-            {isCompleted ? 'Đóng' : 'Chạy nền'}
+          <Button onClick={onClose}>
+            Đóng
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -514,6 +424,8 @@ export default function CallCenterPage() {
 
   const handleManualSync = async () => {
     try {
+      setShowSyncProgress(true);
+      
       const result = await syncData({
         variables: {
           input: {},
@@ -523,24 +435,33 @@ export default function CallCenterPage() {
       if (result.data.syncCallCenterData.success) {
         setCurrentSyncLogId(result.data.syncCallCenterData.syncLogId);
         setSyncStats({
-          recordsFetched: 0,
-          recordsCreated: 0,
-          recordsUpdated: 0,
+          recordsFetched: result.data.syncCallCenterData.recordsFetched,
+          recordsCreated: result.data.syncCallCenterData.recordsCreated,
+          recordsUpdated: result.data.syncCallCenterData.recordsUpdated,
           recordsSkipped: 0,
-          status: 'running',
         });
-        setShowSyncProgress(true);
         
-        // Không auto-close, để user tự close hoặc chạy nền
+        toast.success('Sync thành công!', {
+          description: `${result.data.syncCallCenterData.recordsCreated} records mới đã được tạo`,
+        });
+        
+        setTimeout(() => {
+          refetchRecords();
+          refetchLogs();
+          refetchConfig();
+          setShowSyncProgress(false);
+        }, 2000);
       } else {
         toast.error('Sync thất bại', {
           description: result.data.syncCallCenterData.error,
         });
+        setShowSyncProgress(false);
       }
     } catch (error: any) {
       toast.error('Sync error', {
         description: error.message,
       });
+      setShowSyncProgress(false);
     }
   };
 
@@ -552,6 +473,7 @@ export default function CallCenterPage() {
 
     try {
       setShowDateRangeDialog(false);
+      setShowSyncProgress(true);
       
       const result = await syncData({
         variables: {
@@ -565,22 +487,33 @@ export default function CallCenterPage() {
       if (result.data.syncCallCenterData.success) {
         setCurrentSyncLogId(result.data.syncCallCenterData.syncLogId);
         setSyncStats({
-          recordsFetched: 0,
-          recordsCreated: 0,
-          recordsUpdated: 0,
+          recordsFetched: result.data.syncCallCenterData.recordsFetched,
+          recordsCreated: result.data.syncCallCenterData.recordsCreated,
+          recordsUpdated: result.data.syncCallCenterData.recordsUpdated,
           recordsSkipped: 0,
-          status: 'running',
         });
-        setShowSyncProgress(true);
+        
+        toast.success('Sync thành công!', {
+          description: `${result.data.syncCallCenterData.recordsCreated} records mới đã được tạo`,
+        });
+        
+        setTimeout(() => {
+          refetchRecords();
+          refetchLogs();
+          refetchConfig();
+          setShowSyncProgress(false);
+        }, 2000);
       } else {
         toast.error('Sync thất bại', {
           description: result.data.syncCallCenterData.error,
         });
+        setShowSyncProgress(false);
       }
     } catch (error: any) {
       toast.error('Sync error', {
         description: error.message,
       });
+      setShowSyncProgress(false);
     }
   };
 
@@ -660,72 +593,6 @@ export default function CallCenterPage() {
     const config = variants[status] || { variant: 'outline' as const, label: status };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
-
-  // Define columns for AdvancedTable
-  const callRecordColumns: ColumnDef<any>[] = [
-    {
-      field: 'direction',
-      headerName: 'Direction',
-      width: 120,
-      sortable: true,
-      cellRenderer: (params) => (
-        <div className="flex items-center gap-2">
-          {getDirectionIcon(params.value)}
-          <span className="text-xs">{params.value}</span>
-        </div>
-      ),
-    },
-    {
-      field: 'callerIdNumber',
-      headerName: 'Caller',
-      width: 130,
-      sortable: true,
-      cellRenderer: (params) => <div className="font-mono text-sm">{params.value}</div>,
-    },
-    {
-      field: 'destinationNumber',
-      headerName: 'Destination',
-      width: 130,
-      sortable: true,
-      cellRenderer: (params) => <div className="font-mono text-sm">{params.value}</div>,
-    },
-    {
-      field: 'startEpoch',
-      headerName: 'Start Time',
-      width: 180,
-      sortable: true,
-      cellRenderer: (params) => <div className="text-sm">{formatEpoch(params.value)}</div>,
-    },
-    {
-      field: 'duration',
-      headerName: 'Duration',
-      width: 120,
-      sortable: true,
-      cellRenderer: (params) => (
-        <div className="flex flex-col gap-1 text-sm">
-          <span>Total: {formatDuration(params.value)}</span>
-          <span className="text-xs text-muted-foreground">
-            Talk: {formatDuration(params.data.billsec)}
-          </span>
-        </div>
-      ),
-    },
-    {
-      field: 'callStatus',
-      headerName: 'Status',
-      width: 120,
-      sortable: true,
-      cellRenderer: (params) => getStatusBadge(params.value),
-    },
-    {
-      field: 'recordPath',
-      headerName: 'Recording',
-      width: 180,
-      cellRenderer: (params) => (
-        <AudioPlayer recordPath={params.value} domain={params.data.domain} />
-      ),
-    },
-  ];
 
   return (
     <div className="p-6 space-y-6">
@@ -842,61 +709,99 @@ export default function CallCenterPage() {
                 Hiển thị {records?.pagination.totalItems || 0} cuộc gọi
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent>
               {recordsLoading ? (
                 <div className="flex justify-center p-8">
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : (
-                <AdvancedTable
-                  columns={callRecordColumns}
-                  data={records?.items || []}
-                  config={{
-                    enableSorting: true,
-                    enableFiltering: true,
-                    enableColumnPinning: false,
-                    enableColumnResizing: true,
-                    enableColumnHiding: true,
-                    enableRowSelection: false,
-                    enableInlineEditing: false,
-                    enableRowDeletion: false,
-                    showToolbar: true,
-                    showPagination: false,
-                  }}
-                  height={600}
-                />
+                <>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[100px]">Direction</TableHead>
+                          <TableHead>Caller</TableHead>
+                          <TableHead>Destination</TableHead>
+                          <TableHead>Start Time</TableHead>
+                          <TableHead>Duration</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Recording</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {records?.items.map((record: any) => (
+                          <TableRow key={record.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                {getDirectionIcon(record.direction)}
+                                <span className="text-xs">{record.direction}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-mono text-sm">{record.callerIdNumber}</div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-mono text-sm">{record.destinationNumber}</div>
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {formatEpoch(record.startEpoch)}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              <div className="flex flex-col gap-1">
+                                <span>Total: {formatDuration(record.duration)}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  Talk: {formatDuration(record.billsec)}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {getStatusBadge(record.callStatus)}
+                            </TableCell>
+                            <TableCell>
+                              <AudioPlayer 
+                                recordPath={record.recordPath} 
+                                domain={record.domain}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Pagination */}
+                  {records?.pagination && (
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="text-sm text-muted-foreground">
+                        Trang {records.pagination.currentPage} / {records.pagination.totalPages}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+                          disabled={!records.pagination.hasPreviousPage}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          Trước
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+                          disabled={!records.pagination.hasNextPage}
+                        >
+                          Sau
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
-
-          {/* Custom Pagination (outside AdvancedTable) */}
-          {records?.pagination && (
-            <div className="flex items-center justify-between px-4">
-              <div className="text-sm text-muted-foreground">
-                Trang {records.pagination.currentPage} / {records.pagination.totalPages}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
-                  disabled={!records.pagination.hasPreviousPage}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Trước
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
-                  disabled={!records.pagination.hasNextPage}
-                >
-                  Sau
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
         </TabsContent>
 
         {/* Sync Logs Tab */}
@@ -979,12 +884,7 @@ export default function CallCenterPage() {
 
       <SyncProgressDialog
         open={showSyncProgress}
-        onClose={() => {
-          setShowSyncProgress(false);
-          refetchRecords();
-          refetchLogs();
-          refetchConfig();
-        }}
+        onClose={() => setShowSyncProgress(false)}
         syncLogId={currentSyncLogId}
         initialStats={syncStats}
       />
