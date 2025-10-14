@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import PageBuilder from '@/components/page-builder/PageBuilder';
+import { FullScreenPageBuilder } from '@/components/page-builder/FullScreenPageBuilder';
 import { usePages } from '@/hooks/usePageBuilder';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -297,22 +297,13 @@ function PageBuilderContent() {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Back Button */}
-      <div className="bg-white border-b px-4 py-2">
-        <Button
-          variant="ghost"
-          onClick={handleBackToList}
-          className="text-blue-600 hover:text-blue-700"
-        >
-          ← Back to Pages
-        </Button>
-      </div>
-
-      {/* Page Builder */}
-      <div className="flex-1">
-        <PageBuilder pageId={pageId || undefined} />
-      </div>
+    <div className="h-screen w-screen overflow-hidden">
+      {/* Full Screen Page Builder */}
+      <FullScreenPageBuilder 
+        pageId={pageId || undefined}
+        onExit={handleBackToList}
+        initialMode="visual"
+      />
     </div>
   );
 }
