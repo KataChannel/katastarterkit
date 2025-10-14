@@ -329,7 +329,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
                           {imagePos === 'top' || imagePos === 'bottom' ? (
                             <div className={`space-y-6 ${imagePos === 'top' ? 'flex flex-col' : 'flex flex-col-reverse'}`}>
                               {/* Image */}
-                              {slide.image && imagePos !== 'background' && (
+                              {slide.image && (
                                 <div className="w-full">
                                   <div className="w-full h-48 md:h-64 overflow-hidden rounded-lg shadow-2xl">
                                     <img 
@@ -432,7 +432,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
                               </div>
 
                               {/* Image */}
-                              {slide.image && imagePos !== 'background' && (
+                              {slide.image && (
                                 <div className={`hidden md:block ${imagePos === 'left' ? 'md:order-1' : ''}`}>
                                   <div className="w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg shadow-2xl">
                                     <img 
@@ -493,11 +493,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
                           )}
                         </div>
                       )}
-                      
-                      {/* Background Pattern/Overlay for non-background images */}
-                      {imagePos !== 'background' && (
-                        <div className="absolute inset-0 bg-black/10 z-0" />
-                      )}
+
                     </CardContent>
                   </Card>
                 </CarouselItem>
