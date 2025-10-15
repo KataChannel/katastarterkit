@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { Product, SortField, SortDirection, FilterStatus, ProductStats } from '../types';
+import { Product, SortField, SortDirection, FilterStatus, UniqueFilter, ProductStats } from '../types';
 
 interface UseProductFiltersProps {
   products: Product[];
   searchTerm: string;
   filterStatus: FilterStatus;
+  uniqueFilter: UniqueFilter;
   sortField: SortField;
   sortDirection: SortDirection;
 }
@@ -18,6 +19,7 @@ export const useProductFilters = ({
   products,
   searchTerm,
   filterStatus,
+  uniqueFilter,
   sortField,
   sortDirection,
 }: UseProductFiltersProps): UseProductFiltersResult => {
@@ -45,6 +47,27 @@ export const useProductFilters = ({
       filtered = filtered.filter((p: Product) => p.ten2);
     } else if (filterStatus === 'pending') {
       filtered = filtered.filter((p: Product) => !p.ten2);
+    }
+
+    // Apply unique filter
+    if (uniqueFilter === 'ma') {
+      // Keep only first occurrence of each 'ma' (product code)
+      const seen = new Set<string>();
+      filtered = filtered.filter((p: Product) => {
+        if (!p.ma) return true; // Keep products without ma
+        if (seen.has(p.ma)) return false;
+        seen.add(p.ma);
+        return true;
+      });
+    } else if (uniqueFilter === 'ten2') {
+      // Keep only first occurrence of each 'ten2' (normalized name)
+      const seen = new Set<string>();
+      filtered = filtered.filter((p: Product) => {
+        if (!p.ten2) return true; // Keep products without ten2
+        if (seen.has(p.ten2)) return false;
+        seen.add(p.ten2);
+        return true;
+      });
     }
 
     // Apply sorting
@@ -80,5 +103,5 @@ export const useProductFilters = ({
     };
 
     return { filteredProducts: filtered, stats: statsData };
-  }, [products, searchTerm, filterStatus, sortField, sortDirection]);
+  }, [products, searchTerm, filterStatus, uniqueFilter, sortField, sortDirection]);
 };

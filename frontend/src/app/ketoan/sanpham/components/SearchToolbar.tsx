@@ -1,12 +1,14 @@
 import React from 'react';
 import { Search, RefreshCw, Database } from 'lucide-react';
-import { FilterStatus, ProductStats } from '../types';
+import { FilterStatus, UniqueFilter, ProductStats } from '../types';
 
 interface SearchToolbarProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   filterStatus: FilterStatus;
   onFilterChange: (status: FilterStatus) => void;
+  uniqueFilter: UniqueFilter;
+  onUniqueFilterChange: (filter: UniqueFilter) => void;
   stats: ProductStats;
   loading: boolean;
   onRefresh: () => void;
@@ -18,6 +20,8 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
   onSearchChange,
   filterStatus,
   onFilterChange,
+  uniqueFilter,
+  onUniqueFilterChange,
   stats,
   loading,
   onRefresh,
@@ -94,6 +98,43 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
               }`}
             >
               Chưa xử lý ({stats.pending})
+            </button>
+          </div>
+        </div>
+
+        {/* Unique Filters */}
+        <div className="flex gap-2 items-center">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Hiển thị unique:</span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onUniqueFilterChange('none')}
+              className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                uniqueFilter === 'none'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              Tất cả
+            </button>
+            <button
+              onClick={() => onUniqueFilterChange('ma')}
+              className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                uniqueFilter === 'ma'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              Theo mã sản phẩm
+            </button>
+            <button
+              onClick={() => onUniqueFilterChange('ten2')}
+              className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                uniqueFilter === 'ten2'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              Theo tên chuẩn hóa
             </button>
           </div>
         </div>

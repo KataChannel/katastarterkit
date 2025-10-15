@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useDynamicQuery } from '@/lib/graphql/dynamic-hooks';
 
 // Types
-import { SortField, SortDirection, FilterStatus, NormalizationResult } from './types';
+import { SortField, SortDirection, FilterStatus, UniqueFilter, NormalizationResult } from './types';
 
 // Components
 import {
@@ -27,6 +27,7 @@ export default function SanPhamPage() {
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const [uniqueFilter, setUniqueFilter] = useState<UniqueFilter>('none');
   const [normalizing, setNormalizing] = useState(false);
   const [showNormalizeModal, setShowNormalizeModal] = useState(false);
 
@@ -43,6 +44,7 @@ export default function SanPhamPage() {
     products: rawProducts,
     searchTerm,
     filterStatus,
+    uniqueFilter,
     sortField,
     sortDirection,
   });
@@ -53,7 +55,7 @@ export default function SanPhamPage() {
     page,
     limit,
     setPage,
-    dependencies: [searchTerm, filterStatus, sortField, sortDirection],
+    dependencies: [searchTerm, filterStatus, uniqueFilter, sortField, sortDirection],
   });
 
   // Handlers
@@ -123,6 +125,8 @@ export default function SanPhamPage() {
         onSearchChange={setSearchTerm}
         filterStatus={filterStatus}
         onFilterChange={setFilterStatus}
+        uniqueFilter={uniqueFilter}
+        onUniqueFilterChange={setUniqueFilter}
         stats={stats}
         loading={queryLoading}
         onRefresh={handleRefresh}

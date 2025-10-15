@@ -28,6 +28,7 @@ export interface ProductStats {
 export type SortField = 'ten' | 'ma' | 'dgia' | 'createdAt';
 export type SortDirection = 'asc' | 'desc';
 export type FilterStatus = 'all' | 'normalized' | 'pending';
+export type UniqueFilter = 'none' | 'ma' | 'ten2';
 
 export interface SortConfig {
   field: SortField;
