@@ -10,6 +10,7 @@ interface SearchToolbarProps {
   uniqueFilter: UniqueFilter;
   onUniqueFilterChange: (filter: UniqueFilter) => void;
   stats: ProductStats;
+  filteredCount: number; // Count after applying all filters including unique
   loading: boolean;
   onRefresh: () => void;
   onNormalize: () => void;
@@ -23,6 +24,7 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
   uniqueFilter,
   onUniqueFilterChange,
   stats,
+  filteredCount,
   loading,
   onRefresh,
   onNormalize,
@@ -114,7 +116,7 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
-              Tất cả
+              Tất cả {uniqueFilter === 'none' && `(${filteredCount})`}
             </button>
             <button
               onClick={() => onUniqueFilterChange('ma')}
@@ -124,7 +126,7 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
-              Theo mã sản phẩm
+              Theo mã sản phẩm {uniqueFilter === 'ma' && `(${filteredCount})`}
             </button>
             <button
               onClick={() => onUniqueFilterChange('ten2')}
@@ -134,7 +136,7 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
-              Theo tên chuẩn hóa
+              Theo tên chuẩn hóa {uniqueFilter === 'ten2' && `(${filteredCount})`}
             </button>
           </div>
         </div>

@@ -128,6 +128,7 @@ export default function SanPhamPage() {
         uniqueFilter={uniqueFilter}
         onUniqueFilterChange={setUniqueFilter}
         stats={stats}
+        filteredCount={filteredProducts.length}
         loading={queryLoading}
         onRefresh={handleRefresh}
         onNormalize={() => setShowNormalizeModal(true)}
