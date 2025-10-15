@@ -2085,6 +2085,7 @@ nbmst	khmshdon	khhdon	shdon	cqt	nbdchi	nbten	nmdchi	nmmst	nmten	nmtnmua	tgtcthue
 
 
 Dựa vào : 
+Cập nhật code dự án tính năng xuất nhập tồn với giao diện ở  app/ketoan/xuatnhapton tách thành phần để dễ quản lý và bảo trì. Yêu cầu :
 1. ext_listhoadon.nbmst,ext_listhoadon.nmmst để nhận biết hóa đơn bán hay mua
 2. ext_detailhoadon.dgia  - Đơn giá
   ext_detailhoadon.dvtinh - ĐVT
