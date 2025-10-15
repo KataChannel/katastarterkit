@@ -429,6 +429,7 @@ export class UniversalQueryResolver {
       'ext_dmsodo',
       'ext_trungtamcp',
       'ext_tieude',
+      'ext_sanphamhoadon',
       'customerManagement',
       'productInventory',
       'warehouseManagement',

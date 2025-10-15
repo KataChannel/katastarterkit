@@ -69,24 +69,29 @@ tailwind-test: ## Test TailwindCSS compilation
 .PHONY: db-migrate
 db-migrate: ## Run database migrations
 	@echo "$(GREEN)Running database migrations...$(NC)"
-	@bun db:migrate
+	@(cd $(BACKEND_DIR) && bun prisma migrate dev)
 
 .PHONY: db-seed
 db-seed: ## Seed database with initial data
 	@echo "$(GREEN)Seeding database...$(NC)"
-	@bun db:seed
+	@(cd $(BACKEND_DIR) && bun run prisma:seed)
+
+.PHONY: db-seed-comprehensive
+db-seed-comprehensive: ## Seed database with comprehensive demo data
+	@echo "$(GREEN)Seeding comprehensive data...$(NC)"
+	@(cd $(BACKEND_DIR) && bun run seed:comprehensive)
 
 .PHONY: db-studio
 db-studio: ## Open Prisma Studio
 	@echo "$(GREEN)Opening Prisma Studio...$(NC)"
-	@bun db:studio
+	@(cd $(BACKEND_DIR) && bun prisma studio)
 
 .PHONY: db-reset
 db-reset: ## Reset database (dangerous!)
 	@echo "$(YELLOW)⚠️  WARNING: This will reset all database data!$(NC)"
 	@read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
 	@echo "$(GREEN)Resetting database...$(NC)"
-	@(cd $(BACKEND_DIR) && npx prisma migrate reset --force)
+	@(cd $(BACKEND_DIR) && bun prisma migrate reset --force)
 
 # Docker targets
 .PHONY: docker-up

@@ -69,6 +69,9 @@ export class DynamicQueryGeneratorService {
     'invoice',
     'invoiceItem',
     'invoicePayment',
+    'ext_listhoadon',
+    'ext_detailhoadon',
+    'ext_sanphamhoadon',
   ];
 
   constructor(private prisma: PrismaService) {}
@@ -132,6 +135,9 @@ export class DynamicQueryGeneratorService {
       invoice: this.prisma.ext_listhoadon,
       invoiceitem: this.prisma.ext_detailhoadon,
       invoicepayment: this.prisma.ext_listhoadon, // Assuming same table
+      ext_listhoadon: this.prisma.ext_listhoadon,
+      ext_detailhoadon: this.prisma.ext_detailhoadon,
+      ext_sanphamhoadon: this.prisma.ext_sanphamhoadon,
     };
 
     const delegate = modelMap[normalizedModel];

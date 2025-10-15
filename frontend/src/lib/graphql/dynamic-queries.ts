@@ -8,6 +8,9 @@ export class DynamicGraphQLGenerator {
     const modelNameCamel = modelName.charAt(0).toLowerCase() + modelName.slice(1);
     const modelNamePlural = `${modelNameLower}s`;
     
+    // Check if this is an ext_ model (uses JSON scalar type)
+    const isExtModel = modelName.startsWith('ext_');
+    
     // Default fields if none provided
     const defaultFields = fields.length > 0 ? fields : ['id', 'createdAt', 'updatedAt'];
     
@@ -21,133 +24,196 @@ export class DynamicGraphQLGenerator {
       });
     }
 
+    // For ext_ models, use JSON type instead of specific FilterInput
+    const filterType = isExtModel ? 'JSON' : `${modelName}FilterInput`;
+
     const queries = {
       // GET ALL
-      [`GET_${modelName.toUpperCase()}S`]: gql`
-        query Get${modelName}s($filters: ${modelName}FilterInput) {
-          get${modelName}s(filters: $filters) {
-            ${fieldsStr}
+      [`GET_${modelName.toUpperCase()}S`]: isExtModel 
+        ? gql`
+          query Get${modelName}s($filters: ${filterType}) {
+            get${modelName}s(filters: $filters)
           }
-        }
-      `,
+        `
+        : gql`
+          query Get${modelName}s($filters: ${filterType}) {
+            get${modelName}s(filters: $filters) {
+              ${fieldsStr}
+            }
+          }
+        `,
 
       // GET ALL PAGINATED
-      [`GET_${modelName.toUpperCase()}S_PAGINATED`]: gql`
-        query Get${modelName}sPaginated($filters: ${modelName}FilterInput) {
-          get${modelName}sPaginated(filters: $filters) {
-            data {
-              ${fieldsStr}
-            }
-            meta {
-              total
-              page
-              limit
-              totalPages
-              hasNextPage
-              hasPrevPage
+      [`GET_${modelName.toUpperCase()}S_PAGINATED`]: isExtModel
+        ? gql`
+          query Get${modelName}sPaginated($filters: ${filterType}) {
+            get${modelName}sPaginated(filters: $filters)
+          }
+        `
+        : gql`
+          query Get${modelName}sPaginated($filters: ${filterType}) {
+            get${modelName}sPaginated(filters: $filters) {
+              data {
+                ${fieldsStr}
+              }
+              meta {
+                total
+                page
+                limit
+                totalPages
+                hasNextPage
+                hasPrevPage
+              }
             }
           }
-        }
-      `,
+        `,
 
       // GET BY ID
-      [`GET_${modelName.toUpperCase()}_BY_ID`]: gql`
-        query Get${modelName}ById($id: ID!, $options: JSON) {
-          get${modelName}ById(id: $id, options: $options) {
-            ${fieldsStr}
+      [`GET_${modelName.toUpperCase()}_BY_ID`]: isExtModel
+        ? gql`
+          query Get${modelName}ById($id: ID!, $options: JSON) {
+            get${modelName}ById(id: $id, options: $options)
           }
-        }
-      `,
+        `
+        : gql`
+          query Get${modelName}ById($id: ID!, $options: JSON) {
+            get${modelName}ById(id: $id, options: $options) {
+              ${fieldsStr}
+            }
+          }
+        `,
 
       // CREATE
-      [`CREATE_${modelName.toUpperCase()}`]: gql`
-        mutation Create${modelName}($data: JSON!, $options: JSON) {
-          create${modelName}(data: $data, options: $options) {
-            ${fieldsStr}
+      [`CREATE_${modelName.toUpperCase()}`]: isExtModel
+        ? gql`
+          mutation Create${modelName}($data: JSON!, $options: JSON) {
+            create${modelName}(data: $data, options: $options)
           }
-        }
-      `,
+        `
+        : gql`
+          mutation Create${modelName}($data: JSON!, $options: JSON) {
+            create${modelName}(data: $data, options: $options) {
+              ${fieldsStr}
+            }
+          }
+        `,
 
       // CREATE BULK
-      [`CREATE_${modelName.toUpperCase()}S_BULK`]: gql`
-        mutation Create${modelName}sBulk($input: JSON!, $options: JSON) {
-          create${modelName}sBulk(input: $input, options: $options) {
-            success
-            count
-            data {
-              ${fieldsStr}
-            }
-            errors {
-              index
-              error
-              data
+      [`CREATE_${modelName.toUpperCase()}S_BULK`]: isExtModel
+        ? gql`
+          mutation Create${modelName}sBulk($input: JSON!, $options: JSON) {
+            create${modelName}sBulk(input: $input, options: $options)
+          }
+        `
+        : gql`
+          mutation Create${modelName}sBulk($input: JSON!, $options: JSON) {
+            create${modelName}sBulk(input: $input, options: $options) {
+              success
+              count
+              data {
+                ${fieldsStr}
+              }
+              errors {
+                index
+                error
+                data
+              }
             }
           }
-        }
-      `,
+        `,
 
       // UPDATE
-      [`UPDATE_${modelName.toUpperCase()}`]: gql`
-        mutation Update${modelName}($id: ID!, $data: JSON!, $options: JSON) {
-          update${modelName}(id: $id, data: $data, options: $options) {
-            ${fieldsStr}
+      [`UPDATE_${modelName.toUpperCase()}`]: isExtModel
+        ? gql`
+          mutation Update${modelName}($id: ID!, $data: JSON!, $options: JSON) {
+            update${modelName}(id: $id, data: $data, options: $options)
           }
-        }
-      `,
+        `
+        : gql`
+          mutation Update${modelName}($id: ID!, $data: JSON!, $options: JSON) {
+            update${modelName}(id: $id, data: $data, options: $options) {
+              ${fieldsStr}
+            }
+          }
+        `,
 
       // UPDATE BULK
-      [`UPDATE_${modelName.toUpperCase()}S_BULK`]: gql`
-        mutation Update${modelName}sBulk($input: JSON!, $options: JSON) {
-          update${modelName}sBulk(input: $input, options: $options) {
-            success
-            count
-            data {
-              ${fieldsStr}
-            }
-            errors {
-              index
-              error
-              data
+      [`UPDATE_${modelName.toUpperCase()}S_BULK`]: isExtModel
+        ? gql`
+          mutation Update${modelName}sBulk($input: JSON!, $options: JSON) {
+            update${modelName}sBulk(input: $input, options: $options)
+          }
+        `
+        : gql`
+          mutation Update${modelName}sBulk($input: JSON!, $options: JSON) {
+            update${modelName}sBulk(input: $input, options: $options) {
+              success
+              count
+              data {
+                ${fieldsStr}
+              }
+              errors {
+                index
+                error
+                data
+              }
             }
           }
-        }
-      `,
+        `,
 
       // DELETE
-      [`DELETE_${modelName.toUpperCase()}`]: gql`
-        mutation Delete${modelName}($id: ID!, $options: JSON) {
-          delete${modelName}(id: $id, options: $options) {
-            ${fieldsStr}
+      [`DELETE_${modelName.toUpperCase()}`]: isExtModel
+        ? gql`
+          mutation Delete${modelName}($id: ID!, $options: JSON) {
+            delete${modelName}(id: $id, options: $options)
           }
-        }
-      `,
-
-      // DELETE BULK
-      [`DELETE_${modelName.toUpperCase()}S_BULK`]: gql`
-        mutation Delete${modelName}sBulk($input: JSON!, $options: JSON) {
-          delete${modelName}sBulk(input: $input, options: $options) {
-            success
-            count
-            data {
+        `
+        : gql`
+          mutation Delete${modelName}($id: ID!, $options: JSON) {
+            delete${modelName}(id: $id, options: $options) {
               ${fieldsStr}
             }
-            errors {
-              index
-              error
-              data
+          }
+        `,
+
+      // DELETE BULK
+      [`DELETE_${modelName.toUpperCase()}S_BULK`]: isExtModel
+        ? gql`
+          mutation Delete${modelName}sBulk($input: JSON!, $options: JSON) {
+            delete${modelName}sBulk(input: $input, options: $options)
+          }
+        `
+        : gql`
+          mutation Delete${modelName}sBulk($input: JSON!, $options: JSON) {
+            delete${modelName}sBulk(input: $input, options: $options) {
+              success
+              count
+              data {
+                ${fieldsStr}
+              }
+              errors {
+                index
+                error
+                data
+              }
             }
           }
-        }
-      `,
+        `,
 
       // UPSERT
-      [`UPSERT_${modelName.toUpperCase()}`]: gql`
-        mutation Upsert${modelName}($where: JSON!, $create: JSON!, $update: JSON!, $options: JSON) {
-          upsert${modelName}(where: $where, create: $create, update: $update, options: $options) {
-            ${fieldsStr}
+      [`UPSERT_${modelName.toUpperCase()}`]: isExtModel
+        ? gql`
+          mutation Upsert${modelName}($where: JSON!, $create: JSON!, $update: JSON!, $options: JSON) {
+            upsert${modelName}(where: $where, create: $create, update: $update, options: $options)
           }
-        }
-      `,
+        `
+        : gql`
+          mutation Upsert${modelName}($where: JSON!, $create: JSON!, $update: JSON!, $options: JSON) {
+            upsert${modelName}(where: $where, create: $create, update: $update, options: $options) {
+              ${fieldsStr}
+            }
+          }
+        `,
 
       // COUNT
       [`COUNT_${modelName.toUpperCase()}S`]: gql`

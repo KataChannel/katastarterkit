@@ -44,6 +44,7 @@ import { EnvConfigService } from './config/env-config.service';
 // Controllers
 import { LogController } from './controllers/log.controller';
 import { FileController } from './controllers/file.controller';
+import { ProductNormalizationController } from './api/product-normalization.controller';
 
 // Resolvers
 import { AppResolver } from './app.resolver';
@@ -142,6 +143,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     LogController,
     TestController,
     FileController,
+    ProductNormalizationController,
   ],
   providers: [
     EnvConfigService,

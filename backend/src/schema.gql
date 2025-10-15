@@ -1600,6 +1600,9 @@ type Mutation {
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
+
+  """Create new ext_sanphamhoadon"""
+  createext_sanphamhoadon(data: JSON!, options: JSON): JSON!
   deleteCallCenterConfig(id: String!): CallCenterConfig!
   deleteCategory(deleteProducts: Boolean! = false, id: ID!): CategoryType!
   deleteComment(id: String!): Boolean!
@@ -1625,6 +1628,9 @@ type Mutation {
   deleteTask(id: String!): Boolean!
   deleteTaskMedia(mediaId: String!): Boolean!
   deleteUser(id: String!): Boolean!
+
+  """Delete ext_sanphamhoadon"""
+  deleteext_sanphamhoadon(id: String!, options: JSON): JSON!
   duplicatePage(id: String!, slug: String, title: String): Page!
 
   """Create a new record"""
@@ -1718,6 +1724,9 @@ type Mutation {
   updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateTask(input: UpdateTaskInput!): Task!
   updateUser(id: String!, input: UpdateUserInput!): User!
+
+  """Update ext_sanphamhoadon"""
+  updateext_sanphamhoadon(data: JSON!, id: String!, options: JSON): JSON!
   uploadFile(file: JSON!, folderId: ID, metadata: JSON): FileUploadResponse!
   uploadTaskMedia(input: UploadTaskMediaInput!): TaskMedia!
 
@@ -2373,6 +2382,21 @@ type Query {
   getUserRolePermissions(userId: String!): UserRolePermissionSummary!
   getUserStats: UserStats!
   getUsers: [User!]!
+
+  """Get all ext_detailhoadon records"""
+  getext_detailhoadons(filters: JSON): [JSON!]!
+
+  """Get all ext_listhoadon records"""
+  getext_listhoadons(filters: JSON): [JSON!]!
+
+  """Get single ext_sanphamhoadon by ID"""
+  getext_sanphamhoadonById(id: String!, options: JSON): JSON!
+
+  """Get all ext_sanphamhoadon records"""
+  getext_sanphamhoadons(filters: JSON): [JSON!]!
+
+  """Get paginated ext_sanphamhoadon records"""
+  getext_sanphamhoadonsPaginated(filters: JSON): JSON!
   headerMenus: [MenuResponseDto!]!
 
   """Hello world query"""

@@ -1,0 +1,146 @@
+feat(ketoan): add product management page with fuzzy normalization
+
+## New Features
+
+### 1. Product Management Page (/ketoan/sanpham)
+- Display products from ext_sanphamhoadon table
+- Show fields: ten, ten2, ma, dvt, dgia
+- Search functionality across product names and codes
+- Pagination support (50 items per page)
+- Real-time statistics dashboard
+
+### 2. Product Normalization with Fuzzy Matching
+- Integration with pg_trgm fuzzy matching system
+- Normalize product names using similarity algorithm
+- Preview mode (dry-run) before actual update
+- Configurable batch sizes (10, 100, 1000, or all)
+- Interactive normalization modal
+
+### 3. Statistics Dashboard
+- Total products count
+- Normalized products count (ten2 not null)
+- Pending normalization count (ten2 null)
+- Visual status badges for each product
+
+## Files Created
+
+### Frontend
+- frontend/src/app/ketoan/sanpham/page.tsx
+  * Main product management page
+  * Product table with search and pagination
+  * Normalization modal interface
+  * Statistics cards
+
+- frontend/src/app/api/ketoan/normalize-products/route.ts
+  * API proxy to backend normalization endpoint
+
+### Backend
+- backend/src/api/product-normalization.controller.ts
+  * POST /api/ketoan/normalize-products
+  * Execute updateten2.js script with options
+  * Return stats after normalization
+
+### Documentation
+- docs/KETOAN_SANPHAM_PAGE.md
+  * Complete usage guide
+  * API documentation
+  * SQL examples
+  * Troubleshooting
+
+## Files Modified
+
+### Backend
+- backend/src/app.module.ts
+  * Added ProductNormalizationController import
+  * Registered controller in module
+
+## Technical Details
+
+### Database Schema
+```typescript
+model ext_sanphamhoadon {
+  id: String
+  ten: String  // Original name
+  ten2: String // Normalized name ⭐
+  ma: String   // Product code
+  dvt: String  // Unit
+  dgia: Decimal // Price
+}
+```
+
+### Fuzzy Matching
+- Uses PostgreSQL pg_trgm extension
+- GIN index on ten field for fast similarity search
+- Configurable similarity threshold (default 0.6)
+- Groups similar products automatically
+
+### API Flow
+```
+Frontend → Next.js API Route → Backend Controller → updateten2.js Script
+```
+
+## Features
+
+✅ View all products with normalization status
+✅ Search products by name, code, or normalized name
+✅ Run fuzzy matching normalization (preview/update modes)
+✅ Batch processing with configurable limits
+✅ Real-time statistics
+✅ Responsive design with dark mode support
+✅ Error handling and loading states
+
+## Usage
+
+### Basic
+```bash
+# Access page
+http://localhost:3000/ketoan/sanpham
+
+# Search products
+# Use normalization modal to run fuzzy matching
+```
+
+### Advanced (CLI)
+```bash
+cd backend/scripts
+
+# Interactive menu
+./update-ten2.sh
+
+# Direct command
+node updateten2.js --dry-run --limit=100
+```
+
+## Integration
+
+Works with existing systems:
+- ext_sanphamhoadon model from invoice details
+- Universal Dynamic Query system
+- Backend normalization scripts (updateten2.js)
+- pg_trgm fuzzy matching infrastructure
+
+## Performance
+
+- Frontend: 50 products per page
+- Backend: Batch processing in chunks
+- Database: GIN indexes for fast similarity search
+- Estimated time: ~1s for 10 products, ~30s for 1000
+
+## Testing
+
+1. Ensure products exist: `node scripts/updatesanpham.js`
+2. Test normalization: `node scripts/updateten2.js --dry-run --limit=10`
+3. Verify in UI: http://localhost:3000/ketoan/sanpham
+
+## Documentation
+
+See docs/KETOAN_SANPHAM_PAGE.md for:
+- Complete usage guide
+- API documentation
+- SQL query examples
+- Troubleshooting tips
+- Performance optimization
+
+Type: feature
+Scope: ketoan, product-management, fuzzy-matching
+Breaking: No

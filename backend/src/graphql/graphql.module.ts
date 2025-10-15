@@ -10,6 +10,7 @@ import { InvoiceResolver } from './resolvers/invoice.resolver';
 import { PermissionResolver, RoleResolver, UserRbacResolver } from './resolvers/rbac.resolver';
 import { OramaSearchResolver } from './resolvers/orama-search.resolver';
 import { UniversalQueryResolver } from './resolvers/universal-query.resolver';
+import { ExtModelsResolver } from './resolvers/ext-models.resolver';
 
 import { InvoiceController } from '../controllers/invoice.controller';
 import { AffiliateController } from '../controllers/affiliate.controller';
@@ -80,6 +81,9 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     
     // Universal Dynamic Query resolver
     UniversalQueryResolver,
+    
+    // External models resolver
+    ExtModelsResolver,
     
     // Services
     UserService,

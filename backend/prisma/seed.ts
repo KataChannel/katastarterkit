@@ -46,6 +46,7 @@ async function main() {
         name: 'Next.js',
         slug: 'nextjs',
         color: '#000000',
+        createdBy: adminUser.id,
       },
     }),
     prisma.tag.upsert({
@@ -55,6 +56,7 @@ async function main() {
         name: 'NestJS',
         slug: 'nestjs',
         color: '#ea2845',
+        createdBy: adminUser.id,
       },
     }),
     prisma.tag.upsert({
@@ -64,6 +66,7 @@ async function main() {
         name: 'GraphQL',
         slug: 'graphql',
         color: '#e10098',
+        createdBy: adminUser.id,
       },
     }),
     prisma.tag.upsert({
@@ -73,6 +76,7 @@ async function main() {
         name: 'Prisma',
         slug: 'prisma',
         color: '#2d3748',
+        createdBy: adminUser.id,
       },
     }),
   ]);
