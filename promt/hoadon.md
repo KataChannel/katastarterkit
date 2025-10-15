@@ -2082,3 +2082,18 @@ nbmst	khmshdon	khhdon	shdon	cqt	nbdchi	nbten	nmdchi	nmmst	nmten	nmtnmua	tgtcthue
         ]
     }
 ]
+
+
+Dựa vào : 
+1. ext_listhoadon.nbmst,ext_listhoadon.nmmst để nhận biết hóa đơn bán hay mua
+2. ext_detailhoadon.dgia  - Đơn giá
+  ext_detailhoadon.dvtinh - ĐVT
+  ext_detailhoadon.sluong - Số Lượng
+  ext_detailhoadon.ten    - Tên Sản Phẩm
+  ext_detailhoadon.thtien - Thành Tiền
+3. Giao điện xuất nhập tồn :
+    Config mst user nhập vào - lưu ở local storage để đối chiếu với ext_listhoadon.nbmst,ext_listhoadon.nmmst phân loại hóa đơn bán nếu ext_listhoadon.nbmst = mst, loại hóa đơn bán nếu ext_listhoadon.nmmst = mst
+4. Tùy Chọn thời gian để tạo Bảng xem xuất nhập tồn (Đầy đủ tình năng : search, filter, sort). Có thể xuất ra file excel ( Xuất sẽ xuất toàn bộ dự liệu tương ứng)
+5. Bảng Xuất nhập tồn gồm các trường : Ngày/Tháng/Năm - Tên Sản Phẩm - Số Lượng Tồn Đầu - Tổng Tiền Tồn Đầu - Số Lượng Nhập - Tổng Tiền Nhập - Số Lượng Xuất - Tổng Tiền Xuất - Số Lượng Tồn Cuối - Tổng Tiền Tồn Cuối
+Công Thức : Tồn Đầu + Nhập - Xuất = Tồn Cuối
+6. Tên Sản phẩm sẽ được gộp nhóm : với ext_detailhoadon.ten = ext_sanphamhoadon.ten gộp nhóm bởi ma hoặc ten2
