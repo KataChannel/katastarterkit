@@ -75,7 +75,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
               <TableRow>
                 <TableHead className="w-[60px]">STT</TableHead>
                 <TableHead className="w-[120px]">Ngày</TableHead>
-                <TableHead className="min-w-[200px]">Tên Sản Phẩm</TableHead>
+                <TableHead className="min-w-[250px]">Tên Sản Phẩm</TableHead>
+                <TableHead className="min-w-[250px]">Tên Gốc (Hóa Đơn)</TableHead>
                 <TableHead className="w-[120px]">Mã SP</TableHead>
                 <TableHead className="w-[80px]">ĐVT</TableHead>
                 <TableHead colSpan={2} className="text-center bg-blue-50">Tồn Đầu</TableHead>
@@ -84,7 +85,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                 <TableHead colSpan={2} className="text-center bg-purple-50">Tồn Cuối</TableHead>
               </TableRow>
               <TableRow>
-                <TableHead colSpan={5}></TableHead>
+                <TableHead colSpan={6}></TableHead>
                 <TableHead className="text-right bg-blue-50">SL</TableHead>
                 <TableHead className="text-right bg-blue-50">Thành Tiền</TableHead>
                 <TableHead className="text-right bg-green-50">SL</TableHead>
@@ -105,6 +106,9 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                     {formatDate(row.date)}
                   </TableCell>
                   <TableCell className="font-medium">{row.productName}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {row.originalName}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
                     {row.productCode || '-'}
                   </TableCell>

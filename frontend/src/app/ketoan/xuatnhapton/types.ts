@@ -43,6 +43,7 @@ export interface ProductMapping {
 
 export interface InventoryRow {
   productName: string; // Tên sản phẩm (chuẩn hóa)
+  originalName: string; // Tên sản phẩm gốc từ hóa đơn
   productCode: string | null; // Mã sản phẩm
   unit: string | null; // ĐVT
   date: string; // Ngày/Tháng/Năm

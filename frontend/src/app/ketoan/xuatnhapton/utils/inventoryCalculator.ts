@@ -130,6 +130,7 @@ export const calculateInventory = (
       if (!row) {
         row = {
           productName: productKey,
+          originalName: detail.ten, // Lưu tên gốc từ hóa đơn
           productCode: productCode,
           unit: unit || detail.dvtinh,
           date: date,
