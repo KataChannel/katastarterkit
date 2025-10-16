@@ -603,4 +603,254 @@ export class ProductNormalizationService {
 
     return result[0] || null;
   }
+
+  /**
+   * Update/Create products from ext_detailhoadon
+   * Same logic as updatesanpham.js script but as a service method
+   * 
+   * @param dryRun - If true, preview changes without saving
+   * @param limit - Limit number of records to process
+   * @returns Result with stats
+   */
+  async updateProductsFromDetails(
+    dryRun: boolean = false,
+    limit?: number,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    stats?: {
+      totalDetails: number;
+      processed: number;
+      created: number;
+      updated: number;
+      skipped: number;
+      errors: number;
+    };
+    output?: string;
+  }> {
+    const stats = {
+      totalDetails: 0,
+      processed: 0,
+      created: 0,
+      updated: 0,
+      skipped: 0,
+      errors: 0,
+    };
+
+    try {
+      // Count total details
+      const totalCount = await this.prisma.ext_detailhoadon.count();
+      stats.totalDetails = totalCount;
+
+      const totalToProcess = limit || totalCount;
+
+      // Fetch details in batches
+      const BATCH_SIZE = 100;
+      let processed = 0;
+
+      while (processed < totalToProcess) {
+        const batchSize = Math.min(BATCH_SIZE, totalToProcess - processed);
+
+        const details = await this.prisma.ext_detailhoadon.findMany({
+          take: batchSize,
+          skip: processed,
+          orderBy: { createdAt: 'asc' },
+          select: {
+            id: true,
+            ten: true,
+            dvtinh: true,
+            dgia: true,
+          },
+        });
+
+        if (details.length === 0) break;
+
+        // Process each detail
+        for (const detail of details) {
+          // Convert bigint id to string for consistency
+          const detailData = {
+            id: detail.id.toString(),
+            ten: detail.ten,
+            dvtinh: detail.dvtinh,
+            dgia: detail.dgia,
+          };
+          const result = await this.upsertSanPhamHoaDon(detailData, dryRun);
+
+          stats.processed++;
+
+          if (result.success) {
+            if (
+              result.action === 'created' ||
+              result.action === 'would-create'
+            ) {
+              stats.created++;
+            } else if (
+              result.action === 'updated' ||
+              result.action === 'would-update'
+            ) {
+              stats.updated++;
+            }
+          } else {
+            if (result.action === 'skipped') {
+              stats.skipped++;
+            } else if (result.action === 'error') {
+              stats.errors++;
+            }
+          }
+        }
+
+        processed += details.length;
+      }
+
+      return {
+        success: true,
+        message: dryRun
+          ? `Dry run completed. Would create ${stats.created}, update ${stats.updated} products`
+          : `Successfully updated products: ${stats.created} created, ${stats.updated} updated`,
+        stats,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Failed to update products: ${error.message}`,
+        stats,
+      };
+    }
+  }
+
+  /**
+   * Helper: Create or update sanphamhoadon from detailhoadon
+   */
+  private async upsertSanPhamHoaDon(
+    detail: {
+      id: string;
+      ten: string | null;
+      dvtinh: string | null;
+      dgia: Prisma.Decimal | null;
+    },
+    dryRun: boolean,
+  ): Promise<{
+    success: boolean;
+    action: string;
+    detailId?: string;
+    productId?: string;
+    changes?: any;
+    reason?: string;
+    error?: string;
+  }> {
+    try {
+      // Validate required fields
+      if (!detail.id) {
+        return {
+          success: false,
+          action: 'skipped',
+          reason: 'Missing detail ID',
+        };
+      }
+
+      if (!detail.ten || detail.ten.trim() === '') {
+        return {
+          success: false,
+          action: 'skipped',
+          reason: 'Missing product name (ten)',
+        };
+      }
+
+      // Check if product already exists for this detail
+      const existingProduct = await this.prisma.ext_sanphamhoadon.findFirst({
+        where: { iddetailhoadon: detail.id },
+      });
+
+      // Auto-normalize product name using fuzzy matching
+      const normalizedName = await this.normalizeProductName(detail.ten, 0.6);
+
+      const productData = {
+        iddetailhoadon: detail.id,
+        ten: detail.ten?.trim() || null,
+        ten2: normalizedName || null,
+        ma: this.generateProductCode(detail.ten),
+        dvt: detail.dvtinh?.trim() || null,
+        dgia: detail.dgia || null,
+      };
+
+      if (dryRun) {
+        if (existingProduct) {
+          return {
+            success: true,
+            action: 'would-update',
+            detailId: detail.id,
+            productId: existingProduct.id,
+          };
+        } else {
+          return {
+            success: true,
+            action: 'would-create',
+            detailId: detail.id,
+          };
+        }
+      }
+
+      if (existingProduct) {
+        // Update existing product
+        const updated = await this.prisma.ext_sanphamhoadon.update({
+          where: { id: existingProduct.id },
+          data: productData,
+        });
+
+        return {
+          success: true,
+          action: 'updated',
+          detailId: detail.id,
+          productId: updated.id,
+        };
+      } else {
+        // Create new product
+        const created = await this.prisma.ext_sanphamhoadon.create({
+          data: productData,
+        });
+
+        return {
+          success: true,
+          action: 'created',
+          detailId: detail.id,
+          productId: created.id,
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        action: 'error',
+        detailId: detail.id,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Helper: Generate product code from name
+   */
+  private generateProductCode(name: string | null): string | null {
+    if (!name) return null;
+
+    // Remove Vietnamese accents and special characters
+    const cleaned = name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9\s]/g, '')
+      .trim();
+
+    // Take first letters of each word (max 10 chars)
+    const words = cleaned.split(/\s+/);
+    if (words.length === 1) {
+      return words[0].substring(0, 10);
+    }
+
+    const code = words
+      .map((word) => word.charAt(0))
+      .join('')
+      .substring(0, 10);
+
+    return code || null;
+  }
 }

@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
 
 // Types
 import { UserConfig, DateRange, GroupBy, SortField, SortDirection } from './types';
@@ -69,9 +72,25 @@ export default function XuatNhapTonPage() {
   
   // Calculate inventory rows
   const inventoryRows = useMemo(() => {
-    if (!userConfig || !isReady) return [];
+    if (!userConfig || !isReady) {
+      console.log('⚠️ Inventory calculation skipped:', { 
+        hasUserConfig: !!userConfig, 
+        isReady,
+        userConfig 
+      });
+      return [];
+    }
     
-    return calculateInventory(
+    console.log('📊 Calculating inventory with:', {
+      invoicesCount: invoices.length,
+      detailsCount: details.length,
+      productsCount: products.length,
+      userMST: userConfig.mst,
+      groupBy,
+      dateRange
+    });
+    
+    const result = calculateInventory(
       invoices,
       details,
       products,
@@ -80,6 +99,10 @@ export default function XuatNhapTonPage() {
       dateRange.startDate,
       dateRange.endDate
     );
+    
+    console.log('✅ Inventory rows calculated:', result.length, result);
+    
+    return result;
   }, [invoices, details, products, userConfig, groupBy, dateRange, isReady]);
   
   // Apply filters and sorting
@@ -89,6 +112,8 @@ export default function XuatNhapTonPage() {
     sortField,
     sortDirection,
   });
+  
+  console.log('🔍 Filtered rows:', filteredRows.length, { searchTerm, sortField, sortDirection });
   
   // Calculate summary
   const summary = useMemo(() => calculateSummary(filteredRows), [filteredRows]);
@@ -171,43 +196,36 @@ export default function XuatNhapTonPage() {
   const showWarning = !userConfig && !showConfigModal;
   
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 space-y-6">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Báo Cáo Xuất Nhập Tồn</h1>
-        <p className="text-gray-600 mt-1">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Báo Cáo Xuất Nhập Tồn</h1>
+        <p className="text-muted-foreground mt-1">
           Quản lý và theo dõi xuất nhập tồn kho theo hóa đơn
         </p>
         {userConfig && (
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             MST: <span className="font-medium">{userConfig.mst}</span>
             {userConfig.companyName && ` - ${userConfig.companyName}`}
           </p>
         )}
       </div>
       
-      {/* Warning banner */}
+      {/* Warning Alert */}
       {showWarning && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700">
-                Vui lòng cấu hình mã số thuế (MST) để phân loại hóa đơn bán/mua.{' '}
-                <button
-                  onClick={() => setShowConfigModal(true)}
-                  className="font-medium underline text-yellow-700 hover:text-yellow-600"
-                >
-                  Cấu hình ngay
-                </button>
-              </p>
-            </div>
-          </div>
-        </div>
+        <Alert className="border-yellow-500 bg-yellow-50">
+          <AlertCircle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-700">
+            <span className="font-medium">Cần cấu hình MST:</span> Vui lòng cấu hình mã số thuế (MST) để phân loại hóa đơn bán/mua.{' '}
+            <Button
+              variant="link"
+              className="h-auto p-0 text-yellow-800 underline"
+              onClick={() => setShowConfigModal(true)}
+            >
+              Cấu hình ngay
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
       
       {/* Config Modal */}
@@ -247,17 +265,15 @@ export default function XuatNhapTonPage() {
       />
       
       {/* Pagination */}
-      <div className="mt-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredRows.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={goToPage}
-          canGoPrev={canGoPrev}
-          canGoNext={canGoNext}
-        />
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredRows.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={goToPage}
+        canGoPrev={canGoPrev}
+        canGoNext={canGoNext}
+      />
     </div>
   );
 }

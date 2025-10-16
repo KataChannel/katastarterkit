@@ -1,5 +1,8 @@
 import { InvoiceHeader } from '../types';
 
+// Debug flag
+let classifyDebugLogged = false;
+
 /**
  * Classify invoice as sale or purchase based on MST
  * @param invoice - Invoice header
@@ -15,6 +18,19 @@ export const classifyInvoice = (
   const normalizedUserMST = userMST.trim().toLowerCase();
   const nbmst = invoice.nbmst?.trim().toLowerCase();
   const nmmst = invoice.nmmst?.trim().toLowerCase();
+  
+  // Debug first invoice
+  if (!classifyDebugLogged) {
+    console.log('🔍 classifyInvoice DEBUG:', {
+      userMST: normalizedUserMST,
+      nbmst,
+      nmmst,
+      matchesSeller: nbmst === normalizedUserMST,
+      matchesBuyer: nmmst === normalizedUserMST,
+      invoice: invoice
+    });
+    classifyDebugLogged = true;
+  }
   
   // Hóa đơn bán: nbmst = user MST
   if (nbmst === normalizedUserMST) {

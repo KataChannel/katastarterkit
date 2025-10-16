@@ -1,6 +1,16 @@
 import React from 'react';
 import { InventoryRow } from '../types';
 import { formatCurrency, formatNumber, formatDate } from '../utils';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Loader2, Package } from 'lucide-react';
 
 interface InventoryTableProps {
   rows: InventoryRow[];
@@ -19,128 +29,125 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const endIndex = Math.min(startIndex + itemsPerPage, rows.length);
   const displayRows = rows.slice(startIndex, endIndex);
   
+  console.log('📋 InventoryTable render:', { 
+    totalRows: rows.length, 
+    displayRows: displayRows.length,
+    currentPage,
+    itemsPerPage,
+    startIndex,
+    endIndex,
+    loading 
+  });
+  
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-8 text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">Đang tải dữ liệu...</p>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-8">
+          <div className="flex flex-col items-center justify-center text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+            <p className="text-muted-foreground">Đang tải dữ liệu...</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
   
   if (rows.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-8 text-center text-gray-500">
-          Không có dữ liệu để hiển thị
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-8">
+          <div className="flex flex-col items-center justify-center text-center">
+            <Package className="h-12 w-12 text-muted-foreground mb-2" />
+            <p className="text-muted-foreground">Không có dữ liệu để hiển thị</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
   
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                STT
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ngày
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tên Sản Phẩm
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Mã SP
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ĐVT
-              </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-blue-50" colSpan={2}>
-                Tồn Đầu
-              </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-green-50" colSpan={2}>
-                Nhập
-              </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-orange-50" colSpan={2}>
-                Xuất
-              </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-purple-50" colSpan={2}>
-                Tồn Cuối
-              </th>
-            </tr>
-            <tr>
-              <th colSpan={5}></th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 bg-blue-50">SL</th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 bg-blue-50">Thành Tiền</th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 bg-green-50">SL</th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 bg-green-50">Thành Tiền</th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 bg-orange-50">SL</th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 bg-orange-50">Thành Tiền</th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 bg-purple-50">SL</th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 bg-purple-50">Thành Tiền</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {displayRows.map((row, index) => (
-              <tr key={`${row.productName}-${row.date}-${index}`} className="hover:bg-gray-50">
-                <td className="px-4 py-3 text-sm text-gray-500">
-                  {startIndex + index + 1}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
-                  {formatDate(row.date)}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-900">
-                  {row.productName}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  {row.productCode || '-'}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  {row.unit || '-'}
-                </td>
-                
-                {/* Tồn Đầu */}
-                <td className="px-4 py-3 text-sm text-right text-gray-900 bg-blue-50">
-                  {formatNumber(row.openingQuantity)}
-                </td>
-                <td className="px-4 py-3 text-sm text-right text-blue-600 bg-blue-50">
-                  {formatCurrency(row.openingAmount)}
-                </td>
-                
-                {/* Nhập */}
-                <td className="px-4 py-3 text-sm text-right text-gray-900 bg-green-50">
-                  {formatNumber(row.importQuantity)}
-                </td>
-                <td className="px-4 py-3 text-sm text-right text-green-600 bg-green-50">
-                  {formatCurrency(row.importAmount)}
-                </td>
-                
-                {/* Xuất */}
-                <td className="px-4 py-3 text-sm text-right text-gray-900 bg-orange-50">
-                  {formatNumber(row.exportQuantity)}
-                </td>
-                <td className="px-4 py-3 text-sm text-right text-orange-600 bg-orange-50">
-                  {formatCurrency(row.exportAmount)}
-                </td>
-                
-                {/* Tồn Cuối */}
-                <td className="px-4 py-3 text-sm text-right font-semibold text-gray-900 bg-purple-50">
-                  {formatNumber(row.closingQuantity)}
-                </td>
-                <td className="px-4 py-3 text-sm text-right font-semibold text-purple-600 bg-purple-50">
-                  {formatCurrency(row.closingAmount)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <Card>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[60px]">STT</TableHead>
+                <TableHead className="w-[120px]">Ngày</TableHead>
+                <TableHead className="min-w-[200px]">Tên Sản Phẩm</TableHead>
+                <TableHead className="w-[120px]">Mã SP</TableHead>
+                <TableHead className="w-[80px]">ĐVT</TableHead>
+                <TableHead colSpan={2} className="text-center bg-blue-50">Tồn Đầu</TableHead>
+                <TableHead colSpan={2} className="text-center bg-green-50">Nhập</TableHead>
+                <TableHead colSpan={2} className="text-center bg-orange-50">Xuất</TableHead>
+                <TableHead colSpan={2} className="text-center bg-purple-50">Tồn Cuối</TableHead>
+              </TableRow>
+              <TableRow>
+                <TableHead colSpan={5}></TableHead>
+                <TableHead className="text-right bg-blue-50">SL</TableHead>
+                <TableHead className="text-right bg-blue-50">Thành Tiền</TableHead>
+                <TableHead className="text-right bg-green-50">SL</TableHead>
+                <TableHead className="text-right bg-green-50">Thành Tiền</TableHead>
+                <TableHead className="text-right bg-orange-50">SL</TableHead>
+                <TableHead className="text-right bg-orange-50">Thành Tiền</TableHead>
+                <TableHead className="text-right bg-purple-50">SL</TableHead>
+                <TableHead className="text-right bg-purple-50">Thành Tiền</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {displayRows.map((row, index) => (
+                <TableRow key={`${row.productName}-${row.date}-${index}`}>
+                  <TableCell className="font-medium">
+                    {startIndex + index + 1}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {formatDate(row.date)}
+                  </TableCell>
+                  <TableCell className="font-medium">{row.productName}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {row.productCode || '-'}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {row.unit || '-'}
+                  </TableCell>
+                  
+                  {/* Tồn Đầu */}
+                  <TableCell className="text-right bg-blue-50">
+                    {formatNumber(row.openingQuantity)}
+                  </TableCell>
+                  <TableCell className="text-right text-blue-600 bg-blue-50">
+                    {formatCurrency(row.openingAmount)}
+                  </TableCell>
+                  
+                  {/* Nhập */}
+                  <TableCell className="text-right bg-green-50">
+                    {formatNumber(row.importQuantity)}
+                  </TableCell>
+                  <TableCell className="text-right text-green-600 bg-green-50">
+                    {formatCurrency(row.importAmount)}
+                  </TableCell>
+                  
+                  {/* Xuất */}
+                  <TableCell className="text-right bg-orange-50">
+                    {formatNumber(row.exportQuantity)}
+                  </TableCell>
+                  <TableCell className="text-right text-orange-600 bg-orange-50">
+                    {formatCurrency(row.exportAmount)}
+                  </TableCell>
+                  
+                  {/* Tồn Cuối */}
+                  <TableCell className="text-right font-semibold bg-purple-50">
+                    {formatNumber(row.closingQuantity)}
+                  </TableCell>
+                  <TableCell className="text-right font-semibold text-purple-600 bg-purple-50">
+                    {formatCurrency(row.closingAmount)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, RefreshCw, Database } from 'lucide-react';
+import { Search, RefreshCw, Database, PackagePlus } from 'lucide-react';
 import { FilterStatus, UniqueFilter, ProductStats } from '../types';
 
 interface SearchToolbarProps {
@@ -14,6 +14,7 @@ interface SearchToolbarProps {
   loading: boolean;
   onRefresh: () => void;
   onNormalize: () => void;
+  onUpdate: () => void;
 }
 
 export const SearchToolbar: React.FC<SearchToolbarProps> = ({
@@ -28,6 +29,7 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
   loading,
   onRefresh,
   onNormalize,
+  onUpdate,
 }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
@@ -55,6 +57,14 @@ export const SearchToolbar: React.FC<SearchToolbarProps> = ({
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Làm mới
+            </button>
+
+            <button
+              onClick={onUpdate}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              <PackagePlus className="h-4 w-4" />
+              Cập nhật SP
             </button>
 
             <button

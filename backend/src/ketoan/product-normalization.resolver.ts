@@ -166,6 +166,26 @@ export class ProductNormalizationResolver {
     return this.normalizationService.mergeDuplicates(ten2, keepId);
   }
 
+  @Mutation(() => UpdateProductsResult, {
+    description: 'Update/create products from ext_detailhoadon with auto-normalization',
+  })
+  async updateProductsFromDetails(
+    @Args('dryRun', {
+      type: () => Boolean,
+      defaultValue: false,
+      description: 'Preview mode - do not save to database',
+    })
+    dryRun: boolean,
+    @Args('limit', {
+      type: () => Int,
+      nullable: true,
+      description: 'Limit number of records to process',
+    })
+    limit?: number,
+  ): Promise<UpdateProductsResult> {
+    return this.normalizationService.updateProductsFromDetails(dryRun, limit);
+  }
+
   /* ========================================
    * ADVANCED QUERIES (DVT + PRICE)
    * ========================================*/
@@ -564,3 +584,40 @@ class ProductSimilarityTest {
   isDuplicate: boolean;
 }
 
+// Object type for update products stats (MUST be defined first)
+@ObjectType()
+export class UpdateProductsStats {
+  @Field(() => Int)
+  totalDetails: number;
+
+  @Field(() => Int)
+  processed: number;
+
+  @Field(() => Int)
+  created: number;
+
+  @Field(() => Int)
+  updated: number;
+
+  @Field(() => Int)
+  skipped: number;
+
+  @Field(() => Int)
+  errors: number;
+}
+
+// Object type for update products result
+@ObjectType()
+export class UpdateProductsResult {
+  @Field(() => Boolean)
+  success: boolean;
+
+  @Field(() => String)
+  message: string;
+
+  @Field(() => UpdateProductsStats, { nullable: true })
+  stats?: UpdateProductsStats;
+
+  @Field(() => String, { nullable: true })
+  output?: string;
+}

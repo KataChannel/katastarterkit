@@ -1721,6 +1721,15 @@ type Mutation {
   updateProduct(input: UpdateProductInput!): ProductType!
   updateProductStock(id: ID!, quantity: Float!): ProductType!
   updateProductVariant(input: UpdateProductVariantInput!): ProductType!
+
+  """Update/create products from ext_detailhoadon with auto-normalization"""
+  updateProductsFromDetails(
+    """Preview mode - do not save to database"""
+    dryRun: Boolean! = false
+
+    """Limit number of records to process"""
+    limit: Int
+  ): UpdateProductsResult!
   updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateTask(input: UpdateTaskInput!): Task!
   updateUser(id: String!, input: UpdateUserInput!): User!
@@ -3223,6 +3232,22 @@ input UpdateProductVariantInput {
   price: Float
   sku: String
   stock: Int
+}
+
+type UpdateProductsResult {
+  message: String!
+  output: String
+  stats: UpdateProductsStats
+  success: Boolean!
+}
+
+type UpdateProductsStats {
+  created: Int!
+  errors: Int!
+  processed: Int!
+  skipped: Int!
+  totalDetails: Int!
+  updated: Int!
 }
 
 input UpdateRoleInput {

@@ -1,6 +1,9 @@
 import React from 'react';
 import { InventorySummary } from '../types';
 import { formatCurrency, formatNumber } from '../utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Package, ArrowDownCircle, ArrowUpCircle, Archive } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface SummaryCardsProps {
   summary: InventorySummary;
@@ -10,51 +13,72 @@ interface SummaryCardsProps {
 export const SummaryCards: React.FC<SummaryCardsProps> = ({ summary, loading }) => {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="bg-white rounded-lg shadow p-4 animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-            <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-          </div>
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="h-4 w-4" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-[120px] mb-1" />
+              <Skeleton className="h-3 w-[80px]" />
+            </CardContent>
+          </Card>
         ))}
       </div>
     );
   }
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
       {/* Total Products */}
-      <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-        <p className="text-sm text-gray-600">Tổng Số Sản Phẩm</p>
-        <p className="text-2xl font-bold text-gray-900">{formatNumber(summary.totalProducts)}</p>
-      </div>
+      <Card className="border-l-4 border-l-blue-500">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Tổng Số Sản Phẩm</CardTitle>
+          <Package className="h-4 w-4 text-blue-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatNumber(summary.totalProducts)}</div>
+          <p className="text-xs text-muted-foreground">Sản phẩm unique</p>
+        </CardContent>
+      </Card>
       
       {/* Import Summary */}
-      <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-        <p className="text-sm text-gray-600">Tổng Nhập</p>
-        <p className="text-lg font-semibold text-gray-900">
-          {formatNumber(summary.totalImportQuantity)} sp
-        </p>
-        <p className="text-sm text-green-600">{formatCurrency(summary.totalImportAmount)}</p>
-      </div>
+      <Card className="border-l-4 border-l-green-500">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Tổng Nhập</CardTitle>
+          <ArrowDownCircle className="h-4 w-4 text-green-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatNumber(summary.totalImportQuantity)}</div>
+          <p className="text-xs text-green-600">{formatCurrency(summary.totalImportAmount)}</p>
+        </CardContent>
+      </Card>
       
       {/* Export Summary */}
-      <div className="bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
-        <p className="text-sm text-gray-600">Tổng Xuất</p>
-        <p className="text-lg font-semibold text-gray-900">
-          {formatNumber(summary.totalExportQuantity)} sp
-        </p>
-        <p className="text-sm text-orange-600">{formatCurrency(summary.totalExportAmount)}</p>
-      </div>
+      <Card className="border-l-4 border-l-orange-500">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Tổng Xuất</CardTitle>
+          <ArrowUpCircle className="h-4 w-4 text-orange-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatNumber(summary.totalExportQuantity)}</div>
+          <p className="text-xs text-orange-600">{formatCurrency(summary.totalExportAmount)}</p>
+        </CardContent>
+      </Card>
       
       {/* Closing Inventory */}
-      <div className="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
-        <p className="text-sm text-gray-600">Tồn Cuối</p>
-        <p className="text-lg font-semibold text-gray-900">
-          {formatNumber(summary.totalClosingQuantity)} sp
-        </p>
-        <p className="text-sm text-purple-600">{formatCurrency(summary.totalClosingAmount)}</p>
-      </div>
+      <Card className="border-l-4 border-l-purple-500">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Tồn Cuối</CardTitle>
+          <Archive className="h-4 w-4 text-purple-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatNumber(summary.totalClosingQuantity)}</div>
+          <p className="text-xs text-purple-600">{formatCurrency(summary.totalClosingAmount)}</p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

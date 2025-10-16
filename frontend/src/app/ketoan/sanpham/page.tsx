@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useDynamicQuery } from '@/lib/graphql/dynamic-hooks';
+import { useMutation } from '@apollo/client';
+import { UPDATE_PRODUCTS_FROM_DETAILS } from './graphql/mutations';
 
 // Types
 import { SortField, SortDirection, FilterStatus, UniqueFilter, NormalizationResult } from './types';
@@ -14,6 +16,7 @@ import {
   ProductTable,
   Pagination,
   NormalizationModal,
+  UpdateProductsModal,
 } from './components';
 
 // Hooks
@@ -30,11 +33,16 @@ export default function SanPhamPage() {
   const [uniqueFilter, setUniqueFilter] = useState<UniqueFilter>('none');
   const [normalizing, setNormalizing] = useState(false);
   const [showNormalizeModal, setShowNormalizeModal] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   // GraphQL query
   const { data: productsData, loading: queryLoading, refetch } = useDynamicQuery('GET_ALL', 'ext_sanphamhoadon', {
     fetchPolicy: 'network-only',
   });
+
+  // GraphQL mutation for update products
+  const [updateProductsMutation] = useMutation(UPDATE_PRODUCTS_FROM_DETAILS);
 
   // Extract products from GraphQL response
   const rawProducts = productsData?.getext_sanphamhoadons || [];
@@ -107,6 +115,44 @@ export default function SanPhamPage() {
     }
   };
 
+  const handleUpdate = async (dryRun: boolean, limitValue: number) => {
+    setUpdating(true);
+    
+    try {
+      // Use GraphQL mutation instead of REST API
+      const { data } = await updateProductsMutation({
+        variables: {
+          dryRun,
+          limit: limitValue,
+        },
+      });
+
+      const result = data?.updateProductsFromDetails;
+
+      if (result?.success) {
+        toast.success(result.message);
+        
+        // Show stats if available
+        if (result.stats) {
+          const { created, updated, skipped, errors } = result.stats;
+          console.log('Update stats:', { created, updated, skipped, errors });
+        }
+        
+        if (!dryRun) {
+          await handleRefresh();
+        }
+        setShowUpdateModal(false);
+      } else {
+        toast.error(result?.message || 'Lỗi khi cập nhật sản phẩm');
+      }
+    } catch (error: any) {
+      console.error('Update error:', error);
+      toast.error(error.message || 'Không thể kết nối với server');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       {/* Header */}
@@ -132,6 +178,7 @@ export default function SanPhamPage() {
         loading={queryLoading}
         onRefresh={handleRefresh}
         onNormalize={() => setShowNormalizeModal(true)}
+        onUpdate={() => setShowUpdateModal(true)}
       />
 
       {/* Stats Cards */}
@@ -165,6 +212,14 @@ export default function SanPhamPage() {
         onClose={() => setShowNormalizeModal(false)}
         onNormalize={handleNormalization}
         loading={normalizing}
+      />
+
+      {/* Update Products Modal */}
+      <UpdateProductsModal
+        isOpen={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        onUpdate={handleUpdate}
+        loading={updating}
       />
     </div>
   );

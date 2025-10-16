@@ -7,6 +7,8 @@ import { InvoiceHeader, InvoiceDetail, ProductMapping } from '../types';
  */
 export const useInventoryData = () => {
   const [isReady, setIsReady] = useState(false);
+  const [debugged, setDebughed] = useState(false);
+  const [detailsDebugged, setDetailsDebugged] = useState(false);
   
   // Fetch invoices (ext_listhoadon)
   const {
@@ -17,6 +19,7 @@ export const useInventoryData = () => {
   } = useDynamicQuery('GET_ALL', 'ext_listhoadon', {
     fetchPolicy: 'network-only',
   });
+  console.log('invoicesData', invoicesData);
   
   // Fetch invoice details (ext_detailhoadon)
   const {
@@ -42,6 +45,20 @@ export const useInventoryData = () => {
   const invoices: InvoiceHeader[] = invoicesData?.getext_listhoadons || [];
   const details: InvoiceDetail[] = detailsData?.getext_detailhoadons || [];
   const products: ProductMapping[] = productsData?.getext_sanphamhoadons || [];
+  
+  // Debug data structure
+  useEffect(() => {
+    if (invoices.length > 0 && !debugged) {
+      console.log('📋 Sample invoice:', invoices[0]);
+      console.log('📋 Invoice fields:', Object.keys(invoices[0]));
+      setDebughed(true);
+    }
+    if (details.length > 0 && !detailsDebugged) {
+      console.log('📄 Sample detail:', details[0]);
+      console.log('📄 Detail fields:', Object.keys(details[0]));
+      setDetailsDebugged(true);
+    }
+  }, [invoices, details, debugged, detailsDebugged]);
   
   // Check if all data is loaded
   useEffect(() => {

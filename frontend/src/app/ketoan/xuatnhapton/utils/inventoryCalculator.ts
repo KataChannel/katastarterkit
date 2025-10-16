@@ -55,6 +55,8 @@ export const calculateInventory = (
   startDate: string,
   endDate: string
 ): InventoryRow[] => {
+  console.log('🔧 calculateInventory START:', { invoices: invoices.length, details: details.length, products: products.length });
+  
   // Create a map to store inventory by product and date
   const inventoryMap = new Map<string, InventoryRow>();
   
@@ -68,10 +70,19 @@ export const calculateInventory = (
     return invDate >= start && invDate <= end;
   });
   
+  console.log('📅 Filtered by date:', filteredInvoices.length, 'invoices');
+  
   // Process each invoice detail
+  let processedCount = 0;
+  let skippedNoType = 0;
+  
   filteredInvoices.forEach(invoice => {
     const invoiceType = classifyInvoice(invoice, userMST);
-    if (!invoiceType) return; // Skip if invoice doesn't belong to user
+    if (!invoiceType) {
+      skippedNoType++;
+      return; // Skip if invoice doesn't belong to user
+    }
+    processedCount++;
     
     // Get all details for this invoice
     const invoiceDetails = details.filter(d => d.idhdon === invoice.id);
@@ -125,8 +136,13 @@ export const calculateInventory = (
     });
   });
   
+  console.log('✅ Processed invoices:', processedCount, '| Skipped (no type):', skippedNoType);
+  console.log('📦 Inventory map size:', inventoryMap.size);
+  
   // Convert map to array and calculate closing inventory
   const inventoryRows = Array.from(inventoryMap.values());
+  
+  console.log('📊 Inventory rows before grouping:', inventoryRows.length);
   
   // Sort by date and calculate cumulative inventory
   const productGroups = new Map<string, InventoryRow[]>();
@@ -137,6 +153,8 @@ export const calculateInventory = (
     }
     productGroups.get(key)!.push(row);
   });
+  
+  console.log('🏷️ Product groups:', productGroups.size);
   
   // Calculate opening and closing for each product
   const finalRows: InventoryRow[] = [];
@@ -161,6 +179,11 @@ export const calculateInventory = (
       finalRows.push(row);
     });
   });
+  
+  console.log('🎯 FINAL ROWS:', finalRows.length);
+  if (finalRows.length > 0) {
+    console.log('Sample row:', finalRows[0]);
+  }
   
   return finalRows;
 };
