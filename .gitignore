@@ -87,6 +87,7 @@ docker/grafana/data/
 # Backup files
 *.backup
 *.bak
+backups/
 
 # Local development
 .local/
