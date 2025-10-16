@@ -61,7 +61,7 @@ list_backups() {
         return 1
     fi
     
-    local backups=($(find "$BACKUP_ROOT" -maxdepth 1 -type d -name "[0-9]*" | sort -r | head -5))
+    local backups=($(find "$BACKUP_ROOT" -maxdepth 1 -type d -name "[0-9]*" -printf '%f\n' 2>/dev/null | sort -r | head -5))
     
     if [ ${#backups[@]} -eq 0 ]; then
         log_warn "No backups found!"
@@ -70,8 +70,9 @@ list_backups() {
     
     local index=1
     for backup in "${backups[@]}"; do
-        local timestamp=$(basename "$backup")
-        local size=$(du -sh "$backup" 2>/dev/null | awk '{print $1}')
+        local timestamp="$backup"
+        local backup_path="${BACKUP_ROOT}/${backup}"
+        local size=$(du -sh "$backup_path" 2>/dev/null | awk '{print $1}')
         local date_formatted=$(date -d "${timestamp:0:8} ${timestamp:8:2}:${timestamp:10:2}:${timestamp:12:2}" "+%Y-%m-%d %H:%M:%S" 2>/dev/null || echo "Unknown date")
         
         echo -e "  ${GREEN}[$index]${NC} $timestamp"
@@ -79,7 +80,7 @@ list_backups() {
         echo "      Size: $size"
         
         # List files in backup
-        local files=$(find "$backup" -type f \( -name "*.sql.gz" -o -name "*.archive.gz" -o -name "*.rdb.gz" -o -name "*.tar.gz" \) -exec basename {} \; | head -3)
+        local files=$(find "$backup_path" -type f \( -name "*.sql.gz" -o -name "*.archive.gz" -o -name "*.rdb.gz" -o -name "*.tar.gz" \) -printf '%f\n' 2>/dev/null | head -3)
         if [ -n "$files" ]; then
             echo "      Files: $(echo "$files" | tr '\n' ', ' | sed 's/,$//')"
         fi
@@ -101,7 +102,7 @@ select_backup() {
     if [ "$selection" = "latest" ]; then
         if [ -L "${BACKUP_ROOT}/latest" ]; then
             BACKUP_SOURCE=$(readlink -f "${BACKUP_ROOT}/latest")
-            log_info "Selected latest backup: $(basename "$BACKUP_SOURCE")"
+            log_info "Selected latest backup: ${BACKUP_SOURCE##*/}"
         else
             log_error "Latest backup symlink not found"
             return 1
@@ -116,12 +117,12 @@ select_backup() {
         log_info "Selected backup: $selection"
     elif [[ "$selection" =~ ^[1-5]$ ]]; then
         # User selected number
-        local backups=($(find "$BACKUP_ROOT" -maxdepth 1 -type d -name "[0-9]*" | sort -r | head -5))
+        local backups=($(find "$BACKUP_ROOT" -maxdepth 1 -type d -name "[0-9]*" -printf '%p\n' 2>/dev/null | sort -r | head -5))
         local index=$((selection - 1))
         
         if [ $index -lt ${#backups[@]} ]; then
             BACKUP_SOURCE="${backups[$index]}"
-            log_info "Selected backup: $(basename "$BACKUP_SOURCE")"
+            log_info "Selected backup: ${BACKUP_SOURCE##*/}"
         else
             log_error "Invalid selection"
             return 1
@@ -182,7 +183,7 @@ restore_postgres() {
         return 0
     fi
     
-    log_info "Restoring PostgreSQL from: $(basename "$backup_file")"
+    log_info "Restoring PostgreSQL from: ${backup_file##*/}"
     
     # Decompress if needed
     local sql_file="$backup_file"
@@ -194,6 +195,10 @@ restore_postgres() {
     # Stop application containers to prevent connections
     log_info "Stopping dependent services..."
     $DOCKER_COMPOSE stop backend frontend || true
+    
+    # Terminate all active connections to the database
+    log_info "Terminating active database connections..."
+    $DOCKER_COMPOSE exec -T postgres psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${POSTGRES_DB:-katacore}' AND pid <> pg_backend_pid();" || true
     
     # Drop and recreate database
     log_info "Recreating database..."
@@ -228,7 +233,7 @@ restore_mongodb() {
         return 0
     fi
     
-    log_info "Restoring MongoDB from: $(basename "$backup_file")"
+    log_info "Restoring MongoDB from: ${backup_file##*/}"
     
     # Decompress if needed
     local archive_file="$backup_file"
@@ -261,7 +266,7 @@ restore_redis() {
         return 0
     fi
     
-    log_info "Restoring Redis from: $(basename "$backup_file")"
+    log_info "Restoring Redis from: ${backup_file##*/}"
     
     # Decompress if needed
     local rdb_file="$backup_file"
@@ -297,10 +302,10 @@ restore_redis() {
 # Restore Docker volume
 restore_volume() {
     local backup_file=$1
-    local filename=$(basename "$backup_file")
+    local filename="${backup_file##*/}"
     local volume_name=$(echo "$filename" | sed -E 's/volume_(.+)\.tar\.gz/\1/')
     
-    log_info "Restoring volume: $volume_name from $(basename "$backup_file")"
+    log_info "Restoring volume: $volume_name from ${backup_file##*/}"
     
     # Create volume if doesn't exist
     docker volume create "$volume_name" || true
@@ -309,7 +314,7 @@ restore_volume() {
     if docker run --rm \
         -v "${volume_name}:/data" \
         -v "$(dirname "$backup_file"):/backup" \
-        alpine sh -c "rm -rf /data/* && tar xzf /backup/$(basename "$backup_file") -C /data"; then
+        alpine sh -c "rm -rf /data/* && tar xzf /backup/${backup_file##*/} -C /data"; then
         log_info "Volume restore completed: $volume_name"
     else
         log_error "Volume restore failed: $volume_name"
@@ -320,7 +325,7 @@ restore_volume() {
 # Auto-detect and restore from backup file
 restore_single_file() {
     local file=$1
-    local filename=$(basename "$file")
+    local filename="${file##*/}"
     
     if [[ "$filename" == postgres.sql* ]]; then
         local dir=$(dirname "$file")
@@ -341,7 +346,7 @@ restore_single_file() {
 # Restore from directory (restore all backups)
 restore_from_directory() {
     local backup_dir=$1
-    log_info "Restoring from directory: $(basename "$backup_dir")"
+    log_info "Restoring from directory: ${backup_dir##*/}"
     
     # Restore databases
     restore_postgres "$backup_dir"
