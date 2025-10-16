@@ -87,7 +87,26 @@ export default function XuatNhapTonPage() {
       productsCount: products.length,
       userMST: userConfig.mst,
       groupBy,
-      dateRange
+      dateRange,
+      sampleInvoice: invoices[0],
+      sampleDetail: details[0],
+      sampleProduct: products[0],
+    });
+    
+    // Debug: Check if invoices have nbmst/nmmst matching userMST
+    const userMSTLower = userConfig.mst.trim().toLowerCase();
+    const matchingSales = invoices.filter(inv => inv.nbmst?.trim().toLowerCase() === userMSTLower);
+    const matchingPurchases = invoices.filter(inv => inv.nmmst?.trim().toLowerCase() === userMSTLower);
+    
+    console.log('🔍 MST Matching Debug:', {
+      userMST: userConfig.mst,
+      userMSTLower,
+      matchingSalesCount: matchingSales.length,
+      matchingPurchasesCount: matchingPurchases.length,
+      sampleSaleInvoice: matchingSales[0],
+      samplePurchaseInvoice: matchingPurchases[0],
+      firstInvoiceNbmst: invoices[0]?.nbmst,
+      firstInvoiceNmmst: invoices[0]?.nmmst,
     });
     
     const result = calculateInventory(
@@ -100,7 +119,12 @@ export default function XuatNhapTonPage() {
       dateRange.endDate
     );
     
-    console.log('✅ Inventory rows calculated:', result.length, result);
+    console.log('✅ Inventory rows calculated:', result.length);
+    if (result.length > 0) {
+      console.log('Sample result rows (first 3):', result.slice(0, 3));
+    } else {
+      console.warn('⚠️ No inventory rows generated! Check MST matching logic.');
+    }
     
     return result;
   }, [invoices, details, products, userConfig, groupBy, dateRange, isReady]);

@@ -2,6 +2,7 @@
 
 export interface InvoiceHeader {
   id: string;
+  idServer: string | null; // Server ID for relationship
   nbmst: string | null; // Người bán MST
   nmmst: string | null; // Người mua MST
   shdon: string | null; // Số hóa đơn
@@ -18,7 +19,7 @@ export interface InvoiceHeader {
 
 export interface InvoiceDetail {
   id: string;
-  idhdon: string; // ID hóa đơn
+  idhdonServer: string; // ID hóa đơn (server reference)
   ten: string | null; // Tên sản phẩm
   dvtinh: string | null; // Đơn vị tính (ĐVT)
   sluong: number | null; // Số lượng

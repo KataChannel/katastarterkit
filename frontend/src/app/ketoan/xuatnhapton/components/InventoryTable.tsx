@@ -28,6 +28,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, rows.length);
   const displayRows = rows.slice(startIndex, endIndex);
+  console.log('rows',rows);
   
   console.log('📋 InventoryTable render:', { 
     totalRows: rows.length, 

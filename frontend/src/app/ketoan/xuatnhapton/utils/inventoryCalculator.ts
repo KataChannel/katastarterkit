@@ -10,6 +10,16 @@ const matchProduct = (
   products: ProductMapping[],
   groupBy: GroupBy
 ): { key: string; code: string | null; unit: string | null } => {
+  // If no products available, use original name
+  if (!products || products.length === 0) {
+    console.warn('⚠️ No products available for mapping, using original name');
+    return {
+      key: detailName,
+      code: null,
+      unit: null,
+    };
+  }
+  
   // Try exact match first
   const exactMatch = products.find(p => p.ten?.toLowerCase() === detailName.toLowerCase());
   if (exactMatch) {
@@ -75,6 +85,8 @@ export const calculateInventory = (
   // Process each invoice detail
   let processedCount = 0;
   let skippedNoType = 0;
+  let saleCount = 0;
+  let purchaseCount = 0;
   
   filteredInvoices.forEach(invoice => {
     const invoiceType = classifyInvoice(invoice, userMST);
@@ -83,9 +95,22 @@ export const calculateInventory = (
       return; // Skip if invoice doesn't belong to user
     }
     processedCount++;
+    if (invoiceType === 'sale') saleCount++;
+    if (invoiceType === 'purchase') purchaseCount++;
     
-    // Get all details for this invoice
-    const invoiceDetails = details.filter(d => d.idhdon === invoice.id);
+    // Get all details for this invoice using idServer field
+    const invoiceDetails = details.filter(d => d.idhdonServer === invoice.idServer);
+    
+    if (processedCount <= 2) {
+      console.log(`📄 Processing invoice #${processedCount}:`, {
+        type: invoiceType,
+        id: invoice.id,
+        idServer: invoice.idServer,
+        nbmst: invoice.nbmst,
+        nmmst: invoice.nmmst,
+        detailsCount: invoiceDetails.length,
+      });
+    }
     
     invoiceDetails.forEach(detail => {
       if (!detail.ten) return;
@@ -136,7 +161,7 @@ export const calculateInventory = (
     });
   });
   
-  console.log('✅ Processed invoices:', processedCount, '| Skipped (no type):', skippedNoType);
+  console.log('✅ Processed invoices:', processedCount, '| Sales:', saleCount, '| Purchases:', purchaseCount, '| Skipped (no type):', skippedNoType);
   console.log('📦 Inventory map size:', inventoryMap.size);
   
   // Convert map to array and calculate closing inventory
