@@ -56,16 +56,16 @@ import {
 
 export default function EmployeesPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [departmentFilter, setDepartmentFilter] = useState<string>('');
-  const [positionFilter, setPositionFilter] = useState<string>('');
+  const [departmentFilter, setDepartmentFilter] = useState<string>('all');
+  const [positionFilter, setPositionFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { toast } = useToast();
 
   const { employees, loading, total, hasMore, loadMore, refetch } = useEmployeeProfiles({
-    department: departmentFilter || undefined,
-    position: positionFilter || undefined,
+    department: departmentFilter === 'all' ? undefined : departmentFilter || undefined,
+    position: positionFilter === 'all' ? undefined : positionFilter || undefined,
     isActive: statusFilter === 'all' ? undefined : statusFilter === 'active',
     take: 20,
   });
@@ -148,7 +148,7 @@ export default function EmployeesPage() {
                 <SelectValue placeholder="Phòng ban" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tất cả phòng ban</SelectItem>
+                <SelectItem value="all">Tất cả phòng ban</SelectItem>
                 <SelectItem value="IT">IT</SelectItem>
                 <SelectItem value="HR">HR</SelectItem>
                 <SelectItem value="Sales">Sales</SelectItem>
@@ -162,7 +162,7 @@ export default function EmployeesPage() {
                 <SelectValue placeholder="Chức vụ" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tất cả chức vụ</SelectItem>
+                <SelectItem value="all">Tất cả chức vụ</SelectItem>
                 <SelectItem value="Developer">Developer</SelectItem>
                 <SelectItem value="Manager">Manager</SelectItem>
                 <SelectItem value="Intern">Intern</SelectItem>

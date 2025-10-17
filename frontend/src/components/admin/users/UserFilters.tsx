@@ -68,7 +68,7 @@ export function UserFilters({ filters, onFilterChange }: UserFiltersProps) {
               <SelectValue placeholder="All roles" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All roles</SelectItem>
+              <SelectItem value="all">All roles</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="user">User</SelectItem>
               <SelectItem value="guest">Guest</SelectItem>
@@ -86,7 +86,7 @@ export function UserFilters({ filters, onFilterChange }: UserFiltersProps) {
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All statuses</SelectItem>
+              <SelectItem value="all">All statuses</SelectItem>
               <SelectItem value="true">Active</SelectItem>
               <SelectItem value="false">Inactive</SelectItem>
             </SelectContent>
@@ -103,7 +103,7 @@ export function UserFilters({ filters, onFilterChange }: UserFiltersProps) {
               <SelectValue placeholder="All verification" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All verification</SelectItem>
+              <SelectItem value="all">All verification</SelectItem>
               <SelectItem value="true">Verified</SelectItem>
               <SelectItem value="false">Unverified</SelectItem>
             </SelectContent>

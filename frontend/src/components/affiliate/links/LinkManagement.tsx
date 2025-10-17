@@ -35,7 +35,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
   const [selectedTab, setSelectedTab] = useState('active');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCampaign, setSelectedCampaign] = useState<string>('');
+  const [selectedCampaign, setSelectedCampaign] = useState<string>('all');
   
   // Form state for link creation
   const [formData, setFormData] = useState<CreateAffiliateLinkInput>({
@@ -82,7 +82,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
     const matchesSearch = link.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          link.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          link.campaign.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCampaign = !selectedCampaign || link.campaignId === selectedCampaign;
+    const matchesCampaign = selectedCampaign === 'all' || link.campaignId === selectedCampaign;
     return matchesSearch && matchesCampaign;
   });
 
@@ -354,7 +354,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
               <SelectValue placeholder="All campaigns" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All campaigns</SelectItem>
+              <SelectItem value="all">All campaigns</SelectItem>
               {campaigns.map((campaign) => (
                 <SelectItem key={campaign.id} value={campaign.id}>
                   {campaign.name}

@@ -156,10 +156,10 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
           </div>
           <div className="flex gap-2">
             <Select
-              value={searchInput.isActive?.toString() || ''}
+              value={searchInput.isActive === undefined ? 'all' : searchInput.isActive.toString()}
               onValueChange={(value) => setSearchInput(prev => ({ 
                 ...prev, 
-                isActive: value === '' ? undefined : value === 'true',
+                isActive: value === 'all' ? undefined : value === 'true',
                 page: 0 
               }))}
             >
@@ -167,16 +167,16 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="true">Active</SelectItem>
                 <SelectItem value="false">Inactive</SelectItem>
               </SelectContent>
             </Select>
             <Select
-              value={searchInput.isSystemRole?.toString() || ''}
+              value={searchInput.isSystemRole === undefined ? 'all' : searchInput.isSystemRole.toString()}
               onValueChange={(value) => setSearchInput(prev => ({ 
                 ...prev, 
-                isSystemRole: value === '' ? undefined : value === 'true',
+                isSystemRole: value === 'all' ? undefined : value === 'true',
                 page: 0 
               }))}
             >
@@ -184,7 +184,7 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="true">System</SelectItem>
                 <SelectItem value="false">Custom</SelectItem>
               </SelectContent>

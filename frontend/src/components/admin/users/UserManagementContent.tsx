@@ -244,17 +244,17 @@ export function UserManagementContent() {
             {showFilters && (
               <UserFilters 
                 filters={{
-                  roleType: filters.roleType || '',
-                  isActive: filters.isActive === undefined ? '' : String(filters.isActive),
-                  isVerified: filters.isVerified === undefined ? '' : String(filters.isVerified),
+                  roleType: filters.roleType || 'all',
+                  isActive: filters.isActive === undefined ? 'all' : String(filters.isActive),
+                  isVerified: filters.isVerified === undefined ? 'all' : String(filters.isVerified),
                   sortBy: filters.sortBy,
                   sortOrder: filters.sortOrder,
                 }} 
                 onFilterChange={(key: string, value: any) => {
                   if (key === 'roleType') {
-                    handleFilterChange(key, value || undefined);
+                    handleFilterChange(key, value === 'all' ? undefined : value || undefined);
                   } else if (key === 'isActive' || key === 'isVerified') {
-                    handleFilterChange(key, value === '' ? undefined : value === 'true');
+                    handleFilterChange(key, value === 'all' ? undefined : value === 'true');
                   } else {
                     handleFilterChange(key as keyof UserSearchFilters, value);
                   }

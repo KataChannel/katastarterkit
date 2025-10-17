@@ -162,10 +162,10 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
               className="w-32"
             />
             <Select
-              value={searchInput.isActive?.toString() || ''}
+              value={searchInput.isActive === undefined ? 'all' : searchInput.isActive.toString()}
               onValueChange={(value) => setSearchInput(prev => ({ 
                 ...prev, 
-                isActive: value === '' ? undefined : value === 'true',
+                isActive: value === 'all' ? undefined : value === 'true',
                 page: 0 
               }))}
             >
@@ -173,7 +173,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="true">Active</SelectItem>
                 <SelectItem value="false">Inactive</SelectItem>
               </SelectContent>
