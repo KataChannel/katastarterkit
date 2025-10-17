@@ -12,7 +12,6 @@ interface FullScreenLayoutProps {
   onModeChange: (mode: 'visual' | 'code') => void;
   onExit: () => void;
   onSave: () => void;
-  isFullScreen: boolean;
 }
 
 export function FullScreenLayout({
@@ -20,7 +19,6 @@ export function FullScreenLayout({
   onModeChange,
   onExit,
   onSave,
-  isFullScreen,
 }: FullScreenLayoutProps) {
   const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);

@@ -8,7 +8,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { 
   Plus, 
   Search, 
@@ -319,6 +320,12 @@ function PageBuilderContent() {
             height: '100vh'
           }}
         >
+          <VisuallyHidden>
+            <DialogTitle>Page Builder Editor</DialogTitle>
+            <DialogDescription>
+              Edit your page content using the visual page builder interface
+            </DialogDescription>
+          </VisuallyHidden>
           <div className="h-full w-full">
             <FullScreenPageBuilder 
               pageId={pageId || undefined}

@@ -22,8 +22,6 @@ import {
   FileUp,
   Library,
   ChevronDown,
-  Maximize,
-  Minimize,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -53,8 +51,6 @@ interface EditorToolbarProps {
   currentPageStructure?: PageElement[];
   currentPageStyles?: any;
   onApplyTemplate?: (template: PageTemplate) => void;
-  isFullscreen?: boolean;
-  onToggleFullscreen?: () => void;
 }
 
 export function EditorToolbar({
@@ -71,8 +67,6 @@ export function EditorToolbar({
   currentPageStructure = [],
   currentPageStyles,
   onApplyTemplate,
-  isFullscreen = false,
-  onToggleFullscreen,
 }: EditorToolbarProps) {
   const { toast } = useToast();
   const { addTemplate, importFromJSON } = useTemplates();
@@ -98,18 +92,11 @@ export function EditorToolbar({
         e.preventDefault();
         setIsLibraryOpen(true);
       }
-      // F11 or Ctrl/Cmd + Shift + F - Toggle Fullscreen
-      if (e.key === 'F11' || ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'F')) {
-        e.preventDefault();
-        if (onToggleFullscreen) {
-          onToggleFullscreen();
-        }
-      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onToggleFullscreen]);
+  }, []);
 
   // Handle save template
   const handleSaveTemplate = async (template: PageTemplate) => {
@@ -267,26 +254,6 @@ export function EditorToolbar({
         </Button>
 
         <div className="w-px h-6 bg-gray-300" />
-
-        {/* Fullscreen Toggle */}
-        {onToggleFullscreen && (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onToggleFullscreen}
-              title={isFullscreen ? 'Exit Fullscreen (F11)' : 'Enter Fullscreen (F11)'}
-            >
-              {isFullscreen ? (
-                <Minimize className="w-4 h-4" />
-              ) : (
-                <Maximize className="w-4 h-4" />
-              )}
-            </Button>
-            <div className="w-px h-6 bg-gray-300" />
-          </>
-        )}
-
         {/* Template Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -60,8 +60,6 @@ export const PageBuilderWithFullscreen: React.FC<PageBuilderWithFullscreenProps>
           onToggleLeftPanel={() => setLeftPanelOpen(!leftPanelOpen)}
           rightPanelOpen={rightPanelOpen}
           onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
-          isFullscreen={isFullscreen}
-          onToggleFullscreen={toggleFullscreen}
         />
 
         {/* Main Content Area */}
