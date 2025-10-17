@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePageBuilderContext } from './PageBuilderProvider';
 import { BlockType } from '@/types/page-builder';
-import { TemplateLibrary } from './templates';
 
 /**
  * Block type definitions with icons and colors
@@ -60,39 +59,15 @@ function PageBuilderSidebarComponent() {
     editingPage,
     isNewPageMode,
     
-    // Template actions
-    handleApplyTemplate,
-    setShowSaveTemplateDialog,
-    
     // Block actions
     handleAddBlock,
   } = usePageBuilderContext();
-
-  // Handle template selection with type conversion if needed
-  const handleTemplateSelect = useCallback(async (template: any) => {
-    // Convert PageTemplate to BlockTemplate format if needed
-    const blockTemplate = {
-      ...template,
-      blocks: template.structure || template.blocks || []
-    };
-    await handleApplyTemplate(blockTemplate);
-  }, [handleApplyTemplate]);
-
-  const handleCreateNewTemplate = useCallback(() => {
-    setShowSaveTemplateDialog(true);
-  }, [setShowSaveTemplateDialog]);
-
-  const handleImportTemplate = useCallback(() => {
-    // This could be implemented with an import dialog
-    console.log('Import template functionality - could open import dialog');
-  }, []);
 
   return (
     <div className="w-80 border-r bg-gray-50 p-4 overflow-y-auto">
       <Tabs defaultValue="blocks" className="w-full">
         <TabsList className="w-full mb-4">
           <TabsTrigger value="blocks" className="flex-1">Blocks</TabsTrigger>
-          <TabsTrigger value="templates" className="flex-1">Templates</TabsTrigger>
         </TabsList>
         
         {/* Blocks Tab - Block Types Palette */}
@@ -113,15 +88,6 @@ function PageBuilderSidebarComponent() {
               </Button>
             ))}
           </div>
-        </TabsContent>
-        
-        {/* Templates Tab - Full Template Library */}
-        <TabsContent value="templates" className="mt-0 p-0">
-          <TemplateLibrary 
-            onTemplateSelect={handleTemplateSelect}
-            onCreateNew={handleCreateNewTemplate}
-            onImport={handleImportTemplate}
-          />
         </TabsContent>
       </Tabs>
     </div>

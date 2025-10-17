@@ -20,7 +20,7 @@ import {
   Settings,
   FileDown,
   FileUp,
-  Library,
+  Archive,
   ChevronDown,
 } from 'lucide-react';
 import {
@@ -32,7 +32,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { SaveTemplateDialog } from '@/components/page-builder/templates';
 import { ImportTemplateDialog } from '@/components/page-builder/templates';
-import { TemplateLibrary } from '@/components/page-builder/templates';
 import { PageTemplate, PageElement, ImportTemplateData } from '@/types/template';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useToast } from '@/hooks/use-toast';
@@ -72,7 +71,6 @@ export function EditorToolbar({
   const { addTemplate, importFromJSON } = useTemplates();
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -86,11 +84,6 @@ export function EditorToolbar({
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'O') {
         e.preventDefault();
         setIsImportDialogOpen(true);
-      }
-      // Ctrl/Cmd + Shift + L - Template Library
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
-        e.preventDefault();
-        setIsLibraryOpen(true);
       }
     };
 
@@ -155,19 +148,6 @@ export function EditorToolbar({
         type: 'error',
       });
       return false;
-    }
-  };
-
-  // Handle apply template from library
-  const handleApplyTemplateFromLibrary = (template: PageTemplate) => {
-    if (onApplyTemplate) {
-      onApplyTemplate(template);
-      setIsLibraryOpen(false);
-      toast({
-        title: 'Template applied',
-        description: `"${template.name}" has been applied to your page.`,
-        type: 'success',
-      });
     }
   };
 
@@ -258,7 +238,7 @@ export function EditorToolbar({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
-              <Library className="w-4 h-4" />
+              <Archive className="w-4 h-4" />
               <span className="hidden sm:inline">Templates</span>
               <ChevronDown className="w-3 h-3" />
             </Button>
@@ -273,12 +253,6 @@ export function EditorToolbar({
               <FileUp className="w-4 h-4 mr-2" />
               Import Template
               <span className="ml-auto text-xs text-gray-500">⇧⌘O</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setIsLibraryOpen(true)}>
-              <Library className="w-4 h-4 mr-2" />
-              Template Library
-              <span className="ml-auto text-xs text-gray-500">⇧⌘L</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -314,23 +288,6 @@ export function EditorToolbar({
         onClose={() => setIsImportDialogOpen(false)}
         onImport={handleImportTemplate}
       />
-
-      {/* Template Library Modal */}
-      {isLibraryOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-xl font-semibold">Template Library</h2>
-              <Button variant="ghost" size="icon" onClick={() => setIsLibraryOpen(false)}>
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="flex-1 overflow-auto p-4">
-              <TemplateLibrary onTemplateSelect={handleApplyTemplateFromLibrary} />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
