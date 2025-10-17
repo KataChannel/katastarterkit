@@ -542,8 +542,15 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
   }, []);
 
   const handleApplyTemplate = useCallback(async (template: BlockTemplate) => {
-    if (!editingPage?.id && isNewPageMode) {
+    // Updated validation logic consistent with block addition fixes
+    if (isNewPageMode && !pageId) {
       toast.error('Please save the page first before applying templates');
+      return;
+    }
+
+    const targetPageId = pageId || editingPage?.id;
+    if (!targetPageId) {
+      toast.error('Page ID required to apply templates');
       return;
     }
 
@@ -572,7 +579,7 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
     } finally {
       setIsApplyingTemplate(false);
     }
-  }, [editingPage, isNewPageMode, blocks.length, addBlock, refetch]);
+  }, [editingPage, isNewPageMode, pageId, blocks.length, addBlock, refetch]);
 
   const handleSaveAsTemplate = useCallback((template: Omit<BlockTemplate, 'id' | 'thumbnail'>) => {
     setIsSavingTemplate(true);
