@@ -1,6 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { DndContext, DragStartEvent, DragEndEvent, DragOverlay, closestCorners } from '@dnd-kit/core';
+import { GripVertical } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { usePage, usePageOperations, useBlockOperations, useNestedBlockOperations } from '@/hooks/usePageBuilder';
 import { BLOCK_TEMPLATES, BlockTemplate } from '@/data/blockTemplates';
@@ -10,6 +13,7 @@ import {
   deleteCustomTemplate,
   CustomTemplate 
 } from '@/utils/customTemplates';
+import { initSampleTemplates } from '@/utils/initSampleTemplates';
 import { 
   BlockType, 
   Page, 
@@ -232,6 +236,9 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
   // Load custom templates on mount
   useEffect(() => {
     const loadCustomTemplates = () => {
+      // Initialize sample templates if they don't exist
+      initSampleTemplates();
+      
       const custom = getCustomTemplates();
       setCustomTemplates(custom);
       setAllTemplates([...BLOCK_TEMPLATES, ...custom]);
@@ -328,8 +335,16 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
 
   // Block operations
   const handleAddBlock = useCallback(async (blockType: BlockType) => {
-    if (!editingPage?.id && isNewPageMode) {
+    // For new pages, we need to save the page first if no pageId provided
+    if (isNewPageMode && !pageId) {
       toast.error('Please save the page first before adding blocks');
+      return;
+    }
+
+    // For existing pages or when pageId is provided, allow adding blocks
+    const targetPageId = pageId || editingPage?.id;
+    if (!targetPageId) {
+      toast.error('Page ID required to add blocks');
       return;
     }
 
@@ -395,6 +410,18 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
 
   const handleAddChildBlock = useCallback(async (parentId: string, blockType: BlockType) => {
     try {
+      // Validation logic consistent with other block addition methods
+      if (isNewPageMode && !pageId) {
+        toast.error('Please save the page first before adding blocks');
+        return;
+      }
+
+      const targetPageId = pageId || editingPage?.id;
+      if (!targetPageId) {
+        toast.error('Page ID required to add blocks');
+        return;
+      }
+
       const parentBlock = page?.blocks?.find(b => b.id === parentId);
       const childrenCount = page?.blocks?.filter(b => b.parentId === parentId).length || 0;
 
@@ -417,7 +444,7 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
       console.error('Failed to add child block:', error);
       toast.error(error.message || 'Failed to add child block');
     }
-  }, [page, addBlock, refetch]);
+  }, [page, addBlock, refetch, isNewPageMode, pageId, editingPage]);
 
   const handleCloseAddChildDialog = useCallback(() => {
     setShowAddChildDialog(false);
@@ -434,7 +461,56 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
   const handleDragEnd = useCallback(async (event: any) => {
     const { active, over } = event;
     
-    if (!over || active.id === over.id) {
+    if (!over) {
+      setDraggedBlock(null);
+      return;
+    }
+
+    // Check if dragging a new block from ElementsLibrary
+    if (active.data?.current?.type === 'new-block') {
+      const blockType = active.data.current.blockType as BlockType;
+      
+      // For new pages, we need to save the page first if no pageId provided
+      if (isNewPageMode && !pageId) {
+        toast.error('Please save the page first before adding blocks');
+        setDraggedBlock(null);
+        return;
+      }
+
+      // For existing pages or when pageId is provided, allow adding blocks
+      const targetPageId = pageId || editingPage?.id;
+      if (!targetPageId) {
+        toast.error('Page ID required to add blocks');
+        setDraggedBlock(null);
+        return;
+      }
+
+      // Add new block
+      const input: CreatePageBlockInput = {
+        type: blockType,
+        content: (DEFAULT_BLOCK_CONTENT as any)[blockType] || {},
+        style: {},
+        order: blocks.length,
+        isVisible: true,
+      };
+
+      try {
+        const newBlock = await addBlock(input);
+        if (newBlock) {
+          await refetch();
+          toast.success('Block added successfully!');
+        }
+      } catch (error: any) {
+        console.error('Failed to add block:', error);
+        toast.error(error.message || 'Failed to add block');
+      }
+
+      setDraggedBlock(null);
+      return;
+    }
+
+    // Reordering existing blocks
+    if (active.id === over.id) {
       setDraggedBlock(null);
       return;
     }
@@ -452,7 +528,7 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
     }
 
     setDraggedBlock(null);
-  }, [blocks, handleBlocksReorder]);
+  }, [blocks, handleBlocksReorder, editingPage, isNewPageMode, addBlock, refetch]);
 
   // Template operations
   const handlePreviewTemplate = useCallback((template: BlockTemplate) => {
@@ -602,7 +678,25 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
 
   return (
     <PageBuilderContext.Provider value={value}>
-      {children}
+      <DndContext
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        {children}
+        
+        {/* Drag Overlay - Visual feedback during drag */}
+        <DragOverlay>
+          {draggedBlock && (
+            <Card className="p-4 opacity-90 transform rotate-2 shadow-lg">
+              <div className="flex items-center space-x-2">
+                <GripVertical size={16} className="text-gray-400" />
+                <span className="font-medium">{draggedBlock.type} Block</span>
+              </div>
+            </Card>
+          )}
+        </DragOverlay>
+      </DndContext>
     </PageBuilderContext.Provider>
   );
 }

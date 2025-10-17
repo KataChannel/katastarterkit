@@ -1,17 +1,12 @@
 import React, { useMemo, useCallback } from 'react';
 import {
-  DndContext,
-  DragOverlay,
-  closestCorners,
-  DragStartEvent,
-  DragEndEvent,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers';
-import { Layout, GripVertical } from 'lucide-react';
+import { Layout } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { usePageBuilderContext } from './PageBuilderProvider';
 import { BlockRenderer } from './blocks/BlockRenderer';
@@ -48,10 +43,6 @@ function PageBuilderCanvasComponent() {
     handleBlockUpdate,
     handleBlockDelete,
     handleAddChild,
-    
-    // Drag-and-drop actions
-    handleDragStart,
-    handleDragEnd,
   } = usePageBuilderContext();
 
   // Memoize block IDs array to prevent SortableContext re-renders
@@ -59,6 +50,11 @@ function PageBuilderCanvasComponent() {
 
   // Memoize empty state check
   const hasBlocks = useMemo(() => blocks.length > 0, [blocks.length]);
+
+  // Droppable zone for empty canvas
+  const { setNodeRef } = useDroppable({
+    id: 'canvas-droppable',
+  });
 
   return (
     <div className="flex-1 p-4 overflow-auto">
@@ -78,58 +74,39 @@ function PageBuilderCanvasComponent() {
             ))}
           </div>
         ) : (
-          // Edit Mode - Drag-and-drop enabled
-          <DndContext
-            collisionDetection={closestCorners}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+          // Edit Mode - Sortable enabled
+          <SortableContext 
+            items={blockIds}
+            strategy={verticalListSortingStrategy}
           >
-            <SortableContext 
-              items={blockIds}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="space-y-4">
-                {!hasBlocks ? (
-                  // Empty State
-                  <Card className="p-8 text-center border-dashed">
-                    <div className="text-gray-500">
-                      <Layout size={48} className="mx-auto mb-4 opacity-50" />
-                      <p className="text-lg font-medium mb-2">No blocks yet</p>
-                      <p className="text-sm">Add your first block from the palette on the left</p>
-                    </div>
-                  </Card>
-                ) : (
-                  // Block List
-                  blocks.map(block => (
-                    <BlockRenderer
-                      key={block.id}
-                      block={block}
-                      isEditing={true}
-                      onUpdate={(content: any, style: any) => handleBlockUpdate(block.id, content, style)}
-                      onDelete={() => handleBlockDelete(block.id)}
-                      onAddChild={handleAddChild}
-                      onUpdateChild={handleBlockUpdate}
-                      onDeleteChild={handleBlockDelete}
-                      depth={0}
-                    />
-                  ))
-                )}
-              </div>
-            </SortableContext>
-
-            {/* Drag Overlay - Visual feedback during drag */}
-            <DragOverlay>
-              {draggedBlock && (
-                <Card className="p-4 opacity-90 transform rotate-2 shadow-lg">
-                  <div className="flex items-center space-x-2">
-                    <GripVertical size={16} className="text-gray-400" />
-                    <span className="font-medium">{draggedBlock.type} Block</span>
+            <div ref={setNodeRef} className="space-y-4 min-h-[400px]">
+              {!hasBlocks ? (
+                // Empty State - Droppable
+                <Card className="p-8 text-center border-dashed border-2 border-gray-300 hover:border-primary transition-colors">
+                  <div className="text-gray-500">
+                    <Layout size={48} className="mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium mb-2">No blocks yet</p>
+                    <p className="text-sm">Drag and drop blocks from the left panel to start building</p>
                   </div>
                 </Card>
+              ) : (
+                // Block List
+                blocks.map(block => (
+                  <BlockRenderer
+                    key={block.id}
+                    block={block}
+                    isEditing={true}
+                    onUpdate={(content: any, style: any) => handleBlockUpdate(block.id, content, style)}
+                    onDelete={() => handleBlockDelete(block.id)}
+                    onAddChild={handleAddChild}
+                    onUpdateChild={handleBlockUpdate}
+                    onDeleteChild={handleBlockDelete}
+                    depth={0}
+                  />
+                ))
               )}
-            </DragOverlay>
-          </DndContext>
+            </div>
+          </SortableContext>
         )}
       </div>
     </div>

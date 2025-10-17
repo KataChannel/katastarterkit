@@ -168,6 +168,6 @@ const generateDefaultThumbnail = (): string => {
 
 export const getThumbnailDataURL = (templateId: string): string => {
   const svg = generateThumbnailSVG(templateId);
-  const base64 = btoa(svg);
-  return `data:image/svg+xml;base64,${base64}`;
+  const encodedSvg = encodeURIComponent(svg);
+  return `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
 };

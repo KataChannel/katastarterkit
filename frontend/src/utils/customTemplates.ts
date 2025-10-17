@@ -255,9 +255,10 @@ function generateCustomTemplateThumbnail(template: Omit<BlockTemplate, 'id' | 't
     </svg>
   `;
   
-  // Convert to data URL
-  const base64 = btoa(svg);
-  return `data:image/svg+xml;base64,${base64}`;
+  // Convert to data URL with proper UTF-8 encoding
+  // Use encodeURIComponent to handle Unicode characters
+  const encodedSvg = encodeURIComponent(svg);
+  return `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
 }
 
 /**
