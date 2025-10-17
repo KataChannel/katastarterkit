@@ -410,9 +410,10 @@ export class RbacService {
 
   // Get User's Effective Permissions
   async getUserEffectivePermissions(userId: string): Promise<any> {
-    const [roleAssignmentsData, directPermissions] = await Promise.all([
+    // Fetch ALL role assignments and permissions (both allow and deny)
+    const [allRoleAssignments, allDirectPermissions] = await Promise.all([
       this.prisma.userRoleAssignment.findMany({
-        where: { userId, effect: 'allow' },
+        where: { userId },
         include: {
           role: {
             include: {
@@ -426,7 +427,7 @@ export class RbacService {
         },
       }),
       this.prisma.userPermission.findMany({
-        where: { userId, effect: 'allow' },
+        where: { userId },
         include: {
           permission: true,
         },
@@ -434,7 +435,7 @@ export class RbacService {
     ]);
 
     // Transform role assignments to match GraphQL schema expectations
-    const roleAssignments = roleAssignmentsData.map(assignment => ({
+    const roleAssignments = allRoleAssignments.map(assignment => ({
       ...assignment,
       role: {
         ...assignment.role,
@@ -442,31 +443,63 @@ export class RbacService {
       }
     }));
 
-    // Collect all permissions from roles
-    const rolePermissions = roleAssignments.flatMap((assignment) =>
-      assignment.role.permissions
-    );
+    // Separate allowed and denied permissions
+    const allowedRoleAssignments = allRoleAssignments.filter(a => a.effect === 'allow');
+    const deniedPermissions = new Set<string>();
 
-    // Combine with direct permissions
+    // Collect denied permissions from direct assignments
+    allDirectPermissions
+      .filter(up => up.effect === 'deny')
+      .forEach(up => {
+        if (up.permission) {
+          deniedPermissions.add(up.permission.id);
+        }
+      });
+
+    // Collect denied permissions from role assignments
+    allRoleAssignments
+      .filter(ra => ra.effect === 'deny')
+      .forEach(ra => {
+        ra.role.permissions.forEach(rp => {
+          if (rp.permission) {
+            deniedPermissions.add(rp.permission.id);
+          }
+        });
+      });
+
+    // Collect allowed permissions from roles (excluding denied ones)
+    const rolePermissions = allowedRoleAssignments
+      .flatMap((assignment) => assignment.role.permissions)
+      .filter(p => p && !deniedPermissions.has(p.id));
+
+    // Collect allowed direct permissions (excluding denied ones)
+    const directAllowedPermissions = allDirectPermissions
+      .filter(up => up.effect === 'allow' && up.permission)
+      .map(up => up.permission)
+      .filter(p => p && !deniedPermissions.has(p.id));
+
+    // Combine all allowed permissions (after deny filtering)
     const allPermissions = [
       ...rolePermissions,
-      ...directPermissions.map((up) => up.permission).filter(p => p !== null),
+      ...directAllowedPermissions,
     ];
 
     // Remove duplicates
     const uniquePermissions = allPermissions.filter(
       (permission, index, self) =>
-        index === self.findIndex((p) => p.id === permission.id)
+        permission && index === self.findIndex((p) => p && p.id === permission.id)
     );
 
     return {
       userId,
       roleAssignments,
-      directPermissions,
+      directPermissions: allDirectPermissions,
       effectivePermissions: uniquePermissions,
+      deniedPermissions: Array.from(deniedPermissions),
       summary: {
-        totalDirectPermissions: directPermissions.length,
-        totalRoleAssignments: roleAssignments.length,
+        totalDirectPermissions: allDirectPermissions.filter(p => p.effect === 'allow').length,
+        totalDeniedPermissions: deniedPermissions.size,
+        totalRoleAssignments: allowedRoleAssignments.length,
         totalEffectivePermissions: uniquePermissions.length,
         lastUpdated: new Date(),
       },

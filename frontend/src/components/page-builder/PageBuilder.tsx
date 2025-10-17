@@ -140,13 +140,21 @@ function PageBuilderInternal() {
  * 
  * Main entry point for the Page Builder.
  * Wraps the internal component with PageBuilderProvider for state management.
+ * Includes Error Boundary for graceful error handling.
  * 
  * @param pageId - Optional ID of existing page to edit (if omitted, creates new page)
  */
 export default function PageBuilder({ pageId }: { pageId?: string }) {
+  // Lazy import Error Boundary to avoid circular dependencies
+  const ErrorBoundary = React.lazy(() => import('./ErrorBoundary'));
+  
   return (
-    <PageBuilderProvider pageId={pageId}>
-      <PageBuilderInternal />
-    </PageBuilderProvider>
+    <React.Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+      <ErrorBoundary>
+        <PageBuilderProvider pageId={pageId}>
+          <PageBuilderInternal />
+        </PageBuilderProvider>
+      </ErrorBoundary>
+    </React.Suspense>
   );
 }

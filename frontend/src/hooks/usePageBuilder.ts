@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client';
+import { useEffect, useRef, useCallback } from 'react';
 import { 
   GET_PAGES, 
   GET_PAGE_BY_ID, 
@@ -22,6 +23,12 @@ import {
 } from '@/types/page-builder';
 import { PaginationInput } from '@/types/common';
 import { toast } from 'sonner';
+
+// Constants for validation
+const MAX_BLOCK_DEPTH = 5;
+const MAX_BLOCKS_PER_PAGE = 100;
+const MAX_CHILDREN_PER_CONTAINER = 20;
+const AUTO_SAVE_DELAY = 30000; // 30 seconds
 
 // Hook for managing pages
 export const usePages = (pagination?: PaginationInput, filters?: PageFiltersInput) => {
@@ -51,6 +58,79 @@ export const usePage = (id: string) => {
     loading,
     error,
     refetch
+  };
+};
+
+// Hook for page with auto-save functionality
+export const usePageWithAutoSave = (id: string, onSave?: (page: Page) => Promise<void>) => {
+  const { page, loading, error, refetch } = usePage(id);
+  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedState = useRef<string>('');
+  const hasChanges = useRef<boolean>(false);
+
+  // Auto-save logic
+  useEffect(() => {
+    if (!page || !onSave) return;
+
+    const currentState = JSON.stringify(page);
+    
+    // Check if there are changes
+    if (currentState !== lastSavedState.current && lastSavedState.current !== '') {
+      hasChanges.current = true;
+      
+      // Clear existing timer
+      if (autoSaveTimer.current) {
+        clearTimeout(autoSaveTimer.current);
+      }
+
+      // Set new auto-save timer
+      autoSaveTimer.current = setTimeout(async () => {
+        if (hasChanges.current) {
+          try {
+            await onSave(page);
+            lastSavedState.current = currentState;
+            hasChanges.current = false;
+            toast.success('Auto-saved', { duration: 2000 });
+          } catch (error) {
+            toast.error('Auto-save failed');
+          }
+        }
+      }, AUTO_SAVE_DELAY);
+    } else if (lastSavedState.current === '') {
+      // Initialize last saved state
+      lastSavedState.current = currentState;
+    }
+
+    // Cleanup
+    return () => {
+      if (autoSaveTimer.current) {
+        clearTimeout(autoSaveTimer.current);
+      }
+    };
+  }, [page, onSave]);
+
+  // Manual save function
+  const manualSave = useCallback(async () => {
+    if (!page || !onSave || !hasChanges.current) return;
+
+    try {
+      await onSave(page);
+      lastSavedState.current = JSON.stringify(page);
+      hasChanges.current = false;
+      toast.success('Saved successfully');
+    } catch (error) {
+      toast.error('Save failed');
+      throw error;
+    }
+  }, [page, onSave]);
+
+  return {
+    page,
+    loading,
+    error,
+    refetch,
+    hasUnsavedChanges: hasChanges.current,
+    manualSave
   };
 };
 
@@ -207,9 +287,32 @@ export const useNestedBlockOperations = (pageId: string) => {
       throw new Error('Parent block not found');
     }
 
-    // Calculate depth and order
+    // Validation: Check if parent can accept children
+    if (!isContainerBlock(parentBlock.type)) {
+      toast.error('This block type cannot contain child blocks');
+      throw new Error('Parent block is not a container');
+    }
+
+    // Validation: Check max depth
     const parentDepth = parentBlock.depth || 0;
+    if (parentDepth >= MAX_BLOCK_DEPTH - 1) {
+      toast.error(`Maximum nesting depth (${MAX_BLOCK_DEPTH} levels) reached`);
+      throw new Error(`Maximum depth of ${MAX_BLOCK_DEPTH} exceeded`);
+    }
+
+    // Validation: Check max children
     const siblings = allBlocks.filter(b => b.parentId === parentId);
+    if (siblings.length >= MAX_CHILDREN_PER_CONTAINER) {
+      toast.error(`Maximum ${MAX_CHILDREN_PER_CONTAINER} blocks per container`);
+      throw new Error(`Maximum children limit (${MAX_CHILDREN_PER_CONTAINER}) exceeded`);
+    }
+
+    // Validation: Check max total blocks
+    if (allBlocks.length >= MAX_BLOCKS_PER_PAGE) {
+      toast.error(`Maximum ${MAX_BLOCKS_PER_PAGE} blocks per page`);
+      throw new Error(`Maximum blocks limit (${MAX_BLOCKS_PER_PAGE}) exceeded`);
+    }
+
     const order = siblings.length;
 
     const input: CreatePageBlockInput = {
@@ -253,13 +356,39 @@ export const useNestedBlockOperations = (pageId: string) => {
       if (!newParent) {
         throw new Error('New parent block not found');
       }
+
+      // Validation: Check if new parent can accept children
+      if (!isContainerBlock(newParent.type)) {
+        toast.error('Target block cannot contain child blocks');
+        throw new Error('New parent is not a container');
+      }
+
       newDepth = (newParent.depth || 0) + 1;
+
+      // Validation: Check if move would exceed max depth
+      const descendants = getBlockDescendants(blockId);
+      const maxDescendantDepth = descendants.reduce((max, d) => {
+        const relativeDepth = (d.depth || 0) - (block.depth || 0);
+        return Math.max(max, relativeDepth);
+      }, 0);
+
+      if (newDepth + maxDescendantDepth >= MAX_BLOCK_DEPTH) {
+        toast.error(`Moving this block would exceed maximum depth (${MAX_BLOCK_DEPTH} levels)`);
+        throw new Error('Move would exceed maximum depth');
+      }
+
+      // Validation: Check max children in new parent
+      const newSiblings = allBlocks.filter(b => b.parentId === newParentId && b.id !== blockId);
+      if (newSiblings.length >= MAX_CHILDREN_PER_CONTAINER) {
+        toast.error(`Target container has reached maximum ${MAX_CHILDREN_PER_CONTAINER} blocks`);
+        throw new Error('Target container is full');
+      }
     }
 
     // Calculate order if not provided
     let calculatedOrder = newOrder;
     if (calculatedOrder === undefined) {
-      const siblings = allBlocks.filter(b => b.parentId === newParentId);
+      const siblings = allBlocks.filter(b => b.parentId === newParentId && b.id !== blockId);
       calculatedOrder = siblings.length;
     }
 
@@ -271,6 +400,19 @@ export const useNestedBlockOperations = (pageId: string) => {
 
     try {
       await updateBlock(blockId, input);
+      
+      // Update depths of all descendants
+      const descendants = getBlockDescendants(blockId);
+      const depthDiff = newDepth - (block.depth || 0);
+      
+      if (depthDiff !== 0 && descendants.length > 0) {
+        for (const descendant of descendants) {
+          await updateBlock(descendant.id, {
+            depth: (descendant.depth || 0) + depthDiff
+          });
+        }
+      }
+      
       await refetch();
     } catch (error) {
       throw error;
