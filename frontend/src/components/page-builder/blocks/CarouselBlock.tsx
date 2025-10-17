@@ -5,7 +5,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, Settings, Pencil, Trash2, MoveUp, MoveDown } from 'lucide-react';
+import { Plus, Settings, Pencil, Trash2, MoveUp, MoveDown, X } from 'lucide-react';
 import type { PageBlock } from '@/types/page-builder';
 import { CarouselSettingsDialog } from './CarouselSettingsDialog';
 import { SlideEditorDialog } from './SlideEditorDialog';
@@ -31,15 +31,20 @@ interface CarouselSlide {
 interface CarouselBlockProps {
   block: PageBlock;
   isEditing?: boolean;
-  onUpdate?: (blockId: string, content: any, style?: any) => void;
+  isEditable?: boolean;
+  onUpdate?: (content: any, style?: any) => void;
+  onDelete?: () => void;
 }
 
-export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBlockProps) {
+export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete }: CarouselBlockProps) {
   const [api, setApi] = useState<any>();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [showSlideEditor, setShowSlideEditor] = useState(false);
   const [editingSlideIndex, setEditingSlideIndex] = useState<number | null>(null);
+  
+  // Use isEditable if provided, fallback to isEditing for backwards compatibility
+  const editMode = isEditable ?? isEditing ?? false;
 
   const content = block.content || {};
   const slides: CarouselSlide[] = content.slides || [];
@@ -98,7 +103,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
     };
     
     const updatedSlides = [...slides, newSlide];
-    onUpdate?.(block.id, { ...content, slides: updatedSlides }, block.style);
+    onUpdate?.({ ...content, slides: updatedSlides }, block.style);
   };
 
   const handleEditSlide = (index: number) => {
@@ -108,7 +113,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
 
   const handleDeleteSlide = (index: number) => {
     const updatedSlides = slides.filter((_, i) => i !== index);
-    onUpdate?.(block.id, { ...content, slides: updatedSlides }, block.style);
+    onUpdate?.({ ...content, slides: updatedSlides }, block.style);
   };
 
   const handleMoveSlide = (index: number, direction: 'up' | 'down') => {
@@ -123,7 +128,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
     const newIndex = direction === 'up' ? index - 1 : index + 1;
     [newSlides[index], newSlides[newIndex]] = [newSlides[newIndex], newSlides[index]];
     
-    onUpdate?.(block.id, { ...content, slides: newSlides }, block.style);
+    onUpdate?.({ ...content, slides: newSlides }, block.style);
   };
 
   const handleSaveSlide = (slideData: CarouselSlide) => {
@@ -131,13 +136,13 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
     
     const updatedSlides = [...slides];
     updatedSlides[editingSlideIndex] = slideData;
-    onUpdate?.(block.id, { ...content, slides: updatedSlides }, block.style);
+    onUpdate?.({ ...content, slides: updatedSlides }, block.style);
     setShowSlideEditor(false);
     setEditingSlideIndex(null);
   };
 
   const handleSaveSettings = (settings: any) => {
-    onUpdate?.(block.id, { ...content, ...settings }, block.style);
+    onUpdate?.({ ...content, ...settings }, block.style);
     setShowSettings(false);
   };
 
@@ -238,7 +243,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
   };
 
   // If no slides, show placeholder in edit mode
-  if (slides.length === 0 && isEditing) {
+  if (slides.length === 0 && editMode) {
     return (
       <div 
         className="relative p-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 min-h-[300px] flex items-center justify-center"
@@ -259,7 +264,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
         </div>
       </div>
     );
-  }
+  };
 
   // If no slides in preview mode, don't render
   if (slides.length === 0) {
@@ -269,7 +274,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
   return (
     <>
       <div className={`relative ${getHeightClass()}`} style={block.style}>
-        {isEditing && (
+        {editMode && (
           <div className="absolute top-2 right-2 z-20 flex gap-2">
             <Button
               onClick={handleAddSlide}
@@ -288,6 +293,15 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
             >
               <Settings className="w-4 h-4 mr-2" />
               Settings
+            </Button>
+            <Button
+              onClick={onDelete}
+              size="sm"
+              variant="destructive"
+              className="bg-red-500 hover:bg-red-600 text-white shadow-lg"
+              title="Delete Carousel Block"
+            >
+              <X className="w-4 h-4" />
             </Button>
           </div>
         )}
@@ -374,7 +388,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
                                       variant="secondary"
                                       className="font-semibold hover:scale-105 transition-transform"
                                       onClick={() => {
-                                        if (slide.cta?.link && !isEditing) {
+                                        if (slide.cta?.link && !editMode) {
                                           window.location.href = slide.cta.link;
                                         }
                                       }}
@@ -420,7 +434,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
                                       variant="secondary"
                                       className="font-semibold hover:scale-105 transition-transform"
                                       onClick={() => {
-                                        if (slide.cta?.link && !isEditing) {
+                                        if (slide.cta?.link && !editMode) {
                                           window.location.href = slide.cta.link;
                                         }
                                       }}
@@ -449,7 +463,7 @@ export default function CarouselBlock({ block, isEditing, onUpdate }: CarouselBl
                       </div>
                       
                       {/* Edit Controls in Editing Mode */}
-                      {isEditing && (
+                      {editMode && (
                         <div className="absolute top-2 left-2 z-20 flex gap-2">
                           <Button
                             onClick={() => handleEditSlide(index)}

@@ -10,6 +10,7 @@ import { Layout } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { usePageBuilderContext } from './PageBuilderProvider';
 import { BlockRenderer } from './blocks/BlockRenderer';
+import { SortableBlockWrapper } from './blocks/SortableBlockWrapper';
 
 
 /**
@@ -90,9 +91,9 @@ function PageBuilderCanvasComponent() {
                   </div>
                 </Card>
               ) : (
-                // Block List
+                // Block List with Sortable Wrappers
                 blocks.map(block => (
-                  <BlockRenderer
+                  <SortableBlockWrapper
                     key={block.id}
                     block={block}
                     isEditing={true}

@@ -109,8 +109,15 @@ export const DEFAULT_BLOCK_CONTENT = {
     style: {} 
   },
   [BlockType.DYNAMIC]: { 
-    componentType: 'custom',
-    props: {},
+    componentType: 'template',
+    templateId: null,
+    templateName: 'Dynamic Content',
+    template: '<div class="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center"><h3 class="text-lg font-semibold mb-2">Dynamic Block</h3><p class="text-gray-600">Select a template from the Templates tab to add dynamic content with database integration.</p></div>',
+    dataSource: {
+      type: 'static',
+      data: {}
+    },
+    variables: {},
     style: {} 
   },
 };
@@ -128,6 +135,8 @@ interface PageBuilderContextType {
   // Blocks state
   blocks: PageBlock[];
   draggedBlock: PageBlock | null;
+  selectedBlockId: string | null;
+  selectedBlock: PageBlock | null;
   
   // UI state
   showPageSettings: boolean;
@@ -154,9 +163,20 @@ interface PageBuilderContextType {
   
   // Block operations
   handleAddBlock: (blockType: BlockType) => Promise<void>;
+  handleAddTemplateBlock: (templateConfig: {
+    templateId: string;
+    templateName: string;
+    template: string;
+    dataSource: any;
+    variables: any;
+  }) => Promise<void>;
   handleBlockUpdate: (blockId: string, content: any, style?: any) => Promise<void>;
   handleBlockDelete: (blockId: string) => Promise<void>;
   handleBlocksReorder: (newBlocks: PageBlock[]) => Promise<void>;
+  
+  // Block selection operations
+  handleSelectBlock: (blockId: string | null) => void;
+  handleUpdateBlockStyle: (blockId: string, style: any) => Promise<void>;
   
   // Nested block operations
   handleAddChild: (parentId: string) => void;
@@ -209,6 +229,7 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
   // Blocks state
   const [blocks, setBlocks] = useState<PageBlock[]>([]);
   const [draggedBlock, setDraggedBlock] = useState<PageBlock | null>(null);
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   
   // UI state
   const [showPageSettings, setShowPageSettings] = useState(false);
@@ -333,6 +354,47 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
     }
   }, [editingPage, deletePage]);
 
+  // Add template block with custom configuration
+  const handleAddTemplateBlock = useCallback(async (templateConfig: {
+    templateId: string;
+    templateName: string;
+    template: string;
+    dataSource: any;
+    variables: any;
+  }) => {
+    const targetPageId = pageId || editingPage?.id;
+    if (!targetPageId) {
+      toast.error('Page ID required to add template blocks');
+      return;
+    }
+
+    const input: CreatePageBlockInput = {
+      type: BlockType.DYNAMIC,
+      content: {
+        componentType: 'template',
+        templateId: templateConfig.templateId,
+        templateName: templateConfig.templateName,
+        template: templateConfig.template,
+        dataSource: templateConfig.dataSource,
+        variables: templateConfig.variables,
+      },
+      style: {},
+      order: blocks.length,
+      isVisible: true,
+    };
+
+    try {
+      const newBlock = await addBlock(input);
+      if (newBlock) {
+        await refetch();
+        toast.success(`${templateConfig.templateName} template added successfully!`);
+      }
+    } catch (error) {
+      console.error('Error adding template block:', error);
+      toast.error('Failed to add template block');
+    }
+  }, [pageId, editingPage?.id, blocks.length, addBlock, refetch]);
+
   // Block operations
   const handleAddBlock = useCallback(async (blockType: BlockType) => {
     // For new pages, we need to save the page first if no pageId provided
@@ -401,6 +463,24 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
       toast.error('Failed to reorder blocks');
     }
   }, [updateBlocksOrder, refetch]);
+
+  // Block selection operations
+  const handleSelectBlock = useCallback((blockId: string | null) => {
+    setSelectedBlockId(blockId);
+  }, []);
+
+  const handleUpdateBlockStyle = useCallback(async (blockId: string, style: any) => {
+    try {
+      await updateBlock(blockId, { style });
+      await refetch();
+    } catch (error) {
+      console.error('Failed to update block style:', error);
+      toast.error('Failed to update block style');
+    }
+  }, [updateBlock, refetch]);
+
+  // Computed selected block
+  const selectedBlock = selectedBlockId ? blocks.find(block => block.id === selectedBlockId) || null : null;
 
   // Nested block operations
   const handleAddChild = useCallback((parentId: string) => {
@@ -485,12 +565,23 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
         return;
       }
 
+      // Calculate order based on drop target
+      let order = blocks.length;
+      
+      // If dropped on an existing block, insert after it
+      if (over.id !== 'canvas-droppable') {
+        const targetIndex = blocks.findIndex(b => b.id === over.id);
+        if (targetIndex !== -1) {
+          order = targetIndex + 1;
+        }
+      }
+
       // Add new block
       const input: CreatePageBlockInput = {
         type: blockType,
         content: (DEFAULT_BLOCK_CONTENT as any)[blockType] || {},
         style: {},
-        order: blocks.length,
+        order: order,
         isVisible: true,
       };
 
@@ -528,7 +619,7 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
     }
 
     setDraggedBlock(null);
-  }, [blocks, handleBlocksReorder, editingPage, isNewPageMode, addBlock, refetch]);
+  }, [blocks, handleBlocksReorder, editingPage, isNewPageMode, pageId, addBlock, refetch]);
 
   // Template operations
   const handlePreviewTemplate = useCallback((template: BlockTemplate) => {
@@ -628,6 +719,8 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
     // Blocks state
     blocks,
     draggedBlock,
+    selectedBlockId,
+    selectedBlock,
     
     // UI state
     showPageSettings,
@@ -654,9 +747,14 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
     
     // Block operations
     handleAddBlock,
+    handleAddTemplateBlock,
     handleBlockUpdate,
     handleBlockDelete,
     handleBlocksReorder,
+    
+    // Block selection operations
+    handleSelectBlock,
+    handleUpdateBlockStyle,
     
     // Nested block operations
     handleAddChild,

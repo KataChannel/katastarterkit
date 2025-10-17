@@ -127,8 +127,209 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
     return result;
   };
 
+  // Check if this is a template-based dynamic block
+  const isTemplateBlock = block.content?.componentType === 'template';
+  const templateContent = block.content?.template;
+
+  // Sample data for different template types
+  const getSampleData = (templateId: string) => {
+    const sampleData: Record<string, any> = {
+      'product-grid': {
+        title: 'Featured Products',
+        products: [
+          {
+            id: 1,
+            name: 'MacBook Pro M3',
+            price: 1999,
+            description: 'Powerful laptop for professionals',
+            image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&h=200&fit=crop',
+          },
+          {
+            id: 2,
+            name: 'iPhone 15 Pro',
+            price: 1099,
+            description: 'Latest smartphone technology',
+            image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=200&fit=crop',
+          },
+          {
+            id: 3,
+            name: 'AirPods Pro',
+            price: 249,
+            description: 'Premium wireless earbuds',
+            image: 'https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=200&fit=crop',
+          },
+        ],
+      },
+      'task-dashboard': {
+        projectName: 'Website Redesign',
+        todoTasks: [
+          { title: 'Design mockups', description: 'Create wireframes and prototypes', priority: 'high', dueDate: '2025-10-20' },
+          { title: 'Content audit', description: 'Review existing content', priority: 'medium', dueDate: '2025-10-22' },
+        ],
+        inProgressTasks: [
+          { title: 'Frontend development', description: 'Implement React components', priority: 'high', assignee: 'John Doe' },
+        ],
+        doneTasks: [
+          { title: 'Research phase', description: 'Market analysis completed', priority: 'medium' },
+        ],
+      },
+      'category-showcase': {
+        title: 'Shop by Category',
+        categories: [
+          { name: 'Electronics', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=300&fit=crop', productCount: 150 },
+          { name: 'Fashion', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop', productCount: 89 },
+          { name: 'Home & Garden', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop', productCount: 67 },
+        ],
+      },
+      'hero-section': {
+        title: 'Biến Ý Tưởng Thành Hiện Thực',
+        subtitle: 'Nền tảng toàn diện giúp bạn xây dựng website chuyên nghiệp với công nghệ tiên tiến nhất',
+        ctaText: 'Bắt Đầu Ngay Hôm Nay',
+        backgroundImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&h=1080&fit=crop',
+      },
+      'contact-form': {
+        title: 'Liên Hệ Với Chúng Tôi',
+        description: 'Chúng tôi luôn sẵn sàng hỗ trợ bạn. Hãy để lại thông tin và chúng tôi sẽ phản hồi trong 24h.',
+        email: 'hello@katacore.com',
+        phone: '+84 (0) 123 456 789',
+        address: 'Tầng 10, Tòa nhà ABC, 123 Đường DEF, Quận 1, TP.HCM',
+      },
+      'testimonials': {
+        title: 'Khách Hàng Nói Gì Về Chúng Tôi',
+        testimonials: [
+          {
+            name: 'Nguyễn Văn A',
+            position: 'CEO, Tech Startup',
+            avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
+            content: 'Dịch vụ tuyệt vời! Team rất chuyên nghiệp và hỗ trợ nhiệt tình. Website của chúng tôi đã tăng 300% traffic.',
+            rating: 5,
+          },
+          {
+            name: 'Trần Thị B',
+            position: 'Marketing Manager, Fashion Brand',
+            avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face',
+            content: 'Thiết kế đẹp, tính năng đầy đủ và tốc độ tải nhanh. Đúng là đáng đồng tiền bát gạo!',
+            rating: 5,
+          },
+          {
+            name: 'Lê Minh C',
+            position: 'Founder, E-commerce Store',
+            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
+            content: 'Từ khi dùng platform này, doanh số online của shop tôi tăng gấp đôi. Highly recommended!',
+            rating: 5,
+          },
+        ],
+      },
+      'faq-section': {
+        title: 'Câu Hỏi Thường Gặp',
+        faqs: [
+          {
+            question: 'Tôi có thể tự thiết kế website không cần kiến thức lập trình?',
+            answer: 'Hoàn toàn có thể! Platform của chúng tôi được thiết kế drag-and-drop trực quan, bạn chỉ cần kéo thả các component và tùy chỉnh theo ý muốn.',
+          },
+          {
+            question: 'Có bao nhiều template có sẵn để lựa chọn?',
+            answer: 'Chúng tôi cung cấp hơn 100+ template chuyên nghiệp cho nhiều lĩnh vực khác nhau: e-commerce, business, portfolio, blog, landing page...',
+          },
+          {
+            question: 'Website có responsive trên mobile không?',
+            answer: 'Tất cả template và component đều được tối ưu responsive, hiển thị hoàn hảo trên mọi thiết bị từ desktop, tablet đến mobile.',
+          },
+          {
+            question: 'Có hỗ trợ SEO không?',
+            answer: 'Có! Chúng tôi tích hợp đầy đủ các tính năng SEO: meta tags, sitemap, structured data, page speed optimization...',
+          },
+          {
+            question: 'Tôi có thể kết nối domain riêng không?',
+            answer: 'Chắc chắn rồi! Bạn có thể kết nối domain riêng và chúng tôi hỗ trợ cấu hình SSL certificate miễn phí.',
+          },
+        ],
+      },
+      'newsletter-signup': {
+        title: 'Đăng Ký Nhận Tin Tức Mới Nhất',
+        description: 'Nhận các tips, tricks và update về web development, design trends và business insights.',
+        subscriberCount: '12,500',
+        benefits: [
+          'Weekly tips về web development',
+          'Exclusive templates và resources',
+          'Early access cho features mới',
+          'Community access với 10k+ developers',
+        ],
+      },
+    };
+
+    return sampleData[templateId] || {};
+  };
+
+  // Enhanced template processor with advanced features
+  const processTemplate = (template: string, data: any): string => {
+    let result = template;
+
+    // Replace simple variables
+    Object.entries(data).forEach(([key, value]) => {
+      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+      result = result.replace(regex, String(value));
+    });
+
+    // Process repeat helper (e.g., {{#repeat rating}})
+    const repeatRegex = /{{#repeat\s+(\w+)}}([\s\S]*?){{\/repeat}}/g;
+    result = result.replace(repeatRegex, (match: string, countVar: string, repeatTemplate: string) => {
+      const count = data[countVar] || 0;
+      return Array(count).fill(repeatTemplate).join('');
+    });
+
+    // Process simple loops
+    const loopRegex = /{{#each\s+(\w+)}}([\s\S]*?){{\/each}}/g;
+    result = result.replace(loopRegex, (match: string, arrayName: string, loopTemplate: string) => {
+      const array = data[arrayName];
+      if (Array.isArray(array)) {
+        return array.map(item => {
+          let itemResult = loopTemplate;
+          
+          // Replace item properties
+          Object.entries(item).forEach(([key, value]) => {
+            const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+            itemResult = itemResult.replace(regex, String(value));
+          });
+          
+          // Handle repeat within loops (e.g., for star ratings)
+          const itemRepeatRegex = /{{#repeat\s+(\w+)}}([\s\S]*?){{\/repeat}}/g;
+          itemResult = itemResult.replace(itemRepeatRegex, (match: string, countVar: string, repeatTemplate: string) => {
+            const count = item[countVar] || 0;
+            return Array(count).fill(repeatTemplate).join('');
+          });
+          
+          return itemResult;
+        }).join('');
+      }
+      return '';
+    });
+
+    // Process conditional blocks ({{#if condition}})
+    const ifRegex = /{{#if\s+(\w+)}}([\s\S]*?){{\/if}}/g;
+    result = result.replace(ifRegex, (match: string, condition: string, ifTemplate: string) => {
+      return data[condition] ? ifTemplate : '';
+    });
+
+    return result;
+  };
+
   // Render dynamic content
   const renderContent = () => {
+    // Handle template-based blocks
+    if (isTemplateBlock && templateContent) {
+      const templateId = block.content?.templateId;
+      const sampleData = getSampleData(templateId || '');
+      const processedTemplate = processTemplate(templateContent, sampleData);
+      
+      return (
+        <div 
+          className="template-content"
+          dangerouslySetInnerHTML={{ __html: processedTemplate }}
+        />
+      );
+    }
+
     if (loading) {
       return (
         <div className="flex items-center justify-center p-8">

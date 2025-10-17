@@ -6,6 +6,7 @@ import { EditorCanvas } from './EditorCanvas';
 import { EditorFooter } from './EditorFooter';
 import { LeftPanel } from '../panels/LeftPanel/LeftPanel';
 import { RightPanel } from '../panels/RightPanel/RightPanel';
+import { usePageBuilderContext } from '../PageBuilderProvider';
 
 interface FullScreenLayoutProps {
   editorMode: 'visual' | 'code';
@@ -23,7 +24,9 @@ export function FullScreenLayout({
   const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
-  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  
+  // Get block selection from context
+  const { handleSelectBlock, selectedBlockId } = usePageBuilderContext();
 
   return (
     <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">
@@ -56,14 +59,13 @@ export function FullScreenLayout({
             editorMode={editorMode}
             device={device}
             selectedBlockId={selectedBlockId}
-            onSelectBlock={setSelectedBlockId}
+            onSelectBlock={handleSelectBlock}
           />
         </div>
 
         {/* Right Panel - Style & Settings */}
         {rightPanelOpen && (
           <RightPanel
-            selectedBlockId={selectedBlockId}
             device={device}
             onClose={() => setRightPanelOpen(false)}
           />
