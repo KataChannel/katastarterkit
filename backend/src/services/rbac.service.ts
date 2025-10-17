@@ -338,8 +338,8 @@ export class RbacService {
         where: { roleId: input.roleId },
       });
 
-      // Assign new permissions
-      if (input.permissionIds.length > 0) {
+      // Assign new permissions - with safety check
+      if (input.permissionIds && input.permissionIds.length > 0) {
         await tx.rolePermission.createMany({
           data: input.permissionIds.map((permId) => ({
             roleId: input.roleId,

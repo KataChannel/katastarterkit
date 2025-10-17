@@ -203,6 +203,11 @@ export class PageFiltersInput {
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
+  search?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
   title?: string;
 
   @Field(() => String, { nullable: true })

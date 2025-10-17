@@ -85,6 +85,14 @@ export class PageService {
 
     const where: any = {};
     
+    // Search across title and slug
+    if (filters?.search) {
+      where.OR = [
+        { title: { contains: filters.search, mode: 'insensitive' } },
+        { slug: { contains: filters.search, mode: 'insensitive' } }
+      ];
+    }
+    
     if (filters?.title) {
       where.title = { contains: filters.title, mode: 'insensitive' };
     }

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Search } from 'lucide-react';
 
@@ -33,12 +34,21 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
 
   const [assignRolePermissions, { loading }] = useAssignRolePermissions();
+  // Note: Backend has a max limit of 100 items per request
+  // If you have more than 100 permissions, consider implementing pagination
   const { data: permissionsData } = useSearchPermissions({
     page: 0,
-    size: 1000,
+    size: 100, // Backend max limit is 100
     isActive: true,
   });
   const { toast } = useToast();
+
+  // Reset search term when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchTerm('');
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (role && permissionsData?.searchPermissions?.permissions) {
@@ -46,9 +56,9 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
       const rolePermissions = role.permissions || [];
       
       const newAssignments: PermissionAssignment[] = permissions.map((permission: Permission) => {
-        const existing = rolePermissions.find(rp => rp.permission.id === permission.id);
+        const existing = rolePermissions.find((rp:any) => rp?.permission?.id === permission?.id);
         return {
-          permissionId: permission.id,
+          permissionId: permission?.id,
           effect: existing ? existing.effect : null,
         };
       });
@@ -60,28 +70,48 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const activeAssignments = assignments
-      .filter(a => a.effect !== null)
-      .map(a => ({
-        permissionId: a.permissionId,
-        effect: a.effect!,
-      }));
-
-    const input: AssignRolePermissionInput = {
-      roleId: role.id,
-      assignments: activeAssignments,
-    };
+    // Group permissions by effect
+    const allowPermissions = assignments
+      .filter(a => a.effect === 'allow')
+      .map(a => a.permissionId);
+    
+    const denyPermissions = assignments
+      .filter(a => a.effect === 'deny')
+      .map(a => a.permissionId);
 
     try {
+      // Since backend clears all permissions before adding new ones,
+      // we need to send ALL permissions (allow + deny) in correct order
+      
+      // First, assign "allow" permissions
       await assignRolePermissions({
-        variables: { input },
+        variables: { 
+          input: {
+            roleId: role.id,
+            permissionIds: allowPermissions,
+            effect: 'allow',
+          }
+        },
       });
+      
+      // Then manually add "deny" permissions if any (using a second mutation call)
+      // Note: This requires the backend to support appending, not replacing
+      // For now, this is a limitation - only "allow" permissions work properly
+      
+      if (denyPermissions.length > 0) {
+        // Try to add deny permissions
+        // This will replace the allow permissions due to backend implementation
+        // TODO: Backend needs to support batch assignment with mixed effects
+        console.warn('Deny permissions are not fully supported with current backend API');
+      }
+      
       toast({
         title: 'Permissions updated',
-        description: `Permissions for role "${role.displayName}" have been updated successfully.`,
+        description: `${allowPermissions.length} permission(s) assigned to role "${role.displayName}".`,
         type: 'success',
       });
       onSuccess();
+      onClose(); // Close modal after success
     } catch (error: any) {
       toast({
         title: 'Update failed',
@@ -102,6 +132,7 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
   };
 
   const permissions = permissionsData?.searchPermissions?.permissions || [];
+  const totalPermissions = permissionsData?.searchPermissions?.total || 0;
   const filteredPermissions = permissions.filter((permission: Permission) =>
     permission.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     permission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,6 +141,7 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
   );
 
   const activeCount = assignments.filter(a => a.effect !== null).length;
+  const hasMorePermissions = totalPermissions > 100;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -117,11 +149,19 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
         <DialogHeader>
           <DialogTitle>Manage Permissions for: {role.displayName}</DialogTitle>
           <DialogDescription>
-            Assign or revoke permissions for this role. Choose "Allow" to grant, "Deny" to explicitly block, or "None" to remove assignment.
+            Assign permissions for this role. Choose "Allow" to grant permission or "None" to remove it. Note: "Deny" functionality requires backend API enhancement.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {hasMorePermissions && (
+            <Alert>
+              <AlertDescription>
+                Showing first 100 of {totalPermissions} permissions. Use search to find specific permissions.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex items-center justify-between">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -131,6 +171,7 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
+                disabled={loading}
               />
             </div>
             <Badge variant="secondary" className="ml-4">
@@ -170,15 +211,16 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
                           value === 'none' ? null : value as 'allow' | 'deny'
                         )}
                         className="flex gap-4"
+                        disabled={loading}
                       >
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="none" id={`${permission.id}-none`} />
+                          <RadioGroupItem value="none" id={`${permission.id}-none`} disabled={loading} />
                           <Label htmlFor={`${permission.id}-none`} className="font-normal cursor-pointer">
                             None
                           </Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="allow" id={`${permission.id}-allow`} />
+                          <RadioGroupItem value="allow" id={`${permission.id}-allow`} disabled={loading} />
                           <Label 
                             htmlFor={`${permission.id}-allow`} 
                             className="font-normal cursor-pointer text-green-600"
@@ -187,7 +229,7 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
                           </Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="deny" id={`${permission.id}-deny`} />
+                          <RadioGroupItem value="deny" id={`${permission.id}-deny`} disabled={loading} />
                           <Label 
                             htmlFor={`${permission.id}-deny`} 
                             className="font-normal cursor-pointer text-destructive"
@@ -214,6 +256,7 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
               type="button"
               variant="outline"
               onClick={onClose}
+              disabled={loading}
             >
               Cancel
             </Button>

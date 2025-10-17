@@ -1,5 +1,5 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsOptional, IsString, IsBoolean, IsUUID, IsEnum, IsInt, Min, Max, IsJSON } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsUUID, IsEnum, IsInt, Min, Max, IsJSON, IsArray, ArrayMinSize } from 'class-validator';
 import { GraphQLJSON } from 'graphql-type-json';
 
 // Permission Inputs
@@ -248,6 +248,8 @@ export class AssignRolePermissionInput {
   roleId: string;
 
   @Field(() => [String])
+  @IsArray()
+  @ArrayMinSize(0)
   permissionIds: string[];
 
   @Field({ defaultValue: 'allow' })

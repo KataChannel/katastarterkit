@@ -47,7 +47,8 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
   const { toast } = useToast();
   const { data: userRolePermissions, loading: userLoading, refetch: refetchUser } = useGetUserRolePermissions(user?.id);
   const { data: rolesData } = useSearchRoles({ page: 0, size: 100, isActive: true });
-  const { data: permissionsData } = useSearchPermissions({ page: 0, size: 1000, isActive: true });
+  // Note: Backend has a max limit of 100 items per request
+  const { data: permissionsData } = useSearchPermissions({ page: 0, size: 100, isActive: true });
   
   const [assignUserRoles, { loading: assigningRoles }] = useAssignUserRoles();
   const [assignUserPermissions, { loading: assigningPermissions }] = useAssignUserPermissions();
