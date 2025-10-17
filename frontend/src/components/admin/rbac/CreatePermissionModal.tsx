@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
 import { useCreatePermission } from '../../../hooks/useRbac';
 import { CreatePermissionInput } from '../../../types/rbac.types';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreatePermissionModalProps {
   isOpen: boolean;
@@ -25,6 +31,7 @@ const CreatePermissionModal: React.FC<CreatePermissionModalProps> = ({
   });
 
   const [createPermission, { loading }] = useCreatePermission();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,13 +45,20 @@ const CreatePermissionModal: React.FC<CreatePermissionModalProps> = ({
           },
         },
       });
+      toast({
+        title: 'Permission created',
+        description: `Permission "${formData.displayName}" has been created successfully.`,
+        type: 'success',
+      });
       onSuccess();
-    } catch (error) {
-      console.error('Create permission failed:', error);
+    } catch (error: any) {
+      toast({
+        title: 'Create failed',
+        description: error.message || 'Failed to create permission',
+        type: 'error',
+      });
     }
   };
-
-  if (!isOpen) return null;
 
   const categories = [
     'general',
@@ -58,165 +72,135 @@ const CreatePermissionModal: React.FC<CreatePermissionModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Create New Permission</DialogTitle>
+          <DialogDescription>
+            Define a new permission for the RBAC system. Use the format resource:action:scope for the permission name.
+          </DialogDescription>
+        </DialogHeader>
 
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
-          &#8203;
-        </span>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">
+                Permission Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., user:read:own"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Use the format: resource:action:scope
+              </p>
+            </div>
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <form onSubmit={handleSubmit}>
-            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Create New Permission</h3>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-6 w-6" />
-                </button>
+            <div>
+              <Label htmlFor="displayName">
+                Display Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="displayName"
+                required
+                value={formData.displayName}
+                onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
+                placeholder="e.g., Read Own User Data"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                rows={3}
+                value={formData.description || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe what this permission allows"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="resource">
+                  Resource <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="resource"
+                  required
+                  value={formData.resource}
+                  onChange={(e) => setFormData(prev => ({ ...prev, resource: e.target.value }))}
+                  placeholder="e.g., user, post, comment"
+                />
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Permission Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="e.g., user:read:own"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
-                    Display Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="displayName"
-                    required
-                    value={formData.displayName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="e.g., Read Own User Data"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    rows={3}
-                    value={formData.description || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="Describe what this permission allows"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="resource" className="block text-sm font-medium text-gray-700">
-                      Resource *
-                    </label>
-                    <input
-                      type="text"
-                      id="resource"
-                      required
-                      value={formData.resource}
-                      onChange={(e) => setFormData(prev => ({ ...prev, resource: e.target.value }))}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      placeholder="e.g., user, post, comment"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="action" className="block text-sm font-medium text-gray-700">
-                      Action *
-                    </label>
-                    <input
-                      type="text"
-                      id="action"
-                      required
-                      value={formData.action}
-                      onChange={(e) => setFormData(prev => ({ ...prev, action: e.target.value }))}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      placeholder="e.g., read, write, delete"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="scope" className="block text-sm font-medium text-gray-700">
-                    Scope
-                  </label>
-                  <input
-                    type="text"
-                    id="scope"
-                    value={formData.scope || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, scope: e.target.value }))}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="e.g., own, all, team (optional)"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Optional scope qualifier for the permission
-                  </p>
-                </div>
-
-                <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                    Category *
-                  </label>
-                  <select
-                    id="category"
-                    required
-                    value={formData.category || 'general'}
-                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  >
-                    {categories.map(category => (
-                      <option key={category} value={category}>
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <Label htmlFor="action">
+                  Action <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="action"
+                  required
+                  value={formData.action}
+                  onChange={(e) => setFormData(prev => ({ ...prev, action: e.target.value }))}
+                  placeholder="e.g., read, write, delete"
+                />
               </div>
             </div>
 
-            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-              >
-                {loading ? 'Creating...' : 'Create Permission'}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Cancel
-              </button>
+            <div>
+              <Label htmlFor="scope">Scope</Label>
+              <Input
+                id="scope"
+                value={formData.scope || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, scope: e.target.value }))}
+                placeholder="e.g., own, all, team (optional)"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Optional scope qualifier for the permission
+              </p>
             </div>
-          </form>
-        </div>
-      </div>
-    </div>
+
+            <div>
+              <Label htmlFor="category">
+                Category <span className="text-destructive">*</span>
+              </Label>
+              <Select
+                value={formData.category || 'general'}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Creating...' : 'Create Permission'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

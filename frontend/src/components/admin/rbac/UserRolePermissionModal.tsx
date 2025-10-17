@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { XMarkIcon, UserIcon, ShieldCheckIcon, KeyIcon } from '@heroicons/react/24/outline';
-import { Tab } from '@headlessui/react';
 import { 
   useGetUserRolePermissions, 
   useAssignUserRoles, 
@@ -14,10 +12,17 @@ import {
   Role,
   Permission
 } from '../../../types/rbac.types';
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { Shield, Key, CheckCircle2, Calendar, User } from 'lucide-react';
 
 interface UserRolePermissionModalProps {
   isOpen: boolean;
@@ -30,7 +35,6 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
   user,
   onClose,
 }) => {
-  const [selectedTab, setSelectedTab] = useState(0);
   const [roleAssignments, setRoleAssignments] = useState<Array<{
     roleId: string;
     effect: 'allow' | 'deny' | null;
@@ -40,6 +44,7 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
     effect: 'allow' | 'deny' | null;
   }>>([]);
 
+  const { toast } = useToast();
   const { data: userRolePermissions, loading: userLoading, refetch: refetchUser } = useGetUserRolePermissions(user?.id);
   const { data: rolesData } = useSearchRoles({ page: 0, size: 100, isActive: true });
   const { data: permissionsData } = useSearchPermissions({ page: 0, size: 1000, isActive: true });
@@ -113,9 +118,18 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
 
     try {
       await assignUserRoles({ variables: { input } });
+      toast({
+        title: 'Roles updated',
+        description: `Role assignments for ${user.displayName || user.username} have been updated successfully.`,
+        type: 'success',
+      });
       refetchUser();
-    } catch (error) {
-      console.error('Failed to assign user roles:', error);
+    } catch (error: any) {
+      toast({
+        title: 'Update failed',
+        description: error.message || 'Failed to update role assignments',
+        type: 'error',
+      });
     }
   };
 
@@ -134,337 +148,309 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
 
     try {
       await assignUserPermissions({ variables: { input } });
+      toast({
+        title: 'Permissions updated',
+        description: `Permission assignments for ${user.displayName || user.username} have been updated successfully.`,
+        type: 'success',
+      });
       refetchUser();
-    } catch (error) {
-      console.error('Failed to assign user permissions:', error);
+    } catch (error: any) {
+      toast({
+        title: 'Update failed',
+        description: error.message || 'Failed to update permission assignments',
+        type: 'error',
+      });
     }
   };
-
-  if (!isOpen) return null;
 
   const summary = userRolePermissions?.getUserRolePermissions?.summary;
   const effectivePermissions = userRolePermissions?.getUserRolePermissions?.effectivePermissions || [];
 
+  const roleActiveCount = roleAssignments.filter(ra => ra.effect !== null).length;
+  const permissionActiveCount = permissionAssignments.filter(pa => pa.effect !== null).length;
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
-
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
-          &#8203;
-        </span>
-
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0 h-12 w-12">
-                  {user.avatar ? (
-                    <img
-                      className="h-12 w-12 rounded-full"
-                      src={user.avatar}
-                      alt={user.displayName || user.username}
-                    />
-                  ) : (
-                    <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
-                      <UserIcon className="h-6 w-6 text-gray-600" />
-                    </div>
-                  )}
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {user.displayName || user.username}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500">{user.email}</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-6xl max-h-[90vh] p-0">
+        <DialogHeader className="p-6 pb-0">
+          <div className="flex items-center gap-4 mb-4">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={user?.avatar} alt={user?.displayName || user?.username} />
+              <AvatarFallback>
+                <User className="h-6 w-6" />
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <DialogTitle>{user?.displayName || user?.username}</DialogTitle>
+              <DialogDescription>{user?.email}</DialogDescription>
             </div>
+          </div>
 
-            {/* Summary Stats */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <div className="text-center p-3 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-semibold text-blue-600">
+          {/* Summary Stats */}
+          <div className="grid grid-cols-4 gap-4 mt-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Roles
+                </CardDescription>
+                <CardTitle className="text-2xl text-primary">
                   {summary?.totalRoleAssignments || 0}
-                </div>
-                <div className="text-sm text-gray-600">Roles</div>
-              </div>
-              <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="text-2xl font-semibold text-green-600">
+                </CardTitle>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription className="flex items-center gap-2">
+                  <Key className="h-4 w-4" />
+                  Direct Permissions
+                </CardDescription>
+                <CardTitle className="text-2xl text-green-600">
                   {summary?.totalDirectPermissions || 0}
-                </div>
-                <div className="text-sm text-gray-600">Direct Permissions</div>
-              </div>
-              <div className="text-center p-3 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-semibold text-purple-600">
+                </CardTitle>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Total Permissions
+                </CardDescription>
+                <CardTitle className="text-2xl text-purple-600">
                   {summary?.totalEffectivePermissions || 0}
-                </div>
-                <div className="text-sm text-gray-600">Total Permissions</div>
-              </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-sm text-gray-600">Last Updated</div>
-                <div className="text-sm font-medium">
+                </CardTitle>
+              </CardHeader>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Last Updated
+                </CardDescription>
+                <CardTitle className="text-sm">
                   {summary?.lastUpdated ? new Date(summary.lastUpdated).toLocaleDateString() : 'Never'}
-                </div>
-              </div>
-            </div>
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
+        </DialogHeader>
 
-            {/* Tabs */}
-            <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
-              <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1 mb-6">
-                <Tab
-                  className={({ selected }) =>
-                    classNames(
-                      'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
-                      'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
-                      selected
-                        ? 'bg-white text-blue-700 shadow'
-                        : 'text-blue-600 hover:bg-white/[0.12] hover:text-blue-500'
-                    )
-                  }
-                >
-                  Role Assignments
-                </Tab>
-                <Tab
-                  className={({ selected }) =>
-                    classNames(
-                      'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
-                      'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
-                      selected
-                        ? 'bg-white text-blue-700 shadow'
-                        : 'text-blue-600 hover:bg-white/[0.12] hover:text-blue-500'
-                    )
-                  }
-                >
-                  Permission Assignments
-                </Tab>
-                <Tab
-                  className={({ selected }) =>
-                    classNames(
-                      'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
-                      'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
-                      selected
-                        ? 'bg-white text-blue-700 shadow'
-                        : 'text-blue-600 hover:bg-white/[0.12] hover:text-blue-500'
-                    )
-                  }
-                >
-                  Effective Permissions
-                </Tab>
-              </Tab.List>
-              
-              <Tab.Panels>
-                {/* Role Assignments Panel */}
-                <Tab.Panel className="space-y-4">
-                  <div className="max-h-96 overflow-y-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50 sticky top-0">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Role
-                          </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Assignment
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {roles.map((role: Role) => {
-                          const assignment = roleAssignments.find(ra => ra.roleId === role.id);
-                          return (
-                            <tr key={role.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4">
-                                <div className="flex items-center">
-                                  <ShieldCheckIcon className="h-5 w-5 text-blue-500 mr-3" />
-                                  <div>
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {role.displayName}
-                                    </div>
-                                    <div className="text-sm text-gray-500">{role.name}</div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                <div className="flex justify-center space-x-4">
-                                  <label className="inline-flex items-center">
-                                    <input
-                                      type="radio"
-                                      name={`role-${role.id}`}
-                                      checked={assignment?.effect === null}
-                                      onChange={() => handleRoleChange(role.id, null)}
-                                      className="form-radio h-4 w-4 text-gray-600"
-                                    />
-                                    <span className="ml-2 text-sm text-gray-700">None</span>
-                                  </label>
-                                  <label className="inline-flex items-center">
-                                    <input
-                                      type="radio"
-                                      name={`role-${role.id}`}
-                                      checked={assignment?.effect === 'allow'}
-                                      onChange={() => handleRoleChange(role.id, 'allow')}
-                                      className="form-radio h-4 w-4 text-green-600"
-                                    />
-                                    <span className="ml-2 text-sm text-green-700">Allow</span>
-                                  </label>
-                                  <label className="inline-flex items-center">
-                                    <input
-                                      type="radio"
-                                      name={`role-${role.id}`}
-                                      checked={assignment?.effect === 'deny'}
-                                      onChange={() => handleRoleChange(role.id, 'deny')}
-                                      className="form-radio h-4 w-4 text-red-600"
-                                    />
-                                    <span className="ml-2 text-sm text-red-700">Deny</span>
-                                  </label>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleSaveRoles}
-                      disabled={assigningRoles}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                    >
-                      {assigningRoles ? 'Saving...' : 'Save Role Assignments'}
-                    </button>
-                  </div>
-                </Tab.Panel>
+        <Tabs defaultValue="roles" className="px-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="roles">
+              Role Assignments
+              {roleActiveCount > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {roleActiveCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="permissions">
+              Permission Assignments
+              {permissionActiveCount > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {permissionActiveCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="effective">
+              Effective Permissions
+              <Badge variant="secondary" className="ml-2">
+                {effectivePermissions.length}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
 
-                {/* Permission Assignments Panel */}
-                <Tab.Panel className="space-y-4">
-                  <div className="max-h-96 overflow-y-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50 sticky top-0">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Permission
-                          </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Assignment
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {permissions.map((permission: Permission) => {
-                          const assignment = permissionAssignments.find(pa => pa.permissionId === permission.id);
-                          return (
-                            <tr key={permission.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4">
-                                <div className="flex items-center">
-                                  <KeyIcon className="h-5 w-5 text-green-500 mr-3" />
-                                  <div>
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {permission.displayName}
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                      {permission.resource}:{permission.action}
-                                      {permission.scope && `:${permission.scope}`}
-                                    </div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                <div className="flex justify-center space-x-4">
-                                  <label className="inline-flex items-center">
-                                    <input
-                                      type="radio"
-                                      name={`permission-${permission.id}`}
-                                      checked={assignment?.effect === null}
-                                      onChange={() => handlePermissionChange(permission.id, null)}
-                                      className="form-radio h-4 w-4 text-gray-600"
-                                    />
-                                    <span className="ml-2 text-sm text-gray-700">None</span>
-                                  </label>
-                                  <label className="inline-flex items-center">
-                                    <input
-                                      type="radio"
-                                      name={`permission-${permission.id}`}
-                                      checked={assignment?.effect === 'allow'}
-                                      onChange={() => handlePermissionChange(permission.id, 'allow')}
-                                      className="form-radio h-4 w-4 text-green-600"
-                                    />
-                                    <span className="ml-2 text-sm text-green-700">Allow</span>
-                                  </label>
-                                  <label className="inline-flex items-center">
-                                    <input
-                                      type="radio"
-                                      name={`permission-${permission.id}`}
-                                      checked={assignment?.effect === 'deny'}
-                                      onChange={() => handlePermissionChange(permission.id, 'deny')}
-                                      className="form-radio h-4 w-4 text-red-600"
-                                    />
-                                    <span className="ml-2 text-sm text-red-700">Deny</span>
-                                  </label>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleSavePermissions}
-                      disabled={assigningPermissions}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                    >
-                      {assigningPermissions ? 'Saving...' : 'Save Permission Assignments'}
-                    </button>
-                  </div>
-                </Tab.Panel>
-
-                {/* Effective Permissions Panel */}
-                <Tab.Panel>
-                  <div className="max-h-96 overflow-y-auto">
-                    {effectivePermissions.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        No effective permissions found
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                        {effectivePermissions.map((permission: string, index: number) => (
-                          <div
-                            key={index}
-                            className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700"
-                          >
-                            {permission}
+          {/* Roles Tab */}
+          <TabsContent value="roles" className="space-y-4">
+            <ScrollArea className="h-[400px] border rounded-lg">
+              <div className="divide-y">
+                {roles.map((role: Role) => {
+                  const assignment = roleAssignments.find(ra => ra.roleId === role.id);
+                  return (
+                    <div key={role.id} className="p-4 hover:bg-muted/50 transition-colors">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-primary" />
+                            <span className="font-medium">{role.displayName}</span>
+                            {role.isSystemRole && (
+                              <Badge variant="secondary" className="text-xs">System</Badge>
+                            )}
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Tab.Panel>
-              </Tab.Panels>
-            </Tab.Group>
-          </div>
+                          <div className="text-sm text-muted-foreground">{role.name}</div>
+                          {role.description && (
+                            <div className="text-sm text-muted-foreground">{role.description}</div>
+                          )}
+                        </div>
 
-          <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+                        <RadioGroup
+                          value={assignment?.effect || 'none'}
+                          onValueChange={(value) => handleRoleChange(
+                            role.id,
+                            value === 'none' ? null : value as 'allow' | 'deny'
+                          )}
+                          className="flex gap-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="none" id={`role-${role.id}-none`} />
+                            <Label htmlFor={`role-${role.id}-none`} className="font-normal cursor-pointer">
+                              None
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="allow" id={`role-${role.id}-allow`} />
+                            <Label 
+                              htmlFor={`role-${role.id}-allow`} 
+                              className="font-normal cursor-pointer text-green-600"
+                            >
+                              Assign
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="deny" id={`role-${role.id}-deny`} />
+                            <Label 
+                              htmlFor={`role-${role.id}-deny`} 
+                              className="font-normal cursor-pointer text-destructive"
+                            >
+                              Deny
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+
+            <div className="flex justify-end pt-4 pb-6">
+              <Button onClick={handleSaveRoles} disabled={assigningRoles}>
+                {assigningRoles ? 'Saving...' : 'Save Role Assignments'}
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* Permissions Tab */}
+          <TabsContent value="permissions" className="space-y-4">
+            <ScrollArea className="h-[400px] border rounded-lg">
+              <div className="divide-y">
+                {permissions.map((permission: Permission) => {
+                  const assignment = permissionAssignments.find(pa => pa.permissionId === permission.id);
+                  return (
+                    <div key={permission.id} className="p-4 hover:bg-muted/50 transition-colors">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Key className="h-4 w-4 text-green-600" />
+                            <span className="font-medium">{permission.displayName}</span>
+                          </div>
+                          {permission.description && (
+                            <div className="text-sm text-muted-foreground">{permission.description}</div>
+                          )}
+                          <div className="flex items-center gap-2 text-sm">
+                            <code className="px-2 py-0.5 rounded bg-muted text-xs">
+                              {permission.resource}:{permission.action}
+                              {permission.scope && `:${permission.scope}`}
+                            </code>
+                            <Badge variant="outline" className="text-xs">
+                              {permission.category}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <RadioGroup
+                          value={assignment?.effect || 'none'}
+                          onValueChange={(value) => handlePermissionChange(
+                            permission.id,
+                            value === 'none' ? null : value as 'allow' | 'deny'
+                          )}
+                          className="flex gap-4"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="none" id={`perm-${permission.id}-none`} />
+                            <Label htmlFor={`perm-${permission.id}-none`} className="font-normal cursor-pointer">
+                              None
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="allow" id={`perm-${permission.id}-allow`} />
+                            <Label 
+                              htmlFor={`perm-${permission.id}-allow`} 
+                              className="font-normal cursor-pointer text-green-600"
+                            >
+                              Allow
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="deny" id={`perm-${permission.id}-deny`} />
+                            <Label 
+                              htmlFor={`perm-${permission.id}-deny`} 
+                              className="font-normal cursor-pointer text-destructive"
+                            >
+                              Deny
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+
+            <div className="flex justify-end pt-4 pb-6">
+              <Button onClick={handleSavePermissions} disabled={assigningPermissions}>
+                {assigningPermissions ? 'Saving...' : 'Save Permission Assignments'}
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* Effective Permissions Tab */}
+          <TabsContent value="effective" className="space-y-4">
+            <ScrollArea className="h-[450px] border rounded-lg">
+              <div className="divide-y">
+                {effectivePermissions.map((ep: any) => (
+                  <div key={ep.permission.id} className="p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 space-y-1">
+                        <div className="font-medium">{ep.permission.displayName}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {ep.permission.resource}:{ep.permission.action}
+                          {ep.permission.scope && `:${ep.permission.scope}`}
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant={ep.effect === 'allow' ? 'default' : 'destructive'}>
+                            {ep.effect}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {ep.source}
+                          </Badge>
+                          {ep.fromRole && (
+                            <span className="text-xs text-muted-foreground">
+                              via role: {ep.fromRole.displayName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {effectivePermissions.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    No effective permissions found for this user.
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
   );
 };
 

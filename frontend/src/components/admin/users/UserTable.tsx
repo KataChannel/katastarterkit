@@ -36,6 +36,8 @@ import {
   Calendar,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { TablePagination } from './TablePagination';
+import { UserTableSkeleton } from './UserTableSkeleton';
 
 interface User {
   id: string;
@@ -149,23 +151,7 @@ export function UserTable({
   };
 
   if (loading) {
-    return (
-      <div className="space-y-3">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="animate-pulse">
-            <div className="flex items-center space-x-4 p-4 border rounded">
-              <div className="w-10 h-10 bg-gray-200 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-1/4" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
-              </div>
-              <div className="w-20 h-6 bg-gray-200 rounded" />
-              <div className="w-16 h-6 bg-gray-200 rounded" />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <UserTableSkeleton rows={5} />;
   }
 
   if (!users || users.length === 0) {
@@ -351,46 +337,13 @@ export function UserTable({
 
       {/* Pagination */}
       {data && data.totalPages > 1 && (
-        <div className="flex items-center justify-between border-t pt-4">
-          <div className="text-sm text-gray-600">
-            Showing {data.page * data.size + 1} to {Math.min((data.page + 1) * data.size, data.total)} of {data.total} users
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(data.page - 1)}
-              disabled={data.page === 0}
-            >
-              Previous
-            </Button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
-                const pageNum = data.page < 3 ? i : data.page - 2 + i;
-                if (pageNum >= data.totalPages) return null;
-                return (
-                  <Button
-                    key={pageNum}
-                    variant={pageNum === data.page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => onPageChange(pageNum)}
-                    className="w-8 h-8 p-0"
-                  >
-                    {pageNum + 1}
-                  </Button>
-                );
-              })}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(data.page + 1)}
-              disabled={data.page >= data.totalPages - 1}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
+        <TablePagination
+          currentPage={data.page}
+          totalPages={data.totalPages}
+          pageSize={data.size}
+          totalItems={data.total}
+          onPageChange={onPageChange}
+        />
       )}
     </div>
   );

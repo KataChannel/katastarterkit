@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
 import { useCreateRole, useSearchPermissions } from '../../../hooks/useRbac';
 import { CreateRoleInput } from '../../../types/rbac.types';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreateRoleModalProps {
   isOpen: boolean;
@@ -28,6 +35,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     size: 100,
     isActive: true,
   });
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,9 +46,18 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
           input: formData,
         },
       });
+      toast({
+        title: 'Role created',
+        description: `Role "${formData.displayName}" has been created successfully.`,
+        type: 'success',
+      });
       onSuccess();
-    } catch (error) {
-      console.error('Create role failed:', error);
+    } catch (error: any) {
+      toast({
+        title: 'Create failed',
+        description: error.message || 'Failed to create role',
+        type: 'error',
+      });
     }
   };
 
@@ -53,149 +70,114 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     }));
   };
 
-  if (!isOpen) return null;
-
   const permissions = permissionsData?.searchPermissions?.permissions || [];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create New Role</DialogTitle>
+          <DialogDescription>
+            Create a new role and assign permissions
+          </DialogDescription>
+        </DialogHeader>
 
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
-          &#8203;
-        </span>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">
+                Role Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., user_manager"
+              />
+            </div>
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <form onSubmit={handleSubmit}>
-            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Create New Role</h3>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
+            <div>
+              <Label htmlFor="displayName">
+                Display Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="displayName"
+                required
+                value={formData.displayName}
+                onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
+                placeholder="e.g., User Manager"
+              />
+            </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Role Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="e.g., user_manager"
-                  />
-                </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                rows={3}
+                value={formData.description || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe the role's purpose and responsibilities"
+              />
+            </div>
 
-                <div>
-                  <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
-                    Display Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="displayName"
-                    required
-                    value={formData.displayName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="e.g., User Manager"
-                  />
-                </div>
+            <div>
+              <Label htmlFor="priority">Priority</Label>
+              <Input
+                id="priority"
+                type="number"
+                value={formData.priority}
+                onChange={(e) => setFormData(prev => ({ ...prev, priority: parseInt(e.target.value) || 0 }))}
+                placeholder="0"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Higher numbers have higher priority
+              </p>
+            </div>
 
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    rows={3}
-                    value={formData.description || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="Describe the role's purpose and responsibilities"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
-                    Priority
-                  </label>
-                  <input
-                    type="number"
-                    id="priority"
-                    value={formData.priority}
-                    onChange={(e) => setFormData(prev => ({ ...prev, priority: parseInt(e.target.value) || 0 }))}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    placeholder="0"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Higher numbers have higher priority
-                  </p>
-                </div>
-
-                {permissions.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Permissions
-                    </label>
-                    <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-md p-2">
-                      {permissions.map((permission: any) => (
-                        <div key={permission.id} className="flex items-center mb-2">
-                          <input
-                            type="checkbox"
-                            id={`permission-${permission.id}`}
-                            checked={formData.permissionIds?.includes(permission.id) || false}
-                            onChange={() => handlePermissionToggle(permission.id)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                          <label
-                            htmlFor={`permission-${permission.id}`}
-                            className="ml-2 text-sm text-gray-700"
-                          >
-                            {permission.displayName}
-                            <span className="text-xs text-gray-500 ml-1">
-                              ({permission.resource}:{permission.action})
-                            </span>
-                          </label>
-                        </div>
-                      ))}
-                    </div>
+            {permissions.length > 0 && (
+              <div>
+                <Label className="mb-2 block">Permissions</Label>
+                <ScrollArea className="h-48 border rounded-md p-3">
+                  <div className="space-y-3">
+                    {permissions.map((permission: any) => (
+                      <div key={permission.id} className="flex items-start space-x-2">
+                        <Checkbox
+                          id={`permission-${permission.id}`}
+                          checked={formData.permissionIds?.includes(permission.id) || false}
+                          onCheckedChange={() => handlePermissionToggle(permission.id)}
+                        />
+                        <Label
+                          htmlFor={`permission-${permission.id}`}
+                          className="text-sm font-normal cursor-pointer leading-tight"
+                        >
+                          <div>{permission.displayName}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {permission.resource}:{permission.action}
+                          </div>
+                        </Label>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </ScrollArea>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formData.permissionIds?.length || 0} permissions selected
+                </p>
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-              >
-                {loading ? 'Creating...' : 'Create Role'}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Creating...' : 'Create Role'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

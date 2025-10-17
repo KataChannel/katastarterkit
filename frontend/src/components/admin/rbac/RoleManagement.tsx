@@ -2,6 +2,16 @@ import React, { useState } from 'react';
 import { Plus, Pencil, Trash2, Users, ShieldCheck } from 'lucide-react';
 import { useSearchRoles, useDeleteRole } from '../../../hooks/useRbac';
 import { Role, RoleSearchInput } from '../../../types/rbac.types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
 import AssignRolePermissionsModal from './AssignRolePermissionsModal';
 import CreateRoleModal from './CreateRoleModal';
 import EditRoleModal from './EditRoleModal';
@@ -25,6 +35,7 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
 
   const { data, loading, error, refetch } = useSearchRoles(searchInput);
   const [deleteRole] = useDeleteRole();
+  const { toast } = useToast();
 
   const handleSearch = (search: string) => {
     setSearchInput(prev => ({ ...prev, search, page: 0 }));
@@ -36,16 +47,29 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
 
   const handleDelete = async (role: Role) => {
     if (role.isSystemRole) {
-      alert('Cannot delete system role');
+      toast({
+        title: 'Cannot delete system role',
+        description: 'System roles cannot be deleted for security reasons.',
+        type: 'error',
+      });
       return;
     }
 
     if (window.confirm(`Are you sure you want to delete role "${role.displayName}"?`)) {
       try {
         await deleteRole({ variables: { id: role.id } });
+        toast({
+          title: 'Role deleted',
+          description: `Role "${role.displayName}" has been deleted successfully.`,
+          type: 'success',
+        });
         refetch();
-      } catch (error) {
-        console.error('Delete failed:', error);
+      } catch (error: any) {
+        toast({
+          title: 'Delete failed',
+          description: error.message || 'Failed to delete role',
+          type: 'error',
+        });
       }
     }
   };
@@ -67,19 +91,33 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
 
   if (loading) {
     return (
-      <div className={`flex justify-center items-center p-8 ${className}`}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <Card className={className}>
+        <CardHeader>
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-96" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center space-x-4">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="space-y-2 flex-1">
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className={`bg-red-50 border border-red-200 rounded-md p-4 ${className}`}>
-        <div className="text-red-800">
+      <Alert className={`border-red-200 bg-red-50 text-red-800 ${className}`}>
+        <AlertDescription>
           Error loading roles: {error.message}
-        </div>
-      </div>
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -88,212 +126,202 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
   const totalPages = data?.searchRoles?.totalPages || 0;
 
   return (
-    <div className={`bg-white shadow rounded-lg ${className}`}>
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200">
+    <Card className={className}>
+      <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-medium text-gray-900">Role Management</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <CardTitle>Role Management</CardTitle>
+            <CardDescription>
               Manage system roles and their permissions
-            </p>
+            </CardDescription>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <Plus className="-ml-1 mr-2 h-5 w-5" />
+          <Button onClick={() => setShowCreateModal(true)}>
+            <Plus className="mr-2 h-4 w-4" />
             New Role
-          </button>
+          </Button>
         </div>
-      </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
 
-      {/* Search */}
-      <div className="px-6 py-4 border-b border-gray-200">
+        {/* Search and Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <input
+            <Input
               type="text"
               placeholder="Search roles..."
               value={searchInput.search || ''}
               onChange={(e) => handleSearch(e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             />
           </div>
           <div className="flex gap-2">
-            <select
+            <Select
               value={searchInput.isActive?.toString() || ''}
-              onChange={(e) => setSearchInput(prev => ({ 
+              onValueChange={(value) => setSearchInput(prev => ({ 
                 ...prev, 
-                isActive: e.target.value === '' ? undefined : e.target.value === 'true',
+                isActive: value === '' ? undefined : value === 'true',
                 page: 0 
               }))}
-              className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             >
-              <option value="">All Status</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
-            <select
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="true">Active</SelectItem>
+                <SelectItem value="false">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
               value={searchInput.isSystemRole?.toString() || ''}
-              onChange={(e) => setSearchInput(prev => ({ 
+              onValueChange={(value) => setSearchInput(prev => ({ 
                 ...prev, 
-                isSystemRole: e.target.value === '' ? undefined : e.target.value === 'true',
+                isSystemRole: value === '' ? undefined : value === 'true',
                 page: 0 
               }))}
-              className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             >
-              <option value="">All Types</option>
-              <option value="true">System</option>
-              <option value="false">Custom</option>
-            </select>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="true">System</SelectItem>
+                <SelectItem value="false">Custom</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Role
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Permissions
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Priority
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Created
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {roles.map((role: Role) => (
-              <tr key={role.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10">
-                      <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                        <Users className="h-5 w-5 text-gray-600" />
+        {/* Table */}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Role</TableHead>
+                <TableHead>Permissions</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Priority</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {roles.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    No roles found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                roles.map((role: Role) => (
+                  <TableRow key={role.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarFallback className="bg-muted">
+                            <Users className="h-5 w-5 text-muted-foreground" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{role.displayName}</div>
+                          <div className="text-sm text-muted-foreground flex items-center gap-2">
+                            {role.name}
+                            {role.isSystemRole && (
+                              <Badge variant="secondary" className="text-xs">System</Badge>
+                            )}
+                          </div>
+                          {role.description && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {role.description}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {role.displayName}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {role.name}
-                        {role.isSystemRole && (
-                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                            System
-                          </span>
-                        )}
-                      </div>
-                      {role.description && (
-                        <div className="text-xs text-gray-400 mt-1">
-                          {role.description}
+                    </TableCell>
+                    <TableCell>
+                      <div>{role.permissions?.length || 0} permissions</div>
+                      {role.children && role.children.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          {role.children.length} child roles
                         </div>
                       )}
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {role.permissions?.length || 0} permissions
-                  </div>
-                  {role.children && role.children.length > 0 && (
-                    <div className="text-xs text-gray-500">
-                      {role.children.length} child roles
-                    </div>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    role.isActive 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {role.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {role.priority}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {new Date(role.createdAt).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => setAssigningRole(role)}
-                      className="text-blue-600 hover:text-blue-900"
-                      title="Manage Permissions"
-                    >
-                      <ShieldCheck className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => setEditingRole(role)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                      title="Edit Role"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    {!role.isSystemRole && (
-                      <button
-                        onClick={() => handleDelete(role)}
-                        className="text-red-600 hover:text-red-900"
-                        title="Delete Role"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={role.isActive ? 'default' : 'destructive'}>
+                        {role.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{role.priority}</TableCell>
+                    <TableCell>{new Date(role.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setAssigningRole(role)}
+                          title="Manage Permissions"
+                        >
+                          <ShieldCheck className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setEditingRole(role)}
+                          title="Edit Role"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        {!role.isSystemRole && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(role)}
+                            title="Delete Role"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-700">
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-muted-foreground">
               Showing {(searchInput.page || 0) * (searchInput.size || 20) + 1} to{' '}
               {Math.min(((searchInput.page || 0) + 1) * (searchInput.size || 20), total)} of {total} results
             </div>
-            <div className="flex gap-2">
-              <button
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => handlePageChange((searchInput.page || 0) - 1)}
                 disabled={(searchInput.page || 0) <= 0}
-                className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Previous
-              </button>
-              <span className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-md">
+              </Button>
+              <div className="text-sm font-medium px-3 py-1 bg-muted rounded-md">
                 {(searchInput.page || 0) + 1} / {totalPages}
-              </span>
-              <button
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => handlePageChange((searchInput.page || 0) + 1)}
                 disabled={(searchInput.page || 0) >= totalPages - 1}
-                className="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 Next
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+      </CardContent>
 
       {/* Modals */}
       {showCreateModal && (
@@ -321,7 +349,7 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
           onSuccess={handleAssignSuccess}
         />
       )}
-    </div>
+    </Card>
   );
 };
 

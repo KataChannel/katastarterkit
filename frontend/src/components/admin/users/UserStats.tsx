@@ -112,20 +112,23 @@ export function UserStats({ data, loading }: UserStatsProps) {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title}>
+            <Card 
+              key={stat.title} 
+              className="transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer"
+            >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
                 </CardTitle>
-                <div className={`p-2 rounded-full ${stat.bgColor}`}>
+                <div className={`p-2 rounded-full ${stat.bgColor} transition-transform duration-200 hover:scale-110`}>
                   <Icon className={`h-4 w-4 ${stat.color}`} />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">
-                  {stat.value}
+                <div className="text-2xl font-bold">
+                  {stat.value.toLocaleString()}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {stat.description}
                 </p>
               </CardContent>

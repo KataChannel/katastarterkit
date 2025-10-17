@@ -19,6 +19,8 @@ export { AccessDenied } from './AccessDenied';
 export { UserStats } from './UserStats';
 export { UserFilters } from './UserFilters';
 export { UserTable } from './UserTable';
+export { UserTableSkeleton } from './UserTableSkeleton';
+export { TablePagination } from './TablePagination';
 export { BulkActions } from './BulkActions';
 export { CreateUserModal } from './CreateUserModal';
 export { EditUserModal } from './EditUserModal';

@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
 import { useAssignRolePermissions, useSearchPermissions } from '../../../hooks/useRbac';
 import { Role, Permission, AssignRolePermissionInput } from '../../../types/rbac.types';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import { Search } from 'lucide-react';
 
 interface AssignRolePermissionsModalProps {
   isOpen: boolean;
@@ -30,6 +38,7 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
     size: 1000,
     isActive: true,
   });
+  const { toast } = useToast();
 
   useEffect(() => {
     if (role && permissionsData?.searchPermissions?.permissions) {
@@ -67,9 +76,18 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
       await assignRolePermissions({
         variables: { input },
       });
+      toast({
+        title: 'Permissions updated',
+        description: `Permissions for role "${role.displayName}" have been updated successfully.`,
+        type: 'success',
+      });
       onSuccess();
-    } catch (error) {
-      console.error('Assign role permissions failed:', error);
+    } catch (error: any) {
+      toast({
+        title: 'Update failed',
+        description: error.message || 'Failed to update permissions',
+        type: 'error',
+      });
     }
   };
 
@@ -83,8 +101,6 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
     );
   };
 
-  if (!isOpen) return null;
-
   const permissions = permissionsData?.searchPermissions?.permissions || [];
   const filteredPermissions = permissions.filter((permission: Permission) =>
     permission.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -93,161 +109,121 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
     permission.action.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const activeCount = assignments.filter(a => a.effect !== null).length;
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-          <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>Manage Permissions for: {role.displayName}</DialogTitle>
+          <DialogDescription>
+            Assign or revoke permissions for this role. Choose "Allow" to grant, "Deny" to explicitly block, or "None" to remove assignment.
+          </DialogDescription>
+        </DialogHeader>
 
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
-          &#8203;
-        </span>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search permissions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Badge variant="secondary" className="ml-4">
+              {activeCount} assigned
+            </Badge>
+          </div>
 
-        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-          <form onSubmit={handleSubmit}>
-            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Manage Permissions for: {role.displayName}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Assign or revoke permissions for this role
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
+          <ScrollArea className="h-[400px] border rounded-lg">
+            <div className="divide-y">
+              {filteredPermissions.map((permission: Permission) => {
+                const assignment = assignments.find(a => a.permissionId === permission.id);
+                return (
+                  <div key={permission.id} className="p-4 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 space-y-1">
+                        <div className="font-medium">{permission.displayName}</div>
+                        {permission.description && (
+                          <div className="text-sm text-muted-foreground">
+                            {permission.description}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-sm">
+                          <code className="px-2 py-0.5 rounded bg-muted text-xs">
+                            {permission.resource}:{permission.action}
+                            {permission.scope && `:${permission.scope}`}
+                          </code>
+                          <Badge variant="outline" className="text-xs">
+                            {permission.category}
+                          </Badge>
+                        </div>
+                      </div>
 
-              {/* Search */}
-              <div className="mb-4">
-                <input
-                  type="text"
-                  placeholder="Search permissions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                />
-              </div>
-
-              {/* Permissions Table */}
-              <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50 sticky top-0">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Permission
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Resource:Action
-                      </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Effect
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredPermissions.map((permission: Permission) => {
-                      const assignment = assignments.find(a => a.permissionId === permission.id);
-                      return (
-                        <tr key={permission.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4">
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {permission.displayName}
-                              </div>
-                              {permission.description && (
-                                <div className="text-sm text-gray-500">
-                                  {permission.description}
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">
-                              {permission.resource}:{permission.action}
-                              {permission.scope && (
-                                <span className="text-gray-500">:{permission.scope}</span>
-                              )}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              Category: {permission.category}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <div className="flex justify-center space-x-2">
-                              <label className="inline-flex items-center">
-                                <input
-                                  type="radio"
-                                  name={`permission-${permission.id}`}
-                                  checked={assignment?.effect === null}
-                                  onChange={() => handlePermissionChange(permission.id, null)}
-                                  className="form-radio h-4 w-4 text-gray-600"
-                                />
-                                <span className="ml-2 text-sm text-gray-700">None</span>
-                              </label>
-                              <label className="inline-flex items-center">
-                                <input
-                                  type="radio"
-                                  name={`permission-${permission.id}`}
-                                  checked={assignment?.effect === 'allow'}
-                                  onChange={() => handlePermissionChange(permission.id, 'allow')}
-                                  className="form-radio h-4 w-4 text-green-600"
-                                />
-                                <span className="ml-2 text-sm text-green-700">Allow</span>
-                              </label>
-                              <label className="inline-flex items-center">
-                                <input
-                                  type="radio"
-                                  name={`permission-${permission.id}`}
-                                  checked={assignment?.effect === 'deny'}
-                                  onChange={() => handlePermissionChange(permission.id, 'deny')}
-                                  className="form-radio h-4 w-4 text-red-600"
-                                />
-                                <span className="ml-2 text-sm text-red-700">Deny</span>
-                              </label>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                      <RadioGroup
+                        value={assignment?.effect || 'none'}
+                        onValueChange={(value) => handlePermissionChange(
+                          permission.id,
+                          value === 'none' ? null : value as 'allow' | 'deny'
+                        )}
+                        className="flex gap-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="none" id={`${permission.id}-none`} />
+                          <Label htmlFor={`${permission.id}-none`} className="font-normal cursor-pointer">
+                            None
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="allow" id={`${permission.id}-allow`} />
+                          <Label 
+                            htmlFor={`${permission.id}-allow`} 
+                            className="font-normal cursor-pointer text-green-600"
+                          >
+                            Allow
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="deny" id={`${permission.id}-deny`} />
+                          <Label 
+                            htmlFor={`${permission.id}-deny`} 
+                            className="font-normal cursor-pointer text-destructive"
+                          >
+                            Deny
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                  </div>
+                );
+              })}
 
               {filteredPermissions.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-12 text-muted-foreground">
                   No permissions found matching your search.
                 </div>
               )}
             </div>
+          </ScrollArea>
 
-            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-              >
-                {loading ? 'Saving...' : 'Save Permissions'}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Permissions'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
