@@ -15,7 +15,18 @@ import {
   Eye,
   Copy,
   Check,
+  X,
 } from 'lucide-react';
+import { usePageBuilderContext } from '../../PageBuilderProvider';
+import { BlockType } from '@/types/page-builder';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+
+interface TemplateBlock {
+  type: BlockType;
+  content: any;
+  style?: any;
+}
 
 interface TemplateConfig {
   id: string;
@@ -23,7 +34,8 @@ interface TemplateConfig {
   description: string;
   category: 'ecommerce' | 'productivity' | 'landing' | 'business' | 'marketing';
   preview: string;
-  blocks: number;
+  blockCount: number;
+  blocks: TemplateBlock[];
   color: string;
 }
 
@@ -35,8 +47,16 @@ const templates: TemplateConfig[] = [
     description: 'Responsive product showcase with 3-column layout',
     category: 'ecommerce',
     preview: '🛍️',
-    blocks: 6,
+    blockCount: 6,
     color: 'from-blue-500 to-cyan-500',
+    blocks: [
+      { type: BlockType.HERO, content: { title: 'Our Products', subtitle: 'Discover our latest collection', style: {} } },
+      { type: BlockType.GRID, content: { columns: 3, gap: '20px', style: {} } },
+      { type: BlockType.IMAGE, content: { src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400', alt: 'Product 1', style: {} } },
+      { type: BlockType.IMAGE, content: { src: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400', alt: 'Product 2', style: {} } },
+      { type: BlockType.IMAGE, content: { src: 'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=400', alt: 'Product 3', style: {} } },
+      { type: BlockType.BUTTON, content: { text: 'View All Products', link: '#', variant: 'primary', style: {} } },
+    ],
   },
   {
     id: 'category-showcase',
@@ -44,8 +64,14 @@ const templates: TemplateConfig[] = [
     description: 'Highlight product categories with images',
     category: 'ecommerce',
     preview: '🏪',
-    blocks: 4,
+    blockCount: 4,
     color: 'from-purple-500 to-pink-500',
+    blocks: [
+      { type: BlockType.TEXT, content: { content: '<h2>Shop by Category</h2>', style: {} } },
+      { type: BlockType.GRID, content: { columns: 2, gap: '16px', style: {} } },
+      { type: BlockType.IMAGE, content: { src: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400', alt: 'Category 1', style: {} } },
+      { type: BlockType.IMAGE, content: { src: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400', alt: 'Category 2', style: {} } },
+    ],
   },
 
   // Productivity Templates
@@ -55,8 +81,18 @@ const templates: TemplateConfig[] = [
     description: 'Kanban-style task management interface',
     category: 'productivity',
     preview: '✅',
-    blocks: 8,
+    blockCount: 8,
     color: 'from-green-500 to-emerald-500',
+    blocks: [
+      { type: BlockType.TEXT, content: { content: '<h1>Task Dashboard</h1>', style: {} } },
+      { type: BlockType.STATS, content: { title: 'Project Stats', stats: [{ label: 'Tasks', value: '24' }, { label: 'Completed', value: '12' }], style: {} } },
+      { type: BlockType.FLEX_ROW, content: { justifyContent: 'space-between', style: {} } },
+      { type: BlockType.TEXT, content: { content: '<h3>To Do</h3>', style: {} } },
+      { type: BlockType.TEXT, content: { content: '<h3>In Progress</h3>', style: {} } },
+      { type: BlockType.TEXT, content: { content: '<h3>Done</h3>', style: {} } },
+      { type: BlockType.DIVIDER, content: { thickness: 1, color: '#e5e7eb', style: {} } },
+      { type: BlockType.BUTTON, content: { text: 'Add New Task', link: '#', variant: 'primary', style: {} } },
+    ],
   },
 
   // Landing Page Templates
@@ -66,8 +102,13 @@ const templates: TemplateConfig[] = [
     description: 'Eye-catching hero with CTA buttons',
     category: 'landing',
     preview: '🚀',
-    blocks: 3,
+    blockCount: 3,
     color: 'from-orange-500 to-red-500',
+    blocks: [
+      { type: BlockType.HERO, content: { title: 'Welcome to Our Platform', subtitle: 'The best solution for your business', description: 'Start today and see the difference', buttonText: 'Get Started', buttonLink: '#', style: {} } },
+      { type: BlockType.SPACER, content: { height: 60, style: {} } },
+      { type: BlockType.TEXT, content: { content: '<p style="text-align: center;">Trusted by thousands of companies worldwide</p>', style: {} } },
+    ],
   },
   {
     id: 'contact-form',
@@ -75,8 +116,15 @@ const templates: TemplateConfig[] = [
     description: 'Professional contact form with validation',
     category: 'landing',
     preview: '📧',
-    blocks: 5,
+    blockCount: 5,
     color: 'from-indigo-500 to-blue-500',
+    blocks: [
+      { type: BlockType.TEXT, content: { content: '<h2 style="text-align: center;">Get in Touch</h2>', style: {} } },
+      { type: BlockType.TEXT, content: { content: '<p style="text-align: center;">We\'d love to hear from you</p>', style: {} } },
+      { type: BlockType.CONTACT_INFO, content: { email: 'contact@example.com', phone: '+1 234 567 8900', address: '123 Main St, City, Country', style: {} } },
+      { type: BlockType.SPACER, content: { height: 40, style: {} } },
+      { type: BlockType.BUTTON, content: { text: 'Send Message', link: '#', variant: 'primary', style: {} } },
+    ],
   },
   {
     id: 'testimonials',
@@ -84,8 +132,14 @@ const templates: TemplateConfig[] = [
     description: 'Customer reviews in card layout',
     category: 'landing',
     preview: '⭐',
-    blocks: 4,
+    blockCount: 4,
     color: 'from-yellow-500 to-orange-500',
+    blocks: [
+      { type: BlockType.TEXT, content: { content: '<h2 style="text-align: center;">What Our Customers Say</h2>', style: {} } },
+      { type: BlockType.SPACER, content: { height: 40, style: {} } },
+      { type: BlockType.GRID, content: { columns: 2, gap: '24px', style: {} } },
+      { type: BlockType.TEXT, content: { content: '<blockquote>"Amazing service! Highly recommended." - John Doe</blockquote>', style: {} } },
+    ],
   },
 
   // Business Templates
@@ -95,8 +149,16 @@ const templates: TemplateConfig[] = [
     description: 'Accordion-style frequently asked questions',
     category: 'business',
     preview: '❓',
-    blocks: 6,
+    blockCount: 6,
     color: 'from-teal-500 to-cyan-500',
+    blocks: [
+      { type: BlockType.TEXT, content: { content: '<h2 style="text-align: center;">Frequently Asked Questions</h2>', style: {} } },
+      { type: BlockType.SPACER, content: { height: 40, style: {} } },
+      { type: BlockType.TEXT, content: { content: '<h3>How does it work?</h3><p>Our platform is designed to be intuitive and easy to use.</p>', style: {} } },
+      { type: BlockType.TEXT, content: { content: '<h3>What are the pricing plans?</h3><p>We offer flexible pricing to suit your needs.</p>', style: {} } },
+      { type: BlockType.TEXT, content: { content: '<h3>How can I get support?</h3><p>Our support team is available 24/7 to help you.</p>', style: {} } },
+      { type: BlockType.BUTTON, content: { text: 'Contact Support', link: '#', variant: 'outline', style: {} } },
+    ],
   },
 
   // Marketing Templates
@@ -106,8 +168,13 @@ const templates: TemplateConfig[] = [
     description: 'Email subscription form with benefits',
     category: 'marketing',
     preview: '📰',
-    blocks: 3,
+    blockCount: 3,
     color: 'from-pink-500 to-rose-500',
+    blocks: [
+      { type: BlockType.TEXT, content: { content: '<h2 style="text-align: center;">Subscribe to Our Newsletter</h2>', style: {} } },
+      { type: BlockType.TEXT, content: { content: '<p style="text-align: center;">Get the latest updates and exclusive offers</p>', style: {} } },
+      { type: BlockType.BUTTON, content: { text: 'Subscribe Now', link: '#', variant: 'primary', style: {} } },
+    ],
   },
 ];
 
@@ -127,14 +194,18 @@ const categoryLabels = {
   marketing: 'Marketing',
 };
 
-function TemplateCard({ template, onInsert }: { template: TemplateConfig; onInsert: (id: string) => void }) {
+function TemplateCard({ template, onInsert, onPreview }: { template: TemplateConfig; onInsert: (template: TemplateConfig) => void; onPreview: (template: TemplateConfig) => void }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isInserted, setIsInserted] = useState(false);
 
   const handleInsert = () => {
-    onInsert(template.id);
+    onInsert(template);
     setIsInserted(true);
     setTimeout(() => setIsInserted(false), 2000);
+  };
+
+  const handlePreview = () => {
+    onPreview(template);
   };
 
   return (
@@ -172,6 +243,7 @@ function TemplateCard({ template, onInsert }: { template: TemplateConfig; onInse
               size="sm"
               variant="secondary"
               className="h-7 sm:h-8 px-2.5 sm:px-3 text-xs gap-1.5"
+              onClick={handlePreview}
             >
               <Eye className="w-3 h-3" />
               <span className="hidden sm:inline">Preview</span>
@@ -182,7 +254,7 @@ function TemplateCard({ template, onInsert }: { template: TemplateConfig; onInse
         {/* Block Count Badge */}
         <div className="absolute top-2 right-2">
           <Badge variant="secondary" className="text-[10px] sm:text-xs h-5 sm:h-6 px-1.5 sm:px-2 bg-white/90 backdrop-blur-sm">
-            {template.blocks} blocks
+            {template.blockCount} blocks
           </Badge>
         </div>
       </div>
@@ -213,6 +285,11 @@ function TemplateCard({ template, onInsert }: { template: TemplateConfig; onInse
 export function TemplatesLibrary() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [previewTemplate, setPreviewTemplate] = useState<TemplateConfig | null>(null);
+  const [isInserting, setIsInserting] = useState(false);
+
+  // Get context
+  const context = usePageBuilderContext();
 
   const categories = [
     { id: 'all', label: 'All Templates', icon: Sparkles },
@@ -231,9 +308,41 @@ export function TemplatesLibrary() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleInsertTemplate = (templateId: string) => {
-    console.log('Inserting template:', templateId);
-    // TODO: Implement template insertion logic
+  const handleInsertTemplate = async (template: TemplateConfig) => {
+    setIsInserting(true);
+    
+    try {
+      // Convert our template format to BlockTemplate format for context
+      const blockTemplate = {
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        category: 'custom' as const,
+        blocks: template.blocks.map((block, index) => ({
+          type: block.type,
+          content: block.content,
+          style: block.style || {},
+          order: index,
+          depth: 0,
+        })),
+      };
+      
+      await context.handleApplyTemplate(blockTemplate);
+      toast.success(`Template "${template.name}" inserted successfully!`);
+    } catch (error: any) {
+      console.error('Failed to insert template:', error);
+      toast.error(error.message || 'Failed to insert template');
+    } finally {
+      setIsInserting(false);
+    }
+  };
+
+  const handlePreviewTemplate = (template: TemplateConfig) => {
+    setPreviewTemplate(template);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewTemplate(null);
   };
 
   return (
@@ -289,6 +398,7 @@ export function TemplatesLibrary() {
                 key={template.id}
                 template={template}
                 onInsert={handleInsertTemplate}
+                onPreview={handlePreviewTemplate}
               />
             ))}
           </div>
@@ -311,6 +421,94 @@ export function TemplatesLibrary() {
           </span>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      <Dialog open={!!previewTemplate} onOpenChange={() => handleClosePreview()}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
+          {previewTemplate && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <span className="text-2xl">{previewTemplate.preview}</span>
+                  {previewTemplate.name}
+                </DialogTitle>
+                <DialogDescription>
+                  {previewTemplate.description}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 mt-4">
+                {/* Template Info */}
+                <div className="flex items-center gap-4 text-sm">
+                  <Badge variant="secondary" className="gap-1.5">
+                    {React.createElement(categoryIcons[previewTemplate.category], {
+                      className: 'w-3.5 h-3.5',
+                    })}
+                    {categoryLabels[previewTemplate.category]}
+                  </Badge>
+                  <Badge variant="outline">
+                    {previewTemplate.blockCount} blocks
+                  </Badge>
+                </div>
+
+                {/* Block List */}
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm">Blocks included:</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {previewTemplate.blocks.map((block, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 p-2 bg-gray-50 rounded text-xs"
+                      >
+                        <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                          {index + 1}
+                        </div>
+                        <span className="capitalize">{block.type.replace('_', ' ')}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Preview Gradient */}
+                <div className={`h-32 rounded-lg bg-gradient-to-br ${previewTemplate.color} flex items-center justify-center`}>
+                  <div className="text-6xl">{previewTemplate.preview}</div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    onClick={() => {
+                      handleInsertTemplate(previewTemplate);
+                      handleClosePreview();
+                    }}
+                    disabled={isInserting}
+                    className="flex-1"
+                  >
+                    {isInserting ? (
+                      <>
+                        <span className="animate-spin mr-2">⏳</span>
+                        Inserting...
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 mr-2" />
+                        Insert Template
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleClosePreview}
+                    variant="outline"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
