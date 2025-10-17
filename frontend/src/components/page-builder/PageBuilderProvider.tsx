@@ -470,9 +470,14 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
   }, []);
 
   const handleUpdateBlockStyle = useCallback(async (blockId: string, style: any) => {
+    console.log('PageBuilderProvider - handleUpdateBlockStyle called');
+    console.log('PageBuilderProvider - blockId:', blockId);
+    console.log('PageBuilderProvider - style:', style);
     try {
-      await updateBlock(blockId, { style });
+      const result = await updateBlock(blockId, { style });
+      console.log('PageBuilderProvider - updateBlock result:', result);
       await refetch();
+      console.log('PageBuilderProvider - refetch completed');
     } catch (error) {
       console.error('Failed to update block style:', error);
       toast.error('Failed to update block style');

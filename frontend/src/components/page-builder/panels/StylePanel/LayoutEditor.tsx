@@ -45,7 +45,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
       {/* Display Mode */}
       <div className="space-y-2">
         <Label className="text-xs font-medium">Display</Label>
-        <Tabs value={display} onValueChange={(v) => onChange({ ...value, display: v as any })}>
+        <Tabs value={display} onValueChange={(v) => onChange({ display: v as any })}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="block" className="text-xs">Block</TabsTrigger>
             <TabsTrigger value="flex" className="text-xs">Flex</TabsTrigger>
@@ -65,7 +65,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.flexDirection === 'row' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, flexDirection: 'row' })}
+                onClick={() => onChange({ flexDirection: 'row' })}
                 className="h-8"
               >
                 <Rows className="h-4 w-4 rotate-90" />
@@ -73,7 +73,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.flexDirection === 'column' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, flexDirection: 'column' })}
+                onClick={() => onChange({ flexDirection: 'column' })}
                 className="h-8"
               >
                 <Columns className="h-4 w-4" />
@@ -81,7 +81,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.flexDirection === 'row-reverse' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, flexDirection: 'row-reverse' })}
+                onClick={() => onChange({ flexDirection: 'row-reverse' })}
                 className="h-8"
               >
                 <Rows className="h-4 w-4 rotate-90 scale-x-[-1]" />
@@ -89,7 +89,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.flexDirection === 'column-reverse' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, flexDirection: 'column-reverse' })}
+                onClick={() => onChange({ flexDirection: 'column-reverse' })}
                 className="h-8"
               >
                 <Columns className="h-4 w-4 scale-y-[-1]" />
@@ -104,7 +104,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.justifyContent === 'flex-start' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, justifyContent: 'flex-start' })}
+                onClick={() => onChange({ justifyContent: 'flex-start' })}
                 className="h-8"
               >
                 <AlignLeft className="h-4 w-4" />
@@ -112,7 +112,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.justifyContent === 'center' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, justifyContent: 'center' })}
+                onClick={() => onChange({ justifyContent: 'center' })}
                 className="h-8"
               >
                 <AlignCenter className="h-4 w-4" />
@@ -120,7 +120,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.justifyContent === 'flex-end' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, justifyContent: 'flex-end' })}
+                onClick={() => onChange({ justifyContent: 'flex-end' })}
                 className="h-8"
               >
                 <AlignRight className="h-4 w-4" />
@@ -128,7 +128,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.justifyContent === 'space-between' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, justifyContent: 'space-between' })}
+                onClick={() => onChange({ justifyContent: 'space-between' })}
                 className="h-8 col-span-3"
               >
                 <AlignJustify className="h-4 w-4" />
@@ -143,7 +143,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.alignItems === 'flex-start' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, alignItems: 'flex-start' })}
+                onClick={() => onChange({ alignItems: 'flex-start' })}
                 className="h-8"
               >
                 <AlignStartVertical className="h-4 w-4" />
@@ -151,7 +151,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.alignItems === 'center' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, alignItems: 'center' })}
+                onClick={() => onChange({ alignItems: 'center' })}
                 className="h-8"
               >
                 <AlignCenterVertical className="h-4 w-4" />
@@ -159,7 +159,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.alignItems === 'flex-end' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, alignItems: 'flex-end' })}
+                onClick={() => onChange({ alignItems: 'flex-end' })}
                 className="h-8"
               >
                 <AlignEndVertical className="h-4 w-4" />
@@ -167,7 +167,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
               <Button
                 variant={value.alignItems === 'stretch' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => onChange({ ...value, alignItems: 'stretch' })}
+                onClick={() => onChange({ alignItems: 'stretch' })}
                 className="h-8"
               >
                 <StretchHorizontal className="h-4 w-4" />
@@ -180,7 +180,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
             <Label className="text-xs font-medium">Wrap</Label>
             <Tabs
               value={value.flexWrap || 'nowrap'}
-              onValueChange={(v) => onChange({ ...value, flexWrap: v as any })}
+              onValueChange={(v) => onChange({ flexWrap: v as any })}
             >
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="nowrap" className="text-xs">No Wrap</TabsTrigger>
@@ -198,7 +198,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
                 type="number"
                 min="0"
                 value={value.gap || 0}
-                onChange={(e) => onChange({ ...value, gap: parseInt(e.target.value) || 0 })}
+                onChange={(e) => onChange({ gap: parseInt(e.target.value) || 0 })}
                 className="h-8 text-xs"
               />
               <span className="text-xs text-gray-500">px</span>
@@ -215,7 +215,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
             <Label className="text-xs font-medium">Columns</Label>
             <Input
               value={value.gridTemplateColumns || 'repeat(3, 1fr)'}
-              onChange={(e) => onChange({ ...value, gridTemplateColumns: e.target.value })}
+              onChange={(e) => onChange({ gridTemplateColumns: e.target.value })}
               placeholder="repeat(3, 1fr)"
               className="h-8 text-xs font-mono"
             />
@@ -225,7 +225,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
                   key={cols}
                   variant="outline"
                   size="sm"
-                  onClick={() => onChange({ ...value, gridTemplateColumns: `repeat(${cols}, 1fr)` })}
+                  onClick={() => onChange({ gridTemplateColumns: `repeat(${cols}, 1fr)` })}
                   className="h-6 px-2 text-xs"
                 >
                   {cols}
@@ -239,7 +239,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
             <Label className="text-xs font-medium">Rows</Label>
             <Input
               value={value.gridTemplateRows || 'auto'}
-              onChange={(e) => onChange({ ...value, gridTemplateRows: e.target.value })}
+              onChange={(e) => onChange({ gridTemplateRows: e.target.value })}
               placeholder="auto"
               className="h-8 text-xs font-mono"
             />
@@ -253,7 +253,7 @@ export function LayoutEditor({ value, onChange }: LayoutEditorProps) {
                 type="number"
                 min="0"
                 value={value.gap || 0}
-                onChange={(e) => onChange({ ...value, gap: parseInt(e.target.value) || 0 })}
+                onChange={(e) => onChange({ gap: parseInt(e.target.value) || 0 })}
                 className="h-8 text-xs"
               />
               <span className="text-xs text-gray-500">px</span>

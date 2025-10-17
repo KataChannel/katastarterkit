@@ -216,7 +216,11 @@ export const useBlockOperations = (pageId: string) => {
         variables: { id, input },
         refetchQueries: [{ query: GET_PAGE_BY_ID, variables: { id: pageId } }]
       });
-      toast.success('Block updated successfully!');
+      // Don't show toast for style updates as they happen frequently
+      // Only show toast for content updates
+      if (input.content !== undefined) {
+        toast.success('Block updated successfully!');
+      }
       return data?.updatePageBlock;
     } catch (error: any) {
       toast.error(error.message || 'Failed to update block');

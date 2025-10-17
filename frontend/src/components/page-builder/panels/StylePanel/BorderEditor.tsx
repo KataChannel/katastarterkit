@@ -85,7 +85,7 @@ export function BorderEditor({ value, onChange }: BorderEditorProps) {
               min="0"
               max="20"
               value={value.width || 0}
-              onChange={(e) => onChange({ ...value, width: parseInt(e.target.value) || 0 })}
+              onChange={(e) => onChange({ width: parseInt(e.target.value) || 0 })}
               className="h-8 text-xs"
             />
             <span className="text-xs text-gray-500">px</span>
@@ -96,7 +96,7 @@ export function BorderEditor({ value, onChange }: BorderEditorProps) {
           <Label className="text-xs font-medium">Style</Label>
           <select
             value={value.style || 'solid'}
-            onChange={(e) => onChange({ ...value, style: e.target.value })}
+            onChange={(e) => onChange({ style: e.target.value })}
             className="w-full h-8 px-2 text-xs border rounded-md"
           >
             {BORDER_STYLES.map((style) => (
@@ -112,7 +112,7 @@ export function BorderEditor({ value, onChange }: BorderEditorProps) {
       <AdvancedColorPicker
         label="Border Color"
         value={value.color || '#000000'}
-        onChange={(color) => onChange({ ...value, color })}
+        onChange={(color) => onChange({ color })}
         showOpacity={true}
       />
 

@@ -27,10 +27,16 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
     );
   }
 
-  const currentStyles = selectedBlock.styles || {};
+  const currentStyles = selectedBlock.style || {};
+
+  console.log('StylePanel - selectedBlock:', selectedBlock);
+  console.log('StylePanel - currentStyles:', currentStyles);
 
   const handleStyleUpdate = (updates: Record<string, any>) => {
-    onStyleChange({ ...currentStyles, ...updates });
+    console.log('StylePanel - handleStyleUpdate called with:', updates);
+    const mergedStyles = { ...currentStyles, ...updates };
+    console.log('StylePanel - merged styles:', mergedStyles);
+    onStyleChange(mergedStyles);
   };
 
   return (

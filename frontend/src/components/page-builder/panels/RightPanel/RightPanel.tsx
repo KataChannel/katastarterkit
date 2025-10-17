@@ -31,6 +31,8 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
 
   // Simplified style update handler
   const handleStyleChange = (styles: Record<string, any>) => {
+    console.log('RightPanel - handleStyleChange called with:', styles);
+    console.log('RightPanel - selectedBlockId:', selectedBlockId);
     if (!selectedBlockId) return;
     handleUpdateBlockStyle(selectedBlockId, styles);
   };
