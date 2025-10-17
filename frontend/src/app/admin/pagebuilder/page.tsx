@@ -27,17 +27,20 @@ function PageBuilderContent() {
   const router = useRouter();
   const pageId = searchParams.get('pageId');
   
-  const [showPageList, setShowPageList] = useState(!pageId);
   const [searchTerm, setSearchTerm] = useState('');
   const [renderError, setRenderError] = useState<string | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   
   const { pages, loading, refetch, error: queryError } = usePages(
     { page: 1, limit: 20 },
     searchTerm ? { search: searchTerm } : undefined
   );
 
+  // Open editor dialog when pageId is present
   useEffect(() => {
-    setShowPageList(!pageId);
+    if (pageId) {
+      setIsEditorOpen(true);
+    }
   }, [pageId]);
 
   // Helper function to safely get blocks count
@@ -74,7 +77,7 @@ function PageBuilderContent() {
   const handleCreateNewPage = () => {
     try {
       router.push('/admin/pagebuilder');
-      setShowPageList(false);
+      setIsEditorOpen(true);
     } catch (error) {
       console.error('Error creating page:', error);
       setRenderError('Failed to create new page');
@@ -84,7 +87,7 @@ function PageBuilderContent() {
   const handleEditPage = (id: string) => {
     try {
       router.push(`/admin/pagebuilder?pageId=${id}`);
-      setShowPageList(false);
+      setIsEditorOpen(true);
     } catch (error) {
       console.error('Error editing page:', error);
       setRenderError('Failed to edit page');
@@ -102,11 +105,17 @@ function PageBuilderContent() {
   const handleBackToList = () => {
     try {
       router.push('/admin/pagebuilder');
-      setShowPageList(true);
+      setIsEditorOpen(false);
     } catch (error) {
       console.error('Error going back:', error);
       setRenderError('Failed to go back to list');
     }
+  };
+
+  const handleCloseEditor = () => {
+    setIsEditorOpen(false);
+    router.push('/admin/pagebuilder');
+    refetch(); // Refresh the page list
   };
 
   const getStatusColor = (status: PageStatus) => {
@@ -151,8 +160,8 @@ function PageBuilderContent() {
     );
   }
 
-  if (showPageList) {
-    return (
+  return (
+    <>
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="bg-white shadow-sm border-b">
@@ -293,18 +302,33 @@ function PageBuilderContent() {
           )}
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="h-screen w-screen overflow-hidden">
-      {/* Full Screen Page Builder */}
-      <FullScreenPageBuilder 
-        pageId={pageId || undefined}
-        onExit={handleBackToList}
-        initialMode="visual"
-      />
-    </div>
+      {/* Fullscreen Editor Dialog */}
+      <Dialog open={isEditorOpen} onOpenChange={(open) => {
+        setIsEditorOpen(open);
+        if (!open) {
+          handleCloseEditor();
+        }
+      }}>
+        <DialogContent 
+          className="max-w-full w-screen h-screen p-0 m-0 bg-white border-0 rounded-none"
+          style={{ 
+            maxWidth: '100vw', 
+            maxHeight: '100vh',
+            width: '100vw',
+            height: '100vh'
+          }}
+        >
+          <div className="h-full w-full">
+            <FullScreenPageBuilder 
+              pageId={pageId || undefined}
+              onExit={handleCloseEditor}
+              initialMode="visual"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
