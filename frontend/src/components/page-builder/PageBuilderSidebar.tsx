@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePageBuilderContext } from './PageBuilderProvider';
 import { BlockType } from '@/types/page-builder';
+import { TemplateLibrary } from './templates';
 
 /**
  * Block type definitions with icons and colors
@@ -58,37 +59,33 @@ function PageBuilderSidebarComponent() {
     // State
     editingPage,
     isNewPageMode,
-    allTemplates,
-    customTemplates,
-    templateSearchQuery,
-    selectedTemplateCategory,
-    isApplyingTemplate,
     
     // Template actions
-    setTemplateSearchQuery,
-    setSelectedTemplateCategory,
-    handlePreviewTemplate,
     handleApplyTemplate,
-    handleDeleteCustomTemplate,
+    setShowSaveTemplateDialog,
     
     // Block actions
     handleAddBlock,
   } = usePageBuilderContext();
 
-  // Memoize template filtering (expensive operation with large template lists)
-  const filteredTemplates = useMemo(() => {
-    return allTemplates.filter(template => {
-      const matchesSearch = template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()) ||
-                           template.description.toLowerCase().includes(templateSearchQuery.toLowerCase());
-      const matchesCategory = selectedTemplateCategory === 'all' || template.category === selectedTemplateCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [allTemplates, templateSearchQuery, selectedTemplateCategory]);
+  // Handle template selection with type conversion if needed
+  const handleTemplateSelect = useCallback(async (template: any) => {
+    // Convert PageTemplate to BlockTemplate format if needed
+    const blockTemplate = {
+      ...template,
+      blocks: template.structure || template.blocks || []
+    };
+    await handleApplyTemplate(blockTemplate);
+  }, [handleApplyTemplate]);
 
-  // Memoize unique categories (only recalculate when templates change)
-  const templateCategories = useMemo(() => {
-    return ['all', ...Array.from(new Set(allTemplates.map(t => t.category)))];
-  }, [allTemplates]);
+  const handleCreateNewTemplate = useCallback(() => {
+    setShowSaveTemplateDialog(true);
+  }, [setShowSaveTemplateDialog]);
+
+  const handleImportTemplate = useCallback(() => {
+    // This could be implemented with an import dialog
+    console.log('Import template functionality - could open import dialog');
+  }, []);
 
   return (
     <div className="w-80 border-r bg-gray-50 p-4 overflow-y-auto">
@@ -118,117 +115,13 @@ function PageBuilderSidebarComponent() {
           </div>
         </TabsContent>
         
-        {/* Templates Tab - Template Browser */}
-        <TabsContent value="templates" className="mt-0">
-          {/* Search and Filter */}
-          <div className="space-y-3 mb-4">
-            <Input
-              type="text"
-              placeholder="Tìm kiếm template..."
-              value={templateSearchQuery}
-              onChange={(e) => setTemplateSearchQuery(e.target.value)}
-              className="w-full"
-            />
-            <Select value={selectedTemplateCategory} onValueChange={setSelectedTemplateCategory}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Chọn danh mục" />
-              </SelectTrigger>
-              <SelectContent>
-                {templateCategories.map(category => (
-                  <SelectItem key={category} value={category}>
-                    {category === 'all' ? 'Tất cả' : category.charAt(0).toUpperCase() + category.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {/* Template Cards */}
-          <div className="space-y-3">
-            {filteredTemplates.length === 0 ? (
-              <Card className="p-8 text-center">
-                <p className="text-gray-500">Không tìm thấy template phù hợp</p>
-              </Card>
-            ) : (
-              filteredTemplates.map(template => {
-                const isCustom = customTemplates.some(t => t.id === template.id);
-                
-                return (
-                  <Card
-                    key={template.id}
-                    className="overflow-hidden hover:border-blue-500 hover:shadow-md transition-all"
-                  >
-                    {/* Thumbnail */}
-                    {template.thumbnail && (
-                      <div className="relative w-full h-32 bg-gray-50 border-b overflow-hidden">
-                        <img
-                          src={template.thumbnail}
-                          alt={template.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-2 right-2 flex gap-1">
-                          <Badge 
-                            variant="secondary" 
-                            className="text-xs backdrop-blur-sm bg-white/90"
-                          >
-                            {template.category}
-                          </Badge>
-                          {isCustom && (
-                            <Badge 
-                              variant="default"
-                              className="text-xs backdrop-blur-sm bg-green-600"
-                            >
-                              Custom
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Content */}
-                    <div className="p-3">
-                      <div className="mb-2">
-                        <h4 className="font-semibold text-sm">{template.name}</h4>
-                        <p className="text-xs text-gray-600 leading-relaxed mt-1">
-                          {template.description}
-                        </p>
-                      </div>
-                      <div className="flex gap-2 mt-3">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => handlePreviewTemplate(template)}
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          Preview
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="flex-1"
-                          onClick={() => handleApplyTemplate(template)}
-                          disabled={isApplyingTemplate}
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Apply
-                        </Button>
-                        {isCustom && (
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDeleteCustomTemplate(template.id)}
-                            title="Delete custom template"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })
-            )}
-          </div>
+        {/* Templates Tab - Full Template Library */}
+        <TabsContent value="templates" className="mt-0 p-0">
+          <TemplateLibrary 
+            onTemplateSelect={handleTemplateSelect}
+            onCreateNew={handleCreateNewTemplate}
+            onImport={handleImportTemplate}
+          />
         </TabsContent>
       </Tabs>
     </div>

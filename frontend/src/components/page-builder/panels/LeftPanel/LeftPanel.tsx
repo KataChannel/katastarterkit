@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { X } from 'lucide-react';
 import { ElementsLibrary } from './ElementsLibrary';
+import { TemplateLibrary } from '@/components/page-builder/templates';
+import { SavedBlocksLibrary } from './SavedBlocksLibrary';
+import { usePageBuilderContext } from '@/components/page-builder/PageBuilderProvider';
 
 interface LeftPanelProps {
   onClose: () => void;
@@ -12,6 +15,27 @@ interface LeftPanelProps {
 
 export function LeftPanel({ onClose }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<'elements' | 'templates' | 'saved'>('elements');
+  
+  // Get template operations from PageBuilder context
+  const {
+    handleApplyTemplate,
+    setShowSaveTemplateDialog,
+  } = usePageBuilderContext();
+
+  const handleTemplateSelect = (template: any) => {
+    // Apply template to current page
+    handleApplyTemplate(template);
+  };
+
+  const handleCreateNewTemplate = () => {
+    // Open save template dialog
+    setShowSaveTemplateDialog(true);
+  };
+
+  const handleImportTemplate = () => {
+    // Handle template import (could open import dialog)
+    console.log('Import template functionality');
+  };
 
   return (
     <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
@@ -36,12 +60,16 @@ export function LeftPanel({ onClose }: LeftPanelProps) {
             <ElementsLibrary />
           </TabsContent>
 
-          <TabsContent value="templates" className="mt-0 p-4">
-            <p className="text-sm text-gray-500">Templates library coming soon...</p>
+          <TabsContent value="templates" className="mt-0 p-0">
+            <TemplateLibrary 
+              onTemplateSelect={handleTemplateSelect}
+              onCreateNew={handleCreateNewTemplate}
+              onImport={handleImportTemplate}
+            />
           </TabsContent>
 
-          <TabsContent value="saved" className="mt-0 p-4">
-            <p className="text-sm text-gray-500">Saved blocks coming soon...</p>
+          <TabsContent value="saved" className="mt-0 p-0">
+            <SavedBlocksLibrary />
           </TabsContent>
         </div>
       </Tabs>
