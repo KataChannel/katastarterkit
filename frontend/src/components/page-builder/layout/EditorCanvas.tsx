@@ -40,7 +40,7 @@ export function EditorCanvas({
       <div className="min-h-full flex items-start justify-center p-8">
         {/* Device Frame */}
         <div
-          className="bg-white shadow-xl transition-all duration-300 min-h-[600px]"
+          className="bg-white shadow-xl transition-all duration-300 min-h-[600px] rounded-md"
           style={{
             width: deviceWidths[device],
             maxWidth: '100%',

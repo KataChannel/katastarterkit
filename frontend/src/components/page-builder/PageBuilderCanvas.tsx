@@ -59,7 +59,7 @@ function PageBuilderCanvasComponent() {
   });
 
   return (
-    <div className="flex-1 p-4 overflow-auto">
+    <div className="flex-1 p-12 overflow-auto">
       <div className="max-w-4xl mx-auto">
         {showPreview ? (
           // Preview Mode - Read-only view

@@ -67,15 +67,23 @@ function PageBuilderSidebarComponent() {
 
   return (
     <div className="w-80 border-r bg-gray-50 flex flex-col h-full overflow-hidden">
-      <div className="p-4 flex-1 overflow-y-auto">
-        <Tabs defaultValue="blocks" className="w-full">
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="blocks" className="flex-1">Blocks</TabsTrigger>
-            <TabsTrigger value="templates" className="flex-1">Templates</TabsTrigger>
-          </TabsList>
-          
+      {/* Panel Header */}
+      <div className="border-b border-gray-200 flex-shrink-0">
+        <div className="h-12 flex items-center px-4">
+          <h2 className="font-semibold">Add Elements</h2>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="blocks" className="flex-1 flex flex-col min-h-0">
+        <TabsList className="w-full justify-start rounded-none border-b flex-shrink-0 mx-4">
+          <TabsTrigger value="blocks" className="flex-1">Blocks</TabsTrigger>
+          <TabsTrigger value="templates" className="flex-1">Templates</TabsTrigger>
+        </TabsList>
+        
+        <div className="flex-1 overflow-y-auto min-h-0">
           {/* Blocks Tab - Block Types Palette */}
-          <TabsContent value="blocks" className="mt-0">
+          <TabsContent value="blocks" className="mt-0 p-4">
             <div className="space-y-2">
               {BLOCK_TYPES.map(blockType => (
                 <Button
@@ -95,11 +103,11 @@ function PageBuilderSidebarComponent() {
           </TabsContent>
 
           {/* Templates Tab - Dynamic Templates */}
-          <TabsContent value="templates" className="mt-0">
+          <TabsContent value="templates" className="mt-0 p-4">
             <TemplatesPanel />
           </TabsContent>
-        </Tabs>
-      </div>
+        </div>
+      </Tabs>
     </div>
   );
 }
