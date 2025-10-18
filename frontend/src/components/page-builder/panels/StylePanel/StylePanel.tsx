@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BreakpointSelector, Breakpoint } from './BreakpointSelector';
 import { LayoutEditor } from './LayoutEditor';
 import { VisualSpacingEditor } from './VisualSpacingEditor';
 import { BorderEditor } from './BorderEditor';
@@ -10,6 +9,7 @@ import { AdvancedColorPicker } from './AdvancedColorPicker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Save } from 'lucide-react';
 
 interface StylePanelProps {
   selectedBlock: any;
@@ -17,7 +17,15 @@ interface StylePanelProps {
 }
 
 export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
-  const [breakpoint, setBreakpoint] = useState<Breakpoint>('desktop');
+  // Track pending changes locally before saving
+  const [pendingStyles, setPendingStyles] = useState<Record<string, any>>({});
+  const [hasChanges, setHasChanges] = useState(false);
+  
+  // Reset pending styles when selected block changes
+  useEffect(() => {
+    setPendingStyles({});
+    setHasChanges(false);
+  }, [selectedBlock?.id]);
   
   if (!selectedBlock) {
     return (
@@ -28,21 +36,65 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
   }
 
   const currentStyles = selectedBlock.style || {};
+  // Merge current styles with pending changes for display
+  const displayStyles = { ...currentStyles, ...pendingStyles };
 
   console.log('StylePanel - selectedBlock:', selectedBlock);
   console.log('StylePanel - currentStyles:', currentStyles);
+  console.log('StylePanel - pendingStyles:', pendingStyles);
 
+  // Update pending styles (not saved yet)
   const handleStyleUpdate = (updates: Record<string, any>) => {
     console.log('StylePanel - handleStyleUpdate called with:', updates);
-    const mergedStyles = { ...currentStyles, ...updates };
+    setPendingStyles(prev => ({ ...prev, ...updates }));
+    setHasChanges(true);
+  };
+
+  // Save all pending changes
+  const handleSaveStyles = () => {
+    if (!hasChanges) return;
+    console.log('StylePanel - Saving pending styles:', pendingStyles);
+    const mergedStyles = { ...currentStyles, ...pendingStyles };
     console.log('StylePanel - merged styles:', mergedStyles);
     onStyleChange(mergedStyles);
+    setPendingStyles({});
+    setHasChanges(false);
+  };
+
+  // Discard pending changes
+  const handleDiscardChanges = () => {
+    setPendingStyles({});
+    setHasChanges(false);
   };
 
   return (
     <div className="space-y-3 p-3">
-      {/* Breakpoint Selector */}
-      <BreakpointSelector value={breakpoint} onChange={setBreakpoint} />
+      {/* Save/Discard Actions Bar */}
+      {hasChanges && (
+        <div className="sticky top-0 z-10 bg-blue-50 border border-blue-200 rounded-md p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Save className="w-4 h-4 text-blue-600" />
+            <span className="text-xs font-medium text-blue-900">Unsaved changes</span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleDiscardChanges}
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+            >
+              Discard
+            </Button>
+            <Button
+              onClick={handleSaveStyles}
+              size="sm"
+              className="h-7 text-xs"
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Style Editors */}
       <Accordion type="multiple" defaultValue={['layout', 'spacing', 'typography', 'colors']} className="w-full">
@@ -52,14 +104,14 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
           <AccordionContent>
             <LayoutEditor
               value={{
-                display: currentStyles.display,
-                flexDirection: currentStyles.flexDirection,
-                justifyContent: currentStyles.justifyContent,
-                alignItems: currentStyles.alignItems,
-                gap: currentStyles.gap,
-                gridTemplateColumns: currentStyles.gridTemplateColumns,
-                gridTemplateRows: currentStyles.gridTemplateRows,
-                flexWrap: currentStyles.flexWrap,
+                display: displayStyles.display,
+                flexDirection: displayStyles.flexDirection,
+                justifyContent: displayStyles.justifyContent,
+                alignItems: displayStyles.alignItems,
+                gap: displayStyles.gap,
+                gridTemplateColumns: displayStyles.gridTemplateColumns,
+                gridTemplateRows: displayStyles.gridTemplateRows,
+                flexWrap: displayStyles.flexWrap,
               }}
               onChange={(layout) => handleStyleUpdate(layout)}
             />
@@ -76,10 +128,10 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
                 <VisualSpacingEditor
                   type="padding"
                   value={{
-                    top: currentStyles.paddingTop || 0,
-                    right: currentStyles.paddingRight || 0,
-                    bottom: currentStyles.paddingBottom || 0,
-                    left: currentStyles.paddingLeft || 0,
+                    top: displayStyles.paddingTop || 0,
+                    right: displayStyles.paddingRight || 0,
+                    bottom: displayStyles.paddingBottom || 0,
+                    left: displayStyles.paddingLeft || 0,
                   }}
                   onChange={(padding) =>
                     handleStyleUpdate({
@@ -96,10 +148,10 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
                 <VisualSpacingEditor
                   type="margin"
                   value={{
-                    top: currentStyles.marginTop || 0,
-                    right: currentStyles.marginRight || 0,
-                    bottom: currentStyles.marginBottom || 0,
-                    left: currentStyles.marginLeft || 0,
+                    top: displayStyles.marginTop || 0,
+                    right: displayStyles.marginRight || 0,
+                    bottom: displayStyles.marginBottom || 0,
+                    left: displayStyles.marginLeft || 0,
                   }}
                   onChange={(margin) =>
                     handleStyleUpdate({
@@ -128,7 +180,7 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
                     type="number"
                     min="8"
                     max="72"
-                    value={parseInt(currentStyles.fontSize || 16)}
+                    value={parseInt(displayStyles.fontSize || 16)}
                     onChange={(e) => handleStyleUpdate({ fontSize: `${e.target.value}px` })}
                     className="h-8 text-xs"
                   />
@@ -140,7 +192,7 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
               <div className="space-y-2">
                 <Label className="text-xs font-medium">Font Weight</Label>
                 <select
-                  value={currentStyles.fontWeight || 'normal'}
+                  value={displayStyles.fontWeight || 'normal'}
                   onChange={(e) => handleStyleUpdate({ fontWeight: e.target.value })}
                   className="w-full h-8 px-2 text-xs border rounded-md"
                 >
@@ -162,7 +214,7 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
                   min="1"
                   max="3"
                   step="0.1"
-                  value={parseFloat(currentStyles.lineHeight || 1.5)}
+                  value={parseFloat(displayStyles.lineHeight || 1.5)}
                   onChange={(e) => handleStyleUpdate({ lineHeight: e.target.value })}
                   className="h-8 text-xs"
                 />
@@ -175,7 +227,7 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
                   {['left', 'center', 'right', 'justify'].map((align) => (
                     <Button
                       key={align}
-                      variant={currentStyles.textAlign === align ? 'default' : 'outline'}
+                      variant={displayStyles.textAlign === align ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => handleStyleUpdate({ textAlign: align })}
                       className="h-8 text-xs capitalize"
@@ -196,13 +248,13 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
             <div className="space-y-4">
               <AdvancedColorPicker
                 label="Text Color"
-                value={currentStyles.color || '#000000'}
+                value={displayStyles.color || '#000000'}
                 onChange={(color) => handleStyleUpdate({ color })}
                 showOpacity={true}
               />
               <AdvancedColorPicker
                 label="Background Color"
-                value={currentStyles.backgroundColor || '#ffffff'}
+                value={displayStyles.backgroundColor || '#ffffff'}
                 onChange={(backgroundColor) => handleStyleUpdate({ backgroundColor })}
                 showOpacity={true}
               />
@@ -216,14 +268,14 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
           <AccordionContent>
             <BorderEditor
               value={{
-                width: parseInt(currentStyles.borderWidth || 0),
-                style: currentStyles.borderStyle || 'solid',
-                color: currentStyles.borderColor || '#000000',
+                width: parseInt(displayStyles.borderWidth || 0),
+                style: displayStyles.borderStyle || 'solid',
+                color: displayStyles.borderColor || '#000000',
                 radius: {
-                  topLeft: parseInt(currentStyles.borderTopLeftRadius || 0),
-                  topRight: parseInt(currentStyles.borderTopRightRadius || 0),
-                  bottomRight: parseInt(currentStyles.borderBottomRightRadius || 0),
-                  bottomLeft: parseInt(currentStyles.borderBottomLeftRadius || 0),
+                  topLeft: parseInt(displayStyles.borderTopLeftRadius || 0),
+                  topRight: parseInt(displayStyles.borderTopRightRadius || 0),
+                  bottomRight: parseInt(displayStyles.borderBottomRightRadius || 0),
+                  bottomLeft: parseInt(displayStyles.borderBottomLeftRadius || 0),
                 },
               }}
               onChange={(border) =>
@@ -254,12 +306,12 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
                     type="range"
                     min="0"
                     max="100"
-                    value={parseFloat(currentStyles.opacity || 1) * 100}
+                    value={parseFloat(displayStyles.opacity || 1) * 100}
                     onChange={(e) => handleStyleUpdate({ opacity: parseInt(e.target.value) / 100 })}
                     className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="text-xs w-10 text-right">
-                    {Math.round(parseFloat(currentStyles.opacity || 1) * 100)}%
+                    {Math.round(parseFloat(displayStyles.opacity || 1) * 100)}%
                   </span>
                 </div>
               </div>
@@ -268,7 +320,7 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
               <div className="space-y-2">
                 <Label className="text-xs font-medium">Shadow</Label>
                 <select
-                  value={currentStyles.boxShadow || 'none'}
+                  value={displayStyles.boxShadow || 'none'}
                   onChange={(e) => handleStyleUpdate({ boxShadow: e.target.value })}
                   className="w-full h-8 px-2 text-xs border rounded-md"
                 >
@@ -294,7 +346,7 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
                 <Label className="text-xs font-medium">Width</Label>
                 <div className="flex items-center gap-2">
                   <Input
-                    value={currentStyles.width || 'auto'}
+                    value={displayStyles.width || 'auto'}
                     onChange={(e) => handleStyleUpdate({ width: e.target.value })}
                     placeholder="auto, 100%, 300px"
                     className="h-8 text-xs"
@@ -307,7 +359,7 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
                 <Label className="text-xs font-medium">Height</Label>
                 <div className="flex items-center gap-2">
                   <Input
-                    value={currentStyles.height || 'auto'}
+                    value={displayStyles.height || 'auto'}
                     onChange={(e) => handleStyleUpdate({ height: e.target.value })}
                     placeholder="auto, 100%, 300px"
                     className="h-8 text-xs"
@@ -320,7 +372,7 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
                 <div className="space-y-2">
                   <Label className="text-xs font-medium">Min Width</Label>
                   <Input
-                    value={currentStyles.minWidth || ''}
+                    value={displayStyles.minWidth || ''}
                     onChange={(e) => handleStyleUpdate({ minWidth: e.target.value })}
                     placeholder="0"
                     className="h-8 text-xs"
@@ -329,7 +381,7 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
                 <div className="space-y-2">
                   <Label className="text-xs font-medium">Max Width</Label>
                   <Input
-                    value={currentStyles.maxWidth || ''}
+                    value={displayStyles.maxWidth || ''}
                     onChange={(e) => handleStyleUpdate({ maxWidth: e.target.value })}
                     placeholder="none"
                     className="h-8 text-xs"

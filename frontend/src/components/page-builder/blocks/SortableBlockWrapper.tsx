@@ -12,6 +12,7 @@ interface SortableBlockWrapperProps {
   onAddChild?: (parentId: string) => void;
   onUpdateChild?: (blockId: string, content: any, style?: any) => void;
   onDeleteChild?: (blockId: string) => void;
+  onSelect?: (blockId: string | null) => void;
   depth?: number;
 }
 
@@ -23,6 +24,7 @@ export function SortableBlockWrapper({
   onAddChild,
   onUpdateChild,
   onDeleteChild,
+  onSelect,
   depth = 0,
 }: SortableBlockWrapperProps) {
   const {
@@ -81,6 +83,7 @@ export function SortableBlockWrapper({
           onAddChild={onAddChild}
           onUpdateChild={onUpdateChild}
           onDeleteChild={onDeleteChild}
+          onSelect={onSelect}
           depth={depth}
         />
       </div>

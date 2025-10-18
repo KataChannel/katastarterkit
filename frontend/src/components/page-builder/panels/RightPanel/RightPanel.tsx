@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useState } from 'react';
+import { Button } from '../../../ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../ui/tabs';
+import { Input } from '../../../ui/input';
+import { Label } from '../../../ui/label';
+import { Textarea } from '../../../ui/textarea';
 import { X, Paintbrush, Settings, Trash2, Copy, Eye, EyeOff, Lock, Unlock } from 'lucide-react';
 import { usePageBuilderContext } from '../../PageBuilderProvider';
 import { StylePanel } from '../StylePanel';

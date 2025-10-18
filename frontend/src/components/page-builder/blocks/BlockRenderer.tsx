@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageBlock, BlockType } from '@/types/page-builder';
+import { usePageBuilderContext } from '../PageBuilderProvider';
 import { TextBlock } from './TextBlock';
 import { ImageBlock } from './ImageBlock';
 import { HeroBlock } from './HeroBlock';
@@ -24,6 +25,7 @@ export interface BlockRendererProps {
   onAddChild?: (parentId: string) => void;
   onUpdateChild?: (blockId: string, content: any, style?: any) => void;
   onDeleteChild?: (blockId: string) => void;
+  onSelect?: (blockId: string | null) => void;
   depth?: number;
 }
 
@@ -35,13 +37,26 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   onAddChild,
   onUpdateChild,
   onDeleteChild,
+  onSelect,
   depth = 0,
 }) => {
+  // Get selected block ID from context for visual highlighting
+  const { selectedBlockId } = usePageBuilderContext();
+  const isSelected = selectedBlockId === block.id;
+
   const commonProps = {
     block,
     isEditable: isEditing,
     onUpdate: (content: any, style?: any) => onUpdate(content, style),
     onDelete,
+  };
+
+  // Handle block selection
+  const handleBlockClick = (e: React.MouseEvent) => {
+    if (isEditing && onSelect) {
+      e.stopPropagation(); // Prevent parent blocks from being selected
+      onSelect(block.id);
+    }
   };
 
   const isContainerBlock = [
@@ -68,6 +83,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
           onAddChild={onAddChild}
           onUpdateChild={onUpdateChild}
           onDeleteChild={onDeleteChild}
+          onSelect={onSelect}
           depth={depth + 1}
         />
       ));
@@ -79,44 +95,90 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     children: isContainerBlock ? renderChildren() : undefined,
   };
 
+  // Render block based on type
+  let blockContent;
   switch (block.type) {
     case BlockType.TEXT:
-      return <TextBlock {...commonProps} />;
+      blockContent = <TextBlock {...commonProps} />;
+      break;
     case BlockType.IMAGE:
-      return <ImageBlock {...commonProps} />;
+      blockContent = <ImageBlock {...commonProps} />;
+      break;
     case BlockType.CAROUSEL:
-      return <CarouselBlock {...commonProps} />;
+      blockContent = <CarouselBlock {...commonProps} />;
+      break;
     case BlockType.HERO:
-      return <HeroBlock {...commonProps} />;
+      blockContent = <HeroBlock {...commonProps} />;
+      break;
     case BlockType.BUTTON:
-      return <ButtonBlock {...commonProps} />;
+      blockContent = <ButtonBlock {...commonProps} />;
+      break;
     case BlockType.DIVIDER:
-      return <DividerBlock {...commonProps} />;
+      blockContent = <DividerBlock {...commonProps} />;
+      break;
     case BlockType.SPACER:
-      return <SpacerBlock {...commonProps} />;
+      blockContent = <SpacerBlock {...commonProps} />;
+      break;
     case BlockType.TEAM:
-      return <TeamBlock {...commonProps} />;
+      blockContent = <TeamBlock {...commonProps} />;
+      break;
     case BlockType.STATS:
-      return <StatsBlock {...commonProps} />;
+      blockContent = <StatsBlock {...commonProps} />;
+      break;
     case BlockType.CONTACT_INFO:
-      return <ContactInfoBlock {...commonProps} />;
+      blockContent = <ContactInfoBlock {...commonProps} />;
+      break;
     case BlockType.CONTAINER:
-      return <ContainerBlock {...containerProps} />;
+      blockContent = <ContainerBlock {...containerProps} />;
+      break;
     case BlockType.SECTION:
-      return <SectionBlock {...containerProps} />;
+      blockContent = <SectionBlock {...containerProps} />;
+      break;
     case BlockType.GRID:
-      return <GridBlock {...containerProps} />;
+      blockContent = <GridBlock {...containerProps} />;
+      break;
     case BlockType.FLEX_ROW:
-      return <FlexBlock {...containerProps} />;
+      blockContent = <FlexBlock {...containerProps} />;
+      break;
     case BlockType.FLEX_COLUMN:
-      return <FlexBlock {...containerProps} />;
+      blockContent = <FlexBlock {...containerProps} />;
+      break;
     case BlockType.DYNAMIC:
-      return <DynamicBlock {...commonProps} />;
+      blockContent = <DynamicBlock {...commonProps} />;
+      break;
     default:
-      return (
+      blockContent = (
         <div className="p-4 border border-red-300 bg-red-50 text-red-600 rounded">
           Unknown block type: {block.type}
         </div>
       );
   }
+
+  // Wrap in clickable div for selection (only in edit mode)
+  if (isEditing && onSelect) {
+    return (
+      <div 
+        onClick={handleBlockClick}
+        className={`
+          cursor-pointer transition-all 
+          ${isSelected 
+            ? 'ring-2 ring-blue-500 ring-opacity-100 shadow-lg' 
+            : 'hover:ring-2 hover:ring-blue-400 hover:ring-opacity-50'
+          }
+        `}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect(block.id);
+          }
+        }}
+      >
+        {blockContent}
+      </div>
+    );
+  }
+
+  return blockContent;
 };

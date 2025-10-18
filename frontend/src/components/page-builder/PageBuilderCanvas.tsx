@@ -44,6 +44,7 @@ function PageBuilderCanvasComponent() {
     handleBlockUpdate,
     handleBlockDelete,
     handleAddChild,
+    handleSelectBlock,
   } = usePageBuilderContext();
 
   // Memoize block IDs array to prevent SortableContext re-renders
@@ -102,6 +103,7 @@ function PageBuilderCanvasComponent() {
                     onAddChild={handleAddChild}
                     onUpdateChild={handleBlockUpdate}
                     onDeleteChild={handleBlockDelete}
+                    onSelect={handleSelectBlock}
                     depth={0}
                   />
                 ))
