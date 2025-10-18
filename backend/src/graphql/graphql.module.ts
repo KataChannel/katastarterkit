@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { MulterModule } from '@nestjs/platform-express';
 
 import { UserResolver } from './resolvers/user.resolver';
 import { PostResolver } from './resolvers/post.resolver';
@@ -13,6 +14,7 @@ import { UniversalQueryResolver } from './resolvers/universal-query.resolver';
 import { ExtModelsResolver } from './resolvers/ext-models.resolver';
 
 import { InvoiceController } from '../controllers/invoice.controller';
+import { InvoiceImportController } from '../controllers/invoice-import.controller';
 import { AffiliateController } from '../controllers/affiliate.controller';
 
 import { UserService } from '../services/user.service';
@@ -27,6 +29,7 @@ import { OtpService } from '../services/otp.service';
 import { PubSubService } from '../services/pubsub.service';
 import { PageService } from '../services/page.service';
 import { InvoiceService } from '../services/invoice.service';
+import { InvoiceImportService } from '../services/invoice-import.service';
 import { BackendConfigService } from '../services/backend-config.service';
 import { RbacService } from '../services/rbac.service';
 import { AffiliateUserService, AffiliateCampaignService } from '../services/affiliate.service';
@@ -49,9 +52,15 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     GrokModule,
     MinioModule,
     SearchModule,
+    MulterModule.register({
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB
+      },
+    }),
   ],
   controllers: [
     InvoiceController,
+    InvoiceImportController,
     AffiliateController,
   ],
   providers: [
@@ -98,6 +107,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     PubSubService,
     PageService,
     InvoiceService,
+    InvoiceImportService,
     BackendConfigService,
     RbacService,
     
@@ -122,6 +132,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     PubSubService,
     PageService,
     InvoiceService,
+    InvoiceImportService,
     BackendConfigService,
     RbacService,
     

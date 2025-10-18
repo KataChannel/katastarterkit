@@ -1434,6 +1434,12 @@ type HRStatistics {
   totalEmployees: Int!
 }
 
+type ImportError {
+  data: String
+  error: String!
+  row: Int!
+}
+
 input InvoiceSearchInput {
   fromDate: DateTime
   khmshdon: String

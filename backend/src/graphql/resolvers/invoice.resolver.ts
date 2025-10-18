@@ -5,6 +5,7 @@ import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
 import { $Enums } from '@prisma/client';
 import { InvoiceService } from '../../services/invoice.service';
+import { InvoiceImportService } from '../../services/invoice-import.service';
 import {
   ExtListhoadon,
   ExtDetailhoadon,
@@ -24,7 +25,10 @@ import {
 export class InvoiceResolver {
   private readonly logger = new Logger(InvoiceResolver.name);
 
-  constructor(private readonly invoiceService: InvoiceService) {}
+  constructor(
+    private readonly invoiceService: InvoiceService,
+    private readonly invoiceImportService: InvoiceImportService,
+  ) {}
 
   /**
    * Create a new invoice

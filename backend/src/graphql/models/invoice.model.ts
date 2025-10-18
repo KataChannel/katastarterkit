@@ -295,3 +295,39 @@ export class DatabaseSyncResult {
   @Field(() => String)
   message: string;
 }
+
+@ObjectType()
+export class ImportError {
+  @Field(() => Int)
+  row: number;
+
+  @Field(() => String)
+  error: string;
+
+  @Field(() => String, { nullable: true })
+  data?: string;
+}
+
+@ObjectType()
+export class ImportResult {
+  @Field(() => Boolean)
+  success: boolean;
+
+  @Field(() => Int)
+  totalRows: number;
+
+  @Field(() => Int)
+  successCount: number;
+
+  @Field(() => Int)
+  errorCount: number;
+
+  @Field(() => [ImportError])
+  errors: ImportError[];
+
+  @Field(() => [String])
+  invoiceIds: string[];
+
+  @Field(() => String)
+  message: string;
+}

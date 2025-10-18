@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceTableAdvanced from '@/components/InvoiceTableAdvanced';
 import InvoiceDetailModal from '@/components/InvoiceDetailModal';
+import InvoiceImportModal from '@/components/InvoiceImportModal';
 import ConfigModal from '@/components/ConfigModal';
 import SyncProgressDisplay, { SyncProgress } from '@/components/SyncProgressDisplay';
 import { ExcelPreviewDialog } from '@/components/ExcelPreviewDialog';
@@ -11,7 +12,7 @@ import ConfigService from '@/services/configService';
 import DateService from '@/services/dateService';
 import { useInvoiceDatabase } from '@/services/invoiceDatabaseServiceNew';
 import { InvoiceData, AdvancedFilter, InvoiceApiResponse, InvoiceType } from '@/types/invoice';
-import { Search, RefreshCw, FileSpreadsheet, Settings, Calendar, Filter, ChevronDown, Eye } from 'lucide-react';
+import { Search, RefreshCw, FileSpreadsheet, Settings, Calendar, Filter, ChevronDown, Eye, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import BackendExcelExportService from '@/services/backendExcelExport';
 import FrontendExcelExportService, { InvoiceExportData } from '@/services/frontendExcelExport';
@@ -33,6 +34,7 @@ const ListHoaDonPage = () => {
   // Configuration state
   const [config, setConfig] = useState(ConfigService.getConfig());
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   
   // Excel Preview state
   const [showExcelPreview, setShowExcelPreview] = useState(false);
@@ -710,6 +712,16 @@ const handleFrontendExportExcel = () => {
               
               <button
                 type="button"
+                onClick={() => setShowImportModal(true)}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                title="Import hóa đơn từ file Excel"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Import Excel
+              </button>
+              
+              <button
+                type="button"
                 onClick={() => fetchFromDatabase(0, true)}
                 disabled={loading || isSyncing || dbLoading}
                 className="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
@@ -798,6 +810,15 @@ const handleFrontendExportExcel = () => {
           isOpen={showConfigModal}
           onClose={() => setShowConfigModal(false)}
           onConfigChanged={handleConfigChanged}
+        />
+
+        {/* Import Modal */}
+        <InvoiceImportModal
+          isOpen={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          onSuccess={() => {
+            fetchFromDatabase(0, true);
+          }}
         />
 
         {/* Excel Preview Dialog */}
