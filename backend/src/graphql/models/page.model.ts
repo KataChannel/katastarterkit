@@ -39,6 +39,10 @@ export enum BlockType {
   
   // Dynamic Block
   DYNAMIC = 'DYNAMIC',
+  
+  // E-commerce Blocks (Data-driven)
+  PRODUCT_LIST = 'PRODUCT_LIST',
+  PRODUCT_DETAIL = 'PRODUCT_DETAIL',
 }
 
 // Register enums for GraphQL

@@ -861,6 +861,10 @@ enum BlockType {
   
   // Dynamic Blocks
   DYNAMIC
+  
+  // E-commerce Blocks (Data-driven)
+  PRODUCT_LIST
+  PRODUCT_DETAIL
 }
 
 model Page {

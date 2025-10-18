@@ -45,7 +45,7 @@ export function LeftPanel({ onClose }: LeftPanelProps) {
           </TabsTrigger>
         </TabsList>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto min-h-0">
           <TabsContent value="elements" className="mt-0 h-full data-[state=inactive]:hidden">
             <ElementsLibrary />
           </TabsContent>

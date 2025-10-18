@@ -346,6 +346,8 @@ export interface Product {
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
+  discountPercentage?: number; // Added for computed field
+  profitMargin?: number; // Added for computed field
   createdAt: string;
   updatedAt: string;
 }

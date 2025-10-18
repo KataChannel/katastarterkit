@@ -121,6 +121,31 @@ export const DEFAULT_BLOCK_CONTENT = {
     variables: {},
     style: {} 
   },
+  [BlockType.PRODUCT_LIST]: {
+    title: 'Sản phẩm nổi bật',
+    subtitle: 'Khám phá các sản phẩm chất lượng cao',
+    limit: 12,
+    filters: {
+      isFeatured: true
+    },
+    layout: 'grid',
+    columns: 3,
+    showPrice: true,
+    showCategory: true,
+    showDescription: false,
+    showAddToCart: true,
+    cardVariant: 'default',
+    style: {}
+  },
+  [BlockType.PRODUCT_DETAIL]: {
+    showGallery: true,
+    showDescription: true,
+    showSpecs: true,
+    showReviews: false,
+    showRelated: false,
+    layout: 'default',
+    style: {}
+  },
 };
 
 /**

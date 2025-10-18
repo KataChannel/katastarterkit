@@ -29,6 +29,8 @@ import {
   DollarSign,
   MapPin,
   Search,
+  ShoppingCart,
+  Package,
 } from 'lucide-react';
 import { BlockType } from '@/types/page-builder';
 
@@ -36,7 +38,7 @@ interface ElementConfig {
   id: BlockType;
   icon: any;
   label: string;
-  category: 'basic' | 'layout' | 'content' | 'advanced';
+  category: 'basic' | 'layout' | 'content' | 'advanced' | 'ecommerce';
 }
 
 const elements: ElementConfig[] = [
@@ -65,6 +67,10 @@ const elements: ElementConfig[] = [
 
   // Advanced Elements
   { id: BlockType.FAQ, icon: ChevronDown, label: 'Accordion', category: 'advanced' },
+  
+  // E-commerce Elements
+  { id: BlockType.PRODUCT_LIST, icon: ShoppingCart, label: 'Product List', category: 'ecommerce' },
+  { id: BlockType.PRODUCT_DETAIL, icon: Package, label: 'Product Detail', category: 'ecommerce' },
 ];
 
 function DraggableElement({ element }: { element: ElementConfig }) {
@@ -111,6 +117,7 @@ export function ElementsLibrary() {
     { id: 'layout', label: 'Layout' },
     { id: 'content', label: 'Content' },
     { id: 'advanced', label: 'Advanced' },
+    { id: 'ecommerce', label: 'E-commerce' },
   ];
 
   const filteredElements = elements.filter((element) => {
@@ -128,9 +135,9 @@ export function ElementsLibrary() {
     .filter((group) => group.elements.length > 0);
 
   return (
-    <div className="flex flex-col h-full bg-gray-50/50">
+    <div className="flex flex-col h-full">
       {/* Search */}
-      <div className="p-3 sm:p-4 border-b border-gray-200 bg-white">
+      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200 bg-white">
         <div className="relative">
           <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 pointer-events-none" />
           <Input
@@ -143,7 +150,7 @@ export function ElementsLibrary() {
       </div>
 
       {/* Category Filter */}
-      <div className="flex gap-1.5 sm:gap-2 p-2 sm:p-3 border-b border-gray-200 overflow-x-auto bg-white scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+      <div className="flex-shrink-0 flex gap-1.5 sm:gap-2 p-2 sm:p-3 border-b border-gray-200 overflow-x-auto bg-white scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
         {categories.map((category) => (
           <Button
             key={category.id}
@@ -158,7 +165,7 @@ export function ElementsLibrary() {
       </div>
 
       {/* Elements Grid */}
-      <div className="flex-1 overflow-auto p-3 sm:p-4">
+      <div className="flex-1 min-h-0 p-3 sm:p-4 bg-gray-50/50">
         {activeCategory === 'all' ? (
           // Grouped view
           <div className="space-y-4 sm:space-y-6">

@@ -27,6 +27,10 @@ export enum BlockType {
   
   // Dynamic Blocks
   DYNAMIC = 'DYNAMIC',
+  
+  // E-commerce Blocks (Data-driven)
+  PRODUCT_LIST = 'PRODUCT_LIST',
+  PRODUCT_DETAIL = 'PRODUCT_DETAIL',
 }
 
 export enum PageStatus {
@@ -412,4 +416,38 @@ export interface PageFiltersInput {
 export interface BulkUpdateBlockOrderInput {
   id: string;
   order: number;
+}
+
+// E-commerce Block Content Interfaces
+export interface ProductListBlockContent {
+  title?: string;
+  subtitle?: string;
+  limit?: number;
+  categoryId?: string;
+  filters?: {
+    isFeatured?: boolean;
+    isNew?: boolean;
+    minPrice?: number;
+    maxPrice?: number;
+    search?: string;
+  };
+  layout?: 'grid' | 'list';
+  columns?: 2 | 3 | 4;
+  showPrice?: boolean;
+  showCategory?: boolean;
+  showDescription?: boolean;
+  showAddToCart?: boolean;
+  cardVariant?: 'default' | 'compact' | 'detailed';
+  style?: any;
+}
+
+export interface ProductDetailBlockContent {
+  productSlug?: string;
+  showGallery?: boolean;
+  showDescription?: boolean;
+  showSpecs?: boolean;
+  showReviews?: boolean;
+  showRelated?: boolean;
+  layout?: 'default' | 'wide' | 'sidebar';
+  style?: any;
 }

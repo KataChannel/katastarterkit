@@ -16,6 +16,8 @@ import { GridBlock } from './GridBlock';
 import { FlexBlock } from './FlexBlock';
 import { DynamicBlock } from './DynamicBlock';
 import CarouselBlock from './CarouselBlock';
+import { ProductListBlock } from './ProductListBlock';
+import { ProductDetailBlock } from './ProductDetailBlock';
 
 export interface BlockRendererProps {
   block: PageBlock;
@@ -156,6 +158,20 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       break;
     case BlockType.DYNAMIC:
       blockContent = <DynamicBlock {...commonProps} />;
+      break;
+    case BlockType.PRODUCT_LIST:
+      blockContent = <ProductListBlock 
+        content={block.content}
+        isEditing={isEditing}
+        onUpdate={(content) => onUpdate(content, block.style)}
+      />;
+      break;
+    case BlockType.PRODUCT_DETAIL:
+      blockContent = <ProductDetailBlock 
+        content={block.content}
+        isEditing={isEditing}
+        onUpdate={(content) => onUpdate(content, block.style)}
+      />;
       break;
     default:
       blockContent = (

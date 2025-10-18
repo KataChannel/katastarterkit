@@ -346,9 +346,9 @@ export function TemplatesLibrary() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50/50">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-3 sm:p-4 border-b border-gray-200 bg-white">
+      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-2 mb-3 sm:mb-4">
           <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           <h2 className="font-semibold text-sm sm:text-base">Templates</h2>
@@ -370,7 +370,7 @@ export function TemplatesLibrary() {
       </div>
 
       {/* Category Filter */}
-      <div className="flex gap-1.5 sm:gap-2 p-2 sm:p-3 border-b border-gray-200 overflow-x-auto bg-white scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+      <div className="flex-shrink-0 flex gap-1.5 sm:gap-2 p-2 sm:p-3 border-b border-gray-200 overflow-x-auto bg-white scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
         {categories.map((category) => {
           const Icon = category.icon;
           return (
@@ -390,7 +390,7 @@ export function TemplatesLibrary() {
       </div>
 
       {/* Templates Grid */}
-      <div className="flex-1 overflow-auto p-3 sm:p-4">
+      <div className="flex-1 min-h-0 p-3 sm:p-4 bg-gray-50/50">
         {filteredTemplates.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             {filteredTemplates.map((template) => (
@@ -412,7 +412,7 @@ export function TemplatesLibrary() {
       </div>
 
       {/* Footer Info */}
-      <div className="p-2 sm:p-3 border-t border-gray-200 bg-white">
+      <div className="flex-shrink-0 p-2 sm:p-3 border-t border-gray-200 bg-white">
         <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500">
           <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           <span>
