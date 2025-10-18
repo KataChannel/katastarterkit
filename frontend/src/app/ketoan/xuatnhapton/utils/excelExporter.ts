@@ -34,7 +34,10 @@ export const exportToExcel = (
     'SL Nhập',
     'TT Nhập',
     'SL Xuất',
-    'TT Xuất',
+    'Giá Vốn',
+    'TT Vốn',
+    'Giá Bán',
+    'TT Bán',
     'SL Tồn Cuối',
     'TT Tồn Cuối',
   ]);
@@ -51,7 +54,10 @@ export const exportToExcel = (
       row.importQuantity,
       row.importAmount,
       row.exportQuantity,
+      row.exportCostPrice,
       row.exportAmount,
+      row.exportSalePrice,
+      row.exportSaleAmount,
       row.closingQuantity,
       row.closingAmount,
     ]);
@@ -64,7 +70,8 @@ export const exportToExcel = (
   excelData.push(['Tổng SL nhập:', summary.totalImportQuantity]);
   excelData.push(['Tổng TT nhập:', summary.totalImportAmount]);
   excelData.push(['Tổng SL xuất:', summary.totalExportQuantity]);
-  excelData.push(['Tổng TT xuất:', summary.totalExportAmount]);
+  excelData.push(['Tổng TT vốn:', summary.totalExportAmount]);
+  excelData.push(['Tổng TT bán:', summary.totalExportSaleAmount]);
   excelData.push(['Tổng SL tồn cuối:', summary.totalClosingQuantity]);
   excelData.push(['Tổng TT tồn cuối:', summary.totalClosingAmount]);
   
@@ -82,7 +89,10 @@ export const exportToExcel = (
     { wch: 12 },  // SL Nhập
     { wch: 15 },  // TT Nhập
     { wch: 12 },  // SL Xuất
-    { wch: 15 },  // TT Xuất
+    { wch: 15 },  // Giá Vốn
+    { wch: 15 },  // TT Vốn
+    { wch: 15 },  // Giá Bán
+    { wch: 15 },  // TT Bán
     { wch: 12 },  // SL Tồn Cuối
     { wch: 15 },  // TT Tồn Cuối
   ];
@@ -90,9 +100,9 @@ export const exportToExcel = (
   
   // Merge cells for title
   ws['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 11 } }, // Title
-    { s: { r: 1, c: 0 }, e: { r: 1, c: 11 } }, // Company name
-    { s: { r: 2, c: 0 }, e: { r: 2, c: 11 } }, // Date range
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 14 } }, // Title (15 columns now)
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 14 } }, // Company name
+    { s: { r: 2, c: 0 }, e: { r: 2, c: 14 } }, // Date range
   ];
   
   // Add worksheet to workbook
@@ -119,6 +129,7 @@ export const calculateSummary = (rows: InventoryRow[]): InventorySummary => {
     totalImportAmount: rows.reduce((sum, r) => sum + r.importAmount, 0),
     totalExportQuantity: rows.reduce((sum, r) => sum + r.exportQuantity, 0),
     totalExportAmount: rows.reduce((sum, r) => sum + r.exportAmount, 0),
+    totalExportSaleAmount: rows.reduce((sum, r) => sum + r.exportSaleAmount, 0),
     totalClosingQuantity: rows.reduce((sum, r) => sum + r.closingQuantity, 0),
     totalClosingAmount: rows.reduce((sum, r) => sum + r.closingAmount, 0),
   };

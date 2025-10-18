@@ -64,7 +64,12 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ summary, loading }) 
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatNumber(summary.totalExportQuantity)}</div>
-          <p className="text-xs text-orange-600">{formatCurrency(summary.totalExportAmount)}</p>
+          <p className="text-xs text-orange-600" title="Giá vốn">
+            Vốn: {formatCurrency(summary.totalExportAmount)}
+          </p>
+          <p className="text-xs text-orange-800 font-medium" title="Doanh thu bán">
+            Bán: {formatCurrency(summary.totalExportSaleAmount)}
+          </p>
         </CardContent>
       </Card>
       

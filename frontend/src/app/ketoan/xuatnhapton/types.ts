@@ -58,7 +58,10 @@ export interface InventoryRow {
   
   // Xuất
   exportQuantity: number; // Số lượng xuất
-  exportAmount: number; // Tổng tiền xuất
+  exportAmount: number; // Tổng tiền xuất (theo giá vốn)
+  exportCostPrice: number; // Giá vốn (bình quân gia quyền)
+  exportSalePrice: number; // Giá bán (dgia từ đơn hàng)
+  exportSaleAmount: number; // Thành tiền bán (SL Xuất × Giá Bán)
   
   // Tồn cuối
   closingQuantity: number; // Số lượng tồn cuối
@@ -71,6 +74,7 @@ export interface InventorySummary {
   totalImportAmount: number;
   totalExportQuantity: number;
   totalExportAmount: number;
+  totalExportSaleAmount: number; // Tổng thành tiền bán
   totalClosingQuantity: number;
   totalClosingAmount: number;
 }

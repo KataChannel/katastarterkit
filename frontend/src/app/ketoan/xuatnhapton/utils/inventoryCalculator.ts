@@ -140,6 +140,9 @@ export const calculateInventory = (
           importAmount: 0,
           exportQuantity: 0,
           exportAmount: 0,
+          exportCostPrice: 0,
+          exportSalePrice: 0,
+          exportSaleAmount: 0,
           closingQuantity: 0,
           closingAmount: 0,
         };
@@ -149,6 +152,7 @@ export const calculateInventory = (
       // Add to import or export based on invoice type
       const quantity = Number(detail.sluong) || 0;
       const amount = Number(detail.thtien) || 0;
+      const unitPrice = Number(detail.dgia) || 0;
       
       if (invoiceType === 'purchase') {
         // Mua hàng = Nhập kho
@@ -157,7 +161,10 @@ export const calculateInventory = (
       } else if (invoiceType === 'sale') {
         // Bán hàng = Xuất kho
         row.exportQuantity += quantity;
-        row.exportAmount += amount;
+        // Note: exportAmount will be calculated as cost (giá vốn × SL)
+        // exportSaleAmount will be calculated from sale price (giá bán × SL)
+        row.exportSalePrice = unitPrice; // Store sale unit price from invoice
+        row.exportSaleAmount += unitPrice * quantity; // Total sale amount
       }
     });
   });
@@ -195,6 +202,15 @@ export const calculateInventory = (
       row.openingQuantity = runningQuantity;
       row.openingAmount = runningAmount;
       
+      // Calculate weighted average cost price (Giá vốn bình quân gia quyền)
+      // Formula: (Tồn đầu tiền + Nhập tiền) / (Tồn đầu SL + Nhập SL)
+      const totalQuantity = row.openingQuantity + row.importQuantity;
+      const totalAmount = row.openingAmount + row.importAmount;
+      const weightedAvgCost = totalQuantity > 0 ? totalAmount / totalQuantity : 0;
+      
+      row.exportCostPrice = weightedAvgCost;
+      row.exportAmount = weightedAvgCost * row.exportQuantity; // Cost of goods sold
+      
       // Formula: Tồn Đầu + Nhập - Xuất = Tồn Cuối
       row.closingQuantity = row.openingQuantity + row.importQuantity - row.exportQuantity;
       row.closingAmount = row.openingAmount + row.importAmount - row.exportAmount;
@@ -229,8 +245,15 @@ export const groupInventoryByProduct = (rows: InventoryRow[]): InventoryRow[] =>
       existing.importAmount += row.importAmount;
       existing.exportQuantity += row.exportQuantity;
       existing.exportAmount += row.exportAmount;
+      existing.exportSaleAmount += row.exportSaleAmount;
       existing.closingQuantity += row.closingQuantity;
       existing.closingAmount += row.closingAmount;
+      
+      // Recalculate weighted average for grouped data
+      const totalQty = existing.importQuantity + existing.openingQuantity;
+      const totalAmt = existing.importAmount + existing.openingAmount;
+      existing.exportCostPrice = totalQty > 0 ? totalAmt / totalQty : 0;
+      existing.exportSalePrice = existing.exportQuantity > 0 ? existing.exportSaleAmount / existing.exportQuantity : 0;
     }
   });
   

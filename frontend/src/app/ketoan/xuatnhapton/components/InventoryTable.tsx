@@ -81,7 +81,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                 <TableHead className="w-[80px]">ĐVT</TableHead>
                 <TableHead colSpan={2} className="text-center bg-blue-50">Tồn Đầu</TableHead>
                 <TableHead colSpan={2} className="text-center bg-green-50">Nhập</TableHead>
-                <TableHead colSpan={2} className="text-center bg-orange-50">Xuất</TableHead>
+                <TableHead colSpan={5} className="text-center bg-orange-50">Xuất</TableHead>
                 <TableHead colSpan={2} className="text-center bg-purple-50">Tồn Cuối</TableHead>
               </TableRow>
               <TableRow>
@@ -91,7 +91,10 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                 <TableHead className="text-right bg-green-50">SL</TableHead>
                 <TableHead className="text-right bg-green-50">Thành Tiền</TableHead>
                 <TableHead className="text-right bg-orange-50">SL</TableHead>
-                <TableHead className="text-right bg-orange-50">Thành Tiền</TableHead>
+                <TableHead className="text-right bg-orange-50">Giá Vốn</TableHead>
+                <TableHead className="text-right bg-orange-50">TT Vốn</TableHead>
+                <TableHead className="text-right bg-orange-50">Giá Bán</TableHead>
+                <TableHead className="text-right bg-orange-50">TT Bán</TableHead>
                 <TableHead className="text-right bg-purple-50">SL</TableHead>
                 <TableHead className="text-right bg-purple-50">Thành Tiền</TableHead>
               </TableRow>
@@ -132,12 +135,21 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                     {formatCurrency(row.importAmount)}
                   </TableCell>
                   
-                  {/* Xuất */}
+                  {/* Xuất - 5 columns */}
                   <TableCell className="text-right bg-orange-50">
                     {formatNumber(row.exportQuantity)}
                   </TableCell>
-                  <TableCell className="text-right text-orange-600 bg-orange-50">
+                  <TableCell className="text-right text-orange-600 bg-orange-50" title="Giá vốn bình quân gia quyền">
+                    {formatCurrency(row.exportCostPrice)}
+                  </TableCell>
+                  <TableCell className="text-right text-orange-600 bg-orange-50" title="Thành tiền vốn">
                     {formatCurrency(row.exportAmount)}
+                  </TableCell>
+                  <TableCell className="text-right text-orange-700 bg-orange-50" title="Giá bán (từ đơn hàng)">
+                    {formatCurrency(row.exportSalePrice)}
+                  </TableCell>
+                  <TableCell className="text-right text-orange-800 font-medium bg-orange-50" title="Thành tiền bán">
+                    {formatCurrency(row.exportSaleAmount)}
                   </TableCell>
                   
                   {/* Tồn Cuối */}
