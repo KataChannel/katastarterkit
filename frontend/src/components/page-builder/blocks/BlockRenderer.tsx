@@ -73,20 +73,31 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     // Create a copy of children array before sorting (GraphQL returns read-only array)
     return [...block.children]
       .sort((a, b) => a.order - b.order)
-      .map((childBlock) => (
-        <BlockRenderer
-          key={childBlock.id}
-          block={childBlock}
-          isEditing={isEditing}
-          onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
-          onDelete={() => onDeleteChild?.(childBlock.id)}
-          onAddChild={onAddChild}
-          onUpdateChild={onUpdateChild}
-          onDeleteChild={onDeleteChild}
-          onSelect={onSelect}
-          depth={depth + 1}
-        />
-      ));
+      .map((childBlock) => {
+        // Check if this child is also a container that can have children
+        const childIsContainer = [
+          BlockType.CONTAINER,
+          BlockType.SECTION,
+          BlockType.GRID,
+          BlockType.FLEX_ROW,
+          BlockType.FLEX_COLUMN,
+        ].includes(childBlock.type);
+
+        return (
+          <BlockRenderer
+            key={childBlock.id}
+            block={childBlock}
+            isEditing={isEditing}
+            onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
+            onDelete={() => onDeleteChild?.(childBlock.id)}
+            onAddChild={childIsContainer ? onAddChild : undefined}
+            onUpdateChild={onUpdateChild}
+            onDeleteChild={onDeleteChild}
+            onSelect={onSelect}
+            depth={depth + 1}
+          />
+        );
+      });
   };
 
   const containerProps = {
