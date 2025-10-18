@@ -6,9 +6,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../ui/tabs';
 import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Textarea } from '../../../ui/textarea';
-import { X, Paintbrush, Settings, Trash2, Copy, Eye, EyeOff, Lock, Unlock } from 'lucide-react';
+import { X, Paintbrush, Settings, Trash2, Copy, Eye, EyeOff, Lock, Unlock, FileText } from 'lucide-react';
 import { usePageBuilderContext } from '../../PageBuilderProvider';
 import { StylePanel } from '../StylePanel';
+import { DevLogPanel } from '../DevLogPanel';
 
 interface RightPanelProps {
   device: 'desktop' | 'tablet' | 'mobile';
@@ -16,7 +17,7 @@ interface RightPanelProps {
 }
 
 export function RightPanel({ device, onClose }: RightPanelProps) {
-  const [activeTab, setActiveTab] = useState<'style' | 'settings'>('style');
+  const [activeTab, setActiveTab] = useState<'style' | 'settings' | 'logs'>('style');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   
@@ -70,9 +71,9 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
   };
 
   return (
-    <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
+    <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-full overflow-hidden">
       {/* Panel Header */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 flex-shrink-0">
         <div className="h-12 flex items-center justify-between px-4">
           <h2 className="font-semibold">Properties</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -122,15 +123,15 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
       {selectedBlockId ? (
         <>
           {/* Device Indicator */}
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 flex-shrink-0">
             <p className="text-xs text-gray-500">
               Editing for: <span className="font-semibold capitalize">{device}</span>
             </p>
           </div>
 
           {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col">
-            <TabsList className="w-full justify-start rounded-none border-b">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col min-h-0">
+            <TabsList className="w-full justify-start rounded-none border-b flex-shrink-0">
               <TabsTrigger value="style" className="flex-1 gap-2">
                 <Paintbrush className="w-4 h-4" />
                 Style
@@ -139,11 +140,15 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
                 <Settings className="w-4 h-4" />
                 Settings
               </TabsTrigger>
+              <TabsTrigger value="logs" className="flex-1 gap-2">
+                <FileText className="w-4 h-4" />
+                Logs
+              </TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-y-auto min-h-0">
               {/* Style Tab */}
-              <TabsContent value="style" className="mt-0">
+              <TabsContent value="style" className="mt-0 h-full">
                 <StylePanel
                   selectedBlock={selectedBlock}
                   onStyleChange={handleStyleChange}
@@ -151,7 +156,7 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
               </TabsContent>
 
               {/* Settings Tab */}
-              <TabsContent value="settings" className="mt-0 p-4">
+              <TabsContent value="settings" className="mt-0 p-4 h-full overflow-y-auto">
                 <div className="space-y-6">
                   {/* Block Information */}
                   <div className="space-y-3">
@@ -294,6 +299,11 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
                     </p>
                   </div>
                 </div>
+              </TabsContent>
+
+              {/* Logs Tab */}
+              <TabsContent value="logs" className="mt-0 h-full">
+                <DevLogPanel />
               </TabsContent>
             </div>
           </Tabs>

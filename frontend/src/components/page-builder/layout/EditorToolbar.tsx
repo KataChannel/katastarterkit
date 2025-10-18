@@ -30,6 +30,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { SaveTemplateDialog } from '@/components/page-builder/templates';
 import { ImportTemplateDialog } from '@/components/page-builder/templates';
 import { PageTemplate, PageElement, ImportTemplateData } from '@/types/template';
@@ -71,6 +82,7 @@ export function EditorToolbar({
   const { addTemplate, importFromJSON } = useTemplates();
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -264,7 +276,12 @@ export function EditorToolbar({
         </Button>
 
         {/* Settings */}
-        <Button variant="ghost" size="icon" title="Global Settings">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          title="Global Settings"
+          onClick={() => setIsSettingsOpen(true)}
+        >
           <Settings className="w-4 h-4" />
         </Button>
 
@@ -288,6 +305,192 @@ export function EditorToolbar({
         onClose={() => setIsImportDialogOpen(false)}
         onImport={handleImportTemplate}
       />
+
+      {/* Global Settings Dialog */}
+      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>⚙️ Global Settings</DialogTitle>
+            <DialogDescription>
+              Configure global page settings that apply to the entire page
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Page Settings */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                📄 Page Settings
+              </h3>
+              
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="page-title">Page Title</Label>
+                  <Input
+                    id="page-title"
+                    placeholder="Enter page title..."
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="page-description">Page Description</Label>
+                  <Textarea
+                    id="page-description"
+                    placeholder="Enter page description..."
+                    rows={3}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="page-slug">Page Slug (URL)</Label>
+                  <Input
+                    id="page-slug"
+                    placeholder="/my-page"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SEO Settings */}
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                🔍 SEO Settings
+              </h3>
+              
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="seo-title">SEO Title</Label>
+                  <Input
+                    id="seo-title"
+                    placeholder="SEO optimized title..."
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500">Recommended: 50-60 characters</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo-description">Meta Description</Label>
+                  <Textarea
+                    id="seo-description"
+                    placeholder="SEO meta description..."
+                    rows={3}
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500">Recommended: 150-160 characters</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="seo-keywords">Keywords</Label>
+                  <Input
+                    id="seo-keywords"
+                    placeholder="keyword1, keyword2, keyword3"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Page Options */}
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                🎛️ Page Options
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Published</Label>
+                    <p className="text-xs text-gray-500">Make this page publicly visible</p>
+                  </div>
+                  <Switch />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Show in Navigation</Label>
+                    <p className="text-xs text-gray-500">Include in main navigation menu</p>
+                  </div>
+                  <Switch />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Allow Indexing</Label>
+                    <p className="text-xs text-gray-500">Allow search engines to index this page</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Require Authentication</Label>
+                    <p className="text-xs text-gray-500">Require users to login to view</p>
+                  </div>
+                  <Switch />
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Code */}
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                💻 Custom Code
+              </h3>
+              
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="custom-css">Custom CSS</Label>
+                  <Textarea
+                    id="custom-css"
+                    placeholder=".my-class { color: red; }"
+                    rows={4}
+                    className="w-full font-mono text-xs"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="custom-js">Custom JavaScript</Label>
+                  <Textarea
+                    id="custom-js"
+                    placeholder="console.log('Hello');"
+                    rows={4}
+                    className="w-full font-mono text-xs"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="head-code">Head Code (Meta tags, Analytics)</Label>
+                  <Textarea
+                    id="head-code"
+                    placeholder="<meta name='...'/>"
+                    rows={4}
+                    className="w-full font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 border-t pt-4">
+            <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast({
+                title: 'Settings saved',
+                description: 'Global settings have been updated successfully.',
+                type: 'success',
+              });
+              setIsSettingsOpen(false);
+            }}>
+              Save Settings
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

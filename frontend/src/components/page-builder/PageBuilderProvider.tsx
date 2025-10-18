@@ -23,6 +23,7 @@ import {
   UpdatePageInput,
   CreatePageBlockInput
 } from '@/types/page-builder';
+import { pageBuilderLogger, LOG_OPERATIONS } from './utils/pageBuilderLogger';
 
 /**
  * Default content for each block type
@@ -319,7 +320,11 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
           setIsNewPageMode(false);
           window.history.replaceState(null, '', `/admin/pagebuilder?pageId=${newPage.id}`);
           await refetch();
-          toast.success('Page created successfully!');
+          
+          // Log and show toast for important operation
+          if (pageBuilderLogger.success(LOG_OPERATIONS.PAGE_CREATE, 'Page created successfully', { pageId: newPage.id, title: newPage.title })) {
+            toast.success('Page created successfully!');
+          }
         }
       } else {
         const input: UpdatePageInput = {
@@ -333,11 +338,19 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
         };
         await updatePage(editingPage.id, input);
         await refetch();
-        toast.success('Page updated successfully!');
+        
+        // Log and show toast for important operation
+        if (pageBuilderLogger.success(LOG_OPERATIONS.PAGE_UPDATE, 'Page updated successfully', { pageId: editingPage.id, title: editingPage.title })) {
+          toast.success('Page updated successfully!');
+        }
       }
     } catch (error) {
       console.error('Failed to save page:', error);
-      toast.error('Failed to save page');
+      
+      // Always show error toast
+      if (pageBuilderLogger.error(LOG_OPERATIONS.PAGE_SAVE, 'Failed to save page', { error })) {
+        toast.error('Failed to save page');
+      }
     }
   }, [editingPage, isNewPageMode, createPage, updatePage, refetch]);
 
@@ -346,11 +359,19 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
     
     try {
       await deletePage(editingPage.id);
-      toast.success('Page deleted successfully!');
+      
+      // Log and show toast for important operation
+      if (pageBuilderLogger.success(LOG_OPERATIONS.PAGE_DELETE, 'Page deleted successfully', { pageId: editingPage.id })) {
+        toast.success('Page deleted successfully!');
+      }
       window.location.href = '/admin/pagebuilder';
     } catch (error) {
       console.error('Failed to delete page:', error);
-      toast.error('Failed to delete page');
+      
+      // Always show error toast
+      if (pageBuilderLogger.error(LOG_OPERATIONS.PAGE_DELETE, 'Failed to delete page', { error })) {
+        toast.error('Failed to delete page');
+      }
     }
   }, [editingPage, deletePage]);
 
@@ -364,7 +385,9 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
   }) => {
     const targetPageId = pageId || editingPage?.id;
     if (!targetPageId) {
-      toast.error('Page ID required to add template blocks');
+      if (pageBuilderLogger.warning(LOG_OPERATIONS.TEMPLATE_ADD, 'Page ID required to add template blocks', { templateConfig })) {
+        toast.error('Page ID required to add template blocks');
+      }
       return;
     }
 
@@ -387,11 +410,19 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
       const newBlock = await addBlock(input);
       if (newBlock) {
         await refetch();
-        toast.success(`${templateConfig.templateName} template added successfully!`);
+        
+        // Log and show toast for important operation
+        if (pageBuilderLogger.success(LOG_OPERATIONS.TEMPLATE_ADD, `${templateConfig.templateName} template added successfully`, { templateConfig, blockId: newBlock.id })) {
+          toast.success(`${templateConfig.templateName} template added successfully!`);
+        }
       }
     } catch (error) {
       console.error('Error adding template block:', error);
-      toast.error('Failed to add template block');
+      
+      // Always show error toast
+      if (pageBuilderLogger.error(LOG_OPERATIONS.TEMPLATE_ADD, 'Failed to add template block', { error, templateConfig })) {
+        toast.error('Failed to add template block');
+      }
     }
   }, [pageId, editingPage?.id, blocks.length, addBlock, refetch]);
 
@@ -399,14 +430,18 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
   const handleAddBlock = useCallback(async (blockType: BlockType) => {
     // For new pages, we need to save the page first if no pageId provided
     if (isNewPageMode && !pageId) {
-      toast.error('Please save the page first before adding blocks');
+      if (pageBuilderLogger.warning(LOG_OPERATIONS.BLOCK_ADD, 'Please save the page first before adding blocks', { blockType })) {
+        toast.error('Please save the page first before adding blocks');
+      }
       return;
     }
 
     // For existing pages or when pageId is provided, allow adding blocks
     const targetPageId = pageId || editingPage?.id;
     if (!targetPageId) {
-      toast.error('Page ID required to add blocks');
+      if (pageBuilderLogger.warning(LOG_OPERATIONS.BLOCK_ADD, 'Page ID required to add blocks', { blockType })) {
+        toast.error('Page ID required to add blocks');
+      }
       return;
     }
 
@@ -422,20 +457,33 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
       const newBlock = await addBlock(input);
       if (newBlock) {
         await refetch();
-        toast.success('Block added successfully!');
+        
+        // Only log, don't show toast for regular block additions
+        pageBuilderLogger.info(LOG_OPERATIONS.BLOCK_ADD, `Block added: ${blockType}`, { blockId: newBlock.id, blockType });
       }
     } catch (error: any) {
       console.error('Failed to add block:', error);
-      toast.error(error.message || 'Failed to add block');
+      
+      // Always show error toast
+      if (pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_ADD, error.message || 'Failed to add block', { error, blockType })) {
+        toast.error(error.message || 'Failed to add block');
+      }
     }
   }, [editingPage, isNewPageMode, blocks.length, addBlock, refetch]);
 
   const handleBlockUpdate = useCallback(async (blockId: string, content: any, style: any = {}) => {
     try {
       await updateBlock(blockId, { content, style });
+      
+      // Only log, don't show toast for block updates
+      pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_UPDATE, `Block updated`, { blockId, content, style });
     } catch (error) {
       console.error('Failed to update block:', error);
-      toast.error('Failed to update block');
+      
+      // Always show error toast
+      if (pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_UPDATE, 'Failed to update block', { error, blockId })) {
+        toast.error('Failed to update block');
+      }
     }
   }, [updateBlock]);
 
@@ -443,10 +491,16 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
     try {
       await deleteBlock(blockId);
       await refetch();
-      toast.success('Block deleted successfully!');
+      
+      // Only log, don't show toast for block deletion
+      pageBuilderLogger.info(LOG_OPERATIONS.BLOCK_DELETE, `Block deleted`, { blockId });
     } catch (error) {
       console.error('Failed to delete block:', error);
-      toast.error('Failed to delete block');
+      
+      // Always show error toast
+      if (pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_DELETE, 'Failed to delete block', { error, blockId })) {
+        toast.error('Failed to delete block');
+      }
     }
   }, [deleteBlock, refetch]);
 
@@ -458,9 +512,16 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
     try {
       await updateBlocksOrder(blockOrderInputs);
       await refetch();
+      
+      // Only log, don't show toast for reordering
+      pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_REORDER, `Blocks reordered`, { count: newBlocks.length });
     } catch (error) {
       console.error('Failed to reorder blocks:', error);
-      toast.error('Failed to reorder blocks');
+      
+      // Always show error toast
+      if (pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_REORDER, 'Failed to reorder blocks', { error })) {
+        toast.error('Failed to reorder blocks');
+      }
     }
   }, [updateBlocksOrder, refetch]);
 
@@ -478,9 +539,16 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
       console.log('PageBuilderProvider - updateBlock result:', result);
       await refetch();
       console.log('PageBuilderProvider - refetch completed');
+      
+      // Only log, don't show toast for style updates
+      pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_STYLE_UPDATE, `Block style updated`, { blockId, style });
     } catch (error) {
       console.error('Failed to update block style:', error);
-      toast.error('Failed to update block style');
+      
+      // Always show error toast
+      if (pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_STYLE_UPDATE, 'Failed to update block style', { error, blockId })) {
+        toast.error('Failed to update block style');
+      }
     }
   }, [updateBlock, refetch]);
 
@@ -497,13 +565,17 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
     try {
       // Validation logic consistent with other block addition methods
       if (isNewPageMode && !pageId) {
-        toast.error('Please save the page first before adding blocks');
+        if (pageBuilderLogger.warning(LOG_OPERATIONS.CHILD_BLOCK_ADD, 'Please save the page first before adding blocks', { parentId, blockType })) {
+          toast.error('Please save the page first before adding blocks');
+        }
         return;
       }
 
       const targetPageId = pageId || editingPage?.id;
       if (!targetPageId) {
-        toast.error('Page ID required to add blocks');
+        if (pageBuilderLogger.warning(LOG_OPERATIONS.CHILD_BLOCK_ADD, 'Page ID required to add blocks', { parentId, blockType })) {
+          toast.error('Page ID required to add blocks');
+        }
         return;
       }
 
@@ -524,10 +596,16 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
       await refetch();
       setShowAddChildDialog(false);
       setAddChildParentId(null);
-      toast.success('Child block added successfully!');
+      
+      // Only log, don't show toast for child block additions
+      pageBuilderLogger.info(LOG_OPERATIONS.CHILD_BLOCK_ADD, `Child block added to ${parentId}`, { parentId, blockType, depth: input.depth });
     } catch (error: any) {
       console.error('Failed to add child block:', error);
-      toast.error(error.message || 'Failed to add child block');
+      
+      // Always show error toast
+      if (pageBuilderLogger.error(LOG_OPERATIONS.CHILD_BLOCK_ADD, error.message || 'Failed to add child block', { error, parentId, blockType })) {
+        toast.error(error.message || 'Failed to add child block');
+      }
     }
   }, [page, addBlock, refetch, isNewPageMode, pageId, editingPage]);
 

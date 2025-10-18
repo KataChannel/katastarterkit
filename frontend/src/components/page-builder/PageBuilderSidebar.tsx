@@ -66,38 +66,40 @@ function PageBuilderSidebarComponent() {
   } = usePageBuilderContext();
 
   return (
-    <div className="w-80 border-r bg-gray-50 p-4 overflow-y-auto">
-      <Tabs defaultValue="blocks" className="w-full">
-        <TabsList className="w-full mb-4">
-          <TabsTrigger value="blocks" className="flex-1">Blocks</TabsTrigger>
-          <TabsTrigger value="templates" className="flex-1">Templates</TabsTrigger>
-        </TabsList>
-        
-        {/* Blocks Tab - Block Types Palette */}
-        <TabsContent value="blocks" className="mt-0">
-          <div className="space-y-2">
-            {BLOCK_TYPES.map(blockType => (
-              <Button
-                key={blockType.type}
-                variant="outline"
-                className="w-full justify-start h-auto p-3"
-                onClick={() => handleAddBlock(blockType.type)}
-                disabled={isNewPageMode && !editingPage?.id}
-              >
-                <div className={`p-2 rounded mr-3 ${blockType.color}`}>
-                  <blockType.icon size={16} />
-                </div>
-                <span className="text-sm">{blockType.label}</span>
-              </Button>
-            ))}
-          </div>
-        </TabsContent>
+    <div className="w-80 border-r bg-gray-50 flex flex-col h-full overflow-hidden">
+      <div className="p-4 flex-1 overflow-y-auto">
+        <Tabs defaultValue="blocks" className="w-full">
+          <TabsList className="w-full mb-4">
+            <TabsTrigger value="blocks" className="flex-1">Blocks</TabsTrigger>
+            <TabsTrigger value="templates" className="flex-1">Templates</TabsTrigger>
+          </TabsList>
+          
+          {/* Blocks Tab - Block Types Palette */}
+          <TabsContent value="blocks" className="mt-0">
+            <div className="space-y-2">
+              {BLOCK_TYPES.map(blockType => (
+                <Button
+                  key={blockType.type}
+                  variant="outline"
+                  className="w-full justify-start h-auto p-3"
+                  onClick={() => handleAddBlock(blockType.type)}
+                  disabled={isNewPageMode && !editingPage?.id}
+                >
+                  <div className={`p-2 rounded mr-3 ${blockType.color}`}>
+                    <blockType.icon size={16} />
+                  </div>
+                  <span className="text-sm">{blockType.label}</span>
+                </Button>
+              ))}
+            </div>
+          </TabsContent>
 
-        {/* Templates Tab - Dynamic Templates */}
-        <TabsContent value="templates" className="mt-0">
-          <TemplatesPanel />
-        </TabsContent>
-      </Tabs>
+          {/* Templates Tab - Dynamic Templates */}
+          <TabsContent value="templates" className="mt-0">
+            <TemplatesPanel />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
