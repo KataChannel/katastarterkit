@@ -1,5 +1,6 @@
 import { BlockTemplate } from '@/data/blockTemplates';
 import { generateThumbnailSVG, getThumbnailDataURL } from './templateThumbnails';
+import StorageManager from './storageManager';
 
 const CUSTOM_TEMPLATES_KEY = 'kata_custom_templates';
 
@@ -19,11 +20,8 @@ export interface CustomTemplate extends BlockTemplate {
  */
 export function getCustomTemplates(): CustomTemplate[] {
   try {
-    const stored = localStorage.getItem(CUSTOM_TEMPLATES_KEY);
-    if (!stored) return [];
-    
-    const templates = JSON.parse(stored) as CustomTemplate[];
-    return templates;
+    const templates = StorageManager.getItem<CustomTemplate[]>(CUSTOM_TEMPLATES_KEY);
+    return templates || [];
   } catch (error) {
     console.error('Error loading custom templates:', error);
     return [];
@@ -57,12 +55,28 @@ export function saveCustomTemplate(
     // Add to beginning of array (newest first)
     templates.unshift(customTemplate);
     
-    // Save to localStorage
-    localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(templates));
+    // Save to localStorage with compression and quota management
+    const saved = StorageManager.setItem(CUSTOM_TEMPLATES_KEY, templates, {
+      compress: true,
+      autoCleanup: true,
+    });
+    
+    if (!saved) {
+      throw new Error('Failed to save template. Storage may be full.');
+    }
     
     return customTemplate;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error saving custom template:', error);
+    
+    // Provide user-friendly error message
+    if (error.message?.includes('quota')) {
+      throw new Error(
+        'Storage is full. Please delete some old templates or export them to a file. ' +
+        `Current usage: ${StorageManager.formatBytes(StorageManager.getStorageUsage().used)}`
+      );
+    }
+    
     throw error;
   }
 }
@@ -97,12 +111,27 @@ export function updateCustomTemplate(
     
     templates[index] = updatedTemplate;
     
-    // Save to localStorage
-    localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(templates));
+    // Save to localStorage with compression
+    const saved = StorageManager.setItem(CUSTOM_TEMPLATES_KEY, templates, {
+      compress: true,
+      autoCleanup: true,
+    });
+    
+    if (!saved) {
+      throw new Error('Failed to update template. Storage may be full.');
+    }
     
     return updatedTemplate;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating custom template:', error);
+    
+    if (error.message?.includes('quota')) {
+      throw new Error(
+        'Storage is full. Please delete some old templates. ' +
+        `Current usage: ${StorageManager.formatBytes(StorageManager.getStorageUsage().used)}`
+      );
+    }
+    
     throw error;
   }
 }
@@ -121,7 +150,10 @@ export function deleteCustomTemplate(id: string): boolean {
     }
     
     // Save to localStorage
-    localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(filtered));
+    StorageManager.setItem(CUSTOM_TEMPLATES_KEY, filtered, {
+      compress: true,
+      autoCleanup: false, // Don't cleanup when deleting (we're already freeing space)
+    });
     
     return true;
   } catch (error) {
@@ -148,7 +180,7 @@ export function getCustomTemplate(id: string): CustomTemplate | null {
  */
 export function clearCustomTemplates(): boolean {
   try {
-    localStorage.removeItem(CUSTOM_TEMPLATES_KEY);
+    StorageManager.removeItem(CUSTOM_TEMPLATES_KEY);
     return true;
   } catch (error) {
     console.error('Error clearing custom templates:', error);
@@ -201,12 +233,27 @@ export function importCustomTemplates(jsonString: string): CustomTemplate[] {
       ...existing,
     ];
     
-    // Save to localStorage
-    localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(merged));
+    // Save to localStorage with compression
+    const saved = StorageManager.setItem(CUSTOM_TEMPLATES_KEY, merged, {
+      compress: true,
+      autoCleanup: true,
+    });
+    
+    if (!saved) {
+      throw new Error('Failed to import templates. Storage may be full.');
+    }
     
     return imported;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error importing custom templates:', error);
+    
+    if (error.message?.includes('quota')) {
+      throw new Error(
+        'Storage is full. Cannot import templates. Please delete some existing templates first. ' +
+        `Current usage: ${StorageManager.formatBytes(StorageManager.getStorageUsage().used)}`
+      );
+    }
+    
     throw error;
   }
 }
@@ -290,29 +337,42 @@ function generateBlocksVisualization(blocks: any[]): string {
 }
 
 /**
- * Get template statistics
+ * Get template statistics with storage usage
  */
 export function getCustomTemplateStats(): {
   total: number;
   byCategory: Record<string, number>;
   totalSize: number;
+  storageUsage: ReturnType<typeof StorageManager.getStorageUsage>;
+  formattedSize: string;
 } {
   try {
     const templates = getCustomTemplates();
     const stored = localStorage.getItem(CUSTOM_TEMPLATES_KEY) || '[]';
+    const storageUsage = StorageManager.getStorageUsage();
     
     const byCategory = templates.reduce((acc, template) => {
       acc[template.category] = (acc[template.category] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
     
+    const totalSize = new Blob([stored]).size;
+    
     return {
       total: templates.length,
       byCategory,
-      totalSize: new Blob([stored]).size,
+      totalSize,
+      storageUsage,
+      formattedSize: StorageManager.formatBytes(totalSize),
     };
   } catch (error) {
     console.error('Error getting template stats:', error);
-    return { total: 0, byCategory: {}, totalSize: 0 };
+    return { 
+      total: 0, 
+      byCategory: {}, 
+      totalSize: 0,
+      storageUsage: StorageManager.getStorageUsage(),
+      formattedSize: '0 Bytes',
+    };
   }
 }

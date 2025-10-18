@@ -11,6 +11,7 @@ import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { Product } from '@/graphql/product.queries';
 import { PRODUCT_FULL_FRAGMENT } from '@/graphql/product.queries';
+import { PageBlock } from '@/types/page-builder';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,12 +45,14 @@ export interface ProductDetailBlockContent {
 }
 
 export interface ProductDetailBlockProps {
-  content: ProductDetailBlockContent;
-  isEditing?: boolean;
-  onUpdate?: (content: ProductDetailBlockContent) => void;
+  block: PageBlock;
+  isEditable?: boolean;
+  onUpdate: (content: any, style?: any) => void;
+  onDelete: () => void;
 }
 
-export function ProductDetailBlock({ content, isEditing, onUpdate }: ProductDetailBlockProps) {
+export function ProductDetailBlock({ block, isEditable = true, onUpdate, onDelete }: ProductDetailBlockProps) {
+  const content = (block.content || {}) as ProductDetailBlockContent;
   const {
     productSlug: configSlug,
     showGallery = true,
@@ -60,27 +63,40 @@ export function ProductDetailBlock({ content, isEditing, onUpdate }: ProductDeta
     layout = 'default',
   } = content;
 
+  // In edit mode, only use configSlug (don't use URL slug)
+  // In view mode, use configSlug first, fallback to URL slug
   const params = useParams();
   const urlSlug = params?.slug as string;
-  const productSlug = configSlug || urlSlug;
+  const productSlug = isEditable ? configSlug : (configSlug || urlSlug);
 
   const { data, loading, error } = useQuery(GET_PRODUCT_BY_SLUG, {
     variables: { slug: productSlug },
-    skip: isEditing || !productSlug,
+    skip: isEditable || !productSlug,
   });
 
   const product: Product | null = data?.productBySlug || null;
 
   // Edit mode placeholder
-  if (isEditing) {
+  if (isEditable) {
     return (
       <div className="p-6 border-2 border-dashed border-green-300 rounded-lg bg-green-50">
         <div className="text-center">
           <ShoppingCart className="w-12 h-12 mx-auto mb-3 text-green-500" />
           <h3 className="text-lg font-semibold mb-2">Product Detail Block</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Hiển thị chi tiết sản phẩm {productSlug ? `"${productSlug}"` : 'từ URL'}
-          </p>
+          {productSlug ? (
+            <p className="text-sm text-gray-600 mb-4">
+              Hiển thị chi tiết sản phẩm: <strong>{productSlug}</strong>
+            </p>
+          ) : (
+            <div className="mb-4">
+              <p className="text-sm text-orange-600 mb-2">
+                ⚠️ Chưa cấu hình product slug
+              </p>
+              <p className="text-xs text-gray-500">
+                Vui lòng chọn block này và nhập product slug trong panel bên phải
+              </p>
+            </div>
+          )}
           <div className="flex gap-2 justify-center text-xs text-gray-500">
             {showGallery && <Badge variant="secondary">Gallery</Badge>}
             {showDescription && <Badge variant="secondary">Description</Badge>}
@@ -247,10 +263,10 @@ export function ProductDetailBlock({ content, isEditing, onUpdate }: ProductDeta
             <div className="space-y-3">
               <p className="font-semibold">Chọn loại:</p>
               <div className="flex flex-wrap gap-2">
-                {product.variants.map(variant => (
+                {product.variants.map((variant, index) => (
                   <Button
                     key={variant.id}
-                    variant={variant.isDefault ? 'default' : 'outline'}
+                    variant={index === 0 ? 'default' : 'outline'}
                     size="sm"
                   >
                     {variant.name} - {formatPrice(variant.price)}

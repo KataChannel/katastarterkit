@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_PRODUCTS } from '@/graphql/product.queries';
 import { Product } from '@/graphql/product.queries';
+import { PageBlock } from '@/types/page-builder';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -41,12 +42,14 @@ export interface ProductListBlockContent {
 }
 
 export interface ProductListBlockProps {
-  content: ProductListBlockContent;
-  isEditing?: boolean;
-  onUpdate?: (content: ProductListBlockContent) => void;
+  block: PageBlock;
+  isEditable?: boolean;
+  onUpdate: (content: any, style?: any) => void;
+  onDelete: () => void;
 }
 
-export function ProductListBlock({ content, isEditing, onUpdate }: ProductListBlockProps) {
+export function ProductListBlock({ block, isEditable = true, onUpdate, onDelete }: ProductListBlockProps) {
+  const content = (block.content || {}) as ProductListBlockContent;
   const {
     title = 'Sản phẩm',
     subtitle,
@@ -78,7 +81,7 @@ export function ProductListBlock({ content, isEditing, onUpdate }: ProductListBl
 
   const { data, loading, error } = useQuery(GET_PRODUCTS, {
     variables,
-    skip: isEditing, // Don't fetch in editing mode
+    skip: isEditable, // Don't fetch in editing mode
   });
 
   const products = data?.products?.items || [];
@@ -86,7 +89,7 @@ export function ProductListBlock({ content, isEditing, onUpdate }: ProductListBl
   const totalPages = Math.ceil(total / limit);
 
   // Edit mode placeholder
-  if (isEditing) {
+  if (isEditable) {
     return (
       <div className="p-6 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
         <div className="text-center">
@@ -107,8 +110,15 @@ export function ProductListBlock({ content, isEditing, onUpdate }: ProductListBl
     );
   }
 
+  // Grid layout classes
+  const gridCols = {
+    2: 'grid-cols-1 md:grid-cols-2',
+    3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+    4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
+  }[columns];
+
   // Error state
-  if (error) {
+  if (error && !isEditable) {
     return (
       <div className="p-6 border border-red-200 rounded-lg bg-red-50">
         <p className="text-red-600 text-center">
@@ -118,12 +128,26 @@ export function ProductListBlock({ content, isEditing, onUpdate }: ProductListBl
     );
   }
 
-  // Grid layout classes
-  const gridCols = {
-    2: 'grid-cols-1 md:grid-cols-2',
-    3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-    4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
-  }[columns];
+  // Loading state  
+  if (loading && !isEditable) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className={`grid ${gridCols} gap-6`}>
+          {Array.from({ length: limit }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-48 w-full" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8" style={content.style}>

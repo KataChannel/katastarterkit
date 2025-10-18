@@ -253,6 +253,55 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
                             />
                           </div>
                         )}
+                        
+                        {/* Product Slug (for PRODUCT_DETAIL block) */}
+                        {selectedBlock.content.productSlug !== undefined && (
+                          <div>
+                            <Label htmlFor="block-productSlug" className="text-xs">
+                              Product Slug <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="block-productSlug"
+                              value={selectedBlock.content.productSlug || ''}
+                              onChange={(e) => handleContentChange({ ...selectedBlock.content, productSlug: e.target.value })}
+                              className="mt-1 text-sm"
+                              placeholder="product-slug-example"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Slug của sản phẩm cần hiển thị (vd: "ao-thun-nam")
+                            </p>
+                          </div>
+                        )}
+                        
+                        {/* Category ID (for PRODUCT_LIST block) */}
+                        {selectedBlock.content.categoryId !== undefined && (
+                          <div>
+                            <Label htmlFor="block-categoryId" className="text-xs">Category ID</Label>
+                            <Input
+                              id="block-categoryId"
+                              value={selectedBlock.content.categoryId || ''}
+                              onChange={(e) => handleContentChange({ ...selectedBlock.content, categoryId: e.target.value })}
+                              className="mt-1 text-sm"
+                              placeholder="Optional category filter"
+                            />
+                          </div>
+                        )}
+                        
+                        {/* Limit (for PRODUCT_LIST block) */}
+                        {selectedBlock.content.limit !== undefined && (
+                          <div>
+                            <Label htmlFor="block-limit" className="text-xs">Products Limit</Label>
+                            <Input
+                              id="block-limit"
+                              type="number"
+                              value={selectedBlock.content.limit || 12}
+                              onChange={(e) => handleContentChange({ ...selectedBlock.content, limit: parseInt(e.target.value) || 12 })}
+                              className="mt-1 text-sm"
+                              min="1"
+                              max="100"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

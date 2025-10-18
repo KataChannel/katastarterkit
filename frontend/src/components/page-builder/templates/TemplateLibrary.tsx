@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { StorageWarning } from '../StorageWarning';
 
 interface TemplateLibraryProps {
   onTemplateSelect?: (template: PageTemplate) => void;
@@ -139,6 +140,9 @@ export function TemplateLibrary({
 
   return (
     <div className="space-y-6">
+      {/* Storage Warning */}
+      <StorageWarning threshold={80} />
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

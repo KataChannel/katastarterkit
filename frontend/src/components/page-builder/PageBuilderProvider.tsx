@@ -138,6 +138,7 @@ export const DEFAULT_BLOCK_CONTENT = {
     style: {}
   },
   [BlockType.PRODUCT_DETAIL]: {
+    productSlug: '', // User needs to configure this
     showGallery: true,
     showDescription: true,
     showSpecs: true,
@@ -232,7 +233,7 @@ interface PageBuilderContextType {
 /**
  * PageBuilder Context
  */
-const PageBuilderContext = createContext<PageBuilderContextType | undefined>(undefined);
+export const PageBuilderContext = createContext<PageBuilderContextType | undefined>(undefined);
 
 /**
  * PageBuilder Provider Props

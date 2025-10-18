@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { PageBlock, BlockType } from '@/types/page-builder';
-import { usePageBuilderContext } from '../PageBuilderProvider';
+import { PageBuilderContext } from '../PageBuilderProvider';
 import { TextBlock } from './TextBlock';
 import { ImageBlock } from './ImageBlock';
 import { HeroBlock } from './HeroBlock';
@@ -42,8 +42,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   onSelect,
   depth = 0,
 }) => {
-  // Get selected block ID from context for visual highlighting
-  const { selectedBlockId } = usePageBuilderContext();
+  // Get selected block ID from context for visual highlighting (optional - for editor only)
+  const context = useContext(PageBuilderContext);
+  const selectedBlockId = context?.selectedBlockId;
   const isSelected = selectedBlockId === block.id;
 
   const commonProps = {
@@ -160,18 +161,10 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       blockContent = <DynamicBlock {...commonProps} />;
       break;
     case BlockType.PRODUCT_LIST:
-      blockContent = <ProductListBlock 
-        content={block.content}
-        isEditing={isEditing}
-        onUpdate={(content) => onUpdate(content, block.style)}
-      />;
+      blockContent = <ProductListBlock {...commonProps} />;
       break;
     case BlockType.PRODUCT_DETAIL:
-      blockContent = <ProductDetailBlock 
-        content={block.content}
-        isEditing={isEditing}
-        onUpdate={(content) => onUpdate(content, block.style)}
-      />;
+      blockContent = <ProductDetailBlock {...commonProps} />;
       break;
     default:
       blockContent = (

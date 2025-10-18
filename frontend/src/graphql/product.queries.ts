@@ -10,7 +10,7 @@ export const PRODUCT_IMAGE_FRAGMENT = gql`
     url
     alt
     isPrimary
-    displayOrder
+    order
     createdAt
   }
 `;
@@ -21,12 +21,10 @@ export const PRODUCT_VARIANT_FRAGMENT = gql`
     name
     sku
     price
-    originalPrice
     stock
-    weight
-    unit
-    isDefault
-    displayOrder
+    order
+    isActive
+    attributes
     createdAt
   }
 `;
@@ -289,7 +287,7 @@ export interface ProductImage {
   url: string;
   alt?: string;
   isPrimary: boolean;
-  displayOrder: number;
+  order: number;
   createdAt: string;
 }
 
@@ -298,12 +296,10 @@ export interface ProductVariant {
   name: string;
   sku: string;
   price: number;
-  originalPrice?: number;
   stock: number;
-  weight?: number;
-  unit: string;
-  isDefault: boolean;
-  displayOrder: number;
+  order: number;
+  isActive: boolean;
+  attributes?: any;
   createdAt: string;
 }
 
