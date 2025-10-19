@@ -41,8 +41,11 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
   // Form state for payment request
   const [formData, setFormData] = useState<CreatePaymentRequestInput>({
     amount: 0,
-    method: 'PAYPAL',
-    paymentDetails: {},
+    paymentMethod: 'PAYPAL',
+    accountDetails: '',
+    notes: '',
+    periodStart: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    periodEnd: new Date().toISOString(),
   });
 
   // Memoize date range to prevent unnecessary re-queries
@@ -75,8 +78,11 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
       setCreateDialogOpen(false);
       setFormData({
         amount: 0,
-        method: 'PAYPAL',
-        paymentDetails: {},
+        paymentMethod: 'PAYPAL',
+        accountDetails: '',
+        notes: '',
+        periodStart: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        periodEnd: new Date().toISOString(),
       });
       refetch();
     }
@@ -157,8 +163,8 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
                 {getStatusBadge(request.status)}
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                {getMethodIcon(request.method)}
-                <span>{request.method.replace('_', ' ')}</span>
+                {getMethodIcon(request.paymentMethod)}
+                <span>{request.paymentMethod.replace('_', ' ')}</span>
                 <span>•</span>
                 <span>{new Date(request.requestedAt).toLocaleDateString()}</span>
               </div>
@@ -225,8 +231,8 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
       <div className="space-y-2">
         <Label htmlFor="method">Phương Thức Thanh Toán</Label>
         <Select 
-          value={formData.method} 
-          onValueChange={(value) => setFormData({ ...formData, method: value as any })}
+          value={formData.paymentMethod} 
+          onValueChange={(value) => setFormData({ ...formData, paymentMethod: value as any })}
         >
           <SelectTrigger>
             <SelectValue />
@@ -254,33 +260,36 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
         </Select>
       </div>
 
-      {formData.method === 'PAYPAL' && (
+      {formData.paymentMethod === 'PAYPAL' && (
         <div className="space-y-2">
           <Label htmlFor="paypalEmail">Email PayPal</Label>
           <Input
             id="paypalEmail"
             type="email"
-            value={formData.paymentDetails?.email || ''}
+            value={formData.accountDetails ? JSON.parse(formData.accountDetails).email || '' : ''}
             onChange={(e) => setFormData({ 
               ...formData, 
-              paymentDetails: { ...formData.paymentDetails, email: e.target.value }
+              accountDetails: JSON.stringify({ email: e.target.value })
             })}
             placeholder="paypal-cua-ban@email.com"
           />
         </div>
       )}
 
-      {formData.method === 'BANK_TRANSFER' && (
+      {formData.paymentMethod === 'BANK_TRANSFER' && (
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="accountName">Tên Tài Khoản</Label>
             <Input
               id="accountName"
-              value={formData.paymentDetails?.accountName || ''}
-              onChange={(e) => setFormData({ 
-                ...formData, 
-                paymentDetails: { ...formData.paymentDetails, accountName: e.target.value }
-              })}
+              value={formData.accountDetails ? JSON.parse(formData.accountDetails).accountName || '' : ''}
+              onChange={(e) => {
+                const current = formData.accountDetails ? JSON.parse(formData.accountDetails) : {};
+                setFormData({ 
+                  ...formData, 
+                  accountDetails: JSON.stringify({ ...current, accountName: e.target.value })
+                });
+              }}
               placeholder="Tên chủ tài khoản"
             />
           </div>
@@ -288,11 +297,14 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
             <Label htmlFor="accountNumber">Số Tài Khoản</Label>
             <Input
               id="accountNumber"
-              value={formData.paymentDetails?.accountNumber || ''}
-              onChange={(e) => setFormData({ 
-                ...formData, 
-                paymentDetails: { ...formData.paymentDetails, accountNumber: e.target.value }
-              })}
+              value={formData.accountDetails ? JSON.parse(formData.accountDetails).accountNumber || '' : ''}
+              onChange={(e) => {
+                const current = formData.accountDetails ? JSON.parse(formData.accountDetails) : {};
+                setFormData({ 
+                  ...formData, 
+                  accountDetails: JSON.stringify({ ...current, accountNumber: e.target.value })
+                });
+              }}
               placeholder="Số tài khoản của bạn"
             />
           </div>
@@ -300,27 +312,33 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
             <Label htmlFor="routingNumber">Số Định Tuyến</Label>
             <Input
               id="routingNumber"
-              value={formData.paymentDetails?.routingNumber || ''}
-              onChange={(e) => setFormData({ 
-                ...formData, 
-                paymentDetails: { ...formData.paymentDetails, routingNumber: e.target.value }
-              })}
+              value={formData.accountDetails ? JSON.parse(formData.accountDetails).routingNumber || '' : ''}
+              onChange={(e) => {
+                const current = formData.accountDetails ? JSON.parse(formData.accountDetails) : {};
+                setFormData({ 
+                  ...formData, 
+                  accountDetails: JSON.stringify({ ...current, routingNumber: e.target.value })
+                });
+              }}
               placeholder="Số định tuyến ngân hàng"
             />
           </div>
         </div>
       )}
 
-      {formData.method === 'CRYPTO' && (
+      {formData.paymentMethod === 'CRYPTO' && (
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="cryptoType">Tiền Điện Tử</Label>
             <Select
-              value={formData.paymentDetails?.cryptoType || 'BTC'}
-              onValueChange={(value) => setFormData({ 
-                ...formData, 
-                paymentDetails: { ...formData.paymentDetails, cryptoType: value }
-              })}
+              value={formData.accountDetails ? JSON.parse(formData.accountDetails).cryptoType || 'BTC' : 'BTC'}
+              onValueChange={(value) => {
+                const current = formData.accountDetails ? JSON.parse(formData.accountDetails) : {};
+                setFormData({ 
+                  ...formData, 
+                  accountDetails: JSON.stringify({ ...current, cryptoType: value })
+                });
+              }}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -336,11 +354,14 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
             <Label htmlFor="walletAddress">Địa Chỉ Ví</Label>
             <Input
               id="walletAddress"
-              value={formData.paymentDetails?.walletAddress || ''}
-              onChange={(e) => setFormData({ 
-                ...formData, 
-                paymentDetails: { ...formData.paymentDetails, walletAddress: e.target.value }
-              })}
+              value={formData.accountDetails ? JSON.parse(formData.accountDetails).walletAddress || '' : ''}
+              onChange={(e) => {
+                const current = formData.accountDetails ? JSON.parse(formData.accountDetails) : {};
+                setFormData({ 
+                  ...formData, 
+                  accountDetails: JSON.stringify({ ...current, walletAddress: e.target.value })
+                });
+              }}
               placeholder="Địa chỉ ví của bạn"
             />
           </div>

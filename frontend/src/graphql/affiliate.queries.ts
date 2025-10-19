@@ -303,12 +303,12 @@ export const GET_AFFILIATE_PAYMENT_REQUESTS = gql`
   query GetAffiliatePaymentRequests($search: AffPaymentRequestSearchInput) {
     affiliatePaymentRequests(search: $search) {
       id
-      affiliateUserId
+      affiliateId
       amount
       currency
-      method
+      paymentMethod
       status
-      paymentDetails
+      accountDetails
       transactionId
       processedBy
       processedAt
@@ -324,7 +324,7 @@ export const CREATE_PAYMENT_REQUEST = gql`
       id
       amount
       currency
-      method
+      paymentMethod
       status
       requestedAt
     }

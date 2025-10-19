@@ -106,12 +106,12 @@ export interface AffiliateConversion {
 
 export interface AffiliatePaymentRequest {
   id: string;
-  affiliateUserId: string;
+  affiliateId: string;
   amount: number;
   currency: string;
-  method: 'PAYPAL' | 'BANK_TRANSFER' | 'CRYPTO';
+  paymentMethod: 'PAYPAL' | 'BANK_TRANSFER' | 'CRYPTO';
   status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED';
-  paymentDetails?: Record<string, any>;
+  accountDetails?: string;
   transactionId?: string;
   processedBy?: string;
   processedAt?: Date;
@@ -159,8 +159,11 @@ export interface CreateAffiliateLinkInput {
 
 export interface CreatePaymentRequestInput {
   amount: number;
-  method: 'PAYPAL' | 'BANK_TRANSFER' | 'CRYPTO';
-  paymentDetails?: Record<string, any>;
+  paymentMethod: 'PAYPAL' | 'BANK_TRANSFER' | 'CRYPTO';
+  accountDetails?: string;
+  notes?: string;
+  periodStart: string;
+  periodEnd: string;
 }
 
 // Dashboard Stats
