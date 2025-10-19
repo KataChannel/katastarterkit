@@ -28,6 +28,8 @@ interface FilterToolbarProps {
   onRefresh: () => void;
   onConfig: () => void;
   loading?: boolean;
+  totalRecords?: number;
+  displayedRecords?: number;
 }
 
 export const FilterToolbar: React.FC<FilterToolbarProps> = ({
@@ -45,6 +47,8 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
   onRefresh,
   onConfig,
   loading,
+  totalRecords = 0,
+  displayedRecords = 0,
 }) => {
   // Local state for date range to prevent auto-reload
   const [localDateRange, setLocalDateRange] = useState<DateRange>(dateRange);
@@ -66,6 +70,24 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
   return (
     <Card className="mb-6">
       <CardContent className="pt-6 space-y-4">
+        {/* Records Info */}
+        {totalRecords > 0 && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 px-4 py-2 rounded-md">
+            <span className="font-medium text-blue-700 dark:text-blue-300">
+              Tổng số: {totalRecords.toLocaleString()} bản ghi
+            </span>
+            {totalRecords !== displayedRecords && (
+              <>
+                <span>•</span>
+                <span className="text-amber-700 dark:text-amber-300">
+                  Hiển thị: {displayedRecords.toLocaleString()} bản ghi
+                </span>
+                <span className="text-xs">(Xuất Excel để xem đầy đủ)</span>
+              </>
+            )}
+          </div>
+        )}
+        
         {/* Row 1: Search and Actions */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">

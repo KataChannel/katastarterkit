@@ -10,6 +10,8 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
   canGoPrev: boolean;
   canGoNext: boolean;
+  totalRecords?: number;
+  isLimited?: boolean;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
@@ -20,6 +22,8 @@ export const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   canGoPrev,
   canGoNext,
+  totalRecords = 0,
+  isLimited = false,
 }) => {
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
@@ -69,6 +73,11 @@ export const Pagination: React.FC<PaginationProps> = ({
         Hiển thị <span className="font-medium">{startItem}</span> đến{' '}
         <span className="font-medium">{endItem}</span> trong tổng số{' '}
         <span className="font-medium">{totalItems}</span> kết quả
+        {isLimited && totalRecords > totalItems && (
+          <span className="ml-2 text-amber-600 dark:text-amber-400">
+            ({totalRecords.toLocaleString()} tổng - giới hạn hiển thị)
+          </span>
+        )}
       </div>
       
       <div className="flex items-center gap-2">

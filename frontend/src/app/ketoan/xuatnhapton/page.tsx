@@ -45,7 +45,8 @@ export default function XuatNhapTonPage() {
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   
-  // Pagination
+  // Display limits
+  const DISPLAY_LIMIT = 100; // Limit records shown on UI
   const [itemsPerPage] = useState(50);
   
   // Data loading
@@ -139,10 +140,15 @@ export default function XuatNhapTonPage() {
   
   console.log('🔍 Filtered rows:', filteredRows.length, { searchTerm, sortField, sortDirection });
   
-  // Calculate summary
-  const summary = useMemo(() => calculateSummary(filteredRows), [filteredRows]);
+  // Limit display rows for performance
+  const totalRecords = filteredRows.length;
+  const displayRows = filteredRows.slice(0, DISPLAY_LIMIT);
+  const isLimited = totalRecords > DISPLAY_LIMIT;
   
-  // Pagination
+  // Calculate summary from display rows for performance
+  const summary = useMemo(() => calculateSummary(displayRows), [displayRows]);
+  
+  // Pagination (using display rows)
   const {
     currentPage,
     totalPages,
@@ -154,7 +160,7 @@ export default function XuatNhapTonPage() {
     canGoNext,
     canGoPrev,
   } = usePagination({
-    totalItems: filteredRows.length,
+    totalItems: displayRows.length,
     itemsPerPage,
   });
   
@@ -179,13 +185,16 @@ export default function XuatNhapTonPage() {
     }
     
     try {
+      // Calculate full summary from all filtered rows for export
+      const fullSummary = calculateSummary(filteredRows);
+      
       exportToExcel(
         filteredRows,
-        summary,
+        fullSummary,
         dateRange,
         userConfig.companyName || 'Công ty'
       );
-      toast.success('Đã xuất file Excel thành công');
+      toast.success(`Đã xuất ${filteredRows.length.toLocaleString()} bản ghi ra Excel`);
     } catch (error) {
       console.error('Export error:', error);
       toast.error('Lỗi khi xuất file Excel');
@@ -270,8 +279,7 @@ export default function XuatNhapTonPage() {
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
         onSearch={() => {
-          // Trigger re-calculation by updating a timestamp or simply trigger toast
-          toast.info('Đang tải dữ liệu...');
+          toast.info(`Tìm thấy ${totalRecords} bản ghi${isLimited ? `, hiển thị ${DISPLAY_LIMIT} đầu tiên` : ''}`);
         }}
         groupBy={groupBy}
         onGroupByChange={setGroupBy}
@@ -282,25 +290,31 @@ export default function XuatNhapTonPage() {
         onRefresh={handleRefresh}
         onConfig={() => setShowConfigModal(true)}
         loading={loading.any}
+        totalRecords={totalRecords}
+        displayedRecords={displayRows.length}
       />
       
       {/* Inventory Table */}
       <InventoryTable
-        rows={filteredRows}
+        rows={displayRows}
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         loading={loading.any}
+        totalRecords={totalRecords}
+        isLimited={isLimited}
       />
       
       {/* Pagination */}
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
-        totalItems={filteredRows.length}
+        totalItems={displayRows.length}
         itemsPerPage={itemsPerPage}
         onPageChange={goToPage}
         canGoPrev={canGoPrev}
         canGoNext={canGoNext}
+        totalRecords={totalRecords}
+        isLimited={isLimited}
       />
     </div>
   );

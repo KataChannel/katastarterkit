@@ -17,6 +17,8 @@ interface InventoryTableProps {
   currentPage: number;
   itemsPerPage: number;
   loading?: boolean;
+  totalRecords?: number;
+  isLimited?: boolean;
 }
 
 export const InventoryTable: React.FC<InventoryTableProps> = ({
@@ -24,6 +26,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   currentPage,
   itemsPerPage,
   loading,
+  totalRecords = 0,
+  isLimited = false,
 }) => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, rows.length);
@@ -68,6 +72,14 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   
   return (
     <Card>
+      {isLimited && totalRecords > rows.length && (
+        <div className="bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 px-4 py-3">
+          <p className="text-sm text-amber-800 dark:text-amber-200">
+            ⚠️ Hiển thị {rows.length.toLocaleString()} / {totalRecords.toLocaleString()} bản ghi để tối ưu hiệu suất.
+            <span className="font-medium"> Sử dụng "Xuất Excel" để xem toàn bộ dữ liệu.</span>
+          </p>
+        </div>
+      )}
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table>
