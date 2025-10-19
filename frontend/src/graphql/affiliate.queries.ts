@@ -242,8 +242,8 @@ export const GET_AFFILIATE_LINKS = gql`
       customAlias
       title
       description
-      clicks
-      conversions
+      totalClicks
+      totalConversions
       revenue
       commission
       conversionRate
@@ -335,6 +335,16 @@ export const PROCESS_PAYMENT_REQUEST = gql`
 // ===== ANALYTICS QUERIES =====
 export const GET_AFFILIATE_EARNINGS_REPORT = gql`
   query GetAffiliateEarningsReport($startDate: DateTime, $endDate: DateTime) {
-    affiliateEarningsReport(startDate: $startDate, endDate: $endDate)
+    affiliateEarningsReport(startDate: $startDate, endDate: $endDate) {
+      totalConversions
+      totalEarnings
+      pendingConversions
+      pendingEarnings
+      approvedConversions
+      approvedEarnings
+      paidConversions
+      paidEarnings
+      availableForWithdrawal
+    }
   }
 `;

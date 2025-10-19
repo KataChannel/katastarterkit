@@ -33,7 +33,7 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
   // GraphQL Queries
   const { data: userData, loading: userLoading, error: userError } = useQuery(GET_AFFILIATE_USER);
   const { data: linksData, loading: linksLoading } = useQuery(GET_AFFILIATE_LINKS, {
-    variables: { search: { page: 1, size: 10 } }
+    variables: { search: { pagination: { page: 1, size: 10 } } }
   });
   const { data: campaignsData, loading: campaignsLoading } = useQuery(GET_AFFILIATE_CAMPAIGNS, {
     variables: { search: { status: 'ACTIVE', page: 1, size: 10 } }

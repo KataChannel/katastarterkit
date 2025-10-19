@@ -132,8 +132,8 @@ const GET_AFFILIATE_LINKS = `
       trackingCode
       shortUrl
       originalUrl
-      clicks
-      conversions
+      totalClicks
+      totalConversions
       revenue
       commission
       isActive

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Badge } from '../../ui/badge';
@@ -45,16 +45,29 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
     paymentDetails: {},
   });
 
+  // Memoize date range to prevent unnecessary re-queries
+  const dateRange = useMemo(() => {
+    const endDate = new Date();
+    const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    return {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    };
+  }, []); // Empty deps - only calculate once on mount
+
   // GraphQL queries and mutations
   const { data: requestsData, loading: requestsLoading, refetch } = useQuery(GET_AFFILIATE_PAYMENT_REQUESTS, {
-    variables: { search: { page: 1, size: 20 } }
+    variables: { search: { page: 1, size: 20 } },
+    fetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: false,
   });
 
   const { data: earningsData, loading: earningsLoading } = useQuery(GET_AFFILIATE_EARNINGS_REPORT, {
-    variables: {
-      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      endDate: new Date().toISOString()
-    }
+    variables: dateRange,
+    fetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: false,
+    // Only refetch when explicitly needed, not on every render
+    nextFetchPolicy: 'cache-first',
   });
 
   const [createPaymentRequest, { loading: creating }] = useMutation(CREATE_PAYMENT_REQUEST, {

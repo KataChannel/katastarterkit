@@ -221,7 +221,18 @@ export class AffiliatePaymentService {
     });
 
     if (!affiliate) {
-      throw new BadRequestException('Affiliate profile required');
+      // Return empty report for users without affiliate profile
+      return {
+        totalConversions: 0,
+        totalEarnings: 0,
+        pendingConversions: 0,
+        pendingEarnings: 0,
+        approvedConversions: 0,
+        approvedEarnings: 0,
+        paidConversions: 0,
+        paidEarnings: 0,
+        availableForWithdrawal: 0,
+      };
     }
 
     const where: any = {

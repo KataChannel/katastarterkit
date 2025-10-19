@@ -51,8 +51,10 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
     variables: { 
       search: { 
         isActive: selectedTab === 'active' ? true : selectedTab === 'inactive' ? false : undefined,
-        page: 1, 
-        size: 20 
+        pagination: {
+          page: 1, 
+          size: 20
+        }
       } 
     }
   });
