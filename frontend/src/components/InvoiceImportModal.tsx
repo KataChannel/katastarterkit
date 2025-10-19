@@ -11,6 +11,26 @@ interface ImportError {
   data?: any;
 }
 
+interface ImportStatistics {
+  totalInvoices: number;
+  totalDetails: number;
+  invoicesCreated: number;
+  detailsCreated: number;
+  duplicatesSkipped: number;
+  validationErrors: number;
+}
+
+interface InvoiceCreated {
+  id: string;
+  shdon: string;
+  khhdon: string;
+  nbten: string;
+  nmten: string;
+  tgtttbso: number;
+  detailsCount: number;
+  status: 'created' | 'duplicate' | 'error';
+}
+
 interface ImportResult {
   success: boolean;
   totalRows: number;
@@ -19,6 +39,8 @@ interface ImportResult {
   errors: ImportError[];
   invoiceIds: string[];
   message: string;
+  statistics: ImportStatistics;
+  invoicesCreated: InvoiceCreated[];
 }
 
 interface InvoiceImportModalProps {
@@ -310,26 +332,135 @@ export default function InvoiceImportModal({ isOpen, onClose, onSuccess }: Invoi
                     <AlertCircle className="w-6 h-6 text-yellow-600 flex-shrink-0" />
                   )}
                   <div className="flex-1">
-                    <h3 className={`font-semibold mb-2 ${result.success ? 'text-green-900' : 'text-yellow-900'}`}>
-                      {result.message}
+                    <h3 className={`font-semibold mb-3 text-lg ${result.success ? 'text-green-900' : 'text-yellow-900'}`}>
+                      Kết quả Import
                     </h3>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">Tổng số:</span>
-                        <span className="ml-2 font-semibold">{result.totalRows}</span>
+                    <p className="text-sm mb-3">{result.message}</p>
+                    
+                    {/* Detailed Statistics */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      <div className="bg-white p-3 rounded-md border border-gray-200">
+                        <div className="text-xs text-gray-500 mb-1">📊 Tổng hóa đơn</div>
+                        <div className="text-xl font-bold text-gray-900">
+                          {result.statistics.totalInvoices}
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-green-600">Thành công:</span>
-                        <span className="ml-2 font-semibold text-green-700">{result.successCount}</span>
+                      
+                      <div className="bg-white p-3 rounded-md border border-green-200">
+                        <div className="text-xs text-green-600 mb-1">✅ ext_listhoadon đã tạo</div>
+                        <div className="text-xl font-bold text-green-700">
+                          {result.statistics.invoicesCreated}
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-red-600">Lỗi:</span>
-                        <span className="ml-2 font-semibold text-red-700">{result.errorCount}</span>
+                      
+                      <div className="bg-white p-3 rounded-md border border-blue-200">
+                        <div className="text-xs text-blue-600 mb-1">📋 ext_detailhoadon đã tạo</div>
+                        <div className="text-xl font-bold text-blue-700">
+                          {result.statistics.detailsCreated}
+                        </div>
+                      </div>
+                      
+                      {result.statistics.duplicatesSkipped > 0 && (
+                        <div className="bg-white p-3 rounded-md border border-yellow-200">
+                          <div className="text-xs text-yellow-600 mb-1">⚠️ Trùng lặp (bỏ qua)</div>
+                          <div className="text-xl font-bold text-yellow-700">
+                            {result.statistics.duplicatesSkipped}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {result.statistics.validationErrors > 0 && (
+                        <div className="bg-white p-3 rounded-md border border-red-200">
+                          <div className="text-xs text-red-600 mb-1">❌ Lỗi validation</div>
+                          <div className="text-xl font-bold text-red-700">
+                            {result.statistics.validationErrors}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="bg-white p-3 rounded-md border border-gray-200">
+                        <div className="text-xs text-gray-500 mb-1">📝 Chi tiết trung bình</div>
+                        <div className="text-xl font-bold text-gray-900">
+                          {result.statistics.invoicesCreated > 0 
+                            ? (result.statistics.detailsCreated / result.statistics.invoicesCreated).toFixed(1)
+                            : '0'}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+              
+              {/* List of Created Invoices */}
+              {result.invoicesCreated && result.invoicesCreated.length > 0 && (
+                <div className="bg-white border border-gray-200 rounded-md">
+                  <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                    <h4 className="font-semibold text-gray-900">
+                      📄 Danh sách hóa đơn đã xử lý ({result.invoicesCreated.length})
+                    </h4>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Số HĐ</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ký hiệu</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Người bán</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Người mua</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tổng tiền</th>
+                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Chi tiết</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {result.invoicesCreated.map((invoice, idx) => (
+                          <tr key={idx} className={`
+                            ${invoice.status === 'created' ? 'bg-green-50' : ''}
+                            ${invoice.status === 'duplicate' ? 'bg-yellow-50' : ''}
+                            ${invoice.status === 'error' ? 'bg-red-50' : ''}
+                          `}>
+                            <td className="px-3 py-2 whitespace-nowrap">
+                              {invoice.status === 'created' && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  ✅ Đã tạo
+                                </span>
+                              )}
+                              {invoice.status === 'duplicate' && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  ⚠️ Trùng
+                                </span>
+                              )}
+                              {invoice.status === 'error' && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                  ❌ Lỗi
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2 text-sm text-gray-900">{invoice.shdon}</td>
+                            <td className="px-3 py-2 text-sm text-gray-600">{invoice.khhdon}</td>
+                            <td className="px-3 py-2 text-sm text-gray-600 max-w-[150px] truncate" title={invoice.nbten}>
+                              {invoice.nbten}
+                            </td>
+                            <td className="px-3 py-2 text-sm text-gray-600 max-w-[150px] truncate" title={invoice.nmten}>
+                              {invoice.nmten}
+                            </td>
+                            <td className="px-3 py-2 text-sm text-right text-gray-900 font-medium">
+                              {invoice.tgtttbso?.toLocaleString('vi-VN')}
+                            </td>
+                            <td className="px-3 py-2 text-sm text-center text-gray-600">
+                              {invoice.detailsCount > 0 && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                  {invoice.detailsCount} dòng
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
 
               {/* Errors */}
               {result.errors && result.errors.length > 0 && (

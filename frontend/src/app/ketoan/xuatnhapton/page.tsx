@@ -269,6 +269,10 @@ export default function XuatNhapTonPage() {
         onSearchChange={setSearchTerm}
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
+        onSearch={() => {
+          // Trigger re-calculation by updating a timestamp or simply trigger toast
+          toast.info('Đang tải dữ liệu...');
+        }}
         groupBy={groupBy}
         onGroupByChange={setGroupBy}
         sortField={sortField}

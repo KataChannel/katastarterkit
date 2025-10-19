@@ -1,0 +1,326 @@
+'use client'
+
+import React, { useState } from 'react';
+import { useQuery } from '@apollo/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
+import { Badge } from '../../ui/badge';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Skeleton } from '../../ui/skeleton';
+import { 
+  Search, 
+  Filter,
+  DollarSign, 
+  Calendar, 
+  TrendingUp,
+  Users,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Eye
+} from 'lucide-react';
+import { GET_AFFILIATE_CAMPAIGNS, GET_MY_CAMPAIGN_APPLICATIONS } from '../../../graphql/affiliate.queries';
+import { AffiliateCampaign } from '../../../types/affiliate';
+import JoinCampaignModal from './JoinCampaignModal';
+
+interface CampaignBrowserProps {
+  className?: string;
+}
+
+type ApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | null;
+
+interface CampaignApplication {
+  id: string;
+  status: ApplicationStatus;
+  campaign: {
+    id: string;
+  };
+}
+
+export default function CampaignBrowser({ className = '' }: CampaignBrowserProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [commissionFilter, setCommissionFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('ACTIVE');
+  const [selectedCampaign, setSelectedCampaign] = useState<AffiliateCampaign | null>(null);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+
+  // Fetch available campaigns
+  const { data: campaignsData, loading: campaignsLoading, refetch: refetchCampaigns } = useQuery(
+    GET_AFFILIATE_CAMPAIGNS,
+    {
+      variables: {
+        search: {
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          page: 1,
+          size: 50
+        }
+      }
+    }
+  );
+
+  // Fetch my applications
+  const { data: applicationsData, refetch: refetchApplications } = useQuery(
+    GET_MY_CAMPAIGN_APPLICATIONS,
+    {
+      fetchPolicy: 'cache-and-network'
+    }
+  );
+
+  const campaigns: AffiliateCampaign[] = campaignsData?.affiliateCampaigns || [];
+  const myApplications: CampaignApplication[] = 
+    applicationsData?.getMyAffiliateProfile?.campaigns || [];
+
+  // Create a map of campaign IDs to application status
+  const applicationStatusMap = new Map<string, ApplicationStatus>();
+  myApplications.forEach((app) => {
+    applicationStatusMap.set(app.campaign.id, app.status);
+  });
+
+  // Filter campaigns
+  const filteredCampaigns = campaigns.filter((campaign) => {
+    // Search filter
+    const matchesSearch = 
+      campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      campaign.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Commission filter
+    const matchesCommission =
+      commissionFilter === 'all' ||
+      (commissionFilter === 'percentage' && campaign.commissionType === 'PERCENTAGE') ||
+      (commissionFilter === 'fixed' && campaign.commissionType === 'FIXED');
+
+    return matchesSearch && matchesCommission;
+  });
+
+  const handleJoinClick = (campaign: AffiliateCampaign) => {
+    setSelectedCampaign(campaign);
+    setJoinModalOpen(true);
+  };
+
+  const handleJoinSuccess = () => {
+    refetchApplications();
+    refetchCampaigns();
+  };
+
+  const getApplicationStatus = (campaignId: string): ApplicationStatus => {
+    return applicationStatusMap.get(campaignId) || null;
+  };
+
+  const renderStatusBadge = (status: ApplicationStatus) => {
+    if (!status) return null;
+
+    const config = {
+      PENDING: { icon: Clock, label: 'Pending', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
+      APPROVED: { icon: CheckCircle, label: 'Joined', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+      REJECTED: { icon: XCircle, label: 'Rejected', className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
+    };
+
+    const { icon: Icon, label, className } = config[status];
+
+    return (
+      <Badge className={className}>
+        <Icon className="h-3 w-3 mr-1" />
+        {label}
+      </Badge>
+    );
+  };
+
+  if (campaignsLoading) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <Skeleton className="h-12 w-full" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-64" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`space-y-6 ${className}`}>
+      {/* Header */}
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Browse Campaigns</h2>
+        <p className="text-muted-foreground mt-2">
+          Discover and join campaigns that match your audience
+        </p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search campaigns..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        <Select value={commissionFilter} onValueChange={setCommissionFilter}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <Filter className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Commission Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="percentage">Percentage</SelectItem>
+            <SelectItem value="fixed">Fixed Amount</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="ACTIVE">Active</SelectItem>
+            <SelectItem value="PAUSED">Paused</SelectItem>
+            <SelectItem value="DRAFT">Draft</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Results Count */}
+      <div className="text-sm text-gray-600 dark:text-gray-400">
+        Found {filteredCampaigns.length} campaign{filteredCampaigns.length !== 1 ? 's' : ''}
+      </div>
+
+      {/* Campaign Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredCampaigns.map((campaign) => {
+          const applicationStatus = getApplicationStatus(campaign.id);
+          const canJoin = !applicationStatus && campaign.status === 'ACTIVE';
+
+          return (
+            <Card key={campaign.id} className="flex flex-col hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-xl mb-2">{campaign.name}</CardTitle>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant={campaign.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                        {campaign.status}
+                      </Badge>
+                      <Badge variant="outline">
+                        {campaign.type}
+                      </Badge>
+                      {renderStatusBadge(applicationStatus)}
+                    </div>
+                  </div>
+                </div>
+                <CardDescription className="line-clamp-2">
+                  {campaign.description}
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="flex-1 space-y-4">
+                {/* Commission */}
+                <div className="flex items-center text-2xl font-bold text-green-600 dark:text-green-400">
+                  <DollarSign className="h-6 w-6 mr-1" />
+                  {campaign.commissionType === 'PERCENTAGE'
+                    ? `${campaign.commissionRate}%`
+                    : `${campaign.fixedAmount.toLocaleString()} VND`}
+                  <span className="text-sm font-normal text-gray-600 dark:text-gray-400 ml-2">
+                    per sale
+                  </span>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center text-gray-600 dark:text-gray-400">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    <span>{campaign.cookieDuration}d cookie</span>
+                  </div>
+                  <div className="flex items-center text-gray-600 dark:text-gray-400">
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    <span>{campaign.conversionRate.toFixed(2)}% CVR</span>
+                  </div>
+                  <div className="flex items-center text-gray-600 dark:text-gray-400">
+                    <Users className="h-4 w-4 mr-2" />
+                    <span>{campaign.totalConversions} sales</span>
+                  </div>
+                  <div className="flex items-center text-gray-600 dark:text-gray-400">
+                    <Eye className="h-4 w-4 mr-2" />
+                    <span>{campaign.totalClicks} clicks</span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 pt-2">
+                  {canJoin ? (
+                    <Button
+                      onClick={() => handleJoinClick(campaign)}
+                      className="flex-1"
+                    >
+                      Join Campaign
+                    </Button>
+                  ) : applicationStatus === 'APPROVED' ? (
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      disabled
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Already Joined
+                    </Button>
+                  ) : applicationStatus === 'PENDING' ? (
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      disabled
+                    >
+                      <Clock className="h-4 w-4 mr-2" />
+                      Pending Review
+                    </Button>
+                  ) : applicationStatus === 'REJECTED' ? (
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      disabled
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Application Rejected
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      disabled
+                    >
+                      Not Available
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Empty State */}
+      {filteredCampaigns.length === 0 && (
+        <div className="text-center py-12">
+          <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No campaigns found</h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Try adjusting your filters or search term
+          </p>
+        </div>
+      )}
+
+      {/* Join Campaign Modal */}
+      <JoinCampaignModal
+        campaign={selectedCampaign}
+        isOpen={joinModalOpen}
+        onClose={() => setJoinModalOpen(false)}
+        onSuccess={handleJoinSuccess}
+      />
+    </div>
+  );
+}

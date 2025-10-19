@@ -96,8 +96,10 @@ export const SIMPLE_PRODUCT_GRID_TEMPLATE: DynamicTemplate = {
         </section>
       `,
       styles: {},
-      dataBinding: {
-        source: 'products',
+      props: {
+        dataBinding: {
+          source: 'products',
+        },
       },
     },
   ],
@@ -209,8 +211,10 @@ export const SIMPLE_TASK_LIST_TEMPLATE: DynamicTemplate = {
         </section>
       `,
       styles: {},
-      dataBinding: {
-        source: 'tasks',
+      props: {
+        dataBinding: {
+          source: 'tasks',
+        },
       },
     },
   ],
@@ -223,7 +227,7 @@ export const SIMPLE_TASK_LIST_TEMPLATE: DynamicTemplate = {
 export const TEMPLATE_USAGE_EXAMPLE = `
 // 1. Khởi tạo template registry
 import { TemplateRegistry } from '@/lib/dynamicTemplateSystem';
-import { SIMPLE_PRODUCT_GRID_TEMPLATE, SIMPLE_TASK_LIST_TEMPLATE } from '@/lib/templateExamples';
+import { SIMPLE_PRODUCT_GRID_TEMPLATE, SIMPLE_TASK_LIST_TEMPLATE } from '@/lib/simpleTemplateExamples';
 
 const registry = new TemplateRegistry();
 
@@ -351,10 +355,4 @@ structure: [
     'Sử dụng responsive design trong CSS',
     'Cache compiled templates để tăng performance',
   ],
-};
-
-// Export templates
-export {
-  SIMPLE_PRODUCT_GRID_TEMPLATE,
-  SIMPLE_TASK_LIST_TEMPLATE,
 };

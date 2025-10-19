@@ -296,7 +296,7 @@ export function useProductFilters(initialFilters?: GetProductsInput) {
       page: 1,
       limit: 20,
       sortBy: 'createdAt',
-      sortOrder: 'DESC',
+      sortOrder: 'desc',
     }
   );
 
@@ -311,7 +311,7 @@ export function useProductFilters(initialFilters?: GetProductsInput) {
       page: 1,
       limit: 20,
       sortBy: 'createdAt',
-      sortOrder: 'DESC',
+      sortOrder: 'desc',
     });
   };
 

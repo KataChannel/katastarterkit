@@ -244,7 +244,7 @@ class InvoiceDatabaseService {
       });
 
       if (!response.ok) {
-        if(response.status === 403) {
+        if(response.status === 403 || response.status === 401) {
           // Clear token and redirect to login
           localStorage.removeItem('accessToken');
           window.location.href = '/login';

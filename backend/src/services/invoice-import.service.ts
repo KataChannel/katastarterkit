@@ -60,6 +60,26 @@ export interface ImportResult {
   }>;
   invoiceIds: string[];
   message: string;
+  // Chi tiết thống kê
+  statistics: {
+    totalInvoices: number;
+    totalDetails: number;
+    invoicesCreated: number;
+    detailsCreated: number;
+    duplicatesSkipped: number;
+    validationErrors: number;
+  };
+  // Danh sách hóa đơn đã tạo với thông tin chi tiết
+  invoicesCreated: Array<{
+    id: string;
+    shdon: string;
+    khhdon: string;
+    nbten: string;
+    nmten: string;
+    tgtttbso: number;
+    detailsCount: number;
+    status: 'created' | 'duplicate' | 'error';
+  }>;
 }
 
 @Injectable()
@@ -337,7 +357,16 @@ export class InvoiceImportService {
       errorCount: 0,
       errors: [],
       invoiceIds: [],
-      message: ''
+      message: '',
+      statistics: {
+        totalInvoices: data.length,
+        totalDetails: data.reduce((sum, inv) => sum + (inv.details?.length || 0), 0),
+        invoicesCreated: 0,
+        detailsCreated: 0,
+        duplicatesSkipped: 0,
+        validationErrors: 0,
+      },
+      invoicesCreated: []
     };
 
     for (let i = 0; i < data.length; i++) {
@@ -347,6 +376,7 @@ export class InvoiceImportService {
       try {
         // Validate required fields
         if (!invoiceData.shdon || !invoiceData.khhdon || !invoiceData.khmshdon) {
+          result.statistics.validationErrors++;
           throw new Error('Thiếu thông tin bắt buộc: Số hóa đơn, Ký hiệu hóa đơn, hoặc Ký hiệu mẫu số');
         }
 
@@ -365,12 +395,25 @@ export class InvoiceImportService {
         });
 
         if (existing) {
+          result.statistics.duplicatesSkipped++;
           result.errors.push({
             row: rowNumber,
             error: `Hóa đơn đã tồn tại: ${invoiceData.shdon}`,
             data: invoiceData
           });
           result.errorCount++;
+          
+          // Thêm vào danh sách với status duplicate
+          result.invoicesCreated.push({
+            id: existing.id,
+            shdon: invoiceData.shdon || '',
+            khhdon: invoiceData.khhdon || '',
+            nbten: invoiceData.nbten || '',
+            nmten: invoiceData.nmten || '',
+            tgtttbso: invoiceData.tgtttbso || 0,
+            detailsCount: 0,
+            status: 'duplicate',
+          });
           continue;
         }
 
@@ -399,7 +442,10 @@ export class InvoiceImportService {
           }
         });
 
+        result.statistics.invoicesCreated++;
+        
         // Create details if any
+        let detailsCreated = 0;
         if (invoiceData.details && invoiceData.details.length > 0) {
           for (const detail of invoiceData.details) {
             await this.prisma.ext_detailhoadon.create({
@@ -417,11 +463,25 @@ export class InvoiceImportService {
                 thtien: detail.thtien ? new Decimal(detail.thtien) : null,
               }
             });
+            detailsCreated++;
+            result.statistics.detailsCreated++;
           }
         }
 
         result.invoiceIds.push(invoice.id);
         result.successCount++;
+        
+        // Thêm thông tin hóa đơn đã tạo
+        result.invoicesCreated.push({
+          id: invoice.id,
+          shdon: invoiceData.shdon || '',
+          khhdon: invoiceData.khhdon || '',
+          nbten: invoiceData.nbten || '',
+          nmten: invoiceData.nmten || '',
+          tgtttbso: invoiceData.tgtttbso || 0,
+          detailsCount: detailsCreated,
+          status: 'created',
+        });
 
       } catch (error) {
         this.logger.error(`Error importing invoice at row ${rowNumber}:`, error);
@@ -431,11 +491,37 @@ export class InvoiceImportService {
           data: invoiceData
         });
         result.errorCount++;
+        
+        // Thêm vào danh sách với status error
+        result.invoicesCreated.push({
+          id: '',
+          shdon: invoiceData.shdon || '',
+          khhdon: invoiceData.khhdon || '',
+          nbten: invoiceData.nbten || '',
+          nmten: invoiceData.nmten || '',
+          tgtttbso: invoiceData.tgtttbso || 0,
+          detailsCount: 0,
+          status: 'error',
+        });
       }
     }
 
     result.success = result.errorCount === 0;
-    result.message = `Import completed: ${result.successCount} thành công, ${result.errorCount} lỗi`;
+    
+    // Tạo message chi tiết
+    const messages: string[] = [];
+    messages.push(`✅ ${result.statistics.invoicesCreated} hóa đơn đã tạo thành công`);
+    if (result.statistics.detailsCreated > 0) {
+      messages.push(`📋 ${result.statistics.detailsCreated} chi tiết hóa đơn đã tạo`);
+    }
+    if (result.statistics.duplicatesSkipped > 0) {
+      messages.push(`⚠️ ${result.statistics.duplicatesSkipped} hóa đơn trùng lặp (bỏ qua)`);
+    }
+    if (result.statistics.validationErrors > 0) {
+      messages.push(`❌ ${result.statistics.validationErrors} lỗi xác thực dữ liệu`);
+    }
+    
+    result.message = messages.join(' | ');
 
     return result;
   }

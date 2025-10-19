@@ -158,6 +158,77 @@ export const UPDATE_AFFILIATE_CAMPAIGN = gql`
   }
 `;
 
+export const JOIN_CAMPAIGN = gql`
+  mutation JoinCampaign($input: JoinCampaignInput!) {
+    joinCampaign(input: $input)
+  }
+`;
+
+export const REVIEW_CAMPAIGN_APPLICATION = gql`
+  mutation ReviewCampaignApplication($input: ReviewCampaignApplicationInput!) {
+    reviewCampaignApplication(input: $input)
+  }
+`;
+
+export const DELETE_AFFILIATE_CAMPAIGN = gql`
+  mutation DeleteAffiliateCampaign($id: String!) {
+    deleteAffiliateCampaign(id: $id)
+  }
+`;
+
+export const GET_MY_CAMPAIGN_APPLICATIONS = gql`
+  query GetMyCampaignApplications {
+    getMyAffiliateProfile {
+      campaigns {
+        id
+        status
+        message
+        reviewReason
+        approvedAt
+        reviewedAt
+        createdAt
+        campaign {
+          id
+          name
+          description
+          commissionType
+          commissionRate
+          fixedAmount
+          status
+        }
+      }
+    }
+  }
+`;
+
+export const GET_CAMPAIGN_APPLICATIONS = gql`
+  query GetCampaignApplications($campaignId: String!) {
+    getAffiliateCampaign(id: $campaignId) {
+      id
+      name
+      affiliates {
+        id
+        status
+        message
+        reviewReason
+        approvedAt
+        reviewedAt
+        createdAt
+        affiliate {
+          id
+          businessName
+          website
+          user {
+            firstName
+            lastName
+            email
+          }
+        }
+      }
+    }
+  }
+`;
+
 // ===== LINK MANAGEMENT QUERIES =====
 export const GET_AFFILIATE_LINKS = gql`
   query GetAffiliateLinks($search: AffLinkSearchInput) {

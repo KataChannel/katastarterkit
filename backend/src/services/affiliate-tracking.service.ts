@@ -21,6 +21,21 @@ export class AffiliateTrackingService {
     return crypto.randomBytes(16).toString('hex');
   }
 
+  // Find link by tracking code (for click tracking endpoint)
+  async findLinkByCode(trackingCode: string) {
+    return this.prisma.affLink.findUnique({
+      where: { trackingCode },
+      include: {
+        campaign: true,
+        affiliate: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+  }
+
   // Create affiliate link
   async createAffiliateLink(affiliateUserId: string, input: CreateAffLinkInput) {
     const affiliate = await this.prisma.affUser.findUnique({
@@ -184,8 +199,61 @@ export class AffiliateTrackingService {
     });
   }
 
-  // Track click on affiliate link
-  async trackClick(trackingCode: string, request: any) {
+  // Track click on affiliate link (simplified version for controller)
+  async trackClick(clickData: {
+    linkId: string;
+    ipAddress: string;
+    userAgent: string;
+    referer?: string | null;
+    device?: string;
+    browser?: string;
+    country?: string | null;
+  }) {
+    // Create click record
+    const click = await this.prisma.affClick.create({
+      data: {
+        linkId: clickData.linkId,
+        ipAddress: clickData.ipAddress,
+        userAgent: clickData.userAgent,
+        referer: clickData.referer,
+        device: clickData.device || 'unknown',
+        browser: clickData.browser || 'unknown',
+        visitorId: crypto.randomUUID(), // Generate unique visitor ID
+      },
+    });
+
+    // Update link stats
+    await this.prisma.affLink.update({
+      where: { id: clickData.linkId },
+      data: {
+        totalClicks: {
+          increment: 1,
+        },
+      },
+    });
+
+    // Get campaign ID to update campaign stats
+    const link = await this.prisma.affLink.findUnique({
+      where: { id: clickData.linkId },
+      select: { campaignId: true },
+    });
+
+    if (link) {
+      await this.prisma.affCampaign.update({
+        where: { id: link.campaignId },
+        data: {
+          totalClicks: {
+            increment: 1,
+          },
+        },
+      });
+    }
+
+    return click;
+  }
+
+  // Track click on affiliate link from tracking code and request (for controller)
+  async trackClickFromRequest(trackingCode: string, request: any) {
     const link = await this.prisma.affLink.findUnique({
       where: { trackingCode },
       include: {

@@ -16,12 +16,15 @@ import {
   CampaignSearchInput,
   AffLinkSearchInput,
   AffConversionSearchInput,
-  AffPaymentRequestSearchInput
+  AffPaymentRequestSearchInput,
+  JoinCampaignInput,
+  ReviewCampaignApplicationInput
 } from '../inputs/affiliate.input';
 
 import { AffiliateUserService, AffiliateCampaignService } from '../../services/affiliate.service';
 import { AffiliateTrackingService } from '../../services/affiliate-tracking.service';
 import { AffiliatePaymentService } from '../../services/affiliate-payment.service';
+import { AffiliateConversionService } from '../../services/affiliate-conversion.service';
 
 // Helper function to map Decimal to number and compute additional fields
 const mapDecimalFields = (data: any): any => {
@@ -117,7 +120,8 @@ export class AffiliateCampaignResolver {
   async getCampaigns(
     @Args('search', { nullable: true }) search?: CampaignSearchInput,
   ): Promise<AffCampaign[]> {
-    const results = await this.campaignService.searchCampaigns(search);
+    const searchInput = search || { page: 1, size: 20 };
+    const results = await this.campaignService.searchCampaigns(searchInput);
     return results.campaigns.map(mapDecimalFields);
   }
 
@@ -138,6 +142,41 @@ export class AffiliateCampaignResolver {
   ): Promise<AffCampaign> {
     const userId = context.req.user.id;
     const result = await this.campaignService.updateCampaign(id, userId, input);
+    return mapDecimalFields(result);
+  }
+
+  @Mutation(() => Boolean, { name: 'deleteAffiliateCampaign' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN)
+  async deleteCampaign(
+    @Args('id') id: string,
+    @Context() context: any,
+  ): Promise<boolean> {
+    const userId = context.req.user.id;
+    await this.campaignService.deleteCampaign(id, userId);
+    return true;
+  }
+
+  @Mutation(() => String, { name: 'joinCampaign' })
+  @UseGuards(JwtAuthGuard)
+  async joinCampaign(
+    @Args('input') input: JoinCampaignInput,
+    @Context() context: any,
+  ): Promise<any> {
+    const userId = context.req.user.id;
+    const result = await this.campaignService.joinCampaign(userId, input);
+    return mapDecimalFields(result);
+  }
+
+  @Mutation(() => String, { name: 'reviewCampaignApplication' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.USER, $Enums.UserRoleType.ADMIN)
+  async reviewApplication(
+    @Args('input') input: ReviewCampaignApplicationInput,
+    @Context() context: any,
+  ): Promise<any> {
+    const userId = context.req.user.id;
+    const result = await this.campaignService.reviewCampaignApplication(userId, input);
     return mapDecimalFields(result);
   }
 }
@@ -236,5 +275,35 @@ export class AffiliatePaymentResolver {
     const adminId = context.req.user.id;
     const result = await this.paymentService.processPaymentRequest(adminId, { paymentRequestId: id, status: status as any });
     return mapDecimalFields(result);
+  }
+}
+
+@Resolver('AffConversion')
+export class AffiliateConversionResolver {
+  constructor(private conversionService: AffiliateConversionService) {}
+
+  @Mutation(() => Boolean, { name: 'approveConversion' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.ADMIN)
+  async approveConversion(
+    @Args('id') id: string,
+    @Context() context: any,
+  ): Promise<boolean> {
+    const userId = context.req.user.id;
+    await this.conversionService.approveConversion(id, userId);
+    return true;
+  }
+
+  @Mutation(() => Boolean, { name: 'rejectConversion' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.ADMIN)
+  async rejectConversion(
+    @Args('id') id: string,
+    @Args('reason', { nullable: true }) reason?: string,
+    @Context() context?: any,
+  ): Promise<boolean> {
+    const userId = context?.req?.user?.id;
+    await this.conversionService.rejectConversion(id, userId, reason);
+    return true;
   }
 }

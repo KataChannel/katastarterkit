@@ -309,6 +309,54 @@ export class ImportError {
 }
 
 @ObjectType()
+export class ImportStatistics {
+  @Field(() => Int)
+  totalInvoices: number;
+
+  @Field(() => Int)
+  totalDetails: number;
+
+  @Field(() => Int)
+  invoicesCreated: number;
+
+  @Field(() => Int)
+  detailsCreated: number;
+
+  @Field(() => Int)
+  duplicatesSkipped: number;
+
+  @Field(() => Int)
+  validationErrors: number;
+}
+
+@ObjectType()
+export class InvoiceCreated {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => String)
+  shdon: string;
+
+  @Field(() => String)
+  khhdon: string;
+
+  @Field(() => String)
+  nbten: string;
+
+  @Field(() => String)
+  nmten: string;
+
+  @Field(() => Float)
+  tgtttbso: number;
+
+  @Field(() => Int)
+  detailsCount: number;
+
+  @Field(() => String)
+  status: string; // 'created' | 'duplicate' | 'error'
+}
+
+@ObjectType()
 export class ImportResult {
   @Field(() => Boolean)
   success: boolean;
@@ -330,4 +378,10 @@ export class ImportResult {
 
   @Field(() => String)
   message: string;
+
+  @Field(() => ImportStatistics)
+  statistics: ImportStatistics;
+
+  @Field(() => [InvoiceCreated])
+  invoicesCreated: InvoiceCreated[];
 }

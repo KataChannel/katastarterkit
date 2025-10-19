@@ -21,7 +21,8 @@ import {
   DollarSign,
   Users,
   TrendingUp,
-  Filter
+  Filter,
+  Search
 } from 'lucide-react';
 import { GET_AFFILIATE_CAMPAIGNS, CREATE_AFFILIATE_CAMPAIGN, UPDATE_AFFILIATE_CAMPAIGN } from '../../../graphql/affiliate.queries';
 import { AffiliateCampaign, CreateCampaignInput } from '../../../types/affiliate';
@@ -154,6 +155,14 @@ export default function CampaignManagement({ className = '', userRole = 'AFFILIA
           </div>
           {userRole === 'MERCHANT' && (
             <div className="flex items-center gap-2">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => window.location.href = `/admin/affiliate/campaigns/${campaign.id}/applications`}
+                title="View Applications"
+              >
+                <Users className="h-4 w-4" />
+              </Button>
               <Button size="sm" variant="outline" onClick={() => openEditDialog(campaign)}>
                 <Edit className="h-4 w-4" />
               </Button>
@@ -367,6 +376,12 @@ export default function CampaignManagement({ className = '', userRole = 'AFFILIA
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {userRole === 'AFFILIATE' && (
+            <Button onClick={() => window.location.href = '/admin/affiliate/browse'}>
+              <Search className="h-4 w-4 mr-2" />
+              Browse All Campaigns
+            </Button>
+          )}
           {userRole === 'MERCHANT' && (
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
               <DialogTrigger asChild>

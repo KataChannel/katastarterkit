@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DateRange, GroupBy, SortField, SortDirection } from '../types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,7 @@ interface FilterToolbarProps {
   onSearchChange: (value: string) => void;
   dateRange: DateRange;
   onDateRangeChange: (range: DateRange) => void;
+  onSearch: () => void; // New callback for search button
   groupBy: GroupBy;
   onGroupByChange: (value: GroupBy) => void;
   sortField: SortField;
@@ -34,6 +35,7 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
   onSearchChange,
   dateRange,
   onDateRangeChange,
+  onSearch,
   groupBy,
   onGroupByChange,
   sortField,
@@ -44,6 +46,23 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
   onConfig,
   loading,
 }) => {
+  // Local state for date range to prevent auto-reload
+  const [localDateRange, setLocalDateRange] = useState<DateRange>(dateRange);
+  
+  // Sync local state when parent date range changes
+  useEffect(() => {
+    setLocalDateRange(dateRange);
+  }, [dateRange]);
+  
+  // Handle search button click
+  const handleSearch = () => {
+    onDateRangeChange(localDateRange);
+    onSearch();
+  };
+  
+  // Check if date range has changed
+  const hasDateChanged = localDateRange.startDate !== dateRange.startDate || 
+                        localDateRange.endDate !== dateRange.endDate;
   return (
     <Card className="mb-6">
       <CardContent className="pt-6 space-y-4">
@@ -83,14 +102,14 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
         </div>
         
         {/* Row 2: Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="space-y-2">
             <Label htmlFor="startDate">Từ Ngày</Label>
             <Input
               id="startDate"
               type="date"
-              value={dateRange.startDate}
-              onChange={(e) => onDateRangeChange({ ...dateRange, startDate: e.target.value })}
+              value={localDateRange.startDate}
+              onChange={(e) => setLocalDateRange({ ...localDateRange, startDate: e.target.value })}
             />
           </div>
           
@@ -99,9 +118,23 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
             <Input
               id="endDate"
               type="date"
-              value={dateRange.endDate}
-              onChange={(e) => onDateRangeChange({ ...dateRange, endDate: e.target.value })}
+              value={localDateRange.endDate}
+              onChange={(e) => setLocalDateRange({ ...localDateRange, endDate: e.target.value })}
             />
+          </div>
+          
+          <div className="space-y-2">
+            <Label className="opacity-0">Action</Label>
+            <Button 
+              variant={hasDateChanged ? "default" : "outline"}
+              size="default" 
+              onClick={handleSearch}
+              disabled={loading}
+              className="w-full"
+            >
+              <Search className="h-4 w-4 mr-2" />
+              {hasDateChanged ? 'Tìm kiếm' : 'Đã cập nhật'}
+            </Button>
           </div>
           
           <div className="space-y-2">

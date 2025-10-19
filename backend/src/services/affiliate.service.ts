@@ -251,6 +251,52 @@ export class AffiliateCampaignService {
     });
   }
 
+  // Delete campaign
+  async deleteCampaign(campaignId: string, creatorUserId: string) {
+    const creator = await this.prisma.affUser.findUnique({
+      where: { userId: creatorUserId },
+    });
+
+    if (!creator) {
+      throw new BadRequestException('Creator must have affiliate profile');
+    }
+
+    const campaign = await this.prisma.affCampaign.findFirst({
+      where: {
+        id: campaignId,
+        creatorId: creator.id,
+      },
+    });
+
+    if (!campaign) {
+      throw new NotFoundException('Campaign not found or access denied');
+    }
+
+    // Check if campaign has active conversions or pending payouts
+    const hasActiveData = await this.prisma.affConversion.count({
+      where: {
+        campaignId,
+        status: {
+          in: ['PENDING', 'APPROVED'],
+        },
+      },
+    });
+
+    if (hasActiveData > 0) {
+      throw new BadRequestException(
+        'Cannot delete campaign with pending or approved conversions. Archive it instead.'
+      );
+    }
+
+    // Soft delete by marking as cancelled instead of hard delete
+    return this.prisma.affCampaign.update({
+      where: { id: campaignId },
+      data: {
+        status: $Enums.AffCampaignStatus.CANCELLED,
+      },
+    });
+  }
+
   // Get campaign by ID
   async getCampaign(campaignId: string) {
     const campaign = await this.prisma.affCampaign.findUnique({
@@ -284,7 +330,9 @@ export class AffiliateCampaignService {
 
   // Search campaigns with filters
   async searchCampaigns(input: CampaignSearchInput) {
-    const { query, status, creatorId, minCommissionRate, maxCommissionRate, page, size, sortBy, sortOrder } = input;
+    const { query, status, creatorId, minCommissionRate, maxCommissionRate, sortBy, sortOrder } = input;
+    const page = input.page || 1;
+    const size = input.size || 20;
 
     const where: any = {};
 

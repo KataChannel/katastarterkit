@@ -177,16 +177,23 @@ type AffEarningsReport {
 type AffLink {
   affiliate: AffUser
   affiliateId: String!
+  affiliateUserId: String
   campaign: AffCampaign
   campaignId: String!
   clicks: [AffClick!]
+  commission: Float
+  conversionRate: Float
   conversions: [AffConversion!]
   createdAt: DateTime!
+  customAlias: String
+  description: String
   expiresAt: DateTime
   id: ID!
   isActive: Boolean!
   originalUrl: String!
+  revenue: Float
   shortUrl: String
+  title: String
   totalClicks: Int!
   totalConversions: Int!
   totalEarnings: Float!
@@ -260,24 +267,36 @@ enum AffPaymentStatus {
 }
 
 type AffUser {
+  averageOrderValue: Float
   bankAccount: String
+  bankDetails: String
+  businessName: String
   businessType: String
   campaignJoins: [AffCampaignAffiliate!]
   campaignsCreated: [AffCampaign!]
   companyName: String
+  complianceDocuments: [String!]
+  conversionRate: Float
   conversions: [AffConversion!]
   createdAt: DateTime!
   description: String
   id: ID!
   isActive: Boolean!
+  isVerified: Boolean
   joinedAt: DateTime!
   lastActiveAt: DateTime
   links: [AffLink!]
+  paymentEmail: String
   paymentMethod: AffPaymentMethod
   paymentRequests: [AffPaymentRequest!]
   paypalEmail: String
   role: AffUserRole!
+  socialProfiles: [String!]
+  status: String
   taxId: String
+  totalClicks: Int
+  totalConversions: Int
+  totalEarnings: Float
   updatedAt: DateTime!
   userId: String!
   website: String
@@ -1440,6 +1459,26 @@ type ImportError {
   row: Int!
 }
 
+type ImportStatistics {
+  detailsCreated: Int!
+  duplicatesSkipped: Int!
+  invoicesCreated: Int!
+  totalDetails: Int!
+  totalInvoices: Int!
+  validationErrors: Int!
+}
+
+type InvoiceCreated {
+  detailsCount: Int!
+  id: ID!
+  khhdon: String!
+  nbten: String!
+  nmten: String!
+  shdon: String!
+  status: String!
+  tgtttbso: Float!
+}
+
 input InvoiceSearchInput {
   fromDate: DateTime
   khmshdon: String
@@ -1479,6 +1518,11 @@ scalar JSON
 The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSONObject
+
+input JoinCampaignInput {
+  campaignId: String!
+  message: String
+}
 
 input LoginUserInput {
   emailOrUsername: String!
@@ -1569,6 +1613,7 @@ type Mutation {
   addProductVariant(input: CreateProductVariantInput!): ProductType!
   adminCreateUser(input: AdminCreateUserInput!): User!
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
+  approveConversion(id: String!): Boolean!
   assignRolePermissions(input: AssignRolePermissionInput!): Boolean!
   assignUserPermissions(input: AssignUserPermissionInput!): Boolean!
   assignUserRoles(input: AssignUserRoleInput!): Boolean!
@@ -1611,6 +1656,7 @@ type Mutation {
 
   """Create new ext_sanphamhoadon"""
   createext_sanphamhoadon(data: JSON!, options: JSON): JSON!
+  deleteAffiliateCampaign(id: String!): Boolean!
   deleteCallCenterConfig(id: String!): CallCenterConfig!
   deleteCategory(deleteProducts: Boolean! = false, id: ID!): CategoryType!
   deleteComment(id: String!): Boolean!
@@ -1665,6 +1711,7 @@ type Mutation {
   generateSummary(content: String!, maxLength: Float! = 200): String!
   generateTags(content: String!, maxTags: Float! = 5): [String!]!
   improveContent(content: String!, instruction: String!): String!
+  joinCampaign(input: JoinCampaignInput!): String!
   loginUser(input: LoginUserInput!): AuthResponse!
   loginWithFacebook(input: SocialLoginInput!): AuthResponse!
   loginWithGoogle(input: SocialLoginInput!): AuthResponse!
@@ -1693,8 +1740,10 @@ type Mutation {
 
   """Reindex all data from database into Orama search indexes"""
   reindexAllData: ReindexResult!
+  rejectConversion(id: String!, reason: String): Boolean!
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
+  reviewCampaignApplication(input: ReviewCampaignApplicationInput!): String!
   shareTask(input: ShareTaskInput!): TaskShare!
   syncCallCenterData(input: SyncCallCenterInput): SyncCallCenterResponse!
   toggleMenuActive(id: ID!): MenuResponseDto!
@@ -2505,6 +2554,12 @@ type ReindexResult {
 
 input RequestPhoneVerificationInput {
   phone: String!
+}
+
+input ReviewCampaignApplicationInput {
+  action: String!
+  applicationId: String!
+  reason: String
 }
 
 type Role {

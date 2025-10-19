@@ -77,6 +77,43 @@ export class AffUser {
   @Field()
   updatedAt: Date;
 
+  // Additional computed fields for frontend
+  @Field({ nullable: true })
+  status?: string;
+
+  @Field({ nullable: true })
+  businessName?: string;
+
+  @Field({ nullable: true })
+  paymentEmail?: string;
+
+  @Field({ nullable: true })
+  bankDetails?: string;
+
+  @Field(() => [String], { nullable: true })
+  socialProfiles?: string[];
+
+  @Field(() => [String], { nullable: true })
+  complianceDocuments?: string[];
+
+  @Field(() => Float, { nullable: true })
+  totalEarnings?: number;
+
+  @Field(() => Int, { nullable: true })
+  totalClicks?: number;
+
+  @Field(() => Int, { nullable: true })
+  totalConversions?: number;
+
+  @Field(() => Float, { nullable: true })
+  conversionRate?: number;
+
+  @Field(() => Float, { nullable: true })
+  averageOrderValue?: number;
+
+  @Field({ nullable: true })
+  isVerified?: boolean;
+
   // Relations (populated when needed)
   @Field(() => [AffCampaign], { nullable: true })
   campaignsCreated?: AffCampaign[];
@@ -299,6 +336,28 @@ export class AffLink {
 
   @Field()
   updatedAt: Date;
+
+  // Additional fields for frontend
+  @Field({ nullable: true })
+  affiliateUserId?: string;
+
+  @Field({ nullable: true })
+  customAlias?: string;
+
+  @Field({ nullable: true })
+  title?: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field(() => Float, { nullable: true })
+  revenue?: number;
+
+  @Field(() => Float, { nullable: true })
+  commission?: number;
+
+  @Field(() => Float, { nullable: true })
+  conversionRate?: number;
 
   // Relations
   @Field(() => AffCampaign, { nullable: true })

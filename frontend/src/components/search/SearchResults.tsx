@@ -248,12 +248,8 @@ export function SearchResults({
     return (
       <div style={style} className="px-2 py-2">
         <TaskCard
-          task={item}
-          index={index}
+          task={item as any}
           onEdit={() => onTaskClick?.(item)}
-          isSelected={isSelected}
-          onSelect={(taskId: string) => handleTaskSelect(taskId, !isSelected)}
-          className={viewMode === 'grid' ? 'h-full' : ''}
         />
       </div>
     );

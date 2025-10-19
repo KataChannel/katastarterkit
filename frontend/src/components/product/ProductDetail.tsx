@@ -44,7 +44,7 @@ export function ProductDetail({
 }: ProductDetailProps) {
   const [quantity, setQuantity] = React.useState(1);
   const [selectedVariant, setSelectedVariant] = React.useState<ProductVariant | undefined>(
-    product.variants?.find((v) => v.isDefault) || product.variants?.[0]
+    product.variants?.[0]
   );
   const [selectedImage, setSelectedImage] = React.useState(
     product.thumbnail || product.images?.[0]?.url || '/placeholder-product.png'
@@ -59,9 +59,9 @@ export function ProductDetail({
   };
 
   const currentPrice = selectedVariant?.price || product.price;
-  const currentComparePrice = selectedVariant?.originalPrice || product.originalPrice;
+  const currentComparePrice = product.originalPrice;
   const currentStock = selectedVariant?.stock || product.stock;
-  const currentUnit = selectedVariant?.unit || product.unit;
+  const currentUnit = product.unit;
 
   const isOutOfStock = currentStock === 0;
   const isLowStock = currentStock > 0 && currentStock <= product.minStock;

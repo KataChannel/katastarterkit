@@ -16,6 +16,7 @@ import { ExtModelsResolver } from './resolvers/ext-models.resolver';
 import { InvoiceController } from '../controllers/invoice.controller';
 import { InvoiceImportController } from '../controllers/invoice-import.controller';
 import { AffiliateController } from '../controllers/affiliate.controller';
+import { TrackingController } from '../controllers/tracking.controller';
 
 import { UserService } from '../services/user.service';
 import { PostService } from '../services/post.service';
@@ -35,6 +36,7 @@ import { RbacService } from '../services/rbac.service';
 import { AffiliateUserService, AffiliateCampaignService } from '../services/affiliate.service';
 import { AffiliateTrackingService } from '../services/affiliate-tracking.service';
 import { AffiliatePaymentService } from '../services/affiliate-payment.service';
+import { AffiliateConversionService } from '../services/affiliate-conversion.service';
 import { DynamicQueryGeneratorService } from './services/dynamic-query-generator.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
@@ -42,7 +44,7 @@ import { AuthModule } from '../auth/auth.module';
 import { GrokModule } from '../grok/grok.module';
 import { MinioModule } from '../minio/minio.module';
 import { SearchModule } from '../search/search.module';
-import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingResolver, AffiliatePaymentResolver } from './resolvers/affiliate.resolver';
+import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingResolver, AffiliatePaymentResolver, AffiliateConversionResolver } from './resolvers/affiliate.resolver';
 // JSON scalar handled by graphql-type-json directly
 
 @Module({
@@ -62,6 +64,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     InvoiceController,
     InvoiceImportController,
     AffiliateController,
+    TrackingController,
   ],
   providers: [
     // Scalars handled by graphql-type-json directly
@@ -84,6 +87,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     AffiliateCampaignResolver,
     AffiliateTrackingResolver,
     AffiliatePaymentResolver,
+    AffiliateConversionResolver,
     
     // Search resolver
     OramaSearchResolver,
@@ -116,6 +120,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     AffiliateCampaignService,
     AffiliateTrackingService,
     AffiliatePaymentService,
+    AffiliateConversionService,
     
     // Dynamic Query service
     DynamicQueryGeneratorService,
@@ -141,6 +146,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     AffiliateCampaignService,
     AffiliateTrackingService,
     AffiliatePaymentService,
+    AffiliateConversionService,
   ],
 })
 export class GraphQLResolversModule {}

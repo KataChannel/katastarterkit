@@ -109,7 +109,7 @@ export class TemplateCompiler {
     };
 
     // Process data binding
-    if (element.dataBinding) {
+    if (processedElement.props?.dataBinding) {
       return this.processDataBinding(processedElement);
     }
 
@@ -207,7 +207,7 @@ export class TemplateCompiler {
    * Process data binding for repeated elements
    */
   private processDataBinding(element: PageElement): PageElement {
-    const { dataBinding } = element;
+    const dataBinding = element.props?.dataBinding;
     if (!dataBinding) return element;
 
     const data = this.dataSources.get(dataBinding.source);
@@ -227,7 +227,10 @@ export class TemplateCompiler {
       const processedElement = this.processElement({
         ...element,
         id: `${element.id}_${index}`,
-        dataBinding: undefined, // Remove to prevent infinite recursion
+        props: {
+          ...element.props,
+          dataBinding: undefined, // Remove to prevent infinite recursion
+        },
       });
 
       // Restore original variables
@@ -240,7 +243,10 @@ export class TemplateCompiler {
     return {
       ...element,
       children: repeatedElements,
-      dataBinding: undefined,
+      props: {
+        ...element.props,
+        dataBinding: undefined,
+      },
     };
   }
 }

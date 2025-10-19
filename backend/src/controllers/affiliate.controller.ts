@@ -15,7 +15,7 @@ export class AffiliateController {
     @Res() response: Response,
   ) {
     try {
-      const result = await this.affiliateTrackingService.trackClick(trackingCode, request);
+      const result = await this.affiliateTrackingService.trackClickFromRequest(trackingCode, request);
       
       // Set visitor ID cookie for future tracking
       response.cookie('aff_visitor_id', result.visitorId, {
@@ -44,7 +44,7 @@ export class AffiliateController {
   ) {
     try {
       // Track the click/view
-      await this.affiliateTrackingService.trackClick(trackingCode, request);
+      await this.affiliateTrackingService.trackClickFromRequest(trackingCode, request);
       
       // Return 1x1 transparent pixel
       const pixel = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');

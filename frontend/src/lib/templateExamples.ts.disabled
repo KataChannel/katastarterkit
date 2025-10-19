@@ -103,7 +103,7 @@ const PRODUCT_SHOWCASE_TEMPLATE: DynamicTemplate = {
     {
       id: 'product-showcase-container',
       type: 'container',
-      content: {
+      props: {
         tag: 'section',
         className: 'product-showcase-section',
       },
