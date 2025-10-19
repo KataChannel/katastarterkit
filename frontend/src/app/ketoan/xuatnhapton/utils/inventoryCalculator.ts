@@ -1,5 +1,70 @@
-import { InvoiceHeader, InvoiceDetail, ProductMapping, InventoryRow, GroupBy } from '../types';
+import { InvoiceHeader, InvoiceDetail, ProductMapping, InventoryRow, GroupBy, OpeningBalance } from '../types';
 import { classifyInvoice } from './invoiceClassifier';
+
+/**
+ * Calculate opening balance from transactions before periodStartDate
+ * Looks back up to 5 years
+ */
+export const calculateOpeningBalance = (
+  invoices: InvoiceHeader[],
+  details: InvoiceDetail[],
+  products: ProductMapping[],
+  userMST: string,
+  groupBy: GroupBy,
+  periodStartDate: string
+): Map<string, OpeningBalance> => {
+  console.log('🔵 calculateOpeningBalance START:', { periodStartDate });
+  
+  // Calculate date 5 years before periodStartDate
+  const startDateObj = new Date(periodStartDate);
+  const fiveYearsAgo = new Date(startDateObj);
+  fiveYearsAgo.setFullYear(startDateObj.getFullYear() - 5);
+  
+  console.log('📅 Date range for opening balance:', {
+    from: fiveYearsAgo.toISOString().split('T')[0],
+    to: periodStartDate
+  });
+  
+  // Calculate inventory from 5 years ago to periodStartDate (exclusive)
+  const periodEndDate = new Date(startDateObj);
+  periodEndDate.setDate(periodEndDate.getDate() - 1); // Day before periodStartDate
+  
+  const historicalInventory = calculateInventory(
+    invoices,
+    details,
+    products,
+    userMST,
+    groupBy,
+    fiveYearsAgo.toISOString().split('T')[0],
+    periodEndDate.toISOString().split('T')[0]
+  );
+  
+  // Group by product and get closing balance (which becomes opening balance)
+  const openingBalanceMap = new Map<string, OpeningBalance>();
+  
+  // Sum up all transactions per product to get final closing balance
+  historicalInventory.forEach(row => {
+    const existing = openingBalanceMap.get(row.productName);
+    if (existing) {
+      existing.quantity += row.closingQuantity;
+      existing.amount += row.closingAmount;
+    } else {
+      openingBalanceMap.set(row.productName, {
+        productName: row.productName,
+        quantity: row.closingQuantity,
+        amount: row.closingAmount
+      });
+    }
+  });
+  
+  console.log('✅ Opening balance calculated for', openingBalanceMap.size, 'products');
+  if (openingBalanceMap.size > 0) {
+    const samples = Array.from(openingBalanceMap.values()).slice(0, 3);
+    console.log('Sample opening balances:', samples);
+  }
+  
+  return openingBalanceMap;
+};
 
 /**
  * Match product name from invoice detail to product mapping
@@ -55,6 +120,7 @@ const matchProduct = (
 
 /**
  * Calculate inventory report from invoices
+ * @param openingBalances - Optional opening balances at period start
  */
 export const calculateInventory = (
   invoices: InvoiceHeader[],
@@ -63,7 +129,8 @@ export const calculateInventory = (
   userMST: string,
   groupBy: GroupBy,
   startDate: string,
-  endDate: string
+  endDate: string,
+  openingBalances?: Map<string, OpeningBalance>
 ): InventoryRow[] => {
   console.log('🔧 calculateInventory START:', { invoices: invoices.length, details: details.length, products: products.length });
   
@@ -195,8 +262,19 @@ export const calculateInventory = (
     // Sort by date
     rows.sort((a, b) => a.date.localeCompare(b.date));
     
-    let runningQuantity = 0;
-    let runningAmount = 0;
+    // Initialize running balance
+    const productName = rows[0].productName;
+    const openingBalance = openingBalances?.get(productName);
+    
+    let runningQuantity = openingBalance?.quantity || 0;
+    let runningAmount = openingBalance?.amount || 0;
+    
+    if (openingBalance) {
+      console.log(`🔵 Using opening balance for "${productName}":`, {
+        quantity: runningQuantity,
+        amount: runningAmount
+      });
+    }
     
     rows.forEach(row => {
       row.openingQuantity = runningQuantity;

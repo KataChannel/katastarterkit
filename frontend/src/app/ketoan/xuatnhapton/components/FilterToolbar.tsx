@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, Settings, RefreshCw, FileSpreadsheet, ArrowUpDown } from 'lucide-react';
+import { Search, Settings, RefreshCw, FileSpreadsheet, ArrowUpDown, Loader2 } from 'lucide-react';
 
 interface FilterToolbarProps {
   searchTerm: string;
@@ -30,6 +30,7 @@ interface FilterToolbarProps {
   loading?: boolean;
   totalRecords?: number;
   displayedRecords?: number;
+  isSearching?: boolean;
 }
 
 export const FilterToolbar: React.FC<FilterToolbarProps> = ({
@@ -49,6 +50,7 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
   loading,
   totalRecords = 0,
   displayedRecords = 0,
+  isSearching = false,
 }) => {
   // Local state for date range to prevent auto-reload
   const [localDateRange, setLocalDateRange] = useState<DateRange>(dateRange);
@@ -66,10 +68,23 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
   
   // Check if date range has changed
   const hasDateChanged = localDateRange.startDate !== dateRange.startDate || 
-                        localDateRange.endDate !== dateRange.endDate;
+                        localDateRange.endDate !== dateRange.endDate ||
+                        localDateRange.periodStartDate !== dateRange.periodStartDate;
   return (
     <Card className="mb-6">
       <CardContent className="pt-6 space-y-4">
+        {/* Period Start Info */}
+        {localDateRange.periodStartDate && (
+          <div className="flex items-center gap-2 text-sm bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 px-4 py-2 rounded-md">
+            <span className="text-green-700 dark:text-green-300">
+              🔵 <strong>Ngày chốt đầu kỳ:</strong> {new Date(localDateRange.periodStartDate).toLocaleDateString('vi-VN')}
+            </span>
+            <span className="text-xs text-green-600 dark:text-green-400">
+              (Tồn đầu tính từ 5 năm trước)
+            </span>
+          </div>
+        )}
+        
         {/* Records Info */}
         {totalRecords > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 px-4 py-2 rounded-md">
@@ -91,13 +106,26 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
         {/* Row 1: Search and Actions */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            {isSearching ? (
+              <Loader2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-primary animate-spin" />
+            ) : (
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            )}
             <Input
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Tìm kiếm sản phẩm..."
-              className="pl-9"
+              placeholder="Tìm kiếm theo tên, mã sản phẩm, đơn vị..."
+              className="pl-9 transition-all duration-200 focus:ring-2 focus:ring-primary"
             />
+            {searchTerm && (
+              <button
+                onClick={() => onSearchChange('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                title="Xóa tìm kiếm"
+              >
+                ✕
+              </button>
+            )}
           </div>
           
           <div className="flex gap-2">
@@ -123,8 +151,26 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
           </div>
         </div>
         
-        {/* Row 2: Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {/* Row 2: Date Range & Period Start */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="periodStartDate" className="flex items-center gap-1">
+              Ngày Chốt Đầu Kỳ
+              <span className="text-xs text-muted-foreground">(optional)</span>
+            </Label>
+            <Input
+              id="periodStartDate"
+              type="date"
+              value={localDateRange.periodStartDate || ''}
+              onChange={(e) => setLocalDateRange({ ...localDateRange, periodStartDate: e.target.value || undefined })}
+              placeholder="Chọn ngày chốt"
+              title="Chọn ngày chốt đầu kỳ để tính tồn đầu từ 5 năm trước"
+            />
+            <p className="text-xs text-muted-foreground">
+              Tính tồn đầu từ giao dịch 5 năm trước
+            </p>
+          </div>
+          
           <div className="space-y-2">
             <Label htmlFor="startDate">Từ Ngày</Label>
             <Input

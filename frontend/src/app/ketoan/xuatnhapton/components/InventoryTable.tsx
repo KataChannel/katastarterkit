@@ -19,6 +19,8 @@ interface InventoryTableProps {
   loading?: boolean;
   totalRecords?: number;
   isLimited?: boolean;
+  searchTerm?: string;
+  isSearching?: boolean;
 }
 
 export const InventoryTable: React.FC<InventoryTableProps> = ({
@@ -28,6 +30,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   loading,
   totalRecords = 0,
   isLimited = false,
+  searchTerm = '',
+  isSearching = false,
 }) => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, rows.length);
@@ -41,8 +45,33 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     itemsPerPage,
     startIndex,
     endIndex,
-    loading 
+    loading,
+    searchTerm,
+    isSearching
   });
+  
+  // Helper function to highlight matching text
+  const highlightText = (text: string | null | undefined, searchTerm: string): React.ReactNode => {
+    if (!text || !searchTerm) return text || '-';
+    
+    const lowerText = text.toLowerCase();
+    const lowerSearch = searchTerm.toLowerCase();
+    const index = lowerText.indexOf(lowerSearch);
+    
+    if (index === -1) return text;
+    
+    const before = text.slice(0, index);
+    const match = text.slice(index, index + searchTerm.length);
+    const after = text.slice(index + searchTerm.length);
+    
+    return (
+      <>
+        {before}
+        <mark className="bg-yellow-200 dark:bg-yellow-800 font-semibold">{match}</mark>
+        {after}
+      </>
+    );
+  };
   
   if (loading) {
     return (
@@ -80,6 +109,18 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
           </p>
         </div>
       )}
+      {searchTerm && (
+        <div className="bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-800 px-4 py-3">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            🔍 Tìm kiếm: <span className="font-semibold">"{searchTerm}"</span> - 
+            {isSearching ? (
+              <span className="ml-2 italic">Đang tìm kiếm...</span>
+            ) : (
+              <span className="ml-2">Tìm thấy {rows.length.toLocaleString()} kết quả</span>
+            )}
+          </p>
+        </div>
+      )}
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table>
@@ -113,22 +154,28 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
             </TableHeader>
             <TableBody>
               {displayRows.map((row, index) => (
-                <TableRow key={`${row.productName}-${row.date}-${index}`}>
+                <TableRow 
+                  key={`${row.productName}-${row.date}-${index}`}
+                  className="animate-in fade-in duration-200"
+                  style={{ animationDelay: `${index * 20}ms` }}
+                >
                   <TableCell className="font-medium">
                     {startIndex + index + 1}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {formatDate(row.date)}
                   </TableCell>
-                  <TableCell className="font-medium">{row.productName}</TableCell>
+                  <TableCell className="font-medium">
+                    {highlightText(row.productName, searchTerm)}
+                  </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {row.originalName}
+                    {highlightText(row.originalName, searchTerm)}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {row.productCode || '-'}
+                    {highlightText(row.productCode, searchTerm)}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {row.unit || '-'}
+                    {highlightText(row.unit, searchTerm)}
                   </TableCell>
                   
                   {/* Tồn Đầu */}

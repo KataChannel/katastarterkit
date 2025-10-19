@@ -10,6 +10,7 @@ interface UseInventoryFilterProps {
 
 /**
  * Hook to filter and sort inventory rows
+ * Returns filtered rows and search metadata for performance optimization
  */
 export const useInventoryFilter = ({
   rows,
@@ -18,6 +19,7 @@ export const useInventoryFilter = ({
   sortDirection,
 }: UseInventoryFilterProps): InventoryRow[] => {
   return useMemo(() => {
+    const startTime = performance.now();
     let filtered = [...rows];
     
     // Apply search filter
@@ -28,6 +30,9 @@ export const useInventoryFilter = ({
         row.productCode?.toLowerCase().includes(term) ||
         row.unit?.toLowerCase().includes(term)
       );
+      
+      const endTime = performance.now();
+      console.log(`🔍 Search completed in ${(endTime - startTime).toFixed(2)}ms - Found ${filtered.length}/${rows.length} records`);
     }
     
     // Apply sorting

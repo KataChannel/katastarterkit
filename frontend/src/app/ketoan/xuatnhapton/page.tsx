@@ -19,7 +19,7 @@ import {
 } from './components';
 
 // Hooks
-import { useInventoryData, useInventoryFilter, usePagination } from './hooks';
+import { useInventoryData, useInventoryFilter, usePagination, useDebouncedValue } from './hooks';
 
 // Utils
 import {
@@ -27,6 +27,7 @@ import {
   saveUserConfig,
   getDefaultDateRange,
   calculateInventory,
+  calculateOpeningBalance,
   calculateSummary,
   exportToExcel,
 } from './utils';
@@ -41,6 +42,8 @@ export default function XuatNhapTonPage() {
   
   // Filters and sorting
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebouncedValue(searchTerm, 300); // 300ms debounce
+  const [isSearching, setIsSearching] = useState(false);
   const [groupBy, setGroupBy] = useState<GroupBy>('ma');
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -89,6 +92,7 @@ export default function XuatNhapTonPage() {
       userMST: userConfig.mst,
       groupBy,
       dateRange,
+      periodStartDate: dateRange.periodStartDate,
       sampleInvoice: invoices[0],
       sampleDetail: details[0],
       sampleProduct: products[0],
@@ -110,6 +114,21 @@ export default function XuatNhapTonPage() {
       firstInvoiceNmmst: invoices[0]?.nmmst,
     });
     
+    // Calculate opening balance if periodStartDate is set
+    let openingBalances: Map<string, any> | undefined;
+    if (dateRange.periodStartDate) {
+      console.log('🔵 Calculating opening balance from period start:', dateRange.periodStartDate);
+      openingBalances = calculateOpeningBalance(
+        invoices,
+        details,
+        products,
+        userConfig.mst,
+        groupBy,
+        dateRange.periodStartDate
+      );
+      console.log('✅ Opening balance calculated for', openingBalances.size, 'products');
+    }
+    
     const result = calculateInventory(
       invoices,
       details,
@@ -117,7 +136,8 @@ export default function XuatNhapTonPage() {
       userConfig.mst,
       groupBy,
       dateRange.startDate,
-      dateRange.endDate
+      dateRange.endDate,
+      openingBalances
     );
     
     console.log('✅ Inventory rows calculated:', result.length);
@@ -130,15 +150,24 @@ export default function XuatNhapTonPage() {
     return result;
   }, [invoices, details, products, userConfig, groupBy, dateRange, isReady]);
   
-  // Apply filters and sorting
+  // Apply filters and sorting with debounced search
   const filteredRows = useInventoryFilter({
     rows: inventoryRows,
-    searchTerm,
+    searchTerm: debouncedSearchTerm,
     sortField,
     sortDirection,
   });
   
-  console.log('🔍 Filtered rows:', filteredRows.length, { searchTerm, sortField, sortDirection });
+  // Track search loading state
+  useEffect(() => {
+    if (searchTerm !== debouncedSearchTerm) {
+      setIsSearching(true);
+    } else {
+      setIsSearching(false);
+    }
+  }, [searchTerm, debouncedSearchTerm]);
+  
+  console.log('🔍 Filtered rows:', filteredRows.length, { searchTerm: debouncedSearchTerm, sortField, sortDirection });
   
   // Limit display rows for performance
   const totalRecords = filteredRows.length;
@@ -292,6 +321,7 @@ export default function XuatNhapTonPage() {
         loading={loading.any}
         totalRecords={totalRecords}
         displayedRecords={displayRows.length}
+        isSearching={isSearching}
       />
       
       {/* Inventory Table */}
@@ -302,6 +332,8 @@ export default function XuatNhapTonPage() {
         loading={loading.any}
         totalRecords={totalRecords}
         isLimited={isLimited}
+        searchTerm={debouncedSearchTerm}
+        isSearching={isSearching}
       />
       
       {/* Pagination */}

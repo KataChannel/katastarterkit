@@ -79,6 +79,13 @@ export interface InventorySummary {
   totalClosingAmount: number;
 }
 
+// Opening balance for a product at period start
+export interface OpeningBalance {
+  productName: string;
+  quantity: number;
+  amount: number;
+}
+
 // ==================== CONFIG TYPES ====================
 
 export interface UserConfig {
@@ -87,8 +94,9 @@ export interface UserConfig {
 }
 
 export interface DateRange {
-  startDate: string; // YYYY-MM-DD
-  endDate: string; // YYYY-MM-DD
+  startDate: string; // YYYY-MM-DD (Từ ngày)
+  endDate: string; // YYYY-MM-DD (Đến ngày)
+  periodStartDate?: string; // YYYY-MM-DD (Ngày chốt đầu kỳ - optional)
 }
 
 // ==================== UI STATE TYPES ====================
