@@ -318,9 +318,9 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">{link.description}</p>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{link.clicks} lượt click</span>
-                          <span>{link.conversions} chuyển đổi</span>
-                          <span>${link.commission.toFixed(2)} kiếm được</span>
+                          <span>{link.totalClicks || 0} lượt click</span>
+                          <span>{link.totalConversions || 0} chuyển đổi</span>
+                          <span>${(link.commission || 0).toFixed(2)} kiếm được</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 ml-4">

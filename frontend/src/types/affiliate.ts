@@ -62,8 +62,8 @@ export interface AffiliateLink {
   customAlias?: string;
   title?: string;
   description?: string;
-  clicks: number;
-  conversions: number;
+  totalClicks: number;
+  totalConversions: number;
   revenue: number;
   commission: number;
   conversionRate: number;

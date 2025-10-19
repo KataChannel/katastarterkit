@@ -1891,6 +1891,9 @@ model AffLink {
   trackingCode String  @unique // Unique tracking identifier
   originalUrl  String // The merchant's product URL
   shortUrl     String? // Optional shortened URL
+  customAlias  String? // Custom alias for the link
+  title        String? // Link title for management
+  description  String? @db.Text // Link description
 
   // UTM and tracking parameters
   utmSource   String?

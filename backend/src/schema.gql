@@ -617,7 +617,11 @@ input CountInput {
 
 input CreateAffLinkInput {
   campaignId: String!
+  customAlias: String
+  description: String
   expiresAt: DateTime
+  originalUrl: String
+  title: String
   utmCampaign: String
   utmContent: String
   utmMedium: String

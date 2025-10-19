@@ -1,5 +1,6 @@
 import { InputType, Field, Int, Float } from '@nestjs/graphql';
 import { $Enums } from '@prisma/client';
+import { IsNotEmpty, IsString, IsOptional, IsUrl, Length, Matches } from 'class-validator';
 
 // ===== AFF USER INPUTS =====
 @InputType()
@@ -200,15 +201,46 @@ export class ReviewCampaignApplicationInput {
 @InputType()
 export class CreateAffLinkInput {
   @Field()
+  @IsNotEmpty({ message: 'Campaign ID is required' })
+  @IsString()
   campaignId: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsUrl({}, { message: 'Original URL must be a valid URL' })
+  originalUrl?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @Length(1, 100, { message: 'Custom alias must be between 1 and 100 characters' })
+  @Matches(/^[a-z0-9-]+$/, { message: 'Custom alias must be lowercase alphanumeric with hyphens only' })
+  customAlias?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @Length(1, 200, { message: 'Title must be between 1 and 200 characters' })
+  title?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   utmSource?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   utmMedium?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   utmCampaign?: string;
 
   @Field({ nullable: true })

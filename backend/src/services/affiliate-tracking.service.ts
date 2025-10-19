@@ -38,16 +38,35 @@ export class AffiliateTrackingService {
 
   // Create affiliate link
   async createAffiliateLink(affiliateUserId: string, input: CreateAffLinkInput) {
-    const affiliate = await this.prisma.affUser.findUnique({
+    // Input validation is handled by class-validator decorators
+    
+    // Get or create affiliate profile
+    let affiliate = await this.prisma.affUser.findUnique({
       where: { userId: affiliateUserId },
     });
 
     if (!affiliate) {
-      throw new BadRequestException('Affiliate profile required');
+      // Auto-create affiliate profile with default values
+      affiliate = await this.prisma.affUser.create({
+        data: {
+          userId: affiliateUserId,
+          role: 'AFFILIATE', // Default role
+          isActive: true,
+        },
+      });
     }
 
-    // Verify affiliate is approved for this campaign
-    const campaignJoin = await this.prisma.affCampaignAffiliate.findUnique({
+    // Get campaign details
+    const campaign = await this.prisma.affCampaign.findUnique({
+      where: { id: input.campaignId },
+    });
+
+    if (!campaign) {
+      throw new NotFoundException('Campaign not found');
+    }
+
+    // Check if affiliate has joined this campaign
+    let campaignJoin = await this.prisma.affCampaignAffiliate.findUnique({
       where: {
         campaignId_affiliateId: {
           campaignId: input.campaignId,
@@ -56,16 +75,27 @@ export class AffiliateTrackingService {
       },
     });
 
-    if (!campaignJoin || campaignJoin.status !== 'approved') {
-      throw new BadRequestException('Not approved for this campaign');
+    // Auto-join if not already joined
+    if (!campaignJoin) {
+      const autoApprove = !campaign.requireApproval; // Auto-approve if campaign doesn't require approval
+      
+      campaignJoin = await this.prisma.affCampaignAffiliate.create({
+        data: {
+          campaignId: input.campaignId,
+          affiliateId: affiliate.id,
+          status: autoApprove ? 'approved' : 'pending',
+          appliedAt: new Date(),
+          approvedAt: autoApprove ? new Date() : null,
+        },
+      });
     }
 
-    const campaign = await this.prisma.affCampaign.findUnique({
-      where: { id: input.campaignId },
-    });
-
-    if (!campaign) {
-      throw new NotFoundException('Campaign not found');
+    // Check approval status
+    if (campaignJoin.status !== 'approved') {
+      throw new BadRequestException(
+        `Campaign application is ${campaignJoin.status}. ` +
+        (campaignJoin.status === 'pending' ? 'Please wait for approval.' : 'Application was rejected.')
+      );
     }
 
     // Generate unique tracking code
@@ -94,7 +124,10 @@ export class AffiliateTrackingService {
         campaignId: input.campaignId,
         affiliateId: affiliate.id,
         trackingCode,
-        originalUrl: campaign.productUrl,
+        originalUrl: input.originalUrl || campaign.productUrl, // Use input or fallback to campaign URL
+        customAlias: input.customAlias,
+        title: input.title,
+        description: input.description,
         utmSource: input.utmSource,
         utmMedium: input.utmMedium,
         utmCampaign: input.utmCampaign,

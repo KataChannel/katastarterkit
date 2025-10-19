@@ -152,7 +152,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
             <div className="flex items-center justify-center mb-1">
               <MousePointer className="h-4 w-4 text-blue-500" />
             </div>
-            <div className="text-sm font-semibold">{link.clicks.toLocaleString()}</div>
+            <div className="text-sm font-semibold">{(link.totalClicks || 0).toLocaleString()}</div>
             <div className="text-xs text-muted-foreground">Lượt click</div>
           </div>
           
@@ -160,7 +160,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
             <div className="flex items-center justify-center mb-1">
               <TrendingUp className="h-4 w-4 text-green-500" />
             </div>
-            <div className="text-sm font-semibold">{link.conversions}</div>
+            <div className="text-sm font-semibold">{link.totalConversions || 0}</div>
             <div className="text-xs text-muted-foreground">Chuyển đổi</div>
           </div>
           
@@ -168,7 +168,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
             <div className="flex items-center justify-center mb-1">
               <BarChart3 className="h-4 w-4 text-purple-500" />
             </div>
-            <div className="text-sm font-semibold">{link.conversionRate.toFixed(1)}%</div>
+            <div className="text-sm font-semibold">{(link.conversionRate || 0).toFixed(1)}%</div>
             <div className="text-xs text-muted-foreground">Tỷ lệ</div>
           </div>
         </div>
@@ -176,9 +176,9 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
         {/* Revenue and Commission */}
         <div className="flex items-center justify-between text-sm">
           <div className="text-muted-foreground">
-            Doanh thu: <span className="font-medium text-foreground">${link.revenue.toFixed(2)}</span>
+            Doanh thu: <span className="font-medium text-foreground">${((link.revenue || 0) || 0).toFixed(2)}</span>
             {' • '}
-            Kiếm được: <span className="font-medium text-green-600">${link.commission.toFixed(2)}</span>
+            Hoa hồng: <span className="font-medium text-green-600">${(link.commission || 0).toFixed(2)}</span>
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline">
@@ -411,19 +411,19 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold">
-                  {filteredLinks.reduce((sum, link) => sum + link.clicks, 0).toLocaleString()}
+                  {filteredLinks.reduce((sum, link) => sum + (link.totalClicks || 0), 0).toLocaleString()}
                 </div>
                 <div className="text-sm text-muted-foreground">Tổng Lượt Click</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold">
-                  {filteredLinks.reduce((sum, link) => sum + link.conversions, 0)}
+                  {filteredLinks.reduce((sum, link) => sum + (link.totalConversions || 0), 0)}
                 </div>
                 <div className="text-sm text-muted-foreground">Tổng Chuyển Đổi</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
-                  ${filteredLinks.reduce((sum, link) => sum + link.commission, 0).toFixed(2)}
+                  ${filteredLinks.reduce((sum, link) => sum + (link.commission || 0), 0).toFixed(2)}
                 </div>
                 <div className="text-sm text-muted-foreground">Tổng Kiếm Được</div>
               </div>
