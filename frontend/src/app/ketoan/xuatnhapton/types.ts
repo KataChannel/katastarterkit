@@ -70,6 +70,9 @@ export interface InventoryRow {
 
 export interface InventorySummary {
   totalProducts: number;
+  totalRecords: number; // Tổng số bản ghi
+  totalOpeningQuantity: number; // Tổng số lượng tồn đầu
+  totalOpeningAmount: number; // Tổng tiền tồn đầu
   totalImportQuantity: number;
   totalImportAmount: number;
   totalExportQuantity: number;

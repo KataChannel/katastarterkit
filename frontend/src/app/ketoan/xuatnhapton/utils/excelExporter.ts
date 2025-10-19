@@ -125,6 +125,9 @@ export const calculateSummary = (rows: InventoryRow[]): InventorySummary => {
   
   return {
     totalProducts: uniqueProducts.size,
+    totalRecords: rows.length,
+    totalOpeningQuantity: rows.reduce((sum, r) => sum + r.openingQuantity, 0),
+    totalOpeningAmount: rows.reduce((sum, r) => sum + r.openingAmount, 0),
     totalImportQuantity: rows.reduce((sum, r) => sum + r.importQuantity, 0),
     totalImportAmount: rows.reduce((sum, r) => sum + r.importAmount, 0),
     totalExportQuantity: rows.reduce((sum, r) => sum + r.exportQuantity, 0),
