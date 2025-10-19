@@ -69,12 +69,12 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
 
   const campaigns: AffiliateCampaign[] = campaignsData?.affiliateCampaigns || [];
   const myApplications: CampaignApplication[] = 
-    applicationsData?.getMyAffiliateProfile?.campaigns || [];
+    applicationsData?.affiliateUser?.campaignJoins || [];
 
   // Create a map of campaign IDs to application status
   const applicationStatusMap = new Map<string, ApplicationStatus>();
   myApplications.forEach((app) => {
-    applicationStatusMap.set(app.campaign.id, app.status);
+    applicationStatusMap.set(app.campaign.id, app.status as ApplicationStatus);
   });
 
   // Filter campaigns
@@ -224,8 +224,8 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
                 <div className="flex items-center text-2xl font-bold text-green-600 dark:text-green-400">
                   <DollarSign className="h-6 w-6 mr-1" />
                   {campaign.commissionType === 'PERCENTAGE'
-                    ? `${campaign.commissionRate}%`
-                    : `${campaign.fixedAmount.toLocaleString()} VND`}
+                    ? `${campaign.commissionRate ?? 0}%`
+                    : `${(campaign.fixedAmount ?? 0).toLocaleString()} VND`}
                   <span className="text-sm font-normal text-gray-600 dark:text-gray-400 ml-2">
                     per sale
                   </span>
@@ -235,19 +235,19 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center text-gray-600 dark:text-gray-400">
                     <Calendar className="h-4 w-4 mr-2" />
-                    <span>{campaign.cookieDuration}d cookie</span>
+                    <span>{campaign.cookieDuration ?? 0}d cookie</span>
                   </div>
                   <div className="flex items-center text-gray-600 dark:text-gray-400">
                     <TrendingUp className="h-4 w-4 mr-2" />
-                    <span>{campaign.conversionRate.toFixed(2)}% CVR</span>
+                    <span>{(campaign.conversionRate ?? 0).toFixed(2)}% CVR</span>
                   </div>
                   <div className="flex items-center text-gray-600 dark:text-gray-400">
                     <Users className="h-4 w-4 mr-2" />
-                    <span>{campaign.totalConversions} sales</span>
+                    <span>{campaign.totalConversions ?? 0} sales</span>
                   </div>
                   <div className="flex items-center text-gray-600 dark:text-gray-400">
                     <Eye className="h-4 w-4 mr-2" />
-                    <span>{campaign.totalClicks} clicks</span>
+                    <span>{campaign.totalClicks ?? 0} clicks</span>
                   </div>
                 </div>
 

@@ -178,15 +178,20 @@ export const DELETE_AFFILIATE_CAMPAIGN = gql`
 
 export const GET_MY_CAMPAIGN_APPLICATIONS = gql`
   query GetMyCampaignApplications {
-    getMyAffiliateProfile {
-      campaigns {
+    affiliateUser {
+      id
+      role
+      campaignJoins {
         id
         status
-        message
-        reviewReason
+        reason
         approvedAt
-        reviewedAt
+        rejectedAt
+        appliedAt
         createdAt
+        totalClicks
+        totalConversions
+        totalEarnings
         campaign {
           id
           name
@@ -195,6 +200,11 @@ export const GET_MY_CAMPAIGN_APPLICATIONS = gql`
           commissionRate
           fixedAmount
           status
+          productName
+          productUrl
+          productImage
+          startDate
+          endDate
         }
       }
     }

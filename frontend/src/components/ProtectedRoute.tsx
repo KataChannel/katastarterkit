@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { useRouter } from 'next/router';
+import { ReactNode, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -10,6 +10,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Show loading spinner while checking authentication
   if (loading) {
@@ -23,10 +24,16 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   }
 
   // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated && !loading) {
+      const currentPath = pathname || '/';
+      const loginUrl = `/login${currentPath !== '/' ? `?returnUrl=${encodeURIComponent(currentPath)}` : ''}`;
+      router.push(loginUrl);
+    }
+  }, [isAuthenticated, loading, pathname, router]);
+
+  // Don't render children if not authenticated
   if (!isAuthenticated) {
-    const currentPath = router.asPath;
-    const loginUrl = `/login${currentPath !== '/' ? `?returnUrl=${encodeURIComponent(currentPath)}` : ''}`;
-    router.push(loginUrl);
     return null;
   }
 

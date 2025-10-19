@@ -38,7 +38,7 @@ export class AffiliateUserService {
   }
 
   // Get affiliate user profile
-  async getAffiliateUser(userId: string) {
+  async getAffiliateUser(userId: string): Promise<any | null> {
     const profile = await this.prisma.affUser.findUnique({
       where: { userId },
       include: {
@@ -61,8 +61,9 @@ export class AffiliateUserService {
       },
     });
 
+    // Return null if profile doesn't exist (not an error - user may not be an affiliate)
     if (!profile) {
-      throw new NotFoundException('Affiliate profile not found');
+      return null;
     }
 
     return profile;
