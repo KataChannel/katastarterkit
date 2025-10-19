@@ -15,27 +15,27 @@ export default function AffiliatePage() {
     <div className="container mx-auto px-6 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Affiliate Marketing
+          Tiếp Thị Affiliate
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Manage your affiliate program, campaigns, and track performance
+          Quản lý chương trình affiliate, chiến dịch và theo dõi hiệu suất
         </p>
       </div>
 
       <Tabs defaultValue="dashboard" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          <TabsTrigger value="dashboard">Bảng Điều Khiển</TabsTrigger>
+          <TabsTrigger value="campaigns">Chiến Dịch</TabsTrigger>
           <TabsTrigger value="links">Links</TabsTrigger>
-          <TabsTrigger value="payments">Payments</TabsTrigger>
+          <TabsTrigger value="payments">Thanh Toán</TabsTrigger>
         </TabsList>
         
         <TabsContent value="dashboard" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Affiliate Dashboard</CardTitle>
+              <CardTitle>Bảng Điều Khiển Affiliate</CardTitle>
               <CardDescription>
-                Overview of your affiliate program performance
+                Tổng quan hiệu suất chương trình affiliate của bạn
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -47,9 +47,9 @@ export default function AffiliatePage() {
         <TabsContent value="campaigns" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Campaign Management</CardTitle>
+              <CardTitle>Quản Lý Chiến Dịch</CardTitle>
               <CardDescription>
-                Create and manage your affiliate campaigns
+                Tạo và quản lý các chiến dịch affiliate của bạn
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -61,9 +61,9 @@ export default function AffiliatePage() {
         <TabsContent value="links" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Link Management</CardTitle>
+              <CardTitle>Quản Lý Links</CardTitle>
               <CardDescription>
-                Generate and track your affiliate links
+                Tạo và theo dõi các links affiliate của bạn
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -75,9 +75,9 @@ export default function AffiliatePage() {
         <TabsContent value="payments" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Payment Management</CardTitle>
+              <CardTitle>Quản Lý Thanh Toán</CardTitle>
               <CardDescription>
-                Track earnings and manage payout requests
+                Theo dõi thu nhập và quản lý yêu cầu thanh toán
               </CardDescription>
             </CardHeader>
             <CardContent>

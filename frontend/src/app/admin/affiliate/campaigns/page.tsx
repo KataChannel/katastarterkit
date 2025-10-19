@@ -9,18 +9,18 @@ export default function CampaignsPage() {
     <div className="container mx-auto px-6 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Campaign Management
+          Quản Lý Chiến Dịch
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Create, manage, and monitor your affiliate marketing campaigns
+          Tạo, quản lý và giám sát các chiến dịch tiếp thị affiliate
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Active Campaigns</CardTitle>
+          <CardTitle>Chiến Dịch Đang Hoạt Động</CardTitle>
           <CardDescription>
-            Manage your affiliate campaigns, set commission rates, and track performance
+            Quản lý chiến dịch affiliate, thiết lập tỷ lệ hoa hồng và theo dõi hiệu suất
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -9,18 +9,18 @@ export default function PaymentsPage() {
     <div className="container mx-auto px-6 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Payment Management
+          Quản Lý Thanh Toán
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Track your earnings, manage payout requests, and view payment history
+          Theo dõi thu nhập, quản lý yêu cầu thanh toán và xem lịch sử thanh toán
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Earnings & Payouts</CardTitle>
+          <CardTitle>Thu Nhập & Thanh Toán</CardTitle>
           <CardDescription>
-            Monitor commission earnings, request payouts, and manage payment methods
+            Giám sát thu nhập hoa hồng, yêu cầu thanh toán và quản lý phương thức thanh toán
           </CardDescription>
         </CardHeader>
         <CardContent>

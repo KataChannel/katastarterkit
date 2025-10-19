@@ -49,33 +49,33 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
       <div className={`p-6 ${className}`}>
         <Card className="max-w-2xl mx-auto">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome to Affiliate Program</CardTitle>
+            <CardTitle className="text-2xl">Chào mừng đến Chương Trình Affiliate</CardTitle>
             <CardDescription>
-              Join our affiliate program and start earning commissions by promoting our products.
+              Tham gia chương trình affiliate và bắt đầu kiếm hoa hồng bằng cách quảng bá sản phẩm của chúng tôi.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
               <div className="p-4 border rounded-lg">
                 <DollarSign className="h-8 w-8 mx-auto mb-2 text-green-500" />
-                <h3 className="font-semibold">Earn Commissions</h3>
-                <p className="text-sm text-muted-foreground">Up to 30% on every sale</p>
+                <h3 className="font-semibold">Kiếm Hoa Hồng</h3>
+                <p className="text-sm text-muted-foreground">Lên đến 30% mỗi đơn hàng</p>
               </div>
               <div className="p-4 border rounded-lg">
                 <BarChart3 className="h-8 w-8 mx-auto mb-2 text-blue-500" />
-                <h3 className="font-semibold">Real-time Analytics</h3>
-                <p className="text-sm text-muted-foreground">Track your performance</p>
+                <h3 className="font-semibold">Phân Tích Thời Gian Thực</h3>
+                <p className="text-sm text-muted-foreground">Theo dõi hiệu suất của bạn</p>
               </div>
               <div className="p-4 border rounded-lg">
                 <Target className="h-8 w-8 mx-auto mb-2 text-purple-500" />
-                <h3 className="font-semibold">Multiple Campaigns</h3>
-                <p className="text-sm text-muted-foreground">Choose what to promote</p>
+                <h3 className="font-semibold">Nhiều Chiến Dịch</h3>
+                <p className="text-sm text-muted-foreground">Chọn những gì quảng bá</p>
               </div>
             </div>
             <div className="flex justify-center">
               <Button size="lg" className="w-full max-w-xs">
                 <Plus className="h-4 w-4 mr-2" />
-                Join Affiliate Program
+                Tham Gia Chương Trình Affiliate
               </Button>
             </div>
           </CardContent>
@@ -107,7 +107,7 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
     return (
       <div className={`p-6 ${className}`}>
         <Alert>
-          <AlertDescription>Failed to load affiliate data. Please try again.</AlertDescription>
+          <AlertDescription>Không thể tải dữ liệu affiliate. Vui lòng thử lại.</AlertDescription>
         </Alert>
       </div>
     );
@@ -130,9 +130,9 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Affiliate Dashboard</h1>
+          <h1 className="text-3xl font-bold">Bảng Điều Khiển Affiliate</h1>
           <p className="text-muted-foreground">
-            {affiliateUser?.businessName || 'Welcome back'} • {affiliateUser?.role}
+            {affiliateUser?.businessName || 'Chào mừng trở lại'} • {affiliateUser?.role}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -141,7 +141,7 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
           </Badge>
           {affiliateUser?.isVerified && (
             <Badge variant="outline" className="text-green-600 border-green-600">
-              Verified
+              Đã xác minh
             </Badge>
           )}
         </div>
@@ -153,10 +153,10 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
           <CardContent className="flex items-center p-6">
             <div className="flex items-center justify-between w-full">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
+                <p className="text-sm font-medium text-muted-foreground">Tổng Thu Nhập</p>
                 <div className="text-2xl font-bold">${stats.totalEarnings.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">
-                  +12% from last month
+                  +12% so với tháng trước
                 </p>
               </div>
               <DollarSign className="h-8 w-8 text-green-500" />
@@ -168,10 +168,10 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
           <CardContent className="flex items-center p-6">
             <div className="flex items-center justify-between w-full">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Clicks</p>
+                <p className="text-sm font-medium text-muted-foreground">Tổng Lượt Click</p>
                 <div className="text-2xl font-bold">{stats.totalClicks.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground">
-                  +8% from last month
+                  +8% so với tháng trước
                 </p>
               </div>
               <MousePointer className="h-8 w-8 text-blue-500" />
@@ -183,10 +183,10 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
           <CardContent className="flex items-center p-6">
             <div className="flex items-center justify-between w-full">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Conversions</p>
+                <p className="text-sm font-medium text-muted-foreground">Chuyển Đổi</p>
                 <div className="text-2xl font-bold">{stats.totalConversions}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.conversionRate.toFixed(1)}% rate
+                  Tỷ lệ {stats.conversionRate.toFixed(1)}%
                 </p>
               </div>
               <TrendingUp className="h-8 w-8 text-purple-500" />
@@ -198,10 +198,10 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
           <CardContent className="flex items-center p-6">
             <div className="flex items-center justify-between w-full">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Links</p>
+                <p className="text-sm font-medium text-muted-foreground">Links Hoạt Động</p>
                 <div className="text-2xl font-bold">{stats.activeLinks}</div>
                 <p className="text-xs text-muted-foreground">
-                  {stats.activeCampaigns} campaigns
+                  {stats.activeCampaigns} chiến dịch
                 </p>
               </div>
               <Link2 className="h-8 w-8 text-orange-500" />
@@ -213,10 +213,10 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
       {/* Main Content Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="links">My Links</TabsTrigger>
-          <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="overview">Tổng Quan</TabsTrigger>
+          <TabsTrigger value="links">Links Của Tôi</TabsTrigger>
+          <TabsTrigger value="campaigns">Chiến Dịch</TabsTrigger>
+          <TabsTrigger value="performance">Hiệu Suất</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -224,27 +224,27 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
             {/* Recent Performance */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Performance</CardTitle>
-                <CardDescription>Your performance over the last 30 days</CardDescription>
+                <CardTitle>Hiệu Suất Gần Đây</CardTitle>
+                <CardDescription>Hiệu suất của bạn trong 30 ngày qua</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm">Conversion Rate</span>
+                    <span className="text-sm">Tỷ Lệ Chuyển Đổi</span>
                     <span className="text-sm font-medium">{stats.conversionRate.toFixed(1)}%</span>
                   </div>
                   <Progress value={stats.conversionRate} className="h-2" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm">Average Order Value</span>
+                    <span className="text-sm">Giá Trị Đơn Hàng Trung Bình</span>
                     <span className="text-sm font-medium">${stats.averageOrderValue.toFixed(2)}</span>
                   </div>
                   <Progress value={(stats.averageOrderValue / 200) * 100} className="h-2" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm">Commission Rate</span>
+                    <span className="text-sm">Tỷ Lệ Hoa Hồng</span>
                     <span className="text-sm font-medium">15-30%</span>
                   </div>
                   <Progress value={75} className="h-2" />
@@ -255,25 +255,25 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
             {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Common tasks and shortcuts</CardDescription>
+                <CardTitle>Thao Tác Nhanh</CardTitle>
+                <CardDescription>Các tác vụ và phím tắt thông dụng</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button className="w-full justify-start" variant="outline">
                   <Link2 className="h-4 w-4 mr-2" />
-                  Create New Link
+                  Tạo Link Mới
                 </Button>
                 <Button className="w-full justify-start" variant="outline">
                   <BarChart3 className="h-4 w-4 mr-2" />
-                  View Analytics
+                  Xem Phân Tích
                 </Button>
                 <Button className="w-full justify-start" variant="outline">
                   <DollarSign className="h-4 w-4 mr-2" />
-                  Request Payment
+                  Yêu Cầu Thanh Toán
                 </Button>
                 <Button className="w-full justify-start" variant="outline">
                   <Users className="h-4 w-4 mr-2" />
-                  Browse Campaigns
+                  Duyệt Chiến Dịch
                 </Button>
               </CardContent>
             </Card>
@@ -282,10 +282,10 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
 
         <TabsContent value="links" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">My Affiliate Links</h3>
+            <h3 className="text-lg font-semibold">Links Affiliate Của Tôi</h3>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Create Link
+              Tạo Link
             </Button>
           </div>
           
@@ -295,11 +295,11 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
                 <CardContent className="flex items-center justify-center py-10">
                   <div className="text-center">
                     <Link2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="font-semibold mb-2">No links created yet</h3>
-                    <p className="text-muted-foreground mb-4">Create your first affiliate link to start earning commissions.</p>
+                    <h3 className="font-semibold mb-2">Chưa tạo link nào</h3>
+                    <p className="text-muted-foreground mb-4">Tạo link affiliate đầu tiên của bạn để bắt đầu kiếm hoa hồng.</p>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
-                      Create Your First Link
+                      Tạo Link Đầu Tiên
                     </Button>
                   </div>
                 </CardContent>
@@ -313,14 +313,14 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
                         <div className="flex items-center gap-2 mb-2">
                           <h4 className="font-semibold truncate">{link.title || link.campaign.name}</h4>
                           <Badge variant={link.isActive ? 'default' : 'secondary'}>
-                            {link.isActive ? 'Active' : 'Inactive'}
+                            {link.isActive ? 'Đang hoạt động' : 'Không hoạt động'}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">{link.description}</p>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{link.clicks} clicks</span>
-                          <span>{link.conversions} conversions</span>
-                          <span>${link.commission.toFixed(2)} earned</span>
+                          <span>{link.clicks} lượt click</span>
+                          <span>{link.conversions} chuyển đổi</span>
+                          <span>${link.commission.toFixed(2)} kiếm được</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 ml-4">
@@ -328,7 +328,7 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
                           <ExternalLink className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="outline">
-                          Copy Link
+                          Sao chép Link
                         </Button>
                       </div>
                     </div>
@@ -341,10 +341,10 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
 
         <TabsContent value="campaigns" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Available Campaigns</h3>
+            <h3 className="text-lg font-semibold">Chiến Dịch Có Sẵn</h3>
             <Button variant="outline">
               <Calendar className="h-4 w-4 mr-2" />
-              Filter
+              Lọc
             </Button>
           </div>
           
@@ -368,15 +368,15 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
                       </div>
                       <p className="text-sm text-muted-foreground mb-4">{campaign.description}</p>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{campaign.totalClicks.toLocaleString()} clicks</span>
-                        <span>{campaign.totalConversions} conversions</span>
-                        <span>{campaign.conversionRate.toFixed(1)}% rate</span>
-                        <span>${campaign.totalRevenue.toFixed(2)} revenue</span>
+                        <span>{campaign.totalClicks.toLocaleString()} lượt click</span>
+                        <span>{campaign.totalConversions} chuyển đổi</span>
+                        <span>Tỷ lệ {campaign.conversionRate.toFixed(1)}%</span>
+                        <span>${campaign.totalRevenue.toFixed(2)} doanh thu</span>
                       </div>
                     </div>
                     <Button>
                       <Link2 className="h-4 w-4 mr-2" />
-                      Create Link
+                      Tạo Link
                     </Button>
                   </div>
                 </CardContent>
@@ -389,14 +389,14 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Earnings Trend</CardTitle>
-                <CardDescription>Your earnings over time</CardDescription>
+                <CardTitle>Xu Hướng Thu Nhập</CardTitle>
+                <CardDescription>Thu nhập của bạn theo thời gian</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center h-64 text-muted-foreground">
                   <div className="text-center">
                     <BarChart3 className="h-12 w-12 mx-auto mb-4" />
-                    <p>Chart component will be implemented</p>
+                    <p>Biểu đồ sẽ được triển khai</p>
                   </div>
                 </div>
               </CardContent>
@@ -404,14 +404,14 @@ export default function AffiliateDashboard({ className = '' }: AffiliateDashboar
 
             <Card>
               <CardHeader>
-                <CardTitle>Click Performance</CardTitle>
-                <CardDescription>Clicks and conversions by source</CardDescription>
+                <CardTitle>Hiệu Suất Click</CardTitle>
+                <CardDescription>Lượt click và chuyển đổi theo nguồn</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center h-64 text-muted-foreground">
                   <div className="text-center">
                     <MousePointer className="h-12 w-12 mx-auto mb-4" />
-                    <p>Performance chart will be implemented</p>
+                    <p>Biểu đồ hiệu suất sẽ được triển khai</p>
                   </div>
                 </div>
               </CardContent>

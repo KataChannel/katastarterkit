@@ -86,9 +86,9 @@ export default function JoinCampaignModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Join Campaign</DialogTitle>
+          <DialogTitle className="text-2xl">Tham gia Chiến dịch</DialogTitle>
           <DialogDescription>
-            Review the campaign details and send your application
+            Xem lại thông tin chiến dịch và gửi đơn đăng ký của bạn
           </DialogDescription>
         </DialogHeader>
 
@@ -107,11 +107,11 @@ export default function JoinCampaignModal({
               <div className="flex items-start space-x-2">
                 <DollarSign className="h-5 w-5 text-green-600 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">Commission</p>
+                  <p className="text-sm font-medium">Hoa hồng</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {campaign.commissionType === 'PERCENTAGE'
-                      ? `${campaign.commissionRate}% per sale`
-                      : `${campaign.fixedAmount.toLocaleString()} VND per sale`}
+                      ? `${campaign.commissionRate}% mỗi đơn`
+                      : `${campaign.fixedAmount.toLocaleString()} VND mỗi đơn`}
                   </p>
                 </div>
               </div>
@@ -120,9 +120,9 @@ export default function JoinCampaignModal({
               <div className="flex items-start space-x-2">
                 <Users className="h-5 w-5 text-blue-600 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">Type</p>
+                  <p className="text-sm font-medium">Loại</p>
                   <Badge variant={campaign.type === 'PUBLIC' ? 'default' : 'secondary'}>
-                    {campaign.type}
+                    {campaign.type === 'PUBLIC' ? 'Công khai' : 'Riêng tư'}
                   </Badge>
                 </div>
               </div>
@@ -131,9 +131,9 @@ export default function JoinCampaignModal({
               <div className="flex items-start space-x-2">
                 <Calendar className="h-5 w-5 text-purple-600 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">Cookie Duration</p>
+                  <p className="text-sm font-medium">Thời gian Cookie</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {campaign.cookieDuration} days
+                    {campaign.cookieDuration} ngày
                   </p>
                 </div>
               </div>
@@ -142,9 +142,9 @@ export default function JoinCampaignModal({
               <div className="flex items-start space-x-2">
                 <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">Status</p>
+                  <p className="text-sm font-medium">Trạng thái</p>
                   <Badge variant={campaign.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                    {campaign.status}
+                    {campaign.status === 'ACTIVE' ? 'Đang hoạt động' : campaign.status === 'PAUSED' ? 'Tạm dừng' : 'Nháp'}
                   </Badge>
                 </div>
               </div>
@@ -156,8 +156,8 @@ export default function JoinCampaignModal({
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                This campaign requires approval. Your application will be reviewed by the merchant.
-                Include a message to increase your chances of approval.
+                Chiến dịch này yêu cầu phê duyệt. Đơn đăng ký của bạn sẽ được nhà cung cấp xem xét.
+                Viết lời nhắn để tăng cơ hội được chấp thuận.
               </AlertDescription>
             </Alert>
           )}
@@ -165,11 +165,11 @@ export default function JoinCampaignModal({
           {/* Message Input */}
           <div className="space-y-2">
             <Label htmlFor="message">
-              Message {requiresApproval ? '(Required)' : '(Optional)'}
+              Lời nhắn {requiresApproval ? '(Bắt buộc)' : '(Tùy chọn)'}
             </Label>
             <Textarea
               id="message"
-              placeholder="Tell the merchant why you'd like to promote their products..."
+              placeholder="Cho nhà cung cấp biết tại sao bạn muốn quảng bá sản phẩm của họ..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
@@ -178,8 +178,8 @@ export default function JoinCampaignModal({
             />
             <p className="text-xs text-gray-500">
               {requiresApproval
-                ? 'Include your audience size, niche, and why you\'re a good fit'
-                : 'Optional message to the merchant'}
+                ? 'Bao gồm số lượng khán giả, lĩnh vực và lý do bạn phù hợp'
+                : 'Lời nhắn tùy chọn gửi cho nhà cung cấp'}
             </p>
           </div>
 
@@ -200,17 +200,17 @@ export default function JoinCampaignModal({
               onClick={handleClose}
               disabled={loading}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" disabled={loading || campaign.status !== 'ACTIVE'}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Joining...
+                  Đang gửi...
                 </>
               ) : (
                 <>
-                  {requiresApproval ? 'Send Application' : 'Join Campaign'}
+                  {requiresApproval ? 'Gửi đơn đăng ký' : 'Tham gia chiến dịch'}
                 </>
               )}
             </Button>

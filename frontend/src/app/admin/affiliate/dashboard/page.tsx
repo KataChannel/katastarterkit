@@ -9,18 +9,18 @@ export default function AffiliateDashboardPage() {
     <div className="container mx-auto px-6 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Affiliate Dashboard
+          Bảng Điều Khiển Affiliate
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Overview of your affiliate program performance and key metrics
+          Tổng quan hiệu suất chương trình affiliate và các chỉ số quan trọng
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Performance Overview</CardTitle>
+          <CardTitle>Tổng Quan Hiệu Suất</CardTitle>
           <CardDescription>
-            Track your affiliate program metrics and performance indicators
+            Theo dõi các chỉ số và chỉ báo hiệu suất chương trình affiliate
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -123,7 +123,13 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
       'COMPLETED': 'default',
       'CANCELLED': 'destructive'
     };
-    return <Badge variant={variants[status] || 'secondary'}>{status}</Badge>;
+    const labels: Record<string, string> = {
+      'PENDING': 'Đang chờ',
+      'PROCESSING': 'Đang xử lý',
+      'COMPLETED': 'Hoàn thành',
+      'CANCELLED': 'Đã hủy'
+    };
+    return <Badge variant={variants[status] || 'secondary'}>{labels[status] || status}</Badge>;
   };
 
   const getMethodIcon = (method: string) => {
@@ -159,19 +165,19 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
             </div>
           </div>
           <div className="text-right text-sm text-muted-foreground">
-            Request ID: <code className="text-xs">{request.id.slice(-8)}</code>
+            Mã yêu cầu: <code className="text-xs">{request.id.slice(-8)}</code>
           </div>
         </div>
 
         {request.status === 'COMPLETED' && request.processedAt && (
           <div className="text-sm text-muted-foreground mb-2">
             <div className="flex items-center justify-between">
-              <span>Processed:</span>
+              <span>Đã xử lý:</span>
               <span>{new Date(request.processedAt).toLocaleDateString()}</span>
             </div>
             {request.transactionId && (
               <div className="flex items-center justify-between">
-                <span>Transaction ID:</span>
+                <span>Mã giao dịch:</span>
                 <code className="text-xs">{request.transactionId}</code>
               </div>
             )}
@@ -180,7 +186,7 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
 
         {request.adminNotes && (
           <div className="mt-3 p-3 bg-muted/50 rounded-lg">
-            <div className="text-sm font-medium mb-1">Admin Notes:</div>
+            <div className="text-sm font-medium mb-1">Ghi chú quản trị:</div>
             <div className="text-sm text-muted-foreground">{request.adminNotes}</div>
           </div>
         )}
@@ -191,17 +197,17 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
   const PaymentRequestForm = () => (
     <div className="space-y-4">
       <div className="p-4 bg-muted/50 rounded-lg">
-        <div className="text-sm font-medium mb-2">Available Balance</div>
+        <div className="text-sm font-medium mb-2">Số Dư Có Sẵn</div>
         <div className="text-2xl font-bold text-green-600">
           ${earnings.availableForPayout?.toFixed(2) || '0.00'}
         </div>
         <div className="text-xs text-muted-foreground">
-          Minimum payout: ${earnings.minimumPayout || 50}
+          Số tiền tối thiểu: ${earnings.minimumPayout || 50}
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="amount">Amount</Label>
+        <Label htmlFor="amount">Số Tiền</Label>
         <Input
           id="amount"
           type="number"
@@ -212,12 +218,12 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
           placeholder="0.00"
         />
         <div className="text-xs text-muted-foreground">
-          Maximum: ${earnings.availableForPayout?.toFixed(2) || '0.00'}
+          Tối đa: ${earnings.availableForPayout?.toFixed(2) || '0.00'}
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="method">Payment Method</Label>
+        <Label htmlFor="method">Phương Thức Thanh Toán</Label>
         <Select 
           value={formData.method} 
           onValueChange={(value) => setFormData({ ...formData, method: value as any })}
@@ -235,13 +241,13 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
             <SelectItem value="BANK_TRANSFER">
               <div className="flex items-center gap-2">
                 <Banknote className="h-4 w-4" />
-                Bank Transfer
+                Chuyển khoản ngân hàng
               </div>
             </SelectItem>
             <SelectItem value="CRYPTO">
               <div className="flex items-center gap-2">
                 <Bitcoin className="h-4 w-4" />
-                Cryptocurrency
+                Tiền điện tử
               </div>
             </SelectItem>
           </SelectContent>
@@ -250,7 +256,7 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
 
       {formData.method === 'PAYPAL' && (
         <div className="space-y-2">
-          <Label htmlFor="paypalEmail">PayPal Email</Label>
+          <Label htmlFor="paypalEmail">Email PayPal</Label>
           <Input
             id="paypalEmail"
             type="email"
@@ -259,7 +265,7 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
               ...formData, 
               paymentDetails: { ...formData.paymentDetails, email: e.target.value }
             })}
-            placeholder="your-paypal@email.com"
+            placeholder="paypal-cua-ban@email.com"
           />
         </div>
       )}
@@ -267,7 +273,7 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
       {formData.method === 'BANK_TRANSFER' && (
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="accountName">Account Name</Label>
+            <Label htmlFor="accountName">Tên Tài Khoản</Label>
             <Input
               id="accountName"
               value={formData.paymentDetails?.accountName || ''}
@@ -275,11 +281,11 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
                 ...formData, 
                 paymentDetails: { ...formData.paymentDetails, accountName: e.target.value }
               })}
-              placeholder="Account holder name"
+              placeholder="Tên chủ tài khoản"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="accountNumber">Account Number</Label>
+            <Label htmlFor="accountNumber">Số Tài Khoản</Label>
             <Input
               id="accountNumber"
               value={formData.paymentDetails?.accountNumber || ''}
@@ -287,11 +293,11 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
                 ...formData, 
                 paymentDetails: { ...formData.paymentDetails, accountNumber: e.target.value }
               })}
-              placeholder="Your account number"
+              placeholder="Số tài khoản của bạn"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="routingNumber">Routing Number</Label>
+            <Label htmlFor="routingNumber">Số Định Tuyến</Label>
             <Input
               id="routingNumber"
               value={formData.paymentDetails?.routingNumber || ''}
@@ -299,7 +305,7 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
                 ...formData, 
                 paymentDetails: { ...formData.paymentDetails, routingNumber: e.target.value }
               })}
-              placeholder="Bank routing number"
+              placeholder="Số định tuyến ngân hàng"
             />
           </div>
         </div>
@@ -308,7 +314,7 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
       {formData.method === 'CRYPTO' && (
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="cryptoType">Cryptocurrency</Label>
+            <Label htmlFor="cryptoType">Tiền Điện Tử</Label>
             <Select
               value={formData.paymentDetails?.cryptoType || 'BTC'}
               onValueChange={(value) => setFormData({ 
@@ -327,7 +333,7 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="walletAddress">Wallet Address</Label>
+            <Label htmlFor="walletAddress">Địa Chỉ Ví</Label>
             <Input
               id="walletAddress"
               value={formData.paymentDetails?.walletAddress || ''}
@@ -335,7 +341,7 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
                 ...formData, 
                 paymentDetails: { ...formData.paymentDetails, walletAddress: e.target.value }
               })}
-              placeholder="Your wallet address"
+              placeholder="Địa chỉ ví của bạn"
             />
           </div>
         </div>
@@ -368,9 +374,9 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Payments</h1>
+          <h1 className="text-3xl font-bold">Thanh Toán</h1>
           <p className="text-muted-foreground">
-            Manage your earnings and payment requests
+            Quản lý thu nhập và yêu cầu thanh toán của bạn
           </p>
         </div>
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
@@ -379,23 +385,23 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
               disabled={!earnings.availableForPayout || earnings.availableForPayout < (earnings.minimumPayout || 50)}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Request Payment
+              Yêu Cầu Thanh Toán
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Request Payment</DialogTitle>
+              <DialogTitle>Yêu Cầu Thanh Toán</DialogTitle>
             </DialogHeader>
             <PaymentRequestForm />
             <DialogFooter>
               <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                Cancel
+                Hủy
               </Button>
               <Button 
                 onClick={handleCreateRequest} 
                 disabled={creating || formData.amount < (earnings.minimumPayout || 50) || formData.amount > (earnings.availableForPayout || 0)}
               >
-                {creating ? 'Creating...' : 'Submit Request'}
+                {creating ? 'Đang gửi...' : 'Gửi Yêu Cầu'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -408,9 +414,9 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
           <CardContent className="flex items-center p-6">
             <div className="flex items-center justify-between w-full">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Earnings</p>
+                <p className="text-sm font-medium text-muted-foreground">Tổng Thu Nhập</p>
                 <div className="text-2xl font-bold">${earnings.totalEarnings?.toFixed(2) || '0.00'}</div>
-                <p className="text-xs text-muted-foreground">Lifetime</p>
+                <p className="text-xs text-muted-foreground">Toàn thời gian</p>
               </div>
               <DollarSign className="h-8 w-8 text-green-500" />
             </div>
@@ -421,11 +427,11 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
           <CardContent className="flex items-center p-6">
             <div className="flex items-center justify-between w-full">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Available</p>
+                <p className="text-sm font-medium text-muted-foreground">Có Sẵn</p>
                 <div className="text-2xl font-bold text-green-600">
                   ${earnings.availableForPayout?.toFixed(2) || '0.00'}
                 </div>
-                <p className="text-xs text-muted-foreground">Ready for payout</p>
+                <p className="text-xs text-muted-foreground">Sẵn sàng thanh toán</p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
@@ -436,11 +442,11 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
           <CardContent className="flex items-center p-6">
             <div className="flex items-center justify-between w-full">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                <p className="text-sm font-medium text-muted-foreground">Đang Chờ</p>
                 <div className="text-2xl font-bold text-yellow-600">
                   ${earnings.pendingPayments?.toFixed(2) || '0.00'}
                 </div>
-                <p className="text-xs text-muted-foreground">Being processed</p>
+                <p className="text-xs text-muted-foreground">Đang xử lý</p>
               </div>
               <Clock className="h-8 w-8 text-yellow-500" />
             </div>
@@ -451,9 +457,9 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
           <CardContent className="flex items-center p-6">
             <div className="flex items-center justify-between w-full">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">This Month</p>
+                <p className="text-sm font-medium text-muted-foreground">Tháng Này</p>
                 <div className="text-2xl font-bold">${earnings.paidThisMonth?.toFixed(2) || '0.00'}</div>
-                <p className="text-xs text-muted-foreground">Paid out</p>
+                <p className="text-xs text-muted-foreground">Đã thanh toán</p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
             </div>
@@ -464,22 +470,22 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
       {/* Main Content */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="requests">Payment Requests</TabsTrigger>
-          <TabsTrigger value="history">Payment History</TabsTrigger>
-          <TabsTrigger value="settings">Payment Settings</TabsTrigger>
+          <TabsTrigger value="requests">Yêu Cầu Thanh Toán</TabsTrigger>
+          <TabsTrigger value="history">Lịch Sử Thanh Toán</TabsTrigger>
+          <TabsTrigger value="settings">Cài Đặt Thanh Toán</TabsTrigger>
         </TabsList>
 
         <TabsContent value="requests" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Payment Requests</h3>
+            <h3 className="text-lg font-semibold">Yêu Cầu Thanh Toán</h3>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm">
                 <Filter className="h-4 w-4 mr-2" />
-                Filter
+                Lọc
               </Button>
               <Button variant="outline" size="sm">
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                Xuất
               </Button>
             </div>
           </div>
@@ -490,14 +496,14 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
                 <CardContent className="flex items-center justify-center py-12">
                   <div className="text-center">
                     <DollarSign className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="font-semibold mb-2">No payment requests</h3>
+                    <h3 className="font-semibold mb-2">Chưa có yêu cầu thanh toán</h3>
                     <p className="text-muted-foreground mb-4">
-                      You haven't made any payment requests yet.
+                      Bạn chưa thực hiện yêu cầu thanh toán nào.
                     </p>
                     {earnings.availableForPayout >= (earnings.minimumPayout || 50) && (
                       <Button onClick={() => setCreateDialogOpen(true)}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Request Your First Payment
+                        Yêu Cầu Thanh Toán Đầu Tiên
                       </Button>
                     )}
                   </div>
@@ -513,16 +519,16 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
 
         <TabsContent value="history" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Payment History</h3>
+            <h3 className="text-lg font-semibold">Lịch Sử Thanh Toán</h3>
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="7d">Last 7 days</SelectItem>
-                <SelectItem value="30d">Last 30 days</SelectItem>
-                <SelectItem value="90d">Last 90 days</SelectItem>
-                <SelectItem value="1y">Last year</SelectItem>
+                <SelectItem value="7d">7 ngày qua</SelectItem>
+                <SelectItem value="30d">30 ngày qua</SelectItem>
+                <SelectItem value="90d">90 ngày qua</SelectItem>
+                <SelectItem value="1y">Năm qua</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -531,9 +537,9 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
             <CardContent className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-semibold mb-2">Payment history chart</h3>
+                <h3 className="font-semibold mb-2">Biểu đồ lịch sử thanh toán</h3>
                 <p className="text-muted-foreground">
-                  Detailed payment history visualization will be implemented here.
+                  Trực quan hóa lịch sử thanh toán chi tiết sẽ được triển khai ở đây.
                 </p>
               </div>
             </CardContent>
@@ -544,24 +550,24 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
           <div className="grid gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Payment Preferences</CardTitle>
+                <CardTitle>Tùy Chọn Thanh Toán</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Preferred Payment Method</Label>
+                  <Label>Phương Thức Thanh Toán Ưu Tiên</Label>
                   <Select defaultValue="PAYPAL">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="PAYPAL">PayPal</SelectItem>
-                      <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
-                      <SelectItem value="CRYPTO">Cryptocurrency</SelectItem>
+                      <SelectItem value="BANK_TRANSFER">Chuyển khoản ngân hàng</SelectItem>
+                      <SelectItem value="CRYPTO">Tiền điện tử</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Automatic Payout Threshold</Label>
+                  <Label>Ngưỡng Thanh Toán Tự Động</Label>
                   <Select defaultValue="100">
                     <SelectTrigger>
                       <SelectValue />
@@ -574,7 +580,7 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Automatically request payment when you reach this amount
+                    Tự động yêu cầu thanh toán khi đạt đến số tiền này
                   </p>
                 </div>
               </CardContent>
@@ -582,28 +588,29 @@ export default function PaymentManagement({ className = '' }: PaymentManagementP
 
             <Card>
               <CardHeader>
-                <CardTitle>Tax Information</CardTitle>
+                <CardTitle>Thông Tin Thuế</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Tax ID / SSN</Label>
+                  <Label>Mã số thuế</Label>
                   <Input placeholder="XXX-XX-XXXX" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tax Country</Label>
+                  <Label>Quốc Gia Thuế</Label>
                   <Select defaultValue="US">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="US">United States</SelectItem>
+                      <SelectItem value="US">Hoa Kỳ</SelectItem>
                       <SelectItem value="CA">Canada</SelectItem>
-                      <SelectItem value="UK">United Kingdom</SelectItem>
-                      <SelectItem value="DE">Germany</SelectItem>
+                      <SelectItem value="UK">Vương Quốc Anh</SelectItem>
+                      <SelectItem value="DE">Đức</SelectItem>
+                      <SelectItem value="VN">Việt Nam</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <Button variant="outline">Upload Tax Documents</Button>
+                <Button variant="outline">Tải Lên Tài Liệu Thuế</Button>
               </CardContent>
             </Card>
           </div>

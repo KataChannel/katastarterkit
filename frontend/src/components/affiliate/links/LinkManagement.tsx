@@ -111,14 +111,14 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
             <div className="flex items-center gap-2 mb-2">
               <h3 className="font-semibold truncate">{link.title || link.campaign.name}</h3>
               <Badge variant={link.isActive ? 'default' : 'secondary'}>
-                {link.isActive ? 'Active' : 'Inactive'}
+                {link.isActive ? 'Đang hoạt động' : 'Không hoạt động'}
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-              {link.description || 'No description provided'}
+              {link.description || 'Chưa có mô tả'}
             </p>
             <div className="text-sm text-muted-foreground mb-3">
-              Campaign: <span className="font-medium">{link.campaign.name}</span>
+              Chiến dịch: <span className="font-medium">{link.campaign.name}</span>
             </div>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
         {/* Link URL Display */}
         <div className="space-y-2 mb-4">
           <div className="flex items-center gap-2">
-            <Label className="text-xs">Short URL:</Label>
+            <Label className="text-xs">URL rút gọn:</Label>
             <code className="flex-1 text-sm bg-muted px-2 py-1 rounded truncate">
               {link.shortUrl}
             </code>
@@ -153,7 +153,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
               <MousePointer className="h-4 w-4 text-blue-500" />
             </div>
             <div className="text-sm font-semibold">{link.clicks.toLocaleString()}</div>
-            <div className="text-xs text-muted-foreground">Clicks</div>
+            <div className="text-xs text-muted-foreground">Lượt click</div>
           </div>
           
           <div className="text-center p-3 bg-muted/50 rounded-lg">
@@ -161,7 +161,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
               <TrendingUp className="h-4 w-4 text-green-500" />
             </div>
             <div className="text-sm font-semibold">{link.conversions}</div>
-            <div className="text-xs text-muted-foreground">Conversions</div>
+            <div className="text-xs text-muted-foreground">Chuyển đổi</div>
           </div>
           
           <div className="text-center p-3 bg-muted/50 rounded-lg">
@@ -169,16 +169,16 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
               <BarChart3 className="h-4 w-4 text-purple-500" />
             </div>
             <div className="text-sm font-semibold">{link.conversionRate.toFixed(1)}%</div>
-            <div className="text-xs text-muted-foreground">Rate</div>
+            <div className="text-xs text-muted-foreground">Tỷ lệ</div>
           </div>
         </div>
 
         {/* Revenue and Commission */}
         <div className="flex items-center justify-between text-sm">
           <div className="text-muted-foreground">
-            Revenue: <span className="font-medium text-foreground">${link.revenue.toFixed(2)}</span>
+            Doanh thu: <span className="font-medium text-foreground">${link.revenue.toFixed(2)}</span>
             {' • '}
-            Earned: <span className="font-medium text-green-600">${link.commission.toFixed(2)}</span>
+            Kiếm được: <span className="font-medium text-green-600">${link.commission.toFixed(2)}</span>
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline">
@@ -194,7 +194,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
         </div>
 
         <div className="text-xs text-muted-foreground mt-2">
-          Created: {new Date(link.createdAt).toLocaleDateString()}
+          Tạo lúc: {new Date(link.createdAt).toLocaleDateString()}
         </div>
       </CardContent>
     </Card>
@@ -203,13 +203,13 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
   const LinkForm = () => (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="campaign">Campaign</Label>
+        <Label htmlFor="campaign">Chiến Dịch</Label>
         <Select 
           value={formData.campaignId} 
           onValueChange={(value) => setFormData({ ...formData, campaignId: value })}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select a campaign" />
+            <SelectValue placeholder="Chọn chiến dịch" />
           </SelectTrigger>
           <SelectContent>
             {campaigns.map((campaign) => (
@@ -230,7 +230,7 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="originalUrl">Target URL</Label>
+        <Label htmlFor="originalUrl">URL Đích</Label>
         <Input
           id="originalUrl"
           value={formData.originalUrl}
@@ -240,32 +240,32 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="customAlias">Custom Alias (optional)</Label>
+        <Label htmlFor="customAlias">Biệt danh tùy chỉnh (tùy chọn)</Label>
         <Input
           id="customAlias"
           value={formData.customAlias || ''}
           onChange={(e) => setFormData({ ...formData, customAlias: e.target.value })}
-          placeholder="my-special-link"
+          placeholder="link-đặc-biệt"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="title">Link Title</Label>
+        <Label htmlFor="title">Tiêu Đề Link</Label>
         <Input
           id="title"
           value={formData.title || ''}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          placeholder="Descriptive title for your link"
+          placeholder="Tiêu đề mô tả cho link của bạn"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description (optional)</Label>
+        <Label htmlFor="description">Mô Tả (tùy chọn)</Label>
         <Textarea
           id="description"
           value={formData.description || ''}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Additional notes about this link"
+          placeholder="Ghi chú bổ sung về link này"
           rows={3}
         />
       </div>
@@ -302,32 +302,32 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Affiliate Links</h1>
+          <h1 className="text-3xl font-bold">Links Affiliate</h1>
           <p className="text-muted-foreground">
-            Create and manage your affiliate tracking links
+            Tạo và quản lý các links theo dõi affiliate của bạn
           </p>
         </div>
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Create Link
+              Tạo Link
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Create New Affiliate Link</DialogTitle>
+              <DialogTitle>Tạo Link Affiliate Mới</DialogTitle>
             </DialogHeader>
             <LinkForm />
             <DialogFooter>
               <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                Cancel
+                Hủy
               </Button>
               <Button 
                 onClick={handleCreateLink} 
                 disabled={creating || !formData.campaignId || !formData.originalUrl}
               >
-                {creating ? 'Creating...' : 'Create Link'}
+                {creating ? 'Đang tạo...' : 'Tạo Link'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -338,25 +338,25 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
       <div className="flex items-center justify-between mb-6">
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
           <TabsList>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="inactive">Inactive</TabsTrigger>
-            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="active">Đang hoạt động</TabsTrigger>
+            <TabsTrigger value="inactive">Không hoạt động</TabsTrigger>
+            <TabsTrigger value="all">Tất cả</TabsTrigger>
           </TabsList>
         </Tabs>
         
         <div className="flex items-center gap-2">
           <Input
-            placeholder="Search links..."
+            placeholder="Tìm kiếm links..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-64"
           />
           <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="All campaigns" />
+              <SelectValue placeholder="Tất cả chiến dịch" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All campaigns</SelectItem>
+              <SelectItem value="all">Tất cả chiến dịch</SelectItem>
               {campaigns.map((campaign) => (
                 <SelectItem key={campaign.id} value={campaign.id}>
                   {campaign.name}
@@ -374,16 +374,16 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
             <CardContent className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Link2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-semibold mb-2">No links found</h3>
+                <h3 className="font-semibold mb-2">Không tìm thấy links</h3>
                 <p className="text-muted-foreground mb-4">
                   {searchTerm || selectedCampaign 
-                    ? "No links match your search criteria." 
-                    : "You haven't created any affiliate links yet."
+                    ? "Không có links nào phù hợp với tiêu chí tìm kiếm." 
+                    : "Bạn chưa tạo links affiliate nào."
                   }
                 </p>
                 <Button onClick={() => setCreateDialogOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Link
+                  Tạo Link Đầu Tiên
                 </Button>
               </div>
             </CardContent>
@@ -401,31 +401,31 @@ export default function LinkManagement({ className = '' }: LinkManagementProps) 
       {filteredLinks.length > 0 && (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Summary Statistics</CardTitle>
+            <CardTitle>Thống Kê Tổng Hợp</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold">{filteredLinks.length}</div>
-                <div className="text-sm text-muted-foreground">Total Links</div>
+                <div className="text-sm text-muted-foreground">Tổng Links</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold">
                   {filteredLinks.reduce((sum, link) => sum + link.clicks, 0).toLocaleString()}
                 </div>
-                <div className="text-sm text-muted-foreground">Total Clicks</div>
+                <div className="text-sm text-muted-foreground">Tổng Lượt Click</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold">
                   {filteredLinks.reduce((sum, link) => sum + link.conversions, 0)}
                 </div>
-                <div className="text-sm text-muted-foreground">Total Conversions</div>
+                <div className="text-sm text-muted-foreground">Tổng Chuyển Đổi</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
                   ${filteredLinks.reduce((sum, link) => sum + link.commission, 0).toFixed(2)}
                 </div>
-                <div className="text-sm text-muted-foreground">Total Earned</div>
+                <div className="text-sm text-muted-foreground">Tổng Kiếm Được</div>
               </div>
             </div>
           </CardContent>

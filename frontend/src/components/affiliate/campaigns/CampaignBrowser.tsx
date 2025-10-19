@@ -111,9 +111,9 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
     if (!status) return null;
 
     const config = {
-      PENDING: { icon: Clock, label: 'Pending', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
-      APPROVED: { icon: CheckCircle, label: 'Joined', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-      REJECTED: { icon: XCircle, label: 'Rejected', className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
+      PENDING: { icon: Clock, label: 'Đang chờ', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
+      APPROVED: { icon: CheckCircle, label: 'Đã tham gia', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+      REJECTED: { icon: XCircle, label: 'Từ chối', className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
     };
 
     const { icon: Icon, label, className } = config[status];
@@ -143,9 +143,9 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Browse Campaigns</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Chiến Dịch Affiliate</h2>
         <p className="text-muted-foreground mt-2">
-          Discover and join campaigns that match your audience
+          Khám phá và tham gia các chiến dịch phù hợp với đối tượng của bạn
         </p>
       </div>
 
@@ -154,7 +154,7 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Search campaigns..."
+            placeholder="Tìm kiếm chiến dịch..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -164,31 +164,31 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
         <Select value={commissionFilter} onValueChange={setCommissionFilter}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <Filter className="h-4 w-4 mr-2" />
-            <SelectValue placeholder="Commission Type" />
+            <SelectValue placeholder="Loại hoa hồng" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="percentage">Percentage</SelectItem>
-            <SelectItem value="fixed">Fixed Amount</SelectItem>
+            <SelectItem value="all">Tất cả</SelectItem>
+            <SelectItem value="percentage">Phần trăm</SelectItem>
+            <SelectItem value="fixed">Số tiền cố định</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="ACTIVE">Active</SelectItem>
-            <SelectItem value="PAUSED">Paused</SelectItem>
-            <SelectItem value="DRAFT">Draft</SelectItem>
+            <SelectItem value="all">Tất cả</SelectItem>
+            <SelectItem value="ACTIVE">Đang hoạt động</SelectItem>
+            <SelectItem value="PAUSED">Tạm dừng</SelectItem>
+            <SelectItem value="DRAFT">Nháp</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Results Count */}
       <div className="text-sm text-gray-600 dark:text-gray-400">
-        Found {filteredCampaigns.length} campaign{filteredCampaigns.length !== 1 ? 's' : ''}
+        Tìm thấy {filteredCampaigns.length} chiến dịch
       </div>
 
       {/* Campaign Grid */}
@@ -227,7 +227,7 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
                     ? `${campaign.commissionRate ?? 0}%`
                     : `${(campaign.fixedAmount ?? 0).toLocaleString()} VND`}
                   <span className="text-sm font-normal text-gray-600 dark:text-gray-400 ml-2">
-                    per sale
+                    mỗi đơn
                   </span>
                 </div>
 
@@ -243,11 +243,11 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
                   </div>
                   <div className="flex items-center text-gray-600 dark:text-gray-400">
                     <Users className="h-4 w-4 mr-2" />
-                    <span>{campaign.totalConversions ?? 0} sales</span>
+                    <span>{campaign.totalConversions ?? 0} đơn hàng</span>
                   </div>
                   <div className="flex items-center text-gray-600 dark:text-gray-400">
                     <Eye className="h-4 w-4 mr-2" />
-                    <span>{campaign.totalClicks ?? 0} clicks</span>
+                    <span>{campaign.totalClicks ?? 0} lượt click</span>
                   </div>
                 </div>
 
@@ -258,7 +258,7 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
                       onClick={() => handleJoinClick(campaign)}
                       className="flex-1"
                     >
-                      Join Campaign
+                      Tham gia chiến dịch
                     </Button>
                   ) : applicationStatus === 'APPROVED' ? (
                     <Button
@@ -267,7 +267,7 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
                       disabled
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
-                      Already Joined
+                      Đã tham gia
                     </Button>
                   ) : applicationStatus === 'PENDING' ? (
                     <Button
@@ -276,7 +276,7 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
                       disabled
                     >
                       <Clock className="h-4 w-4 mr-2" />
-                      Pending Review
+                      Đang chờ duyệt
                     </Button>
                   ) : applicationStatus === 'REJECTED' ? (
                     <Button
@@ -285,7 +285,7 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
                       disabled
                     >
                       <XCircle className="h-4 w-4 mr-2" />
-                      Application Rejected
+                      Đơn bị từ chối
                     </Button>
                   ) : (
                     <Button
@@ -293,7 +293,7 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
                       className="flex-1"
                       disabled
                     >
-                      Not Available
+                      Không khả dụng
                     </Button>
                   )}
                 </div>
@@ -307,9 +307,9 @@ export default function CampaignBrowser({ className = '' }: CampaignBrowserProps
       {filteredCampaigns.length === 0 && (
         <div className="text-center py-12">
           <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No campaigns found</h3>
+          <h3 className="text-lg font-semibold mb-2">Không tìm thấy chiến dịch</h3>
           <p className="text-gray-600 dark:text-gray-400">
-            Try adjusting your filters or search term
+            Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
           </p>
         </div>
       )}
