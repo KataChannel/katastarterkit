@@ -36,6 +36,7 @@ import { ProductModule } from './graphql/modules/product.module';
 import { TestController } from './test.controller';
 import { SeedModule } from './seed/seed.module';
 import { CallCenterModule } from './callcenter/callcenter.module';
+import { LmsModule } from './lms/lms.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -138,6 +139,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     ProductModule,
     SeedModule,
     CallCenterModule,
+    LmsModule,
   ],
   controllers: [
     LogController,

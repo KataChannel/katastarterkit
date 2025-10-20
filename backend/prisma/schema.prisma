@@ -153,11 +153,20 @@ model User {
   onboardingChecklist  OnboardingChecklist?
   offboardingProcesses OffboardingProcess[]
 
+  // LMS Relations
+  coursesInstructed Course[]      @relation("InstructorCourses")
+  enrollments       Enrollment[]  @relation("UserEnrollments")
+  quizAttempts      QuizAttempt[]
+  courseReviews     Review[]      @relation("UserReviews")
+  department        Department?   @relation("DepartmentUsers", fields: [departmentId], references: [id])
+  departmentId      String?
+
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
   @@index([roleType])
   @@index([createdAt])
   @@index([lastLoginAt])
+  @@index([departmentId])
   @@map("users")
 }
 
@@ -2792,4 +2801,307 @@ model CallCenterSyncLog {
   @@index([status])
   @@index([startedAt])
   @@map("call_center_sync_logs")
+}
+
+// ============================================
+// LMS (Learning Management System) Models
+// ============================================
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LessonType {
+  VIDEO
+  TEXT
+  QUIZ
+  ASSIGNMENT
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+}
+
+model CourseCategory {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  icon        String?
+  parentId    String?
+  
+  // Relations
+  parent   CourseCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children CourseCategory[] @relation("CategoryHierarchy")
+  courses  Course[]
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([parentId])
+  @@index([slug])
+  @@map("course_categories")
+}
+
+model Course {
+  id               String       @id @default(uuid())
+  title            String
+  slug             String       @unique
+  description      String?
+  thumbnail        String?
+  price            Float        @default(0)
+  level            CourseLevel  @default(BEGINNER)
+  status           CourseStatus @default(DRAFT)
+  duration         Int?         // in minutes
+  
+  // Learning objectives
+  whatYouWillLearn String[]     @default([])
+  requirements     String[]     @default([])
+  
+  // Category & Instructor
+  categoryId   String?
+  instructorId String
+  
+  category   CourseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  instructor User            @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+  
+  // Stats
+  rating          Float @default(0)  // Deprecated: use avgRating
+  reviewCount     Int   @default(0)
+  enrollmentCount Int   @default(0)
+  avgRating       Float @default(0)  // Average rating from reviews
+  
+  // Modules & Enrollments
+  modules     CourseModule[]
+  enrollments Enrollment[]
+  reviews     Review[]        @relation("CourseReviews")
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([slug])
+  @@index([categoryId])
+  @@index([instructorId])
+  @@index([status])
+  @@index([level])
+  @@map("courses")
+}
+
+model CourseModule {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  order       Int
+  courseId    String
+  
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([courseId])
+  @@map("course_modules")
+}
+
+model Lesson {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  type        LessonType @default(VIDEO)
+  content     String?    // URL for video, HTML for text
+  duration    Int?       // in minutes
+  order       Int
+  moduleId    String
+  
+  module       LessonProgress[]
+  quizzes      Quiz[]
+  
+  courseModule CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([moduleId])
+  @@map("lessons")
+}
+
+model Enrollment {
+  id         String           @id @default(uuid())
+  userId     String
+  courseId   String
+  status     EnrollmentStatus @default(ACTIVE)
+  progress   Float            @default(0) // percentage 0-100
+  
+  user   User   @relation("UserEnrollments", fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  lessonProgress LessonProgress[]
+  quizAttempts   QuizAttempt[]
+  
+  // Timestamps
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+  
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+  @@map("enrollments")
+}
+
+model LessonProgress {
+  id           String   @id @default(uuid())
+  enrollmentId String
+  lessonId     String
+  completed    Boolean  @default(false)
+  
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lesson     Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@unique([enrollmentId, lessonId])
+  @@index([enrollmentId])
+  @@index([lessonId])
+  @@map("lesson_progress")
+}
+
+model Quiz {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  lessonId    String
+  passingScore Int     @default(70) // Percentage required to pass
+  timeLimit   Int?     // Time limit in minutes (null = no limit)
+  
+  lesson    Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions Question[]
+  attempts  QuizAttempt[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([lessonId])
+  @@map("quizzes")
+}
+
+model Question {
+  id          String       @id @default(uuid())
+  quizId      String
+  type        QuestionType @default(MULTIPLE_CHOICE)
+  question    String       // The question text
+  points      Int          @default(1)
+  order       Int
+  explanation String?      // Explanation shown after answering
+  
+  quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers Answer[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([quizId])
+  @@map("questions")
+}
+
+model Answer {
+  id         String  @id @default(uuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+  order      Int
+  
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([questionId])
+  @@map("answers")
+}
+
+model QuizAttempt {
+  id          String   @id @default(uuid())
+  quizId      String
+  userId      String
+  enrollmentId String
+  score       Float?   // Percentage score (0-100)
+  passed      Boolean  @default(false)
+  answers     Json?    // Store user's answers: { questionId: selectedAnswerId[] }
+  timeSpent   Int?     // Time spent in seconds
+  
+  quiz       Quiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([quizId])
+  @@index([userId])
+  @@index([enrollmentId])
+  @@map("quiz_attempts")
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  FILL_IN_BLANK
+}
+
+// ==================== COURSE REVIEWS ====================
+
+model Review {
+  id      String @id @default(uuid())
+  courseId String
+  userId   String
+  rating   Int    // 1-5 stars
+  comment  String?
+  
+  // Helpful voting
+  helpfulCount   Int      @default(0)
+  helpfulVoters  String[] @default([])  // Array of user IDs who voted helpful
+  
+  course Course @relation("CourseReviews", fields: [courseId], references: [id], onDelete: Cascade)
+  user   User   @relation("UserReviews", fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([courseId, userId])  // One review per user per course
+  @@index([courseId])
+  @@index([userId])
+  @@index([rating])
+  @@map("reviews")
+}
+
+model Department {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  
+  users User[] @relation("DepartmentUsers")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("departments")
 }

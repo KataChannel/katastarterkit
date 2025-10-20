@@ -1,0 +1,296 @@
+'use client';
+
+import React from 'react';
+import { useQuery } from '@apollo/client';
+import { GET_COURSE_BY_SLUG, GET_ENROLLMENT } from '@/graphql/lms/courses.graphql';
+import { useParams } from 'next/navigation';
+import Image from 'next/image';
+import EnrollButton from '@/components/lms/EnrollButton';
+import RatingStars from '@/components/lms/RatingStars';
+import ReviewsSection from '@/components/lms/ReviewsSection';
+import { Clock, Users, BookOpen, Globe, Award, CheckCircle, PlayCircle, FileText } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+
+export default function CourseDetailPage() {
+  const params = useParams();
+  const slug = params?.slug as string;
+  const { user } = useAuth();
+
+  const { data, loading, error } = useQuery(GET_COURSE_BY_SLUG, {
+    variables: { slug },
+    skip: !slug,
+  });
+
+  const { data: enrollmentData } = useQuery(GET_ENROLLMENT, {
+    variables: { courseId: data?.courseBySlug?.id },
+    skip: !data?.courseBySlug?.id,
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 animate-pulse">
+        <div className="bg-gray-900 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="h-10 bg-gray-700 rounded w-3/4 mb-4" />
+            <div className="h-6 bg-gray-700 rounded w-1/2" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data?.courseBySlug) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Course not found</h1>
+          <p className="text-gray-600">The course you're looking for doesn't exist.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const course = data.courseBySlug;
+  const totalLessons = course.modules?.reduce(
+    (acc: number, mod: any) => acc + (mod.lessons?.length || 0),
+    0
+  ) || 0;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              {/* Breadcrumb */}
+              {course.category && (
+                <p className="text-blue-300 text-sm mb-4">
+                  {course.category.name}
+                </p>
+              )}
+
+              {/* Title */}
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                {course.title}
+              </h1>
+
+              {/* Description */}
+              <p className="text-xl text-gray-300 mb-6">
+                {course.description}
+              </p>
+
+              {/* Stats */}
+              <div className="flex flex-wrap items-center gap-6 mb-6">
+                <RatingStars 
+                  rating={course.rating} 
+                  size="lg" 
+                  showNumber 
+                  reviewCount={course.reviewCount}
+                />
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  <span>{course.enrollmentCount} students</span>
+                </div>
+              </div>
+
+              {/* Instructor */}
+              {course.instructor && (
+                <div className="flex items-center gap-3">
+                  {course.instructor.avatar ? (
+                    <Image
+                      src={course.instructor.avatar}
+                      alt={course.instructor.username}
+                      width={48}
+                      height={48}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
+                      <span className="text-lg font-medium">
+                        {course.instructor.firstName?.[0] || course.instructor.username[0]}
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm text-gray-400">Created by</p>
+                    <p className="font-medium">
+                      {course.instructor.firstName && course.instructor.lastName
+                        ? `${course.instructor.firstName} ${course.instructor.lastName}`
+                        : course.instructor.username}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar Card */}
+            <div className="lg:col-span-1">
+              <div className="bg-white text-gray-900 rounded-xl shadow-xl p-6 sticky top-4">
+                {/* Thumbnail */}
+                {course.thumbnail && (
+                  <div className="relative h-48 mb-6 rounded-lg overflow-hidden">
+                    <Image
+                      src={course.thumbnail}
+                      alt={course.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Price */}
+                <div className="text-3xl font-bold mb-6">
+                  {course.price > 0 ? `$${course.price}` : 'Free'}
+                </div>
+
+                {/* Enroll Button */}
+                <EnrollButton 
+                  courseId={course.id}
+                  courseSlug={course.slug}
+                  price={course.price}
+                  isEnrolled={!!enrollmentData?.enrollment}
+                />
+
+                {/* Course Info */}
+                <div className="mt-6 pt-6 border-t space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Award className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Level</p>
+                      <p className="font-medium">{course.level}</p>
+                    </div>
+                  </div>
+
+                  {course.duration && (
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-5 h-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-600">Duration</p>
+                        <p className="font-medium">
+                          {Math.floor(course.duration / 60)}h {course.duration % 60}m
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Lessons</p>
+                      <p className="font-medium">{totalLessons} lessons</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Globe className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Language</p>
+                      <p className="font-medium">English</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            {/* What You'll Learn */}
+            {course.whatYouWillLearn && course.whatYouWillLearn.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm p-8">
+                <h2 className="text-2xl font-bold mb-6">What you'll learn</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {course.whatYouWillLearn.map((item: string, index: number) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-700">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Requirements */}
+            {course.requirements && course.requirements.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm p-8">
+                <h2 className="text-2xl font-bold mb-6">Requirements</h2>
+                <ul className="space-y-2">
+                  {course.requirements.map((req: string, index: number) => (
+                    <li key={index} className="flex items-start gap-3 text-gray-700">
+                      <span className="text-gray-400">•</span>
+                      {req}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Course Content */}
+            {course.modules && course.modules.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm p-8">
+                <h2 className="text-2xl font-bold mb-6">Course content</h2>
+                <div className="space-y-4">
+                  {course.modules.map((module: any, moduleIndex: number) => (
+                    <details key={module.id} className="group" open={moduleIndex === 0}>
+                      <summary className="flex items-center justify-between cursor-pointer bg-gray-50 hover:bg-gray-100 p-4 rounded-lg transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className="font-semibold text-gray-900">
+                            {moduleIndex + 1}. {module.title}
+                          </span>
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          {module.lessons?.length || 0} lessons
+                        </span>
+                      </summary>
+                      <div className="mt-2 ml-4 space-y-2">
+                        {module.lessons?.map((lesson: any, lessonIndex: number) => (
+                          <div
+                            key={lesson.id}
+                            className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                          >
+                            {lesson.type === 'VIDEO' ? (
+                              <PlayCircle className="w-4 h-4 text-gray-400" />
+                            ) : (
+                              <FileText className="w-4 h-4 text-gray-400" />
+                            )}
+                            <span className="text-gray-700">
+                              {moduleIndex + 1}.{lessonIndex + 1} {lesson.title}
+                            </span>
+                            {lesson.duration && (
+                              <span className="ml-auto text-sm text-gray-500">
+                                {lesson.duration} min
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Student Reviews */}
+            <div className="bg-white rounded-xl shadow-sm p-8">
+              <ReviewsSection
+                courseId={course.id}
+                currentUserId={user?.id}
+                isEnrolled={!!enrollmentData?.enrollment}
+              />
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            {/* Empty for now - could add related courses, etc */}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
