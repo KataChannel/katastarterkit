@@ -3,6 +3,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
 import { CourseFiltersInput } from './dto/course-filters.input';
+import { CreateModuleInput, UpdateModuleInput, ReorderModulesInput } from './dto/module.input';
+import { CreateLessonInput, UpdateLessonInput, ReorderLessonsInput } from './dto/lesson.input';
 import { Prisma, CourseStatus } from '@prisma/client';
 import slugify from 'slugify';
 
@@ -338,6 +340,252 @@ export class CoursesService {
         },
       },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // ==================== MODULE OPERATIONS ====================
+
+  async createModule(userId: string, input: CreateModuleInput) {
+    const { courseId, order, ...rest } = input;
+
+    // Verify user owns the course
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (course.instructorId !== userId) {
+      throw new ForbiddenException('You do not have permission to add modules to this course');
+    }
+
+    // Get next order if not provided
+    let moduleOrder = order;
+    if (moduleOrder === undefined) {
+      const lastModule = await this.prisma.courseModule.findFirst({
+        where: { courseId },
+        orderBy: { order: 'desc' },
+      });
+      moduleOrder = lastModule ? lastModule.order + 1 : 0;
+    }
+
+    return this.prisma.courseModule.create({
+      data: {
+        ...rest,
+        courseId,
+        order: moduleOrder,
+      },
+      include: {
+        lessons: true,
+      },
+    });
+  }
+
+  async updateModule(userId: string, input: UpdateModuleInput) {
+    const { id, ...updateData } = input;
+
+    const module = await this.prisma.courseModule.findUnique({
+      where: { id },
+      include: { course: true },
+    });
+
+    if (!module) {
+      throw new NotFoundException('Module not found');
+    }
+
+    if (module.course.instructorId !== userId) {
+      throw new ForbiddenException('You do not have permission to update this module');
+    }
+
+    return this.prisma.courseModule.update({
+      where: { id },
+      data: updateData,
+      include: {
+        lessons: true,
+      },
+    });
+  }
+
+  async deleteModule(userId: string, moduleId: string) {
+    const module = await this.prisma.courseModule.findUnique({
+      where: { id: moduleId },
+      include: { course: true, lessons: true },
+    });
+
+    if (!module) {
+      throw new NotFoundException('Module not found');
+    }
+
+    if (module.course.instructorId !== userId) {
+      throw new ForbiddenException('You do not have permission to delete this module');
+    }
+
+    // Prevent deletion if module has lessons
+    if (module.lessons.length > 0) {
+      throw new BadRequestException('Cannot delete module with existing lessons. Delete lessons first.');
+    }
+
+    await this.prisma.courseModule.delete({
+      where: { id: moduleId },
+    });
+
+    return { success: true, message: 'Module deleted successfully' };
+  }
+
+  async reorderModules(userId: string, input: ReorderModulesInput) {
+    const { courseId, moduleIds } = input;
+
+    // Verify user owns the course
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (course.instructorId !== userId) {
+      throw new ForbiddenException('You do not have permission to reorder modules');
+    }
+
+    // Update order for each module
+    await Promise.all(
+      moduleIds.map((moduleId, index) =>
+        this.prisma.courseModule.update({
+          where: { id: moduleId },
+          data: { order: index },
+        })
+      )
+    );
+
+    return this.prisma.courseModule.findMany({
+      where: { courseId },
+      orderBy: { order: 'asc' },
+      include: { lessons: true },
+    });
+  }
+
+  // ==================== LESSON OPERATIONS ====================
+
+  async createLesson(userId: string, input: CreateLessonInput) {
+    const { moduleId, order, ...rest } = input;
+
+    // Verify user owns the course
+    const module = await this.prisma.courseModule.findUnique({
+      where: { id: moduleId },
+      include: { course: true },
+    });
+
+    if (!module) {
+      throw new NotFoundException('Module not found');
+    }
+
+    if (module.course.instructorId !== userId) {
+      throw new ForbiddenException('You do not have permission to add lessons to this module');
+    }
+
+    // Get next order if not provided
+    let lessonOrder = order;
+    if (lessonOrder === undefined) {
+      const lastLesson = await this.prisma.lesson.findFirst({
+        where: { moduleId },
+        orderBy: { order: 'desc' },
+      });
+      lessonOrder = lastLesson ? lastLesson.order + 1 : 0;
+    }
+
+    return this.prisma.lesson.create({
+      data: {
+        ...rest,
+        moduleId,
+        order: lessonOrder,
+      },
+    });
+  }
+
+  async updateLesson(userId: string, input: UpdateLessonInput) {
+    const { id, ...updateData } = input;
+
+    const lesson = await this.prisma.lesson.findUnique({
+      where: { id },
+      include: {
+        courseModule: {
+          include: { course: true },
+        },
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException('Lesson not found');
+    }
+
+    if (lesson.courseModule.course.instructorId !== userId) {
+      throw new ForbiddenException('You do not have permission to update this lesson');
+    }
+
+    return this.prisma.lesson.update({
+      where: { id },
+      data: updateData,
+    });
+  }
+
+  async deleteLesson(userId: string, lessonId: string) {
+    const lesson = await this.prisma.lesson.findUnique({
+      where: { id: lessonId },
+      include: {
+        courseModule: {
+          include: { course: true },
+        },
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException('Lesson not found');
+    }
+
+    if (lesson.courseModule.course.instructorId !== userId) {
+      throw new ForbiddenException('You do not have permission to delete this lesson');
+    }
+
+    await this.prisma.lesson.delete({
+      where: { id: lessonId },
+    });
+
+    return { success: true, message: 'Lesson deleted successfully' };
+  }
+
+  async reorderLessons(userId: string, input: ReorderLessonsInput) {
+    const { moduleId, lessonIds } = input;
+
+    // Verify user owns the course
+    const module = await this.prisma.courseModule.findUnique({
+      where: { id: moduleId },
+      include: { course: true },
+    });
+
+    if (!module) {
+      throw new NotFoundException('Module not found');
+    }
+
+    if (module.course.instructorId !== userId) {
+      throw new ForbiddenException('You do not have permission to reorder lessons');
+    }
+
+    // Update order for each lesson
+    await Promise.all(
+      lessonIds.map((lessonId, index) =>
+        this.prisma.lesson.update({
+          where: { id: lessonId },
+          data: { order: index },
+        })
+      )
+    );
+
+    return this.prisma.lesson.findMany({
+      where: { moduleId },
+      orderBy: { order: 'asc' },
     });
   }
 }

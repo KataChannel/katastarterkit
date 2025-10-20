@@ -2,9 +2,13 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { Course } from './entities/course.entity';
+import { CourseModule } from './entities/course-module.entity';
+import { Lesson } from './entities/lesson.entity';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
 import { CourseFiltersInput } from './dto/course-filters.input';
+import { CreateModuleInput, UpdateModuleInput, ReorderModulesInput } from './dto/module.input';
+import { CreateLessonInput, UpdateLessonInput, ReorderLessonsInput } from './dto/lesson.input';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -86,5 +90,91 @@ export class CoursesResolver {
   ) {
     const result = await this.coursesService.remove(id, user.userId);
     return result.success;
+  }
+
+  // ==================== MODULE MUTATIONS ====================
+
+  @Mutation(() => CourseModule, { name: 'createModule' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRoleType.ADMIN)
+  createModule(
+    @CurrentUser() user: any,
+    @Args('input') input: CreateModuleInput,
+  ) {
+    return this.coursesService.createModule(user.userId, input);
+  }
+
+  @Mutation(() => CourseModule, { name: 'updateModule' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRoleType.ADMIN)
+  updateModule(
+    @CurrentUser() user: any,
+    @Args('input') input: UpdateModuleInput,
+  ) {
+    return this.coursesService.updateModule(user.userId, input);
+  }
+
+  @Mutation(() => Boolean, { name: 'deleteModule' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRoleType.ADMIN)
+  async deleteModule(
+    @CurrentUser() user: any,
+    @Args('id', { type: () => ID }) id: string,
+  ) {
+    const result = await this.coursesService.deleteModule(user.userId, id);
+    return result.success;
+  }
+
+  @Mutation(() => [CourseModule], { name: 'reorderModules' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRoleType.ADMIN)
+  reorderModules(
+    @CurrentUser() user: any,
+    @Args('input') input: ReorderModulesInput,
+  ) {
+    return this.coursesService.reorderModules(user.userId, input);
+  }
+
+  // ==================== LESSON MUTATIONS ====================
+
+  @Mutation(() => Lesson, { name: 'createLesson' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRoleType.ADMIN)
+  createLesson(
+    @CurrentUser() user: any,
+    @Args('input') input: CreateLessonInput,
+  ) {
+    return this.coursesService.createLesson(user.userId, input);
+  }
+
+  @Mutation(() => Lesson, { name: 'updateLesson' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRoleType.ADMIN)
+  updateLesson(
+    @CurrentUser() user: any,
+    @Args('input') input: UpdateLessonInput,
+  ) {
+    return this.coursesService.updateLesson(user.userId, input);
+  }
+
+  @Mutation(() => Boolean, { name: 'deleteLesson' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRoleType.ADMIN)
+  async deleteLesson(
+    @CurrentUser() user: any,
+    @Args('id', { type: () => ID }) id: string,
+  ) {
+    const result = await this.coursesService.deleteLesson(user.userId, id);
+    return result.success;
+  }
+
+  @Mutation(() => [Lesson], { name: 'reorderLessons' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRoleType.ADMIN)
+  reorderLessons(
+    @CurrentUser() user: any,
+    @Args('input') input: ReorderLessonsInput,
+  ) {
+    return this.coursesService.reorderLessons(user.userId, input);
   }
 }

@@ -220,3 +220,102 @@ export const MARK_LESSON_COMPLETE = gql`
     }
   }
 `;
+
+// ==================== MODULE MUTATIONS ====================
+
+export const CREATE_MODULE = gql`
+  mutation CreateModule($input: CreateModuleInput!) {
+    createModule(input: $input) {
+      id
+      title
+      description
+      order
+      courseId
+      lessons {
+        id
+        title
+        type
+        order
+      }
+    }
+  }
+`;
+
+export const UPDATE_MODULE = gql`
+  mutation UpdateModule($input: UpdateModuleInput!) {
+    updateModule(input: $input) {
+      id
+      title
+      description
+      order
+    }
+  }
+`;
+
+export const DELETE_MODULE = gql`
+  mutation DeleteModule($id: ID!) {
+    deleteModule(id: $id)
+  }
+`;
+
+export const REORDER_MODULES = gql`
+  mutation ReorderModules($input: ReorderModulesInput!) {
+    reorderModules(input: $input) {
+      id
+      title
+      order
+      lessons {
+        id
+        title
+        order
+      }
+    }
+  }
+`;
+
+// ==================== LESSON MUTATIONS ====================
+
+export const CREATE_LESSON = gql`
+  mutation CreateLesson($input: CreateLessonInput!) {
+    createLesson(input: $input) {
+      id
+      title
+      description
+      type
+      content
+      duration
+      order
+      moduleId
+    }
+  }
+`;
+
+export const UPDATE_LESSON = gql`
+  mutation UpdateLesson($input: UpdateLessonInput!) {
+    updateLesson(input: $input) {
+      id
+      title
+      description
+      type
+      content
+      duration
+      order
+    }
+  }
+`;
+
+export const DELETE_LESSON = gql`
+  mutation DeleteLesson($id: ID!) {
+    deleteLesson(id: $id)
+  }
+`;
+
+export const REORDER_LESSONS = gql`
+  mutation ReorderLessons($input: ReorderLessonsInput!) {
+    reorderLessons(input: $input) {
+      id
+      title
+      order
+    }
+  }
+`;
