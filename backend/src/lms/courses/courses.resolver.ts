@@ -2,8 +2,6 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { Course } from './entities/course.entity';
-import { CourseModule } from './entities/course-module.entity';
-import { Lesson } from './entities/lesson.entity';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
 import { CourseFiltersInput } from './dto/course-filters.input';
@@ -14,6 +12,8 @@ import { CurrentUser } from '../../auth/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { UserRoleType } from '@prisma/client';
+import { CourseModule } from './entities/course-module.entity';
+import { Lesson } from './entities/lesson.entity';
 
 @Resolver(() => Course)
 export class CoursesResolver {

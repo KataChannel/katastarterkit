@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { CoursesModule } from './courses/courses.module';
 import { CourseCategoriesModule } from './categories/course-categories.module';
 import { EnrollmentsModule } from './enrollments/enrollments.module';
@@ -10,6 +11,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 @Module({
   imports: [
     PrismaModule,
+    JwtModule.register({}), // Global JWT for all LMS modules
     CoursesModule,
     CourseCategoriesModule,
     EnrollmentsModule,
@@ -18,6 +20,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     FilesModule,
   ],
   exports: [
+    JwtModule, // Export so child modules can use
     CoursesModule,
     CourseCategoriesModule,
     EnrollmentsModule,

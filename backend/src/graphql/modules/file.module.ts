@@ -3,7 +3,7 @@ import { FileService } from '../../services/file.service';
 import { MinioService } from '../../services/minio.service';
 import { FileResolver } from '../resolvers/file.resolver';
 import { FolderResolver } from '../resolvers/folder.resolver';
-import { UploadScalar } from '../scalars/upload.scalar';
+// import { UploadScalar } from '../scalars/upload.scalar'; // Commented out - using graphql-upload-ts
 import { PrismaService } from '../../prisma/prisma.service';
 import { FileController } from '../../controllers/file.controller';
 import { AuthModule } from '../../auth/auth.module';
@@ -17,7 +17,7 @@ import { UserService } from '../../services/user.service';
     MinioService,
     FileResolver,
     FolderResolver,
-    UploadScalar,
+    // UploadScalar, // Commented out - using graphql-upload-ts
     PrismaService,
     UserService, // Add UserService for JwtAuthGuard
   ],

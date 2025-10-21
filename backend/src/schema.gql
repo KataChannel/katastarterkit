@@ -319,6 +319,16 @@ input AggregateInput {
   where: JSONObject
 }
 
+type Answer {
+  createdAt: DateTime!
+  id: ID!
+  isCorrect: Boolean!
+  order: Int!
+  questionId: String!
+  text: String!
+  updatedAt: DateTime!
+}
+
 input AssignRolePermissionInput {
   conditions: JSON
   effect: String! = "allow"
@@ -615,6 +625,83 @@ input CountInput {
   where: JSONObject
 }
 
+type Course {
+  avgRating: Float!
+  categoryId: String
+  createdAt: DateTime!
+  description: String
+  duration: Int
+  enrollmentCount: Int!
+  id: ID!
+  instructorId: String!
+  level: CourseLevel!
+  metaDescription: String
+  metaTitle: String
+  price: Float!
+  publishedAt: DateTime
+  rating: Float!
+  reviewCount: Int!
+  slug: String!
+  status: CourseStatus!
+  tags: [String!]!
+  thumbnail: String
+  title: String!
+  trailer: String
+  updatedAt: DateTime!
+}
+
+type CourseCategory {
+  createdAt: DateTime!
+  description: String
+  icon: String
+  id: ID!
+  name: String!
+  parentId: ID
+  slug: String!
+  updatedAt: DateTime!
+}
+
+input CourseFiltersInput {
+  categoryId: String
+  instructorId: String
+  level: CourseLevel
+  limit: Int! = 20
+  maxPrice: Float
+  minPrice: Float
+  page: Int! = 1
+  search: String
+  sortBy: String! = "createdAt"
+  sortOrder: String! = "desc"
+  status: CourseStatus
+  tags: [String!]
+}
+
+"""Course difficulty level"""
+enum CourseLevel {
+  ADVANCED
+  BEGINNER
+  EXPERT
+  INTERMEDIATE
+}
+
+type CourseModule {
+  courseId: ID!
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  lessons: [Lesson!]
+  order: Int!
+  title: String!
+  updatedAt: DateTime!
+}
+
+"""Course publication status"""
+enum CourseStatus {
+  ARCHIVED
+  DRAFT
+  PUBLISHED
+}
+
 input CreateAffLinkInput {
   campaignId: String!
   customAlias: String
@@ -638,6 +725,12 @@ input CreateAffUserInput {
   role: AffUserRole!
   taxId: String
   website: String
+}
+
+input CreateAnswerInput {
+  isCorrect: Boolean!
+  order: Int!
+  text: String!
 }
 
 input CreateCallCenterConfigInput {
@@ -685,6 +778,28 @@ input CreateCommentInput {
   content: String!
   parentId: String
   postId: String!
+}
+
+input CreateCourseCategoryInput {
+  description: String
+  icon: String
+  name: String!
+  parentId: String
+}
+
+input CreateCourseInput {
+  categoryId: String
+  description: String
+  duration: Int
+  level: CourseLevel! = BEGINNER
+  metaDescription: String
+  metaTitle: String
+  price: Float! = 0
+  status: CourseStatus! = DRAFT
+  tags: [String!]! = []
+  thumbnail: String
+  title: String!
+  trailer: String
 }
 
 input CreateEmployeeProfileInput {
@@ -836,6 +951,16 @@ input CreateInvoiceInput {
   tthai: String
 }
 
+input CreateLessonInput {
+  content: String
+  description: String
+  duration: Int
+  moduleId: ID!
+  order: Int
+  title: String!
+  type: String!
+}
+
 input CreateManyInput {
   data: [JSONObject!]!
   model: String!
@@ -866,6 +991,13 @@ input CreateMenuDto {
   title: String!
   type: String
   url: String
+}
+
+input CreateModuleInput {
+  courseId: ID!
+  description: String
+  order: Int
+  title: String!
 }
 
 input CreateOffboardingProcessInput {
@@ -1016,6 +1148,30 @@ input CreateProductVariantInput {
   productId: ID!
   sku: String
   stock: Int! = 0
+}
+
+input CreateQuestionInput {
+  answers: [CreateAnswerInput!]!
+  explanation: String
+  order: Int!
+  points: Int! = 1
+  question: String!
+  type: String!
+}
+
+input CreateQuizInput {
+  description: String
+  lessonId: String!
+  passingScore: Int! = 70
+  questions: [CreateQuestionInput!]!
+  timeLimit: Int
+  title: String!
+}
+
+input CreateReviewInput {
+  comment: String
+  courseId: ID!
+  rating: Int!
 }
 
 input CreateRoleInput {
@@ -1195,6 +1351,29 @@ type EmploymentHistory {
   toPosition: String
   updatedAt: DateTime!
   userId: String!
+}
+
+input EnrollCourseInput {
+  courseId: ID!
+}
+
+type Enrollment {
+  completedAt: DateTime
+  courseId: ID!
+  enrolledAt: DateTime!
+  expiresAt: DateTime
+  id: ID!
+  lastAccessedAt: DateTime
+  progress: Int!
+  status: EnrollmentStatus!
+  userId: ID!
+}
+
+"""Status of course enrollment"""
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
 }
 
 type ExtDetailhoadon {
@@ -1379,6 +1558,15 @@ type FileUploadResponse {
   success: Boolean!
 }
 
+type FileUploadResult {
+  bucket: String!
+  filename: String!
+  id: String!
+  mimetype: String!
+  size: Int!
+  url: String!
+}
+
 """Visibility level of the file"""
 enum FileVisibility {
   PRIVATE
@@ -1432,6 +1620,14 @@ input GetProductsInput {
   page: Int = 1
   sortBy: String = "createdAt"
   sortOrder: String = "desc"
+}
+
+input GetReviewsInput {
+  courseId: ID!
+  filterByRating: Int
+  page: Int = 1
+  pageSize: Int = 10
+  sortBy: String = "recent"
 }
 
 input GroupByInput {
@@ -1528,6 +1724,37 @@ input JoinCampaignInput {
   message: String
 }
 
+type Lesson {
+  content: String
+  createdAt: DateTime!
+  description: String
+  duration: Int
+  id: ID!
+  moduleId: ID!
+  order: Int!
+  title: String!
+  type: LessonType!
+  updatedAt: DateTime!
+}
+
+type LessonProgress {
+  completed: Boolean!
+  completedAt: DateTime
+  createdAt: DateTime!
+  enrollmentId: String!
+  id: ID!
+  lessonId: String!
+  updatedAt: DateTime!
+}
+
+"""Type of lesson content"""
+enum LessonType {
+  ASSIGNMENT
+  QUIZ
+  TEXT
+  VIDEO
+}
+
 input LoginUserInput {
   emailOrUsername: String!
   password: String!
@@ -1618,6 +1845,7 @@ type Mutation {
   adminCreateUser(input: AdminCreateUserInput!): User!
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
   approveConversion(id: String!): Boolean!
+  archiveCourse(id: ID!): Course!
   assignRolePermissions(input: AssignRolePermissionInput!): Boolean!
   assignUserPermissions(input: AssignUserPermissionInput!): Boolean!
   assignUserRoles(input: AssignUserRoleInput!): Boolean!
@@ -1633,16 +1861,20 @@ type Mutation {
   createCallCenterConfig(input: CreateCallCenterConfigInput!): CallCenterConfig!
   createCategory(input: CreateCategoryInput!): CategoryType!
   createComment(input: CreateCommentInput!): Comment!
+  createCourse(createCourseInput: CreateCourseInput!): Course!
+  createCourseCategory(createCourseCategoryInput: CreateCourseCategoryInput!): CourseCategory!
   createEmployeeProfile(input: CreateEmployeeProfileInput!): EmployeeProfile!
   createEmploymentHistory(input: CreateEmploymentHistoryInput!): EmploymentHistory!
   createFileShare(input: CreateFileShareInput!): FileShare!
   createFolder(input: CreateFolderInput!): FileFolder!
   createInvoice(input: CreateInvoiceInput!): ExtListhoadon!
   createInvoiceDetails(details: [CreateInvoiceDetailInput!]!, invoiceId: ID!): [ExtDetailhoadon!]!
+  createLesson(input: CreateLessonInput!): Lesson!
 
   """Create multiple records in a single operation"""
   createMany(input: UnifiedBulkCreateInput!, modelName: String!): JSONObject!
   createMenu(input: CreateMenuDto!): MenuResponseDto!
+  createModule(input: CreateModuleInput!): CourseModule!
   createOffboardingProcess(input: CreateOffboardingProcessInput!): OffboardingProcess!
   createOnboardingChecklist(input: CreateOnboardingChecklistInput!): OnboardingChecklist!
 
@@ -1653,6 +1885,8 @@ type Mutation {
   createPermission(input: CreatePermissionInput!): Permission!
   createPost(input: CreatePostInput!): Post!
   createProduct(input: CreateProductInput!): ProductType!
+  createQuiz(input: CreateQuizInput!): Quiz!
+  createReview(input: CreateReviewInput!): Review!
   createRole(input: CreateRoleInput!): Role!
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createTask(input: CreateTaskInput!): Task!
@@ -1664,14 +1898,18 @@ type Mutation {
   deleteCallCenterConfig(id: String!): CallCenterConfig!
   deleteCategory(deleteProducts: Boolean! = false, id: ID!): CategoryType!
   deleteComment(id: String!): Boolean!
+  deleteCourse(id: ID!): Boolean!
+  deleteCourseCategory(id: ID!): Boolean!
   deleteEmployeeProfile(id: ID!): DeleteResponse!
-  deleteFile(id: ID!): Boolean!
+  deleteFile(bucket: String!, fileId: String!): Boolean!
   deleteFolder(id: ID!): Boolean!
   deleteInvoice(id: ID!): Boolean!
+  deleteLesson(id: ID!): Boolean!
 
   """Delete multiple records matching criteria"""
   deleteMany(input: UnifiedBulkDeleteInput!, modelName: String!): JSONObject!
   deleteMenu(id: ID!): Boolean!
+  deleteModule(id: ID!): Boolean!
 
   """Delete a single record by ID"""
   deleteOne(input: UnifiedDeleteInput!, modelName: String!): JSONObject!
@@ -1682,6 +1920,8 @@ type Mutation {
   deleteProduct(id: ID!): ProductType!
   deleteProductImage(id: ID!): Boolean!
   deleteProductVariant(id: ID!): Boolean!
+  deleteQuiz(id: String!): Boolean!
+  deleteReview(reviewId: ID!): Boolean!
   deleteRole(id: String!): Boolean!
   deleteTask(id: String!): Boolean!
   deleteTaskMedia(mediaId: String!): Boolean!
@@ -1689,6 +1929,7 @@ type Mutation {
 
   """Delete ext_sanphamhoadon"""
   deleteext_sanphamhoadon(id: String!, options: JSON): JSON!
+  dropCourse(courseId: ID!): Enrollment!
   duplicatePage(id: String!, slug: String, title: String): Page!
 
   """Create a new record"""
@@ -1711,6 +1952,7 @@ type Mutation {
 
   """Create or update a record (upsert)"""
   dynamicUpsert(input: UpsertInput!): JSONObject!
+  enrollCourse(enrollCourseInput: EnrollCourseInput!): Enrollment!
   generatePostSummary(postId: String!): String!
   generateSummary(content: String!, maxLength: Float! = 200): String!
   generateTags(content: String!, maxTags: Float! = 5): [String!]!
@@ -1720,6 +1962,8 @@ type Mutation {
   loginWithFacebook(input: SocialLoginInput!): AuthResponse!
   loginWithGoogle(input: SocialLoginInput!): AuthResponse!
   loginWithPhone(input: PhoneLoginInput!): AuthResponse!
+  markLessonComplete(enrollmentId: ID!, lessonId: ID!): LessonProgress!
+  markReviewHelpful(reviewId: ID!): Review!
 
   """Merge duplicate products (keep one, delete rest)"""
   mergeDuplicates(
@@ -1739,16 +1983,20 @@ type Mutation {
     threshold: Float! = 0.6
   ): NormalizationStats!
   processPaymentRequest(id: String!, status: String!): AffPaymentRequest!
+  publishCourse(id: ID!): Course!
   publishPost(id: String!): Post!
   registerUser(input: RegisterUserInput!): AuthResponse!
 
   """Reindex all data from database into Orama search indexes"""
   reindexAllData: ReindexResult!
   rejectConversion(id: String!, reason: String): Boolean!
+  reorderLessons(input: ReorderLessonsInput!): [Lesson!]!
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
+  reorderModules(input: ReorderModulesInput!): [CourseModule!]!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   reviewCampaignApplication(input: ReviewCampaignApplicationInput!): String!
   shareTask(input: ShareTaskInput!): TaskShare!
+  submitQuiz(input: SubmitQuizInput!): QuizAttempt!
   syncCallCenterData(input: SyncCallCenterInput): SyncCallCenterResponse!
   toggleMenuActive(id: ID!): MenuResponseDto!
   toggleMenuVisibility(id: ID!): MenuResponseDto!
@@ -1760,15 +2008,19 @@ type Mutation {
   updateCallCenterConfig(id: String!, input: UpdateCallCenterConfigInput!): CallCenterConfig!
   updateCategory(input: UpdateCategoryInput!): CategoryType!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
+  updateCourse(updateCourseInput: UpdateCourseInput!): Course!
+  updateCourseCategory(updateCourseCategoryInput: UpdateCourseCategoryInput!): CourseCategory!
   updateEmployeeProfile(id: ID!, input: UpdateEmployeeProfileInput!): EmployeeProfile!
   updateEmploymentHistory(id: ID!, input: UpdateEmploymentHistoryInput!): EmploymentHistory!
   updateFile(input: UpdateFileInput!): File!
   updateFolder(input: UpdateFolderInput!): FileFolder!
   updateInvoice(id: ID!, input: CreateInvoiceInput!): ExtListhoadon!
+  updateLesson(input: UpdateLessonInput!): Lesson!
 
   """Update multiple records matching criteria"""
   updateMany(input: UnifiedBulkUpdateInput!, modelName: String!): JSONObject!
   updateMenu(id: ID!, input: UpdateMenuDto!): MenuResponseDto!
+  updateModule(input: UpdateModuleInput!): CourseModule!
   updateOffboardingProcess(id: ID!, input: UpdateOffboardingProcessInput!): OffboardingProcess!
   updateOnboardingChecklist(id: ID!, input: UpdateOnboardingChecklistInput!): OnboardingChecklist!
 
@@ -1791,13 +2043,18 @@ type Mutation {
     """Limit number of records to process"""
     limit: Int
   ): UpdateProductsResult!
+  updateQuiz(id: String!, input: UpdateQuizInput!): Quiz!
+  updateReview(input: UpdateReviewInput!): Review!
   updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateTask(input: UpdateTaskInput!): Task!
   updateUser(id: String!, input: UpdateUserInput!): User!
 
   """Update ext_sanphamhoadon"""
   updateext_sanphamhoadon(data: JSON!, id: String!, options: JSON): JSON!
+  uploadCourseMaterial(courseId: String!, file: Upload!): FileUploadResult!
+  uploadCourseThumbnail(courseId: String, file: Upload!): FileUploadResult!
   uploadFile(file: JSON!, folderId: ID, metadata: JSON): FileUploadResponse!
+  uploadLessonVideo(courseId: String!, file: Upload!): FileUploadResult!
   uploadTaskMedia(input: UploadTaskMediaInput!): TaskMedia!
 
   """Create or update a record based on criteria"""
@@ -2340,6 +2597,13 @@ type Query {
 
   """Count records matching the criteria"""
   count(modelName: String!, where: JSONObject): Float!
+  course(id: ID!): Course!
+  courseBySlug(slug: String!): Course!
+  courseCategories: [CourseCategory!]!
+  courseCategory(id: ID!): CourseCategory!
+  courseCategoryTree: [CourseCategory!]!
+  courseEnrollments(courseId: ID!): [Enrollment!]!
+  courses(filters: CourseFiltersInput): [Course!]!
 
   """Compute aggregations (sum, avg, min, max, count)"""
   dynamicAggregate(input: AggregateInput!): JSONObject!
@@ -2362,6 +2626,7 @@ type Query {
   employeeProfileByCode(employeeCode: String!): EmployeeProfile!
   employeeProfileByUserId(userId: ID!): EmployeeProfile!
   employmentHistory(employeeProfileId: ID!): [EmploymentHistory!]!
+  enrollment(courseId: ID!): Enrollment!
 
   """Check if a record exists matching the criteria"""
   exists(modelName: String!, where: JSONObject!): Boolean!
@@ -2433,6 +2698,7 @@ type Query {
   getPostById(id: String!): Post!
   getPostBySlug(slug: String!): Post!
   getPosts(filters: PostFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPosts!
+  getPresignedUrl(bucket: String!, expiresIn: Float, fileId: String!): String!
 
   """Get product groups by normalized name (ten2)"""
   getProductGroups(
@@ -2485,6 +2751,8 @@ type Query {
   menuTree(parentId: String, type: String): [MenuResponseDto!]!
   menus(direction: String, filter: MenuFilterDto, limit: Float, orderBy: String, page: Float): MenuPaginationResponseDto!
   mobileMenus: [MenuResponseDto!]!
+  myCourses: [Course!]!
+  myEnrollments: [Enrollment!]!
   myMenus(type: String): [MenuResponseDto!]!
 
   """Normalize a product name"""
@@ -2502,6 +2770,12 @@ type Query {
   productBySlug(slug: String!): ProductType!
   products(input: GetProductsInput): PaginatedProducts!
   productsByCategory(categoryId: ID!, input: GetProductsInput): PaginatedProducts!
+  quiz(id: String!): Quiz!
+  quizAttempt(id: String!): QuizAttempt!
+  quizAttempts(quizId: String!): [QuizAttempt!]!
+  quizzesByLesson(lessonId: String!): [Quiz!]!
+  reviewStats(courseId: ID!): ReviewStats!
+  reviews(input: GetReviewsInput!): ReviewsWithStats!
 
   """Search affiliate campaigns using Orama full-text search engine"""
   searchAffiliateCampaigns(input: OramaSearchInput!): OramaSearchResult!
@@ -2535,9 +2809,56 @@ type Query {
   Search across all entity types (tasks, users, projects, affiliate campaigns, affiliate links)
   """
   universalSearch(input: OramaSearchInput!): UniversalSearchResult!
+  userReview(courseId: ID!): Review
 
   """Get API version"""
   version: String!
+}
+
+type Question {
+  answers: [Answer!]!
+  createdAt: DateTime!
+  explanation: String
+  id: ID!
+  order: Int!
+  points: Int!
+  question: String!
+  quizId: String!
+  type: String!
+  updatedAt: DateTime!
+}
+
+type Quiz {
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  lessonId: String!
+  passingScore: Int!
+  questions: [Question!]!
+  timeLimit: Int
+  title: String!
+  updatedAt: DateTime!
+}
+
+input QuizAnswerInput {
+  questionId: String!
+  selectedAnswerIds: [String!]!
+}
+
+type QuizAttempt {
+  answers: String
+  completedAt: DateTime
+  createdAt: DateTime!
+  enrollmentId: String!
+  id: ID!
+  passed: Boolean!
+  quiz: Quiz!
+  quizId: String!
+  score: Float
+  startedAt: DateTime!
+  timeSpent: Int
+  updatedAt: DateTime!
+  userId: String!
 }
 
 input RegisterUserInput {
@@ -2556,14 +2877,65 @@ type ReindexResult {
   totalIndexed: Int
 }
 
+input ReorderLessonsInput {
+  lessonIds: [ID!]!
+  moduleId: ID!
+}
+
+input ReorderModulesInput {
+  courseId: ID!
+  moduleIds: [ID!]!
+}
+
 input RequestPhoneVerificationInput {
   phone: String!
+}
+
+type Review {
+  comment: String
+  courseId: ID!
+  createdAt: DateTime!
+  helpfulCount: Int!
+  helpfulVoters: [String!]!
+  id: ID!
+
+  """Rating from 1 to 5 stars"""
+  rating: Int!
+  updatedAt: DateTime!
+  user: ReviewUser
+  userId: ID!
 }
 
 input ReviewCampaignApplicationInput {
   action: String!
   applicationId: String!
   reason: String
+}
+
+type ReviewStats {
+  avgRating: Float!
+  fiveStars: Int!
+  fourStars: Int!
+  oneStar: Int!
+  threeStars: Int!
+  totalReviews: Int!
+  twoStars: Int!
+}
+
+type ReviewUser {
+  avatar: String
+  firstName: String
+  id: ID!
+  lastName: String
+  username: String!
+}
+
+type ReviewsWithStats {
+  page: Int!
+  pageSize: Int!
+  reviews: [Review!]!
+  stats: ReviewStats!
+  total: Int!
 }
 
 type Role {
@@ -2643,6 +3015,13 @@ input SocialLoginInput {
   providerId: String
   rememberMe: Boolean
   token: String!
+}
+
+input SubmitQuizInput {
+  answers: [QuizAnswerInput!]!
+  enrollmentId: String!
+  quizId: String!
+  timeSpent: Int
 }
 
 type Subscription {
@@ -3009,6 +3388,30 @@ input UpdateCommentInput {
   content: String
 }
 
+input UpdateCourseCategoryInput {
+  description: String
+  icon: String
+  id: ID!
+  name: String
+  parentId: String
+}
+
+input UpdateCourseInput {
+  categoryId: String
+  description: String
+  duration: Int
+  id: ID!
+  level: CourseLevel = BEGINNER
+  metaDescription: String
+  metaTitle: String
+  price: Float = 0
+  status: CourseStatus = DRAFT
+  tags: [String!] = []
+  thumbnail: String
+  title: String
+  trailer: String
+}
+
 input UpdateEmployeeProfileInput {
   bankAccountName: String
   bankAccountNumber: String
@@ -3118,6 +3521,16 @@ input UpdateInput {
   where: JSONObject!
 }
 
+input UpdateLessonInput {
+  content: String
+  description: String
+  duration: Int
+  id: ID!
+  order: Int
+  title: String
+  type: String
+}
+
 input UpdateManyInput {
   data: JSONObject!
   model: String!
@@ -3149,6 +3562,13 @@ input UpdateMenuDto {
   title: String
   type: String
   url: String
+}
+
+input UpdateModuleInput {
+  description: String
+  id: ID!
+  order: Int
+  title: String
 }
 
 input UpdateOffboardingProcessInput {
@@ -3318,6 +3738,19 @@ type UpdateProductsStats {
   updated: Int!
 }
 
+input UpdateQuizInput {
+  description: String
+  passingScore: Int
+  timeLimit: Int
+  title: String
+}
+
+input UpdateReviewInput {
+  comment: String
+  rating: Int
+  reviewId: ID!
+}
+
 input UpdateRoleInput {
   description: String
   displayName: String
@@ -3345,7 +3778,7 @@ input UpdateUserInput {
   username: String
 }
 
-"""Upload custom scalar type for file uploads"""
+"""The `Upload` scalar type represents a file upload."""
 scalar Upload
 
 input UploadTaskMediaInput {

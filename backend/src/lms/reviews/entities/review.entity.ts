@@ -1,5 +1,24 @@
 import { ObjectType, Field, ID, Int, Float } from '@nestjs/graphql';
 
+// Define ReviewUser first (before Review uses it)
+@ObjectType()
+export class ReviewUser {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  username: string;
+
+  @Field({ nullable: true })
+  firstName?: string;
+
+  @Field({ nullable: true })
+  lastName?: string;
+
+  @Field({ nullable: true })
+  avatar?: string;
+}
+
 @ObjectType()
 export class Review {
   @Field(() => ID)
@@ -32,24 +51,6 @@ export class Review {
   // Relations
   @Field(() => ReviewUser, { nullable: true })
   user?: ReviewUser;
-}
-
-@ObjectType()
-export class ReviewUser {
-  @Field(() => ID)
-  id: string;
-
-  @Field()
-  username: string;
-
-  @Field({ nullable: true })
-  firstName?: string;
-
-  @Field({ nullable: true })
-  lastName?: string;
-
-  @Field({ nullable: true })
-  avatar?: string;
 }
 
 @ObjectType()
