@@ -24,7 +24,7 @@ import {
 
 // Import our Dynamic Template System
 import { TemplateRegistry } from '@/lib/dynamicTemplateSystem';
-import { TemplatePresets } from '@/utils/templateBuilder';
+// import { TemplatePresets } from '@/utils/templateBuilder'; // Temporarily disabled
 
 // ============================================================================
 // PageBuilder Integration Component
@@ -132,25 +132,27 @@ const TemplateBuilderInterface: React.FC = () => {
   const [templateName, setTemplateName] = useState('');
   const [templateCategory, setTemplateCategory] = useState('ecommerce');
 
+  // Temporarily disabled - TemplatePresets not available
   const createQuickTemplate = (type: string) => {
-    let template;
-    const id = `quick-${type}-${Date.now()}`;
+    console.log('Quick template creation temporarily disabled:', type);
+    // let template;
+    // const id = `quick-${type}-${Date.now()}`;
 
-    switch (type) {
-      case 'product-grid':
-        template = TemplatePresets.createProductGrid(id);
-        break;
-      case 'task-dashboard':
-        template = TemplatePresets.createTaskDashboard(id);
-        break;
-      case 'category-showcase':
-        template = TemplatePresets.createCategoryShowcase(id);
-        break;
-      default:
-        return;
-    }
+    // switch (type) {
+    //   case 'product-grid':
+    //     template = TemplatePresets.createProductGrid(id);
+    //     break;
+    //   case 'task-dashboard':
+    //     template = TemplatePresets.createTaskDashboard(id);
+    //     break;
+    //   case 'category-showcase':
+    //     template = TemplatePresets.createCategoryShowcase(id);
+    //     break;
+    //   default:
+    //     return;
+    // }
 
-    console.log('Created quick template:', template);
+    // console.log('Created quick template:', template);
   };
 
   return (

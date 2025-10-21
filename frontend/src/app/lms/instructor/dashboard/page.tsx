@@ -38,7 +38,7 @@ export default function InstructorDashboardPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
           <p className="text-gray-600 mb-4">You need ADMIN role to access this page</p>
           <Link 
-            href="/courses"
+            href="/lms/courses"
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             Browse Courses

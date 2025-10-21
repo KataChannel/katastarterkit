@@ -37,7 +37,7 @@ export default function ReviewForm({
     setError('');
 
     if (rating === 0) {
-      setError('Please select a rating');
+      setError('Vui lòng chọn đánh giá sao');
       return;
     }
 
@@ -68,7 +68,7 @@ export default function ReviewForm({
 
       onSuccess?.();
     } catch (err: any) {
-      setError(err.message || 'Failed to submit review');
+      setError(err.message || 'Không thể gửi đánh giá');
     }
   };
 
@@ -77,7 +77,7 @@ export default function ReviewForm({
       {/* Star Rating */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Your Rating *
+          Đánh giá của bạn *
         </label>
         <div className="flex items-center gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
@@ -100,7 +100,7 @@ export default function ReviewForm({
           ))}
           {rating > 0 && (
             <span className="ml-3 text-sm font-medium text-gray-700">
-              {rating} {rating === 1 ? 'star' : 'stars'}
+              {rating} sao
             </span>
           )}
         </div>
@@ -112,7 +112,7 @@ export default function ReviewForm({
           htmlFor="comment"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Your Review (Optional)
+          Nhận xét của bạn (Tùy chọn)
         </label>
         <textarea
           id="comment"
@@ -120,11 +120,11 @@ export default function ReviewForm({
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           maxLength={1000}
-          placeholder="Share your experience with this course..."
+          placeholder="Chia sẻ trải nghiệm của bạn về khóa học này..."
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
         />
         <p className="mt-1 text-sm text-gray-500">
-          {comment.length} / 1000 characters
+          {comment.length} / 1000 ký tự
         </p>
       </div>
 
@@ -143,10 +143,10 @@ export default function ReviewForm({
           className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading
-            ? 'Submitting...'
+            ? 'Đang gửi...'
             : existingReview
-            ? 'Update Review'
-            : 'Submit Review'}
+            ? 'Cập nhật đánh giá'
+            : 'Gửi đánh giá'}
         </button>
         {onCancel && (
           <button
@@ -155,7 +155,7 @@ export default function ReviewForm({
             disabled={loading}
             className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
           >
-            Cancel
+            Hủy
           </button>
         )}
       </div>

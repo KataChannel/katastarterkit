@@ -41,22 +41,22 @@ export default function EnrollButton({
 
       // Redirect to learning page after a short delay
       setTimeout(() => {
-        router.push(`/learn/${courseSlug}`);
+        router.push(`/lms/learn/${courseSlug}`);
       }, 1000);
     } catch (error: any) {
       console.error('Enrollment error:', error);
-      alert(error.message || 'Failed to enroll in course');
+      alert(error.message || 'Không thể ghi danh khóa học');
     }
   };
 
   if (enrolled) {
     return (
       <button
-        onClick={() => router.push(`/learn/${courseSlug}`)}
+        onClick={() => router.push(`/lms/learn/${courseSlug}`)}
         className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
       >
         <CheckCircle className="w-5 h-5" />
-        Go to Course
+        Vào học
       </button>
     );
   }
@@ -70,11 +70,11 @@ export default function EnrollButton({
       {loading ? (
         <>
           <Loader2 className="w-5 h-5 animate-spin" />
-          Enrolling...
+          Đang ghi danh...
         </>
       ) : (
         <>
-          {price > 0 ? `Enroll for $${price}` : 'Enroll for Free'}
+          {price > 0 ? `Ghi danh - $${price}` : 'Ghi danh miễn phí'}
         </>
       )}
     </button>

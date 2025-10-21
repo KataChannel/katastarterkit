@@ -13,7 +13,7 @@ interface CourseListProps {
 export default function CourseList({ 
   courses, 
   loading = false, 
-  emptyMessage = 'No courses found',
+  emptyMessage = 'Không tìm thấy khóa học',
   showInstructor = true 
 }: CourseListProps) {
   if (loading) {
@@ -54,7 +54,7 @@ export default function CourseList({
           </svg>
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-1">{emptyMessage}</h3>
-        <p className="text-gray-500">Check back later for new courses</p>
+        <p className="text-gray-500">Kiểm tra lại sau để xem khóa học mới</p>
       </div>
     );
   }

@@ -18,7 +18,7 @@ export default function MyLearningPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your courses...</p>
+          <p className="text-gray-600">Đang tải khóa học của bạn...</p>
         </div>
       </div>
     );
@@ -28,8 +28,8 @@ export default function MyLearningPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Error loading courses</h1>
-          <p className="text-gray-600">Please try again later</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Lỗi khi tải khóa học</h1>
+          <p className="text-gray-600">Vui lòng thử lại sau</p>
         </div>
       </div>
     );
@@ -57,14 +57,14 @@ export default function MyLearningPage() {
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">My Learning</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">Học tập của tôi</h1>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <BookOpen className="w-6 h-6 text-blue-600" />
-                <h3 className="text-sm font-medium text-blue-900">Total Courses</h3>
+                <h3 className="text-sm font-medium text-blue-900">Tổng khóa học</h3>
               </div>
               <p className="text-3xl font-bold text-blue-900">{stats.total}</p>
             </div>
@@ -72,7 +72,7 @@ export default function MyLearningPage() {
             <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <TrendingUp className="w-6 h-6 text-yellow-600" />
-                <h3 className="text-sm font-medium text-yellow-900">In Progress</h3>
+                <h3 className="text-sm font-medium text-yellow-900">Đang học</h3>
               </div>
               <p className="text-3xl font-bold text-yellow-900">{stats.inProgress}</p>
             </div>
@@ -80,7 +80,7 @@ export default function MyLearningPage() {
             <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <Award className="w-6 h-6 text-green-600" />
-                <h3 className="text-sm font-medium text-green-900">Completed</h3>
+                <h3 className="text-sm font-medium text-green-900">Hoàn thành</h3>
               </div>
               <p className="text-3xl font-bold text-green-900">{stats.completed}</p>
             </div>
@@ -88,7 +88,7 @@ export default function MyLearningPage() {
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <Clock className="w-6 h-6 text-purple-600" />
-                <h3 className="text-sm font-medium text-purple-900">Avg. Progress</h3>
+                <h3 className="text-sm font-medium text-purple-900">Tiến độ TB</h3>
               </div>
               <p className="text-3xl font-bold text-purple-900">
                 {stats.averageProgress.toFixed(0)}%
@@ -106,7 +106,7 @@ export default function MyLearningPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              All Courses ({enrollments.length})
+              Tất cả ({enrollments.length})
             </button>
             <button
               onClick={() => setFilter('IN_PROGRESS')}
@@ -116,7 +116,7 @@ export default function MyLearningPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              In Progress ({stats.inProgress})
+              Đang học ({stats.inProgress})
             </button>
             <button
               onClick={() => setFilter('COMPLETED')}
@@ -126,7 +126,7 @@ export default function MyLearningPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Completed ({stats.completed})
+              Hoàn thành ({stats.completed})
             </button>
           </div>
         </div>
@@ -139,19 +139,19 @@ export default function MyLearningPage() {
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               {filter === 'ALL' 
-                ? 'No courses yet' 
+                ? 'Chưa có khóa học nào' 
                 : filter === 'COMPLETED'
-                ? 'No completed courses'
-                : 'No courses in progress'}
+                ? 'Chưa có khóa học hoàn thành'
+                : 'Chưa có khóa học đang học'}
             </h3>
             <p className="text-gray-600 mb-6">
-              Start learning by enrolling in a course
+              Bắt đầu học bằng cách ghi danh khóa học
             </p>
             <Link
-              href="/courses"
+              href="/lms/courses"
               className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
             >
-              Browse Courses
+              Duyệt khóa học
             </Link>
           </div>
         ) : (
@@ -159,7 +159,7 @@ export default function MyLearningPage() {
             {filteredEnrollments.map((enrollment: any) => (
               <Link
                 key={enrollment.id}
-                href={`/courses/${enrollment.course.slug}`}
+                href={`/lms/courses/${enrollment.course.slug}`}
                 className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden group"
               >
                 {/* Thumbnail */}
@@ -180,13 +180,6 @@ export default function MyLearningPage() {
 
                 {/* Content */}
                 <div className="p-5">
-                  {/* Category */}
-                  {enrollment.course.category && (
-                    <p className="text-xs text-blue-600 font-medium mb-2">
-                      {enrollment.course.category.name}
-                    </p>
-                  )}
-
                   {/* Title */}
                   <h3 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
                     {enrollment.course.title}
@@ -195,7 +188,7 @@ export default function MyLearningPage() {
                   {/* Progress */}
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-600">Progress</span>
+                      <span className="text-sm text-gray-600">Tiến độ</span>
                       <span className="text-sm font-medium text-gray-900">
                         {enrollment.progress}%
                       </span>
@@ -211,13 +204,13 @@ export default function MyLearningPage() {
                   {enrollment.status === 'COMPLETED' && (
                     <div className="flex items-center gap-2 text-green-600">
                       <Award className="w-4 h-4" />
-                      <span className="text-sm font-medium">Completed</span>
+                      <span className="text-sm font-medium">Hoàn thành</span>
                     </div>
                   )}
 
                   {enrollment.completedAt && (
                     <p className="text-xs text-gray-500 mt-2">
-                      Completed on {new Date(enrollment.completedAt).toLocaleDateString()}
+                      Hoàn thành vào {new Date(enrollment.completedAt).toLocaleDateString('vi-VN')}
                     </p>
                   )}
                 </div>

@@ -18,15 +18,12 @@ interface CourseCardProps {
     rating: number;
     enrollmentCount: number;
     reviewCount: number;
+    categoryId?: string;
     instructor?: {
       firstName?: string;
       lastName?: string;
       username: string;
       avatar?: string;
-    };
-    category?: {
-      name: string;
-      slug: string;
     };
   };
   showInstructor?: boolean;
@@ -39,11 +36,18 @@ const LEVEL_COLORS = {
   EXPERT: 'bg-red-100 text-red-800',
 };
 
+const LEVEL_LABELS: Record<string, string> = {
+  'BEGINNER': 'Cơ bản',
+  'INTERMEDIATE': 'Trung cấp',
+  'ADVANCED': 'Nâng cao',
+  'EXPERT': 'Chuyên gia'
+};
+
 export default function CourseCard({ course, showInstructor = true }: CourseCardProps) {
   const levelColor = LEVEL_COLORS[course.level as keyof typeof LEVEL_COLORS] || 'bg-gray-100 text-gray-800';
 
   return (
-    <Link href={`/courses/${course.slug}`}>
+    <Link href={`/lms/courses/${course.slug}`}>
       <div className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-200 h-full flex flex-col">
         {/* Thumbnail */}
         <div className="relative h-48 bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
@@ -68,7 +72,7 @@ export default function CourseCard({ course, showInstructor = true }: CourseCard
               </span>
             ) : (
               <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
-                Free
+                Miễn phí
               </span>
             )}
           </div>
@@ -76,20 +80,13 @@ export default function CourseCard({ course, showInstructor = true }: CourseCard
           {/* Level Badge */}
           <div className="absolute top-3 left-3">
             <span className={`${levelColor} px-2 py-1 rounded text-xs font-medium`}>
-              {course.level}
+              {LEVEL_LABELS[course.level] || course.level}
             </span>
           </div>
         </div>
 
         {/* Content */}
         <div className="p-5 flex-1 flex flex-col">
-          {/* Category */}
-          {course.category && (
-            <p className="text-xs text-blue-600 font-medium mb-2">
-              {course.category.name}
-            </p>
-          )}
-
           {/* Title */}
           <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
             {course.title}

@@ -37,25 +37,15 @@ export const COURSE_DETAIL_FRAGMENT = gql`
 export const GET_COURSES = gql`
   query GetCourses($filters: CourseFiltersInput) {
     courses(filters: $filters) {
-      data {
-        ...CourseBasic
-        category {
-          id
-          name
-          slug
-        }
-        instructor {
-          id
-          username
-          firstName
-          lastName
-          avatar
-        }
+      ...CourseBasic
+      categoryId
+      instructor {
+        id
+        username
+        firstName
+        lastName
+        avatar
       }
-      total
-      page
-      limit
-      totalPages
     }
   }
   ${COURSE_BASIC_FRAGMENT}
@@ -65,12 +55,7 @@ export const GET_COURSE_BY_SLUG = gql`
   query GetCourseBySlug($slug: String!) {
     courseBySlug(slug: $slug) {
       ...CourseDetail
-      category {
-        id
-        name
-        slug
-        icon
-      }
+      categoryId
       instructor {
         id
         username
@@ -101,16 +86,7 @@ export const GET_MY_COURSES = gql`
   query GetMyCourses {
     myCourses {
       ...CourseBasic
-      category {
-        id
-        name
-        slug
-      }
-      _count {
-        enrollments
-        modules
-        reviews
-      }
+      categoryId
     }
   }
   ${COURSE_BASIC_FRAGMENT}
@@ -145,9 +121,6 @@ export const GET_COURSE_CATEGORIES = gql`
       description
       icon
       parentId
-      _count {
-        courses
-      }
     }
   }
 `;
@@ -164,12 +137,6 @@ export const GET_COURSE_CATEGORY_TREE = gql`
         name
         slug
         icon
-        _count {
-          courses
-        }
-      }
-      _count {
-        courses
       }
     }
   }

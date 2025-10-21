@@ -31,6 +31,12 @@ export default function CoursesPage() {
   const categories = categoriesData?.courseCategories || [];
 
   const levels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'];
+  const levelLabels: Record<string, string> = {
+    'BEGINNER': 'Cơ bản',
+    'INTERMEDIATE': 'Trung cấp',
+    'ADVANCED': 'Nâng cao',
+    'EXPERT': 'Chuyên gia'
+  };
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -46,10 +52,10 @@ export default function CoursesPage() {
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Explore Our Courses
+            Khám phá Khóa học
           </h1>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl">
-            Learn new skills, advance your career, and achieve your goals with expert-led courses
+            Học kỹ năng mới, thăng tiến sự nghiệp và đạt được mục tiêu với các khóa học chuyên nghiệp
           </p>
 
           {/* Search Bar */}
@@ -57,7 +63,7 @@ export default function CoursesPage() {
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search courses..."
+              placeholder="Tìm kiếm khóa học..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-4 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -78,11 +84,11 @@ export default function CoursesPage() {
             >
               <span className="font-medium flex items-center gap-2">
                 <Filter className="w-5 h-5" />
-                Filters
+                Bộ lọc
               </span>
               {hasActiveFilters && (
                 <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                  Active
+                  Đang lọc
                 </span>
               )}
             </button>
@@ -95,13 +101,13 @@ export default function CoursesPage() {
                   className="w-full flex items-center justify-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   <X className="w-4 h-4" />
-                  Clear all filters
+                  Xóa tất cả bộ lọc
                 </button>
               )}
 
               {/* Category Filter */}
               <div className="bg-white p-4 rounded-lg shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">Category</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">Danh mục</h3>
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -111,7 +117,7 @@ export default function CoursesPage() {
                       onChange={() => setSelectedCategory(null)}
                       className="text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700">All Categories</span>
+                    <span className="text-sm text-gray-700">Tất cả danh mục</span>
                   </label>
                   {categories.map((category: any) => (
                     <label key={category.id} className="flex items-center gap-2 cursor-pointer">
@@ -130,7 +136,7 @@ export default function CoursesPage() {
 
               {/* Level Filter */}
               <div className="bg-white p-4 rounded-lg shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">Level</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">Cấp độ</h3>
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -140,7 +146,7 @@ export default function CoursesPage() {
                       onChange={() => setSelectedLevel(null)}
                       className="text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700">All Levels</span>
+                    <span className="text-sm text-gray-700">Tất cả cấp độ</span>
                   </label>
                   {levels.map((level) => (
                     <label key={level} className="flex items-center gap-2 cursor-pointer">
@@ -151,8 +157,8 @@ export default function CoursesPage() {
                         onChange={() => setSelectedLevel(level)}
                         className="text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-sm text-gray-700 capitalize">
-                        {level.toLowerCase()}
+                      <span className="text-sm text-gray-700">
+                        {levelLabels[level]}
                       </span>
                     </label>
                   ))}
@@ -166,11 +172,11 @@ export default function CoursesPage() {
             {/* Results Header */}
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {loading ? 'Loading...' : `${courses.length} courses`}
+                {loading ? 'Đang tải...' : `${courses.length} khóa học`}
               </h2>
               {hasActiveFilters && (
                 <p className="text-gray-600 mt-1">
-                  Showing filtered results
+                  Hiển thị kết quả đã lọc
                 </p>
               )}
             </div>
@@ -178,7 +184,7 @@ export default function CoursesPage() {
             {/* Error State */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <p className="text-red-800">Failed to load courses. Please try again.</p>
+                <p className="text-red-800">Không thể tải khóa học. Vui lòng thử lại.</p>
               </div>
             )}
 
@@ -186,7 +192,7 @@ export default function CoursesPage() {
             <CourseList 
               courses={courses} 
               loading={loading}
-              emptyMessage={hasActiveFilters ? 'No courses match your filters' : 'No courses available'}
+              emptyMessage={hasActiveFilters ? 'Không có khóa học phù hợp với bộ lọc' : 'Chưa có khóa học nào'}
             />
           </main>
         </div>

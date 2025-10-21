@@ -26,17 +26,13 @@ export const GET_MY_ENROLLMENTS = gql`
         thumbnail
         level
         duration
+        categoryId
         instructor {
           id
           username
           firstName
           lastName
           avatar
-        }
-        category {
-          id
-          name
-          slug
         }
       }
     }

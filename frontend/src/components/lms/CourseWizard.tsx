@@ -98,7 +98,7 @@ export default function CourseWizard({ existingCourse }: CourseWizardProps) {
               handleStepComplete(data);
               handleNext();
             }}
-            onBack={() => router.push('/instructor/courses')}
+            onBack={() => router.push('/lms/instructor/courses')}
           />
         );
       case 2:
