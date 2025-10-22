@@ -1,13 +1,12 @@
 /**
  * Custom hooks for Menu operations using Universal Dynamic Query System
- * FIXED VERSION - Using direct Apollo imports to avoid circular dependencies
  */
 
 'use client';
 
 import { useCallback, useMemo } from 'react';
-import { useQuery, useMutation, ApolloError } from '@apollo/client';
-import { DYNAMIC_FIND_MANY, DYNAMIC_CREATE, DYNAMIC_UPDATE, DYNAMIC_DELETE } from '../graphql/universal-dynamic-queries';
+import { useQuery } from '@apollo/client';
+import { DYNAMIC_FIND_MANY } from '../graphql/universal-dynamic-queries';
 import {
   buildMenuFindManyInput,
   buildMenuFindUniqueInput,
@@ -46,15 +45,13 @@ export function useMenus(params?: {
   const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
     variables: { input },
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
   });
 
   const menus = useMemo(() => {
     try {
       const result = data?.dynamicFindMany?.data;
       return Array.isArray(result) ? result : [];
-    } catch (err) {
-      console.warn('Error extracting menus data:', err);
+    } catch {
       return [];
     }
   }, [data]);
@@ -69,6 +66,7 @@ export function useMenus(params?: {
 
 /**
  * Hook to get user's accessible menus based on roles/permissions
+ * Note: Backend needs to implement permission filtering in myMenus resolver
  */
 export function useMyMenus(type?: string) {
   const where = type ? getMenusByTypeWhere(type) : getActiveMenusWhere();
@@ -82,15 +80,13 @@ export function useMyMenus(type?: string) {
   const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
     variables: { input },
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
   });
 
   const menus = useMemo(() => {
     try {
       const result = data?.dynamicFindMany?.data;
       return Array.isArray(result) ? result : [];
-    } catch (err) {
-      console.warn('Error extracting menus data:', err);
+    } catch {
       return [];
     }
   }, [data]);
@@ -117,48 +113,42 @@ export function useAdminMenus() {
   const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
     variables: { input },
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
   });
   
   const transformMenu = useCallback((menu: MenuTreeNode): any => {
     if (!menu) return null;
 
-    try {
-      // Determine href priority: externalUrl > route > url > path > /slug
-      const href = menu.externalUrl || menu.route || menu.url || menu.path || `/${menu.slug}`;
-      const isExternal = !!menu.externalUrl;
-      
-      return {
-        name: menu.title,
-        href: href,
-        icon: menu.icon || undefined,
-        children: menu.children?.map(transformMenu).filter(Boolean) || undefined,
-        badge: menu.badge || undefined,
-        badgeColor: menu.badgeColor || undefined,
-        target: menu.target || 'SELF',
-        metadata: {
-          id: menu.id,
-          type: menu.type,
-          order: menu.order,
-          level: menu.level,
-          isProtected: menu.isProtected,
-          isActive: menu.isActive,
-          isVisible: menu.isVisible,
-          isPublic: menu.isPublic,
-          slug: menu.slug,
-          description: menu.description,
-          iconType: menu.iconType,
-          cssClass: menu.cssClass,
-          customData: menu.customData,
-          externalUrl: menu.externalUrl,
-          isExternal: isExternal,
-          ...menu.metadata,
-        },
-      };
-    } catch (err) {
-      console.warn('Error transforming menu:', err, menu);
-      return null;
-    }
+    // Determine href priority: externalUrl > route > url > path > /slug
+    // If externalUrl exists, use it; otherwise fall back to internal routes
+    const href = menu.externalUrl || menu.route || menu.url || menu.path || `/${menu.slug}`;
+    const isExternal = !!menu.externalUrl;
+    return {
+      name: menu.title,
+      href: href,
+      icon: menu.icon || undefined, // Icon string (e.g., "LayoutDashboard")
+      children: menu.children?.map(transformMenu).filter(Boolean) || undefined,
+      badge: menu.badge || undefined,
+      badgeColor: menu.badgeColor || undefined,
+      target: menu.target || 'SELF',
+      metadata: {
+        id: menu.id,
+        type: menu.type,
+        order: menu.order,
+        level: menu.level,
+        isProtected: menu.isProtected,
+        isActive: menu.isActive,
+        isVisible: menu.isVisible,
+        isPublic: menu.isPublic,
+        slug: menu.slug,
+        description: menu.description,
+        iconType: menu.iconType,
+        cssClass: menu.cssClass,
+        customData: menu.customData,
+        externalUrl: menu.externalUrl,
+        isExternal: isExternal,
+        ...menu.metadata, // Merge any additional metadata from database
+      },
+    };
   }, []);
 
   const menus = useMemo(() => {
@@ -169,7 +159,7 @@ export function useAdminMenus() {
       // Build tree from flat array
       const tree = buildMenuTree(result);
       
-      // Transform to sidebar format
+      // Transform to sidebar format (NavigationItem[])
       return tree.map(transformMenu).filter(Boolean);
     } catch (err) {
       console.error('Error transforming menus:', err);
@@ -198,21 +188,14 @@ export function usePublicSidebarMenus() {
     orderBy: { order: 'asc', level: 'asc' },
   });
 
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input },
+  const { data, loading, error, refetch } = useDynamicFindMany<Menu>(input, {
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
   });
 
   const menus = useMemo(() => {
-    try {
-      const result = data?.dynamicFindMany?.data as Menu[] | undefined;
-      if (!result || !Array.isArray(result)) return [];
-      return buildMenuTree(result);
-    } catch (err) {
-      console.warn('Error building menu tree:', err);
-      return [];
-    }
+    const result = data?.dynamicFindMany?.data as Menu[] | undefined;
+    if (!result || !Array.isArray(result)) return [];
+    return buildMenuTree(result);
   }, [data]);
   
   return {
@@ -237,21 +220,14 @@ export function useMenuTree(type?: string, parentId?: string) {
     orderBy: { order: 'asc', level: 'asc' },
   });
 
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input },
+  const { data, loading, error, refetch } = useDynamicFindMany<Menu>(input, {
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
   });
 
   const tree = useMemo(() => {
-    try {
-      const result = data?.dynamicFindMany?.data as Menu[] | undefined;
-      if (!result || !Array.isArray(result)) return [];
-      return buildMenuTree(result);
-    } catch (err) {
-      console.warn('Error building menu tree:', err);
-      return [];
-    }
+    const result = data?.dynamicFindMany?.data as Menu[] | undefined;
+    if (!result || !Array.isArray(result)) return [];
+    return buildMenuTree(result);
   }, [data]);
 
   return {
@@ -271,14 +247,12 @@ export function useMenu(id: string) {
     select: DEFAULT_MENU_SELECT,
   });
 
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input: { ...input, pagination: { limit: 1 } } },
+  const { data, loading, error, refetch } = useDynamicFindUnique<Menu>(input, {
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
   });
 
   return {
-    menu: data?.dynamicFindMany?.data?.[0],
+    menu: data?.dynamicFindUnique,
     loading,
     error,
     refetch,
@@ -294,14 +268,12 @@ export function useMenuBySlug(slug: string) {
     select: DEFAULT_MENU_SELECT,
   });
 
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input: { ...input, pagination: { limit: 1 } } },
+  const { data, loading, error, refetch } = useDynamicFindUnique<Menu>(input, {
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
   });
 
   return {
-    menu: data?.dynamicFindMany?.data?.[0],
+    menu: data?.dynamicFindUnique,
     loading,
     error,
     refetch,
@@ -314,14 +286,12 @@ export function useMenuBySlug(slug: string) {
 export function useMenuCount(where?: any) {
   const input = buildMenuCountInput(where);
 
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input: { model: 'menu', where } },
+  const { data, loading, error, refetch } = useDynamicCount(input, {
     fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
   });
 
   return {
-    count: data?.dynamicFindMany?.data?.length || 0,
+    count: data?.dynamicCount?.data || 0,
     loading,
     error,
     refetch,
@@ -334,19 +304,12 @@ export function useMenuCount(where?: any) {
  * Hook to create menu
  */
 export function useCreateMenu() {
-  const [mutate, { data, loading, error }] = useMutation(DYNAMIC_CREATE, {
-    errorPolicy: 'all',
-  });
+  const [mutate, { data, loading, error }] = useDynamicCreate();
 
   const createMenu = useCallback(
     async (menuData: Partial<Menu>) => {
-      try {
-        const input = buildMenuCreateInput(menuData);
-        return await mutate({ variables: { input } });
-      } catch (err) {
-        console.error('Error creating menu:', err);
-        throw err;
-      }
+      const input = buildMenuCreateInput(menuData);
+      return mutate({ variables: { input } });
     },
     [mutate]
   );
@@ -363,19 +326,12 @@ export function useCreateMenu() {
  * Hook to update menu
  */
 export function useUpdateMenu() {
-  const [mutate, { data, loading, error }] = useMutation(DYNAMIC_UPDATE, {
-    errorPolicy: 'all',
-  });
+  const [mutate, { data, loading, error }] = useDynamicUpdate();
 
   const updateMenu = useCallback(
     async (id: string, menuData: Partial<Menu>) => {
-      try {
-        const input = buildMenuUpdateInput({ id }, menuData);
-        return await mutate({ variables: { input } });
-      } catch (err) {
-        console.error('Error updating menu:', err);
-        throw err;
-      }
+      const input = buildMenuUpdateInput({ id }, menuData);
+      return mutate({ variables: { input } });
     },
     [mutate]
   );
@@ -392,19 +348,12 @@ export function useUpdateMenu() {
  * Hook to delete menu
  */
 export function useDeleteMenu() {
-  const [mutate, { data, loading, error }] = useMutation(DYNAMIC_DELETE, {
-    errorPolicy: 'all',
-  });
+  const [mutate, { data, loading, error }] = useDynamicDelete();
 
   const deleteMenu = useCallback(
     async (id: string) => {
-      try {
-        const input = buildMenuDeleteInput({ id });
-        return await mutate({ variables: { input } });
-      } catch (err) {
-        console.error('Error deleting menu:', err);
-        throw err;
-      }
+      const input = buildMenuDeleteInput({ id });
+      return mutate({ variables: { input } });
     },
     [mutate]
   );
