@@ -87,15 +87,23 @@ function DndContextWrapper({ children }: { children: ReactNode }) {
     >
       {children}
       
-      {/* Drag Overlay */}
-      <DragOverlay>
+      {/* Drag Overlay - Visual feedback during drag */}
+      <DragOverlay dropAnimation={null}>
         {draggedBlock ? (
-          <Card className="p-4 bg-white shadow-lg border-2 border-blue-500 opacity-80">
-            <div className="flex items-center gap-2">
-              <GripVertical className="w-4 h-4 text-gray-400" />
-              <span className="text-sm font-medium">{draggedBlock.type}</span>
-            </div>
-          </Card>
+          <div className="animate-pulse">
+            <Card className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 shadow-2xl border-2 border-blue-300 text-white min-w-xs">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <GripVertical className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <span className="text-sm font-bold block">Moving Block</span>
+                  <span className="text-xs opacity-90">{draggedBlock.type}</span>
+                </div>
+                <div className="ml-auto text-2xl">📦</div>
+              </div>
+            </Card>
+          </div>
         ) : null}
       </DragOverlay>
     </DndContext>

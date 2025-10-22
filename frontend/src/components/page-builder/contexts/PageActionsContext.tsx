@@ -434,8 +434,22 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   const handleDragStart = useCallback((event: any) => {
     const { active } = event;
     
+    // Debug: Log the entire active object structure
+    console.log('[PageBuilder] handleDragStart full active object:', active);
+    console.log('[PageBuilder] handleDragStart active.data:', active.data);
+    
+    const dragType = active.data?.type;
+    const blockType = active.data?.blockType;
+    
+    console.log('[PageBuilder] Drag started:', {
+      activeId: active.id,
+      activeType: dragType,
+      activeBlockType: blockType,
+      fullData: active.data,
+    });
+    
     // Handle existing block drag
-    if (active.data?.type !== 'new-block') {
+    if (dragType !== 'new-block') {
       const draggedBlock = pageState.blocks.find(b => b.id === active.id);
       if (draggedBlock) {
         pageState.setDraggedBlock(draggedBlock);
@@ -447,28 +461,76 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   const handleDragEnd = useCallback(async (event: any) => {
     const { active, over } = event;
     
+    // Debug: Log full event structure
+    console.log('[PageBuilder] handleDragEnd full event:', event);
+    console.log('[PageBuilder] handleDragEnd active:', active);
+    console.log('[PageBuilder] handleDragEnd over:', over);
+    
+    const dragType = active.data?.type;
+    const blockType = active.data?.blockType;
+    
+    console.log('[PageBuilder] Drag ended:', {
+      activeId: active.id,
+      activeType: dragType,
+      activeBlockType: blockType,
+      overId: over?.id,
+      overType: over?.data?.type,
+    });
+    
     pageState.setDraggedBlock(null);
     
-    if (!over) return;
+    if (!over) {
+      console.warn('[PageBuilder] No drop target');
+      return;
+    }
     
     // Handle new block from LeftPanel
-    if (active.data?.type === 'new-block') {
-      const blockType = active.data?.blockType;
-      // Only accept drop on canvas-droppable, not within ElementsLibrary
-      if (blockType && over.id === 'canvas-droppable') {
-        await handleAddBlock(blockType);
+    // Check if the draggable ID starts with 'element-' which indicates a library element
+    const isLibraryElement = active.id?.toString().startsWith('element-');
+    
+    if (isLibraryElement || dragType === 'new-block') {
+      // Extract BlockType from active.id if data is missing
+      // Format: 'element-TEXT', 'element-CAROUSEL', etc.
+      let blockTypeValue = blockType;
+      
+      if (!blockTypeValue && isLibraryElement) {
+        const typeStr = active.id.replace('element-', '');
+        // Try to find the BlockType enum value by name
+        blockTypeValue = (BlockType as any)[typeStr];
+        console.log('[PageBuilder] Extracted BlockType from ID:', { typeStr, blockTypeValue });
+      }
+      
+      console.log('[PageBuilder] New block detected:', { blockTypeValue, targetId: over.id, dragType, isLibraryElement });
+      
+      // Only accept drop on canvas-droppable
+      if (blockTypeValue !== undefined && over.id === 'canvas-droppable') {
+        console.log('[PageBuilder] Adding new block:', blockTypeValue);
+        await handleAddBlock(blockTypeValue);
+      } else {
+        console.warn('[PageBuilder] New block rejected:', { 
+          reason: over.id !== 'canvas-droppable' ? 'wrong-target' : 'no-blocktype',
+          targetId: over.id,
+          blockTypeValue,
+          isDefined: blockTypeValue !== undefined,
+        });
       }
       return;
     }
     
     // Handle existing block reorder
-    if (active.id === over.id) return;
+    if (active.id === over.id) {
+      console.log('[PageBuilder] Same block, no reorder');
+      return;
+    }
     
     const { blocks } = pageState;
     const oldIndex = blocks.findIndex(b => b.id === active.id);
     const newIndex = blocks.findIndex(b => b.id === over.id);
     
-    if (oldIndex === -1 || newIndex === -1) return;
+    if (oldIndex === -1 || newIndex === -1) {
+      console.warn('[PageBuilder] Invalid block indices:', { oldIndex, newIndex });
+      return;
+    }
     
     const newBlocks = [...blocks];
     const [movedBlock] = newBlocks.splice(oldIndex, 1);

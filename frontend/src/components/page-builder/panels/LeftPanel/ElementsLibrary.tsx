@@ -70,8 +70,8 @@ function DraggableElement({ element }: { element: ElementConfig }) {
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        opacity: isDragging ? 0.5 : 1,
-        zIndex: 1000, // Ensure drag preview stays on top
+        opacity: isDragging ? 0.7 : 1,
+        zIndex: 1000,
       }
     : undefined;
 
@@ -83,12 +83,29 @@ function DraggableElement({ element }: { element: ElementConfig }) {
       {...listeners}
       {...attributes}
       style={style}
-      className="group flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 hover:border-primary hover:shadow-sm cursor-grab active:cursor-grabbing transition-all duration-200"
+      className={`group flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border-2 transition-all duration-200 ${
+        isDragging
+          ? 'bg-blue-100 border-blue-500 shadow-lg shadow-blue-300 scale-105'
+          : 'border-gray-200 bg-white hover:bg-blue-50 hover:border-blue-400 hover:shadow-md'
+      } cursor-grab active:cursor-grabbing`}
     >
-      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded flex items-center justify-center bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors flex-shrink-0">
+      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded flex items-center justify-center transition-all ${
+        isDragging
+          ? 'bg-blue-500 text-white scale-110'
+          : 'bg-primary/10 text-primary group-hover:bg-blue-400 group-hover:text-white'
+      } flex-shrink-0`}>
         <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </div>
-      <span className="text-xs sm:text-sm font-medium truncate">{element.label}</span>
+      <span className={`text-xs sm:text-sm font-medium truncate transition-colors ${
+        isDragging ? 'text-blue-700 font-bold' : 'text-gray-700'
+      }`}>
+        {element.label}
+      </span>
+      {isDragging && (
+        <span className="ml-auto text-xs bg-blue-500 text-white px-2 py-0.5 rounded font-semibold">
+          Dragging ✨
+        </span>
+      )}
     </div>
   );
 }
