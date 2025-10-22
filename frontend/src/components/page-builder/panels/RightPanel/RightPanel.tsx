@@ -7,7 +7,7 @@ import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Textarea } from '../../../ui/textarea';
 import { X, Paintbrush, Settings, Trash2, Copy, Eye, EyeOff, Lock, Unlock, FileText } from 'lucide-react';
-import { usePageBuilderContext } from '../../PageBuilderProvider';
+import { usePageState, usePageActions } from '../../PageBuilderProvider';
 import { StylePanel } from '../StylePanel';
 import { DevLogPanel } from '../DevLogPanel';
 
@@ -21,14 +21,9 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   
-  // Get selected block and operations from context
-  const {
-    selectedBlockId,
-    selectedBlock,
-    handleUpdateBlockStyle,
-    handleBlockUpdate,
-    handleBlockDelete
-  } = usePageBuilderContext();
+  // Get selected block and operations from individual hooks
+  const { selectedBlockId, selectedBlock } = usePageState();
+  const { handleUpdateBlockStyle, handleBlockUpdate, handleBlockDelete } = usePageActions();
 
   // Simplified style update handler
   const handleStyleChange = (styles: Record<string, any>) => {

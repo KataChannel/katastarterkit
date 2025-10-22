@@ -1,23 +1,8 @@
 import React, { useContext } from 'react';
 import { PageBlock, BlockType } from '@/types/page-builder';
 import { PageBuilderContext } from '../PageBuilderProvider';
-import { TextBlock } from './TextBlock';
-import { ImageBlock } from './ImageBlock';
-import { HeroBlock } from './HeroBlock';
-import { ButtonBlock } from './ButtonBlock';
-import { DividerBlock } from './DividerBlock';
-import { SpacerBlock } from './SpacerBlock';
-import { TeamBlock } from './TeamBlock';
-import { StatsBlock } from './StatsBlock';
-import { ContactInfoBlock } from './ContactInfoBlock';
-import { ContainerBlock } from './ContainerBlock';
-import { SectionBlock } from './SectionBlock';
-import { GridBlock } from './GridBlock';
-import { FlexBlock } from './FlexBlock';
-import { DynamicBlock } from './DynamicBlock';
-import CarouselBlock from './CarouselBlock';
-import { ProductListBlock } from './ProductListBlock';
-import { ProductDetailBlock } from './ProductDetailBlock';
+import { BlockLoader } from './BlockLoader';
+import BlockErrorBoundary from '../BlockErrorBoundary';
 
 export interface BlockRendererProps {
   block: PageBlock;
@@ -109,70 +94,30 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     children: isContainerBlock ? renderChildren() : undefined,
   };
 
-  // Render block based on type
-  let blockContent;
-  switch (block.type) {
-    case BlockType.TEXT:
-      blockContent = <TextBlock {...commonProps} />;
-      break;
-    case BlockType.IMAGE:
-      blockContent = <ImageBlock {...commonProps} />;
-      break;
-    case BlockType.CAROUSEL:
-      blockContent = <CarouselBlock {...commonProps} />;
-      break;
-    case BlockType.HERO:
-      blockContent = <HeroBlock {...commonProps} />;
-      break;
-    case BlockType.BUTTON:
-      blockContent = <ButtonBlock {...commonProps} />;
-      break;
-    case BlockType.DIVIDER:
-      blockContent = <DividerBlock {...commonProps} />;
-      break;
-    case BlockType.SPACER:
-      blockContent = <SpacerBlock {...commonProps} />;
-      break;
-    case BlockType.TEAM:
-      blockContent = <TeamBlock {...commonProps} />;
-      break;
-    case BlockType.STATS:
-      blockContent = <StatsBlock {...commonProps} />;
-      break;
-    case BlockType.CONTACT_INFO:
-      blockContent = <ContactInfoBlock {...commonProps} />;
-      break;
-    case BlockType.CONTAINER:
-      blockContent = <ContainerBlock {...containerProps} />;
-      break;
-    case BlockType.SECTION:
-      blockContent = <SectionBlock {...containerProps} />;
-      break;
-    case BlockType.GRID:
-      blockContent = <GridBlock {...containerProps} />;
-      break;
-    case BlockType.FLEX_ROW:
-      blockContent = <FlexBlock {...containerProps} />;
-      break;
-    case BlockType.FLEX_COLUMN:
-      blockContent = <FlexBlock {...containerProps} />;
-      break;
-    case BlockType.DYNAMIC:
-      blockContent = <DynamicBlock {...commonProps} />;
-      break;
-    case BlockType.PRODUCT_LIST:
-      blockContent = <ProductListBlock {...commonProps} />;
-      break;
-    case BlockType.PRODUCT_DETAIL:
-      blockContent = <ProductDetailBlock {...commonProps} />;
-      break;
-    default:
-      blockContent = (
-        <div className="p-4 border border-red-300 bg-red-50 text-red-600 rounded">
-          Unknown block type: {block.type}
-        </div>
-      );
-  }
+  // Render block based on type using lazy loading
+  const renderBlockContent = () => {
+    // Use BlockLoader for all blocks (handles lazy loading and error boundaries)
+    const isContainerType = [
+      BlockType.CONTAINER,
+      BlockType.SECTION,
+      BlockType.GRID,
+      BlockType.FLEX_ROW,
+      BlockType.FLEX_COLUMN,
+    ].includes(block.type);
+
+    const props = isContainerType ? containerProps : commonProps;
+
+    return (
+      <BlockLoader
+        blockType={block.type}
+        blockId={block.id}
+        props={props}
+        skeletonHeight="200px"
+      />
+    );
+  };
+
+  let blockContent = renderBlockContent();
 
   // Wrap in clickable div for selection (only in edit mode)
   if (isEditing && onSelect) {

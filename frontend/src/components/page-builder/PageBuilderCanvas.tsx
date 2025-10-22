@@ -8,7 +8,7 @@ import {
 } from '@dnd-kit/sortable';
 import { Layout } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { usePageBuilderContext } from './PageBuilderProvider';
+import { usePageState, useUIState, usePageActions } from './PageBuilderProvider';
 import { BlockRenderer } from './blocks/BlockRenderer';
 import { SortableBlockWrapper } from './blocks/SortableBlockWrapper';
 
@@ -33,19 +33,11 @@ import { SortableBlockWrapper } from './blocks/SortableBlockWrapper';
  * - useMemo for block IDs array
  * - useCallback for update handlers
  */
-function PageBuilderCanvasComponent() {
-  const {
-    // State
-    blocks,
-    draggedBlock,
-    showPreview,
-    
-    // Block actions
-    handleBlockUpdate,
-    handleBlockDelete,
-    handleAddChild,
-    handleSelectBlock,
-  } = usePageBuilderContext();
+const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponent() {
+  // Use individual hooks for better performance
+  const { blocks, draggedBlock } = usePageState();
+  const { showPreview } = useUIState();
+  const { handleBlockUpdate, handleBlockDelete, handleAddChild, handleSelectBlock } = usePageActions();
 
   // Memoize block IDs array to prevent SortableContext re-renders
   const blockIds = useMemo(() => blocks.map(b => b.id), [blocks]);
@@ -53,9 +45,12 @@ function PageBuilderCanvasComponent() {
   // Memoize empty state check
   const hasBlocks = useMemo(() => blocks.length > 0, [blocks.length]);
 
-  // Droppable zone for empty canvas
+  // Droppable zone for canvas - accepts both existing blocks and new blocks from LeftPanel
   const { setNodeRef } = useDroppable({
     id: 'canvas-droppable',
+    data: {
+      accepts: ['existing-block', 'new-block'],
+    },
   });
 
   return (
@@ -114,8 +109,8 @@ function PageBuilderCanvasComponent() {
       </div>
     </div>
   );
-}
+});
 
 // Export with React.memo to prevent unnecessary re-renders
 // Only re-renders when blocks, draggedBlock, or showPreview change
-export const PageBuilderCanvas = React.memo(PageBuilderCanvasComponent);
+export const PageBuilderCanvas = PageBuilderCanvasComponent;

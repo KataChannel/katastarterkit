@@ -27,7 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { usePageBuilderContext } from '@/components/page-builder/PageBuilderProvider';
+import { usePageState, usePageActions } from '@/components/page-builder/PageBuilderProvider';
 
 interface SavedBlock {
   id: string;
@@ -48,10 +48,8 @@ export function SavedBlocksLibrary() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const {
-    blocks,
-    handleAddBlock,
-  } = usePageBuilderContext();
+  const { blocks } = usePageState();
+  const { handleAddBlock } = usePageActions();
 
   // Load saved blocks from localStorage
   useEffect(() => {

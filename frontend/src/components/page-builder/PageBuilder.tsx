@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { TemplatePreviewModal } from '@/components/page-builder/TemplatePreviewModal';
 import { SaveTemplateDialog } from '@/components/page-builder/SaveTemplateDialog';
-import { PageBuilderProvider, usePageBuilderContext } from './PageBuilderProvider';
+import { PageBuilderProvider, useUIState, useTemplate, usePageState, usePageActions } from './PageBuilderProvider';
 import { PageBuilderHeader } from './PageBuilderHeader';
 import { PageBuilderSidebar } from './PageBuilderSidebar';
 import { PageBuilderCanvas } from './PageBuilderCanvas';
@@ -52,29 +52,20 @@ const BLOCK_TYPES = [
  * - Modals (template preview, save template, add child)
  */
 function PageBuilderInternal() {
-  const {
-    // Modal state
-    showPreviewModal,
-    showSaveTemplateDialog,
-    showAddChildDialog,
-    addChildParentId,
-    
-    // Template state
-    selectedTemplate,
-    isApplyingTemplate,
+  // Use individual hooks for better performance
+  const { showAddChildDialog, addChildParentId } = useUIState();
+  const { 
+    showPreviewModal, 
+    selectedTemplate, 
+    isApplyingTemplate, 
     isSavingTemplate,
-    
-    // Block state
-    blocks,
-    
-    // Actions
-    handleApplyTemplate,
+    showSaveTemplateDialog,
     handleSaveAsTemplate,
-    handleAddChildBlock,
     handleClosePreview,
-    handleCloseAddChildDialog,
-    setShowSaveTemplateDialog,
-  } = usePageBuilderContext();
+    setShowSaveTemplateDialog
+  } = useTemplate();
+  const { blocks } = usePageState();
+  const { handleApplyTemplate, handleAddChildBlock, handleCloseAddChildDialog } = usePageActions();
 
   return (
     <div className="h-full flex flex-col bg-gray-50">

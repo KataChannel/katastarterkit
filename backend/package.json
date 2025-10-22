@@ -33,6 +33,8 @@
     "reseed:demo": "npm run cleanup:demo && npm run seed:demo",
     "db:backup": "bun run prisma/backup.ts",
     "db:restore": "bun run prisma/restore.ts",
+    "db:restore-optimized": "bun run prisma/restore-optimized.ts",
+    "db:restore-benchmark": "bash prisma/benchmark-restore.sh",
     "prisma:seed": "bun run prisma/seed.ts",
     "seed:comprehensive": "bun run src/scripts/run-comprehensive-seeder.ts",
     "orama:reindex": "bun scripts/orama-reindex.ts"

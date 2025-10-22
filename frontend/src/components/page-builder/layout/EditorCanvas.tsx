@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
-import { usePageBuilderContext } from '../PageBuilderProvider';
+import { Card } from '@/components/ui/card';
+import { PageBlock } from '@/types/page-builder';
+import { usePageState } from '../PageBuilderProvider';
 import { PageBuilderCanvas } from '../PageBuilderCanvas';
 
 interface EditorCanvasProps {
@@ -23,7 +25,7 @@ export function EditorCanvas({
   selectedBlockId,
   onSelectBlock,
 }: EditorCanvasProps) {
-  const { blocks } = usePageBuilderContext();
+  const { blocks } = usePageState();
 
   if (editorMode === 'code') {
     return (

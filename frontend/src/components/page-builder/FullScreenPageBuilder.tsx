@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { FullScreenLayout } from './layout/FullScreenLayout';
-import { PageBuilderProvider, usePageBuilderContext } from './PageBuilderProvider';
+import { PageBuilderProvider, usePageActions } from './PageBuilderProvider';
 import type { PageBlock } from '@/types/page-builder';
 
 interface FullScreenPageBuilderProps {
@@ -25,7 +25,7 @@ function FullScreenPageBuilderInternal({
 }) {
   const router = useRouter();
   const [editorMode, setEditorMode] = useState<'visual' | 'code'>(initialMode);
-  const { handlePageSave } = usePageBuilderContext();
+  const { handlePageSave } = usePageActions();
 
   const handleExit = useCallback(() => {
     if (onExit) {

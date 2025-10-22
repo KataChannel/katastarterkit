@@ -6,7 +6,7 @@ import { EditorCanvas } from './EditorCanvas';
 import { EditorFooter } from './EditorFooter';
 import { LeftPanel } from '../panels/LeftPanel/LeftPanel';
 import { RightPanel } from '../panels/RightPanel/RightPanel';
-import { usePageBuilderContext } from '../PageBuilderProvider';
+import { usePageState, usePageActions } from '../PageBuilderProvider';
 
 interface FullScreenLayoutProps {
   editorMode: 'visual' | 'code';
@@ -26,7 +26,8 @@ export function FullScreenLayout({
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
   
   // Get block selection from context
-  const { handleSelectBlock, selectedBlockId } = usePageBuilderContext();
+  const { selectedBlockId } = usePageState();
+  const { handleSelectBlock } = usePageActions();
 
   return (
     <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">

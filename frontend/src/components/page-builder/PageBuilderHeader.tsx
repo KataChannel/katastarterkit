@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Save, Eye, Settings } from 'lucide-react';
-import { usePageBuilderContext } from './PageBuilderProvider';
+import { usePageState, useUIState, useTemplate, usePageActions } from './PageBuilderProvider';
 import { PageStatus } from '@/types/page-builder';
 import PageSettingsForm from './PageSettingsForm';
 
@@ -23,19 +23,14 @@ import PageSettingsForm from './PageSettingsForm';
  * - useCallback for event handlers to stabilize references
  * - useMemo for computed values to prevent recalculations
  */
-function PageBuilderHeaderComponent() {
-  const {
-    editingPage,
-    isNewPageMode,
-    blocks,
-    showPreview,
-    showPageSettings,
-    setShowPreview,
-    setShowPageSettings,
-    setShowSaveTemplateDialog,
-    handlePageSave,
-    setEditingPage,
-  } = usePageBuilderContext();
+const PageBuilderHeaderComponent = React.memo(function PageBuilderHeaderComponent() {
+  // Use individual hooks for better tree-shaking and performance
+  const { editingPage, blocks, page, setEditingPage } = usePageState();
+  const { showPreview, showPageSettings, setShowPreview, setShowPageSettings } = useUIState();
+  const { setShowSaveTemplateDialog } = useTemplate();
+  const { handlePageSave } = usePageActions();
+  
+  const isNewPageMode = !page?.id;
 
   // Memoize computed values to prevent unnecessary recalculations
   const hasBlocks = useMemo(() => blocks.length > 0, [blocks.length]);
@@ -150,7 +145,9 @@ function PageBuilderHeaderComponent() {
       </div>
     </div>
   );
-}
+});
 
-// Export with React.memo to prevent unnecessary re-renders
-export const PageBuilderHeader = React.memo(PageBuilderHeaderComponent);
+/**
+ * Export the memoized component for better performance
+ */
+export const PageBuilderHeader = PageBuilderHeaderComponent;

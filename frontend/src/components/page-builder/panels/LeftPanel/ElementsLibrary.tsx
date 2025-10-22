@@ -9,7 +9,6 @@ import {
   Heading,
   Image,
   MousePointer,
-  Star,
   Minus,
   Square,
   Columns,
@@ -18,16 +17,8 @@ import {
   Grid3x3,
   Images,
   Video,
-  FormInput,
-  Quote,
   Users,
   BarChart,
-  ChevronDown,
-  Clock,
-  TrendingUp,
-  GitBranch,
-  DollarSign,
-  MapPin,
   Search,
   ShoppingCart,
   Package,
@@ -58,15 +49,9 @@ const elements: ElementConfig[] = [
 
   // Content Elements
   { id: BlockType.CAROUSEL, icon: Images, label: 'Carousel', category: 'content' },
-  { id: BlockType.GALLERY, icon: Image, label: 'Gallery', category: 'content' },
   { id: BlockType.VIDEO, icon: Video, label: 'Video', category: 'content' },
-  { id: BlockType.CONTACT_FORM, icon: FormInput, label: 'Form', category: 'content' },
-  { id: BlockType.TESTIMONIAL, icon: Quote, label: 'Testimonial', category: 'content' },
   { id: BlockType.TEAM, icon: Users, label: 'Team', category: 'content' },
   { id: BlockType.STATS, icon: BarChart, label: 'Stats', category: 'content' },
-
-  // Advanced Elements
-  { id: BlockType.FAQ, icon: ChevronDown, label: 'Accordion', category: 'advanced' },
   
   // E-commerce Elements
   { id: BlockType.PRODUCT_LIST, icon: ShoppingCart, label: 'Product List', category: 'ecommerce' },
@@ -86,6 +71,7 @@ function DraggableElement({ element }: { element: ElementConfig }) {
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
         opacity: isDragging ? 0.5 : 1,
+        zIndex: 1000, // Ensure drag preview stays on top
       }
     : undefined;
 

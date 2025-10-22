@@ -20,7 +20,7 @@ describe('Real-time Comments Subscription', () => {
     cy.window().then((win) => {
       // The Apollo Client should have established a WebSocket connection
       // We can verify this by checking if the real-time updates hook is working
-      expect(win).to.have.property('location');
+      expect(win.location).toBeDefined();
     });
   });
 

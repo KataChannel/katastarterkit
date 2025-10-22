@@ -1,0 +1,133 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import { usePage } from '@/hooks/usePageBuilder';
+import { Page, PageBlock } from '@/types/page-builder';
+
+/**
+ * Page State Context - Manages page and blocks state
+ */
+interface PageStateContextType {
+  // Page state
+  page: Page | null;
+  editingPage: Page | null;
+  isNewPageMode: boolean;
+  loading: boolean;
+  
+  // Blocks state
+  blocks: PageBlock[];
+  selectedBlockId: string | null;
+  selectedBlock: PageBlock | null;
+  
+  // Drag state
+  draggedBlock: PageBlock | null;
+  
+  // State setters
+  setEditingPage: (page: Page | null) => void;
+  setBlocks: (blocks: PageBlock[]) => void;
+  setSelectedBlockId: (id: string | null) => void;
+  setDraggedBlock: (block: PageBlock | null) => void;
+  
+  // Refetch function
+  refetch: () => Promise<any>;
+}
+
+const PageStateContext = createContext<PageStateContextType | undefined>(undefined);
+
+interface PageStateProviderProps {
+  children: ReactNode;
+  pageId?: string;
+}
+
+export function PageStateProvider({ children, pageId }: PageStateProviderProps) {
+  // Page state
+  const [isNewPageMode, setIsNewPageMode] = useState(!pageId);
+  const [editingPage, setEditingPageState] = useState<Page | null>(null);
+  
+  // Blocks state
+  const [blocks, setBlocksState] = useState<PageBlock[]>([]);
+  const [selectedBlockId, setSelectedBlockIdState] = useState<string | null>(null);
+  const [draggedBlock, setDraggedBlockState] = useState<PageBlock | null>(null);
+  
+  // Hooks
+  const { page, loading, refetch } = usePage(pageId || '');
+  
+  // Memoized setters for stable references
+  const setEditingPage = useCallback((page: Page | null) => {
+    setEditingPageState(page);
+  }, []);
+  
+  const setBlocks = useCallback((blocks: PageBlock[]) => {
+    setBlocksState(blocks);
+  }, []);
+  
+  const setSelectedBlockId = useCallback((id: string | null) => {
+    setSelectedBlockIdState(id);
+  }, []);
+  
+  const setDraggedBlock = useCallback((block: PageBlock | null) => {
+    setDraggedBlockState(block);
+  }, []);
+  
+  // Initialize editing page when page loads
+  useEffect(() => {
+    if (page && !editingPage) {
+      setEditingPageState(page);
+    }
+  }, [page, editingPage]);
+  
+  // Initialize blocks from page
+  useEffect(() => {
+    if (page?.blocks) {
+      setBlocksState(page.blocks as PageBlock[]);
+    }
+  }, [page?.blocks]);
+  
+  // Calculate selected block with useMemo for performance
+  const selectedBlock = useMemo(() => {
+    if (!selectedBlockId) return null;
+    
+    const findBlock = (blocks: PageBlock[]): PageBlock | null => {
+      for (const block of blocks) {
+        if (block.id === selectedBlockId) return block;
+        if (block.children) {
+          const found = findBlock(block.children);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    
+    return findBlock(blocks);
+  }, [selectedBlockId, blocks]);
+  
+  const value: PageStateContextType = {
+    page: page || null,
+    editingPage,
+    isNewPageMode,
+    loading,
+    blocks,
+    selectedBlockId,
+    selectedBlock,
+    draggedBlock,
+    setEditingPage,
+    setBlocks,
+    setSelectedBlockId,
+    setDraggedBlock,
+    refetch,
+  };
+  
+  return (
+    <PageStateContext.Provider value={value}>
+      {children}
+    </PageStateContext.Provider>
+  );
+}
+
+export function usePageState() {
+  const context = useContext(PageStateContext);
+  if (context === undefined) {
+    throw new Error('usePageState must be used within a PageStateProvider');
+  }
+  return context;
+}

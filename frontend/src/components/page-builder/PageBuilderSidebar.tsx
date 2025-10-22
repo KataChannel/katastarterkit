@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePageBuilderContext } from './PageBuilderProvider';
+import { usePageState, usePageActions } from './PageBuilderProvider';
 import { BlockType } from '@/types/page-builder';
 import { TemplateCustomizationModal } from './TemplateCustomizationModal';
 
@@ -55,15 +55,12 @@ const BLOCK_TYPES = [
  * - useMemo for template filtering (expensive operation)
  * - useCallback for event handlers
  */
-function PageBuilderSidebarComponent() {
-  const {
-    // State
-    editingPage,
-    isNewPageMode,
-    
-    // Block actions
-    handleAddBlock,
-  } = usePageBuilderContext();
+const PageBuilderSidebarComponent = React.memo(function PageBuilderSidebarComponent() {
+  // Use individual hooks for better performance
+  const { editingPage, page } = usePageState();
+  const { handleAddBlock } = usePageActions();
+  
+  const isNewPageMode = !page?.id;
 
   return (
     <div className="w-80 border-r bg-gray-50 flex flex-col h-full overflow-hidden">
@@ -110,13 +107,13 @@ function PageBuilderSidebarComponent() {
       </Tabs>
     </div>
   );
-}
+});
 
 /**
  * Templates Panel - Product and Task Templates for PageBuilder
  */
 const TemplatesPanel: React.FC = () => {
-  const { handleAddBlock } = usePageBuilderContext();
+  const { handleAddBlock } = usePageActions();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [customizationModal, setCustomizationModal] = useState<{
     isOpen: boolean;
@@ -466,13 +463,12 @@ const TemplatesPanel: React.FC = () => {
   }, [selectedCategory]);
 
   // Apply template to PageBuilder
+  const { handleAddTemplateBlock } = usePageActions();
+  
   const applyTemplate = useCallback((template: typeof templates[0]) => {
-    // Get context here to access all methods
-    const context = usePageBuilderContext();
-    
     // Use handleAddTemplateBlock with proper template configuration
-    if (context.handleAddTemplateBlock) {
-      context.handleAddTemplateBlock({
+    if (handleAddTemplateBlock) {
+      handleAddTemplateBlock({
         templateId: template.id,
         templateName: template.name,
         template: template.template,
@@ -616,4 +612,4 @@ const TemplatesPanel: React.FC = () => {
 
 // Export with React.memo to prevent unnecessary re-renders
 // Component only re-renders when context values it uses actually change
-export const PageBuilderSidebar = React.memo(PageBuilderSidebarComponent);
+export const PageBuilderSidebar = PageBuilderSidebarComponent;

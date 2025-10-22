@@ -17,7 +17,7 @@ import {
   Check,
   X,
 } from 'lucide-react';
-import { usePageBuilderContext } from '../../PageBuilderProvider';
+import { usePageActions } from '../../PageBuilderProvider';
 import { BlockType } from '@/types/page-builder';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
@@ -288,8 +288,8 @@ export function TemplatesLibrary() {
   const [previewTemplate, setPreviewTemplate] = useState<TemplateConfig | null>(null);
   const [isInserting, setIsInserting] = useState(false);
 
-  // Get context
-  const context = usePageBuilderContext();
+  // Get page actions
+  const { handleApplyTemplate } = usePageActions();
 
   const categories = [
     { id: 'all', label: 'All Templates', icon: Sparkles },
@@ -327,7 +327,7 @@ export function TemplatesLibrary() {
         })),
       };
       
-      await context.handleApplyTemplate(blockTemplate);
+      await handleApplyTemplate(blockTemplate);
       toast.success(`Template "${template.name}" inserted successfully!`);
     } catch (error: any) {
       console.error('Failed to insert template:', error);
