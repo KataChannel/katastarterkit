@@ -91,19 +91,75 @@ async function parseJsonStreaming(filePath: string): Promise<any[]> {
 }
 
 /**
- * Transform raw data - convert date strings to Date objects
+ * Transform raw data - convert date strings to Date objects and remove unknown fields
  */
-function transformRecord(record: any): any {
+function transformRecord(record: any, tableName?: string): any {
   const transformed = { ...record };
   const dateFields = [
     'createdAt', 'updatedAt', 'publishedAt', 'completedAt',
     'dueDate', 'processedAt', 'expiresAt', 'lastLoginAt',
-    'lockedUntil', 'startEpoch', 'endEpoch', 'answerEpoch',
+    'lockedUntil', 'startEpoch', 'endEpoch', 'answerEpoch', 'timestamp',
   ];
 
+  // Convert date strings
   for (const field of dateFields) {
     if (transformed[field] && typeof transformed[field] === 'string') {
       transformed[field] = new Date(transformed[field]);
+    }
+  }
+
+  // Handle audit_logs specific transformations
+  if (tableName === 'audit_logs') {
+    // Convert 'details' string to JSON object if it's a string
+    if (transformed.details && typeof transformed.details === 'string') {
+      transformed.details = { message: transformed.details };
+    }
+    // Ensure sessionInfo is JSON
+    if (transformed.sessionInfo && typeof transformed.sessionInfo === 'string') {
+      try {
+        transformed.sessionInfo = JSON.parse(transformed.sessionInfo);
+      } catch {
+        transformed.sessionInfo = { raw: transformed.sessionInfo };
+      }
+    }
+    // Ensure clientInfo is JSON
+    if (transformed.clientInfo && typeof transformed.clientInfo === 'string') {
+      try {
+        transformed.clientInfo = JSON.parse(transformed.clientInfo);
+      } catch {
+        transformed.clientInfo = { raw: transformed.clientInfo };
+      }
+    }
+    // Ensure required fields have defaults
+    if (!transformed.resourceType) {
+      transformed.resourceType = 'unknown';
+    }
+    if (!transformed.action) {
+      transformed.action = 'unknown';
+    }
+    // tags is a required array field
+    if (!transformed.tags || !Array.isArray(transformed.tags)) {
+      transformed.tags = [];
+    }
+  }
+
+  // Handle call_center_config specific transformations
+  if (tableName === 'call_center_config') {
+    // Remove unknown fields
+    const unknownFields = ['_id'];
+    for (const field of unknownFields) {
+      delete transformed[field];
+    }
+  }
+
+  // Handle menus specific transformations
+  if (tableName === 'menus') {
+    // requiredPermissions and requiredRoles are required String[] fields
+    if (!transformed.requiredPermissions || !Array.isArray(transformed.requiredPermissions)) {
+      transformed.requiredPermissions = [];
+    }
+    if (!transformed.requiredRoles || !Array.isArray(transformed.requiredRoles)) {
+      transformed.requiredRoles = [];
     }
   }
 
@@ -124,6 +180,30 @@ async function batchInsert(
 
   // Try batch insert first with dynamic batch sizing
   try {
+    // For menus table, use upsert to handle UNIQUE slug constraint
+    if (table === 'menus') {
+      const errors: any[] = [];
+      for (const record of records) {
+        try {
+          await model.upsert({
+            where: { slug: record.slug },
+            update: record,
+            create: record,
+          });
+          inserted++;
+        } catch (error: any) {
+          skipped++;
+          errors.push({ slug: record.slug, error: error.message });
+        }
+      }
+      if (errors.length > 0) {
+        console.log(`   ⚠️  ${errors.length} menus failed:`);
+        errors.forEach(e => console.log(`      - ${e.slug}: ${e.error.substring(0, 80)}`));
+      }
+      return { inserted, skipped };
+    }
+
+    // For other tables, use createMany with skipDuplicates
     const result = await model.createMany({
       data: records,
       skipDuplicates: true,
@@ -131,6 +211,15 @@ async function batchInsert(
     inserted = result.count || records.length;
     return { inserted, skipped: records.length - inserted };
   } catch (batchError: any) {
+    // Log the error for debugging
+    const errorMsg = (batchError?.message || String(batchError)).toString();
+    if (table === 'audit_logs' || table === 'call_center_config') {
+      // Write full error to a debug file
+      const fs = require('fs');
+      fs.appendFileSync('/tmp/restore_error.log', `\n=== ${table} Error ===\n${errorMsg}\n`);
+      console.log(`   ⚠️  Error logged to /tmp/restore_error.log`);
+    }
+    
     // If batch fails and batch size > 100, try smaller batches
     if (batchSize > 100) {
       const smallerBatchSize = Math.max(100, Math.floor(batchSize / 2));
@@ -223,17 +312,39 @@ async function restoreTableOptimized(
     // Determine batch size based on table characteristics
     // Tables with FK constraints need smaller batches
     const tablesWithFKConstraints = [
+      // E-commerce with FK relationships
       'ext_detailhoadon',
       'ext_sanphamhoadon',
+      'product_images',
+      'product_variants',
+      // Content with FK relationships
       'comments',
       'likes',
+      'post_tags',
+      // Tasks with FK relationships
       'task_comments',
       'task_media',
       'task_shares',
-      'post_tags',
+      // Affiliate with FK relationships
       'aff_clicks',
       'aff_conversions',
       'aff_payment_requests',
+      'aff_campaign_affiliates',
+      // LMS with FK relationships (courses → modules → lessons → progress)
+      'course_modules',
+      'lessons',
+      'enrollments',
+      'lesson_progress',
+      'quizzes',
+      'questions',
+      'answers',
+      // Employee with FK relationships
+      'employment_history',
+      'employee_documents',
+      'onboarding_checklists',
+      'offboarding_processes',
+      // Pages with FK relationships
+      'page_blocks',
     ];
     
     const effectiveBatchSize = tablesWithFKConstraints.includes(table)
@@ -247,7 +358,7 @@ async function restoreTableOptimized(
 
     for (let i = 0; i < records.length; i += effectiveBatchSize) {
       const batch = records.slice(i, i + effectiveBatchSize);
-      const transformedBatch = batch.map(transformRecord);
+      const transformedBatch = batch.map(record => transformRecord(record, table));
 
       const { inserted, skipped } = await batchInsert(
         model,
@@ -348,13 +459,33 @@ async function cleanupBeforeRestore(): Promise<void> {
   console.log('🧹 Cleaning up existing data...');
 
   const cleanupOrder = [
-    'ext_detailhoadon', 'ext_listhoadon',
+    // LMS (children first)
+    'answers', 'questions', 'quizzes', 'lesson_progress', 'enrollments', 'lessons', 'course_modules', 'courses', 'course_categories',
+    // E-commerce (children first)
+    'ext_detailhoadon', 'ext_sanphamhoadon', 'ext_listhoadon',
+    // Chat
     'chat_messages', 'chat_conversations', 'training_data', 'chatbot_models',
+    // Content
     'task_shares', 'task_media', 'task_comments', 'tasks',
     'post_tags', 'likes', 'comments', 'posts', 'notifications', 'tags',
+    // Security & RBAC
     'RolePermission', 'UserRoleAssignment', 'UserPermission', 'ResourceAccess',
     'Permission', 'Role', 'SecurityEvent', 'UserDevice', 'UserMfaSettings',
+    // Pages
     'PageBlock', 'Page',
+    // Reviews
+    'reviews',
+    // Menus
+    'menus',
+    // Affiliate
+    'aff_payment_requests', 'aff_conversions', 'aff_clicks', 'aff_campaign_affiliates', 'aff_links', 'aff_campaigns', 'aff_users',
+    // Employee
+    'offboarding_processes', 'onboarding_checklists', 'employee_documents', 'employment_history', 'employee_profiles',
+    // E-commerce
+    'product_variants', 'product_images', 'products', 'categories',
+    // Files
+    'file_shares', 'files', 'file_folders',
+    // Core
     'audit_logs', 'user_sessions', 'verification_tokens', 'auth_methods', 'users',
   ];
 
@@ -384,26 +515,30 @@ async function cleanupBeforeRestore(): Promise<void> {
  */
 function toCamelCase(tableName: string): string {
   const mapping: { [key: string]: string } = {
+    // Core users & auth
     'users': 'user',
     'auth_methods': 'authMethod',
     'verification_tokens': 'verificationToken',
     'user_sessions': 'userSession',
     'audit_logs': 'auditLog',
+    // Content
     'posts': 'post',
     'comments': 'comment',
     'tags': 'tag',
     'likes': 'like',
     'post_tags': 'postTag',
     'notifications': 'notification',
+    // Tasks
     'tasks': 'task',
     'task_comments': 'taskComment',
     'task_media': 'taskMedia',
     'task_shares': 'taskShare',
+    // AI/Chat
     'chatbot_models': 'chatbotModel',
     'training_data': 'trainingData',
     'chat_conversations': 'chatConversation',
     'chat_messages': 'chatMessage',
-    'menus': 'menu',
+    // Affiliate
     'aff_users': 'affUser',
     'aff_campaigns': 'affCampaign',
     'aff_campaign_affiliates': 'affCampaignAffiliate',
@@ -411,15 +546,39 @@ function toCamelCase(tableName: string): string {
     'aff_clicks': 'affClick',
     'aff_conversions': 'affConversion',
     'aff_payment_requests': 'affPaymentRequest',
+    // Employee
     'employee_profiles': 'employeeProfile',
     'employment_history': 'employmentHistory',
     'employee_documents': 'employeeDocument',
     'onboarding_checklists': 'onboardingChecklist',
     'offboarding_processes': 'offboardingProcess',
+    // E-Commerce
     'categories': 'category',
     'products': 'product',
     'product_images': 'productImage',
     'product_variants': 'productVariant',
+    // Pages & Menu
+    'pages': 'page',
+    'page_blocks': 'pageBlock',
+    'menus': 'menu',
+    // LMS - Courses
+    'course_categories': 'courseCategory',
+    'courses': 'course',
+    'course_modules': 'courseModule',
+    'lessons': 'lesson',
+    'enrollments': 'enrollment',
+    'lesson_progress': 'lessonProgress',
+    // LMS - Quizzes & Learning
+    'quizzes': 'quiz',
+    'questions': 'question',
+    'answers': 'answer',
+    'reviews': 'review',
+    // RBAC & Security
+    'rbac_roles': 'role',
+    'rbac_permissions': 'permission',
+    'rbac_role_permissions': 'rolePermission',
+    // Call Center
+    'call_center_config': 'callCenterConfig',
   };
 
   return mapping[tableName] || tableName;
@@ -437,8 +596,10 @@ async function getTablesToRestore(backupFolder: string): Promise<string[]> {
 
     // Define restoration order - parent tables first
     const restorationOrder = [
-      // Core users
+      // Core users & auth
       'users', 'auth_methods', 'user_sessions', 'verification_tokens',
+      // Audit logs
+      'audit_logs',
       // Core content
       'posts', 'tags', 'post_tags', 'comments', 'likes', 'notifications',
       // Tasks
@@ -453,18 +614,22 @@ async function getTablesToRestore(backupFolder: string): Promise<string[]> {
       'categories', 'products', 'product_images', 'product_variants',
       // Invoice system (parent first)
       'ext_listhoadon', 'ext_detailhoadon', 'ext_sanphamhoadon',
-      // Pages
-      'pages', 'page_blocks',
-      // Audit & Security
-      'audit_logs', 'rbac_roles', 'rbac_permissions', 'rbac_role_permissions',
-      // Menus
-      'menus',
+      // Pages & Menu
+      'pages', 'page_blocks', 'menus',
+      // LMS - Courses (parent before children)
+      'course_categories', 'courses', 'course_modules', 'lessons', 'enrollments', 'lesson_progress',
+      // LMS - Quizzes & Learning (lessons first, then quizzes)
+      'quizzes', 'questions', 'answers',
+      // Reviews
+      'reviews',
+      // RBAC & Security
+      'rbac_roles', 'rbac_permissions', 'rbac_role_permissions',
     ];
 
     // Sort files according to restoration order
     const sortedFiles = restorationOrder.filter(table => allFiles.includes(table));
     
-    // Add any remaining files not in the order list
+    // Add any remaining files not in the order list (excluding non-existent tables)
     const remaining = allFiles.filter(f => !sortedFiles.includes(f));
     const finalOrder = [...sortedFiles, ...remaining.sort()];
 
