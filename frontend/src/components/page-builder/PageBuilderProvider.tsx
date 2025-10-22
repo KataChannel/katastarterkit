@@ -88,9 +88,10 @@ function DndContextWrapper({ children }: { children: ReactNode }) {
       {children}
       
       {/* Drag Overlay - Visual feedback during drag */}
+      {/* Fixed positioning to ensure it's always visible above all other elements */}
       <DragOverlay dropAnimation={null}>
         {draggedBlock ? (
-          <div className="animate-pulse">
+          <div className="animate-pulse pointer-events-none">
             <Card className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 shadow-2xl border-2 border-blue-300 text-white min-w-xs">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-lg">

@@ -24,6 +24,7 @@ import {
   Package,
 } from 'lucide-react';
 import { BlockType } from '@/types/page-builder';
+import { usePageActions } from '../../PageBuilderProvider';
 
 interface ElementConfig {
   id: BlockType;
@@ -59,6 +60,9 @@ const elements: ElementConfig[] = [
 ];
 
 function DraggableElement({ element }: { element: ElementConfig }) {
+  const { handleAddBlock } = usePageActions();
+  const [isAdding, setIsAdding] = useState(false);
+
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `element-${element.id}`,
     data: {
@@ -77,33 +81,59 @@ function DraggableElement({ element }: { element: ElementConfig }) {
 
   const Icon = element.icon;
 
+  // Handle double-click to add block directly
+  const handleDoubleClick = async () => {
+    if (isAdding) return;
+    
+    try {
+      setIsAdding(true);
+      console.log('[ElementsLibrary] Double-click add block:', element.id);
+      await handleAddBlock(element.id);
+    } catch (error) {
+      console.error('[ElementsLibrary] Error adding block:', error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
       style={style}
+      onDoubleClick={handleDoubleClick}
       className={`group flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border-2 transition-all duration-200 ${
         isDragging
           ? 'bg-blue-100 border-blue-500 shadow-lg shadow-blue-300 scale-105'
+          : isAdding
+          ? 'bg-green-100 border-green-500 shadow-lg shadow-green-300'
           : 'border-gray-200 bg-white hover:bg-blue-50 hover:border-blue-400 hover:shadow-md'
-      } cursor-grab active:cursor-grabbing`}
+      } cursor-grab active:cursor-grabbing relative`}
+      title="Double-click to add directly or drag to canvas"
     >
       <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded flex items-center justify-center transition-all ${
         isDragging
           ? 'bg-blue-500 text-white scale-110'
+          : isAdding
+          ? 'bg-green-500 text-white scale-110'
           : 'bg-primary/10 text-primary group-hover:bg-blue-400 group-hover:text-white'
       } flex-shrink-0`}>
         <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
       </div>
       <span className={`text-xs sm:text-sm font-medium truncate transition-colors ${
-        isDragging ? 'text-blue-700 font-bold' : 'text-gray-700'
+        isDragging ? 'text-blue-700 font-bold' : isAdding ? 'text-green-700 font-bold' : 'text-gray-700'
       }`}>
         {element.label}
       </span>
       {isDragging && (
         <span className="ml-auto text-xs bg-blue-500 text-white px-2 py-0.5 rounded font-semibold">
           Dragging ✨
+        </span>
+      )}
+      {isAdding && (
+        <span className="ml-auto text-xs bg-green-500 text-white px-2 py-0.5 rounded font-semibold animate-pulse">
+          Adding ✨
         </span>
       )}
     </div>

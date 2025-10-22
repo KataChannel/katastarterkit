@@ -162,8 +162,10 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   const uiState = useUIState();
   
   const { createPage, updatePage, deletePage } = usePageOperations();
-  const { addBlock, updateBlock, deleteBlock, updateBlocksOrder } = useBlockOperations(pageId || '');
-  const nestedOps = useNestedBlockOperations(pageId || '');
+  // Initialize with pageId from props, but fall back to state's page ID
+  const effectivePageId = pageId || pageState.page?.id || '';
+  const { addBlock, updateBlock, deleteBlock, updateBlocksOrder } = useBlockOperations(effectivePageId);
+  const nestedOps = useNestedBlockOperations(effectivePageId);
   
   // Page operations
   const handlePageSave = useCallback(async () => {
@@ -233,10 +235,11 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   // Block operations
   const handleAddBlock = useCallback(async (blockType: BlockType) => {
     try {
-      const { page, blocks, setBlocks, refetch } = pageState;
+      const { page, blocks, refetch } = pageState;
       
       if (!page?.id) {
         toast.error('Please create a page first');
+        console.warn('[PageBuilder] Cannot add block: no page ID', { page });
         return;
       }
       
@@ -248,11 +251,16 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         order: blocks.length,
       };
       
-      await addBlock(input);
+      console.log('[PageBuilder] Adding block:', { blockType, pageId: page.id, order: input.order });
+      
+      const result = await addBlock(input);
       pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_CREATE, 'Block added', { blockType });
       toast.success('Block added successfully!');
+      
+      console.log('[PageBuilder] Block added successfully:', result);
       await refetch();
     } catch (error: any) {
+      console.error('[PageBuilder] Block add error:', error);
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_CREATE, 'Failed to add block', { error });
       toast.error(error?.message || 'Failed to add block');
     }
@@ -433,6 +441,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   // Drag and drop
   const handleDragStart = useCallback((event: any) => {
     const { active } = event;
+    const { blocks, setDraggedBlock } = pageState;
     
     // Debug: Log the entire active object structure
     console.log('[PageBuilder] handleDragStart full active object:', active);
@@ -450,9 +459,9 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
     
     // Handle existing block drag
     if (dragType !== 'new-block') {
-      const draggedBlock = pageState.blocks.find(b => b.id === active.id);
+      const draggedBlock = blocks.find(b => b.id === active.id);
       if (draggedBlock) {
-        pageState.setDraggedBlock(draggedBlock);
+        setDraggedBlock(draggedBlock);
       }
     }
     // For new blocks from LeftPanel, no need to set draggedBlock
@@ -460,6 +469,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   
   const handleDragEnd = useCallback(async (event: any) => {
     const { active, over } = event;
+    const { blocks, setDraggedBlock } = pageState;
     
     // Debug: Log full event structure
     console.log('[PageBuilder] handleDragEnd full event:', event);
@@ -477,7 +487,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       overType: over?.data?.type,
     });
     
-    pageState.setDraggedBlock(null);
+    setDraggedBlock(null);
     
     if (!over) {
       console.warn('[PageBuilder] No drop target');
@@ -523,7 +533,6 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       return;
     }
     
-    const { blocks } = pageState;
     const oldIndex = blocks.findIndex(b => b.id === active.id);
     const newIndex = blocks.findIndex(b => b.id === over.id);
     

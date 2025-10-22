@@ -208,11 +208,19 @@ function TemplateCard({ template, onInsert, onPreview }: { template: TemplateCon
     onPreview(template);
   };
 
+  // Handle double-click to insert template directly
+  const handleDoubleClick = () => {
+    console.log('[TemplatesLibrary] Double-click insert template:', template.id);
+    handleInsert();
+  };
+
   return (
     <div
-      className="group relative bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg hover:border-primary/50 transition-all duration-300"
+      className="group relative bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg hover:border-primary/50 transition-all duration-300 cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onDoubleClick={handleDoubleClick}
+      title="Double-click to insert template"
     >
       {/* Preview Area */}
       <div className={`relative h-24 sm:h-28 bg-gradient-to-br ${template.color} flex items-center justify-center`}>

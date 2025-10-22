@@ -255,7 +255,12 @@ export function SavedBlocksLibrary() {
           </Card>
         ) : (
           filteredBlocks.map(savedBlock => (
-            <Card key={savedBlock.id} className="overflow-hidden hover:border-blue-500 hover:shadow-md transition-all">
+            <Card 
+              key={savedBlock.id} 
+              className="overflow-hidden hover:border-blue-500 hover:shadow-md transition-all cursor-pointer"
+              onDoubleClick={() => applySavedBlock(savedBlock)}
+              title="Double-click to apply saved block"
+            >
               {/* Content */}
               <div className="p-2.5 sm:p-3">
                 <div className="flex items-start justify-between mb-1.5 sm:mb-2">
