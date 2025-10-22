@@ -323,6 +323,23 @@ Modern, nested block-based page builder with dynamic content and advanced layout
 **Example Component:**
 - [**💻 Example Implementation**](frontend/src/components/page-builder/NestedPageBuilder.example.tsx) - Full UI example
 
+### 🏗️ Nested Blocks Feature (LATEST)
+Complete implementation of hierarchical, nestable block structures in Page Builder.
+
+**Quick Start:**
+- [**⚡ Quick Reference**](QUICK-REFERENCE-NESTED-BLOCKS.md) - 2-minute overview
+- [**🧪 Testing Guide**](NESTED-BLOCKS-TESTING-GUIDE.md) - Test procedures & validation
+- [**📋 Implementation Details**](NESTED-BLOCKS-IMPLEMENTATION.md) - Technical architecture
+- [**✅ Complete Report**](NESTED-BLOCKS-COMPLETE-REPORT.md) - Full feature summary
+
+**What's New:**
+- ✅ Add child blocks to any container (right-click "Add Block")
+- ✅ Edit, delete, and reorder child blocks
+- ✅ Nest containers unlimited levels (max 5 recommended)
+- ✅ All container types fully supported
+- ✅ Proper spacing and layout for children
+- ✅ Full drag-and-drop support for reordering
+
 
 **Features:**
 - ✅ No GraphQL schema conflicts

@@ -50,7 +50,7 @@ export const ContainerBlock: React.FC<ContainerBlockProps> = ({
     alignItems: content.alignment === 'center' ? 'center' : content.alignment === 'right' ? 'flex-end' : 'flex-start',
     width: '100%',
     position: 'relative',
-    minHeight: children ? 'auto' : '100px',
+    minHeight: children && React.Children.count(children) > 0 ? 'auto' : '100px',
     border: isEditable ? '2px dashed #ccc' : 'none',
     borderRadius: '8px',
     overflow: content.layout === 'scroll' ? 'auto' : 'visible',

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,46 +22,94 @@ import {
   Search,
   ShoppingCart,
   Package,
+  Zap,
+  ChevronDown,
+  Copy,
+  Sparkles,
 } from 'lucide-react';
 import { BlockType } from '@/types/page-builder';
 import { usePageActions } from '../../PageBuilderProvider';
+import { cn } from '@/lib/utils';
 
 interface ElementConfig {
   id: BlockType;
   icon: any;
   label: string;
+  description?: string;
   category: 'basic' | 'layout' | 'content' | 'advanced' | 'ecommerce';
+  popularity?: 'hot' | 'new' | null;
 }
+
+interface CategoryConfig {
+  id: string;
+  label: string;
+  icon?: any;
+  description?: string;
+}
+
+const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
+  basic: {
+    id: 'basic',
+    label: 'Basic Elements',
+    icon: Zap,
+    description: 'Core building blocks for your content',
+  },
+  layout: {
+    id: 'layout',
+    label: 'Layout',
+    icon: Layout,
+    description: 'Structure and organize your content',
+  },
+  content: {
+    id: 'content',
+    label: 'Content',
+    icon: Images,
+    description: 'Rich media and dynamic content',
+  },
+  advanced: {
+    id: 'advanced',
+    label: 'Advanced',
+    icon: Sparkles,
+    description: 'Advanced components and features',
+  },
+  ecommerce: {
+    id: 'ecommerce',
+    label: 'E-commerce',
+    icon: ShoppingCart,
+    description: 'Product and commerce elements',
+  },
+};
 
 const elements: ElementConfig[] = [
   // Basic Elements
-  { id: BlockType.TEXT, icon: Type, label: 'Text', category: 'basic' },
-  { id: BlockType.HERO, icon: Heading, label: 'Heading', category: 'basic' },
-  { id: BlockType.IMAGE, icon: Image, label: 'Image', category: 'basic' },
-  { id: BlockType.BUTTON, icon: MousePointer, label: 'Button', category: 'basic' },
-  { id: BlockType.DIVIDER, icon: Minus, label: 'Divider', category: 'basic' },
+  { id: BlockType.TEXT, icon: Type, label: 'Text', description: 'Rich text content', category: 'basic', popularity: 'hot' },
+  { id: BlockType.HERO, icon: Heading, label: 'Heading', description: 'Large page headings', category: 'basic' },
+  { id: BlockType.BUTTON, icon: MousePointer, label: 'Button', description: 'Call-to-action buttons', category: 'basic', popularity: 'hot' },
+  { id: BlockType.IMAGE, icon: Image, label: 'Image', description: 'Image media element', category: 'basic' },
+  { id: BlockType.DIVIDER, icon: Minus, label: 'Divider', description: 'Visual separator', category: 'basic' },
 
   // Layout Elements
-  { id: BlockType.SECTION, icon: Square, label: 'Section', category: 'layout' },
-  { id: BlockType.FLEX_ROW, icon: Columns, label: 'Row', category: 'layout' },
-  { id: BlockType.FLEX_COLUMN, icon: Layout, label: 'Column', category: 'layout' },
-  { id: BlockType.SPACER, icon: MoveVertical, label: 'Spacer', category: 'layout' },
-  { id: BlockType.GRID, icon: Grid3x3, label: 'Grid', category: 'layout' },
+  { id: BlockType.SECTION, icon: Square, label: 'Section', description: 'Page section container', category: 'layout', popularity: 'hot' },
+  { id: BlockType.GRID, icon: Grid3x3, label: 'Grid', description: 'Multi-column grid layout', category: 'layout' },
+  { id: BlockType.FLEX_ROW, icon: Columns, label: 'Flex Row', description: 'Horizontal flex container', category: 'layout' },
+  { id: BlockType.FLEX_COLUMN, icon: Layout, label: 'Flex Column', description: 'Vertical flex container', category: 'layout' },
+  { id: BlockType.SPACER, icon: MoveVertical, label: 'Spacer', description: 'Vertical spacing control', category: 'layout' },
 
   // Content Elements
-  { id: BlockType.CAROUSEL, icon: Images, label: 'Carousel', category: 'content' },
-  { id: BlockType.VIDEO, icon: Video, label: 'Video', category: 'content' },
-  { id: BlockType.TEAM, icon: Users, label: 'Team', category: 'content' },
-  { id: BlockType.STATS, icon: BarChart, label: 'Stats', category: 'content' },
+  { id: BlockType.CAROUSEL, icon: Images, label: 'Carousel', description: 'Image carousel slider', category: 'content', popularity: 'new' },
+  { id: BlockType.VIDEO, icon: Video, label: 'Video', description: 'Video media player', category: 'content' },
+  { id: BlockType.TEAM, icon: Users, label: 'Team', description: 'Team member showcase', category: 'content' },
+  { id: BlockType.STATS, icon: BarChart, label: 'Stats', description: 'Statistics display', category: 'content' },
   
   // E-commerce Elements
-  { id: BlockType.PRODUCT_LIST, icon: ShoppingCart, label: 'Product List', category: 'ecommerce' },
-  { id: BlockType.PRODUCT_DETAIL, icon: Package, label: 'Product Detail', category: 'ecommerce' },
+  { id: BlockType.PRODUCT_LIST, icon: ShoppingCart, label: 'Product List', description: 'Product listing grid', category: 'ecommerce' },
+  { id: BlockType.PRODUCT_DETAIL, icon: Package, label: 'Product Detail', description: 'Detailed product view', category: 'ecommerce' },
 ];
 
 function DraggableElement({ element }: { element: ElementConfig }) {
   const { handleAddBlock } = usePageActions();
   const [isAdding, setIsAdding] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `element-${element.id}`,
@@ -74,20 +122,18 @@ function DraggableElement({ element }: { element: ElementConfig }) {
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        opacity: isDragging ? 0.7 : 1,
+        opacity: isDragging ? 0.8 : 1,
         zIndex: 1000,
       }
     : undefined;
 
   const Icon = element.icon;
 
-  // Handle double-click to add block directly
   const handleDoubleClick = async () => {
     if (isAdding) return;
     
     try {
       setIsAdding(true);
-      console.log('[ElementsLibrary] Double-click add block:', element.id);
       await handleAddBlock(element.id);
     } catch (error) {
       console.error('[ElementsLibrary] Error adding block:', error);
@@ -97,44 +143,137 @@ function DraggableElement({ element }: { element: ElementConfig }) {
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      style={style}
-      onDoubleClick={handleDoubleClick}
-      className={`group flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border-2 transition-all duration-200 ${
-        isDragging
-          ? 'bg-blue-100 border-blue-500 shadow-lg shadow-blue-300 scale-105'
-          : isAdding
-          ? 'bg-green-100 border-green-500 shadow-lg shadow-green-300'
-          : 'border-gray-200 bg-white hover:bg-blue-50 hover:border-blue-400 hover:shadow-md'
-      } cursor-grab active:cursor-grabbing relative`}
-      title="Double-click to add directly or drag to canvas"
-    >
-      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded flex items-center justify-center transition-all ${
-        isDragging
-          ? 'bg-blue-500 text-white scale-110'
-          : isAdding
-          ? 'bg-green-500 text-white scale-110'
-          : 'bg-primary/10 text-primary group-hover:bg-blue-400 group-hover:text-white'
-      } flex-shrink-0`}>
-        <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-      </div>
-      <span className={`text-xs sm:text-sm font-medium truncate transition-colors ${
-        isDragging ? 'text-blue-700 font-bold' : isAdding ? 'text-green-700 font-bold' : 'text-gray-700'
-      }`}>
-        {element.label}
-      </span>
-      {isDragging && (
-        <span className="ml-auto text-xs bg-blue-500 text-white px-2 py-0.5 rounded font-semibold">
-          Dragging ✨
-        </span>
+    <div className="relative group/item">
+      <button
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        style={style}
+        onDoubleClick={handleDoubleClick}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        className={cn(
+          'w-full flex items-start gap-3 p-3 rounded-lg border transition-all duration-200',
+          'text-left select-none group/btn',
+          isDragging && 'bg-blue-50 border-blue-400 shadow-lg scale-105 z-50',
+          isAdding && 'bg-green-50 border-green-400 shadow-lg',
+          !isDragging && !isAdding && 'border-gray-200 bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-transparent hover:border-blue-300 hover:shadow-md'
+        )}
+        title="Double-click to add • Drag to canvas"
+      >
+        {/* Icon Container */}
+        <div className={cn(
+          'flex-shrink-0 w-10 h-10 rounded-md flex items-center justify-center transition-all duration-200',
+          isDragging && 'bg-blue-500 text-white scale-110 shadow-lg',
+          isAdding && 'bg-green-500 text-white scale-110',
+          !isDragging && !isAdding && 'bg-gradient-to-br from-primary/20 to-primary/10 text-primary group-hover/btn:bg-blue-400 group-hover/btn:text-white group-hover/btn:shadow-md'
+        )}>
+          <Icon className="w-5 h-5" />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-sm text-gray-900 truncate">
+              {element.label}
+            </span>
+            {element.popularity === 'hot' && (
+              <span className="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+                🔥 Hot
+              </span>
+            )}
+            {element.popularity === 'new' && (
+              <span className="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                ✨ New
+              </span>
+            )}
+          </div>
+          {element.description && (
+            <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
+              {element.description}
+            </p>
+          )}
+        </div>
+
+        {/* Status Badge */}
+        {isDragging && (
+          <div className="flex-shrink-0 flex items-center gap-1 px-2 py-1 bg-blue-500 text-white rounded text-xs font-semibold whitespace-nowrap">
+            <Zap className="w-3 h-3" />
+            Dragging
+          </div>
+        )}
+        {isAdding && (
+          <div className="flex-shrink-0 flex items-center gap-1 px-2 py-1 bg-green-500 text-white rounded text-xs font-semibold whitespace-nowrap animate-pulse">
+            <Copy className="w-3 h-3" />
+            Adding
+          </div>
+        )}
+      </button>
+
+      {/* Tooltip */}
+      {showTooltip && !isDragging && !isAdding && (
+        <div className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg whitespace-nowrap z-50 pointer-events-none">
+          Double-click to add • Drag to canvas
+          <div className="absolute top-full left-0 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
+        </div>
       )}
-      {isAdding && (
-        <span className="ml-auto text-xs bg-green-500 text-white px-2 py-0.5 rounded font-semibold animate-pulse">
-          Adding ✨
+    </div>
+  );
+}
+
+interface CategoryGroupProps {
+  category: string;
+  config: CategoryConfig;
+  elements: ElementConfig[];
+  isExpanded: boolean;
+  onToggle: () => void;
+  count: number;
+}
+
+function CategoryGroup({ category, config, elements, isExpanded, onToggle, count }: CategoryGroupProps) {
+  const Icon = config.icon;
+
+  return (
+    <div className="space-y-2">
+      {/* Category Header */}
+      <button
+        onClick={onToggle}
+        className={cn(
+          'w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200',
+          'text-sm font-semibold text-gray-700 hover:bg-gray-100 group/cat',
+          isExpanded && 'bg-blue-50 text-primary'
+        )}
+      >
+        {Icon && (
+          <Icon className="w-4 h-4 flex-shrink-0 text-gray-400 group-hover/cat:text-gray-600" />
+        )}
+        <span className="flex-1 text-left">{config.label}</span>
+        <span className={cn(
+          'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700',
+          isExpanded && 'bg-blue-200 text-primary'
+        )}>
+          {count}
         </span>
+        <ChevronDown className={cn(
+          'w-4 h-4 flex-shrink-0 text-gray-400 transition-transform duration-200',
+          isExpanded && 'rotate-180 text-primary'
+        )} />
+      </button>
+
+      {/* Category Description */}
+      {isExpanded && config.description && (
+        <p className="text-xs text-gray-500 px-3">
+          {config.description}
+        </p>
+      )}
+
+      {/* Elements List */}
+      {isExpanded && (
+        <div className="pl-2 space-y-2 border-l-2 border-gray-200">
+          {elements.map((element) => (
+            <DraggableElement key={element.id} element={element} />
+          ))}
+        </div>
       )}
     </div>
   );
@@ -142,95 +281,108 @@ function DraggableElement({ element }: { element: ElementConfig }) {
 
 export function ElementsLibrary() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    new Set(['basic', 'layout'])
+  );
 
-  const categories = [
-    { id: 'all', label: 'All Elements' },
-    { id: 'basic', label: 'Basic' },
-    { id: 'layout', label: 'Layout' },
-    { id: 'content', label: 'Content' },
-    { id: 'advanced', label: 'Advanced' },
-    { id: 'ecommerce', label: 'E-commerce' },
-  ];
+  // Memoize filtered elements
+  const filteredElements = useMemo(() => {
+    return elements.filter((element) => {
+      const matchesSearch = element.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           element.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
+    });
+  }, [searchQuery]);
 
-  const filteredElements = elements.filter((element) => {
-    const matchesSearch = element.label.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = activeCategory === 'all' || element.category === activeCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Group filtered elements by category
+  const groupedElements = useMemo(() => {
+    return Object.values(CATEGORY_CONFIG)
+      .map((config) => ({
+        category: config.id,
+        config,
+        elements: filteredElements.filter((el) => el.category === config.id),
+      }))
+      .filter((group) => group.elements.length > 0);
+  }, [filteredElements]);
 
-  const groupedElements = categories
-    .filter((cat) => cat.id !== 'all')
-    .map((category) => ({
-      category: category.label,
-      elements: filteredElements.filter((el) => el.category === category.id),
-    }))
-    .filter((group) => group.elements.length > 0);
+  const toggleCategory = (categoryId: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(categoryId)) {
+      newExpanded.delete(categoryId);
+    } else {
+      newExpanded.add(categoryId);
+    }
+    setExpandedCategories(newExpanded);
+  };
+
+  const totalElements = filteredElements.length;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Search */}
-      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200 bg-white">
-        <div className="relative">
-          <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 pointer-events-none" />
-          <Input
-            placeholder="Search elements..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 sm:pl-9 h-8 sm:h-9 text-xs sm:text-sm"
-          />
+    <div className="flex flex-col h-full bg-gradient-to-b from-white to-gray-50">
+      {/* Header */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3">
+        <div className="space-y-3">
+          <div>
+            <h2 className="text-base font-bold text-gray-900">Elements</h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {totalElements} element{totalElements !== 1 ? 's' : ''} available
+            </p>
+          </div>
+
+          {/* Search Input */}
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <Input
+              placeholder="Search elements..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 text-sm bg-gray-50 border-gray-300 rounded-lg group-focus-within:bg-white group-focus-within:border-blue-400 group-focus-within:ring-1 group-focus-within:ring-blue-200 transition-all"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Category Filter */}
-      <div className="flex-shrink-0 flex gap-1.5 sm:gap-2 p-2 sm:p-3 border-b border-gray-200 overflow-x-auto bg-white scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {categories.map((category) => (
-          <Button
-            key={category.id}
-            variant={activeCategory === category.id ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setActiveCategory(category.id)}
-            className="whitespace-nowrap text-xs h-7 sm:h-8 px-2.5 sm:px-3 flex-shrink-0"
-          >
-            {category.label}
-          </Button>
-        ))}
-      </div>
-
-      {/* Elements Grid */}
-      <div className="flex-1 min-h-0 p-3 sm:p-4 bg-gray-50/50">
-        {activeCategory === 'all' ? (
-          // Grouped view
-          <div className="space-y-4 sm:space-y-6">
-            {groupedElements.map((group) => (
-              <div key={group.category}>
-                <h3 className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 sm:mb-3 px-1">
-                  {group.category}
-                </h3>
-                <div className="grid gap-1.5 sm:gap-2">
-                  {group.elements.map((element) => (
-                    <DraggableElement key={element.id} element={element} />
-                  ))}
-                </div>
-              </div>
-            ))}
+      {/* Content */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {totalElements === 0 ? (
+          // Empty State
+          <div className="flex flex-col items-center justify-center text-gray-400 py-12 px-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
+              <Search className="w-6 h-6" />
+            </div>
+            <p className="font-semibold text-gray-600">No elements found</p>
+            <p className="text-sm mt-1">Try a different search term</p>
           </div>
         ) : (
-          // Single category view
-          <div className="grid gap-1.5 sm:gap-2">
-            {filteredElements.map((element) => (
-              <DraggableElement key={element.id} element={element} />
+          // Categories
+          <div className="space-y-4 p-4">
+            {groupedElements.map((group) => (
+              <CategoryGroup
+                key={group.category}
+                category={group.category}
+                config={group.config}
+                elements={group.elements}
+                isExpanded={expandedCategories.has(group.category)}
+                onToggle={() => toggleCategory(group.category)}
+                count={group.elements.length}
+              />
             ))}
           </div>
         )}
+      </div>
 
-        {filteredElements.length === 0 && (
-          <div className="flex flex-col items-center justify-center text-gray-400 text-xs sm:text-sm py-8 sm:py-12">
-            <Search className="w-8 h-8 sm:w-10 sm:h-10 mb-2 opacity-50" />
-            <p className="font-medium">No elements found</p>
-            <p className="text-[10px] sm:text-xs mt-1">Try a different search term</p>
+      {/* Footer Info */}
+      <div className="flex-shrink-0 border-t border-gray-200 bg-white px-4 py-2.5">
+        <div className="flex items-center justify-between gap-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2">
+            <Zap className="w-3.5 h-3.5" />
+            <span>Double-click to add</span>
           </div>
-        )}
+          <div className="flex items-center gap-2">
+            <Copy className="w-3.5 h-3.5" />
+            <span>Drag to canvas</span>
+          </div>
+        </div>
       </div>
     </div>
   );

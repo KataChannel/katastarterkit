@@ -59,33 +59,29 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     if (!block.children || block.children.length === 0) return null;
 
     // Create a copy of children array before sorting (GraphQL returns read-only array)
-    return [...block.children]
-      .sort((a, b) => a.order - b.order)
-      .map((childBlock) => {
-        // Check if this child is also a container that can have children
-        const childIsContainer = [
-          BlockType.CONTAINER,
-          BlockType.SECTION,
-          BlockType.GRID,
-          BlockType.FLEX_ROW,
-          BlockType.FLEX_COLUMN,
-        ].includes(childBlock.type);
-
-        return (
-          <BlockRenderer
-            key={childBlock.id}
-            block={childBlock}
-            isEditing={isEditing}
-            onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
-            onDelete={() => onDeleteChild?.(childBlock.id)}
-            onAddChild={childIsContainer ? onAddChild : undefined}
-            onUpdateChild={onUpdateChild}
-            onDeleteChild={onDeleteChild}
-            onSelect={onSelect}
-            depth={depth + 1}
-          />
-        );
-      });
+    // Just render children directly - parent container will handle layout
+    return (
+      <>
+        {[...block.children]
+          .sort((a, b) => a.order - b.order)
+          .map((childBlock) => {
+            return (
+              <BlockRenderer
+                key={childBlock.id}
+                block={childBlock}
+                isEditing={isEditing}
+                onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
+                onDelete={() => onDeleteChild?.(childBlock.id)}
+                onAddChild={onAddChild}
+                onUpdateChild={onUpdateChild}
+                onDeleteChild={onDeleteChild}
+                onSelect={onSelect}
+                depth={depth + 1}
+              />
+            );
+          })}
+      </>
+    );
   };
 
   const containerProps = {
@@ -125,7 +121,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       <div 
         onClick={handleBlockClick}
         className={`
-          cursor-pointer transition-all 
+          w-full cursor-pointer transition-all 
           ${isSelected 
             ? 'ring-2 ring-blue-500 ring-opacity-100 shadow-lg' 
             : 'hover:ring-2 hover:ring-blue-400 hover:ring-opacity-50'
