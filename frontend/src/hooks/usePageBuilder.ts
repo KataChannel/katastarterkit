@@ -31,10 +31,11 @@ const MAX_CHILDREN_PER_CONTAINER = 20;
 const AUTO_SAVE_DELAY = 30000; // 30 seconds
 
 // Hook for managing pages
-export const usePages = (pagination?: PaginationInput, filters?: PageFiltersInput) => {
+export const usePages = (pagination?: PaginationInput, filters?: PageFiltersInput, options?: { skip?: boolean }) => {
   const { data, loading, error, refetch } = useQuery<{ getPages: PaginatedPages }>(GET_PAGES, {
     variables: { pagination, filters },
-    errorPolicy: 'all'
+    errorPolicy: 'all',
+    skip: options?.skip || false, // Allow skipping the query if needed
   });
 
   return {

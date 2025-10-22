@@ -1,22 +1,24 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useApolloClient } from '@apollo/client';
 import { BLOCK_TEMPLATES, BlockTemplate } from '@/data/blockTemplates';
 import { 
-  getCustomTemplates, 
-  saveCustomTemplate, 
-  deleteCustomTemplate,
-  CustomTemplate 
-} from '@/utils/customTemplates';
+  CustomTemplatesService,
+  initCustomTemplatesService,
+  TemplateBlocksData,
+  CreateTemplateInput,
+} from '@/utils/customTemplatesDb';
 import { initSampleTemplates } from '@/utils/initSampleTemplates';
 
 /**
  * Template Context - Manages template state and operations
+ * NOW WITH DATABASE STORAGE - Uses GraphQL for persistence
  */
 interface TemplateContextType {
   // Template state
   allTemplates: BlockTemplate[];
-  customTemplates: CustomTemplate[];
+  customTemplates: TemplateBlocksData[];
   selectedTemplate: BlockTemplate | null;
   templateSearchQuery: string;
   selectedTemplateCategory: string;
@@ -24,6 +26,7 @@ interface TemplateContextType {
   isApplyingTemplate: boolean;
   showSaveTemplateDialog: boolean;
   isSavingTemplate: boolean;
+  isLoadingTemplates: boolean;
   
   // State setters
   setTemplateSearchQuery: (query: string) => void;
@@ -37,9 +40,10 @@ interface TemplateContextType {
   // Template operations
   handlePreviewTemplate: (template: BlockTemplate) => void;
   handleClosePreview: () => void;
-  handleSaveAsTemplate: (template: Omit<BlockTemplate, 'id' | 'thumbnail'>) => void;
-  handleDeleteCustomTemplate: (id: string) => void;
-  refreshTemplates: () => void;
+  handleSaveAsTemplate: (template: CreateTemplateInput) => Promise<void>;
+  handleDeleteCustomTemplate: (id: string) => Promise<void>;
+  handleDuplicateTemplate: (id: string, newName?: string) => Promise<void>;
+  refreshTemplates: () => Promise<void>;
 }
 
 const TemplateContext = createContext<TemplateContextType | undefined>(undefined);
@@ -49,6 +53,14 @@ interface TemplateProviderProps {
 }
 
 export function TemplateProvider({ children }: TemplateProviderProps) {
+  // Get Apollo client for GraphQL operations
+  const apolloClient = useApolloClient();
+  
+  // Initialize service on mount
+  useEffect(() => {
+    initCustomTemplatesService(apolloClient as any);
+  }, [apolloClient]);
+  
   // Template state
   const [templateSearchQuery, setTemplateSearchQuery] = useState('');
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState<string>('all');
@@ -57,23 +69,46 @@ export function TemplateProvider({ children }: TemplateProviderProps) {
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
   const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
   const [isSavingTemplate, setIsSavingTemplate] = useState(false);
-  const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
+  const [customTemplates, setCustomTemplates] = useState<TemplateBlocksData[]>([]);
   const [allTemplates, setAllTemplates] = useState<BlockTemplate[]>(BLOCK_TEMPLATES);
   
-  // Load custom templates
-  const refreshTemplates = React.useCallback(() => {
-    initSampleTemplates();
-    const custom = getCustomTemplates();
-    setCustomTemplates(custom);
-    setAllTemplates([...BLOCK_TEMPLATES, ...custom]);
-  }, []);
+  // Load custom templates from database
+  const refreshTemplates = React.useCallback(async () => {
+    try {
+      setIsLoadingTemplates(true);
+      initSampleTemplates();
+      
+      const service = new CustomTemplatesService(apolloClient as any);
+      const custom = await service.getMyTemplates();
+      
+      setCustomTemplates(custom);
+      
+      // Merge with default templates
+      const merged: BlockTemplate[] = [
+        ...BLOCK_TEMPLATES,
+        ...custom.map((ct: TemplateBlocksData) => ({
+          id: ct.id,
+          name: ct.name,
+          description: ct.description,
+          category: ct.category as any,
+          thumbnail: ct.thumbnail || '/placeholder-template.png',
+          blocks: [], // Will be loaded on demand
+          isCustom: true,
+        })),
+      ];
+      
+      setAllTemplates(merged);
+    } catch (error) {
+      console.error('Error loading templates from database:', error);
+    } finally {
+      setIsLoadingTemplates(false);
+    }
+  }, [apolloClient]);
   
+  // Load custom templates on mount
   useEffect(() => {
     refreshTemplates();
-    
-    // Listen for storage changes
-    window.addEventListener('storage', refreshTemplates);
-    return () => window.removeEventListener('storage', refreshTemplates);
   }, [refreshTemplates]);
   
   // Template operations
@@ -87,21 +122,58 @@ export function TemplateProvider({ children }: TemplateProviderProps) {
     setSelectedTemplate(null);
   }, []);
   
-  const handleSaveAsTemplate = React.useCallback((template: Omit<BlockTemplate, 'id' | 'thumbnail'>) => {
-    const newTemplate: BlockTemplate = {
-      ...template,
-      id: `custom-${Date.now()}`,
-      thumbnail: '/placeholder-template.png',
-    };
-    
-    saveCustomTemplate(newTemplate);
-    refreshTemplates();
-  }, [refreshTemplates]);
+  // Save new template to database
+  const handleSaveAsTemplate = React.useCallback(async (template: CreateTemplateInput) => {
+    try {
+      setIsSavingTemplate(true);
+      
+      const service = new CustomTemplatesService(apolloClient as any);
+      await service.createTemplate(template);
+      
+      console.log(`Template "${template.name}" saved successfully!`);
+      
+      // Refresh templates list
+      await refreshTemplates();
+      setShowSaveTemplateDialog(false);
+    } catch (error) {
+      console.error('Error saving template:', error);
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  }, [apolloClient, refreshTemplates]);
   
-  const handleDeleteCustomTemplate = React.useCallback((id: string) => {
-    deleteCustomTemplate(id);
-    refreshTemplates();
-  }, [refreshTemplates]);
+  // Delete template from database
+  const handleDeleteCustomTemplate = React.useCallback(async (id: string) => {
+    try {
+      const confirmed = window.confirm('Are you sure you want to delete this template?');
+      if (!confirmed) return;
+      
+      const service = new CustomTemplatesService(apolloClient as any);
+      await service.deleteTemplate(id);
+      
+      console.log('Template deleted successfully');
+      
+      // Refresh templates list
+      await refreshTemplates();
+    } catch (error) {
+      console.error('Error deleting template:', error);
+    }
+  }, [apolloClient, refreshTemplates]);
+  
+  // Duplicate template
+  const handleDuplicateTemplate = React.useCallback(async (id: string, newName?: string) => {
+    try {
+      const service = new CustomTemplatesService(apolloClient as any);
+      await service.duplicateTemplate(id, newName);
+      
+      console.log('Template duplicated successfully');
+      
+      // Refresh templates list
+      await refreshTemplates();
+    } catch (error) {
+      console.error('Error duplicating template:', error);
+    }
+  }, [apolloClient, refreshTemplates]);
   
   const value: TemplateContextType = {
     allTemplates,
@@ -113,6 +185,7 @@ export function TemplateProvider({ children }: TemplateProviderProps) {
     isApplyingTemplate,
     showSaveTemplateDialog,
     isSavingTemplate,
+    isLoadingTemplates,
     setTemplateSearchQuery,
     setSelectedTemplateCategory,
     setShowPreviewModal,
@@ -124,6 +197,7 @@ export function TemplateProvider({ children }: TemplateProviderProps) {
     handleClosePreview,
     handleSaveAsTemplate,
     handleDeleteCustomTemplate,
+    handleDuplicateTemplate,
     refreshTemplates,
   };
   

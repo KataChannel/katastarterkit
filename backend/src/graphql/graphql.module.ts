@@ -12,6 +12,7 @@ import { PermissionResolver, RoleResolver, UserRbacResolver } from './resolvers/
 import { OramaSearchResolver } from './resolvers/orama-search.resolver';
 import { UniversalQueryResolver } from './resolvers/universal-query.resolver';
 import { ExtModelsResolver } from './resolvers/ext-models.resolver';
+import { CustomTemplateResolver } from './resolvers/custom-template.resolver';
 
 import { InvoiceController } from '../controllers/invoice.controller';
 import { InvoiceImportController } from '../controllers/invoice-import.controller';
@@ -37,6 +38,7 @@ import { AffiliateUserService, AffiliateCampaignService } from '../services/affi
 import { AffiliateTrackingService } from '../services/affiliate-tracking.service';
 import { AffiliatePaymentService } from '../services/affiliate-payment.service';
 import { AffiliateConversionService } from '../services/affiliate-conversion.service';
+import { CustomTemplateService } from '../services/custom-template.service';
 import { DynamicQueryGeneratorService } from './services/dynamic-query-generator.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
@@ -98,6 +100,9 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     // External models resolver
     ExtModelsResolver,
     
+    // Custom templates resolver
+    CustomTemplateResolver,
+    
     // Services
     UserService,
     PostService,
@@ -114,6 +119,9 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     InvoiceImportService,
     BackendConfigService,
     RbacService,
+    
+    // Custom template service
+    CustomTemplateService,
     
     // Affiliate services
     AffiliateUserService,
@@ -140,6 +148,9 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     InvoiceImportService,
     BackendConfigService,
     RbacService,
+    
+    // Custom template service
+    CustomTemplateService,
     
     // Affiliate services
     AffiliateUserService,

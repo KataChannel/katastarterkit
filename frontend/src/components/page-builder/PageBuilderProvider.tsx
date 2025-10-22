@@ -11,6 +11,8 @@ import {
   PageActionsProvider,
   usePageState,
   usePageActions,
+  useUIState,
+  useTemplate,
 } from './contexts';
 import ErrorBoundary from './ErrorBoundary';
 import PageStateErrorBoundary from './contexts/PageStateErrorBoundary';
@@ -88,28 +90,38 @@ function DndContextWrapper({ children }: { children: ReactNode }) {
       {children}
       
       {/* Drag Overlay - Visual feedback during drag */}
-      {/* Fixed positioning to ensure it's always visible above all other elements */}
-      <DragOverlay dropAnimation={null}>
-        {draggedBlock ? (
-          <div className="animate-pulse pointer-events-none">
-            <Card className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 shadow-2xl border-2 border-blue-300 text-white min-w-xs">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <GripVertical className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <span className="text-sm font-bold block">Moving Block</span>
-                  <span className="text-xs opacity-90">{draggedBlock.type}</span>
-                </div>
-                <div className="ml-auto text-2xl">📦</div>
-              </div>
-            </Card>
-          </div>
-        ) : null}
-      </DragOverlay>
+      {/* Memoized to prevent unnecessary re-renders and memory leaks */}
+      <DragOverlayContent draggedBlock={draggedBlock} />
     </DndContext>
   );
 }
+
+/**
+ * Memoized DragOverlay Content Component
+ * Prevents memory leaks and unnecessary re-renders during drag operations
+ */
+const DragOverlayContent = React.memo(function DragOverlayContent({ draggedBlock }: { draggedBlock: any }) {
+  return (
+    <DragOverlay dropAnimation={null}>
+      {draggedBlock ? (
+        <div className="animate-pulse pointer-events-none">
+          <Card className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 shadow-2xl border-2 border-blue-300 text-white min-w-xs">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <GripVertical className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <span className="text-sm font-bold block">Moving Block</span>
+                <span className="text-xs opacity-90">{draggedBlock.type}</span>
+              </div>
+              <div className="ml-auto text-2xl">📦</div>
+            </div>
+          </Card>
+        </div>
+      ) : null}
+    </DragOverlay>
+  );
+});
 
 /**
  * Combined hook for backward compatibility
@@ -119,8 +131,6 @@ function DndContextWrapper({ children }: { children: ReactNode }) {
  */
 export function usePageBuilderContext() {
   const pageState = usePageState();
-  const { useUIState } = require('./contexts');
-  const { useTemplate } = require('./contexts');
   const uiState = useUIState();
   const templateState = useTemplate();
   const pageActions = usePageActions();

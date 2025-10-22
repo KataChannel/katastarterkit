@@ -8,6 +8,7 @@ import {
 } from '@dnd-kit/sortable';
 import { Layout } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import { usePageState, useUIState, usePageActions } from './contexts';
 import { BlockRenderer } from './blocks/BlockRenderer';
 import { SortableBlockWrapper } from './blocks/SortableBlockWrapper';
@@ -55,12 +56,14 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
     },
   });
   
-  // Log droppable setup
+  // Log droppable setup (dev only to prevent performance overhead)
   React.useEffect(() => {
-    console.log('[PageBuilder] Canvas droppable setup:', {
-      hasRef: !!setCanvasRef,
-      isOver: isCanvasOver,
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[PageBuilder] Canvas droppable setup:', {
+        hasRef: !!setCanvasRef,
+        isOver: isCanvasOver,
+      });
+    }
   }, [setCanvasRef, isCanvasOver]);
 
   return (
@@ -94,14 +97,15 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
                   : 'bg-white border-2 border-dashed border-gray-200'
               }`}
             >
-              {/* Drop zone hint */}
-              {isCanvasOver && (
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                  <div className="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold shadow-lg animate-bounce">
-                    📍 Drop here to add block
-                  </div>
+              {/* Drop zone hint - optimized for performance */}
+              <div className={cn(
+                "absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-200",
+                isCanvasOver ? "opacity-100" : "opacity-0"
+              )}>
+                <div className="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold shadow-lg animate-bounce">
+                  📍 Drop here to add block
                 </div>
-              )}
+              </div>
               
               {!hasBlocks ? (
                 // Empty State - Droppable

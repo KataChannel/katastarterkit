@@ -1,44 +1,15 @@
 import { gql } from '@apollo/client';
+import {
+  CATEGORY_BASIC_FRAGMENT,
+  CATEGORY_WITH_COUNT_FRAGMENT,
+  CATEGORY_TREE_FRAGMENT,
+} from '@/lib/graphql/shared-fragments';
 
 // ============================================================================
-// FRAGMENTS
+// FRAGMENTS - Imported from shared-fragments.ts to avoid duplication
 // ============================================================================
-
-export const CATEGORY_BASIC_FRAGMENT = gql`
-  fragment CategoryBasicFields on CategoryType {
-    id
-    name
-    slug
-    description
-    image
-    displayOrder
-    isActive
-    createdAt
-  }
-`;
-
-export const CATEGORY_WITH_COUNT_FRAGMENT = gql`
-  ${CATEGORY_BASIC_FRAGMENT}
-  fragment CategoryWithCountFields on CategoryType {
-    ...CategoryBasicFields
-    productCount
-  }
-`;
-
-export const CATEGORY_TREE_FRAGMENT = gql`
-  ${CATEGORY_WITH_COUNT_FRAGMENT}
-  fragment CategoryTreeFields on CategoryType {
-    ...CategoryWithCountFields
-    parent {
-      id
-      name
-      slug
-    }
-    children {
-      ...CategoryWithCountFields
-    }
-  }
-`;
+// Re-export for backward compatibility
+export { CATEGORY_BASIC_FRAGMENT, CATEGORY_WITH_COUNT_FRAGMENT, CATEGORY_TREE_FRAGMENT };
 
 // ============================================================================
 // QUERIES

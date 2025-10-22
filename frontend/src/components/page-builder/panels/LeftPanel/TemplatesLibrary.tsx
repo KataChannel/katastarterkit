@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -16,11 +16,13 @@ import {
   Copy,
   Check,
   X,
+  ChevronDown,
 } from 'lucide-react';
 import { usePageActions } from '../../PageBuilderProvider';
 import { BlockType } from '@/types/page-builder';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface TemplateBlock {
   type: BlockType;
@@ -37,6 +39,14 @@ interface TemplateConfig {
   blockCount: number;
   blocks: TemplateBlock[];
   color: string;
+  popularity?: 'hot' | 'new' | null;
+}
+
+interface CategoryConfig {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
 }
 
 const templates: TemplateConfig[] = [
@@ -49,6 +59,7 @@ const templates: TemplateConfig[] = [
     preview: '🛍️',
     blockCount: 6,
     color: 'from-blue-500 to-cyan-500',
+    popularity: 'hot' as const,
     blocks: [
       { type: BlockType.HERO, content: { title: 'Our Products', subtitle: 'Discover our latest collection', style: {} } },
       { type: BlockType.GRID, content: { columns: 3, gap: '20px', style: {} } },
@@ -83,6 +94,7 @@ const templates: TemplateConfig[] = [
     preview: '✅',
     blockCount: 8,
     color: 'from-green-500 to-emerald-500',
+    popularity: 'hot' as const,
     blocks: [
       { type: BlockType.TEXT, content: { content: '<h1>Task Dashboard</h1>', style: {} } },
       { type: BlockType.STATS, content: { title: 'Project Stats', stats: [{ label: 'Tasks', value: '24' }, { label: 'Completed', value: '12' }], style: {} } },
@@ -104,6 +116,7 @@ const templates: TemplateConfig[] = [
     preview: '🚀',
     blockCount: 3,
     color: 'from-orange-500 to-red-500',
+    popularity: 'hot' as const,
     blocks: [
       { type: BlockType.HERO, content: { title: 'Welcome to Our Platform', subtitle: 'The best solution for your business', description: 'Start today and see the difference', buttonText: 'Get Started', buttonLink: '#', style: {} } },
       { type: BlockType.SPACER, content: { height: 60, style: {} } },
@@ -134,6 +147,7 @@ const templates: TemplateConfig[] = [
     preview: '⭐',
     blockCount: 4,
     color: 'from-yellow-500 to-orange-500',
+    popularity: 'new' as const,
     blocks: [
       { type: BlockType.TEXT, content: { content: '<h2 style="text-align: center;">What Our Customers Say</h2>', style: {} } },
       { type: BlockType.SPACER, content: { height: 40, style: {} } },
@@ -170,6 +184,7 @@ const templates: TemplateConfig[] = [
     preview: '📰',
     blockCount: 3,
     color: 'from-pink-500 to-rose-500',
+    popularity: 'new' as const,
     blocks: [
       { type: BlockType.TEXT, content: { content: '<h2 style="text-align: center;">Subscribe to Our Newsletter</h2>', style: {} } },
       { type: BlockType.TEXT, content: { content: '<p style="text-align: center;">Get the latest updates and exclusive offers</p>', style: {} } },
@@ -192,6 +207,39 @@ const categoryLabels = {
   landing: 'Landing Page',
   business: 'Business',
   marketing: 'Marketing',
+};
+
+const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
+  ecommerce: {
+    id: 'ecommerce',
+    label: 'E-commerce',
+    icon: ShoppingBag,
+    description: 'Product showcase and shopping templates',
+  },
+  productivity: {
+    id: 'productivity',
+    label: 'Productivity',
+    icon: LayoutDashboard,
+    description: 'Task management and productivity tools',
+  },
+  landing: {
+    id: 'landing',
+    label: 'Landing Page',
+    icon: Newspaper,
+    description: 'Landing pages and marketing sites',
+  },
+  business: {
+    id: 'business',
+    label: 'Business',
+    icon: Building2,
+    description: 'Business and company templates',
+  },
+  marketing: {
+    id: 'marketing',
+    label: 'Marketing',
+    icon: TrendingUp,
+    description: 'Marketing and promotion templates',
+  },
 };
 
 function TemplateCard({ template, onInsert, onPreview }: { template: TemplateConfig; onInsert: (template: TemplateConfig) => void; onPreview: (template: TemplateConfig) => void }) {
@@ -225,6 +273,17 @@ function TemplateCard({ template, onInsert, onPreview }: { template: TemplateCon
       {/* Preview Area */}
       <div className={`relative h-24 sm:h-28 bg-gradient-to-br ${template.color} flex items-center justify-center`}>
         <div className="text-4xl sm:text-5xl">{template.preview}</div>
+        
+        {/* Popularity Badge */}
+        {template.popularity && (
+          <div className="absolute top-2 left-2">
+            <Badge className={cn('text-[10px] sm:text-xs h-5 sm:h-6 px-1.5 sm:px-2', 
+              template.popularity === 'hot' ? 'bg-red-500 hover:bg-red-600' : 'bg-purple-500 hover:bg-purple-600'
+            )}>
+              {template.popularity === 'hot' ? '🔥 Hot' : '✨ New'}
+            </Badge>
+          </div>
+        )}
         
         {/* Hover Overlay */}
         {isHovered && (
@@ -260,7 +319,7 @@ function TemplateCard({ template, onInsert, onPreview }: { template: TemplateCon
         )}
 
         {/* Block Count Badge */}
-        <div className="absolute top-2 right-2">
+        <div className={cn('absolute top-2 right-2', template.popularity && 'top-10 sm:top-12')}>
           <Badge variant="secondary" className="text-[10px] sm:text-xs h-5 sm:h-6 px-1.5 sm:px-2 bg-white/90 backdrop-blur-sm">
             {template.blockCount} blocks
           </Badge>
@@ -278,11 +337,11 @@ function TemplateCard({ template, onInsert, onPreview }: { template: TemplateCon
         
         {/* Category Badge */}
         <div className="flex items-center gap-1.5">
-          {React.createElement(categoryIcons[template.category], {
+          {React.createElement(CATEGORY_CONFIG[template.category].icon, {
             className: 'w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400',
           })}
           <span className="text-[10px] sm:text-xs text-gray-500">
-            {categoryLabels[template.category]}
+            {CATEGORY_CONFIG[template.category].label}
           </span>
         </div>
       </div>
@@ -295,26 +354,44 @@ export function TemplatesLibrary() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [previewTemplate, setPreviewTemplate] = useState<TemplateConfig | null>(null);
   const [isInserting, setIsInserting] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['all']));
 
   // Get page actions
   const { handleApplyTemplate } = usePageActions();
 
-  const categories = [
-    { id: 'all', label: 'All Templates', icon: Sparkles },
-    { id: 'ecommerce', label: 'E-commerce', icon: ShoppingBag },
-    { id: 'productivity', label: 'Productivity', icon: LayoutDashboard },
-    { id: 'landing', label: 'Landing', icon: Newspaper },
-    { id: 'business', label: 'Business', icon: Building2 },
-    { id: 'marketing', label: 'Marketing', icon: TrendingUp },
-  ];
+  const filteredTemplates = useMemo(() => {
+    return templates.filter((template) => {
+      const matchesSearch =
+        template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        template.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = activeCategory === 'all' || template.category === activeCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, activeCategory]);
 
-  const filteredTemplates = templates.filter((template) => {
-    const matchesSearch =
-      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = activeCategory === 'all' || template.category === activeCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Group templates by category
+  const groupedTemplates = useMemo(() => {
+    if (activeCategory === 'all') {
+      const grouped: Record<string, TemplateConfig[]> = {};
+      Object.keys(CATEGORY_CONFIG).forEach((cat) => {
+        grouped[cat] = templates.filter((t) => t.category === cat && 
+          (t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           t.description.toLowerCase().includes(searchQuery.toLowerCase())));
+      });
+      return grouped;
+    }
+    return {};
+  }, [searchQuery, activeCategory]);
+
+  const toggleCategory = (categoryId: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(categoryId)) {
+      newExpanded.delete(categoryId);
+    } else {
+      newExpanded.add(categoryId);
+    }
+    setExpandedCategories(newExpanded);
+  };
 
   const handleInsertTemplate = async (template: TemplateConfig) => {
     setIsInserting(true);
@@ -354,11 +431,11 @@ export function TemplatesLibrary() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-gray-50">
       {/* Header */}
-      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200 bg-white">
-        <div className="flex items-center gap-2 mb-3 sm:mb-4">
-          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+      <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200 bg-white space-y-3 sm:space-y-4">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
           <h2 className="font-semibold text-sm sm:text-base">Templates</h2>
           <Badge variant="secondary" className="ml-auto text-[10px] sm:text-xs">
             {templates.length} available
@@ -369,63 +446,122 @@ export function TemplatesLibrary() {
         <div className="relative">
           <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 pointer-events-none" />
           <Input
-            placeholder="Search templates..."
+            placeholder="Search templates or description..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 sm:pl-9 h-8 sm:h-9 text-xs sm:text-sm"
+            className="pl-8 sm:pl-9 h-8 sm:h-9 text-xs sm:text-sm focus-visible:ring-primary"
           />
         </div>
       </div>
 
-      {/* Category Filter */}
+      {/* Category Tabs - Horizontal Scroll */}
       <div className="flex-shrink-0 flex gap-1.5 sm:gap-2 p-2 sm:p-3 border-b border-gray-200 overflow-x-auto bg-white scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-        {categories.map((category) => {
-          const Icon = category.icon;
+        <Button
+          variant={activeCategory === 'all' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setActiveCategory('all')}
+          className="whitespace-nowrap text-xs h-7 sm:h-8 px-2.5 sm:px-3 flex-shrink-0 gap-1.5"
+        >
+          <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+          <span className="hidden sm:inline">All Templates</span>
+          <span className="sm:hidden">All</span>
+        </Button>
+        
+        {Object.keys(CATEGORY_CONFIG).map((categoryId) => {
+          const config = CATEGORY_CONFIG[categoryId];
+          const Icon = config.icon;
           return (
             <Button
-              key={category.id}
-              variant={activeCategory === category.id ? 'default' : 'outline'}
+              key={categoryId}
+              variant={activeCategory === categoryId ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setActiveCategory(category.id)}
+              onClick={() => setActiveCategory(categoryId)}
               className="whitespace-nowrap text-xs h-7 sm:h-8 px-2.5 sm:px-3 flex-shrink-0 gap-1.5"
             >
               <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              <span className="hidden sm:inline">{category.label}</span>
-              <span className="sm:hidden">{category.label.split(' ')[0]}</span>
+              <span className="hidden sm:inline">{config.label}</span>
+              <span className="sm:hidden">{config.label.split(' ')[0]}</span>
             </Button>
           );
         })}
       </div>
 
       {/* Templates Grid */}
-      <div className="flex-1 min-h-0 p-3 sm:p-4 bg-gray-50/50">
-        {filteredTemplates.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-            {filteredTemplates.map((template) => (
-              <TemplateCard
-                key={template.id}
-                template={template}
-                onInsert={handleInsertTemplate}
-                onPreview={handlePreviewTemplate}
-              />
-            ))}
+      <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        {activeCategory === 'all' ? (
+          // Grouped view by category
+          <div className="space-y-6 sm:space-y-8">
+            {Object.keys(CATEGORY_CONFIG).map((categoryId) => {
+              const categoryTemplates = groupedTemplates[categoryId] || [];
+              if (categoryTemplates.length === 0) return null;
+              
+              const config = CATEGORY_CONFIG[categoryId];
+              const Icon = config.icon;
+              const isExpanded = expandedCategories.has(categoryId);
+
+              return (
+                <div key={categoryId}>
+                  <button
+                    onClick={() => toggleCategory(categoryId)}
+                    className="flex items-center gap-2 mb-3 sm:mb-4 text-sm sm:text-base font-semibold text-gray-900 hover:text-primary transition-colors w-full"
+                  >
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span>{config.label}</span>
+                    <Badge variant="secondary" className="text-[10px] sm:text-xs ml-auto">
+                      {categoryTemplates.length}
+                    </Badge>
+                    <ChevronDown
+                      className={cn('w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform flex-shrink-0',
+                        isExpanded ? 'rotate-0' : '-rotate-90'
+                      )}
+                    />
+                  </button>
+                  
+                  {isExpanded && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 ml-0 sm:ml-2 pl-0 sm:pl-4 border-l border-gray-200 sm:border-l-2">
+                      {categoryTemplates.map((template) => (
+                        <TemplateCard
+                          key={template.id}
+                          template={template}
+                          onInsert={handleInsertTemplate}
+                          onPreview={handlePreviewTemplate}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center text-gray-400 text-xs sm:text-sm py-8 sm:py-12">
-            <Search className="w-8 h-8 sm:w-10 sm:h-10 mb-2 opacity-50" />
-            <p className="font-medium">No templates found</p>
-            <p className="text-[10px] sm:text-xs mt-1">Try a different search term or category</p>
-          </div>
+          // Single category flat view
+          filteredTemplates.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              {filteredTemplates.map((template) => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  onInsert={handleInsertTemplate}
+                  onPreview={handlePreviewTemplate}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-gray-400 text-xs sm:text-sm py-8 sm:py-12">
+              <Search className="w-8 h-8 sm:w-10 sm:h-10 mb-2 opacity-50" />
+              <p className="font-medium">No templates found</p>
+              <p className="text-[10px] sm:text-xs mt-1">Try a different search term or category</p>
+            </div>
+          )
         )}
       </div>
 
       {/* Footer Info */}
       <div className="flex-shrink-0 p-2 sm:p-3 border-t border-gray-200 bg-white">
         <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500">
-          <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+          <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
           <span>
-            Showing <span className="font-medium text-gray-700">{filteredTemplates.length}</span> template
-            {filteredTemplates.length !== 1 ? 's' : ''}
+            Double-click to insert | 👁️ Preview for details
           </span>
         </div>
       </div>
@@ -447,16 +583,21 @@ export function TemplatesLibrary() {
               
               <div className="space-y-4 mt-4">
                 {/* Template Info */}
-                <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-4 text-sm flex-wrap">
                   <Badge variant="secondary" className="gap-1.5">
-                    {React.createElement(categoryIcons[previewTemplate.category], {
+                    {React.createElement(CATEGORY_CONFIG[previewTemplate.category].icon, {
                       className: 'w-3.5 h-3.5',
                     })}
-                    {categoryLabels[previewTemplate.category]}
+                    {CATEGORY_CONFIG[previewTemplate.category].label}
                   </Badge>
                   <Badge variant="outline">
                     {previewTemplate.blockCount} blocks
                   </Badge>
+                  {previewTemplate.popularity && (
+                    <Badge className={previewTemplate.popularity === 'hot' ? 'bg-red-500 hover:bg-red-600' : 'bg-purple-500 hover:bg-purple-600'}>
+                      {previewTemplate.popularity === 'hot' ? '🔥 Hot' : '✨ New'}
+                    </Badge>
+                  )}
                 </div>
 
                 {/* Block List */}

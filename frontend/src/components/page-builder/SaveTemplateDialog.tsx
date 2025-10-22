@@ -23,13 +23,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { PageBlock } from '@/types/page-builder';
 import { BlockTemplate, TemplateCategory } from '@/data/blockTemplates';
+import { CreateTemplateInput } from '@/utils/customTemplatesDb';
 import { Save, Loader2, Info } from 'lucide-react';
 
 interface SaveTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   blocks: PageBlock[];
-  onSave: (template: Omit<BlockTemplate, 'id' | 'thumbnail'>) => void;
+  onSave: (template: CreateTemplateInput) => Promise<void>;
   isSaving?: boolean;
 }
 
@@ -57,44 +58,39 @@ export function SaveTemplateDialog({
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
   const [templateCategory, setTemplateCategory] = useState<TemplateCategory>('custom');
-  const [errors, setErrors] = useState<{ name?: string; description?: string }>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validation
-    const newErrors: { name?: string; description?: string } = {};
-    
     if (!templateName.trim()) {
-      newErrors.name = 'Template name is required';
-    } else if (templateName.length < 3) {
-      newErrors.name = 'Template name must be at least 3 characters';
-    }
-    
-    if (!templateDescription.trim()) {
-      newErrors.description = 'Template description is required';
-    } else if (templateDescription.length < 10) {
-      newErrors.description = 'Description must be at least 10 characters';
-    }
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+      setErrors({ name: 'Template name is required' });
       return;
     }
-    
-    // Create template object
-    const template: Omit<BlockTemplate, 'id' | 'thumbnail'> = {
-      name: templateName.trim(),
-      description: templateDescription.trim(),
-      category: templateCategory,
-      blocks: blocks.map(block => convertToTemplateBlock(block, 0)),
-    };
-    
-    onSave(template);
-    
-    // Reset form
-    setTemplateName('');
-    setTemplateDescription('');
-    setTemplateCategory('custom');
-    setErrors({});
+
+    const newErrors: Record<string, string> = {};
+    setErrors(newErrors);
+
+    try {
+      // Prepare template data
+      const template: CreateTemplateInput = {
+        name: templateName.trim(),
+        description: templateDescription.trim(),
+        category: templateCategory as any,
+        blocks: blocks.map(block => convertToTemplateBlock(block, 0)),
+      };
+      
+      // Call async handler
+      await onSave(template);
+      
+      // Reset form
+      setTemplateName('');
+      setTemplateDescription('');
+      setTemplateCategory('custom');
+      setErrors({});
+    } catch (error) {
+      console.error('Error saving template:', error);
+      setErrors({ submit: 'Failed to save template. Please try again.' });
+    }
   };
 
   const convertToTemplateBlock = (block: PageBlock, depth: number): any => {
@@ -120,14 +116,18 @@ export function SaveTemplateDialog({
   const handleNameChange = (value: string) => {
     setTemplateName(value);
     if (errors.name) {
-      setErrors({ ...errors, name: undefined });
+      const newErrors = { ...errors };
+      delete newErrors.name;
+      setErrors(newErrors);
     }
   };
 
   const handleDescriptionChange = (value: string) => {
     setTemplateDescription(value);
     if (errors.description) {
-      setErrors({ ...errors, description: undefined });
+      const newErrors = { ...errors };
+      delete newErrors.description;
+      setErrors(newErrors);
     }
   };
 

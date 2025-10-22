@@ -161,6 +161,10 @@ model User {
   department        Department?   @relation("DepartmentUsers", fields: [departmentId], references: [id])
   departmentId      String?
 
+  // Page Builder - Custom Templates Relations
+  customTemplates   CustomTemplate[] @relation("UserCustomTemplates")
+  sharedTemplates   TemplateShare[]  @relation("SharedTemplates")
+
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
   @@index([roleType])
@@ -3104,4 +3108,72 @@ model Department {
   updatedAt DateTime @updatedAt
   
   @@map("departments")
+}
+
+// ============================================================================
+// PAGE BUILDER - CUSTOM TEMPLATES
+// ============================================================================
+
+enum TemplateCategory {
+  HERO
+  FEATURES
+  PRICING
+  TEAM
+  CONTACT
+  TESTIMONIALS
+  CTA
+  FAQ
+  FOOTER
+  NEWSLETTER
+  CUSTOM
+}
+
+model CustomTemplate {
+  id          String            @id @default(uuid())
+  name        String
+  description String
+  category    TemplateCategory  @default(CUSTOM)
+  
+  // Template structure - stored as JSON
+  blocks      Json              // Serialized blocks structure
+  thumbnail   String?           // Base64 encoded thumbnail
+  
+  // Ownership
+  userId      String
+  user        User              @relation("UserCustomTemplates", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Sharing
+  shares      TemplateShare[]    @relation("TemplateShares")
+  
+  // Metadata
+  isPublic    Boolean           @default(false)  // Share with other users
+  isArchived  Boolean           @default(false)
+  usageCount  Int               @default(0)      // Track how many times used
+  
+  // Timestamps
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  @@unique([userId, name])  // User can't have duplicate template names
+  @@index([userId])
+  @@index([category])
+  @@index([isPublic])
+  @@map("custom_templates")
+}
+
+// For sharing templates with other users
+model TemplateShare {
+  id          String            @id @default(uuid())
+  templateId  String
+  sharedWith  String            // User ID who template is shared with
+  
+  template    CustomTemplate    @relation("TemplateShares", fields: [templateId], references: [id], onDelete: Cascade)
+  user        User              @relation("SharedTemplates", fields: [sharedWith], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime          @default(now())
+  
+  @@unique([templateId, sharedWith])  // Can't share same template twice
+  @@index([templateId])
+  @@index([sharedWith])
+  @@map("template_shares")
 }

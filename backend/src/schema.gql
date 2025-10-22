@@ -802,6 +802,14 @@ input CreateCourseInput {
   trailer: String
 }
 
+input CreateCustomTemplateInput {
+  blocks: JSON!
+  category: TemplateCategory!
+  description: String
+  name: String!
+  thumbnail: String
+}
+
 input CreateEmployeeProfileInput {
   bankAccountName: String
   bankAccountNumber: String
@@ -1196,6 +1204,22 @@ input CreateTaskInput {
   dueDate: String
   priority: TaskPriority!
   title: String!
+}
+
+type CustomTemplate {
+  blocks: JSON!
+  category: TemplateCategory!
+  createdAt: DateTime!
+  description: String
+  id: String!
+  isArchived: Boolean!
+  isPublic: Boolean!
+  name: String!
+  thumbnail: String
+  updatedAt: DateTime!
+  usageCount: Float!
+  user: User!
+  userId: String!
 }
 
 type DatabaseSyncResult {
@@ -1863,6 +1887,7 @@ type Mutation {
   createComment(input: CreateCommentInput!): Comment!
   createCourse(createCourseInput: CreateCourseInput!): Course!
   createCourseCategory(createCourseCategoryInput: CreateCourseCategoryInput!): CourseCategory!
+  createCustomTemplate(input: CreateCustomTemplateInput!): CustomTemplate!
   createEmployeeProfile(input: CreateEmployeeProfileInput!): EmployeeProfile!
   createEmploymentHistory(input: CreateEmploymentHistoryInput!): EmploymentHistory!
   createFileShare(input: CreateFileShareInput!): FileShare!
@@ -1900,6 +1925,7 @@ type Mutation {
   deleteComment(id: String!): Boolean!
   deleteCourse(id: ID!): Boolean!
   deleteCourseCategory(id: ID!): Boolean!
+  deleteCustomTemplate(id: String!): Boolean!
   deleteEmployeeProfile(id: ID!): DeleteResponse!
   deleteFile(bucket: String!, fileId: String!): Boolean!
   deleteFolder(id: ID!): Boolean!
@@ -1930,6 +1956,7 @@ type Mutation {
   """Delete ext_sanphamhoadon"""
   deleteext_sanphamhoadon(id: String!, options: JSON): JSON!
   dropCourse(courseId: ID!): Enrollment!
+  duplicateCustomTemplate(newName: String, templateId: String!): CustomTemplate!
   duplicatePage(id: String!, slug: String, title: String): Page!
 
   """Create a new record"""
@@ -1957,6 +1984,7 @@ type Mutation {
   generateSummary(content: String!, maxLength: Float! = 200): String!
   generateTags(content: String!, maxTags: Float! = 5): [String!]!
   improveContent(content: String!, instruction: String!): String!
+  incrementTemplateUsage(templateId: String!): CustomTemplate!
   joinCampaign(input: JoinCampaignInput!): String!
   loginUser(input: LoginUserInput!): AuthResponse!
   loginWithFacebook(input: SocialLoginInput!): AuthResponse!
@@ -1996,6 +2024,7 @@ type Mutation {
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   reviewCampaignApplication(input: ReviewCampaignApplicationInput!): String!
   shareTask(input: ShareTaskInput!): TaskShare!
+  shareTemplate(input: ShareTemplateInput!): [TemplateShare!]!
   submitQuiz(input: SubmitQuizInput!): QuizAttempt!
   syncCallCenterData(input: SyncCallCenterInput): SyncCallCenterResponse!
   toggleMenuActive(id: ID!): MenuResponseDto!
@@ -2003,6 +2032,7 @@ type Mutation {
 
   """Execute any Prisma mutation operation dynamically"""
   universalMutation(input: UniversalQueryInput!): JSONObject!
+  unshareTemplate(templateId: String!, userId: String!): Boolean!
   updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
   updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
   updateCallCenterConfig(id: String!, input: UpdateCallCenterConfigInput!): CallCenterConfig!
@@ -2010,6 +2040,7 @@ type Mutation {
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
   updateCourseCategory(updateCourseCategoryInput: UpdateCourseCategoryInput!): CourseCategory!
+  updateCustomTemplate(input: UpdateCustomTemplateInput!): CustomTemplate!
   updateEmployeeProfile(id: ID!, input: UpdateEmployeeProfileInput!): EmployeeProfile!
   updateEmploymentHistory(id: ID!, input: UpdateEmploymentHistoryInput!): EmploymentHistory!
   updateFile(input: UpdateFileInput!): File!
@@ -2047,6 +2078,7 @@ type Mutation {
   updateReview(input: UpdateReviewInput!): Review!
   updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateTask(input: UpdateTaskInput!): Task!
+  updateTemplatePublicity(input: UpdateTemplatePublicityInput!): CustomTemplate!
   updateUser(id: String!, input: UpdateUserInput!): User!
 
   """Update ext_sanphamhoadon"""
@@ -2687,9 +2719,11 @@ type Query {
   getCallCenterSyncLogs(pagination: PaginationInput! = {limit: 20, page: 1}): [CallCenterSyncLog!]!
   getCommentById(id: String!): Comment!
   getCommentsByPost(postId: String!): [Comment!]!
+  getCustomTemplate(id: String!): CustomTemplate!
   getInvoice(id: ID!): ExtListhoadon!
   getInvoiceStats: InvoiceStats!
   getMe: User!
+  getMyCustomTemplates(archived: Boolean, category: TemplateCategory): [CustomTemplate!]!
   getMyPosts: [Post!]!
   getPageById(id: String!): Page!
   getPageBySlug(slug: String!): Page!
@@ -2708,9 +2742,11 @@ type Query {
 
   """Get product groups with DVT and price statistics"""
   getProductGroupsAdvanced(minGroupSize: Float! = 2, priceTolerance: Float! = 10): [ProductGroupAdvanced!]!
+  getPublicTemplates(category: TemplateCategory): [CustomTemplate!]!
   getPublishedPages(pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
   getRoleById(id: String!): Role!
   getSharedTasks(filters: TaskFilterInput): [Task!]!
+  getSharedTemplates: [CustomTemplate!]!
   getTask(id: String!): Task
   getTaskById(id: ID!): Task!
   getTasks(filters: TaskFilterInput): [Task!]!
@@ -2986,6 +3022,11 @@ input ShareTaskInput {
   taskId: String!
 }
 
+input ShareTemplateInput {
+  templateId: String!
+  userIds: [String!]!
+}
+
 type SimilarProduct {
   id: String!
   ma: String
@@ -3170,6 +3211,30 @@ enum TaskStatus {
 type TasksPaginatedResult {
   data: [Task!]!
   meta: PaginationInfo!
+}
+
+"""Template category for organization"""
+enum TemplateCategory {
+  CONTACT
+  CTA
+  CUSTOM
+  FAQ
+  FEATURES
+  FOOTER
+  HERO
+  NEWSLETTER
+  PRICING
+  TEAM
+  TESTIMONIALS
+}
+
+type TemplateShare {
+  createdAt: DateTime!
+  id: String!
+  sharedWith: String!
+  template: CustomTemplate!
+  templateId: String!
+  user: User!
 }
 
 """Employment termination types"""
@@ -3410,6 +3475,15 @@ input UpdateCourseInput {
   thumbnail: String
   title: String
   trailer: String
+}
+
+input UpdateCustomTemplateInput {
+  blocks: JSON
+  category: TemplateCategory
+  description: String
+  id: String!
+  name: String
+  thumbnail: String
 }
 
 input UpdateEmployeeProfileInput {
@@ -3768,6 +3842,11 @@ input UpdateTaskInput {
   priority: TaskPriority
   status: TaskStatus
   title: String
+}
+
+input UpdateTemplatePublicityInput {
+  isPublic: Boolean!
+  templateId: String!
 }
 
 input UpdateUserInput {

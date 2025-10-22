@@ -1,45 +1,20 @@
 import { gql } from '@apollo/client';
+import {
+  CATEGORY_BASIC_FRAGMENT,
+  PRODUCT_IMAGE_FRAGMENT as SHARED_PRODUCT_IMAGE_FRAGMENT,
+  PRODUCT_VARIANT_FRAGMENT as SHARED_PRODUCT_VARIANT_FRAGMENT,
+} from '@/lib/graphql/shared-fragments';
 
 // ============================================================================
 // FRAGMENTS
 // ============================================================================
 
-export const PRODUCT_IMAGE_FRAGMENT = gql`
-  fragment ProductImageFields on ProductImageType {
-    id
-    url
-    alt
-    isPrimary
-    order
-    createdAt
-  }
-`;
+// Re-export shared fragments for backward compatibility
+export { CATEGORY_BASIC_FRAGMENT };
 
-export const PRODUCT_VARIANT_FRAGMENT = gql`
-  fragment ProductVariantFields on ProductVariantType {
-    id
-    name
-    sku
-    price
-    stock
-    order
-    isActive
-    attributes
-    createdAt
-  }
-`;
+export const PRODUCT_IMAGE_FRAGMENT = SHARED_PRODUCT_IMAGE_FRAGMENT;
 
-export const CATEGORY_BASIC_FRAGMENT = gql`
-  fragment CategoryBasicFields on CategoryType {
-    id
-    name
-    slug
-    description
-    image
-    displayOrder
-    isActive
-  }
-`;
+export const PRODUCT_VARIANT_FRAGMENT = SHARED_PRODUCT_VARIANT_FRAGMENT;
 
 export const PRODUCT_BASIC_FRAGMENT = gql`
   fragment ProductBasicFields on ProductType {

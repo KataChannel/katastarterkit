@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { USER_FRAGMENT, POST_FRAGMENT, COMMENT_FRAGMENT } from '@/lib/graphql/shared-fragments';
 
 // Dynamic GraphQL query generator
 export class DynamicGraphQLGenerator {
@@ -349,36 +350,12 @@ export class DynamicGraphQLGenerator {
 }
 
 // Common field fragments for different models
+// Note: USER_FRAGMENT, POST_FRAGMENT, COMMENT_FRAGMENT are imported from shared-fragments.ts
+// to avoid duplication warnings from graphql-tag
 export const CommonFragments = {
-  USER: gql`
-    fragment UserFragment on User {
-      id
-      email
-      username
-      firstName
-      lastName
-      avatar
-      role
-      isActive
-      createdAt
-      updatedAt
-    }
-  `,
+  USER: USER_FRAGMENT,
 
-  POST: gql`
-    fragment PostFragment on Post {
-      id
-      title
-      content
-      excerpt
-      slug
-      status
-      publishedAt
-      authorId
-      createdAt
-      updatedAt
-    }
-  `,
+  POST: POST_FRAGMENT,
 
   TASK: gql`
     fragment DynamicTaskFragment on Task {
@@ -395,17 +372,7 @@ export const CommonFragments = {
     }
   `,
 
-  COMMENT: gql`
-    fragment CommentFragment on Comment {
-      id
-      content
-      postId
-      userId
-      parentId
-      createdAt
-      updatedAt
-    }
-  `
+  COMMENT: COMMENT_FRAGMENT
 };
 
 // Pre-generated queries for common models

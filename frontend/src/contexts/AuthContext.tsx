@@ -62,8 +62,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                          );
 
       if (isAuthError) {
-        console.log('Authentication error detected, removing token');
+        console.log('Authentication error detected, removing all auth data');
+        // Clear ALL auth-related data at once to prevent confusion
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
         setUser(null);
       } else {
         console.log('Non-authentication error, keeping token');
@@ -96,7 +99,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (data?.loginUser?.accessToken) {
-        localStorage.setItem('accessToken', data.loginUser.accessToken);
+        const token = data.loginUser.accessToken;
+        localStorage.setItem('accessToken', token);
+        
+        // Also notify apollo client of the token change
+        // This ensures apollo-client can use the new token immediately
+        if (typeof window !== 'undefined') {
+          // Dispatch a storage event to notify other parts of the app
+          window.dispatchEvent(new StorageEvent('storage', {
+            key: 'accessToken',
+            newValue: token,
+            storageArea: localStorage,
+          }));
+        }
+        
         // Refresh user data
         getCurrentUser();
         return { success: true };
@@ -121,7 +137,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (data?.registerUser?.accessToken) {
-        localStorage.setItem('accessToken', data.registerUser.accessToken);
+        const token = data.registerUser.accessToken;
+        localStorage.setItem('accessToken', token);
+        
+        // Also notify apollo client of the token change
+        if (typeof window !== 'undefined') {
+          // Dispatch a storage event to notify other parts of the app
+          window.dispatchEvent(new StorageEvent('storage', {
+            key: 'accessToken',
+            newValue: token,
+            storageArea: localStorage,
+          }));
+        }
+        
         // Refresh user data
         getCurrentUser();
         return { success: true };
@@ -134,7 +162,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
+    // Clear ALL auth-related data at once to ensure clean state
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
     setUser(null);
   };
 

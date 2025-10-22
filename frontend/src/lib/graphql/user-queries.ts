@@ -1,26 +1,8 @@
 import { gql } from '@apollo/client';
+import { USER_FRAGMENT } from '@/lib/graphql/shared-fragments';
 
-// User fragments
-export const USER_FRAGMENT = gql`
-  fragment UserFragment on User {
-    id
-    email
-    username
-    firstName
-    lastName
-    phone
-    avatar
-    roleType
-    isActive
-    isVerified
-    isTwoFactorEnabled
-    failedLoginAttempts
-    lockedUntil
-    lastLoginAt
-    createdAt
-    updatedAt
-  }
-`;
+// Re-export for backward compatibility
+export { USER_FRAGMENT };
 
 // User management queries
 export const SEARCH_USERS = gql`

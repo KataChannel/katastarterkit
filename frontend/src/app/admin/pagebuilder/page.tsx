@@ -32,9 +32,13 @@ function PageBuilderContent() {
   const [renderError, setRenderError] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   
+  // Only fetch pages list if we're not in pageId mode
+  // This prevents unnecessary queries and authentication issues
   const { pages, loading, refetch, error: queryError } = usePages(
     { page: 1, limit: 20 },
-    searchTerm ? { search: searchTerm } : undefined
+    searchTerm ? { search: searchTerm } : undefined,
+    // Skip the query if pageId is provided and we're opening the editor
+    { skip: pageId ? true : false }
   );
 
   // Open editor dialog when pageId is present
@@ -43,6 +47,15 @@ function PageBuilderContent() {
       setIsEditorOpen(true);
     }
   }, [pageId]);
+
+  // Handle case where we skip the pages query - we need to refetch when closing editor
+  // to get fresh list after editing
+  useEffect(() => {
+    if (!isEditorOpen && pageId) {
+      // When closing editor, refetch the pages list
+      refetch();
+    }
+  }, [isEditorOpen, pageId, refetch]);
 
   // Helper function to safely get blocks count
   const getBlocksCount = (blocks: any): number => {

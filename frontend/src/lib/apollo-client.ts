@@ -74,9 +74,27 @@ const httpLink = createHttpLink({
 // WebSocket Link for subscriptions - completely disabled in development
 const wsLink = null; // Temporarily disabled due to connection issues
 
-// Auth Link - adds authorization header
+// Auth Link - adds authorization header with token caching and debugging
+let cachedToken: string | null = null;
 const authLink = setContext((_, { headers }) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  let token: string | null = null;
+  
+  if (typeof window !== 'undefined') {
+    // First check localStorage
+    const storedToken = localStorage.getItem('accessToken');
+    if (storedToken) {
+      token = storedToken;
+      cachedToken = storedToken;
+    }
+    // Fall back to cached token (for cases where localStorage isn't synced)
+    else if (cachedToken) {
+      token = cachedToken;
+    }
+  }
+  
+  if (process.env.NODE_ENV === 'development' && !token) {
+    console.warn('[AuthLink] No token found in localStorage or cache');
+  }
   
   return {
     headers: {
@@ -105,13 +123,34 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
         logError('warn', '🚨 Bad request - check query syntax and variables', { message, path });
       }
       
+      // Handle authentication errors - clear ALL auth data at once
+      if (message.includes('Authentication token is required') || 
+          message.includes('No token provided') ||
+          message.includes('Authentication token is required')) {
+        logError('warn', '🔐 No authentication token - user may need to login', { message, path });
+        if (typeof window !== 'undefined') {
+          // Clear ALL auth-related data at once to prevent confusion
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          // Redirect to login on authentication errors
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login?from=' + encodeURIComponent(window.location.pathname + window.location.search);
+          }
+        }
+        return errorInfo;
+      }
+      
       if (message === 'Forbidden resource' || message.includes('Forbidden')) {
         logError('warn', '🔐 Authentication issue - checking if token should be removed', { message, path });
         // Only remove token and redirect for specific authentication errors
         // Let AuthContext handle this instead of doing it here
         if (extensions?.code === 'UNAUTHENTICATED' || message.includes('jwt') || message.includes('accessToken')) {
           if (typeof window !== 'undefined') {
+            // Clear ALL auth-related data at once
             localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
             window.location.href = '/login';
           }
         }
@@ -210,11 +249,14 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
       return;
     }
     
-    // Handle unauthorized errors
+    // Handle unauthorized errors - clear ALL auth data at once
     if ('statusCode' in networkError && networkError.statusCode === 401) {
       console.warn('🔐 Unauthorized access - redirecting to login');
       if (typeof window !== 'undefined') {
+        // Clear ALL auth-related data at once to prevent confusion
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
         window.location.href = '/login';
       }
     }
