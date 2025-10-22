@@ -188,6 +188,18 @@ export interface TextBlockContent {
   fontWeight?: string;
   textAlign?: 'left' | 'center' | 'right';
   color?: string;
+  lineHeight?: number;
+  letterSpacing?: number;
+  textDecoration?: 'none' | 'underline' | 'line-through' | 'overline';
+  backgroundColor?: string;
+  padding?: {
+    top?: number;
+    right?: number;
+    bottom?: number;
+    left?: number;
+  };
+  borderRadius?: number;
+  customCSS?: string;
 }
 
 export interface ImageBlockContent {

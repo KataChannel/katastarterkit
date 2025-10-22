@@ -181,7 +181,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         const input: CreatePageInput = {
           title: editingPage.title,
           slug: editingPage.slug,
-          content: editingPage.content || '',
+          content: editingPage.content || {},
           status: editingPage.status,
           seoTitle: editingPage.seoTitle,
           seoDescription: editingPage.seoDescription,
@@ -199,7 +199,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         const input: UpdatePageInput = {
           title: editingPage.title,
           slug: editingPage.slug,
-          content: editingPage.content || '',
+          content: editingPage.content || {},
           status: editingPage.status,
           seoTitle: editingPage.seoTitle,
           seoDescription: editingPage.seoDescription,

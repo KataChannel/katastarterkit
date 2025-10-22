@@ -82,7 +82,7 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
 
 const elements: ElementConfig[] = [
   // Basic Elements
-  { id: BlockType.TEXT, icon: Type, label: 'Text', description: 'Rich text content', category: 'basic', popularity: 'hot' },
+  { id: BlockType.TEXT, icon: Type, label: 'Text', description: 'Block editor with rich formatting', category: 'basic', popularity: 'hot' },
   { id: BlockType.HERO, icon: Heading, label: 'Heading', description: 'Large page headings', category: 'basic' },
   { id: BlockType.BUTTON, icon: MousePointer, label: 'Button', description: 'Call-to-action buttons', category: 'basic', popularity: 'hot' },
   { id: BlockType.IMAGE, icon: Image, label: 'Image', description: 'Image media element', category: 'basic' },
