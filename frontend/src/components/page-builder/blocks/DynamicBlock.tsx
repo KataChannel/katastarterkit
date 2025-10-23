@@ -63,17 +63,38 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
         if (dataSource.type === 'static') {
           setData(dataSource.staticData);
         } else if (dataSource.type === 'api') {
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+          };
+
+          // Add authorization token if provided
+          if (dataSource.token) {
+            headers['Authorization'] = `Bearer ${dataSource.token}`;
+          }
+
+          const method = dataSource.method || 'POST';
+          const body = method === 'POST' ? JSON.stringify(dataSource.variables || {}) : undefined;
+
           const response = await fetch(dataSource.endpoint || '', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dataSource.variables || {}),
+            method,
+            headers,
+            body,
           });
           const result = await response.json();
           setData(result);
         } else if (dataSource.type === 'graphql') {
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+          };
+
+          // Add authorization token if provided
+          if (dataSource.token) {
+            headers['Authorization'] = `Bearer ${dataSource.token}`;
+          }
+
           const response = await fetch(dataSource.endpoint || '/graphql', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({
               query: dataSource.query,
               variables: dataSource.variables,
@@ -382,8 +403,8 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
 
     if (!data) {
       return (
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded text-gray-500">
-          No data available. Configure data source in settings.
+        <div className="p-4 bg-gray-50 border border-gray-200 rounded text-gray-500 text-sm">
+          No data available. Configure data source and save to preview.
         </div>
       );
     }
@@ -391,11 +412,21 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
     // Handle repeater pattern
     if (config?.repeater?.enabled) {
       const dataPath = config.repeater.dataPath || '';
-      const items = dataPath ? eval(`data.${dataPath}`) : data;
+      let items: any[] = [];
+      
+      try {
+        items = dataPath ? eval(`data.${dataPath}`) : (Array.isArray(data) ? data : [data]);
+      } catch (err) {
+        return (
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700 text-sm">
+            Invalid data path: {dataPath}
+          </div>
+        );
+      }
       
       if (!Array.isArray(items)) {
         return (
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700">
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700 text-sm">
             Data path does not return an array
           </div>
         );
@@ -428,10 +459,20 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
       );
     }
 
-    // Single item display
+    // Single item display - show JSON or render as template if template exists
+    if (templateContent) {
+      const processedTemplate = processTemplate(templateContent, data);
+      return (
+        <div 
+          className="template-content"
+          dangerouslySetInnerHTML={{ __html: processedTemplate }}
+        />
+      );
+    }
+
     return (
       <Card className="p-4">
-        <pre className="text-sm overflow-auto">{JSON.stringify(data, null, 2)}</pre>
+        <pre className="text-sm overflow-auto max-h-96">{JSON.stringify(data, null, 2)}</pre>
       </Card>
     );
   };
@@ -527,6 +568,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   const handleSave = () => {
     const updatedContent = {
       ...block.content,
+      componentType: 'template',
       template: templateEdit,
       config: editConfig, // Save the entire config with template
     };
