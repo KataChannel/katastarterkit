@@ -9,7 +9,6 @@ import { usePageState } from './PageStateContext';
 import { useTemplate } from './TemplateContext';
 import { useUIState } from './UIStateContext';
 import { BlockTemplate } from '@/data/blockTemplates';
-import { getRandomSampleTemplate } from '@/lib/dynamicBlockSampleTemplates';
 
 /**
  * Default content for each block type
@@ -248,19 +247,19 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       
       let defaultContent = DEFAULT_BLOCK_CONTENT[blockType as keyof typeof DEFAULT_BLOCK_CONTENT] || {};
       
-      // Setup sample template data for Dynamic Blocks
+      // For Dynamic Blocks, start with basic empty template
+      // User will choose template in the dialog
       if (blockType === BlockType.DYNAMIC) {
-        const sampleTemplate = getRandomSampleTemplate();
         defaultContent = {
           componentType: 'template',
-          templateId: sampleTemplate.id,
-          templateName: sampleTemplate.name,
-          template: sampleTemplate.template,
-          dataSource: sampleTemplate.dataSource,
-          variables: sampleTemplate.variables,
+          templateId: null,
+          templateName: 'New Dynamic Block',
+          template: '<div class="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center"><h3 class="text-lg font-semibold mb-2">Dynamic Block</h3><p class="text-gray-600">Select a template or paste your HTML template here.</p></div>',
+          dataSource: { type: 'static', data: {} },
+          variables: {},
           style: {},
         } as any;
-        console.log('[PageBuilder] Dynamic Block with sample template:', { template: sampleTemplate.name });
+        console.log('[PageBuilder] Dynamic Block created - user will pick template');
       }
       
       // Don't send order - let backend calculate it to avoid race conditions
@@ -274,7 +273,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       
       const result = await addBlock(input);
       pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_CREATE, 'Block added', { blockType });
-      toast.success(blockType === BlockType.DYNAMIC ? '✨ Dynamic Block added with sample data!' : 'Block added successfully!');
+      toast.success(blockType === BlockType.DYNAMIC ? '✨ Dynamic Block added - pick a template!' : 'Block added successfully!');
       
       console.log('[PageBuilder] Block added successfully:', result);
       await refetch();

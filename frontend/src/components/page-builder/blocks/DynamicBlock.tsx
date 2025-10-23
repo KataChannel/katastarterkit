@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageBlock, DynamicBlockConfig } from '@/types/page-builder';
-import { Settings, Trash2, RefreshCw, Code, X } from 'lucide-react';
+import { Settings, Trash2, RefreshCw, Code, X, Check, BookOpen, Grid3x3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { 
+  getAllSampleTemplates, 
+  type SampleTemplate 
+} from '@/lib/dynamicBlockSampleTemplates';
 
 interface DynamicBlockProps {
   block: PageBlock;
@@ -36,6 +41,8 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<SampleTemplate | null>(null);
+  const sampleTemplates = getAllSampleTemplates();
 
   // Fetch data based on configuration
   useEffect(() => {
@@ -415,6 +422,19 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
     );
   };
 
+  // Handle template selection
+  const handleSelectTemplate = (template: SampleTemplate) => {
+    setSelectedTemplate(template);
+    setTemplateEdit(template.template);
+    setEditConfig({
+      ...editConfig,
+      templateId: template.id,
+      templateName: template.name,
+      dataSource: template.dataSource,
+      variables: template.variables,
+    });
+  };
+
   const handleSave = () => {
     const updatedContent = {
       ...block.content,
@@ -452,48 +472,156 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
         </Button>
       </div>
 
-      {/* Settings Dialog - Full Screen */}
+      {/* Settings Dialog - Professional UI */}
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent className="max-w-6xl h-[90vh] p-0 flex flex-col">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b">
-            <DialogTitle className="flex items-center text-xl">
-              <Code className="w-5 h-5 mr-2" />
-              Dynamic Block Configuration
-            </DialogTitle>
-            <DialogDescription>
-              Configure data source, template, repeater, and other settings
-            </DialogDescription>
+        <DialogContent className="max-w-7xl h-[95vh] p-0 flex flex-col">
+          {/* Header */}
+          <DialogHeader className="px-8 pt-8 pb-6 border-b bg-gradient-to-r from-slate-50 to-slate-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle className="flex items-center text-2xl font-bold">
+                  <Grid3x3 className="w-6 h-6 mr-3 text-blue-600" />
+                  Dynamic Block Configuration
+                </DialogTitle>
+                <DialogDescription className="mt-2 text-base">
+                  Choose a template, configure data source, and customize your block
+                </DialogDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsEditing(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
           </DialogHeader>
 
-          {/* Scrollable Content Area */}
-          <div className="flex-1 overflow-y-auto px-6 py-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-full">
-              
-              {/* Left Column - Configuration */}
-              <div className="space-y-6">
-                
-                {/* Template Info */}
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-3">Template Info</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <Label>Template Name</Label>
-                      <Input
-                        type="text"
-                        placeholder="my-template"
-                        value={editConfig.templateName || ''}
-                        onChange={(e) => setEditConfig({ ...editConfig, templateName: e.target.value })}
-                      />
+          {/* Tabbed Content Area */}
+          <Tabs defaultValue="templates" className="flex-1 flex flex-col overflow-hidden">
+            {/* Tab List */}
+            <div className="px-8 pt-6 border-b bg-white">
+              <TabsList className="bg-slate-100 p-1">
+                <TabsTrigger value="templates" className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Select Template
+                </TabsTrigger>
+                <TabsTrigger value="editor" className="flex items-center gap-2">
+                  <Code className="w-4 h-4" />
+                  Template Editor
+                </TabsTrigger>
+                <TabsTrigger value="settings" className="flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  Configuration
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* Tab Content */}
+            <div className="flex-1 overflow-y-auto">
+              {/* Templates Tab */}
+              <TabsContent value="templates" className="px-8 py-8 space-y-6">
+                <div>
+                  <h3 className="text-lg font-bold mb-4">Choose a Sample Template</h3>
+                  <p className="text-gray-600 mb-6">Select from our professional templates or start with blank</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Blank Template */}
+                    <button
+                      onClick={() => {
+                        setSelectedTemplate(null);
+                        setTemplateEdit('');
+                        setEditConfig({
+                          ...editConfig,
+                          templateName: 'Custom Template',
+                          dataSource: { type: 'static', staticData: {} },
+                          variables: {},
+                        });
+                      }}
+                      className={`p-6 rounded-lg border-2 transition-all text-left hover:shadow-lg ${
+                        selectedTemplate === null
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="font-bold text-lg mb-2">Blank Template</div>
+                      <p className="text-sm text-gray-600">Start with an empty template and write your own HTML</p>
+                      {selectedTemplate === null && (
+                        <div className="mt-3 flex items-center text-blue-600 text-sm font-semibold">
+                          <Check className="w-4 h-4 mr-1" /> Selected
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Sample Templates */}
+                    {sampleTemplates.map((template) => (
+                      <button
+                        key={template.id}
+                        onClick={() => handleSelectTemplate(template)}
+                        className={`p-6 rounded-lg border-2 transition-all text-left hover:shadow-lg ${
+                          selectedTemplate?.id === template.id
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="font-bold text-lg mb-1">{template.name}</div>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{template.description}</p>
+                        {selectedTemplate?.id === template.id && (
+                          <div className="flex items-center text-blue-600 text-sm font-semibold">
+                            <Check className="w-4 h-4 mr-1" /> Selected
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Editor Tab */}
+              <TabsContent value="editor" className="px-8 py-8 space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold">Template HTML</h3>
+                    <div className="text-sm text-gray-500">
+                      {selectedTemplate ? `Using: ${selectedTemplate.name}` : 'Blank template'}
                     </div>
                   </div>
+                  <Textarea
+                    placeholder={`<div class="p-6">\n  <h2>{{title}}</h2>\n  {{#each items}}\n    <p>{{this.name}}</p>\n  {{/each}}\n</div>`}
+                    value={templateEdit}
+                    onChange={(e) => setTemplateEdit(e.target.value)}
+                    rows={12}
+                    className="font-mono text-sm resize-none"
+                  />
+                  <p className="text-xs text-gray-500 mt-3">
+                    Use <code className="bg-gray-100 px-2 py-1 rounded">{'{{variable}}'}</code> •
+                    <code className="bg-gray-100 px-2 py-1 rounded ml-2">{'{{#each array}}...{{/each}}'}</code> •
+                    <code className="bg-gray-100 px-2 py-1 rounded ml-2">{'{{#if condition}}...{{/if}}'}</code>
+                  </p>
+                </div>
+              </TabsContent>
+
+              {/* Settings Tab */}
+              <TabsContent value="settings" className="px-8 py-8 space-y-6 max-w-3xl">
+                {/* Template Name */}
+                <Card className="p-6 border border-gray-200">
+                  <h3 className="text-sm font-bold mb-4 text-gray-900">Template Name</h3>
+                  <Input
+                    type="text"
+                    placeholder="my-dynamic-block"
+                    value={editConfig.templateName || ''}
+                    onChange={(e) => setEditConfig({ ...editConfig, templateName: e.target.value })}
+                    className="bg-white"
+                  />
                 </Card>
 
-                {/* Data Source Configuration */}
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-3">Data Source</h3>
-                  <div className="space-y-3">
+                {/* Data Source */}
+                <Card className="p-6 border border-gray-200">
+                  <h3 className="text-sm font-bold mb-4 text-gray-900">Data Source</h3>
+                  <div className="space-y-4">
                     <div>
-                      <Label>Type</Label>
+                      <Label className="text-sm font-semibold">Type</Label>
                       <Select
                         value={editConfig.dataSource?.type || 'static'}
                         onValueChange={(value) => setEditConfig({
@@ -501,21 +629,20 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                           dataSource: { ...editConfig.dataSource, type: value as any }
                         })}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-white">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="static">Static Data</SelectItem>
                           <SelectItem value="api">REST API</SelectItem>
                           <SelectItem value="graphql">GraphQL</SelectItem>
-                          <SelectItem value="database">Database</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
                     {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
                       <div>
-                        <Label>Endpoint</Label>
+                        <Label className="text-sm font-semibold">Endpoint</Label>
                         <Input
                           type="text"
                           placeholder="/api/data or /graphql"
@@ -551,15 +678,45 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                         />
                       </div>
                     )}
+
+                    {editConfig.dataSource?.type === 'static' && (
+                      <div>
+                        <Label className="text-sm font-semibold">Static Data (JSON)</Label>
+                        <Textarea
+                          placeholder='{"title": "My Data", "items": [{"id": 1, "name": "Item 1"}]}'
+                          value={JSON.stringify(editConfig.dataSource?.staticData || {}, null, 2)}
+                          onChange={(e) => {
+                            try {
+                              const parsed = JSON.parse(e.target.value);
+                              setEditConfig({
+                                ...editConfig,
+                                dataSource: { 
+                                  type: 'static',
+                                  ...editConfig.dataSource, 
+                                  staticData: parsed 
+                                }
+                              });
+                            } catch (err) {
+                              // Invalid JSON, ignore
+                            }
+                          }}
+                          rows={6}
+                          className="font-mono text-sm"
+                        />
+                      </div>
+                    )}
                   </div>
                 </Card>
 
                 {/* Repeater Configuration */}
-                <Card className="p-4">
-                  <h3 className="font-semibold mb-3">Repeater Settings</h3>
-                  <div className="space-y-3">
+                <Card className="p-6 border border-gray-200">
+                  <h3 className="text-sm font-bold mb-4 text-gray-900">Repeater Settings</h3>
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Label>Enable Repeater</Label>
+                      <div>
+                        <Label className="text-sm font-semibold">Enable Repeater</Label>
+                        <p className="text-xs text-gray-500 mt-1">Loop through array items in your data</p>
+                      </div>
                       <Switch
                         checked={editConfig.repeater?.enabled || false}
                         onCheckedChange={(checked) => setEditConfig({
@@ -572,7 +729,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                     {editConfig.repeater?.enabled && (
                       <>
                         <div>
-                          <Label>Data Path</Label>
+                          <Label className="text-sm font-semibold">Data Path</Label>
                           <Input
                             type="text"
                             placeholder="products"
@@ -590,7 +747,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                         </div>
 
                         <div>
-                          <Label>Limit</Label>
+                          <Label className="text-sm font-semibold">Limit</Label>
                           <Input
                             type="number"
                             placeholder="10"
@@ -604,110 +761,18 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                               }
                             })}
                           />
+                          <p className="text-xs text-gray-500 mt-1">Maximum items to display (leave empty for no limit)</p>
                         </div>
                       </>
                     )}
                   </div>
                 </Card>
-              </div>
-
-              {/* Right Column - Template and Data */}
-              <div className="space-y-6">
-                
-                {/* Template HTML Editor */}
-                <Card className="p-4 flex flex-col">
-                  <h3 className="font-semibold mb-3">Template HTML</h3>
-                  <Textarea
-                    placeholder={'<div>{{#each items}}<p>{{name}}</p>{{/each}}</div>'}
-                    value={templateEdit}
-                    onChange={(e) => setTemplateEdit(e.target.value)}
-                    rows={8}
-                    className="font-mono text-xs flex-1 resize-none"
-                  />
-                  <p className="text-xs text-gray-500 mt-2">
-                    {"Use {{variable}} • {{#each}}...{{/each}} for loops • {{#if}}...{{/if}} for conditionals"}
-                  </p>
-                </Card>
-              </div>
-
-              {/* Right Column - Live Preview */}
-              <div className="space-y-6">
-                <Card className="p-4 flex flex-col h-full bg-white border-2 border-green-100">
-                  <h3 className="font-semibold mb-3 flex items-center">
-                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                    Live Preview
-                  </h3>
-                  
-                  {/* Preview Content */}
-                  <div className="flex-1 overflow-auto bg-gray-50 rounded p-3 border border-gray-200">
-                    {templateEdit ? (
-                      <div 
-                        className="text-sm"
-                        dangerouslySetInnerHTML={{ 
-                          __html: processTemplate(
-                            templateEdit, 
-                            editConfig.dataSource?.staticData || getSampleData(block.content?.templateId || '')
-                          )
-                        }}
-                      />
-                    ) : (
-                      <div className="text-gray-400 text-center py-8">
-                        <p>Enter template HTML to see preview</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Preview Info */}
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <p className="text-xs font-semibold text-gray-600 mb-2">Using Data:</p>
-                    <pre className="text-xs bg-white p-2 rounded border border-gray-200 max-h-32 overflow-auto">
-                      {JSON.stringify(
-                        editConfig.dataSource?.staticData || getSampleData(block.content?.templateId || ''),
-                        null,
-                        2
-                      ).substring(0, 300)}
-                      {JSON.stringify(
-                        editConfig.dataSource?.staticData || getSampleData(block.content?.templateId || ''),
-                        null,
-                        2
-                      ).length > 300 && '...'}
-                    </pre>
-                  </div>
-                </Card>
-              </div>
+              </TabsContent>
             </div>
-
-            {/* Static Data Editor - Full Width */}
-            {editConfig.dataSource?.type === 'static' && (
-              <Card className="p-4 mt-6">
-                <h3 className="font-semibold mb-3">Static Data (JSON)</h3>
-                <Textarea
-                  placeholder='{"title": "My Items", "items": [{"id": 1, "name": "Item 1"}]}'
-                  value={JSON.stringify(editConfig.dataSource?.staticData || {}, null, 2)}
-                  onChange={(e) => {
-                    try {
-                      const parsed = JSON.parse(e.target.value);
-                      setEditConfig({
-                        ...editConfig,
-                        dataSource: { 
-                          type: 'static',
-                          ...editConfig.dataSource, 
-                          staticData: parsed 
-                        }
-                      });
-                    } catch (err) {
-                      // Invalid JSON, ignore
-                    }
-                  }}
-                  rows={8}
-                  className="font-mono text-sm"
-                />
-              </Card>
-            )}
-          </div>
+          </Tabs>
 
           {/* Footer - Action Buttons */}
-          <div className="border-t px-6 py-4 flex gap-2 justify-end">
+          <div className="border-t px-6 py-4 flex gap-2 justify-end bg-white">
             <Button onClick={() => setIsEditing(false)} variant="outline">
               Cancel
             </Button>
