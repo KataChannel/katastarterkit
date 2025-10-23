@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageBlock, DynamicBlockConfig } from '@/types/page-builder';
-import { Settings, Trash2, RefreshCw, Code, Check, BookOpen, Grid3x3 } from 'lucide-react';
+import { Settings, Trash2, RefreshCw, Code, Check, BookOpen, Grid3x3, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -45,6 +45,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   const [apiTestResult, setApiTestResult] = useState<any>(null);
   const [apiTestLoading, setApiTestLoading] = useState(false);
   const [apiTestError, setApiTestError] = useState<string | null>(null);
+  const [isFullscreenEditor, setIsFullscreenEditor] = useState(false);
   const sampleTemplates = getAllSampleTemplates();
 
   // Fetch data based on configuration
@@ -624,16 +625,83 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Editor + Configuration (50%) */}
+            {/* FULLSCREEN EDITOR MODAL */}
+            {isFullscreenEditor && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg shadow-2xl w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
+                {/* Fullscreen Header */}
+                <div className="border-b px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <h2 className="text-lg font-bold">Edit Template HTML</h2>
+                  <Button
+                    onClick={() => setIsFullscreenEditor(false)}
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                  >
+                    <Minimize2 className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {/* Fullscreen Content */}
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {/* Editor */}
+                  <div className="flex-1 overflow-hidden flex flex-col p-4">
+                    <Textarea
+                      placeholder={`<div class="p-6">\n  <h2>{{title}}</h2>\n  {{#each items}}\n    <p>{{this.name}}</p>\n  {{/each}}\n</div>`}
+                      value={templateEdit}
+                      onChange={(e) => setTemplateEdit(e.target.value)}
+                      className="font-mono text-sm resize-none flex-1 p-4 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+
+                  {/* Hints */}
+                  <div className="px-4 pb-4 text-xs text-gray-600 space-y-1">
+                    <p>Available syntax:</p>
+                    <div className="flex flex-wrap gap-3">
+                      <code className="bg-gray-100 px-2 py-1 rounded">{'{{variable}}'}</code>
+                      <code className="bg-gray-100 px-2 py-1 rounded">{'{{#each array}}...{{/each}}'}</code>
+                      <code className="bg-gray-100 px-2 py-1 rounded">{'{{#if condition}}...{{/if}}'}</code>
+                      <code className="bg-gray-100 px-2 py-1 rounded">{'{{else}}'}</code>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fullscreen Footer */}
+                <div className="border-t px-6 py-3 flex gap-2 justify-end bg-gray-50">
+                  <Button
+                    onClick={() => setIsFullscreenEditor(false)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </div>
+            )}
+
+            {/* RIGHT COLUMN: Editor + Configuration (50%) - Only show when not fullscreen */}
+            {!isFullscreenEditor && (
             <div className="w-1/2 flex flex-col">
               {/* TOP: Template Editor */}
               <div className="flex-1 border-b border-gray-200 overflow-y-auto flex flex-col">
                 <div className="px-6 py-6 space-y-3 flex flex-col h-full">
-                  <div>
+                  <div className="flex flex-col flex-1">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-base font-bold">Template HTML</h3>
-                      <div className="text-xs text-gray-500">
-                        {selectedTemplate ? `Using: ${selectedTemplate.name}` : 'Blank template'}
+                      <div className="flex items-center gap-2">
+                        <div className="text-xs text-gray-500">
+                          {selectedTemplate ? `Using: ${selectedTemplate.name}` : 'Blank template'}
+                        </div>
+                        <Button
+                          onClick={() => setIsFullscreenEditor(true)}
+                          variant="outline"
+                          size="sm"
+                          className="h-7 w-7 p-0"
+                          title="Fullscreen edit"
+                        >
+                          <Maximize2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                     <Textarea
@@ -825,6 +893,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                 </div>
               </div>
             </div>
+            )}
           </div>
 
           {/* Footer - Action Buttons */}
