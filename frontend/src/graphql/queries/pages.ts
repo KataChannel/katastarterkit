@@ -171,7 +171,10 @@ export const DELETE_PAGE_BLOCK = gql`
 
 // Update the order of multiple page blocks
 export const UPDATE_PAGE_BLOCKS_ORDER = gql`
+  ${PAGE_BLOCK_FRAGMENT}
   mutation UpdatePageBlocksOrder($pageId: String!, $updates: [BulkUpdateBlockOrderInput!]!) {
-    updatePageBlocksOrder(pageId: $pageId, updates: $updates)
+    updatePageBlocksOrder(pageId: $pageId, updates: $updates) {
+      ...PageBlockFields
+    }
   }
 `;

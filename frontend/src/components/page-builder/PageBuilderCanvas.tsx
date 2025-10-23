@@ -6,7 +6,30 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Layout, Plus } from 'lucide-react';
+import { 
+  Layout, 
+  Plus,
+  Type,
+  Image,
+  Video,
+  Zap,
+  Layers,
+  Grid3x3,
+  Share2,
+  Users,
+  BarChart3,
+  HelpCircle,
+  Mail,
+  Phone,
+  Minus,
+  Box,
+  Square,
+  ShoppingCart,
+  MessageSquare,
+  LayoutGrid,
+  ArrowRightLeft,
+  ArrowUpDown,
+} from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -75,16 +98,55 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
     }
   }, [setCanvasRef, isCanvasOver]);
 
-  // Common block types for quick add
-  const commonBlockTypes = [
-    { type: BlockType.TEXT, label: 'Text', icon: '📝' },
-    { type: BlockType.IMAGE, label: 'Image', icon: '🖼️' },
-    { type: BlockType.BUTTON, label: 'Button', icon: '🔘' },
-    { type: BlockType.HERO, label: 'Hero', icon: '🎯' },
-    { type: BlockType.SECTION, label: 'Section', icon: '📦' },
-    { type: BlockType.DIVIDER, label: 'Divider', icon: '➖' },
-    { type: BlockType.SPACER, label: 'Spacer', icon: '⬜' },
+  // Block types grouped by category with lucide icons
+  const blockTypeGroups = [
+    {
+      category: 'Content Blocks',
+      blocks: [
+        { type: BlockType.TEXT, label: 'Text', Icon: Type },
+        { type: BlockType.IMAGE, label: 'Image', Icon: Image },
+        { type: BlockType.VIDEO, label: 'Video', Icon: Video },
+        { type: BlockType.BUTTON, label: 'Button', Icon: Square },
+        { type: BlockType.HERO, label: 'Hero', Icon: Layers },
+        { type: BlockType.CAROUSEL, label: 'Carousel', Icon: Share2 },
+        { type: BlockType.GALLERY, label: 'Gallery', Icon: LayoutGrid },
+        { type: BlockType.CARD, label: 'Card', Icon: Box },
+        { type: BlockType.TESTIMONIAL, label: 'Testimonial', Icon: MessageSquare },
+        { type: BlockType.TEAM, label: 'Team', Icon: Users },
+        { type: BlockType.STATS, label: 'Stats', Icon: BarChart3 },
+        { type: BlockType.FAQ, label: 'FAQ', Icon: HelpCircle },
+        { type: BlockType.CONTACT_FORM, label: 'Contact Form', Icon: Mail },
+        { type: BlockType.CONTACT_INFO, label: 'Contact Info', Icon: Phone },
+      ]
+    },
+    {
+      category: 'Container & Layout',
+      blocks: [
+        { type: BlockType.SECTION, label: 'Section', Icon: Box },
+        { type: BlockType.CONTAINER, label: 'Container', Icon: Layers },
+        { type: BlockType.GRID, label: 'Grid', Icon: Grid3x3 },
+        { type: BlockType.FLEX_ROW, label: 'Flex Row', Icon: ArrowRightLeft },
+        { type: BlockType.FLEX_COLUMN, label: 'Flex Column', Icon: ArrowUpDown },
+      ]
+    },
+    {
+      category: 'Utility Blocks',
+      blocks: [
+        { type: BlockType.DIVIDER, label: 'Divider', Icon: Minus },
+        { type: BlockType.SPACER, label: 'Spacer', Icon: Square },
+      ]
+    },
+    {
+      category: 'Dynamic & E-commerce',
+      blocks: [
+        { type: BlockType.DYNAMIC, label: 'Dynamic Block', Icon: Zap },
+        { type: BlockType.PRODUCT_LIST, label: 'Product List', Icon: ShoppingCart },
+      ]
+    },
   ];
+
+  // Flatten for dropdown rendering
+  const commonBlockTypes = blockTypeGroups.flatMap(group => group.blocks);
 
   // Handle add block with feedback
   const handleAddBlockClick = useCallback(async (blockType: BlockType) => {
@@ -95,6 +157,28 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
       console.error('Failed to add block:', error);
     }
   }, [handleAddBlock]);
+
+  // Render dropdown menu content with grouped items
+  const renderDropdownItems = () => {
+    return blockTypeGroups.map((group, groupIndex) => (
+      <div key={group.category}>
+        {groupIndex > 0 && <div className="my-1 mx-0 h-px bg-gray-200" />}
+        <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase">
+          {group.category}
+        </div>
+        {group.blocks.map(({ type, label, Icon }) => (
+          <DropdownMenuItem 
+            key={type}
+            onClick={() => handleAddBlockClick(type)}
+            className="cursor-pointer gap-2"
+          >
+            <Icon size={16} className="text-gray-600" />
+            <span>{label}</span>
+          </DropdownMenuItem>
+        ))}
+      </div>
+    ));
+  };
 
   return (
     <div className="flex-1 p-12 overflow-auto bg-gradient-to-br from-gray-50 to-gray-100">
@@ -164,17 +248,8 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
                           Add Block
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="center" className="w-48">
-                        {commonBlockTypes.map(({ type, label, icon }) => (
-                          <DropdownMenuItem 
-                            key={type}
-                            onClick={() => handleAddBlockClick(type)}
-                            className="cursor-pointer"
-                          >
-                            <span className="mr-2">{icon}</span>
-                            <span>{label}</span>
-                          </DropdownMenuItem>
-                        ))}
+                      <DropdownMenuContent align="center" className="w-56 max-h-96 overflow-y-auto">
+                        {renderDropdownItems()}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -182,35 +257,6 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
               ) : (
                 // Block List with Sortable Wrappers
                 <>
-                  {/* Add Block Button - Sticky header */}
-                  <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
-                    <h3 className="text-sm font-medium text-gray-700">Blocks</h3>
-                    <DropdownMenu open={isAddingBlock} onOpenChange={setIsAddingBlock}>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          size="sm" 
-                          className="gap-2"
-                          variant="outline"
-                        >
-                          <Plus size={16} />
-                          Add Block
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        {commonBlockTypes.map(({ type, label, icon }) => (
-                          <DropdownMenuItem 
-                            key={type}
-                            onClick={() => handleAddBlockClick(type)}
-                            className="cursor-pointer"
-                          >
-                            <span className="mr-2">{icon}</span>
-                            <span>{label}</span>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
                   {/* Blocks List */}
                   <div className="space-y-4">
                     {blocks.map(block => (
@@ -227,6 +273,25 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
                         depth={0}
                       />
                     ))}
+                    
+                    {/* Add Block Button at Bottom */}
+                    <div className="pt-4 border-t border-gray-200 mt-6">
+                      <DropdownMenu open={isAddingBlock} onOpenChange={setIsAddingBlock}>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            size="sm" 
+                            className="w-full gap-2"
+                            variant="secondary"
+                          >
+                            <Plus size={16} />
+                            Add New Block
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="center" className="w-56 max-h-96 overflow-y-auto">
+                          {renderDropdownItems()}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </>
               )}

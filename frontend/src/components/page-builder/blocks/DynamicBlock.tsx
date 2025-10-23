@@ -25,6 +25,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   const config = block.config as DynamicBlockConfig;
   const [isEditing, setIsEditing] = useState(false);
   const [editConfig, setEditConfig] = useState<DynamicBlockConfig>(config || {});
+  const [templateEdit, setTemplateEdit] = useState<string>(block.content?.template || '');
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -318,9 +319,9 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   const renderContent = () => {
     // Handle template-based blocks
     if (isTemplateBlock && templateContent) {
-      const templateId = block.content?.templateId;
-      const sampleData = getSampleData(templateId || '');
-      const processedTemplate = processTemplate(templateContent, sampleData);
+      // Use actual fetched data if available, otherwise use sample data
+      const renderData = data || getSampleData(block.content?.templateId || '');
+      const processedTemplate = processTemplate(templateContent, renderData);
       
       return (
         <div 
@@ -404,7 +405,11 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   };
 
   const handleSave = () => {
-    onUpdate(block.content, block.style);
+    const updatedContent = {
+      ...block.content,
+      template: templateEdit,
+    };
+    onUpdate(updatedContent, block.style);
     // Update config through parent component
     setIsEditing(false);
   };
@@ -597,6 +602,21 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Template HTML Editor */}
+            <div className="border-t pt-3">
+              <Label>Template HTML</Label>
+              <Textarea
+                placeholder={'<div>{{#each items}}<p>{{name}}</p>{{/each}}</div>'}
+                value={templateEdit}
+                onChange={(e) => setTemplateEdit(e.target.value)}
+                rows={6}
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {"Use {{variable}} for variables, {{#each}}...{{/each}} for loops, {{#if}}...{{/if}} for conditionals"}
+              </p>
             </div>
 
             <div className="flex gap-2 pt-2">

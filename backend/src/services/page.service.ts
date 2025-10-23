@@ -443,16 +443,34 @@ export class PageService {
       throw new NotFoundException(`Page with ID "${pageId}" not found`);
     }
 
-    // Update all blocks in a transaction
-    const updatePromises = updates.map(update => 
-      this.prisma.pageBlock.update({
-        where: { id: update.id },
-        data: { order: update.order }
-      })
+    // Use transaction to handle order updates atomically
+    // First, set all blocks to negative order values (temp) to avoid unique constraint conflicts
+    // Then set to final order values
+    const maxOrder = Math.max(...updates.map(u => u.order), 0);
+    
+    const updatedBlocks = await this.prisma.$transaction(
+      updates.map((update, index) =>
+        this.prisma.pageBlock.update({
+          where: { id: update.id },
+          data: { 
+            // Use negative temporary order to avoid constraint conflicts
+            order: -(maxOrder + index + 1)
+          }
+        })
+      )
     );
 
-    const updatedBlocks = await Promise.all(updatePromises);
-    return updatedBlocks as PageBlock[];
+    // Now update with final order values
+    const finalUpdates = await this.prisma.$transaction(
+      updates.map(update =>
+        this.prisma.pageBlock.update({
+          where: { id: update.id },
+          data: { order: update.order }
+        })
+      )
+    );
+
+    return finalUpdates as PageBlock[];
   }
 
   // Get published pages for public access

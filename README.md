@@ -340,6 +340,36 @@ Complete implementation of hierarchical, nestable block structures in Page Build
 - ✅ Proper spacing and layout for children
 - ✅ Full drag-and-drop support for reordering
 
+### 🎯 Dynamic Block System (NEW)
+Powerful dynamic content system that fetches and renders data from multiple sources with flexible templating.
+
+**Quick Start:**
+- [**⚡ Quick Start Guide**](DYNAMIC_BLOCK_QUICK_START.md) - Get started in 15 minutes
+- [**📖 Complete Guide**](DYNAMIC_BLOCK_GUIDE.md) - Full documentation with all features
+- [**📚 Documentation Index**](DYNAMIC_BLOCK_INDEX.md) - Navigation guide
+
+**Features:**
+- ✅ **Multiple Data Sources**: Static, REST API, GraphQL, Database
+- ✅ **Template System**: Flexible Handlebars-like templates
+- ✅ **Repeater Pattern**: Loop through arrays and render multiple items
+- ✅ **Conditional Rendering**: Display content based on conditions
+- ✅ **Real-time Updates**: Auto-refresh data at intervals
+- ✅ **Error Handling**: Graceful error display and fallbacks
+
+**Data Source Support:**
+- 📊 **Static Data**: Hard-coded JSON objects
+- 🔌 **REST API**: HTTP endpoints with custom headers
+- 🔗 **GraphQL**: GraphQL queries with variables
+- 🗄️ **Database**: Direct Prisma queries
+
+**Common Use Cases:**
+- Product listings and carousels
+- Blog post feeds
+- Testimonials and reviews
+- Category showcases
+- Team member directories
+- Live pricing tables
+- Recent news/updates
 
 **Features:**
 - ✅ No GraphQL schema conflicts
