@@ -9,6 +9,7 @@ import { usePageState } from './PageStateContext';
 import { useTemplate } from './TemplateContext';
 import { useUIState } from './UIStateContext';
 import { BlockTemplate } from '@/data/blockTemplates';
+import { getRandomSampleTemplate } from '@/lib/dynamicBlockSampleTemplates';
 
 /**
  * Default content for each block type
@@ -78,10 +79,12 @@ export const DEFAULT_BLOCK_CONTENT = {
     style: {} 
   },
   [BlockType.DYNAMIC]: { 
+    // Initialize with a random sample template for better user experience
     componentType: 'template',
-    templateId: null,
-    templateName: 'Dynamic Content',
-    template: '<div class="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center"><h3 class="text-lg font-semibold mb-2">Dynamic Block</h3><p class="text-gray-600">Select a template from the Templates tab to add dynamic content with database integration.</p></div>',
+    templateId: 'sample-template',
+    templateName: 'Sample Template',
+    // Will be replaced with actual template on block add
+    template: '<div class="p-6 border-2 border-dashed border-gray-300 rounded-lg text-center"><h3 class="text-lg font-semibold mb-2">Dynamic Block</h3><p class="text-gray-600">Loading sample template...</p></div>',
     dataSource: { type: 'static', data: {} },
     variables: {},
     style: {} 
@@ -243,7 +246,22 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         return;
       }
       
-      const defaultContent = DEFAULT_BLOCK_CONTENT[blockType as keyof typeof DEFAULT_BLOCK_CONTENT] || {};
+      let defaultContent = DEFAULT_BLOCK_CONTENT[blockType as keyof typeof DEFAULT_BLOCK_CONTENT] || {};
+      
+      // Setup sample template data for Dynamic Blocks
+      if (blockType === BlockType.DYNAMIC) {
+        const sampleTemplate = getRandomSampleTemplate();
+        defaultContent = {
+          componentType: 'template',
+          templateId: sampleTemplate.id,
+          templateName: sampleTemplate.name,
+          template: sampleTemplate.template,
+          dataSource: sampleTemplate.dataSource,
+          variables: sampleTemplate.variables,
+          style: {},
+        } as any;
+        console.log('[PageBuilder] Dynamic Block with sample template:', { template: sampleTemplate.name });
+      }
       
       // Don't send order - let backend calculate it to avoid race conditions
       const input = {
@@ -256,7 +274,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       
       const result = await addBlock(input);
       pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_CREATE, 'Block added', { blockType });
-      toast.success('Block added successfully!');
+      toast.success(blockType === BlockType.DYNAMIC ? '✨ Dynamic Block added with sample data!' : 'Block added successfully!');
       
       console.log('[PageBuilder] Block added successfully:', result);
       await refetch();
@@ -301,6 +319,12 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       if (style !== undefined) {
         input.style = style;
       }
+      
+      // If content has config property, extract and save it separately
+      if (content?.config !== undefined) {
+        input.config = content.config;
+      }
+      
       await updateBlock(blockId, input);
       pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_UPDATE, 'Block updated', { blockId, content, style });
       await pageState.refetch();

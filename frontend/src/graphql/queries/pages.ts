@@ -23,6 +23,7 @@ const PAGE_BLOCK_FRAGMENT = gql`
     type
     content
     style
+    config
     order
     parentId
     depth
@@ -32,6 +33,7 @@ const PAGE_BLOCK_FRAGMENT = gql`
       type
       content
       style
+      config
       order
       parentId
       depth
@@ -41,6 +43,7 @@ const PAGE_BLOCK_FRAGMENT = gql`
         type
         content
         style
+        config
         order
         parentId
         depth
@@ -50,6 +53,7 @@ const PAGE_BLOCK_FRAGMENT = gql`
           type
           content
           style
+          config
           order
           parentId
           depth

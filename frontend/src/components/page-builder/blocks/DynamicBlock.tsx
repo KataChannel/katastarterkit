@@ -419,9 +419,10 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
     const updatedContent = {
       ...block.content,
       template: templateEdit,
+      config: editConfig, // Save the entire config with template
     };
+    
     onUpdate(updatedContent, block.style);
-    // Update config through parent component
     setIsEditing(false);
   };
 
@@ -466,7 +467,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
 
           {/* Scrollable Content Area */}
           <div className="flex-1 overflow-y-auto px-6 py-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-full">
               
               {/* Left Column - Configuration */}
               <div className="space-y-6">
@@ -614,18 +615,64 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
               <div className="space-y-6">
                 
                 {/* Template HTML Editor */}
-                <Card className="p-4 flex flex-col h-full">
+                <Card className="p-4 flex flex-col">
                   <h3 className="font-semibold mb-3">Template HTML</h3>
                   <Textarea
                     placeholder={'<div>{{#each items}}<p>{{name}}</p>{{/each}}</div>'}
                     value={templateEdit}
                     onChange={(e) => setTemplateEdit(e.target.value)}
-                    rows={15}
+                    rows={8}
                     className="font-mono text-xs flex-1 resize-none"
                   />
                   <p className="text-xs text-gray-500 mt-2">
                     {"Use {{variable}} • {{#each}}...{{/each}} for loops • {{#if}}...{{/if}} for conditionals"}
                   </p>
+                </Card>
+              </div>
+
+              {/* Right Column - Live Preview */}
+              <div className="space-y-6">
+                <Card className="p-4 flex flex-col h-full bg-white border-2 border-green-100">
+                  <h3 className="font-semibold mb-3 flex items-center">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                    Live Preview
+                  </h3>
+                  
+                  {/* Preview Content */}
+                  <div className="flex-1 overflow-auto bg-gray-50 rounded p-3 border border-gray-200">
+                    {templateEdit ? (
+                      <div 
+                        className="text-sm"
+                        dangerouslySetInnerHTML={{ 
+                          __html: processTemplate(
+                            templateEdit, 
+                            editConfig.dataSource?.staticData || getSampleData(block.content?.templateId || '')
+                          )
+                        }}
+                      />
+                    ) : (
+                      <div className="text-gray-400 text-center py-8">
+                        <p>Enter template HTML to see preview</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Preview Info */}
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <p className="text-xs font-semibold text-gray-600 mb-2">Using Data:</p>
+                    <pre className="text-xs bg-white p-2 rounded border border-gray-200 max-h-32 overflow-auto">
+                      {JSON.stringify(
+                        editConfig.dataSource?.staticData || getSampleData(block.content?.templateId || ''),
+                        null,
+                        2
+                      ).substring(0, 300)}
+                      {JSON.stringify(
+                        editConfig.dataSource?.staticData || getSampleData(block.content?.templateId || ''),
+                        null,
+                        2
+                      ).length > 300 && '...'}
+                    </pre>
+                  </div>
                 </Card>
               </div>
             </div>
