@@ -39,9 +39,9 @@ export function StylePanel({ selectedBlock, onStyleChange }: StylePanelProps) {
   // Merge current styles with pending changes for display
   const displayStyles = { ...currentStyles, ...pendingStyles };
 
-  console.log('StylePanel - selectedBlock:', selectedBlock);
-  console.log('StylePanel - currentStyles:', currentStyles);
-  console.log('StylePanel - pendingStyles:', pendingStyles);
+  // console.log('StylePanel - selectedBlock:', selectedBlock);
+  // console.log('StylePanel - currentStyles:', currentStyles);
+  // console.log('StylePanel - pendingStyles:', pendingStyles);
 
   // Update pending styles (not saved yet)
   const handleStyleUpdate = (updates: Record<string, any>) => {

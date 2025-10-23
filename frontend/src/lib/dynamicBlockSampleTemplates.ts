@@ -511,17 +511,6 @@ export const getAllSampleTemplates = (): SampleTemplate[] => {
   ];
 };
 
-/**
- * Get a random sample template
- */
-export const getRandomSampleTemplate = (): SampleTemplate => {
-  const templates = getAllSampleTemplates();
-  return templates[Math.floor(Math.random() * templates.length)];
-};
-
-/**
- * Get sample template by ID
- */
 export const getSampleTemplateById = (id: string): SampleTemplate | undefined => {
   const templates = getAllSampleTemplates();
   return templates.find(t => t.id === id);

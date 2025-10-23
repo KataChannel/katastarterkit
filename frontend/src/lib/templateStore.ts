@@ -329,6 +329,34 @@ export function clearAllTemplates(): boolean {
 }
 
 /**
+ * Clear PageBuilder cache (pagebuilder_templates localStorage)
+ * Used to fix cache issues when templates are updated
+ */
+export function clearPageBuilderCache(): boolean {
+  try {
+    // Clear the main storage key
+    localStorage.removeItem(STORAGE_KEY);
+    
+    // Also clear any other related cache keys that might exist
+    const keys = Object.keys(localStorage);
+    const cacheKeysToRemove = keys.filter(key => 
+      key.includes('pagebuilder') || 
+      key.includes('template') ||
+      key.includes('dynamicblock')
+    );
+    
+    cacheKeysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('Error clearing PageBuilder cache:', error);
+    return false;
+  }
+}
+
+/**
  * Initialize storage with default templates
  */
 export function initializeStorage(defaultTemplates: PageTemplate[]): boolean {

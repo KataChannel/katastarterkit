@@ -1,25 +1,53 @@
-import React, { useState, useEffect } from 'react';
+/**
+ * Dynamic Block Component - Refactored Version
+ * Senior-level architecture with hooks separation
+ * 
+ * Features:
+ * - Multiple template support (Static, API, GraphQL)
+ * - JSON validation with blur triggers
+ * - Repeater pattern with limit
+ * - Advanced template syntax ({{#each}}, {{#if}}, {{#repeat}})
+ * - No infinite loops - uses reducer pattern
+ */
+
+'use client';
+
+import React, { useEffect } from 'react';
 import { PageBlock, DynamicBlockConfig } from '@/types/page-builder';
-import { Settings, Trash2, RefreshCw, Code, Check, BookOpen, Grid3x3, Maximize2, Minimize2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { 
-  getAllSampleTemplates, 
-  type SampleTemplate 
-} from '@/lib/dynamicBlockSampleTemplates';
+  Settings,
+  Trash2,
+  RefreshCw,
+  Code,
+  Check,
+  Grid3x3,
+  Maximize2,
+  Minimize2,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+
+// Custom hooks
+import {
+  useDynamicBlockState,
+  useDynamicBlockData,
+  useTemplateSelection,
+  useDataValidation,
+  testAPIConnection,
+} from './dynamicBlock';
+
+// Utilities
+import { processTemplate, evaluateAllConditions } from './dynamicBlock/templateUtils';
+import { hasValidationErrors } from './dynamicBlock/validationUtils';
+import { getAllSampleTemplates, type SampleTemplate } from '@/lib/dynamicBlockSampleTemplates';
+
+// UI Components
+import {
+  TemplateSelectionPanel,
+  TemplateEditorPanel,
+  ConfigurationPanel,
+} from './dynamicBlock/components';
 
 interface DynamicBlockProps {
   block: PageBlock;
@@ -28,6 +56,9 @@ interface DynamicBlockProps {
   onDelete: () => void;
 }
 
+/**
+ * Main Dynamic Block Component
+ */
 export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   block,
   isEditable = true,
@@ -35,356 +66,145 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   onDelete,
 }) => {
   const config = block.config as DynamicBlockConfig;
-  const [isEditing, setIsEditing] = useState(false);
-  const [editConfig, setEditConfig] = useState<DynamicBlockConfig>(config || {});
-  const [templateEdit, setTemplateEdit] = useState<string>(block.content?.template || '');
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<SampleTemplate | null>(null);
-  const [apiTestResult, setApiTestResult] = useState<any>(null);
-  const [apiTestLoading, setApiTestLoading] = useState(false);
-  const [apiTestError, setApiTestError] = useState<string | null>(null);
-  const [isFullscreenEditor, setIsFullscreenEditor] = useState(false);
   const sampleTemplates = getAllSampleTemplates();
 
-  // Fetch data based on configuration
+  // State management using custom hook with reducer
+  const {
+    state,
+    setEditing,
+    setFullscreenEditor,
+    setEditConfig,
+    setSelectedTemplate,
+    setTemplateEdit,
+    setLoading,
+    setData,
+    setError,
+    setStaticDataText,
+    setStaticDataError,
+    setRepeaterDataText,
+    setRepeaterDataError,
+    setLimitText,
+    setLimitError,
+    setApiTestLoading,
+    setApiTestResult,
+    setApiTestError,
+  } = useDynamicBlockState(config, block.content?.template || '');
+
+  // Data fetching hook
+  useDynamicBlockData({
+    config: state.editConfig,
+    onDataLoaded: setData,
+    onLoading: setLoading,
+    onError: setError,
+  });
+
+  // Template selection hook
+  const { handleSelectTemplate, handleSelectBlankTemplate } = useTemplateSelection({
+    onConfigChange: setEditConfig,
+    onTemplateChange: setTemplateEdit,
+    onSelectedTemplateChange: setSelectedTemplate,
+    onDataChange: setData,
+    onErrorsReset: () => {
+      setStaticDataError(null, false);
+      setRepeaterDataError(null, false, []);
+      setLimitError(null, false);
+    },
+  });
+
+  // Data validation hook
+  const { validateAndSaveStaticData, validateAndSaveRepeaterData, validateAndSaveLimit } =
+    useDataValidation({
+      editConfig: state.editConfig,
+      onConfigChange: setEditConfig,
+      onDataChange: setData,
+      onStaticDataError: setStaticDataError,
+      onRepeaterDataError: setRepeaterDataError,
+      onLimitError: setLimitError,
+    });
+
+  // Initialize static data text from config on mount/change
   useEffect(() => {
-    if (!config?.dataSource) return;
+    if (state.editConfig.dataSource?.type === 'static') {
+      const staticData = state.editConfig.dataSource?.staticData;
+      const textValue = staticData
+        ? typeof staticData === 'string'
+          ? staticData
+          : JSON.stringify(staticData, null, 2)
+        : '{}';
+      setStaticDataText(textValue);
+    }
+  }, [state.editConfig.dataSource?.type, state.editConfig.templateId, setStaticDataText]);
 
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const dataSource = config.dataSource;
-        if (!dataSource) return;
-
-        if (dataSource.type === 'static') {
-          setData(dataSource.staticData);
-        } else if (dataSource.type === 'api') {
-          const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-          };
-
-          // Add authorization token if provided
-          if (dataSource.token) {
-            headers['Authorization'] = `Bearer ${dataSource.token}`;
-          }
-
-          const method = dataSource.method || 'POST';
-          const body = method === 'POST' ? JSON.stringify(dataSource.variables || {}) : undefined;
-
-          const response = await fetch(dataSource.endpoint || '', {
-            method,
-            headers,
-            body,
-          });
-          const result = await response.json();
-          setData(result);
-        } else if (dataSource.type === 'graphql') {
-          const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-          };
-
-          // Add authorization token if provided
-          if (dataSource.token) {
-            headers['Authorization'] = `Bearer ${dataSource.token}`;
-          }
-
-          const response = await fetch(dataSource.endpoint || '/graphql', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({
-              query: dataSource.query,
-              variables: dataSource.variables,
-            }),
-          });
-          const result = await response.json();
-          setData(result);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [config]);
-
-  // Update preview data when editing config (for real-time preview)
+  // Initialize repeater data text from config on mount/change
   useEffect(() => {
-    if (!isEditing || !editConfig?.dataSource) return;
+    if (state.editConfig.repeater?.enabled) {
+      const repeaterData = state.editConfig.repeater?.data;
+      const textValue = repeaterData
+        ? typeof repeaterData === 'string'
+          ? repeaterData
+          : JSON.stringify(repeaterData, null, 2)
+        : '[]';
+      setRepeaterDataText(textValue);
 
-    if (editConfig.dataSource.type === 'static') {
-      setData(editConfig.dataSource.staticData);
-      setError(null);
+      // Initialize limit text
+      if (state.editConfig.repeater?.limit) {
+        setLimitText(String(state.editConfig.repeater.limit));
+      } else {
+        setLimitText('');
+      }
     }
-  }, [editConfig, isEditing]);
+  }, [state.editConfig.repeater?.enabled, state.editConfig.templateId, setRepeaterDataText, setLimitText]);
 
-  // Evaluate conditions
-  const evaluateConditions = (item: any): boolean => {
-    if (!config?.conditions || config.conditions.length === 0) return true;
+  /**
+   * Handle API/GraphQL testing
+   */
+  const handleTestApi = async () => {
+    setApiTestLoading(true);
+    setApiTestError(null);
+    setApiTestResult(null);
 
-    return config.conditions.every((condition, index) => {
-      const fieldValue = item[condition.field];
-      let result = false;
-
-      switch (condition.operator) {
-        case 'equals':
-          result = fieldValue === condition.value;
-          break;
-        case 'notEquals':
-          result = fieldValue !== condition.value;
-          break;
-        case 'contains':
-          result = String(fieldValue).includes(String(condition.value));
-          break;
-        case 'greaterThan':
-          result = Number(fieldValue) > Number(condition.value);
-          break;
-        case 'lessThan':
-          result = Number(fieldValue) < Number(condition.value);
-          break;
-        case 'exists':
-          result = fieldValue !== null && fieldValue !== undefined;
-          break;
-      }
-
-      // Handle logic operators (AND/OR)
-      if (index > 0 && config.conditions && config.conditions[index - 1]?.logic === 'OR') {
-        return result; // OR logic - any true condition passes
-      }
-      return result; // Default AND logic
-    });
-  };
-
-  // Replace template variables
-  const replaceVariables = (template: string, item: any): string => {
-    let result = template;
-    
-    // Replace {{variable}} syntax
-    const matches = template.match(/\{\{([^}]+)\}\}/g);
-    if (matches) {
-      matches.forEach((match) => {
-        const key = match.replace(/\{\{|\}\}/g, '').trim();
-        const value = item[key] || config?.variables?.[key] || '';
-        result = result.replace(match, String(value));
-      });
+    try {
+      const result = await testAPIConnection(state.editConfig.dataSource);
+      setApiTestResult(result);
+    } catch (err) {
+      setApiTestError(err instanceof Error ? err.message : 'Failed to test connection');
+    } finally {
+      setApiTestLoading(false);
     }
-
-    return result;
   };
 
-  // Check if this is a template-based dynamic block
-  const isTemplateBlock = block.content?.componentType === 'template';
-  const templateContent = block.content?.template;
-
-  // Sample data for different template types
-  const getSampleData = (templateId: string) => {
-    const sampleData: Record<string, any> = {
-      'product-grid': {
-        title: 'Featured Products',
-        products: [
-          {
-            id: 1,
-            name: 'MacBook Pro M3',
-            price: 1999,
-            description: 'Powerful laptop for professionals',
-            image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&h=200&fit=crop',
-          },
-          {
-            id: 2,
-            name: 'iPhone 15 Pro',
-            price: 1099,
-            description: 'Latest smartphone technology',
-            image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=200&fit=crop',
-          },
-          {
-            id: 3,
-            name: 'AirPods Pro',
-            price: 249,
-            description: 'Premium wireless earbuds',
-            image: 'https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=200&fit=crop',
-          },
-        ],
-      },
-      'task-dashboard': {
-        projectName: 'Website Redesign',
-        todoTasks: [
-          { title: 'Design mockups', description: 'Create wireframes and prototypes', priority: 'high', dueDate: '2025-10-20' },
-          { title: 'Content audit', description: 'Review existing content', priority: 'medium', dueDate: '2025-10-22' },
-        ],
-        inProgressTasks: [
-          { title: 'Frontend development', description: 'Implement React components', priority: 'high', assignee: 'John Doe' },
-        ],
-        doneTasks: [
-          { title: 'Research phase', description: 'Market analysis completed', priority: 'medium' },
-        ],
-      },
-      'category-showcase': {
-        title: 'Shop by Category',
-        categories: [
-          { name: 'Electronics', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&h=300&fit=crop', productCount: 150 },
-          { name: 'Fashion', image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop', productCount: 89 },
-          { name: 'Home & Garden', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop', productCount: 67 },
-        ],
-      },
-      'hero-section': {
-        title: 'Biến Ý Tưởng Thành Hiện Thực',
-        subtitle: 'Nền tảng toàn diện giúp bạn xây dựng website chuyên nghiệp với công nghệ tiên tiến nhất',
-        ctaText: 'Bắt Đầu Ngay Hôm Nay',
-        backgroundImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&h=1080&fit=crop',
-      },
-      'contact-form': {
-        title: 'Liên Hệ Với Chúng Tôi',
-        description: 'Chúng tôi luôn sẵn sàng hỗ trợ bạn. Hãy để lại thông tin và chúng tôi sẽ phản hồi trong 24h.',
-        email: 'hello@katacore.com',
-        phone: '+84 (0) 123 456 789',
-        address: 'Tầng 10, Tòa nhà ABC, 123 Đường DEF, Quận 1, TP.HCM',
-      },
-      'testimonials': {
-        title: 'Khách Hàng Nói Gì Về Chúng Tôi',
-        testimonials: [
-          {
-            name: 'Nguyễn Văn A',
-            position: 'CEO, Tech Startup',
-            avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face',
-            content: 'Dịch vụ tuyệt vời! Team rất chuyên nghiệp và hỗ trợ nhiệt tình. Website của chúng tôi đã tăng 300% traffic.',
-            rating: 5,
-          },
-          {
-            name: 'Trần Thị B',
-            position: 'Marketing Manager, Fashion Brand',
-            avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face',
-            content: 'Thiết kế đẹp, tính năng đầy đủ và tốc độ tải nhanh. Đúng là đáng đồng tiền bát gạo!',
-            rating: 5,
-          },
-          {
-            name: 'Lê Minh C',
-            position: 'Founder, E-commerce Store',
-            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face',
-            content: 'Từ khi dùng platform này, doanh số online của shop tôi tăng gấp đôi. Highly recommended!',
-            rating: 5,
-          },
-        ],
-      },
-      'faq-section': {
-        title: 'Câu Hỏi Thường Gặp',
-        faqs: [
-          {
-            question: 'Tôi có thể tự thiết kế website không cần kiến thức lập trình?',
-            answer: 'Hoàn toàn có thể! Platform của chúng tôi được thiết kế drag-and-drop trực quan, bạn chỉ cần kéo thả các component và tùy chỉnh theo ý muốn.',
-          },
-          {
-            question: 'Có bao nhiều template có sẵn để lựa chọn?',
-            answer: 'Chúng tôi cung cấp hơn 100+ template chuyên nghiệp cho nhiều lĩnh vực khác nhau: e-commerce, business, portfolio, blog, landing page...',
-          },
-          {
-            question: 'Website có responsive trên mobile không?',
-            answer: 'Tất cả template và component đều được tối ưu responsive, hiển thị hoàn hảo trên mọi thiết bị từ desktop, tablet đến mobile.',
-          },
-          {
-            question: 'Có hỗ trợ SEO không?',
-            answer: 'Có! Chúng tôi tích hợp đầy đủ các tính năng SEO: meta tags, sitemap, structured data, page speed optimization...',
-          },
-          {
-            question: 'Tôi có thể kết nối domain riêng không?',
-            answer: 'Chắc chắn rồi! Bạn có thể kết nối domain riêng và chúng tôi hỗ trợ cấu hình SSL certificate miễn phí.',
-          },
-        ],
-      },
-      'newsletter-signup': {
-        title: 'Đăng Ký Nhận Tin Tức Mới Nhất',
-        description: 'Nhận các tips, tricks và update về web development, design trends và business insights.',
-        subscriberCount: '12,500',
-        benefits: [
-          'Weekly tips về web development',
-          'Exclusive templates và resources',
-          'Early access cho features mới',
-          'Community access với 10k+ developers',
-        ],
-      },
-    };
-
-    return sampleData[templateId] || {};
-  };
-
-  // Enhanced template processor with advanced features
-  const processTemplate = (template: string, data: any): string => {
-    let result = template;
-
-    // Process repeat helper (e.g., {{#repeat rating}}) - FIRST before loops
-    const repeatRegex = /{{#repeat\s+(\w+)}}([\s\S]*?){{\/repeat}}/g;
-    result = result.replace(repeatRegex, (match: string, countVar: string, repeatTemplate: string) => {
-      const count = data[countVar] || 0;
-      return Array(count).fill(repeatTemplate).join('');
-    });
-
-    // Process conditional blocks ({{#if condition}}) - BEFORE loops to preserve outer scope
-    const ifRegex = /{{#if\s+(\w+)}}([\s\S]*?){{\/if}}/g;
-    result = result.replace(ifRegex, (match: string, condition: string, ifTemplate: string) => {
-      return data[condition] ? ifTemplate : '';
-    });
-
-    // Process simple loops
-    const loopRegex = /{{#each\s+(\w+)}}([\s\S]*?){{\/each}}/g;
-    result = result.replace(loopRegex, (match: string, arrayName: string, loopTemplate: string) => {
-      const array = data[arrayName];
-      if (Array.isArray(array)) {
-        return array.map(item => {
-          let itemResult = loopTemplate;
-          
-          // Replace ONLY item properties (variables that exist in the item)
-          Object.entries(item).forEach(([key, value]) => {
-            const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-            itemResult = itemResult.replace(regex, String(value));
-          });
-          
-          // Handle repeat within loops (e.g., for star ratings)
-          const itemRepeatRegex = /{{#repeat\s+(\w+)}}([\s\S]*?){{\/repeat}}/g;
-          itemResult = itemResult.replace(itemRepeatRegex, (match: string, countVar: string, repeatTemplate: string) => {
-            const count = item[countVar] || 0;
-            return Array(count).fill(repeatTemplate).join('');
-          });
-          
-          return itemResult;
-        }).join('');
-      }
-      return '';
-    });
-
-    // Replace remaining simple variables (outside loops) - LAST
-    Object.entries(data).forEach(([key, value]) => {
-      // Skip arrays and complex objects
-      if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
-        return;
-      }
-      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-      result = result.replace(regex, String(value));
-    });
-
-    return result;
-  };
-
-  // Render dynamic content
+  /**
+   * Render dynamic content based on configuration
+   */
   const renderContent = () => {
-    // Handle template-based blocks
-    if (isTemplateBlock && templateContent) {
-      // Use actual fetched data if available, otherwise use sample data
-      const renderData = data || getSampleData(block.content?.templateId || '');
-      const processedTemplate = processTemplate(templateContent, renderData);
-      
+    // Template-based rendering
+    if (block.content?.componentType === 'template' && block.content?.template) {
+      let renderData = state.data;
+
+      // Fallback to sample template data
+      if (!renderData && block.content?.templateId) {
+        const matchingTemplate = sampleTemplates.find(t => t.id === block.content?.templateId);
+        if (matchingTemplate?.dataSource?.staticData) {
+          renderData = matchingTemplate.dataSource.staticData;
+        }
+      }
+
+      if (!renderData) {
+        return (
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded text-gray-500 text-sm">
+            No data available. Configure data source and save to preview.
+          </div>
+        );
+      }
+
+      const processedTemplate = processTemplate(block.content.template, renderData);
       return (
-        <div 
-          className="template-content"
-          dangerouslySetInnerHTML={{ __html: processedTemplate }}
-        />
+        <div className="template-content" dangerouslySetInnerHTML={{ __html: processedTemplate }} />
       );
     }
 
-    if (loading) {
+    // Loading state
+    if (state.loading) {
       return (
         <div className="flex items-center justify-center p-8">
           <RefreshCw className="w-6 h-6 animate-spin text-blue-500" />
@@ -393,47 +213,22 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
       );
     }
 
-    if (error) {
+    // Error state
+    if (state.error) {
       return (
         <div className="p-4 bg-red-50 border border-red-200 rounded text-red-600">
-          <strong>Error:</strong> {error}
+          <strong>Error:</strong> {state.error}
         </div>
       );
     }
 
-    if (!data) {
-      return (
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded text-gray-500 text-sm">
-          No data available. Configure data source and save to preview.
-        </div>
+    // Repeater pattern rendering
+    if (config?.repeater?.enabled && state.data) {
+      const items = Array.isArray(state.data) ? state.data : [];
+      const filteredItems = items.filter(item =>
+        evaluateAllConditions(item, config.conditions)
       );
-    }
-
-    // Handle repeater pattern
-    if (config?.repeater?.enabled) {
-      const dataPath = config.repeater.dataPath || '';
-      let items: any[] = [];
-      
-      try {
-        items = dataPath ? eval(`data.${dataPath}`) : (Array.isArray(data) ? data : [data]);
-      } catch (err) {
-        return (
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700 text-sm">
-            Invalid data path: {dataPath}
-          </div>
-        );
-      }
-      
-      if (!Array.isArray(items)) {
-        return (
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700 text-sm">
-            Data path does not return an array
-          </div>
-        );
-      }
-
-      const filteredItems = items.filter(evaluateConditions);
-      const limitedItems = config.repeater?.limit 
+      const limitedItems = config.repeater?.limit
         ? filteredItems.slice(0, config.repeater.limit)
         : filteredItems;
 
@@ -441,146 +236,62 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
         <div className="grid gap-4">
           {limitedItems.map((item, index) => (
             <Card key={index} className="p-4">
-              {config.repeater?.itemTemplate ? (
-                <div>
-                  <h3 className="font-bold">
-                    {replaceVariables(config.repeater.itemTemplate.content?.title || '', item)}
-                  </h3>
-                  <p className="text-gray-600">
-                    {replaceVariables(config.repeater.itemTemplate.content?.description || '', item)}
-                  </p>
-                </div>
-              ) : (
-                <pre className="text-sm">{JSON.stringify(item, null, 2)}</pre>
-              )}
+              <pre className="text-sm overflow-auto max-h-96">{JSON.stringify(item, null, 2)}</pre>
             </Card>
           ))}
         </div>
       );
     }
 
-    // Single item display - show JSON or render as template if template exists
-    if (templateContent) {
-      const processedTemplate = processTemplate(templateContent, data);
+    // No data
+    if (!state.data) {
       return (
-        <div 
-          className="template-content"
-          dangerouslySetInnerHTML={{ __html: processedTemplate }}
-        />
+        <div className="p-4 bg-gray-50 border border-gray-200 rounded text-gray-500 text-sm">
+          No data available. Configure data source and save to preview.
+        </div>
       );
     }
 
+    // Default: show JSON
     return (
       <Card className="p-4">
-        <pre className="text-sm overflow-auto max-h-96">{JSON.stringify(data, null, 2)}</pre>
+        <pre className="text-sm overflow-auto max-h-96">{JSON.stringify(state.data, null, 2)}</pre>
       </Card>
     );
   };
 
-  // Handle template selection
-  const handleSelectTemplate = (template: SampleTemplate) => {
-    setSelectedTemplate(template);
-    setTemplateEdit(template.template);
-    
-    // Create a complete new config object with deep copy of dataSource
-    const newConfig: DynamicBlockConfig = {
-      ...editConfig,
-      templateId: template.id,
-      templateName: template.name,
-      dataSource: {
-        type: template.dataSource.type,
-        staticData: template.dataSource.staticData ? { ...template.dataSource.staticData } : undefined,
-        endpoint: template.dataSource.endpoint,
-        query: template.dataSource.query,
-        variables: template.dataSource.variables ? { ...template.dataSource.variables } : undefined,
-      },
-      variables: template.variables ? { ...template.variables } : {},
-    };
-    
-    setEditConfig(newConfig);
-    // Immediately update data state for preview
-    if (newConfig.dataSource?.type === 'static' && (newConfig.dataSource as any).staticData) {
-      setData((newConfig.dataSource as any).staticData);
-      setError(null);
-    }
-  };
-
-  // Test API or GraphQL endpoint
-  const handleTestApi = async () => {
-    setApiTestLoading(true);
-    setApiTestError(null);
-    setApiTestResult(null);
-
-    try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-
-      // Add authorization token if provided
-      if (editConfig.dataSource?.token) {
-        headers['Authorization'] = `Bearer ${editConfig.dataSource.token}`;
-      }
-
-      if (editConfig.dataSource?.type === 'graphql') {
-        const response = await fetch(editConfig.dataSource.endpoint || '', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            query: editConfig.dataSource.query || '',
-            variables: editConfig.dataSource.variables || {},
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        if (result.errors) {
-          setApiTestError(result.errors[0]?.message || 'GraphQL Error');
-        } else {
-          setApiTestResult(result.data);
-        }
-      } else if (editConfig.dataSource?.type === 'api') {
-        const method = editConfig.dataSource?.method || 'GET';
-        const body = method === 'POST' ? JSON.stringify(editConfig.dataSource.variables || {}) : undefined;
-
-        const response = await fetch(editConfig.dataSource.endpoint || '', {
-          method,
-          headers,
-          body,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        setApiTestResult(result);
-      }
-    } catch (err: any) {
-      setApiTestError(err.message || 'Failed to fetch data');
-    } finally {
-      setApiTestLoading(false);
-    }
-  };
-
+  /**
+   * Handle save
+   */
   const handleSave = () => {
+    // Check for validation errors
+    if (
+      hasValidationErrors(
+        state.hasValidationError,
+        state.repeaterValidationError,
+        state.limitValidationError
+      )
+    ) {
+      return;
+    }
+
     const updatedContent = {
       ...block.content,
       componentType: 'template',
-      template: templateEdit,
-      config: editConfig, // Save the entire config with template
+      template: state.templateEdit,
+      config: state.editConfig,
     };
-    
+
     onUpdate(updatedContent, block.style);
-    setIsEditing(false);
+    setEditing(false);
   };
 
+  // Non-editable mode
   if (!isEditable) {
     return <div className="dynamic-block-content">{renderContent()}</div>;
   }
 
+  // Editable mode with dialog
   return (
     <div className="relative border-2 border-dashed border-purple-300 rounded-lg p-4 group">
       {/* Control Bar */}
@@ -588,23 +299,18 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
         <Button
           size="sm"
           variant="outline"
-          onClick={() => setIsEditing(!isEditing)}
+          onClick={() => setEditing(!state.isEditing)}
           className="bg-white shadow-sm"
         >
           <Settings className="w-4 h-4" />
         </Button>
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={onDelete}
-          className="shadow-sm"
-        >
+        <Button size="sm" variant="destructive" onClick={onDelete} className="shadow-sm">
           <Trash2 className="w-4 h-4" />
         </Button>
       </div>
 
-      {/* Settings Dialog - 2-Column Layout */}
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+      {/* Settings Dialog */}
+      <Dialog open={state.isEditing} onOpenChange={setEditing}>
         <DialogContent className="max-w-7xl h-[95vh] p-0 flex flex-col">
           {/* Header */}
           <DialogHeader className="px-8 pt-8 pb-6 border-b bg-gradient-to-r from-slate-50 to-slate-100">
@@ -619,396 +325,136 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
 
           {/* Main Content - 2 Column Layout */}
           <div className="flex-1 flex overflow-hidden">
-            {/* LEFT COLUMN: Template Selection (50%) */}
-            <div className="w-1/2 border-r border-gray-200 overflow-y-auto flex flex-col">
-              <div className="px-6 py-6 space-y-4 flex-1 overflow-y-auto">
-                <div>
-                  <h3 className="text-lg font-bold mb-2">Choose Template</h3>
-                  <p className="text-sm text-gray-600 mb-6">Select from professional templates or start with blank</p>
-                  
-                  <div className="space-y-3">
-                    {/* Blank Template */}
-                    <button
-                      onClick={() => {
-                        setSelectedTemplate(null);
-                        setTemplateEdit('');
-                        setEditConfig({
-                          ...editConfig,
-                          templateName: 'Custom Template',
-                          dataSource: { type: 'static', staticData: {} },
-                          variables: {},
-                        });
-                      }}
-                      className={`w-full p-4 rounded-lg border-2 transition-all text-left hover:shadow-md ${
-                        selectedTemplate === null
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 bg-white hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="font-semibold text-base mb-1">Blank Template</div>
-                      <p className="text-xs text-gray-600">Start with empty HTML</p>
-                      {selectedTemplate === null && (
-                        <div className="mt-2 flex items-center text-blue-600 text-xs font-semibold">
-                          <Check className="w-3 h-3 mr-1" /> Selected
-                        </div>
-                      )}
-                    </button>
+            {/* LEFT: Template Selection */}
+            <TemplateSelectionPanel
+              sampleTemplates={sampleTemplates}
+              selectedTemplate={state.selectedTemplate}
+              onSelectTemplate={handleSelectTemplate}
+              onSelectBlank={() => handleSelectBlankTemplate(state.editConfig)}
+              currentConfig={state.editConfig}
+            />
 
-                    {/* Sample Templates */}
-                    {sampleTemplates.map((template) => (
-                      <button
-                        key={template.id}
-                        onClick={() => handleSelectTemplate(template)}
-                        className={`w-full p-4 rounded-lg border-2 transition-all text-left hover:shadow-md ${
-                          selectedTemplate?.id === template.id
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 bg-white hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="font-semibold text-base mb-1">{template.name}</div>
-                        <p className="text-xs text-gray-600 line-clamp-2">{template.description}</p>
-                        {selectedTemplate?.id === template.id && (
-                          <div className="mt-2 flex items-center text-blue-600 text-xs font-semibold">
-                            <Check className="w-3 h-3 mr-1" /> Selected
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+            {/* RIGHT: Editor & Configuration */}
+            {!state.isFullscreenEditor && (
+              <div className="w-1/2 flex flex-col">
+                {/* Template Editor */}
+                <TemplateEditorPanel
+                  templateEdit={state.templateEdit}
+                  onTemplateChange={setTemplateEdit}
+                  selectedTemplate={state.selectedTemplate}
+                  isFullscreenEditor={state.isFullscreenEditor}
+                  onFullscreenToggle={setFullscreenEditor}
+                />
+
+                {/* Configuration */}
+                <ConfigurationPanel
+                  editConfig={state.editConfig}
+                  onConfigChange={setEditConfig}
+                  staticDataText={state.staticDataText}
+                  onStaticDataChange={setStaticDataText}
+                  onStaticDataBlur={() => validateAndSaveStaticData(state.staticDataText)}
+                  staticDataError={state.staticDataError}
+                  hasStaticValidationError={state.hasValidationError}
+                  repeaterEnabled={state.editConfig.repeater?.enabled || false}
+                  onRepeaterEnabledChange={(checked) => {
+                    setEditConfig({
+                      ...state.editConfig,
+                      repeater: checked
+                        ? {
+                            ...state.editConfig.repeater,
+                            enabled: checked,
+                            data: state.editConfig.repeater?.data || [],
+                          }
+                        : { enabled: false },
+                    });
+                  }}
+                  repeaterDataText={state.repeaterDataText}
+                  onRepeaterDataChange={setRepeaterDataText}
+                  onRepeaterDataBlur={() => validateAndSaveRepeaterData(state.repeaterDataText)}
+                  repeaterDataError={state.repeaterDataError}
+                  hasRepeaterValidationError={state.repeaterValidationError}
+                  repeaterItemsCount={state.repeaterItemsData.length}
+                  limitText={state.limitText}
+                  onLimitChange={setLimitText}
+                  onLimitBlur={() => validateAndSaveLimit(state.limitText)}
+                  limitError={state.limitError}
+                  hasLimitValidationError={state.limitValidationError}
+                  onTestApi={handleTestApi}
+                  apiTestLoading={state.apiTestLoading}
+                  apiTestResult={state.apiTestResult}
+                  apiTestError={state.apiTestError}
+                />
               </div>
-            </div>
+            )}
 
-            {/* FULLSCREEN EDITOR MODAL */}
-            {isFullscreenEditor && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg shadow-2xl w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
-                {/* Fullscreen Header */}
-                <div className="border-b px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
-                  <h2 className="text-lg font-bold">Edit Template HTML</h2>
-                  <Button
-                    onClick={() => setIsFullscreenEditor(false)}
-                    variant="outline"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
-                    <Minimize2 className="w-4 h-4" />
-                  </Button>
-                </div>
+            {/* Fullscreen Editor Modal */}
+            {state.isFullscreenEditor && (
+              <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-lg shadow-2xl w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
+                  <div className="border-b px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <h2 className="text-lg font-bold">Edit Template HTML</h2>
+                    <Button
+                      onClick={() => setFullscreenEditor(false)}
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                    >
+                      <Minimize2 className="w-4 h-4" />
+                    </Button>
+                  </div>
 
-                {/* Fullscreen Content */}
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  {/* Editor */}
                   <div className="flex-1 overflow-hidden flex flex-col p-4">
-                    <Textarea
+                    <textarea
                       placeholder={`<div class="p-6">\n  <h2>{{title}}</h2>\n  {{#each items}}\n    <p>{{this.name}}</p>\n  {{/each}}\n</div>`}
-                      value={templateEdit}
+                      value={state.templateEdit}
                       onChange={(e) => setTemplateEdit(e.target.value)}
                       className="font-mono text-sm resize-none flex-1 p-4 border border-gray-300 rounded-lg"
                     />
                   </div>
 
-                  {/* Hints */}
-                  <div className="px-4 pb-4 text-xs text-gray-600 space-y-1">
-                    <p>Available syntax:</p>
-                    <div className="flex flex-wrap gap-3">
-                      <code className="bg-gray-100 px-2 py-1 rounded">{'{{variable}}'}</code>
-                      <code className="bg-gray-100 px-2 py-1 rounded">{'{{#each array}}...{{/each}}'}</code>
-                      <code className="bg-gray-100 px-2 py-1 rounded">{'{{#if condition}}...{{/if}}'}</code>
-                      <code className="bg-gray-100 px-2 py-1 rounded">{'{{else}}'}</code>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Fullscreen Footer */}
-                <div className="border-t px-6 py-3 flex gap-2 justify-end bg-gray-50">
-                  <Button
-                    onClick={() => setIsFullscreenEditor(false)}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Close
-                  </Button>
-                </div>
-              </div>
-            </div>
-            )}
-
-            {/* RIGHT COLUMN: Editor + Configuration (50%) - Only show when not fullscreen */}
-            {!isFullscreenEditor && (
-            <div className="w-1/2 flex flex-col">
-              {/* TOP: Template Editor */}
-              <div className="flex-1 border-b border-gray-200 overflow-y-auto flex flex-col">
-                <div className="px-6 py-6 space-y-3 flex flex-col h-full">
-                  <div className="flex flex-col flex-1">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-base font-bold">Template HTML</h3>
-                      <div className="flex items-center gap-2">
-                        <div className="text-xs text-gray-500">
-                          {selectedTemplate ? `Using: ${selectedTemplate.name}` : 'Blank template'}
-                        </div>
-                        <Button
-                          onClick={() => setIsFullscreenEditor(true)}
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                          title="Fullscreen edit"
-                        >
-                          <Maximize2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <Textarea
-                      placeholder={`<div class="p-6">\n  <h2>{{title}}</h2>\n  {{#each items}}\n    <p>{{this.name}}</p>\n  {{/each}}\n</div>`}
-                      value={templateEdit}
-                      onChange={(e) => setTemplateEdit(e.target.value)}
-                      className="font-mono text-xs resize-none flex-1"
-                    />
-                    <p className="text-xs text-gray-500 mt-2">
-                      Syntax: <code className="bg-gray-100 px-1 rounded text-xs">{'{{var}}'}</code> 
-                      <code className="bg-gray-100 px-1 rounded text-xs ml-1">{'{{#each}}'}</code>
-                      <code className="bg-gray-100 px-1 rounded text-xs ml-1">{'{{#if}}'}</code>
-                    </p>
+                  <div className="border-t px-6 py-3 flex gap-2 justify-end bg-gray-50">
+                    <Button onClick={() => setFullscreenEditor(false)} variant="outline" size="sm">
+                      Close
+                    </Button>
                   </div>
                 </div>
               </div>
-
-              {/* BOTTOM: Configuration */}
-              <div className="flex-1 overflow-y-auto">
-                <div className="px-6 py-6 space-y-4">
-                  {/* Template Name */}
-                  <div>
-                    <Label className="text-xs font-semibold">Template Name</Label>
-                    <Input
-                      type="text"
-                      placeholder="my-dynamic-block"
-                      value={editConfig.templateName || ''}
-                      onChange={(e) => setEditConfig({ ...editConfig, templateName: e.target.value })}
-                      className="bg-white mt-1 text-sm h-9"
-                    />
-                  </div>
-
-                  {/* Data Source Type */}
-                  <div>
-                    <Label className="text-xs font-semibold">Data Source Type</Label>
-                    <Select
-                      value={editConfig.dataSource?.type || 'static'}
-                      onValueChange={(value) => setEditConfig({
-                        ...editConfig,
-                        dataSource: { 
-                          ...editConfig.dataSource, 
-                          type: value as any,
-                          method: editConfig.dataSource?.method || 'GET',
-                          token: editConfig.dataSource?.token || ''
-                        }
-                      })}
-                    >
-                      <SelectTrigger className="bg-white mt-1 text-sm h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="static">Static Data</SelectItem>
-                        <SelectItem value="api">REST API</SelectItem>
-                        <SelectItem value="graphql">GraphQL</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Endpoint (for API/GraphQL) */}
-                  {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
-                    <>
-                      <div>
-                        <Label className="text-xs font-semibold">Endpoint</Label>
-                        <Input
-                          type="text"
-                          placeholder="/api/data or /graphql"
-                          value={editConfig.dataSource?.endpoint || ''}
-                          onChange={(e) => setEditConfig({
-                            ...editConfig,
-                            dataSource: { 
-                              type: editConfig.dataSource?.type || 'api',
-                              ...editConfig.dataSource, 
-                              endpoint: e.target.value 
-                            }
-                          })}
-                          className="bg-white mt-1 text-sm h-9"
-                        />
-                      </div>
-
-                      {/* Method Selection (GET/POST) */}
-                      <div>
-                        <Label className="text-xs font-semibold">Method</Label>
-                        <Select
-                          value={editConfig.dataSource?.method || 'GET'}
-                          onValueChange={(value) => setEditConfig({
-                            ...editConfig,
-                            dataSource: { 
-                              type: editConfig.dataSource?.type || 'api',
-                              ...editConfig.dataSource, 
-                              method: value as 'GET' | 'POST'
-                            }
-                          })}
-                        >
-                          <SelectTrigger className="bg-white mt-1 text-sm h-9">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="GET">GET</SelectItem>
-                            <SelectItem value="POST">POST</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Authorization Token */}
-                      <div>
-                        <Label className="text-xs font-semibold">Authorization Token</Label>
-                        <Input
-                          type="password"
-                          placeholder="Bearer token or API key"
-                          value={editConfig.dataSource?.token || ''}
-                          onChange={(e) => setEditConfig({
-                            ...editConfig,
-                            dataSource: { 
-                              type: editConfig.dataSource?.type || 'api',
-                              ...editConfig.dataSource, 
-                              token: e.target.value 
-                            }
-                          })}
-                          className="bg-white mt-1 text-sm h-9"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Your token will be sent as Authorization header</p>
-                      </div>
-                    </>
-                  )}
-
-                  {/* GraphQL Query */}
-                  {editConfig.dataSource?.type === 'graphql' && (
-                    <div>
-                      <Label className="text-xs font-semibold">GraphQL Query</Label>
-                      <Textarea
-                        placeholder="query GetData { items { id name } }"
-                        value={editConfig.dataSource?.query || ''}
-                        onChange={(e) => setEditConfig({
-                          ...editConfig,
-                          dataSource: { 
-                            type: editConfig.dataSource?.type || 'graphql',
-                            ...editConfig.dataSource, 
-                            query: e.target.value 
-                          }
-                        })}
-                        rows={3}
-                        className="font-mono text-xs mt-1"
-                      />
-                    </div>
-                  )}
-
-                  {/* Test Button (for API/GraphQL) */}
-                  {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
-                    <div className="flex gap-2 items-center pt-2">
-                      <Button 
-                        onClick={handleTestApi} 
-                        disabled={apiTestLoading || !editConfig.dataSource?.endpoint}
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700 h-8 text-xs"
-                      >
-                        {apiTestLoading ? 'Testing...' : 'Test'}
-                      </Button>
-                      {apiTestResult && <span className="text-xs text-green-600">✓ Success</span>}
-                      {apiTestError && <span className="text-xs text-red-600">✗ Error</span>}
-                    </div>
-                  )}
-
-                  {/* Static Data */}
-                  {editConfig.dataSource?.type === 'static' && (
-                    <div>
-                      <Label className="text-xs font-semibold">Static Data (JSON)</Label>
-                      <Textarea
-                        placeholder='{"title": "My Data", "items": [{"id": 1, "name": "Item 1"}]}'
-                        value={JSON.stringify(editConfig.dataSource?.staticData || {}, null, 2)}
-                        onChange={(e) => {
-                          try {
-                            const parsed = JSON.parse(e.target.value);
-                            setEditConfig({
-                              ...editConfig,
-                              dataSource: { 
-                                type: editConfig.dataSource?.type || 'static',
-                                staticData: parsed,
-                                endpoint: editConfig.dataSource?.endpoint,
-                                query: editConfig.dataSource?.query,
-                                variables: editConfig.dataSource?.variables,
-                              }
-                            });
-                            setData(parsed);
-                            setError(null);
-                          } catch (err) {
-                            // Invalid JSON, ignore
-                          }
-                        }}
-                        rows={4}
-                        className="font-mono text-xs mt-1"
-                      />
-                    </div>
-                  )}
-
-                  {/* Repeater */}
-                  <div className="pt-2 border-t border-gray-200">
-                    <div className="flex items-center justify-between gap-2">
-                      <Label className="text-xs font-semibold">Enable Repeater</Label>
-                      <Switch
-                        checked={editConfig.repeater?.enabled || false}
-                        onCheckedChange={(checked) => setEditConfig({
-                          ...editConfig,
-                          repeater: { ...editConfig.repeater, enabled: checked }
-                        })}
-                      />
-                    </div>
-                    {editConfig.repeater?.enabled && (
-                      <div className="space-y-2 mt-2">
-                        <Input
-                          type="text"
-                          placeholder="Data path (e.g., 'products')"
-                          value={editConfig.repeater?.dataPath || ''}
-                          onChange={(e) => setEditConfig({
-                            ...editConfig,
-                            repeater: { 
-                              enabled: editConfig.repeater?.enabled || false,
-                              ...editConfig.repeater, 
-                              dataPath: e.target.value 
-                            }
-                          })}
-                          className="text-xs h-8"
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Limit (optional)"
-                          value={editConfig.repeater?.limit || ''}
-                          onChange={(e) => setEditConfig({
-                            ...editConfig,
-                            repeater: { 
-                              enabled: editConfig.repeater?.enabled || false,
-                              ...editConfig.repeater, 
-                              limit: parseInt(e.target.value) 
-                            }
-                          })}
-                          className="text-xs h-8"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
             )}
           </div>
 
           {/* Footer - Action Buttons */}
           <div className="border-t px-6 py-4 flex gap-2 justify-end bg-white">
-            <Button onClick={() => setIsEditing(false)} variant="outline" size="sm">
+            <Button onClick={() => setEditing(false)} variant="outline" size="sm">
               Cancel
             </Button>
-            <Button onClick={handleSave} className="min-w-32" size="sm">
+            <Button
+              onClick={handleSave}
+              className="min-w-32"
+              size="sm"
+              disabled={hasValidationErrors(
+                state.hasValidationError,
+                state.repeaterValidationError,
+                state.limitValidationError
+              )}
+              title={
+                hasValidationErrors(
+                  state.hasValidationError,
+                  state.repeaterValidationError,
+                  state.limitValidationError
+                )
+                  ? 'Please fix errors before saving'
+                  : ''
+              }
+            >
               Save Changes
             </Button>
+            {hasValidationErrors(
+              state.hasValidationError,
+              state.repeaterValidationError,
+              state.limitValidationError
+            ) && (
+              <span className="text-xs text-red-600 flex items-center">⚠️ Fix errors to save</span>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -1025,3 +471,5 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
     </div>
   );
 };
+
+export default DynamicBlock;

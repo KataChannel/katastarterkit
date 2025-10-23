@@ -83,6 +83,7 @@ export interface DynamicBlockConfig {
   // Repeater configuration (for dynamic lists)
   repeater?: {
     enabled: boolean;
+    data?: any[];
     dataPath?: string;
     itemTemplate?: any;
     limit?: number;
