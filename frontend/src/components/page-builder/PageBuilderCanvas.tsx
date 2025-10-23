@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
   useDroppable,
 } from '@dnd-kit/core';
@@ -6,12 +6,20 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Layout } from 'lucide-react';
+import { Layout, Plus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { usePageState, useUIState, usePageActions } from './contexts';
 import { BlockRenderer } from './blocks/BlockRenderer';
 import { SortableBlockWrapper } from './blocks/SortableBlockWrapper';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { BlockType } from '@/types/page-builder';
 
 
 /**
@@ -38,7 +46,8 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
   // Use individual hooks for better performance
   const { blocks, draggedBlock } = usePageState();
   const { showPreview } = useUIState();
-  const { handleBlockUpdate, handleBlockDelete, handleAddChild, handleSelectBlock } = usePageActions();
+  const { handleBlockUpdate, handleBlockDelete, handleAddChild, handleSelectBlock, handleAddBlock } = usePageActions();
+  const [isAddingBlock, setIsAddingBlock] = useState(false);
 
   // Memoize block IDs array to prevent SortableContext re-renders
   const blockIds = useMemo(() => blocks.map(b => b.id), [blocks]);
@@ -65,6 +74,27 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
       });
     }
   }, [setCanvasRef, isCanvasOver]);
+
+  // Common block types for quick add
+  const commonBlockTypes = [
+    { type: BlockType.TEXT, label: 'Text', icon: '📝' },
+    { type: BlockType.IMAGE, label: 'Image', icon: '🖼️' },
+    { type: BlockType.BUTTON, label: 'Button', icon: '🔘' },
+    { type: BlockType.HERO, label: 'Hero', icon: '🎯' },
+    { type: BlockType.SECTION, label: 'Section', icon: '📦' },
+    { type: BlockType.DIVIDER, label: 'Divider', icon: '➖' },
+    { type: BlockType.SPACER, label: 'Spacer', icon: '⬜' },
+  ];
+
+  // Handle add block with feedback
+  const handleAddBlockClick = useCallback(async (blockType: BlockType) => {
+    try {
+      await handleAddBlock(blockType);
+      setIsAddingBlock(false);
+    } catch (error) {
+      console.error('Failed to add block:', error);
+    }
+  }, [handleAddBlock]);
 
   return (
     <div className="flex-1 p-12 overflow-auto bg-gradient-to-br from-gray-50 to-gray-100">
@@ -117,28 +147,88 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
                   <div className="text-gray-500">
                     <Layout size={48} className="mx-auto mb-4 opacity-50" />
                     <p className="text-lg font-medium mb-2">No blocks yet</p>
-                    <p className="text-sm">Drag and drop blocks from the left panel to start building</p>
+                    <p className="text-sm mb-6">Drag and drop blocks from the left panel to start building</p>
                     {isCanvasOver && (
-                      <p className="text-sm text-blue-600 font-semibold mt-3">🎯 Ready to drop!</p>
+                      <p className="text-sm text-blue-600 font-semibold mb-4">🎯 Ready to drop!</p>
                     )}
+                    
+                    {/* Add Block Dropdown Button */}
+                    <DropdownMenu open={isAddingBlock} onOpenChange={setIsAddingBlock}>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          className="gap-2"
+                          variant="default"
+                        >
+                          <Plus size={16} />
+                          Add Block
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="center" className="w-48">
+                        {commonBlockTypes.map(({ type, label, icon }) => (
+                          <DropdownMenuItem 
+                            key={type}
+                            onClick={() => handleAddBlockClick(type)}
+                            className="cursor-pointer"
+                          >
+                            <span className="mr-2">{icon}</span>
+                            <span>{label}</span>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </Card>
               ) : (
                 // Block List with Sortable Wrappers
-                blocks.map(block => (
-                  <SortableBlockWrapper
-                    key={block.id}
-                    block={block}
-                    isEditing={true}
-                    onUpdate={(content: any, style: any) => handleBlockUpdate(block.id, content, style)}
-                    onDelete={() => handleBlockDelete(block.id)}
-                    onAddChild={handleAddChild}
-                    onUpdateChild={handleBlockUpdate}
-                    onDeleteChild={handleBlockDelete}
-                    onSelect={handleSelectBlock}
-                    depth={0}
-                  />
-                ))
+                <>
+                  {/* Add Block Button - Sticky header */}
+                  <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-200">
+                    <h3 className="text-sm font-medium text-gray-700">Blocks</h3>
+                    <DropdownMenu open={isAddingBlock} onOpenChange={setIsAddingBlock}>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          className="gap-2"
+                          variant="outline"
+                        >
+                          <Plus size={16} />
+                          Add Block
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        {commonBlockTypes.map(({ type, label, icon }) => (
+                          <DropdownMenuItem 
+                            key={type}
+                            onClick={() => handleAddBlockClick(type)}
+                            className="cursor-pointer"
+                          >
+                            <span className="mr-2">{icon}</span>
+                            <span>{label}</span>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  {/* Blocks List */}
+                  <div className="space-y-4">
+                    {blocks.map(block => (
+                      <SortableBlockWrapper
+                        key={block.id}
+                        block={block}
+                        isEditing={true}
+                        onUpdate={(content: any, style: any) => handleBlockUpdate(block.id, content, style)}
+                        onDelete={() => handleBlockDelete(block.id)}
+                        onAddChild={handleAddChild}
+                        onUpdateChild={handleBlockUpdate}
+                        onDeleteChild={handleBlockDelete}
+                        onSelect={handleSelectBlock}
+                        depth={0}
+                      />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </SortableContext>

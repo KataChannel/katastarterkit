@@ -309,7 +309,8 @@ export class PageService {
   // Add block to page
   async addBlock(pageId: string, input: CreatePageBlockInput): Promise<PageBlock> {
     const page = await this.prisma.page.findUnique({
-      where: { id: pageId }
+      where: { id: pageId },
+      include: { blocks: { where: { parentId: null } } } // Get top-level blocks only
     });
 
     if (!page) {
@@ -319,9 +320,27 @@ export class PageService {
     // Remove children from input as we'll handle them separately
     const { children, parentId, ...blockData } = input;
 
+    // Calculate order if not provided or if adding to root level
+    let order = blockData.order;
+    if (order === undefined || order === null) {
+      // If no order provided, place at the end
+      if (parentId) {
+        // For nested blocks, get siblings
+        const parent = await this.prisma.pageBlock.findUnique({
+          where: { id: parentId },
+          include: { children: true }
+        });
+        order = parent?.children?.length ?? 0;
+      } else {
+        // For top-level blocks, use page blocks count
+        order = page.blocks?.length ?? 0;
+      }
+    }
+
     // Build the data object for Prisma create
     const createData: any = {
       ...blockData,
+      order, // Ensure order is set
       content: blockData.content || {},
       page: { connect: { id: pageId } },
       depth: blockData.depth || 0,
@@ -333,11 +352,32 @@ export class PageService {
       createData.parent = { connect: { id: parentId } };
     }
 
-    const block = await this.prisma.pageBlock.create({
-      data: createData
-    });
+    try {
+      const block = await this.prisma.pageBlock.create({
+        data: createData
+      });
+      return block as PageBlock;
+    } catch (error: any) {
+      // If unique constraint fails on order, recalculate order
+      if (error.code === 'P2002' && error.meta?.target?.includes('order')) {
+        // Get the latest block count to determine correct order
+        const latestPage = await this.prisma.page.findUnique({
+          where: { id: pageId },
+          include: { blocks: { where: { parentId: input.parentId || null }, orderBy: { order: 'desc' }, take: 1 } }
+        });
 
-    return block as PageBlock;
+        const latestOrder = latestPage?.blocks?.[0]?.order ?? -1;
+        createData.order = latestOrder + 1;
+
+        // Retry with new order
+        const block = await this.prisma.pageBlock.create({
+          data: createData
+        });
+        return block as PageBlock;
+      }
+
+      throw error;
+    }
   }
 
   // Update block

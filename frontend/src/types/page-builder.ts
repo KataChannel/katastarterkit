@@ -1,4 +1,6 @@
 // Block types and interfaces
+// NOTE: Frontend uses string values matching backend/database ('TEXT', 'IMAGE', etc.)
+// Numeric conversion is handled by frontend utilities if needed
 export enum BlockType {
   // Content Blocks
   TEXT = 'TEXT',
@@ -12,6 +14,12 @@ export enum BlockType {
   TEAM = 'TEAM',
   STATS = 'STATS',
   CONTACT_INFO = 'CONTACT_INFO',
+  GALLERY = 'GALLERY',
+  CARD = 'CARD',
+  TESTIMONIAL = 'TESTIMONIAL',
+  FAQ = 'FAQ',
+  CONTACT_FORM = 'CONTACT_FORM',
+  COMPLETED_TASKS = 'COMPLETED_TASKS',
   
   // Container/Layout Blocks (for nested children)
   CONTAINER = 'CONTAINER',
@@ -19,6 +27,8 @@ export enum BlockType {
   GRID = 'GRID',
   FLEX_ROW = 'FLEX_ROW',
   FLEX_COLUMN = 'FLEX_COLUMN',
+  COLUMN = 'COLUMN',
+  ROW = 'ROW',
   
   // Dynamic Blocks
   DYNAMIC = 'DYNAMIC',
@@ -394,7 +404,7 @@ export interface CreatePageBlockInput {
   type: BlockType;
   content: any;
   style?: BlockStyle;
-  order: number;
+  order?: number;
   isVisible?: boolean;
   parentId?: string | null;
   depth?: number;

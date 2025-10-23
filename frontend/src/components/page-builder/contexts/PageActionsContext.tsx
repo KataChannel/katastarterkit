@@ -235,7 +235,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   // Block operations
   const handleAddBlock = useCallback(async (blockType: BlockType) => {
     try {
-      const { page, blocks, refetch } = pageState;
+      const { page, refetch } = pageState;
       
       if (!page?.id) {
         toast.error('Please create a page first');
@@ -245,13 +245,14 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       
       const defaultContent = DEFAULT_BLOCK_CONTENT[blockType as keyof typeof DEFAULT_BLOCK_CONTENT] || {};
       
+      // Don't send order - let backend calculate it to avoid race conditions
       const input = {
         type: blockType,
         content: defaultContent,
-        order: blocks.length,
+        // order is NOT sent, backend will auto-calculate based on block count
       };
       
-      console.log('[PageBuilder] Adding block:', { blockType, pageId: page.id, order: input.order });
+      console.log('[PageBuilder] Adding block:', { blockType, pageId: page.id });
       
       const result = await addBlock(input);
       pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_CREATE, 'Block added', { blockType });
@@ -268,7 +269,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   
   const handleAddTemplateBlock = useCallback(async (templateConfig: any) => {
     try {
-      const { page, blocks, refetch } = pageState;
+      const { page, refetch } = pageState;
       
       if (!page?.id) {
         toast.error('Please create a page first');
@@ -281,7 +282,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
           ...DEFAULT_BLOCK_CONTENT[BlockType.DYNAMIC],
           ...templateConfig,
         },
-        order: blocks.length,
+        // order is NOT sent, backend will auto-calculate
       };
       
       await addBlock(input);

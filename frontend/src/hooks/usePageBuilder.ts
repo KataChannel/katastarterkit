@@ -318,15 +318,14 @@ export const useNestedBlockOperations = (pageId: string) => {
       throw new Error(`Maximum blocks limit (${MAX_BLOCKS_PER_PAGE}) exceeded`);
     }
 
-    const order = siblings.length;
-
+    // Don't calculate order - let backend handle it to avoid race conditions
     const input: CreatePageBlockInput = {
       type: blockType as any,
       content: content || {},
       style: style || {},
       parentId,
       depth: parentDepth + 1,
-      order,
+      // order is NOT sent, backend will auto-calculate
       isVisible: true
     };
 

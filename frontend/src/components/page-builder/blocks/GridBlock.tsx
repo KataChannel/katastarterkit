@@ -10,7 +10,7 @@ interface GridBlockProps {
   isEditable?: boolean;
   onUpdate: (content: any, style?: any) => void;
   onDelete: () => void;
-  onAddChild?: () => void;
+  onAddChild?: (parentId: string) => void;
   children?: React.ReactNode;
 }
 
@@ -69,7 +69,7 @@ export const GridBlock: React.FC<GridBlockProps> = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={onAddChild}
+              onClick={() => onAddChild(block.id)}
               className="bg-white shadow-sm"
             >
               <Plus className="w-4 h-4 mr-1" />

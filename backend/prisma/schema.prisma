@@ -848,22 +848,21 @@ enum BlockType {
   // Content Blocks
   TEXT
   IMAGE
-  HERO
-  GALLERY
   VIDEO
+  CAROUSEL
+  HERO
   BUTTON
   DIVIDER
   SPACER
-  COLUMN
-  ROW
-  CARD
-  CAROUSEL
-  TESTIMONIAL
-  FAQ
-  CONTACT_FORM
   TEAM
   STATS
   CONTACT_INFO
+  GALLERY
+  CARD
+  TESTIMONIAL
+  FAQ
+  CONTACT_FORM
+  COMPLETED_TASKS
   
   // Container/Layout Blocks (for nested children)
   CONTAINER
@@ -871,6 +870,8 @@ enum BlockType {
   GRID
   FLEX_ROW
   FLEX_COLUMN
+  COLUMN
+  ROW
   
   // Dynamic Blocks
   DYNAMIC
@@ -937,6 +938,7 @@ model PageBlock {
   updatedAt DateTime @updatedAt
 
   // Indexing for performance
+  @@unique([pageId, parentId, order], map: "idx_PageBlock_unique_order_per_level")
   @@index([pageId, order])
   @@index([type])
   @@index([parentId])

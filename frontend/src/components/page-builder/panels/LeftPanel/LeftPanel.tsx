@@ -29,7 +29,7 @@ export function LeftPanel({ onClose }: LeftPanelProps) {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 min-h-0 overflow-y-auto">
         <TabsList className="w-full justify-start rounded-none border-b bg-white h-auto p-1">
           <TabsTrigger value="elements" className="flex-1 gap-1.5 text-xs sm:text-sm data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
             <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

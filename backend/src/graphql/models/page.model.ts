@@ -8,26 +8,26 @@ export enum PageStatus {
   ARCHIVED = 'ARCHIVED',
 }
 
+// BlockType enum - Using string values for GraphQL/Prisma compatibility
+// Mapping: Frontend numeric (0-26) <-> Backend string ('TEXT', 'IMAGE', etc.)
 export enum BlockType {
   // Content Blocks
   TEXT = 'TEXT',
   IMAGE = 'IMAGE',
-  HERO = 'HERO',
-  GALLERY = 'GALLERY',
-  CAROUSEL = 'CAROUSEL',
   VIDEO = 'VIDEO',
+  CAROUSEL = 'CAROUSEL',
+  HERO = 'HERO',
   BUTTON = 'BUTTON',
   DIVIDER = 'DIVIDER',
   SPACER = 'SPACER',
-  COLUMN = 'COLUMN',
-  ROW = 'ROW',
+  TEAM = 'TEAM',
+  STATS = 'STATS',
+  CONTACT_INFO = 'CONTACT_INFO',
+  GALLERY = 'GALLERY',
   CARD = 'CARD',
   TESTIMONIAL = 'TESTIMONIAL',
   FAQ = 'FAQ',
   CONTACT_FORM = 'CONTACT_FORM',
-  TEAM = 'TEAM',
-  STATS = 'STATS',
-  CONTACT_INFO = 'CONTACT_INFO',
   COMPLETED_TASKS = 'COMPLETED_TASKS',
   
   // Container/Layout Blocks
@@ -36,6 +36,8 @@ export enum BlockType {
   GRID = 'GRID',
   FLEX_ROW = 'FLEX_ROW',
   FLEX_COLUMN = 'FLEX_COLUMN',
+  COLUMN = 'COLUMN',
+  ROW = 'ROW',
   
   // Dynamic Block
   DYNAMIC = 'DYNAMIC',

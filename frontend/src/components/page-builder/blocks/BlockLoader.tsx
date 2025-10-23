@@ -29,10 +29,14 @@ const VideoBlock = lazy(() => import('./VideoBlock').then(m => ({ default: m.Vid
 
 /**
  * Block component map for lazy loading
+ * Mapped by BlockType enum string values ('TEXT', 'IMAGE', etc.)
  */
 export const LAZY_BLOCK_COMPONENTS: Record<BlockType | string, React.ComponentType<any>> = {
+  // Content Blocks
   [BlockType.TEXT]: TextBlock,
   [BlockType.IMAGE]: ImageBlock,
+  [BlockType.VIDEO]: VideoBlock,
+  [BlockType.CAROUSEL]: CarouselBlock,
   [BlockType.HERO]: HeroBlock,
   [BlockType.BUTTON]: ButtonBlock,
   [BlockType.DIVIDER]: DividerBlock,
@@ -40,16 +44,28 @@ export const LAZY_BLOCK_COMPONENTS: Record<BlockType | string, React.ComponentTy
   [BlockType.TEAM]: TeamBlock,
   [BlockType.STATS]: StatsBlock,
   [BlockType.CONTACT_INFO]: ContactInfoBlock,
+  [BlockType.GALLERY]: ImageBlock,             // Fallback: uses ImageBlock
+  [BlockType.CARD]: TextBlock,                 // Fallback: uses TextBlock
+  [BlockType.TESTIMONIAL]: TextBlock,          // Fallback: uses TextBlock
+  [BlockType.FAQ]: TextBlock,                  // Fallback: uses TextBlock
+  [BlockType.CONTACT_FORM]: TextBlock,         // Fallback: uses TextBlock
+  [BlockType.COMPLETED_TASKS]: TextBlock,      // Fallback: uses TextBlock
+  
+  // Container/Layout Blocks
   [BlockType.CONTAINER]: ContainerBlock,
   [BlockType.SECTION]: SectionBlock,
   [BlockType.GRID]: GridBlock,
   [BlockType.FLEX_ROW]: FlexBlock,
   [BlockType.FLEX_COLUMN]: FlexBlock,
+  [BlockType.COLUMN]: FlexBlock,               // Fallback: uses FlexBlock
+  [BlockType.ROW]: FlexBlock,                  // Fallback: uses FlexBlock
+  
+  // Dynamic Block
   [BlockType.DYNAMIC]: DynamicBlock,
-  [BlockType.CAROUSEL]: CarouselBlock,
+  
+  // E-commerce Blocks
   [BlockType.PRODUCT_LIST]: ProductListBlock,
   [BlockType.PRODUCT_DETAIL]: ProductDetailBlock,
-  [BlockType.VIDEO]: VideoBlock,
 };
 
 /**
@@ -62,9 +78,15 @@ export const BlockSkeleton: React.FC<{ height?: string }> = ({ height = '200px' 
 /**
  * Get block component by type
  * Returns lazy-loaded component or placeholder
+ * Supports BlockType string values ('TEXT', 'IMAGE', etc.)
  */
 export function getBlockComponent(blockType: BlockType | string) {
-  return LAZY_BLOCK_COMPONENTS[blockType] || null;
+  if (!blockType) return null;
+  
+  // Normalize to uppercase in case of case mismatch
+  const normalizedType = typeof blockType === 'string' ? blockType.toUpperCase() : blockType;
+  
+  return LAZY_BLOCK_COMPONENTS[normalizedType] || null;
 }
 
 /**
@@ -90,6 +112,7 @@ export const BlockLoader: React.FC<BlockLoaderProps> = ({
   const Component = getBlockComponent(blockType);
 
   if (!Component) {
+    console.error(`[BlockLoader] Unknown block type: ${blockType} (type: ${typeof blockType}, blockId: ${blockId})`);
     return (
       <div className="p-4 border border-red-300 bg-red-50 text-red-600 rounded">
         Unknown block type: {blockType}
