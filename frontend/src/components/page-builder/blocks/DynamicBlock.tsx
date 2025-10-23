@@ -471,10 +471,19 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
     setApiTestResult(null);
 
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add authorization token if provided
+      if (editConfig.dataSource?.token) {
+        headers['Authorization'] = `Bearer ${editConfig.dataSource.token}`;
+      }
+
       if (editConfig.dataSource?.type === 'graphql') {
         const response = await fetch(editConfig.dataSource.endpoint || '', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             query: editConfig.dataSource.query || '',
             variables: editConfig.dataSource.variables || {},
@@ -492,10 +501,13 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
           setApiTestResult(result.data);
         }
       } else if (editConfig.dataSource?.type === 'api') {
+        const method = editConfig.dataSource?.method || 'GET';
+        const body = method === 'POST' ? JSON.stringify(editConfig.dataSource.variables || {}) : undefined;
+
         const response = await fetch(editConfig.dataSource.endpoint || '', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(editConfig.dataSource.variables || {}),
+          method,
+          headers,
+          body,
         });
 
         if (!response.ok) {
@@ -741,7 +753,12 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       value={editConfig.dataSource?.type || 'static'}
                       onValueChange={(value) => setEditConfig({
                         ...editConfig,
-                        dataSource: { ...editConfig.dataSource, type: value as any }
+                        dataSource: { 
+                          ...editConfig.dataSource, 
+                          type: value as any,
+                          method: editConfig.dataSource?.method || 'GET',
+                          token: editConfig.dataSource?.token || ''
+                        }
                       })}
                     >
                       <SelectTrigger className="bg-white mt-1 text-sm h-9">
@@ -757,23 +774,69 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
 
                   {/* Endpoint (for API/GraphQL) */}
                   {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
-                    <div>
-                      <Label className="text-xs font-semibold">Endpoint</Label>
-                      <Input
-                        type="text"
-                        placeholder="/api/data or /graphql"
-                        value={editConfig.dataSource?.endpoint || ''}
-                        onChange={(e) => setEditConfig({
-                          ...editConfig,
-                          dataSource: { 
-                            type: editConfig.dataSource?.type || 'api',
-                            ...editConfig.dataSource, 
-                            endpoint: e.target.value 
-                          }
-                        })}
-                        className="bg-white mt-1 text-sm h-9"
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <Label className="text-xs font-semibold">Endpoint</Label>
+                        <Input
+                          type="text"
+                          placeholder="/api/data or /graphql"
+                          value={editConfig.dataSource?.endpoint || ''}
+                          onChange={(e) => setEditConfig({
+                            ...editConfig,
+                            dataSource: { 
+                              type: editConfig.dataSource?.type || 'api',
+                              ...editConfig.dataSource, 
+                              endpoint: e.target.value 
+                            }
+                          })}
+                          className="bg-white mt-1 text-sm h-9"
+                        />
+                      </div>
+
+                      {/* Method Selection (GET/POST) */}
+                      <div>
+                        <Label className="text-xs font-semibold">Method</Label>
+                        <Select
+                          value={editConfig.dataSource?.method || 'GET'}
+                          onValueChange={(value) => setEditConfig({
+                            ...editConfig,
+                            dataSource: { 
+                              type: editConfig.dataSource?.type || 'api',
+                              ...editConfig.dataSource, 
+                              method: value as 'GET' | 'POST'
+                            }
+                          })}
+                        >
+                          <SelectTrigger className="bg-white mt-1 text-sm h-9">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="GET">GET</SelectItem>
+                            <SelectItem value="POST">POST</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Authorization Token */}
+                      <div>
+                        <Label className="text-xs font-semibold">Authorization Token</Label>
+                        <Input
+                          type="password"
+                          placeholder="Bearer token or API key"
+                          value={editConfig.dataSource?.token || ''}
+                          onChange={(e) => setEditConfig({
+                            ...editConfig,
+                            dataSource: { 
+                              type: editConfig.dataSource?.type || 'api',
+                              ...editConfig.dataSource, 
+                              token: e.target.value 
+                            }
+                          })}
+                          className="bg-white mt-1 text-sm h-9"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Your token will be sent as Authorization header</p>
+                      </div>
+                    </>
                   )}
 
                   {/* GraphQL Query */}

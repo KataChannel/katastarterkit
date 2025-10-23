@@ -55,6 +55,9 @@ export interface DynamicBlockConfig {
     type: 'api' | 'graphql' | 'static' | 'database';
     endpoint?: string;
     query?: string;
+    method?: 'GET' | 'POST';
+    token?: string;
+    headers?: Record<string, string>;
     variables?: Record<string, any>;
     staticData?: any;
   };
