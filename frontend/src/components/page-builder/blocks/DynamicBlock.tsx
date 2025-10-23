@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageBlock, DynamicBlockConfig } from '@/types/page-builder';
-import { Settings, Trash2, RefreshCw, Code } from 'lucide-react';
+import { Settings, Trash2, RefreshCw, Code, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface DynamicBlockProps {
   block: PageBlock;
@@ -266,17 +273,17 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   const processTemplate = (template: string, data: any): string => {
     let result = template;
 
-    // Replace simple variables
-    Object.entries(data).forEach(([key, value]) => {
-      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-      result = result.replace(regex, String(value));
-    });
-
-    // Process repeat helper (e.g., {{#repeat rating}})
+    // Process repeat helper (e.g., {{#repeat rating}}) - FIRST before loops
     const repeatRegex = /{{#repeat\s+(\w+)}}([\s\S]*?){{\/repeat}}/g;
     result = result.replace(repeatRegex, (match: string, countVar: string, repeatTemplate: string) => {
       const count = data[countVar] || 0;
       return Array(count).fill(repeatTemplate).join('');
+    });
+
+    // Process conditional blocks ({{#if condition}}) - BEFORE loops to preserve outer scope
+    const ifRegex = /{{#if\s+(\w+)}}([\s\S]*?){{\/if}}/g;
+    result = result.replace(ifRegex, (match: string, condition: string, ifTemplate: string) => {
+      return data[condition] ? ifTemplate : '';
     });
 
     // Process simple loops
@@ -287,7 +294,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
         return array.map(item => {
           let itemResult = loopTemplate;
           
-          // Replace item properties
+          // Replace ONLY item properties (variables that exist in the item)
           Object.entries(item).forEach(([key, value]) => {
             const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
             itemResult = itemResult.replace(regex, String(value));
@@ -306,10 +313,14 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
       return '';
     });
 
-    // Process conditional blocks ({{#if condition}})
-    const ifRegex = /{{#if\s+(\w+)}}([\s\S]*?){{\/if}}/g;
-    result = result.replace(ifRegex, (match: string, condition: string, ifTemplate: string) => {
-      return data[condition] ? ifTemplate : '';
+    // Replace remaining simple variables (outside loops) - LAST
+    Object.entries(data).forEach(([key, value]) => {
+      // Skip arrays and complex objects
+      if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
+        return;
+      }
+      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+      result = result.replace(regex, String(value));
     });
 
     return result;
@@ -440,196 +451,225 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
         </Button>
       </div>
 
-      {/* Settings Panel */}
-      {isEditing && (
-        <div className="absolute top-12 right-2 bg-white p-4 rounded-lg shadow-lg border border-gray-200 z-20 w-96 max-h-96 overflow-y-auto">
-          <h3 className="font-semibold mb-3 flex items-center">
-            <Code className="w-4 h-4 mr-2" />
-            Dynamic Block Configuration
-          </h3>
-          
-          <div className="space-y-3">
-            {/* Template Info */}
-            <div>
-              <Label>Template Name</Label>
-              <Input
-                type="text"
-                placeholder="my-template"
-                value={editConfig.templateName || ''}
-                onChange={(e) => setEditConfig({ ...editConfig, templateName: e.target.value })}
-              />
-            </div>
+      {/* Settings Dialog - Full Screen */}
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="max-w-6xl h-[90vh] p-0 flex flex-col">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b">
+            <DialogTitle className="flex items-center text-xl">
+              <Code className="w-5 h-5 mr-2" />
+              Dynamic Block Configuration
+            </DialogTitle>
+            <DialogDescription>
+              Configure data source, template, repeater, and other settings
+            </DialogDescription>
+          </DialogHeader>
 
-            {/* Data Source Configuration */}
-            <div className="border-t pt-3">
-              <h4 className="font-medium mb-2">Data Source</h4>
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-full">
               
-              <div className="space-y-2">
-                <div>
-                  <Label>Type</Label>
-                  <Select
-                    value={editConfig.dataSource?.type || 'static'}
-                    onValueChange={(value) => setEditConfig({
-                      ...editConfig,
-                      dataSource: { ...editConfig.dataSource, type: value as any }
-                    })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="static">Static Data</SelectItem>
-                      <SelectItem value="api">REST API</SelectItem>
-                      <SelectItem value="graphql">GraphQL</SelectItem>
-                      <SelectItem value="database">Database</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
-                  <div>
-                    <Label>Endpoint</Label>
-                    <Input
-                      type="text"
-                      placeholder="/api/data or /graphql"
-                      value={editConfig.dataSource?.endpoint || ''}
-                      onChange={(e) => setEditConfig({
-                        ...editConfig,
-                        dataSource: { 
-                          type: editConfig.dataSource?.type || 'api',
-                          ...editConfig.dataSource, 
-                          endpoint: e.target.value 
-                        }
-                      })}
-                    />
+              {/* Left Column - Configuration */}
+              <div className="space-y-6">
+                
+                {/* Template Info */}
+                <Card className="p-4">
+                  <h3 className="font-semibold mb-3">Template Info</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label>Template Name</Label>
+                      <Input
+                        type="text"
+                        placeholder="my-template"
+                        value={editConfig.templateName || ''}
+                        onChange={(e) => setEditConfig({ ...editConfig, templateName: e.target.value })}
+                      />
+                    </div>
                   </div>
-                )}
+                </Card>
 
-                {editConfig.dataSource?.type === 'graphql' && (
-                  <div>
-                    <Label>GraphQL Query</Label>
-                    <Textarea
-                      placeholder="query GetData { items { id name } }"
-                      value={editConfig.dataSource?.query || ''}
-                      onChange={(e) => setEditConfig({
-                        ...editConfig,
-                        dataSource: { 
-                          type: editConfig.dataSource?.type || 'graphql',
-                          ...editConfig.dataSource, 
-                          query: e.target.value 
-                        }
-                      })}
-                      rows={3}
-                    />
-                  </div>
-                )}
+                {/* Data Source Configuration */}
+                <Card className="p-4">
+                  <h3 className="font-semibold mb-3">Data Source</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label>Type</Label>
+                      <Select
+                        value={editConfig.dataSource?.type || 'static'}
+                        onValueChange={(value) => setEditConfig({
+                          ...editConfig,
+                          dataSource: { ...editConfig.dataSource, type: value as any }
+                        })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="static">Static Data</SelectItem>
+                          <SelectItem value="api">REST API</SelectItem>
+                          <SelectItem value="graphql">GraphQL</SelectItem>
+                          <SelectItem value="database">Database</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                {editConfig.dataSource?.type === 'static' && (
-                  <div>
-                    <Label>Static Data (JSON)</Label>
-                    <Textarea
-                      placeholder='{"items": [{"id": 1, "name": "Item 1"}]}'
-                      value={JSON.stringify(editConfig.dataSource?.staticData || {}, null, 2)}
-                      onChange={(e) => {
-                        try {
-                          const parsed = JSON.parse(e.target.value);
-                          setEditConfig({
+                    {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
+                      <div>
+                        <Label>Endpoint</Label>
+                        <Input
+                          type="text"
+                          placeholder="/api/data or /graphql"
+                          value={editConfig.dataSource?.endpoint || ''}
+                          onChange={(e) => setEditConfig({
                             ...editConfig,
                             dataSource: { 
-                              type: 'static',
+                              type: editConfig.dataSource?.type || 'api',
                               ...editConfig.dataSource, 
-                              staticData: parsed 
+                              endpoint: e.target.value 
                             }
-                          });
-                        } catch (err) {
-                          // Invalid JSON, ignore
-                        }
-                      }}
-                      rows={4}
-                    />
+                          })}
+                        />
+                      </div>
+                    )}
+
+                    {editConfig.dataSource?.type === 'graphql' && (
+                      <div>
+                        <Label>GraphQL Query</Label>
+                        <Textarea
+                          placeholder="query GetData { items { id name } }"
+                          value={editConfig.dataSource?.query || ''}
+                          onChange={(e) => setEditConfig({
+                            ...editConfig,
+                            dataSource: { 
+                              type: editConfig.dataSource?.type || 'graphql',
+                              ...editConfig.dataSource, 
+                              query: e.target.value 
+                            }
+                          })}
+                          rows={4}
+                          className="font-mono text-sm"
+                        />
+                      </div>
+                    )}
                   </div>
-                )}
+                </Card>
+
+                {/* Repeater Configuration */}
+                <Card className="p-4">
+                  <h3 className="font-semibold mb-3">Repeater Settings</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Enable Repeater</Label>
+                      <Switch
+                        checked={editConfig.repeater?.enabled || false}
+                        onCheckedChange={(checked) => setEditConfig({
+                          ...editConfig,
+                          repeater: { ...editConfig.repeater, enabled: checked }
+                        })}
+                      />
+                    </div>
+
+                    {editConfig.repeater?.enabled && (
+                      <>
+                        <div>
+                          <Label>Data Path</Label>
+                          <Input
+                            type="text"
+                            placeholder="products"
+                            value={editConfig.repeater?.dataPath || ''}
+                            onChange={(e) => setEditConfig({
+                              ...editConfig,
+                              repeater: { 
+                                enabled: editConfig.repeater?.enabled || false,
+                                ...editConfig.repeater, 
+                                dataPath: e.target.value 
+                              }
+                            })}
+                          />
+                          <p className="text-xs text-gray-500 mt-1">Path to array in data (e.g., "products" or "data.items")</p>
+                        </div>
+
+                        <div>
+                          <Label>Limit</Label>
+                          <Input
+                            type="number"
+                            placeholder="10"
+                            value={editConfig.repeater?.limit || ''}
+                            onChange={(e) => setEditConfig({
+                              ...editConfig,
+                              repeater: { 
+                                enabled: editConfig.repeater?.enabled || false,
+                                ...editConfig.repeater, 
+                                limit: parseInt(e.target.value) 
+                              }
+                            })}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Card>
+              </div>
+
+              {/* Right Column - Template and Data */}
+              <div className="space-y-6">
+                
+                {/* Template HTML Editor */}
+                <Card className="p-4 flex flex-col h-full">
+                  <h3 className="font-semibold mb-3">Template HTML</h3>
+                  <Textarea
+                    placeholder={'<div>{{#each items}}<p>{{name}}</p>{{/each}}</div>'}
+                    value={templateEdit}
+                    onChange={(e) => setTemplateEdit(e.target.value)}
+                    rows={15}
+                    className="font-mono text-xs flex-1 resize-none"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    {"Use {{variable}} • {{#each}}...{{/each}} for loops • {{#if}}...{{/if}} for conditionals"}
+                  </p>
+                </Card>
               </div>
             </div>
 
-            {/* Repeater Configuration */}
-            <div className="border-t pt-3">
-              <div className="flex items-center justify-between mb-2">
-                <Label>Enable Repeater</Label>
-                <Switch
-                  checked={editConfig.repeater?.enabled || false}
-                  onCheckedChange={(checked) => setEditConfig({
-                    ...editConfig,
-                    repeater: { ...editConfig.repeater, enabled: checked }
-                  })}
+            {/* Static Data Editor - Full Width */}
+            {editConfig.dataSource?.type === 'static' && (
+              <Card className="p-4 mt-6">
+                <h3 className="font-semibold mb-3">Static Data (JSON)</h3>
+                <Textarea
+                  placeholder='{"title": "My Items", "items": [{"id": 1, "name": "Item 1"}]}'
+                  value={JSON.stringify(editConfig.dataSource?.staticData || {}, null, 2)}
+                  onChange={(e) => {
+                    try {
+                      const parsed = JSON.parse(e.target.value);
+                      setEditConfig({
+                        ...editConfig,
+                        dataSource: { 
+                          type: 'static',
+                          ...editConfig.dataSource, 
+                          staticData: parsed 
+                        }
+                      });
+                    } catch (err) {
+                      // Invalid JSON, ignore
+                    }
+                  }}
+                  rows={8}
+                  className="font-mono text-sm"
                 />
-              </div>
-
-              {editConfig.repeater?.enabled && (
-                <div className="space-y-2">
-                  <div>
-                    <Label>Data Path</Label>
-                    <Input
-                      type="text"
-                      placeholder="data.items"
-                      value={editConfig.repeater?.dataPath || ''}
-                      onChange={(e) => setEditConfig({
-                        ...editConfig,
-                        repeater: { 
-                          enabled: editConfig.repeater?.enabled || false,
-                          ...editConfig.repeater, 
-                          dataPath: e.target.value 
-                        }
-                      })}
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Limit</Label>
-                    <Input
-                      type="number"
-                      placeholder="10"
-                      value={editConfig.repeater?.limit || ''}
-                      onChange={(e) => setEditConfig({
-                        ...editConfig,
-                        repeater: { 
-                          enabled: editConfig.repeater?.enabled || false,
-                          ...editConfig.repeater, 
-                          limit: parseInt(e.target.value) 
-                        }
-                      })}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Template HTML Editor */}
-            <div className="border-t pt-3">
-              <Label>Template HTML</Label>
-              <Textarea
-                placeholder={'<div>{{#each items}}<p>{{name}}</p>{{/each}}</div>'}
-                value={templateEdit}
-                onChange={(e) => setTemplateEdit(e.target.value)}
-                rows={6}
-                className="font-mono text-xs"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                {"Use {{variable}} for variables, {{#each}}...{{/each}} for loops, {{#if}}...{{/if}} for conditionals"}
-              </p>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <Button onClick={handleSave} className="flex-1">
-                Save
-              </Button>
-              <Button onClick={() => setIsEditing(false)} variant="outline" className="flex-1">
-                Cancel
-              </Button>
-            </div>
+              </Card>
+            )}
           </div>
-        </div>
-      )}
+
+          {/* Footer - Action Buttons */}
+          <div className="border-t px-6 py-4 flex gap-2 justify-end">
+            <Button onClick={() => setIsEditing(false)} variant="outline">
+              Cancel
+            </Button>
+            <Button onClick={handleSave} className="min-w-32">
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Dynamic Content Display */}
       <div className="mt-8">
