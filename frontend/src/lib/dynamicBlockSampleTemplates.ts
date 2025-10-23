@@ -84,10 +84,7 @@ export const productGridTemplate: SampleTemplate = {
       ],
     },
   },
-  variables: {
-    title: 'Featured Products',
-    subtitle: 'Discover our best-selling products with premium quality and affordable prices',
-  },
+  variables: {},
 };
 
 /**

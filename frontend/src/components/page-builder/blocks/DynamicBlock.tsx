@@ -91,6 +91,16 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
     fetchData();
   }, [config]);
 
+  // Update preview data when editing config (for real-time preview)
+  useEffect(() => {
+    if (!isEditing || !editConfig?.dataSource) return;
+
+    if (editConfig.dataSource.type === 'static') {
+      setData(editConfig.dataSource.staticData);
+      setError(null);
+    }
+  }, [editConfig, isEditing]);
+
   // Evaluate conditions
   const evaluateConditions = (item: any): boolean => {
     if (!config?.conditions || config.conditions.length === 0) return true;
@@ -429,13 +439,28 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   const handleSelectTemplate = (template: SampleTemplate) => {
     setSelectedTemplate(template);
     setTemplateEdit(template.template);
-    setEditConfig({
+    
+    // Create a complete new config object with deep copy of dataSource
+    const newConfig: DynamicBlockConfig = {
       ...editConfig,
       templateId: template.id,
       templateName: template.name,
-      dataSource: template.dataSource,
-      variables: template.variables,
-    });
+      dataSource: {
+        type: template.dataSource.type,
+        staticData: template.dataSource.staticData ? { ...template.dataSource.staticData } : undefined,
+        endpoint: template.dataSource.endpoint,
+        query: template.dataSource.query,
+        variables: template.dataSource.variables ? { ...template.dataSource.variables } : undefined,
+      },
+      variables: template.variables ? { ...template.variables } : {},
+    };
+    
+    setEditConfig(newConfig);
+    // Immediately update data state for preview
+    if (newConfig.dataSource?.type === 'static' && (newConfig.dataSource as any).staticData) {
+      setData((newConfig.dataSource as any).staticData);
+      setError(null);
+    }
   };
 
   // Test API or GraphQL endpoint
@@ -523,7 +548,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
         </Button>
       </div>
 
-      {/* Settings Dialog - Professional UI */}
+      {/* Settings Dialog - 2-Column Layout */}
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
         <DialogContent className="max-w-7xl h-[95vh] p-0 flex flex-col">
           {/* Header */}
@@ -537,35 +562,16 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
             </DialogDescription>
           </DialogHeader>
 
-          {/* Tabbed Content Area */}
-          <Tabs defaultValue="templates" className="flex-1 flex flex-col overflow-hidden">
-            {/* Tab List */}
-            <div className="px-8 pt-6 border-b bg-white">
-              <TabsList className="bg-slate-100 p-1">
-                <TabsTrigger value="templates" className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  Select Template
-                </TabsTrigger>
-                <TabsTrigger value="editor" className="flex items-center gap-2">
-                  <Code className="w-4 h-4" />
-                  Template Editor
-                </TabsTrigger>
-                <TabsTrigger value="settings" className="flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
-                  Configuration
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            {/* Tab Content */}
-            <div className="flex-1 overflow-y-auto">
-              {/* Templates Tab */}
-              <TabsContent value="templates" className="px-8 py-8 space-y-6">
+          {/* Main Content - 2 Column Layout */}
+          <div className="flex-1 flex overflow-hidden">
+            {/* LEFT COLUMN: Template Selection (50%) */}
+            <div className="w-1/2 border-r border-gray-200 overflow-y-auto flex flex-col">
+              <div className="px-6 py-6 space-y-4 flex-1 overflow-y-auto">
                 <div>
-                  <h3 className="text-lg font-bold mb-4">Choose a Sample Template</h3>
-                  <p className="text-gray-600 mb-6">Select from our professional templates or start with blank</p>
+                  <h3 className="text-lg font-bold mb-2">Choose Template</h3>
+                  <p className="text-sm text-gray-600 mb-6">Select from professional templates or start with blank</p>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-3">
                     {/* Blank Template */}
                     <button
                       onClick={() => {
@@ -578,17 +584,17 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                           variables: {},
                         });
                       }}
-                      className={`p-6 rounded-lg border-2 transition-all text-left hover:shadow-lg ${
+                      className={`w-full p-4 rounded-lg border-2 transition-all text-left hover:shadow-md ${
                         selectedTemplate === null
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-gray-200 bg-white hover:border-gray-300'
                       }`}
                     >
-                      <div className="font-bold text-lg mb-2">Blank Template</div>
-                      <p className="text-sm text-gray-600">Start with an empty template and write your own HTML</p>
+                      <div className="font-semibold text-base mb-1">Blank Template</div>
+                      <p className="text-xs text-gray-600">Start with empty HTML</p>
                       {selectedTemplate === null && (
-                        <div className="mt-3 flex items-center text-blue-600 text-sm font-semibold">
-                          <Check className="w-4 h-4 mr-1" /> Selected
+                        <div className="mt-2 flex items-center text-blue-600 text-xs font-semibold">
+                          <Check className="w-3 h-3 mr-1" /> Selected
                         </div>
                       )}
                     </button>
@@ -598,192 +604,183 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       <button
                         key={template.id}
                         onClick={() => handleSelectTemplate(template)}
-                        className={`p-6 rounded-lg border-2 transition-all text-left hover:shadow-lg ${
+                        className={`w-full p-4 rounded-lg border-2 transition-all text-left hover:shadow-md ${
                           selectedTemplate?.id === template.id
                             ? 'border-blue-500 bg-blue-50'
                             : 'border-gray-200 bg-white hover:border-gray-300'
                         }`}
                       >
-                        <div className="font-bold text-lg mb-1">{template.name}</div>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{template.description}</p>
+                        <div className="font-semibold text-base mb-1">{template.name}</div>
+                        <p className="text-xs text-gray-600 line-clamp-2">{template.description}</p>
                         {selectedTemplate?.id === template.id && (
-                          <div className="flex items-center text-blue-600 text-sm font-semibold">
-                            <Check className="w-4 h-4 mr-1" /> Selected
+                          <div className="mt-2 flex items-center text-blue-600 text-xs font-semibold">
+                            <Check className="w-3 h-3 mr-1" /> Selected
                           </div>
                         )}
                       </button>
                     ))}
                   </div>
                 </div>
-              </TabsContent>
+              </div>
+            </div>
 
-              {/* Editor Tab */}
-              <TabsContent value="editor" className="px-8 py-8 space-y-6">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold">Template HTML</h3>
-                    <div className="text-sm text-gray-500">
-                      {selectedTemplate ? `Using: ${selectedTemplate.name}` : 'Blank template'}
+            {/* RIGHT COLUMN: Editor + Configuration (50%) */}
+            <div className="w-1/2 flex flex-col">
+              {/* TOP: Template Editor */}
+              <div className="flex-1 border-b border-gray-200 overflow-y-auto flex flex-col">
+                <div className="px-6 py-6 space-y-3 flex flex-col h-full">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-base font-bold">Template HTML</h3>
+                      <div className="text-xs text-gray-500">
+                        {selectedTemplate ? `Using: ${selectedTemplate.name}` : 'Blank template'}
+                      </div>
                     </div>
+                    <Textarea
+                      placeholder={`<div class="p-6">\n  <h2>{{title}}</h2>\n  {{#each items}}\n    <p>{{this.name}}</p>\n  {{/each}}\n</div>`}
+                      value={templateEdit}
+                      onChange={(e) => setTemplateEdit(e.target.value)}
+                      className="font-mono text-xs resize-none flex-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Syntax: <code className="bg-gray-100 px-1 rounded text-xs">{'{{var}}'}</code> 
+                      <code className="bg-gray-100 px-1 rounded text-xs ml-1">{'{{#each}}'}</code>
+                      <code className="bg-gray-100 px-1 rounded text-xs ml-1">{'{{#if}}'}</code>
+                    </p>
                   </div>
-                  <Textarea
-                    placeholder={`<div class="p-6">\n  <h2>{{title}}</h2>\n  {{#each items}}\n    <p>{{this.name}}</p>\n  {{/each}}\n</div>`}
-                    value={templateEdit}
-                    onChange={(e) => setTemplateEdit(e.target.value)}
-                    rows={12}
-                    className="font-mono text-sm resize-none"
-                  />
-                  <p className="text-xs text-gray-500 mt-3">
-                    Use <code className="bg-gray-100 px-2 py-1 rounded">{'{{variable}}'}</code> •
-                    <code className="bg-gray-100 px-2 py-1 rounded ml-2">{'{{#each array}}...{{/each}}'}</code> •
-                    <code className="bg-gray-100 px-2 py-1 rounded ml-2">{'{{#if condition}}...{{/if}}'}</code>
-                  </p>
                 </div>
-              </TabsContent>
+              </div>
 
-              {/* Settings Tab */}
-              <TabsContent value="settings" className="px-8 py-8 space-y-6 max-w-3xl">
-                {/* Template Name */}
-                <Card className="p-6 border border-gray-200">
-                  <h3 className="text-sm font-bold mb-4 text-gray-900">Template Name</h3>
-                  <Input
-                    type="text"
-                    placeholder="my-dynamic-block"
-                    value={editConfig.templateName || ''}
-                    onChange={(e) => setEditConfig({ ...editConfig, templateName: e.target.value })}
-                    className="bg-white"
-                  />
-                </Card>
-
-                {/* Data Source */}
-                <Card className="p-6 border border-gray-200">
-                  <h3 className="text-sm font-bold mb-4 text-gray-900">Data Source</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-sm font-semibold">Type</Label>
-                      <Select
-                        value={editConfig.dataSource?.type || 'static'}
-                        onValueChange={(value) => setEditConfig({
-                          ...editConfig,
-                          dataSource: { ...editConfig.dataSource, type: value as any }
-                        })}
-                      >
-                        <SelectTrigger className="bg-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="static">Static Data</SelectItem>
-                          <SelectItem value="api">REST API</SelectItem>
-                          <SelectItem value="graphql">GraphQL</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
-                      <div>
-                        <Label className="text-sm font-semibold">Endpoint</Label>
-                        <Input
-                          type="text"
-                          placeholder="/api/data or /graphql"
-                          value={editConfig.dataSource?.endpoint || ''}
-                          onChange={(e) => setEditConfig({
-                            ...editConfig,
-                            dataSource: { 
-                              type: editConfig.dataSource?.type || 'api',
-                              ...editConfig.dataSource, 
-                              endpoint: e.target.value 
-                            }
-                          })}
-                        />
-                      </div>
-                    )}
-
-                    {editConfig.dataSource?.type === 'graphql' && (
-                      <div>
-                        <Label>GraphQL Query</Label>
-                        <Textarea
-                          placeholder="query GetData { items { id name } }"
-                          value={editConfig.dataSource?.query || ''}
-                          onChange={(e) => setEditConfig({
-                            ...editConfig,
-                            dataSource: { 
-                              type: editConfig.dataSource?.type || 'graphql',
-                              ...editConfig.dataSource, 
-                              query: e.target.value 
-                            }
-                          })}
-                          rows={4}
-                          className="font-mono text-sm"
-                        />
-                      </div>
-                    )}
-
-                    {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={handleTestApi} 
-                          disabled={apiTestLoading || !editConfig.dataSource?.endpoint}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          {apiTestLoading ? 'Testing...' : 'Test API'}
-                        </Button>
-                        {apiTestResult && <span className="text-xs text-green-600 flex items-center">✓ Success</span>}
-                        {apiTestError && <span className="text-xs text-red-600 flex items-center">✗ Error</span>}
-                      </div>
-                    )}
-
-                    {apiTestError && (
-                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-xs font-semibold text-red-800 mb-1">Error:</p>
-                        <pre className="text-xs text-red-700 whitespace-pre-wrap">{apiTestError}</pre>
-                      </div>
-                    )}
-
-                    {apiTestResult && (
-                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-xs font-semibold text-green-800 mb-2">Response Data:</p>
-                        <pre className="text-xs text-green-800 whitespace-pre-wrap overflow-auto max-h-48 bg-white p-2 rounded border border-green-200">{JSON.stringify(apiTestResult, null, 2)}</pre>
-                      </div>
-                    )}
-
-                    {editConfig.dataSource?.type === 'static' && (
-                      <div>
-                        <Label className="text-sm font-semibold">Static Data (JSON)</Label>
-                        <Textarea
-                          placeholder='{"title": "My Data", "items": [{"id": 1, "name": "Item 1"}]}'
-                          value={JSON.stringify(editConfig.dataSource?.staticData || {}, null, 2)}
-                          onChange={(e) => {
-                            try {
-                              const parsed = JSON.parse(e.target.value);
-                              setEditConfig({
-                                ...editConfig,
-                                dataSource: { 
-                                  type: 'static',
-                                  ...editConfig.dataSource, 
-                                  staticData: parsed 
-                                }
-                              });
-                            } catch (err) {
-                              // Invalid JSON, ignore
-                            }
-                          }}
-                          rows={6}
-                          className="font-mono text-sm"
-                        />
-                      </div>
-                    )}
+              {/* BOTTOM: Configuration */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="px-6 py-6 space-y-4">
+                  {/* Template Name */}
+                  <div>
+                    <Label className="text-xs font-semibold">Template Name</Label>
+                    <Input
+                      type="text"
+                      placeholder="my-dynamic-block"
+                      value={editConfig.templateName || ''}
+                      onChange={(e) => setEditConfig({ ...editConfig, templateName: e.target.value })}
+                      className="bg-white mt-1 text-sm h-9"
+                    />
                   </div>
-                </Card>
 
-                {/* Repeater Configuration */}
-                <Card className="p-6 border border-gray-200">
-                  <h3 className="text-sm font-bold mb-4 text-gray-900">Repeater Settings</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="text-sm font-semibold">Enable Repeater</Label>
-                        <p className="text-xs text-gray-500 mt-1">Loop through array items in your data</p>
-                      </div>
+                  {/* Data Source Type */}
+                  <div>
+                    <Label className="text-xs font-semibold">Data Source Type</Label>
+                    <Select
+                      value={editConfig.dataSource?.type || 'static'}
+                      onValueChange={(value) => setEditConfig({
+                        ...editConfig,
+                        dataSource: { ...editConfig.dataSource, type: value as any }
+                      })}
+                    >
+                      <SelectTrigger className="bg-white mt-1 text-sm h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="static">Static Data</SelectItem>
+                        <SelectItem value="api">REST API</SelectItem>
+                        <SelectItem value="graphql">GraphQL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Endpoint (for API/GraphQL) */}
+                  {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
+                    <div>
+                      <Label className="text-xs font-semibold">Endpoint</Label>
+                      <Input
+                        type="text"
+                        placeholder="/api/data or /graphql"
+                        value={editConfig.dataSource?.endpoint || ''}
+                        onChange={(e) => setEditConfig({
+                          ...editConfig,
+                          dataSource: { 
+                            type: editConfig.dataSource?.type || 'api',
+                            ...editConfig.dataSource, 
+                            endpoint: e.target.value 
+                          }
+                        })}
+                        className="bg-white mt-1 text-sm h-9"
+                      />
+                    </div>
+                  )}
+
+                  {/* GraphQL Query */}
+                  {editConfig.dataSource?.type === 'graphql' && (
+                    <div>
+                      <Label className="text-xs font-semibold">GraphQL Query</Label>
+                      <Textarea
+                        placeholder="query GetData { items { id name } }"
+                        value={editConfig.dataSource?.query || ''}
+                        onChange={(e) => setEditConfig({
+                          ...editConfig,
+                          dataSource: { 
+                            type: editConfig.dataSource?.type || 'graphql',
+                            ...editConfig.dataSource, 
+                            query: e.target.value 
+                          }
+                        })}
+                        rows={3}
+                        className="font-mono text-xs mt-1"
+                      />
+                    </div>
+                  )}
+
+                  {/* Test Button (for API/GraphQL) */}
+                  {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
+                    <div className="flex gap-2 items-center pt-2">
+                      <Button 
+                        onClick={handleTestApi} 
+                        disabled={apiTestLoading || !editConfig.dataSource?.endpoint}
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 h-8 text-xs"
+                      >
+                        {apiTestLoading ? 'Testing...' : 'Test'}
+                      </Button>
+                      {apiTestResult && <span className="text-xs text-green-600">✓ Success</span>}
+                      {apiTestError && <span className="text-xs text-red-600">✗ Error</span>}
+                    </div>
+                  )}
+
+                  {/* Static Data */}
+                  {editConfig.dataSource?.type === 'static' && (
+                    <div>
+                      <Label className="text-xs font-semibold">Static Data (JSON)</Label>
+                      <Textarea
+                        placeholder='{"title": "My Data", "items": [{"id": 1, "name": "Item 1"}]}'
+                        value={JSON.stringify(editConfig.dataSource?.staticData || {}, null, 2)}
+                        onChange={(e) => {
+                          try {
+                            const parsed = JSON.parse(e.target.value);
+                            setEditConfig({
+                              ...editConfig,
+                              dataSource: { 
+                                type: editConfig.dataSource?.type || 'static',
+                                staticData: parsed,
+                                endpoint: editConfig.dataSource?.endpoint,
+                                query: editConfig.dataSource?.query,
+                                variables: editConfig.dataSource?.variables,
+                              }
+                            });
+                            setData(parsed);
+                            setError(null);
+                          } catch (err) {
+                            // Invalid JSON, ignore
+                          }
+                        }}
+                        rows={4}
+                        className="font-mono text-xs mt-1"
+                      />
+                    </div>
+                  )}
+
+                  {/* Repeater */}
+                  <div className="pt-2 border-t border-gray-200">
+                    <div className="flex items-center justify-between gap-2">
+                      <Label className="text-xs font-semibold">Enable Repeater</Label>
                       <Switch
                         checked={editConfig.repeater?.enabled || false}
                         onCheckedChange={(checked) => setEditConfig({
@@ -792,58 +789,50 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                         })}
                       />
                     </div>
-
                     {editConfig.repeater?.enabled && (
-                      <>
-                        <div>
-                          <Label className="text-sm font-semibold">Data Path</Label>
-                          <Input
-                            type="text"
-                            placeholder="products"
-                            value={editConfig.repeater?.dataPath || ''}
-                            onChange={(e) => setEditConfig({
-                              ...editConfig,
-                              repeater: { 
-                                enabled: editConfig.repeater?.enabled || false,
-                                ...editConfig.repeater, 
-                                dataPath: e.target.value 
-                              }
-                            })}
-                          />
-                          <p className="text-xs text-gray-500 mt-1">Path to array in data (e.g., "products" or "data.items")</p>
-                        </div>
-
-                        <div>
-                          <Label className="text-sm font-semibold">Limit</Label>
-                          <Input
-                            type="number"
-                            placeholder="10"
-                            value={editConfig.repeater?.limit || ''}
-                            onChange={(e) => setEditConfig({
-                              ...editConfig,
-                              repeater: { 
-                                enabled: editConfig.repeater?.enabled || false,
-                                ...editConfig.repeater, 
-                                limit: parseInt(e.target.value) 
-                              }
-                            })}
-                          />
-                          <p className="text-xs text-gray-500 mt-1">Maximum items to display (leave empty for no limit)</p>
-                        </div>
-                      </>
+                      <div className="space-y-2 mt-2">
+                        <Input
+                          type="text"
+                          placeholder="Data path (e.g., 'products')"
+                          value={editConfig.repeater?.dataPath || ''}
+                          onChange={(e) => setEditConfig({
+                            ...editConfig,
+                            repeater: { 
+                              enabled: editConfig.repeater?.enabled || false,
+                              ...editConfig.repeater, 
+                              dataPath: e.target.value 
+                            }
+                          })}
+                          className="text-xs h-8"
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Limit (optional)"
+                          value={editConfig.repeater?.limit || ''}
+                          onChange={(e) => setEditConfig({
+                            ...editConfig,
+                            repeater: { 
+                              enabled: editConfig.repeater?.enabled || false,
+                              ...editConfig.repeater, 
+                              limit: parseInt(e.target.value) 
+                            }
+                          })}
+                          className="text-xs h-8"
+                        />
+                      </div>
                     )}
                   </div>
-                </Card>
-              </TabsContent>
+                </div>
+              </div>
             </div>
-          </Tabs>
+          </div>
 
           {/* Footer - Action Buttons */}
           <div className="border-t px-6 py-4 flex gap-2 justify-end bg-white">
-            <Button onClick={() => setIsEditing(false)} variant="outline">
+            <Button onClick={() => setIsEditing(false)} variant="outline" size="sm">
               Cancel
             </Button>
-            <Button onClick={handleSave} className="min-w-32">
+            <Button onClick={handleSave} className="min-w-32" size="sm">
               Save Changes
             </Button>
           </div>
