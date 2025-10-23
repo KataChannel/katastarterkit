@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageBlock, DynamicBlockConfig } from '@/types/page-builder';
-import { Settings, Trash2, RefreshCw, Code, X, Check, BookOpen, Grid3x3 } from 'lucide-react';
+import { Settings, Trash2, RefreshCw, Code, Check, BookOpen, Grid3x3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,6 +42,9 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<SampleTemplate | null>(null);
+  const [apiTestResult, setApiTestResult] = useState<any>(null);
+  const [apiTestLoading, setApiTestLoading] = useState(false);
+  const [apiTestError, setApiTestError] = useState<string | null>(null);
   const sampleTemplates = getAllSampleTemplates();
 
   // Fetch data based on configuration
@@ -435,6 +438,54 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
     });
   };
 
+  // Test API or GraphQL endpoint
+  const handleTestApi = async () => {
+    setApiTestLoading(true);
+    setApiTestError(null);
+    setApiTestResult(null);
+
+    try {
+      if (editConfig.dataSource?.type === 'graphql') {
+        const response = await fetch(editConfig.dataSource.endpoint || '', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: editConfig.dataSource.query || '',
+            variables: editConfig.dataSource.variables || {},
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        if (result.errors) {
+          setApiTestError(result.errors[0]?.message || 'GraphQL Error');
+        } else {
+          setApiTestResult(result.data);
+        }
+      } else if (editConfig.dataSource?.type === 'api') {
+        const response = await fetch(editConfig.dataSource.endpoint || '', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(editConfig.dataSource.variables || {}),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        setApiTestResult(result);
+      }
+    } catch (err: any) {
+      setApiTestError(err.message || 'Failed to fetch data');
+    } finally {
+      setApiTestLoading(false);
+    }
+  };
+
   const handleSave = () => {
     const updatedContent = {
       ...block.content,
@@ -477,25 +528,13 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
         <DialogContent className="max-w-7xl h-[95vh] p-0 flex flex-col">
           {/* Header */}
           <DialogHeader className="px-8 pt-8 pb-6 border-b bg-gradient-to-r from-slate-50 to-slate-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <DialogTitle className="flex items-center text-2xl font-bold">
-                  <Grid3x3 className="w-6 h-6 mr-3 text-blue-600" />
-                  Dynamic Block Configuration
-                </DialogTitle>
-                <DialogDescription className="mt-2 text-base">
-                  Choose a template, configure data source, and customize your block
-                </DialogDescription>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsEditing(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
+            <DialogTitle className="flex items-center text-2xl font-bold">
+              <Grid3x3 className="w-6 h-6 mr-3 text-blue-600" />
+              Dynamic Block Configuration
+            </DialogTitle>
+            <DialogDescription className="mt-2 text-base">
+              Choose a template, configure data source, and customize your block
+            </DialogDescription>
           </DialogHeader>
 
           {/* Tabbed Content Area */}
@@ -676,6 +715,34 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                           rows={4}
                           className="font-mono text-sm"
                         />
+                      </div>
+                    )}
+
+                    {(editConfig.dataSource?.type === 'api' || editConfig.dataSource?.type === 'graphql') && (
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={handleTestApi} 
+                          disabled={apiTestLoading || !editConfig.dataSource?.endpoint}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          {apiTestLoading ? 'Testing...' : 'Test API'}
+                        </Button>
+                        {apiTestResult && <span className="text-xs text-green-600 flex items-center">✓ Success</span>}
+                        {apiTestError && <span className="text-xs text-red-600 flex items-center">✗ Error</span>}
+                      </div>
+                    )}
+
+                    {apiTestError && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-xs font-semibold text-red-800 mb-1">Error:</p>
+                        <pre className="text-xs text-red-700 whitespace-pre-wrap">{apiTestError}</pre>
+                      </div>
+                    )}
+
+                    {apiTestResult && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-xs font-semibold text-green-800 mb-2">Response Data:</p>
+                        <pre className="text-xs text-green-800 whitespace-pre-wrap overflow-auto max-h-48 bg-white p-2 rounded border border-green-200">{JSON.stringify(apiTestResult, null, 2)}</pre>
                       </div>
                     )}
 

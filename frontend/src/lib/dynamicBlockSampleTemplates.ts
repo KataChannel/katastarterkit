@@ -13,6 +13,7 @@ export interface SampleTemplate {
   dataSource: {
     type: 'static' | 'graphql' | 'api';
     data?: any;
+    staticData?: any;
     query?: string;
     variables?: any;
     endpoint?: string;
@@ -55,26 +56,28 @@ export const productGridTemplate: SampleTemplate = {
   `,
   dataSource: {
     type: 'static',
-    data: {
+    staticData: {
+      title: 'Featured Products',
+      subtitle: 'Discover our best-selling products with premium quality and affordable prices',
       products: [
         {
           id: 1,
           name: 'MacBook Pro M3',
-          price: 1999,
+          price: '$1,999',
           description: 'Powerful laptop for professionals with M3 chip and stunning display',
           image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop',
         },
         {
           id: 2,
           name: 'iPhone 15 Pro',
-          price: 1099,
+          price: '$1,099',
           description: 'Latest smartphone with advanced camera system and A17 Pro chip',
           image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop',
         },
         {
           id: 3,
           name: 'AirPods Pro',
-          price: 249,
+          price: '$249',
           description: 'Premium wireless earbuds with noise cancellation and spatial audio',
           image: 'https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=400&h=300&fit=crop',
         },
@@ -152,7 +155,11 @@ export const taskDashboardTemplate: SampleTemplate = {
   `,
   dataSource: {
     type: 'static',
-    data: {
+    staticData: {
+      projectName: 'Website Redesign',
+      todoCount: 2,
+      inProgressCount: 2,
+      doneCount: 2,
       todoTasks: [
         {
           id: 1,
@@ -201,12 +208,7 @@ export const taskDashboardTemplate: SampleTemplate = {
       ],
     },
   },
-  variables: {
-    projectName: 'Website Redesign',
-    todoCount: 2,
-    inProgressCount: 2,
-    doneCount: 2,
-  },
+  variables: {},
 };
 
 /**
@@ -239,7 +241,8 @@ export const categoryShowcaseTemplate: SampleTemplate = {
   `,
   dataSource: {
     type: 'static',
-    data: {
+    staticData: {
+      title: 'Shop by Category',
       categories: [
         {
           id: 1,
@@ -262,9 +265,7 @@ export const categoryShowcaseTemplate: SampleTemplate = {
       ],
     },
   },
-  variables: {
-    title: 'Shop by Category',
-  },
+  variables: {},
 };
 
 /**
@@ -291,14 +292,14 @@ export const heroSectionTemplate: SampleTemplate = {
   `,
   dataSource: {
     type: 'static',
-    data: {},
+    staticData: {
+      title: 'Turn Ideas Into Reality',
+      subtitle: 'Build professional websites with cutting-edge technology. No coding required.',
+      ctaText: 'Start Building Now',
+      backgroundImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&h=1080&fit=crop',
+    },
   },
-  variables: {
-    title: 'Turn Ideas Into Reality',
-    subtitle: 'Build professional websites with cutting-edge technology. No coding required.',
-    ctaText: 'Start Building Now',
-    backgroundImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&h=1080&fit=crop',
-  },
+  variables: {},
 };
 
 /**
@@ -337,7 +338,8 @@ export const testimonialsTemplate: SampleTemplate = {
   `,
   dataSource: {
     type: 'static',
-    data: {
+    staticData: {
+      title: 'What Our Customers Say',
       testimonials: [
         {
           id: 1,
@@ -366,9 +368,7 @@ export const testimonialsTemplate: SampleTemplate = {
       ],
     },
   },
-  variables: {
-    title: 'What Our Customers Say',
-  },
+  variables: {},
 };
 
 /**
@@ -424,15 +424,15 @@ export const contactFormTemplate: SampleTemplate = {
   `,
   dataSource: {
     type: 'static',
-    data: {},
+    staticData: {
+      title: 'Get in Touch',
+      description: 'We are always ready to help. Leave your information and we will respond within 24 hours.',
+      email: 'hello@katacore.com',
+      phone: '+84 (0) 123 456 789',
+      address: 'Floor 10, ABC Building, 123 DEF Street, District 1, Ho Chi Minh City',
+    },
   },
-  variables: {
-    title: 'Get in Touch',
-    description: 'We are always ready to help. Leave your information and we will respond within 24 hours.',
-    email: 'hello@katacore.com',
-    phone: '+84 (0) 123 456 789',
-    address: 'Floor 10, ABC Building, 123 DEF Street, District 1, Ho Chi Minh City',
-  },
+  variables: {},
 };
 
 /**
@@ -465,7 +465,8 @@ export const faqTemplate: SampleTemplate = {
   `,
   dataSource: {
     type: 'static',
-    data: {
+    staticData: {
+      title: 'Frequently Asked Questions',
       faqs: [
         {
           id: 1,
@@ -495,9 +496,7 @@ export const faqTemplate: SampleTemplate = {
       ],
     },
   },
-  variables: {
-    title: 'Frequently Asked Questions',
-  },
+  variables: {},
 };
 
 /**
