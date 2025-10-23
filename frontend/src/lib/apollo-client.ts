@@ -105,8 +105,19 @@ const authLink = setContext((_, { headers }) => {
 });
 
 // Error Link - handles GraphQL and network errors
+// IMPORTANT: This link should NOT redirect users or clear tokens!
+// The AuthContext is responsible for managing auth state.
+// Apollo should only log errors and let the application handle the response.
 const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
-  if (graphQLErrors) {
+  if (graphQLErrors && graphQLErrors.length > 0) {
+    console.group('%c🚨 GraphQL Errors Detected', 'color: #e74c3c; font-weight: bold;');
+    console.log(`Operation: ${operation.operationName}`);
+    console.table(graphQLErrors.map((err, idx) => ({
+      '#': idx + 1,
+      'Message': err.message,
+      'Code': err.extensions?.code || 'N/A',
+      'Path': err.path?.join('.') || 'N/A',
+    })));
     const errorDetails = graphQLErrors.map(({ message, locations, path, extensions }) => {
       const errorInfo = {
         message,
@@ -118,52 +129,29 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
         timestamp: new Date().toISOString()
       };
 
-      // Handle specific GraphQL errors with actions
+      // Handle specific GraphQL errors with logging only
       if (message === 'Bad Request Exception') {
         logError('warn', '🚨 Bad request - check query syntax and variables', { message, path });
       }
       
-      // Handle authentication errors - clear ALL auth data at once
-      if (message.includes('Authentication token is required') || 
-          message.includes('No token provided') ||
-          message.includes('Authentication token is required')) {
-        logError('warn', '🔐 No authentication token - user may need to login', { message, path });
-        if (typeof window !== 'undefined') {
-          // Clear ALL auth-related data at once to prevent confusion
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          // Redirect to login on authentication errors
-          if (window.location.pathname !== '/login') {
-            window.location.href = '/login?from=' + encodeURIComponent(window.location.pathname + window.location.search);
-          }
-        }
+      // Log authentication errors but don't redirect here
+      // AuthContext will handle token removal based on error type (only UNAUTHENTICATED code)
+      if (extensions?.code === 'UNAUTHENTICATED') {
+        console.log('%c🔐 UNAUTHENTICATED error - delegating to AuthContext', 'color: #f39c12;');
+        logError('warn', '🔐 UNAUTHENTICATED error - AuthContext will handle logout', { message, path });
+        // Don't redirect or clear tokens here - let AuthContext handle it
         return errorInfo;
       }
       
-      if (message === 'Forbidden resource' || message.includes('Forbidden')) {
-        logError('warn', '🔐 Authentication issue - checking if token should be removed', { message, path });
-        // Only remove token and redirect for specific authentication errors
-        // Let AuthContext handle this instead of doing it here
-        if (extensions?.code === 'UNAUTHENTICATED' || message.includes('jwt') || message.includes('accessToken')) {
-          if (typeof window !== 'undefined') {
-            // Clear ALL auth-related data at once
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('user');
-            window.location.href = '/login';
-          }
-        }
+      if (message === 'Forbidden resource' || (extensions?.code === 'FORBIDDEN')) {
+        console.log('%c🚫 Forbidden error - delegating to AuthContext', 'color: #f39c12;');
+        logError('warn', '🔐 Forbidden error - let AuthContext decide if logout is needed', { message, path });
+        // Let AuthContext handle this, don't auto-logout from Apollo
       }
       
       // Handle validation errors
       if (message.includes('validation') || message.includes('invalid')) {
         logError('warn', '📝 Validation error - check input data', { message, path });
-      }
-      
-      // Handle authorization errors
-      if (message.includes('unauthorized') || message.includes('not authorized')) {
-        logError('warn', '🚫 Authorization error - insufficient permissions', { message, path });
       }
 
       return errorInfo;
@@ -171,23 +159,10 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
 
     // Log based on environment
     if (isDevelopment) {
-      // console.group('🔍 [GraphQL Error Details]');
-      // console.error('Context:', collectErrorContext());
-      // graphQLErrors.forEach((error: any) => {
-      //   console.error(`Error: ${error.message}`);
-      //   if (error.extensions) {
-      //     console.error('Extensions:', error.extensions);
-      //   }
-      //   if (error.path) {
-      //     console.error('Path:', error.path);
-      //   }
-      //   if (error.locations) {
-      //     console.error('Locations:', error.locations);
-      //   }
-      // });
-      // console.groupEnd();
+      // Detailed logging in development
+      console.log('%cℹ️ Full error details:', 'color: #3498db;', errorDetails);
     } else {
-      // Production logging - summarized with context
+      // Production logging - summarized
       const errorSummary = graphQLErrors.map((err: any) => ({
         message: err.message,
         code: err.extensions?.code,
@@ -198,6 +173,7 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
         context: collectErrorContext()
       });
     }
+    console.groupEnd();
   }
 
   if (networkError) {
@@ -231,7 +207,8 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
       console.group('🚨 [Network Error Details]');
       console.error('Error Info:', errorInfo);
       console.error('Context:', collectErrorContext());
-      console.error('Full Error Object:', networkError);
+      console.log(`⏱️ Error Type: ${errorInfo.type}`);
+      console.log(`📡 Operation: ${errorInfo.operation}`);
       console.groupEnd();
     } else {
       // Production logging - less verbose but include context
@@ -245,43 +222,56 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
     if (networkError.message?.includes('Socket closed') || 
         networkError.message?.includes('WebSocket')) {
       console.warn('🔌 WebSocket connection lost - will attempt to reconnect');
-      // Don't redirect on WebSocket errors, just log
+      // Don't redirect on WebSocket errors
       return;
     }
     
-    // Handle unauthorized errors - clear ALL auth data at once
+    // IMPORTANT: Only redirect for explicit 401 errors
+    // Transient network errors should not cause logout
+    // That way, if there's a temporary network hiccup during page reload,
+    // the user won't get logged out
     if ('statusCode' in networkError && networkError.statusCode === 401) {
-      console.warn('🔐 Unauthorized access - redirecting to login');
+      console.log('%c🚨 HTTP 401 Unauthorized - LOGGING OUT', 'color: #c0392b; font-weight: bold;');
+      logError('warn', '🔐 Unauthorized access (401) - redirecting to login');
       if (typeof window !== 'undefined') {
-        // Clear ALL auth-related data at once to prevent confusion
+        // Clear ALL auth-related data at once
+        console.log('%c🔓 Clearing auth data from Apollo error link', 'color: #c0392b;');
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
+        console.log('%c↪️ Redirecting to /login', 'color: #c0392b;');
         window.location.href = '/login';
       }
     }
     
-    // Handle other common network errors
+    // Handle other common network errors with logging only
     if ('statusCode' in networkError) {
       const statusCode = networkError.statusCode;
       switch (statusCode) {
         case 403:
-          console.warn('🚫 Forbidden - insufficient permissions');
+          console.log(`%c🚫 Forbidden (403) - insufficient permissions`, 'color: #e67e22;');
+          logError('warn', '🚫 Forbidden (403) - insufficient permissions');
           break;
         case 404:
-          console.warn('❓ Resource not found');
+          console.log(`%c❓ Not Found (404) - resource not found`, 'color: #e67e22;');
+          logError('warn', '❓ Not Found (404) - resource not found');
           break;
         case 500:
-          console.error('💥 Internal server error');
+          console.log(`%c💥 Internal Server Error (500)`, 'color: #e74c3c;');
+          logError('error', '💥 Internal Server Error (500)');
           break;
         case 502:
-          console.error('🔧 Bad gateway - server might be down');
+          console.log(`%c🔧 Bad Gateway (502) - server might be down`, 'color: #e74c3c;');
+          logError('error', '🔧 Bad Gateway (502) - server might be down');
           break;
         case 503:
-          console.error('⏰ Service unavailable - please try again later');
+          console.log(`%c⏰ Service Unavailable (503) - please try again later`, 'color: #e74c3c;');
+          logError('error', '⏰ Service Unavailable (503) - please try again later');
           break;
         default:
-          console.error(`❌ HTTP Error ${statusCode}`);
+          // For other status codes, just log - don't auto-logout
+          console.log(`%c⚠️ HTTP Error ${statusCode}`, 'color: #e67e22;');
+          logError('warn', `⚠️ HTTP Error ${statusCode}`);
       }
     }
   }

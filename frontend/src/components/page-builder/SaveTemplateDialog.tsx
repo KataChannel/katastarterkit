@@ -23,7 +23,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { PageBlock } from '@/types/page-builder';
 import { BlockTemplate, TemplateCategory } from '@/data/blockTemplates';
-import { CreateTemplateInput } from '@/utils/customTemplatesDb';
+import { CreateTemplateInput } from '@/utils/customTemplates';
 import { Save, Loader2, Info } from 'lucide-react';
 
 interface SaveTemplateDialogProps {

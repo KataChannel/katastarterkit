@@ -25,8 +25,8 @@ export function FullScreenLayout({
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
   
-  // Get block selection from context
-  const { selectedBlockId } = usePageState();
+  // Get block selection and loading state from context
+  const { selectedBlockId, loading, editingPage } = usePageState();
   const { handleSelectBlock } = usePageActions();
 
   return (
@@ -43,6 +43,8 @@ export function FullScreenLayout({
         onToggleLeftPanel={() => setLeftPanelOpen(!leftPanelOpen)}
         rightPanelOpen={rightPanelOpen}
         onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
+        isLoading={loading}
+        pageTitle={editingPage?.title}
       />
 
       {/* Main Content Area */}

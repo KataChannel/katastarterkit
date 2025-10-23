@@ -61,6 +61,8 @@ interface EditorToolbarProps {
   currentPageStructure?: PageElement[];
   currentPageStyles?: any;
   onApplyTemplate?: (template: PageTemplate) => void;
+  isLoading?: boolean;
+  pageTitle?: string;
 }
 
 export function EditorToolbar({
@@ -77,6 +79,8 @@ export function EditorToolbar({
   currentPageStructure = [],
   currentPageStyles,
   onApplyTemplate,
+  isLoading = false,
+  pageTitle,
 }: EditorToolbarProps) {
   const { toast } = useToast();
   const { addTemplate, importFromJSON } = useTemplates();
@@ -270,9 +274,15 @@ export function EditorToolbar({
         </DropdownMenu>
 
         {/* Save */}
-        <Button variant="default" size="sm" onClick={onSave} className="gap-2">
+        <Button 
+          variant="default" 
+          size="sm" 
+          onClick={onSave} 
+          className="gap-2"
+          disabled={isLoading}
+        >
           <Save className="w-4 h-4" />
-          <span className="hidden sm:inline">Save</span>
+          <span className="hidden sm:inline">{isLoading ? 'Loading...' : 'Save'}</span>
         </Button>
 
         {/* Settings */}
@@ -281,6 +291,7 @@ export function EditorToolbar({
           size="icon" 
           title="Global Settings"
           onClick={() => setIsSettingsOpen(true)}
+          disabled={isLoading}
         >
           <Settings className="w-4 h-4" />
         </Button>

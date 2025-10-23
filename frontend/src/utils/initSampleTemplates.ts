@@ -1,16 +1,27 @@
 import { BlockType } from '@/types/page-builder';
-import { saveCustomTemplate, getCustomTemplates } from './customTemplates';
+import { 
+  saveCustomTemplateToDB, 
+  getCustomTemplatesFromDB 
+} from './customTemplates';
 
 /**
  * Initialize sample custom templates if they don't exist
  * This will create 3 sample saved templates for users
+ * 
+ * @param client - Apollo Client instance
+ * @param userId - Current user ID
  */
-export function initSampleTemplates() {
-  const existing = getCustomTemplates();
-  
-  // Check if sample templates already exist
-  if (existing.some(t => t.id.startsWith('sample-'))) {
-    console.log('Sample templates already exist, skipping initialization');
+export async function initSampleTemplates(client: any, userId: string) {
+  try {
+    const existing = await getCustomTemplatesFromDB(client, userId);
+    
+    // Check if sample templates already exist
+    if (existing.some(t => t.id.startsWith('sample-'))) {
+      console.log('Sample templates already exist, skipping initialization');
+      return;
+    }
+  } catch (error) {
+    console.error('Error checking existing templates:', error);
     return;
   }
 
@@ -18,7 +29,7 @@ export function initSampleTemplates() {
 
   // Sample 1: Product Showcase
   try {
-    saveCustomTemplate({
+    await saveCustomTemplateToDB(client, {
       name: 'Product Showcase',
       description: 'Mẫu giới thiệu sản phẩm với hình ảnh, mô tả và nút mua hàng',
       category: 'custom',
@@ -91,7 +102,7 @@ export function initSampleTemplates() {
           },
         },
       ],
-    });
+    }, userId);
     console.log('✅ Created: Product Showcase');
   } catch (error) {
     console.error('Failed to create Product Showcase template:', error);
@@ -99,7 +110,7 @@ export function initSampleTemplates() {
 
   // Sample 2: Team Introduction
   try {
-    saveCustomTemplate({
+    await saveCustomTemplateToDB(client, {
       name: 'Team Introduction',
       description: 'Mẫu giới thiệu đội ngũ với ảnh và thông tin thành viên',
       category: 'team',
@@ -184,7 +195,7 @@ export function initSampleTemplates() {
           },
         },
       ],
-    });
+    }, userId);
     console.log('✅ Created: Team Introduction');
   } catch (error) {
     console.error('Failed to create Team Introduction template:', error);
@@ -192,7 +203,7 @@ export function initSampleTemplates() {
 
   // Sample 3: Call to Action
   try {
-    saveCustomTemplate({
+    await saveCustomTemplateToDB(client, {
       name: 'Call to Action',
       description: 'Mẫu kêu gọi hành động với tiêu đề nổi bật và nút CTA',
       category: 'cta',
@@ -316,7 +327,7 @@ export function initSampleTemplates() {
           },
         },
       ],
-    });
+    }, userId);
     console.log('✅ Created: Call to Action');
   } catch (error) {
     console.error('Failed to create Call to Action template:', error);

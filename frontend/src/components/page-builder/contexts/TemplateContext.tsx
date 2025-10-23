@@ -8,8 +8,7 @@ import {
   initCustomTemplatesService,
   TemplateBlocksData,
   CreateTemplateInput,
-} from '@/utils/customTemplatesDb';
-import { initSampleTemplates } from '@/utils/initSampleTemplates';
+} from '@/utils/customTemplates';
 
 /**
  * Template Context - Manages template state and operations
@@ -77,9 +76,13 @@ export function TemplateProvider({ children }: TemplateProviderProps) {
   const refreshTemplates = React.useCallback(async () => {
     try {
       setIsLoadingTemplates(true);
-      initSampleTemplates();
       
+      // Initialize service
       const service = new CustomTemplatesService(apolloClient as any);
+      
+      // Note: initSampleTemplates requires client and userId - should be called elsewhere
+      // in a hook that has access to current user context
+      
       const custom = await service.getMyTemplates();
       
       setCustomTemplates(custom);

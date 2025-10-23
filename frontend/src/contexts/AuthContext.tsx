@@ -44,35 +44,76 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Handle current user data updates
   useEffect(() => {
     if (currentUserData?.getMe) {
+      console.log('%c✅ AuthContext - User authenticated successfully', 'color: #2ecc71; font-weight: bold;', currentUserData.getMe);
       setUser(currentUserData.getMe);
       setLoading(false);
     } else if (currentUserError) {
-      console.error('AuthContext - getCurrentUser error:', currentUserError);
-      
-      // Only remove token for authentication-related errors
       const networkError = currentUserError.networkError as any;
-      const isAuthError = networkError?.statusCode === 401 ||
-                         networkError?.status === 401 ||
-                         currentUserError.graphQLErrors?.some(err => 
-                           err.extensions?.code === 'UNAUTHENTICATED' || 
-                           err.extensions?.code === 'FORBIDDEN' ||
-                           err.message?.includes('Unauthorized') ||
-                           err.message?.includes('jwt') ||
-                           err.message?.includes('accessToken')
-                         );
+      const graphQLErrors = currentUserError.graphQLErrors || [];
+      
+      // Log detailed error information
+      console.group('%c❌ AuthContext - Error Handling', 'color: #e74c3c; font-weight: bold;');
+      console.error('Full Error Object:', currentUserError);
+      console.error('Network Error:', networkError);
+      console.table(graphQLErrors.map(e => ({
+        message: e.message,
+        code: e.extensions?.code,
+        path: e.path,
+      })));
+      
+      // Check if it's a 401 Unauthorized error
+      const is401Error = networkError?.statusCode === 401 || networkError?.status === 401;
+      if (is401Error) {
+        console.log('%c🔐 401 HTTP Status Code detected - LOGOUT REQUIRED', 'color: #e74c3c; font-weight: bold;');
+      }
+      
+      // Check if it's an explicit auth-related GraphQL error
+      // ONLY check error codes, NOT message strings (messages are too unpredictable)
+      const isExplicitAuthError = graphQLErrors.some(err => {
+        const isUnauthenticated = err.extensions?.code === 'UNAUTHENTICATED';
+        const isForbidden = err.extensions?.code === 'FORBIDDEN';
+        
+        if (isUnauthenticated) console.log('%c🔑 UNAUTHENTICATED error code detected', 'color: #f39c12;');
+        if (isForbidden) console.log('%c🚫 FORBIDDEN error code detected', 'color: #f39c12;');
+        
+        return isUnauthenticated || isForbidden;
+      });
+      
+      if (isExplicitAuthError) {
+        console.log('%c🚨 Explicit auth-related GraphQL error detected - LOGOUT REQUIRED', 'color: #e74c3c; font-weight: bold;');
+      }
+      
+      // Only logout on explicit auth errors, NOT on transient network issues
+      const isAuthError = is401Error || isExplicitAuthError;
 
       if (isAuthError) {
-        console.log('Authentication error detected, removing all auth data');
+        console.log('%c🔓 LOGGING OUT - Clearing all auth data', 'color: #c0392b; font-weight: bold;');
+        console.table({
+          'Current Token': localStorage.getItem('accessToken') ? 'EXISTS' : 'NONE',
+          'Action': 'REMOVING',
+          'Timestamp': new Date().toISOString()
+        });
+        
         // Clear ALL auth-related data at once to prevent confusion
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
+        console.log('%c✓ Auth data cleared from localStorage', 'color: #27ae60;');
+        
         setUser(null);
       } else {
-        console.log('Non-authentication error, keeping token');
-        // For network errors or other issues, don't remove token
-        // but still set loading to false
+        console.log('%c⚠️  Transient network error detected - KEEPING TOKEN for retry', 'color: #f39c12; font-weight: bold;');
+        console.log('Error details:', {
+          type: networkError?.name || 'Unknown',
+          message: networkError?.message,
+          statusCode: networkError?.statusCode,
+          willRetry: true
+        });
+        // For network errors, timeouts, or other transient issues, keep the token
+        // User will retry on next interaction
+        // Don't set user to null, just stop loading
       }
+      console.groupEnd();
       setLoading(false);
     }
   }, [currentUserData, currentUserError]);
@@ -89,6 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
+      console.log('%c🔐 Login attempt started', 'color: #3498db; font-weight: bold;', { email, timestamp: new Date().toISOString() });
       const { data } = await loginMutation({
         variables: { 
           input: {
@@ -163,9 +205,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     // Clear ALL auth-related data at once to ensure clean state
+    console.log('%c🚪 Manual logout triggered', 'color: #e74c3c; font-weight: bold;', { timestamp: new Date().toISOString() });
+    console.table({
+      'Token Before': localStorage.getItem('accessToken') ? 'EXISTS' : 'NONE',
+      'Action': 'REMOVING',
+      'User': user?.email || 'NONE'
+    });
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    console.log('%c✓ All auth data cleared', 'color: #27ae60;');
     setUser(null);
   };
 

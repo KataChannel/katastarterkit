@@ -25,7 +25,18 @@ export function EditorCanvas({
   selectedBlockId,
   onSelectBlock,
 }: EditorCanvasProps) {
-  const { blocks } = usePageState();
+  const { blocks, loading } = usePageState();
+
+  if (loading) {
+    return (
+      <div className="h-full bg-gray-100 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="text-sm text-gray-600">Loading page...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (editorMode === 'code') {
     return (
