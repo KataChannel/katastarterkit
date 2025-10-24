@@ -107,7 +107,7 @@ export function ProductCard({
 
   if (variant === 'compact') {
     return (
-      <Link href={`/product/${product.slug}`}>
+      <Link href={`/sanpham/${product.slug}`}>
         <Card className={cn('hover:shadow-lg transition-shadow', className)}>
           <CardContent className="p-3">
             <div className="flex gap-3">

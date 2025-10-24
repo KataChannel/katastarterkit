@@ -91,8 +91,9 @@ export function ProductDetail({
   return (
     <div className={cn('grid lg:grid-cols-2 gap-8', className)}>
       {/* Image Gallery */}
-      <div className="space-y-4">
-        <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+      <div className="space-y-4 sticky top-4">
+        {/* Main Image */}
+        <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
           <img
             src={selectedImage}
             alt={product.name}
@@ -104,24 +105,39 @@ export function ProductDetail({
             </Badge>
           )}
         </div>
+
+        {/* Thumbnail Gallery - Horizontal Scrollable */}
         {images.length > 1 && (
-          <div className="grid grid-cols-5 gap-2">
-            {images.map((img, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedImage(img)}
-                className={cn(
-                  'aspect-square rounded-lg overflow-hidden border-2 transition-all',
-                  selectedImage === img
-                    ? 'border-primary'
-                    : 'border-transparent hover:border-gray-300'
-                )}
-              >
-                <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
-              </button>
-            ))}
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground font-medium">Hình ảnh khác</p>
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {images.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImage(img)}
+                  className={cn(
+                    'flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-all',
+                    selectedImage === img
+                      ? 'border-primary ring-2 ring-primary/50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  )}
+                  title={`Hình ${index + 1}`}
+                >
+                  <img 
+                    src={img} 
+                    alt={`${product.name} ${index + 1}`} 
+                    className="w-full h-full object-cover" 
+                  />
+                </button>
+              ))}
+            </div>
           </div>
         )}
+
+        {/* Image Counter */}
+        <div className="text-xs text-muted-foreground text-center">
+          {images.length > 0 && `${images.indexOf(selectedImage) + 1} / ${images.length}`}
+        </div>
       </div>
 
       {/* Product Info */}
@@ -140,7 +156,7 @@ export function ProductDetail({
         </div>
 
         {/* Price */}
-        <div className="space-y-2">
+        <div className="space-y-2 pt-2 border-t">
           <div className="flex items-baseline gap-3">
             <span className="text-4xl font-bold text-primary">
               {formatPrice(currentPrice)}
@@ -159,6 +175,40 @@ export function ProductDetail({
               </span>
             </div>
           )}
+        </div>
+
+        {/* Specifications */}
+        <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-semibold text-sm">Thông tin sản phẩm</h3>
+          <div className="space-y-2">
+            {product.sku && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Mã SKU:</span>
+                <span className="font-medium text-right">{product.sku}</span>
+              </div>
+            )}
+            {product.origin && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Xuất xứ:</span>
+                <span className="font-medium text-right">{product.origin}</span>
+              </div>
+            )}
+            {product.weight && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Khối lượng:</span>
+                <span className="font-medium text-right">{product.weight}g</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Số lượng có sẵn:</span>
+              <span className={cn(
+                'font-medium',
+                currentStock === 0 ? 'text-red-600' : currentStock <= product.minStock ? 'text-yellow-600' : 'text-green-600'
+              )}>
+                {currentStock} {UNIT_LABELS[currentUnit] || currentUnit}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Description */}
@@ -269,64 +319,147 @@ export function ProductDetail({
           </Card>
         </div>
 
-        {/* Additional Info */}
-        <div className="space-y-2 text-sm">
-          {product.sku && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">SKU:</span>
-              <span className="font-medium">{product.sku}</span>
-            </div>
-          )}
-          {product.origin && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Xuất xứ:</span>
-              <span className="font-medium">{product.origin}</span>
-            </div>
-          )}
-          {product.weight && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Trọng lượng:</span>
-              <span className="font-medium">{product.weight}g</span>
-            </div>
-          )}
-        </div>
-
         <Separator />
 
         {/* Tabs */}
         <Tabs defaultValue="description" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="description">Mô tả</TabsTrigger>
-            <TabsTrigger value="specifications">Thông số</TabsTrigger>
-            <TabsTrigger value="reviews">Đánh giá</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="description">Mô tả chi tiết</TabsTrigger>
+            <TabsTrigger value="reviews">Đánh giá & Xếp hạng</TabsTrigger>
           </TabsList>
-          <TabsContent value="description" className="mt-4">
-            <div className="prose max-w-none">
-              {product.description ? (
-                <div dangerouslySetInnerHTML={{ __html: product.description }} />
-              ) : (
-                <p className="text-muted-foreground">Chưa có mô tả chi tiết</p>
-              )}
-            </div>
+          
+          {/* Description Tab */}
+          <TabsContent value="description" className="mt-6 space-y-4">
+            {product.description ? (
+              <div className="prose prose-sm max-w-none">
+                {typeof product.description === 'string' ? (
+                  product.description.includes('<') ? (
+                    <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                  ) : (
+                    <p className="whitespace-pre-line">{product.description}</p>
+                  )
+                ) : (
+                  <p className="text-muted-foreground">Chưa có mô tả chi tiết</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">Chưa có mô tả chi tiết</p>
+            )}
+
+            {/* Specifications Table */}
+            {product.attributes && typeof product.attributes === 'object' && Object.keys(product.attributes).length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-semibold mb-3">Thông số kỹ thuật</h4>
+                <div className="border rounded-lg overflow-hidden">
+                  {Object.entries(product.attributes).map(([key, value], index) => (
+                    <div
+                      key={key}
+                      className={cn(
+                        'flex items-center justify-between px-4 py-3 text-sm',
+                        index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                      )}
+                    >
+                      <span className="font-medium text-muted-foreground capitalize">
+                        {key.replace(/_/g, ' ')}
+                      </span>
+                      <span className="font-medium text-foreground">{String(value)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </TabsContent>
-          <TabsContent value="specifications" className="mt-4">
-            <div className="space-y-2">
-              {product.attributes && typeof product.attributes === 'object' ? (
-                Object.entries(product.attributes).map(([key, value]) => (
-                  <div key={key} className="flex justify-between py-2 border-b">
-                    <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>
-                    <span className="text-muted-foreground">{String(value)}</span>
+
+          {/* Reviews Tab */}
+          <TabsContent value="reviews" className="mt-6 space-y-6">
+            <div className="flex items-center gap-8">
+              {/* Overall Rating */}
+              <div className="flex flex-col items-center">
+                <div className="text-4xl font-bold text-primary mb-2">4.5</div>
+                <div className="flex gap-1 mb-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={cn(
+                        'h-5 w-5',
+                        i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                      )}
+                    />
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground">Dựa trên 12 đánh giá</p>
+              </div>
+
+              {/* Rating Breakdown */}
+              <div className="flex-1 space-y-2">
+                {[5, 4, 3, 2, 1].map((stars) => (
+                  <div key={stars} className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground w-8">{stars}⭐</span>
+                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-yellow-400"
+                        style={{
+                          width: `${stars === 5 ? 60 : stars === 4 ? 25 : stars === 3 ? 10 : 5}%`,
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm text-muted-foreground w-8 text-right">
+                      {stars === 5 ? 7 : stars === 4 ? 3 : stars === 3 ? 1 : 1}
+                    </span>
                   </div>
-                ))
-              ) : (
-                <p className="text-muted-foreground">Chưa có thông số kỹ thuật</p>
-              )}
+                ))}
+              </div>
             </div>
-          </TabsContent>
-          <TabsContent value="reviews" className="mt-4">
-            <div className="text-center py-8">
-              <Star className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-muted-foreground">Chưa có đánh giá nào</p>
+
+            {/* Reviews List */}
+            <div className="space-y-4 border-t pt-6">
+              <h4 className="font-semibold">Đánh giá từ khách hàng</h4>
+              
+              {/* Sample Reviews */}
+              {[
+                {
+                  author: 'Nguyễn Văn A',
+                  rating: 5,
+                  date: '2 ngày trước',
+                  title: 'Sản phẩm rất tốt',
+                  comment: 'Chất lượng tốt, giao hàng nhanh, rất hài lòng với đơn hàng.',
+                },
+                {
+                  author: 'Trần Thị B',
+                  rating: 4,
+                  date: '1 tuần trước',
+                  title: 'Khá hài lòng',
+                  comment: 'Sản phẩm đúng như mô tả. Có thể cộng hơi chậm một chút.',
+                },
+              ].map((review, idx) => (
+                <div key={idx} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="font-semibold">{review.author}</p>
+                      <p className="text-xs text-muted-foreground">{review.date}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={cn(
+                            'h-4 w-4',
+                            i < review.rating
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-gray-300'
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="font-medium text-sm mb-1">{review.title}</p>
+                  <p className="text-sm text-muted-foreground">{review.comment}</p>
+                </div>
+              ))}
+
+              <Button variant="outline" className="w-full mt-4">
+                Xem thêm đánh giá
+              </Button>
             </div>
           </TabsContent>
         </Tabs>
