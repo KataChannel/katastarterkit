@@ -7,6 +7,7 @@ import {
   MenuFilterDto,
   MenuResponseDto,
   MenuPaginationResponseDto,
+  MenuHierarchicalDto,
 } from './dto';
 import {
   MenuNotFoundException,
@@ -141,6 +142,11 @@ export class MenuService {
   async getMenusByType(type: MenuType): Promise<MenuResponseDto[]> {
     const menus = await this.menuRepository.findByType(type);
     return MenuResponseDto.fromEntities(menus);
+  }
+
+  async getMenusByTypeHierarchical(type: MenuType): Promise<MenuHierarchicalDto[]> {
+    const menus = await this.menuRepository.findRootsHierarchical(type, 3);
+    return MenuHierarchicalDto.fromEntities(menus);
   }
 
   async getAccessibleMenus(

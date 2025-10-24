@@ -401,6 +401,48 @@ enum BlockType {
   VIDEO
 }
 
+type BlogCategoryType {
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  name: String!
+  postCount: Int!
+  slug: String!
+  thumbnail: String
+  updatedAt: DateTime!
+}
+
+type BlogTagType {
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  slug: String!
+  updatedAt: DateTime!
+}
+
+type BlogType {
+  author: String!
+  bannerUrl: String
+  category: BlogCategoryType
+  content: String!
+  createdAt: DateTime!
+  excerpt: String
+  id: ID!
+  isFeatured: Boolean!
+  isPublished: Boolean!
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  publishedAt: DateTime
+  shortDescription: String
+  slug: String!
+  tags: [BlogTagType!]
+  thumbnailUrl: String
+  title: String!
+  updatedAt: DateTime!
+  viewCount: Int!
+}
+
 input BulkDeleteFilesInput {
   fileIds: [ID!]!
 }
@@ -731,6 +773,37 @@ input CreateAnswerInput {
   isCorrect: Boolean!
   order: Int!
   text: String!
+}
+
+input CreateBlogCategoryInput {
+  description: String
+  name: String!
+  slug: String!
+  thumbnail: String
+}
+
+input CreateBlogInput {
+  author: String!
+  bannerUrl: String
+  categoryId: String
+  content: String!
+  excerpt: String
+  isFeatured: Boolean = false
+  isPublished: Boolean = true
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  publishedAt: DateTime
+  shortDescription: String
+  slug: String!
+  tagIds: [String!]
+  thumbnailUrl: String
+  title: String!
+}
+
+input CreateBlogTagInput {
+  name: String!
+  slug: String!
 }
 
 input CreateCallCenterConfigInput {
@@ -1809,6 +1882,38 @@ input MenuFilterDto {
   type: String
 }
 
+type MenuHierarchicalDto {
+  badge: String
+  badgeColor: String
+  children: [MenuHierarchicalDto!]
+  createdAt: DateTime!
+  createdBy: String
+  description: String
+  externalUrl: String
+  icon: String
+  iconType: String
+  id: String!
+  image: String
+  isActive: Boolean!
+  isProtected: Boolean!
+  isPublic: Boolean!
+  isVisible: Boolean!
+  level: Int!
+  order: Int!
+  parentId: String
+  path: String
+  requiredPermissions: [String!]!
+  requiredRoles: [String!]!
+  route: String
+  slug: String!
+  target: String!
+  title: String!
+  type: String!
+  updatedAt: DateTime!
+  updatedBy: String
+  url: String
+}
+
 input MenuOrderDto {
   """Menu ID"""
   id: ID!
@@ -1882,6 +1987,9 @@ type Mutation {
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
   createAffiliateLink(input: CreateAffLinkInput!): AffLink!
   createAffiliateUser(input: CreateAffUserInput!): AffUser!
+  createBlog(input: CreateBlogInput!): BlogType!
+  createBlogCategory(input: CreateBlogCategoryInput!): BlogCategoryType!
+  createBlogTag(input: CreateBlogTagInput!): BlogTagType!
   createCallCenterConfig(input: CreateCallCenterConfigInput!): CallCenterConfig!
   createCategory(input: CreateCategoryInput!): CategoryType!
   createComment(input: CreateCommentInput!): Comment!
@@ -1920,6 +2028,9 @@ type Mutation {
   """Create new ext_sanphamhoadon"""
   createext_sanphamhoadon(data: JSON!, options: JSON): JSON!
   deleteAffiliateCampaign(id: String!): Boolean!
+  deleteBlog(id: ID!): Boolean!
+  deleteBlogCategory(id: ID!): Boolean!
+  deleteBlogTag(id: ID!): Boolean!
   deleteCallCenterConfig(id: String!): CallCenterConfig!
   deleteCategory(deleteProducts: Boolean! = false, id: ID!): CategoryType!
   deleteComment(id: String!): Boolean!
@@ -2035,6 +2146,9 @@ type Mutation {
   unshareTemplate(templateId: String!, userId: String!): Boolean!
   updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
   updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
+  updateBlog(input: UpdateBlogInput!): BlogType!
+  updateBlogCategory(input: UpdateBlogCategoryInput!): BlogCategoryType!
+  updateBlogTag(input: UpdateBlogTagInput!): BlogTagType!
   updateCallCenterConfig(id: String!, input: UpdateCallCenterConfigInput!): CallCenterConfig!
   updateCategory(input: UpdateCategoryInput!): CategoryType!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
@@ -2320,6 +2434,15 @@ enum PageStatus {
   ARCHIVED
   DRAFT
   PUBLISHED
+}
+
+type PaginatedBlogs {
+  hasMore: Boolean!
+  items: [BlogType!]!
+  page: Int!
+  pageSize: Int!
+  total: Int!
+  totalPages: Int!
 }
 
 type PaginatedCallCenterRecords {
@@ -2622,6 +2745,13 @@ type Query {
   affiliateLinks(search: AffLinkSearchInput): [AffLink!]!
   affiliatePaymentRequests(search: AffPaymentRequestSearchInput): [AffPaymentRequest!]!
   affiliateUser: AffUser
+  blog(id: ID!): BlogType!
+  blogBySlug(slug: String!): BlogType!
+  blogCategories: [BlogCategoryType!]!
+  blogCategory(id: ID!): BlogCategoryType!
+  blogTags: [BlogTagType!]!
+  blogs(categoryId: ID, limit: Int, page: Int, search: String, sort: String): PaginatedBlogs!
+  blogsByCategory(categoryId: ID!, limit: Int, page: Int): PaginatedBlogs!
   categories(input: GetCategoriesInput): PaginatedCategories!
   category(id: ID!): CategoryType!
   categoryBySlug(slug: String!): CategoryType!
@@ -2662,6 +2792,7 @@ type Query {
 
   """Check if a record exists matching the criteria"""
   exists(modelName: String!, where: JSONObject!): Boolean!
+  featuredBlogs(limit: Int): [BlogType!]!
   file(id: ID!): File!
   fileStorageStats: FileStorageStats!
   files(input: GetFilesInput): PaginatedFiles!
@@ -2712,7 +2843,7 @@ type Query {
   ): [SimilarProductAdvanced!]!
   folder(id: ID!): FileFolder!
   folders: [FileFolder!]!
-  footerMenus: [MenuResponseDto!]!
+  footerMenus: [MenuHierarchicalDto!]!
   getCallCenterConfig: CallCenterConfig!
   getCallCenterRecordById(id: String!): CallCenterRecord!
   getCallCenterRecords(filters: CallCenterRecordFiltersInput, pagination: PaginationInput! = {limit: 20, page: 1}): PaginatedCallCenterRecords!
@@ -2770,7 +2901,7 @@ type Query {
 
   """Get paginated ext_sanphamhoadon records"""
   getext_sanphamhoadonsPaginated(filters: JSON): JSON!
-  headerMenus: [MenuResponseDto!]!
+  headerMenus: [MenuHierarchicalDto!]!
 
   """Hello world query"""
   hello: String!
@@ -2786,7 +2917,7 @@ type Query {
   menuBySlug(slug: String!): MenuResponseDto
   menuTree(parentId: String, type: String): [MenuResponseDto!]!
   menus(direction: String, filter: MenuFilterDto, limit: Float, orderBy: String, page: Float): MenuPaginationResponseDto!
-  mobileMenus: [MenuResponseDto!]!
+  mobileMenus: [MenuHierarchicalDto!]!
   myCourses: [Course!]!
   myEnrollments: [Enrollment!]!
   myMenus(type: String): [MenuResponseDto!]!
@@ -2810,6 +2941,7 @@ type Query {
   quizAttempt(id: String!): QuizAttempt!
   quizAttempts(quizId: String!): [QuizAttempt!]!
   quizzesByLesson(lessonId: String!): [Quiz!]!
+  relatedBlogs(categoryId: ID!, excludeBlogId: ID!, limit: Int): [BlogType!]!
   reviewStats(courseId: ID!): ReviewStats!
   reviews(input: GetReviewsInput!): ReviewsWithStats!
 
@@ -3404,6 +3536,40 @@ input UpdateAffUserInput {
   paypalEmail: String
   taxId: String
   website: String
+}
+
+input UpdateBlogCategoryInput {
+  description: String
+  id: ID!
+  name: String
+  slug: String
+  thumbnail: String
+}
+
+input UpdateBlogInput {
+  author: String
+  bannerUrl: String
+  categoryId: String
+  content: String
+  excerpt: String
+  id: ID!
+  isFeatured: Boolean
+  isPublished: Boolean
+  metaDescription: String
+  metaKeywords: String
+  metaTitle: String
+  publishedAt: DateTime
+  shortDescription: String
+  slug: String
+  tagIds: [String!]
+  thumbnailUrl: String
+  title: String
+}
+
+input UpdateBlogTagInput {
+  id: ID!
+  name: String
+  slug: String
 }
 
 input UpdateCallCenterConfigInput {

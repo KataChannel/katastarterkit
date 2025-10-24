@@ -3179,3 +3179,91 @@ model TemplateShare {
   @@index([sharedWith])
   @@map("template_shares")
 }
+
+// ============================================================================
+// BLOG SYSTEM
+// ============================================================================
+
+// Blog Category Model
+model BlogCategory {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  thumbnail   String?
+  
+  // Relations
+  blogs       Blog[]
+  
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([slug])
+  @@map("blog_categories")
+}
+
+// Blog Tag Model
+model BlogTag {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  
+  // Relations
+  blogs     Blog[]   @relation("BlogTags")
+  
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([slug])
+  @@map("blog_tags")
+}
+
+// Blog Model
+model Blog {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  content     String   // HTML content
+  
+  // Descriptions
+  shortDescription String?
+  excerpt     String?
+  
+  // Author & Metadata
+  author      String
+  thumbnailUrl String?
+  bannerUrl   String?
+  
+  // SEO
+  metaTitle   String?
+  metaDescription String?
+  metaKeywords String?
+  
+  // Status & Features
+  isPublished Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  
+  // Statistics
+  viewCount   Int      @default(0)
+  
+  // Category
+  categoryId  String?
+  category    BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  
+  // Tags (many-to-many)
+  tags        BlogTag[] @relation("BlogTags")
+  
+  // Timestamps
+  publishedAt DateTime? @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([slug])
+  @@index([categoryId])
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@index([publishedAt])
+  @@map("blogs")
+}

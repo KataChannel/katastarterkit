@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@apollo/client';
+import { GET_HEADER_MENUS } from '@/graphql/menu.queries';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,8 +33,8 @@ import React from 'react';
 // ListItem component for navigation menu
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a"> & { title: string }
->(({ className, title, children, href, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<"a"> & { title: string; target?: string }
+>(({ className, title, children, href, target, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
@@ -43,6 +45,8 @@ const ListItem = React.forwardRef<
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
           )}
+          target={target === 'BLANK' ? '_blank' : undefined}
+          rel={target === 'BLANK' ? 'noopener noreferrer' : undefined}
           {...props}
           >
           <div className="text-sm font-medium leading-none">{title}</div>
@@ -60,6 +64,15 @@ export function WebsiteHeader() {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
 
+  // Fetch header menus from database
+  const { data: menuData, loading: menuLoading, error: menuError } = useQuery(GET_HEADER_MENUS, {
+    errorPolicy: 'all',
+  });
+
+  const headerMenus = menuData?.headerMenus || [];
+  console.log('menuData',menuData);
+  console.log('headerMenus',headerMenus);
+  
   // Banner data
   const bannerItems = [
     {
@@ -72,30 +85,9 @@ export function WebsiteHeader() {
       badge: "HOT",
       bgColor: ""
     },
-    // {
-    //   id: 2,
-    //   title: "Sản Phẩm Mới",
-    //   subtitle: "Bộ sưu tập mới nhất 2024",
-    //   description: "Khám phá những sản phẩm chất lượng cao mới nhất",
-    //   image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=300&fit=crop",
-    //   cta: "Khám Phá",
-    //   badge: "NEW",
-    //   bgColor: "bg-gradient-to-r from-blue-500 to-cyan-600"
-    // },
-    // {
-    //   id: 3,
-    //   title: "Chất Lượng Đảm Bảo",
-    //   subtitle: "Cam kết 100% chính hãng",
-    //   description: "Sản phẩm được kiểm định chất lượng nghiêm ngặt",
-    //   image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=300&fit=crop",
-    //   cta: "Tìm Hiểu",
-    //   badge: "QUALITY",
-    //   bgColor: "bg-gradient-to-r from-green-500 to-emerald-600"
-    // }
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
-
   const [api, setApi] = useState<any>();
 
   // Auto-slide functionality
@@ -128,6 +120,69 @@ export function WebsiteHeader() {
   const handleLogout = async () => {
     await logout();
     router.push('/');
+  };
+
+  // Helper function to render menu items
+  const renderMenuItem = (item: any) => {
+    if (!item.isVisible || !item.isActive) return null;
+
+    // Determine destination URL
+    const href = item.route || item.url || '#';
+    const isExternalLink = item.target === 'BLANK' || item.externalUrl;
+
+    // Check if item has children with content
+    const hasChildren = item.children && Array.isArray(item.children) && item.children.length > 0;
+
+    if (hasChildren) {
+      // Has children - render as dropdown
+      return (
+        <NavigationMenuItem key={item.id}>
+          <NavigationMenuTrigger className="text-white hover:text-blue-200 bg-transparent hover:bg-white/10 data-[state=open]:bg-white/20 text-sm lg:text-base px-2 lg:px-4">
+            {item.icon && <span className="mr-2">{item.icon}</span>}
+            {item.title}
+            {item.badge && <Badge className="ml-2 text-xs">{item.badge}</Badge>}
+          </NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+              {item.children.map((child: any) => {
+                const childHref = child.route || child.url || '#';
+                return (
+                  <ListItem
+                    key={child.id}
+                    href={childHref}
+                    title={child.title}
+                    target={child.target === 'BLANK' ? '_blank' : undefined}
+                  >
+                    {child.description || child.title}
+                  </ListItem>
+                );
+              })}
+            </div>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
+      );
+    } else {
+      // No children - render as simple link
+      return (
+        <NavigationMenuItem key={item.id}>
+          <NavigationMenuLink asChild>
+            <Link
+              href={href}
+              className={cn(
+                navigationMenuTriggerStyle(),
+                "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4"
+              )}
+              target={isExternalLink ? '_blank' : undefined}
+              rel={isExternalLink ? 'noopener noreferrer' : undefined}
+            >
+              {item.icon && <span className="mr-2">{item.icon}</span>}
+              {item.title}
+              {item.badge && <Badge className="ml-2 text-xs">{item.badge}</Badge>}
+            </Link>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+      );
+    }
   };
 
   return (
@@ -199,7 +254,8 @@ export function WebsiteHeader() {
 
         <div className="col-span-3 flex flex-col space-y-2">
           <NavigationMenu className="w-full p-4">
-            <NavigationMenuList className="flex justify-evenly space-x-1 lg:space-x-2 w-full">
+            <NavigationMenuList className="flex justify-evenly space-x-1 lg:space-x-2 w-full flex-wrap">
+              {/* Trang Chủ */}
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link href="/website" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4")}>
@@ -208,74 +264,17 @@ export function WebsiteHeader() {
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="text-white hover:text-blue-200 bg-transparent hover:bg-white/10 data-[state=open]:bg-white/20 text-sm lg:text-base px-2 lg:px-4">
-                  Giới Thiệu
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                    <div className="row-span-3">
-                      <NavigationMenuLink asChild>
-                        <a
-                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                          href="/website/gioi-thieu"
-                        >
-                          <div className="mb-2 mt-4 text-lg font-medium">
-                            Về Chúng Tôi
-                          </div>
-                          <p className="text-sm leading-tight text-muted-foreground">
-                            Tìm hiểu thêm về công ty và các giá trị cốt lõi của chúng tôi.
-                          </p>
-                        </a>
-                      </NavigationMenuLink>
-                    </div>
-                    <ListItem href="/website/gioi-thieu/ve-noom" title="Về Noom">
-                      Câu chuyện thương hiệu và sứ mệnh của chúng tôi.
-                    </ListItem>
-                    <ListItem href="/website/gioi-thieu/tieu-chuan-chat-luong" title="Tiêu Chuẩn Chất Lượng">
-                      Cam kết về chất lượng sản phẩm và dịch vụ.
-                    </ListItem>
-                    <ListItem href="/website/gioi-thieu/ho-so-cong-bo" title="Hồ Sơ Công Bố">
-                      Thông tin pháp lý và chứng nhận chất lượng.
-                    </ListItem>
-                    <ListItem href="/website/gioi-thieu/quy-trinh-san-xuat" title="Quy Trình Sản Xuất">
-                      Tìm hiểu về quy trình sản xuất hiện đại.
-                    </ListItem>
-                    <ListItem href="/website/gioi-thieu/thong-tin-tuyen-dung" title="Tuyển Dụng">
-                      Cơ hội nghề nghiệp tại công ty chúng tôi.
-                    </ListItem>
-                    <ListItem href="/website/gioi-thieu/su-kien" title="Sự Kiện">
-                      Các hoạt động và sự kiện nổi bật.
-                    </ListItem>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link href="/website/san-pham" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4")}>
-                    Sản Phẩm
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link href="/website/dia-diem-phan-phoi" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-1 lg:px-4")}>
-                    <span className="hidden lg:inline">Địa Điểm Phân Phối</span>
-                    <span className="lg:hidden">Phân Phối</span>
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link href="/website/huong-dan-su-dung" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-1 lg:px-4")}>
-                    <span className="hidden lg:inline">Hướng Dẫn Sử Dụng</span>
-                    <span className="lg:hidden">Hướng Dẫn</span>
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
+              {/* Render menu items from database */}
+              {menuLoading ? (
+                <div className="text-white text-sm">Đang tải menu...</div>
+              ) : menuError ? (
+                <div className="text-red-200 text-sm">Lỗi tải menu</div>
+              ) : (
+                headerMenus
+                  .filter((item: any) => (item.level === 0 || item.level === 1) && item.isActive && item.isVisible)
+                  .sort((a: any, b: any) => a.order - b.order)
+                  .map((item: any) => renderMenuItem(item))
+              )}
             </NavigationMenuList>
           </NavigationMenu>
 

@@ -115,6 +115,46 @@ export class MenuRepository {
     return this.findMany(where, { orderBy: { order: 'asc' } });
   }
 
+  async findRootsHierarchical(type?: MenuType, depth: number = 3): Promise<any[]> {
+    const where: Prisma.MenuWhereInput = {
+      parentId: null,
+      isActive: true,
+      isVisible: true,
+    };
+    if (type) where.type = type;
+
+    const menus = await this.prisma.menu.findMany({
+      where,
+      orderBy: { order: 'asc' },
+    });
+
+    // Recursively load children
+    const loadChildren = async (menuId: string, currentDepth: number): Promise<any> => {
+      if (currentDepth <= 0) return null;
+
+      const children = await this.prisma.menu.findMany({
+        where: { parentId: menuId, isActive: true, isVisible: true },
+        orderBy: { order: 'asc' },
+      });
+
+      if (children.length === 0) return undefined;
+
+      return Promise.all(
+        children.map(async (child) => ({
+          ...child,
+          children: await loadChildren(child.id, currentDepth - 1),
+        }))
+      );
+    };
+
+    return Promise.all(
+      menus.map(async (menu) => ({
+        ...menu,
+        children: await loadChildren(menu.id, depth - 1),
+      }))
+    );
+  }
+
   async updateMany(ids: string[], data: Prisma.MenuUpdateInput): Promise<number> {
     const result = await this.prisma.menu.updateMany({
       where: { id: { in: ids } },

@@ -8,6 +8,7 @@ import {
   MenuResponseDto,
   MenuPaginationResponseDto,
   MenuOrderDto,
+  MenuHierarchicalDto,
 } from './dto';
 
 @Resolver('Menu')
@@ -65,22 +66,22 @@ export class MenuResolver {
     return this.menuService.getMenusByType('SIDEBAR');
   }
 
-  @Query(() => [MenuResponseDto], { name: 'headerMenus' })
-  async getHeaderMenus(): Promise<MenuResponseDto[]> {
+  @Query(() => [MenuHierarchicalDto], { name: 'headerMenus' })
+  async getHeaderMenus(): Promise<MenuHierarchicalDto[]> {
     this.logger.log('Query: getHeaderMenus');
-    return this.menuService.getMenusByType('HEADER');
+    return this.menuService.getMenusByTypeHierarchical('HEADER' as any);
   }
 
-  @Query(() => [MenuResponseDto], { name: 'footerMenus' })
-  async getFooterMenus(): Promise<MenuResponseDto[]> {
+  @Query(() => [MenuHierarchicalDto], { name: 'footerMenus' })
+  async getFooterMenus(): Promise<MenuHierarchicalDto[]> {
     this.logger.log('Query: getFooterMenus');
-    return this.menuService.getMenusByType('FOOTER');
+    return this.menuService.getMenusByTypeHierarchical('FOOTER' as any);
   }
 
-  @Query(() => [MenuResponseDto], { name: 'mobileMenus' })
-  async getMobileMenus(): Promise<MenuResponseDto[]> {
+  @Query(() => [MenuHierarchicalDto], { name: 'mobileMenus' })
+  async getMobileMenus(): Promise<MenuHierarchicalDto[]> {
     this.logger.log('Query: getMobileMenus');
-    return this.menuService.getMenusByType('MOBILE');
+    return this.menuService.getMenusByTypeHierarchical('MOBILE' as any);
   }
 
   @Query(() => [MenuResponseDto], { name: 'myMenus' })

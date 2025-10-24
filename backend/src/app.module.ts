@@ -33,6 +33,7 @@ import { MenuModule } from './menu/menu.module';
 import { FileModule } from './graphql/modules/file.module';
 import { HRModule } from './graphql/modules/hr.module';
 import { ProductModule } from './graphql/modules/product.module';
+import { BlogModule } from './graphql/modules/blog.module';
 import { TestController } from './test.controller';
 import { SeedModule } from './seed/seed.module';
 import { CallCenterModule } from './callcenter/callcenter.module';
@@ -137,6 +138,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     FileModule,
     HRModule,
     ProductModule,
+    BlogModule,
     SeedModule,
     CallCenterModule,
     LmsModule,

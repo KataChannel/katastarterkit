@@ -1,0 +1,387 @@
+import { gql } from '@apollo/client';
+
+// ============================================================================
+// QUERIES
+// ============================================================================
+
+export const GET_HEADER_MENUS = gql`
+  query GetHeaderMenus {
+    headerMenus {
+      id
+      title
+      slug
+      description
+      order
+      level
+      url
+      route
+      externalUrl
+      target
+      icon
+      badge
+      badgeColor
+      isActive
+      isVisible
+      children {
+        id
+        title
+        slug
+        description
+        order
+        level
+        url
+        route
+        externalUrl
+        target
+        icon
+        badge
+        isActive
+        isVisible
+        children {
+          id
+          title
+          slug
+          description
+          order
+          url
+          route
+          externalUrl
+          target
+          icon
+          badge
+          isActive
+          isVisible
+        }
+      }
+    }
+  }
+`;
+
+export const GET_MENUS_BY_TYPE = gql`
+  query GetMenusByType($type: MenuType!) {
+    menus(filter: { type: $type, isActive: true, isVisible: true }) {
+      items {
+        id
+        title
+        slug
+        description
+        type
+        order
+        level
+        url
+        route
+        externalUrl
+        target
+        icon
+        badge
+        badgeColor
+        isActive
+        isVisible
+        children {
+          id
+          title
+          slug
+          description
+          order
+          level
+          url
+          route
+          externalUrl
+          target
+          icon
+          badge
+          isActive
+          isVisible
+          children {
+            id
+            title
+            slug
+            description
+            order
+            url
+            route
+            externalUrl
+            target
+            icon
+            badge
+            isActive
+            isVisible
+          }
+        }
+      }
+      total
+      page
+      pageSize
+      totalPages
+    }
+  }
+`;
+
+export const GET_MENU_TREE = gql`
+  query GetMenuTree($type: MenuType) {
+    menuTree(type: $type) {
+      id
+      title
+      slug
+      description
+      order
+      level
+      url
+      route
+      externalUrl
+      target
+      icon
+      badge
+      badgeColor
+      isActive
+      isVisible
+      children {
+        id
+        title
+        slug
+        description
+        order
+        level
+        url
+        route
+        externalUrl
+        target
+        icon
+        badge
+        isActive
+        isVisible
+        children {
+          id
+          title
+          slug
+          description
+          order
+          url
+          route
+          externalUrl
+          target
+          icon
+          badge
+          isActive
+          isVisible
+        }
+      }
+    }
+  }
+`;
+
+export const GET_MENU_BY_SLUG = gql`
+  query GetMenuBySlug($slug: String!) {
+    menuBySlug(slug: $slug) {
+      id
+      title
+      slug
+      description
+      type
+      order
+      level
+      url
+      route
+      externalUrl
+      target
+      icon
+      badge
+      badgeColor
+      isActive
+      isVisible
+      children {
+        id
+        title
+        slug
+        description
+        order
+        level
+        url
+        route
+        externalUrl
+        target
+        icon
+        badge
+        isActive
+        isVisible
+        children {
+          id
+          title
+          slug
+          description
+          order
+          url
+          route
+          externalUrl
+          target
+          icon
+          badge
+          isActive
+          isVisible
+        }
+      }
+    }
+  }
+`;
+
+// ============================================================================
+// MUTATIONS
+// ============================================================================
+
+export const CREATE_MENU = gql`
+  mutation CreateMenu($input: CreateMenuInput!) {
+    createMenu(input: $input) {
+      id
+      title
+      slug
+      description
+      type
+      order
+      level
+      url
+      route
+      externalUrl
+      target
+      icon
+      badge
+      badgeColor
+      isActive
+      isVisible
+      children {
+        id
+        title
+        slug
+        url
+        route
+        externalUrl
+        target
+        icon
+        badge
+        isActive
+        isVisible
+      }
+    }
+  }
+`;
+
+export const UPDATE_MENU = gql`
+  mutation UpdateMenu($id: ID!, $input: UpdateMenuInput!) {
+    updateMenu(id: $id, input: $input) {
+      id
+      title
+      slug
+      description
+      type
+      order
+      level
+      url
+      route
+      externalUrl
+      target
+      icon
+      badge
+      badgeColor
+      isActive
+      isVisible
+      children {
+        id
+        title
+        slug
+        url
+        route
+        externalUrl
+        target
+        icon
+        badge
+        isActive
+        isVisible
+      }
+    }
+  }
+`;
+
+export const DELETE_MENU = gql`
+  mutation DeleteMenu($id: ID!) {
+    deleteMenu(id: $id)
+  }
+`;
+
+export const REORDER_MENUS = gql`
+  mutation ReorderMenus($ids: [ID!]!) {
+    reorderMenus(ids: $ids) {
+      id
+      title
+      order
+      isActive
+      isVisible
+    }
+  }
+`;
+
+export const TOGGLE_MENU_ACTIVE = gql`
+  mutation ToggleMenuActive($id: ID!) {
+    toggleMenuActive(id: $id) {
+      id
+      isActive
+    }
+  }
+`;
+
+export const TOGGLE_MENU_VISIBILITY = gql`
+  mutation ToggleMenuVisibility($id: ID!) {
+    toggleMenuVisibility(id: $id) {
+      id
+      isVisible
+    }
+  }
+`;
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export enum MenuType {
+  SIDEBAR = 'SIDEBAR',
+  HEADER = 'HEADER',
+  FOOTER = 'FOOTER',
+  MOBILE = 'MOBILE',
+  CUSTOM = 'CUSTOM',
+}
+
+export enum MenuTarget {
+  SELF = 'SELF',
+  BLANK = 'BLANK',
+  MODAL = 'MODAL',
+}
+
+export interface MenuItem {
+  id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  order: number;
+  level: number;
+  url?: string;
+  route?: string;
+  externalUrl?: string;
+  target: MenuTarget;
+  icon?: string;
+  badge?: string;
+  badgeColor?: string;
+  isActive: boolean;
+  isVisible: boolean;
+  children: MenuItem[];
+}
+
+export interface MenuQueryResponse {
+  headerMenus?: MenuItem[];
+  menus?: {
+    items: MenuItem[];
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  };
+  menuTree?: MenuItem[];
+  menuBySlug?: MenuItem;
+}
