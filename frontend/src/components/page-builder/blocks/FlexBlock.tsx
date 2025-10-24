@@ -1,11 +1,10 @@
 import React from 'react';
 import { PageBlock, FlexBlockContent } from '@/types/page-builder';
-import { Settings, Trash2, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { LayoutBlockWrapper } from './LayoutBlockWrapper';
 
 interface FlexBlockProps {
   block: PageBlock;
@@ -13,6 +12,8 @@ interface FlexBlockProps {
   onUpdate: (content: any, style?: any) => void;
   onDelete: () => void;
   onAddChild?: (parentId: string) => void;
+  onUpdateChild?: (childId: string, content: any, style?: any) => void;
+  onDeleteChild?: (childId: string) => void;
   children?: React.ReactNode;
 }
 
@@ -22,10 +23,11 @@ export const FlexBlock: React.FC<FlexBlockProps> = ({
   onUpdate,
   onDelete,
   onAddChild,
+  onUpdateChild,
+  onDeleteChild,
   children,
 }) => {
   const content = block.content as FlexBlockContent;
-  const [isEditing, setIsEditing] = React.useState(false);
   const [editContent, setEditContent] = React.useState<FlexBlockContent>(content || {
     direction: 'row',
     justifyContent: 'start',
@@ -33,11 +35,6 @@ export const FlexBlock: React.FC<FlexBlockProps> = ({
     wrap: false,
     gap: 16,
   });
-
-  const handleSave = () => {
-    onUpdate(editContent);
-    setIsEditing(false);
-  };
 
   const justifyContentMap = {
     start: 'flex-start',
@@ -65,149 +62,105 @@ export const FlexBlock: React.FC<FlexBlockProps> = ({
     width: '100%',
     position: 'relative',
     minHeight: children ? 'auto' : '150px',
-    border: isEditable ? '2px dashed #cbd5e0' : 'none',
     borderRadius: '8px',
     padding: isEditable ? '16px' : '0',
   };
 
-  if (!isEditable) {
-    return (
-      <div style={flexStyles}>
-        {children}
+  const settingsPanel = (
+    <>
+      <div>
+        <Label className="text-xs">Direction</Label>
+        <Select
+          value={editContent.direction || 'row'}
+          onValueChange={(value) => setEditContent({ ...editContent, direction: value as any })}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="row">Row (Horizontal)</SelectItem>
+            <SelectItem value="column">Column (Vertical)</SelectItem>
+            <SelectItem value="row-reverse">Row Reverse</SelectItem>
+            <SelectItem value="column-reverse">Column Reverse</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-    );
-  }
+
+      <div>
+        <Label className="text-xs">Justify Content</Label>
+        <Select
+          value={editContent.justifyContent || 'start'}
+          onValueChange={(value) => setEditContent({ ...editContent, justifyContent: value as any })}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="start">Start</SelectItem>
+            <SelectItem value="center">Center</SelectItem>
+            <SelectItem value="end">End</SelectItem>
+            <SelectItem value="between">Space Between</SelectItem>
+            <SelectItem value="around">Space Around</SelectItem>
+            <SelectItem value="evenly">Space Evenly</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label className="text-xs">Align Items</Label>
+        <Select
+          value={editContent.alignItems || 'start'}
+          onValueChange={(value) => setEditContent({ ...editContent, alignItems: value as any })}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="start">Start</SelectItem>
+            <SelectItem value="center">Center</SelectItem>
+            <SelectItem value="end">End</SelectItem>
+            <SelectItem value="stretch">Stretch</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label className="text-xs">Gap (px)</Label>
+        <Input
+          type="number"
+          value={editContent.gap || 16}
+          onChange={(e) => setEditContent({ ...editContent, gap: parseInt(e.target.value) })}
+          className="text-xs"
+        />
+      </div>
+
+      <div className="flex items-center justify-between">
+        <Label htmlFor="wrap" className="text-xs">Wrap</Label>
+        <Switch
+          id="wrap"
+          checked={editContent.wrap || false}
+          onCheckedChange={(checked) => setEditContent({ ...editContent, wrap: checked })}
+        />
+      </div>
+    </>
+  );
 
   return (
-    <div style={flexStyles} className="group">
-      {/* Control Bar */}
-      {isEditable && (
-        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-          {onAddChild && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onAddChild(block.id)}
-              className="bg-white shadow-sm"
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              Add Block
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setIsEditing(!isEditing)}
-            className="bg-white shadow-sm"
-          >
-            <Settings className="w-4 h-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={onDelete}
-            className="shadow-sm"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      )}
-
-      {/* Settings Panel */}
-      {isEditing && (
-        <div className="absolute top-12 right-2 bg-white p-4 rounded-lg shadow-lg border border-gray-200 z-20 w-80">
-          <h3 className="font-semibold mb-3">Flex Container Settings</h3>
-          
-          <div className="space-y-3">
-            <div>
-              <Label>Direction</Label>
-              <Select
-                value={editContent.direction || 'row'}
-                onValueChange={(value) => setEditContent({ ...editContent, direction: value as any })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="row">Row (Horizontal)</SelectItem>
-                  <SelectItem value="column">Column (Vertical)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Justify Content</Label>
-              <Select
-                value={editContent.justifyContent || 'start'}
-                onValueChange={(value) => setEditContent({ ...editContent, justifyContent: value as any })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="start">Start</SelectItem>
-                  <SelectItem value="center">Center</SelectItem>
-                  <SelectItem value="end">End</SelectItem>
-                  <SelectItem value="between">Space Between</SelectItem>
-                  <SelectItem value="around">Space Around</SelectItem>
-                  <SelectItem value="evenly">Space Evenly</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Align Items</Label>
-              <Select
-                value={editContent.alignItems || 'start'}
-                onValueChange={(value) => setEditContent({ ...editContent, alignItems: value as any })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="start">Start</SelectItem>
-                  <SelectItem value="center">Center</SelectItem>
-                  <SelectItem value="end">End</SelectItem>
-                  <SelectItem value="stretch">Stretch</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label>Wrap Items</Label>
-              <Switch
-                checked={editContent.wrap || false}
-                onCheckedChange={(checked) => setEditContent({ ...editContent, wrap: checked })}
-              />
-            </div>
-
-            <div>
-              <Label>Gap (px)</Label>
-              <Input
-                type="number"
-                value={editContent.gap || 16}
-                onChange={(e) => setEditContent({ ...editContent, gap: parseInt(e.target.value) })}
-              />
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <Button onClick={handleSave} className="flex-1">
-                Save
-              </Button>
-              <Button onClick={() => setIsEditing(false)} variant="outline" className="flex-1">
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Children Blocks */}
-      {children || (
-        <div className="text-gray-400 text-center py-8 flex-1">
-          Drop blocks here or click "Add Block" to add child blocks
-        </div>
-      )}
-    </div>
+    <LayoutBlockWrapper
+      block={block}
+      isEditable={isEditable}
+      children={children}
+      onDelete={onDelete}
+      onAddChild={onAddChild}
+      onUpdate={(content) => {
+        setEditContent(content);
+        onUpdate(content);
+      }}
+      onUpdateChild={onUpdateChild}
+      onDeleteChild={onDeleteChild}
+      containerStyles={flexStyles}
+      settingsPanel={settingsPanel}
+      title="Flex Block Settings"
+    />
   );
 };

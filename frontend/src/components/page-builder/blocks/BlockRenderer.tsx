@@ -86,9 +86,21 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
   const containerProps = {
     ...commonProps,
-    onAddChild: isContainerBlock ? () => onAddChild?.(block.id) : undefined,
+    onAddChild: isContainerBlock ? () => {
+      console.log(`[BlockRenderer ${block.id}] onAddChild wrapper called, isContainerBlock=${isContainerBlock}, onAddChild=${!!onAddChild}`);
+      onAddChild?.(block.id);
+    } : undefined,
     children: isContainerBlock ? renderChildren() : undefined,
   };
+
+  // Debug log
+  if (isContainerBlock) {
+    console.log(`[BlockRenderer] Rendering container block ${block.id}:`, {
+      isContainerBlock,
+      onAddChildDefined: !!containerProps.onAddChild,
+      blockType: block.type,
+    });
+  }
 
   // Render block based on type using lazy loading
   const renderBlockContent = () => {

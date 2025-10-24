@@ -387,8 +387,10 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   
   // Nested block operations
   const handleAddChild = useCallback((parentId: string) => {
+    console.log(`[PageActionsContext] handleAddChild called with parentId:`, parentId);
     uiState.setAddChildParentId(parentId);
     uiState.setShowAddChildDialog(true);
+    console.log(`[PageActionsContext] showAddChildDialog and parentId set`);
   }, [uiState]);
   
   const handleAddChildBlock = useCallback(async (parentId: string, blockType: BlockType) => {

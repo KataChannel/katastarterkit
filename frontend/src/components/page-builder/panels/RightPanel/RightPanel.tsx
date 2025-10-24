@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../../../ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../ui/tabs';
 import { Input } from '../../../ui/input';
 import { Label } from '../../../ui/label';
 import { Textarea } from '../../../ui/textarea';
-import { X, Paintbrush, Settings, Trash2, Copy, Eye, EyeOff, Lock, Unlock, FileText } from 'lucide-react';
+import { X, Paintbrush, Settings, Trash2, Copy, Eye, EyeOff, Lock, Unlock, FileText, Code2, Zap } from 'lucide-react';
 import { usePageState, usePageActions } from '../../PageBuilderProvider';
 import { StylePanel } from '../StylePanel';
 import { DevLogPanel } from '../DevLogPanel';
@@ -20,6 +20,8 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
   const [activeTab, setActiveTab] = useState<'style' | 'settings' | 'logs'>('style');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [customClasses, setCustomClasses] = useState('');
+  const [inlineStyles, setInlineStyles] = useState('');
   
   // Get selected block and operations from individual hooks
   const { selectedBlockId, selectedBlock } = usePageState();
@@ -64,6 +66,31 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
   const toggleLock = () => {
     setIsLocked(!isLocked);
   };
+
+  // Handle custom classes update
+  const handleCustomClassesChange = (value: string) => {
+    setCustomClasses(value);
+    if (!selectedBlockId || !selectedBlock) return;
+    handleUpdateBlockStyle(selectedBlockId, { customClasses: value });
+  };
+
+  // Handle inline styles update
+  const handleInlineStylesChange = (value: string) => {
+    setInlineStyles(value);
+    if (!selectedBlockId || !selectedBlock) return;
+    handleUpdateBlockStyle(selectedBlockId, { inlineStyles: value });
+  };
+
+  // Initialize custom classes and styles when block changes
+  useEffect(() => {
+    if (selectedBlock?.style) {
+      setCustomClasses(selectedBlock.style.customClasses || '');
+      setInlineStyles(selectedBlock.style.inlineStyles || '');
+    } else {
+      setCustomClasses('');
+      setInlineStyles('');
+    }
+  }, [selectedBlockId, selectedBlock]);
 
   return (
     <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-full overflow-hidden">
@@ -303,7 +330,10 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
 
                   {/* Advanced Settings */}
                   <div className="space-y-3">
-                    <h3 className="text-sm font-semibold text-gray-900">Advanced</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                      <Zap className="w-4 h-4" />
+                      Advanced
+                    </h3>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                         <span className="text-xs text-gray-600">Visibility</span>
@@ -318,6 +348,72 @@ export function RightPanel({ device, onClose }: RightPanelProps) {
                           <span className="text-xs">None</span>
                         </Button>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Custom CSS Classes */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                      <Code2 className="w-4 h-4" />
+                      Custom CSS Classes
+                    </h3>
+                    <div>
+                      <Label htmlFor="custom-classes" className="text-xs">Tailwind Classes</Label>
+                      <Textarea
+                        id="custom-classes"
+                        value={customClasses}
+                        onChange={(e) => handleCustomClassesChange(e.target.value)}
+                        placeholder="e.g., hover:shadow-lg hover:scale-105 transition-all duration-300"
+                        className="mt-1 text-xs font-mono"
+                        rows={3}
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        💡 Add Tailwind classes for additional styling (space-separated)
+                      </p>
+                      {customClasses && (
+                        <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                          <p className="text-xs font-semibold text-amber-900 mb-2">Preview:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {customClasses.split(/\s+/).filter(Boolean).map((cls, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs font-mono">
+                                {cls}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Inline Styles */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                      <Code2 className="w-4 h-4" />
+                      Inline Styles (CSS)
+                    </h3>
+                    <div>
+                      <Label htmlFor="inline-styles" className="text-xs">CSS Properties</Label>
+                      <Textarea
+                        id="inline-styles"
+                        value={inlineStyles}
+                        onChange={(e) => handleInlineStylesChange(e.target.value)}
+                        placeholder={`e.g., box-shadow: 0 10px 30px rgba(0,0,0,0.3);\nbackground: linear-gradient(135deg, #667eea 0%, #764ba2 100%);`}
+                        className="mt-1 text-xs font-mono"
+                        rows={4}
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        💡 Add inline CSS properties (semicolon-separated)
+                      </p>
+                      {inlineStyles && (
+                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <p className="text-xs font-semibold text-blue-900 mb-2">Applied Styles:</p>
+                          <pre className="text-xs font-mono text-blue-800 overflow-x-auto">
+                            {inlineStyles.split(';').filter(s => s.trim()).map((style, idx) => (
+                              <div key={idx}>{style.trim()};</div>
+                            ))}
+                          </pre>
+                        </div>
+                      )}
                     </div>
                   </div>
 
