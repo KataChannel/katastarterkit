@@ -107,7 +107,7 @@ export function ProductCard({
 
   if (variant === 'compact') {
     return (
-      <Link href={`/sanpham/${product.slug}`}>
+      <Link href={`/website/sanpham/${product.slug}`}>
         <Card className={cn('hover:shadow-lg transition-shadow', className)}>
           <CardContent className="p-3">
             <div className="flex gap-3">
@@ -144,7 +144,7 @@ export function ProductCard({
 
   if (variant === 'featured') {
     return (
-      <Link href={`/product/${product.slug}`}>
+      <Link href={`/website/sanpham/${product.slug}`}>
         <Card
           className={cn(
             'group overflow-hidden hover:shadow-2xl transition-all duration-300',
@@ -176,7 +176,7 @@ export function ProductCard({
                 <Heart className={cn('h-5 w-5', isFavorite && 'fill-red-500 text-red-500')} />
               </Button>
               <Button size="icon" variant="secondary" asChild>
-                <Link href={`/product/${product.slug}`}>
+                <Link href={`/website/sanpham/${product.slug}`}>
                   <Eye className="h-5 w-5" />
                 </Link>
               </Button>
@@ -233,7 +233,7 @@ export function ProductCard({
 
   // Default variant
   return (
-    <Link href={`/product/${product.slug}`}>
+    <Link href={`/website/sanpham/${product.slug}`}>
       <Card
         className={cn('group hover:shadow-lg transition-shadow', className)}
         onMouseEnter={() => setIsHovered(true)}

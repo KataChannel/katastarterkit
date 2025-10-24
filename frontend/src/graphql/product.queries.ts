@@ -114,7 +114,7 @@ export const GET_PRODUCT_BY_SLUG = gql`
 
 export const GET_PRODUCTS_BY_CATEGORY = gql`
   ${PRODUCT_BASIC_FRAGMENT}
-  query GetProductsByCategory($categoryId: String!, $input: GetProductsInput) {
+  query GetProductsByCategory($categoryId: ID!, $input: GetProductsInput) {
     productsByCategory(categoryId: $categoryId, input: $input) {
       items {
         ...ProductBasicFields

@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { siteConfig } from '@/config/site.config';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -119,6 +122,14 @@ export default function Home() {
   const [currentQuote, setCurrentQuote] = React.useState(motivationalQuotes[0]); // Default first quote
   const [currentTime, setCurrentTime] = React.useState<Date | null>(null); // Null for SSR
   const [mounted, setMounted] = React.useState(false);
+  const router = useRouter();
+
+  // Redirect to configured root path if rootRedirect is set
+  useEffect(() => {
+    if (siteConfig.rootRedirect && siteConfig.rootRedirect !== '/') {
+      router.push(siteConfig.rootRedirect);
+    }
+  }, [router]);
 
   // Set random quote only on client side
   React.useEffect(() => {
@@ -175,6 +186,22 @@ export default function Home() {
       day: 'numeric' 
     });
   };
+
+  // Show loading screen if redirecting
+  if (siteConfig.rootRedirect && siteConfig.rootRedirect !== '/' && mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin">
+            <div className="h-16 w-16 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
+          </div>
+          <p className="text-gray-600 text-lg font-medium">
+            Đang chuyển hướng tới {siteConfig.rootRedirect}...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 p-3 sm:p-4 md:p-6">

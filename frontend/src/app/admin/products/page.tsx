@@ -328,7 +328,7 @@ export default function ProductsPage() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={() => router.push(`/product/${product.slug}`)}
+                            onClick={() => router.push(`/website/sanpham/${product.slug}`)}
                             title="Xem"
                           >
                             <Eye className="h-4 w-4" />
