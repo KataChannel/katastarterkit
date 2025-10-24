@@ -177,6 +177,29 @@ export const SEARCH_PRODUCTS = gql`
   }
 `;
 
+export const GET_CHEAP_PRODUCTS = gql`
+  ${PRODUCT_BASIC_FRAGMENT}
+  ${CATEGORY_BASIC_FRAGMENT}
+  query GetCheapProducts($input: GetProductsInput) {
+    products(input: $input) {
+      items {
+        ...ProductBasicFields
+        category {
+          ...CategoryBasicFields
+        }
+        isFeatured
+        isNewArrival
+        isBestSeller
+        isOnSale
+      }
+      total
+      page
+      limit
+      totalPages
+    }
+  }
+`;
+
 // ============================================================================
 // MUTATIONS
 // ============================================================================
