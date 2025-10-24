@@ -2,10 +2,10 @@ services:
   # PostgreSQL Database
   postgres:
     image: ${POSTGRES_IMAGE:-postgres:16-alpine}
-    container_name: ${POSTGRES_CONTAINER_NAME:-raucore-postgres}
+    container_name: ${POSTGRES_CONTAINER_NAME:-katacore-postgres}
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-raucore}
+      POSTGRES_DB: ${POSTGRES_DB:-katacore}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - raucore-network
+      - katacore-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 30s
@@ -22,10 +22,10 @@ services:
   # pgAdmin for PostgreSQL Management
   pgadmin:
     image: ${PGADMIN_IMAGE:-dpage/pgadmin4:latest}
-    container_name: ${PGADMIN_CONTAINER_NAME:-raucore-pgadmin}
+    container_name: ${PGADMIN_CONTAINER_NAME:-katacore-pgadmin}
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@raucore.com}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@katacore.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
@@ -36,18 +36,18 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - raucore-network
+      - katacore-network
   # Redis Cache & Pub/Sub
   redis:
     image: ${REDIS_IMAGE:-redis:7.4-alpine}
-    container_name: ${REDIS_CONTAINER_NAME:-raucore-redis}
+    container_name: ${REDIS_CONTAINER_NAME:-katacore-redis}
     restart: unless-stopped
     ports:
       - "${REDIS_PORT:-12004}:6379"
     volumes:
       - redis_data:/data
     networks:
-      - raucore-network
+      - katacore-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 30s
@@ -57,7 +57,7 @@ services:
   # Elasticsearch for Search
   elasticsearch:
     image: ${ELASTICSEARCH_IMAGE:-docker.elastic.co/elasticsearch/elasticsearch:8.15.0}
-    container_name: ${ELASTICSEARCH_CONTAINER_NAME:-raucore-elasticsearch}
+    container_name: ${ELASTICSEARCH_CONTAINER_NAME:-katacore-elasticsearch}
     restart: unless-stopped
     environment:
       - discovery.type=single-node
@@ -72,7 +72,7 @@ services:
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
-      - raucore-network
+      - katacore-network
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
       interval: 30s
@@ -83,11 +83,11 @@ services:
   # Minio Object Storage
   minio:
     image: ${MINIO_IMAGE:-minio/minio:RELEASE.2024-08-26T15-33-07Z}
-    container_name: ${MINIO_CONTAINER_NAME:-raucore-minio}
+    container_name: ${MINIO_CONTAINER_NAME:-katacore-minio}
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-raucore-admin}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-raucore-secret-2025}
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-katacore-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-katacore-secret-2025}
     ports:
       - "${MINIO_PORT:-12007}:9000"
       - "${MINIO_CONSOLE_PORT:-12008}:9001"
@@ -95,7 +95,7 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
     networks:
-      - raucore-network
+      - katacore-network
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
       interval: 30s
@@ -108,11 +108,11 @@ services:
   #   build:
   #     context: ./backend
   #     dockerfile: Dockerfile
-  #   container_name: ${BACKEND_CONTAINER_NAME:-raucore-backend}
+  #   container_name: ${BACKEND_CONTAINER_NAME:-katacore-backend}
   #   restart: unless-stopped
   #   environment:
   #     NODE_ENV: ${NODE_ENV:-development}
-  #     DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/raucore}
+  #     DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/katacore}
   #     REDIS_HOST: ${DOCKER_REDIS_HOST:-redis}
   #     REDIS_PORT: ${REDIS_PORT:-12004}
   #     REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -139,14 +139,14 @@ services:
   #     minio:
   #       condition: service_healthy
   #   networks:
-  #     - raucore-network
+  #     - katacore-network
 
   # # Frontend with Bun
   # frontend:
   #   build:
   #     context: ./frontend
   #     dockerfile: Dockerfile
-  #   container_name: ${FRONTEND_CONTAINER_NAME:-raucore-frontend}
+  #   container_name: ${FRONTEND_CONTAINER_NAME:-katacore-frontend}
   #   restart: unless-stopped
   #   environment:
   #     NODE_ENV: ${NODE_ENV:-development}
@@ -164,7 +164,7 @@ services:
   #   depends_on:
   #     - backend
   #   networks:
-  #     - raucore-network
+  #     - katacore-network
 
 volumes:
   postgres_data:
@@ -179,6 +179,6 @@ volumes:
     driver: local
 
 networks:
-  raucore-network:
+  katacore-network:
     driver: bridge
-    name: ${DOCKER_NETWORK_NAME:-raucore-network}
+    name: ${DOCKER_NETWORK_NAME:-katacore-network}
