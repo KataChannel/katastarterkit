@@ -23,7 +23,7 @@ cd shoprausach
 git pull
 # Deploy with docker (all builds are cached/prebuilt locally)
 # Remove orphan containers to avoid warnings
-docker compose -f 'docker-compose.yml' up -d --build --remove-orphans
+docker compose -f 'docker-compose.yml' up -d --build
 docker builder prune -af
 #docker image prune -a -f
 EOF
