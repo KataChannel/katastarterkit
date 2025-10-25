@@ -132,10 +132,20 @@ declare -a skipped_files
 declare -a archived_files
 declare -a error_files
 
-# Tìm tất cả file .md ở root level, trừ README.md
+# Tìm tất cả file .md ở root level, trừ README.md (case-insensitive)
 shopt -s nullglob  # Prevent glob expansion if no matches
-md_files=(*.md)
+all_md_files=(*.md)
 shopt -u nullglob
+
+# Filter out README.md (case-insensitive)
+md_files=()
+for file in "${all_md_files[@]}"; do
+    filename=$(basename "$file")
+    # Skip README.md in any case variation
+    if [[ ! "${filename,,}" == "readme.md" ]]; then
+        md_files+=("$file")
+    fi
+done
 
 # Apply category filter if specified
 if [ -n "$CATEGORY" ]; then
@@ -147,6 +157,12 @@ if [ -n "$CATEGORY" ]; then
     done
     md_files=("${filtered_files[@]}")
     print_status "$YELLOW" "🏷️  Filtered to ${#md_files[@]} files matching category: $CATEGORY"
+fi
+
+# Show excluded files for transparency
+excluded_count=$((${#all_md_files[@]} - ${#md_files[@]}))
+if [ $excluded_count -gt 0 ]; then
+    print_status "$YELLOW" "📄 Excluded $excluded_count README.md files from processing"
 fi
 
 if [ ${#md_files[@]} -eq 0 ]; then
@@ -161,12 +177,7 @@ echo ""
 # Sắp xếp file theo thời gian sửa đổi (mtime)
 declare -A file_times
 for file in "${md_files[@]}"; do
-    # Skip README.md (case insensitive)
-    if [[ "${file,,}" == "readme.md" ]]; then
-        continue
-    fi
-    
-    # Skip if already in docs/
+    # Skip if file doesn't exist (shouldn't happen after filtering)
     if [ ! -f "$file" ]; then
         continue
     fi
