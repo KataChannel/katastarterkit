@@ -53,8 +53,16 @@ export class ElasticsearchService {
   constructor(private configService: ConfigService) {
     this.indexPrefix = this.configService.get('ELASTICSEARCH_INDEX_PREFIX', 'rausachcore');
     
+    // Detect Docker environment
+    const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
+    
+    // Use appropriate URL based on environment
+    const elasticsearchUrl = isDockerEnv
+      ? this.configService.get('DOCKER_ELASTICSEARCH_URL', 'http://elasticsearch:9200')
+      : this.configService.get('ELASTICSEARCH_URL', 'http://116.118.49.243:12005');
+    
     this.client = new Client({
-      node: this.configService.get('ELASTICSEARCH_URL', 'http://localhost:9200'),
+      node: elasticsearchUrl,
       auth: {
         username: this.configService.get('ELASTICSEARCH_USERNAME'),
         password: this.configService.get('ELASTICSEARCH_PASSWORD'),
@@ -71,12 +79,17 @@ export class ElasticsearchService {
 
   private async initializeClient() {
     try {
+      const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
+      const elasticsearchUrl = isDockerEnv
+        ? this.configService.get('DOCKER_ELASTICSEARCH_URL', 'http://elasticsearch:9200')
+        : this.configService.get('ELASTICSEARCH_URL', 'http://localhost:12005');
+      this.logger.log(`[Elasticsearch] Connecting to: ${elasticsearchUrl} (dockerEnv=${isDockerEnv})`);
       await this.client.ping();
-      this.logger.log('Elasticsearch client connected successfully');
+      this.logger.log('✅ Elasticsearch client connected successfully');
       this.isConnected = true;
       await this.createIndicesIfNotExist();
     } catch (error) {
-      this.logger.warn('Failed to connect to Elasticsearch:', error.message);
+      this.logger.warn('❌ Failed to connect to Elasticsearch:', error.message);
       this.logger.warn('Search functionality will be limited without Elasticsearch');
       this.isConnected = false;
       // Don't throw error - allow app to start without Elasticsearch

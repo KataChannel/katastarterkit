@@ -11,14 +11,17 @@ const redisProvider = {
     // Detect Docker environment
     const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
     
-    // Use Docker Redis host/port if in Docker, otherwise use local configuration
+    // Use Docker Redis host/port if in Docker, otherwise use configured server
     const host = isDockerEnv
       ? configService.get('DOCKER_REDIS_HOST', 'redis')
-      : configService.get('REDIS_HOST', 'localhost');
+      : configService.get('REDIS_HOST', '116.118.49.243');
     
-    const port = isDockerEnv
-      ? configService.get('DOCKER_REDIS_PORT', 6379)
-      : configService.get('REDIS_PORT', 6379);
+    // Always use configured port from .env
+    const portConfig = isDockerEnv
+      ? configService.get('DOCKER_REDIS_PORT', '6379')
+      : configService.get('REDIS_PORT', '12004');
+    
+    const port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
     
     const password = configService.get('REDIS_PASSWORD');
     const db = configService.get('REDIS_DB', 0);
