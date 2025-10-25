@@ -30,10 +30,12 @@ const redisProvider = {
       port,
       password,
       db,
-      // Connection retry configuration
+      // Connection retry configuration - critical for resilience
       retryStrategy: (times: number) => {
         const delay = Math.min(times * 50, 2000);
-        logger.warn(`[Redis] Retry attempt ${times}, delay ${delay}ms`);
+        if (times % 5 === 0) {
+          logger.warn(`[Redis] Retry attempt ${times}, next delay ${delay}ms`);
+        }
         return delay;
       },
       reconnectOnError: (err: Error) => {
@@ -51,42 +53,52 @@ const redisProvider = {
       // Timeout settings
       connectTimeout: 10000,
       commandTimeout: 5000,
-      lazyConnect: false,
+      // CRITICAL: Use lazy connect to prevent immediate crash
+      lazyConnect: true,
     });
 
-    // Set up error handlers
+    // Set up error handlers - these should NOT crash the app
     redis.on('error', (err) => {
-      logger.error(`[Redis] Error: ${err.message}`, err.stack);
+      logger.warn(`[Redis] Connection error: ${err.message}`);
+      // Don't throw - just log and let retry strategy handle it
     });
 
     redis.on('connect', () => {
-      logger.log('[Redis] Connected successfully');
+      logger.log('[Redis] ✅ Connected successfully');
     });
 
     redis.on('reconnecting', () => {
-      logger.warn('[Redis] Reconnecting...');
+      logger.log('[Redis] 🔄 Attempting to reconnect...');
     });
 
     redis.on('ready', () => {
-      logger.log('[Redis] Ready');
+      logger.log('[Redis] ✅ Ready and accepting commands');
     });
 
-    // Wait for Redis to be ready before returning
-    await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('Redis connection timeout'));
-      }, 30000); // 30 second timeout
+    // Attempt initial connection with timeout
+    // If it fails, the redis instance will keep retrying automatically
+    try {
+      logger.log('[Redis] Attempting initial connection...');
+      await new Promise<void>((resolve) => {
+        const timeout = setTimeout(() => {
+          logger.warn('[Redis] Initial connection attempt timeout (15s), will retry automatically...');
+          resolve(); // Resolve to continue - redis will retry on its own
+        }, 15000);
 
-      redis.on('ready', () => {
-        clearTimeout(timeout);
-        resolve(null);
+        redis.connect().then(() => {
+          clearTimeout(timeout);
+          logger.log('[Redis] ✅ Connected on first attempt!');
+          resolve();
+        }).catch((err) => {
+          clearTimeout(timeout);
+          logger.warn(`[Redis] Initial connection failed: ${err.message}, will retry automatically...`);
+          resolve(); // Resolve anyway - let redis retry
+        });
       });
-
-      redis.on('error', (err) => {
-        clearTimeout(timeout);
-        reject(err);
-      });
-    });
+    } catch (error) {
+      logger.warn(`[Redis] Caught error during initialization: ${error.message}, continuing...`);
+      // Continue anyway - redis will retry on demand
+    }
 
     return redis;
   },

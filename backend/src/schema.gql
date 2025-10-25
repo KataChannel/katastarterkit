@@ -631,6 +631,11 @@ type CategoryType {
   updatedBy: String
 }
 
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
 """Clearance status for offboarding"""
 enum ClearanceStatus {
   COMPLETE
@@ -1982,6 +1987,7 @@ type Mutation {
   bulkDeleteFiles(input: BulkDeleteFilesInput!): Int!
   bulkUpdateFiles(input: BulkUpdateFilesInput!): [File!]!
   bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!
+  changePassword(input: ChangePasswordInput!): Boolean!
   completeOffboarding(id: ID!): OffboardingProcess!
   completeOnboardingTask(checklistId: ID!, taskId: ID!): OnboardingChecklist!
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
@@ -2134,6 +2140,7 @@ type Mutation {
   reorderModules(input: ReorderModulesInput!): [CourseModule!]!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   reviewCampaignApplication(input: ReviewCampaignApplicationInput!): String!
+  setPassword(input: SetPasswordInput!): Boolean!
   shareTask(input: ShareTaskInput!): TaskShare!
   shareTemplate(input: ShareTemplateInput!): [TemplateShare!]!
   submitQuiz(input: SubmitQuizInput!): QuizAttempt!
@@ -2188,6 +2195,7 @@ type Mutation {
     """Limit number of records to process"""
     limit: Int
   ): UpdateProductsResult!
+  updateProfile(input: UpdateProfileInput!): User!
   updateQuiz(id: String!, input: UpdateQuizInput!): Quiz!
   updateReview(input: UpdateReviewInput!): Review!
   updateRole(id: String!, input: UpdateRoleInput!): Role!
@@ -2901,6 +2909,7 @@ type Query {
 
   """Get paginated ext_sanphamhoadon records"""
   getext_sanphamhoadonsPaginated(filters: JSON): JSON!
+  hasPassword: Boolean!
   headerMenus: [MenuHierarchicalDto!]!
 
   """Hello world query"""
@@ -3139,6 +3148,11 @@ type RoleSearchResult {
   size: Int!
   total: Int!
   totalPages: Int!
+}
+
+input SetPasswordInput {
+  confirmPassword: String!
+  password: String!
 }
 
 """The permission level for shared tasks"""
@@ -3976,6 +3990,13 @@ type UpdateProductsStats {
   skipped: Int!
   totalDetails: Int!
   updated: Int!
+}
+
+input UpdateProfileInput {
+  avatar: String
+  firstName: String
+  lastName: String
+  phone: String
 }
 
 input UpdateQuizInput {

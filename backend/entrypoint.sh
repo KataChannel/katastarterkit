@@ -27,6 +27,26 @@ if [ "$REDIS_READY" -eq 0 ]; then
   echo "⚠️  Redis not responding, but continuing (will retry on demand)..."
 fi
 
+# Wait for Minio to be ready
+echo "⏳ Waiting for Minio to be ready..."
+MINIO_HOST=${DOCKER_MINIO_ENDPOINT:-minio}
+MINIO_PORT=${DOCKER_MINIO_PORT:-9000}
+MINIO_READY=0
+
+for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+  echo "Minio connection attempt $i/15..."
+  if nc -z "$MINIO_HOST" "$MINIO_PORT" 2>/dev/null; then
+    echo "✅ Minio is ready!"
+    MINIO_READY=1
+    break
+  fi
+  sleep 2
+done
+
+if [ "$MINIO_READY" -eq 0 ]; then
+  echo "⚠️  Minio not responding, but continuing (will retry on demand)..."
+fi
+
 # Wait for database to be ready
 echo "⏳ Waiting for database to be ready..."
 until ./node_modules/.bin/prisma db push --accept-data-loss 2>/dev/null; do
