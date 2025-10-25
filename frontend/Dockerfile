@@ -8,22 +8,26 @@ FROM oven/bun:1-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy only what's needed for frontend
-COPY package.json bun.lockb* ./
-COPY frontend/package.json ./frontend/
-COPY frontend/bun.lockb* ./frontend/
-RUN bun install --frozen-lockfile
+# Copy only frontend and root package.json for workspace structure
+COPY package.json ./
+COPY frontend ./frontend
+RUN cd frontend && bun install --frozen-lockfile
 
 # ========================================
 # STAGE 2: Builder (for build mode only)
 # ========================================
 FROM oven/bun:1-alpine AS builder
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
-COPY package.json bun.lockb* ./
+COPY --from=deps /app/frontend/node_modules ./frontend/node_modules
+COPY package.json ./
 COPY frontend ./frontend
+
+# Change to frontend directory for build
+WORKDIR /app/frontend
 
 # Set build environment
 ENV NODE_ENV=production
@@ -35,7 +39,6 @@ ENV SKIP_TYPE_CHECK=true
 
 # Build the application with memory optimization
 ENV DOCKER_BUILD=true
-RUN bunx prisma generate
 RUN NODE_OPTIONS="--max-old-space-size=384" bun run build
 
 # ========================================
@@ -98,11 +101,11 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Copy built files from builder stage
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/public ./public
 # Copy app directory for App Router support
-COPY --from=builder --chown=nextjs:nodejs /app/app ./app
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/app ./app
 
 # Switch to non-root user
 USER nextjs
