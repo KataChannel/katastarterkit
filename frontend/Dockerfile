@@ -8,8 +8,10 @@ FROM oven/bun:1-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files
+# Copy only what's needed for frontend
 COPY package.json bun.lockb* ./
+COPY frontend/package.json ./frontend/
+COPY frontend/bun.lockb* ./frontend/
 RUN bun install --frozen-lockfile
 
 # ========================================
@@ -20,7 +22,8 @@ WORKDIR /app
 
 # Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY package.json bun.lockb* ./
+COPY frontend ./frontend
 
 # Set build environment
 ENV NODE_ENV=production
@@ -55,11 +58,11 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Copy pre-built application files (for prebuilt mode)
-COPY --chown=nextjs:nodejs .next/standalone ./ 
-COPY --chown=nextjs:nodejs .next/static ./.next/static
-COPY --chown=nextjs:nodejs public ./public
+COPY --chown=nextjs:nodejs frontend/.next/standalone ./ 
+COPY --chown=nextjs:nodejs frontend/.next/static ./.next/static
+COPY --chown=nextjs:nodejs frontend/public ./public
 # Copy app directory for App Router support
-COPY --chown=nextjs:nodejs app ./app
+COPY --chown=nextjs:nodejs frontend/app ./app
 
 # Switch to non-root user
 USER nextjs
