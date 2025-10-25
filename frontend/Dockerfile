@@ -8,16 +8,17 @@ RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
 COPY package.json bun.lockb* ./
 RUN bun install --frozen-lockfile
 
-# Build stage
-FROM oven/bun:1.1.34 AS builder
+# Build stage (use Node.js instead of Bun for better Next.js compatibility)
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Disable Next.js telemetry
+# Disable Next.js telemetry and set production environment for build
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
-RUN bun --bun next build
+RUN npm run build --legacy-peer-deps
 
 # Production stage with Bun.js
 FROM oven/bun:1.1.34-alpine AS production
