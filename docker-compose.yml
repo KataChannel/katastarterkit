@@ -154,6 +154,10 @@ services:
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:12000}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-nextauth-secret-change-in-production}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:12000}
+      # Disable Next.js instrumentation to avoid OpenTelemetry module loading issues
+      NEXT_OTEL_ENABLED: "false"
+      # Disable telemetry
+      NEXT_TELEMETRY_DISABLED: "1"
     ports:
       - "${FRONTEND_PORT:-12000}:3000"
     # Note: Remove volumes for production deployment

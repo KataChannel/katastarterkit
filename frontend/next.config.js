@@ -14,6 +14,17 @@ const nextConfig = {
    * - Lazy loading heavy modules
    */
   webpack: (config, { isServer }) => {
+    // Fix for OpenTelemetry module resolution issue with Bun/Docker
+    // Prevent Next.js tracer from loading OpenTelemetry in runtime
+    if (isServer) {
+      config.externals = [
+        ...(config.externals || []),
+        {
+          'next/dist/compiled/@opentelemetry/api': 'next/dist/compiled/@opentelemetry/api',
+        },
+      ];
+    }
+    
     if (!isServer) {
       // Client-side optimizations
       config.optimization = {

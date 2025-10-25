@@ -43,7 +43,7 @@ RUN NODE_OPTIONS="--max-old-space-size=384" bun run build
 # ========================================
 # STAGE 3: Runtime (for prebuilt mode)
 # ========================================
-FROM oven/bun:1.3-alpine AS runtime
+FROM node:22-alpine AS runtime
 
 # Install minimal runtime dependencies
 RUN apk add --no-cache curl dumb-init && \
@@ -76,12 +76,12 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 # Start the application
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["bun", "server.js"]
+CMD ["node", "server.js"]
 
 # ========================================
 # STAGE 4: Runtime with build (for build mode)
 # ========================================
-FROM oven/bun:1.3-alpine AS runtime-build
+FROM node:22-alpine AS runtime-build
 
 # Install minimal runtime dependencies
 RUN apk add --no-cache curl dumb-init && \
@@ -94,8 +94,12 @@ WORKDIR /app
 # Set environment variables
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_OTEL_ENABLED=false
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+# Copy node_modules from builder stage (required for Next.js standalone)
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Copy built files from builder stage
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/standalone ./
@@ -116,4 +120,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 # Start the application
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["bun", "server.js"]
+CMD ["node", "server.js"]
