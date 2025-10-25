@@ -4,10 +4,10 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
 import { CurrentUser } from '../../auth/current-user.decorator';
-import { User, UserSearchResult, UserStats, BulkUserActionResult } from '../models/user.model';
+import { User, UserSearchResult, UserStats, BulkUserActionResult, AdminResetPasswordResult } from '../models/user.model';
 import { AuthResponse } from '../models/auth.model';
 import { OtpResponse } from '../models/otp.model';
-import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput, AdminCreateUserInput, UpdateProfileInput, ChangePasswordInput, SetPasswordInput } from '../inputs/user.input';
+import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput, AdminCreateUserInput, UpdateProfileInput, ChangePasswordInput, SetPasswordInput, AdminResetPasswordInput } from '../inputs/user.input';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../auth/auth.service';
 import { OtpService } from '../../services/otp.service';
@@ -244,6 +244,22 @@ export class UserResolver {
   @Roles($Enums.UserRoleType.ADMIN)
   async adminCreateUser(@Args('input') input: AdminCreateUserInput): Promise<User> {
     return this.userService.adminCreateUser(input);
+  }
+
+  /**
+   * Admin reset password cho người dùng
+   * - Tạo mật khẩu ngẫu nhiên
+   * - Gửi email/thông báo cho người dùng
+   * - Audit log sự kiện reset password
+   */
+  @Mutation(() => AdminResetPasswordResult, { name: 'adminResetPassword' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles($Enums.UserRoleType.ADMIN)
+  async adminResetPassword(
+    @Args('input') input: AdminResetPasswordInput,
+    @CurrentUser() adminUser: User,
+  ): Promise<AdminResetPasswordResult> {
+    return this.userService.adminResetPassword(input.userId, adminUser.id);
   }
 
   // Field resolvers

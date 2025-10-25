@@ -121,3 +121,23 @@ export class BulkUserActionResult {
   @Field()
   message: string;
 }
+
+/**
+ * Result model cho admin reset password
+ * - Trả về password mới đã được tạo
+ * - Trả về user đã được cập nhật
+ */
+@ObjectType()
+export class AdminResetPasswordResult {
+  @Field()
+  success: boolean;
+
+  @Field()
+  message: string;
+
+  @Field()
+  newPassword: string;
+
+  @Field()
+  user: User;
+}

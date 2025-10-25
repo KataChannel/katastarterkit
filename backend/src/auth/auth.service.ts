@@ -655,4 +655,97 @@ export class AuthService {
 
     return !!user?.password;
   }
+
+  /**
+   * Generate mật khẩu ngẫu nhiên
+   * - Độ dài 12 ký tự
+   * - Bao gồm chữ hoa, thường, số, ký tự đặc biệt
+   */
+  private generateRandomPassword(length: number = 12): string {
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const numbers = '0123456789';
+    const special = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    
+    const allChars = uppercase + lowercase + numbers + special;
+    let password = '';
+    
+    // Đảm bảo có ít nhất 1 ký tự từ mỗi loại
+    password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+    password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+    password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    password += special.charAt(Math.floor(Math.random() * special.length));
+    
+    // Điền phần còn lại
+    for (let i = password.length; i < length; i++) {
+      password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+    }
+    
+    // Xáo trộn mật khẩu
+    return password
+      .split('')
+      .sort(() => Math.random() - 0.5)
+      .join('');
+  }
+
+  /**
+   * Admin reset password cho người dùng
+   * - Tạo mật khẩu ngẫu nhiên
+   * - Cập nhật mật khẩu trong DB
+   * - Tạo audit log
+   */
+  async adminResetPassword(
+    userId: string,
+    adminId: string,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    newPassword: string;
+    user: User;
+  }> {
+    // Kiểm tra người dùng tồn tại
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Người dùng không tồn tại');
+    }
+
+    // Tạo mật khẩu ngẫu nhiên
+    const newPassword = this.generateRandomPassword();
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Cập nhật mật khẩu
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    // Tạo audit log
+    await this.prisma.auditLog.create({
+      data: {
+        userId: adminId,
+        action: 'ADMIN_RESET_PASSWORD',
+        resourceType: 'user',
+        resourceId: userId,
+        details: {
+          targetUserId: userId,
+          timestamp: new Date(),
+          adminId: adminId,
+        },
+      },
+    });
+
+    this.logger.log(`✅ Admin ${adminId} reset password cho user ${userId}`);
+
+    return {
+      success: true,
+      message: 'Mật khẩu đã được reset thành công. Mật khẩu mới đã được gửi cho người dùng.',
+      newPassword,
+      user: updatedUser,
+    };
+  }
 }
