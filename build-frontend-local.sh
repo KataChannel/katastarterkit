@@ -16,9 +16,6 @@ bun install --frozen-lockfile
 echo "  ✓ Building Next.js application..."
 bun run build
 
-echo "  ✓ Installing production dependencies..."
-bun install --production
-
 echo ""
 echo "✅ Frontend build complete!"
 echo ""

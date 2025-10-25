@@ -106,8 +106,8 @@ services:
   # Backend with Bun
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./backend/Dockerfile
     container_name: ${BACKEND_CONTAINER_NAME:-katacore-backend}
     restart: unless-stopped
     environment:
@@ -144,8 +144,8 @@ services:
   # Frontend with Bun
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./frontend/Dockerfile
     container_name: ${FRONTEND_CONTAINER_NAME:-katacore-frontend}
     restart: unless-stopped
     environment:

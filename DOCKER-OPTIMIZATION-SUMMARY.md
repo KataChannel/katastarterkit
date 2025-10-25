@@ -105,15 +105,13 @@ docker compose up -d backend
 ```bash
 backend/
 ├── 1️⃣  bun install --frozen-lockfile
-│   └─ Install ALL dependencies (including dev tools)
+│   └─ Install dependencies from bun.lockb
 ├── 2️⃣  bun run prisma generate
 │   └─ Generate Prisma client
-├── 3️⃣  bun run build
-│   └─ Compile TypeScript → dist/ folder
-└── 4️⃣  bun install --production
-    └─ Remove dev dependencies (200MB+)
+└── 3️⃣  bun run build
+    └─ Compile TypeScript → dist/ folder
     
-Result: dist/ + prisma/ + node_modules/ (~400MB)
+Result: dist/ + prisma/ + node_modules/
 ```
 
 ### Frontend Build Process
@@ -121,13 +119,11 @@ Result: dist/ + prisma/ + node_modules/ (~400MB)
 ```bash
 frontend/
 ├── 1️⃣  bun install --frozen-lockfile
-│   └─ Install ALL dependencies
-├── 2️⃣  bun run build
-│   └─ Build Next.js → .next/ folder
-└── 3️⃣  bun install --production
-    └─ Remove dev dependencies (500MB+)
+│   └─ Install dependencies from bun.lockb
+└── 2️⃣  bun run build
+    └─ Build Next.js → .next/ folder
     
-Result: .next/ + node_modules/ (~500MB)
+Result: .next/ + node_modules/
 ```
 
 ### Docker Image Creation
@@ -174,12 +170,12 @@ Before building Docker image, you need pre-built artifacts:
 ```
 backend/
 ├── dist/           ← Required (from `bun run build`)
-├── node_modules/   ← Required (from `bun install --production`)
+├── node_modules/   ← Required (from `bun install --frozen-lockfile`)
 └── prisma/         ← Already exists
 
 frontend/
 ├── .next/          ← Required (from `bun run build`)
-├── node_modules/   ← Required (from `bun install --production`)
+├── node_modules/   ← Required (from `bun install --frozen-lockfile`)
 └── public/         ← Already exists
 ```
 

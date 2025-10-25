@@ -16,17 +16,18 @@ RUN adduser -S nestjs -u 1001
 
 # Copy pre-built artifacts from local build
 # Expected local paths (should exist before building):
-# - dist/          (compiled TypeScript)
-# - node_modules/  (production dependencies only)
-# - prisma/        (Prisma schema)
-# - package.json   (package definition)
-# - entrypoint.sh  (migration script)
+# - backend/dist/          (compiled TypeScript)
+# - backend/prisma/        (Prisma schema)
+# - backend/package.json   (package definition)
+# - backend/entrypoint.sh  (migration script)
 
-COPY dist ./dist
-COPY prisma ./prisma
-COPY node_modules ./node_modules
-COPY package.json ./package.json
-COPY entrypoint.sh ./entrypoint.sh
+COPY backend/dist ./dist
+COPY backend/prisma ./prisma
+COPY backend/package.json ./package.json
+COPY backend/entrypoint.sh ./entrypoint.sh
+
+# Install dependencies using bun
+RUN bun install --frozen-lockfile --production 2>/dev/null || bun install --production
 
 RUN chmod +x ./entrypoint.sh
 RUN chown -R nestjs:nodejs /app

@@ -17,15 +17,19 @@ RUN adduser --system --uid 1001 nextjs
 
 # Copy pre-built artifacts from local build
 # Expected local paths (should exist before building):
-# - .next/        (Next.js build output)
-# - node_modules/ (production dependencies only)
-# - public/       (static files)
-# - package.json  (package definition)
+# - frontend/.next/        (Next.js build output)
+# - frontend/public/       (static files)
+# - frontend/package.json  (package definition)
 
-COPY --chown=nextjs:nodejs .next ./.next
-COPY --chown=nextjs:nodejs node_modules ./node_modules
-COPY --chown=nextjs:nodejs public ./public
-COPY --chown=nextjs:nodejs package.json ./package.json
+COPY frontend/.next ./.next
+COPY frontend/public ./public
+COPY frontend/package.json ./package.json
+
+# Install dependencies using bun
+RUN bun install --frozen-lockfile --production 2>/dev/null || bun install --production
+
+# Change ownership of files to nextjs user
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
@@ -38,4 +42,4 @@ ENV HOSTNAME="0.0.0.0"
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/ || exit 1
 
-CMD ["bun", "run", "start"]
+CMD ["bun", "start"]

@@ -34,9 +34,6 @@ bun run prisma generate
 echo "  → Compiling TypeScript..."
 bun run build
 
-echo "  → Installing production dependencies only..."
-bun install --production
-
 cd "$PROJECT_ROOT"
 echo -e "${GREEN}✅ Backend build complete${NC}"
 echo ""
@@ -53,9 +50,6 @@ bun install --frozen-lockfile
 
 echo "  → Building Next.js application..."
 bun run build
-
-echo "  → Installing production dependencies only..."
-bun install --production
 
 cd "$PROJECT_ROOT"
 echo -e "${GREEN}✅ Frontend build complete${NC}"

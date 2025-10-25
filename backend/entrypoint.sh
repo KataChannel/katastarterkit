@@ -9,7 +9,7 @@ echo "🚀 Starting backend entrypoint..."
 
 # Wait for database to be ready
 echo "⏳ Waiting for database to be ready..."
-until bun prisma db push --accept-data-loss 2>/dev/null; do
+until ./node_modules/.bin/prisma db push --accept-data-loss 2>/dev/null; do
   echo "Database is unavailable - sleeping"
   sleep 2
 done
@@ -18,11 +18,11 @@ echo "✅ Database is ready!"
 
 # Run Prisma migrations
 echo "🔄 Running Prisma migrations..."
-bun prisma migrate deploy
+./node_modules/.bin/prisma migrate deploy
 
 # Generate Prisma client
 echo "🔧 Generating Prisma client..."
-bun prisma generate
+./node_modules/.bin/prisma generate
 
 # Seed database if needed (optional)
 if [ "$NODE_ENV" = "development" ]; then

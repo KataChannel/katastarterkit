@@ -19,9 +19,6 @@ bun run prisma generate
 echo "  ✓ Compiling TypeScript..."
 bun run build
 
-echo "  ✓ Installing production dependencies..."
-bun install --production
-
 echo ""
 echo "✅ Backend build complete!"
 echo ""

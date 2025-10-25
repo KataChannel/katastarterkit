@@ -13,14 +13,12 @@
 - [ ] Install dependencies: `bun install --frozen-lockfile`
 - [ ] Generate Prisma: `bun run prisma generate`
 - [ ] Compile code: `bun run build`
-- [ ] Production deps: `bun install --production`
 - [ ] Verify dist/ folder exists: `ls -la dist/`
 
 ### Frontend Build
 - [ ] Navigate to frontend: `cd frontend`
 - [ ] Install dependencies: `bun install --frozen-lockfile`
 - [ ] Build Next.js: `bun run build`
-- [ ] Production deps: `bun install --production`
 - [ ] Verify .next/ folder exists: `ls -la .next/`
 
 ## Docker Build Phase
