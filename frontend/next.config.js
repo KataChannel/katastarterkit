@@ -102,6 +102,9 @@ const nextConfig = {
     
     // Dynamic CSS optimization
     optimizeCss: true,
+    
+    // Disable telemetry to avoid OpenTelemetry issues with Bun
+    disableInstrumentation: true,
   },
   
   // Moved from experimental.serverComponentsExternalPackages

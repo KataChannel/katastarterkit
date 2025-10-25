@@ -33,13 +33,11 @@ WORKDIR /app/frontend
 # Set build environment
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-
-# Disable linting and type checking for resource optimization
 ENV SKIP_LINT=true
 ENV SKIP_TYPE_CHECK=true
+ENV DOCKER_BUILD=true
 
 # Build the application with memory optimization
-ENV DOCKER_BUILD=true
 RUN NODE_OPTIONS="--max-old-space-size=384" bun run build
 
 # ========================================
@@ -65,8 +63,6 @@ ENV HOSTNAME="0.0.0.0"
 COPY --chown=nextjs:nodejs frontend/.next/standalone ./ 
 COPY --chown=nextjs:nodejs frontend/.next/static ./.next/static
 COPY --chown=nextjs:nodejs frontend/public ./public
-# Copy app directory for App Router support
-COPY --chown=nextjs:nodejs frontend/app ./app
 
 # Switch to non-root user
 USER nextjs
