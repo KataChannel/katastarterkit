@@ -10,14 +10,17 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push('/login?redirect=/admin');
+    } else if (!loading && isAuthenticated && user?.roleType && user.roleType !== 'ADMIN') {
+      // Redirect USER and other non-admin roles to request-access page
+      router.push('/admin/request-access');
     }
-  }, [isAuthenticated, loading, router]);
+  }, [isAuthenticated, loading, user, router]);
 
   // Show loading spinner while checking authentication
   if (loading) {
