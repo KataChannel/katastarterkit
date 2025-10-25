@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   
+  // Enable standalone output for Docker deployment
+  output: 'standalone',
+  
   /**
    * Webpack Configuration for Code Splitting & Tree Shaking
    * Optimizes bundle size by:
