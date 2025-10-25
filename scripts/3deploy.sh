@@ -16,6 +16,12 @@ git push
 ssh root@116.118.49.243 << 'EOF'
 cd shoprausach
 git pull
+# Build backend on remote server
+cd backend
+bun install
+bun run build
+cd ..
+# Deploy with docker
 docker compose -f 'docker-compose.yml' up -d --build
 docker builder prune -af
 #docker image prune -a -f
