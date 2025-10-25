@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Build backend before deployment
+echo "Building backend..."
+cd backend
+bun install
+bun run build
+cd ..
+
 # Local git operations
 git add .
 git commit -m "update"
