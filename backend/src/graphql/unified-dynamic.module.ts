@@ -4,6 +4,7 @@ import { UnifiedDynamicResolver } from './resolvers/unified-dynamic.resolver';
 import { DynamicCRUDService } from '../services/dynamic-crud.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../services/user.service';
+import { AuthModule } from '../auth/auth.module';
 
 /**
  * Unified Dynamic GraphQL Module
@@ -125,7 +126,8 @@ import { UserService } from '../services/user.service';
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'your-secret-key',
       signOptions: { expiresIn: '24h' },
-    })
+    }),
+    AuthModule, // Import AuthModule to provide AuthService for UserService
   ],
   providers: [
     UnifiedDynamicResolver,
