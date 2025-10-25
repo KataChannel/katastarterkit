@@ -22,7 +22,8 @@ ssh root@116.118.49.243 << 'EOF'
 cd shoprausach
 git pull
 # Deploy with docker (all builds are cached/prebuilt locally)
-docker compose -f 'docker-compose.yml' up -d --build
+# Remove orphan containers to avoid warnings
+docker compose -f 'docker-compose.yml' up -d --build --remove-orphans
 docker builder prune -af
 #docker image prune -a -f
 EOF
