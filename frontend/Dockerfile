@@ -30,6 +30,9 @@ COPY frontend ./frontend
 # Change to frontend directory for build
 WORKDIR /app/frontend
 
+# Copy environment files for production build
+COPY frontend/.env* ./
+
 # Set build environment
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
