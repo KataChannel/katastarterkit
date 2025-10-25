@@ -1,35 +1,86 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 
 @Injectable()
-export class MinioService {
+export class MinioService implements OnModuleInit {
   private readonly logger = new Logger(MinioService.name);
-  private readonly minioClient: Minio.Client;
+  private minioClient: Minio.Client;
+  private isReady: boolean = false;
 
-  constructor(private readonly configService: ConfigService) {
-    // Use Docker-specific endpoints if available (for Docker deployments)
-    const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
-    const endpoint = isDockerEnv 
-      ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
-      : this.configService.get('MINIO_ENDPOINT', 'localhost');
-    const port = isDockerEnv
-      ? parseInt(this.configService.get('DOCKER_MINIO_PORT', '9000'))
-      : parseInt(this.configService.get('MINIO_PORT', '9000'));
-    const useSSL = this.configService.get('MINIO_USE_SSL') === 'true';
-    const accessKey = this.configService.get('MINIO_ACCESS_KEY', 'minioadmin');
-    const secretKey = this.configService.get('MINIO_SECRET_KEY', 'minioadmin');
+  constructor(private readonly configService: ConfigService) {}
 
-    this.logger.log(`Connecting to Minio: endpoint=${endpoint}, port=${port}, useSSL=${useSSL}, dockerEnv=${isDockerEnv}`);
+  async onModuleInit(): Promise<void> {
+    await this.initializeWithRetry();
+  }
 
-    this.minioClient = new Minio.Client({
-      endPoint: endpoint,
-      port: port,
-      useSSL: useSSL,
-      accessKey: accessKey,
-      secretKey: secretKey,
-    });
-    this.initializeBuckets();
+  private async initializeWithRetry(retries: number = 10): Promise<void> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        // Use Docker-specific endpoints if available
+        const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
+        const endpoint = isDockerEnv 
+          ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
+          : this.configService.get('MINIO_ENDPOINT', 'localhost');
+        const port = isDockerEnv
+          ? parseInt(this.configService.get('DOCKER_MINIO_PORT', '9000'))
+          : parseInt(this.configService.get('MINIO_PORT', '9000'));
+        const useSSL = this.configService.get('MINIO_USE_SSL') === 'true';
+        const accessKey = this.configService.get('MINIO_ACCESS_KEY', 'minioadmin');
+        const secretKey = this.configService.get('MINIO_SECRET_KEY', 'minioadmin');
+
+        this.logger.log(`[Minio] Connection attempt ${attempt}/${retries}: endpoint=${endpoint}, port=${port}, dockerEnv=${isDockerEnv}`);
+
+        this.minioClient = new Minio.Client({
+          endPoint: endpoint,
+          port: port,
+          useSSL: useSSL,
+          accessKey: accessKey,
+          secretKey: secretKey,
+          region: 'us-east-1',
+        });
+
+        // Test connection by listing buckets
+        await this.testConnection();
+        
+        this.isReady = true;
+        this.logger.log(`✅ Minio connected successfully`);
+        
+        // Initialize buckets after successful connection
+        await this.initializeBuckets();
+        return;
+      } catch (error) {
+        this.logger.warn(`[Minio] Attempt ${attempt}/${retries} failed: ${error?.message || error}`);
+        
+        if (attempt === retries) {
+          this.logger.error(`❌ Failed to connect to Minio after ${retries} attempts: ${error?.message || error}`);
+          // Don't throw - allow service to continue with degraded mode
+          this.isReady = false;
+          return;
+        }
+        
+        // Wait before retry (exponential backoff: 500ms, 1s, 2s, 4s...)
+        const delay = Math.min(500 * Math.pow(2, attempt - 1), 8000);
+        this.logger.log(`⏳ Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  private async testConnection(): Promise<void> {
+    await Promise.race([
+      this.minioClient.listBuckets(),
+      new Promise<void>((_, reject) =>
+        setTimeout(() => reject(new Error('Minio connection timeout (5s)')), 5000)
+      ),
+    ]);
+  }
+
+  private async ensureReady(): Promise<void> {
+    if (!this.isReady) {
+      this.logger.warn('⚠️  Minio not ready, attempting re-initialization...');
+      await this.initializeWithRetry(3);
+    }
   }
 
   private async initializeBuckets(): Promise<void> {
