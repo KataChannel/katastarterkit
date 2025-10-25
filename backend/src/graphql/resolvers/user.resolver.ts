@@ -7,7 +7,7 @@ import { CurrentUser } from '../../auth/current-user.decorator';
 import { User, UserSearchResult, UserStats, BulkUserActionResult } from '../models/user.model';
 import { AuthResponse } from '../models/auth.model';
 import { OtpResponse } from '../models/otp.model';
-import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput, AdminCreateUserInput } from '../inputs/user.input';
+import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput, AdminCreateUserInput, UpdateProfileInput, ChangePasswordInput, SetPasswordInput } from '../inputs/user.input';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../auth/auth.service';
 import { OtpService } from '../../services/otp.service';
@@ -137,6 +137,66 @@ export class UserResolver {
     }
     
     return this.userService.update(id, input);
+  }
+
+  /**
+   * Cập nhật thông tin hồ sơ người dùng
+   * - Có thể cập nhật firstName, lastName, avatar, phone
+   */
+  @Mutation(() => User, { name: 'updateProfile' })
+  @UseGuards(JwtAuthGuard)
+  async updateProfile(
+    @Args('input') input: UpdateProfileInput,
+    @CurrentUser() user: User,
+  ): Promise<User> {
+    return this.authService.updateProfile(user.id, input);
+  }
+
+  /**
+   * Thay đổi mật khẩu
+   * - Yêu cầu mật khẩu hiện tại để xác thực
+   */
+  @Mutation(() => Boolean, { name: 'changePassword' })
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @Args('input') input: ChangePasswordInput,
+    @CurrentUser() user: User,
+  ): Promise<boolean> {
+    await this.authService.changePassword(
+      user.id,
+      input.currentPassword,
+      input.newPassword,
+    );
+    return true;
+  }
+
+  /**
+   * Tạo mật khẩu cho tài khoản login qua mạng xã hội
+   * - Chỉ dùng khi tài khoản chưa có mật khẩu
+   */
+  @Mutation(() => Boolean, { name: 'setPassword' })
+  @UseGuards(JwtAuthGuard)
+  async setPassword(
+    @Args('input') input: SetPasswordInput,
+    @CurrentUser() user: User,
+  ): Promise<boolean> {
+    // Kiểm tra confirm password match
+    if (input.password !== input.confirmPassword) {
+      throw new Error('Mật khẩu xác nhận không khớp');
+    }
+
+    await this.authService.setPassword(user.id, input.password);
+    return true;
+  }
+
+  /**
+   * Kiểm tra tài khoản có mật khẩu không
+   * - Dùng để xác định có nên show form tạo/thay đổi mật khẩu không
+   */
+  @Query(() => Boolean, { name: 'hasPassword' })
+  @UseGuards(JwtAuthGuard)
+  async hasPassword(@CurrentUser() user: User): Promise<boolean> {
+    return this.authService.hasPassword(user.id);
   }
 
   @Mutation(() => Boolean, { name: 'deleteUser' })

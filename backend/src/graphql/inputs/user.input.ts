@@ -374,3 +374,50 @@ export class AdminCreateUserInput {
   @IsString()
   avatar?: string;
 }
+
+/**
+ * Input để cập nhật thông tin hồ sơ người dùng
+ * - firstName, lastName, avatar, phone
+ */
+@InputType()
+export class UpdateProfileInput {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @MinLength(2, { message: 'Họ phải có ít nhất 2 ký tự' })
+  firstName?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @MinLength(2, { message: 'Tên phải có ít nhất 2 ký tự' })
+  lastName?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsPhoneNumber('VN', { message: 'Số điện thoại không hợp lệ' })
+  phone?: string;
+}
+
+/**
+ * Input để tạo mật khẩu cho tài khoản login qua mạng xã hội
+ * - Chỉ sử dụng khi tài khoản chưa có mật khẩu
+ */
+@InputType()
+export class SetPasswordInput {
+  @Field()
+  @IsString()
+  @IsNotEmpty({ message: 'Mật khẩu không được để trống' })
+  @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
+  password: string;
+
+  @Field()
+  @IsString()
+  @IsNotEmpty({ message: 'Xác nhận mật khẩu không được để trống' })
+  confirmPassword: string;
+}
