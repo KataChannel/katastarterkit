@@ -119,14 +119,23 @@ export class RbacSeederService implements OnModuleInit {
         description: 'Full system access with all permissions',
         priority: 1000,
         permissions: [
+          // System Administration - Full control
           'system:admin', 'system:config', 'system:backup',
+          // User Management - Complete CRUD
           'users:create', 'users:read', 'users:update', 'users:delete',
+          // Role Management - Complete CRUD
           'roles:create', 'roles:read', 'roles:update', 'roles:delete',
+          // Permission Management - Complete CRUD
           'permissions:create', 'permissions:read', 'permissions:update', 'permissions:delete',
+          // Security Management - Full access
           'security:audit', 'security:monitor', 'security:manage',
+          // Task Management - Complete CRUD + assign
           'tasks:create', 'tasks:read', 'tasks:update', 'tasks:delete', 'tasks:assign',
+          // Project Management - Complete CRUD + manage
           'projects:create', 'projects:read', 'projects:update', 'projects:delete', 'projects:manage',
+          // Content Management - Complete CRUD + publish
           'content:create', 'content:read', 'content:update', 'content:delete', 'content:publish',
+          // Analytics - Full read and export
           'analytics:read', 'analytics:export'
         ]
       },
@@ -264,7 +273,14 @@ export class RbacSeederService implements OnModuleInit {
         
         // Ensure user has super_admin role
         const superAdminRole = await this.prisma.role.findUnique({
-          where: { name: 'super_admin' }
+          where: { name: 'super_admin' },
+          include: {
+            permissions: {
+              include: {
+                permission: true
+              }
+            }
+          }
         });
 
         if (superAdminRole) {
@@ -284,6 +300,8 @@ export class RbacSeederService implements OnModuleInit {
             }, 'system');
             this.logger.debug(`Assigned super_admin role to existing user: ${existingUser.email}`);
           }
+
+          this.logger.debug(`Admin user ${existingUser.email} has ${superAdminRole.permissions.length} permissions via super_admin role`);
         }
         return;
       }
@@ -308,9 +326,16 @@ export class RbacSeederService implements OnModuleInit {
 
       this.logger.log(`Created admin user: ${adminUser.email}`);
 
-      // Get super_admin role
+      // Get super_admin role with all permissions
       const superAdminRole = await this.prisma.role.findUnique({
-        where: { name: 'super_admin' }
+        where: { name: 'super_admin' },
+        include: {
+          permissions: {
+            include: {
+              permission: true
+            }
+          }
+        }
       });
 
       if (superAdminRole) {
@@ -320,16 +345,18 @@ export class RbacSeederService implements OnModuleInit {
           roleId: superAdminRole.id
         }, 'system');
         this.logger.log(`Assigned super_admin role to user: ${adminUser.email}`);
+
+        this.logger.log(`✅ Default admin user created successfully:`);
+        this.logger.log(`   Email: ${adminEmail}`);
+        this.logger.log(`   Phone: ${adminPhone}`);
+        this.logger.log(`   Name: ${adminName}`);
+        this.logger.log(`   Default Password: ${defaultPassword}`);
+        this.logger.log(`   Role: super_admin`);
+        this.logger.log(`   Permissions: All (${superAdminRole.permissions.length} permissions assigned via role)`);
+        this.logger.log(`   🔒 Please change the default password after first login!`);
       } else {
         this.logger.error('Super admin role not found!');
       }
-
-      this.logger.log(`✅ Default admin user created successfully:`);
-      this.logger.log(`   Email: ${adminEmail}`);
-      this.logger.log(`   Phone: ${adminPhone}`);
-      this.logger.log(`   Name: ${adminName}`);
-      this.logger.log(`   Default Password: ${defaultPassword}`);
-      this.logger.log(`   🔒 Please change the default password after first login!`);
       
     } catch (error) {
       this.logger.error(`Failed to create default admin user: ${error.message}`);

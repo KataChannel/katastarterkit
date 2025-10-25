@@ -36,6 +36,7 @@ import { NavigationMenu } from './NavigationMenu';
 import { UniversalSearch } from '@/components/search/universal-search';
 import { useAdminMenus } from '@/lib/hooks/useMenus';
 import { Loader2 } from 'lucide-react';
+import { filterMenuByPermissions, debugMenuPermissions } from '@/lib/utils/permission-utils';
 
 interface AdminSidebarLayoutProps {
   children: React.ReactNode;
@@ -107,9 +108,18 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
   const navigation = React.useMemo(() => {
     if (menusLoading || !dynamicMenus || dynamicMenus.length === 0) {
       return staticNavigation;
-    }    
-    return dynamicMenus;
-  }, [dynamicMenus, menusLoading]);
+    }
+    
+    // 🔐 Filter menus based on user permissions and role
+    const filteredMenus = filterMenuByPermissions(dynamicMenus, user);
+    
+    // Debug: Log menu permissions (can be removed in production)
+    if (process.env.NODE_ENV === 'development') {
+      debugMenuPermissions(dynamicMenus, user);
+    }
+    
+    return filteredMenus;
+  }, [dynamicMenus, menusLoading, user]);
   
   const handleLogout = async () => {
     await logout();
