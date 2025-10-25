@@ -114,7 +114,7 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/katacore}
       REDIS_HOST: ${DOCKER_REDIS_HOST:-redis}
-      REDIS_PORT: ${REDIS_PORT:-12004}
+      REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}

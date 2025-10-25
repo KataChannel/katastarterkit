@@ -17,16 +17,15 @@ RUN adduser --system --uid 1001 nextjs
 
 # Copy pre-built artifacts from local build
 # Expected local paths (should exist before building):
-# - frontend/.next/        (Next.js build output)
+# - frontend/.next/        (Next.js build output - REQUIRED)
+# - frontend/node_modules/ (dependencies - REQUIRED)
 # - frontend/public/       (static files)
 # - frontend/package.json  (package definition)
 
 COPY frontend/.next ./.next
+COPY frontend/node_modules ./node_modules
 COPY frontend/public ./public
 COPY frontend/package.json ./package.json
-
-# Install dependencies using bun
-RUN bun install --frozen-lockfile --production 2>/dev/null || bun install --production
 
 # Change ownership of files to nextjs user
 RUN chown -R nextjs:nodejs /app

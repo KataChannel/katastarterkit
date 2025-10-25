@@ -19,15 +19,18 @@ RUN adduser -S nestjs -u 1001
 # - backend/dist/          (compiled TypeScript)
 # - backend/prisma/        (Prisma schema)
 # - backend/package.json   (package definition)
+# - backend/bun.lockb      (lock file)
 # - backend/entrypoint.sh  (migration script)
 
 COPY backend/dist ./dist
 COPY backend/prisma ./prisma
 COPY backend/package.json ./package.json
+COPY backend/package-lock.json* ./
+COPY backend/bun.lockb* ./
 COPY backend/entrypoint.sh ./entrypoint.sh
 
-# Install dependencies using bun
-RUN bun install --frozen-lockfile --production 2>/dev/null || bun install --production
+# Install dependencies (including devDependencies with Prisma)
+RUN bun install --frozen-lockfile
 
 RUN chmod +x ./entrypoint.sh
 RUN chown -R nestjs:nodejs /app
