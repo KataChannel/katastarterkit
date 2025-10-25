@@ -66,7 +66,7 @@ COPY --chown=nextjs:nodejs frontend/.next/standalone ./
 COPY --chown=nextjs:nodejs frontend/.next/static ./.next/static
 COPY --chown=nextjs:nodejs frontend/public ./public
 # Copy app directory for App Router support
-COPY --chown=nextjs:nodejs frontend/app ./app
+# COPY --chown=nextjs:nodejs frontend/app ./app
 
 # Switch to non-root user
 USER nextjs
