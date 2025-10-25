@@ -7,6 +7,26 @@ set -e
 
 echo "🚀 Starting backend entrypoint..."
 
+# Wait for Redis to be ready
+echo "⏳ Waiting for Redis to be ready..."
+REDIS_HOST=${DOCKER_REDIS_HOST:-redis}
+REDIS_PORT=${DOCKER_REDIS_PORT:-6379}
+REDIS_READY=0
+
+for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+  echo "Redis connection attempt $i/15..."
+  if nc -z "$REDIS_HOST" "$REDIS_PORT" 2>/dev/null; then
+    echo "✅ Redis is ready!"
+    REDIS_READY=1
+    break
+  fi
+  sleep 2
+done
+
+if [ "$REDIS_READY" -eq 0 ]; then
+  echo "⚠️  Redis not responding, but continuing (will retry on demand)..."
+fi
+
 # Wait for database to be ready
 echo "⏳ Waiting for database to be ready..."
 until ./node_modules/.bin/prisma db push --accept-data-loss 2>/dev/null; do

@@ -42,6 +42,7 @@ services:
     image: ${REDIS_IMAGE:-redis:7.4-alpine}
     container_name: ${REDIS_CONTAINER_NAME:-rausachcore-redis}
     restart: unless-stopped
+    command: redis-server --appendonly yes --timeout 300
     ports:
       - "${REDIS_PORT:-12004}:6379"
     volumes:
@@ -49,10 +50,13 @@ services:
     networks:
       - rausachcore-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    environment:
+      - REDIS_REPLICATION_BACKLOG_TTL=3600
 
   # Elasticsearch for Search
   elasticsearch:

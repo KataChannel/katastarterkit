@@ -7,8 +7,8 @@
 FROM oven/bun:1.3-alpine AS production
 WORKDIR /app
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+# Install curl and netcat for health checks and service availability checks
+RUN apk add --no-cache curl netcat-openbsd
 
 # Create non-root user first
 RUN addgroup -g 1001 -S nodejs
