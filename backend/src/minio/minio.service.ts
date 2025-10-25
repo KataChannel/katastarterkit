@@ -21,10 +21,14 @@ export class MinioService implements OnModuleInit {
         const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
         const endpoint = isDockerEnv 
           ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
-          : this.configService.get('MINIO_ENDPOINT', 'localhost');
-        const port = isDockerEnv
-          ? parseInt(this.configService.get('DOCKER_MINIO_PORT', '9000'))
-          : parseInt(this.configService.get('MINIO_PORT', '9000'));
+          : this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
+        
+        // Always use configured port from .env
+        const portConfig = isDockerEnv
+          ? this.configService.get('DOCKER_MINIO_PORT', '9000')
+          : this.configService.get('MINIO_PORT', '12007');
+        const port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
+        
         const useSSL = this.configService.get('MINIO_USE_SSL') === 'true';
         const accessKey = this.configService.get('MINIO_ACCESS_KEY', 'minioadmin');
         const secretKey = this.configService.get('MINIO_SECRET_KEY', 'minioadmin');
@@ -54,7 +58,6 @@ export class MinioService implements OnModuleInit {
         
         if (attempt === retries) {
           this.logger.error(`❌ Failed to connect to Minio after ${retries} attempts: ${error?.message || error}`);
-          // Don't throw - allow service to continue with degraded mode
           this.isReady = false;
           return;
         }

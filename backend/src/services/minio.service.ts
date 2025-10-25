@@ -25,16 +25,17 @@ export class MinioService implements OnModuleInit {
 
   constructor(private configService: ConfigService) {
     // Determine if running in Docker
-    const isDocker = process.env.DOCKER_ENV === 'true';
+    const isDocker = process.env.DOCKER_NETWORK_NAME !== undefined;
     
     this.endpoint = isDocker 
       ? this.configService.get<string>('DOCKER_MINIO_ENDPOINT', 'minio')
-      : this.configService.get<string>('MINIO_ENDPOINT', 'localhost');
+      : this.configService.get<string>('MINIO_ENDPOINT', '116.118.49.243');
     
-    this.port = parseInt(
-      this.configService.get<string>('MINIO_PORT', '9000'),
-      10,
-    );
+    // Always use configured port from .env
+    const portConfig = isDocker
+      ? this.configService.get<string>('DOCKER_MINIO_PORT', '9000')
+      : this.configService.get<string>('MINIO_PORT', '12007');
+    this.port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
     
     this.useSSL = this.configService.get<string>('MINIO_USE_SSL', 'false') === 'true';
     this.bucketName = this.configService.get<string>('MINIO_BUCKET_NAME', 'uploads');
