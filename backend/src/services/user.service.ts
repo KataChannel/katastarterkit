@@ -2,11 +2,15 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service';
 import { User, $Enums } from '@prisma/client';
 import { RegisterUserInput, UpdateUserInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput, AdminCreateUserInput } from '../graphql/inputs/user.input';
+import { AuthService } from '../auth/auth.service';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
+  ) {}
 
   async findById(id: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
@@ -415,5 +419,22 @@ export class UserService {
         },
       },
     });
+  }
+
+  /**
+   * Admin reset password cho người dùng
+   * - Call authService để generate password ngẫu nhiên
+   * - Trả về password mới cho admin gửi cho user
+   */
+  async adminResetPassword(
+    userId: string,
+    adminId: string,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    newPassword: string;
+    user: User;
+  }> {
+    return this.authService.adminResetPassword(userId, adminId);
   }
 }

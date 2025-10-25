@@ -421,3 +421,15 @@ export class SetPasswordInput {
   @IsNotEmpty({ message: 'Xác nhận mật khẩu không được để trống' })
   confirmPassword: string;
 }
+
+/**
+ * Input để admin reset mật khẩu cho người dùng
+ * - Admin sẽ nhập ID người dùng
+ * - Hệ thống tự động tạo mật khẩu ngẫu nhiên
+ */
+@InputType()
+export class AdminResetPasswordInput {
+  @Field()
+  @IsUUID('4', { message: 'User ID phải là UUID hợp lệ' })
+  userId: string;
+}
