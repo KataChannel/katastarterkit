@@ -80,7 +80,7 @@ export function WebsiteHeader() {
       title: "Khuyến Mãi Đặc Biệt",
       subtitle: "Giảm giá lên đến 50% cho tất cả sản phẩm",
       description: "Ưu đãi có thời hạn - Nhanh tay đặt hàng!",
-      image: "https://shop.rausachtrangia.com/assets/images/tunongtraidenbanan.jpg",
+      image: "/assets/images/tunongtraidenbanan.jpg",
       cta: "Mua Ngay",
       badge: "HOT",
       bgColor: ""
@@ -248,7 +248,7 @@ export function WebsiteHeader() {
               href="/website"
               className="text-2xl font-bold text-blue-600"
               >
-              <img src="https://shop.rausachtrangia.com/assets/images/logo-full.png" alt="Logo" className="max-h-20" />
+              <img src="/assets/images/logo.svg" alt="Logo" className="max-h-20 h-20" />
             </Link>
           </div>  
 

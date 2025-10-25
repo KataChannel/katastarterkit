@@ -15,6 +15,17 @@ input AdminCreateUserInput {
   username: String!
 }
 
+input AdminResetPasswordInput {
+  userId: String!
+}
+
+type AdminResetPasswordResult {
+  message: String!
+  newPassword: String!
+  success: Boolean!
+  user: User!
+}
+
 input AdminUpdateUserInput {
   avatar: String
   email: String
@@ -1977,6 +1988,7 @@ type Mutation {
   addProductImage(input: CreateProductImageInput!): ProductType!
   addProductVariant(input: CreateProductVariantInput!): ProductType!
   adminCreateUser(input: AdminCreateUserInput!): User!
+  adminResetPassword(input: AdminResetPasswordInput!): AdminResetPasswordResult!
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
   approveConversion(id: String!): Boolean!
   archiveCourse(id: ID!): Course!
