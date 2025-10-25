@@ -1,9 +1,14 @@
 #!/bin/bash
 
-# Build backend before deployment
+# Build backend and frontend before deployment
 echo "Building backend..."
 cd backend
 bun install
+bun run build
+cd ..
+
+echo "Building frontend..."
+cd frontend
 bun run build
 cd ..
 
@@ -16,12 +21,7 @@ git push
 ssh root@116.118.49.243 << 'EOF'
 cd shoprausach
 git pull
-# Build backend on remote server
-cd backend
-bun install
-bun run build
-cd ..
-# Deploy with docker
+# Deploy with docker (all builds are cached/prebuilt locally)
 docker compose -f 'docker-compose.yml' up -d --build
 docker builder prune -af
 #docker image prune -a -f
