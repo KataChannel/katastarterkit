@@ -101,10 +101,10 @@ show_progress() {
 
 # Lấy số thứ tự cao nhất hiện có trong thư mục docs
 max_number=0
-if ls docs/*.md 1> /dev/null 2>&1; then
-    for file in docs/*.md; do
+if ls docs/*.{md,js,sh} 1> /dev/null 2>&1; then
+    for file in docs/*.{md,js,sh}; do
         if [ -f "$file" ]; then
-            # Trích xuất số từ tên file (format: số-tên.md)
+            # Trích xuất số từ tên file (format: số-tên.extension)
             filename=$(basename "$file")
             if [[ "$filename" =~ ^([0-9]+)- ]]; then
                 number="${BASH_REMATCH[1]}"
@@ -132,19 +132,27 @@ declare -a skipped_files
 declare -a archived_files
 declare -a error_files
 
-# Tìm tất cả file .md ở root level, trừ README.md (case-insensitive)
+# Tìm tất cả file: .md (trừ README.md), *test* và *verify* (.js, .sh)
 shopt -s nullglob  # Prevent glob expansion if no matches
 all_md_files=(*.md)
+test_js_files=(*test*.js)
+verify_js_files=(*verify*.js)
+test_sh_files=(*test*.sh)
+verify_sh_files=(*verify*.sh)
 shopt -u nullglob
 
-# Filter out README.md (case-insensitive)
+# Combine all file types
+all_target_files=("${all_md_files[@]}" "${test_js_files[@]}" "${verify_js_files[@]}" "${test_sh_files[@]}" "${verify_sh_files[@]}")
+
+# Filter out README.md (case-insensitive) and process all files
 md_files=()
-for file in "${all_md_files[@]}"; do
+for file in "${all_target_files[@]}"; do
     filename=$(basename "$file")
     # Skip README.md in any case variation
-    if [[ ! "${filename,,}" == "readme.md" ]]; then
-        md_files+=("$file")
+    if [[ "${filename,,}" == "readme.md" ]]; then
+        continue
     fi
+    md_files+=("$file")
 done
 
 # Apply category filter if specified
@@ -159,19 +167,33 @@ if [ -n "$CATEGORY" ]; then
     print_status "$YELLOW" "🏷️  Filtered to ${#md_files[@]} files matching category: $CATEGORY"
 fi
 
-# Show excluded files for transparency
-excluded_count=$((${#all_md_files[@]} - ${#md_files[@]}))
+# Show file type statistics for transparency
+total_found=${#all_target_files[@]}
+excluded_count=$((total_found - ${#md_files[@]}))
 if [ $excluded_count -gt 0 ]; then
     print_status "$YELLOW" "📄 Excluded $excluded_count README.md files from processing"
 fi
+if [ ${#test_js_files[@]} -gt 0 ] || [ ${#verify_js_files[@]} -gt 0 ] || [ ${#test_sh_files[@]} -gt 0 ] || [ ${#verify_sh_files[@]} -gt 0 ]; then
+    script_count=$((${#test_js_files[@]} + ${#verify_js_files[@]} + ${#test_sh_files[@]} + ${#verify_sh_files[@]}))
+    print_status "$BLUE" "🔧 Found $script_count test/verify script files (.js/.sh)"
+fi
 
 if [ ${#md_files[@]} -eq 0 ]; then
-    print_status "$YELLOW" "📄 No .md files found in root directory"
+    print_status "$YELLOW" "📄 No target files (.md, *test*, *verify*) found in root directory"
     exit 0
 fi
 
 total_files=${#md_files[@]}
-print_status "$GREEN" "📊 Found $total_files .md files to process"
+md_count=0
+script_count=0
+for file in "${md_files[@]}"; do
+    if [[ "$file" == *.md ]]; then
+        md_count=$((md_count + 1))
+    else
+        script_count=$((script_count + 1))
+    fi
+done
+print_status "$GREEN" "📊 Found $total_files files to process: $md_count .md files, $script_count test/verify scripts"
 echo ""
 
 # Sắp xếp file theo thời gian sửa đổi (mtime)
@@ -222,7 +244,7 @@ for file in "${sorted_files[@]}"; do
     fi
     
     # Process based on file state
-    if [[ ! "$filename" =~ ^[0-9]+-.*\.md$ ]]; then
+    if [[ ! "$filename" =~ ^[0-9]+-.*\.(md|js|sh)$ ]]; then
         # File without number - add number and move
         new_filename="${next_number}-${filename}"
         
@@ -320,7 +342,7 @@ echo ""
 
 # Total files in docs
 if [ "$DRY_RUN" = false ]; then
-    total_docs=$(ls -1 docs/*.md 2>/dev/null | wc -l)
+    total_docs=$(ls -1 docs/*.{md,js,sh} 2>/dev/null | wc -l)
     print_status "$GREEN" "📁 Total files in docs/: $total_docs"
     
     if [ "$ARCHIVE_OLD" = true ]; then
@@ -375,13 +397,13 @@ if [ ${#error_files[@]} -gt 0 ]; then
 fi
 
 # List final state (first 15 files)
-if [ "$DRY_RUN" = false ] && ls docs/*.md 1> /dev/null 2>&1; then
+if [ "$DRY_RUN" = false ] && ls docs/*.{md,js,sh} 1> /dev/null 2>&1; then
     print_status "$BLUE" "📁 Current docs/ contents:"
-    ls -1 docs/*.md | head -15 | while read -r file; do
+    ls -1 docs/*.{md,js,sh} | head -15 | while read -r file; do
         basename "$file"
     done | nl -w2 -s'. '
     
-    remaining=$(($(ls -1 docs/*.md | wc -l) - 15))
+    remaining=$(($(ls -1 docs/*.{md,js,sh} | wc -l) - 15))
     if [ $remaining -gt 0 ]; then
         echo "   ... and $remaining more files"
     fi
