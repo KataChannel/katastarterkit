@@ -24,7 +24,7 @@ echo -e "${BLUE}========================================${NC}\n"
 if [ ! -d "$BACKUP_ROOT" ]; then
     echo -e "${RED}❌ Backup directory not found: $BACKUP_ROOT${NC}"
     echo -e "${YELLOW}⚠️  Create a backup first:${NC}"
-    echo -e "   npm run db:backup"
+    echo -e "   bun run db:backup"
     exit 1
 fi
 

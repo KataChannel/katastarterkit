@@ -119,10 +119,10 @@ services:
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       MINIO_ENDPOINT: ${DOCKER_MINIO_ENDPOINT:-minio}
-      MINIO_PORT: ${MINIO_PORT:-9000}
+      MINIO_PORT: 9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      MINIO_USE_SSL: ${MINIO_USE_SSL:-true}
+      MINIO_USE_SSL: false
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-uploads}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:12000}
     ports:

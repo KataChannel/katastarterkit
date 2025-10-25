@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Entrypoint script for NestJS backend with Prisma migrations
+# Uses Bun.js for faster execution
 
 set -e
 

@@ -51,7 +51,7 @@ echo "--------------------------------------"
 cat > test-dynamic-templates.ts << 'EOF'
 /**
  * Dynamic Template System Test Script
- * Run: npx ts-node test-dynamic-templates.ts
+ * Run: bun run test-dynamic-templates.ts
  */
 
 import { TemplateRegistry, TemplateCompiler, DatabaseTemplateService } from './src/lib/dynamicTemplateSystem';
@@ -684,7 +684,7 @@ echo "- Documentation: 1"
 echo "- Example Templates: 5+"
 echo ""
 echo "🧪 To Test the System:"
-echo "1. Run: npx ts-node test-dynamic-templates.ts"
+echo "1. Run: bun run test-dynamic-templates.ts"
 echo "2. Import DynamicTemplateManager in your PageBuilder"
 echo "3. Use TemplateBuilder for creating custom templates"
 echo "4. Check documentation in DYNAMIC_TEMPLATE_SYSTEM_GUIDE.md"

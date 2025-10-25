@@ -79,11 +79,8 @@ const BACKUP_ROOT_DIR = './kata_json'; // Backup directory
 # Using bun
 bun run prisma/restore-optimized.ts
 
-# Using npm
-npm run db:restore-optimized
-
-# Using ts-node
-npx ts-node prisma/restore-optimized.ts
+# Using package.json script
+bun run db:restore-optimized
 ```
 
 ### Add to package.json
@@ -258,7 +255,7 @@ bun run prisma/restore-optimized.ts --dry-run
 
 ### Regular Backups
 ```bash
-npm run db:backup  # Create new backup
+bun run db:backup  # Create new backup
 ```
 
 ### Monitor Restore Performance

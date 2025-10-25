@@ -338,7 +338,7 @@ echo "   - Test template search and filtering"
 echo "   - Test template preview and application"
 echo
 echo "4. 🚀 BROWSER TESTING:"
-echo "   - Start dev server: npm run dev"
+echo "   - Start dev server: bun run dev"
 echo "   - Open PageBuilder"
 echo "   - Go to Templates tab"
 echo "   - Try creating, saving, and applying templates"

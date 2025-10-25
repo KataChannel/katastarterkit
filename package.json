@@ -33,8 +33,8 @@
     "db:studio": "cd backend && npx prisma studio",
     "db:pushforce": "cd backend && npx prisma db push --force-reset",
     "db:push": "cd backend && npx prisma db push",
-    "db:restore": "cd backend && npx ts-node prisma/restore.ts",
-    "db:backup": "cd backend && npx ts-node prisma/backup.ts"
+    "db:restore": "cd backend && bun run prisma/restore.ts",
+    "db:backup": "cd backend && bun run prisma/backup.ts"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.40.0",
@@ -47,9 +47,7 @@
     "prettier": "^3.6.2"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=10.0.0",
-    "bun": ">=1.1.34"
+    "bun": ">=1.1.0"
   },
   "keywords": [
     "bun",

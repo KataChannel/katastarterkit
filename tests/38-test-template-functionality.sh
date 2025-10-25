@@ -276,7 +276,7 @@ fi
 echo "📊 Status: $WORKING_FILES/$TOTAL_FILES core files working"
 echo
 echo "🚀 Next Steps:"
-echo "1. Start dev server: npm run dev"
+echo "1. Start dev server: bun run dev"
 echo "2. Open PageBuilder"
 echo "3. Check Templates tab in sidebar"
 echo "4. Test template preview and apply"

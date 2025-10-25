@@ -9,9 +9,9 @@ echo "🔍 Analyzing Next.js Production Bundle..."
 echo ""
 
 # Check if @next/bundle-analyzer is installed
-if ! npm list @next/bundle-analyzer >/dev/null 2>&1; then
+if ! bun list @next/bundle-analyzer >/dev/null 2>&1; then
   echo "📦 Installing @next/bundle-analyzer..."
-  npm install --save-dev @next/bundle-analyzer
+  bun add --save-dev @next/bundle-analyzer
 fi
 
 # Create temporary next.config.js with bundle analyzer
@@ -34,7 +34,7 @@ module.exports = withBundleAnalyzer(baseConfig)
 EOF
 
 echo "🏗️  Building production bundle..."
-ANALYZE=true npm run build
+ANALYZE=true bun run build
 
 # Restore original config
 mv "$BACKUP" "$NEXT_CONFIG"

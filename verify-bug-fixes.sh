@@ -65,7 +65,7 @@ echo
 echo "🚀 Ready for testing in browser!"
 echo
 echo "Next steps:"
-echo "- Start the development server: npm run dev"
+echo "- Start the development server: bun run dev"
 echo "- Test PageBuilder with new page creation"
 echo "- Verify drag-drop works when pageId is available"
 echo "- Test template thumbnails with Vietnamese text"

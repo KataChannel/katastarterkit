@@ -289,10 +289,10 @@ const BATCH_SIZE = 50; // Default
 ```bash
 # Run migrations
 cd backend
-npx prisma migrate deploy
+bun run prisma migrate deploy
 
 # Test
-node scripts/test-fuzzy-matching.js
+bun run scripts/test-fuzzy-matching.js
 ```
 
 ### Issue 2: Too Many Groups
@@ -301,7 +301,7 @@ node scripts/test-fuzzy-matching.js
 
 **Solution:** Lower threshold
 ```bash
-node updateten2.js --threshold=0.5 --force
+bun run updateten2.js --threshold=0.5 --force
 ```
 
 ### Issue 3: Too Few Groups

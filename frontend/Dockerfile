@@ -1,27 +1,9 @@
-# Multi-stage Dockerfile for Next.js Frontend with Bun.js
+# Optimized Dockerfile for Next.js Frontend
+# This expects pre-built artifacts from local build
+# Build locally: bun run build
+# Then: docker compose build frontend --no-cache
 
-# Dependencies stage
-FROM oven/bun:1.1.34 AS deps
-WORKDIR /app
-# Install unzip for Cypress
-RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
-COPY package.json bun.lockb* ./
-RUN bun install --frozen-lockfile
-
-# Build stage (use Node.js instead of Bun for better Next.js compatibility)
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Disable Next.js telemetry and set production environment for build
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
-
-RUN npm run build --legacy-peer-deps
-
-# Production stage with Bun.js
-FROM oven/bun:1.1.34-alpine AS production
+FROM oven/bun:1-alpine AS production
 WORKDIR /app
 
 # Install curl for health checks
@@ -33,11 +15,17 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy built application
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+# Copy pre-built artifacts from local build
+# Expected local paths (should exist before building):
+# - .next/        (Next.js build output)
+# - node_modules/ (production dependencies only)
+# - public/       (static files)
+# - package.json  (package definition)
+
+COPY --chown=nextjs:nodejs .next ./.next
+COPY --chown=nextjs:nodejs node_modules ./node_modules
+COPY --chown=nextjs:nodejs public ./public
+COPY --chown=nextjs:nodejs package.json ./package.json
 
 USER nextjs
 

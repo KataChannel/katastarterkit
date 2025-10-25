@@ -29,7 +29,7 @@ echo "------------------------------------"
 
 # Create a simple test to verify template loading
 cat > /tmp/test-template-loading.js << 'EOF'
-// Test template loading in Node.js environment
+// Test template loading in Bun environment
 console.log('Testing template loading...');
 
 // Mock localStorage for testing
@@ -71,7 +71,7 @@ if (stored.length === 1 && stored[0].name === 'Test Template') {
 }
 EOF
 
-node /tmp/test-template-loading.js
+bun run /tmp/test-template-loading.js
 
 echo
 
@@ -326,7 +326,7 @@ echo "  6. User guide created"
 echo
 
 echo "🔍 VERIFICATION STEPS:"
-echo "  1. Start development server: npm run dev"
+echo "  1. Start development server: bun run dev"
 echo "  2. Open PageBuilder in browser"
 echo "  3. Click Templates tab in sidebar"
 echo "  4. Check for any console errors"

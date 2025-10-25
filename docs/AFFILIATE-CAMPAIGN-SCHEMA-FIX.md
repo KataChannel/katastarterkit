@@ -257,7 +257,7 @@ model AffCampaign {
 
 ### 2. Run Migration
 ```bash
-npx prisma migrate dev --name add_campaign_optional_fields
+bun run prisma migrate dev --name add_campaign_optional_fields
 ```
 
 ### 3. Update Resolver
@@ -268,7 +268,7 @@ Remove default value assignments since they'll come from the database.
 ### Check GraphQL Schema
 ```bash
 # Start the backend
-npm run dev
+bun run dev
 
 # Visit GraphQL Playground
 # http://localhost:3000/graphql

@@ -8,14 +8,27 @@ export class MinioService {
   private readonly minioClient: Minio.Client;
 
   constructor(private readonly configService: ConfigService) {
+    // Use Docker-specific endpoints if available (for Docker deployments)
+    const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
+    const endpoint = isDockerEnv 
+      ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
+      : this.configService.get('MINIO_ENDPOINT', 'localhost');
+    const port = isDockerEnv
+      ? parseInt(this.configService.get('DOCKER_MINIO_PORT', '9000'))
+      : parseInt(this.configService.get('MINIO_PORT', '9000'));
+    const useSSL = this.configService.get('MINIO_USE_SSL') === 'true';
+    const accessKey = this.configService.get('MINIO_ACCESS_KEY', 'minioadmin');
+    const secretKey = this.configService.get('MINIO_SECRET_KEY', 'minioadmin');
+
+    this.logger.log(`Connecting to Minio: endpoint=${endpoint}, port=${port}, useSSL=${useSSL}, dockerEnv=${isDockerEnv}`);
+
     this.minioClient = new Minio.Client({
-      endPoint: this.configService.get('MINIO_ENDPOINT', 'localhost'),
-      port: parseInt(this.configService.get('MINIO_PORT', '9000')),
-      useSSL: this.configService.get('MINIO_USE_SSL', 'false') === 'true',
-      accessKey: this.configService.get('MINIO_ACCESS_KEY', 'minioadmin'),
-      secretKey: this.configService.get('MINIO_SECRET_KEY', 'minioadmin'),
+      endPoint: endpoint,
+      port: port,
+      useSSL: useSSL,
+      accessKey: accessKey,
+      secretKey: secretKey,
     });
-    console.log('this.minioClient',this.minioClient);
     this.initializeBuckets();
   }
 

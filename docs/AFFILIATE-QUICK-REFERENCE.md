@@ -198,17 +198,17 @@ Database:
 ### 1. Database
 ```bash
 cd backend
-npx prisma migrate deploy
+bun run prisma migrate deploy
 ```
 
 ### 2. Build
 ```bash
 # Backend
-npm run build
+bun run build
 
 # Frontend
 cd ../frontend
-npm run build
+bun run build
 ```
 
 ### 3. Environment Variables
@@ -222,10 +222,10 @@ API_URL=http://localhost:3001
 ### 4. Start
 ```bash
 # Backend
-npm run start:prod
+bun run start:prod
 
 # Frontend
-npm run start
+bun run start
 ```
 
 ### 5. Verify

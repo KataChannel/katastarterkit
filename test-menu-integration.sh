@@ -13,7 +13,7 @@ echo "[Step 1] Verifying backend has no TypeScript errors..."
 
 cd backend
 
-if npm run build 2>&1 | grep -q "error TS"; then
+if bun run build 2>&1 | grep -q "error TS"; then
   echo "❌ Backend has TypeScript errors!"
   exit 1
 fi
@@ -26,7 +26,7 @@ echo "[Step 2] Verifying frontend has no TypeScript errors..."
 
 cd ../frontend
 
-if npm run build 2>&1 | grep -q "error TS"; then
+if bun run build 2>&1 | grep -q "error TS"; then
   echo "❌ Frontend has TypeScript errors!"
   exit 1
 fi
@@ -81,8 +81,8 @@ echo ""
 echo "System is ready for runtime testing!"
 echo ""
 echo "To test the complete system:"
-echo "1. Start backend: cd backend && npm run dev"
-echo "2. Start frontend: cd frontend && npm run dev"
+echo "1. Start backend: cd backend && bun run dev"
+echo "2. Start frontend: cd frontend && bun run dev"
 echo "3. Navigate to http://localhost:3000/website"
 echo "4. Check browser DevTools > Network > GraphQL for headerMenus query"
 echo "5. Verify menu items appear in header with working dropdowns"

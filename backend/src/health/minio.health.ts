@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   HealthIndicator,
   HealthIndicatorResult,
@@ -10,15 +10,22 @@ import { Client } from 'minio';
 @Injectable()
 export class MinioHealthIndicator extends HealthIndicator {
   private minioClient: Client;
+  private readonly logger = new Logger(MinioHealthIndicator.name);
 
   constructor(private readonly configService: ConfigService) {
     super();
     
+    const endpoint = this.configService.get('MINIO_ENDPOINT', 'localhost');
+    const port = parseInt(this.configService.get('MINIO_PORT', '9000'));
+    const useSSL = this.configService.get('MINIO_USE_SSL') === 'true';
+    
+    this.logger.log(`MinIO Health Check Config: endpoint=${endpoint}, port=${port}, useSSL=${useSSL}`);
+    
     // Create MinIO client for health checks
     this.minioClient = new Client({
-      endPoint: this.configService.get('MINIO_ENDPOINT', 'localhost'),
-      port: this.configService.get('MINIO_PORT', 9000),
-      useSSL: this.configService.get('MINIO_USE_SSL', 'false') === 'true',
+      endPoint: endpoint,
+      port: port,
+      useSSL: useSSL,
       accessKey: this.configService.get('MINIO_ACCESS_KEY', 'minioadmin'),
       secretKey: this.configService.get('MINIO_SECRET_KEY', 'minioadmin'),
     });
@@ -29,6 +36,8 @@ export class MinioHealthIndicator extends HealthIndicator {
       // Test MinIO connection by listing buckets
       const buckets = await this.minioClient.listBuckets();
       
+      this.logger.log(`MinIO health check passed. Found ${buckets.length} buckets`);
+      
       return this.getStatus(key, true, {
         minio: 'up',
         message: 'MinIO connection is healthy',
@@ -36,6 +45,8 @@ export class MinioHealthIndicator extends HealthIndicator {
         buckets: buckets.map(bucket => bucket.name),
       });
     } catch (error) {
+      this.logger.error(`MinIO health check failed: ${error.message}`, error);
+      
       const result = this.getStatus(key, false, {
         minio: 'down',
         message: error.message,

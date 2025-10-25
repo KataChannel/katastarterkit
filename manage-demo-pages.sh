@@ -18,12 +18,12 @@ cd "$(dirname "$0")"
 case "$1" in
   seed)
     echo "🌱 Seeding demo pages..."
-    cd $BACKEND_DIR && npx ts-node $SEED_SCRIPT
+    cd $BACKEND_DIR && bun run $SEED_SCRIPT
     ;;
   
   cleanup)
     echo "🧹 Cleaning up demo pages..."
-    cd $BACKEND_DIR && npx ts-node $CLEANUP_SCRIPT
+    cd $BACKEND_DIR && bun run $CLEANUP_SCRIPT
     ;;
   
   reseed)
@@ -31,10 +31,10 @@ case "$1" in
     echo ""
     cd $BACKEND_DIR
     echo "Step 1/2: Cleanup..."
-    npx ts-node $CLEANUP_SCRIPT
+    bun run $CLEANUP_SCRIPT
     echo ""
     echo "Step 2/2: Seed..."
-    npx ts-node $SEED_SCRIPT
+    bun run $SEED_SCRIPT
     ;;
   
   *)
