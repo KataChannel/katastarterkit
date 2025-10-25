@@ -104,9 +104,9 @@ ENV HOSTNAME="0.0.0.0"
 # Copy built files from builder stage
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/public ./public
+COPY --chown=nextjs:nodejs frontend/public ./public
 # Copy app directory for App Router support
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/app ./app
+COPY --chown=nextjs:nodejs frontend/app ./app
 
 # Switch to non-root user
 USER nextjs
