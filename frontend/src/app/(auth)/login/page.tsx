@@ -77,7 +77,7 @@ function LoginPageContent() {
         {/* Header */}
         <div>
           <div className="mx-auto h-12 w-auto flex items-center justify-center">
-            <h1 className="text-3xl font-bold text-blue-600">Katacore</h1>
+            <h1 className="text-3xl font-bold text-blue-600">rausachcore</h1>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to your account

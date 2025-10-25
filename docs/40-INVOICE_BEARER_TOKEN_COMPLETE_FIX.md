@@ -141,12 +141,12 @@ private async updatePostTags(postId: string, tagSlugs: string[], creatorId?: str
 ### Quick Deploy (Existing Setup)
 ```bash
 # 1. Pull latest code
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 git pull
 
 # 2. Restart backend (token optional now)
 cd backend
-pm2 restart katacore-backend
+pm2 restart rausachcore-backend
 # or
 bun dev
 ```
@@ -155,7 +155,7 @@ bun dev
 ```bash
 # 1. Clone and setup
 git clone <repo-url>
-cd katacore
+cd rausachcore
 npm install
 
 # 2. Configure environment

@@ -73,7 +73,7 @@ Quick navigation to all nested blocks documentation:
 ## 📂 File Structure
 
 ```
-/mnt/chikiet/kataoffical/fullstack/katacore/
+/mnt/chikiet/kataoffical/fullstack/rausachcore/
 │
 ├── 📄 QUICK-REFERENCE-NESTED-BLOCKS.md
 │   └─ TL;DR guide, 2-minute read

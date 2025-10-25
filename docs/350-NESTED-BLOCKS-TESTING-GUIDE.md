@@ -6,7 +6,7 @@
 
 1. Start the development environment:
 ```bash
-cd /mnt/chikiet/kataoffical/fullstack/katacore
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore
 npm run dev  # or yarn dev
 ```
 

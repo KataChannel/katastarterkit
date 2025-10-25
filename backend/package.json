@@ -1,8 +1,8 @@
 {
-  "name": "katacore-backend",
+  "name": "rausachcore-backend",
   "version": "1.0.0",
   "description": "Modern Backend with NestJS, GraphQL, Prisma, Redis, and Authentication",
-  "author": "KataCore Team",
+  "author": "rausachcore Team",
   "private": true,
   "license": "MIT",
   "scripts": {

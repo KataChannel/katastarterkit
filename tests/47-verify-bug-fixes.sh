@@ -24,7 +24,7 @@ echo
 echo "📋 Validation Pattern Check:"
 echo "Searching for consistent validation logic across all block addition methods..."
 
-cd /mnt/chikiet/kataoffical/fullstack/katacore/frontend
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore/frontend
 
 # Count validation patterns
 VALIDATION_COUNT=$(grep -c "Please save the page first before adding blocks" src/components/page-builder/PageBuilderProvider.tsx)

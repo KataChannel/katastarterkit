@@ -52,8 +52,8 @@ minio:
 
 ```bash
 # Stop and remove old container
-docker stop katacore-minio
-docker rm katacore-minio
+docker stop rausachcore-minio
+docker rm rausachcore-minio
 
 # Start with new configuration
 docker compose up -d minio
@@ -103,8 +103,8 @@ $ curl -s http://localhost:14000/health | jq '.info.minio'
 ```env
 MINIO_ENDPOINT=localhost
 MINIO_PORT=19001
-MINIO_ACCESS_KEY=katacore-admin
-MINIO_SECRET_KEY=katacore-secret-2025
+MINIO_ACCESS_KEY=rausachcore-admin
+MINIO_SECRET_KEY=rausachcore-secret-2025
 MINIO_USE_SSL=false
 MINIO_BUCKET_NAME=uploads
 ```
@@ -160,8 +160,8 @@ query {
 ### 1. Access MinIO Console:
 ```
 http://localhost:9001
-Username: katacore-admin
-Password: katacore-secret-2025
+Username: rausachcore-admin
+Password: rausachcore-secret-2025
 ```
 
 ### 2. Test File Upload (GraphQL):
@@ -218,8 +218,8 @@ For production deployment, consider:
 
 **Commands Executed:**
 ```bash
-docker stop katacore-minio
-docker rm katacore-minio
+docker stop rausachcore-minio
+docker rm rausachcore-minio
 docker compose up -d minio
 ```
 

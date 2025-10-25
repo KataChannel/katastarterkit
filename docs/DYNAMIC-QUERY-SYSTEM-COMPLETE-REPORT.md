@@ -8,7 +8,7 @@
 
 ## 📊 EXECUTIVE SUMMARY
 
-Đã hoàn thành việc xây dựng **Universal Dynamic Query System** - một hệ thống truy vấn động toàn diện cho **tất cả 42 Prisma models** trong dự án Katacore, giải quyết vấn đề "hầu như các query GraphQL đều bị lỗi" theo yêu cầu của user.
+Đã hoàn thành việc xây dựng **Universal Dynamic Query System** - một hệ thống truy vấn động toàn diện cho **tất cả 42 Prisma models** trong dự án rausachcore, giải quyết vấn đề "hầu như các query GraphQL đều bị lỗi" theo yêu cầu của user.
 
 ### Thành Quả Chính
 

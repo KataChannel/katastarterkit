@@ -131,8 +131,8 @@ curl -fsSL https://bun.sh/install | bash
 #### **Clone Repository**
 ```bash
 cd /opt
-git clone https://github.com/yourusername/katacore.git
-cd katacore
+git clone https://github.com/yourusername/rausachcore.git
+cd rausachcore
 git checkout main  # or your production branch
 ```
 
@@ -161,7 +161,7 @@ sleep 10
 cd backend
 
 # Set database URL
-export DATABASE_URL="postgresql://user:password@host:5432/katacore_prod"
+export DATABASE_URL="postgresql://user:password@host:5432/rausachcore_prod"
 
 # Run migrations
 bun prisma migrate deploy
@@ -184,7 +184,7 @@ nano .env.production
 
 ```env
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/katacore_prod"
+DATABASE_URL="postgresql://user:password@localhost:5432/rausachcore_prod"
 
 # JWT
 JWT_SECRET="your-super-secret-jwt-key-min-32-chars"
@@ -277,9 +277,9 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: katacore
+      POSTGRES_USER: rausachcore
       POSTGRES_PASSWORD: your-secure-password
-      POSTGRES_DB: katacore_prod
+      POSTGRES_DB: rausachcore_prod
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -291,7 +291,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://katacore:your-secure-password@postgres:5432/katacore_prod
+      DATABASE_URL: postgresql://rausachcore:your-secure-password@postgres:5432/rausachcore_prod
       NODE_ENV: production
       PORT: 14000
     ports:
@@ -362,7 +362,7 @@ pm2 status
 ```javascript
 module.exports = {
   apps: [{
-    name: 'katacore-backend',
+    name: 'rausachcore-backend',
     script: 'dist/main.js',
     instances: 2,
     exec_mode: 'cluster',
@@ -379,7 +379,7 @@ module.exports = {
 cd frontend
 
 # Start with PM2
-pm2 start npm --name "katacore-frontend" -- start
+pm2 start npm --name "rausachcore-frontend" -- start
 
 # Check status
 pm2 status
@@ -397,7 +397,7 @@ sudo systemctl enable nginx
 
 #### **Configure Nginx**
 ```bash
-sudo nano /etc/nginx/sites-available/katacore
+sudo nano /etc/nginx/sites-available/rausachcore
 ```
 
 ```nginx
@@ -453,7 +453,7 @@ server {
 
 #### **Enable Site**
 ```bash
-sudo ln -s /etc/nginx/sites-available/katacore /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/rausachcore /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -620,7 +620,7 @@ bun prisma studio
 
 #### **Create log viewer script**
 ```bash
-nano /opt/katacore/view-logs.sh
+nano /opt/rausachcore/view-logs.sh
 ```
 
 ```bash
@@ -636,7 +636,7 @@ sudo tail -n 50 /var/log/nginx/error.log
 ```
 
 ```bash
-chmod +x /opt/katacore/view-logs.sh
+chmod +x /opt/rausachcore/view-logs.sh
 ```
 
 ---
@@ -650,16 +650,16 @@ crontab -e
 
 ```cron
 # Check for errors every hour
-0 * * * * /opt/katacore/check-errors.sh
+0 * * * * /opt/rausachcore/check-errors.sh
 ```
 
 #### **check-errors.sh**
 ```bash
 #!/bin/bash
-ERROR_COUNT=$(docker-compose -f /opt/katacore/docker-compose.prod.yml logs backend | grep -i error | wc -l)
+ERROR_COUNT=$(docker-compose -f /opt/rausachcore/docker-compose.prod.yml logs backend | grep -i error | wc -l)
 
 if [ $ERROR_COUNT -gt 10 ]; then
-  echo "High error rate detected: $ERROR_COUNT errors" | mail -s "Katacore Alert" admin@yourdomain.com
+  echo "High error rate detected: $ERROR_COUNT errors" | mail -s "rausachcore Alert" admin@yourdomain.com
 fi
 ```
 
@@ -831,10 +831,10 @@ docker-compose -f docker-compose.prod.yml up -d --build
 #### **2. Database Rollback**
 ```bash
 # Backup current state
-pg_dump -U katacore katacore_prod > backup_$(date +%Y%m%d_%H%M%S).sql
+pg_dump -U rausachcore rausachcore_prod > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Restore previous backup
-psql -U katacore katacore_prod < backup_previous.sql
+psql -U rausachcore rausachcore_prod < backup_previous.sql
 ```
 
 #### **3. Communication**

@@ -427,7 +427,7 @@
   "schemaVersion": 27,
   "style": "dark",
   "tags": [
-    "katacore",
+    "rausachcore",
     "monitoring"
   ],
   "templating": {
@@ -439,7 +439,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "KataCore Application Dashboard",
-  "uid": "katacore-main",
+  "title": "rausachcore Application Dashboard",
+  "uid": "rausachcore-main",
   "version": 1
 }

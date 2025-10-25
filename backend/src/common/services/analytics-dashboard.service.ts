@@ -351,8 +351,8 @@ export class AnalyticsDashboardService {
   private initializeDefaultDashboard(): void {
     const defaultDashboard: CustomDashboard = {
       id: 'default',
-      name: 'KataCore Analytics Dashboard',
-      description: 'Main analytics dashboard for KataCore application',
+      name: 'rausachcore Analytics Dashboard',
+      description: 'Main analytics dashboard for rausachcore application',
       widgets: this.defaultWidgets,
       layout: 'grid',
       refreshRate: 5000,

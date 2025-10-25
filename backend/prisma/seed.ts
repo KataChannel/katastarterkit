@@ -9,10 +9,10 @@ async function main() {
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 10);
     const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@katacore.dev' },
+    where: { email: 'admin@rausachcore.dev' },
     update: {},
     create: {
-      email: 'admin@katacore.dev',
+      email: 'admin@rausachcore.dev',
       username: 'admin',
       firstName: 'Admin',
       lastName: 'User',
@@ -25,10 +25,10 @@ async function main() {
   // Create test users
   const userPassword = await bcrypt.hash('user123', 10);
   const testUser = await prisma.user.upsert({
-    where: { email: 'user@katacore.dev' },
+    where: { email: 'user@rausachcore.dev' },
     update: {},
     create: {
-      email: 'user@katacore.dev',
+      email: 'user@rausachcore.dev',
       username: 'testuser',
       password: userPassword,
       firstName: 'Test',
@@ -85,10 +85,10 @@ async function main() {
   const posts = await Promise.all([
     prisma.post.create({
       data: {
-        title: 'Welcome to KataCore',
-        content: `# Welcome to KataCore
+        title: 'Welcome to rausachcore',
+        content: `# Welcome to rausachcore
 
-KataCore is a modern fullstack starter kit built with the latest technologies.
+rausachcore is a modern fullstack starter kit built with the latest technologies.
 
 ## Features
 
@@ -101,8 +101,8 @@ KataCore is a modern fullstack starter kit built with the latest technologies.
 - **Docker** for containerization
 
 This starter kit provides everything you need to build scalable, production-ready applications.`,
-        excerpt: 'Learn about KataCore, the modern fullstack starter kit.',
-        slug: 'welcome-to-katacore',
+        excerpt: 'Learn about rausachcore, the modern fullstack starter kit.',
+        slug: 'welcome-to-rausachcore',
         status: PostStatus.PUBLISHED,
         publishedAt: new Date(),
         authorId: adminUser.id,
@@ -215,7 +215,7 @@ export class PostModule {}
   await Promise.all([
     prisma.comment.create({
       data: {
-        content: 'Great introduction to KataCore! Looking forward to using it.',
+        content: 'Great introduction to rausachcore! Looking forward to using it.',
         postId: posts[0].id,
         userId: testUser.id,
       },
@@ -246,8 +246,8 @@ export class PostModule {}
   ]);
 
   console.log('✅ Seed completed successfully!');
-  console.log(`👤 Admin user: admin@katacore.dev / admin123`);
-  console.log(`👤 Test user: user@katacore.dev / user123`);
+  console.log(`👤 Admin user: admin@rausachcore.dev / admin123`);
+  console.log(`👤 Test user: user@rausachcore.dev / user123`);
   console.log(`📝 Created ${posts.length} posts`);
   console.log(`🏷️ Created ${tags.length} tags`);
 }

@@ -1,6 +1,6 @@
 # 📊 AFFILIATE SYSTEM - EXECUTIVE SUMMARY
 
-**Dự án**: KataCore Fullstack Affiliate Marketing System  
+**Dự án**: rausachcore Fullstack Affiliate Marketing System  
 **Ngày**: 19 Tháng 10, 2025  
 **Status**: ✅ **PRODUCTION READY**
 

@@ -1,7 +1,7 @@
 # ✅ CẬP NHẬT PORT HOÀN THÀNH
 
 ## 🎯 Kết Quả
-Toàn bộ dự án KATACORE đã được cập nhật để chạy trên các port mới.
+Toàn bộ dự án rausachcore đã được cập nhật để chạy trên các port mới.
 
 ## 📊 Port Mapping
 
@@ -27,7 +27,7 @@ Toàn bộ dự án KATACORE đã được cập nhật để chạy trên các 
 ## 🚀 Quick Start
 
 ```bash
-cd /mnt/chikiet/kataoffical/fullstack/katacore
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore
 docker compose up -d --build
 ```
 

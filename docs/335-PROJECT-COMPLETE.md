@@ -365,7 +365,7 @@ See: `RESTORE-OPTIMIZATION-REPORT.md` → "Technical Improvements"
 All files ready to use:
 
 ```
-/mnt/chikiet/kataoffical/fullstack/katacore/
+/mnt/chikiet/kataoffical/fullstack/rausachcore/
 
 Root Level:
 ├─ DB-RESTORE-QUICK-START.md ⭐ Start here
@@ -421,7 +421,7 @@ Read: `DB-RESTORE-QUICK-START.md`
 
 ---
 
-**Project**: Katacore LMS Database Restore Optimization  
+**Project**: rausachcore LMS Database Restore Optimization  
 **Status**: ✅ COMPLETE  
 **Version**: 1.0  
 **Date**: December 2024  

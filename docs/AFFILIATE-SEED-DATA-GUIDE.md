@@ -438,4 +438,4 @@ Nếu gặp vấn đề:
 
 ---
 
-**Created with ❤️ for KataCore Affiliate System**
+**Created with ❤️ for rausachcore Affiliate System**

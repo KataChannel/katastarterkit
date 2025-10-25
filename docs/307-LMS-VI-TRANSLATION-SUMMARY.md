@@ -9,7 +9,7 @@
 ### 1. Pages (Trang)
 
 #### `/lms/page.tsx` - Trang chủ LMS ✅
-- Hero: "Chào mừng đến Katacore LMS"
+- Hero: "Chào mừng đến rausachcore LMS"
 - Stats: "Khóa học", "Học viên", "Giảng viên", "Tỉ lệ thành công"
 - Features: "Khóa học Video", "Nội dung Đa dạng", "Bài kiểm tra", "Chứng chỉ"
 - CTA: "Khám phá khóa học", "Học tập của tôi", "Trở thành Giảng viên"

@@ -51,7 +51,7 @@ export class ElasticsearchService {
   private isConnected: boolean = false;
 
   constructor(private configService: ConfigService) {
-    this.indexPrefix = this.configService.get('ELASTICSEARCH_INDEX_PREFIX', 'katacore');
+    this.indexPrefix = this.configService.get('ELASTICSEARCH_INDEX_PREFIX', 'rausachcore');
     
     this.client = new Client({
       node: this.configService.get('ELASTICSEARCH_URL', 'http://localhost:9200'),

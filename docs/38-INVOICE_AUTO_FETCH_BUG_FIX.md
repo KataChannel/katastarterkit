@@ -208,7 +208,7 @@ curl -X POST http://localhost:14000/api/invoices/sync \
 
 1. **Check Code Changes**:
    ```bash
-   cd /chikiet/kataoffical/fullstack/katacore/backend
+   cd /chikiet/kataoffical/fullstack/rausachcore/backend
    grep -n "getBearerTokenSafe" src/services/invoice.service.ts
    # Should show lines 81 and 159
    ```

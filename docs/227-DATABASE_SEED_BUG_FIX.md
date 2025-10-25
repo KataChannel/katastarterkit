@@ -162,12 +162,12 @@ docker compose up -d --build
 
 Creates:
 - ✅ **Admin User**
-  - Email: `admin@katacore.dev`
+  - Email: `admin@rausachcore.dev`
   - Password: `admin123`
   - Role: `ADMIN`
 
 - ✅ **Test User**
-  - Email: `user@katacore.dev`
+  - Email: `user@rausachcore.dev`
   - Password: `user123`
   - Role: `USER`
 
@@ -211,8 +211,8 @@ Expected output:
 📋 Step 2: Run Database Seed
 🌱 Starting seed...
 ✅ Seed completed successfully!
-👤 Admin user: admin@katacore.dev / admin123
-👤 Test user: user@katacore.dev / user123
+👤 Admin user: admin@rausachcore.dev / admin123
+👤 Test user: user@rausachcore.dev / user123
 📝 Created 3 posts
 🏷️ Created 4 tags
 
@@ -222,11 +222,11 @@ Expected output:
 🎉 All tests passed!
 
 📊 Admin Credentials:
-   Email: admin@katacore.dev
+   Email: admin@rausachcore.dev
    Password: admin123
 
 📊 Test User Credentials:
-   Email: user@katacore.dev
+   Email: user@rausachcore.dev
    Password: user123
 ```
 

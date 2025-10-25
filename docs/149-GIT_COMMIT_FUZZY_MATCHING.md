@@ -83,5 +83,5 @@ Tested with 16k+ products. Production ready."
 ## Push to Remote
 
 ```bash
-git push origin katacore
+git push origin rausachcore
 ```

@@ -6,7 +6,7 @@
 echo "🔍 Testing PageBuilder Updates..."
 echo "=================================="
 
-FRONTEND_DIR="/mnt/chikiet/kataoffical/fullstack/katacore/frontend"
+FRONTEND_DIR="/mnt/chikiet/kataoffical/fullstack/rausachcore/frontend"
 PASSED=0
 FAILED=0
 

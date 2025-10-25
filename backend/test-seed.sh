@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Test seed script for KataCore Backend
+# Test seed script for rausachcore Backend
 
 echo "🧪 Testing Database Seed..."
 echo ""
@@ -55,9 +55,9 @@ echo ""
 echo -e "${GREEN}🎉 All tests passed!${NC}"
 echo ""
 echo "📊 Admin Credentials:"
-echo "   Email: admin@katacore.dev"
+echo "   Email: admin@rausachcore.dev"
 echo "   Password: admin123"
 echo ""
 echo "📊 Test User Credentials:"
-echo "   Email: user@katacore.dev"
+echo "   Email: user@rausachcore.dev"
 echo "   Password: user123"

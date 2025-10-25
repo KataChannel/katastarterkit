@@ -73,7 +73,7 @@
 ```bash
 # 1. Clone repository
 git clone <repository-url>
-cd katacore
+cd rausachcore
 
 # 2. Install dependencies
 cd backend

@@ -1,6 +1,6 @@
-# Prometheus Alert Rules for KataCore
+# Prometheus Alert Rules for rausachcore
 groups:
-  - name: katacore.rules
+  - name: rausachcore.rules
     rules:
       # High CPU usage
       - alert: HighCpuUsage

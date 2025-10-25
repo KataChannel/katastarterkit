@@ -84,8 +84,8 @@ DOCKER_MINIO_PORT=9000
 MINIO_ENDPOINT=localhost
 MINIO_PORT=12007
 MINIO_USE_SSL=false
-MINIO_ACCESS_KEY=katacore-admin
-MINIO_SECRET_KEY=katacore-secret-2025
+MINIO_ACCESS_KEY=rausachcore-admin
+MINIO_SECRET_KEY=rausachcore-secret-2025
 ```
 
 ### Docker (chạy trong container)
@@ -113,7 +113,7 @@ docker compose up -d
 ### 3. **Check logs**
 ```bash
 # Backend logs
-docker logs katacore-backend
+docker logs rausachcore-backend
 
 # Look for:
 # ✅ "Connecting to Minio: endpoint=minio, port=9000, useSSL=false"
@@ -125,7 +125,7 @@ docker logs katacore-backend
 ### 4. **Test Minio connection**
 ```bash
 # SSH into backend container
-docker exec -it katacore-backend bash
+docker exec -it rausachcore-backend bash
 
 # Test with curl
 curl -v telnet://minio:9000
@@ -173,7 +173,7 @@ Local Development:
 
 Docker Network:
 ┌──────────────────────────────────────┐
-│ Docker Network: katacore-network    │
+│ Docker Network: rausachcore-network    │
 │                                     │
 │  ┌──────────────────┐ ┌──────────┐ │
 │  │ Backend Service  │ │ Minio    │ │

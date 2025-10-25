@@ -5,7 +5,7 @@ echo "🔧 Template Library Comprehensive Fix"
 echo "====================================="
 echo
 
-cd /mnt/chikiet/kataoffical/fullstack/katacore/frontend
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore/frontend
 
 # 1. Fix Template Library Validation Issues
 echo "⚡ 1. Fixing Template Validation Issues"

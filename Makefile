@@ -1,10 +1,10 @@
-# Makefile for KataCore Development and Deployment
+# Makefile for rausachcore Development and Deployment
 
 # Default shell
 SHELL := /bin/bash
 
 # Project information
-PROJECT_NAME := katacore
+PROJECT_NAME := rausachcore
 COMPOSE_FILE := docker-compose.yml
 BACKEND_DIR := backend
 FRONTEND_DIR := frontend
@@ -22,7 +22,7 @@ NC := \033[0m # No Color
 # Help target
 .PHONY: help
 help: ## Show this help message
-	@echo "$(GREEN)KataCore Development Commands$(NC)"
+	@echo "$(GREEN)rausachcore Development Commands$(NC)"
 	@echo "=============================="
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "$(YELLOW)%-20s$(NC) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 

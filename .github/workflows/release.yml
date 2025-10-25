@@ -343,18 +343,18 @@ jobs:
         echo "Deploying $VERSION to production..."
         
         # Update image tags in manifests
-        sed -i "s|katacore/backend:latest|ghcr.io/${{ github.repository }}/backend:$VERSION|g" k8s/backend/backend.yaml
-        sed -i "s|katacore/frontend:latest|ghcr.io/${{ github.repository }}/frontend:$VERSION|g" k8s/frontend/frontend.yaml
+        sed -i "s|rausachcore/backend:latest|ghcr.io/${{ github.repository }}/backend:$VERSION|g" k8s/backend/backend.yaml
+        sed -i "s|rausachcore/frontend:latest|ghcr.io/${{ github.repository }}/frontend:$VERSION|g" k8s/frontend/frontend.yaml
         
         # Apply manifests
-        kubectl apply -f k8s/ --namespace=katacore
+        kubectl apply -f k8s/ --namespace=rausachcore
         
         # Wait for rollout
-        kubectl rollout restart deployment/backend --namespace=katacore
-        kubectl rollout restart deployment/frontend --namespace=katacore
+        kubectl rollout restart deployment/backend --namespace=rausachcore
+        kubectl rollout restart deployment/frontend --namespace=rausachcore
         
-        kubectl wait --for=condition=available deployment/backend --namespace=katacore --timeout=600s
-        kubectl wait --for=condition=available deployment/frontend --namespace=katacore --timeout=600s
+        kubectl wait --for=condition=available deployment/backend --namespace=rausachcore --timeout=600s
+        kubectl wait --for=condition=available deployment/frontend --namespace=rausachcore --timeout=600s
         
         echo "✅ Deployment completed successfully"
     
@@ -363,8 +363,8 @@ jobs:
         echo "Verifying deployment..."
         
         # Test health endpoints
-        kubectl exec -n katacore deployment/backend -- curl -f http://localhost:4000/health
-        kubectl exec -n katacore deployment/frontend -- curl -f http://localhost:3000
+        kubectl exec -n rausachcore deployment/backend -- curl -f http://localhost:4000/health
+        kubectl exec -n rausachcore deployment/frontend -- curl -f http://localhost:3000
         
         echo "✅ Deployment verification passed"
     
@@ -412,7 +412,7 @@ jobs:
         curl -X POST $SLACK_WEBHOOK_URL \
           -H 'Content-type: application/json' \
           --data "{
-            \"text\": \"${STATUS_EMOJI} KataCore ${RELEASE_TYPE}\",
+            \"text\": \"${STATUS_EMOJI} rausachcore ${RELEASE_TYPE}\",
             \"attachments\": [
               {
                 \"color\": \"${COLOR}\",

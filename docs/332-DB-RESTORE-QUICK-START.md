@@ -78,7 +78,7 @@ npm run db:restore-optimized
 
 **Output:**
 ```
-🚀 STARTING OPTIMIZED KATACORE DATA RESTORE
+🚀 STARTING OPTIMIZED rausachcore DATA RESTORE
 📂 Using backup: 20241219_103045
 
 🧹 Cleaning up existing data...

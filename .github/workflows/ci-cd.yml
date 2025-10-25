@@ -1,4 +1,4 @@
-name: KataCore CI/CD Pipeline
+name: rausachcore CI/CD Pipeline
 
 on:
   push:
@@ -315,19 +315,19 @@ jobs:
     
     - name: Update image tags in manifests
       run: |
-        sed -i "s|katacore/backend:latest|${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:develop|g" k8s/backend/backend.yaml
-        sed -i "s|katacore/frontend:latest|${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:develop|g" k8s/frontend/frontend.yaml
+        sed -i "s|rausachcore/backend:latest|${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:develop|g" k8s/backend/backend.yaml
+        sed -i "s|rausachcore/frontend:latest|${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:develop|g" k8s/frontend/frontend.yaml
     
     - name: Deploy to staging
       run: |
-        kubectl apply -f k8s/ --namespace=katacore-staging
-        kubectl rollout restart deployment/backend --namespace=katacore-staging
-        kubectl rollout restart deployment/frontend --namespace=katacore-staging
+        kubectl apply -f k8s/ --namespace=rausachcore-staging
+        kubectl rollout restart deployment/backend --namespace=rausachcore-staging
+        kubectl rollout restart deployment/frontend --namespace=rausachcore-staging
     
     - name: Wait for deployment
       run: |
-        kubectl wait --for=condition=available deployment/backend --namespace=katacore-staging --timeout=300s
-        kubectl wait --for=condition=available deployment/frontend --namespace=katacore-staging --timeout=300s
+        kubectl wait --for=condition=available deployment/backend --namespace=rausachcore-staging --timeout=300s
+        kubectl wait --for=condition=available deployment/frontend --namespace=rausachcore-staging --timeout=300s
     
     - name: Run smoke tests
       run: |
@@ -335,10 +335,10 @@ jobs:
         sleep 30
         
         # Test backend health
-        kubectl exec -n katacore-staging deployment/backend -- curl -f http://localhost:4000/health
+        kubectl exec -n rausachcore-staging deployment/backend -- curl -f http://localhost:4000/health
         
         # Test frontend
-        kubectl exec -n katacore-staging deployment/frontend -- curl -f http://localhost:3000
+        kubectl exec -n rausachcore-staging deployment/frontend -- curl -f http://localhost:3000
 
   # Deploy to Production
   deploy-production:
@@ -369,19 +369,19 @@ jobs:
     
     - name: Update image tags in manifests
       run: |
-        sed -i "s|katacore/backend:latest|${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:${{ steps.version.outputs.VERSION }}|g" k8s/backend/backend.yaml
-        sed -i "s|katacore/frontend:latest|${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.version.outputs.VERSION }}|g" k8s/frontend/frontend.yaml
+        sed -i "s|rausachcore/backend:latest|${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}:${{ steps.version.outputs.VERSION }}|g" k8s/backend/backend.yaml
+        sed -i "s|rausachcore/frontend:latest|${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}:${{ steps.version.outputs.VERSION }}|g" k8s/frontend/frontend.yaml
     
     - name: Deploy to production
       run: |
-        kubectl apply -f k8s/ --namespace=katacore
-        kubectl rollout restart deployment/backend --namespace=katacore
-        kubectl rollout restart deployment/frontend --namespace=katacore
+        kubectl apply -f k8s/ --namespace=rausachcore
+        kubectl rollout restart deployment/backend --namespace=rausachcore
+        kubectl rollout restart deployment/frontend --namespace=rausachcore
     
     - name: Wait for deployment
       run: |
-        kubectl wait --for=condition=available deployment/backend --namespace=katacore --timeout=600s
-        kubectl wait --for=condition=available deployment/frontend --namespace=katacore --timeout=600s
+        kubectl wait --for=condition=available deployment/backend --namespace=rausachcore --timeout=600s
+        kubectl wait --for=condition=available deployment/frontend --namespace=rausachcore --timeout=600s
     
     - name: Run production smoke tests
       run: |
@@ -389,10 +389,10 @@ jobs:
         sleep 30
         
         # Test backend health
-        kubectl exec -n katacore deployment/backend -- curl -f http://localhost:4000/health
+        kubectl exec -n rausachcore deployment/backend -- curl -f http://localhost:4000/health
         
         # Test frontend
-        kubectl exec -n katacore deployment/frontend -- curl -f http://localhost:3000
+        kubectl exec -n rausachcore deployment/frontend -- curl -f http://localhost:3000
         
         # Test external endpoints (if configured)
         if [ "${{ secrets.PRODUCTION_DOMAIN }}" != "" ]; then
@@ -430,7 +430,7 @@ jobs:
     - name: Create database backup
       run: |
         BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S)"
-        kubectl exec -n katacore deployment/postgres -- pg_dump -U katacore katacore_prod > "${BACKUP_NAME}.sql"
+        kubectl exec -n rausachcore deployment/postgres -- pg_dump -U rausachcore rausachcore_prod > "${BACKUP_NAME}.sql"
         
         # Upload to backup storage (configure as needed)
         echo "Backup created: ${BACKUP_NAME}.sql"

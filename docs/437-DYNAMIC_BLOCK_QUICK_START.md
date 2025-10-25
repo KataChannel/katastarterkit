@@ -303,8 +303,8 @@ A: Sử dụng Tailwind CSS classes: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
 ## 📞 Liên Hệ
 
 📖 Full Documentation: `DYNAMIC_BLOCK_GUIDE.md`  
-💻 GitHub: [KataCore](https://github.com/KataChannel/katastarterkit)  
-💬 Discord: [KataCore Community](https://discord.gg/kata)
+💻 GitHub: [rausachcore](https://github.com/KataChannel/katastarterkit)  
+💬 Discord: [rausachcore Community](https://discord.gg/kata)
 
 ---
 

@@ -211,7 +211,7 @@ Page Builder → Save Action → GraphQL Mutation
 
 ## Environment
 
-- **Database:** PostgreSQL at localhost:15432 (katacore database)
+- **Database:** PostgreSQL at localhost:15432 (rausachcore database)
 - **Backend ORM:** Prisma v6.14.0
 - **Frontend GraphQL Client:** Apollo Client
 - **Authentication:** JWT with CurrentUser decorator

@@ -578,11 +578,11 @@ Next Week:
 ### Immediate Tasks to Start
 ```bash
 # 1. Install backend testing dependencies
-cd /mnt/chikiet/kataoffical/fullstack/katacore/backend
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore/backend
 bun add -D @nestjs/testing jest @types/jest ts-jest supertest @types/supertest
 
 # 2. Install frontend testing dependencies
-cd /mnt/chikiet/kataoffical/fullstack/katacore/frontend
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore/frontend
 npm install -D vitest @vitest/ui @testing-library/react @testing-library/jest-dom
 
 # 3. Create test configuration files

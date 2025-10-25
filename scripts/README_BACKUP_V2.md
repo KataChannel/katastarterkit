@@ -81,11 +81,11 @@ backups/20251017014610/
 ├── postgres.sql.gz         # PostgreSQL full dump
 ├── redis.rdb.gz           # Redis snapshot
 ├── minio.tar.gz           # MinIO data
-├── volume_katacore_postgres_data.tar.gz
-├── volume_katacore_redis_data.tar.gz
-├── volume_katacore_elasticsearch_data.tar.gz
-├── volume_katacore_minio_data.tar.gz
-├── volume_katacore_pgadmin_data.tar.gz
+├── volume_rausachcore_postgres_data.tar.gz
+├── volume_rausachcore_redis_data.tar.gz
+├── volume_rausachcore_elasticsearch_data.tar.gz
+├── volume_rausachcore_minio_data.tar.gz
+├── volume_rausachcore_pgadmin_data.tar.gz
 ├── config.tar.gz          # docker-compose, .env, Makefile
 ├── backup.log             # Detailed log
 └── summary.txt            # Summary report
@@ -192,7 +192,7 @@ Backup Count:
 # Output:
   ✓ postgres.sql.gz
   ✓ redis.rdb.gz
-  ✓ volume_katacore_postgres_data.tar.gz
+  ✓ volume_rausachcore_postgres_data.tar.gz
   ...
 All backups verified successfully!
 ```
@@ -314,7 +314,7 @@ gunzip -c postgres.sql.gz | docker compose exec -T postgres psql -U postgres
 cd backups/20251017014610
 docker compose stop redis
 docker run --rm \
-  -v katacore_redis_data:/data \
+  -v rausachcore_redis_data:/data \
   -v $(pwd):/backup \
   alpine sh -c "gunzip -c /backup/redis.rdb.gz > /data/dump.rdb"
 docker compose start redis
@@ -432,4 +432,4 @@ chown backup-user:backup-user backups/
 
 **Version**: 2.0.0  
 **Last Updated**: 2025-10-17  
-**Author**: KataCore Team
+**Author**: rausachcore Team

@@ -103,20 +103,20 @@ These require authentication but no specific role:
 
 **Instructors (ADMIN role):**
 ```
-Email: john.instructor@katacore.com
+Email: john.instructor@rausachcore.com
 Username: john_instructor
 Password: password123
 ```
 
 ```
-Email: jane.instructor@katacore.com
+Email: jane.instructor@rausachcore.com
 Username: jane_instructor
 Password: password123
 ```
 
 **Student (USER role):**
 ```
-Email: alice.student@katacore.com
+Email: alice.student@rausachcore.com
 Username: alice_student
 Password: password123
 ```

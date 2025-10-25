@@ -182,7 +182,7 @@ Type error: Property 'to' does not exist on type 'JestMatchers<AUTWindow>'
 - **⚠️ Action Required:** Change password after first login
 
 ### Test User
-- **Email:** `user@katacore.dev`
+- **Email:** `user@rausachcore.dev`
 - **Password:** `user123`
 
 ---

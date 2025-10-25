@@ -20,21 +20,21 @@ async function seedDynamicBlockDemo() {
   try {
     // Get demo user for createdBy
     let user = await prisma.user.findFirst({
-      where: { email: 'demo@katacore.com' }
+      where: { email: 'demo@rausachcore.com' }
     }).catch(() => null);
 
     if (!user) {
       console.log('👤 Creating demo user...');
       user = await prisma.user.create({
         data: {
-          email: 'demo@katacore.com',
+          email: 'demo@rausachcore.com',
           username: 'demo-user',
           firstName: 'Demo',
           lastName: 'User',
         },
       }).catch(() => ({
         id: 'demo-user',
-        email: 'demo@katacore.com',
+        email: 'demo@rausachcore.com',
         username: 'demo-user',
         firstName: 'Demo',
         lastName: 'User',

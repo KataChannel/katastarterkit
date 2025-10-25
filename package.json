@@ -1,5 +1,5 @@
 {
-  "name": "katacore-starter",
+  "name": "rausachcore-starter",
   "version": "1.0.0",
   "description": "Modern Fullstack Starter Kit with Next.js + NestJS + GraphQL + Prisma + Redis + TailwindCSS v4",
   "private": true,
@@ -69,7 +69,7 @@
     "modern",
     "fast"
   ],
-  "author": "Katacore Team",
+  "author": "rausachcore Team",
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -411,7 +411,7 @@ export class UserSearchInput {
 ### Bước 3: Rebuild Schema
 
 ```bash
-cd /mnt/chikiet/kataoffical/fullstack/katacore/backend
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore/backend
 npm run build
 
 # Hoặc restart backend để GraphQL regenerate schema

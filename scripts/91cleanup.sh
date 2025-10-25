@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Cleanup and Reset Script for KataCore
+# Cleanup and Reset Script for rausachcore
 # Safely removes all containers, volumes, and data
 
 set -e
@@ -43,7 +43,7 @@ check_compose() {
 
 # Stop all services
 stop_all_services() {
-    print_step "Stopping all KataCore services..."
+    print_step "Stopping all rausachcore services..."
     
     # Stop main services
     if [ -f "docker-compose.yml" ]; then
@@ -70,16 +70,16 @@ stop_all_services() {
 
 # Remove containers
 remove_containers() {
-    print_step "Removing KataCore containers..."
+    print_step "Removing rausachcore containers..."
     
     # Remove containers by name pattern
-    containers=$(docker ps -a --filter "name=katacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "{{.Names}}" 2>/dev/null || true)
+    containers=$(docker ps -a --filter "name=rausachcore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "{{.Names}}" 2>/dev/null || true)
     
     if [ -n "$containers" ]; then
         echo "$containers" | xargs docker rm -f
         print_success "Containers removed"
     else
-        print_warning "No KataCore containers found"
+        print_warning "No rausachcore containers found"
     fi
 }
 
@@ -93,13 +93,13 @@ remove_volumes() {
         print_step "Removing volumes..."
         
         # Remove named volumes
-        volumes=$(docker volume ls --filter "name=katacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "{{.Name}}" 2>/dev/null || true)
+        volumes=$(docker volume ls --filter "name=rausachcore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "{{.Name}}" 2>/dev/null || true)
         
         if [ -n "$volumes" ]; then
             echo "$volumes" | xargs docker volume rm -f
             print_success "Volumes removed"
         else
-            print_warning "No KataCore volumes found"
+            print_warning "No rausachcore volumes found"
         fi
     else
         print_step "Volume removal cancelled"
@@ -110,7 +110,7 @@ remove_volumes() {
 remove_networks() {
     print_step "Removing networks..."
     
-    networks=("katacore-network" "katacore-prod")
+    networks=("rausachcore-network" "rausachcore-prod")
     
     for network in "${networks[@]}"; do
         if docker network ls | grep -q "$network"; then
@@ -129,14 +129,14 @@ remove_images() {
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         print_step "Removing images..."
         
-        # Remove KataCore images
-        images=$(docker images --filter "reference=katacore*" --format "{{.Repository}}:{{.Tag}}" 2>/dev/null || true)
+        # Remove rausachcore images
+        images=$(docker images --filter "reference=rausachcore*" --format "{{.Repository}}:{{.Tag}}" 2>/dev/null || true)
         
         if [ -n "$images" ]; then
             echo "$images" | xargs docker rmi -f
             print_success "Images removed"
         else
-            print_warning "No KataCore images found"
+            print_warning "No rausachcore images found"
         fi
     else
         print_step "Image removal cancelled"
@@ -206,48 +206,48 @@ full_reset() {
 
 # Show current status
 show_status() {
-    print_step "Current KataCore status..."
+    print_step "Current rausachcore status..."
     
     echo ""
     echo "🐳 Containers:"
-    containers=$(docker ps -a --filter "name=katacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "table {{.Names}}\t{{.Status}}" 2>/dev/null || true)
+    containers=$(docker ps -a --filter "name=rausachcore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "table {{.Names}}\t{{.Status}}" 2>/dev/null || true)
     if [ -n "$containers" ]; then
         echo "$containers"
     else
-        echo "  No KataCore containers found"
+        echo "  No rausachcore containers found"
     fi
     
     echo ""
     echo "📦 Volumes:"
-    volumes=$(docker volume ls --filter "name=katacore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "table {{.Name}}\t{{.Driver}}" 2>/dev/null || true)
+    volumes=$(docker volume ls --filter "name=rausachcore" --filter "name=redis-cluster" --filter "name=prometheus" --filter "name=grafana" --format "table {{.Name}}\t{{.Driver}}" 2>/dev/null || true)
     if [ -n "$volumes" ]; then
         echo "$volumes"
     else
-        echo "  No KataCore volumes found"
+        echo "  No rausachcore volumes found"
     fi
     
     echo ""
     echo "🌐 Networks:"
-    networks=$(docker network ls --filter "name=katacore" --format "table {{.Name}}\t{{.Driver}}" 2>/dev/null || true)
+    networks=$(docker network ls --filter "name=rausachcore" --format "table {{.Name}}\t{{.Driver}}" 2>/dev/null || true)
     if [ -n "$networks" ]; then
         echo "$networks"
     else
-        echo "  No KataCore networks found"
+        echo "  No rausachcore networks found"
     fi
     
     echo ""
     echo "🖼️  Images:"
-    images=$(docker images --filter "reference=katacore*" --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" 2>/dev/null || true)
+    images=$(docker images --filter "reference=rausachcore*" --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" 2>/dev/null || true)
     if [ -n "$images" ]; then
         echo "$images"
     else
-        echo "  No KataCore images found"
+        echo "  No rausachcore images found"
     fi
 }
 
 # Show help
 show_help() {
-    echo "KataCore Cleanup and Reset Script"
+    echo "rausachcore Cleanup and Reset Script"
     echo "Usage: $0 [command]"
     echo
     echo "Commands:"

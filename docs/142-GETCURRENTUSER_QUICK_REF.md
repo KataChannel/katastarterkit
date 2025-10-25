@@ -90,7 +90,7 @@ bun run start:dev
 
 ### 2. Run Test Script
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 node test-getme.js
 ```
 

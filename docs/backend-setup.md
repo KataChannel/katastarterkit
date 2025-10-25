@@ -1,6 +1,6 @@
 # Backend Setup Guide
 
-This guide covers the setup and configuration of the KataCore NestJS backend.
+This guide covers the setup and configuration of the rausachcore NestJS backend.
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ bun install
 Create a `.env` file in the backend directory:
 ```env
 # Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/katacore"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/rausachcore"
 
 # Redis
 REDIS_HOST=localhost
@@ -236,8 +236,8 @@ MINIO_USE_SSL=true
 
 ### Docker Deployment
 ```bash
-docker build -t katacore-backend .
-docker run -p 4000:4000 katacore-backend
+docker build -t rausachcore-backend .
+docker run -p 4000:4000 rausachcore-backend
 ```
 
 ### Health Checks

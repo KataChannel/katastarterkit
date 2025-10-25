@@ -368,10 +368,10 @@ WHERE ten IS NOT NULL;
 **Solution:**
 ```bash
 # Kiểm tra pg_trgm extension
-psql -U postgres -d katacore -c "SELECT * FROM pg_extension WHERE extname = 'pg_trgm';"
+psql -U postgres -d rausachcore -c "SELECT * FROM pg_extension WHERE extname = 'pg_trgm';"
 
 # Tạo extension nếu chưa có
-psql -U postgres -d katacore -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+psql -U postgres -d rausachcore -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
 ```
 
 ### Issue: Không hiển thị dữ liệu

@@ -60,7 +60,7 @@ async function testAdminOperations() {
         query: loginMutation,
         variables: {
           input: {
-            email: 'admin@katacore.dev',
+            email: 'admin@rausachcore.dev',
             password: 'admin123'
           }
         }

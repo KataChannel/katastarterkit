@@ -76,7 +76,7 @@ Before running `./build-and-deploy.sh`:
 ### Step 1: Build & Deploy
 
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 ./build-and-deploy.sh
 ```
 
@@ -371,7 +371,7 @@ echo ""
 
 # Check Docker image
 echo "✓ Checking Docker image..."
-docker images | grep -i katacore
+docker images | grep -i rausachcore
 
 # Check running containers
 echo ""

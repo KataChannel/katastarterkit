@@ -301,12 +301,12 @@ async function restoreAllTablesFromJson(): Promise<void> {
 }
 
 backupAllTablesToJson()
-  .then(() => console.log('🎉 KataCore backup completed successfully!'))
+  .then(() => console.log('🎉 rausachcore backup completed successfully!'))
   .catch((err) => console.error('❌ Backup error:', err))
   .finally(() => prisma.$disconnect());
 
 // To restore data, uncomment and run restoreAllTablesFromJson()
 // restoreAllTablesFromJson()
-//   .then(() => console.log('🎉 KataCore restore completed successfully!'))
+//   .then(() => console.log('🎉 rausachcore restore completed successfully!'))
 //   .catch((err) => console.error('❌ Restore error:', err))
 //   .finally(() => prisma.$disconnect());

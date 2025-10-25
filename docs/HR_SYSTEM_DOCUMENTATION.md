@@ -96,7 +96,7 @@ Response → Apollo Cache → Component State → UI Update
 ### File Structure
 
 ```
-katacore/
+rausachcore/
 ├── backend/
 │   ├── prisma/
 │   │   └── schema.prisma              # Database schema
@@ -1149,7 +1149,7 @@ All pages follow consistent patterns:
 1. **Clone Repository**
 ```bash
 git clone <repository-url>
-cd katacore
+cd rausachcore
 ```
 
 2. **Install Dependencies**
@@ -1169,7 +1169,7 @@ Create `.env` files:
 
 **backend/.env:**
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/katacore"
+DATABASE_URL="postgresql://user:password@localhost:5432/rausachcore"
 JWT_SECRET="your-secret-key"
 MINIO_ENDPOINT="localhost"
 MINIO_PORT=9000

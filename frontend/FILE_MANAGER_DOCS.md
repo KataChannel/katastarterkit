@@ -308,6 +308,6 @@ describe('FileManager', () => {
 
 ---
 
-**Developed with ❤️ by KataCore Team**
+**Developed with ❤️ by rausachcore Team**
 
 *Last updated: October 8, 2025*

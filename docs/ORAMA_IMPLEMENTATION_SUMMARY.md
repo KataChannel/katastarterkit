@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Successfully integrated **Orama self-hosted search engine** into the KataCore application, providing fast, full-text search capabilities across all major entities without requiring external services.
+Successfully integrated **Orama self-hosted search engine** into the rausachcore application, providing fast, full-text search capabilities across all major entities without requiring external services.
 
 **Completion Date**: $(date)  
 **Status**: ✅ Production Ready  

@@ -5,7 +5,7 @@ echo "🔍 Template Library Runtime Diagnostic"
 echo "======================================"
 echo
 
-cd /mnt/chikiet/kataoffical/fullstack/katacore/frontend
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore/frontend
 
 # 1. Test if sample templates are being initialized
 echo "📋 1. Testing Sample Template Initialization"

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Katacore Quick Setup Script
-# This script sets up the Katacore project with Bun.js
+# rausachcore Quick Setup Script
+# This script sets up the rausachcore project with Bun.js
 
 set -e
 
-echo "🚀 Setting up Katacore project..."
+echo "🚀 Setting up rausachcore project..."
 
 # Check if Bun is installed
 if ! command -v bun &> /dev/null; then
@@ -57,11 +57,11 @@ if command -v docker &> /dev/null && command -v docker-compose &> /dev/null; the
     cd ..
 else
     echo "⚠️ Docker not found. Please set up PostgreSQL, Redis, and Minio manually."
-    echo "Database connection string: postgresql://postgres:postgres@localhost:5432/katacore"
+    echo "Database connection string: postgresql://postgres:postgres@localhost:5432/rausachcore"
 fi
 
 echo ""
-echo "🎉 Katacore setup complete!"
+echo "🎉 rausachcore setup complete!"
 echo ""
 echo "To start development:"
 echo "  bun run dev"

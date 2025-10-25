@@ -1,8 +1,8 @@
-# Phân tích Cấu trúc Hệ thống Todos - KataCore
+# Phân tích Cấu trúc Hệ thống Todos - rausachcore
 
 ## 🔍 Tổng quan Kiến trúc
 
-Hệ thống Todos của KataCore được xây dựng theo kiến trúc **Fullstack GraphQL** với **Dynamic CRUD Operations** và **Real-time capabilities**. Đây là một hệ thống quản lý công việc hiện đại với nhiều tính năng nâng cao.
+Hệ thống Todos của rausachcore được xây dựng theo kiến trúc **Fullstack GraphQL** với **Dynamic CRUD Operations** và **Real-time capabilities**. Đây là một hệ thống quản lý công việc hiện đại với nhiều tính năng nâng cao.
 
 ### 🏆 Điểm mạnh kiến trúc hiện tại:
 - ✅ **Hybrid GraphQL Strategy**: Kết hợp traditional + dynamic GraphQL
@@ -1051,7 +1051,7 @@ export class TaskSearchService {
 ```typescript
 // Service Worker for offline functionality
 // sw.js
-const CACHE_NAME = 'katacore-tasks-v1';
+const CACHE_NAME = 'rausachcore-tasks-v1';
 const urlsToCache = [
   '/',
   '/admin/todos',

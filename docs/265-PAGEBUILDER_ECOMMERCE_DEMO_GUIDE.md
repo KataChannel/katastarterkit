@@ -54,7 +54,7 @@ Page này đã có PRODUCT_LIST block với config:
 #### Step 1: Tạo Product Detail Page
 ```bash
 # Via SQL (nếu chưa có)
-docker exec -i katacore-postgres psql -U postgres -d katacore <<EOF
+docker exec -i rausachcore-postgres psql -U postgres -d rausachcore <<EOF
 INSERT INTO "Page" (id, title, slug, description, status, "createdBy", "createdAt", "updatedAt")
 VALUES (
   gen_random_uuid(),
@@ -84,7 +84,7 @@ EOF
 #### Step 3: Test với product có sẵn
 ```bash
 # Lấy danh sách products từ database
-docker exec -i katacore-postgres psql -U postgres -d katacore -c \
+docker exec -i rausachcore-postgres psql -U postgres -d rausachcore -c \
 "SELECT id, name, slug, price, stock FROM \"Product\" LIMIT 5;"
 
 # Example outputs:
@@ -227,7 +227,7 @@ query GetProductBySlug($slug: String!) {
 ### Problem: Product List không hiển thị
 **Solution**:
 1. Check console for GraphQL errors
-2. Verify products exist: `docker exec -i katacore-postgres psql -U postgres -d katacore -c "SELECT COUNT(*) FROM \"Product\";"`
+2. Verify products exist: `docker exec -i rausachcore-postgres psql -U postgres -d rausachcore -c "SELECT COUNT(*) FROM \"Product\";"`
 3. Check filters - maybe no products match
 4. Try removing filters (set to empty object)
 

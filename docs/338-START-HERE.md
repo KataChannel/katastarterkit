@@ -1,6 +1,6 @@
 # 🚀 START HERE - Database Restore Optimization
 
-**Welcome!** You have successfully completed the database restore optimization for Katacore LMS.
+**Welcome!** You have successfully completed the database restore optimization for rausachcore LMS.
 
 ---
 

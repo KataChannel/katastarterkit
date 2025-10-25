@@ -99,7 +99,7 @@ PORT=12001                           # was 14000
 FRONTEND_URL=http://localhost:12000  # was http://localhost:13000
 
 # Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:12003/katacore"
+DATABASE_URL="postgresql://postgres:postgres@localhost:12003/rausachcore"
 POSTGRES_PORT=12003                  # was 15432
 
 # PgAdmin
@@ -166,7 +166,7 @@ docker-compose logs -f postgres
 docker-compose ps
 
 # Test PostgreSQL
-psql -h localhost -p 12003 -U postgres -d katacore
+psql -h localhost -p 12003 -U postgres -d rausachcore
 
 # Test Redis
 redis-cli -p 12004 ping
@@ -191,7 +191,7 @@ If you're running services locally without Docker:
 ### Backend (.env)
 ```bash
 PORT=12001
-DATABASE_URL="postgresql://postgres:postgres@localhost:12003/katacore"
+DATABASE_URL="postgresql://postgres:postgres@localhost:12003/rausachcore"
 REDIS_PORT=12004
 ELASTICSEARCH_URL=http://localhost:12005
 MINIO_ENDPOINT=localhost
@@ -223,8 +223,8 @@ In Docker Compose, containers connect using service names:
 
 **Backend to PostgreSQL:**
 ```
-Database URL (inside Docker): postgresql://postgres:postgres@postgres:5432/katacore
-Database URL (localhost):     postgresql://postgres:postgres@localhost:12003/katacore
+Database URL (inside Docker): postgresql://postgres:postgres@postgres:5432/rausachcore
+Database URL (localhost):     postgresql://postgres:postgres@localhost:12003/rausachcore
 ```
 
 **Backend to Redis:**
@@ -270,7 +270,7 @@ GraphQL Endpoint (localhost):     http://localhost:12001/graphql
 3. **Test connections:**
    ```bash
    # Test PostgreSQL
-   psql -h localhost -p 12003 -U postgres -d katacore
+   psql -h localhost -p 12003 -U postgres -d rausachcore
 
    # Test Redis
    redis-cli -p 12004 PING

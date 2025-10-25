@@ -160,7 +160,7 @@
 ### Chạy ứng dụng
 ```bash
 # Chạy tất cả services
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 bun run dev
 
 # Hoặc chạy riêng từng service

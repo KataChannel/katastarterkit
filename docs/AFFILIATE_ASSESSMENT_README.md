@@ -341,7 +341,7 @@ Lines 1763-2050: Affiliate models (7 models)
 - **Created**: 2025-10-18
 - **Version**: 1.0
 - **By**: GitHub Copilot
-- **Project**: KataCore Fullstack
+- **Project**: rausachcore Fullstack
 - **Status**: 🟡 MVP - Needs Work
 
 ---

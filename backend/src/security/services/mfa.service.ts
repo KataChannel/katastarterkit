@@ -75,8 +75,8 @@ export class MfaService {
 
       // Generate secret
       const secret = speakeasy.generateSecret({
-        name: `KataCore (${userId})`,
-        issuer: 'KataCore Enterprise',
+        name: `rausachcore (${userId})`,
+        issuer: 'rausachcore Enterprise',
         length: 32
       });
 
@@ -571,7 +571,7 @@ export class MfaService {
     this.logger.debug(`SMS verification code for ${userId} (${this.maskPhoneNumber(phoneNumber)}): ${code}`);
     
     // In production, replace with actual SMS sending logic:
-    // await this.smsService.sendMessage(phoneNumber, `Your KataCore verification code is: ${code}`);
+    // await this.smsService.sendMessage(phoneNumber, `Your rausachcore verification code is: ${code}`);
   }
 
   private async logMfaEvent(userId: string, eventType: string, metadata: any): Promise<void> {

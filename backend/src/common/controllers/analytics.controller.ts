@@ -229,14 +229,14 @@ export class AnalyticsController {
     if (format === 'csv') {
       return {
         contentType: 'text/csv',
-        filename: `katacore-analytics-${timeRange}-${Date.now()}.csv`,
+        filename: `rausachcore-analytics-${timeRange}-${Date.now()}.csv`,
         data: this.convertToCSV(report)
       };
     }
     
     return {
       contentType: 'application/json',
-      filename: `katacore-analytics-${timeRange}-${Date.now()}.json`,
+      filename: `rausachcore-analytics-${timeRange}-${Date.now()}.json`,
       data: report
     };
   }

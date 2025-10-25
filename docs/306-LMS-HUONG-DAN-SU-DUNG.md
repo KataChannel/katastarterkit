@@ -1,4 +1,4 @@
-# 📚 HƯỚNG DẪN SỬ DỤNG HỆ THỐNG LMS KATACORE
+# 📚 HƯỚNG DẪN SỬ DỤNG HỆ THỐNG LMS rausachcore
 
 ## 📅 Ngày cập nhật: 21 tháng 10, 2025
 ## 🎯 Phiên bản: MVP 2 - Hoàn thành 100%
@@ -7,7 +7,7 @@
 
 ## 🌟 TỔNG QUAN HỆ THỐNG
 
-**Katacore LMS** là một hệ thống quản lý học tập (Learning Management System) đầy đủ tính năng, cho phép:
+**rausachcore LMS** là một hệ thống quản lý học tập (Learning Management System) đầy đủ tính năng, cho phép:
 - 👨‍🏫 **Giảng viên**: Tạo và quản lý khóa học
 - 👨‍🎓 **Học viên**: Học tập và theo dõi tiến độ
 - 🏢 **Quản trị viên**: Quản lý toàn bộ hệ thống
@@ -1180,10 +1180,10 @@ Metric:
 
 ### Liên hệ:
 ```
-📧 Email: support@katacore.com
+📧 Email: support@rausachcore.com
 💬 Chat: http://localhost:13000/support
 📱 Hotline: 1900-xxxx
-🌐 Website: https://katacore.com
+🌐 Website: https://rausachcore.com
 ```
 
 ### Tài liệu:
@@ -1274,7 +1274,7 @@ Metric:
 
 ## 🎉 KẾT LUẬN
 
-**Katacore LMS** là một hệ thống học tập trực tuyến hoàn chỉnh với đầy đủ tính năng:
+**rausachcore LMS** là một hệ thống học tập trực tuyến hoàn chỉnh với đầy đủ tính năng:
 
 ✅ **Cho Học viên**: Trải nghiệm học tập chuyên nghiệp
 ✅ **Cho Giảng viên**: Công cụ tạo khóa học mạnh mẽ  
@@ -1294,4 +1294,4 @@ Metric:
 
 *Tài liệu được cập nhật: 21/10/2025*  
 *Phiên bản: 2.5.0*  
-*© 2025 Katacore LMS - All rights reserved*
+*© 2025 rausachcore LMS - All rights reserved*

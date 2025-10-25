@@ -49,7 +49,7 @@ export default function LMSHomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-24 lg:py-32">
           <div className="text-center">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-4 sm:mb-6 leading-tight">
-              Chào mừng đến Katacore LMS
+              Chào mừng đến rausachcore LMS
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-100 mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
               Chuyển đổi hành trình học tập của bạn với hệ thống quản lý học tập toàn diện
@@ -98,7 +98,7 @@ export default function LMSHomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
         <div className="text-center mb-8 sm:mb-12 md:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-4">
-            Tại sao chọn Katacore LMS?
+            Tại sao chọn rausachcore LMS?
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
             Trải nghiệm nền tảng học tập toàn diện và thân thiện nhất

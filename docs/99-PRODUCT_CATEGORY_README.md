@@ -143,7 +143,7 @@ Hệ thống quản lý sản phẩm và danh mục đầy đủ tính năng, đ
 
 ```bash
 git clone <repository-url>
-cd katacore
+cd rausachcore
 ```
 
 ### 2. Backend Setup

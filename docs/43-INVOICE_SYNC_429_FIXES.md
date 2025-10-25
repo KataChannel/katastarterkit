@@ -10,7 +10,7 @@ Khi đồng bộ hóa đơn từ API bên ngoài, hệ thống gặp hai vấn �
 Data: {
   "error": {
     "error": "Request failed with status code 429",
-    "stack": "Error\n    at settle (/chikiet/kataoffical/fullstack/katacore/node_modules/axios/lib/core/settle.js:19:16)..."
+    "stack": "Error\n    at settle (/chikiet/kataoffical/fullstack/rausachcore/node_modules/axios/lib/core/settle.js:19:16)..."
   }
 }
 ```

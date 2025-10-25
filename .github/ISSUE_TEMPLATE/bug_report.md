@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help us improve KataCore
+about: Create a report to help us improve rausachcore
 title: '[BUG] '
 labels: ['bug']
 assignees: ''

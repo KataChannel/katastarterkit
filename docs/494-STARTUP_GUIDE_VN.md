@@ -1,4 +1,4 @@
-# 🚀 HƯỚNG DẪN KHỞI ĐỘNG DỰ ÁN KATACORE VỚI PORT MỚI
+# 🚀 HƯỚNG DẪN KHỞI ĐỘNG DỰ ÁN rausachcore VỚI PORT MỚI
 
 ## ✅ Trạng Thái Hiện Tại
 
@@ -35,7 +35,7 @@ MinIO:              12007 & 12008
 
 #### Bước 1: Dừng các container cũ (nếu có)
 ```bash
-cd /mnt/chikiet/kataoffical/fullstack/katacore
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore
 docker compose down
 ```
 
@@ -57,13 +57,13 @@ docker compose ps
 **Kết quả mong đợi:**
 ```
 NAME                    STATUS          PORTS
-katacore-postgres       Up (healthy)    0.0.0.0:12003->5432/tcp
-katacore-pgadmin        Up              0.0.0.0:12002->80/tcp
-katacore-redis          Up (healthy)    0.0.0.0:12004->6379/tcp
-katacore-elasticsearch  Up (healthy)    0.0.0.0:12005->9200/tcp
-katacore-minio          Up              0.0.0.0:12007->9000/tcp, 0.0.0.0:12008->9001/tcp
-katacore-backend        Up              0.0.0.0:12001->4000/tcp
-katacore-frontend       Up              0.0.0.0:12000->3000/tcp
+rausachcore-postgres       Up (healthy)    0.0.0.0:12003->5432/tcp
+rausachcore-pgadmin        Up              0.0.0.0:12002->80/tcp
+rausachcore-redis          Up (healthy)    0.0.0.0:12004->6379/tcp
+rausachcore-elasticsearch  Up (healthy)    0.0.0.0:12005->9200/tcp
+rausachcore-minio          Up              0.0.0.0:12007->9000/tcp, 0.0.0.0:12008->9001/tcp
+rausachcore-backend        Up              0.0.0.0:12001->4000/tcp
+rausachcore-frontend       Up              0.0.0.0:12000->3000/tcp
 ```
 
 #### Bước 5: Xem logs để kiểm tra lỗi
@@ -82,13 +82,13 @@ Nếu bạn muốn chạy backend và frontend trên máy local thay vì Docker:
 
 #### Terminal 1: Backend
 ```bash
-cd /mnt/chikiet/kataoffical/fullstack/katacore/backend
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore/backend
 PORT=12001 bun run dev
 ```
 
 #### Terminal 2: Frontend
 ```bash
-cd /mnt/chikiet/kataoffical/fullstack/katacore/frontend
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore/frontend
 bun run dev -- --port 12000
 ```
 
@@ -115,7 +115,7 @@ Sau khi tất cả services khởi động thành công, bạn có thể truy c�
 
 ### 1. Test PostgreSQL
 ```bash
-psql -h localhost -p 12003 -U postgres -d katacore -c "SELECT version();"
+psql -h localhost -p 12003 -U postgres -d rausachcore -c "SELECT version();"
 ```
 
 **Kết quả mong đợi:**
@@ -167,8 +167,8 @@ HTML response (Next.js app)
 
 ### 6. Test MinIO Console
 - Mở browser: http://localhost:12008
-- Username: `katacore-admin`
-- Password: `katacore-secret-2025`
+- Username: `rausachcore-admin`
+- Password: `rausachcore-secret-2025`
 
 ## 📊 KIỂM TRA CHI TIẾT CONTAINER
 
@@ -180,13 +180,13 @@ docker ps
 docker stats
 
 # Kiểm tra network
-docker network inspect katacore-network
+docker network inspect rausachcore-network
 
 # Xem logs chi tiết của một container
-docker logs katacore-backend --follow
+docker logs rausachcore-backend --follow
 
 # Enter container để debug
-docker exec -it katacore-backend bash
+docker exec -it rausachcore-backend bash
 ```
 
 ## 🛠️ TROUBLESHOOTING
@@ -220,7 +220,7 @@ docker compose up -d --build
 docker compose ps | grep postgres
 
 # Kiểm tra health status
-docker inspect katacore-postgres | grep -A 10 '"Health"'
+docker inspect rausachcore-postgres | grep -A 10 '"Health"'
 
 # Xem logs postgres
 docker compose logs postgres
@@ -243,7 +243,7 @@ docker compose down
 ### Backend (.env.development)
 Các biến được tự động load từ `.env` file:
 - `PORT=12001`
-- `DATABASE_URL=postgresql://postgres:postgres@localhost:12003/katacore`
+- `DATABASE_URL=postgresql://postgres:postgres@localhost:12003/rausachcore`
 - `REDIS_HOST=localhost` và `REDIS_PORT=12004`
 - `ELASTICSEARCH_URL=http://localhost:12005`
 - `MINIO_ENDPOINT=localhost` và `MINIO_PORT=12007`
@@ -301,7 +301,7 @@ docker compose exec backend bash
 docker compose exec frontend bash
 
 # Test database
-docker compose exec postgres psql -U postgres -d katacore
+docker compose exec postgres psql -U postgres -d rausachcore
 
 # Test Redis
 docker compose exec redis redis-cli PING
@@ -330,7 +330,7 @@ docker compose ps --format "table {{.Names}}\t{{.Status}}"
 - [ ] File `.env` đã được cập nhật
 - [ ] File `docker-compose.yml` đã được cập nhật
 - [ ] Dockerfile tồn tại trong cả backend và frontend
-- [ ] Network `katacore-network` sẽ được tạo tự động
+- [ ] Network `rausachcore-network` sẽ được tạo tự động
 
 ## 🎉 HOÀN THÀNH
 

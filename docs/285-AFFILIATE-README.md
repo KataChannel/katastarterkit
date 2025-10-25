@@ -1,6 +1,6 @@
 # 🚀 AFFILIATE MARKETING SYSTEM
 
-**Hệ thống Affiliate Marketing toàn diện cho KataCore Platform**
+**Hệ thống Affiliate Marketing toàn diện cho rausachcore Platform**
 
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-success)](./docs/AFFILIATE-EXECUTIVE-SUMMARY.md)
 [![Score](https://img.shields.io/badge/Score-8.2%2F10-green)](./docs/AFFILIATE-SYSTEM-COMPREHENSIVE-REPORT.md)
@@ -51,7 +51,7 @@ npm or bun
 ```bash
 # 1. Clone repository
 git clone <repo-url>
-cd katacore
+cd rausachcore
 
 # 2. Install dependencies
 cd backend && npm install
@@ -495,7 +495,7 @@ Version:        1.0
 License:        MIT (or your license)
 
 Contributors:   Development Team
-Maintained By:  KataCore Team
+Maintained By:  rausachcore Team
 ```
 
 ---

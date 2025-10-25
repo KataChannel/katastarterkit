@@ -174,7 +174,7 @@ Quick reference guide with:
 
 ```bash
 # 1. Start dev server
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 bun run dev
 
 # 2. Open page builder

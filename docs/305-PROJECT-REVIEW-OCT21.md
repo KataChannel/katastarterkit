@@ -132,7 +132,7 @@ npx ts-node ./src/main.ts
 
 **Connection String:**
 ```
-postgresql://postgres:postgres@localhost:15432/katacore
+postgresql://postgres:postgres@localhost:15432/rausachcore
 ```
 
 **Checks Needed:**

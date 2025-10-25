@@ -9,7 +9,7 @@
 
 set -e
 
-BACKEND_DIR="/chikiet/kataoffical/fullstack/katacore/backend"
+BACKEND_DIR="/chikiet/kataoffical/fullstack/rausachcore/backend"
 
 # Colors for output
 RED='\033[0;31m'

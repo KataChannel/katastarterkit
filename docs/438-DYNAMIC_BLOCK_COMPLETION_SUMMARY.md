@@ -72,7 +72,7 @@
 
 ### Step 1: Run Seed Script (2 minutes)
 ```bash
-cd /mnt/chikiet/kataoffical/fullstack/katacore/backend
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore/backend
 npx ts-node scripts/seed-dynamic-block-demo.ts
 ```
 
@@ -89,7 +89,7 @@ npx ts-node scripts/seed-dynamic-block-demo.ts
 
 ### Step 2: Start Development Server (5 minutes)
 ```bash
-cd /mnt/chikiet/kataoffical/fullstack/katacore
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore
 bun run dev
 ```
 
@@ -332,7 +332,7 @@ Display with error handling
 | **Navigation** | [DYNAMIC_BLOCK_INDEX.md](DYNAMIC_BLOCK_INDEX.md) |
 | **GitHub Issues** | https://github.com/KataChannel/katastarterkit/issues |
 | **Discord** | https://discord.gg/kata |
-| **Email** | support@katacore.dev |
+| **Email** | support@rausachcore.dev |
 
 ---
 

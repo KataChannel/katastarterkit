@@ -153,7 +153,7 @@ Your project has been transformed with enterprise-grade Docker optimization. Ins
 ### Option 1: Full Deployment (Recommended)
 
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 ./build-and-deploy.sh
 
 # Wait ~5-7 minutes
@@ -266,7 +266,7 @@ TOTAL: 7 minutes (vs 30 before)
 
 ```bash
 # Check image sizes
-docker images | grep katacore
+docker images | grep rausachcore
 
 # Expected:
 # Backend: ~450MB

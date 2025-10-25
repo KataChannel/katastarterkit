@@ -271,7 +271,7 @@ E-commerce Elements (2)
 
 ### 1. Apply Changes
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore/frontend
+cd /chikiet/kataoffical/fullstack/rausachcore/frontend
 npm install  # If needed
 ```
 

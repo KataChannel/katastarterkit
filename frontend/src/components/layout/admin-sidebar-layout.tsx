@@ -147,7 +147,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                   <span className="text-primary-foreground font-bold text-lg">K</span>
                 </div>
-                <span className="font-semibold text-lg">KataCore</span>
+                <span className="font-semibold text-lg">rausachcore</span>
               </Link>
             )}
             <Button
@@ -253,7 +253,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                   <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                     <span className="text-primary-foreground font-bold text-lg">K</span>
                   </div>
-                  <span className="font-semibold text-lg">KataCore</span>
+                  <span className="font-semibold text-lg">rausachcore</span>
                 </Link>
                 <Button
                   variant="ghost"

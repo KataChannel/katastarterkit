@@ -80,7 +80,7 @@ const all = getAllSampleTemplates();
 
 ```bash
 # Start dev server
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 bun run dev
 
 # Open browser

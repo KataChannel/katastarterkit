@@ -171,7 +171,7 @@ bash -n docsclean.sh         # Syntax check passed
 ## 📁 Project Structure After Fix
 
 ```
-/chikiet/kataoffical/fullstack/katacore/
+/chikiet/kataoffical/fullstack/rausachcore/
 ├── README.md                    # ← Only .md file in root
 ├── docsclean.sh                 # ← Fixed and functional
 └── docs/

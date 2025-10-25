@@ -10,7 +10,7 @@ We release patches for security vulnerabilities. Which versions are eligible for
 
 ## 🚨 Reporting a Vulnerability
 
-We take security vulnerabilities seriously. If you discover a security issue in KataCore, please follow these steps:
+We take security vulnerabilities seriously. If you discover a security issue in rausachcore, please follow these steps:
 
 ### 📧 Report Privately
 
@@ -38,7 +38,7 @@ Instead, create a private GitHub Security Advisory at: https://github.com/KataCh
 
 ### 🛡️ Security Best Practices
 
-When using KataCore in production:
+When using rausachcore in production:
 
 1. **Environment Variables**: Never commit sensitive data to version control
 2. **Database Security**: Use strong passwords and restrict access
@@ -50,7 +50,7 @@ When using KataCore in production:
 
 ### 🔐 Security Features
 
-KataCore includes several security features:
+rausachcore includes several security features:
 
 - JWT-based authentication
 - Input validation with class-validator
@@ -67,4 +67,4 @@ KataCore includes several security features:
 
 ## 🙏 Acknowledgments
 
-We appreciate security researchers and users who responsibly disclose vulnerabilities to help keep Katacore secure.
+We appreciate security researchers and users who responsibly disclose vulnerabilities to help keep rausachcore secure.

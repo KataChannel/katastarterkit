@@ -108,7 +108,7 @@ Added new script:
 
 ### 6. **Pages & Blocks**
 **Home Page**:
-- Hero block: "Welcome to KataCore"
+- Hero block: "Welcome to rausachcore"
 - Text block: "Features" with feature list
 
 ### 7. **AI/Chatbot**
@@ -118,7 +118,7 @@ Added new script:
 - System prompt configured
 
 **TrainingData**:
-- Title: "KataCore Introduction"
+- Title: "rausachcore Introduction"
 - Content: Platform introduction
 - Type: TEXT
 - Status: COMPLETED
@@ -130,7 +130,7 @@ Added new script:
 
 **AffCampaign**:
 - Name: "Demo Campaign 2024"
-- Product: KataCore Pro
+- Product: rausachcore Pro
 - Commission: 10% (percentage)
 - Status: ACTIVE
 - Duration: 90 days
@@ -141,7 +141,7 @@ Added new script:
 
 **AffLink**:
 - Tracking code: KATA-DEMO-2024
-- Original URL: https://katacore.dev
+- Original URL: https://rausachcore.dev
 - Short URL: https://kata.link/demo
 - Active tracking
 
@@ -151,7 +151,7 @@ Added new script:
 - No backup codes generated
 
 ### 10. **Notifications** (2)
-- "Welcome to KataCore!" - info
+- "Welcome to rausachcore!" - info
 - "Demo Data Created" - success
 
 ## Schema Field Name Corrections

@@ -81,7 +81,7 @@ DOCKER_MINIO_ENDPOINT=minio
 DOCKER_MINIO_PORT=9000
 
 # Detection mechanism
-DOCKER_NETWORK_NAME=katacore-network
+DOCKER_NETWORK_NAME=rausachcore-network
 ```
 
 The `DOCKER_NETWORK_NAME` variable is set by docker-compose and used to detect the Docker environment.
@@ -126,7 +126,7 @@ The database is already in sync with the Prisma schema.
    - Backend service connects to `minio` service (by name)
    - Uses `DOCKER_MINIO_ENDPOINT=minio`
    - Port remains `9000` (internal MinIO port)
-   - All containers on same `katacore-network`
+   - All containers on same `rausachcore-network`
 
 ## Troubleshooting
 

@@ -300,7 +300,7 @@ User can:
 ### Contact Form
 - Contact information (email, phone, address)
 - Functional contact form
-- Email: hello@katacore.com
+- Email: hello@rausachcore.com
 - Vietnamese address example
 
 ### FAQ

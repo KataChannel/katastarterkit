@@ -393,7 +393,7 @@ Guides: Implementation, Testing, Reference, Complete Report, Session Summary
 
 ### Project Structure
 ```
-/mnt/chikiet/kataoffical/fullstack/katacore/
+/mnt/chikiet/kataoffical/fullstack/rausachcore/
 ├── NESTED-BLOCKS-IMPLEMENTATION.md (650+ lines)
 ├── NESTED-BLOCKS-TESTING-GUIDE.md (500+ lines)
 ├── NESTED-BLOCKS-COMPLETE-REPORT.md (400+ lines)

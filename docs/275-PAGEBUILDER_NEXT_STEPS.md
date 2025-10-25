@@ -658,7 +658,7 @@ For each new dynamic block:
 
 ```bash
 # Pull latest code
-git pull origin katacore
+git pull origin rausachcore
 
 # Install dependencies
 cd frontend && bun install

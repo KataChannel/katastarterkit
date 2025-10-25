@@ -44,8 +44,8 @@ bun run seed:comprehensive
 - 📝 3 Sample Posts
 
 **Credentials:**
-- **Admin**: `admin@katacore.dev` / `admin123`
-- **Test User**: `user@katacore.dev` / `user123`
+- **Admin**: `admin@rausachcore.dev` / `admin123`
+- **Test User**: `user@rausachcore.dev` / `user123`
 
 **Use When:**
 - ✅ Starting fresh development

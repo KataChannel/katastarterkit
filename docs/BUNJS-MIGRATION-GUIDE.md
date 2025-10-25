@@ -141,7 +141,7 @@ time curl http://localhost:4000/health
 # Expected: <20ms response time (was ~50ms with Node.js)
 
 # Check memory usage
-docker stats katacore-backend
+docker stats rausachcore-backend
 
 # Expected: 100-150MB (was 250-300MB with Node.js)
 ```
@@ -224,8 +224,8 @@ Bun automatically optimizes for production:
 docker compose ps
 
 # Expected:
-# katacore-backend   oven/bun:latest-alpine   ✓
-# katacore-frontend  oven/bun:latest-alpine   ✓
+# rausachcore-backend   oven/bun:latest-alpine   ✓
+# rausachcore-frontend  oven/bun:latest-alpine   ✓
 ```
 
 ### Monitor Performance

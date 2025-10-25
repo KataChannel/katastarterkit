@@ -117,7 +117,7 @@ echo ""
 echo -e "${YELLOW}Test 7: Database Verification${NC}"
 echo "After clicking a link, verify in database:"
 echo ""
-echo "psql -h localhost -U postgres -d katacore -c \\"
+echo "psql -h localhost -U postgres -d rausachcore -c \\"
 echo "  'SELECT id, \"linkId\", \"ipAddress\", device, browser, \"clickedAt\" FROM \"AffClick\" ORDER BY \"clickedAt\" DESC LIMIT 5;'"
 echo ""
 

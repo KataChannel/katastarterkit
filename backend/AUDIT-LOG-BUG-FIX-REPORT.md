@@ -4,7 +4,7 @@
 ```
 [Nest] 414273  - 09/25/2025, 9:48:02 PM   ERROR [AuthService] Google login failed: 
 Invalid `this.prisma.auditLog.create()` invocation in
-/chikiet/kataoffical/fullstack/katacore/backend/src/auth/auth.service.ts:266:34
+/chikiet/kataoffical/fullstack/rausachcore/backend/src/auth/auth.service.ts:266:34
 
 Argument `resourceType` is missing.
 PrismaClientValidationError: Invalid `this.prisma.auditLog.create()` invocation

@@ -193,7 +193,7 @@ This is your **master index** for all product page documentation. Everything you
 ## 🗂️ File Organization
 
 ```
-Project Root (katacore/)
+Project Root (rausachcore/)
 │
 ├── Documentation Files (Master Index):
 │   ├── PRODUCT_DETAIL_QUICK_REFERENCE.md ................... ⭐ Start here!

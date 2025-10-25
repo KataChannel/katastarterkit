@@ -2,7 +2,7 @@
 
 **Ngày đánh giá**: 18/10/2025  
 **Người đánh giá**: GitHub Copilot  
-**Dự án**: KataCore Fullstack Application
+**Dự án**: rausachcore Fullstack Application
 
 ---
 

@@ -137,7 +137,7 @@ fi
 ## 📁 Project Structure After Organization
 
 ```
-/chikiet/kataoffical/fullstack/katacore/
+/chikiet/kataoffical/fullstack/rausachcore/
 ├── testclean.sh                 # ← Script remains in root
 ├── docsclean.sh                 # ← Cleanup scripts excluded
 ├── tests/                       # ← All test files organized here

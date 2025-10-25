@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the Orama self-hosted search engine integration in the KataCore application. Orama provides fast, full-text search capabilities across all major entities without requiring external services like Elasticsearch.
+This document describes the Orama self-hosted search engine integration in the rausachcore application. Orama provides fast, full-text search capabilities across all major entities without requiring external services like Elasticsearch.
 
 ## Features
 

@@ -21,7 +21,7 @@ The user reported "Forbidden resource" errors when trying to execute GraphQL ope
 ```typescript
 // WRONG:
 create: {
-  email: 'admin@katacore.dev',
+  email: 'admin@rausachcore.dev',
   name: 'Admin User',        // ❌ doesn't exist
   password: adminPassword,
   role: UserRole.ADMIN,      // ❌ wrong field name and enum
@@ -30,7 +30,7 @@ create: {
 
 // FIXED:
 create: {
-  email: 'admin@katacore.dev',
+  email: 'admin@rausachcore.dev',
   username: 'admin',         // ✅ correct field
   firstName: 'Admin',        // ✅ correct field
   lastName: 'User',          // ✅ correct field
@@ -62,8 +62,8 @@ npx tsx prisma/seed.ts
 ```
 🌱 Starting seed...
 ✅ Seed completed successfully!
-👤 Admin user: admin@katacore.dev / admin123
-👤 Test user: user@katacore.dev / user123
+👤 Admin user: admin@rausachcore.dev / admin123
+👤 Test user: user@rausachcore.dev / user123
 📝 Created 3 posts
 🏷️ Created 4 tags
 ```
@@ -71,7 +71,7 @@ npx tsx prisma/seed.ts
 ## Expected Resolution ✅
 With the admin user now properly created with `roleType: 'ADMIN'`, the GraphQL operations should work:
 
-1. **Login**: `admin@katacore.dev` / `admin123`
+1. **Login**: `admin@rausachcore.dev` / `admin123`
 2. **searchUsers**: Should return user list (requires ADMIN role)
 3. **getUserStats**: Should return user statistics (requires ADMIN role)
 
@@ -82,7 +82,7 @@ With the admin user now properly created with `roleType: 'ADMIN'`, the GraphQL o
 ## Verification Steps
 To test the fix:
 1. Start backend: `make dev-backend`
-2. Login as admin: `admin@katacore.dev` / `admin123`
+2. Login as admin: `admin@rausachcore.dev` / `admin123`
 3. Execute GraphQL operations:
    - `searchUsers(input: {query: "", limit: 10, offset: 0})`
    - `getUserStats(input: {startDate: "2024-01-01", endDate: "2024-12-31"})`

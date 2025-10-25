@@ -1,6 +1,6 @@
-# Contributing to KataCore
+# Contributing to rausachcore
 
-Thank you for your interest in contributing to KataCore! 🎉
+Thank you for your interest in contributing to rausachcore! 🎉
 
 ## 🚀 Quick Start for Contributors
 

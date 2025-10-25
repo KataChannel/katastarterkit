@@ -14,7 +14,7 @@ export function Navigation() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="text-xl font-bold text-gray-900">
-                KataCore
+                rausachcore
               </Link>
             </div>
             <div className="ml-6 flex space-x-8">

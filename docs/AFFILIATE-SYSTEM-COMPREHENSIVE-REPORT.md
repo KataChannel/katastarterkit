@@ -1,6 +1,6 @@
 # 📊 BÁO CÁO TỔNG HỢP HỆ THỐNG AFFILIATE
 
-**Dự án**: KataCore Fullstack  
+**Dự án**: rausachcore Fullstack  
 **Ngày phân tích**: 19 Tháng 10, 2025  
 **Phiên bản**: Production-ready MVP  
 **Người đánh giá**: GitHub Copilot AI Assistant

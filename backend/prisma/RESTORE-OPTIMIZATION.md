@@ -127,7 +127,7 @@ bun run db:restore-optimized
 ## Example Output
 
 ```
-🚀 STARTING OPTIMIZED KATACORE DATA RESTORE
+🚀 STARTING OPTIMIZED rausachcore DATA RESTORE
 ⏰ Start time: 12/19/2024, 10:30:45 AM
 ⚙️  Batch size: 1,000 records
 💾 Backup root: ./kata_json

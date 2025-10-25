@@ -252,7 +252,7 @@ const { data } = await createAffiliateLink({
 
 ### 1. Pull Latest Code
 ```bash
-git pull origin katacore
+git pull origin rausachcore
 ```
 
 ### 2. Apply Migration

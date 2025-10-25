@@ -76,7 +76,7 @@ https://localhost:13000/product-detail/airpods-pro
 ## 📁 File Structure
 
 ```
-/katacore
+/rausachcore
 ├── QUICK_START_PRODUCT_PAGE.md     ← 5 phút nhanh
 ├── PRODUCT_DETAIL_PAGE_GUIDE.md    ← Chi tiết 10 bước
 ├── PRODUCT_PAGE_EXAMPLES.json      ← 10 ví dụ code
@@ -261,7 +261,7 @@ query GetProduct($slug: String!) {
 
 ### Files Location:
 ```
-/mnt/chikiet/kataoffical/fullstack/katacore/
+/mnt/chikiet/kataoffical/fullstack/rausachcore/
 ├── QUICK_START_PRODUCT_PAGE.md
 ├── PRODUCT_DETAIL_PAGE_GUIDE.md
 └── PRODUCT_PAGE_EXAMPLES.json

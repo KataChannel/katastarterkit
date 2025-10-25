@@ -1,8 +1,8 @@
-# 🎓 KataCore LMS - Learning Management System Development Plan
+# 🎓 rausachcore LMS - Learning Management System Development Plan
 
 ## 📋 Tổng quan dự án
 
-Tài liệu này mô tả chi tiết kế hoạch phát triển hệ thống LMS (Learning Management System) cho KataCore, phục vụ cả nội bộ công ty và khách hàng bên ngoài.
+Tài liệu này mô tả chi tiết kế hoạch phát triển hệ thống LMS (Learning Management System) cho rausachcore, phục vụ cả nội bộ công ty và khách hàng bên ngoài.
 
 ### Mục tiêu
 - ✅ Xây dựng nền tảng đào tạo nội bộ cho nhân viên
@@ -1535,5 +1535,5 @@ Nếu có thắc mắc trong quá trình triển khai:
 
 **Document Version:** 1.0  
 **Last Updated:** 20/10/2025  
-**Author:** KataCore Team  
+**Author:** rausachcore Team  
 **Status:** Ready for Implementation 🚀

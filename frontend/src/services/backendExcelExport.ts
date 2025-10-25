@@ -307,7 +307,7 @@ class BackendExcelExportService {
         responseType: 'blob',
         headers: {
           'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream, */*',
-          'User-Agent': 'Mozilla/5.0 (compatible; KataCore-Frontend)',
+          'User-Agent': 'Mozilla/5.0 (compatible; rausachcore-Frontend)',
         },
         timeout: 30000, // 30 seconds timeout
         withCredentials: false,

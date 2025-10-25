@@ -65,7 +65,7 @@ These were causing circular dependencies that prevented webpack from properly in
 
 ## Files Changed
 
-### `/mnt/chikiet/kataoffical/fullstack/katacore/frontend/src/lib/hooks/useMenus.ts`
+### `/mnt/chikiet/kataoffical/fullstack/rausachcore/frontend/src/lib/hooks/useMenus.ts`
 - **Before**: 358 lines with wrapper hooks causing circular dependencies
 - **After**: 366 lines with direct Apollo integration and proper error handling
 - **Changes**:

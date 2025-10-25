@@ -198,12 +198,12 @@ restore_postgres() {
     
     # Terminate all active connections to the database
     log_info "Terminating active database connections..."
-    $DOCKER_COMPOSE exec -T postgres psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${POSTGRES_DB:-katacore}' AND pid <> pg_backend_pid();" || true
+    $DOCKER_COMPOSE exec -T postgres psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${POSTGRES_DB:-rausachcore}' AND pid <> pg_backend_pid();" || true
     
     # Drop and recreate database
     log_info "Recreating database..."
-    $DOCKER_COMPOSE exec -T postgres psql -U postgres -c "DROP DATABASE IF EXISTS ${POSTGRES_DB:-katacore};" || true
-    $DOCKER_COMPOSE exec -T postgres psql -U postgres -c "CREATE DATABASE ${POSTGRES_DB:-katacore};"
+    $DOCKER_COMPOSE exec -T postgres psql -U postgres -c "DROP DATABASE IF EXISTS ${POSTGRES_DB:-rausachcore};" || true
+    $DOCKER_COMPOSE exec -T postgres psql -U postgres -c "CREATE DATABASE ${POSTGRES_DB:-rausachcore};"
     
     # Restore
     if cat "$sql_file" | $DOCKER_COMPOSE exec -T postgres psql -U postgres; then

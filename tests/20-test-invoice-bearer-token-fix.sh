@@ -95,7 +95,7 @@ echo "3. Checking backend logs for warnings..."
 echo ""
 
 # Check logs
-LOG_DIR="/chikiet/kataoffical/fullstack/katacore/backend/logs"
+LOG_DIR="/chikiet/kataoffical/fullstack/rausachcore/backend/logs"
 if [ -d "$LOG_DIR" ]; then
     LATEST_LOG=$(ls -t "$LOG_DIR"/app-*.log 2>/dev/null | head -1)
     if [ -f "$LATEST_LOG" ]; then

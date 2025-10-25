@@ -103,19 +103,19 @@ BACKEND                                  FRONTEND
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 👨‍🏫 INSTRUCTOR 1 (ADMIN)                                                    │
-│   Email:    john.instructor@katacore.com                                    │
+│   Email:    john.instructor@rausachcore.com                                    │
 │   Username: john_instructor                                                 │
 │   Password: password123                                                     │
 │   Courses:  2 (NestJS Fundamentals, React & Next.js Mastery)               │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 👨‍🏫 INSTRUCTOR 2 (ADMIN)                                                    │
-│   Email:    jane.instructor@katacore.com                                    │
+│   Email:    jane.instructor@rausachcore.com                                    │
 │   Username: jane_instructor                                                 │
 │   Password: password123                                                     │
 │   Courses:  2 (Business Strategy 101, GraphQL API Development)             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 👨‍🎓 STUDENT (USER)                                                          │
-│   Email:    alice.student@katacore.com                                      │
+│   Email:    alice.student@rausachcore.com                                      │
 │   Username: alice_student                                                   │
 │   Password: password123                                                     │
 │   Enrolled: 2 courses (NestJS 33% complete, React 0% complete)             │

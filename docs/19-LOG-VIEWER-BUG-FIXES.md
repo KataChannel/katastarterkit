@@ -81,7 +81,7 @@ http://localhost:14000/logs/logs.html
 ```
 
 ## Files Modified
-- `/chikiet/kataoffical/fullstack/katacore/backend/public/logs.html`
+- `/chikiet/kataoffical/fullstack/rausachcore/backend/public/logs.html`
 
 ## Impact
 The log viewer is now fully functional and provides:

@@ -149,7 +149,7 @@ npm run dev
 
 ```bash
 # Update code
-cd /mnt/chikiet/kataoffical/fullstack/katacore
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore
 git pull origin main
 
 # Run tests
@@ -162,25 +162,25 @@ npm run test          # Should pass: ✅
 
 ```bash
 # Build Docker image
-docker build -f frontend/Dockerfile -t katacore-frontend:v2.0-rc .
+docker build -f frontend/Dockerfile -t rausachcore-frontend:v2.0-rc .
 
 # Push to staging registry
-docker push katacore-frontend:v2.0-rc
+docker push rausachcore-frontend:v2.0-rc
 
 # Deploy to staging environment
-kubectl set image deployment/katacore-frontend \
-  katacore-frontend=katacore-frontend:v2.0-rc \
+kubectl set image deployment/rausachcore-frontend \
+  rausachcore-frontend=rausachcore-frontend:v2.0-rc \
   -n staging
 
 # Verify deployment
-kubectl rollout status deployment/katacore-frontend -n staging
+kubectl rollout status deployment/rausachcore-frontend -n staging
 ```
 
 ### Step 3: Staging Testing
 
 ```bash
 # Run automated tests on staging
-npm run test:e2e -- --base-url=https://staging.katacore.com
+npm run test:e2e -- --base-url=https://staging.rausachcore.com
 
 # Manual testing checklist (see above)
 # - Test all 6 test cases
@@ -196,28 +196,28 @@ git tag v2.0 -m "Fix: localStorage cleanup on auth errors"
 git push origin v2.0
 
 # Build production image
-docker build -f frontend/Dockerfile -t katacore-frontend:v2.0 .
+docker build -f frontend/Dockerfile -t rausachcore-frontend:v2.0 .
 
 # Push to production registry
-docker push katacore-frontend:v2.0
+docker push rausachcore-frontend:v2.0
 
 # Deploy to production with canary (10% -> 50% -> 100%)
-kubectl set image deployment/katacore-frontend \
-  katacore-frontend=katacore-frontend:v2.0 \
+kubectl set image deployment/rausachcore-frontend \
+  rausachcore-frontend=rausachcore-frontend:v2.0 \
   -n production
 
 # Monitor rollout
-kubectl rollout status deployment/katacore-frontend -n production
+kubectl rollout status deployment/rausachcore-frontend -n production
 ```
 
 ### Step 5: Post-Deployment Monitoring
 
 ```bash
 # Check error logs
-kubectl logs -f deployment/katacore-frontend -n production | grep -i error
+kubectl logs -f deployment/rausachcore-frontend -n production | grep -i error
 
 # Monitor error rate
-curl https://monitoring.katacore.com/api/errors?service=frontend&limit=100
+curl https://monitoring.rausachcore.com/api/errors?service=frontend&limit=100
 
 # Check user feedback channels
 # - Slack: #frontend-issues
@@ -232,15 +232,15 @@ If issues occur, rollback immediately:
 
 ```bash
 # Immediate rollback to v1.9
-kubectl set image deployment/katacore-frontend \
-  katacore-frontend=katacore-frontend:v1.9 \
+kubectl set image deployment/rausachcore-frontend \
+  rausachcore-frontend=rausachcore-frontend:v1.9 \
   -n production
 
 # Verify rollback
-kubectl rollout status deployment/katacore-frontend -n production
+kubectl rollout status deployment/rausachcore-frontend -n production
 
 # Check logs
-kubectl logs -f deployment/katacore-frontend -n production
+kubectl logs -f deployment/rausachcore-frontend -n production
 ```
 
 ---

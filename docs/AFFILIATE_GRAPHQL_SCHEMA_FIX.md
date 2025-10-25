@@ -170,7 +170,7 @@ conversionRate?: number;
 
 ### Build Verification
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore/backend
+cd /chikiet/kataoffical/fullstack/rausachcore/backend
 bun run build
 ```
 ✅ **Result**: Build successful - No TypeScript errors

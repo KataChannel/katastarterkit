@@ -1,6 +1,6 @@
 # 🚀 PLAN HOÀN THIỆN AFFILIATE SYSTEM
 
-**Dự án**: KataCore Fullstack  
+**Dự án**: rausachcore Fullstack  
 **Thời gian**: 12 tuần (3 tháng)  
 **Team**: 1 Backend Dev + 1 Frontend Dev (+ 0.5 DevOps part-time)  
 **Mục tiêu**: Từ MVP (7.1/10) → Production-Ready (9/10)

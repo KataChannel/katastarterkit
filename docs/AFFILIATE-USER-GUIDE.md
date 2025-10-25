@@ -858,4 +858,4 @@ A: Có GraphQL API với 19 operations
 
 **Cập nhật lần cuối**: 19 Tháng 10, 2025  
 **Phiên bản**: 1.0.0  
-**Copyright**: © 2025 KataCore. All rights reserved.
+**Copyright**: © 2025 rausachcore. All rights reserved.

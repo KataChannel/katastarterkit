@@ -441,7 +441,7 @@ bun install xlsx
 
 ## 📄 License
 
-MIT License - Part of KataCore fullstack project
+MIT License - Part of rausachcore fullstack project
 
 ---
 

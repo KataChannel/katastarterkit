@@ -60,7 +60,7 @@
 # INVOICE_BEARER_TOKEN=
 
 # 2. Restart backend
-cd /chikiet/kataoffical/fullstack/katacore/backend
+cd /chikiet/kataoffical/fullstack/rausachcore/backend
 npm run dev
 
 # 3. Test sync endpoint
@@ -88,7 +88,7 @@ curl -X POST http://localhost:14000/api/invoices/sync \
 INVOICE_BEARER_TOKEN=eyJhbGciOiJIUzUxMiJ9...
 
 # 2. Restart backend
-cd /chikiet/kataoffical/fullstack/katacore/backend
+cd /chikiet/kataoffical/fullstack/rausachcore/backend
 npm run dev
 
 # 3. Test sync endpoint (same as above)
@@ -128,7 +128,7 @@ curl -X GET http://localhost:14000/api/config/invoice \
 ### Minimal Configuration (Database Only)
 ```bash
 # .env file
-DATABASE_URL="postgresql://postgres:postgres@localhost:15432/katacore"
+DATABASE_URL="postgresql://postgres:postgres@localhost:15432/rausachcore"
 JWT_SECRET="your-secret-key"
 
 # Invoice settings (token optional)
@@ -140,7 +140,7 @@ INVOICE_DELAY_BETWEEN_BATCHES=1000
 ### Full Configuration (With External API)
 ```bash
 # .env file
-DATABASE_URL="postgresql://postgres:postgres@localhost:15432/katacore"
+DATABASE_URL="postgresql://postgres:postgres@localhost:15432/rausachcore"
 JWT_SECRET="your-secret-key"
 
 # Invoice settings (token required for external sync)
@@ -189,8 +189,8 @@ These are pre-existing issues and do not affect the INVOICE_BEARER_TOKEN fix.
 ```bash
 # Your current .env already has the correct variable name
 # Just restart the backend
-cd /chikiet/kataoffical/fullstack/katacore/backend
-pm2 restart katacore-backend
+cd /chikiet/kataoffical/fullstack/rausachcore/backend
+pm2 restart rausachcore-backend
 # or
 npm run dev
 ```
@@ -202,8 +202,8 @@ nano backend/.env
 # Comment out: # INVOICE_BEARER_TOKEN=...
 
 # 2. Restart backend
-cd /chikiet/kataoffical/fullstack/katacore/backend
-pm2 restart katacore-backend
+cd /chikiet/kataoffical/fullstack/rausachcore/backend
+pm2 restart rausachcore-backend
 ```
 
 ### Option 3: Fresh Setup
@@ -224,9 +224,9 @@ npm run dev
 
 ## 📚 **Related Documentation**
 
-- [INVOICE_BEARER_TOKEN_BUG_FIX.md](/chikiet/kataoffical/fullstack/katacore/INVOICE_BEARER_TOKEN_BUG_FIX.md) - Detailed technical analysis
-- [ENHANCED_AUDIT_LOGGING_COMPLETE.md](/chikiet/kataoffical/fullstack/katacore/ENHANCED_AUDIT_LOGGING_COMPLETE.md) - New audit logging system
-- [.env.example](/chikiet/kataoffical/fullstack/katacore/backend/.env.example) - Environment variable template
+- [INVOICE_BEARER_TOKEN_BUG_FIX.md](/chikiet/kataoffical/fullstack/rausachcore/INVOICE_BEARER_TOKEN_BUG_FIX.md) - Detailed technical analysis
+- [ENHANCED_AUDIT_LOGGING_COMPLETE.md](/chikiet/kataoffical/fullstack/rausachcore/ENHANCED_AUDIT_LOGGING_COMPLETE.md) - New audit logging system
+- [.env.example](/chikiet/kataoffical/fullstack/rausachcore/backend/.env.example) - Environment variable template
 
 ---
 

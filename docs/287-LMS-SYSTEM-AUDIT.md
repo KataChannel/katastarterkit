@@ -336,19 +336,19 @@ Public Operations:
 ### Sample Accounts:
 ```
 👨‍🏫 INSTRUCTOR 1 (ADMIN):
-   Email: john.instructor@katacore.com
+   Email: john.instructor@rausachcore.com
    Username: john_instructor
    Password: password123
    Courses: 2 (NestJS, React)
 
 👨‍🏫 INSTRUCTOR 2 (ADMIN):
-   Email: jane.instructor@katacore.com
+   Email: jane.instructor@rausachcore.com
    Username: jane_instructor
    Password: password123
    Courses: 2 (Business, GraphQL)
 
 👨‍🎓 STUDENT (USER):
-   Email: alice.student@katacore.com
+   Email: alice.student@rausachcore.com
    Username: alice_student
    Password: password123
    Enrollments: 2 (NestJS at 33%, React at 0%)

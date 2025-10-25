@@ -43,7 +43,7 @@ Hệ thống backup/restore tự động cho Docker containers với error handl
 ├── postgres_20231017_120000.sql.gz
 ├── redis_20231017_120000.rdb.gz
 ├── minio_20231017_120000.tar.gz
-├── volume_katacore_postgres_data_20231017_120000.tar.gz
+├── volume_rausachcore_postgres_data_20231017_120000.tar.gz
 ├── config_20231017_120000.tar.gz
 ├── backup_20231017_120000.log
 └── backup_summary_20231017_120000.txt
@@ -157,7 +157,7 @@ Thay đổi khi chạy:
 crontab -e
 
 # Add line:
-0 2 * * * cd /path/to/katacore && ./scripts/6backupdocker.sh >> /var/log/docker-backup.log 2>&1
+0 2 * * * cd /path/to/rausachcore && ./scripts/6backupdocker.sh >> /var/log/docker-backup.log 2>&1
 ```
 
 ### Setup với systemd timer (Ubuntu/Debian)
@@ -175,8 +175,8 @@ After=docker.service
 [Service]
 Type=oneshot
 User=your-user
-WorkingDirectory=/path/to/katacore
-ExecStart=/path/to/katacore/scripts/6backupdocker.sh
+WorkingDirectory=/path/to/rausachcore
+ExecStart=/path/to/rausachcore/scripts/6backupdocker.sh
 ```
 
 2. Tạo timer file:
@@ -216,10 +216,10 @@ sudo systemctl status docker-backup.timer
 ### 2. Off-site Backup
 ```bash
 # Sync to remote server
-rsync -avz ./backups/ user@remote:/backup/katacore/
+rsync -avz ./backups/ user@remote:/backup/rausachcore/
 
 # Or AWS S3
-aws s3 sync ./backups/ s3://your-bucket/katacore-backups/
+aws s3 sync ./backups/ s3://your-bucket/rausachcore-backups/
 ```
 
 ### 3. Monitor Backup Size
@@ -330,4 +330,4 @@ Nếu gặp vấn đề, check:
 
 **Version**: 1.0.0  
 **Last Updated**: 2023-10-17  
-**Author**: KataCore Team
+**Author**: rausachcore Team

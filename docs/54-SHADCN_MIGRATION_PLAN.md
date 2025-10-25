@@ -1,7 +1,7 @@
-# Shadcn/UI Migration Plan - Katacore Project
+# Shadcn/UI Migration Plan - rausachcore Project
 
 ## 📋 Overview
-This document outlines the complete migration plan to standardize the Katacore project with shadcn/ui components and best practices.
+This document outlines the complete migration plan to standardize the rausachcore project with shadcn/ui components and best practices.
 
 **Migration Date:** October 3, 2025  
 **Current State:** Mixed implementation (some shadcn, some custom, Headless UI, Heroicons)  

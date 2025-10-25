@@ -215,9 +215,9 @@ git pull
 
 # Option B: Build locally, push images
 ./build-and-deploy.sh         # Local build
-docker tag katacore-backend myregistry/backend:latest
+docker tag rausachcore-backend myregistry/backend:latest
 docker push myregistry/backend:latest
-docker tag katacore-frontend myregistry/frontend:latest
+docker tag rausachcore-frontend myregistry/frontend:latest
 docker push myregistry/frontend:latest
 
 # On production: just pull and run

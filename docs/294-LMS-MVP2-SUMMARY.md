@@ -2,7 +2,7 @@
 
 ## 🎯 Overview
 
-**Project:** Katacore LMS (Learning Management System)  
+**Project:** rausachcore LMS (Learning Management System)  
 **Duration:** October 2025  
 **Status:** ✅ 100% COMPLETE  
 
@@ -410,7 +410,7 @@ frontend:    Port 13000 (Web App)
 
 ### Start Services
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 ./run.sh
 ```
 
@@ -438,7 +438,7 @@ bun prisma db seed      # Seed data
 
 ## 🎓 Conclusion
 
-**Katacore LMS MVP 2 is now complete** with all 5 phases successfully implemented:
+**rausachcore LMS MVP 2 is now complete** with all 5 phases successfully implemented:
 
 ✅ Professional video player with progress tracking  
 ✅ Quiz system with auto-grading  

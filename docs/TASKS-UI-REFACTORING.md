@@ -5,7 +5,7 @@
 Successfully modernized the `/app/admin/tasks` page with a senior-level, component-based architecture using shadcn/ui components. The refactoring transforms a monolithic 373-line page into a modular, maintainable system with reusable components.
 
 **Date:** October 7, 2025  
-**Branch:** katacore  
+**Branch:** rausachcore  
 **Status:** ✅ **COMPLETED**
 
 ---
@@ -622,7 +622,7 @@ const filteredTasks = allTasks
 ## 📖 Documentation
 
 **File:** `TASKS-UI-REFACTORING.md`  
-**Location:** `/mnt/chikiet/kataoffical/fullstack/katacore/docs/`  
+**Location:** `/mnt/chikiet/kataoffical/fullstack/rausachcore/docs/`  
 **Status:** ✅ Complete
 
 ---
@@ -632,8 +632,8 @@ const filteredTasks = allTasks
 **Developer:** GitHub Copilot  
 **User Request:** "cập nhật code app/admin/tasks giao diện like senior, chuyển về shadcn, tách thành phần cho dễ quản lý"  
 **Date:** October 7, 2025  
-**Repository:** kataoffical/fullstack/katacore  
-**Branch:** katacore
+**Repository:** kataoffical/fullstack/rausachcore  
+**Branch:** rausachcore
 
 ---
 

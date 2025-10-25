@@ -6,7 +6,7 @@
 echo "🔍 Debugging PageBuilder Add Block Issue..."
 echo "==========================================="
 
-FRONTEND_DIR="/mnt/chikiet/kataoffical/fullstack/katacore/frontend"
+FRONTEND_DIR="/mnt/chikiet/kataoffical/fullstack/rausachcore/frontend"
 
 # Colors
 GREEN='\033[0;32m'

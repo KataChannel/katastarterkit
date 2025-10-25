@@ -117,7 +117,7 @@ Restore complete!
 
 AFTER (Optimized Script):
 $ bun run restore-optimized.ts
-🚀 STARTING OPTIMIZED KATACORE DATA RESTORE
+🚀 STARTING OPTIMIZED rausachcore DATA RESTORE
 📂 Using backup: 20241219_103045
 
 🧹 Cleaning up existing data...

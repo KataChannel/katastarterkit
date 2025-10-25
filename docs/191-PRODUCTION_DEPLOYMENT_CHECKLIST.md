@@ -124,7 +124,7 @@ mv PageBuilderCanvas.tsx PageBuilderCanvas.tsx.disabled
 mv PageSettingsForm.tsx PageSettingsForm.tsx.disabled
 
 # Restart dev server
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 ./run.sh
 ```
 
@@ -245,7 +245,7 @@ bun run dev
 
 ### 2. Git Commit
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 
 git add frontend/src/components/page-builder/
 git add docs/PAGEBUILDER*.md
@@ -311,7 +311,7 @@ new file:   frontend/src/components/page-builder/PageBuilderHeader_OLD.tsx
 
 ### 3. Push to Repository
 ```bash
-git push origin katacore
+git push origin rausachcore
 ```
 
 ### 4. Deploy

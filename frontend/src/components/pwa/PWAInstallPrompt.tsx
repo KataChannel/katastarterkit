@@ -62,7 +62,7 @@ export function PWAInstallPrompt({
       // Show success notification
       if (capabilities.hasNotificationSupport) {
         await showNotification('App Installed Successfully!', {
-          body: 'Katacore has been installed to your device. You can now access it from your home screen.',
+          body: 'rausachcore has been installed to your device. You can now access it from your home screen.',
           tag: 'pwa-install-success'
         });
       }
@@ -122,7 +122,7 @@ export function PWAInstallPrompt({
             
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-gray-900">
-                Install Katacore
+                Install rausachcore
               </h3>
               <p className="text-sm text-gray-600 mt-1">
                 Add to your home screen for quick access

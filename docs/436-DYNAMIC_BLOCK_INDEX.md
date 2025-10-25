@@ -1,6 +1,6 @@
 # 📘 Dynamic Block Documentation
 
-Bộ hướng dẫn toàn diện về cách sử dụng Dynamic Block trong KataCore Page Builder.
+Bộ hướng dẫn toàn diện về cách sử dụng Dynamic Block trong rausachcore Page Builder.
 
 ---
 
@@ -85,7 +85,7 @@ npx ts-node scripts/seed-dynamic-block-demo.ts
 ## 📋 Yêu Cầu
 
 ### Cần Thiết
-- ✅ KataCore Page Builder installed
+- ✅ rausachcore Page Builder installed
 - ✅ PostgreSQL hoặc database compatible
 - ✅ Node.js 16+
 

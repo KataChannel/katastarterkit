@@ -6,7 +6,7 @@
 **Lỗi ban đầu:**
 ```
 SyntaxError: Unexpected token 'export'
-/mnt/chikiet/kataoffical/fullstack/katacore/frontend/postcss.config.js:5
+/mnt/chikiet/kataoffical/fullstack/rausachcore/frontend/postcss.config.js:5
 export default config;
 ^^^^^^
 ```

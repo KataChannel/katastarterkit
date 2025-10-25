@@ -19,7 +19,7 @@ export function Header() {
         <div className="flex justify-between items-center py-6">
           <div className="flex justify-start lg:w-0 lg:flex-1">
             <Link href="/" className="text-2xl font-bold text-gray-900">
-              KataCore
+              rausachcore
             </Link>
           </div>
           

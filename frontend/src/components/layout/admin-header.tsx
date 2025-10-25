@@ -39,7 +39,7 @@ export function AdminHeader() {
               href="/admin/dashboard"
               className="text-2xl font-bold text-white"
               >
-              KataCore <span className="text-blue-400">Admin</span>
+              rausachcore <span className="text-blue-400">Admin</span>
             </Link>
             
             <nav className="hidden md:flex space-x-1">

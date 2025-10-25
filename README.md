@@ -1,6 +1,6 @@
-# 🚀 KataCore - Modern Fullstack Starter Kit
+# 🚀 rausachcore - Modern Fullstack Starter Kit
 
-![KataCore](https://img.shields.io/badge/KataCore-Starter%20Kit-blue)
+![rausachcore](https://img.shields.io/badge/rausachcore-Starter%20Kit-blue)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black)](https://nextjs.org/)
@@ -42,8 +42,8 @@ A modern, production-ready fullstack starter kit built with the latest technolog
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/katacore/katacore.git
-   cd katacore
+   git clone https://github.com/rausachcore/rausachcore.git
+   cd rausachcore
    ```
 
 2. **Start development environment**
@@ -141,7 +141,7 @@ bun run dev
 ## 📁 Project Structure
 
 ```
-katacore/
+rausachcore/
 ├── frontend/                 # Next.js application
 │   ├── src/
 │   │   ├── app/             # App router pages
@@ -407,7 +407,7 @@ If this project helped you, please give it a ⭐ on GitHub!
 
 **Happy coding! 🎉**
 
-> **KataCore** - Build faster, ship smarter.
+> **rausachcore** - Build faster, ship smarter.
 ```
 
 ## 🛠️ Technology Stack
@@ -576,10 +576,10 @@ make dev
 make deploy-staging
 
 # Check deployment status
-kubectl get pods -n katacore-staging
+kubectl get pods -n rausachcore-staging
 
 # View logs
-kubectl logs -f deployment/backend -n katacore-staging
+kubectl logs -f deployment/backend -n rausachcore-staging
 ```
 
 ### Production Deployment
@@ -588,8 +588,8 @@ kubectl logs -f deployment/backend -n katacore-staging
 make deploy-production
 
 # Monitor deployment
-kubectl rollout status deployment/backend -n katacore
-kubectl rollout status deployment/frontend -n katacore
+kubectl rollout status deployment/backend -n rausachcore
+kubectl rollout status deployment/frontend -n rausachcore
 
 # Verify deployment
 make verify-production
@@ -774,18 +774,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/katacore/katacore/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/katacore/katacore/discussions)
-- **Security**: [security@katacore.dev](mailto:security@katacore.dev)
+- **Issues**: [GitHub Issues](https://github.com/rausachcore/rausachcore/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/rausachcore/rausachcore/discussions)
+- **Security**: [security@rausachcore.dev](mailto:security@rausachcore.dev)
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=katacore/katacore&type=Date)](https://star-history.com/#katacore/katacore&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=rausachcore/rausachcore&type=Date)](https://star-history.com/#rausachcore/rausachcore&Date)
 
 ---
 
 <div align="center">
-  <strong>Built with ❤️ by the KataCore Team</strong>
+  <strong>Built with ❤️ by the rausachcore Team</strong>
   <br>
   <sub>Making fullstack development accessible and scalable</sub>
 </div>
@@ -816,6 +816,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Happy coding! 🎉**
 
-> **Katacore** - Build faster, ship smarter.
+> **rausachcore** - Build faster, ship smarter.
 
 ⭐ **If you find this project helpful, please give it a star on GitHub!**

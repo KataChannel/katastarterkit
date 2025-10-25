@@ -115,7 +115,7 @@
 ```bash
 git add -A
 git commit -m "feat(pagebuilder): Phase 3 - Responsive Controls System"
-git push origin katacore
+git push origin rausachcore
 ```
 
 ### Next Phase: Apply to Remaining Editors

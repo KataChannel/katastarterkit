@@ -99,7 +99,7 @@ backend/scripts/
 ├── seed-dynamic-block-demo.ts ⭐ NEW (240 lines)
 │   Purpose: Populate database with demo data
 │   Creates:
-│   - Demo user (demo@katacore.com)
+│   - Demo user (demo@rausachcore.com)
 │   - 3 sample products with images
 │   - 2 demo pages with Dynamic Blocks
 │   - Static Data and GraphQL data sources

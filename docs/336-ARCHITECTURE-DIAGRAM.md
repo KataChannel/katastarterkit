@@ -4,7 +4,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    KATACORE DATABASE RESTORE                    │
+│                    rausachcore DATABASE RESTORE                    │
 │                      OPTIMIZED ARCHITECTURE                     │
 └─────────────────────────────────────────────────────────────────┘
 

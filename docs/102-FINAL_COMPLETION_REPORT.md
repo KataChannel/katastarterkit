@@ -610,7 +610,7 @@ Lines of code: 4,000+
 - **Documentation:** GitHub Copilot
 
 ### Project Owner
-- **Kata Team** - katacore@example.com
+- **Kata Team** - rausachcore@example.com
 
 ---
 
@@ -658,7 +658,7 @@ Lines of code: 4,000+
 ## Appendix A: File Structure
 
 ```
-/chikiet/kataoffical/fullstack/katacore/
+/chikiet/kataoffical/fullstack/rausachcore/
 ├── frontend/
 │   ├── src/
 │   │   ├── graphql/

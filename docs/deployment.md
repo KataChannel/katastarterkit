@@ -1,10 +1,10 @@
-# Deployment Guide - KataCore
+# Deployment Guide - rausachcore
 
-This guide covers deploying KataCore to production using Kubernetes with comprehensive monitoring, security, and automation.
+This guide covers deploying rausachcore to production using Kubernetes with comprehensive monitoring, security, and automation.
 
 ## Overview
 
-KataCore uses a modern Kubernetes-based deployment strategy with:
+rausachcore uses a modern Kubernetes-based deployment strategy with:
 - **Container Orchestration**: k3s (lightweight Kubernetes)
 - **Service Mesh**: NGINX Ingress Controller
 - **SSL/TLS**: Automatic certificate management with cert-manager
@@ -55,12 +55,12 @@ Monitoring:
 
 ### Option 1: Automated Cloud Server Setup (Recommended)
 
-This is the fastest way to deploy KataCore to a fresh Ubuntu server:
+This is the fastest way to deploy rausachcore to a fresh Ubuntu server:
 
 1. **Prepare your server**
    ```bash
    # On your Ubuntu server (as root)
-   wget -O setup.sh https://raw.githubusercontent.com/katacore/katacore/main/k8s/scripts/setup-cloud-server.sh
+   wget -O setup.sh https://raw.githubusercontent.com/rausachcore/rausachcore/main/k8s/scripts/setup-cloud-server.sh
    chmod +x setup.sh
    ./setup.sh
    ```
@@ -71,8 +71,8 @@ This is the fastest way to deploy KataCore to a fresh Ubuntu server:
    su - kata
    
    # Clone the repository
-   git clone https://github.com/katacore/katacore.git
-   cd katacore
+   git clone https://github.com/rausachcore/rausachcore.git
+   cd rausachcore
    
    # Deploy the application
    chmod +x k8s/scripts/deploy.sh
@@ -123,15 +123,15 @@ Edit `k8s/secrets/app-secrets.yaml` and replace placeholders:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: katacore-secrets
-  namespace: katacore
+  name: rausachcore-secrets
+  namespace: rausachcore
 type: Opaque
 stringData:
   # Database credentials
-  DATABASE_URL: "postgresql://katacore:YOUR_DB_PASSWORD@postgres:5432/katacore_prod"
-  POSTGRES_USER: "katacore"
+  DATABASE_URL: "postgresql://rausachcore:YOUR_DB_PASSWORD@postgres:5432/rausachcore_prod"
+  POSTGRES_USER: "rausachcore"
   POSTGRES_PASSWORD: "YOUR_DB_PASSWORD"
-  POSTGRES_DB: "katacore_prod"
+  POSTGRES_DB: "rausachcore_prod"
   
   # JWT secrets
   JWT_SECRET: "YOUR_JWT_SECRET_KEY"
@@ -164,7 +164,7 @@ spec:
     - api.yourdomain.com      # Replace with your domain
     - grafana.yourdomain.com  # Replace with your domain
     - minio.yourdomain.com    # Replace with your domain
-    secretName: katacore-tls
+    secretName: rausachcore-tls
   rules:
   - host: app.yourdomain.com      # Replace with your domain
   # ... etc
@@ -188,7 +188,7 @@ kubectl apply -f k8s/database/
 kubectl apply -f k8s/redis/
 
 # Wait for database to be ready
-kubectl wait --for=condition=available deployment/postgres --namespace=katacore --timeout=300s
+kubectl wait --for=condition=available deployment/postgres --namespace=rausachcore --timeout=300s
 
 # Deploy application services
 kubectl apply -f k8s/minio/
@@ -202,8 +202,8 @@ kubectl apply -f k8s/monitoring/
 kubectl apply -f k8s/ingress/
 
 # Check deployment status
-kubectl get all -n katacore
-kubectl get all -n katacore-monitoring
+kubectl get all -n rausachcore
+kubectl get all -n rausachcore-monitoring
 ```
 
 ## Post-Deployment Configuration
@@ -212,18 +212,18 @@ kubectl get all -n katacore-monitoring
 
 ```bash
 # Check pod status
-kubectl get pods -n katacore
-kubectl get pods -n katacore-monitoring
+kubectl get pods -n rausachcore
+kubectl get pods -n rausachcore-monitoring
 
 # Check services
-kubectl get svc -n katacore
+kubectl get svc -n rausachcore
 
 # Check ingress
-kubectl get ingress -n katacore
+kubectl get ingress -n rausachcore
 
 # View logs
-kubectl logs -f deployment/backend -n katacore
-kubectl logs -f deployment/frontend -n katacore
+kubectl logs -f deployment/backend -n rausachcore
+kubectl logs -f deployment/frontend -n rausachcore
 ```
 
 ### 2. Access Applications
@@ -243,8 +243,8 @@ Once deployed and DNS is configured:
 
 ```bash
 # Check certificate status
-kubectl get certificaterequests -n katacore
-kubectl get certificates -n katacore
+kubectl get certificaterequests -n rausachcore
+kubectl get certificates -n rausachcore
 
 # If certificates are not ready, check cert-manager logs
 kubectl logs -n cert-manager deployment/cert-manager
@@ -264,7 +264,7 @@ Access Grafana at `https://grafana.yourdomain.com` to view:
 - Application performance metrics
 - System resource usage
 - Database performance
-- Custom KataCore dashboard
+- Custom rausachcore dashboard
 
 ## Security Configuration
 
@@ -272,14 +272,14 @@ Access Grafana at `https://grafana.yourdomain.com` to view:
 
 **Grafana Admin Password:**
 ```bash
-kubectl exec -it deployment/grafana -n katacore-monitoring -- grafana-cli admin reset-admin-password NEW_PASSWORD
+kubectl exec -it deployment/grafana -n rausachcore-monitoring -- grafana-cli admin reset-admin-password NEW_PASSWORD
 ```
 
 **Database Password:**
 Update the secret and restart the deployment:
 ```bash
-kubectl patch secret katacore-secrets -n katacore -p '{"stringData":{"POSTGRES_PASSWORD":"NEW_PASSWORD"}}'
-kubectl rollout restart deployment/postgres -n katacore
+kubectl patch secret rausachcore-secrets -n rausachcore -p '{"stringData":{"POSTGRES_PASSWORD":"NEW_PASSWORD"}}'
+kubectl rollout restart deployment/postgres -n rausachcore
 ```
 
 ### 2. Network Security
@@ -304,13 +304,13 @@ SSL certificates are automatically managed by cert-manager with Let's Encrypt. T
 
 **Manual Backup:**
 ```bash
-kubectl exec deployment/postgres -n katacore -- pg_dump -U katacore katacore_prod > backup-$(date +%Y%m%d).sql
+kubectl exec deployment/postgres -n rausachcore -- pg_dump -U rausachcore rausachcore_prod > backup-$(date +%Y%m%d).sql
 ```
 
 **Automated Backup (recommended):**
 ```bash
 # Add to crontab
-0 2 * * * kubectl exec deployment/postgres -n katacore -- pg_dump -U katacore katacore_prod > /backups/katacore-$(date +%Y%m%d).sql
+0 2 * * * kubectl exec deployment/postgres -n rausachcore -- pg_dump -U rausachcore rausachcore_prod > /backups/rausachcore-$(date +%Y%m%d).sql
 ```
 
 ### Application Data Backup
@@ -318,10 +318,10 @@ kubectl exec deployment/postgres -n katacore -- pg_dump -U katacore katacore_pro
 ```bash
 # Backup persistent volumes
 kubectl get pv
-kubectl get pvc -n katacore
+kubectl get pvc -n rausachcore
 
 # MinIO data backup
-kubectl exec deployment/minio -n katacore -- mc mirror /data /backup-location
+kubectl exec deployment/minio -n rausachcore -- mc mirror /data /backup-location
 ```
 
 ## Scaling and Performance
@@ -331,10 +331,10 @@ kubectl exec deployment/minio -n katacore -- mc mirror /data /backup-location
 **Scale application pods:**
 ```bash
 # Scale backend
-kubectl scale deployment backend --replicas=3 -n katacore
+kubectl scale deployment backend --replicas=3 -n rausachcore
 
 # Scale frontend
-kubectl scale deployment frontend --replicas=3 -n katacore
+kubectl scale deployment frontend --replicas=3 -n rausachcore
 ```
 
 **Scale Redis cluster:**
@@ -367,43 +367,43 @@ Monitor performance through Grafana dashboards:
 
 **1. Pods not starting:**
 ```bash
-kubectl describe pod POD_NAME -n katacore
-kubectl logs POD_NAME -n katacore
+kubectl describe pod POD_NAME -n rausachcore
+kubectl logs POD_NAME -n rausachcore
 ```
 
 **2. SSL certificates not working:**
 ```bash
-kubectl describe certificaterequest -n katacore
+kubectl describe certificaterequest -n rausachcore
 kubectl logs -n cert-manager deployment/cert-manager
 ```
 
 **3. Database connection issues:**
 ```bash
-kubectl exec -it deployment/postgres -n katacore -- psql -U katacore -d katacore_prod
+kubectl exec -it deployment/postgres -n rausachcore -- psql -U rausachcore -d rausachcore_prod
 ```
 
 **4. Application not accessible:**
 ```bash
-kubectl get ingress -n katacore
-kubectl describe ingress katacore-ingress -n katacore
+kubectl get ingress -n rausachcore
+kubectl describe ingress rausachcore-ingress -n rausachcore
 ```
 
 ### Health Checks
 
 **Application Health:**
 ```bash
-kubectl exec -n katacore deployment/backend -- curl http://localhost:4000/health
-kubectl exec -n katacore deployment/frontend -- curl http://localhost:3000
+kubectl exec -n rausachcore deployment/backend -- curl http://localhost:4000/health
+kubectl exec -n rausachcore deployment/frontend -- curl http://localhost:3000
 ```
 
 **Database Health:**
 ```bash
-kubectl exec -n katacore deployment/postgres -- pg_isready -U katacore
+kubectl exec -n rausachcore deployment/postgres -- pg_isready -U rausachcore
 ```
 
 **Redis Health:**
 ```bash
-kubectl exec -n katacore deployment/redis-master -- redis-cli ping
+kubectl exec -n rausachcore deployment/redis-master -- redis-cli ping
 ```
 
 ## Maintenance
@@ -413,21 +413,21 @@ kubectl exec -n katacore deployment/redis-master -- redis-cli ping
 **1. Application Updates:**
 ```bash
 # Update image tags in manifests
-sed -i 's|katacore/backend:latest|katacore/backend:v1.1.0|g' k8s/backend/backend.yaml
-sed -i 's|katacore/frontend:latest|katacore/frontend:v1.1.0|g' k8s/frontend/frontend.yaml
+sed -i 's|rausachcore/backend:latest|rausachcore/backend:v1.1.0|g' k8s/backend/backend.yaml
+sed -i 's|rausachcore/frontend:latest|rausachcore/frontend:v1.1.0|g' k8s/frontend/frontend.yaml
 
 # Apply updates
 kubectl apply -f k8s/backend/
 kubectl apply -f k8s/frontend/
 
 # Monitor rollout
-kubectl rollout status deployment/backend -n katacore
-kubectl rollout status deployment/frontend -n katacore
+kubectl rollout status deployment/backend -n rausachcore
+kubectl rollout status deployment/frontend -n rausachcore
 ```
 
 **2. Database Migrations:**
 ```bash
-kubectl exec -it deployment/backend -n katacore -- bun run prisma:migrate
+kubectl exec -it deployment/backend -n rausachcore -- bun run prisma:migrate
 ```
 
 **3. System Updates:**
@@ -450,8 +450,8 @@ Set up alerts in Grafana for:
 
 ## Support and Documentation
 
-- **GitHub Issues**: [Report issues](https://github.com/katacore/katacore/issues)
-- **Documentation**: [Full docs](https://github.com/katacore/katacore/docs)
-- **Security**: [security@katacore.dev](mailto:security@katacore.dev)
+- **GitHub Issues**: [Report issues](https://github.com/rausachcore/rausachcore/issues)
+- **Documentation**: [Full docs](https://github.com/rausachcore/rausachcore/docs)
+- **Security**: [security@rausachcore.dev](mailto:security@rausachcore.dev)
 
 For additional help with deployment, monitoring, or scaling, please refer to the project documentation or open an issue on GitHub.

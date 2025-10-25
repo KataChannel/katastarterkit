@@ -1,6 +1,6 @@
-# KataCore Documentation
+# rausachcore Documentation
 
-Chào mừng đến với tài liệu dự án **KataCore** - Một hệ thống full-stack hiện đại với GraphQL, React, NestJS và PostgreSQL.
+Chào mừng đến với tài liệu dự án **rausachcore** - Một hệ thống full-stack hiện đại với GraphQL, React, NestJS và PostgreSQL.
 
 ## 🎯 New: HR Management System Documentation
 

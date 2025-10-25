@@ -173,7 +173,7 @@ Total: 44 blocks (was 46)
 #!/bin/bash
 echo "🗑️  Cleaning up COMPLETED_TASKS blocks..."
 
-docker exec -i katacore-postgres psql -U postgres -d katacore <<-EOSQL
+docker exec -i rausachcore-postgres psql -U postgres -d rausachcore <<-EOSQL
     DELETE FROM "PageBlock" WHERE type = 'COMPLETED_TASKS';
     
     SELECT DISTINCT type, COUNT(*) as count 
@@ -194,7 +194,7 @@ echo "✅ Cleanup complete!"
 #!/bin/bash
 echo "🔄 Updating BlockType enum..."
 
-docker exec -i katacore-postgres psql -U postgres -d katacore <<-EOSQL
+docker exec -i rausachcore-postgres psql -U postgres -d rausachcore <<-EOSQL
     BEGIN;
     CREATE TYPE "BlockType_new" AS ENUM (...);
     ALTER TABLE "PageBlock" ALTER COLUMN type TYPE "BlockType_new" ...;
@@ -281,7 +281,7 @@ Value 'COMPLETED_TASKS' not found in enum 'BlockType'
 ### 1. Verify No Errors
 ```bash
 # Check backend logs
-docker logs katacore-backend 2>&1 | grep COMPLETED_TASKS
+docker logs rausachcore-backend 2>&1 | grep COMPLETED_TASKS
 # Should return nothing
 ```
 

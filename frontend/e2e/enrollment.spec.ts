@@ -68,7 +68,7 @@ test.describe('Course Enrollment Flow', () => {
   test('should display course in my learning after enrollment', async ({ page }) => {
     // Login and enroll (assuming already enrolled)
     await page.goto('/login');
-    await page.fill('input[name="email"]', 'alice.student@katacore.com');
+    await page.fill('input[name="email"]', 'alice.student@rausachcore.com');
     await page.fill('input[name="password"]', 'password123');
     await page.click('button[type="submit"]');
     
@@ -85,7 +85,7 @@ test.describe('Course Enrollment Flow', () => {
   test('should start learning from course card', async ({ page }) => {
     // Login
     await page.goto('/login');
-    await page.fill('input[name="email"]', 'alice.student@katacore.com');
+    await page.fill('input[name="email"]', 'alice.student@rausachcore.com');
     await page.fill('input[name="password"]', 'password123');
     await page.click('button[type="submit"]');
     

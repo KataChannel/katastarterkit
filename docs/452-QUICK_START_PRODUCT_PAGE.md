@@ -248,7 +248,7 @@ http://localhost:13000/product-detail/airpods-pro
 
 ### Admin Credentials
 ```
-Email: admin@katacore.dev
+Email: admin@rausachcore.dev
 Password: admin123
 ```
 

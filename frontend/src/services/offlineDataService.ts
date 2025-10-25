@@ -35,7 +35,7 @@ export interface OfflineStorage {
 
 class OfflineDataService {
   private db: IDBDatabase | null = null;
-  private dbName = 'KatacoreOfflineDB';
+  private dbName = 'rausachcoreOfflineDB';
   private dbVersion = 1;
   private syncInProgress = false;
 

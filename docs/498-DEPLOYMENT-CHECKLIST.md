@@ -25,7 +25,7 @@
 
 - [ ] Build backend image: `docker compose build backend --no-cache`
 - [ ] Build frontend image: `docker compose build frontend --no-cache`
-- [ ] Verify images exist: `docker images | grep katacore`
+- [ ] Verify images exist: `docker images | grep rausachcore`
 
 ## Deployment Phase
 
@@ -75,7 +75,7 @@ After deployment, verify improvements:
 
 ```bash
 # Check image sizes
-docker images | grep katacore
+docker images | grep rausachcore
 
 # Expected sizes (50-70% smaller):
 # Backend: ~350-550MB
@@ -134,7 +134,7 @@ docker compose logs -f frontend
 docker compose down
 
 # Remove images
-docker rmi $(docker images | grep katacore | awk '{print $3}')
+docker rmi $(docker images | grep rausachcore | awk '{print $3}')
 
 # Clean disk
 docker system prune -a

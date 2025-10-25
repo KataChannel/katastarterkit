@@ -1,6 +1,6 @@
 # Frontend Setup Guide
 
-This guide covers the setup and configuration of the KataCore Next.js frontend with TailwindCSS v4.
+This guide covers the setup and configuration of the rausachcore Next.js frontend with TailwindCSS v4.
 
 ## Prerequisites
 
@@ -546,8 +546,8 @@ npm run export
 
 ### Docker
 ```bash
-docker build -t katacore-frontend .
-docker run -p 3000:3000 katacore-frontend
+docker build -t rausachcore-frontend .
+docker run -p 3000:3000 rausachcore-frontend
 ```
 
 ### Vercel

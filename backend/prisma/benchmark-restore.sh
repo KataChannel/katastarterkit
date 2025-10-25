@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Katacore Database Restore Performance Benchmark
+# rausachcore Database Restore Performance Benchmark
 # This script helps you compare old vs optimized restore performance
 
 set -e
@@ -17,7 +17,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}Katacore Database Restore Benchmark${NC}"
+echo -e "${BLUE}rausachcore Database Restore Benchmark${NC}"
 echo -e "${BLUE}========================================${NC}\n"
 
 # Check if backup exists

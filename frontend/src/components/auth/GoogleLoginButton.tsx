@@ -69,7 +69,7 @@ export default function GoogleLoginButton() {
         // Show success message
         const isNewUser = user.createdAt && new Date(user.createdAt) > new Date(Date.now() - 5000);
         if (isNewUser) {
-          toast.success(`Welcome to KataCore, ${user.firstName || user.username}! Your account has been created.`);
+          toast.success(`Welcome to rausachcore, ${user.firstName || user.username}! Your account has been created.`);
         } else {
           toast.success(`Welcome back, ${user.firstName || user.username}!`);
         }

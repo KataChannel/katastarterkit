@@ -141,7 +141,7 @@ npm run seed:comprehensive
 
 ### AI/Chatbot
 - **1 ChatbotModel** (KataBot)
-- **1 TrainingData** (KataCore Introduction)
+- **1 TrainingData** (rausachcore Introduction)
 
 ### Affiliate System
 - **1 AffUser** (admin as affiliate)

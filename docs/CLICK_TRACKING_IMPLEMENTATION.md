@@ -107,14 +107,14 @@ cat cookies.txt
 #### Step 5: Verify Database
 ```bash
 # Check clicks recorded
-psql -h localhost -U postgres -d katacore -c \
+psql -h localhost -U postgres -d rausachcore -c \
   "SELECT id, \"linkId\", \"ipAddress\", device, browser, \"clickedAt\" 
    FROM \"AffClick\" 
    ORDER BY \"clickedAt\" DESC 
    LIMIT 5;"
 
 # Check link stats updated
-psql -h localhost -U postgres -d katacore -c \
+psql -h localhost -U postgres -d rausachcore -c \
   "SELECT id, \"trackingCode\", \"totalClicks\", \"totalConversions\" 
    FROM \"AffLink\" 
    WHERE \"trackingCode\" = 'abc123def456';"
@@ -348,7 +348,7 @@ cd backend && bun run dev
 ./test-click-tracking.sh
 
 # Terminal 3: Watch database
-watch -n 2 'psql -h localhost -U postgres -d katacore -c "SELECT COUNT(*) as total_clicks FROM \"AffClick\""'
+watch -n 2 'psql -h localhost -U postgres -d rausachcore -c "SELECT COUNT(*) as total_clicks FROM \"AffClick\""'
 ```
 
 ### Debugging

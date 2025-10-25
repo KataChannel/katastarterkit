@@ -1,6 +1,6 @@
 # 📦 Product Shop Layout - File Manifest
 
-**Project**: Katacore E-Commerce  
+**Project**: rausachcore E-Commerce  
 **Feature**: Product Shop Layout (/website/sanpham)  
 **Created**: October 24, 2025  
 **Status**: ✅ Complete
@@ -141,7 +141,7 @@ product.queries.ts              (Updated)    ✅ Modified
 ## 🗂️ Complete File Tree
 
 ```
-/mnt/chikiet/kataoffical/fullstack/katacore/
+/mnt/chikiet/kataoffical/fullstack/rausachcore/
 │
 ├── 📄 PRODUCT_SHOP_DOCUMENTATION.md              ✅
 ├── 📄 PRODUCT_SHOP_QUICK_START.md               ✅
@@ -455,6 +455,6 @@ This implementation teaches:
 
 **Created by**: GitHub Copilot  
 **Date**: October 24, 2025  
-**Project**: Katacore E-Commerce  
+**Project**: rausachcore E-Commerce  
 **Version**: 1.0  
 **Status**: Production Ready ✨

@@ -62,7 +62,7 @@
 ### Browser Testing Steps:
 1. **Start Development Server**:
    ```bash
-   cd /mnt/chikiet/kataoffical/fullstack/katacore/frontend
+   cd /mnt/chikiet/kataoffical/fullstack/rausachcore/frontend
    npm run dev
    ```
 

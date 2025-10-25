@@ -281,8 +281,8 @@ Successfully implemented **complete file upload system** with MinIO integration 
   minio:
     image: minio/minio:RELEASE.2024-08-26T15-33-07Z
     environment:
-      MINIO_ROOT_USER: katacore-admin
-      MINIO_ROOT_PASSWORD: katacore-secret-2025
+      MINIO_ROOT_USER: rausachcore-admin
+      MINIO_ROOT_PASSWORD: rausachcore-secret-2025
     ports:
       - "9000:9000"   # API
       - "9001:9001"   # Console
@@ -594,15 +594,15 @@ URL saved to form state
 
 ### 1. Start Backend with MinIO
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 ./run.sh
 ```
 
 ### 2. Access MinIO Console
 ```
 URL: http://localhost:9001
-Username: katacore-admin
-Password: katacore-secret-2025
+Username: rausachcore-admin
+Password: rausachcore-secret-2025
 ```
 
 ### 3. Create Course with File Uploads
@@ -636,7 +636,7 @@ Password: katacore-secret-2025
 ### 4. Verify MinIO Storage
 ```bash
 # Check uploaded files
-docker exec -it katacore-minio mc ls local/uploads/
+docker exec -it rausachcore-minio mc ls local/uploads/
 ```
 
 ---
@@ -648,8 +648,8 @@ docker exec -it katacore-minio mc ls local/uploads/
 # MinIO Configuration (already configured)
 MINIO_ENDPOINT=localhost
 MINIO_PORT=9000
-MINIO_ACCESS_KEY=katacore-admin
-MINIO_SECRET_KEY=katacore-secret-2025
+MINIO_ACCESS_KEY=rausachcore-admin
+MINIO_SECRET_KEY=rausachcore-secret-2025
 MINIO_USE_SSL=false
 MINIO_BUCKET_NAME=uploads
 

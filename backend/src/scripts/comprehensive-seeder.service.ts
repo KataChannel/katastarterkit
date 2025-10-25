@@ -505,7 +505,7 @@ export class ComprehensiveSeederService {
       data: {
         pageId: homePage.id,
         type: BlockType.HERO,
-        content: { heading: 'Welcome to KataCore', subheading: 'Built with Next.js, NestJS, and Prisma' },
+        content: { heading: 'Welcome to rausachcore', subheading: 'Built with Next.js, NestJS, and Prisma' },
         order: 1,
       },
     });
@@ -531,10 +531,10 @@ export class ComprehensiveSeederService {
     const chatbot = await this.prisma.chatbotModel.create({
       data: {
         name: 'KataBot',
-        description: 'Official KataCore chatbot assistant',
+        description: 'Official rausachcore chatbot assistant',
         status: ChatbotStatus.ACTIVE,
         userId: this.adminUser.id,
-        systemPrompt: 'You are a helpful assistant for KataCore platform.',
+        systemPrompt: 'You are a helpful assistant for rausachcore platform.',
       },
     });
 
@@ -542,8 +542,8 @@ export class ComprehensiveSeederService {
       data: {
         chatbotId: chatbot.id,
         userId: this.adminUser.id,
-        title: 'KataCore Introduction',
-        content: 'KataCore is a modern fullstack starter kit.',
+        title: 'rausachcore Introduction',
+        content: 'rausachcore is a modern fullstack starter kit.',
         type: TrainingDataType.TEXT,
         status: TrainingStatus.COMPLETED,
       },
@@ -571,8 +571,8 @@ export class ComprehensiveSeederService {
       data: {
         name: 'Demo Campaign 2024',
         description: 'Demo affiliate campaign for testing',
-        productName: 'KataCore Pro',
-        productUrl: 'https://katacore.dev/pro',
+        productName: 'rausachcore Pro',
+        productUrl: 'https://rausachcore.dev/pro',
         commissionRate: 10.0,
         commissionType: 'percentage',
         status: AffCampaignStatus.ACTIVE,
@@ -598,7 +598,7 @@ export class ComprehensiveSeederService {
         affiliateId: affUser.id,
         campaignId: campaign.id,
         trackingCode: 'KATA-DEMO-2024',
-        originalUrl: 'https://katacore.dev',
+        originalUrl: 'https://rausachcore.dev',
         shortUrl: 'https://kata.link/demo',
         isActive: true,
       },
@@ -637,7 +637,7 @@ export class ComprehensiveSeederService {
     await this.prisma.notification.create({
       data: {
         userId: this.adminUser.id,
-        title: 'Welcome to KataCore!',
+        title: 'Welcome to rausachcore!',
         message: 'Your admin account has been set up successfully.',
         type: 'info',
         isRead: false,
@@ -686,7 +686,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor i
 
 ## Conclusion
 
-This post demonstrates the seeding functionality of KataCore.
+This post demonstrates the seeding functionality of rausachcore.
     `.trim();
   }
 

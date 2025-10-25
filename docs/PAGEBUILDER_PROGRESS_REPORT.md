@@ -9,7 +9,7 @@
 ## 🎯 TỔNG QUAN DỰ ÁN
 
 ### Thông tin cơ bản
-- **Tên dự án:** KataCore - Enterprise Fullstack Starter Kit
+- **Tên dự án:** rausachcore - Enterprise Fullstack Starter Kit
 - **Module đánh giá:** PageBuilder (Trình xây dựng trang web)
 - **Công nghệ:**
   - **Frontend:** Next.js 15, React 19, TypeScript, TailwindCSS
@@ -794,7 +794,7 @@ docs/
 
 ### **Tổng kết:**
 
-PageBuilder của KataCore là một **module xuất sắc** với:
+PageBuilder của rausachcore là một **module xuất sắc** với:
 
 ✅ **Strengths:**
 - Architecture chuyên nghiệp, scalable

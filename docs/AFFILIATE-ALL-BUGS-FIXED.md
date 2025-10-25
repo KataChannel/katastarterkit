@@ -154,11 +154,11 @@
 
 ```bash
 # 1. Start backend
-cd /chikiet/kataoffical/fullstack/katacore/backend
+cd /chikiet/kataoffical/fullstack/rausachcore/backend
 bun run dev
 
 # 2. Start frontend
-cd /chikiet/kataoffical/fullstack/katacore/frontend
+cd /chikiet/kataoffical/fullstack/rausachcore/frontend
 bun run dev
 
 # 3. Login as new user
@@ -314,14 +314,14 @@ Developer Experience:
 
 ### Backend
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore/backend
+cd /chikiet/kataoffical/fullstack/rausachcore/backend
 bun run build
 bun run start
 ```
 
 ### Frontend
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore/frontend
+cd /chikiet/kataoffical/fullstack/rausachcore/frontend
 bun run build
 bun run start
 ```

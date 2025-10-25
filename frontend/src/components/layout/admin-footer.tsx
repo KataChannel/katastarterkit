@@ -26,7 +26,7 @@ export function AdminFooter() {
           <div className="mt-4 md:mt-0 md:order-1">
             <div className="flex items-center justify-center md:justify-start space-x-4">
               <p className="text-sm text-gray-400">
-                &copy; 2025 KataCore Admin Panel
+                &copy; 2025 rausachcore Admin Panel
               </p>
               <span className="text-gray-600">|</span>
               <p className="text-sm text-gray-500">

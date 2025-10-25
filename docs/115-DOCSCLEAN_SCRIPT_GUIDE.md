@@ -333,7 +333,7 @@ $ ./scripts/docsclean.sh --category FIX
 ### Before Running Script
 
 ```
-katacore/
+rausachcore/
 ├── README.md                           # Skipped
 ├── CATEGORY_FIX_SUMMARY.md             # → docs/69-*
 ├── PRODUCTS_REMOVE_DIALOG.md           # → docs/70-*
@@ -348,7 +348,7 @@ katacore/
 ### After Running Script
 
 ```
-katacore/
+rausachcore/
 ├── README.md                           # ✅ Preserved
 └── docs/
     ├── 1-FIRST_DOC.md
@@ -555,7 +555,7 @@ chmod +x scripts/docsclean.sh
 ls -la *.md
 
 # Check if using correct directory
-pwd  # Should be in katacore root
+pwd  # Should be in rausachcore root
 ```
 
 ### Issue: Dry Run Shows Different Results Than Actual Run

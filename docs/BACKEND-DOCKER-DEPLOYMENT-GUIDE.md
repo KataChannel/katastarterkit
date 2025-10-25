@@ -60,14 +60,14 @@ DOCKER_MINIO_ENDPOINT=minio
 DOCKER_MINIO_PORT=9000
 
 # Detection Mechanism
-DOCKER_NETWORK_NAME=katacore-network
+DOCKER_NETWORK_NAME=rausachcore-network
 ```
 
 ## 🚀 Deployment Instructions
 
 ### Step 1: Build Backend
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 docker compose build backend --no-cache
 ```
 
@@ -79,7 +79,7 @@ Expected output:
 #24 [production 9/12] RUN adduser -S nestjs -u 1001
 #24 DONE 0.2s
 
-katacore-backend  Built ✅
+rausachcore-backend  Built ✅
 ```
 
 ### Step 2: Start Services
@@ -115,14 +115,14 @@ The database is already in sync with the Prisma schema.
 2. MinIO service on same network: `minio:9000`
 3. MinioService detects `DOCKER_NETWORK_NAME` env var
 4. Uses `DOCKER_MINIO_ENDPOINT=minio` automatically
-5. All containers on `katacore-network`
+5. All containers on `rausachcore-network`
 
 ## 📊 Architecture After Fix
 
 ```
 ┌─────────────────────────────────────────────┐
 │          Docker Compose Network             │
-│         katacore-network (bridge)           │
+│         rausachcore-network (bridge)           │
 ├─────────────────────────────────────────────┤
 │                                             │
 │  ┌──────────────┐    ┌───────────────┐    │

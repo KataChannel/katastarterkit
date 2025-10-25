@@ -521,4 +521,4 @@ query {
 
 ---
 
-*Generated with ❤️ for KataCore Affiliate System*
+*Generated with ❤️ for rausachcore Affiliate System*

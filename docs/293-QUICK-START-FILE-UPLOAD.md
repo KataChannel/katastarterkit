@@ -8,7 +8,7 @@
 ## 1. Start Services
 
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 ./run.sh
 ```
 
@@ -24,8 +24,8 @@ This starts:
 Open your browser:
 ```
 URL: http://localhost:9001
-Username: katacore-admin
-Password: katacore-secret-2025
+Username: rausachcore-admin
+Password: rausachcore-secret-2025
 ```
 
 Verify buckets exist:
@@ -126,7 +126,7 @@ Verify buckets exist:
 ### Check MinIO Storage:
 ```bash
 # Enter MinIO container
-docker exec -it katacore-minio sh
+docker exec -it rausachcore-minio sh
 
 # List uploaded files
 mc ls local/uploads/
@@ -248,7 +248,7 @@ cd backend
 bun test
 
 # Check logs
-docker logs katacore-backend -f
+docker logs rausachcore-backend -f
 
 # Verify GraphQL schema
 curl http://localhost:14000/graphql
@@ -279,7 +279,7 @@ open http://localhost:9001
 ### Remove Test Files:
 ```bash
 # Enter MinIO container
-docker exec -it katacore-minio sh
+docker exec -it rausachcore-minio sh
 
 # Remove all files in uploads bucket
 mc rm --recursive --force local/uploads/

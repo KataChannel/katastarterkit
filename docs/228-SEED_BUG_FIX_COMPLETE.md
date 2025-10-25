@@ -106,8 +106,8 @@ Your database is now in sync with your schema.
 $ bun run prisma:seed
 🌱 Starting seed...
 ✅ Seed completed successfully!
-👤 Admin user: admin@katacore.dev / admin123
-👤 Test user: user@katacore.dev / user123
+👤 Admin user: admin@rausachcore.dev / admin123
+👤 Test user: user@rausachcore.dev / user123
 📝 Created 3 posts
 🏷️ Created 4 tags
 ```
@@ -129,13 +129,13 @@ $ bun run prisma:seed
 
 #### Users (2)
 - **Admin User**
-  - Email: `admin@katacore.dev`
+  - Email: `admin@rausachcore.dev`
   - Password: `admin123`
   - Role: `ADMIN`
   - Status: Active & Verified
 
 - **Test User**
-  - Email: `user@katacore.dev`
+  - Email: `user@rausachcore.dev`
   - Password: `user123`
   - Role: `USER`
   - Status: Active
@@ -147,7 +147,7 @@ $ bun run prisma:seed
 - Prisma (#2d3748)
 
 #### Posts (3)
-- Welcome to KataCore
+- Welcome to rausachcore
 - Getting Started with GraphQL
 - Building Modern APIs with NestJS
 

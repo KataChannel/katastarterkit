@@ -124,14 +124,14 @@ RUN npm run build --legacy-peer-deps
 
 Run the full Docker build:
 ```bash
-cd /chikiet/kataoffical/fullstack/katacore
+cd /chikiet/kataoffical/fullstack/rausachcore
 docker compose build
 ```
 
 Expected output:
 ```
-katacore-backend  Built  ✅
-katacore-frontend  Built ✅
+rausachcore-backend  Built  ✅
+rausachcore-frontend  Built ✅
 ```
 
 Run the containers:

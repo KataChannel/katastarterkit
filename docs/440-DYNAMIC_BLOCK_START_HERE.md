@@ -103,7 +103,7 @@ npm --version
 
 ### Step 2: Install Dependencies ✅
 ```bash
-cd /mnt/chikiet/kataoffical/fullstack/katacore
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore
 bun install
 cd backend && bun install && cd ..
 cd frontend && bun install && cd ..
@@ -129,7 +129,7 @@ Expected output:
 ### Step 4: Start Dev Server ✅
 ```bash
 # Back to root directory
-cd /mnt/chikiet/kataoffical/fullstack/katacore
+cd /mnt/chikiet/kataoffical/fullstack/rausachcore
 bun run dev
 ```
 

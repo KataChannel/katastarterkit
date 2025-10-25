@@ -9,33 +9,33 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    default: 'KataCore - AI-Powered Chatbot Platform',
-    template: '%s | KataCore',
+    default: 'rausachcore - AI-Powered Chatbot Platform',
+    template: '%s | rausachcore',
   },
   description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data. Built with Next.js, NestJS, GraphQL, Prisma, Redis, and Minio.',
   keywords: ['ai', 'chatbot', 'fullstack', 'starter-kit', 'nextjs', 'nestjs', 'graphql', 'prisma', 'redis', 'minio', 'artificial intelligence', 'machine learning'],
-  authors: [{ name: 'KataCore Team' }],
-  creator: 'KataCore Team',
+  authors: [{ name: 'rausachcore Team' }],
+  creator: 'rausachcore Team',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:13000'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    title: 'KataCore - AI-Powered Chatbot Platform',
+    title: 'rausachcore - AI-Powered Chatbot Platform',
     description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data.',
-    siteName: 'KataCore',
+    siteName: 'rausachcore',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'KataCore - AI-Powered Chatbot Platform',
+        alt: 'rausachcore - AI-Powered Chatbot Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'KataCore - AI-Powered Chatbot Platform',
+    title: 'rausachcore - AI-Powered Chatbot Platform',
     description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data.',
     images: ['/og-image.png'],
   },

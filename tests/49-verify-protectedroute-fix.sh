@@ -8,7 +8,7 @@
 
 set -e
 
-FRONTEND_DIR="/chikiet/kataoffical/fullstack/katacore/frontend"
+FRONTEND_DIR="/chikiet/kataoffical/fullstack/rausachcore/frontend"
 
 # Colors
 RED='\033[0;31m'
