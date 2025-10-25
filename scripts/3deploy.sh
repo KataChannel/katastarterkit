@@ -30,7 +30,7 @@ docker network prune -f 2>/dev/null || true
 
 # Deploy với timeout và remove-orphans
 echo "🚀 Starting deployment..."
-timeout 300 docker compose -f 'docker-compose.yml' up -d --build --remove-orphans --pull missing
+timeout 600 docker compose -f 'docker-compose.yml' up -d --build --remove-orphans --pull missing
 
 # Final cleanup
 docker builder prune -af 2>/dev/null || true
