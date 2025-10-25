@@ -4,7 +4,7 @@
 # Then: docker compose build backend --no-cache
 # Bun.js provides 3-4x faster startup and better runtime performance
 
-FROM oven/bun:1-alpine AS production
+FROM oven/bun:1.3-alpine AS production
 WORKDIR /app
 
 # Install curl for health checks

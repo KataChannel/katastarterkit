@@ -4,7 +4,7 @@ ARG BUILD_MODE=prebuilt
 # ========================================
 # STAGE 1: Dependencies (for build mode only)
 # ========================================
-FROM oven/bun:1-alpine AS deps
+FROM oven/bun:1.3-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN mkdir -p /app/node_modules && cp -r frontend/node_modules/* /app/node_module
 # ========================================
 # STAGE 2: Builder (for build mode only)
 # ========================================
-FROM oven/bun:1-alpine AS builder
+FROM oven/bun:1.3-alpine AS builder
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -43,7 +43,7 @@ RUN NODE_OPTIONS="--max-old-space-size=384" bun run build
 # ========================================
 # STAGE 3: Runtime (for prebuilt mode)
 # ========================================
-FROM oven/bun:1-alpine AS runtime
+FROM oven/bun:1.3-alpine AS runtime
 
 # Install minimal runtime dependencies
 RUN apk add --no-cache curl dumb-init && \
@@ -81,7 +81,7 @@ CMD ["bun", "server.js"]
 # ========================================
 # STAGE 4: Runtime with build (for build mode)
 # ========================================
-FROM oven/bun:1-alpine AS runtime-build
+FROM oven/bun:1.3-alpine AS runtime-build
 
 # Install minimal runtime dependencies
 RUN apk add --no-cache curl dumb-init && \
