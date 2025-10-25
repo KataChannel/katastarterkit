@@ -17,12 +17,12 @@ import FacebookLoginButton from "@/components/auth/FacebookLoginButton";
 const loginSchema = yup.object({
   email: yup
     .string()
-    .email("Please enter a valid email address")
-    .required("Email is required"),
+    .email("Vui lòng nhập địa chỉ email hợp lệ")
+    .required("Email là bắt buộc"),
   password: yup
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .required("Password is required"),
+    .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
+    .required("Mật khẩu là bắt buộc"),
 });
 
 type LoginFormData = yup.InferType<typeof loginSchema>;
@@ -56,16 +56,16 @@ function LoginPageContent() {
       const result = await login(data.email, data.password);
 
       if (result.success) {
-        toast.success("Welcome back!");
+        toast.success("Chào mừng bạn quay lại!");
         // Redirect to dashboard or intended page
         const returnUrl = searchParams?.get("returnUrl") || "/admin";
         router.push(returnUrl);
       } else {
-        toast.error(result.error || "Login failed. Please try again.");
+        toast.error(result.error || "Đăng nhập thất bại. Vui lòng thử lại.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("Login failed. Please try again.");
+      toast.error("Đăng nhập thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -80,15 +80,15 @@ function LoginPageContent() {
             <h1 className="text-3xl font-bold text-blue-600">rausachcore</h1>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Đăng nhập vào tài khoản của bạn
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{" "}
+            Hoặc{" "}
             <Link
               href="/register"
               className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
             >
-              create a new account
+              tạo tài khoản mới
             </Link>
           </p>
         </div>
@@ -106,7 +106,7 @@ function LoginPageContent() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email address
+                Địa chỉ email
               </label>
               <div className="mt-1">
                 <input
@@ -116,7 +116,7 @@ function LoginPageContent() {
                   data-testid="email-input"
                   className={`appearance-none relative block w-full px-3 py-2 border ${errors.email ? "border-red-300" : "border-gray-300"
                     } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
-                  placeholder="Enter your email"
+                  placeholder="Nhập email của bạn"
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">
@@ -132,7 +132,7 @@ function LoginPageContent() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Mật khẩu
               </label>
               <div className="mt-1 relative">
                 <input
@@ -142,7 +142,7 @@ function LoginPageContent() {
                   data-testid="password-input"
                   className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${errors.password ? "border-red-300" : "border-gray-300"
                     } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu của bạn"
                 />
                 <button
                   type="button"
@@ -178,7 +178,7 @@ function LoginPageContent() {
                 htmlFor="remember-me"
                 className="ml-2 block text-sm text-gray-900"
               >
-                Remember me
+                Ghi nhớ tôi
               </label>
             </div>
 
@@ -187,7 +187,7 @@ function LoginPageContent() {
                 href="/forgot-password"
                 className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
-                Forgot your password?
+                Quên mật khẩu?
               </Link>
             </div>
           </div>
@@ -225,10 +225,10 @@ function LoginPageContent() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Signing in...
+                  Đang đăng nhập...
                 </div>
               ) : (
-                "Sign in"
+                "Đăng nhập"
               )}
             </button>
           </div>
@@ -241,7 +241,7 @@ function LoginPageContent() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-gray-50 text-gray-500">
-                  Or continue with
+                  Hoặc tiếp tục với
                 </span>
               </div>
             </div>

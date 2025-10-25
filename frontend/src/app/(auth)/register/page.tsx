@@ -17,24 +17,24 @@ import FacebookLoginButton from '@/components/auth/FacebookLoginButton';
 const registerSchema = yup.object({
   name: yup
     .string()
-    .min(2, 'Name must be at least 2 characters')
-    .required('Name is required'),
+    .min(2, 'Tên phải có ít nhất 2 ký tự')
+    .required('Tên là bắt buộc'),
   email: yup
     .string()
-    .email('Please enter a valid email address')
-    .required('Email is required'),
+    .email('Vui lòng nhập địa chỉ email hợp lệ')
+    .required('Email là bắt buộc'),
   password: yup
     .string()
-    .min(8, 'Password must be at least 8 characters')
+    .min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+      'Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường và một số'
     )
-    .required('Password is required'),
+    .required('Mật khẩu là bắt buộc'),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref('password')], 'Passwords must match')
-    .required('Please confirm your password'),
+    .oneOf([yup.ref('password')], 'Mật khẩu không khớp')
+    .required('Vui lòng xác nhận mật khẩu'),
 });
 
 type RegisterFormData = yup.InferType<typeof registerSchema>;
@@ -70,14 +70,14 @@ function RegisterPageContent() {
       const result = await registerUser(registerData.email, registerData.password, registerData.name);
       
       if (result.success) {
-        toast.success('Account created successfully!');
+        toast.success('Tài khoản đã được tạo thành công!');
         router.push('/admin');
       } else {
-        toast.error(result.error || 'Registration failed');
+        toast.error(result.error || 'Đăng ký thất bại');
       }
     } catch (error: any) {
       console.error('Registration error:', error);
-      toast.error(error.message || 'Registration failed. Please try again.');
+      toast.error(error.message || 'Đăng ký thất bại. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -103,15 +103,15 @@ function RegisterPageContent() {
             </svg>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
+            Tạo tài khoản của bạn
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Already have an account?{' '}
+            Đã có tài khoản?{' '}
             <Link
               href="/login"
               className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
             >
-              Sign in here
+              Đăng nhập tại đây
             </Link>
           </p>
         </div>
@@ -121,7 +121,7 @@ function RegisterPageContent() {
             {/* Name Field */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
+                Họ và tên
               </label>
               <div className="mt-1">
                 <input
@@ -132,7 +132,7 @@ function RegisterPageContent() {
                   className={`appearance-none relative block w-full px-3 py-2 border ${
                     errors.name ? 'border-red-300' : 'border-gray-300'
                   } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
-                  placeholder="Enter your full name"
+                  placeholder="Nhập họ và tên của bạn"
                 />
                 {errors.name && (
                   <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
@@ -143,7 +143,7 @@ function RegisterPageContent() {
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
+                Địa chỉ email
               </label>
               <div className="mt-1">
                 <input
@@ -154,7 +154,7 @@ function RegisterPageContent() {
                   className={`appearance-none relative block w-full px-3 py-2 border ${
                     errors.email ? 'border-red-300' : 'border-gray-300'
                   } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
-                  placeholder="Enter your email"
+                  placeholder="Nhập email của bạn"
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -165,7 +165,7 @@ function RegisterPageContent() {
             {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                Mật khẩu
               </label>
               <div className="mt-1 relative">
                 <input
@@ -176,7 +176,7 @@ function RegisterPageContent() {
                   className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
                   } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu của bạn"
                 />
                 <button
                   type="button"
@@ -199,7 +199,7 @@ function RegisterPageContent() {
             {/* Confirm Password Field */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
+                Xác nhận mật khẩu
               </label>
               <div className="mt-1 relative">
                 <input
@@ -210,7 +210,7 @@ function RegisterPageContent() {
                   className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
                     errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                   } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
-                  placeholder="Confirm your password"
+                  placeholder="Xác nhận mật khẩu của bạn"
                 />
                 <button
                   type="button"
@@ -259,10 +259,10 @@ function RegisterPageContent() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Creating account...
+                  Đang tạo tài khoản...
                 </div>
               ) : (
-                'Create Account'
+                'Tạo tài khoản'
               )}
             </button>
           </div>
@@ -274,7 +274,7 @@ function RegisterPageContent() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-50 text-gray-500">Or continue with</span>
+                <span className="px-2 bg-gray-50 text-gray-500">Hoặc tiếp tục với</span>
               </div>
             </div>
 

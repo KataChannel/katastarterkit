@@ -1,7 +1,7 @@
 export default function PhonePage() {
   return (
     <div>
-      <h1>Phone Auth Page</h1>
+      <h1>Trang xác thực bằng điện thoại</h1>
     </div>
   );
 }
