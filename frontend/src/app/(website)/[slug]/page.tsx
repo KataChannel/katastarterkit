@@ -21,6 +21,7 @@ interface DynamicPageProps {
 
 export default function DynamicPage({ params }: DynamicPageProps) {
   const [slug, setSlug] = useState<string | null>(null);
+  const [routeError, setRouteError] = useState<string | null>(null);
   
   useEffect(() => {
     const resolveParams = async () => {
@@ -30,6 +31,15 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         console.log('Rendering page for slug:', resolvedParams);
         
         if (resolvedParams && resolvedParams.slug) {
+          // Exclude reserved routes that have explicit handlers
+          const reservedRoutes = ['baiviet', 'sanpham', 'website'];
+          if (reservedRoutes.includes(resolvedParams.slug)) {
+            console.warn(`Route "${resolvedParams.slug}" is reserved and should use specific handler`);
+            setRouteError(`Route "/${resolvedParams.slug}" không được xử lý bởi dynamic page handler`);
+            setSlug('');
+            return;
+          }
+          
           // Prepend 'website/' to match the database slug format
           const fullSlug = `website/${resolvedParams.slug}`;
           setSlug(fullSlug);
@@ -37,8 +47,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           console.error('No slug found in params:', resolvedParams);
           setSlug(''); // This will trigger notFound() in the query
         }
-      } catch (error) {
-        console.error('Error resolving params:', error);
+      } catch (err) {
+        console.error('Error resolving params:', err);
+        setRouteError('Lỗi khi xử lý tham số route');
         setSlug(''); // This will trigger notFound() in the query
       }
     };

@@ -24,6 +24,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
+    // Return a default context for SSR/initial render to prevent errors
+    // This allows components to render without throwing during hydration
+    if (typeof window === 'undefined') {
+      // Server-side: return a fallback context
+      return {
+        user: null,
+        login: async () => ({ success: false, error: 'Not available on server' }),
+        register: async () => ({ success: false, error: 'Not available on server' }),
+        logout: () => {},
+        loading: true,
+        isAuthenticated: false,
+      };
+    }
+    // Client-side: this should not happen if AuthProvider is properly set up
+    console.warn('useAuth is being called outside of AuthProvider. This should not happen. Check your component tree.');
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

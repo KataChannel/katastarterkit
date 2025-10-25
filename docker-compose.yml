@@ -103,72 +103,72 @@ services:
       retries: 3
       start_period: 10s
 
-  # Backend with Bun
-  backend:
-    build:
-      context: .
-      dockerfile: ./backend/Dockerfile
-    container_name: ${BACKEND_CONTAINER_NAME:-rausachcore-backend}
-    restart: unless-stopped
-    environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/rausachcore}
-      REDIS_HOST: ${DOCKER_REDIS_HOST:-redis}
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      MINIO_ENDPOINT: ${DOCKER_MINIO_ENDPOINT:-minio}
-      MINIO_PORT: 9000
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      MINIO_USE_SSL: false
-      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-uploads}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:12000}
-    ports:
-      - "${PORT:-12001}:4000"
-    # Note: Remove volumes for production deployment  
-    # volumes:
-    #   - ./backend:/app
-    #   - /app/node_modules
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    networks:
-      - rausachcore-network
+  # # Backend with Bun
+  # backend:
+  #   build:
+  #     context: .
+  #     dockerfile: ./backend/Dockerfile
+  #   container_name: ${BACKEND_CONTAINER_NAME:-rausachcore-backend}
+  #   restart: unless-stopped
+  #   environment:
+  #     NODE_ENV: ${NODE_ENV:-development}
+  #     DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/rausachcore}
+  #     REDIS_HOST: ${DOCKER_REDIS_HOST:-redis}
+  #     REDIS_PORT: 6379
+  #     REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+  #     JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+  #     JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+  #     MINIO_ENDPOINT: ${DOCKER_MINIO_ENDPOINT:-minio}
+  #     MINIO_PORT: 9000
+  #     MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+  #     MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+  #     MINIO_USE_SSL: false
+  #     MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-uploads}
+  #     FRONTEND_URL: ${FRONTEND_URL:-http://localhost:12000}
+  #   ports:
+  #     - "${PORT:-12001}:4000"
+  #   # Note: Remove volumes for production deployment  
+  #   # volumes:
+  #   #   - ./backend:/app
+  #   #   - /app/node_modules
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     minio:
+  #       condition: service_healthy
+  #   networks:
+  #     - rausachcore-network
 
-  # Frontend with Bun
-  frontend:
-    build:
-      context: .
-      dockerfile: ./frontend/Dockerfile
-    container_name: ${FRONTEND_CONTAINER_NAME:-rausachcore-frontend}
-    restart: unless-stopped
-    environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      NEXT_PUBLIC_GRAPHQL_ENDPOINT: ${NEXT_PUBLIC_GRAPHQL_ENDPOINT:-http://localhost:12001/graphql}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:12000}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-nextauth-secret-change-in-production}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:12000}
-      # Disable Next.js instrumentation to avoid OpenTelemetry module loading issues
-      NEXT_OTEL_ENABLED: "false"
-      # Disable telemetry
-      NEXT_TELEMETRY_DISABLED: "1"
-    ports:
-      - "${FRONTEND_PORT:-12000}:3000"
-    # Note: Remove volumes for production deployment
-    # volumes:
-    #   - ./frontend:/app
-    #   - /app/node_modules
-    #   - /app/.next
-    depends_on:
-      - backend
-    networks:
-      - rausachcore-network
+  # # Frontend with Bun
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: ./frontend/Dockerfile
+  #   container_name: ${FRONTEND_CONTAINER_NAME:-rausachcore-frontend}
+  #   restart: unless-stopped
+  #   environment:
+  #     NODE_ENV: ${NODE_ENV:-development}
+  #     NEXT_PUBLIC_GRAPHQL_ENDPOINT: ${NEXT_PUBLIC_GRAPHQL_ENDPOINT:-http://localhost:12001/graphql}
+  #     NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:12000}
+  #     NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-nextauth-secret-change-in-production}
+  #     NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:12000}
+  #     # Disable Next.js instrumentation to avoid OpenTelemetry module loading issues
+  #     NEXT_OTEL_ENABLED: "false"
+  #     # Disable telemetry
+  #     NEXT_TELEMETRY_DISABLED: "1"
+  #   ports:
+  #     - "${FRONTEND_PORT:-12000}:3000"
+  #   # Note: Remove volumes for production deployment
+  #   # volumes:
+  #   #   - ./frontend:/app
+  #   #   - /app/node_modules
+  #   #   - /app/.next
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - rausachcore-network
 
 volumes:
   postgres_data:

@@ -1,3 +1,5 @@
+'use client';
+
 import { WebsiteFooter } from '@/components/layout/website-footer';
 import { WebsiteHeader } from '@/components/layout/website-header';
 import { ReactNode } from 'react';

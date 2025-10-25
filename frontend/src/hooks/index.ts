@@ -49,3 +49,7 @@ export {
   useIsOnline 
 } from './useMounted';
 export type { WindowSize } from './useMounted';
+
+// Error notification hooks
+export { useErrorNotification, parseGraphQLError } from './useErrorNotification';
+export type { ErrorNotification } from './useErrorNotification';

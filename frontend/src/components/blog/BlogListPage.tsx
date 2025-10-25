@@ -1,15 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_BLOGS, GET_BLOG_CATEGORIES } from '@/graphql/blog.queries';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { BlogCard } from './BlogCard';
+import { useErrorNotification, parseGraphQLError } from '@/hooks/useErrorNotification';
 
 interface BlogsQueryData {
   blogs: {
@@ -59,6 +60,8 @@ export function BlogListPage() {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('latest');
+  const [displayError, setDisplayError] = useState<{ message: string; details?: string } | null>(null);
+  const { notify } = useErrorNotification();
 
   const { data, loading, error, refetch } = useQuery<BlogsQueryData>(GET_BLOGS, {
     variables: {
@@ -71,9 +74,31 @@ export function BlogListPage() {
     errorPolicy: 'all',
   });
 
-  const { data: categoriesData, loading: categoriesLoading } = useQuery<CategoriesQueryData>(GET_BLOG_CATEGORIES, {
+  const { data: categoriesData, loading: categoriesLoading, error: categoriesError } = useQuery<CategoriesQueryData>(GET_BLOG_CATEGORIES, {
     errorPolicy: 'all',
   });
+
+  // Handle errors and display notifications
+  useEffect(() => {
+    if (error) {
+      const errorInfo = parseGraphQLError(error);
+      setDisplayError({
+        message: errorInfo.message,
+        details: errorInfo.details,
+      });
+      notify(errorInfo);
+    } else {
+      setDisplayError(null);
+    }
+  }, [error, notify]);
+
+  // Log categories errors
+  useEffect(() => {
+    if (categoriesError) {
+      const errorInfo = parseGraphQLError(categoriesError);
+      console.warn('[Categories Error]', errorInfo);
+    }
+  }, [categoriesError]);
 
   const handleSearch = (value: string) => {
     setSearch(value);
@@ -125,13 +150,13 @@ export function BlogListPage() {
           {/* Category and Sort Filters */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Category Filter */}
-            <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+            <Select value={selectedCategory || 'all'} onValueChange={(value) => handleCategoryChange(value === 'all' ? '' : value)}>
               <SelectTrigger className="h-10">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Chọn danh mục" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tất cả danh mục</SelectItem>
+                <SelectItem value="all">Tất cả danh mục</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}
@@ -168,8 +193,40 @@ export function BlogListPage() {
             ))}
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <p className="text-red-600">Lỗi tải bài viết. Vui lòng thử lại.</p>
+          <div className="space-y-4">
+            {/* Error Banner */}
+            <div className="bg-red-50 border border-red-300 rounded-lg p-6 shadow-md">
+              <div className="flex items-start gap-4">
+                <AlertCircle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-red-800 mb-2">
+                    {displayError?.message || 'Lỗi tải bài viết'}
+                  </h3>
+                  {displayError?.details && (
+                    <details className="mb-4 cursor-pointer">
+                      <summary className="text-sm text-red-700 hover:text-red-800 font-medium">
+                        Chi tiết lỗi
+                      </summary>
+                      <pre className="mt-2 text-xs bg-red-100 p-3 rounded border border-red-200 overflow-auto max-h-40 text-red-700 font-mono">
+                        {displayError.details}
+                      </pre>
+                    </details>
+                  )}
+                  <p className="text-sm text-red-700 mb-4">
+                    Vui lòng thử lại. Nếu vẫn lỗi, hãy liên hệ với bộ phận hỗ trợ.
+                  </p>
+                  <Button
+                    onClick={() => {
+                      setDisplayError(null);
+                      refetch();
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Thử lại
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         ) : blogs.length === 0 ? (
           <div className="text-center py-12">

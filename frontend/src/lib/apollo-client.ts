@@ -154,6 +154,16 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
         logError('warn', '📝 Validation error - check input data', { message, path });
       }
 
+      // Handle resource not found errors
+      if (message.includes('not found')) {
+        logError('warn', '🔍 Resource not found - check if resource exists', { 
+          message, 
+          path,
+          operation: operation.operationName,
+          variables: operation.variables
+        });
+      }
+
       return errorInfo;
     });
 
