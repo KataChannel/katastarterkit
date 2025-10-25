@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # Build backend and frontend before deployment
-echo "Building backend..."
-cd backend
-bun install
-bun run build
-cd ..
+# echo "Building backend..."
+# cd backend
+# bun install
+# bun run build
+# cd ..
 
-echo "Building frontend..."
-cd frontend
-bun run build
-cd ..
+# echo "Building frontend..."
+# cd frontend
+# bun run build
+# cd ..
 
 # Local git operations
 git add .
