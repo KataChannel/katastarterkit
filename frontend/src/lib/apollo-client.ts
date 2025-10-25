@@ -67,8 +67,29 @@ const collectErrorContext = () => {
 };
 
 // HTTP Link
+const getGraphQLUri = () => {
+  let endpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:14000/graphql';
+  
+  // In browser environment, if page is loaded via HTTPS but endpoint is HTTP, fix it
+  if (typeof window !== 'undefined') {
+    // If current page is HTTPS but endpoint is HTTP, upgrade to HTTPS
+    if (window.location.protocol === 'https:' && endpoint.startsWith('http://')) {
+      // Replace http:// with https://
+      endpoint = endpoint.replace('http://', 'https://');
+      console.info(`[Apollo] Upgraded GraphQL endpoint to HTTPS: ${endpoint}`);
+    }
+    // If current page is HTTP and endpoint is HTTPS, downgrade to HTTP
+    else if (window.location.protocol === 'http:' && endpoint.startsWith('https://')) {
+      endpoint = endpoint.replace('https://', 'http://');
+      console.info(`[Apollo] Downgraded GraphQL endpoint to HTTP: ${endpoint}`);
+    }
+  }
+  
+  return endpoint;
+};
+
 const httpLink = createHttpLink({
-  uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:14000/graphql',
+  uri: getGraphQLUri(),
 });
 
 // WebSocket Link for subscriptions - completely disabled in development
