@@ -8,19 +8,27 @@ FROM oven/bun:1-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files
-COPY package.json bun.lockb* ./
-RUN bun install --frozen-lockfile
+# Copy only frontend and root package.json for workspace structure
+COPY package.json ./
+COPY frontend ./frontend
+RUN cd frontend && bun install --frozen-lockfile
+# Create a node_modules directory in /app for builder stage
+RUN mkdir -p /app/node_modules && cp -r frontend/node_modules/* /app/node_modules 2>/dev/null || true
 
 # ========================================
 # STAGE 2: Builder (for build mode only)
 # ========================================
 FROM oven/bun:1-alpine AS builder
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# Copy dependencies (note: deps stage installs in frontend directory)
+COPY --from=deps /app/frontend/node_modules ./node_modules
+COPY package.json ./
+COPY frontend ./frontend
+
+# Change to frontend directory for build
+WORKDIR /app/frontend
 
 # Set build environment
 ENV NODE_ENV=production
@@ -32,7 +40,6 @@ ENV SKIP_TYPE_CHECK=true
 
 # Build the application with memory optimization
 ENV DOCKER_BUILD=true
-RUN bunx prisma generate
 RUN NODE_OPTIONS="--max-old-space-size=384" bun run build
 
 # ========================================
@@ -55,11 +62,11 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Copy pre-built application files (for prebuilt mode)
-COPY --chown=nextjs:nodejs .next/standalone ./ 
-COPY --chown=nextjs:nodejs .next/static ./.next/static
-COPY --chown=nextjs:nodejs public ./public
+COPY --chown=nextjs:nodejs frontend/.next/standalone ./ 
+COPY --chown=nextjs:nodejs frontend/.next/static ./.next/static
+COPY --chown=nextjs:nodejs frontend/public ./public
 # Copy app directory for App Router support
-COPY --chown=nextjs:nodejs app ./app
+COPY --chown=nextjs:nodejs frontend/app ./app
 
 # Switch to non-root user
 USER nextjs
@@ -95,11 +102,11 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Copy built files from builder stage
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/static ./.next/static
+COPY --chown=nextjs:nodejs frontend/public ./public
 # Copy app directory for App Router support
-COPY --from=builder --chown=nextjs:nodejs /app/app ./app
+COPY --chown=nextjs:nodejs frontend/app ./app
 
 # Switch to non-root user
 USER nextjs
