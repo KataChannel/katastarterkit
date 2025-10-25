@@ -156,17 +156,15 @@ echo "────────────────────────�
 
 # Create deployment timeout handler
 deploy_failed=0
-timeout ${DEPLOY_TIMEOUT} bash -c '
-    docker compose -f ${DOCKER_COMPOSE_FILE} up -d --build --remove-orphans --pull missing
-    EXIT_CODE=$?
-    if [ $EXIT_CODE -ne 0 ]; then
-        echo -e "${RED}❌ Docker compose failed with code $EXIT_CODE${NC}"
-        exit $EXIT_CODE
-    fi
-' || deploy_failed=$?
+timeout ${DEPLOY_TIMEOUT} docker compose -f ${DOCKER_COMPOSE_FILE} up -d --build --remove-orphans --pull missing || deploy_failed=$?
 
-if [ $deploy_failed -ne 0 ]; then
-    echo -e "${RED}❌ Deployment timeout or failed${NC}"
+if [ $deploy_failed -ne 0 ] && [ $deploy_failed -ne 124 ]; then
+    echo -e "${RED}❌ Docker compose failed with code $deploy_failed${NC}"
+    echo "🔄 Attempting rollback..."
+    docker compose -f ${DOCKER_COMPOSE_FILE} down --timeout=15 2>/dev/null || true
+    exit 1
+elif [ $deploy_failed -eq 124 ]; then
+    echo -e "${RED}❌ Deployment timeout (>300s)${NC}"
     echo "🔄 Attempting rollback..."
     docker compose -f ${DOCKER_COMPOSE_FILE} down --timeout=15 2>/dev/null || true
     exit 1
