@@ -45,10 +45,23 @@ async function bootstrap() {
   // Serve static files for log viewer
   app.use('/logs', express.static(join(__dirname, '../public')));
   
-  // Enable CORS
+  // Enable CORS with support for multiple origins and IP addresses
+  const frontendUrl = configService.get('FRONTEND_URL', 'http://localhost:3000');
+  const corsOrigins = [
+    'http://localhost:3000',
+    'http://localhost:12000',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:12000',
+    frontendUrl,
+    // Allow any origin in development, or configure specific IPs in production
+    process.env.NODE_ENV === 'development' ? /.*/ : undefined,
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: configService.get('FRONTEND_URL', 'http://localhost:3000'),
+    origin: corsOrigins.length > 0 ? corsOrigins : true,
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   });
 
   // Global validation pipe

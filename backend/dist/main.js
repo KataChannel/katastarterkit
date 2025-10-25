@@ -64,9 +64,20 @@ async function bootstrap() {
     app.use(express.json({ limit: '50mb' }));
     app.use(express.urlencoded({ extended: true, limit: '50mb' }));
     app.use('/logs', express.static((0, path_1.join)(__dirname, '../public')));
+    const frontendUrl = configService.get('FRONTEND_URL', 'http://localhost:3000');
+    const corsOrigins = [
+        'http://localhost:3000',
+        'http://localhost:12000',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:12000',
+        frontendUrl,
+        process.env.NODE_ENV === 'development' ? /.*/ : undefined,
+    ].filter(Boolean);
     app.enableCors({
-        origin: configService.get('FRONTEND_URL', 'http://localhost:3000'),
+        origin: corsOrigins.length > 0 ? corsOrigins : true,
         credentials: true,
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     });
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
