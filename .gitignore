@@ -9,6 +9,8 @@ bun.lockb
 .next/
 dist/
 build/
+# Exception: Include backend/dist for Docker builds
+!backend/dist
 
 # Environment variables
 .env*
