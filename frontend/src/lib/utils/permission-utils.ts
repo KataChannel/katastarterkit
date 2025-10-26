@@ -28,39 +28,53 @@ export interface User {
 }
 
 export interface MenuItem {
-  id: string;
-  title: string;
-  requiredRoles?: string[];
-  requiredPermissions?: string[];
+  id?: string;
+  title?: string;
+  name?: string;  // Support both title (database) and name (static)
+  requiredRoles?: string[] | string;  // Can be array or JSON string from database
+  requiredPermissions?: string[] | string;  // Can be array or JSON string from database
   isPublic?: boolean;
   route?: string | null;
   url?: string | null;
   externalUrl?: string | null;
+  href?: string;  // Support href from static navigation
+  icon?: any;  // Support icon from static navigation
   children?: MenuItem[];
 }
 
 /**
  * Get user's role names from their role assignments
+ * Normalizes roleType to lowercase for consistent matching
  */
 export function getUserRoleNames(user: User | null | undefined): string[] {
   if (!user) return [];
   
   const roleNames: string[] = [];
   
-  // Add roleType (legacy)
+  // Add roleType (legacy) - normalize to lowercase
   if (user.roleType) {
-    roleNames.push(user.roleType);
+    const normalizedRoleType = user.roleType.toLowerCase();
+    roleNames.push(normalizedRoleType);
     // Map ADMIN roleType to role names
-    if (user.roleType === 'ADMIN') {
-      roleNames.push('admin', 'super_admin');
+    if (normalizedRoleType === 'admin') {
+      if (!roleNames.includes('admin')) roleNames.push('admin');
+      if (!roleNames.includes('super_admin')) roleNames.push('super_admin');
     }
   }
   
-  // Add assigned roles from database
+  // Add assigned roles from database - normalize to lowercase
   if (user.roles && Array.isArray(user.roles)) {
     user.roles.forEach(role => {
-      if (role.name && !roleNames.includes(role.name)) {
-        roleNames.push(role.name);
+      if (role.name) {
+        const normalizedName = role.name.toLowerCase();
+        if (!roleNames.includes(normalizedName)) {
+          roleNames.push(normalizedName);
+        }
+      } else {
+        // DEBUG: role object structure if name is missing
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('⚠️ Role object missing name field:', role);
+        }
       }
     });
   }
@@ -107,7 +121,7 @@ export function getUserPermissionNames(user: User | null | undefined): string[] 
  * Rules:
  * 1. Nếu isPublic = true, cho phép truy cập
  * 2. Nếu requiredRoles rỗng và requiredPermissions rỗng, cho phép truy cập
- * 3. Nếu user.roleType = 'ADMIN' hoặc 'super_admin', cho phép truy cập tất cả
+ * 3. Nếu user.roleType = 'ADMIN' hoặc 'admin', cho phép truy cập tất cả
  * 4. Nếu có requiredRoles, user phải có ít nhất một role
  * 5. Nếu có requiredPermissions, user phải có ít nhất một permission
  */
@@ -120,31 +134,62 @@ export function canAccessMenuItem(
     return menuItem.isPublic === true;
   }
 
-  // Super admin hoặc admin có quyền truy cập tất cả
-  if (user.roleType === 'ADMIN' || user.roleType === 'super_admin') {
-    return true;
-  }
-
   // Nếu public, cho phép truy cập
   if (menuItem.isPublic === true) {
     return true;
   }
 
-  // Nếu không có yêu cầu quyền, cho phép truy cập
-  if (
-    (!menuItem.requiredRoles || menuItem.requiredRoles.length === 0) &&
-    (!menuItem.requiredPermissions || menuItem.requiredPermissions.length === 0)
-  ) {
-    return true;
-  }
-
-  // Get user's roles and permissions from database
+  // Get user's roles and permissions from database FIRST
   const userRoles = getUserRoleNames(user);
   const userPermissions = getUserPermissionNames(user);
 
+  // Super admin hoặc admin có quyền truy cập tất cả - CHECK EARLY
+  if (userRoles.includes('admin') || userRoles.includes('super_admin')) {
+    return true;
+  }
+
+  // Parse requiredRoles - có thể là array hoặc JSON string từ database
+  let requiredRoles: string[] = [];
+  if (menuItem.requiredRoles) {
+    if (Array.isArray(menuItem.requiredRoles)) {
+      requiredRoles = menuItem.requiredRoles.map(r => r.toLowerCase()); // Normalize to lowercase
+    } else if (typeof menuItem.requiredRoles === 'string') {
+      try {
+        const parsed = JSON.parse(menuItem.requiredRoles);
+        if (Array.isArray(parsed)) {
+          requiredRoles = parsed.map((r: string) => r.toLowerCase()); // Normalize to lowercase
+        }
+      } catch {
+        requiredRoles = [];
+      }
+    }
+  }
+
+  // Parse requiredPermissions - có thể là array hoặc JSON string từ database
+  let requiredPermissions: string[] = [];
+  if (menuItem.requiredPermissions) {
+    if (Array.isArray(menuItem.requiredPermissions)) {
+      requiredPermissions = menuItem.requiredPermissions;
+    } else if (typeof menuItem.requiredPermissions === 'string') {
+      try {
+        const parsed = JSON.parse(menuItem.requiredPermissions);
+        if (Array.isArray(parsed)) {
+          requiredPermissions = parsed;
+        }
+      } catch {
+        requiredPermissions = [];
+      }
+    }
+  }
+
+  // Nếu không có yêu cầu quyền, cho phép truy cập
+  if (requiredRoles.length === 0 && requiredPermissions.length === 0) {
+    return true;
+  }
+
   // Kiểm tra requiredRoles
-  if (menuItem.requiredRoles && menuItem.requiredRoles.length > 0) {
-    const hasRequiredRole = menuItem.requiredRoles.some(requiredRole => 
+  if (requiredRoles.length > 0) {
+    const hasRequiredRole = requiredRoles.some(requiredRole => 
       userRoles.includes(requiredRole)
     );
     if (hasRequiredRole) {
@@ -153,8 +198,8 @@ export function canAccessMenuItem(
   }
 
   // Kiểm tra requiredPermissions
-  if (menuItem.requiredPermissions && menuItem.requiredPermissions.length > 0) {
-    const hasRequiredPermission = menuItem.requiredPermissions.some(requiredPerm => 
+  if (requiredPermissions.length > 0) {
+    const hasRequiredPermission = requiredPermissions.some(requiredPerm => 
       userPermissions.includes(requiredPerm)
     );
     if (hasRequiredPermission) {
@@ -177,8 +222,24 @@ export function filterMenuByPermissions(
     return [];
   }
 
+  const DEBUG = process.env.NODE_ENV === 'development';
+  
   return menus
-    .filter((item) => canAccessMenuItem(user, item))
+    .filter((item, index) => {
+      const canAccess = canAccessMenuItem(user, item);
+      
+      // DEBUG: Log first item only to avoid spam
+      if (DEBUG && index === 0) {
+        const userRoles = getUserRoleNames(user);
+        console.log('🔍 FILTER DEBUG - First Item:');
+        console.log('  Item title:', item.title || item.name);
+        console.log('  Item requiredRoles (raw):', item.requiredRoles);
+        console.log('  User roles:', userRoles);
+        console.log('  Can access:', canAccess);
+      }
+      
+      return canAccess;
+    })
     .map((item) => ({
       ...item,
       // Recursively filter children
@@ -233,13 +294,52 @@ export function debugMenuPermissions(
       const indent = '  '.repeat(level);
       const status = canAccess ? '✅' : '❌';
 
+      // Parse requiredRoles for display
+      let requiredRoles: string[] = [];
+      if (item.requiredRoles) {
+        if (Array.isArray(item.requiredRoles)) {
+          requiredRoles = item.requiredRoles;
+        } else if (typeof item.requiredRoles === 'string') {
+          try {
+            const parsed = JSON.parse(item.requiredRoles);
+            requiredRoles = Array.isArray(parsed) ? parsed : [];
+          } catch {
+            requiredRoles = [];
+          }
+        }
+      }
+
+      // Parse requiredPermissions for display
+      let requiredPermissions: string[] = [];
+      if (item.requiredPermissions) {
+        if (Array.isArray(item.requiredPermissions)) {
+          requiredPermissions = item.requiredPermissions;
+        } else if (typeof item.requiredPermissions === 'string') {
+          try {
+            const parsed = JSON.parse(item.requiredPermissions);
+            requiredPermissions = Array.isArray(parsed) ? parsed : [];
+          } catch {
+            requiredPermissions = [];
+          }
+        }
+      }
+
       const requiredStr = [];
-      if (item.requiredRoles?.length) requiredStr.push(`roles: [${item.requiredRoles.join(', ')}]`);
-      if (item.requiredPermissions?.length) requiredStr.push(`perms: [${item.requiredPermissions.join(', ')}]`);
+      if (requiredRoles.length) requiredStr.push(`roles: [${requiredRoles.join(', ')}]`);
+      if (requiredPermissions.length) requiredStr.push(`perms: [${requiredPermissions.join(', ')}]`);
       
-      console.log(
-        `${indent}${status} ${item.title} (${requiredStr.join(', ') || 'public'})`
-      );
+      // Get title from item.title (database) or item.name (static) or fallback to id
+      const itemTitle = item.title || item.name || `Menu #${item.id}`;
+      
+      // DEBUG: Show why item is blocked
+      if (!canAccess && level === 0) {
+        console.log(`${indent}${status} ${itemTitle} (${requiredStr.join(', ') || 'public'})`);
+        console.log(`  Raw item.requiredRoles:`, item.requiredRoles);
+        console.log(`  Raw item.requiredPermissions:`, item.requiredPermissions);
+        console.log(`  isPublic:`, item.isPublic);
+      } else {
+        console.log(`${indent}${status} ${itemTitle} (${requiredStr.join(', ') || 'public'})`);
+      }
 
       if (item.children) {
         checkMenu(item.children, level + 1);

@@ -128,10 +128,17 @@ export function useAdminMenus() {
       const href = menu.externalUrl || menu.route || menu.url || menu.path || `/${menu.slug}`;
       const isExternal = !!menu.externalUrl;
       
+      // Ensure we have a name - fallback to slug if title is missing
+      const name = menu.title || menu.slug || 'Menu';
+      
       return {
-        name: menu.title,
+        title: menu.title,
+        name: name,  // Always have a name for display
         href: href,
         icon: menu.icon || undefined,
+        requiredRoles: menu.requiredRoles || undefined,
+        requiredPermissions: menu.requiredPermissions || undefined,
+        isPublic: menu.isPublic,
         children: menu.children?.map(transformMenu).filter(Boolean) || undefined,
         badge: menu.badge || undefined,
         badgeColor: menu.badgeColor || undefined,
