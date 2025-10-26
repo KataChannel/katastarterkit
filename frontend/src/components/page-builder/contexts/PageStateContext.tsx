@@ -69,13 +69,22 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
     setDraggedBlockState(block);
   }, []);
   
+  // Update isNewPageMode when pageId changes
+  useEffect(() => {
+    setIsNewPageMode(!pageId);
+  }, [pageId]);
+  
   // Initialize editing page when page loads or when in new page mode
   useEffect(() => {
-    if (page && !editingPage) {
+    console.log('PageStateContext effect:', { page, editingPage, isNewPageMode, pageId });
+    
+    if (page) {
       // Mode: EDIT existing page
+      console.log('Setting existing page:', page.title);
       setEditingPageState(page);
-    } else if (isNewPageMode && !editingPage && !page) {
+    } else if (isNewPageMode && !editingPage) {
       // Mode: CREATE new page - initialize with default values
+      console.log('Initializing new page');
       const newPage: Page = {
         id: '', // Will be assigned by backend
         title: 'Untitled Page',
@@ -92,7 +101,7 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
       };
       setEditingPageState(newPage);
     }
-  }, [page, editingPage, isNewPageMode]);
+  }, [page, pageId, isNewPageMode]);
   
   // Initialize blocks from page
   useEffect(() => {

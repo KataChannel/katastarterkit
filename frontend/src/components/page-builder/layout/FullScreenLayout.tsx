@@ -45,6 +45,7 @@ export function FullScreenLayout({
         onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
         isLoading={loading}
         pageTitle={editingPage?.title}
+        pageSlug={editingPage?.slug}
       />
 
       {/* Main Content Area */}

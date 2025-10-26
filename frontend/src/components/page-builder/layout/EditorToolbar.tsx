@@ -66,6 +66,7 @@ interface EditorToolbarProps {
   onApplyTemplate?: (template: PageTemplate) => void;
   isLoading?: boolean;
   pageTitle?: string;
+  pageSlug?: string;
   pageId?: string;
   onSettingsSave?: (settings: any) => void;
 }
@@ -86,6 +87,7 @@ export function EditorToolbar({
   onApplyTemplate,
   isLoading = false,
   pageTitle,
+  pageSlug,
   pageId,
   onSettingsSave,
 }: EditorToolbarProps) {
@@ -101,7 +103,7 @@ export function EditorToolbar({
   const [pageSettings, setPageSettings] = useState({
     pageTitle: pageTitle || editingPage?.title || '',
     pageDescription: '',
-    pageSlug: editingPage?.slug || '',
+    pageSlug: pageSlug || editingPage?.slug || '',
     seoTitle: editingPage?.seoTitle || '',
     seoDescription: editingPage?.seoDescription || '',
     seoKeywords: Array.isArray(editingPage?.seoKeywords) ? editingPage.seoKeywords.join(', ') : '',
@@ -140,9 +142,9 @@ export function EditorToolbar({
     }
   }, [isSettingsOpen, pageId]);
 
-  // Update pageSettings when editingPage changes (for new pages)
+  // Update pageSettings when editingPage changes (both for new and existing pages)
   useEffect(() => {
-    if (editingPage && isNewPageMode) {
+    if (editingPage) {
       setPageSettings(prev => ({
         ...prev,
         pageTitle: editingPage.title || '',
@@ -153,7 +155,7 @@ export function EditorToolbar({
         isPublished: editingPage.status === 'PUBLISHED',
       }));
     }
-  }, [editingPage, isNewPageMode]);
+  }, [editingPage]);
 
   // Update pageTitle in state when prop changes
   useEffect(() => {
@@ -161,6 +163,13 @@ export function EditorToolbar({
       setPageSettings(prev => ({ ...prev, pageTitle }));
     }
   }, [pageTitle]);
+
+  // Update pageSlug in state when prop changes (for existing pages)
+  useEffect(() => {
+    if (pageSlug) {
+      setPageSettings(prev => ({ ...prev, pageSlug }));
+    }
+  }, [pageSlug]);
 
   // Load page settings from API
   const loadPageSettings = async () => {
@@ -295,8 +304,25 @@ export function EditorToolbar({
         </Tabs>
       </div>
 
-      {/* Center Section - Device Preview */}
-      <div className="flex items-center gap-2">
+      {/* Center Section - Device Preview & Page Info */}
+      <div className="flex items-center gap-4">
+        {/* Page Title & Slug Display - Always show if editingPage exists */}
+        {editingPage && (
+          <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded border border-gray-200 min-w-max">
+            <div className="flex flex-col gap-0.5">
+              <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                {editingPage.title || 'Untitled Page'}
+              </div>
+              {editingPage.slug && (
+                <div className="text-xs text-gray-500 truncate max-w-xs">
+                  /{editingPage.slug}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Device Selector */}
         <Tabs value={device} onValueChange={(v) => onDeviceChange(v as 'desktop' | 'tablet' | 'mobile')}>
           <TabsList>
             <TabsTrigger value="desktop" className="gap-2">
