@@ -23,9 +23,10 @@ interface CarouselSlide {
   badge?: string;
   bgColor?: string;
   textColor?: string;
-  imagePosition?: 'left' | 'right' | 'top' | 'bottom' | 'background';
+  imagePosition?: 'left' | 'right' | 'top' | 'bottom' | 'background' | 'fullscreen';
   imageOverlay?: number;
   animation?: 'fade' | 'slide' | 'zoom' | 'none';
+  imageOnly?: boolean; // Show only image without text content
 }
 
 interface SlideEditorDialogProps {
@@ -210,8 +211,30 @@ export function SlideEditorDialog({ open, onOpenChange, slide, onSave }: SlideEd
                   <SelectItem value="top">Top</SelectItem>
                   <SelectItem value="bottom">Bottom</SelectItem>
                   <SelectItem value="background">Background</SelectItem>
+                  <SelectItem value="fullscreen">Fullscreen</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Image Only Mode */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="imageOnly">Image Only Mode</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show only the image without text content
+                  </p>
+                </div>
+                <input
+                  id="imageOnly"
+                  type="checkbox"
+                  checked={localSlide.imageOnly || false}
+                  onChange={(e) =>
+                    setLocalSlide({ ...localSlide, imageOnly: e.target.checked })
+                  }
+                  className="w-5 h-5 rounded border border-gray-300 cursor-pointer"
+                />
+              </div>
             </div>
 
             {/* Image Overlay (only for background) */}
@@ -298,24 +321,26 @@ export function SlideEditorDialog({ open, onOpenChange, slide, onSave }: SlideEd
 
             {/* Animation */}
             <div className="space-y-2">
-              <Label htmlFor="animation">Animation (Coming Soon)</Label>
+              <Label htmlFor="animation">Animation</Label>
               <Select
                 value={localSlide.animation || 'slide'}
                 onValueChange={(value: any) =>
                   setLocalSlide({ ...localSlide, animation: value })
                 }
-                disabled
               >
                 <SelectTrigger id="animation">
                   <SelectValue placeholder="Select animation" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
                   <SelectItem value="fade">Fade</SelectItem>
                   <SelectItem value="slide">Slide</SelectItem>
                   <SelectItem value="zoom">Zoom</SelectItem>
-                  <SelectItem value="none">None</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Animation effect when slide appears
+              </p>
             </div>
           </TabsContent>
         </Tabs>
