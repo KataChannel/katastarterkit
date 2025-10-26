@@ -56,65 +56,146 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
 
   // Fallback static navigation (used while loading or on error)
   // This ensures users always have access to admin features, even if database menus fail to load
-  const staticNavigation:any[] = [
+  const staticNavigation: any = [
     {
       name: 'Dashboard',
       href: '/admin',
       icon: LayoutDashboard,
+      requiredRoles: ['admin', 'super_admin'],
     },
     {
       name: 'Users',
       href: '/admin/users',
       icon: Users,
+      requiredRoles: ['admin', 'super_admin'],
     },
     {
       name: 'Roles & Permissions',
       href: '/admin/roles',
       icon: Settings,
+      requiredRoles: ['admin', 'super_admin'],
     },
     {
       name: 'Content',
       href: '/admin/posts',
       icon: ClipboardList,
+      requiredRoles: ['admin', 'super_admin'],
     },
     {
       name: 'Projects',
       href: '/admin/projects',
       icon: Target,
+      requiredRoles: ['admin', 'super_admin'],
     },
     {
       name: 'Tasks',
       href: '/admin/tasks',
       icon: CheckSquare,
+      requiredRoles: ['admin', 'super_admin'],
     },
     {
       name: 'Analytics',
       href: '/admin/analytics',
       icon: TrendingUp,
+      requiredRoles: ['admin', 'super_admin'],
     },
     {
       name: 'Settings',
       href: '/admin/settings',
       icon: Settings,
+      requiredRoles: ['admin', 'super_admin'],
     },
   ];
 
   // Use dynamic menus if loaded, otherwise use static navigation
   const navigation = React.useMemo(() => {
-    if (menusLoading || !dynamicMenus || dynamicMenus.length === 0) {
-      return staticNavigation;
+    let menusToDisplay = staticNavigation;
+  
+    // If dynamic menus loaded and available, use them
+    if (!menusLoading && dynamicMenus && dynamicMenus.length > 0) {
+      menusToDisplay = dynamicMenus;
+    } else if (menusLoading) {
+      // While loading, show static navigation
+      menusToDisplay = staticNavigation;
     }
     
-    // 🔐 Filter menus based on user permissions and role
-    const filteredMenus = filterMenuByPermissions(dynamicMenus, user);
+    // 🔐 IMPORTANT: Filter menus based on user roles/permissions
+    // This ensures normal users can't access admin menus
     
-    // Debug: Log menu permissions (can be removed in production)
+    // DEEP DEBUG
+    if (process.env.NODE_ENV === 'development' && menusToDisplay.length > 0) {
+      const firstMenu = menusToDisplay[0];
+      console.log('🔍 MENU STRUCTURE DEBUG:');
+      console.log('  First menu item:', {
+        title: firstMenu.title,
+        name: firstMenu.name,
+        requiredRoles: firstMenu.requiredRoles,
+        requiredRolesType: typeof firstMenu.requiredRoles,
+        requiredRolesIsArray: Array.isArray(firstMenu.requiredRoles),
+      });
+      console.log('🔍 USER STRUCTURE DEBUG:');
+      console.log('  User:', {
+        email: user?.email,
+        roleType: user?.roleType,
+        roles: user?.roles?.map((r: any) => ({ name: r.name, id: r.id })),
+      });
+    }
+    
+    const filteredMenus = filterMenuByPermissions(menusToDisplay, user);
+    console.log('🔍 Debugging Filtered Menus:', filteredMenus);
+    
+    // Convert filtered menus to NavigationItem format (ensure href is set)
+    const navigationItems = filteredMenus.map((item: any) => ({
+      name: item.name || item.title || 'Menu',
+      href: item.href || item.route || item.url || '/',
+      icon: item.icon,
+      children: item.children?.map((child: any) => ({
+        name: child.name || child.title || 'Submenu',
+        href: child.href || child.route || child.url || '/',
+        icon: child.icon,
+      })),
+      badge: item.badge,
+      badgeColor: item.badgeColor,
+      target: item.target,
+      metadata: item.metadata,
+    }));
+    console.log('navigationItems', navigationItems);
+    
+    // Debug: Log menu permissions
     if (process.env.NODE_ENV === 'development') {
-      debugMenuPermissions(dynamicMenus, user);
+      console.group('🔐 Menu Access Control');
+      console.log('👤 User:', user?.email, `(${user?.roleType})`);
+      console.log('📋 Roles from DB:', user?.roles?.map(r => r.name));
+      console.log('📊 Menu Summary:');
+      console.log(`  Available: ${menusToDisplay.length} items`);
+      console.log(`  After Filter: ${filteredMenus.length} items`);
+      console.log(`  Rendered: ${navigationItems.length} items`);
+      
+      if (filteredMenus.length === 0 && menusToDisplay.length > 0) {
+        console.warn('⚠️  WARNING: All menus were filtered out!');
+        const firstItem = menusToDisplay[0];
+        console.log('\n🔍 Debugging First Menu Item:');
+        console.log('  Title:', firstItem.title || firstItem.name);
+        console.log('  Required Roles (raw):', firstItem.requiredRoles);
+        console.log('  Required Roles TYPE:', typeof firstItem.requiredRoles);
+        console.log('  Required Roles IS ARRAY:', Array.isArray(firstItem.requiredRoles));
+        
+        // If it's a string, try to parse
+        if (typeof firstItem.requiredRoles === 'string') {
+          try {
+            const parsed = JSON.parse(firstItem.requiredRoles);
+            console.log('  Parsed as JSON:', parsed);
+          } catch (e) {
+            console.log('  Failed to parse as JSON:', e);
+          }
+        }
+      }
+      
+      console.groupEnd();
     }
     
-    return filteredMenus;
-  }, [dynamicMenus, menusLoading, user]);
+    return navigationItems as any;
+  }, [dynamicMenus, menusLoading, user, staticNavigation]);
   
   const handleLogout = async () => {
     await logout();
@@ -182,6 +263,11 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                   <p>⚠️ Failed to load menus from database</p>
                   <p className="text-xs mt-1">Using default navigation</p>
                 </div>
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="px-4 py-2 text-xs text-red-600">
+                    <p>Error: {JSON.stringify(menusError)}</p>
+                  </div>
+                )}
                 <NavigationMenu navigation={navigation} collapsed={collapsed} />
               </>
             ) : (
