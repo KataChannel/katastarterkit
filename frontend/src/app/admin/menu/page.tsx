@@ -188,7 +188,7 @@ export default function MenuManagementPage() {
       await createMenuMutation({
         ...formData,
         order: parseInt(formData.order.toString()),
-        parentId: formData.parentId || undefined,
+        parentId: formData.parentId && formData.parentId !== 'none' ? formData.parentId : undefined,
       });
       toast.success('Menu created successfully');
       setIsCreateOpen(false);
@@ -205,7 +205,7 @@ export default function MenuManagementPage() {
       await updateMenuMutation(selectedMenu.id, {
         ...formData,
         order: parseInt(formData.order.toString()),
-        parentId: formData.parentId || undefined,
+        parentId: formData.parentId && formData.parentId !== 'none' ? formData.parentId : undefined,
       });
       toast.success('Menu updated successfully');
       setIsEditOpen(false);
@@ -265,7 +265,7 @@ export default function MenuManagementPage() {
       url: menu.url || '',
       icon: menu.icon || '',
       order: menu.order,
-      parentId: menu.parentId || '',
+      parentId: menu.parentId || 'none',
       isActive: menu.isActive,
       isVisible: menu.isVisible,
       isPublic: menu.isPublic,
@@ -283,7 +283,7 @@ export default function MenuManagementPage() {
       url: '',
       icon: '',
       order: 0,
-      parentId: '',
+      parentId: 'none',
       isActive: true,
       isVisible: true,
       isPublic: false,

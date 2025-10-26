@@ -245,7 +245,7 @@ export function WebsiteHeader() {
         <div className="bg-[#57A345] grid grid-cols-6 items-center">
           <div className="bg-white col-span-2 flex justify-end p-4 rounded-e-full pe-8">
             <Link
-              href="/website"
+              href="/"
               className="text-2xl font-bold text-blue-600"
               >
               <img src="/assets/images/logo.svg" alt="Logo" className="max-h-20 h-20" />
@@ -258,9 +258,9 @@ export function WebsiteHeader() {
               {/* Trang Chủ */}
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link href="/website" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4")}>
+                  {/* <Link href="/" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4")}>
                     Trang Chủ
-                  </Link>
+                  </Link> */}
                 </NavigationMenuLink>
               </NavigationMenuItem>
 

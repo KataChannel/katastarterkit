@@ -156,7 +156,7 @@ export function MenuFormDialog({
                     <SelectValue placeholder="Không có (Cấp gốc)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Không có (Cấp gốc)</SelectItem>
+                    <SelectItem value="none">Không có (Cấp gốc)</SelectItem>
                     {menus
                       .filter((m) => !m.parentId && m.id !== selectedMenuId)
                       .map((menu) => (
