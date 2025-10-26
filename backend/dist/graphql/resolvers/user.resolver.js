@@ -101,6 +101,23 @@ let UserResolver = class UserResolver {
         }
         return this.userService.update(id, input);
     }
+    async updateProfile(input, user) {
+        return this.authService.updateProfile(user.id, input);
+    }
+    async changePassword(input, user) {
+        await this.authService.changePassword(user.id, input.currentPassword, input.newPassword);
+        return true;
+    }
+    async setPassword(input, user) {
+        if (input.password !== input.confirmPassword) {
+            throw new Error('Mật khẩu xác nhận không khớp');
+        }
+        await this.authService.setPassword(user.id, input.password);
+        return true;
+    }
+    async hasPassword(user) {
+        return this.authService.hasPassword(user.id);
+    }
     async deleteUser(id) {
         await this.userService.delete(id);
         return true;
@@ -120,8 +137,39 @@ let UserResolver = class UserResolver {
     async adminCreateUser(input) {
         return this.userService.adminCreateUser(input);
     }
+    async adminResetPassword(input, adminUser) {
+        return this.userService.adminResetPassword(input.userId, adminUser.id);
+    }
     async role(user) {
         return user.roleType;
+    }
+    async roles(user) {
+        if (user.userRoles && Array.isArray(user.userRoles)) {
+            return user.userRoles.map((assignment) => assignment.role);
+        }
+        return [];
+    }
+    async permissions(user) {
+        const permissions = new Map();
+        if (user.userPermissions && Array.isArray(user.userPermissions)) {
+            user.userPermissions.forEach((up) => {
+                if (up.permission && up.permission.id && up.permission.name) {
+                    permissions.set(up.permission.id, up.permission);
+                }
+            });
+        }
+        if (user.userRoles && Array.isArray(user.userRoles)) {
+            user.userRoles.forEach((assignment) => {
+                if (assignment.role?.permissions && Array.isArray(assignment.role.permissions)) {
+                    assignment.role.permissions.forEach((rp) => {
+                        if (rp.permission && rp.permission.id && rp.permission.name) {
+                            permissions.set(rp.permission.id, rp.permission);
+                        }
+                    });
+                }
+            });
+        }
+        return Array.from(permissions.values());
     }
     userRegistered() {
         return this.pubSubService.getUserRegisteredIterator();
@@ -205,6 +253,44 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "updateUser", null);
 __decorate([
+    (0, graphql_1.Mutation)(() => user_model_1.User, { name: 'updateProfile' }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, graphql_1.Args)('input')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_input_1.UpdateProfileInput,
+        user_model_1.User]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "updateProfile", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => Boolean, { name: 'changePassword' }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, graphql_1.Args)('input')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_input_1.ChangePasswordInput,
+        user_model_1.User]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "changePassword", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => Boolean, { name: 'setPassword' }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, graphql_1.Args)('input')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_input_1.SetPasswordInput,
+        user_model_1.User]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "setPassword", null);
+__decorate([
+    (0, graphql_1.Query)(() => Boolean, { name: 'hasPassword' }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_model_1.User]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "hasPassword", null);
+__decorate([
     (0, graphql_1.Mutation)(() => Boolean, { name: 'deleteUser' }),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(client_1.$Enums.UserRoleType.ADMIN),
@@ -259,12 +345,37 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "adminCreateUser", null);
 __decorate([
+    (0, graphql_1.Mutation)(() => user_model_1.AdminResetPasswordResult, { name: 'adminResetPassword' }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(client_1.$Enums.UserRoleType.ADMIN),
+    __param(0, (0, graphql_1.Args)('input')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_input_1.AdminResetPasswordInput,
+        user_model_1.User]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "adminResetPassword", null);
+__decorate([
     (0, graphql_1.ResolveField)('role', () => client_1.$Enums.UserRoleType),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [user_model_1.User]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "role", null);
+__decorate([
+    (0, graphql_1.ResolveField)('roles', () => [Object], { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "roles", null);
+__decorate([
+    (0, graphql_1.ResolveField)('permissions', () => [Object], { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "permissions", null);
 __decorate([
     (0, graphql_1.Subscription)(() => user_model_1.User, { name: 'userRegistered' }),
     __metadata("design:type", Function),

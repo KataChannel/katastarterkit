@@ -2,11 +2,28 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { GET_CURRENT_USER, LOGIN_MUTATION, REGISTER_MUTATION } from '../lib/graphql/queries';
 
+interface Role {
+  id: string;
+  name: string;
+  displayName: string;
+  permissions?: Permission[];
+}
+
+interface Permission {
+  id: string;
+  name: string;
+  displayName: string;
+  resource?: string;
+  action?: string;
+}
+
 interface User {
   id: string;
   email: string;
   username: string;
   roleType?: string;
+  roles?: Role[];
+  permissions?: Permission[];
   createdAt?: string;
 }
 

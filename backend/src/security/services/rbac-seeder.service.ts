@@ -414,6 +414,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'FileText',
           order: 4,
           requiredPermissions: ['content:read'],
+          requiredRoles: ['super_admin', 'admin'],
         },
         {
           title: 'Posts',
@@ -425,6 +426,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'FileEdit',
           order: 1,
           requiredPermissions: ['content:read'],
+          requiredRoles: ['super_admin', 'admin'],
         },
         {
           title: 'Categories',
@@ -436,6 +438,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'FolderTree',
           order: 2,
           requiredPermissions: ['content:read'],
+          requiredRoles: ['super_admin', 'admin'],
         },
         {
           title: 'Tags',
@@ -447,6 +450,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'Tag',
           order: 3,
           requiredPermissions: ['content:read'],
+          requiredRoles: ['super_admin', 'admin'],
         },
         {
           title: 'Projects',
@@ -457,6 +461,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'Briefcase',
           order: 5,
           requiredPermissions: ['projects:read'],
+          requiredRoles: ['super_admin', 'admin'],
         },
         {
           title: 'Tasks',
@@ -467,6 +472,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'CheckSquare',
           order: 6,
           requiredPermissions: ['tasks:read'],
+          requiredRoles: ['super_admin', 'admin'],
         },
         {
           title: 'Menus',
@@ -489,6 +495,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'BarChart',
           order: 8,
           requiredPermissions: ['analytics:read'],
+          requiredRoles: ['super_admin', 'admin'],
         },
         {
           title: 'Settings',

@@ -98,3 +98,16 @@ export declare class AdminCreateUserInput {
     isVerified?: boolean;
     avatar?: string;
 }
+export declare class UpdateProfileInput {
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
+    phone?: string;
+}
+export declare class SetPasswordInput {
+    password: string;
+    confirmPassword: string;
+}
+export declare class AdminResetPasswordInput {
+    userId: string;
+}

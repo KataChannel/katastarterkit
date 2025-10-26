@@ -97,6 +97,14 @@ let RoleResolver = class RoleResolver {
     constructor(rbacService) {
         this.rbacService = rbacService;
     }
+    async permissions(role) {
+        if (!role.permissions || !Array.isArray(role.permissions)) {
+            return [];
+        }
+        return role.permissions
+            .map((rp) => rp.permission)
+            .filter((permission) => permission && permission.id && permission.name);
+    }
     async searchRoles(input) {
         return this.rbacService.searchRoles(input);
     }
@@ -117,6 +125,13 @@ let RoleResolver = class RoleResolver {
     }
 };
 exports.RoleResolver = RoleResolver;
+__decorate([
+    (0, graphql_1.ResolveField)('permissions', () => [Object], { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], RoleResolver.prototype, "permissions", null);
 __decorate([
     (0, graphql_1.Query)(() => rbac_model_1.RoleSearchResult, { name: 'searchRoles' }),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

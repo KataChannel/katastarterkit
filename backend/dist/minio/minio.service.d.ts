@@ -1,9 +1,15 @@
+import { OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-export declare class MinioService {
+export declare class MinioService implements OnModuleInit {
     private readonly configService;
     private readonly logger;
-    private readonly minioClient;
+    private minioClient;
+    private isReady;
     constructor(configService: ConfigService);
+    onModuleInit(): Promise<void>;
+    private initializeWithRetry;
+    private testConnection;
+    private ensureReady;
     private initializeBuckets;
     uploadFile(bucket: string, fileName: string, buffer: Buffer, contentType: string): Promise<string>;
     deleteFile(bucket: string, fileName: string): Promise<void>;

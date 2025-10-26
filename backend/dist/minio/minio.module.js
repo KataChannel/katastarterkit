@@ -14,6 +14,7 @@ let MinioModule = class MinioModule {
 };
 exports.MinioModule = MinioModule;
 exports.MinioModule = MinioModule = __decorate([
+    (0, common_1.Global)(),
     (0, common_1.Module)({
         imports: [config_1.ConfigModule],
         providers: [minio_service_1.MinioService],

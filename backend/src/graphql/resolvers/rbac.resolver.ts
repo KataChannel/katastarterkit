@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context, ResolveField, Parent } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
@@ -74,6 +74,19 @@ export class PermissionResolver {
 @Resolver(() => Role)
 export class RoleResolver {
   constructor(private readonly rbacService: RbacService) {}
+
+  @ResolveField('permissions', () => [Object], { nullable: true })
+  async permissions(@Parent() role: any): Promise<any[]> {
+    // Extract Permission objects from RolePermission array
+    // and filter out any with null name fields
+    if (!role.permissions || !Array.isArray(role.permissions)) {
+      return [];
+    }
+
+    return role.permissions
+      .map((rp: any) => rp.permission)
+      .filter((permission: any) => permission && permission.id && permission.name);
+  }
 
   @Query(() => RoleSearchResult, { name: 'searchRoles' })
   @UseGuards(JwtAuthGuard, RolesGuard)

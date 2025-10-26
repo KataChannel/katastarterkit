@@ -51,25 +51,64 @@ let MinioService = MinioService_1 = class MinioService {
     constructor(configService) {
         this.configService = configService;
         this.logger = new common_1.Logger(MinioService_1.name);
-        const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
-        const endpoint = isDockerEnv
-            ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
-            : this.configService.get('MINIO_ENDPOINT', 'localhost');
-        const port = isDockerEnv
-            ? parseInt(this.configService.get('DOCKER_MINIO_PORT', '9000'))
-            : parseInt(this.configService.get('MINIO_PORT', '9000'));
-        const useSSL = this.configService.get('MINIO_USE_SSL') === 'true';
-        const accessKey = this.configService.get('MINIO_ACCESS_KEY', 'minioadmin');
-        const secretKey = this.configService.get('MINIO_SECRET_KEY', 'minioadmin');
-        this.logger.log(`Connecting to Minio: endpoint=${endpoint}, port=${port}, useSSL=${useSSL}, dockerEnv=${isDockerEnv}`);
-        this.minioClient = new Minio.Client({
-            endPoint: endpoint,
-            port: port,
-            useSSL: useSSL,
-            accessKey: accessKey,
-            secretKey: secretKey,
-        });
-        this.initializeBuckets();
+        this.isReady = false;
+    }
+    async onModuleInit() {
+        await this.initializeWithRetry();
+    }
+    async initializeWithRetry(retries = 10) {
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
+                const endpoint = isDockerEnv
+                    ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
+                    : this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
+                const portConfig = isDockerEnv
+                    ? this.configService.get('DOCKER_MINIO_PORT', '9000')
+                    : this.configService.get('MINIO_PORT', '12007');
+                const port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
+                const useSSL = this.configService.get('MINIO_USE_SSL') === 'true';
+                const accessKey = this.configService.get('MINIO_ACCESS_KEY', 'minioadmin');
+                const secretKey = this.configService.get('MINIO_SECRET_KEY', 'minioadmin');
+                this.logger.log(`[Minio] Connection attempt ${attempt}/${retries}: endpoint=${endpoint}, port=${port}, dockerEnv=${isDockerEnv}`);
+                this.minioClient = new Minio.Client({
+                    endPoint: endpoint,
+                    port: port,
+                    useSSL: useSSL,
+                    accessKey: accessKey,
+                    secretKey: secretKey,
+                    region: 'us-east-1',
+                });
+                await this.testConnection();
+                this.isReady = true;
+                this.logger.log(`✅ Minio connected successfully`);
+                await this.initializeBuckets();
+                return;
+            }
+            catch (error) {
+                this.logger.warn(`[Minio] Attempt ${attempt}/${retries} failed: ${error?.message || error}`);
+                if (attempt === retries) {
+                    this.logger.error(`❌ Failed to connect to Minio after ${retries} attempts: ${error?.message || error}`);
+                    this.isReady = false;
+                    return;
+                }
+                const delay = Math.min(500 * Math.pow(2, attempt - 1), 8000);
+                this.logger.log(`⏳ Retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+    async testConnection() {
+        await Promise.race([
+            this.minioClient.listBuckets(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Minio connection timeout (5s)')), 5000)),
+        ]);
+    }
+    async ensureReady() {
+        if (!this.isReady) {
+            this.logger.warn('⚠️  Minio not ready, attempting re-initialization...');
+            await this.initializeWithRetry(3);
+        }
     }
     async initializeBuckets() {
         const buckets = ['avatars', 'posts', 'uploads'];
