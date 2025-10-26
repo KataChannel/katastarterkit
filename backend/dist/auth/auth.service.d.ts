@@ -38,5 +38,27 @@ export declare class AuthService {
         accessToken: string;
         refreshToken: string;
     }>;
+    updateProfile(userId: string, updateData: {
+        firstName?: string;
+        lastName?: string;
+        avatar?: string;
+        phone?: string;
+    }): Promise<User>;
+    changePassword(userId: string, currentPassword: string, newPassword: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    setPassword(userId: string, newPassword: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    hasPassword(userId: string): Promise<boolean>;
+    private generateRandomPassword;
+    adminResetPassword(userId: string, adminId: string): Promise<{
+        success: boolean;
+        message: string;
+        newPassword: string;
+        user: User;
+    }>;
 }
 export {};

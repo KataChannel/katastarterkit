@@ -29,6 +29,7 @@ const unified_dynamic_resolver_1 = require("./resolvers/unified-dynamic.resolver
 const dynamic_crud_service_1 = require("../services/dynamic-crud.service");
 const prisma_service_1 = require("../prisma/prisma.service");
 const user_service_1 = require("../services/user.service");
+const auth_module_1 = require("../auth/auth.module");
 let UnifiedDynamicModule = class UnifiedDynamicModule {
 };
 exports.UnifiedDynamicModule = UnifiedDynamicModule;
@@ -38,7 +39,8 @@ exports.UnifiedDynamicModule = UnifiedDynamicModule = __decorate([
             jwt_1.JwtModule.register({
                 secret: process.env.JWT_SECRET || 'your-secret-key',
                 signOptions: { expiresIn: '24h' },
-            })
+            }),
+            auth_module_1.AuthModule,
         ],
         providers: [
             unified_dynamic_resolver_1.UnifiedDynamicResolver,

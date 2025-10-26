@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdminCreateUserInput = exports.AdminUpdateUserInput = exports.BulkUserActionInput = exports.UserSearchInput = exports.RequestPhoneVerificationInput = exports.ChangePasswordInput = exports.UpdateUserInput = exports.VerifyPhoneInput = exports.VerifyEmailInput = exports.ResetPasswordInput = exports.ForgotPasswordInput = exports.SocialLoginInput = exports.PhoneLoginInput = exports.LoginUserInput = exports.RegisterUserInput = void 0;
+exports.AdminResetPasswordInput = exports.SetPasswordInput = exports.UpdateProfileInput = exports.AdminCreateUserInput = exports.AdminUpdateUserInput = exports.BulkUserActionInput = exports.UserSearchInput = exports.RequestPhoneVerificationInput = exports.ChangePasswordInput = exports.UpdateUserInput = exports.VerifyPhoneInput = exports.VerifyEmailInput = exports.ResetPasswordInput = exports.ForgotPasswordInput = exports.SocialLoginInput = exports.PhoneLoginInput = exports.LoginUserInput = exports.RegisterUserInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
 const client_1 = require("@prisma/client");
@@ -494,4 +494,66 @@ __decorate([
 exports.AdminCreateUserInput = AdminCreateUserInput = __decorate([
     (0, graphql_1.InputType)()
 ], AdminCreateUserInput);
+let UpdateProfileInput = class UpdateProfileInput {
+};
+exports.UpdateProfileInput = UpdateProfileInput;
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(2, { message: 'Họ phải có ít nhất 2 ký tự' }),
+    __metadata("design:type", String)
+], UpdateProfileInput.prototype, "firstName", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(2, { message: 'Tên phải có ít nhất 2 ký tự' }),
+    __metadata("design:type", String)
+], UpdateProfileInput.prototype, "lastName", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateProfileInput.prototype, "avatar", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsPhoneNumber)('VN', { message: 'Số điện thoại không hợp lệ' }),
+    __metadata("design:type", String)
+], UpdateProfileInput.prototype, "phone", void 0);
+exports.UpdateProfileInput = UpdateProfileInput = __decorate([
+    (0, graphql_1.InputType)()
+], UpdateProfileInput);
+let SetPasswordInput = class SetPasswordInput {
+};
+exports.SetPasswordInput = SetPasswordInput;
+__decorate([
+    (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Mật khẩu không được để trống' }),
+    (0, class_validator_1.MinLength)(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' }),
+    __metadata("design:type", String)
+], SetPasswordInput.prototype, "password", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Xác nhận mật khẩu không được để trống' }),
+    __metadata("design:type", String)
+], SetPasswordInput.prototype, "confirmPassword", void 0);
+exports.SetPasswordInput = SetPasswordInput = __decorate([
+    (0, graphql_1.InputType)()
+], SetPasswordInput);
+let AdminResetPasswordInput = class AdminResetPasswordInput {
+};
+exports.AdminResetPasswordInput = AdminResetPasswordInput;
+__decorate([
+    (0, graphql_1.Field)(),
+    (0, class_validator_1.IsUUID)('4', { message: 'User ID phải là UUID hợp lệ' }),
+    __metadata("design:type", String)
+], AdminResetPasswordInput.prototype, "userId", void 0);
+exports.AdminResetPasswordInput = AdminResetPasswordInput = __decorate([
+    (0, graphql_1.InputType)()
+], AdminResetPasswordInput);
 //# sourceMappingURL=user.input.js.map

@@ -266,7 +266,14 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
             if (existingUser) {
                 this.logger.debug(`Admin user already exists: ${existingUser.email}`);
                 const superAdminRole = await this.prisma.role.findUnique({
-                    where: { name: 'super_admin' }
+                    where: { name: 'super_admin' },
+                    include: {
+                        permissions: {
+                            include: {
+                                permission: true
+                            }
+                        }
+                    }
                 });
                 if (superAdminRole) {
                     const existingRoleAssignment = await this.prisma.userRoleAssignment.findUnique({
@@ -284,6 +291,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                         }, 'system');
                         this.logger.debug(`Assigned super_admin role to existing user: ${existingUser.email}`);
                     }
+                    this.logger.debug(`Admin user ${existingUser.email} has ${superAdminRole.permissions.length} permissions via super_admin role`);
                 }
                 return;
             }
@@ -303,7 +311,14 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
             });
             this.logger.log(`Created admin user: ${adminUser.email}`);
             const superAdminRole = await this.prisma.role.findUnique({
-                where: { name: 'super_admin' }
+                where: { name: 'super_admin' },
+                include: {
+                    permissions: {
+                        include: {
+                            permission: true
+                        }
+                    }
+                }
             });
             if (superAdminRole) {
                 await this.rbacService.assignRoleToUser({
@@ -311,16 +326,18 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     roleId: superAdminRole.id
                 }, 'system');
                 this.logger.log(`Assigned super_admin role to user: ${adminUser.email}`);
+                this.logger.log(`✅ Default admin user created successfully:`);
+                this.logger.log(`   Email: ${adminEmail}`);
+                this.logger.log(`   Phone: ${adminPhone}`);
+                this.logger.log(`   Name: ${adminName}`);
+                this.logger.log(`   Default Password: ${defaultPassword}`);
+                this.logger.log(`   Role: super_admin`);
+                this.logger.log(`   Permissions: All (${superAdminRole.permissions.length} permissions assigned via role)`);
+                this.logger.log(`   🔒 Please change the default password after first login!`);
             }
             else {
                 this.logger.error('Super admin role not found!');
             }
-            this.logger.log(`✅ Default admin user created successfully:`);
-            this.logger.log(`   Email: ${adminEmail}`);
-            this.logger.log(`   Phone: ${adminPhone}`);
-            this.logger.log(`   Name: ${adminName}`);
-            this.logger.log(`   Default Password: ${defaultPassword}`);
-            this.logger.log(`   🔒 Please change the default password after first login!`);
         }
         catch (error) {
             this.logger.error(`Failed to create default admin user: ${error.message}`);
@@ -375,6 +392,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'FileText',
                     order: 4,
                     requiredPermissions: ['content:read'],
+                    requiredRoles: ['super_admin', 'admin'],
                 },
                 {
                     title: 'Posts',
@@ -386,6 +404,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'FileEdit',
                     order: 1,
                     requiredPermissions: ['content:read'],
+                    requiredRoles: ['super_admin', 'admin'],
                 },
                 {
                     title: 'Categories',
@@ -397,6 +416,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'FolderTree',
                     order: 2,
                     requiredPermissions: ['content:read'],
+                    requiredRoles: ['super_admin', 'admin'],
                 },
                 {
                     title: 'Tags',
@@ -408,6 +428,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'Tag',
                     order: 3,
                     requiredPermissions: ['content:read'],
+                    requiredRoles: ['super_admin', 'admin'],
                 },
                 {
                     title: 'Projects',
@@ -418,6 +439,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'Briefcase',
                     order: 5,
                     requiredPermissions: ['projects:read'],
+                    requiredRoles: ['super_admin', 'admin'],
                 },
                 {
                     title: 'Tasks',
@@ -428,6 +450,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'CheckSquare',
                     order: 6,
                     requiredPermissions: ['tasks:read'],
+                    requiredRoles: ['super_admin', 'admin'],
                 },
                 {
                     title: 'Menus',
@@ -450,6 +473,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'BarChart',
                     order: 8,
                     requiredPermissions: ['analytics:read'],
+                    requiredRoles: ['super_admin', 'admin'],
                 },
                 {
                     title: 'Settings',

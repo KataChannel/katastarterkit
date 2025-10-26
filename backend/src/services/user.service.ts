@@ -18,6 +18,24 @@ export class UserService {
       include: {
         posts: true,
         comments: true,
+        userRoles: {
+          include: {
+            role: {
+              include: {
+                permissions: {
+                  include: {
+                    permission: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        userPermissions: {
+          include: {
+            permission: true,
+          },
+        },
       },
     });
 

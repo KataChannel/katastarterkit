@@ -45,6 +45,25 @@ export const GET_CURRENT_USER = gql`
       lastName
       createdAt
       updatedAt
+      roles {
+        id
+        name
+        displayName
+        permissions {
+          id
+          name
+          displayName
+          resource
+          action
+        }
+      }
+      permissions {
+        id
+        name
+        displayName
+        resource
+        action
+      }
     }
   }
 `;

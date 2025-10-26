@@ -268,6 +268,47 @@ export class UserResolver {
     return user.roleType;
   }
 
+  @ResolveField('roles', () => [Object], { nullable: true })
+  async roles(@Parent() user: any): Promise<any[]> {
+    // Extract roles from userRoles relation
+    if (user.userRoles && Array.isArray(user.userRoles)) {
+      return user.userRoles.map((assignment: any) => assignment.role);
+    }
+    return [];
+  }
+
+  @ResolveField('permissions', () => [Object], { nullable: true })
+  async permissions(@Parent() user: any): Promise<any[]> {
+    // Extract permissions from both userPermissions relation and roles
+    const permissions = new Map();
+    
+    // Add direct user permissions
+    if (user.userPermissions && Array.isArray(user.userPermissions)) {
+      user.userPermissions.forEach((up: any) => {
+        // Only add valid permissions with non-null names
+        if (up.permission && up.permission.id && up.permission.name) {
+          permissions.set(up.permission.id, up.permission);
+        }
+      });
+    }
+    
+    // Add permissions from roles
+    if (user.userRoles && Array.isArray(user.userRoles)) {
+      user.userRoles.forEach((assignment: any) => {
+        if (assignment.role?.permissions && Array.isArray(assignment.role.permissions)) {
+          assignment.role.permissions.forEach((rp: any) => {
+            // Only add valid permissions with non-null names
+            if (rp.permission && rp.permission.id && rp.permission.name) {
+              permissions.set(rp.permission.id, rp.permission);
+            }
+          });
+        }
+      });
+    }
+    
+    return Array.from(permissions.values());
+  }
+
   // Subscriptions
   @Subscription(() => User, { name: 'userRegistered' })
   userRegistered() {

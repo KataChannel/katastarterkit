@@ -81,10 +81,12 @@ async function main() {
     }),
   ]);
 
-  // Create sample posts
+  // Create sample posts using upsert to avoid duplicate slug errors
   const posts = await Promise.all([
-    prisma.post.create({
-      data: {
+    prisma.post.upsert({
+      where: { slug: 'welcome-to-rausachcore' },
+      update: {},
+      create: {
         title: 'Welcome to rausachcore',
         content: `# Welcome to rausachcore
 
@@ -108,8 +110,10 @@ This starter kit provides everything you need to build scalable, production-read
         authorId: adminUser.id,
       },
     }),
-    prisma.post.create({
-      data: {
+    prisma.post.upsert({
+      where: { slug: 'getting-started-with-graphql' },
+      update: {},
+      create: {
         title: 'Getting Started with GraphQL',
         content: `# Getting Started with GraphQL
 
@@ -151,8 +155,10 @@ This query will fetch posts with their titles and author usernames.`,
         authorId: testUser.id,
       },
     }),
-    prisma.post.create({
-      data: {
+    prisma.post.upsert({
+      where: { slug: 'building-scalable-applications-with-nestjs' },
+      update: {},
+      create: {
         title: 'Building Scalable Applications with NestJS',
         content: `# Building Scalable Applications with NestJS
 
@@ -183,35 +189,71 @@ export class PostModule {}
     }),
   ]);
 
-  // Add tags to posts
+  // Add tags to posts - use upsert to avoid constraint errors
   await Promise.all([
-    prisma.postTag.create({
-      data: {
+    prisma.postTag.upsert({
+      where: {
+        postId_tagId: {
+          postId: posts[0].id,
+          tagId: tags[0].id,
+        },
+      },
+      update: {},
+      create: {
         postId: posts[0].id,
         tagId: tags[0].id, // Next.js
       },
     }),
-    prisma.postTag.create({
-      data: {
+    prisma.postTag.upsert({
+      where: {
+        postId_tagId: {
+          postId: posts[0].id,
+          tagId: tags[1].id,
+        },
+      },
+      update: {},
+      create: {
         postId: posts[0].id,
         tagId: tags[1].id, // NestJS
       },
     }),
-    prisma.postTag.create({
-      data: {
+    prisma.postTag.upsert({
+      where: {
+        postId_tagId: {
+          postId: posts[1].id,
+          tagId: tags[2].id,
+        },
+      },
+      update: {},
+      create: {
         postId: posts[1].id,
         tagId: tags[2].id, // GraphQL
       },
     }),
-    prisma.postTag.create({
-      data: {
+    prisma.postTag.upsert({
+      where: {
+        postId_tagId: {
+          postId: posts[2].id,
+          tagId: tags[1].id,
+        },
+      },
+      update: {},
+      create: {
         postId: posts[2].id,
         tagId: tags[1].id, // NestJS
       },
     }),
   ]);
 
-  // Create sample comments
+  // Create sample comments - delete existing first to avoid constraint errors
+  await prisma.comment.deleteMany({
+    where: {
+      postId: {
+        in: [posts[0].id, posts[1].id],
+      },
+    },
+  });
+
   await Promise.all([
     prisma.comment.create({
       data: {
@@ -229,7 +271,15 @@ export class PostModule {}
     }),
   ]);
 
-  // Create sample likes
+  // Create sample likes - delete existing first to avoid constraint errors
+  await prisma.like.deleteMany({
+    where: {
+      postId: {
+        in: [posts[0].id, posts[1].id],
+      },
+    },
+  });
+
   await Promise.all([
     prisma.like.create({
       data: {

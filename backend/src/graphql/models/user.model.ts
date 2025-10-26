@@ -1,5 +1,6 @@
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { $Enums } from '@prisma/client';
+import { Role, Permission } from './rbac.model';
 
 // Register the UserRoleType enum
 registerEnumType($Enums.UserRoleType, {
@@ -59,6 +60,13 @@ export class User {
 
   @Field()
   updatedAt: Date;
+
+  // RBAC Fields - User's assigned roles and permissions
+  @Field(() => [Role], { nullable: true })
+  roles?: Role[];
+
+  @Field(() => [Permission], { nullable: true })
+  permissions?: Permission[];
 
   // Relations - handled by field resolvers to avoid circular dependencies
   posts?: any[];

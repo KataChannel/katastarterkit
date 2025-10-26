@@ -1,4 +1,5 @@
 import { $Enums } from '@prisma/client';
+import { Role, Permission } from './rbac.model';
 export declare class User {
     id: string;
     email?: string;
@@ -17,6 +18,8 @@ export declare class User {
     lastLoginAt?: Date;
     createdAt: Date;
     updatedAt: Date;
+    roles?: Role[];
+    permissions?: Permission[];
     posts?: any[];
     comments?: any[];
 }
@@ -41,4 +44,10 @@ export declare class BulkUserActionResult {
     affectedCount: number;
     errors: string[];
     message: string;
+}
+export declare class AdminResetPasswordResult {
+    success: boolean;
+    message: string;
+    newPassword: string;
+    user: User;
 }

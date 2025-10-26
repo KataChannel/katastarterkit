@@ -51,11 +51,14 @@ let MinioService = MinioService_1 = class MinioService {
     constructor(configService) {
         this.configService = configService;
         this.logger = new common_1.Logger(MinioService_1.name);
-        const isDocker = process.env.DOCKER_ENV === 'true';
+        const isDocker = process.env.DOCKER_NETWORK_NAME !== undefined;
         this.endpoint = isDocker
             ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
-            : this.configService.get('MINIO_ENDPOINT', 'localhost');
-        this.port = parseInt(this.configService.get('MINIO_PORT', '9000'), 10);
+            : this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
+        const portConfig = isDocker
+            ? this.configService.get('DOCKER_MINIO_PORT', '9000')
+            : this.configService.get('MINIO_PORT', '12007');
+        this.port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
         this.useSSL = this.configService.get('MINIO_USE_SSL', 'false') === 'true';
         this.bucketName = this.configService.get('MINIO_BUCKET_NAME', 'uploads');
         const protocol = this.useSSL ? 'https' : 'http';

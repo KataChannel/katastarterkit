@@ -6,9 +6,9 @@ export declare class CourseCategoriesResolver {
     constructor(categoriesService: CourseCategoriesService);
     createCategory(createCourseCategoryInput: CreateCourseCategoryInput): Promise<{
         parent: {
-            id: string;
             createdAt: Date;
             name: string;
+            id: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
@@ -16,9 +16,9 @@ export declare class CourseCategoriesResolver {
             icon: string | null;
         };
         children: {
-            id: string;
             createdAt: Date;
             name: string;
+            id: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
@@ -26,9 +26,9 @@ export declare class CourseCategoriesResolver {
             icon: string | null;
         }[];
     } & {
-        id: string;
         createdAt: Date;
         name: string;
+        id: string;
         updatedAt: Date;
         slug: string;
         parentId: string | null;
@@ -40,9 +40,9 @@ export declare class CourseCategoriesResolver {
             courses: number;
         };
         parent: {
-            id: string;
             createdAt: Date;
             name: string;
+            id: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
@@ -50,9 +50,9 @@ export declare class CourseCategoriesResolver {
             icon: string | null;
         };
         children: {
-            id: string;
             createdAt: Date;
             name: string;
+            id: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
@@ -60,9 +60,9 @@ export declare class CourseCategoriesResolver {
             icon: string | null;
         }[];
     } & {
-        id: string;
         createdAt: Date;
         name: string;
+        id: string;
         updatedAt: Date;
         slug: string;
         parentId: string | null;
@@ -78,9 +78,9 @@ export declare class CourseCategoriesResolver {
                 courses: number;
             };
             children: {
-                id: string;
                 createdAt: Date;
                 name: string;
+                id: string;
                 updatedAt: Date;
                 slug: string;
                 parentId: string | null;
@@ -88,9 +88,9 @@ export declare class CourseCategoriesResolver {
                 icon: string | null;
             }[];
         } & {
-            id: string;
             createdAt: Date;
             name: string;
+            id: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
@@ -98,9 +98,9 @@ export declare class CourseCategoriesResolver {
             icon: string | null;
         })[];
     } & {
-        id: string;
         createdAt: Date;
         name: string;
+        id: string;
         updatedAt: Date;
         slug: string;
         parentId: string | null;
@@ -112,9 +112,9 @@ export declare class CourseCategoriesResolver {
             courses: number;
         };
         parent: {
-            id: string;
             createdAt: Date;
             name: string;
+            id: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
@@ -122,9 +122,9 @@ export declare class CourseCategoriesResolver {
             icon: string | null;
         };
         children: {
-            id: string;
             createdAt: Date;
             name: string;
+            id: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
@@ -132,9 +132,9 @@ export declare class CourseCategoriesResolver {
             icon: string | null;
         }[];
     } & {
-        id: string;
         createdAt: Date;
         name: string;
+        id: string;
         updatedAt: Date;
         slug: string;
         parentId: string | null;
@@ -143,9 +143,9 @@ export declare class CourseCategoriesResolver {
     }>;
     updateCategory(updateCourseCategoryInput: UpdateCourseCategoryInput): Promise<{
         parent: {
-            id: string;
             createdAt: Date;
             name: string;
+            id: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
@@ -153,9 +153,9 @@ export declare class CourseCategoriesResolver {
             icon: string | null;
         };
         children: {
-            id: string;
             createdAt: Date;
             name: string;
+            id: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
@@ -163,9 +163,9 @@ export declare class CourseCategoriesResolver {
             icon: string | null;
         }[];
     } & {
-        id: string;
         createdAt: Date;
         name: string;
+        id: string;
         updatedAt: Date;
         slug: string;
         parentId: string | null;

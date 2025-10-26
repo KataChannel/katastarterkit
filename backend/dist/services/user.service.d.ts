@@ -1,9 +1,11 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { RegisterUserInput, UpdateUserInput, AdminCreateUserInput } from '../graphql/inputs/user.input';
+import { AuthService } from '../auth/auth.service';
 export declare class UserService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly authService;
+    constructor(prisma: PrismaService, authService: AuthService);
     findById(id: string): Promise<User>;
     findByEmail(email: string): Promise<User | null>;
     findByUsername(username: string): Promise<User | null>;
@@ -18,4 +20,10 @@ export declare class UserService {
     bulkUserAction(actionInput: any): Promise<any>;
     adminUpdateUser(id: string, input: any): Promise<User>;
     adminCreateUser(input: AdminCreateUserInput): Promise<User>;
+    adminResetPassword(userId: string, adminId: string): Promise<{
+        success: boolean;
+        message: string;
+        newPassword: string;
+        user: User;
+    }>;
 }

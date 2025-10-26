@@ -9,9 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BulkUserActionResult = exports.UserStats = exports.UserSearchResult = exports.User = void 0;
+exports.AdminResetPasswordResult = exports.BulkUserActionResult = exports.UserStats = exports.UserSearchResult = exports.User = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const client_1 = require("@prisma/client");
+const rbac_model_1 = require("./rbac.model");
 (0, graphql_1.registerEnumType)(client_1.$Enums.UserRoleType, {
     name: 'UserRole',
     description: 'User role types',
@@ -83,6 +84,14 @@ __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)
 ], User.prototype, "updatedAt", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [rbac_model_1.Role], { nullable: true }),
+    __metadata("design:type", Array)
+], User.prototype, "roles", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [rbac_model_1.Permission], { nullable: true }),
+    __metadata("design:type", Array)
+], User.prototype, "permissions", void 0);
 exports.User = User = __decorate([
     (0, graphql_1.ObjectType)()
 ], User);
@@ -168,4 +177,26 @@ __decorate([
 exports.BulkUserActionResult = BulkUserActionResult = __decorate([
     (0, graphql_1.ObjectType)()
 ], BulkUserActionResult);
+let AdminResetPasswordResult = class AdminResetPasswordResult {
+};
+exports.AdminResetPasswordResult = AdminResetPasswordResult;
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", Boolean)
+], AdminResetPasswordResult.prototype, "success", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], AdminResetPasswordResult.prototype, "message", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], AdminResetPasswordResult.prototype, "newPassword", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", User)
+], AdminResetPasswordResult.prototype, "user", void 0);
+exports.AdminResetPasswordResult = AdminResetPasswordResult = __decorate([
+    (0, graphql_1.ObjectType)()
+], AdminResetPasswordResult);
 //# sourceMappingURL=user.model.js.map

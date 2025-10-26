@@ -4091,9 +4091,11 @@ type User {
   lastLoginAt: DateTime
   lastName: String
   lockedUntil: DateTime
+  permissions: [Permission!]
   phone: String
   role: UserRoleType!
   roleType: UserRoleType!
+  roles: [Role!]
   updatedAt: DateTime!
   username: String!
 }

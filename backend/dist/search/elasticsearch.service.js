@@ -20,8 +20,12 @@ let ElasticsearchService = ElasticsearchService_1 = class ElasticsearchService {
         this.logger = new common_1.Logger(ElasticsearchService_1.name);
         this.isConnected = false;
         this.indexPrefix = this.configService.get('ELASTICSEARCH_INDEX_PREFIX', 'rausachcore');
+        const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
+        const elasticsearchUrl = isDockerEnv
+            ? this.configService.get('DOCKER_ELASTICSEARCH_URL', 'http://elasticsearch:9200')
+            : this.configService.get('ELASTICSEARCH_URL', 'http://116.118.49.243:12005');
         this.client = new elasticsearch_1.Client({
-            node: this.configService.get('ELASTICSEARCH_URL', 'http://localhost:9200'),
+            node: elasticsearchUrl,
             auth: {
                 username: this.configService.get('ELASTICSEARCH_USERNAME'),
                 password: this.configService.get('ELASTICSEARCH_PASSWORD'),
@@ -36,13 +40,18 @@ let ElasticsearchService = ElasticsearchService_1 = class ElasticsearchService {
     }
     async initializeClient() {
         try {
+            const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
+            const elasticsearchUrl = isDockerEnv
+                ? this.configService.get('DOCKER_ELASTICSEARCH_URL', 'http://elasticsearch:9200')
+                : this.configService.get('ELASTICSEARCH_URL', 'http://localhost:12005');
+            this.logger.log(`[Elasticsearch] Connecting to: ${elasticsearchUrl} (dockerEnv=${isDockerEnv})`);
             await this.client.ping();
-            this.logger.log('Elasticsearch client connected successfully');
+            this.logger.log('✅ Elasticsearch client connected successfully');
             this.isConnected = true;
             await this.createIndicesIfNotExist();
         }
         catch (error) {
-            this.logger.warn('Failed to connect to Elasticsearch:', error.message);
+            this.logger.warn('❌ Failed to connect to Elasticsearch:', error.message);
             this.logger.warn('Search functionality will be limited without Elasticsearch');
             this.isConnected = false;
         }

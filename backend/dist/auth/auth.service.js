@@ -70,14 +70,14 @@ let AuthService = AuthService_1 = class AuthService {
             },
         });
         if (!user) {
-            throw new common_1.UnauthorizedException('Invalid credentials');
+            throw new common_1.UnauthorizedException('Email hoặc tên người dùng không hợp lệ');
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw new common_1.UnauthorizedException('Invalid credentials');
+            throw new common_1.UnauthorizedException('Email hoặc mật khẩu không hợp lệ');
         }
         if (!user.isActive) {
-            throw new common_1.UnauthorizedException('Account is disabled');
+            throw new common_1.UnauthorizedException('Tài khoản đã bị khóa');
         }
         return user;
     }
@@ -106,12 +106,12 @@ let AuthService = AuthService_1 = class AuthService {
                 where: { id: payload.sub },
             });
             if (!user) {
-                throw new common_1.UnauthorizedException('User not found');
+                throw new common_1.UnauthorizedException('Người dùng không tồn tại');
             }
             return this.generateTokens(user);
         }
         catch (error) {
-            throw new common_1.UnauthorizedException('Invalid refresh token');
+            throw new common_1.UnauthorizedException('Token làm mới không hợp lệ');
         }
     }
     async verifyGoogleToken(token) {
@@ -393,6 +393,183 @@ let AuthService = AuthService_1 = class AuthService {
         return {
             user,
             ...tokens,
+        };
+    }
+    async updateProfile(userId, updateData) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException('Người dùng không tồn tại');
+        }
+        if (updateData.phone && updateData.phone !== user.phone) {
+            const existingUser = await this.prisma.user.findUnique({
+                where: { phone: updateData.phone },
+            });
+            if (existingUser && existingUser.id !== userId) {
+                throw new common_1.BadRequestException('Số điện thoại đã được sử dụng');
+            }
+        }
+        const updatedUser = await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                firstName: updateData.firstName ?? user.firstName,
+                lastName: updateData.lastName ?? user.lastName,
+                avatar: updateData.avatar ?? user.avatar,
+                phone: updateData.phone ?? user.phone,
+            },
+        });
+        await this.prisma.auditLog.create({
+            data: {
+                userId,
+                action: 'UPDATE_PROFILE',
+                resourceType: 'user',
+                resourceId: userId,
+                details: {
+                    updatedFields: Object.keys(updateData),
+                },
+            },
+        });
+        this.logger.log(`✅ Cập nhật hồ sơ người dùng ${userId}`);
+        return updatedUser;
+    }
+    async changePassword(userId, currentPassword, newPassword) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException('Người dùng không tồn tại');
+        }
+        if (!user.password) {
+            throw new common_1.BadRequestException('Tài khoản này không có mật khẩu. Vui lòng tạo mật khẩu trước.');
+        }
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isPasswordValid) {
+            throw new common_1.UnauthorizedException('Mật khẩu hiện tại không chính xác');
+        }
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        if (isSamePassword) {
+            throw new common_1.BadRequestException('Mật khẩu mới phải khác mật khẩu cũ');
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                password: hashedPassword,
+            },
+        });
+        await this.prisma.auditLog.create({
+            data: {
+                userId,
+                action: 'CHANGE_PASSWORD',
+                resourceType: 'user',
+                resourceId: userId,
+                details: {
+                    timestamp: new Date(),
+                },
+            },
+        });
+        this.logger.log(`✅ Người dùng ${userId} đã thay đổi mật khẩu`);
+        return {
+            success: true,
+            message: 'Mật khẩu đã được cập nhật thành công',
+        };
+    }
+    async setPassword(userId, newPassword) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException('Người dùng không tồn tại');
+        }
+        if (user.password) {
+            throw new common_1.BadRequestException('Tài khoản này đã có mật khẩu. Vui lòng sử dụng chức năng thay đổi mật khẩu.');
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                password: hashedPassword,
+            },
+        });
+        await this.prisma.auditLog.create({
+            data: {
+                userId,
+                action: 'SET_PASSWORD',
+                resourceType: 'user',
+                resourceId: userId,
+                details: {
+                    timestamp: new Date(),
+                    source: 'social_login',
+                },
+            },
+        });
+        this.logger.log(`✅ Người dùng ${userId} đã tạo mật khẩu`);
+        return {
+            success: true,
+            message: 'Mật khẩu đã được tạo thành công',
+        };
+    }
+    async hasPassword(userId) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { password: true },
+        });
+        return !!user?.password;
+    }
+    generateRandomPassword(length = 12) {
+        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        const numbers = '0123456789';
+        const special = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+        const allChars = uppercase + lowercase + numbers + special;
+        let password = '';
+        password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+        password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+        password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+        password += special.charAt(Math.floor(Math.random() * special.length));
+        for (let i = password.length; i < length; i++) {
+            password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+        }
+        return password
+            .split('')
+            .sort(() => Math.random() - 0.5)
+            .join('');
+    }
+    async adminResetPassword(userId, adminId) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException('Người dùng không tồn tại');
+        }
+        const newPassword = this.generateRandomPassword();
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const updatedUser = await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                password: hashedPassword,
+            },
+        });
+        await this.prisma.auditLog.create({
+            data: {
+                userId: adminId,
+                action: 'ADMIN_RESET_PASSWORD',
+                resourceType: 'user',
+                resourceId: userId,
+                details: {
+                    targetUserId: userId,
+                    timestamp: new Date(),
+                    adminId: adminId,
+                },
+            },
+        });
+        this.logger.log(`✅ Admin ${adminId} reset password cho user ${userId}`);
+        return {
+            success: true,
+            message: 'Mật khẩu đã được reset thành công. Mật khẩu mới đã được gửi cho người dùng.',
+            newPassword,
+            user: updatedUser,
         };
     }
 };

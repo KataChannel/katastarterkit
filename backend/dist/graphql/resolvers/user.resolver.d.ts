@@ -1,7 +1,7 @@
-import { User, UserSearchResult, UserStats, BulkUserActionResult } from '../models/user.model';
+import { User, UserSearchResult, UserStats, BulkUserActionResult, AdminResetPasswordResult } from '../models/user.model';
 import { AuthResponse } from '../models/auth.model';
 import { OtpResponse } from '../models/otp.model';
-import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput, AdminCreateUserInput } from '../inputs/user.input';
+import { RegisterUserInput, LoginUserInput, UpdateUserInput, SocialLoginInput, PhoneLoginInput, RequestPhoneVerificationInput, UserSearchInput, BulkUserActionInput, AdminUpdateUserInput, AdminCreateUserInput, UpdateProfileInput, ChangePasswordInput, SetPasswordInput, AdminResetPasswordInput } from '../inputs/user.input';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../auth/auth.service';
 import { OtpService } from '../../services/otp.service';
@@ -23,12 +23,19 @@ export declare class UserResolver {
     loginWithPhone(input: PhoneLoginInput): Promise<AuthResponse>;
     requestPhoneVerification(input: RequestPhoneVerificationInput): Promise<OtpResponse>;
     updateUser(id: string, input: UpdateUserInput, context: any): Promise<User>;
+    updateProfile(input: UpdateProfileInput, user: User): Promise<User>;
+    changePassword(input: ChangePasswordInput, user: User): Promise<boolean>;
+    setPassword(input: SetPasswordInput, user: User): Promise<boolean>;
+    hasPassword(user: User): Promise<boolean>;
     deleteUser(id: string): Promise<boolean>;
     searchUsers(input: UserSearchInput): Promise<UserSearchResult>;
     getUserStats(): Promise<UserStats>;
     bulkUserAction(input: BulkUserActionInput): Promise<BulkUserActionResult>;
     adminUpdateUser(id: string, input: AdminUpdateUserInput): Promise<User>;
     adminCreateUser(input: AdminCreateUserInput): Promise<User>;
+    adminResetPassword(input: AdminResetPasswordInput, adminUser: User): Promise<AdminResetPasswordResult>;
     role(user: User): Promise<$Enums.UserRoleType>;
+    roles(user: any): Promise<any[]>;
+    permissions(user: any): Promise<any[]>;
     userRegistered(): any;
 }
