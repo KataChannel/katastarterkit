@@ -54,6 +54,13 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
   // Using Universal Dynamic Query System
   const { menus: dynamicMenus, loading: menusLoading, error: menusError } = useAdminMenus();
 
+  // Memoized user identifier for stable filtering
+  const userIdentifier = React.useMemo(() => ({
+    id: user?.id,
+    roleType: user?.roleType,
+    roles: user?.roles?.map(r => r.id),
+  }), [user?.id, user?.roleType, user?.roles]);
+
   // Fallback static navigation - MEMOIZED to prevent re-render issues
   const staticNavigation = React.useMemo(() => [
     {
@@ -108,15 +115,8 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
 
   // Use dynamic menus if loaded, otherwise use static navigation
   const navigation = React.useMemo(() => {
-    let menusToDisplay = staticNavigation;
-  
-    // If dynamic menus loaded and available, use them
-    if (!menusLoading && dynamicMenus && dynamicMenus.length > 0) {
-      menusToDisplay = dynamicMenus;
-    } else if (menusLoading) {
-      // While loading, show static navigation
-      menusToDisplay = staticNavigation;
-    }
+    // SIMPLE: Use dynamic menus if available, otherwise static (no loading flapping)
+    const menusToDisplay = (dynamicMenus && dynamicMenus.length > 0) ? dynamicMenus : staticNavigation;
     
     // 🔐 IMPORTANT: Filter menus based on user roles/permissions
     // This ensures normal users can't access admin menus
@@ -137,11 +137,9 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
       target: item.target,
       metadata: item.metadata,
     }));
-
-    console.log('[' + new Date().getTime() + '] navigationItems', navigationItems);
     
     return navigationItems as any;
-  }, [dynamicMenus, menusLoading, user, staticNavigation]);
+  }, [dynamicMenus, userIdentifier, user]);
   
   const handleLogout = async () => {
     await logout();

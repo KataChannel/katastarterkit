@@ -116,7 +116,7 @@ export function useAdminMenus() {
   
   const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
     variables: { input },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-first',  // FIX: Prevent cache-and-network double fetches
     errorPolicy: 'all',
   });
   
