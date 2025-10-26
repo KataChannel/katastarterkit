@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -55,9 +55,17 @@ export function FilterBar<T>({
   const [isAddingFilter, setIsAddingFilter] = useState(false);
   const [newFilter, setNewFilter] = useState<Partial<FilterCondition>>({});
 
-  const filterableColumns = columns.filter(col => col.filterable !== false);
+  const filterableColumns = useMemo(() => columns.filter(col => col.filterable !== false), [columns]);
 
-  const addFilter = () => {
+  // Reset newFilter when closing popover
+  const handleClosePopover = useCallback((open: boolean) => {
+    setIsAddingFilter(open);
+    if (!open) {
+      setNewFilter({});
+    }
+  }, []);
+
+  const addFilter = useCallback(() => {
     if (newFilter.field && newFilter.operator && newFilter.value !== undefined && newFilter.value !== '') {
       const filter: FilterCondition = {
         field: newFilter.field,
@@ -69,28 +77,28 @@ export function FilterBar<T>({
       setNewFilter({});
       setIsAddingFilter(false);
     }
-  };
+  }, [newFilter, filters, onFiltersChange]);
 
-  const removeFilter = (index: number) => {
+  const removeFilter = useCallback((index: number) => {
     const newFilters = filters.filter((_, i) => i !== index);
     onFiltersChange(newFilters);
-  };
+  }, [filters, onFiltersChange]);
 
-  const updateFilter = (index: number, updates: Partial<FilterCondition>) => {
+  const updateFilter = useCallback((index: number, updates: Partial<FilterCondition>) => {
     const newFilters = filters.map((filter, i) => 
       i === index ? { ...filter, ...updates } : filter
     );
     onFiltersChange(newFilters);
-  };
+  }, [filters, onFiltersChange]);
 
-  const getColumnType = (field: string): FilterType => {
+  const getColumnType = useCallback((field: string): FilterType => {
     const column = columns.find(col => col.field === field);
     return (column?.type as FilterType) || 'text';
-  };
+  }, [columns]);
 
-  const getOperators = (type: FilterType) => {
+  const getOperators = useCallback((type: FilterType) => {
     return OPERATORS[type] || OPERATORS.text;
-  };
+  }, []);
 
   const renderFilterValue = (filter: FilterCondition, index: number) => {
     const column = columns.find(col => col.field === filter.field);
@@ -231,7 +239,7 @@ export function FilterBar<T>({
           className="flex-1 sm:max-w-md text-sm"
         />
         
-        <Popover open={isAddingFilter} onOpenChange={setIsAddingFilter}>
+        <Popover open={isAddingFilter} onOpenChange={handleClosePopover}>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
               <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
