@@ -13,7 +13,7 @@ export class RbacSeederService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.seedDefaultRolesAndPermissions();
+    // await this.seedDefaultRolesAndPermissions();
   }
 
   async seedDefaultRolesAndPermissions() {
@@ -367,9 +367,23 @@ export class RbacSeederService implements OnModuleInit {
   private async seedDefaultMenus() {
     try {
       this.logger.log('Seeding default menus...');
+      
+      // First, update ALL existing menus to only allow super_admin
+      this.logger.log('Updating existing menus to super_admin only...');
+      await this.prisma.menu.updateMany({
+        where: {
+          type: 'SIDEBAR', // Only update sidebar menus (admin menus)
+        },
+        data: {
+          requiredRoles: ['super_admin'],
+          isPublic: false,
+        },
+      });
+      this.logger.log('✅ All existing sidebar menus updated to super_admin only');
 
       const menus = [
         // ==================== SIDEBAR MENUS ====================
+        // All menus restricted to super_admin only (katachanneloffical@gmail.com)
         {
           title: 'Dashboard',
           slug: 'dashboard',
@@ -379,7 +393,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'LayoutDashboard',
           order: 1,
           isPublic: false,
-          requiredRoles: ['super_admin', 'admin', 'manager'],
+          requiredRoles: ['super_admin'],
           isProtected: true,
         },
         {
@@ -391,7 +405,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'Users',
           order: 2,
           requiredPermissions: ['users:read'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
           isProtected: true,
         },
         {
@@ -403,7 +417,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'Shield',
           order: 3,
           requiredPermissions: ['roles:read', 'permissions:read'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
           isProtected: true,
         },
         {
@@ -414,7 +428,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'FileText',
           order: 4,
           requiredPermissions: ['content:read'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
         },
         {
           title: 'Posts',
@@ -426,7 +440,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'FileEdit',
           order: 1,
           requiredPermissions: ['content:read'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
         },
         {
           title: 'Categories',
@@ -438,7 +452,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'FolderTree',
           order: 2,
           requiredPermissions: ['content:read'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
         },
         {
           title: 'Tags',
@@ -450,7 +464,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'Tag',
           order: 3,
           requiredPermissions: ['content:read'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
         },
         {
           title: 'Projects',
@@ -461,7 +475,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'Briefcase',
           order: 5,
           requiredPermissions: ['projects:read'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
         },
         {
           title: 'Tasks',
@@ -472,7 +486,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'CheckSquare',
           order: 6,
           requiredPermissions: ['tasks:read'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
         },
         {
           title: 'Menus',
@@ -483,7 +497,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'Menu',
           order: 7,
           requiredPermissions: ['content:manage'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
           isProtected: true,
         },
         {
@@ -495,7 +509,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'BarChart',
           order: 8,
           requiredPermissions: ['analytics:read'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
         },
         {
           title: 'Settings',
@@ -504,7 +518,7 @@ export class RbacSeederService implements OnModuleInit {
           type: 'SIDEBAR',
           icon: 'Settings',
           order: 9,
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
         },
         {
           title: 'General',
@@ -515,7 +529,7 @@ export class RbacSeederService implements OnModuleInit {
           route: '/admin/settings/general',
           icon: 'Sliders',
           order: 1,
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
         },
         {
           title: 'Security',
@@ -538,7 +552,7 @@ export class RbacSeederService implements OnModuleInit {
           icon: 'FileSearch',
           order: 10,
           requiredPermissions: ['security:audit'],
-          requiredRoles: ['super_admin', 'admin'],
+          requiredRoles: ['super_admin'],
         },
 
         // ==================== HEADER MENUS ====================
@@ -588,7 +602,19 @@ export class RbacSeederService implements OnModuleInit {
           });
 
           if (existingMenu) {
-            this.logger.debug(`Menu already exists: ${menuData.slug}`);
+            // Update existing menu to ensure correct permissions
+            if (menuData.type === 'SIDEBAR') {
+              await this.prisma.menu.update({
+                where: { slug: menuData.slug },
+                data: {
+                  requiredRoles: (menuData as any).requiredRoles || ['super_admin'],
+                  requiredPermissions: (menuData as any).requiredPermissions || [],
+                  isPublic: (menuData as any).isPublic || false,
+                  isProtected: (menuData as any).isProtected || false,
+                },
+              });
+              this.logger.debug(`Updated menu permissions: ${menuData.slug}`);
+            }
             continue;
           }
 
