@@ -138,8 +138,11 @@ export const UPDATE_PAGE = gql`
 
 // Delete a page
 export const DELETE_PAGE = gql`
+  ${PAGE_FRAGMENT}
   mutation DeletePage($id: String!) {
-    deletePage(id: $id)
+    deletePage(id: $id) {
+      ...PageFields
+    }
   }
 `;
 

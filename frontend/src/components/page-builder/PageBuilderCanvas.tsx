@@ -29,9 +29,11 @@ import {
   LayoutGrid,
   ArrowRightLeft,
   ArrowUpDown,
+  Star,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { usePageState, useUIState, usePageActions } from './contexts';
 import { BlockRenderer } from './blocks/BlockRenderer';
@@ -41,7 +43,9 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BlockType } from '@/types/page-builder';
 
 
@@ -71,6 +75,8 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
   const { showPreview } = useUIState();
   const { handleBlockUpdate, handleBlockDelete, handleAddChild, handleSelectBlock, handleAddBlock } = usePageActions();
   const [isAddingBlock, setIsAddingBlock] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [bookmarkedBlocks, setBookmarkedBlocks] = useState<BlockType[]>([]);
 
   // Memoize block IDs array to prevent SortableContext re-renders
   const blockIds = useMemo(() => blocks.map(b => b.id), [blocks]);
@@ -148,6 +154,39 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
   // Flatten for dropdown rendering
   const commonBlockTypes = blockTypeGroups.flatMap(group => group.blocks);
 
+  // Get bookmarked blocks
+  const bookmarkedBlocksData = useMemo(() => {
+    return bookmarkedBlocks
+      .map(blockType => commonBlockTypes.find(b => b.type === blockType))
+      .filter(Boolean) as typeof commonBlockTypes;
+  }, [bookmarkedBlocks, commonBlockTypes]);
+
+  // Filter block types based on search query
+  const filteredBlockTypeGroups = useMemo(() => {
+    if (!searchQuery.trim()) return blockTypeGroups;
+    
+    const query = searchQuery.toLowerCase();
+    return blockTypeGroups
+      .map(group => ({
+        ...group,
+        blocks: group.blocks.filter(
+          block => 
+            block.label.toLowerCase().includes(query) ||
+            block.type.toLowerCase().includes(query)
+        ),
+      }))
+      .filter(group => group.blocks.length > 0);
+  }, [searchQuery, blockTypeGroups]);
+
+  // Toggle bookmark
+  const toggleBookmark = useCallback((blockType: BlockType) => {
+    setBookmarkedBlocks(prev => 
+      prev.includes(blockType)
+        ? prev.filter(b => b !== blockType)
+        : [...prev, blockType]
+    );
+  }, []);
+
   // Handle add block with feedback
   const handleAddBlockClick = useCallback(async (blockType: BlockType) => {
     try {
@@ -158,26 +197,72 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
     }
   }, [handleAddBlock]);
 
-  // Render dropdown menu content with grouped items
+  // Render block item with bookmark button
+  const renderBlockItem = (block: typeof commonBlockTypes[0]) => {
+    const isBookmarked = bookmarkedBlocks.includes(block.type);
+    return (
+      <div key={block.type} className="flex items-center justify-between group">
+        <DropdownMenuItem 
+          onClick={() => handleAddBlockClick(block.type)}
+          className="cursor-pointer gap-2 flex-1"
+        >
+          <block.Icon size={16} className="text-gray-600" />
+          <span>{block.label}</span>
+        </DropdownMenuItem>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleBookmark(block.type);
+          }}
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-gray-100"
+        >
+          <Star
+            size={16}
+            className={isBookmarked ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}
+          />
+        </button>
+      </div>
+    );
+  };
+
+  // Render dropdown menu content with grouped items and search
   const renderDropdownItems = () => {
-    return blockTypeGroups.map((group, groupIndex) => (
+    if (filteredBlockTypeGroups.length === 0) {
+      return (
+        <div className="px-2 py-4 text-center text-sm text-gray-500">
+          No blocks found matching "{searchQuery}"
+        </div>
+      );
+    }
+
+    return filteredBlockTypeGroups.map((group, groupIndex) => (
       <div key={group.category}>
         {groupIndex > 0 && <div className="my-1 mx-0 h-px bg-gray-200" />}
         <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase">
           {group.category}
         </div>
-        {group.blocks.map(({ type, label, Icon }) => (
-          <DropdownMenuItem 
-            key={type}
-            onClick={() => handleAddBlockClick(type)}
-            className="cursor-pointer gap-2"
-          >
-            <Icon size={16} className="text-gray-600" />
-            <span>{label}</span>
-          </DropdownMenuItem>
-        ))}
+        {group.blocks.map((block) => renderBlockItem(block))}
       </div>
     ));
+  };
+
+  // Render bookmarked blocks
+  const renderBookmarkedItems = () => {
+    if (bookmarkedBlocksData.length === 0) {
+      return (
+        <div className="px-2 py-8 text-center text-sm text-gray-500">
+          <Star size={32} className="mx-auto mb-2 opacity-30" />
+          <p>No bookmarked blocks yet</p>
+          <p className="text-xs mt-1">Star your favorite blocks to see them here</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-1">
+        {bookmarkedBlocksData.map((block) => renderBlockItem(block))}
+      </div>
+    );
   };
 
   return (
@@ -248,8 +333,42 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
                           Add Block
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="center" className="w-56 max-h-96 overflow-y-auto">
-                        {renderDropdownItems()}
+                      <DropdownMenuContent align="center" className="w-72">
+                        {/* Tabs for All Blocks and Bookmarked */}
+                        <Tabs defaultValue="all" className="w-full">
+                          <TabsList className="w-full grid grid-cols-2 mb-2 border-b">
+                            <TabsTrigger value="all" className="text-xs">
+                              All Blocks
+                            </TabsTrigger>
+                            <TabsTrigger value="bookmarked" className="text-xs">
+                              <Star size={14} className="mr-1" />
+                              Bookmarked
+                            </TabsTrigger>
+                          </TabsList>
+
+                          {/* Search Input */}
+                          <div className="p-2 border-b border-gray-200 sticky top-14 bg-white z-10">
+                            <Input
+                              placeholder="Search blocks..."
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              className="h-8 text-sm"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+
+                          {/* All Blocks Tab */}
+                          <TabsContent value="all" className="max-h-80 overflow-y-auto p-0 m-0">
+                            {renderDropdownItems()}
+                          </TabsContent>
+
+                          {/* Bookmarked Tab */}
+                          <TabsContent value="bookmarked" className="max-h-80 overflow-y-auto p-0 m-0">
+                            <div className="p-2">
+                              {renderBookmarkedItems()}
+                            </div>
+                          </TabsContent>
+                        </Tabs>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -287,8 +406,42 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
                             Add New Block
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="center" className="w-56 max-h-96 overflow-y-auto">
-                          {renderDropdownItems()}
+                        <DropdownMenuContent align="center" className="w-72">
+                          {/* Tabs for All Blocks and Bookmarked */}
+                          <Tabs defaultValue="all" className="w-full">
+                            <TabsList className="w-full grid grid-cols-2 mb-2 border-b">
+                              <TabsTrigger value="all" className="text-xs">
+                                All Blocks
+                              </TabsTrigger>
+                              <TabsTrigger value="bookmarked" className="text-xs">
+                                <Star size={14} className="mr-1" />
+                                Bookmarked
+                              </TabsTrigger>
+                            </TabsList>
+
+                            {/* Search Input */}
+                            <div className="p-2 border-b border-gray-200 sticky top-14 bg-white z-10">
+                              <Input
+                                placeholder="Search blocks..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="h-8 text-sm"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+
+                            {/* All Blocks Tab */}
+                            <TabsContent value="all" className="max-h-80 overflow-y-auto p-0 m-0">
+                              {renderDropdownItems()}
+                            </TabsContent>
+
+                            {/* Bookmarked Tab */}
+                            <TabsContent value="bookmarked" className="max-h-80 overflow-y-auto p-0 m-0">
+                              <div className="p-2">
+                                {renderBookmarkedItems()}
+                              </div>
+                            </TabsContent>
+                          </Tabs>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>

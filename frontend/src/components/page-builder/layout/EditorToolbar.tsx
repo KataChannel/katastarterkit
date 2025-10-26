@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -46,6 +46,7 @@ import { Switch } from '@/components/ui/switch';
 import { SaveTemplateDialog } from '@/components/page-builder/templates';
 import { ImportTemplateDialog } from '@/components/page-builder/templates';
 import { PageTemplate, PageElement, ImportTemplateData } from '@/types/template';
+import { PageStatus } from '@/types/page-builder';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useToast } from '@/hooks/use-toast';
 import { usePageState } from '@/components/page-builder/PageBuilderProvider';
@@ -93,7 +94,7 @@ export function EditorToolbar({
 }: EditorToolbarProps) {
   const { toast } = useToast();
   const { addTemplate, importFromJSON } = useTemplates();
-  const { editingPage, isNewPageMode } = usePageState();
+  const { editingPage, isNewPageMode, setEditingPage } = usePageState();
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -221,6 +222,82 @@ export function EditorToolbar({
     setPageSettings(prev => ({ ...prev, [field]: value }));
   };
 
+  // Sync pageSettings to editingPage before save
+  const syncSettingsToEditingPage = useCallback(async () => {
+    if (!editingPage) return;
+    
+    // Update editingPage with current pageSettings values
+    const updatedPage = {
+      ...editingPage,
+      title: pageSettings.pageTitle,
+      slug: pageSettings.pageSlug,
+      seoTitle: pageSettings.seoTitle,
+      seoDescription: pageSettings.seoDescription,
+      seoKeywords: pageSettings.seoKeywords
+        ?.split(',')
+        .map(k => k.trim())
+        .filter(Boolean) || [],
+      status: pageSettings.isPublished ? PageStatus.PUBLISHED : PageStatus.DRAFT,
+    };
+    
+    setEditingPage(updatedPage);
+    return updatedPage;
+  }, [editingPage, pageSettings, setEditingPage]);
+
+  // Handle save with settings sync
+  const handleSaveWithSync = useCallback(async () => {
+    try {
+      // First sync settings to editingPage
+      await syncSettingsToEditingPage();
+      
+      // Then call the original save handler
+      if (onSave) {
+        await onSave();
+      }
+    } catch (error) {
+      console.error('Error during save with sync:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save page. Please try again.',
+        type: 'error',
+      });
+    }
+  }, [syncSettingsToEditingPage, onSave, toast]);
+
+  // Handle settings dialog save
+  const handleSettingsSave = useCallback(async () => {
+    try {
+      setIsSettingsLoading(true);
+      
+      // Sync settings to editingPage
+      const updatedPage = await syncSettingsToEditingPage();
+      
+      // Call the original save handler if provided
+      if (onSettingsSave) {
+        await onSettingsSave(pageSettings);
+      } else if (onSave) {
+        // If no onSettingsSave, use onSave to persist changes
+        await onSave();
+      }
+      
+      toast({
+        title: 'Settings saved',
+        description: 'Global settings have been updated successfully.',
+        type: 'success',
+      });
+      setIsSettingsOpen(false);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save settings. Please try again.',
+        type: 'error',
+      });
+    } finally {
+      setIsSettingsLoading(false);
+    }
+  }, [pageSettings, syncSettingsToEditingPage, onSettingsSave, onSave, toast]);
+
   // Handle save template
   const handleSaveTemplate = async (template: PageTemplate) => {
     try {
@@ -286,7 +363,21 @@ export function EditorToolbar({
       {/* Left Section - Logo & Mode */}
       <div className="flex items-center gap-4">
         <div className="font-bold text-lg text-primary">
-          Kata Builder
+                 {/* Page Title & Slug Display - Always show if editingPage exists */}
+        {editingPage && (
+          <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded border border-gray-200 min-w-max">
+            <div className="flex flex-col gap-0.5">
+              <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                {editingPage.title || 'Untitled Page'}
+              </div>
+              {editingPage.slug && (
+                <div className="text-xs text-gray-500 truncate max-w-xs">
+                  /{editingPage.slug}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         </div>
 
         {/* Editor Mode Switcher */}
@@ -306,22 +397,6 @@ export function EditorToolbar({
 
       {/* Center Section - Device Preview & Page Info */}
       <div className="flex items-center gap-4">
-        {/* Page Title & Slug Display - Always show if editingPage exists */}
-        {editingPage && (
-          <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded border border-gray-200 min-w-max">
-            <div className="flex flex-col gap-0.5">
-              <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
-                {editingPage.title || 'Untitled Page'}
-              </div>
-              {editingPage.slug && (
-                <div className="text-xs text-gray-500 truncate max-w-xs">
-                  /{editingPage.slug}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* Device Selector */}
         <Tabs value={device} onValueChange={(v) => onDeviceChange(v as 'desktop' | 'tablet' | 'mobile')}>
           <TabsList>
@@ -342,7 +417,7 @@ export function EditorToolbar({
       </div>
 
       {/* Right Section - Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 pr-8">
         {/* Panel Toggles */}
         <Button
           variant="ghost"
@@ -408,7 +483,7 @@ export function EditorToolbar({
         <Button 
           variant="default" 
           size="sm" 
-          onClick={onSave} 
+          onClick={handleSaveWithSync} 
           className="gap-2"
           disabled={isLoading}
         >
@@ -428,9 +503,9 @@ export function EditorToolbar({
         </Button>
 
         {/* Exit */}
-        <Button variant="ghost" size="icon" onClick={onExit} title="Exit Fullscreen (ESC)">
+        {/* <Button variant="ghost" size="icon" onClick={onExit} title="Exit Fullscreen (ESC)">
           <X className="w-4 h-4" />
-        </Button>
+        </Button> */}
       </div>
 
       {/* Template Dialogs */}
@@ -677,25 +752,7 @@ export function EditorToolbar({
               Cancel
             </Button>
             <Button 
-              onClick={async () => {
-                try {
-                  if (onSettingsSave) {
-                    await onSettingsSave(pageSettings);
-                  }
-                  toast({
-                    title: 'Settings saved',
-                    description: 'Global settings have been updated successfully.',
-                    type: 'success',
-                  });
-                  setIsSettingsOpen(false);
-                } catch (error) {
-                  toast({
-                    title: 'Error',
-                    description: 'Failed to save settings. Please try again.',
-                    type: 'error',
-                  });
-                }
-              }}
+              onClick={handleSettingsSave}
               disabled={isSettingsLoading}
             >
               {isSettingsLoading ? (
