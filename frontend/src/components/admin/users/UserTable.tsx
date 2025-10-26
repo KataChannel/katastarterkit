@@ -15,7 +15,6 @@ import {
 import {
   MoreVertical,
   Edit,
-  Eye,
   Trash2,
   UserCheck,
   UserX,
@@ -69,7 +68,6 @@ interface UserTableProps {
   onPageChange: (page: number) => void;
   onCreateUser?: () => void;
   onEditUser: (user: User) => void;
-  onViewUser?: (user: User) => void;
   onActivateUser?: (user: User) => void;
   onDeactivateUser?: (user: User) => void;
   onDeleteUser?: (user: User) => void;
@@ -87,7 +85,6 @@ export function UserTable({
   onPageChange,
   onCreateUser,
   onEditUser,
-  onViewUser,
   onActivateUser,
   onDeactivateUser,
   onDeleteUser,
@@ -284,10 +281,6 @@ export function UserTable({
               <Edit className="w-4 h-4 mr-2" />
               Edit User
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onViewUser && onViewUser(data)}>
-              <Eye className="w-4 h-4 mr-2" />
-              View Details
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               onClick={() => data.isActive 
@@ -319,7 +312,7 @@ export function UserTable({
         </DropdownMenu>
       )
     },
-  ], [onEditUser, onViewUser, onActivateUser, onDeactivateUser, onDeleteUser]);
+  ], [onEditUser, onActivateUser, onDeactivateUser, onDeleteUser]);
 
   // Advanced table configuration
   const tableConfig: TableConfig = {
