@@ -333,13 +333,12 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
               const slideTextColor = slide.textColor || 'text-white';
               const imagePos = (slide.imagePosition || 'right') as 'left' | 'right' | 'top' | 'bottom' | 'background' | 'fullscreen';
               
-              // Image Only Mode - display only the image fullscreen
-              if (slide.imageOnly && slide.image) {
-                return (
-                  <CarouselItem key={slide.id || index} className={`h-full ${getItemBasisClass()}`}>
-                    <Card className="border-0 rounded-lg overflow-hidden h-full">
-                      <CardContent className="relative p-0 overflow-hidden h-full">
-                        {/* Fullscreen Image */}
+              return (
+                <CarouselItem key={slide.id || index} className={`h-full ${getItemBasisClass()}`}>
+                  <Card className="border-0 rounded-lg overflow-hidden h-full">
+                    <CardContent className="relative p-0 overflow-hidden h-full">
+                      {/* Image Only Mode - display only the image fullscreen */}
+                      {slide.imageOnly && slide.image ? (
                         <div className="w-full h-full">
                           <img 
                             src={slide.image} 
@@ -347,135 +346,81 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
                             className="w-full h-full object-cover"
                           />
                         </div>
-                        
-                        {/* Edit Controls in Editing Mode */}
-                        {editMode && (
-                          <div className="absolute top-2 left-2 z-20 flex gap-2">
-                            <Button
-                              onClick={() => handleEditSlide(index)}
-                              size="sm"
-                              variant="outline"
-                              className="bg-white shadow-lg"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            {slides.length > 1 && (
-                              <>
-                                {index > 0 && (
-                                  <Button
-                                    onClick={() => handleMoveSlide(index, 'up')}
-                                    size="sm"
-                                    variant="outline"
-                                    className="bg-white shadow-lg"
-                                  >
-                                    <MoveUp className="w-4 h-4" />
-                                  </Button>
-                                )}
-                                {index < slides.length - 1 && (
-                                  <Button
-                                    onClick={() => handleMoveSlide(index, 'down')}
-                                    size="sm"
-                                    variant="outline"
-                                    className="bg-white shadow-lg"
-                                  >
-                                    <MoveDown className="w-4 h-4" />
-                                  </Button>
-                                )}
-                                <Button
-                                  onClick={() => handleDeleteSlide(index)}
-                                  size="sm"
-                                  variant="destructive"
-                                  className="bg-red-500 shadow-lg"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </CarouselItem>
-                );
-              }
-              
-              return (
-                <CarouselItem key={slide.id || index} className={`h-full ${getItemBasisClass()}`}>
-                  <Card className="border-0 rounded-lg overflow-hidden h-full">
-                    <CardContent className={`relative p-0 ${slide.bgColor || 'bg-gradient-to-r from-blue-500 to-purple-600'} overflow-hidden h-full`}>
-                      {/* Background Image with Overlay */}
-                      {imagePos === 'background' && slide.image && (
+                      ) : (
                         <>
-                          <div 
-                            className="absolute inset-0 bg-cover bg-center"
-                            style={{ backgroundImage: `url(${slide.image})` }}
-                          />
-                          <div 
-                            className="absolute inset-0 bg-black"
-                            style={{ opacity: (slide.imageOverlay || 50) / 100 }}
-                          />
-                        </>
-                      )}
+                          {/* Background Image with Overlay */}
+                          {imagePos === 'background' && slide.image && (
+                            <>
+                              <div 
+                                className="absolute inset-0 bg-cover bg-center"
+                                style={{ backgroundImage: `url(${slide.image})` }}
+                              />
+                              <div 
+                                className="absolute inset-0 bg-black"
+                                style={{ opacity: (slide.imageOverlay || 50) / 100 }}
+                              />
+                            </>
+                          )}
 
-                      <div className="relative z-10 h-full flex items-center">
-                        {imagePos === 'fullscreen' && slide.image ? (
-                          /* Fullscreen Image with Overlay Text */
-                          <div className="w-full h-full">
-                            <div 
-                              className="absolute inset-0 bg-cover bg-center"
-                              style={{ backgroundImage: `url(${slide.image})` }}
-                            />
-                            <div 
-                              className="absolute inset-0 bg-black"
-                              style={{ opacity: (slide.imageOverlay || 40) / 100 }}
-                            />
-                            <div className="relative z-10 w-full h-full flex items-center justify-center">
-                              <div className="container mx-auto px-4 md:px-8 text-center">
-                                {slide.badge && (
-                                  <Badge variant="secondary" className="mb-4 text-sm font-semibold">
-                                    {slide.badge}
-                                  </Badge>
-                                )}
-                                
-                                {slide.title && (
-                                  <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 text-white drop-shadow-lg">
-                                    {slide.title}
-                                  </h2>
-                                )}
-                                
-                                {slide.subtitle && (
-                                  <p className="text-2xl md:text-3xl font-semibold mb-4 text-white drop-shadow-lg">
-                                    {slide.subtitle}
-                                  </p>
-                                )}
-                                
-                                {slide.description && (
-                                  <p className="text-lg md:text-xl opacity-95 max-w-3xl mx-auto mb-6 text-white drop-shadow-lg">
-                                    {slide.description}
-                                  </p>
-                                )}
-                                
-                                {slide.cta && (
-                                  <div className="pt-4">
-                                    <Button 
-                                      size="lg" 
-                                      variant="secondary"
-                                      className="font-semibold hover:scale-105 transition-transform"
-                                      onClick={() => {
-                                        if (slide.cta?.link && !editMode) {
-                                          window.location.href = slide.cta.link;
-                                        }
-                                      }}
-                                    >
-                                      {slide.cta.text}
-                                    </Button>
+                          <div className="relative z-10 h-full flex items-center">
+                            {imagePos === 'fullscreen' && slide.image ? (
+                              /* Fullscreen Image with Overlay Text */
+                              <div className="w-full h-full">
+                                <div 
+                                  className="absolute inset-0 bg-cover bg-center"
+                                  style={{ backgroundImage: `url(${slide.image})` }}
+                                />
+                                <div 
+                                  className="absolute inset-0 bg-black"
+                                  style={{ opacity: (slide.imageOverlay || 40) / 100 }}
+                                />
+                                <div className="relative z-10 w-full h-full flex items-center justify-center">
+                                  <div className="container mx-auto px-4 md:px-8 text-center">
+                                    {slide.badge && (
+                                      <Badge variant="secondary" className="mb-4 text-sm font-semibold">
+                                        {slide.badge}
+                                      </Badge>
+                                    )}
+                                    
+                                    {slide.title && (
+                                      <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 text-white drop-shadow-lg">
+                                        {slide.title}
+                                      </h2>
+                                    )}
+                                    
+                                    {slide.subtitle && (
+                                      <p className="text-2xl md:text-3xl font-semibold mb-4 text-white drop-shadow-lg">
+                                        {slide.subtitle}
+                                      </p>
+                                    )}
+                                    
+                                    {slide.description && (
+                                      <p className="text-lg md:text-xl opacity-95 max-w-3xl mx-auto mb-6 text-white drop-shadow-lg">
+                                        {slide.description}
+                                      </p>
+                                    )}
+                                    
+                                    {slide.cta && (
+                                      <div className="pt-4">
+                                        <Button 
+                                          size="lg" 
+                                          variant="secondary"
+                                          className="font-semibold hover:scale-105 transition-transform"
+                                          onClick={() => {
+                                            if (slide.cta?.link && !editMode) {
+                                              window.location.href = slide.cta.link;
+                                            }
+                                          }}
+                                        >
+                                          {slide.cta.text}
+                                        </Button>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">
+                            ) : (
+                              <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">
                           {/* Dynamic Layout based on image position */}
                           {imagePos === 'top' || imagePos === 'bottom' ? (
                             <div className={`space-y-6 ${imagePos === 'top' ? 'flex flex-col' : 'flex flex-col-reverse'}`}>
@@ -598,8 +543,12 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
                           )}
                         </div>
                       )}
-                      </div>
-                      {editMode && (
+                    </div>
+
+                      </>
+                    )}
+
+                    {editMode && (
                         <div className="absolute top-2 left-2 z-20 flex gap-2">
                           <Button
                             onClick={() => handleEditSlide(index)}
