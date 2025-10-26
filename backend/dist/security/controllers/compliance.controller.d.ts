@@ -141,18 +141,18 @@ export declare class ComplianceController {
                     username: string;
                 };
             } & {
-                category: string;
                 id: string;
+                description: string;
                 createdAt: Date;
+                updatedAt: Date;
+                userId: string | null;
+                category: string;
                 sessionId: string | null;
                 ipAddress: string;
                 userAgent: string | null;
                 details: import("@prisma/client/runtime/library").JsonValue | null;
-                updatedAt: Date;
-                userId: string | null;
                 severity: string;
                 correlationId: string | null;
-                description: string;
                 eventType: string;
                 location: string | null;
                 riskScore: number | null;
@@ -185,13 +185,16 @@ export declare class ComplianceController {
                 };
             } & {
                 id: string;
+                tags: string[];
                 createdAt: Date;
+                userId: string | null;
+                action: string;
+                errorMessage: string | null;
+                success: boolean;
                 sessionId: string | null;
                 ipAddress: string | null;
                 userAgent: string | null;
-                action: string;
                 details: import("@prisma/client/runtime/library").JsonValue | null;
-                userId: string | null;
                 resourceType: string;
                 resourceId: string | null;
                 method: string | null;
@@ -203,12 +206,9 @@ export declare class ComplianceController {
                 parentResourceId: string | null;
                 operationType: string | null;
                 severity: string;
-                tags: string[];
                 batchId: string | null;
                 batchSize: number | null;
                 batchIndex: number | null;
-                success: boolean;
-                errorMessage: string | null;
                 errorCode: string | null;
                 responseTime: number | null;
                 requestSize: number | null;
@@ -249,18 +249,18 @@ export declare class ComplianceController {
                     username: string;
                 };
             } & {
-                category: string;
                 id: string;
+                description: string;
                 createdAt: Date;
+                updatedAt: Date;
+                userId: string | null;
+                category: string;
                 sessionId: string | null;
                 ipAddress: string;
                 userAgent: string | null;
                 details: import("@prisma/client/runtime/library").JsonValue | null;
-                updatedAt: Date;
-                userId: string | null;
                 severity: string;
                 correlationId: string | null;
-                description: string;
                 eventType: string;
                 location: string | null;
                 riskScore: number | null;

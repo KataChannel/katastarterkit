@@ -55,7 +55,6 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
         this.logger = new common_1.Logger(RbacSeederService_1.name);
     }
     async onModuleInit() {
-        await this.seedDefaultRolesAndPermissions();
     }
     async seedDefaultRolesAndPermissions() {
         try {
@@ -347,6 +346,17 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
     async seedDefaultMenus() {
         try {
             this.logger.log('Seeding default menus...');
+            this.logger.log('Updating existing menus to super_admin only...');
+            await this.prisma.menu.updateMany({
+                where: {
+                    type: 'SIDEBAR',
+                },
+                data: {
+                    requiredRoles: ['super_admin'],
+                    isPublic: false,
+                },
+            });
+            this.logger.log('✅ All existing sidebar menus updated to super_admin only');
             const menus = [
                 {
                     title: 'Dashboard',
@@ -357,7 +367,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'LayoutDashboard',
                     order: 1,
                     isPublic: false,
-                    requiredRoles: ['super_admin', 'admin', 'manager'],
+                    requiredRoles: ['super_admin'],
                     isProtected: true,
                 },
                 {
@@ -369,7 +379,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'Users',
                     order: 2,
                     requiredPermissions: ['users:read'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                     isProtected: true,
                 },
                 {
@@ -381,7 +391,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'Shield',
                     order: 3,
                     requiredPermissions: ['roles:read', 'permissions:read'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                     isProtected: true,
                 },
                 {
@@ -392,7 +402,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'FileText',
                     order: 4,
                     requiredPermissions: ['content:read'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                 },
                 {
                     title: 'Posts',
@@ -404,7 +414,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'FileEdit',
                     order: 1,
                     requiredPermissions: ['content:read'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                 },
                 {
                     title: 'Categories',
@@ -416,7 +426,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'FolderTree',
                     order: 2,
                     requiredPermissions: ['content:read'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                 },
                 {
                     title: 'Tags',
@@ -428,7 +438,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'Tag',
                     order: 3,
                     requiredPermissions: ['content:read'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                 },
                 {
                     title: 'Projects',
@@ -439,7 +449,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'Briefcase',
                     order: 5,
                     requiredPermissions: ['projects:read'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                 },
                 {
                     title: 'Tasks',
@@ -450,7 +460,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'CheckSquare',
                     order: 6,
                     requiredPermissions: ['tasks:read'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                 },
                 {
                     title: 'Menus',
@@ -461,7 +471,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'Menu',
                     order: 7,
                     requiredPermissions: ['content:manage'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                     isProtected: true,
                 },
                 {
@@ -473,7 +483,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'BarChart',
                     order: 8,
                     requiredPermissions: ['analytics:read'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                 },
                 {
                     title: 'Settings',
@@ -482,7 +492,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     type: 'SIDEBAR',
                     icon: 'Settings',
                     order: 9,
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                 },
                 {
                     title: 'General',
@@ -493,7 +503,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     route: '/admin/settings/general',
                     icon: 'Sliders',
                     order: 1,
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                 },
                 {
                     title: 'Security',
@@ -516,7 +526,7 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                     icon: 'FileSearch',
                     order: 10,
                     requiredPermissions: ['security:audit'],
-                    requiredRoles: ['super_admin', 'admin'],
+                    requiredRoles: ['super_admin'],
                 },
                 {
                     title: 'Home',
@@ -561,7 +571,18 @@ let RbacSeederService = RbacSeederService_1 = class RbacSeederService {
                         where: { slug: menuData.slug },
                     });
                     if (existingMenu) {
-                        this.logger.debug(`Menu already exists: ${menuData.slug}`);
+                        if (menuData.type === 'SIDEBAR') {
+                            await this.prisma.menu.update({
+                                where: { slug: menuData.slug },
+                                data: {
+                                    requiredRoles: menuData.requiredRoles || ['super_admin'],
+                                    requiredPermissions: menuData.requiredPermissions || [],
+                                    isPublic: menuData.isPublic || false,
+                                    isProtected: menuData.isProtected || false,
+                                },
+                            });
+                            this.logger.debug(`Updated menu permissions: ${menuData.slug}`);
+                        }
                         continue;
                     }
                     let parentId;

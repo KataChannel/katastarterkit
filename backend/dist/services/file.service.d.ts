@@ -13,11 +13,11 @@ export declare class FileService {
     getFiles(input: GetFilesInput, userId: string): Promise<{
         items: ({
             shares: {
-                password: string | null;
                 id: string;
                 createdAt: Date;
-                token: string;
+                password: string | null;
                 expiresAt: Date | null;
+                token: string;
                 sharedBy: string;
                 sharedWith: string | null;
                 fileId: string;
@@ -27,33 +27,33 @@ export declare class FileService {
                 lastAccess: Date | null;
             }[];
             folder: {
-                path: string;
                 id: string;
+                description: string | null;
                 createdAt: Date;
-                name: string;
                 updatedAt: Date;
+                name: string;
                 userId: string;
                 parentId: string | null;
-                description: string | null;
-                color: string | null;
+                path: string;
                 icon: string | null;
+                color: string | null;
                 isSystem: boolean;
             };
         } & {
-            path: string;
             id: string;
+            description: string | null;
+            title: string | null;
+            tags: string[];
             createdAt: Date;
-            size: number;
             updatedAt: Date;
             userId: string;
-            tags: string[];
-            title: string | null;
-            description: string | null;
             url: string;
+            metadata: Prisma.JsonValue | null;
+            path: string;
+            size: number;
             filename: string;
             mimeType: string;
             width: number | null;
-            metadata: Prisma.JsonValue | null;
             etag: string | null;
             bucket: string;
             alt: string | null;
@@ -89,7 +89,7 @@ export declare class FileService {
         totalSize: number;
         totalFolders: number;
         filesByType: {
-            type: "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER" | "AUDIO" | "ARCHIVE";
+            type: "OTHER" | "IMAGE" | "VIDEO" | "DOCUMENT" | "AUDIO" | "ARCHIVE";
             count: number;
             totalSize: number;
         }[];
@@ -100,20 +100,20 @@ export declare class FileService {
     }>;
     createFileShare(input: CreateFileShareInput, userId: string): Promise<{
         file: {
-            path: string;
             id: string;
+            description: string | null;
+            title: string | null;
+            tags: string[];
             createdAt: Date;
-            size: number;
             updatedAt: Date;
             userId: string;
-            tags: string[];
-            title: string | null;
-            description: string | null;
             url: string;
+            metadata: Prisma.JsonValue | null;
+            path: string;
+            size: number;
             filename: string;
             mimeType: string;
             width: number | null;
-            metadata: Prisma.JsonValue | null;
             etag: string | null;
             bucket: string;
             alt: string | null;
@@ -127,11 +127,11 @@ export declare class FileService {
             viewCount: number;
         };
     } & {
-        password: string | null;
         id: string;
         createdAt: Date;
-        token: string;
+        password: string | null;
         expiresAt: Date | null;
+        token: string;
         sharedBy: string;
         sharedWith: string | null;
         fileId: string;

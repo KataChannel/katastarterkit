@@ -7,38 +7,38 @@ export declare class HRService {
     constructor(prisma: PrismaService);
     createEmployeeProfile(input: CreateEmployeeProfileInput): Promise<{
         user: {
-            password: string | null;
             id: string;
-            isVerified: boolean;
             createdAt: Date;
-            isActive: boolean;
+            updatedAt: Date;
             email: string | null;
             username: string;
+            password: string | null;
             phone: string | null;
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
             roleType: import(".prisma/client").$Enums.UserRoleType;
+            isActive: boolean;
+            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
-        level: string | null;
-        department: string | null;
         id: string;
         createdAt: Date;
-        isActive: boolean;
         updatedAt: Date;
-        userId: string;
-        createdBy: string | null;
-        updatedBy: string | null;
-        displayName: string | null;
+        department: string | null;
         skills: string[];
         startDate: Date | null;
+        userId: string;
+        level: string | null;
+        isActive: boolean;
+        displayName: string | null;
+        createdBy: string | null;
+        updatedBy: string | null;
         notes: string | null;
         city: string | null;
         employeeCode: string;
@@ -86,20 +86,20 @@ export declare class HRService {
     getEmployeeProfile(id: string): Promise<{
         user: {
             id: string;
-            isActive: boolean;
             email: string;
             username: string;
             firstName: string;
             lastName: string;
             avatar: string;
+            isActive: boolean;
         };
         employmentHistory: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            notes: string | null;
             approvedAt: Date | null;
+            notes: string | null;
             processedBy: string | null;
             eventType: import(".prisma/client").$Enums.EmploymentEventType;
             contractType: import(".prisma/client").$Enums.ContractType | null;
@@ -128,40 +128,16 @@ export declare class HRService {
             approvedBy: string | null;
             internalNotes: string | null;
         }[];
-        onboardingChecklist: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            tasks: import("@prisma/client/runtime/library").JsonValue;
-            userId: string;
-            status: import(".prisma/client").$Enums.OnboardingStatus;
-            createdBy: string | null;
-            startDate: Date;
-            completedTasks: number;
-            employeeProfileId: string;
-            checklistTemplate: string | null;
-            totalTasks: number;
-            targetDate: Date | null;
-            assignedTo: string | null;
-            buddyId: string | null;
-            hrNotes: string | null;
-            progressPercentage: number;
-            actualCompletionDate: Date | null;
-            employeeFeedback: string | null;
-            managerFeedback: string | null;
-            remindersSent: number;
-            lastReminderAt: Date | null;
-        };
         documents: {
             id: string;
-            isVerified: boolean;
+            description: string | null;
+            title: string;
             updatedAt: Date;
             userId: string;
-            title: string;
-            description: string | null;
-            uploadedBy: string;
+            isVerified: boolean;
             fileName: string;
             fileSize: number | null;
+            uploadedBy: string;
             fileId: string;
             employeeProfileId: string;
             documentType: import(".prisma/client").$Enums.DocumentType;
@@ -178,12 +154,36 @@ export declare class HRService {
             verificationNotes: string | null;
             uploadedAt: Date;
         }[];
+        onboardingChecklist: {
+            id: string;
+            tasks: import("@prisma/client/runtime/library").JsonValue;
+            status: import(".prisma/client").$Enums.OnboardingStatus;
+            createdAt: Date;
+            updatedAt: Date;
+            startDate: Date;
+            userId: string;
+            createdBy: string | null;
+            completedTasks: number;
+            employeeProfileId: string;
+            checklistTemplate: string | null;
+            totalTasks: number;
+            targetDate: Date | null;
+            assignedTo: string | null;
+            buddyId: string | null;
+            hrNotes: string | null;
+            progressPercentage: number;
+            actualCompletionDate: Date | null;
+            employeeFeedback: string | null;
+            managerFeedback: string | null;
+            remindersSent: number;
+            lastReminderAt: Date | null;
+        };
         offboardingProcesses: {
             id: string;
+            status: import(".prisma/client").$Enums.OffboardingStatus;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            status: import(".prisma/client").$Enums.OffboardingStatus;
             completedAt: Date | null;
             employeeProfileId: string;
             effectiveDate: Date | null;
@@ -229,18 +229,18 @@ export declare class HRService {
             completedBy: string | null;
         }[];
     } & {
-        level: string | null;
-        department: string | null;
         id: string;
         createdAt: Date;
-        isActive: boolean;
         updatedAt: Date;
-        userId: string;
-        createdBy: string | null;
-        updatedBy: string | null;
-        displayName: string | null;
+        department: string | null;
         skills: string[];
         startDate: Date | null;
+        userId: string;
+        level: string | null;
+        isActive: boolean;
+        displayName: string | null;
+        createdBy: string | null;
+        updatedBy: string | null;
         notes: string | null;
         city: string | null;
         employeeCode: string;
@@ -288,20 +288,20 @@ export declare class HRService {
     getEmployeeProfileByUserId(userId: string): Promise<{
         user: {
             id: string;
-            isActive: boolean;
             email: string;
             username: string;
             firstName: string;
             lastName: string;
             avatar: string;
+            isActive: boolean;
         };
         employmentHistory: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            notes: string | null;
             approvedAt: Date | null;
+            notes: string | null;
             processedBy: string | null;
             eventType: import(".prisma/client").$Enums.EmploymentEventType;
             contractType: import(".prisma/client").$Enums.ContractType | null;
@@ -330,40 +330,16 @@ export declare class HRService {
             approvedBy: string | null;
             internalNotes: string | null;
         }[];
-        onboardingChecklist: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            tasks: import("@prisma/client/runtime/library").JsonValue;
-            userId: string;
-            status: import(".prisma/client").$Enums.OnboardingStatus;
-            createdBy: string | null;
-            startDate: Date;
-            completedTasks: number;
-            employeeProfileId: string;
-            checklistTemplate: string | null;
-            totalTasks: number;
-            targetDate: Date | null;
-            assignedTo: string | null;
-            buddyId: string | null;
-            hrNotes: string | null;
-            progressPercentage: number;
-            actualCompletionDate: Date | null;
-            employeeFeedback: string | null;
-            managerFeedback: string | null;
-            remindersSent: number;
-            lastReminderAt: Date | null;
-        };
         documents: {
             id: string;
-            isVerified: boolean;
+            description: string | null;
+            title: string;
             updatedAt: Date;
             userId: string;
-            title: string;
-            description: string | null;
-            uploadedBy: string;
+            isVerified: boolean;
             fileName: string;
             fileSize: number | null;
+            uploadedBy: string;
             fileId: string;
             employeeProfileId: string;
             documentType: import(".prisma/client").$Enums.DocumentType;
@@ -380,12 +356,36 @@ export declare class HRService {
             verificationNotes: string | null;
             uploadedAt: Date;
         }[];
+        onboardingChecklist: {
+            id: string;
+            tasks: import("@prisma/client/runtime/library").JsonValue;
+            status: import(".prisma/client").$Enums.OnboardingStatus;
+            createdAt: Date;
+            updatedAt: Date;
+            startDate: Date;
+            userId: string;
+            createdBy: string | null;
+            completedTasks: number;
+            employeeProfileId: string;
+            checklistTemplate: string | null;
+            totalTasks: number;
+            targetDate: Date | null;
+            assignedTo: string | null;
+            buddyId: string | null;
+            hrNotes: string | null;
+            progressPercentage: number;
+            actualCompletionDate: Date | null;
+            employeeFeedback: string | null;
+            managerFeedback: string | null;
+            remindersSent: number;
+            lastReminderAt: Date | null;
+        };
         offboardingProcesses: {
             id: string;
+            status: import(".prisma/client").$Enums.OffboardingStatus;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            status: import(".prisma/client").$Enums.OffboardingStatus;
             completedAt: Date | null;
             employeeProfileId: string;
             effectiveDate: Date | null;
@@ -431,18 +431,18 @@ export declare class HRService {
             completedBy: string | null;
         }[];
     } & {
-        level: string | null;
-        department: string | null;
         id: string;
         createdAt: Date;
-        isActive: boolean;
         updatedAt: Date;
-        userId: string;
-        createdBy: string | null;
-        updatedBy: string | null;
-        displayName: string | null;
+        department: string | null;
         skills: string[];
         startDate: Date | null;
+        userId: string;
+        level: string | null;
+        isActive: boolean;
+        displayName: string | null;
+        createdBy: string | null;
+        updatedBy: string | null;
         notes: string | null;
         city: string | null;
         employeeCode: string;
@@ -489,23 +489,23 @@ export declare class HRService {
     }>;
     getEmployeeProfileByCode(employeeCode: string): Promise<{
         user: {
-            password: string | null;
             id: string;
-            isVerified: boolean;
             createdAt: Date;
-            isActive: boolean;
+            updatedAt: Date;
             email: string | null;
             username: string;
+            password: string | null;
             phone: string | null;
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
             roleType: import(".prisma/client").$Enums.UserRoleType;
+            isActive: boolean;
+            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            updatedAt: Date;
             departmentId: string | null;
         };
         employmentHistory: {
@@ -513,8 +513,8 @@ export declare class HRService {
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            notes: string | null;
             approvedAt: Date | null;
+            notes: string | null;
             processedBy: string | null;
             eventType: import(".prisma/client").$Enums.EmploymentEventType;
             contractType: import(".prisma/client").$Enums.ContractType | null;
@@ -544,18 +544,18 @@ export declare class HRService {
             internalNotes: string | null;
         }[];
     } & {
-        level: string | null;
-        department: string | null;
         id: string;
         createdAt: Date;
-        isActive: boolean;
         updatedAt: Date;
-        userId: string;
-        createdBy: string | null;
-        updatedBy: string | null;
-        displayName: string | null;
+        department: string | null;
         skills: string[];
         startDate: Date | null;
+        userId: string;
+        level: string | null;
+        isActive: boolean;
+        displayName: string | null;
+        createdBy: string | null;
+        updatedBy: string | null;
         notes: string | null;
         city: string | null;
         employeeCode: string;
@@ -610,26 +610,26 @@ export declare class HRService {
         employees: ({
             user: {
                 id: string;
-                isActive: boolean;
                 email: string;
                 username: string;
                 firstName: string;
                 lastName: string;
                 avatar: string;
+                isActive: boolean;
             };
         } & {
-            level: string | null;
-            department: string | null;
             id: string;
             createdAt: Date;
-            isActive: boolean;
             updatedAt: Date;
-            userId: string;
-            createdBy: string | null;
-            updatedBy: string | null;
-            displayName: string | null;
+            department: string | null;
             skills: string[];
             startDate: Date | null;
+            userId: string;
+            level: string | null;
+            isActive: boolean;
+            displayName: string | null;
+            createdBy: string | null;
+            updatedBy: string | null;
             notes: string | null;
             city: string | null;
             employeeCode: string;
@@ -679,38 +679,38 @@ export declare class HRService {
     }>;
     updateEmployeeProfile(id: string, input: UpdateEmployeeProfileInput): Promise<{
         user: {
-            password: string | null;
             id: string;
-            isVerified: boolean;
             createdAt: Date;
-            isActive: boolean;
+            updatedAt: Date;
             email: string | null;
             username: string;
+            password: string | null;
             phone: string | null;
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
             roleType: import(".prisma/client").$Enums.UserRoleType;
+            isActive: boolean;
+            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
-        level: string | null;
-        department: string | null;
         id: string;
         createdAt: Date;
-        isActive: boolean;
         updatedAt: Date;
-        userId: string;
-        createdBy: string | null;
-        updatedBy: string | null;
-        displayName: string | null;
+        department: string | null;
         skills: string[];
         startDate: Date | null;
+        userId: string;
+        level: string | null;
+        isActive: boolean;
+        displayName: string | null;
+        createdBy: string | null;
+        updatedBy: string | null;
         notes: string | null;
         city: string | null;
         employeeCode: string;
@@ -764,8 +764,8 @@ export declare class HRService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        notes: string | null;
         approvedAt: Date | null;
+        notes: string | null;
         processedBy: string | null;
         eventType: import(".prisma/client").$Enums.EmploymentEventType;
         contractType: import(".prisma/client").$Enums.ContractType | null;
@@ -799,8 +799,8 @@ export declare class HRService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        notes: string | null;
         approvedAt: Date | null;
+        notes: string | null;
         processedBy: string | null;
         eventType: import(".prisma/client").$Enums.EmploymentEventType;
         contractType: import(".prisma/client").$Enums.ContractType | null;
@@ -834,8 +834,8 @@ export declare class HRService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        notes: string | null;
         approvedAt: Date | null;
+        notes: string | null;
         processedBy: string | null;
         eventType: import(".prisma/client").$Enums.EmploymentEventType;
         contractType: import(".prisma/client").$Enums.ContractType | null;
@@ -867,38 +867,38 @@ export declare class HRService {
     createOnboardingChecklist(input: CreateOnboardingChecklistInput): Promise<{
         employeeProfile: {
             user: {
-                password: string | null;
                 id: string;
-                isVerified: boolean;
                 createdAt: Date;
-                isActive: boolean;
+                updatedAt: Date;
                 email: string | null;
                 username: string;
+                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import(".prisma/client").$Enums.UserRoleType;
+                isActive: boolean;
+                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            level: string | null;
-            department: string | null;
             id: string;
             createdAt: Date;
-            isActive: boolean;
             updatedAt: Date;
-            userId: string;
-            createdBy: string | null;
-            updatedBy: string | null;
-            displayName: string | null;
+            department: string | null;
             skills: string[];
             startDate: Date | null;
+            userId: string;
+            level: string | null;
+            isActive: boolean;
+            displayName: string | null;
+            createdBy: string | null;
+            updatedBy: string | null;
             notes: string | null;
             city: string | null;
             employeeCode: string;
@@ -945,13 +945,13 @@ export declare class HRService {
         };
     } & {
         id: string;
+        tasks: import("@prisma/client/runtime/library").JsonValue;
+        status: import(".prisma/client").$Enums.OnboardingStatus;
         createdAt: Date;
         updatedAt: Date;
-        tasks: import("@prisma/client/runtime/library").JsonValue;
-        userId: string;
-        status: import(".prisma/client").$Enums.OnboardingStatus;
-        createdBy: string | null;
         startDate: Date;
+        userId: string;
+        createdBy: string | null;
         completedTasks: number;
         employeeProfileId: string;
         checklistTemplate: string | null;
@@ -970,38 +970,38 @@ export declare class HRService {
     getOnboardingChecklist(id: string): Promise<{
         employeeProfile: {
             user: {
-                password: string | null;
                 id: string;
-                isVerified: boolean;
                 createdAt: Date;
-                isActive: boolean;
+                updatedAt: Date;
                 email: string | null;
                 username: string;
+                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import(".prisma/client").$Enums.UserRoleType;
+                isActive: boolean;
+                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            level: string | null;
-            department: string | null;
             id: string;
             createdAt: Date;
-            isActive: boolean;
             updatedAt: Date;
-            userId: string;
-            createdBy: string | null;
-            updatedBy: string | null;
-            displayName: string | null;
+            department: string | null;
             skills: string[];
             startDate: Date | null;
+            userId: string;
+            level: string | null;
+            isActive: boolean;
+            displayName: string | null;
+            createdBy: string | null;
+            updatedBy: string | null;
             notes: string | null;
             city: string | null;
             employeeCode: string;
@@ -1048,13 +1048,13 @@ export declare class HRService {
         };
     } & {
         id: string;
+        tasks: import("@prisma/client/runtime/library").JsonValue;
+        status: import(".prisma/client").$Enums.OnboardingStatus;
         createdAt: Date;
         updatedAt: Date;
-        tasks: import("@prisma/client/runtime/library").JsonValue;
-        userId: string;
-        status: import(".prisma/client").$Enums.OnboardingStatus;
-        createdBy: string | null;
         startDate: Date;
+        userId: string;
+        createdBy: string | null;
         completedTasks: number;
         employeeProfileId: string;
         checklistTemplate: string | null;
@@ -1073,38 +1073,38 @@ export declare class HRService {
     getOnboardingChecklistByEmployee(employeeProfileId: string): Promise<{
         employeeProfile: {
             user: {
-                password: string | null;
                 id: string;
-                isVerified: boolean;
                 createdAt: Date;
-                isActive: boolean;
+                updatedAt: Date;
                 email: string | null;
                 username: string;
+                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import(".prisma/client").$Enums.UserRoleType;
+                isActive: boolean;
+                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            level: string | null;
-            department: string | null;
             id: string;
             createdAt: Date;
-            isActive: boolean;
             updatedAt: Date;
-            userId: string;
-            createdBy: string | null;
-            updatedBy: string | null;
-            displayName: string | null;
+            department: string | null;
             skills: string[];
             startDate: Date | null;
+            userId: string;
+            level: string | null;
+            isActive: boolean;
+            displayName: string | null;
+            createdBy: string | null;
+            updatedBy: string | null;
             notes: string | null;
             city: string | null;
             employeeCode: string;
@@ -1151,13 +1151,13 @@ export declare class HRService {
         };
     } & {
         id: string;
+        tasks: import("@prisma/client/runtime/library").JsonValue;
+        status: import(".prisma/client").$Enums.OnboardingStatus;
         createdAt: Date;
         updatedAt: Date;
-        tasks: import("@prisma/client/runtime/library").JsonValue;
-        userId: string;
-        status: import(".prisma/client").$Enums.OnboardingStatus;
-        createdBy: string | null;
         startDate: Date;
+        userId: string;
+        createdBy: string | null;
         completedTasks: number;
         employeeProfileId: string;
         checklistTemplate: string | null;
@@ -1188,18 +1188,18 @@ export declare class HRService {
                     lastName: string;
                 };
             } & {
-                level: string | null;
-                department: string | null;
                 id: string;
                 createdAt: Date;
-                isActive: boolean;
                 updatedAt: Date;
-                userId: string;
-                createdBy: string | null;
-                updatedBy: string | null;
-                displayName: string | null;
+                department: string | null;
                 skills: string[];
                 startDate: Date | null;
+                userId: string;
+                level: string | null;
+                isActive: boolean;
+                displayName: string | null;
+                createdBy: string | null;
+                updatedBy: string | null;
                 notes: string | null;
                 city: string | null;
                 employeeCode: string;
@@ -1246,13 +1246,13 @@ export declare class HRService {
             };
         } & {
             id: string;
+            tasks: import("@prisma/client/runtime/library").JsonValue;
+            status: import(".prisma/client").$Enums.OnboardingStatus;
             createdAt: Date;
             updatedAt: Date;
-            tasks: import("@prisma/client/runtime/library").JsonValue;
-            userId: string;
-            status: import(".prisma/client").$Enums.OnboardingStatus;
-            createdBy: string | null;
             startDate: Date;
+            userId: string;
+            createdBy: string | null;
             completedTasks: number;
             employeeProfileId: string;
             checklistTemplate: string | null;
@@ -1274,38 +1274,38 @@ export declare class HRService {
     updateOnboardingChecklist(id: string, input: UpdateOnboardingChecklistInput): Promise<{
         employeeProfile: {
             user: {
-                password: string | null;
                 id: string;
-                isVerified: boolean;
                 createdAt: Date;
-                isActive: boolean;
+                updatedAt: Date;
                 email: string | null;
                 username: string;
+                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import(".prisma/client").$Enums.UserRoleType;
+                isActive: boolean;
+                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            level: string | null;
-            department: string | null;
             id: string;
             createdAt: Date;
-            isActive: boolean;
             updatedAt: Date;
-            userId: string;
-            createdBy: string | null;
-            updatedBy: string | null;
-            displayName: string | null;
+            department: string | null;
             skills: string[];
             startDate: Date | null;
+            userId: string;
+            level: string | null;
+            isActive: boolean;
+            displayName: string | null;
+            createdBy: string | null;
+            updatedBy: string | null;
             notes: string | null;
             city: string | null;
             employeeCode: string;
@@ -1352,13 +1352,13 @@ export declare class HRService {
         };
     } & {
         id: string;
+        tasks: import("@prisma/client/runtime/library").JsonValue;
+        status: import(".prisma/client").$Enums.OnboardingStatus;
         createdAt: Date;
         updatedAt: Date;
-        tasks: import("@prisma/client/runtime/library").JsonValue;
-        userId: string;
-        status: import(".prisma/client").$Enums.OnboardingStatus;
-        createdBy: string | null;
         startDate: Date;
+        userId: string;
+        createdBy: string | null;
         completedTasks: number;
         employeeProfileId: string;
         checklistTemplate: string | null;
@@ -1376,13 +1376,13 @@ export declare class HRService {
     }>;
     completeOnboardingTask(checklistId: string, taskId: string, completedBy: string): Promise<{
         id: string;
+        tasks: import("@prisma/client/runtime/library").JsonValue;
+        status: import(".prisma/client").$Enums.OnboardingStatus;
         createdAt: Date;
         updatedAt: Date;
-        tasks: import("@prisma/client/runtime/library").JsonValue;
-        userId: string;
-        status: import(".prisma/client").$Enums.OnboardingStatus;
-        createdBy: string | null;
         startDate: Date;
+        userId: string;
+        createdBy: string | null;
         completedTasks: number;
         employeeProfileId: string;
         checklistTemplate: string | null;
@@ -1401,38 +1401,38 @@ export declare class HRService {
     createOffboardingProcess(input: CreateOffboardingProcessInput): Promise<{
         employeeProfile: {
             user: {
-                password: string | null;
                 id: string;
-                isVerified: boolean;
                 createdAt: Date;
-                isActive: boolean;
+                updatedAt: Date;
                 email: string | null;
                 username: string;
+                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import(".prisma/client").$Enums.UserRoleType;
+                isActive: boolean;
+                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            level: string | null;
-            department: string | null;
             id: string;
             createdAt: Date;
-            isActive: boolean;
             updatedAt: Date;
-            userId: string;
-            createdBy: string | null;
-            updatedBy: string | null;
-            displayName: string | null;
+            department: string | null;
             skills: string[];
             startDate: Date | null;
+            userId: string;
+            level: string | null;
+            isActive: boolean;
+            displayName: string | null;
+            createdBy: string | null;
+            updatedBy: string | null;
             notes: string | null;
             city: string | null;
             employeeCode: string;
@@ -1479,10 +1479,10 @@ export declare class HRService {
         };
     } & {
         id: string;
+        status: import(".prisma/client").$Enums.OffboardingStatus;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        status: import(".prisma/client").$Enums.OffboardingStatus;
         completedAt: Date | null;
         employeeProfileId: string;
         effectiveDate: Date | null;
@@ -1530,38 +1530,38 @@ export declare class HRService {
     getOffboardingProcess(id: string): Promise<{
         employeeProfile: {
             user: {
-                password: string | null;
                 id: string;
-                isVerified: boolean;
                 createdAt: Date;
-                isActive: boolean;
+                updatedAt: Date;
                 email: string | null;
                 username: string;
+                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import(".prisma/client").$Enums.UserRoleType;
+                isActive: boolean;
+                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            level: string | null;
-            department: string | null;
             id: string;
             createdAt: Date;
-            isActive: boolean;
             updatedAt: Date;
-            userId: string;
-            createdBy: string | null;
-            updatedBy: string | null;
-            displayName: string | null;
+            department: string | null;
             skills: string[];
             startDate: Date | null;
+            userId: string;
+            level: string | null;
+            isActive: boolean;
+            displayName: string | null;
+            createdBy: string | null;
+            updatedBy: string | null;
             notes: string | null;
             city: string | null;
             employeeCode: string;
@@ -1608,10 +1608,10 @@ export declare class HRService {
         };
     } & {
         id: string;
+        status: import(".prisma/client").$Enums.OffboardingStatus;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        status: import(".prisma/client").$Enums.OffboardingStatus;
         completedAt: Date | null;
         employeeProfileId: string;
         effectiveDate: Date | null;
@@ -1672,18 +1672,18 @@ export declare class HRService {
                     lastName: string;
                 };
             } & {
-                level: string | null;
-                department: string | null;
                 id: string;
                 createdAt: Date;
-                isActive: boolean;
                 updatedAt: Date;
-                userId: string;
-                createdBy: string | null;
-                updatedBy: string | null;
-                displayName: string | null;
+                department: string | null;
                 skills: string[];
                 startDate: Date | null;
+                userId: string;
+                level: string | null;
+                isActive: boolean;
+                displayName: string | null;
+                createdBy: string | null;
+                updatedBy: string | null;
                 notes: string | null;
                 city: string | null;
                 employeeCode: string;
@@ -1730,10 +1730,10 @@ export declare class HRService {
             };
         } & {
             id: string;
+            status: import(".prisma/client").$Enums.OffboardingStatus;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            status: import(".prisma/client").$Enums.OffboardingStatus;
             completedAt: Date | null;
             employeeProfileId: string;
             effectiveDate: Date | null;
@@ -1784,38 +1784,38 @@ export declare class HRService {
     updateOffboardingProcess(id: string, input: UpdateOffboardingProcessInput): Promise<{
         employeeProfile: {
             user: {
-                password: string | null;
                 id: string;
-                isVerified: boolean;
                 createdAt: Date;
-                isActive: boolean;
+                updatedAt: Date;
                 email: string | null;
                 username: string;
+                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import(".prisma/client").$Enums.UserRoleType;
+                isActive: boolean;
+                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            level: string | null;
-            department: string | null;
             id: string;
             createdAt: Date;
-            isActive: boolean;
             updatedAt: Date;
-            userId: string;
-            createdBy: string | null;
-            updatedBy: string | null;
-            displayName: string | null;
+            department: string | null;
             skills: string[];
             startDate: Date | null;
+            userId: string;
+            level: string | null;
+            isActive: boolean;
+            displayName: string | null;
+            createdBy: string | null;
+            updatedBy: string | null;
             notes: string | null;
             city: string | null;
             employeeCode: string;
@@ -1862,10 +1862,10 @@ export declare class HRService {
         };
     } & {
         id: string;
+        status: import(".prisma/client").$Enums.OffboardingStatus;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        status: import(".prisma/client").$Enums.OffboardingStatus;
         completedAt: Date | null;
         employeeProfileId: string;
         effectiveDate: Date | null;
@@ -1912,10 +1912,10 @@ export declare class HRService {
     }>;
     completeOffboarding(id: string, completedBy: string): Promise<{
         id: string;
+        status: import(".prisma/client").$Enums.OffboardingStatus;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        status: import(".prisma/client").$Enums.OffboardingStatus;
         completedAt: Date | null;
         employeeProfileId: string;
         effectiveDate: Date | null;
