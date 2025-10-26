@@ -93,7 +93,8 @@ function PageBuilderContent() {
   const filteredPages = useMemo(() => {
     if (!pages?.items) return [];
     
-    let filtered = pages.items;
+    // Create a copy to avoid mutating read-only arrays
+    let filtered = [...pages.items];
     
     if (statusFilter !== 'all') {
       filtered = filtered.filter(p => p.status === statusFilter);
@@ -280,20 +281,6 @@ function PageBuilderContent() {
                   <Plus size={20} />
                   <span>New Page</span>
                 </Button>
-              </div>
-
-              {/* Search */}
-              <div className="mt-6 max-w-md">
-                <div className="relative">
-                  <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <Input
-                    type="text"
-                    placeholder="Search pages..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
               </div>
             </div>
           </div>

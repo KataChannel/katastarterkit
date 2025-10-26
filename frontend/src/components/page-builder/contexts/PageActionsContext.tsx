@@ -173,6 +173,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   const handlePageSave = useCallback(async () => {
     try {
       const { editingPage, isNewPageMode, blocks, refetch, setEditingPage } = pageState;
+      console.log('Editing page:', editingPage);
       
       if (!editingPage) {
         toast.error('No page to save');
