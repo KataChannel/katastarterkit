@@ -93,7 +93,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
 
   const handleAddSlide = () => {
     const newSlide: CarouselSlide = {
-      id: `slide-${Date.now()}`,
+      id: `slide-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       title: 'New Slide',
       subtitle: '',
       description: '',

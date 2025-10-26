@@ -497,9 +497,180 @@ export const faqTemplate: SampleTemplate = {
 };
 
 /**
+ * Carousel Product Template
+ * Display products in a carousel/slider format for featured products
+ */
+export const carouselProductTemplate: SampleTemplate = {
+  id: 'carousel-product',
+  name: 'Carousel Product',
+  description: 'Showcase featured products in an interactive carousel with images, pricing, and call-to-action buttons',
+  template: `
+<div class="carousel-product-container py-12 px-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-10">
+      <h2 class="text-4xl font-bold mb-3">{{title}}</h2>
+      <p class="text-lg text-gray-600 mb-2">{{subtitle}}</p>
+      <p class="text-gray-500">{{description}}</p>
+    </div>
+    
+    <div class="carousel-wrapper relative">
+      <!-- Main Carousel Container -->
+      <div class="carousel-track flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth" style="scroll-behavior: smooth;">
+        {{#each products}}
+        <div class="carousel-slide min-w-max w-80 flex-shrink-0 snap-center">
+          <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden h-full flex flex-col">
+            <!-- Product Image -->
+            <div class="relative h-64 overflow-hidden bg-gray-200">
+              <img src="{{this.image}}" alt="{{this.name}}" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
+              {{#if this.badge}}
+              <div class="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                {{this.badge}}
+              </div>
+              {{/if}}
+            </div>
+            
+            <!-- Product Info -->
+            <div class="p-6 flex-grow flex flex-col">
+              <div class="mb-3">
+                <h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2">{{this.name}}</h3>
+                <p class="text-gray-600 text-sm line-clamp-2">{{this.description}}</p>
+              </div>
+              
+              <!-- Rating -->
+              {{#if this.rating}}
+              <div class="flex items-center mb-3">
+                <div class="text-yellow-400 text-sm">★★★★★</div>
+                <span class="text-gray-600 text-sm ml-2">({{this.reviews}} reviews)</span>
+              </div>
+              {{/if}}
+              
+              <!-- Price Section -->
+              <div class="mb-4 mt-auto">
+                <div class="flex items-baseline gap-2">
+                  <span class="text-3xl font-bold text-blue-600">{{this.price}}</span>
+                  {{#if this.originalPrice}}
+                  <span class="text-lg text-gray-400 line-through">{{this.originalPrice}}</span>
+                  {{/if}}
+                </div>
+                {{#if this.discount}}
+                <p class="text-green-600 text-sm font-semibold">Save {{this.discount}}</p>
+                {{/if}}
+              </div>
+              
+              <!-- CTA Button -->
+              <button class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                {{this.ctaText}}
+              </button>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+      
+      <!-- Navigation Dots (Optional) -->
+      <div class="flex justify-center gap-2 mt-6">
+        {{#each products}}
+        <button class="w-3 h-3 rounded-full bg-gray-300 hover:bg-blue-600 transition-colors"></button>
+        {{/each}}
+      </div>
+    </div>
+    
+    <!-- View All Button -->
+    <div class="text-center mt-10">
+      <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg">
+        {{viewAllText}}
+      </button>
+    </div>
+  </div>
+</div>
+  `,
+  dataSource: {
+    type: 'static',
+    staticData: {
+      title: 'Featured Products',
+      subtitle: 'Browse Our Best Sellers',
+      description: 'Discover premium quality products handpicked for our valued customers',
+      viewAllText: 'View All Products',
+      products: [
+        {
+          id: 1,
+          name: 'Premium Wireless Headphones',
+          price: '$199.99',
+          originalPrice: '$299.99',
+          discount: '$100',
+          description: 'High-quality sound with active noise cancellation and 30-hour battery life',
+          image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&h=400&fit=crop',
+          badge: 'Best Seller',
+          rating: 5,
+          reviews: 324,
+          ctaText: 'Add to Cart',
+        },
+        {
+          id: 2,
+          name: 'Smart Watch Pro',
+          price: '$349.99',
+          originalPrice: '$449.99',
+          discount: '$100',
+          description: 'Fitness tracking, heart rate monitor, and 7-day battery life',
+          image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=400&fit=crop',
+          badge: 'New',
+          rating: 5,
+          reviews: 187,
+          ctaText: 'Shop Now',
+        },
+        {
+          id: 3,
+          name: 'Professional Camera',
+          price: '$1,299.00',
+          originalPrice: '$1,599.00',
+          discount: '$300',
+          description: '24MP sensor, 4K video, weather-sealed body for professional photography',
+          image: 'https://images.unsplash.com/photo-1606986628025-35d57e735ae0?w=500&h=400&fit=crop',
+          badge: 'Sale',
+          rating: 5,
+          reviews: 256,
+          ctaText: 'View Details',
+        },
+        {
+          id: 4,
+          name: 'Portable Speaker',
+          price: '$89.99',
+          originalPrice: '$129.99',
+          discount: '$40',
+          description: 'Waterproof design with 360° sound and 20-hour battery',
+          image: 'https://images.unsplash.com/photo-1589003077984-894e133da279?w=500&h=400&fit=crop',
+          badge: 'Popular',
+          rating: 4,
+          reviews: 412,
+          ctaText: 'Buy Now',
+        },
+        {
+          id: 5,
+          name: 'Tablet Device',
+          price: '$599.99',
+          originalPrice: null,
+          discount: null,
+          description: '12.9" display, powerful processor, perfect for work and entertainment',
+          image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&h=400&fit=crop',
+          rating: 5,
+          reviews: 189,
+          ctaText: 'Explore',
+        },
+      ],
+    },
+  },
+  variables: {
+    title: 'Featured Products',
+    subtitle: 'Browse Our Best Sellers',
+    description: 'Discover premium quality products handpicked for our valued customers',
+    viewAllText: 'View All Products',
+  },
+};
+
+/**
  * Get all available sample templates
  */
-export const getAllSampleTemplates = (): SampleTemplate[] => {
+export const getAllSampleTemplates = (): SampleTemplate[] => {  
   return [
     productGridTemplate,
     taskDashboardTemplate,
@@ -508,6 +679,7 @@ export const getAllSampleTemplates = (): SampleTemplate[] => {
     testimonialsTemplate,
     contactFormTemplate,
     faqTemplate,
+    carouselProductTemplate,
   ];
 };
 

@@ -369,4 +369,4 @@ export const ConfigurationPanel: React.FC<{
       </div>
     </div>
   </div>
-);
+  );

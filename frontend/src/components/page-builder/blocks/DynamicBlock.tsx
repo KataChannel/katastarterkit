@@ -67,6 +67,11 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
 }) => {
   const config = block.config as DynamicBlockConfig;
   const sampleTemplates = getAllSampleTemplates();
+  
+  // DEBUG: Log templates to verify carousel product is included
+  useEffect(() => {
+    console.log('[DynamicBlock] Sample templates loaded:', sampleTemplates.map(t => t.name));
+  }, [sampleTemplates]);
 
   // State management using custom hook with reducer
   const {
