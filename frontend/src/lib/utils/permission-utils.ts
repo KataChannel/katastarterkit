@@ -70,11 +70,6 @@ export function getUserRoleNames(user: User | null | undefined): string[] {
         if (!roleNames.includes(normalizedName)) {
           roleNames.push(normalizedName);
         }
-      } else {
-        // DEBUG: role object structure if name is missing
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('⚠️ Role object missing name field:', role);
-        }
       }
     });
   }
@@ -222,24 +217,8 @@ export function filterMenuByPermissions(
     return [];
   }
 
-  const DEBUG = process.env.NODE_ENV === 'development';
-  
   return menus
-    .filter((item, index) => {
-      const canAccess = canAccessMenuItem(user, item);
-      
-      // DEBUG: Log first item only to avoid spam
-      if (DEBUG && index === 0) {
-        const userRoles = getUserRoleNames(user);
-        console.log('🔍 FILTER DEBUG - First Item:');
-        console.log('  Item title:', item.title || item.name);
-        console.log('  Item requiredRoles (raw):', item.requiredRoles);
-        console.log('  User roles:', userRoles);
-        console.log('  Can access:', canAccess);
-      }
-      
-      return canAccess;
-    })
+    .filter((item) => canAccessMenuItem(user, item))
     .map((item) => ({
       ...item,
       // Recursively filter children

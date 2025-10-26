@@ -121,28 +121,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
     
     // 🔐 IMPORTANT: Filter menus based on user roles/permissions
     // This ensures normal users can't access admin menus
-    
-    // DEEP DEBUG
-    if (process.env.NODE_ENV === 'development' && menusToDisplay.length > 0) {
-      const firstMenu = menusToDisplay[0];
-      console.log('🔍 MENU STRUCTURE DEBUG:');
-      console.log('  First menu item:', {
-        title: firstMenu.title,
-        name: firstMenu.name,
-        requiredRoles: firstMenu.requiredRoles,
-        requiredRolesType: typeof firstMenu.requiredRoles,
-        requiredRolesIsArray: Array.isArray(firstMenu.requiredRoles),
-      });
-      console.log('🔍 USER STRUCTURE DEBUG:');
-      console.log('  User:', {
-        email: user?.email,
-        roleType: user?.roleType,
-        roles: user?.roles?.map((r: any) => ({ name: r.name, id: r.id })),
-      });
-    }
-    
     const filteredMenus = filterMenuByPermissions(menusToDisplay, user);
-    console.log('🔍 Debugging Filtered Menus:', filteredMenus);
     
     // Convert filtered menus to NavigationItem format (ensure href is set)
     const navigationItems = filteredMenus.map((item: any) => ({
@@ -160,39 +139,6 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
       metadata: item.metadata,
     }));
     console.log('navigationItems', navigationItems);
-    
-    // Debug: Log menu permissions
-    if (process.env.NODE_ENV === 'development') {
-      console.group('🔐 Menu Access Control');
-      console.log('👤 User:', user?.email, `(${user?.roleType})`);
-      console.log('📋 Roles from DB:', user?.roles?.map(r => r.name));
-      console.log('📊 Menu Summary:');
-      console.log(`  Available: ${menusToDisplay.length} items`);
-      console.log(`  After Filter: ${filteredMenus.length} items`);
-      console.log(`  Rendered: ${navigationItems.length} items`);
-      
-      if (filteredMenus.length === 0 && menusToDisplay.length > 0) {
-        console.warn('⚠️  WARNING: All menus were filtered out!');
-        const firstItem = menusToDisplay[0];
-        console.log('\n🔍 Debugging First Menu Item:');
-        console.log('  Title:', firstItem.title || firstItem.name);
-        console.log('  Required Roles (raw):', firstItem.requiredRoles);
-        console.log('  Required Roles TYPE:', typeof firstItem.requiredRoles);
-        console.log('  Required Roles IS ARRAY:', Array.isArray(firstItem.requiredRoles));
-        
-        // If it's a string, try to parse
-        if (typeof firstItem.requiredRoles === 'string') {
-          try {
-            const parsed = JSON.parse(firstItem.requiredRoles);
-            console.log('  Parsed as JSON:', parsed);
-          } catch (e) {
-            console.log('  Failed to parse as JSON:', e);
-          }
-        }
-      }
-      
-      console.groupEnd();
-    }
     
     return navigationItems as any;
   }, [dynamicMenus, menusLoading, user, staticNavigation]);
