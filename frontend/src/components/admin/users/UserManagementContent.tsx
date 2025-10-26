@@ -246,6 +246,39 @@ export function UserManagementContent() {
     // TODO: Implement actual export functionality
   };
 
+  // Handle delete user
+  const handleDeleteUser = async (user: any) => {
+    try {
+      await bulkUserAction({
+        variables: {
+          input: {
+            userIds: [user.id],
+            action: 'delete',
+          },
+        },
+      });
+
+      toast({
+        title: 'Success',
+        description: `User ${user.username} has been deleted.`,
+        type: 'success',
+      });
+
+      // Remove from selection if selected
+      setSelectedUsers(prev => prev.filter(id => id !== user.id));
+      
+      // Refetch users
+      await refetchUsers();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete user',
+        type: 'error',
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Handle errors
   if (usersError) {
     return (
@@ -275,7 +308,9 @@ export function UserManagementContent() {
             onSelectAll={handleSelectAll}
             onSort={handleSort}
             onPageChange={handlePageChange}
+            onCreateUser={() => setIsCreateModalOpen(true)}
             onEditUser={setEditingUser}
+            onDeleteUser={handleDeleteUser}
             sortBy={filters.sortBy}
             sortOrder={filters.sortOrder}
           />
