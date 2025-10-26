@@ -11,7 +11,7 @@ async function bootstrap() {
 
   try {
     console.log('📋 Seeding RBAC (roles, permissions, and menus)...');
-    await seeder.seedDefaultRolesAndPermissions();
+    // await seeder.seedDefaultRolesAndPermissions();
     console.log('✅ Seeding completed successfully!');
   } catch (error) {
     console.error('❌ Error seeding menus:', error);

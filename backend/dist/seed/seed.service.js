@@ -20,13 +20,6 @@ let SeedService = SeedService_1 = class SeedService {
         this.prisma = prisma;
         this.logger = new common_1.Logger(SeedService_1.name);
     }
-    async onModuleInit() {
-        const shouldSeed = process.env.NODE_ENV === 'development' ||
-            process.env.SEED_DEFAULT_PAGES === 'true';
-        if (shouldSeed) {
-            await this.seedDefaultPages();
-        }
-    }
     async seedDefaultPages() {
         try {
             this.logger.log('🌱 Checking default pages...');

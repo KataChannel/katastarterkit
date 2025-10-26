@@ -4,45 +4,45 @@ export declare class NotificationService {
     constructor(prisma: PrismaService);
     createTaskAssignedNotification(taskId: string, assignedUserId: string): Promise<{
         id: string;
+        title: string;
         createdAt: Date;
-        type: string;
         updatedAt: Date;
         userId: string;
         data: import("@prisma/client/runtime/library").JsonValue | null;
-        title: string;
+        type: string;
         message: string;
         isRead: boolean;
     }>;
     createTaskCompletedNotification(taskId: string, userId: string): Promise<{
         id: string;
+        title: string;
         createdAt: Date;
-        type: string;
         updatedAt: Date;
         userId: string;
         data: import("@prisma/client/runtime/library").JsonValue | null;
-        title: string;
+        type: string;
         message: string;
         isRead: boolean;
     }[]>;
     createTaskCommentNotification(taskId: string, commentAuthorId: string): Promise<{
         id: string;
+        title: string;
         createdAt: Date;
-        type: string;
         updatedAt: Date;
         userId: string;
         data: import("@prisma/client/runtime/library").JsonValue | null;
-        title: string;
+        type: string;
         message: string;
         isRead: boolean;
     }[]>;
     findByUserId(userId: string, limit?: number): Promise<{
         id: string;
+        title: string;
         createdAt: Date;
-        type: string;
         updatedAt: Date;
         userId: string;
         data: import("@prisma/client/runtime/library").JsonValue | null;
-        title: string;
+        type: string;
         message: string;
         isRead: boolean;
     }[]>;
