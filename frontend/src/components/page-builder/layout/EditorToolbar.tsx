@@ -63,6 +63,8 @@ interface EditorToolbarProps {
   onApplyTemplate?: (template: PageTemplate) => void;
   isLoading?: boolean;
   pageTitle?: string;
+  pageId?: string;
+  onSettingsSave?: (settings: any) => void;
 }
 
 export function EditorToolbar({
@@ -81,12 +83,32 @@ export function EditorToolbar({
   onApplyTemplate,
   isLoading = false,
   pageTitle,
+  pageId,
+  onSettingsSave,
 }: EditorToolbarProps) {
   const { toast } = useToast();
   const { addTemplate, importFromJSON } = useTemplates();
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSettingsLoading, setIsSettingsLoading] = useState(false);
+
+  // Page settings state
+  const [pageSettings, setPageSettings] = useState({
+    pageTitle: pageTitle || '',
+    pageDescription: '',
+    pageSlug: '',
+    seoTitle: '',
+    seoDescription: '',
+    seoKeywords: '',
+    isPublished: true,
+    showInNavigation: true,
+    allowIndexing: true,
+    requireAuth: false,
+    customCSS: '',
+    customJS: '',
+    headCode: '',
+  });
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -106,6 +128,70 @@ export function EditorToolbar({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Load page settings when dialog opens
+  useEffect(() => {
+    if (isSettingsOpen && pageId) {
+      loadPageSettings();
+    }
+  }, [isSettingsOpen, pageId]);
+
+  // Update pageTitle in state when prop changes
+  useEffect(() => {
+    if (pageTitle) {
+      setPageSettings(prev => ({ ...prev, pageTitle }));
+    }
+  }, [pageTitle]);
+
+  // Load page settings from API
+  const loadPageSettings = async () => {
+    if (!pageId) return;
+    
+    try {
+      setIsSettingsLoading(true);
+      const response = await fetch(`/api/pages/${pageId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to load page settings');
+      }
+
+      const data = await response.json();
+      
+      if (data.page) {
+        const page = data.page;
+        setPageSettings(prev => ({
+          ...prev,
+          pageTitle: page.title || '',
+          pageDescription: page.description || '',
+          pageSlug: page.slug || '',
+          seoTitle: page.seoTitle || '',
+          seoDescription: page.metaDescription || '',
+          seoKeywords: page.keywords || '',
+          isPublished: page.isPublished ?? true,
+          showInNavigation: page.showInNavigation ?? true,
+          allowIndexing: page.allowIndexing ?? true,
+          requireAuth: page.requireAuth ?? false,
+          customCSS: page.customCSS || '',
+          customJS: page.customJS || '',
+          headCode: page.headCode || '',
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading page settings:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load page settings. Using defaults.',
+        type: 'error',
+      });
+    } finally {
+      setIsSettingsLoading(false);
+    }
+  };
+
+  // Handle page settings change
+  const handleSettingChange = (field: string, value: any) => {
+    setPageSettings(prev => ({ ...prev, [field]: value }));
+  };
 
   // Handle save template
   const handleSaveTemplate = async (template: PageTemplate) => {
@@ -340,6 +426,9 @@ export function EditorToolbar({
                   <Input
                     id="page-title"
                     placeholder="Enter page title..."
+                    value={pageSettings.pageTitle}
+                    onChange={(e) => handleSettingChange('pageTitle', e.target.value)}
+                    disabled={isSettingsLoading}
                     className="w-full"
                   />
                 </div>
@@ -349,6 +438,9 @@ export function EditorToolbar({
                   <Textarea
                     id="page-description"
                     placeholder="Enter page description..."
+                    value={pageSettings.pageDescription}
+                    onChange={(e) => handleSettingChange('pageDescription', e.target.value)}
+                    disabled={isSettingsLoading}
                     rows={3}
                     className="w-full"
                   />
@@ -359,6 +451,9 @@ export function EditorToolbar({
                   <Input
                     id="page-slug"
                     placeholder="/my-page"
+                    value={pageSettings.pageSlug}
+                    onChange={(e) => handleSettingChange('pageSlug', e.target.value)}
+                    disabled={isSettingsLoading}
                     className="w-full"
                   />
                 </div>
@@ -377,6 +472,9 @@ export function EditorToolbar({
                   <Input
                     id="seo-title"
                     placeholder="SEO optimized title..."
+                    value={pageSettings.seoTitle}
+                    onChange={(e) => handleSettingChange('seoTitle', e.target.value)}
+                    disabled={isSettingsLoading}
                     className="w-full"
                   />
                   <p className="text-xs text-gray-500">Recommended: 50-60 characters</p>
@@ -387,6 +485,9 @@ export function EditorToolbar({
                   <Textarea
                     id="seo-description"
                     placeholder="SEO meta description..."
+                    value={pageSettings.seoDescription}
+                    onChange={(e) => handleSettingChange('seoDescription', e.target.value)}
+                    disabled={isSettingsLoading}
                     rows={3}
                     className="w-full"
                   />
@@ -398,6 +499,9 @@ export function EditorToolbar({
                   <Input
                     id="seo-keywords"
                     placeholder="keyword1, keyword2, keyword3"
+                    value={pageSettings.seoKeywords}
+                    onChange={(e) => handleSettingChange('seoKeywords', e.target.value)}
+                    disabled={isSettingsLoading}
                     className="w-full"
                   />
                 </div>
@@ -416,7 +520,11 @@ export function EditorToolbar({
                     <Label>Published</Label>
                     <p className="text-xs text-gray-500">Make this page publicly visible</p>
                   </div>
-                  <Switch />
+                  <Switch 
+                    checked={pageSettings.isPublished}
+                    onCheckedChange={(checked) => handleSettingChange('isPublished', checked)}
+                    disabled={isSettingsLoading}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -424,7 +532,11 @@ export function EditorToolbar({
                     <Label>Show in Navigation</Label>
                     <p className="text-xs text-gray-500">Include in main navigation menu</p>
                   </div>
-                  <Switch />
+                  <Switch 
+                    checked={pageSettings.showInNavigation}
+                    onCheckedChange={(checked) => handleSettingChange('showInNavigation', checked)}
+                    disabled={isSettingsLoading}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -432,7 +544,12 @@ export function EditorToolbar({
                     <Label>Allow Indexing</Label>
                     <p className="text-xs text-gray-500">Allow search engines to index this page</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch 
+                    checked={pageSettings.allowIndexing}
+                    onCheckedChange={(checked) => handleSettingChange('allowIndexing', checked)}
+                    disabled={isSettingsLoading}
+                    defaultChecked 
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -440,7 +557,11 @@ export function EditorToolbar({
                     <Label>Require Authentication</Label>
                     <p className="text-xs text-gray-500">Require users to login to view</p>
                   </div>
-                  <Switch />
+                  <Switch 
+                    checked={pageSettings.requireAuth}
+                    onCheckedChange={(checked) => handleSettingChange('requireAuth', checked)}
+                    disabled={isSettingsLoading}
+                  />
                 </div>
               </div>
             </div>
@@ -457,6 +578,9 @@ export function EditorToolbar({
                   <Textarea
                     id="custom-css"
                     placeholder=".my-class { color: red; }"
+                    value={pageSettings.customCSS}
+                    onChange={(e) => handleSettingChange('customCSS', e.target.value)}
+                    disabled={isSettingsLoading}
                     rows={4}
                     className="w-full font-mono text-xs"
                   />
@@ -467,6 +591,9 @@ export function EditorToolbar({
                   <Textarea
                     id="custom-js"
                     placeholder="console.log('Hello');"
+                    value={pageSettings.customJS}
+                    onChange={(e) => handleSettingChange('customJS', e.target.value)}
+                    disabled={isSettingsLoading}
                     rows={4}
                     className="w-full font-mono text-xs"
                   />
@@ -477,6 +604,9 @@ export function EditorToolbar({
                   <Textarea
                     id="head-code"
                     placeholder="<meta name='...'/>"
+                    value={pageSettings.headCode}
+                    onChange={(e) => handleSettingChange('headCode', e.target.value)}
+                    disabled={isSettingsLoading}
                     rows={4}
                     className="w-full font-mono text-xs"
                   />
@@ -486,18 +616,36 @@ export function EditorToolbar({
           </div>
 
           <div className="flex justify-end gap-2 border-t pt-4">
-            <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsSettingsOpen(false)}
+              disabled={isSettingsLoading}
+            >
               Cancel
             </Button>
-            <Button onClick={() => {
-              toast({
-                title: 'Settings saved',
-                description: 'Global settings have been updated successfully.',
-                type: 'success',
-              });
-              setIsSettingsOpen(false);
-            }}>
-              Save Settings
+            <Button 
+              onClick={async () => {
+                try {
+                  if (onSettingsSave) {
+                    await onSettingsSave(pageSettings);
+                  }
+                  toast({
+                    title: 'Settings saved',
+                    description: 'Global settings have been updated successfully.',
+                    type: 'success',
+                  });
+                  setIsSettingsOpen(false);
+                } catch (error) {
+                  toast({
+                    title: 'Error',
+                    description: 'Failed to save settings. Please try again.',
+                    type: 'error',
+                  });
+                }
+              }}
+              disabled={isSettingsLoading}
+            >
+              {isSettingsLoading ? 'Saving...' : 'Save Settings'}
             </Button>
           </div>
         </DialogContent>
