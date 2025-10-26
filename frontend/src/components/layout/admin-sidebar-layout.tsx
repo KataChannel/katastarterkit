@@ -54,9 +54,8 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
   // Using Universal Dynamic Query System
   const { menus: dynamicMenus, loading: menusLoading, error: menusError } = useAdminMenus();
 
-  // Fallback static navigation (used while loading or on error)
-  // This ensures users always have access to admin features, even if database menus fail to load
-  const staticNavigation: any = [
+  // Fallback static navigation - MEMOIZED to prevent re-render issues
+  const staticNavigation = React.useMemo(() => [
     {
       name: 'Dashboard',
       href: '/admin',
@@ -105,7 +104,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
       icon: Settings,
       requiredRoles: ['admin', 'super_admin'],
     },
-  ];
+  ], []);
 
   // Use dynamic menus if loaded, otherwise use static navigation
   const navigation = React.useMemo(() => {
@@ -138,7 +137,8 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
       target: item.target,
       metadata: item.metadata,
     }));
-    console.log('navigationItems', navigationItems);
+
+    console.log('[' + new Date().getTime() + '] navigationItems', navigationItems);
     
     return navigationItems as any;
   }, [dynamicMenus, menusLoading, user, staticNavigation]);
