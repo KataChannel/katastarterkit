@@ -51,7 +51,7 @@ import {
   Grid3x3,
   LayoutList
 } from 'lucide-react';
-import { PageStatus } from '@/types/page-builder';
+import { PageStatus, UpdatePageInput } from '@/types/page-builder';
 
 function PageBuilderContent() {
   const searchParams = useSearchParams();
@@ -190,10 +190,17 @@ function PageBuilderContent() {
     
     setStatusUpdating(prev => ({ ...prev, [id]: true }));
     try {
-      await updatePage(id, {
-        ...page,
+      // Construct proper UpdatePageInput to avoid GraphQL validation errors
+      const input: UpdatePageInput = {
+        title: page.title,
+        slug: page.slug,
+        content: page.content || {},
         status: newStatus as PageStatus,
-      });
+        seoTitle: page.seoTitle,
+        seoDescription: page.seoDescription,
+        seoKeywords: page.seoKeywords || [],
+      };
+      await updatePage(id, input);
       refetch();
     } catch (error) {
       console.error('Error updating page status:', error);

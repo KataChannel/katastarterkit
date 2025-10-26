@@ -180,14 +180,18 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         return;
       }
       
-      if (isNewPageMode) {
+      // Use editingPage.id to determine if this is a new page (id is empty) or existing page (id exists)
+      const isCreatingNewPage = !editingPage.id || editingPage.id === '';
+      
+      if (isCreatingNewPage) {
+        // CREATE NEW PAGE
         const input: CreatePageInput = {
-          title: editingPage.title,
-          slug: editingPage.slug,
+          title: editingPage.title || 'Untitled Page',
+          slug: editingPage.slug || '',
           content: editingPage.content || {},
           status: editingPage.status,
-          seoTitle: editingPage.seoTitle,
-          seoDescription: editingPage.seoDescription,
+          seoTitle: editingPage.seoTitle || '',
+          seoDescription: editingPage.seoDescription || '',
           seoKeywords: editingPage.seoKeywords || [],
         };
         
@@ -199,13 +203,14 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
           setEditingPage(result.data.createPage);
         }
       } else {
+        // UPDATE EXISTING PAGE
         const input: UpdatePageInput = {
-          title: editingPage.title,
-          slug: editingPage.slug,
+          title: editingPage.title || 'Untitled Page',
+          slug: editingPage.slug || '',
           content: editingPage.content || {},
           status: editingPage.status,
-          seoTitle: editingPage.seoTitle,
-          seoDescription: editingPage.seoDescription,
+          seoTitle: editingPage.seoTitle || '',
+          seoDescription: editingPage.seoDescription || '',
           seoKeywords: editingPage.seoKeywords || [],
         };
         

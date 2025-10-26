@@ -48,6 +48,7 @@ import { ImportTemplateDialog } from '@/components/page-builder/templates';
 import { PageTemplate, PageElement, ImportTemplateData } from '@/types/template';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useToast } from '@/hooks/use-toast';
+import { usePageState } from '@/components/page-builder/PageBuilderProvider';
 
 interface EditorToolbarProps {
   editorMode: 'visual' | 'code';
@@ -90,6 +91,7 @@ export function EditorToolbar({
 }: EditorToolbarProps) {
   const { toast } = useToast();
   const { addTemplate, importFromJSON } = useTemplates();
+  const { editingPage, isNewPageMode } = usePageState();
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -97,13 +99,13 @@ export function EditorToolbar({
 
   // Page settings state
   const [pageSettings, setPageSettings] = useState({
-    pageTitle: pageTitle || '',
+    pageTitle: pageTitle || editingPage?.title || '',
     pageDescription: '',
-    pageSlug: '',
-    seoTitle: '',
-    seoDescription: '',
-    seoKeywords: '',
-    isPublished: true,
+    pageSlug: editingPage?.slug || '',
+    seoTitle: editingPage?.seoTitle || '',
+    seoDescription: editingPage?.seoDescription || '',
+    seoKeywords: Array.isArray(editingPage?.seoKeywords) ? editingPage.seoKeywords.join(', ') : '',
+    isPublished: editingPage?.status === 'PUBLISHED',
     showInNavigation: true,
     allowIndexing: true,
     requireAuth: false,
@@ -137,6 +139,21 @@ export function EditorToolbar({
       loadPageSettings();
     }
   }, [isSettingsOpen, pageId]);
+
+  // Update pageSettings when editingPage changes (for new pages)
+  useEffect(() => {
+    if (editingPage && isNewPageMode) {
+      setPageSettings(prev => ({
+        ...prev,
+        pageTitle: editingPage.title || '',
+        pageSlug: editingPage.slug || '',
+        seoTitle: editingPage.seoTitle || '',
+        seoDescription: editingPage.seoDescription || '',
+        seoKeywords: Array.isArray(editingPage.seoKeywords) ? editingPage.seoKeywords.join(', ') : '',
+        isPublished: editingPage.status === 'PUBLISHED',
+      }));
+    }
+  }, [editingPage, isNewPageMode]);
 
   // Update pageTitle in state when prop changes
   useEffect(() => {
