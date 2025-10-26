@@ -16,15 +16,10 @@ import { Loader2, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 // Import sub-components
-import { UserActionBar } from './UserActionBar';
-import { UserSearchBar } from './UserSearchBar';
-import { UserStats } from './UserStats';
-import { UserFilters } from './UserFilters';
-import { UserTable } from './UserTable';
-import { BulkActions } from './BulkActions';
 import { CreateUserModal } from './CreateUserModal';
 import { EditUserModal } from './EditUserModal';
 import { ErrorState } from './ErrorState';
+import { UserTable } from './UserTable';
 
 interface UserSearchFilters {
   search: string;
@@ -141,9 +136,25 @@ export function UserManagementContent() {
   };
 
   const handleSelectAll = (userIds: string[]) => {
-    setSelectedUsers(prev => 
-      prev.length === userIds.length ? [] : userIds
-    );
+    // If all current page users are selected, deselect all
+    // Otherwise, select all users on current page
+    const allCurrentPageSelected = userIds.every(id => selectedUsers.includes(id));
+    
+    if (allCurrentPageSelected) {
+      // Deselect all users on current page
+      setSelectedUsers(prev => prev.filter(id => !userIds.includes(id)));
+    } else {
+      // Select all users on current page (merge with existing selection)
+      setSelectedUsers(prev => {
+        const newSelection = [...prev];
+        userIds.forEach(id => {
+          if (!newSelection.includes(id)) {
+            newSelection.push(id);
+          }
+        });
+        return newSelection;
+      });
+    }
   };
 
   // Handle bulk actions
@@ -155,6 +166,22 @@ export function UserManagementContent() {
         type: 'error',
         variant: 'destructive',
       });
+      return;
+    }
+
+    // Validate userIds are UUIDs
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const invalidIds = selectedUsers.filter(id => !uuidRegex.test(id));
+    
+    if (invalidIds.length > 0) {
+      console.error('Invalid user IDs detected:', invalidIds);
+      toast({
+        title: 'Invalid user selection',
+        description: 'Some selected users have invalid IDs. Please refresh and try again.',
+        type: 'error',
+        variant: 'destructive',
+      });
+      setSelectedUsers([]);
       return;
     }
 
@@ -178,17 +205,31 @@ export function UserManagementContent() {
         setSelectedUsers([]);
         refetchUsers();
       } else {
+        const errorMessage = result.data?.bulkUserAction?.message || 'Unknown error occurred';
+        const errors = result.data?.bulkUserAction?.errors || [];
+        
         toast({
           title: 'Bulk action failed',
-          description: result.data?.bulkUserAction?.message || 'Unknown error occurred',
+          description: errors.length > 0 ? errors.join(', ') : errorMessage,
           type: 'error',
           variant: 'destructive',
         });
       }
     } catch (error: any) {
+      console.error('Bulk action error:', error);
+      
+      // Extract meaningful error message
+      let errorMessage = 'Failed to perform bulk action';
+      
+      if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+        errorMessage = error.graphQLErrors.map((e: any) => e.message).join(', ');
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Error',
-        description: error.message || 'Failed to perform bulk action',
+        description: errorMessage,
         type: 'error',
         variant: 'destructive',
       });
@@ -219,89 +260,8 @@ export function UserManagementContent() {
 
   return (
     <div className="space-y-6">
-      {/* User Statistics */}
-      <UserStats data={statsData?.getUserStats} loading={statsLoading} />
-
-      {/* Action Bar */}
-      <UserActionBar
-        showFilters={showFilters}
-        onToggleFilters={() => setShowFilters(!showFilters)}
-        onExport={handleExport}
-        onCreateUser={() => setIsCreateModalOpen(true)}
-      />
-
-      {/* Search and Filters */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <UserSearchBar
-              searchTerm={filters.search}
-              pageSize={filters.size}
-              onSearchChange={handleSearch}
-              onPageSizeChange={handlePageSizeChange}
-            />
-
-            {showFilters && (
-              <UserFilters 
-                filters={{
-                  roleType: filters.roleType || 'all',
-                  isActive: filters.isActive === undefined ? 'all' : String(filters.isActive),
-                  isVerified: filters.isVerified === undefined ? 'all' : String(filters.isVerified),
-                  sortBy: filters.sortBy,
-                  sortOrder: filters.sortOrder,
-                }} 
-                onFilterChange={(key: string, value: any) => {
-                  if (key === 'roleType') {
-                    handleFilterChange(key, value === 'all' ? undefined : value || undefined);
-                  } else if (key === 'isActive' || key === 'isVerified') {
-                    handleFilterChange(key, value === 'all' ? undefined : value === 'true');
-                  } else {
-                    handleFilterChange(key as keyof UserSearchFilters, value);
-                  }
-                }}
-              />
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Bulk Actions */}
-      {selectedUsers.length > 0 && (
-        <BulkActions
-          selectedCount={selectedUsers.length}
-          onBulkAction={handleBulkAction}
-          loading={bulkActionLoading}
-        />
-      )}
-
       {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>
-              Users
-              {total > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {total} total
-                </Badge>
-              )}
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => refetchUsers()}
-              disabled={usersLoading}
-            >
-              {usersLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4" />
-              )}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <UserTable
+  <UserTable
             data={{
               users,
               total,
@@ -319,8 +279,6 @@ export function UserManagementContent() {
             sortBy={filters.sortBy}
             sortOrder={filters.sortOrder}
           />
-        </CardContent>
-      </Card>
 
       {/* Modals */}
       <CreateUserModal

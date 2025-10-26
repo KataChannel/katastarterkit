@@ -22,16 +22,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "../../ui/alert-dialog";
 
 interface BulkActionsProps {
   selectedCount: number;
   onBulkAction: (action: string, newRole?: string) => Promise<void>;
+  onClearSelection?: () => void;
   loading?: boolean;
 }
 
-export function BulkActions({ selectedCount, onBulkAction, loading }: BulkActionsProps) {
+export function BulkActions({ selectedCount, onBulkAction, onClearSelection, loading }: BulkActionsProps) {
   const [selectedAction, setSelectedAction] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -85,14 +85,24 @@ export function BulkActions({ selectedCount, onBulkAction, loading }: BulkAction
     setSelectedAction(action);
     const actionConfig = actions.find(a => a.value === action);
     
-    if (actionConfig?.dangerous) {
-      setShowConfirmDialog(true);
-    } else if (actionConfig?.requiresRole) {
-      // Show role selection for changeRole action
+    // For changeRole, we need role selection first
+    if (actionConfig?.requiresRole) {
+      // Will show role selector, user clicks "Apply Role" to confirm
       return;
-    } else {
-      executeAction(action);
     }
+    
+    // Show confirmation dialog for all actions
+    setShowConfirmDialog(true);
+  };
+
+  const handleRoleChange = (role: string) => {
+    setSelectedRole(role);
+  };
+
+  const handleApplyRole = () => {
+    if (!selectedRole) return;
+    // Show confirmation before applying role
+    setShowConfirmDialog(true);
   };
 
   const executeAction = async (action: string, role?: string) => {
@@ -103,7 +113,21 @@ export function BulkActions({ selectedCount, onBulkAction, loading }: BulkAction
       setShowConfirmDialog(false);
     } catch (error) {
       console.error('Bulk action failed:', error);
+      // Don't close dialog on error so user can retry
     }
+  };
+
+  const handleConfirm = () => {
+    if (selectedAction === 'changeRole') {
+      executeAction(selectedAction, selectedRole);
+    } else {
+      executeAction(selectedAction);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowConfirmDialog(false);
+    // Don't clear selectedAction/selectedRole so user can modify and retry
   };
 
   const getActionDescription = () => {
@@ -111,10 +135,26 @@ export function BulkActions({ selectedCount, onBulkAction, loading }: BulkAction
     if (!action) return '';
     
     if (selectedAction === 'changeRole' && selectedRole) {
-      return `Change role to ${selectedRole.toUpperCase()} for ${selectedCount} selected users`;
+      return `Are you sure you want to change the role to ${selectedRole.toUpperCase()} for ${selectedCount} selected user${selectedCount > 1 ? 's' : ''}?`;
     }
     
-    return `${action.description} (${selectedCount} users)`;
+    if (selectedAction === 'delete') {
+      return `Are you sure you want to permanently delete ${selectedCount} selected user${selectedCount > 1 ? 's' : ''}?`;
+    }
+    
+    if (selectedAction === 'activate') {
+      return `Are you sure you want to activate ${selectedCount} selected user${selectedCount > 1 ? 's' : ''}?`;
+    }
+    
+    if (selectedAction === 'deactivate') {
+      return `Are you sure you want to deactivate ${selectedCount} selected user${selectedCount > 1 ? 's' : ''}?`;
+    }
+    
+    if (selectedAction === 'verify') {
+      return `Are you sure you want to verify ${selectedCount} selected user${selectedCount > 1 ? 's' : ''}?`;
+    }
+    
+    return `${action.description} (${selectedCount} user${selectedCount > 1 ? 's' : ''})`;
   };
 
   return (
@@ -126,93 +166,114 @@ export function BulkActions({ selectedCount, onBulkAction, loading }: BulkAction
               {selectedCount} selected
             </Badge>
             <span className="text-sm text-gray-600">Bulk Actions:</span>
+            {onClearSelection && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClearSelection}
+                disabled={loading}
+                className="h-7 text-xs"
+              >
+                Clear Selection
+              </Button>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
             {/* Role Selection for Change Role Action */}
             {selectedAction === 'changeRole' && (
-              <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="user">User</SelectItem>
-                  <SelectItem value="guest">Guest</SelectItem>
-                </SelectContent>
-              </Select>
+              <>
+                <Select value={selectedRole} onValueChange={handleRoleChange}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="guest">Guest</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  onClick={handleApplyRole}
+                  disabled={loading || !selectedRole}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                  ) : (
+                    <Users className="w-4 h-4 mr-1" />
+                  )}
+                  Apply Role
+                </Button>
+              </>
             )}
 
-            {/* Action Buttons */}
-            {actions.map((action) => {
-              const Icon = action.icon;
-              const isSelected = selectedAction === action.value;
-              const isDisabled = loading || (action.value === 'changeRole' && isSelected && !selectedRole);
+            {/* Action Buttons - Hide changeRole button when it's selected (role selector shown instead) */}
+            {actions
+              .filter(action => !(selectedAction === 'changeRole' && action.value === 'changeRole'))
+              .map((action) => {
+                const Icon = action.icon;
+                const isSelected = selectedAction === action.value;
+                const isDisabled = loading;
 
-              if (action.value === 'changeRole' && isSelected && selectedRole) {
                 return (
                   <Button
                     key={action.value}
+                    variant={action.variant}
                     size="sm"
-                    onClick={() => executeAction(action.value, selectedRole)}
+                    onClick={() => handleActionClick(action.value)}
                     disabled={isDisabled}
-                    className="bg-purple-600 hover:bg-purple-700"
+                    className={isSelected ? 'ring-2 ring-offset-2' : ''}
                   >
-                    {loading ? (
+                    {loading && selectedAction === action.value ? (
                       <Loader2 className="w-4 h-4 animate-spin mr-1" />
                     ) : (
                       <Icon className="w-4 h-4 mr-1" />
                     )}
-                    Apply Role
+                    {action.label}
                   </Button>
                 );
-              }
-
-              return (
-                <Button
-                  key={action.value}
-                  variant={action.variant}
-                  size="sm"
-                  onClick={() => handleActionClick(action.value)}
-                  disabled={isDisabled}
-                >
-                  {loading && selectedAction === action.value ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-1" />
-                  ) : (
-                    <Icon className="w-4 h-4 mr-1" />
-                  )}
-                  {action.label}
-                </Button>
-              );
-            })}
+              })}
           </div>
         </div>
 
         {/* Confirmation Dialog */}
-        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        {/* <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Confirm Bulk Action</AlertDialogTitle>
               <AlertDialogDescription>
                 {getActionDescription()}
                 {selectedAction === 'delete' && (
-                  <div className="mt-2 p-2 bg-red-50 rounded border border-red-200">
-                    <strong className="text-red-800">Warning:</strong> This action cannot be undone.
+                  <div className="mt-3 p-3 bg-red-50 rounded-md border border-red-200">
+                    <strong className="text-red-800">⚠️ Warning:</strong>
+                    <p className="text-red-700 text-sm mt-1">This action cannot be undone. All selected user data will be permanently deleted.</p>
                   </div>
                 )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel onClick={handleCancel} disabled={loading}>
+                Cancel
+              </AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => executeAction(selectedAction)}
+                onClick={handleConfirm}
+                disabled={loading}
                 className={selectedAction === 'delete' ? 'bg-red-600 hover:bg-red-700' : ''}
               >
-                Confirm
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Processing...
+                  </>
+                ) : (
+                  'Confirm'
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialog>
+        </AlertDialog> */}
       </CardContent>
     </Card>
   );

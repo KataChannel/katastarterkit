@@ -22,13 +22,10 @@ export function UserManagementHeader({ activeTab, onTabChange }: UserManagementH
       {/* Page Title */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Admin Panel</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Bảng Điều Khiển Quản Trị</h1>
           <p className="text-muted-foreground mt-2">
-            Manage users, roles, and permissions across the system
+        Quản lý người dùng, vai trò và quyền hạn trên toàn hệ thống
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Settings className="w-5 h-5 text-muted-foreground" />
         </div>
       </div>
 

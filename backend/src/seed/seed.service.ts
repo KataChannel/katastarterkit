@@ -19,23 +19,26 @@ interface SampleData {
   pages: SamplePage[];
 }
 
+/**
+ * Seed Service for Default Pages
+ * 
+ * NOTE: Automatic seeding is DISABLED.
+ * This service will NOT run on module initialization.
+ * Call seedDefaultPages() manually if you need to seed pages.
+ */
 @Injectable()
-export class SeedService implements OnModuleInit {
+export class SeedService {
   private readonly logger = new Logger(SeedService.name);
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async onModuleInit() {
-    // Chỉ seed khi môi trường development hoặc có biến SEED_DEFAULT_PAGES=true
-    const shouldSeed = 
-      process.env.NODE_ENV === 'development' || 
-      process.env.SEED_DEFAULT_PAGES === 'true';
+  // DISABLED: Removed OnModuleInit to prevent automatic seeding
+  // Call seedDefaultPages() manually if needed
 
-    if (shouldSeed) {
-      await this.seedDefaultPages();
-    }
-  }
-
+  /**
+   * Seed default pages from JSON file
+   * WARNING: This creates demo/sample page data
+   */
   async seedDefaultPages(): Promise<void> {
     try {
       this.logger.log('🌱 Checking default pages...');

@@ -58,7 +58,7 @@ export function FilterBar<T>({
   const filterableColumns = columns.filter(col => col.filterable !== false);
 
   const addFilter = () => {
-    if (newFilter.field && newFilter.operator && newFilter.value !== undefined) {
+    if (newFilter.field && newFilter.operator && newFilter.value !== undefined && newFilter.value !== '') {
       const filter: FilterCondition = {
         field: newFilter.field,
         operator: newFilter.operator,
@@ -155,6 +155,71 @@ export function FilterBar<T>({
     );
   };
 
+  const renderNewFilterValue = () => {
+    if (!newFilter.field) return null;
+    
+    const column = columns.find(col => col.field === newFilter.field);
+    const type = getColumnType(newFilter.field);
+
+    if (type === 'select' && column?.filterOptions) {
+      return (
+        <Select
+          value={newFilter.value}
+          onValueChange={(value) => setNewFilter({ ...newFilter, value })}
+        >
+          <SelectTrigger className="w-full text-xs sm:text-sm">
+            <SelectValue placeholder="Select value" />
+          </SelectTrigger>
+          <SelectContent>
+            {column.filterOptions.map(option => (
+              <SelectItem key={option} value={option} className="text-xs sm:text-sm">
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    if (type === 'boolean') {
+      return (
+        <Select
+          value={newFilter.value !== undefined ? String(newFilter.value) : undefined}
+          onValueChange={(value) => setNewFilter({ ...newFilter, value: value === 'true' })}
+        >
+          <SelectTrigger className="w-full text-xs sm:text-sm">
+            <SelectValue placeholder="Select value" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="true" className="text-xs sm:text-sm">True</SelectItem>
+            <SelectItem value="false" className="text-xs sm:text-sm">False</SelectItem>
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    return (
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Input
+          type={type === 'number' ? 'number' : type === 'date' ? 'date' : 'text'}
+          value={newFilter.value || ''}
+          onChange={(e) => setNewFilter({ ...newFilter, value: e.target.value })}
+          className="w-full text-xs sm:text-sm"
+          placeholder="Value"
+        />
+        {newFilter.operator === 'between' && (
+          <Input
+            type={type === 'number' ? 'number' : type === 'date' ? 'date' : 'text'}
+            value={newFilter.value2 || ''}
+            onChange={(e) => setNewFilter({ ...newFilter, value2: e.target.value })}
+            className="w-full text-xs sm:text-sm"
+            placeholder="To"
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 border-b bg-gray-50">
       {/* Global Search - Responsive */}
@@ -215,7 +280,7 @@ export function FilterBar<T>({
 
               {newFilter.field && newFilter.operator && (
                 <div>
-                  {renderFilterValue({ ...newFilter } as FilterCondition, -1)}
+                  {renderNewFilterValue()}
                 </div>
               )}
 
@@ -231,7 +296,7 @@ export function FilterBar<T>({
                 <Button
                   size="sm"
                   onClick={addFilter}
-                  disabled={!newFilter.field || !newFilter.operator || newFilter.value === undefined}
+                  disabled={!newFilter.field || !newFilter.operator || newFilter.value === undefined || newFilter.value === ''}
                   className="w-full sm:w-auto text-xs sm:text-sm"
                 >
                   Add

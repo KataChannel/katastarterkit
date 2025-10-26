@@ -20,6 +20,9 @@ import {
  * Comprehensive Data Seeder Service
  * Seeds demo data for ALL models in schema.prisma
  * Uses admin user: katachanneloffical@gmail.com
+ * 
+ * NOTE: This seeder is DISABLED to prevent automatic seed data creation.
+ * Only RBAC seeder (rbac-seeder.service.ts) should run automatically.
  */
 @Injectable()
 export class ComprehensiveSeederService {
@@ -28,8 +31,12 @@ export class ComprehensiveSeederService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  // DISABLED: Removed OnModuleInit to prevent automatic seeding
+  // If you need to run this seeder, call seedAll() manually
+  
   /**
-   * Main seeding function - called on module init
+   * Main seeding function - call manually if needed
+   * WARNING: This will create demo/sample data
    */
   async seedAll() {
     try {
