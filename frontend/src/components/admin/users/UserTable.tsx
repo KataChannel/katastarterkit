@@ -67,6 +67,7 @@ interface UserTableProps {
   onSelectAll: (userIds: string[]) => void;
   onSort: (sortBy: string, sortOrder: string) => void;
   onPageChange: (page: number) => void;
+  onCreateUser?: () => void;
   onEditUser: (user: User) => void;
   onViewUser?: (user: User) => void;
   onActivateUser?: (user: User) => void;
@@ -84,6 +85,7 @@ export function UserTable({
   onSelectAll,
   onSort,
   onPageChange,
+  onCreateUser,
   onEditUser,
   onViewUser,
   onActivateUser,
@@ -329,7 +331,7 @@ export function UserTable({
     enableRowSelection: true,
     enableInlineEditing: false,
     enableDialogEditing: false,
-    enableRowDeletion: false,
+    enableRowDeletion: true,
     rowHeight: 60,
     headerHeight: 48,
     showToolbar: true,
@@ -380,6 +382,32 @@ export function UserTable({
     }
   }, [onSort]);
 
+  // Handle create user
+  const handleCreateUser = useCallback((newRow: Partial<User>) => {
+    if (onCreateUser) {
+      onCreateUser();
+    }
+    return Promise.resolve(true);
+  }, [onCreateUser]);
+
+  // Handle edit user (inline or dialog editing)
+  const handleEditUser = useCallback((user: User, field: keyof User, newValue: any) => {
+    // For now, just trigger the onEditUser callback
+    // You can implement inline editing logic here if needed
+    onEditUser(user);
+    return Promise.resolve(true);
+  }, [onEditUser]);
+
+  // Handle delete users (bulk delete)
+  const handleDeleteUsers = useCallback((usersToDelete: User[]) => {
+    if (onDeleteUser && usersToDelete.length > 0) {
+      // Delete first user as example, or handle bulk delete
+      usersToDelete.forEach(user => onDeleteUser(user));
+      return Promise.resolve(true);
+    }
+    return Promise.resolve(false);
+  }, [onDeleteUser]);
+
   if (loading) {
     return <UserTableSkeleton rows={5} />;
   }
@@ -402,6 +430,9 @@ export function UserTable({
         loading={loading}
         onRowSelect={handleRowSelect}
         onSort={handleSort}
+        onRowCreate={onCreateUser ? handleCreateUser : undefined}
+        onRowEdit={handleEditUser}
+        onRowDelete={onDeleteUser ? handleDeleteUsers : undefined}
         height={600}
         className="border rounded-lg"
       />
