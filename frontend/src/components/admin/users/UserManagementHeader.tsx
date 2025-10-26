@@ -24,7 +24,7 @@ export function UserManagementHeader({ activeTab, onTabChange }: UserManagementH
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Bảng Điều Khiển Quản Trị</h1>
           <p className="text-muted-foreground mt-2">
-        Quản lý người dùng, vai trò và quyền hạn trên toàn hệ thống
+            Quản lý người dùng, vai trò và quyền hạn trên toàn hệ thống
           </p>
         </div>
       </div>

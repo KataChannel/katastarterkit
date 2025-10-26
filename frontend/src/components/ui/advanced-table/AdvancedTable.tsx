@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -98,6 +98,41 @@ export function AdvancedTable<T extends RowData>({
     return result;
   }, [data, globalSearch, filters, sortConfigs, columns]);
 
+  // Notify parent of selection changes (outside render cycle)
+  useEffect(() => {
+    if (onRowSelect) {
+      // Defer to next tick to avoid setState during render warning
+      const timeoutId = setTimeout(() => {
+        const selectedRowData = processedData.filter(row => selectedRows.has(row.id));
+        onRowSelect(selectedRowData);
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [selectedRows, processedData, onRowSelect]);
+
+  // Notify parent of sort changes (outside render cycle)
+  useEffect(() => {
+    if (onSort && sortConfigs.length >= 0) {
+      const timeoutId = setTimeout(() => {
+        onSort(sortConfigs);
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [sortConfigs, onSort]);
+
+  // Notify parent of filter changes (outside render cycle)
+  useEffect(() => {
+    if (onFilter) {
+      const timeoutId = setTimeout(() => {
+        onFilter(filters);
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [filters, onFilter]);
+
   // Column management
   const visibleColumns = useMemo(() => TableUtils.getVisibleColumns(columns), [columns]);
   const pinnedLeftColumns = useMemo(() => TableUtils.getPinnedColumns(columns, 'left'), [columns]);
@@ -106,23 +141,24 @@ export function AdvancedTable<T extends RowData>({
 
   // Event handlers
   const handleSort = useCallback((field: keyof T, direction: SortConfig['direction']) => {
-    let newSortConfigs: SortConfig[];
-    
-    if (direction === null) {
-      newSortConfigs = sortConfigs.filter(config => config.field !== field);
-    } else {
-      const existingIndex = sortConfigs.findIndex(config => config.field === field);
-      if (existingIndex >= 0) {
-        newSortConfigs = [...sortConfigs];
-        newSortConfigs[existingIndex] = { ...newSortConfigs[existingIndex], direction };
+    setSortConfigs(prev => {
+      let newSortConfigs: SortConfig[];
+      
+      if (direction === null) {
+        newSortConfigs = prev.filter(config => config.field !== field);
       } else {
-        newSortConfigs = [...sortConfigs, { field: String(field), direction, priority: sortConfigs.length }];
+        const existingIndex = prev.findIndex(config => config.field === field);
+        if (existingIndex >= 0) {
+          newSortConfigs = [...prev];
+          newSortConfigs[existingIndex] = { ...newSortConfigs[existingIndex], direction };
+        } else {
+          newSortConfigs = [...prev, { field: String(field), direction, priority: prev.length }];
+        }
       }
-    }
-    
-    setSortConfigs(newSortConfigs);
-    onSort?.(newSortConfigs);
-  }, [sortConfigs, onSort]);
+      
+      return newSortConfigs;
+    });
+  }, []);
 
   const handleColumnPin = useCallback((field: keyof T, position: ColumnPinPosition) => {
     setColumns(prev => prev.map(col => 
@@ -153,28 +189,25 @@ export function AdvancedTable<T extends RowData>({
   }, [visibleColumns, handleAutoSizeColumn]);
 
   const handleRowSelect = useCallback((rowId: string | number, selected: boolean) => {
-    const newSelection = new Set(selectedRows);
-    if (selected) {
-      newSelection.add(rowId);
-    } else {
-      newSelection.delete(rowId);
-    }
-    setSelectedRows(newSelection);
-    
-    const selectedRowData = processedData.filter(row => newSelection.has(row.id));
-    onRowSelect?.(selectedRowData);
-  }, [selectedRows, processedData, onRowSelect]);
+    setSelectedRows(prev => {
+      const newSelection = new Set(prev);
+      if (selected) {
+        newSelection.add(rowId);
+      } else {
+        newSelection.delete(rowId);
+      }
+      return newSelection;
+    });
+  }, []);
 
   const handleSelectAll = useCallback((selected: boolean) => {
     if (selected) {
       const allIds = new Set(processedData.map(row => row.id));
       setSelectedRows(allIds);
-      onRowSelect?.(processedData);
     } else {
       setSelectedRows(new Set());
-      onRowSelect?.([]);
     }
-  }, [processedData, onRowSelect]);
+  }, [processedData]);
 
   const handleCellEdit = useCallback(async (rowId: string | number, field: keyof T, newValue: any) => {
     const row = processedData.find(r => r.id === rowId);
@@ -200,11 +233,15 @@ export function AdvancedTable<T extends RowData>({
     TableUtils.exportToCsv(processedData, visibleColumns, 'export.csv');
   }, [processedData, visibleColumns]);
 
-  const getSortConfig = (field: keyof T) => {
-    return sortConfigs.find(config => config.field === field);
-  };
+  const handleFiltersChange = useCallback((newFilters: FilterCondition[]) => {
+    setFilters(newFilters);
+  }, []);
 
-  const renderColumnGroup = (cols: ColumnDef<T>[], isPinned: boolean = false) => {
+  const getSortConfig = useCallback((field: keyof T) => {
+    return sortConfigs.find(config => config.field === field);
+  }, [sortConfigs]);
+
+  const renderColumnGroup = useCallback((cols: ColumnDef<T>[], isPinned: boolean = false) => {
     return cols.map(column => {
       const sortConfig = getSortConfig(column.field);
       const width = columnWidths[String(column.field)] || column.width || 150;
@@ -249,7 +286,9 @@ export function AdvancedTable<T extends RowData>({
         </div>
       );
     });
-  };
+  }, [processedData, sortConfigs, columnWidths, headerHeight, rowHeight, editingCell, selectedRows, 
+      getSortConfig, handleSort, handleColumnPin, handleColumnHide, handleAutoSizeColumn, 
+      handleColumnResize, handleCellEdit]);
 
   if (loading) {
     return (
@@ -321,10 +360,7 @@ export function AdvancedTable<T extends RowData>({
         <FilterBar
           columns={columns}
           filters={filters}
-          onFiltersChange={(newFilters) => {
-            setFilters(newFilters);
-            onFilter?.(newFilters);
-          }}
+          onFiltersChange={handleFiltersChange}
           globalSearch={globalSearch}
           onGlobalSearchChange={setGlobalSearch}
         />

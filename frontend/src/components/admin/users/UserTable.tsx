@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { AdvancedTable, ColumnDef, RowData, TableConfig, SortConfig } from '@/components/ui/advanced-table';
 import { Button } from '../../ui/button';
 import { Badge } from '../../ui/badge';
@@ -337,36 +337,48 @@ export function UserTable({
     virtualScrolling: false,
   };
 
+  // Track internal selection state to avoid conflicts with parent
+  const internalSelectionRef = useRef<Set<string>>(new Set(selectedUsers));
+
+  // Update internal ref when parent selection changes
+  useEffect(() => {
+    internalSelectionRef.current = new Set(selectedUsers);
+  }, [selectedUsers]);
+
   // Handle row selection from AdvancedTable
-  const handleRowSelect = (selectedRows: User[]) => {
-    const allUserIds = users.map(u => u.id);
+  const handleRowSelect = useMemo(() => (selectedRows: User[]) => {
     const selectedIds = selectedRows.map(r => r.id);
+    const allUserIds = users.map(u => u.id);
     
-    if (selectedIds.length === allUserIds.length) {
-      onSelectAll(allUserIds);
-    } else {
-      // Update selection based on what's selected
-      selectedIds.forEach(id => {
-        if (!selectedUsers.includes(id)) {
-          onSelectUser(id);
-        }
-      });
-      // Remove deselected
-      selectedUsers.forEach(id => {
-        if (!selectedIds.includes(id) && allUserIds.includes(id)) {
-          onSelectUser(id);
-        }
-      });
+    // Update internal ref
+    const newSelection = new Set(selectedIds);
+    const oldSelection = internalSelectionRef.current;
+    
+    // Find changes
+    const added = selectedIds.filter(id => !oldSelection.has(id));
+    const removed = Array.from(oldSelection).filter(id => allUserIds.includes(id) && !newSelection.has(id));
+    
+    internalSelectionRef.current = newSelection;
+    
+    // Notify parent of changes
+    if (added.length > 0 || removed.length > 0) {
+      // Check if all page users are now selected
+      if (selectedIds.length === allUserIds.length && allUserIds.length > 0) {
+        onSelectAll(allUserIds);
+      } else {
+        // Toggle individual items
+        [...added, ...removed].forEach(id => onSelectUser(id));
+      }
     }
-  };
+  }, [users, onSelectUser, onSelectAll]);
 
   // Handle sorting from AdvancedTable
-  const handleSort = (sortConfigs: SortConfig[]) => {
+  const handleSort = useCallback((sortConfigs: SortConfig[]) => {
     if (sortConfigs.length > 0) {
       const primarySort = sortConfigs[0];
       onSort(String(primarySort.field), primarySort.direction || 'asc');
     }
-  };
+  }, [onSort]);
 
   if (loading) {
     return <UserTableSkeleton rows={5} />;
