@@ -234,7 +234,8 @@ export function filterMenuByPermissions(
         item.children.length === 0 &&
         !item.route &&
         !item.url &&
-        !item.externalUrl
+        !item.externalUrl &&
+        !item.href  // FIX: Also check href (used by static navigation and transformed menus)
       ) {
         return false;
       }
