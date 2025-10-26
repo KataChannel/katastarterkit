@@ -57,6 +57,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
   const transition = content.transition || 'slide'; // slide, fade, zoom
   const indicatorStyle = content.indicatorStyle || 'dots'; // dots, lines, numbers, thumbnails
   const arrowStyle = content.arrowStyle || 'default'; // default, circle, square, minimal
+  const itemsPerSlide = content.itemsPerSlide || 1; // Default 1 item per slide
 
   // Auto-slide functionality
   useEffect(() => {
@@ -153,6 +154,17 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
       case 'lg': return 'h-[500px]';
       case 'xl': return 'h-[600px]';
       default: return 'min-h-[400px]';
+    }
+  };
+
+  const getItemBasisClass = () => {
+    switch (itemsPerSlide) {
+      case 2: return 'basis-1/2';
+      case 3: return 'basis-1/3';
+      case 4: return 'basis-1/4';
+      case 5: return 'basis-1/5';
+      case 6: return 'basis-1/6';
+      default: return 'basis-full'; // 1 item per slide
     }
   };
 
@@ -312,6 +324,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
           opts={{
             align: "start",
             loop: loop,
+            slidesToScroll: 1,
           }}
         >
           <CarouselContent className="h-full">
@@ -320,7 +333,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
               const imagePos = (slide.imagePosition || 'right') as 'left' | 'right' | 'top' | 'bottom' | 'background';
               
               return (
-                <CarouselItem key={slide.id || index} className="h-full">
+                <CarouselItem key={slide.id || index} className={`h-full ${getItemBasisClass()}`}>
                   <Card className="border-0 rounded-lg overflow-hidden h-full">
                     <CardContent className={`relative p-0 ${slide.bgColor || 'bg-gradient-to-r from-blue-500 to-purple-600'} overflow-hidden h-full`}>
                       {/* Background Image with Overlay */}
@@ -541,6 +554,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
           transition,
           indicatorStyle,
           arrowStyle,
+          itemsPerSlide,
         }}
         onSave={handleSaveSettings}
       />

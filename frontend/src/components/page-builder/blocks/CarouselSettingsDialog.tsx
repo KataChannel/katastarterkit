@@ -23,6 +23,7 @@ interface CarouselSettingsDialogProps {
     transition: string;
     indicatorStyle: string;
     arrowStyle: string;
+    itemsPerSlide?: number;
   };
   onSave: (settings: any) => void;
 }
@@ -159,6 +160,36 @@ export function CarouselSettingsDialog({ open, onOpenChange, settings, onSave }:
                   <SelectItem value="xl">Extra Large (600px)</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Items Per Slide */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="itemsPerSlide">Items Per Slide</Label>
+                <span className="text-sm text-muted-foreground font-semibold">
+                  {localSettings.itemsPerSlide || 1}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5, 6].map((num) => (
+                  <button
+                    key={num}
+                    onClick={() =>
+                      setLocalSettings({ ...localSettings, itemsPerSlide: num })
+                    }
+                    className={`flex-1 py-2 px-3 rounded-md border-2 transition-colors ${
+                      (localSettings.itemsPerSlide || 1) === num
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Number of items to display in one slide. Use more items for gallery-style carousels.
+              </p>
             </div>
           </TabsContent>
 
