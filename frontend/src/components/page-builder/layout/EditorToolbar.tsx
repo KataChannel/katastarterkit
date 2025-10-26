@@ -22,6 +22,7 @@ import {
   FileUp,
   Archive,
   ChevronDown,
+  Loader2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -36,6 +37,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -405,15 +407,21 @@ export function EditorToolbar({
 
       {/* Global Settings Dialog */}
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>⚙️ Global Settings</DialogTitle>
+        <DialogContent className="flex flex-col max-w-2xl max-h-[90vh] p-0">
+          {/* Fixed Header */}
+          <DialogHeader className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Global Settings
+            </DialogTitle>
             <DialogDescription>
               Configure global page settings that apply to the entire page
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 border-b border-gray-200">
+            <div className="space-y-6">
             {/* Page Settings */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
@@ -613,9 +621,11 @@ export function EditorToolbar({
                 </div>
               </div>
             </div>
+            </div>
           </div>
 
-          <div className="flex justify-end gap-2 border-t pt-4">
+          {/* Fixed Footer */}
+          <DialogFooter className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex-shrink-0">
             <Button 
               variant="outline" 
               onClick={() => setIsSettingsOpen(false)}
@@ -645,9 +655,16 @@ export function EditorToolbar({
               }}
               disabled={isSettingsLoading}
             >
-              {isSettingsLoading ? 'Saving...' : 'Save Settings'}
+              {isSettingsLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Settings'
+              )}
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
