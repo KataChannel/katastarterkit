@@ -26,6 +26,8 @@ interface CarouselSlide {
   imagePosition?: 'left' | 'right' | 'top' | 'bottom' | 'background';
   imageOverlay?: number; // 0-100
   animation?: 'fade' | 'slide' | 'zoom' | 'none';
+  mediaType?: 'image' | 'video'; // For filtering
+  videoUrl?: string; // YouTube, Vimeo, etc.
 }
 
 interface CarouselBlockProps {
@@ -57,6 +59,22 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
   const transition = content.transition || 'slide'; // slide, fade, zoom
   const indicatorStyle = content.indicatorStyle || 'dots'; // dots, lines, numbers, thumbnails
   const arrowStyle = content.arrowStyle || 'default'; // default, circle, square, minimal
+  const slidesPerView = content.slidesPerView || 1; // 1-5 slides displayed
+  const mediaFilter = content.mediaFilter || 'all'; // all, images, videos
+  const animationType = content.animationType || 'fade'; // fade, slide, zoom, none
+  const animationDuration = content.animationDuration || 600; // ms
+
+  // Filter slides based on media type
+  const filteredSlides = slides.filter((slide) => {
+    if (mediaFilter === 'all') return true;
+    if (mediaFilter === 'images') {
+      return !slide.videoUrl && slide.image; // Has image, no video
+    }
+    if (mediaFilter === 'videos') {
+      return slide.videoUrl || slide.mediaType === 'video'; // Has video
+    }
+    return true;
+  });
 
   // Auto-slide functionality
   useEffect(() => {
@@ -84,6 +102,27 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
       api.off('select', onSelect);
     };
   }, [api]);
+
+  const getAnimationStyle = (): React.CSSProperties => {
+    const duration = `${animationDuration}ms`;
+    switch (animationType) {
+      case 'fade':
+        return {
+          animation: `fadeIn ${duration} ease-in-out`,
+        };
+      case 'slide':
+        return {
+          animation: `slideIn ${duration} ease-out`,
+        };
+      case 'zoom':
+        return {
+          animation: `zoomIn ${duration} ease-out`,
+        };
+      case 'none':
+      default:
+        return {};
+    }
+  };
 
   const handleEdit = () => {
     setShowSettings(true);
@@ -157,7 +196,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
   };
 
   const getIndicatorComponent = () => {
-    if (!showIndicators || slides.length <= 1) return null;
+    if (!showIndicators || filteredSlides.length <= 1) return null;
 
     switch (indicatorStyle) {
       case 'lines':
@@ -181,7 +220,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
           <div className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-4 py-2 rounded-full backdrop-blur-sm">
             <span className="font-semibold">{currentSlide + 1}</span>
             <span className="mx-1">/</span>
-            <span>{slides.length}</span>
+            <span>{filteredSlides.length}</span>
           </div>
         );
       
@@ -245,10 +284,25 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
   // If no slides, show placeholder in edit mode
   if (slides.length === 0 && editMode) {
     return (
-      <div 
-        className="relative p-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 min-h-[300px] flex items-center justify-center"
-        style={block.style}
-      >
+      <>
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+          }
+          @keyframes zoomIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+          }
+        `}</style>
+        <div 
+          className="relative p-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 min-h-[300px] flex items-center justify-center"
+          style={block.style}
+        >
         <div className="text-center space-y-4">
           <p className="text-gray-500 mb-4">Carousel Block - No slides added</p>
           <div className="flex gap-2 justify-center">
@@ -262,7 +316,8 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
             </Button>
           </div>
         </div>
-      </div>
+        </div>
+      </>
     );
   };
 
@@ -273,6 +328,20 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
 
   return (
     <>
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes zoomIn {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
       <div className={`relative ${getHeightClass()}`} style={block.style}>
         {editMode && (
           <div className="absolute top-2 right-2 z-20 flex gap-2">
@@ -312,15 +381,25 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
           opts={{
             align: "start",
             loop: loop,
+            slidesToScroll: 1,
           }}
         >
           <CarouselContent className="h-full">
-            {slides.map((slide, index) => {
+            {filteredSlides.map((slide, index) => {
               const slideTextColor = slide.textColor || 'text-white';
               const imagePos = (slide.imagePosition || 'right') as 'left' | 'right' | 'top' | 'bottom' | 'background';
               
               return (
-                <CarouselItem key={slide.id || index} className="h-full">
+                <CarouselItem 
+                  key={slide.id || index} 
+                  className={`h-full ${
+                    slidesPerView > 1 ? `basis-1/${slidesPerView}` : ''
+                  }`}
+                  style={{
+                    ...getAnimationStyle(),
+                    minWidth: slidesPerView > 1 ? `${100 / slidesPerView}%` : 'auto',
+                  }}
+                >
                   <Card className="border-0 rounded-lg overflow-hidden h-full">
                     <CardContent className={`relative p-0 ${slide.bgColor || 'bg-gradient-to-r from-blue-500 to-purple-600'} overflow-hidden h-full`}>
                       {/* Background Image with Overlay */}
@@ -515,7 +594,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
             })}
           </CarouselContent>
           
-          {showArrows && slides.length > 1 && (
+          {showArrows && filteredSlides.length > 1 && (
             <>
               <CarouselPrevious className={`left-4 ${getArrowClasses()}`} />
               <CarouselNext className={`right-4 ${getArrowClasses()}`} />
@@ -541,6 +620,10 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
           transition,
           indicatorStyle,
           arrowStyle,
+          slidesPerView,
+          mediaFilter,
+          animationType,
+          animationDuration,
         }}
         onSave={handleSaveSettings}
       />

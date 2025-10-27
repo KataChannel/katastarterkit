@@ -23,6 +23,10 @@ interface CarouselSettingsDialogProps {
     transition: string;
     indicatorStyle: string;
     arrowStyle: string;
+    slidesPerView?: number;
+    mediaFilter?: 'all' | 'images' | 'videos';
+    animationType?: 'fade' | 'slide' | 'zoom' | 'none';
+    animationDuration?: number;
   };
   onSave: (settings: any) => void;
 }
@@ -48,9 +52,10 @@ export function CarouselSettingsDialog({ open, onOpenChange, settings, onSave }:
         </DialogHeader>
 
         <Tabs defaultValue="behavior" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="behavior">Behavior</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="controls">Controls</TabsTrigger>
           </TabsList>
 
@@ -136,6 +141,55 @@ export function CarouselSettingsDialog({ open, onOpenChange, settings, onSave }:
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Animation Type */}
+            <div className="space-y-2">
+              <Label htmlFor="animationType">Slide Animation</Label>
+              <Select
+                value={localSettings.animationType || 'fade'}
+                onValueChange={(value) =>
+                  setLocalSettings({ ...localSettings, animationType: value as any })
+                }
+              >
+                <SelectTrigger id="animationType">
+                  <SelectValue placeholder="Select animation" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="fade">Fade In</SelectItem>
+                  <SelectItem value="slide">Slide In</SelectItem>
+                  <SelectItem value="zoom">Zoom In</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Animation applied when each slide appears
+              </p>
+            </div>
+
+            {/* Animation Duration */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="animationDuration">Animation Duration</Label>
+                <span className="text-sm text-muted-foreground">
+                  {localSettings.animationDuration || 600}ms
+                </span>
+              </div>
+              <Input
+                id="animationDuration"
+                type="range"
+                min={300}
+                max={2000}
+                step={100}
+                value={localSettings.animationDuration || 600}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setLocalSettings({ ...localSettings, animationDuration: parseInt(e.target.value) })
+                }
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                How long the animation takes (300-2000ms)
+              </p>
+            </div>
           </TabsContent>
 
           <TabsContent value="appearance" className="space-y-4 mt-4">
@@ -159,6 +213,56 @@ export function CarouselSettingsDialog({ open, onOpenChange, settings, onSave }:
                   <SelectItem value="xl">Extra Large (600px)</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="content" className="space-y-4 mt-4">
+            {/* Slides Per View */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="slidesPerView">Slides Per View</Label>
+                <span className="text-sm text-muted-foreground font-semibold">
+                  {localSettings.slidesPerView || 1}
+                </span>
+              </div>
+              <Input
+                id="slidesPerView"
+                type="range"
+                min={1}
+                max={5}
+                step={1}
+                value={localSettings.slidesPerView || 1}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setLocalSettings({ ...localSettings, slidesPerView: parseInt(e.target.value) })
+                }
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Display multiple slides simultaneously (1-5 slides)
+              </p>
+            </div>
+
+            {/* Media Filter */}
+            <div className="space-y-2">
+              <Label htmlFor="mediaFilter">Show Media Type</Label>
+              <Select
+                value={localSettings.mediaFilter || 'all'}
+                onValueChange={(value) =>
+                  setLocalSettings({ ...localSettings, mediaFilter: value as any })
+                }
+              >
+                <SelectTrigger id="mediaFilter">
+                  <SelectValue placeholder="Select media type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Media</SelectItem>
+                  <SelectItem value="images">Images Only</SelectItem>
+                  <SelectItem value="videos">Videos Only</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Filter slides by media type. Slides with video embeds will be identified by video URLs (YouTube, Vimeo, etc.)
+              </p>
             </div>
           </TabsContent>
 

@@ -23,6 +23,7 @@ import {
   ChevronDown,
   Package,
   Zap,
+  Heart,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -46,6 +47,7 @@ interface SavedBlock {
   category: string;
   tags: string[];
   popularity?: 'hot' | 'new' | null;
+  isBookmarked?: boolean; // NEW: bookmark flag
 }
 
 const SAVED_BLOCKS_KEY = 'kata_saved_blocks';
@@ -55,12 +57,14 @@ function SavedBlockCard({
   block, 
   onApply, 
   onDuplicate, 
-  onDelete 
+  onDelete,
+  onToggleBookmark,
 }: { 
   block: SavedBlock;
   onApply: (block: SavedBlock) => void;
   onDuplicate: (block: SavedBlock) => void;
   onDelete: (id: string) => void;
+  onToggleBookmark?: (id: string) => void;
 }) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -103,19 +107,36 @@ function SavedBlockCard({
             )}
           </div>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className={cn(
-                  'h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0 transition-opacity',
-                  isHovered ? 'opacity-100' : 'opacity-0'
-                )}
-              >
-                <MoreVertical className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-            </DropdownMenuTrigger>
+          <div className="flex items-center gap-1">
+            {/* Bookmark Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                'h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0 transition-colors',
+                block.isBookmarked 
+                  ? 'text-red-500 hover:text-red-600' 
+                  : 'text-gray-400 hover:text-red-500'
+              )}
+              onClick={() => onToggleBookmark?.(block.id)}
+              title={block.isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+            >
+              <Heart className={cn('h-4 w-4 sm:h-5 sm:w-5', block.isBookmarked && 'fill-current')} />
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className={cn(
+                    'h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0 transition-opacity',
+                    isHovered ? 'opacity-100' : 'opacity-0'
+                  )}
+                >
+                  <MoreVertical className="h-3 w-3 sm:h-4 sm:w-4" />
+                </Button>
+              </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onApply(block)} className="text-xs sm:text-sm">
                 <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
@@ -134,7 +155,8 @@ function SavedBlockCard({
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          </div>
         </div>
 
         <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-500 flex-wrap gap-1">
@@ -263,6 +285,20 @@ export function SavedBlocksLibrary() {
       const updated = savedBlocks.filter(b => b.id !== id);
       saveSavedBlocks(updated);
       toast.success('Block deleted');
+    }
+  };
+
+  const toggleBookmarkBlock = (id: string) => {
+    const updated = savedBlocks.map(b => 
+      b.id === id ? { ...b, isBookmarked: !b.isBookmarked } : b
+    );
+    saveSavedBlocks(updated);
+    
+    const block = savedBlocks.find(b => b.id === id);
+    if (block?.isBookmarked) {
+      toast.success('Bookmark removed');
+    } else {
+      toast.success('Block bookmarked!');
     }
   };
 
@@ -462,6 +498,7 @@ export function SavedBlocksLibrary() {
                           onApply={applySavedBlock}
                           onDuplicate={duplicateSavedBlock}
                           onDelete={deleteSavedBlock}
+                          onToggleBookmark={toggleBookmarkBlock}
                         />
                       ))}
                     </div>

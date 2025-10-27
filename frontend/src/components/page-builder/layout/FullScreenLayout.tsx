@@ -1,12 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useMutation } from '@apollo/client';
 import { EditorToolbar } from './EditorToolbar';
 import { EditorCanvas } from './EditorCanvas';
 import { EditorFooter } from './EditorFooter';
 import { LeftPanel } from '../panels/LeftPanel/LeftPanel';
 import { RightPanel } from '../panels/RightPanel/RightPanel';
 import { usePageState, usePageActions } from '../PageBuilderProvider';
+import { toast } from 'sonner';
+import { UPDATE_PAGE } from '@/graphql/queries/pages';
+import { UpdatePageInput } from '@/types/page-builder';
 
 interface FullScreenLayoutProps {
   editorMode: 'visual' | 'code';
@@ -29,6 +33,40 @@ export function FullScreenLayout({
   const { selectedBlockId, loading, editingPage } = usePageState();
   const { handleSelectBlock } = usePageActions();
 
+  // GraphQL mutation for updating page
+  const [updatePageMutation] = useMutation(UPDATE_PAGE);
+
+  // Handle saving global page settings
+  const handleSettingsSave = useCallback(async (settings: any) => {
+    if (!editingPage?.id) {
+      toast.error('No page selected');
+      return;
+    }
+
+    try {
+      const updateInput: UpdatePageInput = {
+        title: settings.pageTitle,
+        slug: settings.pageSlug,
+        seoTitle: settings.seoTitle,
+        seoDescription: settings.seoDescription,
+        seoKeywords: settings.seoKeywords ? settings.seoKeywords.split(',').map((k: string) => k.trim()) : [],
+      };
+
+      await updatePageMutation({
+        variables: {
+          id: editingPage.id,
+          input: updateInput,
+        },
+      });
+
+      toast.success('Global settings saved successfully');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('Failed to save global settings');
+      throw error;
+    }
+  }, [editingPage?.id, updatePageMutation]);
+
   return (
     <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Top Toolbar */}
@@ -45,6 +83,8 @@ export function FullScreenLayout({
         onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
         isLoading={loading}
         pageTitle={editingPage?.title}
+        onSettingsSave={handleSettingsSave}
+        pageId={editingPage?.id}
       />
 
       {/* Main Content Area */}
