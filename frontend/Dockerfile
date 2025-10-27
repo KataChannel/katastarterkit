@@ -46,11 +46,12 @@ COPY --chown=nextjs:nodejs frontend/.next/standalone/ ./
 # This ensures clean, production-only dependencies
 COPY --chown=nextjs:nodejs frontend/node_modules/ ./node_modules/
 
-# Copy static files (.next/static) - overwrites any cached version
-COPY --chown=nextjs:nodejs frontend/.next/static/ ./.next/static/
+# Copy static files to the correct location (frontend/.next/static/)
+# Server runs from /app/frontend/, so it looks for static files at /app/frontend/.next/static/
+COPY --chown=nextjs:nodejs frontend/.next/static/ ./frontend/.next/static/
 
-# Copy public assets (if any override is needed)
-COPY --chown=nextjs:nodejs frontend/public/ ./public/
+# Copy public assets (frontend/public)
+COPY --chown=nextjs:nodejs frontend/public/ ./frontend/public/
 
 # Switch to non-root user for security
 USER nextjs
