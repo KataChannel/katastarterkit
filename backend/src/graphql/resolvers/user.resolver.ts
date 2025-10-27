@@ -263,9 +263,9 @@ export class UserResolver {
   }
 
   // Field resolvers
-  @ResolveField('role', () => $Enums.UserRoleType)
-  async role(@Parent() user: User): Promise<$Enums.UserRoleType> {
-    return user.roleType;
+  @ResolveField('role', () => String)
+  async role(@Parent() user: User): Promise<string> {
+    return user.roleType as string;
   }
 
   @ResolveField('roles', () => [Object], { nullable: true })

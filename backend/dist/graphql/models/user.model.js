@@ -13,7 +13,13 @@ exports.AdminResetPasswordResult = exports.BulkUserActionResult = exports.UserSt
 const graphql_1 = require("@nestjs/graphql");
 const client_1 = require("@prisma/client");
 const rbac_model_1 = require("./rbac.model");
-(0, graphql_1.registerEnumType)(client_1.$Enums.UserRoleType, {
+const prisma = new client_1.PrismaClient();
+const UserRoleTypeValues = {
+    ADMIN: 'ADMIN',
+    USER: 'USER',
+    GUEST: 'GUEST',
+};
+(0, graphql_1.registerEnumType)(UserRoleTypeValues, {
     name: 'UserRole',
     description: 'User role types',
 });
@@ -49,7 +55,7 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "avatar", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => client_1.$Enums.UserRoleType),
+    (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "roleType", void 0);
 __decorate([

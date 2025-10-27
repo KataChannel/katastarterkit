@@ -4093,8 +4093,8 @@ type User {
   lockedUntil: DateTime
   permissions: [Permission!]
   phone: String
-  role: UserRoleType!
-  roleType: UserRoleType!
+  role: String!
+  roleType: String
   roles: [Role!]
   updatedAt: DateTime!
   username: String!
