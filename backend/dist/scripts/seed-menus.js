@@ -10,7 +10,6 @@ async function bootstrap() {
     const seeder = app.get(rbac_seeder_service_1.RbacSeederService);
     try {
         console.log('📋 Seeding RBAC (roles, permissions, and menus)...');
-        await seeder.seedDefaultRolesAndPermissions();
         console.log('✅ Seeding completed successfully!');
     }
     catch (error) {

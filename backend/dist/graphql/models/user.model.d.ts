@@ -1,4 +1,3 @@
-import { $Enums } from '@prisma/client';
 import { Role, Permission } from './rbac.model';
 export declare class User {
     id: string;
@@ -9,7 +8,7 @@ export declare class User {
     firstName?: string;
     lastName?: string;
     avatar?: string;
-    roleType: $Enums.UserRoleType;
+    roleType?: string;
     isActive: boolean;
     isVerified: boolean;
     isTwoFactorEnabled: boolean;

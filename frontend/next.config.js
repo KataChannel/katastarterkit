@@ -7,11 +7,8 @@ const nextConfig = {
   
   /**
    * Webpack Configuration for Code Splitting & Tree Shaking
-   * Optimizes bundle size by:
-   * - Splitting large chunks
-   * - Removing unused code
-   * - Optimizing CSS
-   * - Lazy loading heavy modules
+   * DISABLED due to SIGBUS error in production build
+   * Using minimal webpack config
    */
   webpack: (config, { isServer }) => {
     // Fix for OpenTelemetry module resolution issue with Bun/Docker
@@ -25,98 +22,8 @@ const nextConfig = {
       ];
     }
     
-    if (!isServer) {
-      // Client-side optimizations
-      config.optimization = {
-        ...config.optimization,
-        
-        // Advanced code splitting strategy
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            // Split React ecosystem into separate chunk
-            react: {
-              test: /[\\/]node_modules[\\/](react|react-dom|next)[\\/]/,
-              name: 'react-vendors',
-              priority: 50,
-              reuseExistingChunk: true,
-            },
-            
-            // UI libraries
-            ui: {
-              test: /[\\/]node_modules[\\/](@radix-ui|@headlessui|lucide-react|@heroicons)[\\/]/,
-              name: 'ui-vendors',
-              priority: 40,
-              reuseExistingChunk: true,
-            },
-            
-            // Apollo/GraphQL
-            apollo: {
-              test: /[\\/]node_modules[\\/](@apollo|graphql)[\\/]/,
-              name: 'apollo-vendors',
-              priority: 30,
-              reuseExistingChunk: true,
-            },
-            
-            // Page Builder specific blocks
-            blocks: {
-              test: /[\\/]frontend[\\/]src[\\/]components[\\/]page-builder[\\/]blocks[\\/]/,
-              name: 'page-builder-blocks',
-              priority: 20,
-              reuseExistingChunk: true,
-              minSize: 0,
-            },
-            
-            // Common vendors
-            vendors: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              priority: 10,
-              reuseExistingChunk: true,
-            },
-            
-            // Common shared across pages
-            common: {
-              minChunks: 2,
-              priority: 5,
-              reuseExistingChunk: true,
-              name: 'common',
-            },
-          },
-          maxAsyncRequests: 30,
-          maxInitialRequests: 30,
-          minSize: 20000,
-          maxSize: 244000,
-        },
-        
-        // Runtime chunk for better caching
-        runtimeChunk: {
-          name: 'runtime',
-        },
-      };
-    }
-    
     return config;
   },
-  
-  experimental: {
-    // Enable stable features for Next.js 15
-    optimizePackageImports: [
-      '@heroicons/react', 
-      '@headlessui/react',
-      '@apollo/client',
-      'react-hook-form',
-      'react-hot-toast',
-      'lucide-react',
-      '@radix-ui/react-icons'
-    ],
-    
-    // Dynamic CSS optimization
-    optimizeCss: true,
-  },
-  
-  // Moved from experimental.serverComponentsExternalPackages
-  serverExternalPackages: ['graphql'],
   
   // Image optimization
   images: {

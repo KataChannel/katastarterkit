@@ -356,7 +356,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "adminResetPassword", null);
 __decorate([
-    (0, graphql_1.ResolveField)('role', () => client_1.$Enums.UserRoleType),
+    (0, graphql_1.ResolveField)('role', () => String),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [user_model_1.User]),

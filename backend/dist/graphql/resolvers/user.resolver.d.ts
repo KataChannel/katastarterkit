@@ -6,7 +6,6 @@ import { UserService } from '../../services/user.service';
 import { AuthService } from '../../auth/auth.service';
 import { OtpService } from '../../services/otp.service';
 import { PubSubService } from '../../services/pubsub.service';
-import { $Enums } from '@prisma/client';
 export declare class UserResolver {
     private readonly userService;
     private readonly authService;
@@ -34,7 +33,7 @@ export declare class UserResolver {
     adminUpdateUser(id: string, input: AdminUpdateUserInput): Promise<User>;
     adminCreateUser(input: AdminCreateUserInput): Promise<User>;
     adminResetPassword(input: AdminResetPasswordInput, adminUser: User): Promise<AdminResetPasswordResult>;
-    role(user: User): Promise<$Enums.UserRoleType>;
+    role(user: User): Promise<string>;
     roles(user: any): Promise<any[]>;
     permissions(user: any): Promise<any[]>;
     userRegistered(): any;
