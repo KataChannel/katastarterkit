@@ -35,12 +35,12 @@ async function bootstrap() {
   console.log(`   PORT: ${configService.get('PORT', 4000)}`);
   console.log(`   FRONTEND_URL: ${configService.get('FRONTEND_URL', 'http://localhost:3000')}`);
   
-  // Configure file upload middleware (must be before body parser)
-  app.use(graphqlUploadExpress({ maxFileSize: 500000000, maxFiles: 10 })); // 500MB max file size
-  
-  // Configure JSON body parser with larger limit for GraphQL
+  // Configure JSON body parser with larger limit for GraphQL (MUST be BEFORE graphqlUploadExpress)
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+  
+  // Configure file upload middleware (MUST be after JSON body parser)
+  app.use(graphqlUploadExpress({ maxFileSize: 500000000, maxFiles: 10 })); // 500MB max file size
   
   // Serve static files for log viewer
   app.use('/logs', express.static(join(__dirname, '../public')));

@@ -41,16 +41,20 @@ COPY backend/prisma ./prisma
 COPY backend/package.json ./package.json
 COPY backend/package-lock.json* ./
 COPY backend/bun.lockb* ./
-# COPY backend/entrypoint.sh ./entrypoint.sh
+COPY backend/entrypoint.sh ./entrypoint.sh
 
-# Install production dependencies only (no devDependencies)
+# Install dependencies with prisma CLI (needed for client generation)
 # Using frozen-lockfile ensures exact versions
-RUN bun install --frozen-lockfile --production
+# Note: Keep full dependencies (not just --production) so we can generate Prisma client
+RUN bun install --frozen-lockfile
+
+# Generate Prisma client at build time
+# This creates @prisma/client for runtime use
+RUN bun prisma generate
 
 # Set permissions
-# RUN chown -R nestjs:nodejs /app
-# RUN chmod +x ./entrypoint.sh && \
-#     chown -R nestjs:nodejs /app
+RUN chown -R nestjs:nodejs /app && \
+    chmod +x ./entrypoint.sh
 
 # Switch to non-root user for security
 USER nestjs
@@ -63,7 +67,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:4000/health || exit 1
 
 # Entry point for migrations and startup
-# ENTRYPOINT ["dumb-init", "./entrypoint.sh"]
+ENTRYPOINT ["dumb-init", "./entrypoint.sh"]
 
 # Start using Bun runtime (3-4x faster than Node.js)
 CMD ["bun", "run", "start:prod"]
