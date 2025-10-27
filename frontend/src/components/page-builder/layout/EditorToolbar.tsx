@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -48,6 +49,7 @@ import { ImportTemplateDialog } from '@/components/page-builder/templates';
 import { PageTemplate, PageElement, ImportTemplateData } from '@/types/template';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useToast } from '@/hooks/use-toast';
+import { GET_PAGE_BY_ID } from '@/graphql/queries/pages';
 
 interface EditorToolbarProps {
   editorMode: 'visual' | 'code';
@@ -131,12 +133,28 @@ export function EditorToolbar({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Load page settings when dialog opens
+  // Load page settings from GraphQL
+  const { data: pageData } = useQuery(GET_PAGE_BY_ID, {
+    variables: { id: pageId },
+    skip: !pageId,
+    errorPolicy: 'all'
+  });
+
+  // Update page settings when data loads
   useEffect(() => {
-    if (isSettingsOpen && pageId) {
-      loadPageSettings();
+    if (pageData?.getPageById) {
+      const page = pageData.getPageById;
+      setPageSettings(prev => ({
+        ...prev,
+        pageTitle: page.title || '',
+        pageDescription: page.description || '',
+        pageSlug: page.slug || '',
+        seoTitle: page.seoTitle || '',
+        seoDescription: page.seoDescription || '',
+        seoKeywords: Array.isArray(page.seoKeywords) ? page.seoKeywords.join(', ') : '',
+      }));
     }
-  }, [isSettingsOpen, pageId]);
+  }, [pageData]);
 
   // Update pageTitle in state when prop changes
   useEffect(() => {
@@ -144,51 +162,6 @@ export function EditorToolbar({
       setPageSettings(prev => ({ ...prev, pageTitle }));
     }
   }, [pageTitle]);
-
-  // Load page settings from API
-  const loadPageSettings = async () => {
-    if (!pageId) return;
-    
-    try {
-      setIsSettingsLoading(true);
-      const response = await fetch(`/api/pages/${pageId}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to load page settings');
-      }
-
-      const data = await response.json();
-      
-      if (data.page) {
-        const page = data.page;
-        setPageSettings(prev => ({
-          ...prev,
-          pageTitle: page.title || '',
-          pageDescription: page.description || '',
-          pageSlug: page.slug || '',
-          seoTitle: page.seoTitle || '',
-          seoDescription: page.metaDescription || '',
-          seoKeywords: page.keywords || '',
-          isPublished: page.isPublished ?? true,
-          showInNavigation: page.showInNavigation ?? true,
-          allowIndexing: page.allowIndexing ?? true,
-          requireAuth: page.requireAuth ?? false,
-          customCSS: page.customCSS || '',
-          customJS: page.customJS || '',
-          headCode: page.headCode || '',
-        }));
-      }
-    } catch (error) {
-      console.error('Error loading page settings:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load page settings. Using defaults.',
-        type: 'error',
-      });
-    } finally {
-      setIsSettingsLoading(false);
-    }
-  };
 
   // Handle page settings change
   const handleSettingChange = (field: string, value: any) => {
