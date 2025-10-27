@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { usePage } from '@/hooks/usePageBuilder';
-import { Page, PageBlock } from '@/types/page-builder';
+import { Page, PageBlock, PageStatus } from '@/types/page-builder';
 
 /**
  * Page State Context - Manages page and blocks state
@@ -41,8 +41,25 @@ interface PageStateProviderProps {
 
 export function PageStateProvider({ children, pageId }: PageStateProviderProps) {
   // Page state
-  const [isNewPageMode, setIsNewPageMode] = useState(!pageId);
-  const [editingPage, setEditingPageState] = useState<Page | null>(null);
+  const isNewPageModeBool = !pageId;
+  const [isNewPageMode, setIsNewPageMode] = useState(isNewPageModeBool);
+  
+  // Initialize editingPage with default values for new page mode
+  const [editingPage, setEditingPageState] = useState<Page | null>(
+    isNewPageModeBool ? {
+      id: '',
+      title: 'Untitled Page',
+      slug: 'untitled-page',
+      content: {},
+      status: PageStatus.DRAFT,
+      blocks: [],
+      seoTitle: '',
+      seoDescription: '',
+      seoKeywords: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } : null
+  );
   
   // Blocks state
   const [blocks, setBlocksState] = useState<PageBlock[]>([]);
@@ -69,12 +86,12 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
     setDraggedBlockState(block);
   }, []);
   
-  // Initialize editing page when page loads
+  // Initialize editing page when page loads (for existing pages)
   useEffect(() => {
-    if (page && !editingPage) {
+    if (page && !isNewPageMode) {
       setEditingPageState(page);
     }
-  }, [page, editingPage]);
+  }, [page, isNewPageMode]);
   
   // Initialize blocks from page
   useEffect(() => {
