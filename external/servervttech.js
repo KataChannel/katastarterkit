@@ -176,7 +176,7 @@ app.post('/api/employees', async (req, res) => {
         const config = {
             method: 'post',
             maxBodyLength: Infinity,
-            url: 'https://tmtaza.vttechsolution.com/Admin/User/?handler=LoadUser&limit=10000',
+            url: 'https://tmtaza.vttechsolution.com/Employee/EmployeeList/?handler=LoadataEmployee',
             headers: {
                 'Cookie': cookie,
                 'Xsrf-Token': xsrfToken,
@@ -187,6 +187,8 @@ app.post('/api/employees', async (req, res) => {
 
         console.log('Fetching employees from VTTECH API...');
         const response = await axios.request(config);
+        console.log('response',response);
+        
         const decodedData = decompressVTTECHData(response.data);
 
         res.json({
