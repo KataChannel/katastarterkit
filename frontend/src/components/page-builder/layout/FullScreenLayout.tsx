@@ -30,7 +30,7 @@ export function FullScreenLayout({
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
   
   // Get block selection and loading state from context
-  const { selectedBlockId, loading, editingPage } = usePageState();
+  const { selectedBlockId, loading, editingPage, setEditingPage } = usePageState();
   const { handleSelectBlock } = usePageActions();
 
   // GraphQL mutation for updating page
@@ -38,7 +38,7 @@ export function FullScreenLayout({
 
   // Handle saving global page settings
   const handleSettingsSave = useCallback(async (settings: any) => {
-    if (!editingPage?.id) {
+    if (!editingPage?.id && editingPage?.id !== '') {
       toast.error('No page selected');
       return;
     }
@@ -52,11 +52,36 @@ export function FullScreenLayout({
         seoKeywords: settings.seoKeywords ? settings.seoKeywords.split(',').map((k: string) => k.trim()) : [],
       };
 
+      // For new pages (no ID), just update local state
+      if (!editingPage?.id) {
+        setEditingPage({
+          ...editingPage,
+          title: settings.pageTitle,
+          slug: settings.pageSlug,
+          seoTitle: settings.seoTitle,
+          seoDescription: settings.seoDescription,
+          seoKeywords: settings.seoKeywords ? settings.seoKeywords.split(',').map((k: string) => k.trim()) : [],
+        });
+        toast.success('Page settings updated');
+        return;
+      }
+
+      // For existing pages, update via GraphQL
       await updatePageMutation({
         variables: {
           id: editingPage.id,
           input: updateInput,
         },
+      });
+
+      // Also update local state
+      setEditingPage({
+        ...editingPage,
+        title: settings.pageTitle,
+        slug: settings.pageSlug,
+        seoTitle: settings.seoTitle,
+        seoDescription: settings.seoDescription,
+        seoKeywords: settings.seoKeywords ? settings.seoKeywords.split(',').map((k: string) => k.trim()) : [],
       });
 
       toast.success('Global settings saved successfully');
@@ -65,7 +90,7 @@ export function FullScreenLayout({
       toast.error('Failed to save global settings');
       throw error;
     }
-  }, [editingPage?.id, updatePageMutation]);
+  }, [editingPage, updatePageMutation, setEditingPage]);
 
   return (
     <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">
