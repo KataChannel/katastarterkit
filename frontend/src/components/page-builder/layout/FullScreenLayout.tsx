@@ -8,7 +8,7 @@ import { EditorFooter } from './EditorFooter';
 import { LeftPanel } from '../panels/LeftPanel/LeftPanel';
 import { RightPanel } from '../panels/RightPanel/RightPanel';
 import { usePageState, usePageActions } from '../PageBuilderProvider';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 import { UPDATE_PAGE } from '@/graphql/queries/pages';
 import { UpdatePageInput } from '@/types/page-builder';
 
@@ -32,6 +32,7 @@ export function FullScreenLayout({
   // Get block selection and loading state from context
   const { selectedBlockId, loading, editingPage, setEditingPage } = usePageState();
   const { handleSelectBlock } = usePageActions();
+  const { toast } = useToast();
 
   // GraphQL mutation for updating page
   const [updatePageMutation] = useMutation(UPDATE_PAGE);
@@ -39,7 +40,11 @@ export function FullScreenLayout({
   // Handle saving global page settings
   const handleSettingsSave = useCallback(async (settings: any) => {
     if (!editingPage) {
-      toast.error('No page selected');
+      toast({
+        title: 'Error',
+        description: 'No page selected',
+        type: 'error',
+      });
       return;
     }
 
@@ -69,7 +74,11 @@ export function FullScreenLayout({
           seoDescription: settings.seoDescription,
           seoKeywords: seoKeywordsArray,
         });
-        toast.success('Page settings updated');
+        toast({
+          title: 'Success',
+          description: 'Page settings updated',
+          type: 'success',
+        });
         return;
       }
 
@@ -91,13 +100,21 @@ export function FullScreenLayout({
         seoKeywords: seoKeywordsArray,
       });
 
-      toast.success('Global settings saved successfully');
+      toast({
+        title: 'Success',
+        description: 'Global settings saved successfully',
+        type: 'success',
+      });
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast.error('Failed to save global settings');
+      toast({
+        title: 'Error',
+        description: 'Failed to save global settings',
+        type: 'error',
+      });
       throw error;
     }
-  }, [editingPage, updatePageMutation, setEditingPage]);
+  }, [editingPage, updatePageMutation, setEditingPage, toast]);
 
   return (
     <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">
