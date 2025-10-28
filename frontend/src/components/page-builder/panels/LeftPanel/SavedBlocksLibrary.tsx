@@ -2,17 +2,19 @@
  * SavedBlocksLibrary Component
  * Manages user-saved block combinations for quick reuse
  * Features: search, filter, export/import, double-click apply
+ * 
+ * Refactored to use shared hooks:
+ * - useFilteredAndGrouped: Filtering and grouping logic
+ * - useCategoryToggle: Category expansion state
  */
 
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { 
-  MoreVertical, 
   Plus, 
   Search, 
   Copy, 
@@ -23,16 +25,11 @@ import {
   ChevronDown,
   Package,
   Zap,
-  Heart,
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { usePageState, usePageActions } from '@/components/page-builder/PageBuilderProvider';
+import { useFilteredAndGrouped } from '@/components/page-builder/hooks/useFilteredAndGrouped';
+import { useCategoryToggle } from '@/components/page-builder/hooks/useCategoryToggle';
+import { LibraryCard } from '@/components/page-builder/components/LibraryCard';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { pageBuilderLogger, LOG_OPERATIONS } from '@/components/page-builder/utils/pageBuilderLogger';
@@ -53,147 +50,9 @@ interface SavedBlock {
 
 const SAVED_BLOCKS_KEY = 'kata_saved_blocks';
 
-// SavedBlockCard Component
-function SavedBlockCard({ 
-  block, 
-  onApply, 
-  onDuplicate, 
-  onDelete,
-  onToggleBookmark,
-}: { 
-  block: SavedBlock;
-  onApply: (block: SavedBlock) => void;
-  onDuplicate: (block: SavedBlock) => void;
-  onDelete: (id: string) => void;
-  onToggleBookmark?: (id: string) => void;
-}) {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleDoubleClick = () => {
-    pageBuilderLogger.info('BLOCK_APPLY', 'Double-click applying saved block', { blockId: block.id });
-    onApply(block);
-  };
-
-  const daysAgo = Math.floor((Date.now() - new Date(block.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-  const isRecent = daysAgo <= 7;
-
-  return (
-    <Card
-      className={cn(
-        'overflow-hidden hover:border-primary/50 hover:shadow-md transition-all cursor-pointer',
-        isHovered && 'border-primary/50 shadow-md'
-      )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onDoubleClick={handleDoubleClick}
-      title="Double-click to apply saved block"
-    >
-      {/* Preview Bar */}
-      <div className="h-1 bg-gradient-to-r from-primary/60 to-primary/20" />
-
-      {/* Content */}
-      <div className="p-2.5 sm:p-3">
-        <div className="flex items-start justify-between mb-1.5 sm:mb-2 gap-2">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <h4 className="font-semibold text-xs sm:text-sm truncate">{block.name}</h4>
-              {isRecent && (
-                <Badge className="text-[9px] sm:text-[10px] h-4 sm:h-5 px-1 bg-blue-500 hover:bg-blue-600 flex-shrink-0">
-                  ✨ New
-                </Badge>
-              )}
-            </div>
-            {block.description && (
-              <p className="text-[10px] sm:text-xs text-gray-600 line-clamp-2">{block.description}</p>
-            )}
-          </div>
-          
-          <div className="flex items-center gap-1">
-            {/* Bookmark Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                'h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0 transition-colors',
-                block.isBookmarked 
-                  ? 'text-red-500 hover:text-red-600' 
-                  : 'text-gray-400 hover:text-red-500'
-              )}
-              onClick={() => onToggleBookmark?.(block.id)}
-              title={block.isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
-            >
-              <Heart className={cn('h-4 w-4 sm:h-5 sm:w-5', block.isBookmarked && 'fill-current')} />
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className={cn(
-                    'h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0 transition-opacity',
-                    isHovered ? 'opacity-100' : 'opacity-0'
-                  )}
-                >
-                  <MoreVertical className="h-3 w-3 sm:h-4 sm:w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onApply(block)} className="text-xs sm:text-sm">
-                <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                Apply to Page
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDuplicate(block)} className="text-xs sm:text-sm">
-                <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                Duplicate
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={() => onDelete(block.id)}
-                className="text-red-600 text-xs sm:text-sm"
-              >
-                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-500 flex-wrap gap-1">
-          <div className="flex items-center gap-1 sm:gap-1.5">
-            <Badge variant="secondary" className="text-[9px] sm:text-[10px] h-5 sm:h-6 px-1.5 sm:px-2 gap-1">
-              <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              {block.blocks.length}
-            </Badge>
-            <span className="flex items-center gap-0.5 sm:gap-1">
-              <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-              {new Date(block.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-            </span>
-          </div>
-          
-          <Button
-            size="sm"
-            variant={isHovered ? 'default' : 'outline'}
-            onClick={(e) => {
-              e.stopPropagation();
-              onApply(block);
-            }}
-            className="h-5 sm:h-6 px-1.5 sm:px-2 text-[9px] sm:text-xs"
-          >
-            <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5" />
-            <span className="hidden sm:inline">Apply</span>
-          </Button>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
 export function SavedBlocksLibrary() {
   const [savedBlocks, setSavedBlocks] = useState<SavedBlock[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['custom']));
 
   const { blocks } = usePageState();
   const { handleAddBlock } = usePageActions();
@@ -345,39 +204,21 @@ export function SavedBlocksLibrary() {
     input.click();
   };
 
-  // Filter and group saved blocks
-  const filteredBlocks = useMemo(() => {
-    return savedBlocks.filter(block => {
-      const matchesSearch = block.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           block.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           block.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchesSearch;
-    });
-  }, [savedBlocks, searchQuery]);
+  // Use shared hooks for filtering, grouping, and category toggle
+  const { expandedCategories, toggleCategory, expandAll, collapseAll } = useCategoryToggle({
+    initialState: { 'custom': true },
+  });
 
-  const groupedBlocks = useMemo(() => {
-    const grouped: Record<string, SavedBlock[]> = {};
-    filteredBlocks.forEach(block => {
-      if (!grouped[block.category]) {
-        grouped[block.category] = [];
-      }
-      grouped[block.category].push(block);
-    });
-    return grouped;
-  }, [filteredBlocks]);
-
-  const toggleCategory = (categoryId: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
+  const { groupedItems: groupedBlocks, isEmpty } = useFilteredAndGrouped(
+    savedBlocks,
+    searchQuery,
+    {
+      searchFields: ['name', 'description', 'tags'],
+      groupByField: 'category',
     }
-    setExpandedCategories(newExpanded);
-  };
+  );
 
   const categories = Object.keys(groupedBlocks);
-  const isExpanded = (cat: string) => expandedCategories.has(cat);
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
@@ -458,7 +299,7 @@ export function SavedBlocksLibrary() {
               Save Current Selection
             </Button>
           </div>
-        ) : filteredBlocks.length === 0 ? (
+        ) : isEmpty ? (
           // No Results
           <div className="flex flex-col items-center justify-center text-gray-400 text-xs sm:text-sm py-8 sm:py-12">
             <Search className="w-10 h-10 sm:w-12 sm:h-12 mb-3 opacity-50" />
@@ -470,7 +311,7 @@ export function SavedBlocksLibrary() {
           <div className="space-y-4 sm:space-y-6">
             {categories.map((category) => {
               const categoryBlocks = groupedBlocks[category] || [];
-              const expanded = isExpanded(category);
+              const expanded = expandedCategories[category] || false;
 
               return (
                 <div key={category}>
@@ -492,16 +333,49 @@ export function SavedBlocksLibrary() {
 
                   {expanded && (
                     <div className="space-y-2 sm:space-y-2.5 ml-0 sm:ml-2 pl-0 sm:pl-4 border-l border-gray-200 sm:border-l-2">
-                      {categoryBlocks.map((block) => (
-                        <SavedBlockCard
-                          key={block.id}
-                          block={block}
-                          onApply={applySavedBlock}
-                          onDuplicate={duplicateSavedBlock}
-                          onDelete={deleteSavedBlock}
-                          onToggleBookmark={toggleBookmarkBlock}
-                        />
-                      ))}
+                      {categoryBlocks.map((block: SavedBlock) => {
+                        const daysAgo = Math.floor((Date.now() - new Date(block.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+                        const badge = daysAgo <= 7 ? { label: '✨ New', variant: 'default' as const } : undefined;
+
+                        return (
+                          <LibraryCard
+                            key={block.id}
+                            id={block.id}
+                            title={block.name}
+                            description={block.description}
+                            badge={badge}
+                            isBookmarked={block.isBookmarked}
+                            onBookmarkToggle={() => toggleBookmarkBlock(block.id)}
+                            onDoubleClick={() => {
+                              pageBuilderLogger.info('BLOCK_APPLY', 'Double-click applying saved block', { blockId: block.id });
+                              applySavedBlock(block);
+                            }}
+                            metadata={[
+                              { label: 'Blocks', value: block.blocks.length },
+                              { label: 'Created', value: new Date(block.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) },
+                            ]}
+                            actions={[
+                              {
+                                label: 'Apply to Page',
+                                icon: <Plus className="w-4 h-4" />,
+                                onClick: () => applySavedBlock(block),
+                              },
+                              {
+                                label: 'Duplicate',
+                                icon: <Copy className="w-4 h-4" />,
+                                onClick: () => duplicateSavedBlock(block),
+                              },
+                              { separator: true, label: '', onClick: () => {} },
+                              {
+                                label: 'Delete',
+                                icon: <Trash2 className="w-4 h-4" />,
+                                variant: 'destructive',
+                                onClick: () => deleteSavedBlock(block.id),
+                              },
+                            ]}
+                          />
+                        );
+                      })}
                     </div>
                   )}
                 </div>
