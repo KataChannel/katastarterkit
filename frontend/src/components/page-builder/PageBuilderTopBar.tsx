@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Eye,
   Code,
@@ -277,6 +277,260 @@ const TemplatesMenu = React.memo(function TemplatesMenu({
 });
 
 /**
+ * MEMOIZED SUB-COMPONENT: UnifiedSettingsDialog
+ * Consolidated dialog combining Page Settings + Global Settings in tabs
+ * 
+ * Tabs:
+ * - PAGE SETTINGS: General, Layout, SEO (from PageSettingsForm)
+ * - GLOBAL SETTINGS: SEO, Page Options, Custom Code (developer-level)
+ */
+const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
+  isOpen,
+  onOpenChange,
+  editingPage,
+  onPageUpdate,
+  pageSettings,
+  onSettingChange,
+  isLoading,
+  onSave,
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  editingPage: any;
+  onPageUpdate: (page: any) => void;
+  pageSettings: any;
+  onSettingChange: (field: string, value: any) => void;
+  isLoading: boolean;
+  onSave: () => Promise<void>;
+}) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('page');
+
+  const handleSave = useCallback(async () => {
+    setIsSaving(true);
+    try {
+      await onSave();
+    } finally {
+      setIsSaving(false);
+    }
+  }, [onSave]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="flex flex-col max-w-3xl max-h-[90vh] p-0">
+        <DialogHeader className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            Settings
+          </DialogTitle>
+          <DialogDescription>
+            Configure page settings and global developer options
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Tabs Navigation */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+          <TabsList className="mx-6 mt-4 grid w-auto grid-cols-2">
+            <TabsTrigger value="page">Page Settings</TabsTrigger>
+            <TabsTrigger value="global">Global Settings</TabsTrigger>
+          </TabsList>
+
+          <div className="flex-1 overflow-y-auto px-6 py-4 border-b border-gray-200">
+            {/* PAGE SETTINGS TAB */}
+            <TabsContent value="page" className="space-y-6 mt-0">
+              {editingPage ? (
+                <PageSettingsForm
+                  page={editingPage}
+                  onUpdate={onPageUpdate}
+                />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No page selected
+                </div>
+              )}
+            </TabsContent>
+
+            {/* GLOBAL SETTINGS TAB */}
+            <TabsContent value="global" className="space-y-6 mt-0">
+              {/* SEO Settings */}
+              <div className="space-y-4 border-t pt-4">
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  🔍 SEO Settings
+                </h3>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="seo-title">SEO Title</Label>
+                    <Input
+                      id="seo-title"
+                      placeholder="SEO optimized title..."
+                      value={pageSettings.seoTitle}
+                      onChange={(e) => onSettingChange('seoTitle', e.target.value)}
+                      disabled={isLoading || isSaving}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-gray-500">Recommended: 50-60 characters</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="seo-description">Meta Description</Label>
+                    <Textarea
+                      id="seo-description"
+                      placeholder="SEO meta description..."
+                      value={pageSettings.seoDescription}
+                      onChange={(e) => onSettingChange('seoDescription', e.target.value)}
+                      disabled={isLoading || isSaving}
+                      rows={3}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-gray-500">Recommended: 150-160 characters</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="seo-keywords">Keywords</Label>
+                    <Input
+                      id="seo-keywords"
+                      placeholder="keyword1, keyword2, keyword3"
+                      value={pageSettings.seoKeywords}
+                      onChange={(e) => onSettingChange('seoKeywords', e.target.value)}
+                      disabled={isLoading || isSaving}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Page Options */}
+              <div className="space-y-4 border-t pt-4">
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  🎛️ Page Options
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Published</Label>
+                      <p className="text-xs text-gray-500">Make this page publicly visible</p>
+                    </div>
+                    <Switch
+                      checked={pageSettings.isPublished}
+                      onCheckedChange={(checked) => onSettingChange('isPublished', checked)}
+                      disabled={isLoading || isSaving}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Show in Navigation</Label>
+                      <p className="text-xs text-gray-500">Include in main navigation menu</p>
+                    </div>
+                    <Switch
+                      checked={pageSettings.showInNavigation}
+                      onCheckedChange={(checked) => onSettingChange('showInNavigation', checked)}
+                      disabled={isLoading || isSaving}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Allow Indexing</Label>
+                      <p className="text-xs text-gray-500">Allow search engines to index this page</p>
+                    </div>
+                    <Switch
+                      checked={pageSettings.allowIndexing}
+                      onCheckedChange={(checked) => onSettingChange('allowIndexing', checked)}
+                      disabled={isLoading || isSaving}
+                      defaultChecked
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Require Authentication</Label>
+                      <p className="text-xs text-gray-500">Require users to login to view</p>
+                    </div>
+                    <Switch
+                      checked={pageSettings.requireAuth}
+                      onCheckedChange={(checked) => onSettingChange('requireAuth', checked)}
+                      disabled={isLoading || isSaving}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Custom Code */}
+              <div className="space-y-4 border-t pt-4">
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  💻 Custom Code
+                </h3>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="custom-css">Custom CSS</Label>
+                    <Textarea
+                      id="custom-css"
+                      placeholder=".my-class { color: red; }"
+                      value={pageSettings.customCSS}
+                      onChange={(e) => onSettingChange('customCSS', e.target.value)}
+                      disabled={isLoading || isSaving}
+                      rows={4}
+                      className="w-full font-mono text-xs"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="custom-js">Custom JavaScript</Label>
+                    <Textarea
+                      id="custom-js"
+                      placeholder="console.log('Hello');"
+                      value={pageSettings.customJS}
+                      onChange={(e) => onSettingChange('customJS', e.target.value)}
+                      disabled={isLoading || isSaving}
+                      rows={4}
+                      className="w-full font-mono text-xs"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="head-code">Head Code (Meta tags, Analytics)</Label>
+                    <Textarea
+                      id="head-code"
+                      placeholder="<meta name='...'/>"
+                      value={pageSettings.headCode}
+                      onChange={(e) => onSettingChange('headCode', e.target.value)}
+                      disabled={isLoading || isSaving}
+                      rows={4}
+                      className="w-full font-mono text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </div>
+        </Tabs>
+
+        <DialogFooter className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex-shrink-0">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isLoading || isSaving}
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={isLoading || isSaving}>
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save Settings'
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+});
+
+/**
  * MEMOIZED SUB-COMPONENT: GlobalSettingsDialog
  * Dialog for developer-level settings (SEO, Page Options, Custom Code)
  */
@@ -510,7 +764,6 @@ const ToolbarRightSection = React.memo(function ToolbarRightSection({
   onSave,
   onExit,
   onTemplateClick,
-  onPageSettingsClick,
   onSettingsClick,
   isSaving,
   isLoading,
@@ -523,7 +776,6 @@ const ToolbarRightSection = React.memo(function ToolbarRightSection({
   onSave?: () => void | Promise<void>;
   onExit?: () => void;
   onTemplateClick?: () => void;
-  onPageSettingsClick?: () => void;
   onSettingsClick?: () => void;
   isSaving: boolean;
   isLoading: boolean;
@@ -591,18 +843,6 @@ const ToolbarRightSection = React.memo(function ToolbarRightSection({
           />
         </>
       )}
-
-      {/* Page Settings */}
-      <Button
-        variant="ghost"
-        size="icon"
-        title="Page Settings (Title, Slug, Status)"
-        onClick={onPageSettingsClick}
-        disabled={isLoading}
-      >
-        <FileDown className="w-4 h-4" />
-      </Button>
-
       {/* Global Settings */}
       <Button
         variant="ghost"
@@ -705,14 +945,14 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
 
   // Context
   const { editingPage, blocks, setEditingPage } = usePageState();
-  const { showPreview, setShowPreview, showPageSettings, setShowPageSettings } = useUIState();
+  const { showPreview, setShowPreview } = useUIState();
   const { toast } = useToast();
   const { addTemplate, importFromJSON } = useTemplates();
 
   // Local state
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isUnifiedSettingsOpen, setIsUnifiedSettingsOpen] = useState(false);
   const [isSettingsLoading, setIsSettingsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -846,7 +1086,7 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
           description: 'Global settings have been updated successfully.',
           type: 'success',
         });
-        setIsSettingsOpen(false);
+        setIsUnifiedSettingsOpen(false);
       }
     } catch (error) {
       toast({
@@ -910,8 +1150,7 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
             onSave={handleSavePage}
             onExit={onExit}
             onTemplateClick={() => setIsSaveDialogOpen(true)}
-            onPageSettingsClick={() => setShowPageSettings(true)}
-            onSettingsClick={() => setIsSettingsOpen(true)}
+            onSettingsClick={() => setIsUnifiedSettingsOpen(true)}
             isSaving={isSaving}
             isLoading={isLoading}
             showEditorControls={showEditorControls}
@@ -934,43 +1173,25 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
       </div>
 
       {/* Page Settings Dialog */}
-      <Dialog open={showPageSettings} onOpenChange={setShowPageSettings}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Page Settings</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6">
-            {editingPage ? (
-              <PageSettingsForm
-                page={editingPage}
-                onUpdate={(updatedPage) => {
-                  // Update editing page in context
-                  setEditingPage(updatedPage);
-                  
-                  // Also sync to global settings if SEO fields changed
-                  setPageSettings((prev) => ({
-                    ...prev,
-                    seoTitle: updatedPage.seoTitle || '',
-                    seoDescription: updatedPage.seoDescription || '',
-                    seoKeywords: Array.isArray(updatedPage.seoKeywords) 
-                      ? updatedPage.seoKeywords.join(', ') 
-                      : '',
-                  }));
-                }}
-              />
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                No page selected
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Global Settings Dialog */}
-      <GlobalSettingsDialog
-        isOpen={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
+      {/* CONSOLIDATED: Merged Page Settings + Global Settings into UnifiedSettingsDialog */}
+      <UnifiedSettingsDialog
+        isOpen={isUnifiedSettingsOpen}
+        onOpenChange={setIsUnifiedSettingsOpen}
+        editingPage={editingPage}
+        onPageUpdate={(updatedPage) => {
+          // Update editing page in context
+          setEditingPage(updatedPage);
+          
+          // Also sync to global settings if SEO fields changed
+          setPageSettings((prev) => ({
+            ...prev,
+            seoTitle: updatedPage.seoTitle || '',
+            seoDescription: updatedPage.seoDescription || '',
+            seoKeywords: Array.isArray(updatedPage.seoKeywords) 
+              ? updatedPage.seoKeywords.join(', ') 
+              : '',
+          }));
+        }}
         pageSettings={pageSettings}
         onSettingChange={handleSettingChange}
         isLoading={isLoading || isSettingsLoading}
