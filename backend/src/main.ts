@@ -39,8 +39,8 @@ async function bootstrap() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
   
-  // Configure file upload middleware (MUST be after JSON body parser)
-  app.use(graphqlUploadExpress({ maxFileSize: 500000000, maxFiles: 10 })); // 500MB max file size
+  // Configure file upload middleware ONLY for GraphQL endpoint (not for REST API)
+  app.use('/graphql', graphqlUploadExpress({ maxFileSize: 500000000, maxFiles: 10 })); // 500MB max file size
   
   // Serve static files for log viewer
   app.use('/logs', express.static(join(__dirname, '../public')));

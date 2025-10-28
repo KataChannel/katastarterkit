@@ -11,6 +11,7 @@ import {
 import { Category, CreateCategoryInput, UpdateCategoryInput } from '@/graphql/category.queries';
 import { CategoryTree } from '@/components/category';
 import { CategoryForm } from '@/components/category';
+import { ImportExportDialog } from '@/components/admin/ImportExportDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -19,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus, Loader2, FolderTree } from 'lucide-react';
+import { Plus, Loader2, FolderTree, Download, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 type DialogMode = 'create' | 'edit' | 'create-child' | null;
@@ -29,6 +30,7 @@ export default function CategoriesPage() {
   const [dialogMode, setDialogMode] = React.useState<DialogMode>(null);
   const [selectedCategory, setSelectedCategory] = React.useState<Category | null>(null);
   const [parentCategory, setParentCategory] = React.useState<Category | null>(null);
+  const [importDialogOpen, setImportDialogOpen] = React.useState(false);
 
   const { categoryTree, loading, error, refetch } = useCategoryTree();
   const { createCategory, loading: creating } = useCreateCategory();
@@ -92,6 +94,34 @@ export default function CategoriesPage() {
     setParentCategory(null);
   };
 
+  const handleExport = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const backendUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '') || 'http://localhost:12001';
+      const response = await fetch(`${backendUrl}/api/category-import-export/export`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Export failed');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `DanhMuc_${Date.now()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success('Đã export danh mục thành công');
+    } catch (error) {
+      toast.error('Không thể export danh mục');
+    }
+  };
+
   const totalCategories = React.useMemo(() => {
     const countCategories = (categories: Category[]): number => {
       return categories.reduce((count, cat) => {
@@ -124,10 +154,20 @@ export default function CategoriesPage() {
             Quản lý cây danh mục sản phẩm
           </p>
         </div>
-        <Button onClick={handleCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Tạo danh mục mới
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import Excel
+          </Button>
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            Export Excel
+          </Button>
+          <Button onClick={handleCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Tạo danh mục mới
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -230,6 +270,20 @@ export default function CategoriesPage() {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Import/Export Dialog */}
+      <ImportExportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        title="Import Danh Mục từ Excel"
+        description="Tải file mẫu, điền thông tin, và upload để import hàng loạt danh mục"
+        templateUrl="/api/category-import-export/template"
+        importUrl="/api/category-import-export/import"
+        onImportSuccess={() => {
+          refetch();
+          toast.success('Import danh mục thành công');
+        }}
+      />
     </div>
   );
 }
