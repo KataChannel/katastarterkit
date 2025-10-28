@@ -383,6 +383,7 @@ type AuthResponse {
 
 """The type of a page block"""
 enum BlockType {
+  BOOKMARK
   BUTTON
   CARD
   CAROUSEL
@@ -403,6 +404,7 @@ enum BlockType {
   PRODUCT_DETAIL
   PRODUCT_LIST
   ROW
+  SEARCH
   SECTION
   SPACER
   STATS

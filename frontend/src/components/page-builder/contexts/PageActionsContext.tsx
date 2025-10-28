@@ -114,6 +114,20 @@ export const DEFAULT_BLOCK_CONTENT = {
     style: {}
   },
   [BlockType.VIDEO]: { url: '', title: '', autoplay: false, controls: true, muted: false, loop: false, style: {} },
+  [BlockType.SEARCH]: { 
+    placeholder: 'Tìm kiếm...', 
+    searchType: 'global',
+    showFilters: true,
+    showResults: true,
+    style: {} 
+  },
+  [BlockType.BOOKMARK]: {
+    bookmarks: [],
+    displayMode: 'list',
+    showCategories: true,
+    allowEdit: true,
+    style: {}
+  },
 } as const;
 
 /**

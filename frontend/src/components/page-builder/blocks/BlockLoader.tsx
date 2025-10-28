@@ -26,6 +26,8 @@ const CarouselBlock = lazy(() => import('./CarouselBlock'));
 const ProductListBlock = lazy(() => import('./ProductListBlock').then(m => ({ default: m.ProductListBlock })));
 const ProductDetailBlock = lazy(() => import('./ProductDetailBlock').then(m => ({ default: m.ProductDetailBlock })));
 const VideoBlock = lazy(() => import('./VideoBlock').then(m => ({ default: m.VideoBlock })));
+const SearchBlock = lazy(() => import('./SearchBlock').then(m => ({ default: m.SearchBlock })));
+const BookmarkBlock = lazy(() => import('./BookmarkBlock').then(m => ({ default: m.BookmarkBlock })));
 
 /**
  * Block component map for lazy loading
@@ -50,6 +52,8 @@ export const LAZY_BLOCK_COMPONENTS: Record<BlockType | string, React.ComponentTy
   [BlockType.FAQ]: TextBlock,                  // Fallback: uses TextBlock
   [BlockType.CONTACT_FORM]: TextBlock,         // Fallback: uses TextBlock
   [BlockType.COMPLETED_TASKS]: TextBlock,      // Fallback: uses TextBlock
+  [BlockType.SEARCH]: SearchBlock,
+  [BlockType.BOOKMARK]: BookmarkBlock,
   
   // Container/Layout Blocks
   [BlockType.CONTAINER]: ContainerBlock,

@@ -35,6 +35,7 @@ import {
 import { usePageState, usePageActions } from '@/components/page-builder/PageBuilderProvider';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { pageBuilderLogger, LOG_OPERATIONS } from '@/components/page-builder/utils/pageBuilderLogger';
 
 interface SavedBlock {
   id: string;
@@ -69,7 +70,7 @@ function SavedBlockCard({
   const [isHovered, setIsHovered] = useState(false);
 
   const handleDoubleClick = () => {
-    console.log('[SavedBlocksLibrary] Double-click apply:', block.id);
+    pageBuilderLogger.info('BLOCK_APPLY', 'Double-click applying saved block', { blockId: block.id });
     onApply(block);
   };
 
@@ -209,7 +210,7 @@ export function SavedBlocksLibrary() {
         setSavedBlocks(JSON.parse(stored));
       }
     } catch (error) {
-      console.error('Error loading saved blocks:', error);
+      pageBuilderLogger.error('SAVED_BLOCKS_LOAD', 'Error loading saved blocks', { error });
       toast.error('Failed to load saved blocks');
     }
   };
@@ -219,7 +220,7 @@ export function SavedBlocksLibrary() {
       localStorage.setItem(SAVED_BLOCKS_KEY, JSON.stringify(blocks));
       setSavedBlocks(blocks);
     } catch (error) {
-      console.error('Error saving blocks:', error);
+      pageBuilderLogger.error('SAVED_BLOCKS_SAVE', 'Error saving blocks', { error });
       toast.error('Failed to save blocks');
     }
   };
@@ -260,7 +261,7 @@ export function SavedBlocksLibrary() {
       }
       toast.success(`Applied "${savedBlock.name}" to page`);
     } catch (error: any) {
-      console.error('Error applying saved block:', error);
+      pageBuilderLogger.error('SAVED_BLOCK_APPLY', 'Error applying saved block', { blockId: savedBlock.id, error });
       toast.error('Failed to apply saved block');
     }
   };

@@ -6,29 +6,9 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { 
-  Layout, 
+import {
   Plus,
-  Type,
-  Image,
-  Video,
-  Zap,
-  Layers,
-  Grid3x3,
-  Share2,
-  Users,
-  BarChart3,
-  HelpCircle,
-  Mail,
-  Phone,
-  Minus,
-  Box,
-  Square,
-  ShoppingCart,
-  MessageSquare,
-  LayoutGrid,
-  ArrowRightLeft,
-  ArrowUpDown,
+  Layout,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { BlockType } from '@/types/page-builder';
+import { BLOCK_TYPES, BLOCK_TYPE_GROUPS } from '@/constants/blockTypes';
+import { pageBuilderLogger, LOG_OPERATIONS } from './utils/pageBuilderLogger';
 
 
 /**
@@ -90,60 +72,14 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
   
   // Log droppable setup (dev only to prevent performance overhead)
   React.useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[PageBuilder] Canvas droppable setup:', {
-        hasRef: !!setCanvasRef,
-        isOver: isCanvasOver,
-      });
-    }
+    pageBuilderLogger.debug('CANVAS_SETUP', 'Canvas droppable initialized', {
+      hasRef: !!setCanvasRef,
+      isOver: isCanvasOver,
+    });
   }, [setCanvasRef, isCanvasOver]);
 
   // Block types grouped by category with lucide icons
-  const blockTypeGroups = [
-    {
-      category: 'Content Blocks',
-      blocks: [
-        { type: BlockType.TEXT, label: 'Text', Icon: Type },
-        { type: BlockType.IMAGE, label: 'Image', Icon: Image },
-        { type: BlockType.VIDEO, label: 'Video', Icon: Video },
-        { type: BlockType.BUTTON, label: 'Button', Icon: Square },
-        { type: BlockType.HERO, label: 'Hero', Icon: Layers },
-        { type: BlockType.CAROUSEL, label: 'Carousel', Icon: Share2 },
-        { type: BlockType.GALLERY, label: 'Gallery', Icon: LayoutGrid },
-        { type: BlockType.CARD, label: 'Card', Icon: Box },
-        { type: BlockType.TESTIMONIAL, label: 'Testimonial', Icon: MessageSquare },
-        { type: BlockType.TEAM, label: 'Team', Icon: Users },
-        { type: BlockType.STATS, label: 'Stats', Icon: BarChart3 },
-        { type: BlockType.FAQ, label: 'FAQ', Icon: HelpCircle },
-        { type: BlockType.CONTACT_FORM, label: 'Contact Form', Icon: Mail },
-        { type: BlockType.CONTACT_INFO, label: 'Contact Info', Icon: Phone },
-      ]
-    },
-    {
-      category: 'Container & Layout',
-      blocks: [
-        { type: BlockType.SECTION, label: 'Section', Icon: Box },
-        { type: BlockType.CONTAINER, label: 'Container', Icon: Layers },
-        { type: BlockType.GRID, label: 'Grid', Icon: Grid3x3 },
-        { type: BlockType.FLEX_ROW, label: 'Flex Row', Icon: ArrowRightLeft },
-        { type: BlockType.FLEX_COLUMN, label: 'Flex Column', Icon: ArrowUpDown },
-      ]
-    },
-    {
-      category: 'Utility Blocks',
-      blocks: [
-        { type: BlockType.DIVIDER, label: 'Divider', Icon: Minus },
-        { type: BlockType.SPACER, label: 'Spacer', Icon: Square },
-      ]
-    },
-    {
-      category: 'Dynamic & E-commerce',
-      blocks: [
-        { type: BlockType.DYNAMIC, label: 'Dynamic Block', Icon: Zap },
-        { type: BlockType.PRODUCT_LIST, label: 'Product List', Icon: ShoppingCart },
-      ]
-    },
-  ];
+  const blockTypeGroups = BLOCK_TYPE_GROUPS;
 
   // Flatten for dropdown rendering
   const commonBlockTypes = blockTypeGroups.flatMap(group => group.blocks);
@@ -154,7 +90,7 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
       await handleAddBlock(blockType);
       setIsAddingBlock(false);
     } catch (error) {
-      console.error('Failed to add block:', error);
+      pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_ADD, 'Failed to add block', { blockType, error });
     }
   }, [handleAddBlock]);
 
@@ -166,13 +102,13 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
         <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase">
           {group.category}
         </div>
-        {group.blocks.map(({ type, label, Icon }) => (
+        {group.blocks.map(({ type, label, icon: IconComponent }) => (
           <DropdownMenuItem 
             key={type}
             onClick={() => handleAddBlockClick(type)}
             className="cursor-pointer gap-2"
           >
-            <Icon size={16} className="text-gray-600" />
+            <IconComponent size={16} className="text-gray-600" />
             <span>{label}</span>
           </DropdownMenuItem>
         ))}

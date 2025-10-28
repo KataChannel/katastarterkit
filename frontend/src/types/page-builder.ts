@@ -20,6 +20,8 @@ export enum BlockType {
   FAQ = 'FAQ',
   CONTACT_FORM = 'CONTACT_FORM',
   COMPLETED_TASKS = 'COMPLETED_TASKS',
+  SEARCH = 'SEARCH',
+  BOOKMARK = 'BOOKMARK',
   
   // Container/Layout Blocks (for nested children)
   CONTAINER = 'CONTAINER',

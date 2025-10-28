@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { PageBlock, BlockType } from '@/types/page-builder';
-import { PageBuilderContext } from '../PageBuilderProvider';
+import { usePageState } from '../contexts';
 import { BlockLoader } from './BlockLoader';
 import BlockErrorBoundary from '../BlockErrorBoundary';
 
@@ -28,8 +28,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   depth = 0,
 }) => {
   // Get selected block ID from context for visual highlighting (optional - for editor only)
-  const context = useContext(PageBuilderContext);
-  const selectedBlockId = context?.selectedBlockId;
+  const { selectedBlockId } = usePageState();
   const isSelected = selectedBlockId === block.id;
 
   const commonProps = {
