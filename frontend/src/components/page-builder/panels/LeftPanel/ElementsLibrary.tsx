@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,8 @@ import {
 } from 'lucide-react';
 import { BlockType } from '@/types/page-builder';
 import { usePageActions } from '../../PageBuilderProvider';
+import { useFilteredAndGrouped } from '@/components/page-builder/hooks/useFilteredAndGrouped';
+import { useCategoryToggle } from '@/components/page-builder/hooks/useCategoryToggle';
 import { cn } from '@/lib/utils';
 
 interface ElementConfig {
@@ -281,41 +283,27 @@ function CategoryGroup({ category, config, elements, isExpanded, onToggle, count
 
 export function ElementsLibrary() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(['basic', 'layout'])
+
+  // Use shared hooks for category toggle and filtering
+  const { expandedCategories, toggleCategory } = useCategoryToggle({
+    initialState: { 'basic': true, 'layout': true },
+  });
+
+  const { groupedItems, itemCount: totalElements } = useFilteredAndGrouped(
+    elements,
+    searchQuery,
+    {
+      searchFields: ['label', 'description'],
+      groupByField: 'category',
+    }
   );
 
-  // Memoize filtered elements
-  const filteredElements = useMemo(() => {
-    return elements.filter((element) => {
-      const matchesSearch = element.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           element.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesSearch;
-    });
-  }, [searchQuery]);
-
-  // Group filtered elements by category
-  const groupedElements = useMemo(() => {
-    return Object.values(CATEGORY_CONFIG)
-      .map((config) => ({
-        category: config.id,
-        config,
-        elements: filteredElements.filter((el) => el.category === config.id),
-      }))
-      .filter((group) => group.elements.length > 0);
-  }, [filteredElements]);
-
-  const toggleCategory = (categoryId: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
-    }
-    setExpandedCategories(newExpanded);
-  };
-
-  const totalElements = filteredElements.length;
+  // Create grouped view with config
+  const groupedElements = Object.entries(groupedItems).map(([category, items]) => ({
+    category,
+    config: CATEGORY_CONFIG[category],
+    elements: items as ElementConfig[],
+  }));
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-white to-gray-50">
@@ -362,7 +350,7 @@ export function ElementsLibrary() {
                 category={group.category}
                 config={group.config}
                 elements={group.elements}
-                isExpanded={expandedCategories.has(group.category)}
+                isExpanded={expandedCategories[group.category] || false}
                 onToggle={() => toggleCategory(group.category)}
                 count={group.elements.length}
               />

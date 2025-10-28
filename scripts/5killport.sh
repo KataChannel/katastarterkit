@@ -1,41 +1,41 @@
 #!/bin/bash
 
-# Find and kill processes running on ports 14000 and 13000
-echo "Killing processes on ports 14000 and 13000..."
+# Find and kill processes running on ports 12001 and 12000
+echo "Killing processes on ports 12001 and 12000..."
 
-# Kill process on port 14000
-PID_14000=$(sudo lsof -ti:14000)
-if [ ! -z "$PID_14000" ]; then
-    sudo kill -9 $PID_14000
-    echo "Killed process $PID_14000 on port 14000"
+# Kill process on port 12001
+PID_12001=$(sudo lsof -ti:12001)
+if [ ! -z "$PID_12001" ]; then
+    sudo kill -9 $PID_12001
+    echo "Killed process $PID_12001 on port 12001"
 else
-    echo "No process found on port 14000"
+    echo "No process found on port 12001"
 fi
 
-PID_14002=$(sudo lsof -ti:14002)
-if [ ! -z "$PID_14002" ]; then
-    sudo kill -9 $PID_14002
-    echo "Killed process $PID_14002 on port 14002"
+PID_12001=$(sudo lsof -ti:12001)
+if [ ! -z "$PID_12001" ]; then
+    sudo kill -9 $PID_12001
+    echo "Killed process $PID_12001 on port 12001"
 else
-    echo "No process found on port 14002"
+    echo "No process found on port 12001"
 fi
 
-# Kill process on port 13000
-PID_13000=$(sudo lsof -ti:13000)
-if [ ! -z "$PID_13000" ]; then
-    sudo kill -9 $PID_13000
-    echo "Killed process $PID_13000 on port 13000"
+# Kill process on port 12000
+PID_12000=$(sudo lsof -ti:12000)
+if [ ! -z "$PID_12000" ]; then
+    sudo kill -9 $PID_12000
+    echo "Killed process $PID_12000 on port 12000"
 else
-    echo "No process found on port 13000"
+    echo "No process found on port 12000"
 fi
 
 
-PID_13002=$(sudo lsof -ti:13002)
-if [ ! -z "$PID_13002" ]; then
-    sudo kill -9 $PID_13002
-    echo "Killed process $PID_13002 on port 13002"
+PID_12000=$(sudo lsof -ti:12000)
+if [ ! -z "$PID_12000" ]; then
+    sudo kill -9 $PID_12000
+    echo "Killed process $PID_12000 on port 12000"
 else
-    echo "No process found on port 13002"
+    echo "No process found on port 12000"
 fi
 
 echo "Done!"
