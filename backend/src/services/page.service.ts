@@ -227,7 +227,25 @@ export class PageService {
       }
     }
 
-    const { blocks, ...pageData } = input;
+    const { blocks, isHomepage, ...pageData } = input;
+
+    // Handle homepage setting - only one page can be homepage
+    let homepageUpdate = {};
+    if (isHomepage !== undefined) {
+      if (isHomepage === true) {
+        // Reset all other pages' homepage flag
+        await this.prisma.page.updateMany({
+          where: {
+            id: { not: id },
+            isHomepage: true
+          },
+          data: { isHomepage: false }
+        });
+        homepageUpdate = { isHomepage: true };
+      } else {
+        homepageUpdate = { isHomepage: false };
+      }
+    }
 
     // Handle blocks update if provided
     let blocksUpdate = {};
@@ -476,6 +494,23 @@ export class PageService {
   // Get published pages for public access
   async findPublished(pagination?: PaginationInput): Promise<PaginatedPages> {
     return this.findMany(pagination, { status: PageStatus.PUBLISHED });
+  }
+
+  // Find homepage - the page marked as homepage
+  async findHomepage(): Promise<Page | null> {
+    const homepage = await this.prisma.page.findFirst({
+      where: {
+        isHomepage: true,
+        status: PageStatus.PUBLISHED
+      },
+      include: {
+        blocks: {
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
+
+    return homepage as Page | null;
   }
 
   // Duplicate page

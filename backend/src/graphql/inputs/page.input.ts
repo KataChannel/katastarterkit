@@ -143,6 +143,11 @@ export class CreatePageInput {
   @IsString()
   ogImage?: string;
 
+  @Field(() => Boolean, { defaultValue: false, nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isHomepage?: boolean;
+
   @Field(() => [CreatePageBlockInput], { nullable: true })
   @IsOptional()
   blocks?: CreatePageBlockInput[];
@@ -192,6 +197,11 @@ export class UpdatePageInput {
   @IsOptional()
   @IsString()
   ogImage?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isHomepage?: boolean;
 
   @Field(() => [UpdatePageBlockInput], { nullable: true })
   @IsOptional()

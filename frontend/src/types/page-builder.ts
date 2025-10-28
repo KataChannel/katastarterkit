@@ -181,6 +181,7 @@ export interface Page {
   seoKeywords?: string[];
   blocks?: PageBlock[];
   layoutSettings?: PageLayoutSettings;
+  isHomepage?: boolean; // Flag to mark this page as the homepage
   createdAt: string;
   updatedAt: string;
 }
@@ -393,6 +394,7 @@ export interface CreatePageInput {
   seoDescription?: string;
   seoKeywords?: string[];
   layoutSettings?: PageLayoutSettings;
+  isHomepage?: boolean;
 }
 
 export interface UpdatePageInput {
@@ -404,6 +406,7 @@ export interface UpdatePageInput {
   seoDescription?: string;
   seoKeywords?: string[];
   layoutSettings?: PageLayoutSettings;
+  isHomepage?: boolean;
 }
 
 export interface CreatePageBlockInput {

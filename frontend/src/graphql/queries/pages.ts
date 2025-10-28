@@ -8,6 +8,7 @@ const PAGE_FRAGMENT = gql`
     slug
     content
     status
+    isHomepage
     seoTitle
     seoDescription
     seoKeywords
@@ -109,6 +110,21 @@ export const GET_PAGE_BY_SLUG = gql`
   query GetPageBySlug($slug: String!) {
     getPageBySlug(slug: $slug) {
       ...PageFields
+      blocks {
+        ...PageBlockFields
+      }
+    }
+  }
+`;
+
+// Get homepage
+export const GET_HOMEPAGE = gql`
+  ${PAGE_FRAGMENT}
+  ${PAGE_BLOCK_FRAGMENT}
+  query GetHomepage {
+    getHomepage {
+      ...PageFields
+      isHomepage
       blocks {
         ...PageBlockFields
       }
