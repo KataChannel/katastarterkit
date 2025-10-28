@@ -44,12 +44,19 @@ export function FullScreenLayout({
     }
 
     try {
+      // Handle seoKeywords - can be string or array
+      const seoKeywordsArray = Array.isArray(settings.seoKeywords)
+        ? settings.seoKeywords
+        : settings.seoKeywords
+        ? settings.seoKeywords.split(',').map((k: string) => k.trim())
+        : [];
+
       const updateInput: UpdatePageInput = {
         title: settings.pageTitle,
         slug: settings.pageSlug,
         seoTitle: settings.seoTitle,
         seoDescription: settings.seoDescription,
-        seoKeywords: settings.seoKeywords ? settings.seoKeywords.split(',').map((k: string) => k.trim()) : [],
+        seoKeywords: seoKeywordsArray,
       };
 
       // For new pages (no ID), just update local state
@@ -60,7 +67,7 @@ export function FullScreenLayout({
           slug: settings.pageSlug,
           seoTitle: settings.seoTitle,
           seoDescription: settings.seoDescription,
-          seoKeywords: settings.seoKeywords ? settings.seoKeywords.split(',').map((k: string) => k.trim()) : [],
+          seoKeywords: seoKeywordsArray,
         });
         toast.success('Page settings updated');
         return;
@@ -81,7 +88,7 @@ export function FullScreenLayout({
         slug: settings.pageSlug,
         seoTitle: settings.seoTitle,
         seoDescription: settings.seoDescription,
-        seoKeywords: settings.seoKeywords ? settings.seoKeywords.split(',').map((k: string) => k.trim()) : [],
+        seoKeywords: seoKeywordsArray,
       });
 
       toast.success('Global settings saved successfully');
