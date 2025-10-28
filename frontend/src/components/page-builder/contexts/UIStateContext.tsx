@@ -79,7 +79,10 @@ export function UIStateProvider({ children }: UIStateProviderProps) {
 export function useUIState() {
   const context = useContext(UIStateContext);
   if (context === undefined) {
-    throw new Error('useUIState must be used within a UIStateProvider');
+    throw new Error(
+      'useUIState must be used within a UIStateProvider. ' +
+      'Make sure your component is wrapped with <PageBuilderProvider>'
+    );
   }
   return context;
 }

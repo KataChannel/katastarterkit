@@ -11,6 +11,7 @@ import { PageBuilderSidebar } from './PageBuilderSidebar';
 import { PageBuilderCanvas } from './PageBuilderCanvas';
 import { BlockType } from '@/types/page-builder';
 import { BLOCK_TYPES } from '@/constants/blockTypes';
+import ErrorBoundary from './ErrorBoundary';
 
 /**
  * PageBuilder Internal Component
@@ -20,9 +21,13 @@ import { BLOCK_TYPES } from '@/constants/blockTypes';
  * - Sidebar (block palette, templates)
  * - Canvas (editing area with drag-and-drop)
  * - Modals (template preview, save template, add child)
+ * 
+ * NOTE: Must be wrapped with PageBuilderProvider to access context hooks
  */
 function PageBuilderInternal() {
   // Use individual hooks for better performance
+  // These are safe to call here because PageBuilderInternal is always
+  // rendered inside PageBuilderProvider
   const { showAddChildDialog, addChildParentId } = useUIState();
   const { 
     showPreviewModal, 
@@ -103,19 +108,20 @@ function PageBuilderInternal() {
  * Wraps the internal component with PageBuilderProvider for state management.
  * Includes Error Boundary for graceful error handling.
  * 
+ * IMPORTANT: Provider must wrap PageBuilderInternal BEFORE any hooks are called.
+ * The error "usePageState must be used within a PageStateProvider" occurs when:
+ * 1. Hook is called outside provider scope
+ * 2. Provider hasn't initialized before component renders
+ * 3. Async/Suspense creates timing issues
+ * 
  * @param pageId - Optional ID of existing page to edit (if omitted, creates new page)
  */
 export default function PageBuilder({ pageId }: { pageId?: string }) {
-  // Lazy import Error Boundary to avoid circular dependencies
-  const ErrorBoundary = React.lazy(() => import('./ErrorBoundary'));
-  
   return (
-    <React.Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
-      <ErrorBoundary>
-        <PageBuilderProvider pageId={pageId}>
-          <PageBuilderInternal />
-        </PageBuilderProvider>
-      </ErrorBoundary>
-    </React.Suspense>
+    <ErrorBoundary>
+      <PageBuilderProvider pageId={pageId}>
+        <PageBuilderInternal />
+      </PageBuilderProvider>
+    </ErrorBoundary>
   );
 }

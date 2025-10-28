@@ -145,7 +145,10 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
 export function usePageState() {
   const context = useContext(PageStateContext);
   if (context === undefined) {
-    throw new Error('usePageState must be used within a PageStateProvider');
+    throw new Error(
+      'usePageState must be used within a PageStateProvider. ' +
+      'Make sure your component is wrapped with <PageBuilderProvider>'
+    );
   }
   return context;
 }

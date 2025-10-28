@@ -627,7 +627,10 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
 export function usePageActions() {
   const context = useContext(PageActionsContext);
   if (context === undefined) {
-    throw new Error('usePageActions must be used within a PageActionsProvider');
+    throw new Error(
+      'usePageActions must be used within a PageActionsProvider. ' +
+      'Make sure your component is wrapped with <PageBuilderProvider>'
+    );
   }
   return context;
 }
