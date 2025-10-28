@@ -20,7 +20,7 @@ export default function EditProductPage() {
 
   const handleSubmit = async (data: UpdateProductInput | any) => {
     try {
-      await updateProduct(productId, data as UpdateProductInput);
+      await updateProduct({ id: productId, ...data } as UpdateProductInput);
       toast.success('Cập nhật sản phẩm thành công!');
       router.push('/admin/products');
     } catch (error: any) {

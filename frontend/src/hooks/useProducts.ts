@@ -20,6 +20,9 @@ import {
   GetProductsInput,
   CreateProductInput,
   UpdateProductInput,
+  CreateProductImageInput,
+  CreateProductVariantInput,
+  UpdateProductVariantInput,
 } from '../graphql/product.queries';
 
 // ============================================================================
@@ -167,12 +170,12 @@ export function useCreateProduct() {
 export function useUpdateProduct() {
   const [updateProduct, { data, loading, error }] = useMutation<
     { updateProduct: Product },
-    { id: string; input: UpdateProductInput }
+    { input: UpdateProductInput }
   >(UPDATE_PRODUCT);
 
   return {
-    updateProduct: (id: string, input: UpdateProductInput) =>
-      updateProduct({ variables: { id, input } }),
+    updateProduct: (input: UpdateProductInput) =>
+      updateProduct({ variables: { input } }),
     product: data?.updateProduct,
     loading,
     error,
@@ -214,8 +217,8 @@ export function useAddProductImage() {
   const [addImage, { data, loading, error }] = useMutation(ADD_PRODUCT_IMAGE);
 
   return {
-    addImage: (productId: string, input: any) =>
-      addImage({ variables: { productId, input } }),
+    addImage: (input: CreateProductImageInput) =>
+      addImage({ variables: { input } }),
     image: data?.addProductImage,
     loading,
     error,
@@ -238,8 +241,8 @@ export function useAddProductVariant() {
   );
 
   return {
-    addVariant: (productId: string, input: any) =>
-      addVariant({ variables: { productId, input } }),
+    addVariant: (input: CreateProductVariantInput) =>
+      addVariant({ variables: { input } }),
     variant: data?.addProductVariant,
     loading,
     error,
@@ -252,8 +255,8 @@ export function useUpdateProductVariant() {
   );
 
   return {
-    updateVariant: (id: string, input: any) =>
-      updateVariant({ variables: { id, input } }),
+    updateVariant: (input: UpdateProductVariantInput) =>
+      updateVariant({ variables: { input } }),
     variant: data?.updateProductVariant,
     loading,
     error,

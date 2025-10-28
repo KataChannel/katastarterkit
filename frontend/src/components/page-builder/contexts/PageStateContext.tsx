@@ -157,6 +157,24 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
 export function usePageState() {
   const context = useContext(PageStateContext);
   if (context === undefined) {
+    // Return default values instead of throwing during SSR or initial render
+    if (typeof window === 'undefined') {
+      return {
+        page: null,
+        editingPage: null,
+        isNewPageMode: true,
+        loading: false,
+        blocks: [],
+        selectedBlockId: null,
+        selectedBlock: null,
+        draggedBlock: null,
+        setEditingPage: () => {},
+        setBlocks: () => {},
+        setSelectedBlockId: () => {},
+        setDraggedBlock: () => {},
+        refetch: async () => {},
+      } as PageStateContextType;
+    }
     throw new Error(
       'usePageState must be used within a PageStateProvider. ' +
       'Make sure your component is wrapped with <PageBuilderProvider>'

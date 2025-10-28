@@ -96,7 +96,7 @@ export const GET_PRODUCTS = gql`
 
 export const GET_PRODUCT = gql`
   ${PRODUCT_FULL_FRAGMENT}
-  query GetProduct($id: String!) {
+  query GetProduct($id: ID!) {
     product(id: $id) {
       ...ProductFullFields
     }
@@ -215,22 +215,22 @@ export const CREATE_PRODUCT = gql`
 
 export const UPDATE_PRODUCT = gql`
   ${PRODUCT_FULL_FRAGMENT}
-  mutation UpdateProduct($id: String!, $input: UpdateProductInput!) {
-    updateProduct(id: $id, input: $input) {
+  mutation UpdateProduct($input: UpdateProductInput!) {
+    updateProduct(input: $input) {
       ...ProductFullFields
     }
   }
 `;
 
 export const DELETE_PRODUCT = gql`
-  mutation DeleteProduct($id: String!) {
+  mutation DeleteProduct($id: ID!) {
     deleteProduct(id: $id)
   }
 `;
 
 export const UPDATE_PRODUCT_STOCK = gql`
   ${PRODUCT_BASIC_FRAGMENT}
-  mutation UpdateProductStock($id: String!, $quantity: Float!) {
+  mutation UpdateProductStock($id: ID!, $quantity: Float!) {
     updateProductStock(id: $id, quantity: $quantity) {
       ...ProductBasicFields
     }
@@ -239,23 +239,23 @@ export const UPDATE_PRODUCT_STOCK = gql`
 
 export const ADD_PRODUCT_IMAGE = gql`
   ${PRODUCT_IMAGE_FRAGMENT}
-  mutation AddProductImage($productId: String!, $input: CreateProductImageInput!) {
-    addProductImage(productId: $productId, input: $input) {
+  mutation AddProductImage($input: CreateProductImageInput!) {
+    addProductImage(input: $input) {
       ...ProductImageFields
     }
   }
 `;
 
 export const DELETE_PRODUCT_IMAGE = gql`
-  mutation DeleteProductImage($id: String!) {
+  mutation DeleteProductImage($id: ID!) {
     deleteProductImage(id: $id)
   }
 `;
 
 export const ADD_PRODUCT_VARIANT = gql`
   ${PRODUCT_VARIANT_FRAGMENT}
-  mutation AddProductVariant($productId: String!, $input: CreateProductVariantInput!) {
-    addProductVariant(productId: $productId, input: $input) {
+  mutation AddProductVariant($input: CreateProductVariantInput!) {
+    addProductVariant(input: $input) {
       ...ProductVariantFields
     }
   }
@@ -263,15 +263,15 @@ export const ADD_PRODUCT_VARIANT = gql`
 
 export const UPDATE_PRODUCT_VARIANT = gql`
   ${PRODUCT_VARIANT_FRAGMENT}
-  mutation UpdateProductVariant($id: String!, $input: UpdateProductVariantInput!) {
-    updateProductVariant(id: $id, input: $input) {
+  mutation UpdateProductVariant($input: UpdateProductVariantInput!) {
+    updateProductVariant(input: $input) {
       ...ProductVariantFields
     }
   }
 `;
 
 export const DELETE_PRODUCT_VARIANT = gql`
-  mutation DeleteProductVariant($id: String!) {
+  mutation DeleteProductVariant($id: ID!) {
     deleteProductVariant(id: $id)
   }
 `;
@@ -405,6 +405,7 @@ export interface CreateProductInput {
 }
 
 export interface UpdateProductInput {
+  id: string;
   name?: string;
   categoryId?: string;
   description?: string;
@@ -429,4 +430,37 @@ export interface UpdateProductInput {
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
+}
+
+export interface CreateProductImageInput {
+  productId: string;
+  url: string;
+  alt?: string;
+  title?: string;
+  isPrimary?: boolean;
+  order?: number;
+}
+
+export interface CreateProductVariantInput {
+  productId: string;
+  name: string;
+  sku?: string;
+  barcode?: string;
+  price: number;
+  stock?: number;
+  attributes?: Record<string, any>;
+  isActive?: boolean;
+  order?: number;
+}
+
+export interface UpdateProductVariantInput {
+  id: string;
+  name?: string;
+  sku?: string;
+  barcode?: string;
+  price?: number;
+  stock?: number;
+  attributes?: Record<string, any>;
+  isActive?: boolean;
+  order?: number;
 }
