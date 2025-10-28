@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { ApolloProvider } from '@apollo/client';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/ui/toaster';
 import { apolloClient } from '@/lib/apollo-client';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -16,12 +16,7 @@ export function Providers({ children }: ProvidersProps) {
     <ErrorBoundary>
       <ApolloProvider client={apolloClient}>
         <AuthProvider>
-          <Toaster 
-            position="top-right"
-            expand={true}
-            richColors
-            closeButton
-          />
+          <Toaster />
           {children}
         </AuthProvider>
       </ApolloProvider>
