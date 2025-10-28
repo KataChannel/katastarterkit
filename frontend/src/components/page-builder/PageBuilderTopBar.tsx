@@ -851,26 +851,67 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
 
   const handleSaveSettings = useCallback(async () => {
     try {
-      if (onSettingsSave) {
-        setIsSettingsLoading(true);
-        await onSettingsSave(pageSettings);
-        toast({
-          title: 'Settings saved',
-          description: 'Global settings have been updated successfully.',
-          type: 'success',
-        });
-        setIsUnifiedSettingsOpen(false);
+      if (!editingPage?.id) {
+        throw new Error('No page selected. Please select a page first.');
       }
+
+      setIsSettingsLoading(true);
+      
+      // Update only the fields that exist in Page interface
+      // Handle seoKeywords - can be string or array
+      const seoKeywordsArray = Array.isArray(pageSettings.seoKeywords)
+        ? pageSettings.seoKeywords
+        : (pageSettings.seoKeywords || '')
+            .split(',')
+            .map((k: string) => k.trim())
+            .filter((k: string) => k.length > 0);
+
+      const updatedPage: typeof editingPage = {
+        ...editingPage,
+        seoTitle: pageSettings.seoTitle || undefined,
+        seoDescription: pageSettings.seoDescription || undefined,
+        seoKeywords: seoKeywordsArray,
+      };
+
+      // Update page state
+      setEditingPage(updatedPage);
+
+      // Call parent handler if provided
+      if (onSettingsSave) {
+        await onSettingsSave({
+          ...updatedPage,
+          customCSS: pageSettings.customCSS,
+          customJS: pageSettings.customJS,
+          headCode: pageSettings.headCode,
+          isPublished: pageSettings.isPublished,
+          showInNavigation: pageSettings.showInNavigation,
+          allowIndexing: pageSettings.allowIndexing,
+          requireAuth: pageSettings.requireAuth,
+        });
+      }
+
+      // Save page via main handler
+      await onSave?.();
+
+      toast({
+        title: 'Settings saved',
+        description: 'Page settings have been updated and saved successfully.',
+        type: 'success',
+      });
+      
+      setIsUnifiedSettingsOpen(false);
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save settings';
       toast({
         title: 'Error',
-        description: 'Failed to save settings. Please try again.',
+        description: message,
         type: 'error',
       });
+      console.error('Save settings error:', error);
     } finally {
       setIsSettingsLoading(false);
     }
-  }, [onSettingsSave, pageSettings, toast]);
+  }, [editingPage, pageSettings, onSettingsSave, onSave, setEditingPage, toast]);
 
   const handleSavePage = useCallback(async () => {
     setIsSaving(true);
