@@ -139,6 +139,13 @@ export class Page {
   @Field(() => Boolean, { defaultValue: false })
   isHomepage: boolean;
 
+  // 🆕 Dynamic Page Template Support
+  @Field(() => Boolean, { defaultValue: false })
+  isDynamic: boolean;
+
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  dynamicConfig?: any;
+
   @Field(() => [PageBlock])
   blocks: PageBlock[];
 

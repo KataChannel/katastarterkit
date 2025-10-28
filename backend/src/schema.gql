@@ -1158,6 +1158,8 @@ input CreatePageInput {
   blocks: [CreatePageBlockInput!]
   content: JSONObject
   description: String
+  dynamicConfig: JSONObject
+  isDynamic: Boolean = false
   isHomepage: Boolean = false
   ogImage: String
   seoDescription: String
@@ -2407,7 +2409,9 @@ type Page {
   createdAt: DateTime!
   createdBy: String!
   description: String
+  dynamicConfig: JSONObject
   id: ID!
+  isDynamic: Boolean!
   isHomepage: Boolean!
   ogImage: String
   publishedAt: DateTime
@@ -2883,6 +2887,7 @@ type Query {
   getMyPosts: [Post!]!
   getPageById(id: String!): Page!
   getPageBySlug(slug: String!): Page!
+  getPageBySlugPattern(slugPattern: String!): Page
   getPages(filters: PageFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
   getPermissionById(id: String!): Permission!
   getPostById(id: String!): Post!
@@ -3921,6 +3926,8 @@ input UpdatePageInput {
   blocks: [UpdatePageBlockInput!]
   content: JSONObject
   description: String
+  dynamicConfig: JSONObject
+  isDynamic: Boolean
   isHomepage: Boolean
   ogImage: String
   seoDescription: String

@@ -148,6 +148,16 @@ export class CreatePageInput {
   @IsBoolean()
   isHomepage?: boolean;
 
+  // 🆕 Dynamic Page Template Support
+  @Field(() => Boolean, { defaultValue: false, nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isDynamic?: boolean;
+
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  dynamicConfig?: any;
+
   @Field(() => [CreatePageBlockInput], { nullable: true })
   @IsOptional()
   blocks?: CreatePageBlockInput[];
@@ -202,6 +212,16 @@ export class UpdatePageInput {
   @IsOptional()
   @IsBoolean()
   isHomepage?: boolean;
+
+  // 🆕 Dynamic Page Template Support
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isDynamic?: boolean;
+
+  @Field(() => GraphQLJSONObject, { nullable: true })
+  @IsOptional()
+  dynamicConfig?: any;
 
   @Field(() => [UpdatePageBlockInput], { nullable: true })
   @IsOptional()

@@ -513,6 +513,42 @@ export class PageService {
     return homepage as Page | null;
   }
 
+  // 🆕 Find dynamic page template by slug pattern
+  async findBySlugPattern(slugPattern: string): Promise<Page | null> {
+    const page = await this.prisma.page.findFirst({
+      where: {
+        isDynamic: true,
+        slug: slugPattern,
+        status: PageStatus.PUBLISHED
+      },
+      include: {
+        blocks: {
+          where: { isVisible: true, parentId: null },
+          orderBy: { order: 'asc' },
+          include: {
+            children: {
+              where: { isVisible: true },
+              orderBy: { order: 'asc' },
+              include: {
+                children: {
+                  where: { isVisible: true },
+                  orderBy: { order: 'asc' },
+                  include: {
+                    children: {
+                      where: { isVisible: true }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return page as Page | null;
+  }
+
   // Duplicate page
   async duplicate(id: string, userId: string, newTitle?: string, newSlug?: string): Promise<Page> {
     const originalPage = await this.findById(id);

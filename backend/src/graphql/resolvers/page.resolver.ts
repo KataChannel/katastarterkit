@@ -52,6 +52,12 @@ export class PageResolver {
     return this.pageService.findHomepage();
   }
 
+  // 🆕 Query to find dynamic page template by slug pattern
+  @Query(() => Page, { name: 'getPageBySlugPattern', nullable: true })
+  async getPageBySlugPattern(@Args('slugPattern') slugPattern: string): Promise<Page | null> {
+    return this.pageService.findBySlugPattern(slugPattern);
+  }
+
   // Mutations
   @Mutation(() => Page, { name: 'createPage' })
   @UseGuards(JwtAuthGuard)

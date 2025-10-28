@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script to organize markdown files by moving them to docs/ directory with numbering
-# Enhanced version with batch processing and categorization
+# Enhanced version with batch processing, categorization and recursive search
 #
 # Usage: 
 #   ./docsclean.sh [options]
@@ -13,7 +13,7 @@
 #   --help             Show this help message
 #
 # Examples:
-#   ./docsclean.sh                    # Normal operation
+#   ./docsclean.sh                    # Normal operation (search all directories)
 #   ./docsclean.sh --dry-run          # Preview changes
 #   ./docsclean.sh --archive          # Archive old docs
 #   ./docsclean.sh --category FIX     # Only process FIX-*.md files
@@ -132,17 +132,112 @@ declare -a skipped_files
 declare -a archived_files
 declare -a error_files
 
-# Tìm tất cả file: .md (trừ README.md), *test* và *verify* (.js, .sh)
+# Tìm tất cả file: .md (trừ README.md), *test*, *verify*, *demo* (.js, .sh) từ TẤT CẢ thư mục
+# Excluding: node_modules, .git, dist, build, .next, docs (destination)
 shopt -s nullglob  # Prevent glob expansion if no matches
-all_md_files=(*.md)
-test_js_files=(*test*.js)
-verify_js_files=(*verify*.js)
-test_sh_files=(*test*.sh)
-verify_sh_files=(*verify*.sh)
+
+print_status "$BLUE" "🔍 Searching for files in all directories..."
+
+# Use find to search recursively, excluding certain directories
+all_md_files=()
+test_js_files=()
+verify_js_files=()
+demo_js_files=()
+test_sh_files=()
+verify_sh_files=()
+demo_sh_files=()
+
+# Find all .md files (excluding node_modules, .git, docs, etc.)
+while IFS= read -r -d '' file; do
+    all_md_files+=("$file")
+done < <(find . -type f -name "*.md" \
+    -not -path "*/node_modules/*" \
+    -not -path "*/.git/*" \
+    -not -path "*/dist/*" \
+    -not -path "*/build/*" \
+    -not -path "*/.next/*" \
+    -not -path "*/docs/*" \
+    -not -path "*/coverage/*" \
+    -not -path "*/.cache/*" \
+    -print0)
+
+# Find all *test*.js files
+while IFS= read -r -d '' file; do
+    test_js_files+=("$file")
+done < <(find . -type f -name "*test*.js" \
+    -not -path "*/node_modules/*" \
+    -not -path "*/.git/*" \
+    -not -path "*/dist/*" \
+    -not -path "*/build/*" \
+    -not -path "*/.next/*" \
+    -not -path "*/docs/*" \
+    -not -path "*/coverage/*" \
+    -print0)
+
+# Find all *verify*.js files
+while IFS= read -r -d '' file; do
+    verify_js_files+=("$file")
+done < <(find . -type f -name "*verify*.js" \
+    -not -path "*/node_modules/*" \
+    -not -path "*/.git/*" \
+    -not -path "*/dist/*" \
+    -not -path "*/build/*" \
+    -not -path "*/.next/*" \
+    -not -path "*/docs/*" \
+    -print0)
+
+# Find all *demo*.js files
+while IFS= read -r -d '' file; do
+    demo_js_files+=("$file")
+done < <(find . -type f -name "*demo*.js" \
+    -not -path "*/node_modules/*" \
+    -not -path "*/.git/*" \
+    -not -path "*/dist/*" \
+    -not -path "*/build/*" \
+    -not -path "*/.next/*" \
+    -not -path "*/docs/*" \
+    -print0)
+
+# Find all *test*.sh files
+while IFS= read -r -d '' file; do
+    test_sh_files+=("$file")
+done < <(find . -type f -name "*test*.sh" \
+    -not -path "*/node_modules/*" \
+    -not -path "*/.git/*" \
+    -not -path "*/dist/*" \
+    -not -path "*/build/*" \
+    -not -path "*/.next/*" \
+    -not -path "*/docs/*" \
+    -print0)
+
+# Find all *verify*.sh files
+while IFS= read -r -d '' file; do
+    verify_sh_files+=("$file")
+done < <(find . -type f -name "*verify*.sh" \
+    -not -path "*/node_modules/*" \
+    -not -path "*/.git/*" \
+    -not -path "*/dist/*" \
+    -not -path "*/build/*" \
+    -not -path "*/.next/*" \
+    -not -path "*/docs/*" \
+    -print0)
+
+# Find all *demo*.sh files
+while IFS= read -r -d '' file; do
+    demo_sh_files+=("$file")
+done < <(find . -type f -name "*demo*.sh" \
+    -not -path "*/node_modules/*" \
+    -not -path "*/.git/*" \
+    -not -path "*/dist/*" \
+    -not -path "*/build/*" \
+    -not -path "*/.next/*" \
+    -not -path "*/docs/*" \
+    -print0)
+
 shopt -u nullglob
 
 # Combine all file types
-all_target_files=("${all_md_files[@]}" "${test_js_files[@]}" "${verify_js_files[@]}" "${test_sh_files[@]}" "${verify_sh_files[@]}")
+all_target_files=("${all_md_files[@]}" "${test_js_files[@]}" "${verify_js_files[@]}" "${demo_js_files[@]}" "${test_sh_files[@]}" "${verify_sh_files[@]}" "${demo_sh_files[@]}")
 
 # Filter out README.md (case-insensitive) and process all files
 md_files=()
@@ -173,13 +268,13 @@ excluded_count=$((total_found - ${#md_files[@]}))
 if [ $excluded_count -gt 0 ]; then
     print_status "$YELLOW" "📄 Excluded $excluded_count README.md files from processing"
 fi
-if [ ${#test_js_files[@]} -gt 0 ] || [ ${#verify_js_files[@]} -gt 0 ] || [ ${#test_sh_files[@]} -gt 0 ] || [ ${#verify_sh_files[@]} -gt 0 ]; then
-    script_count=$((${#test_js_files[@]} + ${#verify_js_files[@]} + ${#test_sh_files[@]} + ${#verify_sh_files[@]}))
-    print_status "$BLUE" "🔧 Found $script_count test/verify script files (.js/.sh)"
+if [ ${#test_js_files[@]} -gt 0 ] || [ ${#verify_js_files[@]} -gt 0 ] || [ ${#demo_js_files[@]} -gt 0 ] || [ ${#test_sh_files[@]} -gt 0 ] || [ ${#verify_sh_files[@]} -gt 0 ] || [ ${#demo_sh_files[@]} -gt 0 ]; then
+    script_count=$((${#test_js_files[@]} + ${#verify_js_files[@]} + ${#demo_js_files[@]} + ${#test_sh_files[@]} + ${#verify_sh_files[@]} + ${#demo_sh_files[@]}))
+    print_status "$BLUE" "🔧 Found $script_count test/verify/demo script files (.js/.sh)"
 fi
 
 if [ ${#md_files[@]} -eq 0 ]; then
-    print_status "$YELLOW" "📄 No target files (.md, *test*, *verify*) found in root directory"
+    print_status "$YELLOW" "📄 No target files (.md, *test*, *verify*, *demo*) found in project directories"
     exit 0
 fi
 
@@ -193,7 +288,7 @@ for file in "${md_files[@]}"; do
         script_count=$((script_count + 1))
     fi
 done
-print_status "$GREEN" "📊 Found $total_files files to process: $md_count .md files, $script_count test/verify scripts"
+print_status "$GREEN" "📊 Found $total_files files to process: $md_count .md files, $script_count test/verify/demo scripts"
 echo ""
 
 # Sắp xếp file theo thời gian sửa đổi (mtime)
@@ -264,10 +359,11 @@ for file in "${sorted_files[@]}"; do
             fi
         fi
         
-        # Move file
+        # Move file with directory information in output
+        source_path=$(dirname "$file")
         if [ "$DRY_RUN" = false ]; then
             if mv "$file" "docs/$new_filename" 2>/dev/null; then
-                moved_files+=("$filename → docs/$new_filename")
+                moved_files+=("$source_path/$filename → docs/$new_filename")
                 moved_count=$((moved_count + 1))
                 next_number=$((next_number + 1))
             else
@@ -275,12 +371,13 @@ for file in "${sorted_files[@]}"; do
                 error_count=$((error_count + 1))
             fi
         else
-            echo "  [DRY RUN] Would move: $filename → docs/$new_filename"
+            echo "  [DRY RUN] Would move: $source_path/$filename → docs/$new_filename"
             moved_count=$((moved_count + 1))
             next_number=$((next_number + 1))
         fi
     else
         # File already has number - check if needs to move
+        source_path=$(dirname "$file")
         if [ -f "docs/$filename" ]; then
             # Duplicate - handle based on mode
             if [ "$ARCHIVE_OLD" = true ] && [ "$DRY_RUN" = false ]; then
@@ -289,27 +386,27 @@ for file in "${sorted_files[@]}"; do
                 archived_count=$((archived_count + 1))
                 
                 mv "$file" "docs/$filename"
-                moved_files+=("$filename → docs/$filename (replaced)")
+                moved_files+=("$source_path/$filename → docs/$filename (replaced)")
                 moved_count=$((moved_count + 1))
             else
                 if [ "$DRY_RUN" = false ]; then
                     rm "$file"
                 fi
-                skipped_files+=("$filename (duplicate removed)")
+                skipped_files+=("$source_path/$filename (duplicate removed)")
                 skipped_count=$((skipped_count + 1))
             fi
         else
             # Just move it
             if [ "$DRY_RUN" = false ]; then
                 if mv "$file" "docs/$filename" 2>/dev/null; then
-                    moved_files+=("$filename → docs/$filename")
+                    moved_files+=("$source_path/$filename → docs/$filename")
                     moved_count=$((moved_count + 1))
                 else
                     error_files+=("$filename (move failed)")
                     error_count=$((error_count + 1))
                 fi
             else
-                echo "  [DRY RUN] Would move: $filename → docs/$filename"
+                echo "  [DRY RUN] Would move: $source_path/$filename → docs/$filename"
                 moved_count=$((moved_count + 1))
             fi
         fi

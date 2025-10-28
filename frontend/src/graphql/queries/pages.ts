@@ -9,6 +9,8 @@ const PAGE_FRAGMENT = gql`
     content
     status
     isHomepage
+    isDynamic
+    dynamicConfig
     seoTitle
     seoDescription
     seoKeywords
