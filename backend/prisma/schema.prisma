@@ -894,6 +894,10 @@ model Page {
   ogImage        String?
   layoutSettings Json? // Layout configuration: hasHeader, hasFooter, headerMenuId, footerMenuId, headerStyle, footerStyle
   isHomepage     Boolean    @default(false) // Flag to mark this page as the homepage (root /)
+  
+  // Dynamic Page Support
+  isDynamic         Boolean             @default(false)
+  dynamicConfig     Json?
 
   // Relationships
   blocks PageBlock[]
@@ -907,6 +911,7 @@ model Page {
 
   // Indexing
   @@index([slug])
+  @@index([isDynamic])
   @@index([status])
   @@index([isHomepage])
   @@index([createdAt])

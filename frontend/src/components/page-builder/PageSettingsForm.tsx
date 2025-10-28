@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertCircle, CheckCircle, Lock } from 'lucide-react';
-import { Page, PageStatus } from '@/types/page-builder';
+import { Page, PageStatus, DynamicConfig } from '@/types/page-builder';
+import { DynamicPageConfig } from './DynamicPageConfig';
 
 /**
  * Vietnamese character transliteration map
@@ -129,6 +130,8 @@ export default function PageSettingsForm({ page, onUpdate }: PageSettingsFormPro
     content: (page.content && typeof page.content === 'string') ? page.content : '',
     status: page.status,
     isHomepage: page.isHomepage ?? false,
+    isDynamic: page.isDynamic ?? false, // 🆕
+    dynamicConfig: page.dynamicConfig, // 🆕
     seoTitle: page.seoTitle || '',
     seoDescription: page.seoDescription || '',
     seoKeywords: (page.seoKeywords || []).join(', '),
@@ -339,6 +342,34 @@ export default function PageSettingsForm({ page, onUpdate }: PageSettingsFormPro
                   ✓ Trang này sẽ được hiển thị là trang chủ (homepage) khi truy cập vào root URL. 
                   Chỉ một trang có thể được đặt làm trang chủ.
                 </p>
+              </div>
+            )}
+          </div>
+
+          {/* 🆕 Dynamic Page Template Toggle */}
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="isDynamic">Dynamic Page Template</Label>
+                <p className="text-xs text-gray-500">Use this page as a template for multiple items with different slugs</p>
+              </div>
+              <Switch
+                id="isDynamic"
+                checked={formData.isDynamic || false}
+                onCheckedChange={(checked) => {
+                  setFormData({ ...formData, isDynamic: checked });
+                }}
+              />
+            </div>
+            {formData.isDynamic && (
+              <div className="mt-4">
+                <DynamicPageConfig
+                  config={formData.dynamicConfig}
+                  blocks={page.blocks}
+                  onChange={(config) => {
+                    setFormData({ ...formData, dynamicConfig: config });
+                  }}
+                />
               </div>
             )}
           </div>

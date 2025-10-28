@@ -170,6 +170,22 @@ export interface PageLayoutSettings {
   footerConfig?: any; // FooterProps from /types/layout
 }
 
+// 🆕 Dynamic Page Template Configuration
+export interface DynamicConfig {
+  dataSource: 'product' | 'post' | 'category' | 'custom';
+  dataQuery?: string;
+  slugPattern: string;
+  slugField: string;
+  dataBindings: DataBinding[];
+}
+
+export interface DataBinding {
+  blockId: string;
+  sourceField: string;
+  targetProperty: string;
+  transform?: string;
+}
+
 export interface Page {
   id: string;
   title: string;
@@ -182,6 +198,11 @@ export interface Page {
   blocks?: PageBlock[];
   layoutSettings?: PageLayoutSettings;
   isHomepage?: boolean; // Flag to mark this page as the homepage
+  
+  // 🆕 Dynamic Page Template Support
+  isDynamic?: boolean;
+  dynamicConfig?: DynamicConfig;
+  
   createdAt: string;
   updatedAt: string;
 }
@@ -395,6 +416,10 @@ export interface CreatePageInput {
   seoKeywords?: string[];
   layoutSettings?: PageLayoutSettings;
   isHomepage?: boolean;
+  
+  // 🆕 Dynamic Page Template
+  isDynamic?: boolean;
+  dynamicConfig?: DynamicConfig;
 }
 
 export interface UpdatePageInput {
@@ -407,6 +432,10 @@ export interface UpdatePageInput {
   seoKeywords?: string[];
   layoutSettings?: PageLayoutSettings;
   isHomepage?: boolean;
+  
+  // 🆕 Dynamic Page Template
+  isDynamic?: boolean;
+  dynamicConfig?: DynamicConfig;
 }
 
 export interface CreatePageBlockInput {
