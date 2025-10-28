@@ -106,7 +106,7 @@ const PageBuilderHeaderComponent = React.memo(function PageBuilderHeaderComponen
         </Button>
 
         {/* Page Settings Dialog */}
-        <Dialog open={showPageSettings} onOpenChange={handleCloseSettings}>
+        <Dialog open={true} onOpenChange={handleCloseSettings}>
           <DialogTrigger asChild>
             <Button 
               variant="outline" 

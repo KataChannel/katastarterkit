@@ -40,7 +40,7 @@ const AlertDialogContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
     <div
       ref={ref}
       className={`w-full max-w-lg p-6 bg-white rounded-lg shadow-lg ${className || ''}`}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useCallback, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { usePageOperations, useBlockOperations, useNestedBlockOperations } from '@/hooks/usePageBuilder';
 import { BlockType, PageBlock, CreatePageInput, UpdatePageInput } from '@/types/page-builder';
@@ -159,6 +160,7 @@ interface PageActionsProviderProps {
 }
 
 export function PageActionsProvider({ children, pageId }: PageActionsProviderProps) {
+  const router = useRouter();
   const pageState = usePageState();
   const templateState = useTemplate();
   const uiState = useUIState();
@@ -195,7 +197,15 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         toast.success('Page created successfully!');
         
         if (result?.data?.createPage) {
-          setEditingPage(result.data.createPage);
+          const newPage = result.data.createPage;
+          setEditingPage(newPage);
+          // After creating a new page, redirect to the new page's editor
+          if (newPage?.id) {
+            router.push(`/admin/pagebuilder/${newPage.id}`);
+          }
+          // After creating a new page, we've exited "new page mode" since we now have an ID
+          // Do not call refetch here since it will try to query with the old empty pageId
+          // The page state will be automatically updated through the context
         }
       } else {
         const input: UpdatePageInput = {
@@ -211,14 +221,15 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         await updatePage(editingPage.id, input);
         pageBuilderLogger.success(LOG_OPERATIONS.PAGE_UPDATE, 'Page updated successfully', { pageId: editingPage.id });
         toast.success('Page saved successfully!');
+        
+        // For existing pages, refetch to sync state
+        await refetch();
       }
-      
-      await refetch();
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.PAGE_UPDATE, 'Failed to save page', { error });
       toast.error(error?.message || 'Failed to save page');
     }
-  }, [pageState, createPage, updatePage]);
+  }, [pageState, createPage, updatePage, router]);
   
   const handlePageDelete = useCallback(async () => {
     try {

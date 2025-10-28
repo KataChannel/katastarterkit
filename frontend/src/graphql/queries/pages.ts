@@ -118,7 +118,18 @@ export const GET_PAGE_BY_SLUG = gql`
 
 // Create a new page
 export const CREATE_PAGE = gql`
-  ${PAGE_FRAGMENT}
+  fragment PageFields on Page {
+    id
+    title
+    slug
+    content
+    status
+    seoTitle
+    seoDescription
+    seoKeywords
+    createdAt
+    updatedAt
+  }
   mutation CreatePage($input: CreatePageInput!) {
     createPage(input: $input) {
       ...PageFields
@@ -128,7 +139,18 @@ export const CREATE_PAGE = gql`
 
 // Update an existing page
 export const UPDATE_PAGE = gql`
-  ${PAGE_FRAGMENT}
+  fragment PageFields on Page {
+    id
+    title
+    slug
+    content
+    status
+    seoTitle
+    seoDescription
+    seoKeywords
+    createdAt
+    updatedAt
+  }
   mutation UpdatePage($id: String!, $input: UpdatePageInput!) {
     updatePage(id: $id, input: $input) {
       ...PageFields
@@ -138,14 +160,71 @@ export const UPDATE_PAGE = gql`
 
 // Delete a page
 export const DELETE_PAGE = gql`
+  fragment PageFields on Page {
+    id
+    title
+    slug
+    content
+    status
+    seoTitle
+    seoDescription
+    seoKeywords
+    createdAt
+    updatedAt
+  }
   mutation DeletePage($id: String!) {
-    deletePage(id: $id)
+    deletePage(id: $id) {
+      ...PageFields
+    }
   }
 `;
 
 // Add a block to a page
 export const ADD_PAGE_BLOCK = gql`
-  ${PAGE_BLOCK_FRAGMENT}
+  fragment PageBlockFields on PageBlock {
+    id
+    type
+    content
+    style
+    config
+    order
+    parentId
+    depth
+    isVisible
+    children {
+      id
+      type
+      content
+      style
+      config
+      order
+      parentId
+      depth
+      isVisible
+      children {
+        id
+        type
+        content
+        style
+        config
+        order
+        parentId
+        depth
+        isVisible
+        children {
+          id
+          type
+          content
+          style
+          config
+          order
+          parentId
+          depth
+          isVisible
+        }
+      }
+    }
+  }
   mutation AddPageBlock($pageId: String!, $input: CreatePageBlockInput!) {
     addPageBlock(pageId: $pageId, input: $input) {
       ...PageBlockFields
@@ -155,7 +234,50 @@ export const ADD_PAGE_BLOCK = gql`
 
 // Update a page block
 export const UPDATE_PAGE_BLOCK = gql`
-  ${PAGE_BLOCK_FRAGMENT}
+  fragment PageBlockFields on PageBlock {
+    id
+    type
+    content
+    style
+    config
+    order
+    parentId
+    depth
+    isVisible
+    children {
+      id
+      type
+      content
+      style
+      config
+      order
+      parentId
+      depth
+      isVisible
+      children {
+        id
+        type
+        content
+        style
+        config
+        order
+        parentId
+        depth
+        isVisible
+        children {
+          id
+          type
+          content
+          style
+          config
+          order
+          parentId
+          depth
+          isVisible
+        }
+      }
+    }
+  }
   mutation UpdatePageBlock($id: String!, $input: UpdatePageBlockInput!) {
     updatePageBlock(id: $id, input: $input) {
       ...PageBlockFields
@@ -165,7 +287,50 @@ export const UPDATE_PAGE_BLOCK = gql`
 
 // Delete a page block
 export const DELETE_PAGE_BLOCK = gql`
-  ${PAGE_BLOCK_FRAGMENT}
+  fragment PageBlockFields on PageBlock {
+    id
+    type
+    content
+    style
+    config
+    order
+    parentId
+    depth
+    isVisible
+    children {
+      id
+      type
+      content
+      style
+      config
+      order
+      parentId
+      depth
+      isVisible
+      children {
+        id
+        type
+        content
+        style
+        config
+        order
+        parentId
+        depth
+        isVisible
+        children {
+          id
+          type
+          content
+          style
+          config
+          order
+          parentId
+          depth
+          isVisible
+        }
+      }
+    }
+  }
   mutation DeletePageBlock($id: String!) {
     deletePageBlock(id: $id) {
       ...PageBlockFields
@@ -175,7 +340,50 @@ export const DELETE_PAGE_BLOCK = gql`
 
 // Update the order of multiple page blocks
 export const UPDATE_PAGE_BLOCKS_ORDER = gql`
-  ${PAGE_BLOCK_FRAGMENT}
+  fragment PageBlockFields on PageBlock {
+    id
+    type
+    content
+    style
+    config
+    order
+    parentId
+    depth
+    isVisible
+    children {
+      id
+      type
+      content
+      style
+      config
+      order
+      parentId
+      depth
+      isVisible
+      children {
+        id
+        type
+        content
+        style
+        config
+        order
+        parentId
+        depth
+        isVisible
+        children {
+          id
+          type
+          content
+          style
+          config
+          order
+          parentId
+          depth
+          isVisible
+        }
+      }
+    }
+  }
   mutation UpdatePageBlocksOrder($pageId: String!, $updates: [BulkUpdateBlockOrderInput!]!) {
     updatePageBlocksOrder(pageId: $pageId, updates: $updates) {
       ...PageBlockFields

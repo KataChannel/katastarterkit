@@ -43,7 +43,7 @@ const MediaModal: React.FC<MediaModalProps> = ({ media, isOpen, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
       <div className="relative max-w-4xl max-h-full p-4">
         {/* Header */}
-        <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center bg-black bg-opacity-50 rounded-lg p-2">
+        <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center bg-black/50 rounded-lg p-2">
           <div className="text-white">
             <h3 className="font-medium">{media.filename}</h3>
                         <div className="text-sm text-gray-600">
