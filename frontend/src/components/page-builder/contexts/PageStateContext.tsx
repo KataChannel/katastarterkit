@@ -34,6 +34,9 @@ interface PageStateContextType {
 
 const PageStateContext = createContext<PageStateContextType | undefined>(undefined);
 
+// Export the context for direct usage in components that need optional access
+export { PageStateContext };
+
 interface PageStateProviderProps {
   children: ReactNode;
   pageId?: string;
