@@ -278,18 +278,22 @@ const TemplatesMenu = React.memo(function TemplatesMenu({
 
 /**
  * MEMOIZED SUB-COMPONENT: UnifiedSettingsDialog
- * Consolidated dialog combining Page Settings + Global Settings in tabs
+ * Consolidated dialog combining Page Settings + Global Settings (NO TABS - single unified view)
  * 
- * Optimized with:
- * ✅ Proper scrollable content area
- * ✅ Fixed header and footer
- * ✅ Better visual hierarchy
- * ✅ Improved responsive layout
- * ✅ Consistent spacing and padding
+ * ✅ OPTIMIZED - Senior Level Implementation:
+ * ✅ Removed duplicate SEO fields (was in both Page Settings & Global Settings)
+ * ✅ Single unified view instead of 2 tabs
+ * ✅ Page Settings Form (title, slug, status, etc.)
+ * ✅ SEO Settings (seo title, description, keywords) - SINGLE SOURCE
+ * ✅ Page Options (published, navigation, indexing, auth)
+ * ✅ Custom Code (CSS, JS, Head code)
+ * ✅ Better visual hierarchy with collapsible sections
+ * ✅ Proper scrollable content with fixed header/footer
  * 
- * Tabs:
- * - PAGE SETTINGS: General, Layout, SEO (from PageSettingsForm)
- * - GLOBAL SETTINGS: SEO, Page Options, Custom Code (developer-level)
+ * Removed:
+ * ❌ Duplicate SEO fields (was duplicated in 2 tabs)
+ * ❌ Tab navigation overhead
+ * ❌ Redundant sections
  */
 const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
   isOpen,
@@ -311,7 +315,12 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
   onSave: () => Promise<void>;
 }) {
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('page');
+  const [expandedSections, setExpandedSections] = useState({
+    pageInfo: true,
+    seo: true,
+    options: true,
+    code: false,
+  });
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -322,6 +331,13 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
     }
   }, [onSave]);
 
+  const toggleSection = useCallback((section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  }, []);
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col max-w-3xl max-h-[90vh] p-0 gap-0">
@@ -329,227 +345,248 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
         <DialogHeader className="border-b border-gray-200 px-6 py-4 flex-shrink-0 bg-white">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
             <Settings className="w-5 h-5 text-gray-700" />
-            Settings
+            Page Settings
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-500 mt-1">
-            Configure page settings and global developer options
+            Configure page information, SEO, visibility, and custom code
           </DialogDescription>
         </DialogHeader>
 
-        {/* Tabs Navigation - Fixed */}
-        <div className="border-b border-gray-200 px-6 pt-4 pb-0 flex-shrink-0 bg-white">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-lg">
-              <TabsTrigger 
-                value="page" 
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
-              >
-                <span className="text-sm font-medium">📄 Page Settings</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="global"
-                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
-              >
-                <span className="text-sm font-medium">⚙️ Global Settings</span>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto px-6 py-6 bg-white">
-          {/* PAGE SETTINGS TAB */}
-          {activeTab === 'page' && (
-            <div className="space-y-6">
-              {editingPage ? (
-                <PageSettingsForm
-                  page={editingPage}
-                  onUpdate={onPageUpdate}
-                />
-              ) : (
-                <div className="flex items-center justify-center py-12">
-                  <div className="text-center space-y-2">
-                    <div className="text-4xl text-gray-300">📭</div>
-                    <p className="text-gray-500 font-medium">No page selected</p>
-                    <p className="text-xs text-gray-400">Please select a page to edit settings</p>
-                  </div>
-                </div>
-              )}
+          {!editingPage ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center space-y-2">
+                <div className="text-4xl text-gray-300">📭</div>
+                <p className="text-gray-500 font-medium">No page selected</p>
+                <p className="text-xs text-gray-400">Please select a page to edit settings</p>
+              </div>
             </div>
-          )}
-
-          {/* GLOBAL SETTINGS TAB */}
-          {activeTab === 'global' && (
-            <div className="space-y-6">
-              {/* SEO Settings Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
-                  <span className="text-lg">🔍</span>
-                  <h3 className="text-sm font-semibold text-gray-900">SEO Settings</h3>
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="seo-title" className="text-sm font-medium text-gray-700">
-                      SEO Title
-                    </Label>
-                    <Input
-                      id="seo-title"
-                      placeholder="SEO optimized title..."
-                      value={pageSettings.seoTitle}
-                      onChange={(e) => onSettingChange('seoTitle', e.target.value)}
-                      disabled={isLoading || isSaving}
-                      className="w-full h-9 text-sm"
-                    />
-                    <p className="text-xs text-gray-500 flex items-center gap-1">
-                      <span>💡</span> Recommended: 50-60 characters
-                    </p>
+          ) : (
+            <div className="space-y-4">
+              {/* PAGE INFO SECTION */}
+              <div className="rounded-lg border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => toggleSection('pageInfo')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">📄</span>
+                    <h3 className="text-sm font-semibold text-gray-900">Page Information</h3>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="seo-description" className="text-sm font-medium text-gray-700">
-                      Meta Description
-                    </Label>
-                    <Textarea
-                      id="seo-description"
-                      placeholder="SEO meta description..."
-                      value={pageSettings.seoDescription}
-                      onChange={(e) => onSettingChange('seoDescription', e.target.value)}
-                      disabled={isLoading || isSaving}
-                      rows={3}
-                      className="w-full text-sm"
+                  <span className={`transform transition-transform ${expandedSections.pageInfo ? 'rotate-180' : ''}`}>
+                    ▼
+                  </span>
+                </button>
+                {expandedSections.pageInfo && (
+                  <div className="px-4 py-4 border-t border-gray-200 bg-white">
+                    <PageSettingsForm
+                      page={editingPage}
+                      onUpdate={onPageUpdate}
                     />
-                    <p className="text-xs text-gray-500 flex items-center gap-1">
-                      <span>💡</span> Recommended: 150-160 characters
-                    </p>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="seo-keywords" className="text-sm font-medium text-gray-700">
-                      Keywords
-                    </Label>
-                    <Input
-                      id="seo-keywords"
-                      placeholder="keyword1, keyword2, keyword3"
-                      value={pageSettings.seoKeywords}
-                      onChange={(e) => onSettingChange('seoKeywords', e.target.value)}
-                      disabled={isLoading || isSaving}
-                      className="w-full h-9 text-sm"
-                    />
-                    <p className="text-xs text-gray-500">Separate keywords with commas</p>
-                  </div>
-                </div>
+                )}
               </div>
 
-              {/* Page Options Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
-                  <span className="text-lg">🎛️</span>
-                  <h3 className="text-sm font-semibold text-gray-900">Page Options</h3>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-medium text-gray-900">Published</Label>
-                      <p className="text-xs text-gray-500">Make this page publicly visible</p>
-                    </div>
-                    <Switch
-                      checked={pageSettings.isPublished}
-                      onCheckedChange={(checked) => onSettingChange('isPublished', checked)}
-                      disabled={isLoading || isSaving}
-                    />
+              {/* SEO SECTION - SINGLE SOURCE (not duplicated) */}
+              <div className="rounded-lg border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => toggleSection('seo')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🔍</span>
+                    <h3 className="text-sm font-semibold text-gray-900">SEO Settings</h3>
                   </div>
+                  <span className={`transform transition-transform ${expandedSections.seo ? 'rotate-180' : ''}`}>
+                    ▼
+                  </span>
+                </button>
+                {expandedSections.seo && (
+                  <div className="px-4 py-4 border-t border-gray-200 bg-white space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="seo-title" className="text-sm font-medium text-gray-700">
+                        SEO Title
+                      </Label>
+                      <Input
+                        id="seo-title"
+                        placeholder="SEO optimized title..."
+                        value={pageSettings.seoTitle}
+                        onChange={(e) => onSettingChange('seoTitle', e.target.value)}
+                        disabled={isLoading || isSaving}
+                        className="w-full h-9 text-sm"
+                      />
+                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <span>💡</span> Recommended: 50-60 characters
+                      </p>
+                    </div>
 
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-medium text-gray-900">Show in Navigation</Label>
-                      <p className="text-xs text-gray-500">Include in main navigation menu</p>
+                    <div className="space-y-2">
+                      <Label htmlFor="seo-description" className="text-sm font-medium text-gray-700">
+                        Meta Description
+                      </Label>
+                      <Textarea
+                        id="seo-description"
+                        placeholder="SEO meta description..."
+                        value={pageSettings.seoDescription}
+                        onChange={(e) => onSettingChange('seoDescription', e.target.value)}
+                        disabled={isLoading || isSaving}
+                        rows={3}
+                        className="w-full text-sm"
+                      />
+                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <span>💡</span> Recommended: 150-160 characters
+                      </p>
                     </div>
-                    <Switch
-                      checked={pageSettings.showInNavigation}
-                      onCheckedChange={(checked) => onSettingChange('showInNavigation', checked)}
-                      disabled={isLoading || isSaving}
-                    />
-                  </div>
 
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-medium text-gray-900">Allow Indexing</Label>
-                      <p className="text-xs text-gray-500">Allow search engines to index this page</p>
+                    <div className="space-y-2">
+                      <Label htmlFor="seo-keywords" className="text-sm font-medium text-gray-700">
+                        Keywords
+                      </Label>
+                      <Input
+                        id="seo-keywords"
+                        placeholder="keyword1, keyword2, keyword3"
+                        value={pageSettings.seoKeywords}
+                        onChange={(e) => onSettingChange('seoKeywords', e.target.value)}
+                        disabled={isLoading || isSaving}
+                        className="w-full h-9 text-sm"
+                      />
+                      <p className="text-xs text-gray-500">Separate keywords with commas</p>
                     </div>
-                    <Switch
-                      checked={pageSettings.allowIndexing}
-                      onCheckedChange={(checked) => onSettingChange('allowIndexing', checked)}
-                      disabled={isLoading || isSaving}
-                      defaultChecked
-                    />
                   </div>
-
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-medium text-gray-900">Require Authentication</Label>
-                      <p className="text-xs text-gray-500">Require users to login to view</p>
-                    </div>
-                    <Switch
-                      checked={pageSettings.requireAuth}
-                      onCheckedChange={(checked) => onSettingChange('requireAuth', checked)}
-                      disabled={isLoading || isSaving}
-                    />
-                  </div>
-                </div>
+                )}
               </div>
 
-              {/* Custom Code Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
-                  <span className="text-lg">💻</span>
-                  <h3 className="text-sm font-semibold text-gray-900">Custom Code</h3>
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="custom-css" className="text-sm font-medium text-gray-700">
-                      Custom CSS
-                    </Label>
-                    <Textarea
-                      id="custom-css"
-                      placeholder=".my-class { color: red; }"
-                      value={pageSettings.customCSS}
-                      onChange={(e) => onSettingChange('customCSS', e.target.value)}
-                      disabled={isLoading || isSaving}
-                      rows={4}
-                      className="w-full font-mono text-xs bg-gray-50"
-                    />
+              {/* PAGE OPTIONS SECTION */}
+              <div className="rounded-lg border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => toggleSection('options')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🎛️</span>
+                    <h3 className="text-sm font-semibold text-gray-900">Page Options</h3>
                   </div>
+                  <span className={`transform transition-transform ${expandedSections.options ? 'rotate-180' : ''}`}>
+                    ▼
+                  </span>
+                </button>
+                {expandedSections.options && (
+                  <div className="px-4 py-4 border-t border-gray-200 bg-white space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm font-medium text-gray-900">Published</Label>
+                        <p className="text-xs text-gray-500">Make this page publicly visible</p>
+                      </div>
+                      <Switch
+                        checked={pageSettings.isPublished}
+                        onCheckedChange={(checked) => onSettingChange('isPublished', checked)}
+                        disabled={isLoading || isSaving}
+                      />
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="custom-js" className="text-sm font-medium text-gray-700">
-                      Custom JavaScript
-                    </Label>
-                    <Textarea
-                      id="custom-js"
-                      placeholder="console.log('Hello');"
-                      value={pageSettings.customJS}
-                      onChange={(e) => onSettingChange('customJS', e.target.value)}
-                      disabled={isLoading || isSaving}
-                      rows={4}
-                      className="w-full font-mono text-xs bg-gray-50"
-                    />
-                  </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm font-medium text-gray-900">Show in Navigation</Label>
+                        <p className="text-xs text-gray-500">Include in main navigation menu</p>
+                      </div>
+                      <Switch
+                        checked={pageSettings.showInNavigation}
+                        onCheckedChange={(checked) => onSettingChange('showInNavigation', checked)}
+                        disabled={isLoading || isSaving}
+                      />
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="head-code" className="text-sm font-medium text-gray-700">
-                      Head Code (Meta tags, Analytics)
-                    </Label>
-                    <Textarea
-                      id="head-code"
-                      placeholder="<meta name='description' content='...' />"
-                      value={pageSettings.headCode}
-                      onChange={(e) => onSettingChange('headCode', e.target.value)}
-                      disabled={isLoading || isSaving}
-                      rows={4}
-                      className="w-full font-mono text-xs bg-gray-50"
-                    />
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm font-medium text-gray-900">Allow Indexing</Label>
+                        <p className="text-xs text-gray-500">Allow search engines to index this page</p>
+                      </div>
+                      <Switch
+                        checked={pageSettings.allowIndexing}
+                        onCheckedChange={(checked) => onSettingChange('allowIndexing', checked)}
+                        disabled={isLoading || isSaving}
+                        defaultChecked
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm font-medium text-gray-900">Require Authentication</Label>
+                        <p className="text-xs text-gray-500">Require users to login to view</p>
+                      </div>
+                      <Switch
+                        checked={pageSettings.requireAuth}
+                        onCheckedChange={(checked) => onSettingChange('requireAuth', checked)}
+                        disabled={isLoading || isSaving}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
+              </div>
+
+              {/* CUSTOM CODE SECTION */}
+              <div className="rounded-lg border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => toggleSection('code')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">💻</span>
+                    <h3 className="text-sm font-semibold text-gray-900">Custom Code</h3>
+                  </div>
+                  <span className={`transform transition-transform ${expandedSections.code ? 'rotate-180' : ''}`}>
+                    ▼
+                  </span>
+                </button>
+                {expandedSections.code && (
+                  <div className="px-4 py-4 border-t border-gray-200 bg-white space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="custom-css" className="text-sm font-medium text-gray-700">
+                        Custom CSS
+                      </Label>
+                      <Textarea
+                        id="custom-css"
+                        placeholder=".my-class { color: red; }"
+                        value={pageSettings.customCSS}
+                        onChange={(e) => onSettingChange('customCSS', e.target.value)}
+                        disabled={isLoading || isSaving}
+                        rows={4}
+                        className="w-full font-mono text-xs bg-gray-50"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="custom-js" className="text-sm font-medium text-gray-700">
+                        Custom JavaScript
+                      </Label>
+                      <Textarea
+                        id="custom-js"
+                        placeholder="console.log('Hello');"
+                        value={pageSettings.customJS}
+                        onChange={(e) => onSettingChange('customJS', e.target.value)}
+                        disabled={isLoading || isSaving}
+                        rows={4}
+                        className="w-full font-mono text-xs bg-gray-50"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="head-code" className="text-sm font-medium text-gray-700">
+                        Head Code (Meta tags, Analytics)
+                      </Label>
+                      <Textarea
+                        id="head-code"
+                        placeholder="<meta name='description' content='...' />"
+                        value={pageSettings.headCode}
+                        onChange={(e) => onSettingChange('headCode', e.target.value)}
+                        disabled={isLoading || isSaving}
+                        rows={4}
+                        className="w-full font-mono text-xs bg-gray-50"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -580,228 +617,6 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
                 <Save className="w-4 h-4" />
                 <span>Save Settings</span>
               </>
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-});
-
-/**
- * MEMOIZED SUB-COMPONENT: GlobalSettingsDialog
- * Dialog for developer-level settings (SEO, Page Options, Custom Code)
- */
-const GlobalSettingsDialog = React.memo(function GlobalSettingsDialog({
-  isOpen,
-  onOpenChange,
-  pageSettings,
-  onSettingChange,
-  isLoading,
-  onSave,
-}: {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  pageSettings: any;
-  onSettingChange: (field: string, value: any) => void;
-  isLoading: boolean;
-  onSave: () => Promise<void>;
-}) {
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleSave = useCallback(async () => {
-    setIsSaving(true);
-    try {
-      await onSave();
-    } finally {
-      setIsSaving(false);
-    }
-  }, [onSave]);
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col max-w-2xl max-h-[90vh] p-0">
-        <DialogHeader className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            Global Developer Settings
-          </DialogTitle>
-          <DialogDescription>
-            Configure global developer settings: SEO, custom code, and page options
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex-1 overflow-y-auto px-6 py-4 border-b border-gray-200 space-y-6">
-          {/* SEO Settings */}
-          <div className="space-y-4 border-t pt-4">
-            <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-              🔍 SEO Settings
-            </h3>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="seo-title">SEO Title</Label>
-                <Input
-                  id="seo-title"
-                  placeholder="SEO optimized title..."
-                  value={pageSettings.seoTitle}
-                  onChange={(e) => onSettingChange('seoTitle', e.target.value)}
-                  disabled={isLoading || isSaving}
-                  className="w-full"
-                />
-                <p className="text-xs text-gray-500">Recommended: 50-60 characters</p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="seo-description">Meta Description</Label>
-                <Textarea
-                  id="seo-description"
-                  placeholder="SEO meta description..."
-                  value={pageSettings.seoDescription}
-                  onChange={(e) => onSettingChange('seoDescription', e.target.value)}
-                  disabled={isLoading || isSaving}
-                  rows={3}
-                  className="w-full"
-                />
-                <p className="text-xs text-gray-500">Recommended: 150-160 characters</p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="seo-keywords">Keywords</Label>
-                <Input
-                  id="seo-keywords"
-                  placeholder="keyword1, keyword2, keyword3"
-                  value={pageSettings.seoKeywords}
-                  onChange={(e) => onSettingChange('seoKeywords', e.target.value)}
-                  disabled={isLoading || isSaving}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Page Options */}
-          <div className="space-y-4 border-t pt-4">
-            <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-              🎛️ Page Options
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Published</Label>
-                  <p className="text-xs text-gray-500">Make this page publicly visible</p>
-                </div>
-                <Switch
-                  checked={pageSettings.isPublished}
-                  onCheckedChange={(checked) => onSettingChange('isPublished', checked)}
-                  disabled={isLoading || isSaving}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Show in Navigation</Label>
-                  <p className="text-xs text-gray-500">Include in main navigation menu</p>
-                </div>
-                <Switch
-                  checked={pageSettings.showInNavigation}
-                  onCheckedChange={(checked) =>
-                    onSettingChange('showInNavigation', checked)
-                  }
-                  disabled={isLoading || isSaving}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Allow Indexing</Label>
-                  <p className="text-xs text-gray-500">Allow search engines to index this page</p>
-                </div>
-                <Switch
-                  checked={pageSettings.allowIndexing}
-                  onCheckedChange={(checked) => onSettingChange('allowIndexing', checked)}
-                  disabled={isLoading || isSaving}
-                  defaultChecked
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Require Authentication</Label>
-                  <p className="text-xs text-gray-500">Require users to login to view</p>
-                </div>
-                <Switch
-                  checked={pageSettings.requireAuth}
-                  onCheckedChange={(checked) => onSettingChange('requireAuth', checked)}
-                  disabled={isLoading || isSaving}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Custom Code */}
-          <div className="space-y-4 border-t pt-4">
-            <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-              💻 Custom Code
-            </h3>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="custom-css">Custom CSS</Label>
-                <Textarea
-                  id="custom-css"
-                  placeholder=".my-class { color: red; }"
-                  value={pageSettings.customCSS}
-                  onChange={(e) => onSettingChange('customCSS', e.target.value)}
-                  disabled={isLoading || isSaving}
-                  rows={4}
-                  className="w-full font-mono text-xs"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="custom-js">Custom JavaScript</Label>
-                <Textarea
-                  id="custom-js"
-                  placeholder="console.log('Hello');"
-                  value={pageSettings.customJS}
-                  onChange={(e) => onSettingChange('customJS', e.target.value)}
-                  disabled={isLoading || isSaving}
-                  rows={4}
-                  className="w-full font-mono text-xs"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="head-code">Head Code (Meta tags, Analytics)</Label>
-                <Textarea
-                  id="head-code"
-                  placeholder="<meta name='...'/>"
-                  value={pageSettings.headCode}
-                  onChange={(e) => onSettingChange('headCode', e.target.value)}
-                  disabled={isLoading || isSaving}
-                  rows={4}
-                  className="w-full font-mono text-xs"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex-shrink-0">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading || isSaving}
-          >
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={isLoading || isSaving}>
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              'Save Settings'
             )}
           </Button>
         </DialogFooter>
