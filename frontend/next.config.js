@@ -6,6 +6,14 @@ const nextConfig = {
   output: 'standalone',
   
   /**
+   * Turbopack Configuration for Next.js 16+
+   * Turbopack is enabled by default in Next.js 16
+   */
+  turbopack: {
+    // Enable Turbopack (empty config to silence migration warning)
+  },
+  
+  /**
    * Webpack Configuration for Code Splitting & Tree Shaking
    * DISABLED due to SIGBUS error in production build
    * Using minimal webpack config
@@ -27,7 +35,6 @@ const nextConfig = {
   
   // Image optimization
   images: {
-    domains: ['localhost', 'minio'],
     remotePatterns: [
       {
         protocol: 'http',
@@ -39,6 +46,16 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'minio',
         pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+        pathname: '/**',
       },
     ],
     // Optimize image loading
