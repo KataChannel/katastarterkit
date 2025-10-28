@@ -214,6 +214,34 @@ export function TemplateProvider({ children }: TemplateProviderProps) {
 export function useTemplate() {
   const context = useContext(TemplateContext);
   if (context === undefined) {
+    // Return default values instead of throwing during SSR or initial render
+    if (typeof window === 'undefined') {
+      return {
+        allTemplates: [],
+        customTemplates: [],
+        selectedTemplate: null,
+        templateSearchQuery: '',
+        selectedTemplateCategory: 'all',
+        showPreviewModal: false,
+        isApplyingTemplate: false,
+        showSaveTemplateDialog: false,
+        isSavingTemplate: false,
+        isLoadingTemplates: false,
+        setTemplateSearchQuery: () => {},
+        setSelectedTemplateCategory: () => {},
+        setShowPreviewModal: () => {},
+        setSelectedTemplate: () => {},
+        setIsApplyingTemplate: () => {},
+        setShowSaveTemplateDialog: () => {},
+        setIsSavingTemplate: () => {},
+        handlePreviewTemplate: () => {},
+        handleClosePreview: () => {},
+        handleSaveAsTemplate: async () => {},
+        handleDeleteCustomTemplate: async () => {},
+        handleDuplicateTemplate: async () => {},
+        refreshTemplates: async () => {},
+      } as TemplateContextType;
+    }
     throw new Error(
       'useTemplate must be used within a TemplateProvider. ' +
       'Make sure your component is wrapped with <PageBuilderProvider>'

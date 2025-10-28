@@ -79,6 +79,19 @@ export function UIStateProvider({ children }: UIStateProviderProps) {
 export function useUIState() {
   const context = useContext(UIStateContext);
   if (context === undefined) {
+    // Return default values instead of throwing during SSR or initial render
+    if (typeof window === 'undefined') {
+      return {
+        showPageSettings: false,
+        showPreview: false,
+        showAddChildDialog: false,
+        addChildParentId: null,
+        setShowPageSettings: () => {},
+        setShowPreview: () => {},
+        setShowAddChildDialog: () => {},
+        setAddChildParentId: () => {},
+      } as UIStateContextType;
+    }
     throw new Error(
       'useUIState must be used within a UIStateProvider. ' +
       'Make sure your component is wrapped with <PageBuilderProvider>'

@@ -136,18 +136,7 @@ export const GET_HOMEPAGE = gql`
 
 // Create a new page
 export const CREATE_PAGE = gql`
-  fragment PageFields on Page {
-    id
-    title
-    slug
-    content
-    status
-    seoTitle
-    seoDescription
-    seoKeywords
-    createdAt
-    updatedAt
-  }
+  ${PAGE_FRAGMENT}
   mutation CreatePage($input: CreatePageInput!) {
     createPage(input: $input) {
       ...PageFields
@@ -157,18 +146,7 @@ export const CREATE_PAGE = gql`
 
 // Update an existing page
 export const UPDATE_PAGE = gql`
-  fragment PageFields on Page {
-    id
-    title
-    slug
-    content
-    status
-    seoTitle
-    seoDescription
-    seoKeywords
-    createdAt
-    updatedAt
-  }
+  ${PAGE_FRAGMENT}
   mutation UpdatePage($id: String!, $input: UpdatePageInput!) {
     updatePage(id: $id, input: $input) {
       ...PageFields
@@ -178,18 +156,7 @@ export const UPDATE_PAGE = gql`
 
 // Delete a page
 export const DELETE_PAGE = gql`
-  fragment PageFields on Page {
-    id
-    title
-    slug
-    content
-    status
-    seoTitle
-    seoDescription
-    seoKeywords
-    createdAt
-    updatedAt
-  }
+  ${PAGE_FRAGMENT}
   mutation DeletePage($id: String!) {
     deletePage(id: $id) {
       ...PageFields

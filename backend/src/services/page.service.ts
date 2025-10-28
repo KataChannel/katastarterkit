@@ -57,6 +57,15 @@ export class PageService {
 
     const { blocks, ...pageData } = input;
     
+    // Handle homepage setting - only one page can be homepage
+    if (input.isHomepage === true) {
+      // Reset all other pages' homepage flag
+      await this.prisma.page.updateMany({
+        where: { isHomepage: true },
+        data: { isHomepage: false }
+      });
+    }
+    
     const page = await this.prisma.page.create({
       data: {
         ...pageData,
@@ -289,6 +298,7 @@ export class PageService {
       where: { id },
       data: {
         ...pageData,
+        ...homepageUpdate,
         updatedBy: userId,
         publishedAt: input.status === 'PUBLISHED' && existingPage.status !== 'PUBLISHED' 
           ? new Date() 

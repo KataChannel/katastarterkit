@@ -629,6 +629,26 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
 export function usePageActions() {
   const context = useContext(PageActionsContext);
   if (context === undefined) {
+    // Return default values instead of throwing during SSR or initial render
+    if (typeof window === 'undefined') {
+      return {
+        handlePageSave: async () => {},
+        handlePageDelete: async () => {},
+        handleAddBlock: async () => {},
+        handleAddTemplateBlock: async () => {},
+        handleBlockUpdate: async () => {},
+        handleBlockDelete: async () => {},
+        handleBlocksReorder: async () => {},
+        handleSelectBlock: () => {},
+        handleUpdateBlockStyle: async () => {},
+        handleAddChild: () => {},
+        handleAddChildBlock: async () => {},
+        handleCloseAddChildDialog: () => {},
+        handleApplyTemplate: async () => {},
+        handleDragStart: () => {},
+        handleDragEnd: async () => {},
+      } as PageActionsContextType;
+    }
     throw new Error(
       'usePageActions must be used within a PageActionsProvider. ' +
       'Make sure your component is wrapped with <PageBuilderProvider>'
