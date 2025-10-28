@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { PageBlock, BlockType } from '@/types/page-builder';
-import { usePageState } from '../contexts';
+import { PageStateContext } from '../contexts/PageStateContext';
 import { BlockLoader } from './BlockLoader';
 import BlockErrorBoundary from '../BlockErrorBoundary';
 
@@ -28,7 +28,9 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   depth = 0,
 }) => {
   // Get selected block ID from context for visual highlighting (optional - for editor only)
-  const { selectedBlockId } = usePageState();
+  // Use context directly instead of usePageState to make it optional
+  const pageState = useContext(PageStateContext);
+  const selectedBlockId = pageState?.selectedBlockId ?? null;
   const isSelected = selectedBlockId === block.id;
 
   const commonProps = {
