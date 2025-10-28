@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { usePageActions } from '../../PageBuilderProvider';
 import { BlockType } from '@/types/page-builder';
+import { useFilteredAndGrouped } from '@/components/page-builder/hooks/useFilteredAndGrouped';
+import { useCategoryToggle } from '@/components/page-builder/hooks/useCategoryToggle';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -355,44 +357,33 @@ export function TemplatesLibrary() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [previewTemplate, setPreviewTemplate] = useState<TemplateConfig | null>(null);
   const [isInserting, setIsInserting] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['all']));
+
+  // Use shared hooks for category toggle and filtering
+  const { expandedCategories, toggleCategory } = useCategoryToggle({
+    initialState: { 'all': true, 'ecommerce': true, 'landing': true },
+  });
 
   // Get page actions
   const { handleApplyTemplate } = usePageActions();
 
-  const filteredTemplates = useMemo(() => {
-    return templates.filter((template) => {
-      const matchesSearch =
-        template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        template.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = activeCategory === 'all' || template.category === activeCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [searchQuery, activeCategory]);
+  // Filter templates based on search + category
+  const visibleTemplates = templates.filter((template) => {
+    const matchesSearch =
+      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeCategory === 'all' || template.category === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
 
-  // Group templates by category
-  const groupedTemplates = useMemo(() => {
-    if (activeCategory === 'all') {
-      const grouped: Record<string, TemplateConfig[]> = {};
-      Object.keys(CATEGORY_CONFIG).forEach((cat) => {
-        grouped[cat] = templates.filter((t) => t.category === cat && 
-          (t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           t.description.toLowerCase().includes(searchQuery.toLowerCase())));
-      });
-      return grouped;
+  // Group templates by category when viewing all
+  const { groupedItems: groupedTemplates } = useFilteredAndGrouped(
+    activeCategory === 'all' ? templates : [],
+    searchQuery,
+    {
+      searchFields: ['name', 'description'],
+      groupByField: 'category',
     }
-    return {};
-  }, [searchQuery, activeCategory]);
-
-  const toggleCategory = (categoryId: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
-    }
-    setExpandedCategories(newExpanded);
-  };
+  );
 
   const handleInsertTemplate = async (template: TemplateConfig) => {
     setIsInserting(true);
@@ -498,7 +489,7 @@ export function TemplatesLibrary() {
               
               const config = CATEGORY_CONFIG[categoryId];
               const Icon = config.icon;
-              const isExpanded = expandedCategories.has(categoryId);
+              const isExpanded = expandedCategories[categoryId] || false;
 
               return (
                 <div key={categoryId}>
@@ -536,9 +527,9 @@ export function TemplatesLibrary() {
           </div>
         ) : (
           // Single category flat view
-          filteredTemplates.length > 0 ? (
+          visibleTemplates.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              {filteredTemplates.map((template) => (
+              {visibleTemplates.map((template: TemplateConfig) => (
                 <TemplateCard
                   key={template.id}
                   template={template}
