@@ -7,6 +7,7 @@ import { EditorCanvas } from './EditorCanvas';
 import { EditorFooter } from './EditorFooter';
 import { LeftPanel } from '../panels/LeftPanel/LeftPanel';
 import { RightPanel } from '../panels/RightPanel/RightPanel';
+import { PageBuilderHeader } from '../PageBuilderHeader';
 import { usePageState, usePageActions } from '../PageBuilderProvider';
 import { toast } from 'sonner';
 import { UPDATE_PAGE } from '@/graphql/queries/pages';
@@ -94,6 +95,9 @@ export function FullScreenLayout({
 
   return (
     <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Page Builder Header - Shows title, status, homepage badge, settings */}
+      <PageBuilderHeader />
+
       {/* Top Toolbar */}
       <EditorToolbar
         editorMode={editorMode}
