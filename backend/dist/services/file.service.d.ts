@@ -1,0 +1,143 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { MinioService } from './minio.service';
+import { File, FileFolder, Prisma } from '@prisma/client';
+import { CreateFolderInput, UpdateFolderInput, UpdateFileInput, GetFilesInput, CreateFileShareInput, MoveFilesInput, BulkDeleteFilesInput, BulkUpdateFilesInput } from '../graphql/inputs/file.input';
+export declare class FileService {
+    private prisma;
+    private minioService;
+    private readonly logger;
+    constructor(prisma: PrismaService, minioService: MinioService);
+    private getFileType;
+    uploadFile(file: Express.Multer.File, userId: string, folderId?: string, metadata?: any): Promise<File>;
+    getFile(id: string, userId: string): Promise<File>;
+    getFiles(input: GetFilesInput, userId: string): Promise<{
+        items: ({
+            shares: {
+                password: string | null;
+                id: string;
+                createdAt: Date;
+                token: string;
+                expiresAt: Date | null;
+                sharedBy: string;
+                sharedWith: string | null;
+                fileId: string;
+                canDownload: boolean;
+                canView: boolean;
+                accessCount: number;
+                lastAccess: Date | null;
+            }[];
+            folder: {
+                path: string;
+                id: string;
+                createdAt: Date;
+                userId: string;
+                name: string;
+                updatedAt: Date;
+                parentId: string | null;
+                description: string | null;
+                color: string | null;
+                icon: string | null;
+                isSystem: boolean;
+            };
+        } & {
+            path: string;
+            id: string;
+            createdAt: Date;
+            size: number;
+            userId: string;
+            updatedAt: Date;
+            tags: string[];
+            title: string | null;
+            description: string | null;
+            metadata: Prisma.JsonValue | null;
+            url: string;
+            filename: string;
+            mimeType: string;
+            width: number | null;
+            viewCount: number;
+            etag: string | null;
+            bucket: string;
+            alt: string | null;
+            folderId: string | null;
+            visibility: import(".prisma/client").$Enums.FileVisibility;
+            fileType: import(".prisma/client").$Enums.FileType;
+            originalName: string;
+            height: number | null;
+            thumbnailUrl: string | null;
+            downloadCount: number;
+        })[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    }>;
+    updateFile(input: UpdateFileInput, userId: string): Promise<File>;
+    deleteFile(id: string, userId: string): Promise<boolean>;
+    createFolder(input: CreateFolderInput, userId: string): Promise<FileFolder>;
+    getFolder(id: string, userId: string): Promise<FileFolder>;
+    getFolders(userId: string): Promise<FileFolder[]>;
+    updateFolder(input: UpdateFolderInput, userId: string): Promise<FileFolder>;
+    deleteFolder(id: string, userId: string): Promise<boolean>;
+    private getFolderPath;
+    moveFiles(input: MoveFilesInput, userId: string): Promise<File[]>;
+    bulkDeleteFiles(input: BulkDeleteFilesInput, userId: string): Promise<number>;
+    bulkUpdateFiles(input: BulkUpdateFilesInput, userId: string): Promise<File[]>;
+    getStorageStats(userId: string): Promise<{
+        totalFiles: number;
+        totalSize: number;
+        totalFolders: number;
+        filesByType: {
+            type: "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER" | "AUDIO" | "ARCHIVE";
+            count: number;
+            totalSize: number;
+        }[];
+        filesByVisibility: {
+            visibility: "PUBLIC" | "PRIVATE" | "SHARED";
+            count: number;
+        }[];
+    }>;
+    createFileShare(input: CreateFileShareInput, userId: string): Promise<{
+        file: {
+            path: string;
+            id: string;
+            createdAt: Date;
+            size: number;
+            userId: string;
+            updatedAt: Date;
+            tags: string[];
+            title: string | null;
+            description: string | null;
+            metadata: Prisma.JsonValue | null;
+            url: string;
+            filename: string;
+            mimeType: string;
+            width: number | null;
+            viewCount: number;
+            etag: string | null;
+            bucket: string;
+            alt: string | null;
+            folderId: string | null;
+            visibility: import(".prisma/client").$Enums.FileVisibility;
+            fileType: import(".prisma/client").$Enums.FileType;
+            originalName: string;
+            height: number | null;
+            thumbnailUrl: string | null;
+            downloadCount: number;
+        };
+    } & {
+        password: string | null;
+        id: string;
+        createdAt: Date;
+        token: string;
+        expiresAt: Date | null;
+        sharedBy: string;
+        sharedWith: string | null;
+        fileId: string;
+        canDownload: boolean;
+        canView: boolean;
+        accessCount: number;
+        lastAccess: Date | null;
+    }>;
+}
