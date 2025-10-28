@@ -15,9 +15,7 @@ import {
   useTemplate,
 } from './contexts';
 import ErrorBoundary from './ErrorBoundary';
-import PageStateErrorBoundary from './contexts/PageStateErrorBoundary';
-import UIStateErrorBoundary from './contexts/UIStateErrorBoundary';
-import PageActionsErrorBoundary from './contexts/PageActionsErrorBoundary';
+import { pageBuilderLogger } from './utils/pageBuilderLogger';
 
 /**
  * PageBuilder Provider Props
@@ -36,28 +34,22 @@ interface PageBuilderProviderProps {
  * - TemplateContext: Template operations
  * - PageActionsContext: All CRUD operations
  * 
- * Wrapped with Error Boundaries for robust error handling
+ * Wrapped with Single Error Boundary for robust error handling
  */
 export function PageBuilderProvider({ children, pageId }: PageBuilderProviderProps) {
   return (
     <ErrorBoundary>
-      <PageStateErrorBoundary>
-        <PageStateProvider pageId={pageId}>
-          <UIStateErrorBoundary>
-            <UIStateProvider>
-              <TemplateProvider>
-                <PageActionsErrorBoundary>
-                  <PageActionsProvider pageId={pageId}>
-                    <DndContextWrapper>
-                      {children}
-                    </DndContextWrapper>
-                  </PageActionsProvider>
-                </PageActionsErrorBoundary>
-              </TemplateProvider>
-            </UIStateProvider>
-          </UIStateErrorBoundary>
-        </PageStateProvider>
-      </PageStateErrorBoundary>
+      <PageStateProvider pageId={pageId}>
+        <UIStateProvider>
+          <TemplateProvider>
+            <PageActionsProvider pageId={pageId}>
+              <DndContextWrapper>
+                {children}
+              </DndContextWrapper>
+            </PageActionsProvider>
+          </TemplateProvider>
+        </UIStateProvider>
+      </PageStateProvider>
     </ErrorBoundary>
   );
 }
@@ -77,7 +69,7 @@ function DndContextWrapper({ children }: { children: ReactNode }) {
   // Fire and forget - let the async operation complete in the background
   const handleDragEnd = React.useCallback((event: any) => {
     handleDragEndAsync(event).catch((error: any) => {
-      console.error('Error in handleDragEnd:', error);
+      pageBuilderLogger.error('DRAG_END', 'Error in drag and drop operation', { event, error });
     });
   }, [handleDragEndAsync]);
 
@@ -122,37 +114,5 @@ const DragOverlayContent = React.memo(function DragOverlayContent({ draggedBlock
     </DragOverlay>
   );
 });
-
-/**
- * Combined hook for backward compatibility
- * Returns all context values in a single object
- * 
- * @deprecated Use individual hooks (usePageState, useUIState, etc.) instead
- */
-export function usePageBuilderContext() {
-  const pageState = usePageState();
-  const uiState = useUIState();
-  const templateState = useTemplate();
-  const pageActions = usePageActions();
-
-  // Combine all contexts for backward compatibility
-  return {
-    // From PageStateContext
-    ...pageState,
-    
-    // From UIStateContext
-    ...(uiState || {}),
-    
-    // From TemplateContext
-    ...(templateState || {}),
-    
-    // From PageActionsContext
-    ...pageActions,
-  };
-}
-
-// Also export individual hooks for better tree-shaking
+// Export individual hooks for better tree-shaking and clear API
 export { usePageState, useUIState, useTemplate, usePageActions } from './contexts';
-
-// Export PageBuilderContext for backward compatibility
-export const PageBuilderContext = React.createContext<ReturnType<typeof usePageBuilderContext> | undefined>(undefined);

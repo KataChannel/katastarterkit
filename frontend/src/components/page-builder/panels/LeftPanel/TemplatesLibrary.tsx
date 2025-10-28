@@ -23,6 +23,7 @@ import { BlockType } from '@/types/page-builder';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { pageBuilderLogger, LOG_OPERATIONS } from '../../utils/pageBuilderLogger';
 
 interface TemplateBlock {
   type: BlockType;
@@ -258,7 +259,7 @@ function TemplateCard({ template, onInsert, onPreview }: { template: TemplateCon
 
   // Handle double-click to insert template directly
   const handleDoubleClick = () => {
-    console.log('[TemplatesLibrary] Double-click insert template:', template.id);
+    pageBuilderLogger.info('TEMPLATE_INSERT', 'Double-click inserting template', { templateId: template.id });
     handleInsert();
   };
 
@@ -415,7 +416,7 @@ export function TemplatesLibrary() {
       await handleApplyTemplate(blockTemplate);
       toast.success(`Template "${template.name}" inserted successfully!`);
     } catch (error: any) {
-      console.error('Failed to insert template:', error);
+      pageBuilderLogger.error(LOG_OPERATIONS.TEMPLATE_ADD, 'Failed to insert template', { templateId: template.id, error });
       toast.error(error.message || 'Failed to insert template');
     } finally {
       setIsInserting(false);

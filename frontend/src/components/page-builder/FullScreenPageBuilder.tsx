@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FullScreenLayout } from './layout/FullScreenLayout';
 import { PageBuilderProvider, usePageActions } from './PageBuilderProvider';
 import type { PageBlock } from '@/types/page-builder';
+import { pageBuilderLogger, LOG_OPERATIONS } from './utils/pageBuilderLogger';
 
 interface FullScreenPageBuilderProps {
   pageId?: string;
@@ -39,7 +40,7 @@ function FullScreenPageBuilderInternal({
     try {
       await handlePageSave();
     } catch (error) {
-      console.error('Error saving page:', error);
+      pageBuilderLogger.error(LOG_OPERATIONS.PAGE_SAVE, 'Error saving page', { error });
     }
   }, [handlePageSave]);
 

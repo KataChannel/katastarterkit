@@ -25,6 +25,7 @@ import { PageBlock } from '@/types/page-builder';
 import { BlockTemplate, TemplateCategory } from '@/data/blockTemplates';
 import { CreateTemplateInput } from '@/utils/customTemplates';
 import { Save, Loader2, Info } from 'lucide-react';
+import { pageBuilderLogger, LOG_OPERATIONS } from './utils/pageBuilderLogger';
 
 interface SaveTemplateDialogProps {
   open: boolean;
@@ -88,7 +89,7 @@ export function SaveTemplateDialog({
       setTemplateCategory('custom');
       setErrors({});
     } catch (error) {
-      console.error('Error saving template:', error);
+      pageBuilderLogger.error(LOG_OPERATIONS.TEMPLATE_SAVE, 'Error saving template', { error });
       setErrors({ submit: 'Failed to save template. Please try again.' });
     }
   };

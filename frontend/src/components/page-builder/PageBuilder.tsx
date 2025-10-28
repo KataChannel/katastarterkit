@@ -1,10 +1,6 @@
 'use client';
 
 import React from 'react';
-import {
-  Type, Image, Layout, Square, Users, TrendingUp, Phone, Minus, Space,
-  Box, Columns, Grid3x3, ArrowRightLeft, ArrowUpDown, Code, Presentation
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { TemplatePreviewModal } from '@/components/page-builder/TemplatePreviewModal';
@@ -14,33 +10,7 @@ import { PageBuilderHeader } from './PageBuilderHeader';
 import { PageBuilderSidebar } from './PageBuilderSidebar';
 import { PageBuilderCanvas } from './PageBuilderCanvas';
 import { BlockType } from '@/types/page-builder';
-
-/**
- * Block type definitions for the Add Child Dialog
- */
-const BLOCK_TYPES = [
-  // Content Blocks
-  { type: BlockType.TEXT, label: 'Text Block', icon: Type, color: 'bg-blue-100 text-blue-600' },
-  { type: BlockType.IMAGE, label: 'Image Block', icon: Image, color: 'bg-green-100 text-green-600' },
-  { type: BlockType.CAROUSEL, label: 'Carousel', icon: Presentation, color: 'bg-teal-100 text-teal-600' },
-  { type: BlockType.HERO, label: 'Hero Section', icon: Layout, color: 'bg-purple-100 text-purple-600' },
-  { type: BlockType.BUTTON, label: 'Button', icon: Square, color: 'bg-orange-100 text-orange-600' },
-  { type: BlockType.TEAM, label: 'Team Section', icon: Users, color: 'bg-indigo-100 text-indigo-600' },
-  { type: BlockType.STATS, label: 'Stats Section', icon: TrendingUp, color: 'bg-emerald-100 text-emerald-600' },
-  { type: BlockType.CONTACT_INFO, label: 'Contact Info', icon: Phone, color: 'bg-cyan-100 text-cyan-600' },
-  { type: BlockType.DIVIDER, label: 'Divider', icon: Minus, color: 'bg-gray-100 text-gray-600' },
-  { type: BlockType.SPACER, label: 'Spacer', icon: Space, color: 'bg-yellow-100 text-yellow-600' },
-  
-  // Container/Layout Blocks
-  { type: BlockType.CONTAINER, label: 'Container', icon: Box, color: 'bg-violet-100 text-violet-600' },
-  { type: BlockType.SECTION, label: 'Section', icon: Columns, color: 'bg-fuchsia-100 text-fuchsia-600' },
-  { type: BlockType.GRID, label: 'Grid Layout', icon: Grid3x3, color: 'bg-pink-100 text-pink-600' },
-  { type: BlockType.FLEX_ROW, label: 'Flex Row', icon: ArrowRightLeft, color: 'bg-rose-100 text-rose-600' },
-  { type: BlockType.FLEX_COLUMN, label: 'Flex Column', icon: ArrowUpDown, color: 'bg-amber-100 text-amber-600' },
-  
-  // Dynamic Block
-  { type: BlockType.DYNAMIC, label: 'Dynamic Block', icon: Code, color: 'bg-purple-100 text-purple-600' },
-];
+import { BLOCK_TYPES } from '@/constants/blockTypes';
 
 /**
  * PageBuilder Internal Component
