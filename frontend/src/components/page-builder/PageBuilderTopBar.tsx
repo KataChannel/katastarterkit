@@ -280,6 +280,13 @@ const TemplatesMenu = React.memo(function TemplatesMenu({
  * MEMOIZED SUB-COMPONENT: UnifiedSettingsDialog
  * Consolidated dialog combining Page Settings + Global Settings in tabs
  * 
+ * Optimized with:
+ * ✅ Proper scrollable content area
+ * ✅ Fixed header and footer
+ * ✅ Better visual hierarchy
+ * ✅ Improved responsive layout
+ * ✅ Consistent spacing and padding
+ * 
  * Tabs:
  * - PAGE SETTINGS: General, Layout, SEO (from PageSettingsForm)
  * - GLOBAL SETTINGS: SEO, Page Options, Custom Code (developer-level)
@@ -317,62 +324,91 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col max-w-3xl max-h-[90vh] p-0">
-        <DialogHeader className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2">
-            <Settings className="w-5 h-5" />
+      <DialogContent className="flex flex-col max-w-3xl max-h-[90vh] p-0 gap-0">
+        {/* Fixed Header */}
+        <DialogHeader className="border-b border-gray-200 px-6 py-4 flex-shrink-0 bg-white">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+            <Settings className="w-5 h-5 text-gray-700" />
             Settings
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm text-gray-500 mt-1">
             Configure page settings and global developer options
           </DialogDescription>
         </DialogHeader>
 
-        {/* Tabs Navigation */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="mx-6 mt-4 grid w-auto grid-cols-2">
-            <TabsTrigger value="page">Page Settings</TabsTrigger>
-            <TabsTrigger value="global">Global Settings</TabsTrigger>
-          </TabsList>
+        {/* Tabs Navigation - Fixed */}
+        <div className="border-b border-gray-200 px-6 pt-4 pb-0 flex-shrink-0 bg-white">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-lg">
+              <TabsTrigger 
+                value="page" 
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+              >
+                <span className="text-sm font-medium">📄 Page Settings</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="global"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm"
+              >
+                <span className="text-sm font-medium">⚙️ Global Settings</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-4 border-b border-gray-200">
-            {/* PAGE SETTINGS TAB */}
-            <TabsContent value="page" className="space-y-6 mt-0">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 bg-white">
+          {/* PAGE SETTINGS TAB */}
+          {activeTab === 'page' && (
+            <div className="space-y-6">
               {editingPage ? (
                 <PageSettingsForm
                   page={editingPage}
                   onUpdate={onPageUpdate}
                 />
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  No page selected
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-center space-y-2">
+                    <div className="text-4xl text-gray-300">📭</div>
+                    <p className="text-gray-500 font-medium">No page selected</p>
+                    <p className="text-xs text-gray-400">Please select a page to edit settings</p>
+                  </div>
                 </div>
               )}
-            </TabsContent>
+            </div>
+          )}
 
-            {/* GLOBAL SETTINGS TAB */}
-            <TabsContent value="global" className="space-y-6 mt-0">
-              {/* SEO Settings */}
-              <div className="space-y-4 border-t pt-4">
-                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  🔍 SEO Settings
-                </h3>
-                <div className="space-y-3">
+          {/* GLOBAL SETTINGS TAB */}
+          {activeTab === 'global' && (
+            <div className="space-y-6">
+              {/* SEO Settings Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
+                  <span className="text-lg">🔍</span>
+                  <h3 className="text-sm font-semibold text-gray-900">SEO Settings</h3>
+                </div>
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="seo-title">SEO Title</Label>
+                    <Label htmlFor="seo-title" className="text-sm font-medium text-gray-700">
+                      SEO Title
+                    </Label>
                     <Input
                       id="seo-title"
                       placeholder="SEO optimized title..."
                       value={pageSettings.seoTitle}
                       onChange={(e) => onSettingChange('seoTitle', e.target.value)}
                       disabled={isLoading || isSaving}
-                      className="w-full"
+                      className="w-full h-9 text-sm"
                     />
-                    <p className="text-xs text-gray-500">Recommended: 50-60 characters</p>
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <span>💡</span> Recommended: 50-60 characters
+                    </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="seo-description">Meta Description</Label>
+                    <Label htmlFor="seo-description" className="text-sm font-medium text-gray-700">
+                      Meta Description
+                    </Label>
                     <Textarea
                       id="seo-description"
                       placeholder="SEO meta description..."
@@ -380,34 +416,40 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
                       onChange={(e) => onSettingChange('seoDescription', e.target.value)}
                       disabled={isLoading || isSaving}
                       rows={3}
-                      className="w-full"
+                      className="w-full text-sm"
                     />
-                    <p className="text-xs text-gray-500">Recommended: 150-160 characters</p>
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <span>💡</span> Recommended: 150-160 characters
+                    </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="seo-keywords">Keywords</Label>
+                    <Label htmlFor="seo-keywords" className="text-sm font-medium text-gray-700">
+                      Keywords
+                    </Label>
                     <Input
                       id="seo-keywords"
                       placeholder="keyword1, keyword2, keyword3"
                       value={pageSettings.seoKeywords}
                       onChange={(e) => onSettingChange('seoKeywords', e.target.value)}
                       disabled={isLoading || isSaving}
-                      className="w-full"
+                      className="w-full h-9 text-sm"
                     />
+                    <p className="text-xs text-gray-500">Separate keywords with commas</p>
                   </div>
                 </div>
               </div>
 
-              {/* Page Options */}
-              <div className="space-y-4 border-t pt-4">
-                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  🎛️ Page Options
-                </h3>
+              {/* Page Options Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
+                  <span className="text-lg">🎛️</span>
+                  <h3 className="text-sm font-semibold text-gray-900">Page Options</h3>
+                </div>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                     <div className="space-y-0.5">
-                      <Label>Published</Label>
+                      <Label className="text-sm font-medium text-gray-900">Published</Label>
                       <p className="text-xs text-gray-500">Make this page publicly visible</p>
                     </div>
                     <Switch
@@ -417,9 +459,9 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                     <div className="space-y-0.5">
-                      <Label>Show in Navigation</Label>
+                      <Label className="text-sm font-medium text-gray-900">Show in Navigation</Label>
                       <p className="text-xs text-gray-500">Include in main navigation menu</p>
                     </div>
                     <Switch
@@ -429,9 +471,9 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                     <div className="space-y-0.5">
-                      <Label>Allow Indexing</Label>
+                      <Label className="text-sm font-medium text-gray-900">Allow Indexing</Label>
                       <p className="text-xs text-gray-500">Allow search engines to index this page</p>
                     </div>
                     <Switch
@@ -442,9 +484,9 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                     <div className="space-y-0.5">
-                      <Label>Require Authentication</Label>
+                      <Label className="text-sm font-medium text-gray-900">Require Authentication</Label>
                       <p className="text-xs text-gray-500">Require users to login to view</p>
                     </div>
                     <Switch
@@ -456,14 +498,17 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
                 </div>
               </div>
 
-              {/* Custom Code */}
-              <div className="space-y-4 border-t pt-4">
-                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  💻 Custom Code
-                </h3>
-                <div className="space-y-3">
+              {/* Custom Code Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
+                  <span className="text-lg">💻</span>
+                  <h3 className="text-sm font-semibold text-gray-900">Custom Code</h3>
+                </div>
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="custom-css">Custom CSS</Label>
+                    <Label htmlFor="custom-css" className="text-sm font-medium text-gray-700">
+                      Custom CSS
+                    </Label>
                     <Textarea
                       id="custom-css"
                       placeholder=".my-class { color: red; }"
@@ -471,12 +516,14 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
                       onChange={(e) => onSettingChange('customCSS', e.target.value)}
                       disabled={isLoading || isSaving}
                       rows={4}
-                      className="w-full font-mono text-xs"
+                      className="w-full font-mono text-xs bg-gray-50"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="custom-js">Custom JavaScript</Label>
+                    <Label htmlFor="custom-js" className="text-sm font-medium text-gray-700">
+                      Custom JavaScript
+                    </Label>
                     <Textarea
                       id="custom-js"
                       placeholder="console.log('Hello');"
@@ -484,44 +531,55 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
                       onChange={(e) => onSettingChange('customJS', e.target.value)}
                       disabled={isLoading || isSaving}
                       rows={4}
-                      className="w-full font-mono text-xs"
+                      className="w-full font-mono text-xs bg-gray-50"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="head-code">Head Code (Meta tags, Analytics)</Label>
+                    <Label htmlFor="head-code" className="text-sm font-medium text-gray-700">
+                      Head Code (Meta tags, Analytics)
+                    </Label>
                     <Textarea
                       id="head-code"
-                      placeholder="<meta name='...'/>"
+                      placeholder="<meta name='description' content='...' />"
                       value={pageSettings.headCode}
                       onChange={(e) => onSettingChange('headCode', e.target.value)}
                       disabled={isLoading || isSaving}
                       rows={4}
-                      className="w-full font-mono text-xs"
+                      className="w-full font-mono text-xs bg-gray-50"
                     />
                   </div>
                 </div>
               </div>
-            </TabsContent>
-          </div>
-        </Tabs>
+            </div>
+          )}
+        </div>
 
-        <DialogFooter className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex-shrink-0">
+        {/* Fixed Footer */}
+        <DialogFooter className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex-shrink-0 gap-3">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isLoading || isSaving}
+            className="text-sm"
           >
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isLoading || isSaving}>
+          <Button 
+            onClick={handleSave} 
+            disabled={isLoading || isSaving}
+            className="text-sm gap-2"
+          >
             {isSaving ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Saving...</span>
               </>
             ) : (
-              'Save Settings'
+              <>
+                <Save className="w-4 h-4" />
+                <span>Save Settings</span>
+              </>
             )}
           </Button>
         </DialogFooter>
