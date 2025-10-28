@@ -204,6 +204,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
           seoTitle: editingPage.seoTitle,
           seoDescription: editingPage.seoDescription,
           seoKeywords: editingPage.seoKeywords || [],
+          isHomepage: editingPage.isHomepage || false,
         };
         
         const result = await createPage(input);
@@ -230,6 +231,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
           seoTitle: editingPage.seoTitle,
           seoDescription: editingPage.seoDescription,
           seoKeywords: editingPage.seoKeywords || [],
+          isHomepage: editingPage.isHomepage || false,
         };
         
         await updatePage(editingPage.id, input);

@@ -136,6 +136,9 @@ export class Page {
   @Field(() => String, { nullable: true })
   ogImage?: string;
 
+  @Field(() => Boolean, { defaultValue: false })
+  isHomepage: boolean;
+
   @Field(() => [PageBlock])
   blocks: PageBlock[];
 

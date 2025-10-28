@@ -1158,6 +1158,7 @@ input CreatePageInput {
   blocks: [CreatePageBlockInput!]
   content: JSONObject
   description: String
+  isHomepage: Boolean = false
   ogImage: String
   seoDescription: String
   seoKeywords: [String!]
@@ -2407,6 +2408,7 @@ type Page {
   createdBy: String!
   description: String
   id: ID!
+  isHomepage: Boolean!
   ogImage: String
   publishedAt: DateTime
   seoDescription: String
@@ -2873,6 +2875,7 @@ type Query {
   getCommentById(id: String!): Comment!
   getCommentsByPost(postId: String!): [Comment!]!
   getCustomTemplate(id: String!): CustomTemplate!
+  getHomepage: Page
   getInvoice(id: ID!): ExtListhoadon!
   getInvoiceStats: InvoiceStats!
   getMe: User!
@@ -3918,6 +3921,7 @@ input UpdatePageInput {
   blocks: [UpdatePageBlockInput!]
   content: JSONObject
   description: String
+  isHomepage: Boolean
   ogImage: String
   seoDescription: String
   seoKeywords: [String!]

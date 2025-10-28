@@ -47,6 +47,11 @@ export class PageResolver {
     return this.pageService.findPublished(pagination);
   }
 
+  @Query(() => Page, { name: 'getHomepage', nullable: true })
+  async getHomepage(): Promise<Page | null> {
+    return this.pageService.findHomepage();
+  }
+
   // Mutations
   @Mutation(() => Page, { name: 'createPage' })
   @UseGuards(JwtAuthGuard)

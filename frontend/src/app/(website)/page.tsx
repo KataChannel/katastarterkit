@@ -1,15 +1,14 @@
 'use client';
 
 import { useQuery } from '@apollo/client';
-import { GET_PAGE_BY_SLUG } from '@/graphql/queries/pages';
+import { GET_HOMEPAGE } from '@/graphql/queries/pages';
 import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
 import { Page, PageStatus } from '@/types/page-builder';
 import { notFound } from 'next/navigation';
 import Head from 'next/head';
 
 export default function WebsitePage() {
-  const { data, loading, error } = useQuery<{ getPageBySlug: Page }>(GET_PAGE_BY_SLUG, {
-    variables: { slug: '/website' },
+  const { data, loading, error } = useQuery<{ getHomepage: Page | null }>(GET_HOMEPAGE, {
     errorPolicy: 'all'
   });
 
@@ -21,12 +20,13 @@ export default function WebsitePage() {
     );
   }
 
-  if (error || !data?.getPageBySlug) {
+  const page = data?.getHomepage;
+
+  if (error || !page) {
     return notFound();
   }
 
-  const page = data.getPageBySlug;
-  console.log('Fetched website page data:', page);
+  console.log('Fetched homepage data:', page);
   
   // Don't show draft or archived pages in production
   if (process.env.NODE_ENV === 'production' && page.status !== PageStatus.PUBLISHED) {
@@ -48,7 +48,7 @@ export default function WebsitePage() {
         <meta property="og:title" content={seoTitle} />
         {seoDescription && <meta property="og:description" content={seoDescription} />}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_APP_URL}/website`} />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_APP_URL}`} />
         
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -57,7 +57,7 @@ export default function WebsitePage() {
         
         {/* Additional Meta Tags */}
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_APP_URL}/website`} />
+        <link rel="canonical" href={`${process.env.NEXT_PUBLIC_APP_URL}`} />
       </Head>
 
       <div className="min-h-screen bg-white">
@@ -82,10 +82,10 @@ export default function WebsitePage() {
             <div className="min-h-screen flex items-center justify-center">
               <div className="text-center py-12">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-                  Page Content Coming Soon
+                  {page.title}
                 </h2>
                 <p className="text-gray-600">
-                  This page is currently being built. Please check back later.
+                  {page.seoDescription || 'Trang chủ'}
                 </p>
               </div>
             </div>

@@ -4,7 +4,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Save, Eye, Settings } from 'lucide-react';
+import { Save, Eye, Settings, Home } from 'lucide-react';
 import { usePageState, useUIState, useTemplate, usePageActions } from './PageBuilderProvider';
 import { PageStatus } from '@/types/page-builder';
 import PageSettingsForm from './PageSettingsForm';
@@ -71,6 +71,13 @@ const PageBuilderHeaderComponent = React.memo(function PageBuilderHeaderComponen
             <Badge variant={statusBadgeVariant}>
               {editingPage.status}
             </Badge>
+            
+            {editingPage.isHomepage && (
+              <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100 flex items-center space-x-1">
+                <Home size={14} />
+                <span>Homepage</span>
+              </Badge>
+            )}
             
             {editingPage.title && (
               <span className="text-sm text-gray-600">- {editingPage.title}</span>
