@@ -851,7 +851,8 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
 
   const handleSaveSettings = useCallback(async () => {
     try {
-      if (!editingPage?.id) {
+      // Check if page exists (can be new page without ID)
+      if (!editingPage) {
         throw new Error('No page selected. Please select a page first.');
       }
 
