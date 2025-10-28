@@ -67,7 +67,8 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
   const [draggedBlock, setDraggedBlockState] = useState<PageBlock | null>(null);
   
   // Hooks
-  // Only fetch page if we have a valid pageId (for existing pages)
+  // FIX: Only fetch page if we have a valid pageId (for existing pages)
+  // Pass pageId directly (not || '') so Apollo knows when it changes
   const { page, loading, refetch } = usePage(pageId || '');
   
   // Memoized setters for stable references
@@ -86,6 +87,17 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
   const setDraggedBlock = useCallback((block: PageBlock | null) => {
     setDraggedBlockState(block);
   }, []);
+  
+  // Track pageId changes and refetch when it changes
+  useEffect(() => {
+    if (pageId) {
+      setIsNewPageMode(false);
+      // Refetch when pageId changes
+      refetch();
+    } else {
+      setIsNewPageMode(true);
+    }
+  }, [pageId, refetch]);
   
   // Initialize editing page when page loads (for existing pages)
   useEffect(() => {
