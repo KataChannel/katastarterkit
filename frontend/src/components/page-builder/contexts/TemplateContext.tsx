@@ -214,7 +214,10 @@ export function TemplateProvider({ children }: TemplateProviderProps) {
 export function useTemplate() {
   const context = useContext(TemplateContext);
   if (context === undefined) {
-    throw new Error('useTemplate must be used within a TemplateProvider');
+    throw new Error(
+      'useTemplate must be used within a TemplateProvider. ' +
+      'Make sure your component is wrapped with <PageBuilderProvider>'
+    );
   }
   return context;
 }
