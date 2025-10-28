@@ -38,7 +38,7 @@ export function FullScreenLayout({
 
   // Handle saving global page settings
   const handleSettingsSave = useCallback(async (settings: any) => {
-    if (!editingPage?.id && editingPage?.id !== '') {
+    if (!editingPage) {
       toast.error('No page selected');
       return;
     }

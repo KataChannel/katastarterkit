@@ -67,6 +67,7 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
   const [draggedBlock, setDraggedBlockState] = useState<PageBlock | null>(null);
   
   // Hooks
+  // Only fetch page if we have a valid pageId (for existing pages)
   const { page, loading, refetch } = usePage(pageId || '');
   
   // Memoized setters for stable references

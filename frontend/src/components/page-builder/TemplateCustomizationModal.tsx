@@ -119,7 +119,7 @@ export const TemplateCustomizationModal: React.FC<TemplateCustomizationModalProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex overflow-hidden">
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 p-4 border-b bg-white z-10">
