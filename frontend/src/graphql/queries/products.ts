@@ -36,11 +36,10 @@ export const GET_PRODUCTS = gql`
           name
           slug
         }
-        tags {
-          id
-          name
-          slug
-        }
+        isFeatured
+        isNewArrival
+        isBestSeller
+        isOnSale
       }
       pagination {
         currentPage
@@ -84,24 +83,23 @@ export const GET_PRODUCT_BY_SLUG = gql`
         slug
         description
       }
-      tags {
-        id
-        name
-        slug
-        description
-      }
       variants {
         id
         name
         sku
         price
         stock
-        options
+        attributes
       }
-      metaFields
-      seoTitle
-      seoDescription
-      seoKeywords
+      metaTitle
+      metaDescription
+      metaKeywords
+      isFeatured
+      isNewArrival
+      isBestSeller
+      isOnSale
+      viewCount
+      soldCount
       createdAt
       updatedAt
     }
@@ -138,23 +136,23 @@ export const GET_PRODUCT_BY_ID = gql`
         name
         slug
       }
-      tags {
-        id
-        name
-        slug
-      }
       variants {
         id
         name
         sku
         price
         stock
-        options
+        attributes
       }
-      metaFields
-      seoTitle
-      seoDescription
-      seoKeywords
+      metaTitle
+      metaDescription
+      metaKeywords
+      isFeatured
+      isNewArrival
+      isBestSeller
+      isOnSale
+      viewCount
+      soldCount
       createdAt
       updatedAt
     }
