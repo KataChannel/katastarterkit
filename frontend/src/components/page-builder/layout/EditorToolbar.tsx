@@ -198,58 +198,17 @@ const GlobalSettingsDialog = React.memo(function GlobalSettingsDialog({
         <DialogHeader className="border-b border-gray-200 px-6 py-4 flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Settings className="w-5 h-5" />
-            Global Settings
+            Global Developer Settings
           </DialogTitle>
           <DialogDescription>
-            Configure global page settings that apply to the entire page
+            Configure global developer settings: SEO, custom code, and page options
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 border-b border-gray-200 space-y-6">
-          {/* Page Settings */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-              📄 Page Settings
-            </h3>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="page-title">Page Title</Label>
-                <Input
-                  id="page-title"
-                  placeholder="Enter page title..."
-                  value={pageSettings.pageTitle}
-                  onChange={(e) => onSettingChange('pageTitle', e.target.value)}
-                  disabled={isLoading || isSaving}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="page-description">Page Description</Label>
-                <Textarea
-                  id="page-description"
-                  placeholder="Enter page description..."
-                  value={pageSettings.pageDescription}
-                  onChange={(e) => onSettingChange('pageDescription', e.target.value)}
-                  disabled={isLoading || isSaving}
-                  rows={3}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="page-slug">Page Slug (URL)</Label>
-                <Input
-                  id="page-slug"
-                  placeholder="/my-page"
-                  value={pageSettings.pageSlug}
-                  onChange={(e) => onSettingChange('pageSlug', e.target.value)}
-                  disabled={isLoading || isSaving}
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
+          {/* REMOVED: Page Settings moved to PageSettingsForm (PageBuilderHeader) */}
+          {/* NOTE: Title, Slug, Description, Status are now managed in Page Settings dialog */}
+          {/* This Global Settings dialog now focuses on developer-level configurations */}
 
           {/* SEO Settings */}
           <div className="space-y-4 border-t pt-4">
@@ -475,18 +434,18 @@ export function EditorToolbar(props: EditorToolbarProps) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSettingsLoading, setIsSettingsLoading] = useState(false);
 
-  // ===== Page Settings State =====
+  // ===== Global Settings State (Developer-focused only) =====
   const [pageSettings, setPageSettings] = useState({
-    pageTitle: pageTitle || '',
-    pageDescription: '',
-    pageSlug: '',
+    // SEO Settings
     seoTitle: '',
     seoDescription: '',
     seoKeywords: '',
+    // Page Options
     isPublished: true,
     showInNavigation: true,
     allowIndexing: true,
     requireAuth: false,
+    // Custom Code
     customCSS: '',
     customJS: '',
     headCode: '',
@@ -516,27 +475,18 @@ export function EditorToolbar(props: EditorToolbarProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // ===== Sync Page Data =====
+  // ===== Sync Page Data (Developer Settings Only) =====
   useEffect(() => {
     if (pageData?.getPageById) {
       const page = pageData.getPageById;
       setPageSettings((prev) => ({
         ...prev,
-        pageTitle: page.title || '',
-        pageDescription: page.description || '',
-        pageSlug: page.slug || '',
         seoTitle: page.seoTitle || '',
         seoDescription: page.seoDescription || '',
         seoKeywords: Array.isArray(page.seoKeywords) ? page.seoKeywords.join(', ') : '',
       }));
     }
   }, [pageData]);
-
-  useEffect(() => {
-    if (pageTitle) {
-      setPageSettings((prev) => ({ ...prev, pageTitle }));
-    }
-  }, [pageTitle]);
 
   // ===== Memoized Event Handlers =====
   const handleSettingChange = useCallback((field: string, value: any) => {

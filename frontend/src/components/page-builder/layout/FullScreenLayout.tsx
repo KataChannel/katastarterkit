@@ -2,12 +2,11 @@
 
 import React, { useState, useCallback } from 'react';
 import { useMutation } from '@apollo/client';
-import { EditorToolbar } from './EditorToolbar';
+import { PageBuilderTopBar } from '../PageBuilderTopBar';
 import { EditorCanvas } from './EditorCanvas';
 import { EditorFooter } from './EditorFooter';
 import { LeftPanel } from '../panels/LeftPanel/LeftPanel';
 import { RightPanel } from '../panels/RightPanel/RightPanel';
-import { PageBuilderHeader } from '../PageBuilderHeader';
 import { usePageState, usePageActions } from '../PageBuilderProvider';
 import { toast } from 'sonner';
 import { UPDATE_PAGE } from '@/graphql/queries/pages';
@@ -95,11 +94,8 @@ export function FullScreenLayout({
 
   return (
     <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">
-      {/* Page Builder Header - Shows title, status, homepage badge, settings */}
-      <PageBuilderHeader />
-
-      {/* Top Toolbar */}
-      <EditorToolbar
+      {/* Unified Top Bar - Consolidated PageBuilderHeader + EditorToolbar */}
+      <PageBuilderTopBar
         editorMode={editorMode}
         onModeChange={onModeChange}
         device={device}
@@ -111,9 +107,9 @@ export function FullScreenLayout({
         rightPanelOpen={rightPanelOpen}
         onToggleRightPanel={() => setRightPanelOpen(!rightPanelOpen)}
         isLoading={loading}
-        pageTitle={editingPage?.title}
         onSettingsSave={handleSettingsSave}
-        pageId={editingPage?.id}
+        showEditorControls={true}
+        showPageInfo={true}
       />
 
       {/* Main Content Area */}

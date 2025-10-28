@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { TemplatePreviewModal } from '@/components/page-builder/TemplatePreviewModal';
 import { SaveTemplateDialog } from '@/components/page-builder/SaveTemplateDialog';
 import { PageBuilderProvider, useUIState, useTemplate, usePageState, usePageActions } from './PageBuilderProvider';
-import { PageBuilderHeader } from './PageBuilderHeader';
+import { PageBuilderTopBar } from './PageBuilderTopBar';
 import { PageBuilderSidebar } from './PageBuilderSidebar';
 import { PageBuilderCanvas } from './PageBuilderCanvas';
 import { BlockType } from '@/types/page-builder';
@@ -44,8 +44,11 @@ function PageBuilderInternal() {
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
-      {/* Header: Title, status, actions */}
-      <PageBuilderHeader />
+      {/* Top Bar: Page title, status, actions (simplified for normal mode) */}
+      <PageBuilderTopBar
+        showEditorControls={false}
+        showPageInfo={true}
+      />
       
       {/* Main Content: Sidebar + Canvas */}
       <div className="flex-1 flex overflow-hidden">
