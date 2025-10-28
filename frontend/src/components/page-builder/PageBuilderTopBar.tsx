@@ -278,22 +278,19 @@ const TemplatesMenu = React.memo(function TemplatesMenu({
 
 /**
  * MEMOIZED SUB-COMPONENT: UnifiedSettingsDialog
- * Consolidated dialog combining Page Settings + Global Settings (NO TABS - single unified view)
+ * Consolidated dialog combining Page Settings (with embedded tabs) + Page Options + Custom Code
  * 
  * ✅ OPTIMIZED - Senior Level Implementation:
- * ✅ Removed duplicate SEO fields (was in both Page Settings & Global Settings)
- * ✅ Single unified view instead of 2 tabs
- * ✅ Page Settings Form (title, slug, status, etc.)
- * ✅ SEO Settings (seo title, description, keywords) - SINGLE SOURCE
- * ✅ Page Options (published, navigation, indexing, auth)
- * ✅ Custom Code (CSS, JS, Head code)
- * ✅ Better visual hierarchy with collapsible sections
+ * ✅ Embedded PageSettingsForm directly (with 3 tabs: General, Layout, SEO)
+ * ✅ Page Options section for visibility & access control
+ * ✅ Custom Code section for developers
+ * ✅ Tab-based organization within Page Settings
  * ✅ Proper scrollable content with fixed header/footer
  * 
- * Removed:
- * ❌ Duplicate SEO fields (was duplicated in 2 tabs)
- * ❌ Tab navigation overhead
- * ❌ Redundant sections
+ * Structure:
+ * - Dialog Header (fixed)
+ * - Scrollable Content with 3 tabs (General, Layout, SEO) + Page Options + Custom Code
+ * - Dialog Footer (fixed)
  */
 const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
   isOpen,
@@ -315,12 +312,6 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
   onSave: () => Promise<void>;
 }) {
   const [isSaving, setIsSaving] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({
-    pageInfo: true,
-    seo: true,
-    options: true,
-    code: false,
-  });
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -331,16 +322,9 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
     }
   }, [onSave]);
 
-  const toggleSection = useCallback((section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  }, []);
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col max-w-3xl max-h-[90vh] p-0 gap-0">
+      <DialogContent className="flex flex-col max-w-4xl max-h-[90vh] p-0 gap-0">
         {/* Fixed Header */}
         <DialogHeader className="border-b border-gray-200 px-6 py-4 flex-shrink-0 bg-white">
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
@@ -348,12 +332,12 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
             Page Settings
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-500 mt-1">
-            Configure page information, SEO, visibility, and custom code
+            Configure page information, layout, SEO, visibility, and custom code
           </DialogDescription>
         </DialogHeader>
 
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 bg-white">
+        {/* Scrollable Content Area with Tabs */}
+        <div className="flex-1 overflow-y-auto bg-white">
           {!editingPage ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center space-y-2">
@@ -363,116 +347,42 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
-              {/* PAGE INFO SECTION */}
-              <div className="rounded-lg border border-gray-200 overflow-hidden">
-                <button
-                  onClick={() => toggleSection('pageInfo')}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">📄</span>
-                    <h3 className="text-sm font-semibold text-gray-900">Page Information</h3>
-                  </div>
-                  <span className={`transform transition-transform ${expandedSections.pageInfo ? 'rotate-180' : ''}`}>
-                    ▼
-                  </span>
-                </button>
-                {expandedSections.pageInfo && (
-                  <div className="px-4 py-4 border-t border-gray-200 bg-white">
-                    <PageSettingsForm
-                      page={editingPage}
-                      onUpdate={onPageUpdate}
-                    />
-                  </div>
-                )}
+            <Tabs defaultValue="page-settings" className="w-full">
+              {/* Tabs Navigation - Fixed position */}
+              <div className="sticky top-0 bg-white border-b border-gray-200">
+                <TabsList className="grid w-full grid-cols-2 rounded-none bg-white p-0 h-auto">
+                  <TabsTrigger 
+                    value="page-settings" 
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-white"
+                  >
+                    📄 Page Settings
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="advanced" 
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-white"
+                  >
+                    ⚙️ Advanced Options
+                  </TabsTrigger>
+                </TabsList>
               </div>
 
-              {/* SEO SECTION - SINGLE SOURCE (not duplicated) */}
-              <div className="rounded-lg border border-gray-200 overflow-hidden">
-                <button
-                  onClick={() => toggleSection('seo')}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🔍</span>
-                    <h3 className="text-sm font-semibold text-gray-900">SEO Settings</h3>
-                  </div>
-                  <span className={`transform transition-transform ${expandedSections.seo ? 'rotate-180' : ''}`}>
-                    ▼
-                  </span>
-                </button>
-                {expandedSections.seo && (
-                  <div className="px-4 py-4 border-t border-gray-200 bg-white space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="seo-title" className="text-sm font-medium text-gray-700">
-                        SEO Title
-                      </Label>
-                      <Input
-                        id="seo-title"
-                        placeholder="SEO optimized title..."
-                        value={pageSettings.seoTitle}
-                        onChange={(e) => onSettingChange('seoTitle', e.target.value)}
-                        disabled={isLoading || isSaving}
-                        className="w-full h-9 text-sm"
-                      />
-                      <p className="text-xs text-gray-500 flex items-center gap-1">
-                        <span>💡</span> Recommended: 50-60 characters
-                      </p>
-                    </div>
+              {/* PAGE SETTINGS TAB - Contains PageSettingsForm */}
+              <TabsContent value="page-settings" className="px-6 py-6 m-0">
+                <PageSettingsForm
+                  page={editingPage}
+                  onUpdate={onPageUpdate}
+                />
+              </TabsContent>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="seo-description" className="text-sm font-medium text-gray-700">
-                        Meta Description
-                      </Label>
-                      <Textarea
-                        id="seo-description"
-                        placeholder="SEO meta description..."
-                        value={pageSettings.seoDescription}
-                        onChange={(e) => onSettingChange('seoDescription', e.target.value)}
-                        disabled={isLoading || isSaving}
-                        rows={3}
-                        className="w-full text-sm"
-                      />
-                      <p className="text-xs text-gray-500 flex items-center gap-1">
-                        <span>💡</span> Recommended: 150-160 characters
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="seo-keywords" className="text-sm font-medium text-gray-700">
-                        Keywords
-                      </Label>
-                      <Input
-                        id="seo-keywords"
-                        placeholder="keyword1, keyword2, keyword3"
-                        value={pageSettings.seoKeywords}
-                        onChange={(e) => onSettingChange('seoKeywords', e.target.value)}
-                        disabled={isLoading || isSaving}
-                        className="w-full h-9 text-sm"
-                      />
-                      <p className="text-xs text-gray-500">Separate keywords with commas</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* PAGE OPTIONS SECTION */}
-              <div className="rounded-lg border border-gray-200 overflow-hidden">
-                <button
-                  onClick={() => toggleSection('options')}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🎛️</span>
-                    <h3 className="text-sm font-semibold text-gray-900">Page Options</h3>
-                  </div>
-                  <span className={`transform transition-transform ${expandedSections.options ? 'rotate-180' : ''}`}>
-                    ▼
-                  </span>
-                </button>
-                {expandedSections.options && (
-                  <div className="px-4 py-4 border-t border-gray-200 bg-white space-y-3">
+              {/* ADVANCED OPTIONS TAB - Page Options + Custom Code */}
+              <TabsContent value="advanced" className="px-6 py-6 m-0 space-y-8">
+                {/* PAGE OPTIONS SECTION */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                    <span>🎛️</span>
+                    Page Visibility & Access
+                  </h3>
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-medium text-gray-900">Published</Label>
@@ -522,25 +432,15 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
                       />
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* CUSTOM CODE SECTION */}
-              <div className="rounded-lg border border-gray-200 overflow-hidden">
-                <button
-                  onClick={() => toggleSection('code')}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">💻</span>
-                    <h3 className="text-sm font-semibold text-gray-900">Custom Code</h3>
-                  </div>
-                  <span className={`transform transition-transform ${expandedSections.code ? 'rotate-180' : ''}`}>
-                    ▼
-                  </span>
-                </button>
-                {expandedSections.code && (
-                  <div className="px-4 py-4 border-t border-gray-200 bg-white space-y-4">
+                {/* CUSTOM CODE SECTION */}
+                <div className="space-y-4 border-t pt-8">
+                  <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                    <span>💻</span>
+                    Custom Code
+                  </h3>
+                  <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="custom-css" className="text-sm font-medium text-gray-700">
                         Custom CSS
@@ -586,9 +486,9 @@ const UnifiedSettingsDialog = React.memo(function UnifiedSettingsDialog({
                       />
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           )}
         </div>
 
