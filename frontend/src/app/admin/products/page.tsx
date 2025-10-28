@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useProducts, useDeleteProduct } from '@/hooks/useProducts';
 import { Product, GetProductsInput } from '@/graphql/product.queries';
+import { ImportExportDialog } from '@/components/admin/ImportExportDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -32,6 +33,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  Download,
+  Upload,
 } from 'lucide-react';
 import { useActiveCategories } from '@/hooks/useCategories';
 import { toast } from 'sonner';
@@ -63,6 +66,7 @@ export default function ProductsPage() {
     filters: {},
   });
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [importDialogOpen, setImportDialogOpen] = React.useState(false);
 
   const { products, pagination, loading, error, refetch } = useProducts(filters);
   const { categories } = useActiveCategories();
@@ -116,6 +120,43 @@ export default function ProductsPage() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const queryParams = new URLSearchParams();
+      if (filters.filters?.categoryId) {
+        queryParams.append('categoryId', filters.filters.categoryId as string);
+      }
+      if (filters.filters?.status) {
+        queryParams.append('status', filters.filters.status as string);
+      }
+
+      const backendUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '') || 'http://localhost:12001';
+      const url = `${backendUrl}/api/product-import-export/export${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Export failed');
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `SanPham_${Date.now()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(downloadUrl);
+      document.body.removeChild(a);
+
+      toast.success('Đã export sản phẩm thành công');
+    } catch (error) {
+      toast.error('Không thể export sản phẩm');
+    }
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
@@ -126,10 +167,20 @@ export default function ProductsPage() {
             Quản lý danh sách sản phẩm, giá cả và tồn kho
           </p>
         </div>
-        <Button onClick={() => router.push('/admin/products/create')}>
-          <Plus className="h-4 w-4 mr-2" />
-          Tạo sản phẩm mới
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import Excel
+          </Button>
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            Export Excel
+          </Button>
+          <Button onClick={() => router.push('/admin/products/create')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Tạo sản phẩm mới
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -328,7 +379,7 @@ export default function ProductsPage() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={() => router.push(`/website/sanpham/${product.slug}`)}
+                            onClick={() => router.push(`/sanpham/${product.slug}`)}
                             title="Xem"
                           >
                             <Eye className="h-4 w-4" />
@@ -391,6 +442,20 @@ export default function ProductsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Import/Export Dialog */}
+      <ImportExportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        title="Import Sản Phẩm từ Excel"
+        description="Tải file mẫu, điền thông tin sản phẩm, và upload để import hàng loạt"
+        templateUrl="/api/product-import-export/template"
+        importUrl="/api/product-import-export/import"
+        onImportSuccess={() => {
+          refetch();
+          toast.success('Import sản phẩm thành công');
+        }}
+      />
     </div>
   );
 }

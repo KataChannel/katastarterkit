@@ -16,6 +16,8 @@ import { CustomTemplateResolver } from './resolvers/custom-template.resolver';
 
 import { InvoiceController } from '../controllers/invoice.controller';
 import { InvoiceImportController } from '../controllers/invoice-import.controller';
+import { CategoryImportExportController } from '../controllers/category-import-export.controller';
+import { ProductImportExportController } from '../controllers/product-import-export.controller';
 import { AffiliateController } from '../controllers/affiliate.controller';
 import { TrackingController } from '../controllers/tracking.controller';
 
@@ -32,6 +34,8 @@ import { PubSubService } from '../services/pubsub.service';
 import { PageService } from '../services/page.service';
 import { InvoiceService } from '../services/invoice.service';
 import { InvoiceImportService } from '../services/invoice-import.service';
+import { CategoryImportExportService } from '../services/category-import-export.service';
+import { ProductImportExportService } from '../services/product-import-export.service';
 import { BackendConfigService } from '../services/backend-config.service';
 import { RbacService } from '../services/rbac.service';
 import { AffiliateUserService, AffiliateCampaignService } from '../services/affiliate.service';
@@ -65,6 +69,8 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
   controllers: [
     InvoiceController,
     InvoiceImportController,
+    CategoryImportExportController,
+    ProductImportExportController,
     AffiliateController,
     TrackingController,
   ],
@@ -117,6 +123,8 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     PageService,
     InvoiceService,
     InvoiceImportService,
+    CategoryImportExportService,
+    ProductImportExportService,
     BackendConfigService,
     RbacService,
     
@@ -146,6 +154,8 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     PageService,
     InvoiceService,
     InvoiceImportService,
+    CategoryImportExportService,
+    ProductImportExportService,
     BackendConfigService,
     RbacService,
     
