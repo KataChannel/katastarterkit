@@ -9,8 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateMemberRoleInput = exports.AddMemberInput = exports.UpdateProjectInput = exports.CreateProjectInput = exports.ProjectStats = exports.ProjectMemberType = exports.ProjectType = exports.ProjectUserType = void 0;
+exports.UpdateMemberRoleInput = exports.AddMemberInput = exports.UpdateProjectInput = exports.CreateProjectInput = exports.ProjectMemberType = exports.ProjectType = exports.ProjectStats = exports.ProjectUserType = void 0;
 const graphql_1 = require("@nestjs/graphql");
+const class_validator_1 = require("class-validator");
 let ProjectUserType = class ProjectUserType {
 };
 exports.ProjectUserType = ProjectUserType;
@@ -37,6 +38,24 @@ __decorate([
 exports.ProjectUserType = ProjectUserType = __decorate([
     (0, graphql_1.ObjectType)('ProjectUser')
 ], ProjectUserType);
+let ProjectStats = class ProjectStats {
+};
+exports.ProjectStats = ProjectStats;
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
+    __metadata("design:type", Number)
+], ProjectStats.prototype, "tasks", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
+    __metadata("design:type", Number)
+], ProjectStats.prototype, "chatMessages", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
+    __metadata("design:type", Number)
+], ProjectStats.prototype, "members", void 0);
+exports.ProjectStats = ProjectStats = __decorate([
+    (0, graphql_1.ObjectType)('ProjectStats')
+], ProjectStats);
 let ProjectType = class ProjectType {
 };
 exports.ProjectType = ProjectType;
@@ -117,33 +136,28 @@ __decorate([
 exports.ProjectMemberType = ProjectMemberType = __decorate([
     (0, graphql_1.ObjectType)('ProjectMember')
 ], ProjectMemberType);
-let ProjectStats = class ProjectStats {
-};
-exports.ProjectStats = ProjectStats;
-__decorate([
-    (0, graphql_1.Field)(() => graphql_1.Int),
-    __metadata("design:type", Number)
-], ProjectStats.prototype, "tasks", void 0);
-__decorate([
-    (0, graphql_1.Field)(() => graphql_1.Int),
-    __metadata("design:type", Number)
-], ProjectStats.prototype, "chatMessages", void 0);
-exports.ProjectStats = ProjectStats = __decorate([
-    (0, graphql_1.ObjectType)('ProjectStats')
-], ProjectStats);
 let CreateProjectInput = class CreateProjectInput {
 };
 exports.CreateProjectInput = CreateProjectInput;
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1, { message: 'Project name cannot be empty' }),
+    (0, class_validator_1.MaxLength)(200, { message: 'Project name is too long' }),
     __metadata("design:type", String)
 ], CreateProjectInput.prototype, "name", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(1000),
     __metadata("design:type", String)
 ], CreateProjectInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsUrl)({}, { message: 'Avatar must be a valid URL' }),
     __metadata("design:type", String)
 ], CreateProjectInput.prototype, "avatar", void 0);
 exports.CreateProjectInput = CreateProjectInput = __decorate([

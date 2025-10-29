@@ -474,7 +474,7 @@ __decorate([
         description: 'Get tasks by project ID (for TaskFeed)'
     }),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, graphql_1.Args)('projectId')),
+    __param(0, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
     __param(1, (0, graphql_1.Args)('filters', { nullable: true })),
     __param(2, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
@@ -487,7 +487,7 @@ __decorate([
         description: 'Create task in project with @mentions'
     }),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, graphql_1.Args)('projectId')),
+    __param(0, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
     __param(1, (0, graphql_1.Args)('input')),
     __param(2, (0, graphql_1.Context)()),
     __metadata("design:type", Function),

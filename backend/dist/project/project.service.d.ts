@@ -1,20 +1,6 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { Project, ProjectMember } from '@prisma/client';
-export interface CreateProjectInput {
-    name: string;
-    description?: string;
-    avatar?: string;
-}
-export interface UpdateProjectInput {
-    name?: string;
-    description?: string;
-    avatar?: string;
-    isArchived?: boolean;
-}
-export interface AddMemberInput {
-    userId: string;
-    role?: 'owner' | 'admin' | 'member';
-}
+import { CreateProjectInput, UpdateProjectInput, AddMemberInput } from './dto/project.dto';
 export declare class ProjectService {
     private prisma;
     constructor(prisma: PrismaService);

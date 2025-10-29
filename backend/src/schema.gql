@@ -2011,7 +2011,7 @@ type Mutation {
   addProductVariant(input: CreateProductVariantInput!): ProductType!
 
   """Thêm thành viên vào project"""
-  addProjectMember(input: AddMemberInput!, projectId: String!): ProjectMember!
+  addProjectMember(input: AddMemberInput!, projectId: ID!): ProjectMember!
   adminCreateUser(input: AdminCreateUserInput!): User!
   adminResetPassword(input: AdminResetPasswordInput!): AdminResetPasswordResult!
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
@@ -2069,7 +2069,7 @@ type Mutation {
   createProject(input: CreateProjectInput!): Project!
 
   """Create task in project with @mentions"""
-  createProjectTask(input: CreateTaskInput!, projectId: String!): Task!
+  createProjectTask(input: CreateTaskInput!, projectId: ID!): Task!
   createQuiz(input: CreateQuizInput!): Quiz!
   createReview(input: CreateReviewInput!): Review!
   createRole(input: CreateRoleInput!): Role!
@@ -2186,7 +2186,7 @@ type Mutation {
   rejectConversion(id: String!, reason: String): Boolean!
 
   """Xóa thành viên khỏi project"""
-  removeProjectMember(memberId: String!, projectId: String!): Boolean!
+  removeProjectMember(memberId: String!, projectId: ID!): Boolean!
   reorderLessons(input: ReorderLessonsInput!): [Lesson!]!
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
   reorderModules(input: ReorderModulesInput!): [CourseModule!]!
@@ -2253,7 +2253,7 @@ type Mutation {
   updateProject(id: String!, input: UpdateProjectInput!): Project!
 
   """Update role của member (owner only)"""
-  updateProjectMemberRole(input: UpdateMemberRoleInput!, projectId: String!): ProjectMember!
+  updateProjectMemberRole(input: UpdateMemberRoleInput!, projectId: ID!): ProjectMember!
   updateQuiz(id: String!, input: UpdateQuizInput!): Quiz!
   updateReview(input: UpdateReviewInput!): Review!
   updateRole(id: String!, input: UpdateRoleInput!): Role!
@@ -3057,10 +3057,10 @@ type Query {
   project(id: String!): Project!
 
   """Lấy danh sách members (dùng cho @mention autocomplete)"""
-  projectMembers(projectId: String!): [ProjectMember!]!
+  projectMembers(projectId: ID!): [ProjectMember!]!
 
   """Get tasks by project ID (for TaskFeed)"""
-  projectTasks(filters: TaskFilterInput, projectId: String!): [Task!]!
+  projectTasks(filters: TaskFilterInput, projectId: ID!): [Task!]!
   quiz(id: String!): Quiz!
   quizAttempt(id: String!): QuizAttempt!
   quizAttempts(quizId: String!): [QuizAttempt!]!

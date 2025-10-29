@@ -8,7 +8,7 @@ import { TASK_FRAGMENT } from './queries';
  */
 export const CREATE_PROJECT_TASK = gql`
   ${TASK_FRAGMENT}
-  mutation CreateProjectTask($projectId: ID!, $input: CreateProjectTaskInput!) {
+  mutation CreateProjectTask($projectId: ID!, $input: CreateTaskInput!) {
     createProjectTask(projectId: $projectId, input: $input) {
       ...TaskFields
     }

@@ -17,11 +17,16 @@ let ProjectService = class ProjectService {
         this.prisma = prisma;
     }
     async createProject(ownerId, input) {
+        console.log('📝 CreateProject called with:', { ownerId, input });
+        if (!input.name || input.name.trim() === '') {
+            console.error('❌ Validation failed: name is empty');
+            throw new common_1.BadRequestException('Project name is required');
+        }
         const project = await this.prisma.project.create({
             data: {
-                name: input.name,
-                description: input.description,
-                avatar: input.avatar,
+                name: input.name.trim(),
+                description: input.description || null,
+                avatar: input.avatar || null,
                 ownerId,
                 members: {
                     create: {
@@ -39,6 +44,7 @@ let ProjectService = class ProjectService {
                 },
             },
         });
+        console.log('✅ Project created:', project.id);
         return project;
     }
     async getMyProjects(userId, includeArchived = false) {
