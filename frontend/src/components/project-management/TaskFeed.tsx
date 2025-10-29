@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { useProjectTasks } from '@/hooks/useTasks';
+import { useProjectTasks } from '@/hooks/useTasks.dynamic';
 import TaskCard from './TaskCard';
 import CreateTaskModal from './CreateTaskModal';
+import TaskDetailModal from './TaskDetailModal';
 
 interface TaskFeedProps {
   projectId: string | null;
@@ -17,7 +18,8 @@ interface TaskFeedProps {
 export default function TaskFeed({ projectId }: TaskFeedProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const { data, loading, error } = useProjectTasks(projectId, {
     search: searchQuery || undefined,
@@ -136,10 +138,11 @@ export default function TaskFeed({ projectId }: TaskFeedProps) {
           {!loading && !error && tasks.length > 0 && (
             <>
               {tasks.map((task: any) => (
-                <TaskCard key={task.id} task={task} onClick={() => {
-                  // TODO: Open task detail modal
-                  console.log('Open task:', task.id);
-                }} />
+                <TaskCard 
+                  key={task.id} 
+                  task={task} 
+                  onClick={() => setSelectedTaskId(task.id)} 
+                />
               ))}
             </>
           )}
@@ -151,6 +154,14 @@ export default function TaskFeed({ projectId }: TaskFeedProps) {
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         projectId={projectId}
+      />
+
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        taskId={selectedTaskId}
+        projectId={projectId!}
+        open={!!selectedTaskId}
+        onOpenChange={(open) => !open && setSelectedTaskId(null)}
       />
     </div>
   );

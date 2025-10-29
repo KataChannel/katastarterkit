@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useMyProjects } from '@/hooks/useProjects';
+import { useMyProjects } from '@/hooks/useProjects.dynamic';
 import { Plus, Archive, Users, MessageSquare, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';

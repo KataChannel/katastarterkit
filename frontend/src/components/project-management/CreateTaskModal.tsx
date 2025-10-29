@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useCreateProjectTask } from '@/hooks/useTasks';
-import { useProjectMembers } from '@/hooks/useProjects';
+import { useCreateProjectTask } from '@/hooks/useTasks.dynamic';
+import { useProjectMembers } from '@/hooks/useProjects.dynamic';
 import {
   Dialog,
   DialogContent,
@@ -38,7 +38,7 @@ interface CreateTaskForm {
   title: string;
   description?: string;
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-  category: string;
+  category: 'WORK' | 'PERSONAL' | 'SHOPPING' | 'HEALTH' | 'OTHER';
   dueDate?: Date;
 }
 
@@ -168,7 +168,7 @@ export default function CreateTaskModal({
               <Label htmlFor="category">Category</Label>
               <Select
                 defaultValue="OTHER"
-                onValueChange={(value) => setValue('category', value)}
+                onValueChange={(value) => setValue('category', value as 'WORK' | 'PERSONAL' | 'SHOPPING' | 'HEALTH' | 'OTHER')}
               >
                 <SelectTrigger>
                   <SelectValue />
