@@ -64,6 +64,7 @@
         "graphql": "^16.11.0",
         "graphql-depth-limit": "^1.1.0",
         "graphql-query-complexity": "^1.1.0",
+        "graphql-scalars": "^1.25.0",
         "graphql-subscriptions": "^3.0.0",
         "graphql-type-json": "^0.3.2",
         "graphql-upload": "^17.0.0",
@@ -2562,6 +2563,8 @@
     "graphql-query-complexity": ["graphql-query-complexity@1.1.0", "", { "dependencies": { "lodash.get": "^4.4.2" }, "peerDependencies": { "graphql": "^15.0.0 || ^16.0.0" } }, "sha512-6sfAX+9CgkcPeZ7UiuBwgTGA+M1FYgHrQOXvORhQGd6SiaXbNVkLDcJ9ZSvNgzyChIfH0uPFFOY3Jm4wFZ4qEA=="],
 
     "graphql-request": ["graphql-request@7.2.0", "", { "dependencies": { "@graphql-typed-document-node/core": "^3.2.0" }, "peerDependencies": { "graphql": "14 - 16" } }, "sha512-0GR7eQHBFYz372u9lxS16cOtEekFlZYB2qOyq8wDvzRmdRSJ0mgUVX1tzNcIzk3G+4NY+mGtSz411wZdeDF/+A=="],
+
+    "graphql-scalars": ["graphql-scalars@1.25.0", "", { "dependencies": { "tslib": "^2.5.0" }, "peerDependencies": { "graphql": "^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0" } }, "sha512-b0xyXZeRFkne4Eq7NAnL400gStGqG/Sx9VqX0A05nHyEbv57UJnWKsjNnrpVqv5e/8N1MUxkt0wwcRXbiyKcFg=="],
 
     "graphql-subscriptions": ["graphql-subscriptions@3.0.0", "", { "peerDependencies": { "graphql": "^15.7.2 || ^16.0.0" } }, "sha512-kZCdevgmzDjGAOqH7GlDmQXYAkuHoKpMlJrqF40HMPhUhM5ZWSFSxCwD/nSi6AkaijmMfsFhoJRGJ27UseCvRA=="],
 
