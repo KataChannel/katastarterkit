@@ -8,7 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CallCenterModule = void 0;
 const common_1 = require("@nestjs/common");
-const schedule_1 = require("@nestjs/schedule");
 const prisma_module_1 = require("../prisma/prisma.module");
 const auth_module_1 = require("../auth/auth.module");
 const callcenter_service_1 = require("../services/callcenter.service");
@@ -21,7 +20,6 @@ exports.CallCenterModule = CallCenterModule = __decorate([
     (0, common_1.Module)({
         imports: [
             prisma_module_1.PrismaModule,
-            schedule_1.ScheduleModule.forRoot(),
             auth_module_1.AuthModule,
         ],
         providers: [callcenter_service_1.CallCenterService, callcenter_resolver_1.CallCenterResolver, user_service_1.UserService],

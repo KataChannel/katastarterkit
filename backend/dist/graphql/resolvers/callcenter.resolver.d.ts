@@ -17,17 +17,17 @@ export declare class CallCenterResolver {
         errorMessage: string | null;
         status: string;
         completedAt: Date | null;
+        duration: number | null;
         fromDate: Date;
         toDate: Date;
-        duration: number | null;
+        startedAt: Date;
         offset: number;
         configId: string | null;
-        syncType: import(".prisma/client").$Enums.CallCenterSyncMode;
+        syncType: import("@prisma/client").$Enums.CallCenterSyncMode;
         recordsFetched: number;
         recordsCreated: number;
         recordsUpdated: number;
         recordsSkipped: number;
         errorDetails: import("@prisma/client/runtime/library").JsonValue | null;
-        startedAt: Date;
     }[]>;
 }

@@ -12,7 +12,6 @@ const config_1 = require("@nestjs/config");
 const graphql_1 = require("@nestjs/graphql");
 const apollo_1 = require("@nestjs/apollo");
 const throttler_1 = require("@nestjs/throttler");
-const terminus_1 = require("@nestjs/terminus");
 const core_1 = require("@nestjs/core");
 const path_1 = require("path");
 const prisma_module_1 = require("./prisma/prisma.module");
@@ -23,7 +22,6 @@ const graphql_module_1 = require("./graphql/graphql.module");
 const grok_module_1 = require("./grok/grok.module");
 const minio_module_1 = require("./minio/minio.module");
 const logger_module_1 = require("./logger/logger.module");
-const health_module_1 = require("./health/health.module");
 const ai_training_module_1 = require("./ai-training/ai-training.module");
 const chatbot_module_1 = require("./chatbot/chatbot.module");
 const ai_module_1 = require("./ai/ai.module");
@@ -32,7 +30,6 @@ const graphql_performance_module_1 = require("./common/graphql-performance/graph
 const common_services_module_1 = require("./common/common-services.module");
 const real_time_module_1 = require("./realtime/real-time.module");
 const search_module_1 = require("./search/search.module");
-const monitoring_module_1 = require("./monitoring/monitoring.module");
 const security_module_1 = require("./security/security.module");
 const unified_dynamic_module_1 = require("./graphql/unified-dynamic.module");
 const ketoan_module_1 = require("./ketoan/ketoan.module");
@@ -41,10 +38,12 @@ const file_module_1 = require("./graphql/modules/file.module");
 const hr_module_1 = require("./graphql/modules/hr.module");
 const product_module_1 = require("./graphql/modules/product.module");
 const blog_module_1 = require("./graphql/modules/blog.module");
+const review_module_1 = require("./graphql/modules/review.module");
 const test_controller_1 = require("./test.controller");
 const seed_module_1 = require("./seed/seed.module");
 const callcenter_module_1 = require("./callcenter/callcenter.module");
 const lms_module_1 = require("./lms/lms.module");
+const ecommerce_module_1 = require("./ecommerce/ecommerce.module");
 const validation_1 = require("./config/validation");
 const env_config_service_1 = require("./config/env-config.service");
 const log_controller_1 = require("./controllers/log.controller");
@@ -104,7 +103,6 @@ exports.AppModule = AppModule = __decorate([
                     limit: 100,
                 },
             ]),
-            terminus_1.TerminusModule,
             prisma_module_1.PrismaModule,
             cache_module_1.CacheModule,
             redis_module_1.RedisModule,
@@ -115,14 +113,12 @@ exports.AppModule = AppModule = __decorate([
             grok_module_1.GrokModule,
             minio_module_1.MinioModule,
             logger_module_1.LoggerModule,
-            health_module_1.HealthModule,
             ai_training_module_1.AiTrainingModule,
             chatbot_module_1.ChatbotModule,
             ai_module_1.AiModule,
             common_services_module_1.CommonServicesModule,
             real_time_module_1.RealTimeModule,
             search_module_1.SearchModule,
-            monitoring_module_1.MonitoringModule,
             security_module_1.SecurityModule,
             unified_dynamic_module_1.UnifiedDynamicModule,
             ketoan_module_1.KetoAnModule,
@@ -131,10 +127,12 @@ exports.AppModule = AppModule = __decorate([
             hr_module_1.HRModule,
             product_module_1.ProductModule,
             blog_module_1.BlogModule,
+            review_module_1.ReviewModule,
             seed_module_1.SeedModule,
             callcenter_module_1.CallCenterModule,
             lms_module_1.LmsModule,
             project_module_1.ProjectModule,
+            ecommerce_module_1.EcommerceModule,
         ],
         controllers: [
             log_controller_1.LogController,

@@ -15,12 +15,12 @@ export declare class QuizzesService {
                 questionId: string;
             }[];
         } & {
-            question: string;
             id: string;
             createdAt: Date;
-            type: import(".prisma/client").$Enums.QuestionType;
             updatedAt: Date;
             order: number;
+            type: import("@prisma/client").$Enums.QuestionType;
+            question: string;
             points: number;
             explanation: string | null;
             quizId: string;
@@ -29,8 +29,8 @@ export declare class QuizzesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
         description: string | null;
+        title: string;
         lessonId: string;
         passingScore: number;
         timeLimit: number | null;
@@ -39,21 +39,21 @@ export declare class QuizzesService {
         lesson: {
             courseModule: {
                 course: {
-                    level: import(".prisma/client").$Enums.CourseLevel;
+                    level: import("@prisma/client").$Enums.CourseLevel;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
+                    description: string | null;
+                    status: import("@prisma/client").$Enums.CourseStatus;
                     title: string;
                     slug: string;
-                    status: import(".prisma/client").$Enums.CourseStatus;
-                    description: string | null;
                     thumbnail: string | null;
                     price: number;
-                    categoryId: string | null;
                     duration: number | null;
-                    instructorId: string;
                     whatYouWillLearn: string[];
                     requirements: string[];
+                    categoryId: string | null;
+                    instructorId: string;
                     rating: number;
                     reviewCount: number;
                     enrollmentCount: number;
@@ -63,21 +63,21 @@ export declare class QuizzesService {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                title: string;
                 description: string | null;
-                order: number;
                 courseId: string;
+                title: string;
+                order: number;
             };
         } & {
             id: string;
             createdAt: Date;
-            type: import(".prisma/client").$Enums.LessonType;
             updatedAt: Date;
-            title: string;
-            content: string | null;
             description: string | null;
-            order: number;
+            title: string;
             duration: number | null;
+            order: number;
+            type: import("@prisma/client").$Enums.LessonType;
+            content: string | null;
             moduleId: string;
         };
         questions: ({
@@ -91,12 +91,12 @@ export declare class QuizzesService {
                 questionId: string;
             }[];
         } & {
-            question: string;
             id: string;
             createdAt: Date;
-            type: import(".prisma/client").$Enums.QuestionType;
             updatedAt: Date;
             order: number;
+            type: import("@prisma/client").$Enums.QuestionType;
+            question: string;
             points: number;
             explanation: string | null;
             quizId: string;
@@ -105,8 +105,8 @@ export declare class QuizzesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
         description: string | null;
+        title: string;
         lessonId: string;
         passingScore: number;
         timeLimit: number | null;
@@ -123,12 +123,12 @@ export declare class QuizzesService {
                 questionId: string;
             }[];
         } & {
-            question: string;
             id: string;
             createdAt: Date;
-            type: import(".prisma/client").$Enums.QuestionType;
             updatedAt: Date;
             order: number;
+            type: import("@prisma/client").$Enums.QuestionType;
+            question: string;
             points: number;
             explanation: string | null;
             quizId: string;
@@ -137,8 +137,8 @@ export declare class QuizzesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
         description: string | null;
+        title: string;
         lessonId: string;
         passingScore: number;
         timeLimit: number | null;
@@ -155,12 +155,12 @@ export declare class QuizzesService {
                 questionId: string;
             }[];
         } & {
-            question: string;
             id: string;
             createdAt: Date;
-            type: import(".prisma/client").$Enums.QuestionType;
             updatedAt: Date;
             order: number;
+            type: import("@prisma/client").$Enums.QuestionType;
+            question: string;
             points: number;
             explanation: string | null;
             quizId: string;
@@ -169,8 +169,8 @@ export declare class QuizzesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
         description: string | null;
+        title: string;
         lessonId: string;
         passingScore: number;
         timeLimit: number | null;
@@ -189,12 +189,12 @@ export declare class QuizzesService {
                     questionId: string;
                 }[];
             } & {
-                question: string;
                 id: string;
                 createdAt: Date;
-                type: import(".prisma/client").$Enums.QuestionType;
                 updatedAt: Date;
                 order: number;
+                type: import("@prisma/client").$Enums.QuestionType;
+                question: string;
                 points: number;
                 explanation: string | null;
                 quizId: string;
@@ -203,25 +203,25 @@ export declare class QuizzesService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
             description: string | null;
+            title: string;
             lessonId: string;
             passingScore: number;
             timeLimit: number | null;
         };
     } & {
         id: string;
-        createdAt: Date;
         userId: string;
+        createdAt: Date;
         updatedAt: Date;
         completedAt: Date | null;
-        score: number | null;
-        startedAt: Date;
         enrollmentId: string;
         answers: import("@prisma/client/runtime/library").JsonValue | null;
         quizId: string;
-        timeSpent: number | null;
+        score: number | null;
         passed: boolean;
+        timeSpent: number | null;
+        startedAt: Date;
     }>;
     getQuizAttempts(userId: string, quizId: string): Promise<({
         quiz: {
@@ -236,12 +236,12 @@ export declare class QuizzesService {
                     questionId: string;
                 }[];
             } & {
-                question: string;
                 id: string;
                 createdAt: Date;
-                type: import(".prisma/client").$Enums.QuestionType;
                 updatedAt: Date;
                 order: number;
+                type: import("@prisma/client").$Enums.QuestionType;
+                question: string;
                 points: number;
                 explanation: string | null;
                 quizId: string;
@@ -250,25 +250,25 @@ export declare class QuizzesService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
             description: string | null;
+            title: string;
             lessonId: string;
             passingScore: number;
             timeLimit: number | null;
         };
     } & {
         id: string;
-        createdAt: Date;
         userId: string;
+        createdAt: Date;
         updatedAt: Date;
         completedAt: Date | null;
-        score: number | null;
-        startedAt: Date;
         enrollmentId: string;
         answers: import("@prisma/client/runtime/library").JsonValue | null;
         quizId: string;
-        timeSpent: number | null;
+        score: number | null;
         passed: boolean;
+        timeSpent: number | null;
+        startedAt: Date;
     })[]>;
     getQuizAttempt(userId: string, attemptId: string): Promise<{
         quiz: {
@@ -283,12 +283,12 @@ export declare class QuizzesService {
                     questionId: string;
                 }[];
             } & {
-                question: string;
                 id: string;
                 createdAt: Date;
-                type: import(".prisma/client").$Enums.QuestionType;
                 updatedAt: Date;
                 order: number;
+                type: import("@prisma/client").$Enums.QuestionType;
+                question: string;
                 points: number;
                 explanation: string | null;
                 quizId: string;
@@ -297,24 +297,24 @@ export declare class QuizzesService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
             description: string | null;
+            title: string;
             lessonId: string;
             passingScore: number;
             timeLimit: number | null;
         };
     } & {
         id: string;
-        createdAt: Date;
         userId: string;
+        createdAt: Date;
         updatedAt: Date;
         completedAt: Date | null;
-        score: number | null;
-        startedAt: Date;
         enrollmentId: string;
         answers: import("@prisma/client/runtime/library").JsonValue | null;
         quizId: string;
-        timeSpent: number | null;
+        score: number | null;
         passed: boolean;
+        timeSpent: number | null;
+        startedAt: Date;
     }>;
 }

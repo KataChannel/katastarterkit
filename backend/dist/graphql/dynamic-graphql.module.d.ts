@@ -14,7 +14,7 @@ export declare class DynamicGraphQLModule {
         };
     }>): {
         module: typeof DynamicGraphQLModule;
-        providers: (typeof PrismaService | typeof DynamicCRUDService | typeof DynamicResolverService | typeof UniversalDynamicResolver | {
+        providers: (typeof DynamicCRUDService | typeof PrismaService | typeof DynamicResolverService | typeof UniversalDynamicResolver | {
             provide: string;
             useFactory: (prismaService: PrismaService) => import("@nestjs/common").Type<any>;
             inject: (typeof PrismaService)[];

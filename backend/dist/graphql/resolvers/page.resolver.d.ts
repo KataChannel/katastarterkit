@@ -10,6 +10,7 @@ export declare class PageResolver {
     getPageBySlug(slug: string): Promise<Page>;
     getPublishedPages(pagination: PaginationInput): Promise<PaginatedPages>;
     getHomepage(): Promise<Page | null>;
+    getReservedSlugs(): Promise<string[]>;
     getPageBySlugPattern(slugPattern: string): Promise<Page | null>;
     createPage(input: CreatePageInput, context: any): Promise<Page>;
     updatePage(id: string, input: UpdatePageInput, context: any): Promise<Page>;

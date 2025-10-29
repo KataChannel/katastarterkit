@@ -71,19 +71,18 @@ export declare class EnhancedAuditService {
             };
         } & {
             id: string;
-            createdAt: Date;
-            sessionId: string | null;
-            ipAddress: string | null;
-            userAgent: string | null;
-            action: string;
-            details: Prisma.JsonValue | null;
             userId: string | null;
+            sessionId: string | null;
+            action: string;
             resourceType: string;
             resourceId: string | null;
+            ipAddress: string | null;
+            userAgent: string | null;
             method: string | null;
             endpoint: string | null;
             oldValues: Prisma.JsonValue | null;
             newValues: Prisma.JsonValue | null;
+            details: Prisma.JsonValue | null;
             entityName: string | null;
             parentResourceType: string | null;
             parentResourceId: string | null;
@@ -112,6 +111,7 @@ export declare class EnhancedAuditService {
             sessionInfo: Prisma.JsonValue | null;
             clientInfo: Prisma.JsonValue | null;
             timestamp: Date;
+            createdAt: Date;
         })[];
         pagination: {
             page: number;

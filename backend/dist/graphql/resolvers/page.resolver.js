@@ -40,6 +40,9 @@ let PageResolver = class PageResolver {
     async getHomepage() {
         return this.pageService.findHomepage();
     }
+    async getReservedSlugs() {
+        return this.pageService.getReservedSlugs();
+    }
     async getPageBySlugPattern(slugPattern) {
         return this.pageService.findBySlugPattern(slugPattern);
     }
@@ -134,6 +137,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], PageResolver.prototype, "getHomepage", null);
+__decorate([
+    (0, graphql_1.Query)(() => [String], { name: 'getReservedSlugs' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], PageResolver.prototype, "getReservedSlugs", null);
 __decorate([
     (0, graphql_1.Query)(() => page_model_1.Page, { name: 'getPageBySlugPattern', nullable: true }),
     __param(0, (0, graphql_1.Args)('slugPattern')),

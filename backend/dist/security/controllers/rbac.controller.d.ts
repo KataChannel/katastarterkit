@@ -72,21 +72,21 @@ export declare class RbacController {
     createPermission(req: any, createPermissionDto: CreatePermissionDto): Promise<{
         success: boolean;
         data: {
-            category: string;
             id: string;
+            action: string;
             createdAt: Date;
             isActive: boolean;
-            action: string;
-            name: string;
             updatedAt: Date;
+            name: string;
             description: string | null;
+            category: string;
             createdBy: string | null;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             displayName: string;
             resource: string;
             scope: string | null;
             isSystemPerm: boolean;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
         };
         message: string;
         error?: undefined;
@@ -99,21 +99,21 @@ export declare class RbacController {
     getAllPermissions(req: any, category?: string, resource?: string): Promise<{
         success: boolean;
         data: {
-            category: string;
             id: string;
+            action: string;
             createdAt: Date;
             isActive: boolean;
-            action: string;
-            name: string;
             updatedAt: Date;
+            name: string;
             description: string | null;
+            category: string;
             createdBy: string | null;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             displayName: string;
             resource: string;
             scope: string | null;
             isSystemPerm: boolean;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
         }[];
         message: string;
         error?: undefined;
@@ -126,21 +126,21 @@ export declare class RbacController {
     getPermissionById(req: any, permissionId: string): Promise<{
         success: boolean;
         data: {
-            category: string;
             id: string;
+            action: string;
             createdAt: Date;
             isActive: boolean;
-            action: string;
-            name: string;
             updatedAt: Date;
+            name: string;
             description: string | null;
+            category: string;
             createdBy: string | null;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             displayName: string;
             resource: string;
             scope: string | null;
             isSystemPerm: boolean;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
         };
         message: string;
         error?: undefined;
@@ -153,21 +153,21 @@ export declare class RbacController {
     updatePermission(req: any, permissionId: string, updatePermissionDto: Partial<CreatePermissionDto>): Promise<{
         success: boolean;
         data: {
-            category: string;
             id: string;
+            action: string;
             createdAt: Date;
             isActive: boolean;
-            action: string;
-            name: string;
             updatedAt: Date;
+            name: string;
             description: string | null;
+            category: string;
             createdBy: string | null;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             displayName: string;
             resource: string;
             scope: string | null;
             isSystemPerm: boolean;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
         };
         message: string;
         error?: undefined;
@@ -212,13 +212,13 @@ export declare class RbacController {
         success: boolean;
         data: {
             id: string;
-            createdAt: Date;
-            expiresAt: Date | null;
             userId: string;
+            createdAt: Date;
             updatedAt: Date;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            expiresAt: Date | null;
             scope: string | null;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             roleId: string;
             effect: string;
             assignedBy: string | null;
@@ -245,18 +245,18 @@ export declare class RbacController {
         success: boolean;
         data: {
             id: string;
-            createdAt: Date;
-            expiresAt: Date | null;
             userId: string;
+            createdAt: Date;
             updatedAt: Date;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            expiresAt: Date | null;
+            reason: string | null;
             scope: string | null;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             permissionId: string;
             effect: string;
             assignedBy: string | null;
             assignedAt: Date;
-            reason: string | null;
         };
         message: string;
         error?: undefined;

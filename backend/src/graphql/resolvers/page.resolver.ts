@@ -52,6 +52,12 @@ export class PageResolver {
     return this.pageService.findHomepage();
   }
 
+  // Get list of reserved slugs
+  @Query(() => [String], { name: 'getReservedSlugs' })
+  async getReservedSlugs(): Promise<string[]> {
+    return this.pageService.getReservedSlugs();
+  }
+
   // 🆕 Query to find dynamic page template by slug pattern
   @Query(() => Page, { name: 'getPageBySlugPattern', nullable: true })
   async getPageBySlugPattern(@Args('slugPattern') slugPattern: string): Promise<Page | null> {

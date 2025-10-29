@@ -14,6 +14,7 @@ const passport_1 = require("@nestjs/passport");
 const axios_1 = require("@nestjs/axios");
 const auth_service_1 = require("./auth.service");
 const prisma_module_1 = require("../prisma/prisma.module");
+const user_module_1 = require("../user/user.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -23,6 +24,7 @@ exports.AuthModule = AuthModule = __decorate([
             prisma_module_1.PrismaModule,
             passport_1.PassportModule,
             axios_1.HttpModule,
+            (0, common_1.forwardRef)(() => user_module_1.UserModule),
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: async (configService) => {

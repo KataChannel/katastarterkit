@@ -77,20 +77,20 @@ export declare class SecurityDashboardController {
                 username: string;
             };
         } & {
-            category: string;
             id: string;
-            createdAt: Date;
+            userId: string | null;
             sessionId: string | null;
             ipAddress: string;
             userAgent: string | null;
             details: import("@prisma/client/runtime/library").JsonValue | null;
-            userId: string | null;
-            updatedAt: Date;
             severity: string;
             correlationId: string | null;
+            createdAt: Date;
+            updatedAt: Date;
             description: string;
-            eventType: string;
+            category: string;
             location: string | null;
+            eventType: string;
             riskScore: number | null;
             isBlocked: boolean;
             requiresAction: boolean;
@@ -122,7 +122,7 @@ export declare class SecurityDashboardController {
         assessment: {
             id: string;
             score: number;
-            riskLevel: "medium" | "low" | "high" | "critical";
+            riskLevel: "medium" | "critical" | "low" | "high";
             timestamp: Date;
         };
     }>;
