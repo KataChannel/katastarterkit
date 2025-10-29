@@ -4,6 +4,7 @@ import { Page, PageBlock, PaginatedPages } from '../graphql/models/page.model';
 import { PaginationInput } from '../graphql/models/pagination.model';
 export declare class PageService {
     private readonly prisma;
+    private readonly RESERVED_SLUGS;
     constructor(prisma: PrismaService);
     private convertBlocksToPrismaFormat;
     create(input: CreatePageInput, userId: string): Promise<Page>;
@@ -20,4 +21,6 @@ export declare class PageService {
     findHomepage(): Promise<Page | null>;
     findBySlugPattern(slugPattern: string): Promise<Page | null>;
     duplicate(id: string, userId: string, newTitle?: string, newSlug?: string): Promise<Page>;
+    getReservedSlugs(): string[];
+    isSlugReserved(slug: string): boolean;
 }

@@ -4,389 +4,110 @@ export declare class BlogResolver {
     private blogService;
     constructor(blogService: BlogService);
     getBlogs(page?: number, limit?: number, search?: string, categoryId?: string, sort?: string): Promise<{
-        items: ({
-            category: {
-                id: string;
-                createdAt: Date;
-                name: string;
-                updatedAt: Date;
-                slug: string;
-                description: string | null;
-                thumbnail: string | null;
-            };
-            tags: {
-                id: string;
-                createdAt: Date;
-                name: string;
-                updatedAt: Date;
-                slug: string;
-            }[];
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            content: string;
-            excerpt: string | null;
-            slug: string;
-            publishedAt: Date | null;
-            author: string;
-            isFeatured: boolean;
-            metaTitle: string | null;
-            metaDescription: string | null;
-            metaKeywords: string | null;
-            categoryId: string | null;
-            viewCount: number;
-            thumbnailUrl: string | null;
-            shortDescription: string | null;
-            bannerUrl: string | null;
-            isPublished: boolean;
-        })[];
-        total: number;
+        items: any;
+        total: any;
         page: number;
         pageSize: number;
         totalPages: number;
         hasMore: boolean;
     }>;
-    getBlog(id: string): Promise<{
-        category: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-            description: string | null;
-            thumbnail: string | null;
-        };
-        tags: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-        }[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        title: string;
-        content: string;
-        excerpt: string | null;
-        slug: string;
-        publishedAt: Date | null;
-        author: string;
-        isFeatured: boolean;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        metaKeywords: string | null;
-        categoryId: string | null;
-        viewCount: number;
-        thumbnailUrl: string | null;
-        shortDescription: string | null;
-        bannerUrl: string | null;
-        isPublished: boolean;
-    }>;
-    getBlogBySlug(slug: string): Promise<{
-        category: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-            description: string | null;
-            thumbnail: string | null;
-        };
-        tags: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-        }[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        title: string;
-        content: string;
-        excerpt: string | null;
-        slug: string;
-        publishedAt: Date | null;
-        author: string;
-        isFeatured: boolean;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        metaKeywords: string | null;
-        categoryId: string | null;
-        viewCount: number;
-        thumbnailUrl: string | null;
-        shortDescription: string | null;
-        bannerUrl: string | null;
-        isPublished: boolean;
-    }>;
-    getFeaturedBlogs(limit?: number): Promise<({
-        category: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-            description: string | null;
-            thumbnail: string | null;
-        };
-        tags: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-        }[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        title: string;
-        content: string;
-        excerpt: string | null;
-        slug: string;
-        publishedAt: Date | null;
-        author: string;
-        isFeatured: boolean;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        metaKeywords: string | null;
-        categoryId: string | null;
-        viewCount: number;
-        thumbnailUrl: string | null;
-        shortDescription: string | null;
-        bannerUrl: string | null;
-        isPublished: boolean;
-    })[]>;
+    getBlog(id: string): Promise<any>;
+    getBlogBySlug(slug: string): Promise<any>;
+    getFeaturedBlogs(limit?: number): Promise<any>;
     getBlogsByCategory(categoryId: string, page?: number, limit?: number): Promise<{
-        items: ({
-            category: {
-                id: string;
-                createdAt: Date;
-                name: string;
-                updatedAt: Date;
-                slug: string;
-                description: string | null;
-                thumbnail: string | null;
-            };
-            tags: {
-                id: string;
-                createdAt: Date;
-                name: string;
-                updatedAt: Date;
-                slug: string;
-            }[];
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            content: string;
-            excerpt: string | null;
-            slug: string;
-            publishedAt: Date | null;
-            author: string;
-            isFeatured: boolean;
-            metaTitle: string | null;
-            metaDescription: string | null;
-            metaKeywords: string | null;
-            categoryId: string | null;
-            viewCount: number;
-            thumbnailUrl: string | null;
-            shortDescription: string | null;
-            bannerUrl: string | null;
-            isPublished: boolean;
-        })[];
-        total: number;
+        items: any;
+        total: any;
         page: number;
         pageSize: number;
         totalPages: number;
         hasMore: boolean;
     }>;
-    getRelatedBlogs(categoryId: string, excludeBlogId: string, limit?: number): Promise<({
-        category: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-            description: string | null;
-            thumbnail: string | null;
-        };
-        tags: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-        }[];
-    } & {
+    getRelatedBlogs(categoryId: string, excludeBlogId: string, limit?: number): Promise<any>;
+    getCategories(): Promise<{
+        postCount: any;
         id: string;
         createdAt: Date;
+        isActive: boolean;
         updatedAt: Date;
-        title: string;
-        content: string;
-        excerpt: string | null;
+        name: string;
+        description: string | null;
         slug: string;
-        publishedAt: Date | null;
-        author: string;
-        isFeatured: boolean;
+        thumbnail: string | null;
+        parentId: string | null;
+        order: number;
         metaTitle: string | null;
         metaDescription: string | null;
-        metaKeywords: string | null;
-        categoryId: string | null;
-        viewCount: number;
-        thumbnailUrl: string | null;
-        shortDescription: string | null;
-        bannerUrl: string | null;
-        isPublished: boolean;
-    })[]>;
-    getCategories(): Promise<{
-        postCount: number;
-        _count: {
-            blogs: number;
-        };
-        id: string;
-        createdAt: Date;
-        name: string;
-        updatedAt: Date;
-        slug: string;
-        description: string | null;
-        thumbnail: string | null;
     }[]>;
     getCategory(id: string): Promise<{
-        postCount: number;
-        _count: {
-            blogs: number;
-        };
+        postCount: any;
         id: string;
         createdAt: Date;
-        name: string;
+        isActive: boolean;
         updatedAt: Date;
-        slug: string;
+        name: string;
         description: string | null;
+        slug: string;
         thumbnail: string | null;
+        parentId: string | null;
+        order: number;
+        metaTitle: string | null;
+        metaDescription: string | null;
     }>;
     getTags(): Promise<{
         id: string;
         createdAt: Date;
         name: string;
-        updatedAt: Date;
+        description: string | null;
         slug: string;
+        color: string | null;
     }[]>;
-    createBlog(input: CreateBlogInput): Promise<{
-        category: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-            description: string | null;
-            thumbnail: string | null;
-        };
-        tags: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-        }[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        title: string;
-        content: string;
-        excerpt: string | null;
-        slug: string;
-        publishedAt: Date | null;
-        author: string;
-        isFeatured: boolean;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        metaKeywords: string | null;
-        categoryId: string | null;
-        viewCount: number;
-        thumbnailUrl: string | null;
-        shortDescription: string | null;
-        bannerUrl: string | null;
-        isPublished: boolean;
-    }>;
-    updateBlog(input: UpdateBlogInput): Promise<{
-        category: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-            description: string | null;
-            thumbnail: string | null;
-        };
-        tags: {
-            id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            slug: string;
-        }[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        title: string;
-        content: string;
-        excerpt: string | null;
-        slug: string;
-        publishedAt: Date | null;
-        author: string;
-        isFeatured: boolean;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        metaKeywords: string | null;
-        categoryId: string | null;
-        viewCount: number;
-        thumbnailUrl: string | null;
-        shortDescription: string | null;
-        bannerUrl: string | null;
-        isPublished: boolean;
-    }>;
+    createBlog(input: CreateBlogInput): Promise<any>;
+    updateBlog(input: UpdateBlogInput): Promise<any>;
     deleteBlog(id: string): Promise<boolean>;
     createCategory(input: CreateBlogCategoryInput): Promise<{
         id: string;
         createdAt: Date;
-        name: string;
+        isActive: boolean;
         updatedAt: Date;
-        slug: string;
+        name: string;
         description: string | null;
+        slug: string;
         thumbnail: string | null;
+        parentId: string | null;
+        order: number;
+        metaTitle: string | null;
+        metaDescription: string | null;
     }>;
     updateCategory(input: UpdateBlogCategoryInput): Promise<{
         id: string;
         createdAt: Date;
-        name: string;
+        isActive: boolean;
         updatedAt: Date;
-        slug: string;
+        name: string;
         description: string | null;
+        slug: string;
         thumbnail: string | null;
+        parentId: string | null;
+        order: number;
+        metaTitle: string | null;
+        metaDescription: string | null;
     }>;
     deleteCategory(id: string): Promise<boolean>;
     createTag(input: CreateBlogTagInput): Promise<{
         id: string;
         createdAt: Date;
         name: string;
-        updatedAt: Date;
+        description: string | null;
         slug: string;
+        color: string | null;
     }>;
     updateTag(input: UpdateBlogTagInput): Promise<{
         id: string;
         createdAt: Date;
         name: string;
-        updatedAt: Date;
+        description: string | null;
         slug: string;
+        color: string | null;
     }>;
     deleteTag(id: string): Promise<boolean>;
 }

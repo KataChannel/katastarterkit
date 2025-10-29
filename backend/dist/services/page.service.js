@@ -16,6 +16,25 @@ const page_model_1 = require("../graphql/models/page.model");
 let PageService = class PageService {
     constructor(prisma) {
         this.prisma = prisma;
+        this.RESERVED_SLUGS = [
+            'bai-viet',
+            'san-pham',
+            'gio-hang',
+            'thanh-toan',
+            'tai-khoan',
+            'dang-nhap',
+            'dang-ky',
+            'quen-mat-khau',
+            'admin',
+            'api',
+            'auth',
+            'graphql',
+            '_next',
+            'static',
+            'public',
+            'images',
+            'assets'
+        ];
     }
     convertBlocksToPrismaFormat(blocks) {
         return blocks.map((block, index) => {
@@ -39,6 +58,9 @@ let PageService = class PageService {
         });
     }
     async create(input, userId) {
+        if (this.RESERVED_SLUGS.includes(input.slug)) {
+            throw new common_1.BadRequestException(`Slug "${input.slug}" đã được hệ thống sử dụng. Vui lòng chọn slug khác.`);
+        }
         const existingPage = await this.prisma.page.findUnique({
             where: { slug: input.slug }
         });
@@ -185,6 +207,9 @@ let PageService = class PageService {
             throw new common_1.NotFoundException(`Page with ID "${id}" not found`);
         }
         if (input.slug && input.slug !== existingPage.slug) {
+            if (this.RESERVED_SLUGS.includes(input.slug)) {
+                throw new common_1.BadRequestException(`Slug "${input.slug}" đã được hệ thống sử dụng. Vui lòng chọn slug khác.`);
+            }
             const slugExists = await this.prisma.page.findUnique({
                 where: { slug: input.slug }
             });
@@ -453,6 +478,12 @@ let PageService = class PageService {
             }))
         }, userId);
         return duplicatedPage;
+    }
+    getReservedSlugs() {
+        return [...this.RESERVED_SLUGS];
+    }
+    isSlugReserved(slug) {
+        return this.RESERVED_SLUGS.includes(slug);
     }
 };
 exports.PageService = PageService;

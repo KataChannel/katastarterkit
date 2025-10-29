@@ -8,9 +8,7 @@ export declare class AffiliatePaymentService {
         affiliate: {
             user: {
                 id: string;
-                isVerified: boolean;
                 createdAt: Date;
-                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -19,6 +17,8 @@ export declare class AffiliatePaymentService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
+                isActive: boolean;
+                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
@@ -27,14 +27,13 @@ export declare class AffiliatePaymentService {
                 departmentId: string | null;
             };
         } & {
-            role: $Enums.AffUserRole;
             id: string;
+            userId: string;
             createdAt: Date;
             isActive: boolean;
-            userId: string;
             updatedAt: Date;
             description: string | null;
-            joinedAt: Date;
+            role: $Enums.AffUserRole;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
@@ -42,6 +41,7 @@ export declare class AffiliatePaymentService {
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
+            joinedAt: Date;
             lastActiveAt: Date | null;
         };
     } & {
@@ -51,28 +51,26 @@ export declare class AffiliatePaymentService {
         status: $Enums.AffPaymentStatus;
         completedAt: Date | null;
         affiliateId: string;
-        paymentMethod: $Enums.AffPaymentMethod;
+        currency: string;
         notes: string | null;
+        paymentMethod: $Enums.AffPaymentMethod;
         amount: import("@prisma/client/runtime/library").Decimal;
         accountDetails: string | null;
-        periodStart: Date;
-        periodEnd: Date;
-        transactionId: string | null;
-        adminNotes: string | null;
-        currency: string;
         requestedAt: Date;
         processedAt: Date | null;
         failedAt: Date | null;
+        transactionId: string | null;
+        adminNotes: string | null;
         processedBy: string | null;
+        periodStart: Date;
+        periodEnd: Date;
     }>;
     getPaymentRequests(input: AffPaymentRequestSearchInput, userRole?: $Enums.AffUserRole, userId?: string): Promise<{
         requests: ({
             affiliate: {
                 user: {
                     id: string;
-                    isVerified: boolean;
                     createdAt: Date;
-                    isActive: boolean;
                     email: string | null;
                     username: string;
                     password: string | null;
@@ -81,6 +79,8 @@ export declare class AffiliatePaymentService {
                     lastName: string | null;
                     avatar: string | null;
                     roleType: $Enums.UserRoleType;
+                    isActive: boolean;
+                    isVerified: boolean;
                     isTwoFactorEnabled: boolean;
                     failedLoginAttempts: number;
                     lockedUntil: Date | null;
@@ -89,14 +89,13 @@ export declare class AffiliatePaymentService {
                     departmentId: string | null;
                 };
             } & {
-                role: $Enums.AffUserRole;
                 id: string;
+                userId: string;
                 createdAt: Date;
                 isActive: boolean;
-                userId: string;
                 updatedAt: Date;
                 description: string | null;
-                joinedAt: Date;
+                role: $Enums.AffUserRole;
                 companyName: string | null;
                 businessType: string | null;
                 website: string | null;
@@ -104,6 +103,7 @@ export declare class AffiliatePaymentService {
                 bankAccount: string | null;
                 paypalEmail: string | null;
                 taxId: string | null;
+                joinedAt: Date;
                 lastActiveAt: Date | null;
             };
         } & {
@@ -113,19 +113,19 @@ export declare class AffiliatePaymentService {
             status: $Enums.AffPaymentStatus;
             completedAt: Date | null;
             affiliateId: string;
-            paymentMethod: $Enums.AffPaymentMethod;
+            currency: string;
             notes: string | null;
+            paymentMethod: $Enums.AffPaymentMethod;
             amount: import("@prisma/client/runtime/library").Decimal;
             accountDetails: string | null;
-            periodStart: Date;
-            periodEnd: Date;
-            transactionId: string | null;
-            adminNotes: string | null;
-            currency: string;
             requestedAt: Date;
             processedAt: Date | null;
             failedAt: Date | null;
+            transactionId: string | null;
+            adminNotes: string | null;
             processedBy: string | null;
+            periodStart: Date;
+            periodEnd: Date;
         })[];
         total: number;
         page: number;
@@ -136,9 +136,7 @@ export declare class AffiliatePaymentService {
         affiliate: {
             user: {
                 id: string;
-                isVerified: boolean;
                 createdAt: Date;
-                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -147,6 +145,8 @@ export declare class AffiliatePaymentService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
+                isActive: boolean;
+                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
@@ -155,14 +155,13 @@ export declare class AffiliatePaymentService {
                 departmentId: string | null;
             };
         } & {
-            role: $Enums.AffUserRole;
             id: string;
+            userId: string;
             createdAt: Date;
             isActive: boolean;
-            userId: string;
             updatedAt: Date;
             description: string | null;
-            joinedAt: Date;
+            role: $Enums.AffUserRole;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
@@ -170,6 +169,7 @@ export declare class AffiliatePaymentService {
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
+            joinedAt: Date;
             lastActiveAt: Date | null;
         };
     } & {
@@ -179,19 +179,19 @@ export declare class AffiliatePaymentService {
         status: $Enums.AffPaymentStatus;
         completedAt: Date | null;
         affiliateId: string;
-        paymentMethod: $Enums.AffPaymentMethod;
+        currency: string;
         notes: string | null;
+        paymentMethod: $Enums.AffPaymentMethod;
         amount: import("@prisma/client/runtime/library").Decimal;
         accountDetails: string | null;
-        periodStart: Date;
-        periodEnd: Date;
-        transactionId: string | null;
-        adminNotes: string | null;
-        currency: string;
         requestedAt: Date;
         processedAt: Date | null;
         failedAt: Date | null;
+        transactionId: string | null;
+        adminNotes: string | null;
         processedBy: string | null;
+        periodStart: Date;
+        periodEnd: Date;
     }>;
     getAffiliateEarnings(affiliateUserId: string, dateRange?: AffDateRangeInput): Promise<{
         totalConversions: number;
@@ -215,19 +215,19 @@ export declare class AffiliatePaymentService {
             status: $Enums.AffPaymentStatus;
             completedAt: Date | null;
             affiliateId: string;
-            paymentMethod: $Enums.AffPaymentMethod;
+            currency: string;
             notes: string | null;
+            paymentMethod: $Enums.AffPaymentMethod;
             amount: import("@prisma/client/runtime/library").Decimal;
             accountDetails: string | null;
-            periodStart: Date;
-            periodEnd: Date;
-            transactionId: string | null;
-            adminNotes: string | null;
-            currency: string;
             requestedAt: Date;
             processedAt: Date | null;
             failedAt: Date | null;
+            transactionId: string | null;
+            adminNotes: string | null;
             processedBy: string | null;
+            periodStart: Date;
+            periodEnd: Date;
         }[];
         total: number;
         page: number;
@@ -243,24 +243,24 @@ export declare class AffiliatePaymentService {
         };
         commissions: ({
             campaign: {
-                productImage: string | null;
                 id: string;
                 createdAt: Date;
-                name: string;
                 updatedAt: Date;
-                status: $Enums.AffCampaignStatus;
+                name: string;
                 description: string | null;
-                commissionType: string;
-                startDate: Date | null;
-                endDate: Date | null;
+                status: $Enums.AffCampaignStatus;
+                productImage: string | null;
+                totalClicks: number;
+                totalConversions: number;
                 productName: string;
                 productUrl: string;
                 commissionRate: import("@prisma/client/runtime/library").Decimal;
+                commissionType: string;
                 fixedAmount: import("@prisma/client/runtime/library").Decimal | null;
+                startDate: Date | null;
+                endDate: Date | null;
                 maxAffiliates: number | null;
                 requireApproval: boolean;
-                totalClicks: number;
-                totalConversions: number;
                 totalRevenue: import("@prisma/client/runtime/library").Decimal;
                 totalCommission: import("@prisma/client/runtime/library").Decimal;
                 creatorId: string;
@@ -268,9 +268,7 @@ export declare class AffiliatePaymentService {
             affiliate: {
                 user: {
                     id: string;
-                    isVerified: boolean;
                     createdAt: Date;
-                    isActive: boolean;
                     email: string | null;
                     username: string;
                     password: string | null;
@@ -279,6 +277,8 @@ export declare class AffiliatePaymentService {
                     lastName: string | null;
                     avatar: string | null;
                     roleType: $Enums.UserRoleType;
+                    isActive: boolean;
+                    isVerified: boolean;
                     isTwoFactorEnabled: boolean;
                     failedLoginAttempts: number;
                     lockedUntil: Date | null;
@@ -287,14 +287,13 @@ export declare class AffiliatePaymentService {
                     departmentId: string | null;
                 };
             } & {
-                role: $Enums.AffUserRole;
                 id: string;
+                userId: string;
                 createdAt: Date;
                 isActive: boolean;
-                userId: string;
                 updatedAt: Date;
                 description: string | null;
-                joinedAt: Date;
+                role: $Enums.AffUserRole;
                 companyName: string | null;
                 businessType: string | null;
                 website: string | null;
@@ -302,6 +301,7 @@ export declare class AffiliatePaymentService {
                 bankAccount: string | null;
                 paypalEmail: string | null;
                 taxId: string | null;
+                joinedAt: Date;
                 lastActiveAt: Date | null;
             };
         } & {
@@ -309,21 +309,21 @@ export declare class AffiliatePaymentService {
             createdAt: Date;
             updatedAt: Date;
             status: $Enums.AffConversionStatus;
+            saleAmount: import("@prisma/client/runtime/library").Decimal;
+            commission: import("@prisma/client/runtime/library").Decimal;
+            linkId: string;
             campaignId: string;
             affiliateId: string;
             orderId: string | null;
             customerEmail: string | null;
-            saleAmount: import("@prisma/client/runtime/library").Decimal;
-            conversionType: string;
-            notes: string | null;
-            approvedAt: Date | null;
-            rejectedAt: Date | null;
-            linkId: string;
-            commission: import("@prisma/client/runtime/library").Decimal;
             clickId: string | null;
+            conversionType: string;
             currency: string;
             convertedAt: Date;
+            approvedAt: Date | null;
+            rejectedAt: Date | null;
             paidAt: Date | null;
+            notes: string | null;
             validatedBy: string | null;
         })[];
         summary: any[];

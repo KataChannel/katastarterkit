@@ -56,20 +56,20 @@ export declare class SecurityAuditService {
                 username: string;
             };
         } & {
-            category: string;
             id: string;
-            createdAt: Date;
+            userId: string | null;
             sessionId: string | null;
             ipAddress: string;
             userAgent: string | null;
             details: import("@prisma/client/runtime/library").JsonValue | null;
-            userId: string | null;
-            updatedAt: Date;
             severity: string;
             correlationId: string | null;
+            createdAt: Date;
+            updatedAt: Date;
             description: string;
-            eventType: string;
+            category: string;
             location: string | null;
+            eventType: string;
             riskScore: number | null;
             isBlocked: boolean;
             requiresAction: boolean;
@@ -93,19 +93,18 @@ export declare class SecurityAuditService {
             };
         } & {
             id: string;
-            createdAt: Date;
-            sessionId: string | null;
-            ipAddress: string | null;
-            userAgent: string | null;
-            action: string;
-            details: import("@prisma/client/runtime/library").JsonValue | null;
             userId: string | null;
+            sessionId: string | null;
+            action: string;
             resourceType: string;
             resourceId: string | null;
+            ipAddress: string | null;
+            userAgent: string | null;
             method: string | null;
             endpoint: string | null;
             oldValues: import("@prisma/client/runtime/library").JsonValue | null;
             newValues: import("@prisma/client/runtime/library").JsonValue | null;
+            details: import("@prisma/client/runtime/library").JsonValue | null;
             entityName: string | null;
             parentResourceType: string | null;
             parentResourceId: string | null;
@@ -134,6 +133,7 @@ export declare class SecurityAuditService {
             sessionInfo: import("@prisma/client/runtime/library").JsonValue | null;
             clientInfo: import("@prisma/client/runtime/library").JsonValue | null;
             timestamp: Date;
+            createdAt: Date;
         })[];
         total: number;
         limit: number;
@@ -162,20 +162,20 @@ export declare class SecurityAuditService {
                 username: string;
             };
         } & {
-            category: string;
             id: string;
-            createdAt: Date;
+            userId: string | null;
             sessionId: string | null;
             ipAddress: string;
             userAgent: string | null;
             details: import("@prisma/client/runtime/library").JsonValue | null;
-            userId: string | null;
-            updatedAt: Date;
             severity: string;
             correlationId: string | null;
+            createdAt: Date;
+            updatedAt: Date;
             description: string;
-            eventType: string;
+            category: string;
             location: string | null;
+            eventType: string;
             riskScore: number | null;
             isBlocked: boolean;
             requiresAction: boolean;
@@ -193,7 +193,7 @@ export declare class SecurityAuditService {
         timeframe: "day" | "hour";
         anomaliesDetected: number;
         anomalies: any[];
-        riskLevel: "medium" | "low" | "high" | "critical";
+        riskLevel: "medium" | "critical" | "low" | "high";
     }>;
     private calculateAnomalyRiskLevel;
     generateComplianceReport(startDate: Date, endDate: Date): Promise<{

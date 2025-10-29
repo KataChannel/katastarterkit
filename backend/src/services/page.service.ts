@@ -13,6 +13,27 @@ import { PaginationInput } from '../graphql/models/pagination.model';
 
 @Injectable()
 export class PageService {
+  // Danh sách các slug được bảo vệ - không được phép tạo trong Page Builder
+  private readonly RESERVED_SLUGS = [
+    'bai-viet',
+    'san-pham', 
+    'gio-hang',
+    'thanh-toan',
+    'tai-khoan',
+    'dang-nhap',
+    'dang-ky',
+    'quen-mat-khau',
+    'admin',
+    'api',
+    'auth',
+    'graphql',
+    '_next',
+    'static',
+    'public',
+    'images',
+    'assets'
+  ];
+
   constructor(private readonly prisma: PrismaService) {}
 
   // Helper function to convert block input to Prisma create format
@@ -46,6 +67,13 @@ export class PageService {
 
   // Create a new page
   async create(input: CreatePageInput, userId: string): Promise<Page> {
+    // Kiểm tra slug có nằm trong danh sách reserved không
+    if (this.RESERVED_SLUGS.includes(input.slug)) {
+      throw new BadRequestException(
+        `Slug "${input.slug}" đã được hệ thống sử dụng. Vui lòng chọn slug khác.`
+      );
+    }
+
     // Check if slug already exists
     const existingPage = await this.prisma.page.findUnique({
       where: { slug: input.slug }
@@ -227,6 +255,13 @@ export class PageService {
 
     // Check slug uniqueness if updating slug
     if (input.slug && input.slug !== existingPage.slug) {
+      // Kiểm tra slug có nằm trong danh sách reserved không
+      if (this.RESERVED_SLUGS.includes(input.slug)) {
+        throw new BadRequestException(
+          `Slug "${input.slug}" đã được hệ thống sử dụng. Vui lòng chọn slug khác.`
+        );
+      }
+
       const slugExists = await this.prisma.page.findUnique({
         where: { slug: input.slug }
       });
@@ -582,5 +617,15 @@ export class PageService {
     }, userId);
 
     return duplicatedPage;
+  }
+
+  // Get list of reserved slugs (useful for frontend validation)
+  getReservedSlugs(): string[] {
+    return [...this.RESERVED_SLUGS];
+  }
+
+  // Check if slug is reserved
+  isSlugReserved(slug: string): boolean {
+    return this.RESERVED_SLUGS.includes(slug);
   }
 }

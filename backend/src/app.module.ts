@@ -33,6 +33,7 @@ import { FileModule } from './graphql/modules/file.module';
 import { HRModule } from './graphql/modules/hr.module';
 import { ProductModule } from './graphql/modules/product.module';
 import { BlogModule } from './graphql/modules/blog.module';
+import { ReviewModule } from './graphql/modules/review.module';
 import { TestController } from './test.controller';
 import { SeedModule } from './seed/seed.module';
 import { CallCenterModule } from './callcenter/callcenter.module';
@@ -140,6 +141,7 @@ import { ProjectModule } from './project/project.module';
     HRModule,
     ProductModule,
     BlogModule,
+    ReviewModule,
     SeedModule,
     CallCenterModule,
     LmsModule,
