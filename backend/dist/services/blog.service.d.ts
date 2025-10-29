@@ -7,30 +7,30 @@ export declare class BlogService {
         items: ({
             category: {
                 id: string;
-                description: string | null;
                 createdAt: Date;
-                updatedAt: Date;
                 name: string;
+                updatedAt: Date;
                 slug: string;
+                description: string | null;
                 thumbnail: string | null;
             };
             tags: {
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 name: string;
+                updatedAt: Date;
                 slug: string;
             }[];
         } & {
             id: string;
-            title: string;
             createdAt: Date;
             updatedAt: Date;
+            title: string;
             content: string;
-            author: string;
             excerpt: string | null;
             slug: string;
             publishedAt: Date | null;
+            author: string;
             isFeatured: boolean;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -51,30 +51,30 @@ export declare class BlogService {
     getBlogById(id: string): Promise<{
         category: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
+            description: string | null;
             thumbnail: string | null;
         };
         tags: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
         }[];
     } & {
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
         content: string;
-        author: string;
         excerpt: string | null;
         slug: string;
         publishedAt: Date | null;
+        author: string;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -89,30 +89,30 @@ export declare class BlogService {
     getBlogBySlug(slug: string): Promise<{
         category: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
+            description: string | null;
             thumbnail: string | null;
         };
         tags: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
         }[];
     } & {
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
         content: string;
-        author: string;
         excerpt: string | null;
         slug: string;
         publishedAt: Date | null;
+        author: string;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -127,30 +127,30 @@ export declare class BlogService {
     getFeaturedBlogs(limit?: number): Promise<({
         category: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
+            description: string | null;
             thumbnail: string | null;
         };
         tags: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
         }[];
     } & {
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
         content: string;
-        author: string;
         excerpt: string | null;
         slug: string;
         publishedAt: Date | null;
+        author: string;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -166,30 +166,30 @@ export declare class BlogService {
         items: ({
             category: {
                 id: string;
-                description: string | null;
                 createdAt: Date;
-                updatedAt: Date;
                 name: string;
+                updatedAt: Date;
                 slug: string;
+                description: string | null;
                 thumbnail: string | null;
             };
             tags: {
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 name: string;
+                updatedAt: Date;
                 slug: string;
             }[];
         } & {
             id: string;
-            title: string;
             createdAt: Date;
             updatedAt: Date;
+            title: string;
             content: string;
-            author: string;
             excerpt: string | null;
             slug: string;
             publishedAt: Date | null;
+            author: string;
             isFeatured: boolean;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -210,30 +210,30 @@ export declare class BlogService {
     getRelatedBlogs(categoryId: string, excludeBlogId: string, limit?: number): Promise<({
         category: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
+            description: string | null;
             thumbnail: string | null;
         };
         tags: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
         }[];
     } & {
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
         content: string;
-        author: string;
         excerpt: string | null;
         slug: string;
         publishedAt: Date | null;
+        author: string;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -248,30 +248,30 @@ export declare class BlogService {
     createBlog(input: CreateBlogInput): Promise<{
         category: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
+            description: string | null;
             thumbnail: string | null;
         };
         tags: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
         }[];
     } & {
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
         content: string;
-        author: string;
         excerpt: string | null;
         slug: string;
         publishedAt: Date | null;
+        author: string;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -286,30 +286,30 @@ export declare class BlogService {
     updateBlog(input: UpdateBlogInput): Promise<{
         category: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
+            description: string | null;
             thumbnail: string | null;
         };
         tags: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
             slug: string;
         }[];
     } & {
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
         content: string;
-        author: string;
         excerpt: string | null;
         slug: string;
         publishedAt: Date | null;
+        author: string;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -328,11 +328,11 @@ export declare class BlogService {
             blogs: number;
         };
         id: string;
-        description: string | null;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
+        description: string | null;
         thumbnail: string | null;
     }[]>;
     getCategoryById(id: string): Promise<{
@@ -341,51 +341,51 @@ export declare class BlogService {
             blogs: number;
         };
         id: string;
-        description: string | null;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
+        description: string | null;
         thumbnail: string | null;
     }>;
     createCategory(input: CreateBlogCategoryInput): Promise<{
         id: string;
-        description: string | null;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
+        description: string | null;
         thumbnail: string | null;
     }>;
     updateCategory(input: UpdateBlogCategoryInput): Promise<{
         id: string;
-        description: string | null;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
+        description: string | null;
         thumbnail: string | null;
     }>;
     deleteCategory(id: string): Promise<boolean>;
     getTags(): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
     }[]>;
     createTag(input: CreateBlogTagInput): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
     }>;
     updateTag(input: UpdateBlogTagInput): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
     }>;
     deleteTag(id: string): Promise<boolean>;

@@ -25,6 +25,7 @@ import {
   useToggleSubtask,
   useDeleteSubtask,
 } from '@/hooks/useSubtasks.dynamic';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -46,6 +47,7 @@ interface SubtasksSectionProps {
 
 export default function SubtasksSection({ taskId }: SubtasksSectionProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const { data: subtasks, loading, refetch } = useSubtasks(taskId);
   const progress = useSubtaskProgress(taskId);
   const [createSubtask, { loading: creating }] = useCreateSubtask();
@@ -57,12 +59,23 @@ export default function SubtasksSection({ taskId }: SubtasksSectionProps) {
     e.preventDefault();
     if (!newSubtask.trim()) return;
 
+    if (!user?.id) {
+      toast({
+        title: 'Error',
+        description: 'User not authenticated',
+        variant: 'destructive',
+        type: 'error',
+      });
+      return;
+    }
+
     try {
       await createSubtask({
         variables: {
           input: {
             title: newSubtask,
             parentId: taskId,
+            userId: user.id,
           },
         },
       });

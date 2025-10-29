@@ -72,13 +72,12 @@ export declare class EnhancedAuditService {
         } & {
             id: string;
             createdAt: Date;
-            userId: string | null;
-            tags: string[];
             sessionId: string | null;
             ipAddress: string | null;
             userAgent: string | null;
             action: string;
             details: Prisma.JsonValue | null;
+            userId: string | null;
             resourceType: string;
             resourceId: string | null;
             method: string | null;
@@ -90,6 +89,7 @@ export declare class EnhancedAuditService {
             parentResourceId: string | null;
             operationType: string | null;
             severity: string;
+            tags: string[];
             batchId: string | null;
             batchSize: number | null;
             batchIndex: number | null;
