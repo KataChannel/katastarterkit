@@ -1,18 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const GET_PRODUCTS = gql`
-  query GetProducts(
-    $page: Int
-    $pageSize: Int
-    $search: String
-    $categoryId: String
-  ) {
-    products(
-      page: $page
-      pageSize: $pageSize
-      search: $search
-      categoryId: $categoryId
-    ) {
+  query GetProducts($input: GetProductsInput) {
+    products(input: $input) {
       items {
         id
         name
@@ -21,33 +11,41 @@ export const GET_PRODUCTS = gql`
         shortDesc
         price
         originalPrice
+        costPrice
         sku
+        barcode
         stock
+        minStock
+        maxStock
         unit
+        weight
+        origin
         status
-        images {
-          id
-          url
-          alt
-          isPrimary
-        }
-        category {
-          id
-          name
-          slug
-        }
+        categoryId
+        thumbnail
+        attributes
+        metaTitle
+        metaDescription
+        metaKeywords
         isFeatured
         isNewArrival
         isBestSeller
         isOnSale
+        displayOrder
+        category {
+          id
+          name
+          slug
+          description
+        }
+        createdAt
+        updatedAt
       }
-      pagination {
-        currentPage
-        totalPages
-        totalItems
-        hasNextPage
-        hasPreviousPage
-      }
+      total
+      page
+      limit
+      totalPages
+      hasMore
     }
   }
 `;

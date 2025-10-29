@@ -264,14 +264,27 @@ export interface PaginationInput {
 // Filter Types
 // ============================================================================
 
-export interface ProductFilterInput {
+export interface ProductFiltersInput {
   search?: string;
   categoryId?: string;
   status?: ProductStatus;
   minPrice?: number;
   maxPrice?: number;
-  isActive?: boolean;
   isFeatured?: boolean;
+  isNewArrival?: boolean;
+  isBestSeller?: boolean;
+  isOnSale?: boolean;
+  inStock?: boolean;
+  origin?: string;
+  units?: string[];
+}
+
+export interface GetProductsInput {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  filters?: ProductFiltersInput;
 }
 
 export interface TaskFilterInput {

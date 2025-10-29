@@ -18,28 +18,36 @@ export default function ProductsPage() {
   // Fetch products
   const { data, loading, error } = useQuery(GET_PRODUCTS, {
     variables: {
-      filter: {
-        categoryId,
-        searchQuery: searchQuery || undefined,
-        minPrice: priceRange[0],
-        maxPrice: priceRange[1],
-        isActive: true,
-      },
-      pagination: {
+      input: {
         page,
         limit: 12,
         sortBy,
+        sortOrder: 'desc',
+        filters: {
+          categoryId: categoryId || undefined,
+          search: searchQuery || undefined,
+          minPrice: priceRange[0],
+          maxPrice: priceRange[1],
+          inStock: true,
+        }
       }
     }
   });
 
   // Fetch categories
-  const { data: categoriesData } = useQuery(GET_PRODUCT_CATEGORIES);
+  const { data: categoriesData } = useQuery(GET_PRODUCT_CATEGORIES, {
+    variables: {
+      input: {
+        page: 1,
+        limit: 100
+      }
+    }
+  });
 
-  const products = data?.products?.products || [];
+  const products = data?.products?.items || [];
   const total = data?.products?.total || 0;
   const hasMore = data?.products?.hasMore || false;
-  const categories = categoriesData?.productCategories || [];
+  const categories = categoriesData?.categories?.items || [];
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {

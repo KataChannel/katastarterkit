@@ -5,47 +5,49 @@ import { gql } from '@apollo/client';
 // ============================================================================
 
 export const GET_PRODUCTS = gql`
-  query GetProducts($filter: ProductFilterInput, $pagination: PaginationInput) {
-    products(filter: $filter, pagination: $pagination) {
-      products {
+  query GetProducts($input: GetProductsInput) {
+    products(input: $input) {
+      items {
         id
         name
         slug
         description
-        shortDescription
+        shortDesc
+        price
         originalPrice
-        compareAtPrice
-        discount
-        finalPrice
+        costPrice
+        sku
+        barcode
         stock
-        lowStockThreshold
-        images
-        featuredImage
+        minStock
+        maxStock
+        unit
+        weight
+        origin
+        status
+        categoryId
+        thumbnail
+        attributes
+        metaTitle
+        metaDescription
+        metaKeywords
+        isFeatured
+        isNewArrival
+        isBestSeller
+        isOnSale
+        displayOrder
         category {
           id
           name
           slug
         }
-        tags {
-          id
-          name
-        }
-        variants {
-          id
-          name
-          sku
-          price
-          stock
-          attributes
-        }
-        isFeatured
-        isActive
-        rating
-        reviewCount
-        viewCount
         createdAt
+        updatedAt
       }
       total
+      page
+      limit
+      totalPages
       hasMore
     }
   }
@@ -58,47 +60,35 @@ export const GET_PRODUCT_BY_SLUG = gql`
       name
       slug
       description
-      shortDescription
+      shortDesc
+      price
       originalPrice
-      compareAtPrice
-      discount
-      finalPrice
+      costPrice
+      sku
+      barcode
       stock
-      lowStockThreshold
-      images
-      featuredImage
+      minStock
+      maxStock
+      unit
+      weight
+      origin
+      status
+      categoryId
+      thumbnail
+      attributes
+      metaTitle
+      metaDescription
+      metaKeywords
+      isFeatured
+      isNewArrival
+      isBestSeller
+      isOnSale
+      displayOrder
       category {
         id
         name
         slug
-      }
-      tags {
-        id
-        name
-      }
-      variants {
-        id
-        name
-        sku
-        price
-        stock
-        attributes
-        images
-      }
-      specifications
-      features
-      isFeatured
-      isActive
-      rating
-      reviewCount
-      viewCount
-      relatedProducts {
-        id
-        name
-        slug
-        finalPrice
-        featuredImage
-        rating
+        description
       }
       createdAt
       updatedAt
@@ -107,40 +97,46 @@ export const GET_PRODUCT_BY_SLUG = gql`
 `;
 
 export const GET_FEATURED_PRODUCTS = gql`
-  query GetFeaturedProducts($limit: Int) {
-    featuredProducts(limit: $limit) {
-      id
-      name
-      slug
-      shortDescription
-      originalPrice
-      finalPrice
-      discount
-      featuredImage
-      rating
-      reviewCount
-      stock
+  query GetFeaturedProducts($input: GetProductsInput) {
+    products(input: $input) {
+      items {
+        id
+        name
+        slug
+        shortDesc
+        price
+        originalPrice
+        thumbnail
+        stock
+        isFeatured
+        category {
+          id
+          name
+          slug
+        }
+      }
+      total
     }
   }
 `;
 
 export const GET_PRODUCT_CATEGORIES = gql`
-  query GetProductCategories {
-    productCategories {
-      id
-      name
-      slug
-      description
-      image
-      parentId
-      children {
+  query GetProductCategories($input: GetCategoriesInput) {
+    categories(input: $input) {
+      items {
         id
         name
         slug
+        description
+        thumbnail
+        parentId
+        children {
+          id
+          name
+          slug
+        }
       }
-      _count {
-        products
-      }
+      total
     }
   }
 `;
@@ -150,32 +146,34 @@ export const GET_PRODUCT_CATEGORIES = gql`
 // ============================================================================
 
 export const GET_CART = gql`
-  query GetCart {
-    cart {
+  query GetCart($sessionId: String) {
+    getCart(sessionId: $sessionId) {
       id
+      userId
+      sessionId
       items {
         id
+        cartId
+        productId
+        variantId
         quantity
         price
         product {
           id
           name
           slug
-          finalPrice
-          featuredImage
-          stock
-        }
-        variant {
-          id
-          name
           price
+          thumbnail
           stock
         }
       }
-      totalItems
       subtotal
       discount
+      tax
       total
+      couponCode
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -340,15 +338,17 @@ export const GET_ORDER = gql`
 `;
 
 export const GET_MY_ORDERS = gql`
-  query GetMyOrders($filter: OrderFilterInput, $pagination: PaginationInput) {
-    myOrders(filter: $filter, pagination: $pagination) {
+  query GetMyOrders($skip: Int, $take: Int) {
+    getMyOrders(skip: $skip, take: $take) {
+      success
+      message
       orders {
         id
         orderNumber
         status
         total
-        itemCount
         createdAt
+        updatedAt
       }
       total
       hasMore
@@ -357,12 +357,13 @@ export const GET_MY_ORDERS = gql`
 `;
 
 export const CANCEL_ORDER = gql`
-  mutation CancelOrder($orderId: ID!, $reason: String!) {
-    cancelOrder(orderId: $orderId, reason: $reason) {
+  mutation CancelOrder($input: CancelOrderInput!) {
+    cancelOrder(input: $input) {
       success
       message
       order {
         id
+        orderNumber
         status
       }
     }
@@ -374,24 +375,32 @@ export const CANCEL_ORDER = gql`
 // ============================================================================
 
 export const GET_PRODUCT_REVIEWS = gql`
-  query GetProductReviews($productId: ID!, $pagination: PaginationInput) {
-    productReviews(productId: $productId, pagination: $pagination) {
-      reviews {
+  query GetProductReviews($productId: ID!, $page: Int, $limit: Int, $rating: Int) {
+    productReviews(productId: $productId, page: $page, limit: $limit, rating: $rating) {
+      items {
         id
+        productId
+        userId
         rating
+        title
         comment
         images
+        isVerifiedPurchase
+        isApproved
+        helpfulCount
         user {
+          id
           email
-          profile {
-            fullName
-            avatar
-          }
+          fullName
         }
         createdAt
+        updatedAt
       }
       total
-      averageRating
+      page
+      pageSize
+      totalPages
+      hasMore
     }
   }
 `;
@@ -399,13 +408,18 @@ export const GET_PRODUCT_REVIEWS = gql`
 export const CREATE_REVIEW = gql`
   mutation CreateReview($input: CreateReviewInput!) {
     createReview(input: $input) {
-      success
-      message
-      review {
-        id
-        rating
-        comment
-      }
+      id
+      productId
+      userId
+      rating
+      title
+      comment
+      images
+      isVerifiedPurchase
+      isApproved
+      helpfulCount
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -413,40 +427,41 @@ export const CREATE_REVIEW = gql`
 // ============================================================================
 // WISHLIST QUERIES & MUTATIONS
 // ============================================================================
+// TODO: Implement Wishlist resolver in backend
 
-export const GET_WISHLIST = gql`
-  query GetWishlist {
-    wishlist {
-      items {
-        id
-        product {
-          id
-          name
-          slug
-          finalPrice
-          featuredImage
-          stock
-        }
-        createdAt
-      }
-    }
-  }
-`;
+// export const GET_WISHLIST = gql`
+//   query GetWishlist {
+//     wishlist {
+//       items {
+//         id
+//         product {
+//           id
+//           name
+//           slug
+//           finalPrice
+//           featuredImage
+//           stock
+//         }
+//         createdAt
+//       }
+//     }
+//   }
+// `;
 
-export const ADD_TO_WISHLIST = gql`
-  mutation AddToWishlist($productId: ID!) {
-    addToWishlist(productId: $productId) {
-      success
-      message
-    }
-  }
-`;
+// export const ADD_TO_WISHLIST = gql`
+//   mutation AddToWishlist($productId: ID!) {
+//     addToWishlist(productId: $productId) {
+//       success
+//       message
+//     }
+//   }
+// `;
 
-export const REMOVE_FROM_WISHLIST = gql`
-  mutation RemoveFromWishlist($productId: ID!) {
-    removeFromWishlist(productId: $productId) {
-      success
-      message
-    }
-  }
-`;
+// export const REMOVE_FROM_WISHLIST = gql`
+//   mutation RemoveFromWishlist($productId: ID!) {
+//     removeFromWishlist(productId: $productId) {
+//       success
+//       message
+//     }
+//   }
+// `;
