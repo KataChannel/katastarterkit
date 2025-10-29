@@ -20,8 +20,8 @@ export const CREATE_PROJECT_TASK = gql`
  */
 export const UPDATE_TASK = gql`
   ${TASK_FRAGMENT}
-  mutation UpdateTask($id: ID!, $input: UpdateTaskInput!) {
-    updateTask(id: $id, input: $input) {
+  mutation UpdateTask($input: UpdateTaskInput!) {
+    updateTask(input: $input) {
       ...TaskFields
     }
   }
@@ -65,7 +65,7 @@ export const ASSIGN_TASK = gql`
  */
 export const UPDATE_TASK_STATUS = gql`
   mutation UpdateTaskStatus($id: ID!, $status: TaskStatus!) {
-    updateTask(id: $id, input: { status: $status }) {
+    updateTask(input: { id: $id, status: $status }) {
       id
       status
       completedAt

@@ -69,8 +69,8 @@ export default function TaskDetailPage() {
     try {
       await updateTask({
         variables: {
-          id: task.id,
           input: {
+            id: task.id,
             title: editForm.title,
             description: editForm.description || null,
             status: editForm.status,
@@ -105,8 +105,10 @@ export default function TaskDetailPage() {
     try {
       await updateTask({
         variables: {
-          id: task.id,
-          input: { status: newStatus },
+          input: { 
+            id: task.id,
+            status: newStatus 
+          },
         },
       });
     } catch (error) {
