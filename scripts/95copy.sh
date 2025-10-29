@@ -310,7 +310,7 @@ restart_docker() {
         echo ""
         echo "=== Container Status ==="
         docker compose ps
-        
+        docker builder prune -af --filter "until=72h" &>/dev/null || true
         echo ""
         echo "=== Frontend logs (last 15 lines) ==="
         docker compose logs frontend --tail 15 2>/dev/null || echo "Frontend container not ready yet"

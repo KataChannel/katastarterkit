@@ -218,6 +218,22 @@ let TaskResolver = class TaskResolver {
     async commentReplies(comment) {
         return this.taskCommentService.findReplies(comment.id);
     }
+    async getProjectTasks(projectId, filters, context) {
+        const userId = context.req.user.id;
+        return this.taskService.findByProjectId(projectId, userId, filters);
+    }
+    async createProjectTask(projectId, input, context) {
+        const userId = context.req.user.id;
+        return this.taskService.createProjectTask(projectId, userId, input);
+    }
+    async updateTaskOrder(taskId, newOrder, context) {
+        const userId = context.req.user.id;
+        return this.taskService.updateTaskOrder(taskId, userId, newOrder);
+    }
+    async assignTask(taskId, userIds, context) {
+        const userId = context.req.user.id;
+        return this.taskService.assignTask(taskId, userId, userIds);
+    }
 };
 exports.TaskResolver = TaskResolver;
 __decorate([
@@ -452,6 +468,58 @@ __decorate([
     __metadata("design:paramtypes", [task_comment_model_1.TaskComment]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "commentReplies", null);
+__decorate([
+    (0, graphql_1.Query)(() => [task_model_1.Task], {
+        name: 'projectTasks',
+        description: 'Get tasks by project ID (for TaskFeed)'
+    }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, graphql_1.Args)('projectId')),
+    __param(1, (0, graphql_1.Args)('filters', { nullable: true })),
+    __param(2, (0, graphql_1.Context)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, task_input_1.TaskFilterInput, Object]),
+    __metadata("design:returntype", Promise)
+], TaskResolver.prototype, "getProjectTasks", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => task_model_1.Task, {
+        name: 'createProjectTask',
+        description: 'Create task in project with @mentions'
+    }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, graphql_1.Args)('projectId')),
+    __param(1, (0, graphql_1.Args)('input')),
+    __param(2, (0, graphql_1.Context)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, task_input_1.CreateTaskInput, Object]),
+    __metadata("design:returntype", Promise)
+], TaskResolver.prototype, "createProjectTask", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => task_model_1.Task, {
+        name: 'updateTaskOrder',
+        description: 'Update task order for drag & drop'
+    }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, graphql_1.Args)('taskId')),
+    __param(1, (0, graphql_1.Args)('newOrder', { type: () => graphql_1.Int })),
+    __param(2, (0, graphql_1.Context)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number, Object]),
+    __metadata("design:returntype", Promise)
+], TaskResolver.prototype, "updateTaskOrder", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => task_model_1.Task, {
+        name: 'assignTask',
+        description: 'Assign task to users'
+    }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, graphql_1.Args)('taskId')),
+    __param(1, (0, graphql_1.Args)('userIds', { type: () => [graphql_1.ID] })),
+    __param(2, (0, graphql_1.Context)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array, Object]),
+    __metadata("design:returntype", Promise)
+], TaskResolver.prototype, "assignTask", null);
 exports.TaskResolver = TaskResolver = __decorate([
     (0, graphql_1.Resolver)(() => task_model_1.Task),
     __metadata("design:paramtypes", [task_service_1.TaskService,

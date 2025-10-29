@@ -43,13 +43,13 @@ export declare class AffiliateConversionService {
     getRecentConversions(limit?: number): Promise<({
         link: {
             campaign: {
-                productImage: string | null;
                 id: string;
-                createdAt: Date;
-                name: string;
-                updatedAt: Date;
-                status: import(".prisma/client").$Enums.AffCampaignStatus;
                 description: string | null;
+                status: import(".prisma/client").$Enums.AffCampaignStatus;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                productImage: string | null;
                 commissionType: string;
                 startDate: Date | null;
                 endDate: Date | null;
@@ -73,31 +73,31 @@ export declare class AffiliateConversionService {
                     lastName: string;
                 };
             } & {
-                role: import(".prisma/client").$Enums.AffUserRole;
                 id: string;
-                createdAt: Date;
-                isActive: boolean;
-                userId: string;
-                updatedAt: Date;
                 description: string | null;
-                website: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                isActive: boolean;
+                role: import(".prisma/client").$Enums.AffUserRole;
+                joinedAt: Date;
                 companyName: string | null;
                 businessType: string | null;
+                website: string | null;
                 paymentMethod: import(".prisma/client").$Enums.AffPaymentMethod | null;
                 bankAccount: string | null;
                 paypalEmail: string | null;
                 taxId: string | null;
-                joinedAt: Date;
                 lastActiveAt: Date | null;
             };
         } & {
             id: string;
-            createdAt: Date;
-            expiresAt: Date | null;
-            isActive: boolean;
-            updatedAt: Date;
             title: string | null;
             description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            expiresAt: Date | null;
             campaignId: string;
             totalClicks: number;
             totalConversions: number;
@@ -114,9 +114,9 @@ export declare class AffiliateConversionService {
         };
     } & {
         id: string;
+        status: import(".prisma/client").$Enums.AffConversionStatus;
         createdAt: Date;
         updatedAt: Date;
-        status: import(".prisma/client").$Enums.AffConversionStatus;
         campaignId: string;
         affiliateId: string;
         orderId: string | null;

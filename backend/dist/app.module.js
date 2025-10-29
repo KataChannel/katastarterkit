@@ -55,6 +55,7 @@ const graphql_logging_interceptor_1 = require("./interceptors/graphql-logging.in
 const input_sanitization_interceptor_1 = require("./common/interceptors/input-sanitization.interceptor");
 const graphql_performance_interceptor_1 = require("./common/interceptors/graphql-performance.interceptor");
 const performance_interceptor_1 = require("./interceptors/performance.interceptor");
+const project_module_1 = require("./project/project.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -133,6 +134,7 @@ exports.AppModule = AppModule = __decorate([
             seed_module_1.SeedModule,
             callcenter_module_1.CallCenterModule,
             lms_module_1.LmsModule,
+            project_module_1.ProjectModule,
         ],
         controllers: [
             log_controller_1.LogController,

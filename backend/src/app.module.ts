@@ -56,6 +56,7 @@ import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interc
 import { InputSanitizationInterceptor } from './common/interceptors/input-sanitization.interceptor';
 import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-performance.interceptor';
 import { PerformanceInterceptor } from './interceptors/performance.interceptor';
+import { ProjectModule } from './project/project.module';
 
 @Module({
   imports: [
@@ -142,6 +143,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     SeedModule,
     CallCenterModule,
     LmsModule,
+    ProjectModule,
   ],
   controllers: [
     LogController,

@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddMemberInput {
+  role: String = "member"
+  userId: ID!
+}
+
 input AdminCreateUserInput {
   avatar: String
   email: String
@@ -1252,6 +1257,12 @@ input CreateProductVariantInput {
   stock: Int! = 0
 }
 
+input CreateProjectInput {
+  avatar: String
+  description: String
+  name: String!
+}
+
 input CreateQuestionInput {
   answers: [CreateAnswerInput!]!
   explanation: String
@@ -1293,10 +1304,16 @@ input CreateTaskCommentInput {
 }
 
 input CreateTaskInput {
+  assignedTo: [ID!]
   category: TaskCategory!
   description: String
   dueDate: String
+  mentions: [ID!]
+  order: Float
+  parentId: String
   priority: TaskPriority!
+  status: TaskStatus
+  tags: [String!]
   title: String!
 }
 
@@ -1992,12 +2009,18 @@ type Mutation {
   addPageBlock(input: CreatePageBlockInput!, pageId: String!): PageBlock!
   addProductImage(input: CreateProductImageInput!): ProductType!
   addProductVariant(input: CreateProductVariantInput!): ProductType!
+
+  """Thêm thành viên vào project"""
+  addProjectMember(input: AddMemberInput!, projectId: String!): ProjectMember!
   adminCreateUser(input: AdminCreateUserInput!): User!
   adminResetPassword(input: AdminResetPasswordInput!): AdminResetPasswordResult!
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
   approveConversion(id: String!): Boolean!
   archiveCourse(id: ID!): Course!
   assignRolePermissions(input: AssignRolePermissionInput!): Boolean!
+
+  """Assign task to users"""
+  assignTask(taskId: String!, userIds: [ID!]!): Task!
   assignUserPermissions(input: AssignUserPermissionInput!): Boolean!
   assignUserRoles(input: AssignUserRoleInput!): Boolean!
   bulkCreateInvoices(input: BulkInvoiceInput!): DatabaseSyncResult!
@@ -2041,6 +2064,12 @@ type Mutation {
   createPermission(input: CreatePermissionInput!): Permission!
   createPost(input: CreatePostInput!): Post!
   createProduct(input: CreateProductInput!): ProductType!
+
+  """Tạo dự án mới"""
+  createProject(input: CreateProjectInput!): Project!
+
+  """Create task in project with @mentions"""
+  createProjectTask(input: CreateTaskInput!, projectId: String!): Task!
   createQuiz(input: CreateQuizInput!): Quiz!
   createReview(input: CreateReviewInput!): Review!
   createRole(input: CreateRoleInput!): Role!
@@ -2080,6 +2109,9 @@ type Mutation {
   deleteProduct(id: ID!): ProductType!
   deleteProductImage(id: ID!): Boolean!
   deleteProductVariant(id: ID!): Boolean!
+
+  """Xóa project (soft delete = archive, owner only)"""
+  deleteProject(id: String!): Project!
   deleteQuiz(id: String!): Boolean!
   deleteReview(reviewId: ID!): Boolean!
   deleteRole(id: String!): Boolean!
@@ -2152,6 +2184,9 @@ type Mutation {
   """Reindex all data from database into Orama search indexes"""
   reindexAllData: ReindexResult!
   rejectConversion(id: String!, reason: String): Boolean!
+
+  """Xóa thành viên khỏi project"""
+  removeProjectMember(memberId: String!, projectId: String!): Boolean!
   reorderLessons(input: ReorderLessonsInput!): [Lesson!]!
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
   reorderModules(input: ReorderModulesInput!): [CourseModule!]!
@@ -2213,10 +2248,19 @@ type Mutation {
     limit: Int
   ): UpdateProductsResult!
   updateProfile(input: UpdateProfileInput!): User!
+
+  """Update project (owner/admin only)"""
+  updateProject(id: String!, input: UpdateProjectInput!): Project!
+
+  """Update role của member (owner only)"""
+  updateProjectMemberRole(input: UpdateMemberRoleInput!, projectId: String!): ProjectMember!
   updateQuiz(id: String!, input: UpdateQuizInput!): Quiz!
   updateReview(input: UpdateReviewInput!): Review!
   updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateTask(input: UpdateTaskInput!): Task!
+
+  """Update task order for drag & drop"""
+  updateTaskOrder(newOrder: Int!, taskId: String!): Task!
   updateTemplatePublicity(input: UpdateTemplatePublicityInput!): CustomTemplate!
   updateUser(id: String!, input: UpdateUserInput!): User!
 
@@ -2765,6 +2809,43 @@ type ProductVariantType {
   updatedAt: DateTime!
 }
 
+type Project {
+  _count: ProjectStats
+  avatar: String
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  isArchived: Boolean!
+  members: [ProjectMember!]!
+  name: String!
+  owner: ProjectUser!
+  ownerId: ID!
+  updatedAt: DateTime!
+}
+
+type ProjectMember {
+  id: ID!
+  joinedAt: DateTime!
+  projectId: ID!
+  role: String!
+  user: ProjectUser!
+  userId: ID!
+}
+
+type ProjectStats {
+  chatMessages: Int!
+  members: Int!
+  tasks: Int!
+}
+
+type ProjectUser {
+  avatar: String
+  email: String
+  firstName: String
+  id: ID!
+  lastName: String
+}
+
 type Query {
   affiliateCampaign(id: String!): AffCampaign
   affiliateCampaigns(search: CampaignSearchInput): [AffCampaign!]!
@@ -2953,6 +3034,9 @@ type Query {
   myEnrollments: [Enrollment!]!
   myMenus(type: String): [MenuResponseDto!]!
 
+  """Lấy tất cả projects mà user là thành viên (dùng cho Sidebar)"""
+  myProjects(includeArchived: Boolean! = false): [Project!]!
+
   """Normalize a product name"""
   normalizeProductName(productName: String!, threshold: Float! = 0.6): String!
 
@@ -2968,6 +3052,15 @@ type Query {
   productBySlug(slug: String!): ProductType!
   products(input: GetProductsInput): PaginatedProducts!
   productsByCategory(categoryId: ID!, input: GetProductsInput): PaginatedProducts!
+
+  """Lấy chi tiết 1 project"""
+  project(id: String!): Project!
+
+  """Lấy danh sách members (dùng cho @mention autocomplete)"""
+  projectMembers(projectId: String!): [ProjectMember!]!
+
+  """Get tasks by project ID (for TaskFeed)"""
+  projectTasks(filters: TaskFilterInput, projectId: String!): [Task!]!
   quiz(id: String!): Quiz!
   quizAttempt(id: String!): QuizAttempt!
   quizAttempts(quizId: String!): [QuizAttempt!]!
@@ -3273,6 +3366,8 @@ type Tag {
 }
 
 type Task {
+  _count: TaskCount
+  assignedTo: [ID!]
   author: User!
   category: TaskCategory!
   commentAuthor: User!
@@ -3280,22 +3375,28 @@ type Task {
   commentParent: TaskComment
   commentReplies: [TaskComment!]!
   comments: [TaskComment!]
+  completedAt: DateTime
   createdAt: DateTime!
   description: String
   dueDate: DateTime
   id: ID!
   media: [TaskMedia!]
   mediaCount: Float!
+  mentions: [ID!]
+  order: Int
   parent: Task
   parentId: String
   priority: TaskPriority!
   progress: Float
+  projectId: String
   shares: [TaskShare!]
   status: TaskStatus!
   subtaskCount: Float!
   subtasks: [Task!]
+  tags: [String!]
   title: String!
   updatedAt: DateTime!
+  user: User!
   userId: String!
 }
 
@@ -3319,6 +3420,11 @@ type TaskComment {
   updatedAt: DateTime!
   user: User!
   userId: String!
+}
+
+type TaskCount {
+  comments: Int!
+  subtasks: Int!
 }
 
 input TaskFilterInput {
@@ -3813,6 +3919,11 @@ input UpdateManyInput {
   where: JSONObject!
 }
 
+input UpdateMemberRoleInput {
+  role: String!
+  userId: ID!
+}
+
 input UpdateMenuDto {
   badge: String
   badgeColor: String
@@ -4022,6 +4133,13 @@ input UpdateProfileInput {
   firstName: String
   lastName: String
   phone: String
+}
+
+input UpdateProjectInput {
+  avatar: String
+  description: String
+  isArchived: Boolean
+  name: String
 }
 
 input UpdateQuizInput {

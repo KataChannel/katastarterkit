@@ -13,13 +13,13 @@ export declare class FileService {
     getFiles(input: GetFilesInput, userId: string): Promise<{
         items: ({
             shares: {
-                password: string | null;
                 id: string;
                 createdAt: Date;
-                token: string;
+                password: string | null;
                 expiresAt: Date | null;
                 sharedBy: string;
                 sharedWith: string | null;
+                token: string;
                 fileId: string;
                 canDownload: boolean;
                 canView: boolean;
@@ -27,41 +27,41 @@ export declare class FileService {
                 lastAccess: Date | null;
             }[];
             folder: {
-                path: string;
                 id: string;
-                createdAt: Date;
-                userId: string;
-                name: string;
-                updatedAt: Date;
-                parentId: string | null;
                 description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                parentId: string | null;
+                name: string;
+                path: string;
                 color: string | null;
                 icon: string | null;
                 isSystem: boolean;
             };
         } & {
-            path: string;
             id: string;
-            createdAt: Date;
-            size: number;
-            userId: string;
-            updatedAt: Date;
-            tags: string[];
             title: string | null;
             description: string | null;
-            metadata: Prisma.JsonValue | null;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            tags: string[];
             url: string;
             filename: string;
+            size: number;
             mimeType: string;
+            path: string;
+            metadata: Prisma.JsonValue | null;
             width: number | null;
             viewCount: number;
-            etag: string | null;
-            bucket: string;
             alt: string | null;
             folderId: string | null;
             visibility: import(".prisma/client").$Enums.FileVisibility;
             fileType: import(".prisma/client").$Enums.FileType;
             originalName: string;
+            bucket: string;
+            etag: string | null;
             height: number | null;
             thumbnailUrl: string | null;
             downloadCount: number;
@@ -89,7 +89,7 @@ export declare class FileService {
         totalSize: number;
         totalFolders: number;
         filesByType: {
-            type: "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER" | "AUDIO" | "ARCHIVE";
+            type: "OTHER" | "IMAGE" | "VIDEO" | "DOCUMENT" | "AUDIO" | "ARCHIVE";
             count: number;
             totalSize: number;
         }[];
@@ -100,40 +100,40 @@ export declare class FileService {
     }>;
     createFileShare(input: CreateFileShareInput, userId: string): Promise<{
         file: {
-            path: string;
             id: string;
-            createdAt: Date;
-            size: number;
-            userId: string;
-            updatedAt: Date;
-            tags: string[];
             title: string | null;
             description: string | null;
-            metadata: Prisma.JsonValue | null;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            tags: string[];
             url: string;
             filename: string;
+            size: number;
             mimeType: string;
+            path: string;
+            metadata: Prisma.JsonValue | null;
             width: number | null;
             viewCount: number;
-            etag: string | null;
-            bucket: string;
             alt: string | null;
             folderId: string | null;
             visibility: import(".prisma/client").$Enums.FileVisibility;
             fileType: import(".prisma/client").$Enums.FileType;
             originalName: string;
+            bucket: string;
+            etag: string | null;
             height: number | null;
             thumbnailUrl: string | null;
             downloadCount: number;
         };
     } & {
-        password: string | null;
         id: string;
         createdAt: Date;
-        token: string;
+        password: string | null;
         expiresAt: Date | null;
         sharedBy: string;
         sharedWith: string | null;
+        token: string;
         fileId: string;
         canDownload: boolean;
         canView: boolean;

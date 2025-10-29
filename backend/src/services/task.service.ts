@@ -383,4 +383,284 @@ export class TaskService {
       progressPercentage: totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0,
     };
   }
+
+  // ==================== PROJECT TASK METHODS (NEW) ====================
+
+  /**
+   * Lấy tasks của project (dùng cho TaskFeed)
+   * Sắp xếp theo: priority + dueDate + order
+   */
+  async findByProjectId(projectId: string, userId: string, filters?: TaskFilterInput) {
+    // Check if user is member of project
+    const member = await this.prisma.projectMember.findUnique({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId,
+        },
+      },
+    });
+
+    if (!member) {
+      throw new ForbiddenException('You are not a member of this project');
+    }
+
+    const where: any = { projectId };
+    
+    if (filters?.category) where.category = filters.category;
+    if (filters?.priority) where.priority = filters.priority;
+    if (filters?.status) where.status = filters.status;
+    
+    if (filters?.search) {
+      where.OR = [
+        { title: { contains: filters.search, mode: 'insensitive' } },
+        { description: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+    
+    if (filters?.dueBefore) where.dueDate = { lte: new Date(filters.dueBefore) };
+    if (filters?.dueAfter) where.dueDate = { gte: new Date(filters.dueAfter) };
+
+    return this.prisma.task.findMany({
+      where,
+      include: {
+        user: true,
+        project: true,
+        media: true,
+        comments: {
+          include: {
+            user: true,
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 3, // Show only first 3 comments
+        },
+        _count: {
+          select: {
+            comments: true,
+            subtasks: true,
+          },
+        },
+      },
+      orderBy: [
+        { priority: 'desc' },
+        { dueDate: 'asc' },
+        { order: 'asc' },
+        { createdAt: 'desc' },
+      ],
+    });
+  }
+
+  /**
+   * Tạo task trong project
+   * Support @mentions
+   */
+  async createProjectTask(
+    projectId: string,
+    userId: string,
+    input: CreateTaskInput & {
+      assignedTo?: string[];
+      mentions?: string[];
+      tags?: string[];
+      order?: number;
+    },
+  ) {
+    // Check if user is member
+    const member = await this.prisma.projectMember.findUnique({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId,
+        },
+      },
+    });
+
+    if (!member) {
+      throw new ForbiddenException('You are not a member of this project');
+    }
+
+    // Get max order for auto-ordering
+    const lastTask = await this.prisma.task.findFirst({
+      where: { projectId },
+      orderBy: { order: 'desc' },
+    });
+
+    const task = await this.prisma.task.create({
+      data: {
+        title: input.title,
+        description: input.description,
+        category: input.category,
+        priority: input.priority,
+        status: input.status || 'PENDING',
+        dueDate: input.dueDate ? new Date(input.dueDate) : null,
+        userId,
+        projectId,
+        assignedTo: input.assignedTo || [],
+        mentions: input.mentions || [],
+        tags: input.tags || [],
+        order: input.order ?? (lastTask?.order ?? 0) + 1,
+        parentId: input.parentId,
+      },
+      include: {
+        user: true,
+        project: true,
+        comments: true,
+        media: true,
+      },
+    });
+
+    // Create notifications for @mentions
+    if (input.mentions && input.mentions.length > 0) {
+      await this.createMentionNotifications(task.id, userId, input.mentions);
+    }
+
+    // Create notifications for assigned users
+    if (input.assignedTo && input.assignedTo.length > 0) {
+      await this.createAssignmentNotifications(task.id, userId, input.assignedTo);
+    }
+
+    return task;
+  }
+
+  /**
+   * Update task order (drag & drop)
+   */
+  async updateTaskOrder(taskId: string, userId: string, newOrder: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+    });
+
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+
+    // Check permission (project member or task owner)
+    if (task.projectId) {
+      const member = await this.prisma.projectMember.findUnique({
+        where: {
+          projectId_userId: {
+            projectId: task.projectId,
+            userId,
+          },
+        },
+      });
+      if (!member && task.userId !== userId) {
+        throw new ForbiddenException('You do not have permission to reorder this task');
+      }
+    } else if (task.userId !== userId) {
+      throw new ForbiddenException('You can only reorder your own tasks');
+    }
+
+    return this.prisma.task.update({
+      where: { id: taskId },
+      data: { order: newOrder },
+    });
+  }
+
+  /**
+   * Assign task to users
+   */
+  async assignTask(taskId: string, userId: string, assignedUserIds: string[]) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+      include: { project: true },
+    });
+
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+
+    // Check permission
+    if (task.projectId) {
+      const member = await this.prisma.projectMember.findUnique({
+        where: {
+          projectId_userId: {
+            projectId: task.projectId,
+            userId,
+          },
+        },
+      });
+      if (!member) {
+        throw new ForbiddenException('You are not a member of this project');
+      }
+    } else if (task.userId !== userId) {
+      throw new ForbiddenException('Only task owner can assign personal tasks');
+    }
+
+    const updatedTask = await this.prisma.task.update({
+      where: { id: taskId },
+      data: { assignedTo: assignedUserIds },
+      include: {
+        user: true,
+        project: true,
+      },
+    });
+
+    // Notify assigned users
+    await this.createAssignmentNotifications(taskId, userId, assignedUserIds);
+
+    return updatedTask;
+  }
+
+  // ==================== NOTIFICATION HELPERS ====================
+
+  /**
+   * Tạo notifications cho @mentions
+   */
+  private async createMentionNotifications(
+    taskId: string,
+    mentionerUserId: string,
+    mentionedUserIds: string[],
+  ) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+      select: { title: true },
+    });
+
+    const notifications = mentionedUserIds
+      .filter((uid) => uid !== mentionerUserId) // Don't notify yourself
+      .map((mentionedUserId) => ({
+        userId: mentionedUserId,
+        type: 'TASK_MENTION',
+        title: 'You were mentioned',
+        message: `You were mentioned in task "${task?.title}"`,
+        taskId,
+        mentionedBy: mentionerUserId,
+      }));
+
+    if (notifications.length > 0) {
+      await this.prisma.notification.createMany({
+        data: notifications,
+      });
+    }
+  }
+
+  /**
+   * Tạo notifications cho task assignments
+   */
+  private async createAssignmentNotifications(
+    taskId: string,
+    assignerUserId: string,
+    assignedUserIds: string[],
+  ) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: taskId },
+      select: { title: true },
+    });
+
+    const notifications = assignedUserIds
+      .filter((uid) => uid !== assignerUserId)
+      .map((assignedUserId) => ({
+        userId: assignedUserId,
+        type: 'TASK_ASSIGNED',
+        title: 'Task assigned to you',
+        message: `You were assigned to task "${task?.title}"`,
+        taskId,
+      }));
+
+    if (notifications.length > 0) {
+      await this.prisma.notification.createMany({
+        data: notifications,
+      });
+    }
+  }
 }

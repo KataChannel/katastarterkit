@@ -3,6 +3,10 @@ import { TaskMedia } from './task-media.model';
 import { TaskShare } from './task-share.model';
 import { TaskComment } from './task-comment.model';
 import { TaskCategory, TaskPriority, TaskStatus } from '@prisma/client';
+export declare class TaskCount {
+    comments: number;
+    subtasks: number;
+}
 export declare class Task {
     id: string;
     title: string;
@@ -11,9 +15,10 @@ export declare class Task {
     priority: TaskPriority;
     status: TaskStatus;
     dueDate?: Date;
+    completedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
-    author: User;
+    user: User;
     userId: string;
     parentId?: string;
     parent?: Task;
@@ -22,4 +27,10 @@ export declare class Task {
     media?: TaskMedia[];
     shares?: TaskShare[];
     comments?: TaskComment[];
+    projectId?: string;
+    assignedTo?: string[];
+    mentions?: string[];
+    tags?: string[];
+    order?: number;
+    _count?: TaskCount;
 }

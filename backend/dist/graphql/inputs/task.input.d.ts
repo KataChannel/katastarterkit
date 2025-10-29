@@ -4,7 +4,13 @@ export declare class CreateTaskInput {
     description?: string;
     category: TaskCategory;
     priority: TaskPriority;
+    status?: TaskStatus;
     dueDate?: string;
+    parentId?: string;
+    assignedTo?: string[];
+    mentions?: string[];
+    tags?: string[];
+    order?: number;
 }
 export declare class UpdateTaskInput {
     id: string;
