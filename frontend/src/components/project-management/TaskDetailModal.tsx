@@ -1,18 +1,18 @@
 /**
  * ============================================================================
- * TASK DETAIL MODAL - MVP 2 FEATURE
+ * TASK DETAIL MODAL - MVP 3 COMPLETE
  * ============================================================================
  * 
  * Full task view with:
  * - Task details with inline editing
- * - Comments section
- * - Subtasks list
- * - Activity history
+ * - Real-time Comments with threaded replies
+ * - Subtasks with progress tracking
+ * - Activity history timeline
  * - Assignee management
  * - All using Dynamic GraphQL
  * 
  * @author Senior Full-Stack Engineer
- * @version 2.0.0 - MVP 2 Dynamic GraphQL
+ * @version 3.0.0 - MVP 3 Complete
  */
 
 'use client';
@@ -24,6 +24,9 @@ import {
   useUpdateTask, 
   useDeleteTask 
 } from '@/hooks/useTasks.dynamic';
+import CommentsSection from './CommentsSection';
+import SubtasksSection from './SubtasksSection';
+import ActivityTimeline from './ActivityTimeline';
 import {
   Dialog,
   DialogContent,
@@ -475,27 +478,15 @@ export default function TaskDetailModal({
               </TabsList>
 
               <TabsContent value="comments" className="space-y-4 pt-4">
-                <div className="text-center py-8 text-muted-foreground">
-                  <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Comments feature coming in MVP 3</p>
-                  <p className="text-sm">Will use Dynamic GraphQL for real-time updates</p>
-                </div>
+                <CommentsSection taskId={taskId} />
               </TabsContent>
 
               <TabsContent value="subtasks" className="space-y-4 pt-4">
-                <div className="text-center py-8 text-muted-foreground">
-                  <CheckSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Subtasks feature coming in MVP 3</p>
-                  <p className="text-sm">Create, assign, and track subtasks</p>
-                </div>
+                <SubtasksSection taskId={taskId} />
               </TabsContent>
 
               <TabsContent value="activity" className="space-y-4 pt-4">
-                <div className="text-center py-8 text-muted-foreground">
-                  <Clock className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>Activity history coming in MVP 3</p>
-                  <p className="text-sm">Track all changes and updates</p>
-                </div>
+                <ActivityTimeline taskId={taskId} />
               </TabsContent>
             </Tabs>
           </div>
