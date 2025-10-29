@@ -54,6 +54,7 @@ export interface CreateSubtaskInput {
   description?: string;
   priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   parentId: string; // Parent task ID
+  userId?: string; // Creator user ID
 }
 
 export interface UpdateSubtaskInput {
@@ -83,11 +84,7 @@ export const useSubtasks = (taskId: string | null) => {
 
   const { data, loading, error, refetch } = useFindMany<Subtask>('task', {
     where,
-    orderBy: [
-      { status: 'asc' }, // PENDING first
-      { order: 'asc' }, // Manual ordering
-      { createdAt: 'asc' },
-    ],
+    orderBy: { createdAt: 'asc' }, // Oldest first (single field for Dynamic GraphQL)
     include: {
       user: {
         select: {
@@ -179,12 +176,21 @@ export const useCreateSubtask = () => {
   const [createOne, { data, loading, error }] = useCreateOne<Subtask>('task');
 
   const createSubtask = async (options: { variables: { input: CreateSubtaskInput } }) => {
+    const { userId, ...subtaskData } = options.variables.input;
+    
+    if (!userId) {
+      throw new Error('userId is required to create a subtask');
+    }
+
     const result = await createOne({
       data: {
-        ...options.variables.input,
+        ...subtaskData,
         status: 'PENDING',
         category: 'OTHER', // Default category for subtasks
         order: 0, // Will be updated by backend
+        user: {
+          connect: { id: userId }
+        }
       },
       include: {
         user: {

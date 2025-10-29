@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useCreateProjectTask } from '@/hooks/useTasks.dynamic';
 import { useProjectMembers } from '@/hooks/useProjects.dynamic';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
   DialogContent,
@@ -47,6 +48,7 @@ export default function CreateTaskModal({
   onOpenChange,
   projectId,
 }: CreateTaskModalProps) {
+  const { user } = useAuth();
   const [createTask, { loading }] = useCreateProjectTask(projectId);
   const { data: membersData } = useProjectMembers(projectId);
   
@@ -63,6 +65,11 @@ export default function CreateTaskModal({
   const [tagInput, setTagInput] = useState('');
 
   const onSubmit = async (data: CreateTaskForm) => {
+    if (!user?.id) {
+      console.error('User not authenticated');
+      return;
+    }
+
     try {
       await createTask({
         variables: {
@@ -75,6 +82,7 @@ export default function CreateTaskModal({
             dueDate: selectedDate?.toISOString(),
             assignedTo: selectedAssignees,
             tags,
+            userId: user.id, // Current user is the creator
           },
         },
       });

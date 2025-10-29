@@ -14,9 +14,9 @@ export declare class CallCenterResolver {
     getRecordById(id: string): Promise<CallCenterRecord>;
     getSyncLogs(pagination: PaginationInput): Promise<{
         id: string;
+        errorMessage: string | null;
         status: string;
         completedAt: Date | null;
-        errorMessage: string | null;
         fromDate: Date;
         toDate: Date;
         duration: number | null;

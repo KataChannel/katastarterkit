@@ -8,8 +8,8 @@ export declare class CallCenterService {
     getConfig(): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         isActive: boolean;
+        updatedAt: Date;
         batchSize: number;
         apiUrl: string;
         domain: string;
@@ -25,8 +25,8 @@ export declare class CallCenterService {
     createConfig(input: CreateCallCenterConfigInput): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         isActive: boolean;
+        updatedAt: Date;
         batchSize: number;
         apiUrl: string;
         domain: string;
@@ -42,8 +42,8 @@ export declare class CallCenterService {
     updateConfig(id: string, input: UpdateCallCenterConfigInput): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         isActive: boolean;
+        updatedAt: Date;
         batchSize: number;
         apiUrl: string;
         domain: string;
@@ -59,8 +59,8 @@ export declare class CallCenterService {
     deleteConfig(id: string): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         isActive: boolean;
+        updatedAt: Date;
         batchSize: number;
         apiUrl: string;
         domain: string;
@@ -136,9 +136,9 @@ export declare class CallCenterService {
     getSyncLogs(pagination: PaginationInput): Promise<{
         items: {
             id: string;
+            errorMessage: string | null;
             status: string;
             completedAt: Date | null;
-            errorMessage: string | null;
             fromDate: Date;
             toDate: Date;
             duration: number | null;

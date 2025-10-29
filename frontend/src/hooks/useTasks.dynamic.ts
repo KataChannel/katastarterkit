@@ -71,6 +71,7 @@ export interface CreateTaskInput {
   assignedTo?: string[];
   tags?: string[];
   projectId?: string;
+  userId?: string; // Creator/owner user ID
 }
 
 export interface UpdateTaskInput {
@@ -153,12 +154,7 @@ export const useProjectTasks = (projectId: string | null, filters?: TaskFilterIn
 
   const { data, loading, error, refetch } = useFindMany<Task>('task', {
     where,
-    orderBy: [
-      { status: 'asc' }, // PENDING first
-      { priority: 'desc' }, // URGENT first
-      { dueDate: 'asc' }, // Soonest first
-      { order: 'asc' }, // Manual order
-    ],
+    orderBy: { createdAt: 'desc' }, // Latest first (single field for Dynamic GraphQL)
     include: {
       user: {
         select: {
@@ -265,10 +261,7 @@ export const useMyTasks = (filters?: TaskFilterInput) => {
 
   const { data, loading, error, refetch } = useFindMany<Task>('task', {
     where,
-    orderBy: [
-      { priority: 'desc' },
-      { dueDate: 'asc' },
-    ],
+    orderBy: { createdAt: 'desc' }, // Latest first (single field for Dynamic GraphQL)
     include: {
       user: {
         select: {
@@ -325,12 +318,22 @@ export const useCreateProjectTask = (projectId: string) => {
       input: CreateTaskInput;
     };
   }) => {
+    // Extract userId from input, throw error if missing
+    const { userId, ...taskData } = options.variables.input;
+    
+    if (!userId) {
+      throw new Error('userId is required to create a task');
+    }
+
     const result = await createOne({
       data: {
-        ...options.variables.input,
+        ...taskData,
         projectId: options.variables.projectId,
         status: 'PENDING',
         order: 0, // Will be set by backend
+        user: {
+          connect: { id: userId }
+        }
       },
       include: {
         user: {
