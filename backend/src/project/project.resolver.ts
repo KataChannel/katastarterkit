@@ -61,8 +61,11 @@ export class ProjectResolver {
   })
   async createProject(
     @CurrentUser('id') userId: string,
-    @Args('input') input: CreateProjectInput,
+    @Args('input', { type: () => CreateProjectInput }) input: CreateProjectInput,
   ): Promise<ProjectType> {
+    console.log('🔍 Resolver received input:', input);
+    console.log('🔍 Input constructor:', input?.constructor?.name);
+    console.log('🔍 Input keys:', Object.keys(input || {}));
     return this.projectService.createProject(userId, input) as any;
   }
 

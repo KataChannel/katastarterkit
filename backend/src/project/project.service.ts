@@ -1,24 +1,12 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Project, ProjectMember } from '@prisma/client';
-
-export interface CreateProjectInput {
-  name: string;
-  description?: string;
-  avatar?: string;
-}
-
-export interface UpdateProjectInput {
-  name?: string;
-  description?: string;
-  avatar?: string;
-  isArchived?: boolean;
-}
-
-export interface AddMemberInput {
-  userId: string;
-  role?: 'owner' | 'admin' | 'member';
-}
+import {
+  CreateProjectInput,
+  UpdateProjectInput,
+  AddMemberInput,
+  UpdateMemberRoleInput,
+} from './dto/project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -34,11 +22,19 @@ export class ProjectService {
     ownerId: string,
     input: CreateProjectInput,
   ): Promise<Project> {
+    console.log('📝 CreateProject called with:', { ownerId, input });
+
+    // Validate required fields
+    if (!input.name || input.name.trim() === '') {
+      console.error('❌ Validation failed: name is empty');
+      throw new BadRequestException('Project name is required');
+    }
+
     const project = await this.prisma.project.create({
       data: {
-        name: input.name,
-        description: input.description,
-        avatar: input.avatar,
+        name: input.name.trim(),
+        description: input.description || null,
+        avatar: input.avatar || null,
         ownerId,
         members: {
           create: {
@@ -57,6 +53,7 @@ export class ProjectService {
       },
     });
 
+    console.log('✅ Project created:', project.id);
     return project;
   }
 

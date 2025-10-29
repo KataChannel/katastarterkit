@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID, Int, InputType } from '@nestjs/graphql';
+import { IsString, IsOptional, MinLength, MaxLength, IsUrl } from 'class-validator';
 
 // ==================== User Type (Simple) ====================
 
@@ -98,12 +99,21 @@ export class ProjectMemberType {
 @InputType('CreateProjectInput')
 export class CreateProjectInput {
   @Field()
+  @IsString()
+  @MinLength(1, { message: 'Project name cannot be empty' })
+  @MaxLength(200, { message: 'Project name is too long' })
   name: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
   description?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @IsUrl({}, { message: 'Avatar must be a valid URL' })
   avatar?: string;
 }
 
