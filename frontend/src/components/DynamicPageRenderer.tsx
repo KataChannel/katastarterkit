@@ -1,54 +1,57 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useQuery, gql } from '@apollo/client';
 import type { Page, PageBlock, DynamicConfig } from '@/types/page-builder';
+// ✅ MIGRATED: Import Dynamic GraphQL
+import { useFindUnique } from '@/hooks/useDynamicGraphQL';
 
 interface DynamicPageRendererProps {
   pageTemplate: Page;
   slug: string;
 }
 
-// GraphQL query to load product data
-const GET_PRODUCT_BY_SLUG = gql`
-  query GetProductBySlug($slug: String!) {
-    getProductBySlug(slug: $slug) {
-      id
-      name
-      slug
-      description
-      price
-      compareAtPrice
-      stock
-      sku
-      images {
-        url
-        alt
-      }
-      category {
-        name
-      }
-    }
-  }
-`;
-
 export function DynamicPageRenderer({ pageTemplate, slug }: DynamicPageRendererProps) {
   const [renderedBlocks, setRenderedBlocks] = useState<PageBlock[]>([]);
 
-  // Load product data based on slug
-  const { data, loading, error } = useQuery(GET_PRODUCT_BY_SLUG, {
-    variables: { slug },
-    skip: !slug || !pageTemplate.isDynamic,
-  });
+  // ✅ MIGRATED: Load product data with Dynamic GraphQL
+  const { data: product, loading, error } = useFindUnique('product', 
+    { slug }, // where
+    {
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        price: true,
+        compareAtPrice: true,
+        stock: true,
+        sku: true,
+        images: {
+          select: {
+            url: true,
+            alt: true,
+          }
+        },
+        category: {
+          select: {
+            name: true,
+          }
+        }
+      },
+    },
+    {
+      skip: !slug || !pageTemplate.isDynamic,
+    }
+  );
 
   // Apply data bindings to blocks
   useEffect(() => {
-    if (!data || !pageTemplate.dynamicConfig || !pageTemplate.blocks) {
+    if (!product || !pageTemplate.dynamicConfig || !pageTemplate.blocks) {
       setRenderedBlocks(pageTemplate.blocks || []);
       return;
     }
 
-    const productData = data.getProductBySlug;
+    const productData = product; // ✅ MIGRATED: Direct access (no .getProductBySlug wrapper)
     const { dataBindings } = pageTemplate.dynamicConfig;
 
     // Clone blocks and apply data bindings
@@ -69,7 +72,7 @@ export function DynamicPageRenderer({ pageTemplate, slug }: DynamicPageRendererP
     });
 
     setRenderedBlocks(updatedBlocks);
-  }, [data, pageTemplate]);
+  }, [product, pageTemplate]);
 
   if (loading) {
     return (
@@ -82,7 +85,7 @@ export function DynamicPageRenderer({ pageTemplate, slug }: DynamicPageRendererP
     );
   }
 
-  if (error || !data) {
+  if (error || !product) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
