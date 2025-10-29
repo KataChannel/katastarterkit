@@ -115,7 +115,7 @@ export default function CreateTaskModal({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Title */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="title">
               Task Title <span className="text-destructive">*</span>
             </Label>
@@ -131,7 +131,7 @@ export default function CreateTaskModal({
           </div>
 
           {/* Description */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
@@ -146,7 +146,7 @@ export default function CreateTaskModal({
 
           {/* Priority & Category */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="priority">Priority</Label>
               <Select
                 defaultValue="MEDIUM"
@@ -164,7 +164,7 @@ export default function CreateTaskModal({
               </Select>
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Select
                 defaultValue="OTHER"
@@ -185,7 +185,7 @@ export default function CreateTaskModal({
           </div>
 
           {/* Due Date */}
-          <div>
+          <div className="space-y-2">
             <Label>Due Date</Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -212,7 +212,7 @@ export default function CreateTaskModal({
           </div>
 
           {/* Assign to */}
-          <div>
+          <div className="space-y-2">
             <Label>Assign to (optional)</Label>
             <Select onValueChange={(userId) => {
               if (!selectedAssignees.includes(userId)) {
@@ -259,7 +259,7 @@ export default function CreateTaskModal({
           </div>
 
           {/* Tags */}
-          <div>
+          <div className="space-y-2">
             <Label>Tags</Label>
             <div className="flex gap-2">
               <Input

@@ -56,6 +56,7 @@ export default function CreateProjectModal({
       reset();
       onOpenChange(false);
     } catch (error: any) {
+      console.error('Create project error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to create project',
@@ -77,14 +78,16 @@ export default function CreateProjectModal({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Project Name */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="name">
               Project Name <span className="text-destructive">*</span>
             </Label>
             <Input
               id="name"
               placeholder="e.g., Website Redesign"
-              {...register('name', { required: 'Project name is required' })}
+              {...register('name', { 
+                required: 'Project name is required'
+              })}
               className={errors.name ? 'border-destructive' : ''}
             />
             {errors.name && (
@@ -93,7 +96,7 @@ export default function CreateProjectModal({
           </div>
 
           {/* Description */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
@@ -104,7 +107,7 @@ export default function CreateProjectModal({
           </div>
 
           {/* Avatar URL */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="avatar">Avatar URL (optional)</Label>
             <Input
               id="avatar"
