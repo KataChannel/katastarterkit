@@ -30,8 +30,10 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
     try {
       await updateStatus({
         variables: {
-          id: task.id,
-          status: newStatus,
+          input: {
+            id: task.id,
+            status: newStatus,
+          },
         },
       });
     } catch (error) {

@@ -156,9 +156,9 @@ export const useUpdateTaskStatus = () => {
     // Optimistic update
     optimisticResponse: (vars) => ({
       updateTask: {
-        id: vars.id,
-        status: vars.status,
-        completedAt: vars.status === 'COMPLETED' ? new Date().toISOString() : null,
+        id: vars.input.id,
+        status: vars.input.status,
+        completedAt: vars.input.status === 'COMPLETED' ? new Date().toISOString() : null,
         __typename: 'Task',
       },
     }),

@@ -64,8 +64,8 @@ export const ASSIGN_TASK = gql`
  * Update task status
  */
 export const UPDATE_TASK_STATUS = gql`
-  mutation UpdateTaskStatus($id: ID!, $status: TaskStatus!) {
-    updateTask(input: { id: $id, status: $status }) {
+  mutation UpdateTaskStatus($input: UpdateTaskInput!) {
+    updateTask(input: $input) {
       id
       status
       completedAt
