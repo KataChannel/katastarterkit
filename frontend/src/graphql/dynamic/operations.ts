@@ -30,24 +30,12 @@ import { gql } from '@apollo/client';
  */
 export const FIND_MANY = gql`
   query FindMany(
-    $model: String!
-    $where: JSON
-    $orderBy: JSON
-    $skip: Int
-    $take: Int
-    $select: JSON
-    $include: JSON
-    $distinct: JSON
+    $modelName: String!
+    $input: UnifiedFindManyInput
   ) {
     findMany(
-      model: $model
-      where: $where
-      orderBy: $orderBy
-      skip: $skip
-      take: $take
-      select: $select
-      include: $include
-      distinct: $distinct
+      modelName: $modelName
+      input: $input
     )
   }
 `;
@@ -57,16 +45,12 @@ export const FIND_MANY = gql`
  */
 export const FIND_UNIQUE = gql`
   query FindUnique(
-    $model: String!
-    $where: JSON!
-    $select: JSON
-    $include: JSON
+    $modelName: String!
+    $input: UnifiedFindByIdInput!
   ) {
-    findUnique(
-      model: $model
-      where: $where
-      select: $select
-      include: $include
+    findById(
+      modelName: $modelName
+      input: $input
     )
   }
 `;
@@ -76,18 +60,12 @@ export const FIND_UNIQUE = gql`
  */
 export const FIND_FIRST = gql`
   query FindFirst(
-    $model: String!
-    $where: JSON
-    $orderBy: JSON
-    $select: JSON
-    $include: JSON
+    $modelName: String!
+    $input: UnifiedFindManyInput
   ) {
-    findFirst(
-      model: $model
-      where: $where
-      orderBy: $orderBy
-      select: $select
-      include: $include
+    findMany(
+      modelName: $modelName
+      input: $input
     )
   }
 `;
@@ -97,22 +75,12 @@ export const FIND_FIRST = gql`
  */
 export const FIND_MANY_PAGINATED = gql`
   query FindManyPaginated(
-    $model: String!
-    $page: Int = 1
-    $limit: Int = 10
-    $where: JSON
-    $orderBy: JSON
-    $select: JSON
-    $include: JSON
+    $modelName: String!
+    $input: UnifiedPaginatedInput
   ) {
     findManyPaginated(
-      model: $model
-      page: $page
-      limit: $limit
-      where: $where
-      orderBy: $orderBy
-      select: $select
-      include: $include
+      modelName: $modelName
+      input: $input
     )
   }
 `;
@@ -122,11 +90,11 @@ export const FIND_MANY_PAGINATED = gql`
  */
 export const COUNT = gql`
   query Count(
-    $model: String!
+    $modelName: String!
     $where: JSON
   ) {
     count(
-      model: $model
+      modelName: $modelName
       where: $where
     )
   }
@@ -171,16 +139,12 @@ export const GROUP_BY = gql`
  */
 export const CREATE_ONE = gql`
   mutation CreateOne(
-    $model: String!
-    $data: JSON!
-    $select: JSON
-    $include: JSON
+    $modelName: String!
+    $input: UnifiedCreateInput!
   ) {
     createOne(
-      model: $model
-      data: $data
-      select: $select
-      include: $include
+      modelName: $modelName
+      input: $input
     )
   }
 `;
@@ -207,18 +171,12 @@ export const CREATE_MANY = gql`
  */
 export const UPDATE_ONE = gql`
   mutation UpdateOne(
-    $model: String!
-    $where: JSON!
-    $data: JSON!
-    $select: JSON
-    $include: JSON
+    $modelName: String!
+    $input: UnifiedUpdateInput!
   ) {
     updateOne(
-      model: $model
-      where: $where
-      data: $data
-      select: $select
-      include: $include
+      modelName: $modelName
+      input: $input
     )
   }
 `;
@@ -245,14 +203,12 @@ export const UPDATE_MANY = gql`
  */
 export const DELETE_ONE = gql`
   mutation DeleteOne(
-    $model: String!
-    $where: JSON!
-    $select: JSON
+    $modelName: String!
+    $input: UnifiedDeleteInput!
   ) {
     deleteOne(
-      model: $model
-      where: $where
-      select: $select
+      modelName: $modelName
+      input: $input
     )
   }
 `;

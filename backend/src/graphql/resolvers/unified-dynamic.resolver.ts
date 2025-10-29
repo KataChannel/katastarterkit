@@ -81,7 +81,7 @@ export class UnifiedDynamicResolver {
    * @param modelName - The model name (e.g., 'task', 'user', 'post')
    * @param input - Query options (where, orderBy, select, include, etc.)
    */
-  @Query(() => GraphQLJSONObject, { 
+  @Query(() => [GraphQLJSONObject], { 
     name: 'findMany',
     description: 'Find all records for a model with Prisma-like syntax' 
   })
