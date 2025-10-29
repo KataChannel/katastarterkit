@@ -51,8 +51,6 @@ export const BLOCK_TYPES = [
   { type: BlockType.FAQ, label: 'FAQ', icon: HelpCircle, color: 'bg-sky-100 text-sky-600' },
   { type: BlockType.CONTACT_FORM, label: 'Contact Form', icon: Mail, color: 'bg-amber-100 text-amber-600' },
   { type: BlockType.CONTACT_INFO, label: 'Contact Info', icon: Phone, color: 'bg-cyan-100 text-cyan-600' },
-  { type: BlockType.SEARCH, label: 'Search', icon: Search, color: 'bg-indigo-100 text-indigo-600' },
-  { type: BlockType.BOOKMARK, label: 'Bookmark', icon: Bookmark, color: 'bg-pink-100 text-pink-600' },
 
   // Container/Layout Blocks
   { type: BlockType.CONTAINER, label: 'Container', icon: Box, color: 'bg-violet-100 text-violet-600' },
@@ -95,7 +93,7 @@ export const BLOCK_TYPE_GROUPS = [
         BlockType.TEXT, BlockType.IMAGE, BlockType.VIDEO, BlockType.BUTTON, BlockType.HERO, 
         BlockType.CAROUSEL, BlockType.GALLERY, BlockType.CARD, BlockType.TESTIMONIAL, 
         BlockType.TEAM, BlockType.STATS, BlockType.FAQ, BlockType.CONTACT_FORM, 
-        BlockType.CONTACT_INFO, BlockType.SEARCH, BlockType.BOOKMARK
+        BlockType.CONTACT_INFO
       ].includes(b.type)
     )
   },
