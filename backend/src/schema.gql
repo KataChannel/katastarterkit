@@ -7,6 +7,21 @@ input AddMemberInput {
   userId: ID!
 }
 
+input AddToCartInput {
+  metadata: JSON
+  productId: ID!
+  quantity: Int! = 1
+  sessionId: String
+  variantId: ID
+}
+
+type AddToCartResponse {
+  cart: CartType
+  errors: [String!]
+  message: String
+  success: Boolean!
+}
+
 input AdminCreateUserInput {
   avatar: String
   email: String
@@ -345,6 +360,20 @@ type Answer {
   updatedAt: DateTime!
 }
 
+input ApplyCouponInput {
+  cartId: ID
+  couponCode: String!
+  sessionId: String
+}
+
+type ApplyCouponResponse {
+  cart: CartType
+  discountAmount: Float
+  errors: [String!]
+  message: String
+  success: Boolean!
+}
+
 input AssignRolePermissionInput {
   conditions: JSON
   effect: String! = "allow"
@@ -609,12 +638,58 @@ input CampaignSearchInput {
   status: AffCampaignStatus
 }
 
+input CancelOrderInput {
+  orderId: ID!
+  reason: String
+}
+
+type CancelOrderResponse {
+  errors: [String!]
+  message: String
+  order: OrderType
+  success: Boolean!
+}
+
 type CanonicalNameAdvanced {
   avgPrice: Float
   canonicalDvt: String
   canonicalName: String!
   canonicalPrice: Float
   matchCount: Int!
+}
+
+type CartItemType {
+  cartId: ID!
+  createdAt: DateTime!
+  id: ID!
+  isAvailable: Boolean!
+  isPriceChanged: Boolean!
+  metadata: JSON
+  price: Float!
+  product: ProductSummaryType!
+  productId: ID!
+  quantity: Int!
+  subtotal: Float!
+  updatedAt: DateTime!
+  variant: ProductVariantSummaryType
+  variantId: ID
+}
+
+type CartType {
+  createdAt: DateTime!
+  discount: Float!
+  expiresAt: DateTime
+  id: ID!
+  itemCount: Int!
+  items: [CartItemType!]!
+  metadata: JSON
+  sessionId: String
+  shippingFee: Float!
+  subtotal: Float!
+  tax: Float!
+  total: Float!
+  updatedAt: DateTime!
+  userId: ID
 }
 
 input CategoryFiltersInput {
@@ -652,6 +727,13 @@ type CategoryType {
 input ChangePasswordInput {
   currentPassword: String!
   newPassword: String!
+}
+
+type ClearCartResponse {
+  cart: CartType
+  errors: [String!]
+  message: String
+  success: Boolean!
 }
 
 """Clearance status for offboarding"""
@@ -1145,6 +1227,27 @@ input CreateOnboardingChecklistInput {
   tasks: JSON!
   totalTasks: Int! = 0
   userId: String!
+}
+
+input CreateOrderInput {
+  billingAddress: ShippingAddressInput
+  cartId: ID
+  customerNote: String
+  guestEmail: String
+  guestName: String
+  guestPhone: String
+  items: [OrderItemInput!]
+  metadata: JSON
+  paymentMethod: PaymentMethod! = CASH_ON_DELIVERY
+  shippingAddress: ShippingAddressInput!
+  shippingMethod: ShippingMethod! = STANDARD
+}
+
+type CreateOrderResponse {
+  errors: [String!]
+  message: String
+  order: OrderType
+  success: Boolean!
 }
 
 input CreatePageBlockInput {
@@ -2000,6 +2103,18 @@ type MenuResponseDto {
   url: String
 }
 
+input MergeCartsInput {
+  sessionId: String!
+  userId: ID!
+}
+
+type MergeCartsResponse {
+  cart: CartType
+  errors: [String!]
+  message: String
+  success: Boolean!
+}
+
 input MoveFilesInput {
   fileIds: [ID!]!
   targetFolderId: ID
@@ -2012,9 +2127,12 @@ type Mutation {
 
   """Thêm thành viên vào project"""
   addProjectMember(input: AddMemberInput!, projectId: ID!): ProjectMember!
+  addToCart(input: AddToCartInput!): AddToCartResponse!
+  addTrackingEvent(description: String!, location: String!, orderId: ID!, status: String): OrderType!
   adminCreateUser(input: AdminCreateUserInput!): User!
   adminResetPassword(input: AdminResetPasswordInput!): AdminResetPasswordResult!
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
+  applyCoupon(input: ApplyCouponInput!): ApplyCouponResponse!
   approveConversion(id: String!): Boolean!
   archiveCourse(id: ID!): Course!
   assignRolePermissions(input: AssignRolePermissionInput!): Boolean!
@@ -2027,10 +2145,12 @@ type Mutation {
   bulkDeleteFiles(input: BulkDeleteFilesInput!): Int!
   bulkUpdateFiles(input: BulkUpdateFilesInput!): [File!]!
   bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!
+  cancelOrder(input: CancelOrderInput!): CancelOrderResponse!
   changePassword(input: ChangePasswordInput!): Boolean!
 
   """Clear all cached data"""
   clearCache: Boolean!
+  clearCart(sessionId: String): ClearCartResponse!
   completeOffboarding(id: ID!): OffboardingProcess!
   completeOnboardingTask(checklistId: ID!, taskId: ID!): OnboardingChecklist!
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
@@ -2062,6 +2182,7 @@ type Mutation {
 
   """Create a single record with Prisma-like syntax"""
   createOne(input: UnifiedCreateInput!, modelName: String!): JSONObject!
+  createOrder(input: CreateOrderInput!): CreateOrderResponse!
   createPage(input: CreatePageInput!): Page!
   createPaymentRequest(input: CreatePaymentRequestInput!): AffPaymentRequest!
   createPermission(input: CreatePermissionInput!): Permission!
@@ -2161,6 +2282,7 @@ type Mutation {
   loginWithPhone(input: PhoneLoginInput!): AuthResponse!
   markLessonComplete(enrollmentId: ID!, lessonId: ID!): LessonProgress!
   markReviewHelpful(reviewId: ID!): Review!
+  mergeCarts(input: MergeCartsInput!): MergeCartsResponse!
 
   """Merge duplicate products (keep one, delete rest)"""
   mergeDuplicates(
@@ -2187,6 +2309,7 @@ type Mutation {
   """Reindex all data from database into Orama search indexes"""
   reindexAllData: ReindexResult!
   rejectConversion(id: String!, reason: String): Boolean!
+  removeFromCart(input: RemoveFromCartInput!, sessionId: String): RemoveFromCartResponse!
 
   """Xóa thành viên khỏi project"""
   removeProjectMember(memberId: String!, projectId: ID!): Boolean!
@@ -2212,6 +2335,7 @@ type Mutation {
   updateBlogCategory(input: UpdateBlogCategoryInput!): BlogCategoryType!
   updateBlogTag(input: UpdateBlogTagInput!): BlogTagType!
   updateCallCenterConfig(id: String!, input: UpdateCallCenterConfigInput!): CallCenterConfig!
+  updateCartItem(input: UpdateCartItemInput!, sessionId: String): UpdateCartResponse!
   updateCategory(input: UpdateCategoryInput!): CategoryType!
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
@@ -2233,6 +2357,7 @@ type Mutation {
 
   """Update a single record by ID"""
   updateOne(input: UnifiedUpdateInput!, modelName: String!): JSONObject!
+  updateOrderStatus(input: UpdateOrderStatusInput!): UpdateOrderResponse!
   updatePage(id: String!, input: UpdatePageInput!): Page!
   updatePageBlock(id: String!, input: UpdatePageBlockInput!): PageBlock!
   updatePageBlocksOrder(pageId: String!, updates: [BulkUpdateBlockOrderInput!]!): [PageBlock!]!
@@ -2445,6 +2570,122 @@ enum OramaSortOrder {
   DESC
 }
 
+input OrderFilterInput {
+  dateFrom: String
+  dateTo: String
+  paymentStatus: PaymentStatus
+  paymentStatuses: [PaymentStatus!]
+  searchQuery: String
+  skip: Int = 0
+  status: OrderStatus
+  statuses: [OrderStatus!]
+  take: Int = 20
+}
+
+input OrderItemInput {
+  productId: ID!
+  quantity: Int!
+  variantId: ID
+}
+
+type OrderItemType {
+  createdAt: DateTime!
+  id: ID!
+  metadata: JSON
+  orderId: ID!
+  price: Float!
+  productId: ID
+  productName: String!
+  quantity: Int!
+  sku: String
+  subtotal: Float!
+  thumbnail: String
+  variantName: String
+}
+
+type OrderListResponse {
+  errors: [String!]
+  hasMore: Boolean!
+  message: String
+  orders: [OrderType!]!
+  total: Int!
+}
+
+type OrderStatisticsResponse {
+  byPaymentStatus: JSON!
+  byStatus: JSON!
+  message: String
+  success: Boolean!
+  totalOrders: Int!
+  totalRevenue: Float!
+}
+
+enum OrderStatus {
+  CANCELLED
+  COMPLETED
+  CONFIRMED
+  DELIVERED
+  PACKAGING
+  PENDING
+  PROCESSING
+  READY_TO_SHIP
+  REFUNDED
+  RETURNED
+  SHIPPING
+}
+
+type OrderTrackingEventType {
+  description: String!
+  eventTime: DateTime!
+  id: ID!
+  location: String
+  status: String!
+}
+
+type OrderTrackingType {
+  actualDelivery: DateTime
+  carrier: String
+  estimatedDelivery: DateTime
+  events: [OrderTrackingEventType!]!
+  id: ID!
+  orderId: ID!
+  status: String!
+  trackingNumber: String
+  trackingUrl: String
+}
+
+type OrderType {
+  billingAddress: JSON
+  cancelledAt: DateTime
+  confirmedAt: DateTime
+  createdAt: DateTime!
+  customerNote: String
+  deliveredAt: DateTime
+  discount: Float!
+  guestEmail: String
+  guestName: String
+  guestPhone: String
+  id: ID!
+  internalNote: String
+  items: [OrderItemType!]!
+  metadata: JSON
+  orderNumber: String!
+  payment: PaymentType
+  paymentMethod: PaymentMethod!
+  paymentStatus: PaymentStatus!
+  shippedAt: DateTime
+  shippingAddress: JSON!
+  shippingFee: Float!
+  shippingMethod: ShippingMethod!
+  status: OrderStatus!
+  subtotal: Float!
+  tax: Float!
+  total: Float!
+  tracking: OrderTrackingType
+  updatedAt: DateTime!
+  userId: ID
+}
+
 type OtpResponse {
   message: String!
   success: Boolean!
@@ -2596,6 +2837,35 @@ input PaginationQueryInput {
   sortOrder: String! = "desc"
 }
 
+enum PaymentMethod {
+  BANK_TRANSFER
+  CASH_ON_DELIVERY
+  CREDIT_CARD
+  MOMO
+  VNPAY
+  ZALOPAY
+}
+
+enum PaymentStatus {
+  FAILED
+  PAID
+  PARTIALLY_REFUNDED
+  PENDING
+  PROCESSING
+  REFUNDED
+}
+
+type PaymentType {
+  amount: Float!
+  createdAt: DateTime!
+  currency: String!
+  gatewayTransactionId: String
+  id: ID!
+  method: PaymentMethod!
+  paidAt: DateTime
+  status: PaymentStatus!
+}
+
 type Permission {
   action: String!
   category: String!
@@ -2744,6 +3014,16 @@ type ProductSummary {
   ten: String!
 }
 
+type ProductSummaryType {
+  id: ID!
+  name: String!
+  price: Float!
+  slug: String!
+  status: String!
+  stock: Int!
+  thumbnail: String
+}
+
 type ProductType {
   attributes: JSON
   barcode: String
@@ -2795,6 +3075,14 @@ enum ProductUnit {
   G
   KG
   PIECE
+}
+
+type ProductVariantSummaryType {
+  id: ID!
+  isActive: Boolean!
+  name: String!
+  price: Float!
+  stock: Int!
 }
 
 type ProductVariantType {
@@ -2972,6 +3260,7 @@ type Query {
   getCallCenterRecordById(id: String!): CallCenterRecord!
   getCallCenterRecords(filters: CallCenterRecordFiltersInput, pagination: PaginationInput! = {limit: 20, page: 1}): PaginatedCallCenterRecords!
   getCallCenterSyncLogs(pagination: PaginationInput! = {limit: 20, page: 1}): [CallCenterSyncLog!]!
+  getCart(sessionId: String): CartType
   getCommentById(id: String!): Comment!
   getCommentsByPost(postId: String!): [Comment!]!
   getCustomTemplate(id: String!): CustomTemplate!
@@ -2980,7 +3269,11 @@ type Query {
   getInvoiceStats: InvoiceStats!
   getMe: User!
   getMyCustomTemplates(archived: Boolean, category: TemplateCategory): [CustomTemplate!]!
+  getMyOrders(skip: Float = 0, take: Float = 20): OrderListResponse!
   getMyPosts: [Post!]!
+  getOrder(orderId: ID!): OrderType
+  getOrderByNumber(email: String, orderNumber: String!): OrderType
+  getOrderStatistics(endDate: DateTime, startDate: DateTime): OrderStatisticsResponse!
   getPageById(id: String!): Page!
   getPageBySlug(slug: String!): Page!
   getPageBySlugPattern(slugPattern: String!): Page
@@ -3043,6 +3336,7 @@ type Query {
   listEmployeeProfiles(department: String, isActive: Boolean, position: String, skip: Float, take: Float): EmployeeListResponse!
   listOffboardingProcesses(clearanceStatus: ClearanceStatus, skip: Int, status: OffboardingStatus, take: Int): OffboardingListResponse!
   listOnboardingChecklists(skip: Int, status: OnboardingStatus, take: Int): OnboardingListResponse!
+  listOrders(filter: OrderFilterInput): OrderListResponse!
   menu(id: ID!): MenuResponseDto
   menuBySlug(slug: String!): MenuResponseDto
   menuTree(parentId: String, type: String): [MenuResponseDto!]!
@@ -3120,6 +3414,7 @@ type Query {
   """
   universalSearch(input: OramaSearchInput!): UniversalSearchResult!
   userReview(courseId: ID!): Review
+  validateCart(sessionId: String): ValidateCartResponse!
 
   """Get API version"""
   version: String!
@@ -3185,6 +3480,17 @@ type ReindexResult {
   message: String!
   success: Boolean!
   totalIndexed: Int
+}
+
+input RemoveFromCartInput {
+  itemId: ID!
+}
+
+type RemoveFromCartResponse {
+  cart: CartType
+  errors: [String!]
+  message: String
+  success: Boolean!
 }
 
 input ReorderLessonsInput {
@@ -3304,6 +3610,23 @@ input ShareTaskInput {
 input ShareTemplateInput {
   templateId: String!
   userIds: [String!]!
+}
+
+input ShippingAddressInput {
+  address: String!
+  city: String!
+  district: String!
+  name: String!
+  phone: String!
+  ward: String!
+  zipCode: String
+}
+
+enum ShippingMethod {
+  EXPRESS
+  PICKUP
+  SAME_DAY
+  STANDARD
 }
 
 type SimilarProduct {
@@ -3759,6 +4082,18 @@ input UpdateCampaignInput {
   status: AffCampaignStatus
 }
 
+input UpdateCartItemInput {
+  itemId: ID!
+  quantity: Int!
+}
+
+type UpdateCartResponse {
+  cart: CartType
+  errors: [String!]
+  message: String
+  success: Boolean!
+}
+
 input UpdateCategoryInput {
   description: String
   displayOrder: Int
@@ -4036,6 +4371,19 @@ input UpdateOnboardingChecklistInput {
   targetDate: String
   tasks: JSON
   totalTasks: Int
+}
+
+type UpdateOrderResponse {
+  errors: [String!]
+  message: String
+  order: OrderType
+  success: Boolean!
+}
+
+input UpdateOrderStatusInput {
+  internalNote: String
+  orderId: ID!
+  status: OrderStatus!
 }
 
 input UpdatePageBlockInput {
@@ -4319,6 +4667,13 @@ type UserSummary {
   totalDirectPermissions: Int!
   totalEffectivePermissions: Int!
   totalRoleAssignments: Int!
+}
+
+type ValidateCartResponse {
+  cart: CartType
+  errors: [String!]!
+  isValid: Boolean!
+  warnings: [String!]!
 }
 
 type VisibilityCount {

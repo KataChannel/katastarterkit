@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { TerminusModule } from '@nestjs/terminus';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { join } from 'path';
 
@@ -16,7 +16,6 @@ import { GraphQLResolversModule } from './graphql/graphql.module';
 import { GrokModule } from './grok/grok.module';
 import { MinioModule } from './minio/minio.module';
 import { LoggerModule } from './logger/logger.module';
-import { HealthModule } from './health/health.module';
 import { AiTrainingModule } from './ai-training/ai-training.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { AiModule } from './ai/ai.module';
@@ -38,6 +37,7 @@ import { TestController } from './test.controller';
 import { SeedModule } from './seed/seed.module';
 import { CallCenterModule } from './callcenter/callcenter.module';
 import { LmsModule } from './lms/lms.module';
+import { EcommerceModule } from './ecommerce/ecommerce.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -110,8 +110,8 @@ import { ProjectModule } from './project/project.module';
       },
     ]),
 
-    // Health Checks
-    TerminusModule,
+    // Scheduling (global) - TODO: Fix Reflector dependency issue
+    // ScheduleModule.forRoot(),
 
     // Application Modules
     PrismaModule,
@@ -124,14 +124,14 @@ import { ProjectModule } from './project/project.module';
     GrokModule,
     MinioModule,
     LoggerModule,
-    HealthModule,
+    // HealthModule, // TODO: Fix TypeOrmHealthIndicator issue with Terminus - using Prisma only
     AiTrainingModule,
     ChatbotModule,
     AiModule,
     CommonServicesModule,
     RealTimeModule,
     SearchModule,
-    MonitoringModule,
+    // MonitoringModule, // TODO: Fix TerminusModule/TypeORM dependency issue
     SecurityModule,
     UnifiedDynamicModule,
     KetoAnModule,
@@ -144,6 +144,7 @@ import { ProjectModule } from './project/project.module';
     CallCenterModule,
     LmsModule,
     ProjectModule,
+    EcommerceModule,
   ],
   controllers: [
     LogController,

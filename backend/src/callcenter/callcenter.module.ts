@@ -9,7 +9,7 @@ import { UserService } from '../services/user.service';
 @Module({
   imports: [
     PrismaModule,
-    ScheduleModule.forRoot(),
+    // ScheduleModule.forRoot(), // Moved to AppModule
     AuthModule,
   ],
   providers: [CallCenterService, CallCenterResolver, UserService],

@@ -3,6 +3,7 @@
 
 generator client {
   provider      = "prisma-client-js"
+  output        = "../node_modules/@prisma/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -130,13 +131,13 @@ model User {
   permissionsCreated Permission[] @relation("PermissionCreator")
 
   // Content relations
-  posts         Post[]         @relation("PostAuthor")
-  comments      Comment[]      @relation("CommentAuthor")
-  likes         Like[]         @relation("UserLikes")
-  notifications Notification[] @relation("UserNotifications")
-  tasks         Task[]         @relation("UserTasks")
-  taskComments  TaskComment[]  @relation("TaskCommentAuthor")
-  taskMedia     TaskMedia[]    @relation("TaskMediaUploader")
+  posts          Post[]            @relation("PostAuthor")
+  comments       Comment[]         @relation("CommentAuthor")
+  likes          Like[]            @relation("UserLikes")
+  notifications  Notification[]    @relation("UserNotifications")
+  tasks          Task[]            @relation("UserTasks")
+  taskComments   TaskComment[]     @relation("TaskCommentAuthor")
+  taskMedia      TaskMedia[]       @relation("TaskMediaUploader")
   taskActivities TaskActivityLog[] @relation("UserTaskActivities") // 🆕 MVP 3
 
   // Tag relations
@@ -147,10 +148,10 @@ model User {
   tasksSharedWith TaskShare[] @relation("TaskSharedWith")
 
   // 🆕 Project Management Relations
-  projectsOwned        Project[]        @relation("ProjectOwner")
-  projectMemberships   ProjectMember[]  @relation("ProjectMembers")
-  chatMessagesSent     ChatMessagePM[]  @relation("ChatSender")
-  notificationsMentioned Notification[] @relation("NotificationMentioner")
+  projectsOwned          Project[]       @relation("ProjectOwner")
+  projectMemberships     ProjectMember[] @relation("ProjectMembers")
+  chatMessagesSent       ChatMessagePM[] @relation("ChatSender")
+  notificationsMentioned Notification[]  @relation("NotificationMentioner")
 
   // AI Training relations
   chatbotModels     ChatbotModel[]
@@ -190,8 +191,19 @@ model User {
   departmentId      String?
 
   // Page Builder - Custom Templates Relations
-  customTemplates   CustomTemplate[] @relation("UserCustomTemplates")
-  sharedTemplates   TemplateShare[]  @relation("SharedTemplates")
+  customTemplates CustomTemplate[] @relation("UserCustomTemplates")
+  sharedTemplates TemplateShare[]  @relation("SharedTemplates")
+
+  // E-commerce Relations
+  carts          Cart[]          @relation("UserCart")
+  orders         Order[]         @relation("UserOrders")
+  productReviews ProductReview[] @relation("UserReviews")
+  wishlist       Wishlist?       @relation("UserWishlist")
+
+  // Blog Relations
+  blogPosts    BlogPost[]      @relation("BlogPostAuthor")
+  blogComments BlogComment[]   @relation("BlogCommentAuthor")
+  blogShares   BlogPostShare[] @relation("BlogShareUser")
 
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
@@ -452,9 +464,9 @@ model Notification {
 
   // 🆕 Task mention tracking
   taskId      String?
-  task        Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
-  mentionedBy String?  // User who mentioned
-  mentioner   User?    @relation("NotificationMentioner", fields: [mentionedBy], references: [id], onDelete: SetNull)
+  task        Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  mentionedBy String? // User who mentioned
+  mentioner   User?   @relation("NotificationMentioner", fields: [mentionedBy], references: [id], onDelete: SetNull)
 
   // 🆕 Indexes
   @@index([userId])
@@ -482,12 +494,12 @@ model Task {
   user   User   @relation("UserTasks", fields: [userId], references: [id], onDelete: Cascade)
 
   // 🆕 Project Management Fields
-  projectId   String?
-  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  assignedTo  String[]  // Array of user IDs
-  mentions    String[]  // Array of user IDs mentioned
-  order       Int       @default(0)  // For drag & drop ordering
-  tags        String[]  // Quick tags
+  projectId  String?
+  project    Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  assignedTo String[] // Array of user IDs
+  mentions   String[] // Array of user IDs mentioned
+  order      Int      @default(0) // For drag & drop ordering
+  tags       String[] // Quick tags
 
   // Hierarchical relations
   parentId String?
@@ -498,7 +510,7 @@ model Task {
   comments      TaskComment[]
   media         TaskMedia[]
   shares        TaskShare[]
-  notifications Notification[]    // 🆕 Task mention notifications
+  notifications Notification[] // 🆕 Task mention notifications
   activities    TaskActivityLog[] @relation("TaskActivities") // 🆕 MVP 3: Activity logs
 
   // Performance indexes for GIAI ĐOẠN 1 optimization
@@ -602,12 +614,12 @@ model TaskActivityLog {
   id          String       @id @default(uuid())
   action      ActivityType
   description String // Human-readable description: "changed status from PENDING to IN_PROGRESS"
-  
+
   // Store old and new values as JSON
-  oldValue    Json?
-  newValue    Json?
-  
-  createdAt   DateTime     @default(now())
+  oldValue Json?
+  newValue Json?
+
+  createdAt DateTime @default(now())
 
   // Relations
   taskId String
@@ -947,7 +959,7 @@ enum BlockType {
   FAQ
   CONTACT_FORM
   COMPLETED_TASKS
-  
+
   // Container/Layout Blocks (for nested children)
   CONTAINER
   SECTION
@@ -956,10 +968,10 @@ enum BlockType {
   FLEX_COLUMN
   COLUMN
   ROW
-  
+
   // Dynamic Blocks
   DYNAMIC
-  
+
   // E-commerce Blocks (Data-driven)
   PRODUCT_LIST
   PRODUCT_DETAIL
@@ -978,10 +990,10 @@ model Page {
   ogImage        String?
   layoutSettings Json? // Layout configuration: hasHeader, hasFooter, headerMenuId, footerMenuId, headerStyle, footerStyle
   isHomepage     Boolean    @default(false) // Flag to mark this page as the homepage (root /)
-  
+
   // Dynamic Page Support
-  isDynamic         Boolean             @default(false)
-  dynamicConfig     Json?
+  isDynamic     Boolean @default(false)
+  dynamicConfig Json?
 
   // Relationships
   blocks PageBlock[]
@@ -1017,12 +1029,12 @@ model PageBlock {
   parentId String?
   parent   PageBlock?  @relation("BlockChildren", fields: [parentId], references: [id], onDelete: Cascade)
   children PageBlock[] @relation("BlockChildren")
-  
+
   // Nesting depth (0 = top level, 1 = first level child, etc.)
-  depth    Int         @default(0)
-  
+  depth Int @default(0)
+
   // Dynamic configuration
-  config   Json? // Dynamic block configuration (templates, data sources, etc.)
+  config Json? // Dynamic block configuration (templates, data sources, etc.)
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -1715,28 +1727,29 @@ model ext_detailhoadon {
   updatedAt DateTime @updatedAt
 
   // Relationships
-  invoice ext_listhoadon @relation(fields: [idhdonServer], references: [idServer], onDelete: Cascade)
+  invoice           ext_listhoadon      @relation(fields: [idhdonServer], references: [idServer], onDelete: Cascade)
+  ext_sanphamhoadon ext_sanphamhoadon[]
 
   // Indexes
   @@index([idhdonServer])
   @@index([stt])
   @@index([createdAt])
-  ext_sanphamhoadon ext_sanphamhoadon[]
 }
 
 model ext_sanphamhoadon {
-  id String @id @default(uuid())
+  id             String            @id @default(uuid())
   iddetailhoadon String? // Foreign key to ext_detailhoadon.id
-  ten String? // Tên sản phẩm
-  ten2 String? // Tên sản phẩm 2
-  ma  String? // Mã sản phẩm
-  dvt String? // Đơn vị tính
-  dgia Decimal? // Đơn giá
+  ten            String? // Tên sản phẩm
+  ten2           String? // Tên sản phẩm 2
+  ma             String? // Mã sản phẩm
+  dvt            String? // Đơn vị tính
+  dgia           Decimal? // Đơn giá
   // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
   // Relationships
-  detailhoadon ext_detailhoadon? @relation(fields: [iddetailhoadon], references: [id], onDelete: Cascade)
+  detailhoadon   ext_detailhoadon? @relation(fields: [iddetailhoadon], references: [id], onDelete: Cascade)
+
   // Indexes
   @@index([iddetailhoadon])
   @@index([ma])
@@ -2594,47 +2607,47 @@ enum ProductStatus {
 }
 
 enum ProductUnit {
-  KG        // Kilogram
-  G         // Gram
-  BUNDLE    // Bó
-  PIECE     // Củ/Quả
-  BAG       // Túi
-  BOX       // Hộp
+  KG // Kilogram
+  G // Gram
+  BUNDLE // Bó
+  PIECE // Củ/Quả
+  BAG // Túi
+  BOX // Hộp
 }
 
 // Category Model - Danh mục sản phẩm
 model Category {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
-  slug        String   @unique
+  slug        String  @unique
   description String?
   image       String?
   icon        String?
-  
+
   // Hierarchy - hỗ trợ danh mục con
-  parentId    String?
-  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children    Category[] @relation("CategoryHierarchy")
-  
+  parentId String?
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Category[] @relation("CategoryHierarchy")
+
   // SEO
   metaTitle       String?
   metaDescription String?
   metaKeywords    String?
-  
+
   // Display
-  displayOrder Int      @default(0)
-  isActive     Boolean  @default(true)
-  isFeatured   Boolean  @default(false)
-  
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+  isFeatured   Boolean @default(false)
+
   // Relations
   products Product[]
-  
+
   // Metadata
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   createdBy String?
   updatedBy String?
-  
+
   @@index([slug])
   @@index([parentId])
   @@index([isActive])
@@ -2645,68 +2658,75 @@ model Category {
 
 // Product Model - Sản phẩm
 model Product {
-  id          String        @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
-  slug        String        @unique
+  slug        String  @unique
   description String?
-  shortDesc   String?       // Mô tả ngắn
-  
+  shortDesc   String? // Mô tả ngắn
+
   // Pricing
-  price          Float
-  originalPrice  Float?      // Giá gốc (để hiển thị giảm giá)
-  costPrice      Float?      // Giá vốn
-  
+  price         Float
+  originalPrice Float? // Giá gốc (để hiển thị giảm giá)
+  costPrice     Float? // Giá vốn
+
   // Inventory
-  sku            String?     @unique
-  barcode        String?     @unique
-  stock          Int         @default(0)
-  minStock       Int         @default(0)  // Ngưỡng tồn kho tối thiểu
-  maxStock       Int?                     // Tồn kho tối đa
-  
+  sku      String? @unique
+  barcode  String? @unique
+  stock    Int     @default(0)
+  minStock Int     @default(0) // Ngưỡng tồn kho tối thiểu
+  maxStock Int? // Tồn kho tối đa
+
   // Product details
-  unit           ProductUnit @default(KG)
-  weight         Float?                   // Trọng lượng (gram)
-  origin         String?                  // Xuất xứ (VD: Đà Lạt, Lâm Đồng)
-  status         ProductStatus @default(ACTIVE)
-  
+  unit   ProductUnit   @default(KG)
+  weight Float? // Trọng lượng (gram)
+  origin String? // Xuất xứ (VD: Đà Lạt, Lâm Đồng)
+  status ProductStatus @default(ACTIVE)
+
   // Category
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
   // Images
-  images      ProductImage[]
-  thumbnail   String?                    // Ảnh đại diện
-  
+  images    ProductImage[]
+  thumbnail String? // Ảnh đại diện
+
   // Variants (sizes, colors, etc.)
-  variants    ProductVariant[]
-  
+  variants ProductVariant[]
+
+  // E-commerce Relations
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  inventoryLogs InventoryLog[]
+  reviews       ProductReview[]
+  wishlistItems WishlistItem[]
+
   // Attributes - JSON field for flexible attributes
   // VD: {"organic": true, "pesticide_free": true, "harvest_date": "2025-01-08"}
-  attributes  Json?
-  
+  attributes Json?
+
   // SEO
   metaTitle       String?
   metaDescription String?
   metaKeywords    String?
-  
+
   // Display & Features
-  isFeatured      Boolean @default(false)
-  isNewArrival    Boolean @default(false)
-  isBestSeller    Boolean @default(false)
-  isOnSale        Boolean @default(false)
-  displayOrder    Int     @default(0)
-  
+  isFeatured   Boolean @default(false)
+  isNewArrival Boolean @default(false)
+  isBestSeller Boolean @default(false)
+  isOnSale     Boolean @default(false)
+  displayOrder Int     @default(0)
+
   // Statistics
-  viewCount       Int     @default(0)
-  soldCount       Int     @default(0)
-  
+  viewCount Int @default(0)
+  soldCount Int @default(0)
+
   // Dates
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   createdBy   String?
   updatedBy   String?
-  
+
   @@index([slug])
   @@index([categoryId])
   @@index([status])
@@ -2721,19 +2741,19 @@ model Product {
 
 // Product Images
 model ProductImage {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
   url       String
   alt       String?
   title     String?
-  isPrimary Boolean  @default(false)
-  order     Int      @default(0)
-  
+  isPrimary Boolean @default(false)
+  order     Int     @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([productId])
   @@index([isPrimary])
   @@map("product_images")
@@ -2744,23 +2764,28 @@ model ProductVariant {
   id        String  @id @default(uuid())
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
-  name      String  // VD: "1kg", "500g", "Túi 2kg"
-  sku       String? @unique
-  barcode   String? @unique
-  
-  price     Float
-  stock     Int     @default(0)
-  
+
+  name    String // VD: "1kg", "500g", "Túi 2kg"
+  sku     String? @unique
+  barcode String? @unique
+
+  price Float
+  stock Int   @default(0)
+
   // Variant details
-  attributes Json?  // VD: {"size": "1kg", "color": "green"}
-  
-  isActive  Boolean  @default(true)
-  order     Int      @default(0)
-  
+  attributes Json? // VD: {"size": "1kg", "color": "green"}
+
+  // E-commerce Relations
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  inventoryLogs InventoryLog[]
+
+  isActive Boolean @default(true)
+  order    Int     @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([productId])
   @@index([isActive])
   @@map("product_variants")
@@ -2791,39 +2816,39 @@ enum CallCenterSyncMode {
 }
 
 model CallCenterRecord {
-  id          String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // External API fields
-  externalUuid            String  @unique // uuid from external API
-  direction               CallDirection
-  callerIdNumber          String?
-  outboundCallerIdNumber  String?
-  destinationNumber       String?
-  
+  externalUuid           String        @unique // uuid from external API
+  direction              CallDirection
+  callerIdNumber         String?
+  outboundCallerIdNumber String?
+  destinationNumber      String?
+
   // Time fields (stored as epoch timestamps)
-  startEpoch    String?
-  endEpoch      String?
-  answerEpoch   String?
-  
+  startEpoch  String?
+  endEpoch    String?
+  answerEpoch String?
+
   // Duration fields (in seconds)
-  duration      String?  // Total call duration
-  billsec       String?  // Billable seconds
-  
+  duration String? // Total call duration
+  billsec  String? // Billable seconds
+
   // Call disposition
   sipHangupDisposition String?
   callStatus           CallStatus
-  
+
   // Recording
-  recordPath    String?
-  
+  recordPath String?
+
   // Metadata
-  domain        String?  // PBX domain
-  rawData       Json?    // Full raw response for debugging
-  
+  domain  String? // PBX domain
+  rawData Json? // Full raw response for debugging
+
   // Sync tracking
-  syncedAt      DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  syncedAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([externalUuid])
   @@index([direction])
   @@index([callStatus])
@@ -2835,65 +2860,65 @@ model CallCenterRecord {
 }
 
 model CallCenterConfig {
-  id            String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // API Configuration
-  apiUrl        String   // Base API URL
-  domain        String   // PBX domain
-  apiKey        String?  // Optional API key for authentication
-  
+  apiUrl String // Base API URL
+  domain String // PBX domain
+  apiKey String? // Optional API key for authentication
+
   // Sync Configuration
-  syncMode      CallCenterSyncMode @default(MANUAL)
+  syncMode       CallCenterSyncMode @default(MANUAL)
   cronExpression String? // For scheduled sync (e.g., "0 */5 * * * *")
-  isActive      Boolean  @default(true)
-  
+  isActive       Boolean            @default(true)
+
   // Sync Range
   defaultDaysBack Int @default(30) // How many days back to sync
-  
+
   // Pagination
-  batchSize     Int @default(200) // Records per API request
-  
+  batchSize Int @default(200) // Records per API request
+
   // Last sync info
-  lastSyncAt    DateTime?
-  lastSyncStatus String?  // "success", "error", "partial"
-  lastSyncError  String?
-  totalRecordsSynced Int @default(0)
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  lastSyncAt         DateTime?
+  lastSyncStatus     String? // "success", "error", "partial"
+  lastSyncError      String?
+  totalRecordsSynced Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("call_center_config")
 }
 
 model CallCenterSyncLog {
-  id              String   @id @default(uuid())
-  
-  configId        String?  // Reference to config used
-  
+  id String @id @default(uuid())
+
+  configId String? // Reference to config used
+
   // Sync details
-  syncType        CallCenterSyncMode
-  status          String   // "running", "success", "error"
-  
+  syncType CallCenterSyncMode
+  status   String // "running", "success", "error"
+
   // Sync parameters
-  fromDate        DateTime
-  toDate          DateTime
-  offset          Int      @default(0)
-  
+  fromDate DateTime
+  toDate   DateTime
+  offset   Int      @default(0)
+
   // Results
-  recordsFetched  Int      @default(0)
-  recordsCreated  Int      @default(0)
-  recordsUpdated  Int      @default(0)
-  recordsSkipped  Int      @default(0)
-  
+  recordsFetched Int @default(0)
+  recordsCreated Int @default(0)
+  recordsUpdated Int @default(0)
+  recordsSkipped Int @default(0)
+
   // Error tracking
-  errorMessage    String?
-  errorDetails    Json?
-  
+  errorMessage String?
+  errorDetails Json?
+
   // Timing
-  startedAt       DateTime @default(now())
-  completedAt     DateTime?
-  duration        Int?     // Duration in milliseconds
-  
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  duration    Int? // Duration in milliseconds
+
   @@index([configId])
   @@index([status])
   @@index([startedAt])
@@ -2931,64 +2956,64 @@ enum EnrollmentStatus {
 }
 
 model CourseCategory {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
-  slug        String   @unique
+  slug        String  @unique
   description String?
   icon        String?
   parentId    String?
-  
+
   // Relations
   parent   CourseCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
   children CourseCategory[] @relation("CategoryHierarchy")
   courses  Course[]
-  
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([parentId])
   @@index([slug])
   @@map("course_categories")
 }
 
 model Course {
-  id               String       @id @default(uuid())
-  title            String
-  slug             String       @unique
-  description      String?
-  thumbnail        String?
-  price            Float        @default(0)
-  level            CourseLevel  @default(BEGINNER)
-  status           CourseStatus @default(DRAFT)
-  duration         Int?         // in minutes
-  
+  id          String       @id @default(uuid())
+  title       String
+  slug        String       @unique
+  description String?
+  thumbnail   String?
+  price       Float        @default(0)
+  level       CourseLevel  @default(BEGINNER)
+  status      CourseStatus @default(DRAFT)
+  duration    Int? // in minutes
+
   // Learning objectives
-  whatYouWillLearn String[]     @default([])
-  requirements     String[]     @default([])
-  
+  whatYouWillLearn String[] @default([])
+  requirements     String[] @default([])
+
   // Category & Instructor
   categoryId   String?
   instructorId String
-  
+
   category   CourseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   instructor User            @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
-  
+
   // Stats
-  rating          Float @default(0)  // Deprecated: use avgRating
+  rating          Float @default(0) // Deprecated: use avgRating
   reviewCount     Int   @default(0)
   enrollmentCount Int   @default(0)
-  avgRating       Float @default(0)  // Average rating from reviews
-  
+  avgRating       Float @default(0) // Average rating from reviews
+
   // Modules & Enrollments
   modules     CourseModule[]
   enrollments Enrollment[]
-  reviews     Review[]        @relation("CourseReviews")
-  
+  reviews     Review[]       @relation("CourseReviews")
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([slug])
   @@index([categoryId])
   @@index([instructorId])
@@ -2998,18 +3023,18 @@ model Course {
 }
 
 model CourseModule {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   title       String
   description String?
   order       Int
   courseId    String
-  
+
   course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons Lesson[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([courseId])
   @@map("course_modules")
 }
@@ -3019,40 +3044,40 @@ model Lesson {
   title       String
   description String?
   type        LessonType @default(VIDEO)
-  content     String?    // URL for video, HTML for text
-  duration    Int?       // in minutes
+  content     String? // URL for video, HTML for text
+  duration    Int? // in minutes
   order       Int
   moduleId    String
-  
-  module       LessonProgress[]
-  quizzes      Quiz[]
-  
+
+  module  LessonProgress[]
+  quizzes Quiz[]
+
   courseModule CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([moduleId])
   @@map("lessons")
 }
 
 model Enrollment {
-  id         String           @id @default(uuid())
-  userId     String
-  courseId   String
-  status     EnrollmentStatus @default(ACTIVE)
-  progress   Float            @default(0) // percentage 0-100
-  
+  id       String           @id @default(uuid())
+  userId   String
+  courseId String
+  status   EnrollmentStatus @default(ACTIVE)
+  progress Float            @default(0) // percentage 0-100
+
   user   User   @relation("UserEnrollments", fields: [userId], references: [id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
+
   lessonProgress LessonProgress[]
   quizAttempts   QuizAttempt[]
-  
+
   // Timestamps
   enrolledAt  DateTime  @default(now())
   completedAt DateTime?
-  
+
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
@@ -3061,18 +3086,18 @@ model Enrollment {
 }
 
 model LessonProgress {
-  id           String   @id @default(uuid())
+  id           String  @id @default(uuid())
   enrollmentId String
   lessonId     String
-  completed    Boolean  @default(false)
-  
+  completed    Boolean @default(false)
+
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   lesson     Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  
+
   completedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  
+
   @@unique([enrollmentId, lessonId])
   @@index([enrollmentId])
   @@index([lessonId])
@@ -3080,20 +3105,20 @@ model LessonProgress {
 }
 
 model Quiz {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  lessonId    String
+  id           String  @id @default(uuid())
+  title        String
+  description  String?
+  lessonId     String
   passingScore Int     @default(70) // Percentage required to pass
-  timeLimit   Int?     // Time limit in minutes (null = no limit)
-  
-  lesson    Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  timeLimit    Int? // Time limit in minutes (null = no limit)
+
+  lesson    Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   questions Question[]
   attempts  QuizAttempt[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([lessonId])
   @@map("quizzes")
 }
@@ -3102,17 +3127,17 @@ model Question {
   id          String       @id @default(uuid())
   quizId      String
   type        QuestionType @default(MULTIPLE_CHOICE)
-  question    String       // The question text
+  question    String // The question text
   points      Int          @default(1)
   order       Int
-  explanation String?      // Explanation shown after answering
-  
+  explanation String? // Explanation shown after answering
+
   quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   answers Answer[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([quizId])
   @@map("questions")
 }
@@ -3123,35 +3148,35 @@ model Answer {
   text       String
   isCorrect  Boolean @default(false)
   order      Int
-  
+
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([questionId])
   @@map("answers")
 }
 
 model QuizAttempt {
-  id          String   @id @default(uuid())
-  quizId      String
-  userId      String
+  id           String  @id @default(uuid())
+  quizId       String
+  userId       String
   enrollmentId String
-  score       Float?   // Percentage score (0-100)
-  passed      Boolean  @default(false)
-  answers     Json?    // Store user's answers: { questionId: selectedAnswerId[] }
-  timeSpent   Int?     // Time spent in seconds
-  
+  score        Float? // Percentage score (0-100)
+  passed       Boolean @default(false)
+  answers      Json? // Store user's answers: { questionId: selectedAnswerId[] }
+  timeSpent    Int? // Time spent in seconds
+
   quiz       Quiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  
+
   startedAt   DateTime  @default(now())
   completedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  
+
   @@index([quizId])
   @@index([userId])
   @@index([enrollmentId])
@@ -3167,23 +3192,23 @@ enum QuestionType {
 // ==================== COURSE REVIEWS ====================
 
 model Review {
-  id      String @id @default(uuid())
+  id       String  @id @default(uuid())
   courseId String
   userId   String
-  rating   Int    // 1-5 stars
+  rating   Int // 1-5 stars
   comment  String?
-  
+
   // Helpful voting
-  helpfulCount   Int      @default(0)
-  helpfulVoters  String[] @default([])  // Array of user IDs who voted helpful
-  
+  helpfulCount  Int      @default(0)
+  helpfulVoters String[] @default([]) // Array of user IDs who voted helpful
+
   course Course @relation("CourseReviews", fields: [courseId], references: [id], onDelete: Cascade)
   user   User   @relation("UserReviews", fields: [userId], references: [id], onDelete: Cascade)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  @@unique([courseId, userId])  // One review per user per course
+
+  @@unique([courseId, userId]) // One review per user per course
   @@index([courseId])
   @@index([userId])
   @@index([rating])
@@ -3194,12 +3219,12 @@ model Department {
   id          String  @id @default(uuid())
   name        String
   description String?
-  
+
   users User[] @relation("DepartmentUsers")
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@map("departments")
 }
 
@@ -3222,32 +3247,32 @@ enum TemplateCategory {
 }
 
 model CustomTemplate {
-  id          String            @id @default(uuid())
+  id          String           @id @default(uuid())
   name        String
   description String
-  category    TemplateCategory  @default(CUSTOM)
-  
+  category    TemplateCategory @default(CUSTOM)
+
   // Template structure - stored as JSON
-  blocks      Json              // Serialized blocks structure
-  thumbnail   String?           // Base64 encoded thumbnail
-  
+  blocks    Json // Serialized blocks structure
+  thumbnail String? // Base64 encoded thumbnail
+
   // Ownership
-  userId      String
-  user        User              @relation("UserCustomTemplates", fields: [userId], references: [id], onDelete: Cascade)
-  
+  userId String
+  user   User   @relation("UserCustomTemplates", fields: [userId], references: [id], onDelete: Cascade)
+
   // Sharing
-  shares      TemplateShare[]    @relation("TemplateShares")
-  
+  shares TemplateShare[] @relation("TemplateShares")
+
   // Metadata
-  isPublic    Boolean           @default(false)  // Share with other users
-  isArchived  Boolean           @default(false)
-  usageCount  Int               @default(0)      // Track how many times used
-  
+  isPublic   Boolean @default(false) // Share with other users
+  isArchived Boolean @default(false)
+  usageCount Int     @default(0) // Track how many times used
+
   // Timestamps
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  
-  @@unique([userId, name])  // User can't have duplicate template names
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name]) // User can't have duplicate template names
   @@index([userId])
   @@index([category])
   @@index([isPublic])
@@ -3256,107 +3281,19 @@ model CustomTemplate {
 
 // For sharing templates with other users
 model TemplateShare {
-  id          String            @id @default(uuid())
-  templateId  String
-  sharedWith  String            // User ID who template is shared with
-  
-  template    CustomTemplate    @relation("TemplateShares", fields: [templateId], references: [id], onDelete: Cascade)
-  user        User              @relation("SharedTemplates", fields: [sharedWith], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime          @default(now())
-  
-  @@unique([templateId, sharedWith])  // Can't share same template twice
+  id         String @id @default(uuid())
+  templateId String
+  sharedWith String // User ID who template is shared with
+
+  template CustomTemplate @relation("TemplateShares", fields: [templateId], references: [id], onDelete: Cascade)
+  user     User           @relation("SharedTemplates", fields: [sharedWith], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([templateId, sharedWith]) // Can't share same template twice
   @@index([templateId])
   @@index([sharedWith])
   @@map("template_shares")
-}
-
-// ============================================================================
-// BLOG SYSTEM
-// ============================================================================
-
-// Blog Category Model
-model BlogCategory {
-  id          String   @id @default(uuid())
-  name        String
-  slug        String   @unique
-  description String?
-  thumbnail   String?
-  
-  // Relations
-  blogs       Blog[]
-  
-  // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@index([slug])
-  @@map("blog_categories")
-}
-
-// Blog Tag Model
-model BlogTag {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  
-  // Relations
-  blogs     Blog[]   @relation("BlogTags")
-  
-  // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@index([slug])
-  @@map("blog_tags")
-}
-
-// Blog Model
-model Blog {
-  id          String   @id @default(uuid())
-  title       String
-  slug        String   @unique
-  content     String   // HTML content
-  
-  // Descriptions
-  shortDescription String?
-  excerpt     String?
-  
-  // Author & Metadata
-  author      String
-  thumbnailUrl String?
-  bannerUrl   String?
-  
-  // SEO
-  metaTitle   String?
-  metaDescription String?
-  metaKeywords String?
-  
-  // Status & Features
-  isPublished Boolean  @default(true)
-  isFeatured  Boolean  @default(false)
-  
-  // Statistics
-  viewCount   Int      @default(0)
-  
-  // Category
-  categoryId  String?
-  category    BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  
-  // Tags (many-to-many)
-  tags        BlogTag[] @relation("BlogTags")
-  
-  // Timestamps
-  publishedAt DateTime? @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@index([slug])
-  @@index([categoryId])
-  @@index([isPublished])
-  @@index([isFeatured])
-  @@index([publishedAt])
-  @@map("blogs")
 }
 
 // =====================================================
@@ -3365,25 +3302,25 @@ model Blog {
 
 // Project Model (Like Facebook Group)
 model Project {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
-  avatar      String?   // Project icon/color
-  isArchived  Boolean  @default(false)
-  
+  avatar      String? // Project icon/color
+  isArchived  Boolean @default(false)
+
   // Owner
-  ownerId     String
-  owner       User     @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  
+  ownerId String
+  owner   User   @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
   // Relations
-  members     ProjectMember[]
-  tasks       Task[]
+  members      ProjectMember[]
+  tasks        Task[]
   chatMessages ChatMessagePM[]
-  
+
   // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([ownerId])
   @@index([isArchived])
   @@index([createdAt])
@@ -3392,18 +3329,18 @@ model Project {
 
 // Project Members (Like Group Members)
 model ProjectMember {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
   projectId String
   userId    String
-  role      String   @default("member") // "owner", "admin", "member"
-  
+  role      String @default("member") // "owner", "admin", "member"
+
   // Relations
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  user      User     @relation("ProjectMembers", fields: [userId], references: [id], onDelete: Cascade)
-  
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation("ProjectMembers", fields: [userId], references: [id], onDelete: Cascade)
+
   // Timestamps
-  joinedAt  DateTime @default(now())
-  
+  joinedAt DateTime @default(now())
+
   @@unique([projectId, userId])
   @@index([projectId])
   @@index([userId])
@@ -3413,39 +3350,636 @@ model ProjectMember {
 
 // Chat Messages (Project Chat)
 model ChatMessagePM {
-  id          String   @id @default(uuid())
-  content     String
-  
+  id      String @id @default(uuid())
+  content String
+
   // Relations
-  projectId   String
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  
-  senderId    String
-  sender      User     @relation("ChatSender", fields: [senderId], references: [id], onDelete: Cascade)
-  
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  senderId String
+  sender   User   @relation("ChatSender", fields: [senderId], references: [id], onDelete: Cascade)
+
   // Mentions (@username)
-  mentions    String[] // Array of user IDs
-  
+  mentions String[] // Array of user IDs
+
   // Reply thread
-  replyToId   String?
-  replyTo     ChatMessagePM?  @relation("MessageReplies", fields: [replyToId], references: [id])
-  replies     ChatMessagePM[] @relation("MessageReplies")
-  
+  replyToId String?
+  replyTo   ChatMessagePM?  @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies   ChatMessagePM[] @relation("MessageReplies")
+
   // Reactions (JSON: { "👍": ["userId1"], "❤️": ["userId2"] })
-  reactions   Json?
-  
+  reactions Json?
+
   // Edit history
-  isEdited    Boolean  @default(false)
-  editedAt    DateTime?
-  
+  isEdited Boolean   @default(false)
+  editedAt DateTime?
+
   // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([projectId])
   @@index([senderId])
   @@index([createdAt])
   @@index([projectId, createdAt])
   @@index([replyToId])
   @@map("project_chat_messages")
+}
+
+// ============================================================================
+// E-COMMERCE COMPLETE SYSTEM
+// ============================================================================
+
+enum OrderStatus {
+  PENDING // Chờ xử lý
+  CONFIRMED // Đã xác nhận
+  PROCESSING // Đang xử lý
+  PACKAGING // Đang đóng gói
+  READY_TO_SHIP // Sẵn sàng giao
+  SHIPPING // Đang giao hàng
+  DELIVERED // Đã giao hàng
+  COMPLETED // Hoàn thành
+  CANCELLED // Đã hủy
+  RETURNED // Đã trả hàng
+  REFUNDED // Đã hoàn tiền
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY // COD
+  BANK_TRANSFER
+  CREDIT_CARD
+  MOMO
+  ZALOPAY
+  VNPAY
+  PAYPAL
+  STRIPE
+}
+
+enum ShippingMethod {
+  STANDARD // Giao hàng tiêu chuẩn
+  EXPRESS // Giao hàng nhanh
+  SAME_DAY // Giao trong ngày
+  PICKUP // Lấy tại cửa hàng
+}
+
+enum ShippingStatus {
+  PENDING
+  PREPARING
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED
+  RETURNED
+}
+
+// Shopping Cart
+model Cart {
+  id String @id @default(uuid())
+
+  // User association (null for guest carts)
+  userId String?
+  user   User?   @relation("UserCart", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Session for guest carts
+  sessionId String? @unique
+
+  // Cart items
+  items CartItem[]
+
+  // Metadata
+  metadata Json? // Coupon codes, notes, etc.
+
+  // Timestamps
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  expiresAt DateTime? // Auto-delete after 30 days
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([expiresAt])
+  @@map("carts")
+}
+
+model CartItem {
+  id String @id @default(uuid())
+
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  quantity Int   @default(1)
+  price    Float // Price at time of adding (snapshot)
+
+  // Metadata
+  metadata Json? // Custom options, gift message, etc.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId, variantId])
+  @@index([cartId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+// Orders
+model Order {
+  id          String @id @default(uuid())
+  orderNumber String @unique // Human-readable order number (e.g., ORD-2025-0001)
+
+  // Customer
+  userId String?
+  user   User?   @relation("UserOrders", fields: [userId], references: [id], onDelete: SetNull)
+
+  // Guest order info (if user is null)
+  guestEmail String?
+  guestPhone String?
+  guestName  String?
+
+  // Status
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+
+  // Items
+  items OrderItem[]
+
+  // Pricing
+  subtotal    Float // Tổng tiền hàng
+  shippingFee Float @default(0)
+  tax         Float @default(0)
+  discount    Float @default(0)
+  total       Float // Tổng cuối cùng
+
+  // Shipping
+  shippingMethod  ShippingMethod @default(STANDARD)
+  shippingAddress Json // { name, phone, address, city, district, ward, zipCode }
+  billingAddress  Json? // If different from shipping
+
+  tracking OrderTracking?
+
+  // Payment
+  paymentMethod PaymentMethod @default(CASH_ON_DELIVERY)
+  payment       Payment?
+
+  // Notes & Metadata
+  customerNote String?
+  internalNote String? // Admin note
+  metadata     Json? // Coupon codes, gift wrapping, etc.
+
+  // Timestamps
+  confirmedAt DateTime?
+  shippedAt   DateTime?
+  deliveredAt DateTime?
+  cancelledAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Audit
+  createdBy String?
+  updatedBy String?
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id String @id @default(uuid())
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String? // Nullable in case product is deleted
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  // Snapshot data (in case product is deleted/modified)
+  productName String
+  variantName String?
+  sku         String?
+  thumbnail   String?
+
+  quantity Int
+  price    Float // Unit price at time of order
+  subtotal Float // quantity * price
+
+  // Metadata
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// Order Tracking & Logistics
+model OrderTracking {
+  id String @id @default(uuid())
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  status ShippingStatus @default(PENDING)
+
+  // Carrier info
+  carrier        String? // Giao Hàng Nhanh, J&T, Viettel Post, etc.
+  trackingNumber String? @unique
+  trackingUrl    String?
+
+  // Estimated delivery
+  estimatedDelivery DateTime?
+  actualDelivery    DateTime?
+
+  // Tracking events (timeline)
+  events OrderTrackingEvent[]
+
+  // Metadata
+  metadata Json? // Carrier-specific data
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([trackingNumber])
+  @@index([status])
+  @@map("order_tracking")
+}
+
+model OrderTrackingEvent {
+  id String @id @default(uuid())
+
+  trackingId String
+  tracking   OrderTracking @relation(fields: [trackingId], references: [id], onDelete: Cascade)
+
+  status      String // PICKED_UP, IN_TRANSIT, etc.
+  description String // "Đơn hàng đã được lấy"
+  location    String? // "HCM Hub", "Hanoi Warehouse"
+
+  eventTime DateTime
+  createdAt DateTime @default(now())
+
+  @@index([trackingId])
+  @@index([eventTime])
+  @@map("order_tracking_events")
+}
+
+// Payment
+model Payment {
+  id String @id @default(uuid())
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  amount   Float
+  currency String @default("VND")
+
+  method PaymentMethod
+  status PaymentStatus @default(PENDING)
+
+  // Gateway data
+  gatewayTransactionId String? @unique // Transaction ID from payment gateway
+  gatewayResponse      Json? // Full response from gateway
+
+  // Refund
+  refundedAmount Float?
+  refundedAt     DateTime?
+
+  // Timestamps
+  paidAt   DateTime?
+  failedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([gatewayTransactionId])
+  @@map("payments")
+}
+
+// Inventory Tracking
+model InventoryLog {
+  id String @id @default(uuid())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  // Change details
+  type        String // "SALE", "RESTOCK", "ADJUSTMENT", "RETURN"
+  quantity    Int // Positive for increase, negative for decrease
+  beforeStock Int
+  afterStock  Int
+
+  // Reference
+  orderId String? // If related to an order
+  reason  String?
+
+  // Audit
+  performedBy String?
+  createdAt   DateTime @default(now())
+
+  @@index([productId])
+  @@index([variantId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("inventory_logs")
+}
+
+// Product Reviews
+model ProductReview {
+  id String @id @default(uuid())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User?   @relation("UserReviews", fields: [userId], references: [id], onDelete: SetNull)
+
+  // Guest review
+  guestName  String?
+  guestEmail String?
+
+  rating  Int // 1-5 stars
+  title   String?
+  comment String?
+
+  // Verification
+  isVerified Boolean @default(false) // Verified purchase
+  orderId    String? // Link to order if verified
+
+  // Moderation
+  isApproved  Boolean   @default(false)
+  moderatedBy String?
+  moderatedAt DateTime?
+
+  // Helpful votes
+  helpfulCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([userId])
+  @@index([rating])
+  @@index([isApproved])
+  @@map("product_reviews")
+}
+
+// Wishlist
+model Wishlist {
+  id String @id @default(uuid())
+
+  userId String @unique
+  user   User   @relation("UserWishlist", fields: [userId], references: [id], onDelete: Cascade)
+
+  items WishlistItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("wishlists")
+}
+
+model WishlistItem {
+  id String @id @default(uuid())
+
+  wishlistId String
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  addedAt DateTime @default(now())
+
+  @@unique([wishlistId, productId])
+  @@index([wishlistId])
+  @@index([productId])
+  @@map("wishlist_items")
+}
+
+// ============================================================================
+// BLOG SYSTEM ENHANCEMENTS
+// ============================================================================
+
+enum PostVisibility {
+  PUBLIC
+  PRIVATE
+  PASSWORD_PROTECTED
+}
+
+// Blog Categories
+model BlogCategory {
+  id          String  @id @default(uuid())
+  name        String
+  slug        String  @unique
+  description String?
+
+  // Hierarchy
+  parentId String?
+  parent   BlogCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children BlogCategory[] @relation("CategoryHierarchy")
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Display
+  thumbnail String?
+  order     Int     @default(0)
+  isActive  Boolean @default(true)
+
+  // Relations
+  posts BlogPost[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([parentId])
+  @@map("blog_categories")
+}
+
+// Enhanced Blog Post
+model BlogPost {
+  id      String  @id @default(uuid())
+  title   String
+  slug    String  @unique
+  excerpt String?
+  content String  @db.Text
+
+  // Author
+  authorId String
+  author   User   @relation("BlogPostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Category
+  categoryId String?
+  category   BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Media
+  featuredImage String?
+  images        String[] // Additional images
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String[]
+  canonicalUrl    String?
+
+  // Status & Visibility
+  status     PostStatus     @default(DRAFT)
+  visibility PostVisibility @default(PUBLIC)
+  password   String? // For PASSWORD_PROTECTED
+
+  // Featured & Display
+  isFeatured   Boolean @default(false)
+  isPinned     Boolean @default(false)
+  displayOrder Int     @default(0)
+
+  // Reading stats
+  viewCount   Int  @default(0)
+  readingTime Int? // Minutes
+
+  // Social Sharing
+  shares BlogPostShare[]
+
+  // Comments
+  comments        BlogComment[]
+  commentsEnabled Boolean       @default(true)
+
+  // Tags
+  tags BlogPostTag[]
+
+  // Dates
+  publishedAt DateTime?
+  scheduledAt DateTime? // For scheduled publishing
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([isFeatured])
+  @@index([publishedAt])
+  @@map("blog_posts")
+}
+
+// Blog Comments (separate from general Comment)
+model BlogComment {
+  id String @id @default(uuid())
+
+  postId String
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User?   @relation("BlogCommentAuthor", fields: [userId], references: [id], onDelete: SetNull)
+
+  // Guest comment
+  guestName  String?
+  guestEmail String?
+  guestUrl   String?
+
+  content String @db.Text
+
+  // Moderation
+  isApproved  Boolean   @default(false)
+  moderatedBy String?
+  moderatedAt DateTime?
+
+  // Thread
+  parentId String?
+  parent   BlogComment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies  BlogComment[] @relation("CommentReplies")
+
+  // Reactions
+  likes Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([isApproved])
+  @@map("blog_comments")
+}
+
+// Blog Tags (separate from general Tag)
+model BlogTag {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  color       String?
+
+  // Relations
+  posts BlogPostTag[]
+
+  createdAt DateTime @default(now())
+
+  @@index([slug])
+  @@map("blog_tags")
+}
+
+model BlogPostTag {
+  postId String
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  tagId String
+  tag   BlogTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("blog_post_tags")
+}
+
+// Social Share Tracking
+model BlogPostShare {
+  id String @id @default(uuid())
+
+  postId String
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  platform String // "facebook", "twitter", "linkedin", "pinterest", "email"
+
+  // Optional user tracking
+  userId String?
+  user   User?   @relation("BlogShareUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  // Metadata
+  ipAddress String?
+  userAgent String?
+  referrer  String?
+
+  sharedAt DateTime @default(now())
+
+  @@index([postId])
+  @@index([platform])
+  @@index([sharedAt])
+  @@map("blog_post_shares")
 }

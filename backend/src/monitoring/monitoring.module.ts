@@ -10,7 +10,7 @@ import { MonitoringController } from './controllers/monitoring.controller';
 
 @Module({
   imports: [
-    ScheduleModule.forRoot(),
+    // ScheduleModule.forRoot(), // Moved to AppModule
     TerminusModule,
     PrismaModule
   ],
