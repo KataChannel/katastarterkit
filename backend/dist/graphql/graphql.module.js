@@ -21,6 +21,8 @@ const orama_search_resolver_1 = require("./resolvers/orama-search.resolver");
 const universal_query_resolver_1 = require("./resolvers/universal-query.resolver");
 const ext_models_resolver_1 = require("./resolvers/ext-models.resolver");
 const custom_template_resolver_1 = require("./resolvers/custom-template.resolver");
+const universal_dynamic_resolver_1 = require("./resolvers/universal-dynamic.resolver");
+const dynamic_graphql_engine_1 = require("./core/dynamic-graphql.engine");
 const invoice_controller_1 = require("../controllers/invoice.controller");
 const invoice_import_controller_1 = require("../controllers/invoice-import.controller");
 const category_import_export_controller_1 = require("../controllers/category-import-export.controller");
@@ -82,6 +84,8 @@ exports.GraphQLResolversModule = GraphQLResolversModule = __decorate([
             tracking_controller_1.TrackingController,
         ],
         providers: [
+            dynamic_graphql_engine_1.DynamicGraphQLEngine,
+            universal_dynamic_resolver_1.UniversalDynamicResolver,
             user_resolver_1.UserResolver,
             post_resolver_1.PostResolver,
             comment_resolver_1.CommentResolver,

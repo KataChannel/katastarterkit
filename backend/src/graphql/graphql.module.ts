@@ -14,6 +14,10 @@ import { UniversalQueryResolver } from './resolvers/universal-query.resolver';
 import { ExtModelsResolver } from './resolvers/ext-models.resolver';
 import { CustomTemplateResolver } from './resolvers/custom-template.resolver';
 
+// 🚀 NEW: Universal Dynamic GraphQL Resolver
+import { UniversalDynamicResolver } from './resolvers/universal-dynamic.resolver';
+import { DynamicGraphQLEngine } from './core/dynamic-graphql.engine';
+
 import { InvoiceController } from '../controllers/invoice.controller';
 import { InvoiceImportController } from '../controllers/invoice-import.controller';
 import { CategoryImportExportController } from '../controllers/category-import-export.controller';
@@ -76,6 +80,10 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
   ],
   providers: [
     // Scalars handled by graphql-type-json directly
+    
+    // 🚀 NEW: Universal Dynamic GraphQL System
+    DynamicGraphQLEngine,
+    UniversalDynamicResolver,
     
     // Resolvers
     UserResolver,

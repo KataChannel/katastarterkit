@@ -2028,6 +2028,9 @@ type Mutation {
   bulkUpdateFiles(input: BulkUpdateFilesInput!): [File!]!
   bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!
   changePassword(input: ChangePasswordInput!): Boolean!
+
+  """Clear all cached data"""
+  clearCache: Boolean!
   completeOffboarding(id: ID!): OffboardingProcess!
   completeOnboardingTask(checklistId: ID!, taskId: ID!): OnboardingChecklist!
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
@@ -2854,6 +2857,9 @@ type Query {
   affiliateLinks(search: AffLinkSearchInput): [AffLink!]!
   affiliatePaymentRequests(search: AffPaymentRequestSearchInput): [AffPaymentRequest!]!
   affiliateUser: AffUser
+
+  """Aggregate operations (count, sum, avg, min, max)"""
+  aggregate(model: String!, options: JSON!): JSON!
   blog(id: ID!): BlogType!
   blogBySlug(slug: String!): BlogType!
   blogCategories: [BlogCategoryType!]!
@@ -2921,6 +2927,9 @@ type Query {
   """Find duplicates with DVT and price matching"""
   findDuplicatesAdvanced(priceTolerance: Float! = 10): [DuplicateGroupAdvanced!]!
 
+  """Find first matching record"""
+  findFirst(include: JSON, model: String!, orderBy: JSON, select: JSON, where: JSON): JSON
+
   """Find all records for a model with Prisma-like syntax"""
   findMany(input: UnifiedFindManyInput, modelName: String!): JSONObject!
 
@@ -2950,9 +2959,15 @@ type Query {
     """Similarity threshold (0.0-1.0)"""
     threshold: Float! = 0.3
   ): [SimilarProductAdvanced!]!
+
+  """Find a unique record"""
+  findUnique(include: JSON, model: String!, select: JSON, where: JSON!): JSON
   folder(id: ID!): FileFolder!
   folders: [FileFolder!]!
   footerMenus: [MenuHierarchicalDto!]!
+
+  """Get list of all available Prisma models"""
+  getAvailableModels: [String!]!
   getCallCenterConfig: CallCenterConfig!
   getCallCenterRecordById(id: String!): CallCenterRecord!
   getCallCenterRecords(filters: CallCenterRecordFiltersInput, pagination: PaginationInput! = {limit: 20, page: 1}): PaginatedCallCenterRecords!
@@ -3012,6 +3027,9 @@ type Query {
 
   """Get paginated ext_sanphamhoadon records"""
   getext_sanphamhoadonsPaginated(filters: JSON): JSON!
+
+  """Group records by field(s)"""
+  groupBy(model: String!, options: JSON!): [JSON!]!
   hasPassword: Boolean!
   headerMenus: [MenuHierarchicalDto!]!
 
