@@ -11,9 +11,14 @@ import { GqlExecutionContext } from '@nestjs/graphql';
  *   async getMe(@CurrentUser() user: User): Promise<User> {
  *     return user;
  *   }
+ * 
+ *   // Get specific field
+ *   async myQuery(@CurrentUser('id') userId: string): Promise<any> {
+ *     return this.service.findByUserId(userId);
+ *   }
  */
 export const CurrentUser = createParamDecorator(
-  (data: unknown, context: ExecutionContext) => {
+  (data: string | undefined, context: ExecutionContext) => {
     let request;
     
     // Try GraphQL context first
@@ -25,6 +30,9 @@ export const CurrentUser = createParamDecorator(
       request = context.switchToHttp().getRequest();
     }
     
-    return request.user;
+    const user = request.user;
+    
+    // If data parameter is provided, return specific field
+    return data ? user?.[data] : user;
   },
 );
