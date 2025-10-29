@@ -33,6 +33,9 @@ let ProjectResolver = class ProjectResolver {
         return this.projectService.getProjectMembers(projectId, userId);
     }
     async createProject(userId, input) {
+        console.log('🔍 Resolver received input:', input);
+        console.log('🔍 Input constructor:', input?.constructor?.name);
+        console.log('🔍 Input keys:', Object.keys(input || {}));
         return this.projectService.createProject(userId, input);
     }
     async updateProject(userId, projectId, input) {
@@ -81,7 +84,7 @@ __decorate([
         description: 'Lấy danh sách members (dùng cho @mention autocomplete)',
     }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
-    __param(1, (0, graphql_1.Args)('projectId')),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
@@ -92,7 +95,7 @@ __decorate([
         description: 'Tạo dự án mới',
     }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
-    __param(1, (0, graphql_1.Args)('input')),
+    __param(1, (0, graphql_1.Args)('input', { type: () => project_dto_1.CreateProjectInput })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, project_dto_1.CreateProjectInput]),
     __metadata("design:returntype", Promise)
@@ -126,7 +129,7 @@ __decorate([
         description: 'Thêm thành viên vào project',
     }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
-    __param(1, (0, graphql_1.Args)('projectId')),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
     __param(2, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, project_dto_1.AddMemberInput]),
@@ -138,7 +141,7 @@ __decorate([
         description: 'Xóa thành viên khỏi project',
     }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
-    __param(1, (0, graphql_1.Args)('projectId')),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
     __param(2, (0, graphql_1.Args)('memberId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, String]),
@@ -150,7 +153,7 @@ __decorate([
         description: 'Update role của member (owner only)',
     }),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
-    __param(1, (0, graphql_1.Args)('projectId')),
+    __param(1, (0, graphql_1.Args)('projectId', { type: () => graphql_1.ID })),
     __param(2, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, project_dto_1.UpdateMemberRoleInput]),

@@ -388,7 +388,7 @@ export class TaskResolver {
   })
   @UseGuards(JwtAuthGuard)
   async getProjectTasks(
-    @Args('projectId') projectId: string,
+    @Args('projectId', { type: () => ID }) projectId: string,
     @Args('filters', { nullable: true }) filters: TaskFilterInput,
     @Context() context: any,
   ): Promise<any[]> {
@@ -402,7 +402,7 @@ export class TaskResolver {
   })
   @UseGuards(JwtAuthGuard)
   async createProjectTask(
-    @Args('projectId') projectId: string,
+    @Args('projectId', { type: () => ID }) projectId: string,
     @Args('input') input: CreateTaskInput,
     @Context() context: any,
   ): Promise<any> {

@@ -11,13 +11,22 @@ const common_1 = require("@nestjs/common");
 const project_service_1 = require("./project.service");
 const project_resolver_1 = require("./project.resolver");
 const prisma_module_1 = require("../prisma/prisma.module");
+const auth_module_1 = require("../auth/auth.module");
+const user_service_1 = require("../services/user.service");
 let ProjectModule = class ProjectModule {
 };
 exports.ProjectModule = ProjectModule;
 exports.ProjectModule = ProjectModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule],
-        providers: [project_service_1.ProjectService, project_resolver_1.ProjectResolver],
+        imports: [
+            prisma_module_1.PrismaModule,
+            auth_module_1.AuthModule,
+        ],
+        providers: [
+            project_service_1.ProjectService,
+            project_resolver_1.ProjectResolver,
+            user_service_1.UserService,
+        ],
         exports: [project_service_1.ProjectService],
     })
 ], ProjectModule);

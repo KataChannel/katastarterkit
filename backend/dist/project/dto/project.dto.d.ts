@@ -5,6 +5,11 @@ export declare class ProjectUserType {
     email?: string;
     avatar?: string;
 }
+export declare class ProjectStats {
+    tasks: number;
+    chatMessages: number;
+    members: number;
+}
 export declare class ProjectType {
     id: string;
     name: string;
@@ -25,10 +30,6 @@ export declare class ProjectMemberType {
     role: string;
     user: ProjectUserType;
     joinedAt: Date;
-}
-export declare class ProjectStats {
-    tasks: number;
-    chatMessages: number;
 }
 export declare class CreateProjectInput {
     name: string;

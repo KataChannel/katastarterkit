@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import {
@@ -48,7 +48,7 @@ export class ProjectResolver {
   })
   async getProjectMembers(
     @CurrentUser('id') userId: string,
-    @Args('projectId') projectId: string,
+    @Args('projectId', { type: () => ID }) projectId: string,
   ): Promise<ProjectMemberType[]> {
     return this.projectService.getProjectMembers(projectId, userId) as any;
   }
@@ -100,7 +100,7 @@ export class ProjectResolver {
   })
   async addMember(
     @CurrentUser('id') userId: string,
-    @Args('projectId') projectId: string,
+    @Args('projectId', { type: () => ID }) projectId: string,
     @Args('input') input: AddMemberInput,
   ): Promise<ProjectMemberType> {
     return this.projectService.addMember(projectId, userId, input) as any;
@@ -112,7 +112,7 @@ export class ProjectResolver {
   })
   async removeMember(
     @CurrentUser('id') userId: string,
-    @Args('projectId') projectId: string,
+    @Args('projectId', { type: () => ID }) projectId: string,
     @Args('memberId') memberId: string,
   ): Promise<boolean> {
     await this.projectService.removeMember(projectId, userId, memberId);
@@ -125,7 +125,7 @@ export class ProjectResolver {
   })
   async updateMemberRole(
     @CurrentUser('id') userId: string,
-    @Args('projectId') projectId: string,
+    @Args('projectId', { type: () => ID }) projectId: string,
     @Args('input') input: UpdateMemberRoleInput,
   ): Promise<ProjectMemberType> {
     return this.projectService.updateMemberRole(

@@ -5,46 +5,46 @@ export declare class EnrollmentsResolver {
     constructor(enrollmentsService: EnrollmentsService);
     enrollCourse(user: any, enrollCourseInput: EnrollCourseInput): Promise<{
         course: {
-            id: string;
-            title: string;
-            description: string | null;
-            status: import(".prisma/client").$Enums.CourseStatus;
-            createdAt: Date;
-            updatedAt: Date;
             level: import(".prisma/client").$Enums.CourseLevel;
+            id: string;
+            status: import(".prisma/client").$Enums.CourseStatus;
+            title: string;
             slug: string;
+            description: string | null;
             thumbnail: string | null;
             price: number;
-            categoryId: string | null;
             duration: number | null;
-            instructorId: string;
             whatYouWillLearn: string[];
             requirements: string[];
+            categoryId: string | null;
+            instructorId: string;
             rating: number;
             reviewCount: number;
             enrollmentCount: number;
             avgRating: number;
+            createdAt: Date;
+            updatedAt: Date;
         };
     } & {
         id: string;
-        status: import(".prisma/client").$Enums.EnrollmentStatus;
-        completedAt: Date | null;
         userId: string;
-        progress: number;
         courseId: string;
+        status: import(".prisma/client").$Enums.EnrollmentStatus;
+        progress: number;
         enrolledAt: Date;
+        completedAt: Date | null;
     }>;
     getMyEnrollments(user: any): Promise<({
         course: {
             category: {
                 id: string;
+                name: string;
+                slug: string;
                 description: string | null;
                 createdAt: Date;
                 updatedAt: Date;
-                parentId: string | null;
-                name: string;
-                slug: string;
                 icon: string | null;
+                parentId: string | null;
             };
             instructor: {
                 id: string;
@@ -54,34 +54,34 @@ export declare class EnrollmentsResolver {
                 avatar: string;
             };
         } & {
-            id: string;
-            title: string;
-            description: string | null;
-            status: import(".prisma/client").$Enums.CourseStatus;
-            createdAt: Date;
-            updatedAt: Date;
             level: import(".prisma/client").$Enums.CourseLevel;
+            id: string;
+            status: import(".prisma/client").$Enums.CourseStatus;
+            title: string;
             slug: string;
+            description: string | null;
             thumbnail: string | null;
             price: number;
-            categoryId: string | null;
             duration: number | null;
-            instructorId: string;
             whatYouWillLearn: string[];
             requirements: string[];
+            categoryId: string | null;
+            instructorId: string;
             rating: number;
             reviewCount: number;
             enrollmentCount: number;
             avgRating: number;
+            createdAt: Date;
+            updatedAt: Date;
         };
     } & {
         id: string;
-        status: import(".prisma/client").$Enums.EnrollmentStatus;
-        completedAt: Date | null;
         userId: string;
-        progress: number;
         courseId: string;
+        status: import(".prisma/client").$Enums.EnrollmentStatus;
+        progress: number;
         enrolledAt: Date;
+        completedAt: Date | null;
     })[]>;
     getEnrollment(user: any, courseId: string): Promise<{
         course: {
@@ -90,55 +90,55 @@ export declare class EnrollmentsResolver {
                     id: string;
                     title: string;
                     description: string | null;
+                    duration: number | null;
                     createdAt: Date;
                     updatedAt: Date;
                     order: number;
                     type: import(".prisma/client").$Enums.LessonType;
                     content: string | null;
-                    duration: number | null;
                     moduleId: string;
                 }[];
             } & {
                 id: string;
+                courseId: string;
                 title: string;
                 description: string | null;
                 createdAt: Date;
                 updatedAt: Date;
                 order: number;
-                courseId: string;
             })[];
         } & {
-            id: string;
-            title: string;
-            description: string | null;
-            status: import(".prisma/client").$Enums.CourseStatus;
-            createdAt: Date;
-            updatedAt: Date;
             level: import(".prisma/client").$Enums.CourseLevel;
+            id: string;
+            status: import(".prisma/client").$Enums.CourseStatus;
+            title: string;
             slug: string;
+            description: string | null;
             thumbnail: string | null;
             price: number;
-            categoryId: string | null;
             duration: number | null;
-            instructorId: string;
             whatYouWillLearn: string[];
             requirements: string[];
+            categoryId: string | null;
+            instructorId: string;
             rating: number;
             reviewCount: number;
             enrollmentCount: number;
             avgRating: number;
+            createdAt: Date;
+            updatedAt: Date;
         };
         lessonProgress: ({
             lesson: {
                 id: string;
                 title: string;
                 description: string | null;
+                duration: number | null;
                 createdAt: Date;
                 updatedAt: Date;
                 order: number;
                 type: import(".prisma/client").$Enums.LessonType;
                 content: string | null;
-                duration: number | null;
                 moduleId: string;
             };
         } & {
@@ -146,27 +146,27 @@ export declare class EnrollmentsResolver {
             completedAt: Date | null;
             createdAt: Date;
             updatedAt: Date;
-            completed: boolean;
             enrollmentId: string;
             lessonId: string;
+            completed: boolean;
         })[];
     } & {
         id: string;
-        status: import(".prisma/client").$Enums.EnrollmentStatus;
-        completedAt: Date | null;
         userId: string;
-        progress: number;
         courseId: string;
+        status: import(".prisma/client").$Enums.EnrollmentStatus;
+        progress: number;
         enrolledAt: Date;
+        completedAt: Date | null;
     }>;
     dropCourse(user: any, courseId: string): Promise<{
         id: string;
-        status: import(".prisma/client").$Enums.EnrollmentStatus;
-        completedAt: Date | null;
         userId: string;
-        progress: number;
         courseId: string;
+        status: import(".prisma/client").$Enums.EnrollmentStatus;
+        progress: number;
         enrolledAt: Date;
+        completedAt: Date | null;
     }>;
     getCourseEnrollments(user: any, courseId: string): Promise<({
         user: {
@@ -179,20 +179,20 @@ export declare class EnrollmentsResolver {
         };
     } & {
         id: string;
-        status: import(".prisma/client").$Enums.EnrollmentStatus;
-        completedAt: Date | null;
         userId: string;
-        progress: number;
         courseId: string;
+        status: import(".prisma/client").$Enums.EnrollmentStatus;
+        progress: number;
         enrolledAt: Date;
+        completedAt: Date | null;
     })[]>;
     markLessonComplete(user: any, enrollmentId: string, lessonId: string): Promise<{
         id: string;
         completedAt: Date | null;
         createdAt: Date;
         updatedAt: Date;
-        completed: boolean;
         enrollmentId: string;
         lessonId: string;
+        completed: boolean;
     }>;
 }
