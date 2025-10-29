@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useCreateProject } from '@/hooks/useProjects';
+import { useCreateProject } from '@/hooks/useProjects.dynamic';
 import {
   Dialog,
   DialogContent,
@@ -41,8 +41,8 @@ export default function CreateProjectModal({
         variables: {
           input: {
             name: data.name,
-            description: data.description || null,
-            avatar: data.avatar || null,
+            description: data.description || undefined,
+            avatar: data.avatar || undefined,
           },
         },
       });
