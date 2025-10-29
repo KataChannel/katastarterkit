@@ -379,4 +379,63 @@ export class TaskResolver {
   async commentReplies(@Parent() comment: TaskComment): Promise<any[]> {
     return this.taskCommentService.findReplies(comment.id);
   }
+
+  // ==================== PROJECT TASK QUERIES (NEW) ====================
+
+  @Query(() => [Task], { 
+    name: 'projectTasks',
+    description: 'Get tasks by project ID (for TaskFeed)'
+  })
+  @UseGuards(JwtAuthGuard)
+  async getProjectTasks(
+    @Args('projectId') projectId: string,
+    @Args('filters', { nullable: true }) filters: TaskFilterInput,
+    @Context() context: any,
+  ): Promise<any[]> {
+    const userId = context.req.user.id;
+    return this.taskService.findByProjectId(projectId, userId, filters);
+  }
+
+  @Mutation(() => Task, {
+    name: 'createProjectTask',
+    description: 'Create task in project with @mentions'
+  })
+  @UseGuards(JwtAuthGuard)
+  async createProjectTask(
+    @Args('projectId') projectId: string,
+    @Args('input') input: CreateTaskInput,
+    @Context() context: any,
+  ): Promise<any> {
+    const userId = context.req.user.id;
+    return this.taskService.createProjectTask(projectId, userId, input as any);
+  }
+
+  @Mutation(() => Task, {
+    name: 'updateTaskOrder',
+    description: 'Update task order for drag & drop'
+  })
+  @UseGuards(JwtAuthGuard)
+  async updateTaskOrder(
+    @Args('taskId') taskId: string,
+    @Args('newOrder', { type: () => Int }) newOrder: number,
+    @Context() context: any,
+  ): Promise<any> {
+    const userId = context.req.user.id;
+    return this.taskService.updateTaskOrder(taskId, userId, newOrder);
+  }
+
+  @Mutation(() => Task, {
+    name: 'assignTask',
+    description: 'Assign task to users'
+  })
+  @UseGuards(JwtAuthGuard)
+  async assignTask(
+    @Args('taskId') taskId: string,
+    @Args('userIds', { type: () => [ID] }) userIds: string[],
+    @Context() context: any,
+  ): Promise<any> {
+    const userId = context.req.user.id;
+    return this.taskService.assignTask(taskId, userId, userIds);
+  }
 }
+

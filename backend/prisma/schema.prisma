@@ -124,6 +124,12 @@ model User {
   tasksSharedBy   TaskShare[] @relation("TaskSharedBy")
   tasksSharedWith TaskShare[] @relation("TaskSharedWith")
 
+  // 🆕 Project Management Relations
+  projectsOwned        Project[]        @relation("ProjectOwner")
+  projectMemberships   ProjectMember[]  @relation("ProjectMembers")
+  chatMessagesSent     ChatMessagePM[]  @relation("ChatSender")
+  notificationsMentioned Notification[] @relation("NotificationMentioner")
+
   // AI Training relations
   chatbotModels     ChatbotModel[]
   trainingData      TrainingData[]
@@ -422,6 +428,18 @@ model Notification {
 
   user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
 
+  // 🆕 Task mention tracking
+  taskId      String?
+  task        Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  mentionedBy String?  // User who mentioned
+  mentioner   User?    @relation("NotificationMentioner", fields: [mentionedBy], references: [id], onDelete: SetNull)
+
+  // 🆕 Indexes
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@index([taskId])
+  @@index([mentionedBy])
   @@map("notifications")
 }
 
@@ -441,15 +459,24 @@ model Task {
   userId String
   user   User   @relation("UserTasks", fields: [userId], references: [id], onDelete: Cascade)
 
+  // 🆕 Project Management Fields
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  assignedTo  String[]  // Array of user IDs
+  mentions    String[]  // Array of user IDs mentioned
+  order       Int       @default(0)  // For drag & drop ordering
+  tags        String[]  // Quick tags
+
   // Hierarchical relations
   parentId String?
   parent   Task?   @relation("TaskSubtasks", fields: [parentId], references: [id])
   subtasks Task[]  @relation("TaskSubtasks")
 
   // Relations
-  comments TaskComment[]
-  media    TaskMedia[]
-  shares   TaskShare[]
+  comments      TaskComment[]
+  media         TaskMedia[]
+  shares        TaskShare[]
+  notifications Notification[] // 🆕 Task mention notifications
 
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([userId])
@@ -461,6 +488,12 @@ model Task {
   @@index([userId, status])
   @@index([userId, createdAt])
   @@index([userId, dueDate])
+  // 🆕 Project indexes
+  @@index([projectId])
+  @@index([projectId, status])
+  @@index([projectId, priority])
+  @@index([projectId, order])
+  @@index([projectId, dueDate])
   @@map("tasks")
 }
 
@@ -3273,4 +3306,95 @@ model Blog {
   @@index([isFeatured])
   @@index([publishedAt])
   @@map("blogs")
+}
+
+// =====================================================
+// PROJECT MANAGEMENT SYSTEM
+// =====================================================
+
+// Project Model (Like Facebook Group)
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  avatar      String?   // Project icon/color
+  isArchived  Boolean  @default(false)
+  
+  // Owner
+  ownerId     String
+  owner       User     @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  members     ProjectMember[]
+  tasks       Task[]
+  chatMessages ChatMessagePM[]
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([ownerId])
+  @@index([isArchived])
+  @@index([createdAt])
+  @@map("projects")
+}
+
+// Project Members (Like Group Members)
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  role      String   @default("member") // "owner", "admin", "member"
+  
+  // Relations
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation("ProjectMembers", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  joinedAt  DateTime @default(now())
+  
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@index([joinedAt])
+  @@map("project_members")
+}
+
+// Chat Messages (Project Chat)
+model ChatMessagePM {
+  id          String   @id @default(uuid())
+  content     String
+  
+  // Relations
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  senderId    String
+  sender      User     @relation("ChatSender", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  // Mentions (@username)
+  mentions    String[] // Array of user IDs
+  
+  // Reply thread
+  replyToId   String?
+  replyTo     ChatMessagePM?  @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies     ChatMessagePM[] @relation("MessageReplies")
+  
+  // Reactions (JSON: { "👍": ["userId1"], "❤️": ["userId2"] })
+  reactions   Json?
+  
+  // Edit history
+  isEdited    Boolean  @default(false)
+  editedAt    DateTime?
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([projectId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@index([projectId, createdAt])
+  @@index([replyToId])
+  @@map("project_chat_messages")
 }

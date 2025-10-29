@@ -55,4 +55,8 @@ export declare class TaskResolver {
     commentAuthor(comment: TaskComment): Promise<User>;
     commentParent(comment: TaskComment): Promise<any>;
     commentReplies(comment: TaskComment): Promise<any[]>;
+    getProjectTasks(projectId: string, filters: TaskFilterInput, context: any): Promise<any[]>;
+    createProjectTask(projectId: string, input: CreateTaskInput, context: any): Promise<any>;
+    updateTaskOrder(taskId: string, newOrder: number, context: any): Promise<any>;
+    assignTask(taskId: string, userIds: string[], context: any): Promise<any>;
 }

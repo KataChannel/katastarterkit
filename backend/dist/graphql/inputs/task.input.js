@@ -38,11 +38,46 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTaskInput.prototype, "priority", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => client_1.TaskStatus, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.TaskStatus),
+    __metadata("design:type", String)
+], CreateTaskInput.prototype, "status", void 0);
+__decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreateTaskInput.prototype, "dueDate", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTaskInput.prototype, "parentId", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [graphql_1.ID], { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateTaskInput.prototype, "assignedTo", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [graphql_1.ID], { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateTaskInput.prototype, "mentions", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [String], { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateTaskInput.prototype, "tags", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateTaskInput.prototype, "order", void 0);
 exports.CreateTaskInput = CreateTaskInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateTaskInput);

@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
+import { ObjectType, Field, ID, registerEnumType, Int } from '@nestjs/graphql';
 import { User } from './user.model';
 import { TaskMedia } from './task-media.model';
 import { TaskShare } from './task-share.model';
@@ -19,6 +19,15 @@ registerEnumType(TaskStatus, {
   name: 'TaskStatus',
   description: 'The status of a task',
 });
+
+@ObjectType()
+export class TaskCount {
+  @Field(() => Int)
+  comments: number;
+
+  @Field(() => Int)
+  subtasks: number;
+}
 
 @ObjectType()
 export class Task {
@@ -43,6 +52,9 @@ export class Task {
   @Field({ nullable: true })
   dueDate?: Date;
 
+  @Field({ nullable: true })
+  completedAt?: Date;
+
   @Field()
   createdAt: Date;
 
@@ -50,7 +62,7 @@ export class Task {
   updatedAt: Date;
 
   @Field(() => User)
-  author: User;
+  user: User;
 
   @Field()
   userId: string;
@@ -75,4 +87,23 @@ export class Task {
 
   @Field(() => [TaskComment], { nullable: true })
   comments?: TaskComment[];
+
+  // 🆕 Project task fields
+  @Field({ nullable: true })
+  projectId?: string;
+
+  @Field(() => [ID], { nullable: true })
+  assignedTo?: string[];
+
+  @Field(() => [ID], { nullable: true })
+  mentions?: string[];
+
+  @Field(() => [String], { nullable: true })
+  tags?: string[];
+
+  @Field(() => Int, { nullable: true })
+  order?: number;
+
+  @Field(() => TaskCount, { nullable: true })
+  _count?: TaskCount;
 }
