@@ -2931,7 +2931,7 @@ type Query {
   findFirst(include: JSON, model: String!, orderBy: JSON, select: JSON, where: JSON): JSON
 
   """Find all records for a model with Prisma-like syntax"""
-  findMany(input: UnifiedFindManyInput, modelName: String!): JSONObject!
+  findMany(input: UnifiedFindManyInput, modelName: String!): [JSONObject!]!
 
   """Find records with pagination"""
   findManyPaginated(input: UnifiedPaginatedInput, modelName: String!): JSONObject!

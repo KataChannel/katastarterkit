@@ -83,8 +83,8 @@ export function useFindMany<T = any>(
 ) {
   const { data, loading, error, refetch } = useQuery(FIND_MANY, {
     variables: {
-      model,
-      ...options,
+      modelName: model,
+      input: options || {},
     },
     skip: config?.skip,
     fetchPolicy: config?.fetchPolicy || 'cache-and-network',
@@ -110,15 +110,18 @@ export function useFindUnique<T = any>(
 ) {
   const { data, loading, error, refetch } = useQuery(FIND_UNIQUE, {
     variables: {
-      model,
-      where,
-      ...options,
+      modelName: model,
+      input: {
+        id: typeof where === 'string' ? where : where?.id,
+        select: options?.select,
+        include: options?.include,
+      },
     },
     skip: config?.skip || !where,
   });
 
   return {
-    data: data?.findUnique as T | undefined,
+    data: data?.findById as T | undefined,
     loading,
     error,
     refetch,
@@ -136,14 +139,17 @@ export function useFindFirst<T = any>(
 ) {
   const { data, loading, error, refetch } = useQuery(FIND_FIRST, {
     variables: {
-      model,
-      ...options,
+      modelName: model,
+      input: {
+        ...options,
+        take: 1,
+      },
     },
     skip: config?.skip,
   });
 
   return {
-    data: data?.findFirst as T | undefined,
+    data: (data?.findMany?.[0]) as T | undefined,
     loading,
     error,
     refetch,
@@ -164,13 +170,15 @@ export function useFindManyPaginated<T = any>(
 
   const { data, loading, error, refetch } = useQuery(FIND_MANY_PAGINATED, {
     variables: {
-      model,
-      page,
-      limit,
-      where: options?.where,
-      orderBy: options?.orderBy,
-      select: options?.select,
-      include: options?.include,
+      modelName: model,
+      input: {
+        page,
+        limit,
+        where: options?.where,
+        orderBy: options?.orderBy,
+        select: options?.select,
+        include: options?.include,
+      },
     },
     skip: config?.skip,
     fetchPolicy: 'cache-and-network',
@@ -224,7 +232,7 @@ export function useCount(
   config?: { skip?: boolean }
 ) {
   const { data, loading, error, refetch } = useQuery(COUNT, {
-    variables: { model, where },
+    variables: { modelName: model, where },
     skip: config?.skip,
   });
 
@@ -301,8 +309,12 @@ export function useCreateOne<T = any>(model: string, config?: { refetchQueries?:
     }) => {
       const result = await mutate({
         variables: {
-          model,
-          ...input,
+          modelName: model,
+          input: {
+            data: input.data,
+            select: input.select,
+            include: input.include,
+          },
         },
       });
       return result.data?.createOne as T;
@@ -359,8 +371,13 @@ export function useUpdateOne<T = any>(model: string, config?: { refetchQueries?:
     }) => {
       const result = await mutate({
         variables: {
-          model,
-          ...input,
+          modelName: model,
+          input: {
+            id: typeof input.where === 'string' ? input.where : input.where?.id,
+            data: input.data,
+            select: input.select,
+            include: input.include,
+          },
         },
       });
       return result.data?.updateOne as T;
@@ -415,8 +432,11 @@ export function useDeleteOne<T = any>(model: string, config?: { refetchQueries?:
     }) => {
       const result = await mutate({
         variables: {
-          model,
-          ...input,
+          modelName: model,
+          input: {
+            id: typeof input.where === 'string' ? input.where : input.where?.id,
+            select: input.select,
+          },
         },
       });
       return result.data?.deleteOne as T;

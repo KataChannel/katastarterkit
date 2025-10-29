@@ -168,7 +168,7 @@ let UnifiedDynamicResolver = class UnifiedDynamicResolver {
 };
 exports.UnifiedDynamicResolver = UnifiedDynamicResolver;
 __decorate([
-    (0, graphql_1.Query)(() => graphql_type_json_1.GraphQLJSONObject, {
+    (0, graphql_1.Query)(() => [graphql_type_json_1.GraphQLJSONObject], {
         name: 'findMany',
         description: 'Find all records for a model with Prisma-like syntax'
     }),
