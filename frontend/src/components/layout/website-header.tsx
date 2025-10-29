@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useQuery } from '@apollo/client';
-import { GET_HEADER_MENUS } from '@/graphql/menu.queries';
+// ✅ MIGRATED: Import Dynamic GraphQL
+import { useFindMany } from '@/hooks/useDynamicGraphQL';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -64,13 +64,28 @@ export function WebsiteHeader() {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
 
-  // Fetch header menus from database
-  const { data: menuData, loading: menuLoading, error: menuError } = useQuery(GET_HEADER_MENUS, {
-    errorPolicy: 'all',
+  // ✅ MIGRATED: Fetch header menus with Dynamic GraphQL
+  const { data: headerMenus = [], loading: menuLoading, error: menuError } = useFindMany('menu', {
+    where: { 
+      type: 'HEADER',
+      isActive: true,
+      isVisible: true 
+    },
+    orderBy: { order: 'asc' },
+    include: {
+      children: {
+        where: { isActive: true, isVisible: true },
+        orderBy: { order: 'asc' },
+        include: {
+          children: {
+            where: { isActive: true, isVisible: true },
+            orderBy: { order: 'asc' },
+          }
+        }
+      }
+    }
   });
 
-  const headerMenus = menuData?.headerMenus || [];
-  console.log('menuData',menuData);
   console.log('headerMenus',headerMenus);
   
   // Banner data
