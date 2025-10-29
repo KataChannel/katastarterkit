@@ -51,8 +51,6 @@ export const BLOCK_TYPES = [
   { type: BlockType.FAQ, label: 'FAQ', icon: HelpCircle, color: 'bg-sky-100 text-sky-600' },
   { type: BlockType.CONTACT_FORM, label: 'Contact Form', icon: Mail, color: 'bg-amber-100 text-amber-600' },
   { type: BlockType.CONTACT_INFO, label: 'Contact Info', icon: Phone, color: 'bg-cyan-100 text-cyan-600' },
-  { type: BlockType.DIVIDER, label: 'Divider', icon: Minus, color: 'bg-gray-100 text-gray-600' },
-  { type: BlockType.SPACER, label: 'Spacer', icon: Space, color: 'bg-yellow-100 text-yellow-600' },
   { type: BlockType.SEARCH, label: 'Search', icon: Search, color: 'bg-indigo-100 text-indigo-600' },
   { type: BlockType.BOOKMARK, label: 'Bookmark', icon: Bookmark, color: 'bg-pink-100 text-pink-600' },
 

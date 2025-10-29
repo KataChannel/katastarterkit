@@ -9,9 +9,12 @@ import {
 import {
   Plus,
   Layout,
+  Search,
+  Star,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { usePageState, useUIState, usePageActions } from './contexts';
 import { BlockRenderer } from './blocks/BlockRenderer';
@@ -53,6 +56,28 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
   const { showPreview } = useUIState();
   const { handleBlockUpdate, handleBlockDelete, handleAddChild, handleSelectBlock, handleAddBlock } = usePageActions();
   const [isAddingBlock, setIsAddingBlock] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Load bookmarks from localStorage on mount
+  const [bookmarkedBlocks, setBookmarkedBlocks] = useState<Set<BlockType>>(() => {
+    if (typeof window === 'undefined') return new Set();
+    try {
+      const saved = localStorage.getItem('pagebuilder-bookmarks');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  // Save bookmarks to localStorage whenever they change
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem('pagebuilder-bookmarks', JSON.stringify(Array.from(bookmarkedBlocks)));
+    } catch (error) {
+      pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_ADD, 'Failed to save bookmarks', { error });
+    }
+  }, [bookmarkedBlocks]);
 
   // Memoize block IDs array to prevent SortableContext re-renders
   const blockIds = useMemo(() => blocks.map(b => b.id), [blocks]);
@@ -89,31 +114,123 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
     try {
       await handleAddBlock(blockType);
       setIsAddingBlock(false);
+      setSearchQuery(''); // Clear search after adding
     } catch (error) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_ADD, 'Failed to add block', { blockType, error });
     }
   }, [handleAddBlock]);
 
+  // Toggle bookmark
+  const toggleBookmark = useCallback((blockType: BlockType, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent dropdown item click
+    setBookmarkedBlocks(prev => {
+      const next = new Set(prev);
+      if (next.has(blockType)) {
+        next.delete(blockType);
+      } else {
+        next.add(blockType);
+      }
+      return next;
+    });
+  }, []);
+
+  // Filter blocks based on search query
+  const filteredBlockGroups = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return blockTypeGroups;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return blockTypeGroups.map(group => ({
+      ...group,
+      blocks: group.blocks.filter(block => 
+        block.label.toLowerCase().includes(query) ||
+        block.type.toLowerCase().includes(query)
+      )
+    })).filter(group => group.blocks.length > 0);
+  }, [searchQuery, blockTypeGroups]);
+
+  // Get bookmarked blocks
+  const bookmarkedBlocksList = useMemo(() => {
+    if (bookmarkedBlocks.size === 0) return [];
+    
+    return blockTypeGroups.flatMap(group => group.blocks)
+      .filter(block => bookmarkedBlocks.has(block.type));
+  }, [bookmarkedBlocks, blockTypeGroups]);
+
   // Render dropdown menu content with grouped items
   const renderDropdownItems = () => {
-    return blockTypeGroups.map((group, groupIndex) => (
-      <div key={group.category}>
-        {groupIndex > 0 && <div className="my-1 mx-0 h-px bg-gray-200" />}
-        <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase">
-          {group.category}
-        </div>
-        {group.blocks.map(({ type, label, icon: IconComponent }) => (
-          <DropdownMenuItem 
-            key={type}
-            onClick={() => handleAddBlockClick(type)}
-            className="cursor-pointer gap-2"
-          >
-            <IconComponent size={16} className="text-gray-600" />
-            <span>{label}</span>
-          </DropdownMenuItem>
-        ))}
-      </div>
-    ));
+    return (
+      <>
+        {/* Bookmarked Blocks Section */}
+        {bookmarkedBlocksList.length > 0 && (
+          <div>
+            <div className="px-2 py-1.5 text-xs font-semibold text-yellow-600 uppercase flex items-center gap-1">
+              <Star size={12} className="fill-yellow-500 text-yellow-500" />
+              Bookmarked
+            </div>
+            {bookmarkedBlocksList.map(({ type, label, icon: IconComponent }) => (
+              <DropdownMenuItem 
+                key={type}
+                onClick={() => handleAddBlockClick(type)}
+                className="cursor-pointer gap-2 group"
+              >
+                <IconComponent size={16} className="text-gray-600" />
+                <span className="flex-1">{label}</span>
+                <Star 
+                  size={14} 
+                  className="fill-yellow-500 text-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => toggleBookmark(type, e)}
+                />
+              </DropdownMenuItem>
+            ))}
+            <div className="my-1 mx-0 h-px bg-gray-200" />
+          </div>
+        )}
+
+        {/* Filtered Block Groups */}
+        {filteredBlockGroups.length === 0 ? (
+          <div className="px-4 py-8 text-center text-gray-500 text-sm">
+            <Search size={32} className="mx-auto mb-2 opacity-30" />
+            No blocks found for "{searchQuery}"
+          </div>
+        ) : (
+          filteredBlockGroups.map((group, groupIndex) => (
+            <div key={group.category}>
+              {(groupIndex > 0 || bookmarkedBlocksList.length > 0) && (
+                <div className="my-1 mx-0 h-px bg-gray-200" />
+              )}
+              <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase">
+                {group.category}
+              </div>
+              {group.blocks.map(({ type, label, icon: IconComponent }) => {
+                const isBookmarked = bookmarkedBlocks.has(type);
+                return (
+                  <DropdownMenuItem 
+                    key={type}
+                    onClick={() => handleAddBlockClick(type)}
+                    className="cursor-pointer gap-2 group"
+                  >
+                    <IconComponent size={16} className="text-gray-600" />
+                    <span className="flex-1">{label}</span>
+                    <Star 
+                      size={14} 
+                      className={cn(
+                        "transition-all",
+                        isBookmarked 
+                          ? "fill-yellow-500 text-yellow-500" 
+                          : "text-gray-300 opacity-0 group-hover:opacity-100"
+                      )}
+                      onClick={(e) => toggleBookmark(type, e)}
+                    />
+                  </DropdownMenuItem>
+                );
+              })}
+            </div>
+          ))
+        )}
+      </>
+    );
   };
 
   return (
@@ -184,8 +301,26 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
                           Add Block
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="center" className="w-56 max-h-96 overflow-y-auto">
-                        {renderDropdownItems()}
+                      <DropdownMenuContent align="center" className="w-64 max-h-96 overflow-hidden flex flex-col">
+                        {/* Search Input */}
+                        <div className="p-2 border-b sticky top-0 bg-white z-10">
+                          <div className="relative">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Input
+                              type="text"
+                              placeholder="Search blocks..."
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              className="pl-9 h-8 text-sm"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* Scrollable Content */}
+                        <div className="overflow-y-auto max-h-80">
+                          {renderDropdownItems()}
+                        </div>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -223,8 +358,26 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
                             Add New Block
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="center" className="w-56 max-h-96 overflow-y-auto">
-                          {renderDropdownItems()}
+                        <DropdownMenuContent align="center" className="w-64 max-h-96 overflow-hidden flex flex-col">
+                          {/* Search Input */}
+                          <div className="p-2 border-b sticky top-0 bg-white z-10">
+                            <div className="relative">
+                              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                              <Input
+                                type="text"
+                                placeholder="Search blocks..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9 h-8 text-sm"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          </div>
+                          
+                          {/* Scrollable Content */}
+                          <div className="overflow-y-auto max-h-80">
+                            {renderDropdownItems()}
+                          </div>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
