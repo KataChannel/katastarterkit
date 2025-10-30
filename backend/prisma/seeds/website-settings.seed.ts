@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 export async function seedWebsiteSettings() {
   console.log('🌱 Seeding Website Settings...');
 
-  const settings: Parameters<typeof prisma.websiteSetting.upsert>[0]['create'][] = [
+  const settings: Prisma.WebsiteSettingCreateInput[] = [
     // ===== GENERAL SETTINGS =====
     {
       key: 'site.name',

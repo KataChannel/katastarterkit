@@ -4,7 +4,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR, HttpAdapterHost } from '@nestjs/core';
 import { join } from 'path';
 
 // Modules
@@ -61,14 +61,18 @@ import { ProjectModule } from './project/project.module';
 
 @Module({
   imports: [
-    // Configuration
+    // Configuration - MUST BE FIRST
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema,
       envFilePath: ['.env.local', '../.env'],
     }),
 
-    // GraphQL
+    // Core Modules - BEFORE GraphQL
+    PrismaModule,
+    AuthModule,
+    
+    // GraphQL - AFTER Core Modules
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       inject: [ConfigService],
@@ -115,10 +119,8 @@ import { ProjectModule } from './project/project.module';
     // ScheduleModule.forRoot(),
 
     // Application Modules
-    PrismaModule,
     CacheModule,
     RedisModule,
-    AuthModule,
     DataLoaderModule,
     GraphQLPerformanceModule,
     GraphQLResolversModule,
