@@ -8,6 +8,7 @@ export declare class Lesson {
     duration?: number;
     order: number;
     moduleId: string;
+    isFree: boolean;
     createdAt: Date;
     updatedAt: Date;
 }

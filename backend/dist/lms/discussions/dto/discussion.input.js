@@ -11,23 +11,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateDiscussionInput = exports.CreateReplyInput = exports.CreateDiscussionInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
+const class_validator_1 = require("class-validator");
 let CreateDiscussionInput = class CreateDiscussionInput {
 };
 exports.CreateDiscussionInput = CreateDiscussionInput;
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Course ID is required' }),
     __metadata("design:type", String)
 ], CreateDiscussionInput.prototype, "courseId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateDiscussionInput.prototype, "lessonId", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Title is required' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(200, { message: 'Title must not exceed 200 characters' }),
     __metadata("design:type", String)
 ], CreateDiscussionInput.prototype, "title", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Content is required' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(5000, { message: 'Content must not exceed 5000 characters' }),
     __metadata("design:type", String)
 ], CreateDiscussionInput.prototype, "content", void 0);
 exports.CreateDiscussionInput = CreateDiscussionInput = __decorate([
@@ -38,14 +47,19 @@ let CreateReplyInput = class CreateReplyInput {
 exports.CreateReplyInput = CreateReplyInput;
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Discussion ID is required' }),
     __metadata("design:type", String)
 ], CreateReplyInput.prototype, "discussionId", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Content is required' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(5000, { message: 'Content must not exceed 5000 characters' }),
     __metadata("design:type", String)
 ], CreateReplyInput.prototype, "content", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateReplyInput.prototype, "parentId", void 0);
 exports.CreateReplyInput = CreateReplyInput = __decorate([
@@ -56,14 +70,21 @@ let UpdateDiscussionInput = class UpdateDiscussionInput {
 exports.UpdateDiscussionInput = UpdateDiscussionInput;
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Discussion ID is required' }),
     __metadata("design:type", String)
 ], UpdateDiscussionInput.prototype, "id", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(200, { message: 'Title must not exceed 200 characters' }),
     __metadata("design:type", String)
 ], UpdateDiscussionInput.prototype, "title", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(5000, { message: 'Content must not exceed 5000 characters' }),
     __metadata("design:type", String)
 ], UpdateDiscussionInput.prototype, "content", void 0);
 exports.UpdateDiscussionInput = UpdateDiscussionInput = __decorate([

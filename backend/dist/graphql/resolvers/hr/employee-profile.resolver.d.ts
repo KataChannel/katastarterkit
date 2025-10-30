@@ -25,18 +25,18 @@ export declare class EmployeeProfileResolver {
             departmentId: string | null;
         };
     } & {
-        level: string | null;
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        isActive: boolean;
-        department: string | null;
         createdBy: string | null;
         updatedBy: string | null;
+        level: string | null;
+        isActive: boolean;
+        department: string | null;
+        userId: string;
         displayName: string | null;
-        skills: string[];
         startDate: Date | null;
+        skills: string[];
         notes: string | null;
         city: string | null;
         employeeCode: string;
@@ -93,11 +93,11 @@ export declare class EmployeeProfileResolver {
         };
         employmentHistory: {
             id: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
-            notes: string | null;
+            userId: string;
             approvedAt: Date | null;
+            notes: string | null;
             processedBy: string | null;
             eventType: import("@prisma/client").$Enums.EmploymentEventType;
             contractType: import("@prisma/client").$Enums.ContractType | null;
@@ -128,15 +128,15 @@ export declare class EmployeeProfileResolver {
         }[];
         documents: {
             id: string;
-            userId: string;
-            issueDate: Date | null;
             updatedAt: Date;
-            isVerified: boolean;
             title: string;
             description: string | null;
-            uploadedBy: string;
+            isVerified: boolean;
+            userId: string;
+            issueDate: Date | null;
             fileName: string;
             fileSize: number | null;
+            uploadedBy: string;
             fileId: string;
             employeeProfileId: string;
             uploadedAt: Date;
@@ -154,12 +154,12 @@ export declare class EmployeeProfileResolver {
         }[];
         onboardingChecklist: {
             id: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
             status: import("@prisma/client").$Enums.OnboardingStatus;
-            tasks: import("@prisma/client/runtime/library").JsonValue;
             createdBy: string | null;
+            tasks: import("@prisma/client/runtime/library").JsonValue;
+            userId: string;
             assignedTo: string | null;
             startDate: Date;
             completedTasks: number;
@@ -178,10 +178,10 @@ export declare class EmployeeProfileResolver {
         };
         offboardingProcesses: {
             id: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
             status: import("@prisma/client").$Enums.OffboardingStatus;
+            userId: string;
             completedAt: Date | null;
             employeeProfileId: string;
             effectiveDate: Date | null;
@@ -227,18 +227,18 @@ export declare class EmployeeProfileResolver {
             employeeComments: string | null;
         }[];
     } & {
-        level: string | null;
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        isActive: boolean;
-        department: string | null;
         createdBy: string | null;
         updatedBy: string | null;
+        level: string | null;
+        isActive: boolean;
+        department: string | null;
+        userId: string;
         displayName: string | null;
-        skills: string[];
         startDate: Date | null;
+        skills: string[];
         notes: string | null;
         city: string | null;
         employeeCode: string;
@@ -295,11 +295,11 @@ export declare class EmployeeProfileResolver {
         };
         employmentHistory: {
             id: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
-            notes: string | null;
+            userId: string;
             approvedAt: Date | null;
+            notes: string | null;
             processedBy: string | null;
             eventType: import("@prisma/client").$Enums.EmploymentEventType;
             contractType: import("@prisma/client").$Enums.ContractType | null;
@@ -330,15 +330,15 @@ export declare class EmployeeProfileResolver {
         }[];
         documents: {
             id: string;
-            userId: string;
-            issueDate: Date | null;
             updatedAt: Date;
-            isVerified: boolean;
             title: string;
             description: string | null;
-            uploadedBy: string;
+            isVerified: boolean;
+            userId: string;
+            issueDate: Date | null;
             fileName: string;
             fileSize: number | null;
+            uploadedBy: string;
             fileId: string;
             employeeProfileId: string;
             uploadedAt: Date;
@@ -356,12 +356,12 @@ export declare class EmployeeProfileResolver {
         }[];
         onboardingChecklist: {
             id: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
             status: import("@prisma/client").$Enums.OnboardingStatus;
-            tasks: import("@prisma/client/runtime/library").JsonValue;
             createdBy: string | null;
+            tasks: import("@prisma/client/runtime/library").JsonValue;
+            userId: string;
             assignedTo: string | null;
             startDate: Date;
             completedTasks: number;
@@ -380,10 +380,10 @@ export declare class EmployeeProfileResolver {
         };
         offboardingProcesses: {
             id: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
             status: import("@prisma/client").$Enums.OffboardingStatus;
+            userId: string;
             completedAt: Date | null;
             employeeProfileId: string;
             effectiveDate: Date | null;
@@ -429,18 +429,18 @@ export declare class EmployeeProfileResolver {
             employeeComments: string | null;
         }[];
     } & {
-        level: string | null;
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        isActive: boolean;
-        department: string | null;
         createdBy: string | null;
         updatedBy: string | null;
+        level: string | null;
+        isActive: boolean;
+        department: string | null;
+        userId: string;
         displayName: string | null;
-        skills: string[];
         startDate: Date | null;
+        skills: string[];
         notes: string | null;
         city: string | null;
         employeeCode: string;
@@ -508,11 +508,11 @@ export declare class EmployeeProfileResolver {
         };
         employmentHistory: {
             id: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
-            notes: string | null;
+            userId: string;
             approvedAt: Date | null;
+            notes: string | null;
             processedBy: string | null;
             eventType: import("@prisma/client").$Enums.EmploymentEventType;
             contractType: import("@prisma/client").$Enums.ContractType | null;
@@ -542,18 +542,18 @@ export declare class EmployeeProfileResolver {
             internalNotes: string | null;
         }[];
     } & {
-        level: string | null;
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        isActive: boolean;
-        department: string | null;
         createdBy: string | null;
         updatedBy: string | null;
+        level: string | null;
+        isActive: boolean;
+        department: string | null;
+        userId: string;
         displayName: string | null;
-        skills: string[];
         startDate: Date | null;
+        skills: string[];
         notes: string | null;
         city: string | null;
         employeeCode: string;
@@ -610,18 +610,18 @@ export declare class EmployeeProfileResolver {
                 isActive: boolean;
             };
         } & {
-            level: string | null;
             id: string;
-            userId: string;
             createdAt: Date;
             updatedAt: Date;
-            isActive: boolean;
-            department: string | null;
             createdBy: string | null;
             updatedBy: string | null;
+            level: string | null;
+            isActive: boolean;
+            department: string | null;
+            userId: string;
             displayName: string | null;
-            skills: string[];
             startDate: Date | null;
+            skills: string[];
             notes: string | null;
             city: string | null;
             employeeCode: string;
@@ -691,18 +691,18 @@ export declare class EmployeeProfileResolver {
             departmentId: string | null;
         };
     } & {
-        level: string | null;
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
-        isActive: boolean;
-        department: string | null;
         createdBy: string | null;
         updatedBy: string | null;
+        level: string | null;
+        isActive: boolean;
+        department: string | null;
+        userId: string;
         displayName: string | null;
-        skills: string[];
         startDate: Date | null;
+        skills: string[];
         notes: string | null;
         city: string | null;
         employeeCode: string;

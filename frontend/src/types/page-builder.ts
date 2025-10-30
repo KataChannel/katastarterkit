@@ -4,6 +4,7 @@
 export enum BlockType {
   // Content Blocks
   TEXT = 'TEXT',
+  RICH_TEXT = 'RICH_TEXT', // BlockNote-style editor with Tiptap
   IMAGE = 'IMAGE',
   VIDEO = 'VIDEO',
   CAROUSEL = 'CAROUSEL',

@@ -24,19 +24,19 @@ let CertificatesResolver = class CertificatesResolver {
         this.certificatesService = certificatesService;
     }
     generateCertificate(user, enrollmentId) {
-        return this.certificatesService.generateCertificate(enrollmentId, user.userId);
+        return this.certificatesService.generateCertificate(enrollmentId, user.id);
     }
     getMyCertificates(user) {
-        return this.certificatesService.getMyCertificates(user.userId);
+        return this.certificatesService.getMyCertificates(user.id);
     }
     getCertificate(user, id) {
-        return this.certificatesService.getCertificate(id, user.userId);
+        return this.certificatesService.getCertificate(id, user.id);
     }
     verifyCertificate(certificateNumber) {
         return this.certificatesService.verifyCertificate(certificateNumber);
     }
     getCertificateStats(user) {
-        return this.certificatesService.getCertificateStats(user.userId);
+        return this.certificatesService.getCertificateStats(user.id);
     }
 };
 exports.CertificatesResolver = CertificatesResolver;

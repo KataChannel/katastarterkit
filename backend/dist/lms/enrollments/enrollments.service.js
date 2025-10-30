@@ -118,9 +118,6 @@ let EnrollmentsService = class EnrollmentsService {
                 },
             },
         });
-        if (!enrollment) {
-            throw new common_1.NotFoundException('Enrollment not found');
-        }
         return enrollment;
     }
     async updateProgress(userId, courseId) {

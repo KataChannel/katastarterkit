@@ -17,6 +17,7 @@ const graphql_1 = require("@nestjs/graphql");
 const common_1 = require("@nestjs/common");
 const courses_service_1 = require("./courses.service");
 const course_entity_1 = require("./entities/course.entity");
+const paginated_courses_entity_1 = require("./entities/paginated-courses.entity");
 const create_course_input_1 = require("./dto/create-course.input");
 const update_course_input_1 = require("./dto/update-course.input");
 const course_filters_input_1 = require("./dto/course-filters.input");
@@ -34,7 +35,7 @@ let CoursesResolver = class CoursesResolver {
         this.coursesService = coursesService;
     }
     createCourse(user, createCourseInput) {
-        return this.coursesService.create(user.userId, createCourseInput);
+        return this.coursesService.create(user.id, createCourseInput);
     }
     findAll(filters) {
         return this.coursesService.findAll(filters || new course_filters_input_1.CourseFiltersInput());
@@ -46,46 +47,46 @@ let CoursesResolver = class CoursesResolver {
         return this.coursesService.findBySlug(slug);
     }
     getMyCourses(user) {
-        return this.coursesService.getMyCourses(user.userId);
+        return this.coursesService.getMyCourses(user.id);
     }
     updateCourse(user, updateCourseInput) {
-        return this.coursesService.update(updateCourseInput.id, user.userId, updateCourseInput);
+        return this.coursesService.update(updateCourseInput.id, user.id, updateCourseInput);
     }
     publishCourse(user, id) {
-        return this.coursesService.publish(id, user.userId);
+        return this.coursesService.publish(id, user.id);
     }
     archiveCourse(user, id) {
-        return this.coursesService.archive(id, user.userId);
+        return this.coursesService.archive(id, user.id);
     }
     async removeCourse(user, id) {
-        const result = await this.coursesService.remove(id, user.userId);
+        const result = await this.coursesService.remove(id, user.id);
         return result.success;
     }
     createModule(user, input) {
-        return this.coursesService.createModule(user.userId, input);
+        return this.coursesService.createModule(user.id, input);
     }
     updateModule(user, input) {
-        return this.coursesService.updateModule(user.userId, input);
+        return this.coursesService.updateModule(user.id, input);
     }
     async deleteModule(user, id) {
-        const result = await this.coursesService.deleteModule(user.userId, id);
+        const result = await this.coursesService.deleteModule(user.id, id);
         return result.success;
     }
     reorderModules(user, input) {
-        return this.coursesService.reorderModules(user.userId, input);
+        return this.coursesService.reorderModules(user.id, input);
     }
     createLesson(user, input) {
-        return this.coursesService.createLesson(user.userId, input);
+        return this.coursesService.createLesson(user.id, input);
     }
     updateLesson(user, input) {
-        return this.coursesService.updateLesson(user.userId, input);
+        return this.coursesService.updateLesson(user.id, input);
     }
     async deleteLesson(user, id) {
-        const result = await this.coursesService.deleteLesson(user.userId, id);
+        const result = await this.coursesService.deleteLesson(user.id, id);
         return result.success;
     }
     reorderLessons(user, input) {
-        return this.coursesService.reorderLessons(user.userId, input);
+        return this.coursesService.reorderLessons(user.id, input);
     }
 };
 exports.CoursesResolver = CoursesResolver;
@@ -100,7 +101,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CoursesResolver.prototype, "createCourse", null);
 __decorate([
-    (0, graphql_1.Query)(() => [course_entity_1.Course], { name: 'courses' }),
+    (0, graphql_1.Query)(() => paginated_courses_entity_1.PaginatedCourses, { name: 'courses' }),
     __param(0, (0, graphql_1.Args)('filters', { nullable: true })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [course_filters_input_1.CourseFiltersInput]),
@@ -171,8 +172,7 @@ __decorate([
 ], CoursesResolver.prototype, "removeCourse", null);
 __decorate([
     (0, graphql_1.Mutation)(() => course_module_entity_1.CourseModule, { name: 'createModule' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
@@ -181,8 +181,7 @@ __decorate([
 ], CoursesResolver.prototype, "createModule", null);
 __decorate([
     (0, graphql_1.Mutation)(() => course_module_entity_1.CourseModule, { name: 'updateModule' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
@@ -191,8 +190,7 @@ __decorate([
 ], CoursesResolver.prototype, "updateModule", null);
 __decorate([
     (0, graphql_1.Mutation)(() => Boolean, { name: 'deleteModule' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
     __metadata("design:type", Function),
@@ -201,8 +199,7 @@ __decorate([
 ], CoursesResolver.prototype, "deleteModule", null);
 __decorate([
     (0, graphql_1.Mutation)(() => [course_module_entity_1.CourseModule], { name: 'reorderModules' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
@@ -211,8 +208,7 @@ __decorate([
 ], CoursesResolver.prototype, "reorderModules", null);
 __decorate([
     (0, graphql_1.Mutation)(() => lesson_entity_1.Lesson, { name: 'createLesson' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
@@ -221,8 +217,7 @@ __decorate([
 ], CoursesResolver.prototype, "createLesson", null);
 __decorate([
     (0, graphql_1.Mutation)(() => lesson_entity_1.Lesson, { name: 'updateLesson' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
@@ -231,8 +226,7 @@ __decorate([
 ], CoursesResolver.prototype, "updateLesson", null);
 __decorate([
     (0, graphql_1.Mutation)(() => Boolean, { name: 'deleteLesson' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
     __metadata("design:type", Function),
@@ -241,8 +235,7 @@ __decorate([
 ], CoursesResolver.prototype, "deleteLesson", null);
 __decorate([
     (0, graphql_1.Mutation)(() => [lesson_entity_1.Lesson], { name: 'reorderLessons' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),

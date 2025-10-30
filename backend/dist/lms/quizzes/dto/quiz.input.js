@@ -167,6 +167,8 @@ __decorate([
 ], SubmitQuizInput.prototype, "enrollmentId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [QuizAnswerInput]),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayNotEmpty)(),
     __metadata("design:type", Array)
 ], SubmitQuizInput.prototype, "answers", void 0);
 __decorate([

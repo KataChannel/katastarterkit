@@ -52,6 +52,10 @@ __decorate([
     __metadata("design:type", String)
 ], Lesson.prototype, "moduleId", void 0);
 __decorate([
+    (0, graphql_1.Field)({ defaultValue: false }),
+    __metadata("design:type", Boolean)
+], Lesson.prototype, "isFree", void 0);
+__decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)
 ], Lesson.prototype, "createdAt", void 0);

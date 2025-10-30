@@ -5,6 +5,7 @@ export declare enum PageStatus {
 }
 export declare enum BlockType {
     TEXT = "TEXT",
+    RICH_TEXT = "RICH_TEXT",
     IMAGE = "IMAGE",
     VIDEO = "VIDEO",
     CAROUSEL = "CAROUSEL",

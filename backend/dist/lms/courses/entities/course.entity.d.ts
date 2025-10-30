@@ -1,4 +1,7 @@
 import { CourseLevel, CourseStatus } from '@prisma/client';
+import { User } from '../../../graphql/models/user.model';
+import { CourseCategory } from '../../categories/entities/course-category.entity';
+import { CourseModule } from './course-module.entity';
 export declare class Course {
     id: string;
     title: string;
@@ -13,13 +16,18 @@ export declare class Course {
     metaTitle?: string;
     metaDescription?: string;
     tags: string[];
+    whatYouWillLearn: string[];
+    requirements: string[];
+    targetAudience: string[];
     categoryId?: string;
     enrollmentCount: number;
-    rating: number;
     avgRating: number;
     reviewCount: number;
     instructorId: string;
     createdAt: Date;
     updatedAt: Date;
     publishedAt?: Date;
+    instructor?: User;
+    category?: CourseCategory;
+    modules?: CourseModule[];
 }

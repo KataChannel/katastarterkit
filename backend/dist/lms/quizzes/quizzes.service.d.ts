@@ -7,23 +7,24 @@ export declare class QuizzesService {
         questions: ({
             answers: {
                 id: string;
+                order: number;
                 createdAt: Date;
                 updatedAt: Date;
-                order: number;
                 text: string;
                 isCorrect: boolean;
                 questionId: string;
             }[];
         } & {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             type: import("@prisma/client").$Enums.QuestionType;
             order: number;
+            createdAt: Date;
+            updatedAt: Date;
             question: string;
             points: number;
             explanation: string | null;
             quizId: string;
+            mediaUrl: string | null;
         })[];
     } & {
         id: string;
@@ -34,72 +35,86 @@ export declare class QuizzesService {
         lessonId: string;
         passingScore: number;
         timeLimit: number | null;
+        maxAttempts: number | null;
+        isRequired: boolean;
     }>;
     getQuiz(quizId: string, userId: string): Promise<{
         lesson: {
             courseModule: {
                 course: {
-                    level: import("@prisma/client").$Enums.CourseLevel;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
-                    status: import("@prisma/client").$Enums.CourseStatus;
                     title: string;
                     slug: string;
                     description: string | null;
+                    status: import("@prisma/client").$Enums.CourseStatus;
+                    publishedAt: Date | null;
+                    level: import("@prisma/client").$Enums.CourseLevel;
                     thumbnail: string | null;
-                    price: number;
+                    trailer: string | null;
+                    price: import("@prisma/client/runtime/library").Decimal;
                     duration: number | null;
+                    language: string | null;
                     whatYouWillLearn: string[];
                     requirements: string[];
-                    categoryId: string | null;
-                    instructorId: string;
-                    rating: number;
+                    targetAudience: string[];
+                    avgRating: number;
                     reviewCount: number;
                     enrollmentCount: number;
-                    avgRating: number;
+                    viewCount: number;
+                    metaTitle: string | null;
+                    metaDescription: string | null;
+                    tags: string[];
+                    categoryId: string | null;
+                    instructorId: string;
                 };
             } & {
                 id: string;
-                courseId: string;
+                order: number;
                 createdAt: Date;
                 updatedAt: Date;
                 title: string;
                 description: string | null;
-                order: number;
+                courseId: string;
+                isPublished: boolean;
             };
         } & {
             id: string;
+            type: import("@prisma/client").$Enums.LessonType;
+            content: string | null;
+            order: number;
             createdAt: Date;
             updatedAt: Date;
             title: string;
             description: string | null;
             duration: number | null;
-            type: import("@prisma/client").$Enums.LessonType;
-            content: string | null;
-            order: number;
             moduleId: string;
+            isPreview: boolean;
+            isFree: boolean;
+            attachments: import("@prisma/client/runtime/library").JsonValue | null;
         };
         questions: ({
             answers: {
                 id: string;
+                order: number;
                 createdAt: Date;
                 updatedAt: Date;
-                order: number;
                 text: string;
                 isCorrect: boolean;
                 questionId: string;
             }[];
         } & {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             type: import("@prisma/client").$Enums.QuestionType;
             order: number;
+            createdAt: Date;
+            updatedAt: Date;
             question: string;
             points: number;
             explanation: string | null;
             quizId: string;
+            mediaUrl: string | null;
         })[];
     } & {
         id: string;
@@ -110,28 +125,31 @@ export declare class QuizzesService {
         lessonId: string;
         passingScore: number;
         timeLimit: number | null;
+        maxAttempts: number | null;
+        isRequired: boolean;
     }>;
     getQuizzesByLesson(lessonId: string): Promise<({
         questions: ({
             answers: {
                 id: string;
+                order: number;
                 createdAt: Date;
                 updatedAt: Date;
-                order: number;
                 text: string;
                 isCorrect: boolean;
                 questionId: string;
             }[];
         } & {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             type: import("@prisma/client").$Enums.QuestionType;
             order: number;
+            createdAt: Date;
+            updatedAt: Date;
             question: string;
             points: number;
             explanation: string | null;
             quizId: string;
+            mediaUrl: string | null;
         })[];
     } & {
         id: string;
@@ -142,28 +160,31 @@ export declare class QuizzesService {
         lessonId: string;
         passingScore: number;
         timeLimit: number | null;
+        maxAttempts: number | null;
+        isRequired: boolean;
     })[]>;
     updateQuiz(userId: string, quizId: string, updateQuizInput: UpdateQuizInput): Promise<{
         questions: ({
             answers: {
                 id: string;
+                order: number;
                 createdAt: Date;
                 updatedAt: Date;
-                order: number;
                 text: string;
                 isCorrect: boolean;
                 questionId: string;
             }[];
         } & {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             type: import("@prisma/client").$Enums.QuestionType;
             order: number;
+            createdAt: Date;
+            updatedAt: Date;
             question: string;
             points: number;
             explanation: string | null;
             quizId: string;
+            mediaUrl: string | null;
         })[];
     } & {
         id: string;
@@ -174,6 +195,8 @@ export declare class QuizzesService {
         lessonId: string;
         passingScore: number;
         timeLimit: number | null;
+        maxAttempts: number | null;
+        isRequired: boolean;
     }>;
     deleteQuiz(userId: string, quizId: string): Promise<boolean>;
     submitQuiz(userId: string, submitQuizInput: SubmitQuizInput): Promise<{
@@ -181,23 +204,24 @@ export declare class QuizzesService {
             questions: ({
                 answers: {
                     id: string;
+                    order: number;
                     createdAt: Date;
                     updatedAt: Date;
-                    order: number;
                     text: string;
                     isCorrect: boolean;
                     questionId: string;
                 }[];
             } & {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 type: import("@prisma/client").$Enums.QuestionType;
                 order: number;
+                createdAt: Date;
+                updatedAt: Date;
                 question: string;
                 points: number;
                 explanation: string | null;
                 quizId: string;
+                mediaUrl: string | null;
             })[];
         } & {
             id: string;
@@ -208,43 +232,48 @@ export declare class QuizzesService {
             lessonId: string;
             passingScore: number;
             timeLimit: number | null;
+            maxAttempts: number | null;
+            isRequired: boolean;
         };
     } & {
         id: string;
-        enrollmentId: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         completedAt: Date | null;
-        score: number | null;
-        startedAt: Date;
+        enrollmentId: string;
         answers: import("@prisma/client/runtime/library").JsonValue | null;
         quizId: string;
         timeSpent: number | null;
+        score: number | null;
         passed: boolean;
+        attemptNumber: number;
+        startedAt: Date;
     }>;
+    private updateEnrollmentProgress;
     getQuizAttempts(userId: string, quizId: string): Promise<({
         quiz: {
             questions: ({
                 answers: {
                     id: string;
+                    order: number;
                     createdAt: Date;
                     updatedAt: Date;
-                    order: number;
                     text: string;
                     isCorrect: boolean;
                     questionId: string;
                 }[];
             } & {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 type: import("@prisma/client").$Enums.QuestionType;
                 order: number;
+                createdAt: Date;
+                updatedAt: Date;
                 question: string;
                 points: number;
                 explanation: string | null;
                 quizId: string;
+                mediaUrl: string | null;
             })[];
         } & {
             id: string;
@@ -255,43 +284,47 @@ export declare class QuizzesService {
             lessonId: string;
             passingScore: number;
             timeLimit: number | null;
+            maxAttempts: number | null;
+            isRequired: boolean;
         };
     } & {
         id: string;
-        enrollmentId: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         completedAt: Date | null;
-        score: number | null;
-        startedAt: Date;
+        enrollmentId: string;
         answers: import("@prisma/client/runtime/library").JsonValue | null;
         quizId: string;
         timeSpent: number | null;
+        score: number | null;
         passed: boolean;
+        attemptNumber: number;
+        startedAt: Date;
     })[]>;
     getQuizAttempt(userId: string, attemptId: string): Promise<{
         quiz: {
             questions: ({
                 answers: {
                     id: string;
+                    order: number;
                     createdAt: Date;
                     updatedAt: Date;
-                    order: number;
                     text: string;
                     isCorrect: boolean;
                     questionId: string;
                 }[];
             } & {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 type: import("@prisma/client").$Enums.QuestionType;
                 order: number;
+                createdAt: Date;
+                updatedAt: Date;
                 question: string;
                 points: number;
                 explanation: string | null;
                 quizId: string;
+                mediaUrl: string | null;
             })[];
         } & {
             id: string;
@@ -302,19 +335,22 @@ export declare class QuizzesService {
             lessonId: string;
             passingScore: number;
             timeLimit: number | null;
+            maxAttempts: number | null;
+            isRequired: boolean;
         };
     } & {
         id: string;
-        enrollmentId: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         completedAt: Date | null;
-        score: number | null;
-        startedAt: Date;
+        enrollmentId: string;
         answers: import("@prisma/client/runtime/library").JsonValue | null;
         quizId: string;
         timeSpent: number | null;
+        score: number | null;
         passed: boolean;
+        attemptNumber: number;
+        startedAt: Date;
     }>;
 }

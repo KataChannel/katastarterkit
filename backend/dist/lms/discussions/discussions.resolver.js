@@ -25,7 +25,7 @@ let DiscussionsResolver = class DiscussionsResolver {
         this.discussionsService = discussionsService;
     }
     createDiscussion(user, input) {
-        return this.discussionsService.createDiscussion(user.userId, input);
+        return this.discussionsService.createDiscussion(user.id, input);
     }
     getCourseDiscussions(courseId, lessonId) {
         return this.discussionsService.getCourseDiscussions(courseId, lessonId);
@@ -34,16 +34,16 @@ let DiscussionsResolver = class DiscussionsResolver {
         return this.discussionsService.getDiscussion(id);
     }
     createReply(user, input) {
-        return this.discussionsService.createReply(user.userId, input);
+        return this.discussionsService.createReply(user.id, input);
     }
     updateDiscussion(user, input) {
-        return this.discussionsService.updateDiscussion(user.userId, input);
+        return this.discussionsService.updateDiscussion(user.id, input);
     }
     deleteDiscussion(user, id) {
-        return this.discussionsService.deleteDiscussion(user.userId, id);
+        return this.discussionsService.deleteDiscussion(user.id, id);
     }
     togglePin(user, id) {
-        return this.discussionsService.togglePin(user.userId, id);
+        return this.discussionsService.togglePin(user.id, id);
     }
 };
 exports.DiscussionsResolver = DiscussionsResolver;
