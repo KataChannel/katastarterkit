@@ -206,6 +206,10 @@ model User {
   blogComments BlogComment[]   @relation("BlogCommentAuthor")
   blogShares   BlogPostShare[] @relation("BlogShareUser")
 
+  // Website Settings Relations
+  settingsCreated WebsiteSetting[] @relation("SettingCreator")
+  settingsUpdated WebsiteSetting[] @relation("SettingUpdater")
+
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
   @@index([roleType])
@@ -4004,4 +4008,65 @@ model BlogPostShare {
   @@index([platform])
   @@index([sharedAt])
   @@map("blog_post_shares")
+}
+
+// ===================================
+// WEBSITE SETTINGS MODELS
+// ===================================
+
+enum SettingType {
+  TEXT
+  TEXTAREA
+  NUMBER
+  BOOLEAN
+  COLOR
+  IMAGE
+  URL
+  JSON
+  SELECT
+}
+
+enum SettingCategory {
+  GENERAL
+  HEADER
+  FOOTER
+  SEO
+  SOCIAL
+  CONTACT
+  APPEARANCE
+  ANALYTICS
+  PAYMENT
+  SHIPPING
+}
+
+model WebsiteSetting {
+  id          String          @id @default(uuid())
+  key         String          @unique // e.g., "header.logo", "footer.copyright"
+  value       String?         @db.Text // Giá trị setting (string, json, etc.)
+  type        SettingType     @default(TEXT) // Kiểu dữ liệu
+  category    SettingCategory @default(GENERAL) // Phân loại
+  label       String // Tên hiển thị
+  description String?         @db.Text // Mô tả setting
+  group       String? // Nhóm con (e.g., "logo", "menu", "social")
+  order       Int             @default(0) // Thứ tự hiển thị
+  isActive    Boolean         @default(true)
+  isPublic    Boolean         @default(true) // Public settings có thể lấy không cần auth
+  
+  // Metadata
+  options     Json? // Options cho SELECT type: ["option1", "option2"]
+  validation  Json? // Rules validation: { "min": 0, "max": 100, "required": true }
+  
+  // Timestamps
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  createdBy   String?
+  updatedBy   String?
+  
+  // Relations
+  creator     User?           @relation("SettingCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater     User?           @relation("SettingUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+  
+  @@index([category, isActive])
+  @@index([key])
+  @@map("website_settings")
 }
