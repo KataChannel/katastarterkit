@@ -12,7 +12,6 @@ export const COURSE_BASIC_FRAGMENT = gql`
     level
     status
     duration
-    rating
     avgRating
     enrollmentCount
     reviewCount
@@ -28,6 +27,9 @@ export const COURSE_DETAIL_FRAGMENT = gql`
     metaTitle
     metaDescription
     tags
+    whatYouWillLearn
+    requirements
+    targetAudience
     instructorId
   }
   ${COURSE_BASIC_FRAGMENT}
@@ -37,15 +39,21 @@ export const COURSE_DETAIL_FRAGMENT = gql`
 export const GET_COURSES = gql`
   query GetCourses($filters: CourseFiltersInput) {
     courses(filters: $filters) {
-      ...CourseBasic
-      categoryId
-      instructor {
-        id
-        username
-        firstName
-        lastName
-        avatar
+      data {
+        ...CourseBasic
+        categoryId
+        instructor {
+          id
+          username
+          firstName
+          lastName
+          avatar
+        }
       }
+      total
+      page
+      limit
+      totalPages
     }
   }
   ${COURSE_BASIC_FRAGMENT}

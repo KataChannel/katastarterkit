@@ -1,5 +1,8 @@
 import { ObjectType, Field, ID, Float, Int, registerEnumType } from '@nestjs/graphql';
 import { CourseLevel, CourseStatus } from '@prisma/client';
+import { User } from '../../../graphql/models/user.model';
+import { CourseCategory } from '../../categories/entities/course-category.entity';
+import { CourseModule } from './course-module.entity';
 
 // Register enums for GraphQL
 registerEnumType(CourseLevel, {
@@ -53,19 +56,25 @@ export class Course {
   @Field(() => [String])
   tags: string[];
 
+  @Field(() => [String])
+  whatYouWillLearn: string[];
+
+  @Field(() => [String])
+  requirements: string[];
+
+  @Field(() => [String])
+  targetAudience: string[];
+
   @Field(() => String, { nullable: true })
   categoryId?: string;
 
-  @Field(() => Int)
+  @Field(() => Int, { defaultValue: 0 })
   enrollmentCount: number;
 
-  @Field(() => Float)
-  rating: number;
-
-  @Field(() => Float)
+  @Field(() => Float, { defaultValue: 0 })
   avgRating: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { defaultValue: 0 })
   reviewCount: number;
 
   @Field(() => String)
@@ -80,10 +89,13 @@ export class Course {
   @Field({ nullable: true })
   publishedAt?: Date;
 
-  // Relations (lazy loaded)
-  // instructor?: User;
-  // category?: CourseCategory;
-  // modules?: CourseModule[];
-  // enrollments?: Enrollment[];
-  // reviews?: CourseReview[];
+  // Relations (will be resolved by field resolvers)
+  @Field(() => User, { nullable: true })
+  instructor?: User;
+
+  @Field(() => CourseCategory, { nullable: true })
+  category?: CourseCategory;
+
+  @Field(() => [CourseModule], { nullable: true })
+  modules?: CourseModule[];
 }

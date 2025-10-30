@@ -2,6 +2,7 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { Course } from './entities/course.entity';
+import { PaginatedCourses } from './entities/paginated-courses.entity';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
 import { CourseFiltersInput } from './dto/course-filters.input';
@@ -26,10 +27,10 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('createCourseInput') createCourseInput: CreateCourseInput,
   ) {
-    return this.coursesService.create(user.userId, createCourseInput);
+    return this.coursesService.create(user.id, createCourseInput);
   }
 
-  @Query(() => [Course], { name: 'courses' })
+  @Query(() => PaginatedCourses, { name: 'courses' })
   findAll(@Args('filters', { nullable: true }) filters?: CourseFiltersInput) {
     return this.coursesService.findAll(filters || new CourseFiltersInput());
   }
@@ -48,7 +49,7 @@ export class CoursesResolver {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRoleType.ADMIN)
   getMyCourses(@CurrentUser() user: any) {
-    return this.coursesService.getMyCourses(user.userId);
+    return this.coursesService.getMyCourses(user.id);
   }
 
   @Mutation(() => Course, { name: 'updateCourse' })
@@ -58,7 +59,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('updateCourseInput') updateCourseInput: UpdateCourseInput,
   ) {
-    return this.coursesService.update(updateCourseInput.id, user.userId, updateCourseInput);
+    return this.coursesService.update(updateCourseInput.id, user.id, updateCourseInput);
   }
 
   @Mutation(() => Course, { name: 'publishCourse' })
@@ -68,7 +69,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    return this.coursesService.publish(id, user.userId);
+    return this.coursesService.publish(id, user.id);
   }
 
   @Mutation(() => Course, { name: 'archiveCourse' })
@@ -78,7 +79,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    return this.coursesService.archive(id, user.userId);
+    return this.coursesService.archive(id, user.id);
   }
 
   @Mutation(() => Boolean, { name: 'deleteCourse' })
@@ -88,7 +89,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    const result = await this.coursesService.remove(id, user.userId);
+    const result = await this.coursesService.remove(id, user.id);
     return result.success;
   }
 
@@ -101,7 +102,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('input') input: CreateModuleInput,
   ) {
-    return this.coursesService.createModule(user.userId, input);
+    return this.coursesService.createModule(user.id, input);
   }
 
   @Mutation(() => CourseModule, { name: 'updateModule' })
@@ -111,7 +112,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('input') input: UpdateModuleInput,
   ) {
-    return this.coursesService.updateModule(user.userId, input);
+    return this.coursesService.updateModule(user.id, input);
   }
 
   @Mutation(() => Boolean, { name: 'deleteModule' })
@@ -121,7 +122,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    const result = await this.coursesService.deleteModule(user.userId, id);
+    const result = await this.coursesService.deleteModule(user.id, id);
     return result.success;
   }
 
@@ -132,7 +133,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('input') input: ReorderModulesInput,
   ) {
-    return this.coursesService.reorderModules(user.userId, input);
+    return this.coursesService.reorderModules(user.id, input);
   }
 
   // ==================== LESSON MUTATIONS ====================
@@ -144,7 +145,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('input') input: CreateLessonInput,
   ) {
-    return this.coursesService.createLesson(user.userId, input);
+    return this.coursesService.createLesson(user.id, input);
   }
 
   @Mutation(() => Lesson, { name: 'updateLesson' })
@@ -154,7 +155,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('input') input: UpdateLessonInput,
   ) {
-    return this.coursesService.updateLesson(user.userId, input);
+    return this.coursesService.updateLesson(user.id, input);
   }
 
   @Mutation(() => Boolean, { name: 'deleteLesson' })
@@ -164,7 +165,7 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    const result = await this.coursesService.deleteLesson(user.userId, id);
+    const result = await this.coursesService.deleteLesson(user.id, id);
     return result.success;
   }
 
@@ -175,6 +176,6 @@ export class CoursesResolver {
     @CurrentUser() user: any,
     @Args('input') input: ReorderLessonsInput,
   ) {
-    return this.coursesService.reorderLessons(user.userId, input);
+    return this.coursesService.reorderLessons(user.id, input);
   }
 }

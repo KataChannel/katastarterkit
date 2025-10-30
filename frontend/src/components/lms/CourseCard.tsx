@@ -15,7 +15,7 @@ interface CourseCardProps {
     price: number;
     level: string;
     duration?: number;
-    rating: number;
+    avgRating: number;
     enrollmentCount: number;
     reviewCount: number;
     categoryId?: string;
@@ -130,7 +130,7 @@ export default function CourseCard({ course, showInstructor = true }: CourseCard
             {/* Rating */}
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-              <span className="font-medium">{course.rating.toFixed(1)}</span>
+              <span className="font-medium">{course.avgRating.toFixed(1)}</span>
               <span className="text-gray-400">({course.reviewCount})</span>
             </div>
 

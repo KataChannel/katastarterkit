@@ -1,12 +1,14 @@
-// ✅ MIGRATED TO DYNAMIC GRAPHQL - 2025-10-29
+// ✅ MIGRATED TO LMS ENROLLMENT MUTATION - 2025-10-30
 // Original backup: EnrollButton.tsx.backup
 
 'use client';
 
-import React, { useState } from 'react';
-import { useCreateOne } from '@/hooks/useDynamicGraphQL';
+import React, { useState, useEffect } from 'react';
+import { useMutation } from '@apollo/client';
+import { ENROLL_COURSE } from '@/graphql/lms/enrollments.graphql';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface EnrollButtonProps {
   courseId: string;
@@ -24,16 +26,16 @@ export default function EnrollButton({
   onEnrollSuccess 
 }: EnrollButtonProps) {
   const router = useRouter();
-  // ✅ Migrated to Dynamic GraphQL
-  const [enrollCourse, { loading }] = useCreateOne('enrollment');
+  const { user, isAuthenticated } = useAuth();
   const [enrolled, setEnrolled] = useState(isEnrolled);
-
-  const handleEnroll = async () => {
-    try {
-      await enrollCourse({
-        data: { courseId },
-      });
-      
+  
+  // Sync local state with prop when it changes
+  useEffect(() => {
+    setEnrolled(isEnrolled);
+  }, [isEnrolled]);
+  
+  const [enrollCourse, { loading }] = useMutation(ENROLL_COURSE, {
+    onCompleted: () => {
       setEnrolled(true);
       
       if (onEnrollSuccess) {
@@ -44,9 +46,36 @@ export default function EnrollButton({
       setTimeout(() => {
         router.push(`/lms/learn/${courseSlug}`);
       }, 1000);
-    } catch (error: any) {
+    },
+    onError: (error) => {
       console.error('Enrollment error:', error);
-      alert(error.message || 'Không thể ghi danh khóa học');
+      
+      // Check if already enrolled - redirect to learning page instead of showing error
+      if (error.message.includes('Already enrolled')) {
+        setEnrolled(true);
+        router.push(`/lms/learn/${courseSlug}`);
+      } else {
+        alert(error.message || 'Không thể ghi danh khóa học');
+      }
+    },
+  });
+
+  const handleEnroll = async () => {
+    // Check if user is authenticated
+    if (!isAuthenticated || !user) {
+      // Redirect to login page with return URL
+      router.push(`/login?returnUrl=/lms/courses/${courseSlug}`);
+      return;
+    }
+
+    try {
+      await enrollCourse({
+        variables: { 
+          input: { courseId }
+        },
+      });
+    } catch (error: any) {
+      // Error handled in onError callback
     }
   };
 
@@ -72,6 +101,10 @@ export default function EnrollButton({
         <>
           <Loader2 className="w-5 h-5 animate-spin" />
           Đang ghi danh...
+        </>
+      ) : !isAuthenticated ? (
+        <>
+          Đăng nhập để ghi danh
         </>
       ) : (
         <>

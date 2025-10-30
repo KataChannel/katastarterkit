@@ -15,13 +15,13 @@ export class CertificatesResolver {
     @CurrentUser() user: any,
     @Args('enrollmentId', { type: () => ID }) enrollmentId: string,
   ) {
-    return this.certificatesService.generateCertificate(enrollmentId, user.userId);
+    return this.certificatesService.generateCertificate(enrollmentId, user.id);
   }
 
   @Query(() => [Certificate], { name: 'myCertificates' })
   @UseGuards(JwtAuthGuard)
   getMyCertificates(@CurrentUser() user: any) {
-    return this.certificatesService.getMyCertificates(user.userId);
+    return this.certificatesService.getMyCertificates(user.id);
   }
 
   @Query(() => Certificate, { name: 'certificate' })
@@ -30,7 +30,7 @@ export class CertificatesResolver {
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    return this.certificatesService.getCertificate(id, user.userId);
+    return this.certificatesService.getCertificate(id, user.id);
   }
 
   @Query(() => CertificateVerification, { name: 'verifyCertificate' })
@@ -41,6 +41,6 @@ export class CertificatesResolver {
   @Query(() => CertificateStats, { name: 'certificateStats' })
   @UseGuards(JwtAuthGuard)
   getCertificateStats(@CurrentUser() user: any) {
-    return this.certificatesService.getCertificateStats(user.userId);
+    return this.certificatesService.getCertificateStats(user.id);
   }
 }

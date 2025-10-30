@@ -21,13 +21,21 @@ export default function CoursesPage() {
         categoryId: selectedCategory || undefined,
         level: selectedLevel || undefined,
         status: 'PUBLISHED',
+        page: 1,
+        limit: 100,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
       },
-      skip: 0,
-      take: 100,
     },
   });
 
-  const courses = data?.courses || [];
+  const courses = data?.courses?.data || [];
+  const pagination = {
+    total: data?.courses?.total || 0,
+    page: data?.courses?.page || 1,
+    limit: data?.courses?.limit || 100,
+    totalPages: data?.courses?.totalPages || 0,
+  };
   const categories = categoriesData?.courseCategories || [];
 
   const levels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'];

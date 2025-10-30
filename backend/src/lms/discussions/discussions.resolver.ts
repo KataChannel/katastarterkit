@@ -16,7 +16,7 @@ export class DiscussionsResolver {
     @CurrentUser() user: any,
     @Args('input') input: CreateDiscussionInput,
   ) {
-    return this.discussionsService.createDiscussion(user.userId, input);
+    return this.discussionsService.createDiscussion(user.id, input);
   }
 
   @Query(() => [Discussion], { name: 'courseDiscussions' })
@@ -38,7 +38,7 @@ export class DiscussionsResolver {
     @CurrentUser() user: any,
     @Args('input') input: CreateReplyInput,
   ) {
-    return this.discussionsService.createReply(user.userId, input);
+    return this.discussionsService.createReply(user.id, input);
   }
 
   @Mutation(() => Discussion, { name: 'updateDiscussion' })
@@ -47,7 +47,7 @@ export class DiscussionsResolver {
     @CurrentUser() user: any,
     @Args('input') input: UpdateDiscussionInput,
   ) {
-    return this.discussionsService.updateDiscussion(user.userId, input);
+    return this.discussionsService.updateDiscussion(user.id, input);
   }
 
   @Mutation(() => Boolean, { name: 'deleteDiscussion' })
@@ -56,7 +56,7 @@ export class DiscussionsResolver {
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    return this.discussionsService.deleteDiscussion(user.userId, id);
+    return this.discussionsService.deleteDiscussion(user.id, id);
   }
 
   @Mutation(() => Discussion, { name: 'toggleDiscussionPin' })
@@ -65,6 +65,6 @@ export class DiscussionsResolver {
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
   ) {
-    return this.discussionsService.togglePin(user.userId, id);
+    return this.discussionsService.togglePin(user.id, id);
   }
 }
