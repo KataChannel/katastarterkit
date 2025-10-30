@@ -15,6 +15,8 @@ const enrollments_module_1 = require("./enrollments/enrollments.module");
 const quizzes_module_1 = require("./quizzes/quizzes.module");
 const reviews_module_1 = require("./reviews/reviews.module");
 const files_module_1 = require("./files/files.module");
+const certificates_module_1 = require("./certificates/certificates.module");
+const discussions_module_1 = require("./discussions/discussions.module");
 const prisma_module_1 = require("../prisma/prisma.module");
 let LmsModule = class LmsModule {
 };
@@ -30,6 +32,8 @@ exports.LmsModule = LmsModule = __decorate([
             quizzes_module_1.QuizzesModule,
             reviews_module_1.ReviewsModule,
             files_module_1.FilesModule,
+            certificates_module_1.CertificatesModule,
+            discussions_module_1.DiscussionsModule,
         ],
         exports: [
             jwt_1.JwtModule,
@@ -39,6 +43,8 @@ exports.LmsModule = LmsModule = __decorate([
             quizzes_module_1.QuizzesModule,
             reviews_module_1.ReviewsModule,
             files_module_1.FilesModule,
+            certificates_module_1.CertificatesModule,
+            discussions_module_1.DiscussionsModule,
         ],
     })
 ], LmsModule);

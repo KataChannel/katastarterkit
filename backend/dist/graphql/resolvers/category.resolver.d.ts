@@ -12,12 +12,12 @@ export declare class CategoryResolver {
             parent: {
                 id: string;
                 createdAt: Date;
-                isActive: boolean;
-                name: string;
                 updatedAt: Date;
+                name: string;
+                isActive: boolean;
                 slug: string;
-                parentId: string | null;
                 description: string | null;
+                parentId: string | null;
                 createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
@@ -31,12 +31,12 @@ export declare class CategoryResolver {
             children: {
                 id: string;
                 createdAt: Date;
-                isActive: boolean;
-                name: string;
                 updatedAt: Date;
+                name: string;
+                isActive: boolean;
                 slug: string;
-                parentId: string | null;
                 description: string | null;
+                parentId: string | null;
                 createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
@@ -50,12 +50,12 @@ export declare class CategoryResolver {
         } & {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -83,12 +83,12 @@ export declare class CategoryResolver {
             children: {
                 id: string;
                 createdAt: Date;
-                isActive: boolean;
-                name: string;
                 updatedAt: Date;
+                name: string;
+                isActive: boolean;
                 slug: string;
-                parentId: string | null;
                 description: string | null;
+                parentId: string | null;
                 createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
@@ -102,12 +102,12 @@ export declare class CategoryResolver {
         } & {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -121,12 +121,12 @@ export declare class CategoryResolver {
     } & {
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
@@ -144,12 +144,12 @@ export declare class CategoryResolver {
         parent: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -163,12 +163,12 @@ export declare class CategoryResolver {
         children: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -182,12 +182,12 @@ export declare class CategoryResolver {
     } & {
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
@@ -205,12 +205,12 @@ export declare class CategoryResolver {
         parent: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -224,12 +224,12 @@ export declare class CategoryResolver {
         children: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -243,12 +243,12 @@ export declare class CategoryResolver {
     } & {
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
@@ -266,12 +266,12 @@ export declare class CategoryResolver {
         parent: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -285,12 +285,12 @@ export declare class CategoryResolver {
         children: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -304,12 +304,12 @@ export declare class CategoryResolver {
     } & {
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
@@ -327,12 +327,12 @@ export declare class CategoryResolver {
         parent: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -346,12 +346,12 @@ export declare class CategoryResolver {
         children: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -365,12 +365,12 @@ export declare class CategoryResolver {
     } & {
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
@@ -384,12 +384,12 @@ export declare class CategoryResolver {
     deleteCategory(id: string, deleteProducts: boolean): Promise<{
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;

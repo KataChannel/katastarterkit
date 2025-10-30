@@ -44,18 +44,18 @@ export declare class ReviewService {
             slug: string;
         };
     } & {
-        comment: string | null;
         id: string;
-        createdAt: Date;
         userId: string | null;
+        createdAt: Date;
         updatedAt: Date;
         title: string | null;
+        rating: number;
+        comment: string | null;
         images: string[];
         orderId: string | null;
         productId: string;
         guestName: string | null;
         guestEmail: string | null;
-        rating: number;
         isVerifiedPurchase: boolean;
         isApproved: boolean;
         moderatedBy: string | null;
@@ -72,18 +72,18 @@ export declare class ReviewService {
                 avatar: string;
             };
         } & {
-            comment: string | null;
             id: string;
-            createdAt: Date;
             userId: string | null;
+            createdAt: Date;
             updatedAt: Date;
             title: string | null;
+            rating: number;
+            comment: string | null;
             images: string[];
             orderId: string | null;
             productId: string;
             guestName: string | null;
             guestEmail: string | null;
-            rating: number;
             isVerifiedPurchase: boolean;
             isApproved: boolean;
             moderatedBy: string | null;
@@ -110,18 +110,18 @@ export declare class ReviewService {
             slug: string;
         };
     } & {
-        comment: string | null;
         id: string;
-        createdAt: Date;
         userId: string | null;
+        createdAt: Date;
         updatedAt: Date;
         title: string | null;
+        rating: number;
+        comment: string | null;
         images: string[];
         orderId: string | null;
         productId: string;
         guestName: string | null;
         guestEmail: string | null;
-        rating: number;
         isVerifiedPurchase: boolean;
         isApproved: boolean;
         moderatedBy: string | null;
@@ -137,18 +137,18 @@ export declare class ReviewService {
             avatar: string;
         };
     } & {
-        comment: string | null;
         id: string;
-        createdAt: Date;
         userId: string | null;
+        createdAt: Date;
         updatedAt: Date;
         title: string | null;
+        rating: number;
+        comment: string | null;
         images: string[];
         orderId: string | null;
         productId: string;
         guestName: string | null;
         guestEmail: string | null;
-        rating: number;
         isVerifiedPurchase: boolean;
         isApproved: boolean;
         moderatedBy: string | null;
