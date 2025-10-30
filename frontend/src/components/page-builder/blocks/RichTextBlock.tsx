@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import dynamic from 'next/dynamic';
 import { Type, Settings } from 'lucide-react';
+import { PageBlock } from '@/types/page-builder';
 
 // Dynamic import để tối ưu performance
 const BlockNoteEditor = dynamic(
@@ -35,38 +36,66 @@ export interface RichTextBlockData {
 }
 
 interface RichTextBlockProps {
-  data: RichTextBlockData;
-  isEditMode: boolean;
+  // Support both block prop (from BlockRenderer) and data prop (from EnhancedPageBuilder)
+  block?: PageBlock;
+  data?: RichTextBlockData;
+  isEditMode?: boolean;
+  isEditable?: boolean;
   onChange?: (data: RichTextBlockData) => void;
+  onUpdate?: (content: any, style?: any) => void;
   onSettingsClick?: () => void;
+  onDelete?: () => void;
 }
 
 const RichTextBlock = memo(({
+  block,
   data,
-  isEditMode,
+  isEditMode = false,
+  isEditable = false,
   onChange,
+  onUpdate,
   onSettingsClick,
+  onDelete,
 }: RichTextBlockProps) => {
+  // Determine if we're in edit mode
+  const inEditMode = isEditMode || isEditable;
+  
+  // Get content from either block.content or data
+  const blockContent = block?.content || data || {};
+  
+  // Ensure data has all required properties with defaults
+  const blockData: RichTextBlockData = {
+    ...defaultRichTextData,
+    ...blockContent,
+  };
+
   const handleContentChange = (content: string) => {
-    onChange?.({ ...data, content });
+    const updatedData = { ...blockData, content };
+    
+    // Call appropriate callback
+    if (onChange) {
+      onChange(updatedData);
+    } else if (onUpdate) {
+      onUpdate(updatedData, block?.style);
+    }
   };
 
   // Render view mode
-  if (!isEditMode) {
+  if (!inEditMode) {
     return (
       <div 
         className="rich-text-block-view"
         style={{
-          backgroundColor: data.backgroundColor,
-          color: data.textColor,
-          padding: data.padding || '1rem',
-          borderRadius: data.borderRadius || '0.5rem',
-          maxWidth: data.maxWidth || '100%',
+          backgroundColor: blockData.backgroundColor,
+          color: blockData.textColor,
+          padding: blockData.padding,
+          borderRadius: blockData.borderRadius,
+          maxWidth: blockData.maxWidth,
         }}
       >
         <div 
           className="prose prose-sm md:prose-base max-w-none"
-          dangerouslySetInnerHTML={{ __html: data.content || '<p>No content</p>' }}
+          dangerouslySetInnerHTML={{ __html: blockData.content || '<p>No content</p>' }}
         />
       </div>
     );
@@ -79,32 +108,24 @@ const RichTextBlock = memo(({
       {onSettingsClick && (
         <button
           onClick={onSettingsClick}
-          className="
-            absolute -top-2 -right-2 z-20
-            min-w-[44px] min-h-[44px]
-            flex items-center justify-center
-            bg-blue-600 text-white
-            rounded-full shadow-lg
-            opacity-0 group-hover:opacity-100
-            transition-all duration-200
-            hover:scale-110 active:scale-95
-            touch-manipulation
-          "
+          className="absolute -top-2 -right-2 z-20 min-w-[44px] min-h-[44px] flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation"
           aria-label="Rich text settings"
         >
           <Settings className="w-5 h-5" />
         </button>
       )}
 
-      {/* Editor */}
-      <BlockNoteEditor
-        content={data.content || ''}
-        onChange={handleContentChange}
-        placeholder={data.placeholder || 'Start typing...'}
-        editable={true}
-        minHeight={data.minHeight || '200px'}
-        className="shadow-sm"
-      />
+      {/* Editor with visible border and background */}
+      <div className="border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors">
+        <BlockNoteEditor
+          content={blockData.content}
+          onChange={handleContentChange}
+          placeholder={blockData.placeholder}
+          editable={true}
+          minHeight={blockData.minHeight}
+          className="shadow-sm"
+        />
+      </div>
     </div>
   );
 });

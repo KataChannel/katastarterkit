@@ -288,15 +288,7 @@ export default function EnhancedPageBuilder({
             <button
               onClick={handleSave}
               disabled={creating || updating}
-              className="
-                min-h-[44px] md:min-h-[36px]
-                px-4 md:px-6
-                bg-blue-600 text-white rounded-lg
-                hover:bg-blue-700
-                disabled:opacity-50 disabled:cursor-not-allowed
-                transition-all
-                font-medium
-              "
+              className="min-h-[44px] md:min-h-[36px] px-4 md:px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
             >
               <Save className="w-5 h-5 mr-2 inline" />
               {creating || updating ? 'Saving...' : 'Save'}
@@ -309,12 +301,7 @@ export default function EnhancedPageBuilder({
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar - blocks palette */}
         {!isPreviewMode && (
-          <aside className="
-            w-full md:w-64
-            bg-white border-r border-gray-200
-            overflow-y-auto
-            p-4
-          ">
+          <aside className="w-full md:w-64 bg-white border-r border-gray-200 overflow-y-auto p-4">
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Layout className="w-5 h-5" />
               Add Blocks
@@ -322,18 +309,7 @@ export default function EnhancedPageBuilder({
             <div className="space-y-2">
               <button
                 onClick={() => handleAddBlock(BlockType.RICH_TEXT)}
-                className="
-                  w-full
-                  min-h-[44px]
-                  flex items-center gap-3
-                  px-4 py-3
-                  text-left
-                  bg-gray-50 hover:bg-gray-100
-                  border border-gray-200
-                  rounded-lg
-                  transition-all
-                  touch-manipulation
-                "
+                className="w-full min-h-[44px] flex items-center gap-3 px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-all touch-manipulation"
               >
                 <Plus className="w-5 h-5 text-blue-600" />
                 <span className="font-medium">Rich Text</span>
@@ -360,13 +336,7 @@ export default function EnhancedPageBuilder({
               >
                 <div className="space-y-4">
                   {page.blocks.length === 0 ? (
-                    <div className="
-                      border-2 border-dashed border-gray-300
-                      rounded-lg
-                      p-12
-                      text-center
-                      text-gray-500
-                    ">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center text-gray-500">
                       <Plus className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                       <p>Add your first block to get started</p>
                     </div>

@@ -9,6 +9,7 @@ import BlockErrorBoundary from '../BlockErrorBoundary';
  * Imported dynamically to reduce initial bundle size
  */
 const TextBlock = lazy(() => import('./TextBlock').then(m => ({ default: m.TextBlock })));
+const RichTextBlock = lazy(() => import('./RichTextBlock').then(m => ({ default: m.default })));
 const ImageBlock = lazy(() => import('./ImageBlock').then(m => ({ default: m.ImageBlock })));
 const HeroBlock = lazy(() => import('./HeroBlock').then(m => ({ default: m.HeroBlock })));
 const ButtonBlock = lazy(() => import('./ButtonBlock').then(m => ({ default: m.ButtonBlock })));
@@ -36,6 +37,7 @@ const BookmarkBlock = lazy(() => import('./BookmarkBlock').then(m => ({ default:
 export const LAZY_BLOCK_COMPONENTS: Record<BlockType | string, React.ComponentType<any>> = {
   // Content Blocks
   [BlockType.TEXT]: TextBlock,
+  [BlockType.RICH_TEXT]: RichTextBlock,
   [BlockType.IMAGE]: ImageBlock,
   [BlockType.VIDEO]: VideoBlock,
   [BlockType.CAROUSEL]: CarouselBlock,

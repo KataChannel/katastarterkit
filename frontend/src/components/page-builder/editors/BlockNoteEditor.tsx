@@ -55,20 +55,7 @@ const ToolbarButton: React.FC<{
     type="button"
     onClick={onClick}
     disabled={disabled}
-    className={`
-      touch-manipulation
-      min-w-[44px] min-h-[44px] 
-      md:min-w-[36px] md:min-h-[36px]
-      flex items-center justify-center
-      rounded-md
-      transition-all duration-200
-      ${active 
-        ? 'bg-blue-600 text-white shadow-sm' 
-        : 'bg-white hover:bg-gray-100 text-gray-700'
-      }
-      ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
-      border border-gray-200
-    `}
+    className={`touch-manipulation min-w-[44px] min-h-[44px] md:min-w-[36px] md:min-h-[36px] flex items-center justify-center rounded-md transition-all duration-200 ${active ? 'bg-blue-600 text-white shadow-sm' : 'bg-white hover:bg-gray-100 text-gray-700'} ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'} border border-gray-200`}
     title={label}
     aria-label={label}
   >
@@ -91,6 +78,7 @@ export default function BlockNoteEditor({
 }: BlockNoteEditorProps) {
   
   const editor = useEditor({
+    immediatelyRender: false, // Fix SSR hydration mismatch
     extensions: [
       StarterKit.configure({
         heading: {
@@ -122,7 +110,6 @@ export default function BlockNoteEditor({
           prose prose-sm md:prose-base max-w-none
           focus:outline-none
           px-4 py-3
-          min-h-[${minHeight}]
         `,
       },
     },
@@ -279,15 +266,12 @@ export default function BlockNoteEditor({
   }
 
   return (
-    <div className={`blocknote-editor border border-gray-300 rounded-lg overflow-hidden bg-white ${className}`}>
+    <div 
+      className={`blocknote-editor border border-gray-300 rounded-lg overflow-hidden bg-white ${className}`}
+      onClick={() => editor?.chain().focus().run()}
+    >
       {/* Toolbar - sticky on mobile for better UX */}
-      <div className="
-        sticky top-0 z-10
-        border-b border-gray-200 
-        bg-white/95 backdrop-blur-sm
-        overflow-x-auto
-        scrollbar-thin scrollbar-thumb-gray-300
-      ">
+      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur-sm overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
         <div className="flex gap-1 p-2 min-w-max">
           {toolbarGroups.map((group, groupIndex) => (
             <React.Fragment key={group.label}>
@@ -308,12 +292,8 @@ export default function BlockNoteEditor({
       {/* Editor content */}
       <EditorContent 
         editor={editor} 
-        className="
-          blocknote-content
-          bg-white
-          overflow-y-auto
-          max-h-[600px]
-        "
+        className="blocknote-content bg-white overflow-y-auto max-h-[600px]"
+        style={{ minHeight }}
       />
 
       {/* Character count - optional */}
