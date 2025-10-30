@@ -1,6 +1,6 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
 import { QuestionType } from '@prisma/client';
-import { IsNotEmpty, IsOptional, IsNumber, Min, Max } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsNumber, Min, Max, IsArray, ArrayNotEmpty } from 'class-validator';
 
 @InputType()
 export class CreateAnswerInput {
@@ -116,6 +116,8 @@ export class SubmitQuizInput {
   enrollmentId: string;
 
   @Field(() => [QuizAnswerInput])
+  @IsArray()
+  @ArrayNotEmpty()
   answers: QuizAnswerInput[];
 
   @Field(() => Int, { nullable: true })
