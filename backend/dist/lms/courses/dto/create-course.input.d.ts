@@ -11,5 +11,8 @@ export declare class CreateCourseInput {
     metaTitle?: string;
     metaDescription?: string;
     tags: string[];
+    whatYouWillLearn: string[];
+    requirements: string[];
+    targetAudience: string[];
     categoryId?: string;
 }

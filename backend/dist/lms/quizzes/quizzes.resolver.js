@@ -19,10 +19,7 @@ const quizzes_service_1 = require("./quizzes.service");
 const quiz_entity_1 = require("./entities/quiz.entity");
 const quiz_input_1 = require("./dto/quiz.input");
 const jwt_auth_guard_1 = require("../../auth/jwt-auth.guard");
-const roles_guard_1 = require("../../common/guards/roles.guard");
-const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const current_user_decorator_1 = require("../../auth/current-user.decorator");
-const client_1 = require("@prisma/client");
 let QuizzesResolver = class QuizzesResolver {
     constructor(quizzesService) {
         this.quizzesService = quizzesService;
@@ -55,8 +52,6 @@ let QuizzesResolver = class QuizzesResolver {
 exports.QuizzesResolver = QuizzesResolver;
 __decorate([
     (0, graphql_1.Mutation)(() => quiz_entity_1.Quiz),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
@@ -80,8 +75,6 @@ __decorate([
 ], QuizzesResolver.prototype, "quizzesByLesson", null);
 __decorate([
     (0, graphql_1.Mutation)(() => quiz_entity_1.Quiz),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, graphql_1.Args)('id')),
     __param(2, (0, graphql_1.Args)('input')),
@@ -91,8 +84,6 @@ __decorate([
 ], QuizzesResolver.prototype, "updateQuiz", null);
 __decorate([
     (0, graphql_1.Mutation)(() => Boolean),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
     __param(0, (0, current_user_decorator_1.CurrentUser)('id')),
     __param(1, (0, graphql_1.Args)('id')),
     __metadata("design:type", Function),

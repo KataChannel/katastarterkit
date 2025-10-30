@@ -78,11 +78,11 @@ export declare class SecurityDashboardController {
             };
         } & {
             id: string;
-            userId: string | null;
             createdAt: Date;
             updatedAt: Date;
             description: string;
             category: string;
+            userId: string | null;
             sessionId: string | null;
             ipAddress: string;
             userAgent: string | null;

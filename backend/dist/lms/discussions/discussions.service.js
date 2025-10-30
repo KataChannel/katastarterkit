@@ -17,6 +17,9 @@ let DiscussionsService = class DiscussionsService {
         this.prisma = prisma;
     }
     async createDiscussion(userId, input) {
+        if (!input.courseId) {
+            throw new common_1.BadRequestException('Course ID is required');
+        }
         const enrollment = await this.prisma.enrollment.findUnique({
             where: {
                 userId_courseId: {
@@ -169,6 +172,9 @@ let DiscussionsService = class DiscussionsService {
         return discussion;
     }
     async createReply(userId, input) {
+        if (!input.discussionId) {
+            throw new common_1.BadRequestException('Discussion ID is required');
+        }
         const discussion = await this.prisma.discussion.findUnique({
             where: { id: input.discussionId },
         });

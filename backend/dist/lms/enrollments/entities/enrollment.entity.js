@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Enrollment = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const client_1 = require("@prisma/client");
+const lesson_progress_entity_1 = require("./lesson-progress.entity");
+const course_entity_1 = require("../../courses/entities/course.entity");
 (0, graphql_1.registerEnumType)(client_1.EnrollmentStatus, {
     name: 'EnrollmentStatus',
     description: 'Status of course enrollment',
@@ -55,6 +57,14 @@ __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", Date)
 ], Enrollment.prototype, "lastAccessedAt", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => course_entity_1.Course, { nullable: true }),
+    __metadata("design:type", course_entity_1.Course)
+], Enrollment.prototype, "course", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [lesson_progress_entity_1.LessonProgress], { nullable: true }),
+    __metadata("design:type", Array)
+], Enrollment.prototype, "lessonProgress", void 0);
 exports.Enrollment = Enrollment = __decorate([
     (0, graphql_1.ObjectType)()
 ], Enrollment);

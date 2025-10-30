@@ -19,6 +19,9 @@ let CreateCourseInput = class CreateCourseInput {
         this.level = client_1.CourseLevel.BEGINNER;
         this.status = client_1.CourseStatus.DRAFT;
         this.tags = [];
+        this.whatYouWillLearn = [];
+        this.requirements = [];
+        this.targetAudience = [];
     }
 };
 exports.CreateCourseInput = CreateCourseInput;
@@ -90,6 +93,24 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], CreateCourseInput.prototype, "tags", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [String], { defaultValue: [] }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], CreateCourseInput.prototype, "whatYouWillLearn", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [String], { defaultValue: [] }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], CreateCourseInput.prototype, "requirements", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [String], { defaultValue: [] }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], CreateCourseInput.prototype, "targetAudience", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsString)(),

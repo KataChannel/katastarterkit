@@ -40,18 +40,19 @@ export declare class ReviewService {
         };
         product: {
             id: string;
-            name: string;
             slug: string;
+            name: string;
         };
     } & {
         id: string;
-        userId: string | null;
         createdAt: Date;
         updatedAt: Date;
         title: string | null;
+        images: string[];
+        userId: string | null;
         rating: number;
         comment: string | null;
-        images: string[];
+        helpfulCount: number;
         orderId: string | null;
         productId: string;
         guestName: string | null;
@@ -60,7 +61,6 @@ export declare class ReviewService {
         isApproved: boolean;
         moderatedBy: string | null;
         moderatedAt: Date | null;
-        helpfulCount: number;
     }>;
     getReviews(input: GetReviewsInput): Promise<{
         items: ({
@@ -73,13 +73,14 @@ export declare class ReviewService {
             };
         } & {
             id: string;
-            userId: string | null;
             createdAt: Date;
             updatedAt: Date;
             title: string | null;
+            images: string[];
+            userId: string | null;
             rating: number;
             comment: string | null;
-            images: string[];
+            helpfulCount: number;
             orderId: string | null;
             productId: string;
             guestName: string | null;
@@ -88,7 +89,6 @@ export declare class ReviewService {
             isApproved: boolean;
             moderatedBy: string | null;
             moderatedAt: Date | null;
-            helpfulCount: number;
         })[];
         total: number;
         page: number;
@@ -106,18 +106,19 @@ export declare class ReviewService {
         };
         product: {
             id: string;
-            name: string;
             slug: string;
+            name: string;
         };
     } & {
         id: string;
-        userId: string | null;
         createdAt: Date;
         updatedAt: Date;
         title: string | null;
+        images: string[];
+        userId: string | null;
         rating: number;
         comment: string | null;
-        images: string[];
+        helpfulCount: number;
         orderId: string | null;
         productId: string;
         guestName: string | null;
@@ -126,7 +127,6 @@ export declare class ReviewService {
         isApproved: boolean;
         moderatedBy: string | null;
         moderatedAt: Date | null;
-        helpfulCount: number;
     }>;
     updateReview(reviewId: string, userId: string, input: UpdateReviewInput): Promise<{
         user: {
@@ -138,13 +138,14 @@ export declare class ReviewService {
         };
     } & {
         id: string;
-        userId: string | null;
         createdAt: Date;
         updatedAt: Date;
         title: string | null;
+        images: string[];
+        userId: string | null;
         rating: number;
         comment: string | null;
-        images: string[];
+        helpfulCount: number;
         orderId: string | null;
         productId: string;
         guestName: string | null;
@@ -153,7 +154,6 @@ export declare class ReviewService {
         isApproved: boolean;
         moderatedBy: string | null;
         moderatedAt: Date | null;
-        helpfulCount: number;
     }>;
     deleteReview(reviewId: string, userId: string, isAdmin?: boolean): Promise<{
         success: boolean;

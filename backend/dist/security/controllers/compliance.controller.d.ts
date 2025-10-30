@@ -142,11 +142,11 @@ export declare class ComplianceController {
                 };
             } & {
                 id: string;
-                userId: string | null;
                 createdAt: Date;
                 updatedAt: Date;
                 description: string;
                 category: string;
+                userId: string | null;
                 sessionId: string | null;
                 ipAddress: string;
                 userAgent: string | null;
@@ -185,12 +185,15 @@ export declare class ComplianceController {
                 };
             } & {
                 id: string;
-                userId: string | null;
                 createdAt: Date;
+                tags: string[];
+                userId: string | null;
+                action: string;
+                errorMessage: string | null;
+                success: boolean;
                 sessionId: string | null;
                 ipAddress: string | null;
                 userAgent: string | null;
-                action: string;
                 details: import("@prisma/client/runtime/library").JsonValue | null;
                 resourceType: string;
                 resourceId: string | null;
@@ -203,12 +206,9 @@ export declare class ComplianceController {
                 parentResourceId: string | null;
                 operationType: string | null;
                 severity: string;
-                tags: string[];
                 batchId: string | null;
                 batchSize: number | null;
                 batchIndex: number | null;
-                success: boolean;
-                errorMessage: string | null;
                 errorCode: string | null;
                 responseTime: number | null;
                 requestSize: number | null;
@@ -250,11 +250,11 @@ export declare class ComplianceController {
                 };
             } & {
                 id: string;
-                userId: string | null;
                 createdAt: Date;
                 updatedAt: Date;
                 description: string;
                 category: string;
+                userId: string | null;
                 sessionId: string | null;
                 ipAddress: string;
                 userAgent: string | null;

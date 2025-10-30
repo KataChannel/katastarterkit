@@ -137,8 +137,9 @@ export declare class CallCenterService {
         items: {
             id: string;
             status: string;
-            completedAt: Date | null;
             duration: number | null;
+            completedAt: Date | null;
+            startedAt: Date;
             errorMessage: string | null;
             fromDate: Date;
             toDate: Date;
@@ -150,7 +151,6 @@ export declare class CallCenterService {
             recordsUpdated: number;
             recordsSkipped: number;
             errorDetails: import("@prisma/client/runtime/library").JsonValue | null;
-            startedAt: Date;
         }[];
         total: number;
     }>;

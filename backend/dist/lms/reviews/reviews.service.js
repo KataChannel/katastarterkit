@@ -251,7 +251,6 @@ let ReviewsService = class ReviewsService {
             data: {
                 avgRating: stats.avgRating,
                 reviewCount: stats.totalReviews,
-                rating: stats.avgRating,
             },
         });
     }

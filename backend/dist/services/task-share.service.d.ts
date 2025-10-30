@@ -6,22 +6,22 @@ export declare class TaskShareService {
     create(input: ShareTaskInput, sharedById: string): Promise<{
         task: {
             id: string;
-            userId: string;
-            createdAt: Date;
-            updatedAt: Date;
-            status: import("@prisma/client").$Enums.TaskStatus;
-            completedAt: Date | null;
-            title: string;
-            description: string | null;
-            category: import("@prisma/client").$Enums.TaskCategory;
             order: number;
             parentId: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            title: string;
+            description: string | null;
+            status: import("@prisma/client").$Enums.TaskStatus;
             tags: string[];
+            category: import("@prisma/client").$Enums.TaskCategory;
+            userId: string;
+            completedAt: Date | null;
             priority: import("@prisma/client").$Enums.TaskPriority;
             dueDate: Date | null;
-            projectId: string | null;
             assignedTo: string[];
             mentions: string[];
+            projectId: string | null;
         };
         sharedByUser: {
             id: string;
@@ -68,8 +68,8 @@ export declare class TaskShareService {
         createdAt: Date;
         updatedAt: Date;
         isActive: boolean;
-        permission: import("@prisma/client").$Enums.SharePermission;
         expiresAt: Date | null;
+        permission: import("@prisma/client").$Enums.SharePermission;
         taskId: string;
         shareToken: string;
         sharedBy: string;
@@ -121,8 +121,8 @@ export declare class TaskShareService {
         createdAt: Date;
         updatedAt: Date;
         isActive: boolean;
-        permission: import("@prisma/client").$Enums.SharePermission;
         expiresAt: Date | null;
+        permission: import("@prisma/client").$Enums.SharePermission;
         taskId: string;
         shareToken: string;
         sharedBy: string;
@@ -131,22 +131,22 @@ export declare class TaskShareService {
     update(input: UpdateTaskShareInput, userId: string): Promise<{
         task: {
             id: string;
-            userId: string;
-            createdAt: Date;
-            updatedAt: Date;
-            status: import("@prisma/client").$Enums.TaskStatus;
-            completedAt: Date | null;
-            title: string;
-            description: string | null;
-            category: import("@prisma/client").$Enums.TaskCategory;
             order: number;
             parentId: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            title: string;
+            description: string | null;
+            status: import("@prisma/client").$Enums.TaskStatus;
             tags: string[];
+            category: import("@prisma/client").$Enums.TaskCategory;
+            userId: string;
+            completedAt: Date | null;
             priority: import("@prisma/client").$Enums.TaskPriority;
             dueDate: Date | null;
-            projectId: string | null;
             assignedTo: string[];
             mentions: string[];
+            projectId: string | null;
         };
         sharedByUser: {
             id: string;
@@ -193,8 +193,8 @@ export declare class TaskShareService {
         createdAt: Date;
         updatedAt: Date;
         isActive: boolean;
-        permission: import("@prisma/client").$Enums.SharePermission;
         expiresAt: Date | null;
+        permission: import("@prisma/client").$Enums.SharePermission;
         taskId: string;
         shareToken: string;
         sharedBy: string;

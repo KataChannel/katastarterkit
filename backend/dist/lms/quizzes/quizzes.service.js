@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuizzesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const client_1 = require("@prisma/client");
 let QuizzesService = class QuizzesService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -164,7 +165,12 @@ let QuizzesService = class QuizzesService {
         return true;
     }
     async submitQuiz(userId, submitQuizInput) {
+        console.log('submitQuizInput:', JSON.stringify(submitQuizInput, null, 2));
         const { quizId, enrollmentId, answers, timeSpent } = submitQuizInput;
+        console.log('Destructured - quizId:', quizId, 'enrollmentId:', enrollmentId, 'answers:', answers, 'timeSpent:', timeSpent);
+        if (!answers || !Array.isArray(answers)) {
+            throw new common_1.BadRequestException('Answers are required and must be an array');
+        }
         const enrollment = await this.prisma.enrollment.findUnique({
             where: { id: enrollmentId },
             include: { course: true },
@@ -237,7 +243,41 @@ let QuizzesService = class QuizzesService {
                 },
             },
         });
+        await this.updateEnrollmentProgress(enrollmentId);
         return attempt;
+    }
+    async updateEnrollmentProgress(enrollmentId) {
+        const enrollment = await this.prisma.enrollment.findUnique({
+            where: { id: enrollmentId },
+            include: {
+                course: {
+                    include: {
+                        modules: {
+                            include: {
+                                lessons: true,
+                            },
+                        },
+                    },
+                },
+                lessonProgress: true,
+            },
+        });
+        if (!enrollment)
+            return;
+        const totalLessons = enrollment.course.modules.reduce((acc, module) => acc + module.lessons.length, 0);
+        if (totalLessons === 0)
+            return;
+        const completedLessons = enrollment.lessonProgress.filter(p => p.completed).length;
+        const progress = (completedLessons / totalLessons) * 100;
+        await this.prisma.enrollment.update({
+            where: { id: enrollmentId },
+            data: {
+                progress,
+                status: progress === 100 ? client_1.EnrollmentStatus.COMPLETED : client_1.EnrollmentStatus.ACTIVE,
+                completedAt: progress === 100 ? new Date() : null,
+                lastAccessedAt: new Date(),
+            },
+        });
     }
     async getQuizAttempts(userId, quizId) {
         return this.prisma.quizAttempt.findMany({

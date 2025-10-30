@@ -26,22 +26,22 @@ let EnrollmentsResolver = class EnrollmentsResolver {
         this.enrollmentsService = enrollmentsService;
     }
     enrollCourse(user, enrollCourseInput) {
-        return this.enrollmentsService.enroll(user.userId, enrollCourseInput.courseId);
+        return this.enrollmentsService.enroll(user.id, enrollCourseInput.courseId);
     }
     getMyEnrollments(user) {
-        return this.enrollmentsService.getMyEnrollments(user.userId);
+        return this.enrollmentsService.getMyEnrollments(user.id);
     }
     getEnrollment(user, courseId) {
-        return this.enrollmentsService.getEnrollment(user.userId, courseId);
+        return this.enrollmentsService.getEnrollment(user.id, courseId);
     }
     dropCourse(user, courseId) {
-        return this.enrollmentsService.dropCourse(user.userId, courseId);
+        return this.enrollmentsService.dropCourse(user.id, courseId);
     }
     getCourseEnrollments(user, courseId) {
-        return this.enrollmentsService.getCourseEnrollments(courseId, user.userId);
+        return this.enrollmentsService.getCourseEnrollments(courseId, user.id);
     }
     markLessonComplete(user, enrollmentId, lessonId) {
-        return this.enrollmentsService.markLessonComplete(user.userId, enrollmentId, lessonId);
+        return this.enrollmentsService.markLessonComplete(user.id, enrollmentId, lessonId);
     }
 };
 exports.EnrollmentsResolver = EnrollmentsResolver;
@@ -63,7 +63,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], EnrollmentsResolver.prototype, "getMyEnrollments", null);
 __decorate([
-    (0, graphql_1.Query)(() => enrollment_entity_1.Enrollment, { name: 'enrollment' }),
+    (0, graphql_1.Query)(() => enrollment_entity_1.Enrollment, { name: 'enrollment', nullable: true }),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('courseId', { type: () => graphql_1.ID })),

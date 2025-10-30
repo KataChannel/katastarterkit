@@ -950,6 +950,7 @@ enum PageStatus {
 enum BlockType {
   // Content Blocks
   TEXT
+  RICH_TEXT // BlockNote-style editor with Tiptap
   IMAGE
   VIDEO
   CAROUSEL

@@ -26,6 +26,9 @@ import {
   ChevronDown,
   Copy,
   Sparkles,
+  FileText,
+  Quote,
+  List,
 } from 'lucide-react';
 import { BlockType } from '@/types/page-builder';
 import { usePageActions } from '../../PageBuilderProvider';
@@ -83,29 +86,193 @@ const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
 };
 
 const elements: ElementConfig[] = [
-  // Basic Elements
-  { id: BlockType.TEXT, icon: Type, label: 'Text', description: 'Block editor with rich formatting', category: 'basic', popularity: 'hot' },
-  { id: BlockType.HERO, icon: Heading, label: 'Heading', description: 'Large page headings', category: 'basic' },
-  { id: BlockType.BUTTON, icon: MousePointer, label: 'Button', description: 'Call-to-action buttons', category: 'basic', popularity: 'hot' },
-  { id: BlockType.IMAGE, icon: Image, label: 'Image', description: 'Image media element', category: 'basic' },
-  { id: BlockType.DIVIDER, icon: Minus, label: 'Divider', description: 'Visual separator', category: 'basic' },
+  // Basic Elements - Optimized & Essential Only
+  { 
+    id: BlockType.RICH_TEXT, 
+    icon: FileText, 
+    label: 'Rich Text', 
+    description: 'BlockNote-style editor with advanced formatting', 
+    category: 'basic', 
+    popularity: 'hot' 
+  },
+  { 
+    id: BlockType.TEXT, 
+    icon: Type, 
+    label: 'Simple Text', 
+    description: 'Plain text block for basic content', 
+    category: 'basic' 
+  },
+  { 
+    id: BlockType.HERO, 
+    icon: Heading, 
+    label: 'Hero Section', 
+    description: 'Large hero banner with heading', 
+    category: 'basic', 
+    popularity: 'hot' 
+  },
+  { 
+    id: BlockType.BUTTON, 
+    icon: MousePointer, 
+    label: 'Button', 
+    description: 'Call-to-action button', 
+    category: 'basic', 
+    popularity: 'hot' 
+  },
+  { 
+    id: BlockType.IMAGE, 
+    icon: Image, 
+    label: 'Image', 
+    description: 'Single image with caption', 
+    category: 'basic' 
+  },
+  { 
+    id: BlockType.DIVIDER, 
+    icon: Minus, 
+    label: 'Divider', 
+    description: 'Horizontal separator line', 
+    category: 'basic' 
+  },
 
-  // Layout Elements
-  { id: BlockType.SECTION, icon: Square, label: 'Section', description: 'Page section container', category: 'layout', popularity: 'hot' },
-  { id: BlockType.GRID, icon: Grid3x3, label: 'Grid', description: 'Multi-column grid layout', category: 'layout' },
-  { id: BlockType.FLEX_ROW, icon: Columns, label: 'Flex Row', description: 'Horizontal flex container', category: 'layout' },
-  { id: BlockType.FLEX_COLUMN, icon: Layout, label: 'Flex Column', description: 'Vertical flex container', category: 'layout' },
-  { id: BlockType.SPACER, icon: MoveVertical, label: 'Spacer', description: 'Vertical spacing control', category: 'layout' },
+  // Layout Elements - Container & Structure
+  { 
+    id: BlockType.SECTION, 
+    icon: Square, 
+    label: 'Section', 
+    description: 'Full-width page section', 
+    category: 'layout', 
+    popularity: 'hot' 
+  },
+  { 
+    id: BlockType.CONTAINER, 
+    icon: Layout, 
+    label: 'Container', 
+    description: 'Content container with max-width', 
+    category: 'layout' 
+  },
+  { 
+    id: BlockType.GRID, 
+    icon: Grid3x3, 
+    label: 'Grid', 
+    description: 'Responsive grid layout', 
+    category: 'layout', 
+    popularity: 'hot' 
+  },
+  { 
+    id: BlockType.FLEX_ROW, 
+    icon: Columns, 
+    label: 'Flex Row', 
+    description: 'Horizontal flex container', 
+    category: 'layout' 
+  },
+  { 
+    id: BlockType.FLEX_COLUMN, 
+    icon: MoveVertical, 
+    label: 'Flex Column', 
+    description: 'Vertical flex container', 
+    category: 'layout' 
+  },
+  { 
+    id: BlockType.SPACER, 
+    icon: MoveVertical, 
+    label: 'Spacer', 
+    description: 'Vertical spacing control', 
+    category: 'layout' 
+  },
 
-  // Content Elements
-  { id: BlockType.CAROUSEL, icon: Images, label: 'Carousel', description: 'Image carousel slider', category: 'content', popularity: 'new' },
-  { id: BlockType.VIDEO, icon: Video, label: 'Video', description: 'Video media player', category: 'content' },
-  { id: BlockType.TEAM, icon: Users, label: 'Team', description: 'Team member showcase', category: 'content' },
-  { id: BlockType.STATS, icon: BarChart, label: 'Stats', description: 'Statistics display', category: 'content' },
+  // Content Elements - Rich Media
+  { 
+    id: BlockType.CAROUSEL, 
+    icon: Images, 
+    label: 'Carousel', 
+    description: 'Image slider with controls', 
+    category: 'content', 
+    popularity: 'new' 
+  },
+  { 
+    id: BlockType.GALLERY, 
+    icon: Images, 
+    label: 'Gallery', 
+    description: 'Image gallery grid', 
+    category: 'content' 
+  },
+  { 
+    id: BlockType.VIDEO, 
+    icon: Video, 
+    label: 'Video', 
+    description: 'Video player (YouTube/Vimeo)', 
+    category: 'content' 
+  },
+  { 
+    id: BlockType.CARD, 
+    icon: Quote, 
+    label: 'Card', 
+    description: 'Content card with image/text', 
+    category: 'content', 
+    popularity: 'hot' 
+  },
+  { 
+    id: BlockType.TESTIMONIAL, 
+    icon: Quote, 
+    label: 'Testimonial', 
+    description: 'Customer testimonial block', 
+    category: 'content' 
+  },
+  { 
+    id: BlockType.TEAM, 
+    icon: Users, 
+    label: 'Team', 
+    description: 'Team member showcase', 
+    category: 'content' 
+  },
+  { 
+    id: BlockType.STATS, 
+    icon: BarChart, 
+    label: 'Stats', 
+    description: 'Statistics counter display', 
+    category: 'content' 
+  },
+  { 
+    id: BlockType.FAQ, 
+    icon: List, 
+    label: 'FAQ', 
+    description: 'Accordion FAQ section', 
+    category: 'content' 
+  },
+
+  // Advanced Elements - Dynamic & Forms
+  { 
+    id: BlockType.CONTACT_FORM, 
+    icon: FileText, 
+    label: 'Contact Form', 
+    description: 'Dynamic contact form', 
+    category: 'advanced', 
+    popularity: 'hot' 
+  },
+  { 
+    id: BlockType.DYNAMIC, 
+    icon: Sparkles, 
+    label: 'Dynamic Block', 
+    description: 'Template-based dynamic content', 
+    category: 'advanced', 
+    popularity: 'new' 
+  },
   
-  // E-commerce Elements
-  { id: BlockType.PRODUCT_LIST, icon: ShoppingCart, label: 'Product List', description: 'Product listing grid', category: 'ecommerce' },
-  { id: BlockType.PRODUCT_DETAIL, icon: Package, label: 'Product Detail', description: 'Detailed product view', category: 'ecommerce' },
+  // E-commerce Elements - Product Display
+  { 
+    id: BlockType.PRODUCT_LIST, 
+    icon: ShoppingCart, 
+    label: 'Product List', 
+    description: 'Grid of products with filters', 
+    category: 'ecommerce', 
+    popularity: 'hot' 
+  },
+  { 
+    id: BlockType.PRODUCT_DETAIL, 
+    icon: Package, 
+    label: 'Product Detail', 
+    description: 'Single product showcase', 
+    category: 'ecommerce' 
+  },
 ];
 
 function DraggableElement({ element }: { element: ElementConfig }) {
@@ -157,26 +324,30 @@ function DraggableElement({ element }: { element: ElementConfig }) {
         className={cn(
           'w-full flex items-start gap-3 p-3 rounded-lg border transition-all duration-200',
           'text-left select-none group/btn',
+          // Mobile-first: min 44px height for touch targets
+          'min-h-[44px] sm:min-h-[48px]',
           isDragging && 'bg-blue-50 border-blue-400 shadow-lg scale-105 z-50',
           isAdding && 'bg-green-50 border-green-400 shadow-lg',
-          !isDragging && !isAdding && 'border-gray-200 bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-transparent hover:border-blue-300 hover:shadow-md'
+          !isDragging && !isAdding && 'border-gray-200 bg-white hover:bg-gradient-to-br hover:from-blue-50 hover:to-transparent hover:border-blue-300 hover:shadow-md',
+          // Touch feedback
+          'active:scale-[0.98] touch-manipulation'
         )}
         title="Double-click to add • Drag to canvas"
       >
-        {/* Icon Container */}
+        {/* Icon Container - Mobile optimized */}
         <div className={cn(
-          'flex-shrink-0 w-10 h-10 rounded-md flex items-center justify-center transition-all duration-200',
+          'flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-md flex items-center justify-center transition-all duration-200',
           isDragging && 'bg-blue-500 text-white scale-110 shadow-lg',
           isAdding && 'bg-green-500 text-white scale-110',
           !isDragging && !isAdding && 'bg-gradient-to-br from-primary/20 to-primary/10 text-primary group-hover/btn:bg-blue-400 group-hover/btn:text-white group-hover/btn:shadow-md'
         )}>
-          <Icon className="w-5 h-5" />
+          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm text-gray-900 truncate">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-sm sm:text-base text-gray-900 truncate">
               {element.label}
             </span>
             {element.popularity === 'hot' && (
@@ -191,7 +362,7 @@ function DraggableElement({ element }: { element: ElementConfig }) {
             )}
           </div>
           {element.description && (
-            <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
+            <p className="text-xs sm:text-sm text-gray-500 line-clamp-1 mt-0.5">
               {element.description}
             </p>
           )}
@@ -201,20 +372,20 @@ function DraggableElement({ element }: { element: ElementConfig }) {
         {isDragging && (
           <div className="flex-shrink-0 flex items-center gap-1 px-2 py-1 bg-blue-500 text-white rounded text-xs font-semibold whitespace-nowrap">
             <Zap className="w-3 h-3" />
-            Dragging
+            <span className="hidden sm:inline">Dragging</span>
           </div>
         )}
         {isAdding && (
           <div className="flex-shrink-0 flex items-center gap-1 px-2 py-1 bg-green-500 text-white rounded text-xs font-semibold whitespace-nowrap animate-pulse">
             <Copy className="w-3 h-3" />
-            Adding
+            <span className="hidden sm:inline">Adding</span>
           </div>
         )}
       </button>
 
-      {/* Tooltip */}
+      {/* Tooltip - Hidden on mobile */}
       {showTooltip && !isDragging && !isAdding && (
-        <div className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg whitespace-nowrap z-50 pointer-events-none">
+        <div className="hidden sm:block absolute bottom-full left-0 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded shadow-lg whitespace-nowrap z-50 pointer-events-none">
           Double-click to add • Drag to canvas
           <div className="absolute top-full left-0 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
         </div>
@@ -237,19 +408,21 @@ function CategoryGroup({ category, config, elements, isExpanded, onToggle, count
 
   return (
     <div className="space-y-2">
-      {/* Category Header */}
+      {/* Category Header - Mobile optimized with 44px min height */}
       <button
         onClick={onToggle}
         className={cn(
-          'w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200',
+          'w-full flex items-center gap-2 px-3 py-2.5 rounded-lg transition-all duration-200',
           'text-sm font-semibold text-gray-700 hover:bg-gray-100 group/cat',
+          // Mobile-first: min 44px touch target
+          'min-h-[44px] touch-manipulation active:scale-[0.98]',
           isExpanded && 'bg-blue-50 text-primary'
         )}
       >
         {Icon && (
-          <Icon className="w-4 h-4 flex-shrink-0 text-gray-400 group-hover/cat:text-gray-600" />
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-400 group-hover/cat:text-gray-600" />
         )}
-        <span className="flex-1 text-left">{config.label}</span>
+        <span className="flex-1 text-left text-sm sm:text-base">{config.label}</span>
         <span className={cn(
           'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-700',
           isExpanded && 'bg-blue-200 text-primary'
@@ -264,7 +437,7 @@ function CategoryGroup({ category, config, elements, isExpanded, onToggle, count
 
       {/* Category Description */}
       {isExpanded && config.description && (
-        <p className="text-xs text-gray-500 px-3">
+        <p className="text-xs sm:text-sm text-gray-500 px-3">
           {config.description}
         </p>
       )}

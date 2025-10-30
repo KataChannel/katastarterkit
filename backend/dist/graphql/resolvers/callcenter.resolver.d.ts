@@ -15,8 +15,9 @@ export declare class CallCenterResolver {
     getSyncLogs(pagination: PaginationInput): Promise<{
         id: string;
         status: string;
-        completedAt: Date | null;
         duration: number | null;
+        completedAt: Date | null;
+        startedAt: Date;
         errorMessage: string | null;
         fromDate: Date;
         toDate: Date;
@@ -28,6 +29,5 @@ export declare class CallCenterResolver {
         recordsUpdated: number;
         recordsSkipped: number;
         errorDetails: import("@prisma/client/runtime/library").JsonValue | null;
-        startedAt: Date;
     }[]>;
 }

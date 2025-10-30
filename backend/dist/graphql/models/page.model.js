@@ -21,6 +21,7 @@ var PageStatus;
 var BlockType;
 (function (BlockType) {
     BlockType["TEXT"] = "TEXT";
+    BlockType["RICH_TEXT"] = "RICH_TEXT";
     BlockType["IMAGE"] = "IMAGE";
     BlockType["VIDEO"] = "VIDEO";
     BlockType["CAROUSEL"] = "CAROUSEL";
