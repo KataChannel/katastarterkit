@@ -75,10 +75,9 @@ export function SlideEditorDialog({ open, onOpenChange, slide, onSave }: SlideEd
         </DialogHeader>
 
         <Tabs defaultValue="content" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
-            <TabsTrigger value="mediatype">Media Type</TabsTrigger>
             <TabsTrigger value="styling">Styling</TabsTrigger>
           </TabsList>
 
@@ -186,14 +185,42 @@ export function SlideEditorDialog({ open, onOpenChange, slide, onSave }: SlideEd
                   <SelectValue placeholder="Select media type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="image">Image</SelectItem>
-                  <SelectItem value="video">Video URL</SelectItem>
-                  <SelectItem value="embed">Video Embed (YouTube/Vimeo)</SelectItem>
+                  <SelectItem value="image">📷 Image</SelectItem>
+                  <SelectItem value="video">🎬 Video URL</SelectItem>
+                  <SelectItem value="embed">📺 Video Embed (YouTube/Vimeo)</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
                 Choose the type of media to display on this slide
               </p>
+            </div>
+
+            {/* Media Type Guide */}
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+              <h4 className="font-semibold text-blue-900 mb-3">📚 Media Type Guide</h4>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="text-xl">📷</span>
+                  <div>
+                    <strong className="text-blue-900">Image</strong>
+                    <p className="text-blue-700">Display static images with customizable position and overlay</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-xl">🎬</span>
+                  <div>
+                    <strong className="text-blue-900">Video URL</strong>
+                    <p className="text-blue-700">Direct video file (MP4, WebM) - plays inline with controls</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-xl">📺</span>
+                  <div>
+                    <strong className="text-blue-900">Video Embed</strong>
+                    <p className="text-blue-700">YouTube, Vimeo embeds - responsive player with full features</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Image Controls - Only show for image type */}
@@ -301,75 +328,58 @@ export function SlideEditorDialog({ open, onOpenChange, slide, onSave }: SlideEd
                 )}
               </div>
             )}
-          </TabsContent>
 
-          <TabsContent value="mediatype" className="space-y-4 mt-4">
-            <div className="space-y-4">
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="font-semibold text-blue-900 mb-2">Media Type Guide</h4>
-                <div className="space-y-3 text-sm text-blue-800">
-                  <div>
-                    <strong>Image:</strong>
-                    <p className="text-blue-700">Display static images with customizable position and overlay</p>
-                  </div>
-                  <div>
-                    <strong>Video URL:</strong>
-                    <p className="text-blue-700">Direct video file (MP4, WebM) - plays inline with controls</p>
-                  </div>
-                  <div>
-                    <strong>Video Embed:</strong>
-                    <p className="text-blue-700">YouTube, Vimeo embeds - responsive player with full features</p>
-                  </div>
+            {/* Current Configuration Summary */}
+            <div className="p-4 border rounded-lg bg-gradient-to-r from-gray-50 to-gray-100">
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                ✓ Current Configuration
+              </h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Media Type:</span>
+                  <span className="font-medium capitalize px-2 py-1 bg-white rounded border">
+                    {localSlide.mediaType === 'image' && '📷 Image'}
+                    {localSlide.mediaType === 'video' && '🎬 Video'}
+                    {localSlide.mediaType === 'embed' && '📺 Embed'}
+                    {!localSlide.mediaType && '📷 Image (default)'}
+                  </span>
                 </div>
-              </div>
-
-              {/* Current Media Type Info */}
-              <div className="p-4 border rounded-lg bg-gray-50">
-                <h4 className="font-semibold mb-2">Current Configuration</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Media Type:</span>
-                    <span className="font-medium capitalize">
-                      {localSlide.mediaType || 'Image'}
+                {localSlide.image && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Image URL:</span>
+                    <span className="font-medium text-xs truncate max-w-[200px] text-green-600">
+                      ✓ Set
                     </span>
                   </div>
-                  {localSlide.image && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Image URL:</span>
-                      <span className="font-medium text-xs truncate max-w-[200px]">
-                        {localSlide.image}
-                      </span>
-                    </div>
-                  )}
-                  {localSlide.videoUrl && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Video URL:</span>
-                      <span className="font-medium text-xs truncate max-w-[200px]">
-                        {localSlide.videoUrl}
-                      </span>
-                    </div>
-                  )}
-                  {localSlide.imagePosition && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Position:</span>
-                      <span className="font-medium capitalize">
-                        {localSlide.imagePosition}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                )}
+                {localSlide.videoUrl && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Video URL:</span>
+                    <span className="font-medium text-xs truncate max-w-[200px] text-green-600">
+                      ✓ Set
+                    </span>
+                  </div>
+                )}
+                {localSlide.imagePosition && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Position:</span>
+                    <span className="font-medium capitalize">
+                      {localSlide.imagePosition}
+                    </span>
+                  </div>
+                )}
               </div>
+            </div>
 
-              {/* Quick Tips */}
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                <h4 className="font-semibold text-amber-900 mb-2">💡 Tips</h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-amber-800">
-                  <li>Use high-quality images (1920x1080 recommended)</li>
-                  <li>Video embeds are more performant than video files</li>
-                  <li>Background images work best with overlay enabled</li>
-                  <li>Each slide can have different media types</li>
-                </ul>
-              </div>
+            {/* Quick Tips */}
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <h4 className="font-semibold text-amber-900 mb-2">💡 Tips</h4>
+              <ul className="list-disc list-inside space-y-1 text-sm text-amber-800">
+                <li>Use high-quality images (1920x1080 recommended)</li>
+                <li>Video embeds are more performant than video files</li>
+                <li>Background images work best with overlay enabled</li>
+                <li>Each slide can have different media types</li>
+              </ul>
             </div>
           </TabsContent>
 

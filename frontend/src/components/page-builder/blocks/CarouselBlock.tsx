@@ -63,10 +63,8 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
   const animationType = content.animationType || 'fade'; // fade, slide, zoom, none
   const animationDuration = content.animationDuration || 600; // ms
 
-  // Filter slides - show only image slides (không hiển thị video)
-  const filteredSlides = slides.filter((slide) => {
-    return !slide.videoUrl && slide.image; // Chỉ hiển thị slide có hình, không có video
-  });
+  // Use all slides - no filtering, each slide determines its own media type
+  const displaySlides = slides;
 
   // Auto-slide functionality
   useEffect(() => {
@@ -188,7 +186,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
   };
 
   const getIndicatorComponent = () => {
-    if (!showIndicators || filteredSlides.length <= 1) return null;
+    if (!showIndicators || displaySlides.length <= 1) return null;
 
     switch (indicatorStyle) {
       case 'lines':
@@ -212,7 +210,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
           <div className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-4 py-2 rounded-full backdrop-blur-sm">
             <span className="font-semibold">{currentSlide + 1}</span>
             <span className="mx-1">/</span>
-            <span>{filteredSlides.length}</span>
+            <span>{displaySlides.length}</span>
           </div>
         );
       
@@ -377,7 +375,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
           }}
         >
           <CarouselContent className="h-full -ml-2 md:-ml-4">
-            {filteredSlides.map((slide, index) => {
+            {displaySlides.map((slide, index) => {
               const slideTextColor = slide.textColor || 'text-white';
               const imagePos = (slide.imagePosition || 'right') as 'left' | 'right' | 'top' | 'bottom' | 'background';
               
@@ -588,7 +586,7 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
             })}
           </CarouselContent>
           
-          {showArrows && filteredSlides.length > 1 && (
+          {showArrows && displaySlides.length > 1 && (
             <>
               <CarouselPrevious className={`left-4 ${getArrowClasses()}`} />
               <CarouselNext className={`right-4 ${getArrowClasses()}`} />
