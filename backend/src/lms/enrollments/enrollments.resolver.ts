@@ -26,7 +26,7 @@ export class EnrollmentsResolver {
     return this.enrollmentsService.getMyEnrollments(user.id);
   }
 
-  @Query(() => Enrollment, { name: 'enrollment' })
+  @Query(() => Enrollment, { name: 'enrollment', nullable: true })
   @UseGuards(JwtAuthGuard)
   getEnrollment(
     @CurrentUser() user: any,

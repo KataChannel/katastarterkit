@@ -24,8 +24,7 @@ export default function ManageLessonsPage() {
     isFree: false,
   });
 
-  const { data: course, refetch } = useFindUnique('course', {
-    id: courseId,
+  const { data: course, refetch } = useFindUnique('course', courseId, {
     include: { 
       modules: {
         include: { lessons: { orderBy: { order: 'asc' } } },
@@ -57,8 +56,10 @@ export default function ManageLessonsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prepare lesson data, excluding videoUrl (frontend-only field)
+    const { videoUrl, ...formDataWithoutVideoUrl } = formData;
     const lessonData = {
-      ...formData,
+      ...formDataWithoutVideoUrl,
       content: formData.type === 'VIDEO' ? formData.videoUrl : formData.content,
     };
 

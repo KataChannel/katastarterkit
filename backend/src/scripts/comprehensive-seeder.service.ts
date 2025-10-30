@@ -281,7 +281,7 @@ export class ComprehensiveSeederService {
           content: this.getRandomPostContent(i),
           excerpt: `This is a demo post excerpt for post ${i}.`,
           slug: `demo-post-${i}`,
-          featuredImage: `https://picsum.photos/800/600?random=${i}`,
+          featuredImage: `https://placehold.co/800x600/6366f1/ffffff?text=Post+${i}`,
           status: i <= 7 ? PostStatus.PUBLISHED : PostStatus.DRAFT,
           publishedAt: i <= 7 ? new Date(Date.now() - i * 24 * 60 * 60 * 1000) : null,
           authorId: this.adminUser.id,

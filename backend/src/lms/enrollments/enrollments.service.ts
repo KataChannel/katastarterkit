@@ -122,10 +122,7 @@ export class EnrollmentsService {
       },
     });
 
-    if (!enrollment) {
-      throw new NotFoundException('Enrollment not found');
-    }
-
+    // Return null instead of throwing error - let frontend handle unenrolled state
     return enrollment;
   }
 

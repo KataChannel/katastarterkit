@@ -37,7 +37,7 @@ export default function VideoPlayer({
   useEffect(() => {
     const player = playerRef.current?.plyr;
     
-    if (!player) return;
+    if (!player || typeof player.on !== 'function') return;
 
     // Set start time if provided
     if (startTime > 0) {
@@ -72,8 +72,17 @@ export default function VideoPlayer({
     progressIntervalRef.current = setInterval(trackProgress, 5000);
 
     return () => {
-      player.off('timeupdate', handleTimeUpdate);
-      player.off('ended', handleEnded);
+      // Safely remove event listeners
+      try {
+        if (player && typeof player.off === 'function') {
+          player.off('timeupdate', handleTimeUpdate);
+          player.off('ended', handleEnded);
+        }
+      } catch (error) {
+        // Ignore errors if player is already destroyed
+        console.warn('Error removing player event listeners:', error);
+      }
+      
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }

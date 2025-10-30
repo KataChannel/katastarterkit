@@ -41,8 +41,7 @@ export default function ManageQuizzesPage() {
     ] as Answer[],
   });
 
-  const { data: course, refetch } = useFindUnique('course', {
-    id: courseId,
+  const { data: course, refetch } = useFindUnique('course', courseId, {
     include: { 
       modules: {
         include: { 

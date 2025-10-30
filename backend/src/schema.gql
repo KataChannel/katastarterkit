@@ -3320,7 +3320,7 @@ type Query {
   employeeProfileByCode(employeeCode: String!): EmployeeProfile!
   employeeProfileByUserId(userId: ID!): EmployeeProfile!
   employmentHistory(employeeProfileId: ID!): [EmploymentHistory!]!
-  enrollment(courseId: ID!): Enrollment!
+  enrollment(courseId: ID!): Enrollment
 
   """Check if a record exists matching the criteria"""
   exists(modelName: String!, where: JSONObject!): Boolean!
