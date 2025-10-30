@@ -212,6 +212,17 @@ model User {
   settingsCreated WebsiteSetting[] @relation("SettingCreator")
   settingsUpdated WebsiteSetting[] @relation("SettingUpdater")
 
+  // Live Chat Support Relations
+  supportConversationsAsCustomer SupportConversation[] @relation("SupportCustomerConversations")
+  supportConversationsAsAgent    SupportConversation[] @relation("SupportAgentConversations")
+  supportMessagesSent            SupportMessage[]      @relation("SupportSentMessages")
+  supportAttachmentsUploaded     SupportAttachment[]   @relation("SupportUploadedAttachments")
+  supportTicketsAsCustomer       SupportTicket[]       @relation("CustomerTickets")
+  supportTicketsAsAgent          SupportTicket[]       @relation("AgentTickets")
+  supportTicketsResolved         SupportTicket[]       @relation("ResolvedTickets")
+  quickRepliesCreated            ChatQuickReply[]      @relation("CreatedQuickReplies")
+  supportAnalytics               SupportAnalytics[]    @relation("SupportAgentAnalytics")
+
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
   @@index([roleType])
@@ -4205,4 +4216,373 @@ model WebsiteSetting {
   @@index([category, isActive])
   @@index([key])
   @@map("website_settings")
+}
+
+// ===================================
+// LIVE CHAT SUPPORT SYSTEM (Customer Support)
+// ===================================
+
+enum SupportConversationStatus {
+  ACTIVE
+  WAITING
+  CLOSED
+  RESOLVED
+  ASSIGNED
+}
+
+enum SupportMessageType {
+  TEXT
+  IMAGE
+  FILE
+  AUDIO
+  VIDEO
+  LOCATION
+  PRODUCT
+  ORDER
+  SYSTEM
+}
+
+enum SupportSender {
+  CUSTOMER
+  AGENT
+  BOT
+}
+
+enum IntegrationPlatform {
+  WEBSITE
+  ZALO
+  FACEBOOK
+  TELEGRAM
+  WHATSAPP
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+model SupportConversation {
+  id                String                    @id @default(uuid())
+  conversationCode  String                    @unique @default(cuid()) // Mã hội thoại duy nhất
+  
+  // Customer Info
+  customerId        String?
+  customer          User?                     @relation("SupportCustomerConversations", fields: [customerId], references: [id], onDelete: SetNull)
+  customerName      String? // Tên khách hàng (cho guest)
+  customerEmail     String?
+  customerPhone     String?
+  customerIp        String? // IP address
+  customerLocation  String? // Vị trí địa lý
+  
+  // Agent Assignment
+  assignedAgentId   String?
+  assignedAgent     User?                     @relation("SupportAgentConversations", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  assignedAt        DateTime?
+  
+  // Status & Priority
+  status            SupportConversationStatus @default(WAITING)
+  priority          TicketPriority            @default(MEDIUM)
+  
+  // Integration
+  platform          IntegrationPlatform       @default(WEBSITE)
+  platformUserId    String? // ID của user trên platform (Zalo, FB)
+  platformUserName  String? // Tên user trên platform
+  
+  // Metadata
+  subject           String? // Chủ đề cuộc hội thoại
+  tags              String[] // Tags để phân loại
+  notes             String?  @db.Text // Ghi chú nội bộ
+  lastMessageAt     DateTime?
+  lastMessagePreview String?
+  
+  // Rating
+  rating            Int? // 1-5 stars
+  feedback          String? @db.Text
+  
+  // Timestamps
+  startedAt         DateTime             @default(now())
+  closedAt          DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  
+  // Relations
+  messages          SupportMessage[]
+  attachments       SupportAttachment[]
+  tickets           SupportTicket[]
+  
+  @@index([customerId, status])
+  @@index([assignedAgentId, status])
+  @@index([platform, platformUserId])
+  @@index([status, priority])
+  @@index([createdAt])
+  @@map("support_conversations")
+}
+
+model SupportMessage {
+  id              String               @id @default(uuid())
+  conversationId  String
+  conversation    SupportConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  // Message Content
+  messageType     SupportMessageType   @default(TEXT)
+  content         String               @db.Text
+  senderType      SupportSender        @default(CUSTOMER)
+  
+  // Sender Info
+  senderId        String?
+  sender          User?                @relation("SupportSentMessages", fields: [senderId], references: [id], onDelete: SetNull)
+  senderName      String? // Tên hiển thị
+  
+  // AI Features
+  isAIGenerated   Boolean              @default(false)
+  aiConfidence    Float? // Độ tin cậy của AI response (0-1)
+  aiSuggestions   Json? // Gợi ý từ AI
+  
+  // Metadata
+  metadata        Json? // Dữ liệu bổ sung (product info, order info, etc.)
+  isRead          Boolean              @default(false)
+  readAt          DateTime?
+  isEdited        Boolean              @default(false)
+  editedAt        DateTime?
+  
+  // Timestamps
+  sentAt          DateTime             @default(now())
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  
+  // Relations
+  attachments     SupportAttachment[]
+  
+  @@index([conversationId, sentAt])
+  @@index([senderId])
+  @@index([senderType, sentAt])
+  @@map("support_messages")
+}
+
+model SupportAttachment {
+  id              String               @id @default(uuid())
+  conversationId  String?
+  conversation    SupportConversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  messageId       String?
+  message         SupportMessage?      @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  // File Info
+  fileName        String
+  fileSize        Int // bytes
+  fileType        String // MIME type
+  fileUrl         String
+  thumbnailUrl    String?
+  
+  // Metadata
+  uploadedById    String?
+  uploadedBy      User?                @relation("SupportUploadedAttachments", fields: [uploadedById], references: [id], onDelete: SetNull)
+  
+  // Timestamps
+  createdAt       DateTime             @default(now())
+  
+  @@index([conversationId])
+  @@index([messageId])
+  @@map("support_attachments")
+}
+
+model SupportTicket {
+  id              String               @id @default(uuid())
+  ticketNumber    String               @unique @default(cuid())
+  
+  // Related Conversation
+  conversationId  String?
+  conversation    SupportConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  
+  // Customer Info
+  customerId      String?
+  customer        User?                @relation("CustomerTickets", fields: [customerId], references: [id], onDelete: SetNull)
+  
+  // Ticket Details
+  subject         String
+  description     String               @db.Text
+  status          TicketStatus         @default(OPEN)
+  priority        TicketPriority       @default(MEDIUM)
+  category        String? // Product, Shipping, Payment, etc.
+  
+  // Assignment
+  assignedAgentId String?
+  assignedAgent   User?                @relation("AgentTickets", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  assignedAt      DateTime?
+  
+  // Resolution
+  resolution      String?              @db.Text
+  resolvedAt      DateTime?
+  resolvedById    String?
+  resolvedBy      User?                @relation("ResolvedTickets", fields: [resolvedById], references: [id], onDelete: SetNull)
+  
+  // Related Order (for order support)
+  relatedOrderId  String?
+  
+  // Metadata
+  tags            String[]
+  internalNotes   String?              @db.Text
+  
+  // Timestamps
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  closedAt        DateTime?
+  
+  @@index([customerId, status])
+  @@index([assignedAgentId, status])
+  @@index([status, priority])
+  @@index([ticketNumber])
+  @@map("support_tickets")
+}
+
+model ChatIntegration {
+  id              String              @id @default(uuid())
+  
+  // Platform Info
+  platform        IntegrationPlatform @unique
+  isEnabled       Boolean             @default(false)
+  
+  // Credentials
+  appId           String?
+  appSecret       String?
+  accessToken     String?             @db.Text
+  refreshToken    String?             @db.Text
+  webhookSecret   String?
+  
+  // Configuration
+  config          Json? // Platform-specific config
+  
+  // Webhook Info
+  webhookUrl      String?
+  webhookVerified Boolean             @default(false)
+  
+  // Metadata
+  lastSyncAt      DateTime?
+  syncStatus      String? // success, failed, pending
+  errorLog        String?             @db.Text
+  
+  // Timestamps
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  
+  @@map("chat_integrations")
+}
+
+model ChatQuickReply {
+  id              String   @id @default(uuid())
+  
+  // Quick Reply Info
+  title           String
+  shortcut        String   @unique // e.g., "/hello", "/price"
+  message         String   @db.Text
+  
+  // Categorization
+  category        String? // greeting, product, shipping, etc.
+  tags            String[]
+  
+  // Usage
+  isActive        Boolean  @default(true)
+  usageCount      Int      @default(0)
+  
+  // Creator
+  createdById     String?
+  createdBy       User?    @relation("CreatedQuickReplies", fields: [createdById], references: [id], onDelete: SetNull)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([category, isActive])
+  @@index([shortcut])
+  @@map("chat_quick_replies")
+}
+
+model ChatBotRule {
+  id              String   @id @default(uuid())
+  
+  // Rule Info
+  name            String
+  description     String?  @db.Text
+  
+  // Trigger
+  keywords        String[] // Keywords to trigger this rule
+  pattern         String? // Regex pattern
+  platform        IntegrationPlatform[] // Platforms where this rule applies
+  
+  // Response
+  responseType    String // text, quick_reply, product, order_lookup
+  responseContent String   @db.Text // Response template
+  responseData    Json? // Additional data for complex responses
+  
+  // AI Integration
+  useAI           Boolean  @default(false)
+  aiPrompt        String?  @db.Text
+  
+  // Conditions
+  conditions      Json? // Advanced conditions
+  priority        Int      @default(0)
+  
+  // Status
+  isActive        Boolean  @default(true)
+  
+  // Usage Stats
+  triggerCount    Int      @default(0)
+  successRate     Float?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([isActive, priority])
+  @@map("chat_bot_rules")
+}
+
+model SupportAnalytics {
+  id              String   @id @default(uuid())
+  
+  // Date
+  date            DateTime @db.Date
+  
+  // Metrics
+  totalConversations    Int @default(0)
+  activeConversations   Int @default(0)
+  closedConversations   Int @default(0)
+  totalMessages         Int @default(0)
+  customerMessages      Int @default(0)
+  agentMessages         Int @default(0)
+  botMessages           Int @default(0)
+  
+  // Performance
+  avgResponseTime       Float? // seconds
+  avgResolutionTime     Float? // minutes
+  firstResponseTime     Float? // seconds
+  
+  // Platform breakdown
+  platformStats         Json? // Stats per platform
+  
+  // Agent performance
+  agentId               String?
+  agent                 User?  @relation("SupportAgentAnalytics", fields: [agentId], references: [id], onDelete: SetNull)
+  
+  // Customer satisfaction
+  avgRating             Float?
+  totalRatings          Int    @default(0)
+  
+  // Timestamps
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@unique([date, agentId])
+  @@index([date])
+  @@index([agentId, date])
+  @@map("support_analytics")
 }
