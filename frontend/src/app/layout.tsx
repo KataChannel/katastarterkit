@@ -5,7 +5,11 @@ import { Providers } from '@/components/providers';
 import { Navigation } from '@/components/Navigation';
 import { PWAProvider } from '@/components/pwa';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -58,16 +62,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.className} h-full`}>
+      <body className={`${inter.variable} h-full font-sans`}>
         <Providers>
           <PWAProvider
             enableAutoPrompt={true}
             enableOfflineStatus={true}
-            installPromptDelay={15000} // Show after 15 seconds
+            installPromptDelay={15000}
             offlineStatusPosition="top"
           >
             <div className="min-h-full flex flex-col">
-              {/* <Navigation /> */}
               <main className="flex-1">
                 {children}
               </main>
