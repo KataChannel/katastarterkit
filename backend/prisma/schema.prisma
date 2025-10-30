@@ -2990,6 +2990,7 @@ model Course {
   slug        String       @unique @db.VarChar(255)
   description String?      @db.Text
   thumbnail   String?      @db.VarChar(500)
+  trailer     String?      @db.VarChar(500) // Video trailer URL
   price       Decimal      @default(0) @db.Decimal(10, 2)
   level       CourseLevel  @default(BEGINNER)
   status      CourseStatus @default(DRAFT)

@@ -52,7 +52,7 @@ export default function ReviewsSection({
         <div className="flex items-center gap-3">
           <MessageSquare className="w-6 h-6 text-blue-600" />
           <h2 className="text-2xl font-bold text-gray-900">
-            Student Reviews
+            Đánh giá từ học viên
           </h2>
         </div>
 
@@ -68,14 +68,14 @@ export default function ReviewsSection({
                 className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Edit2 className="w-4 h-4" />
-                Edit Your Review
+                Chỉnh sửa đánh giá
               </button>
             ) : !userReview && !showForm ? (
               <button
                 onClick={() => setShowForm(true)}
                 className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Write a Review
+                Viết đánh giá
               </button>
             ) : null}
           </div>
@@ -86,7 +86,7 @@ export default function ReviewsSection({
       {!isEnrolled && currentUserId && (
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-700">
-            <strong>Enroll in this course</strong> to leave a review and share your experience with other students.
+            <strong>Ghi danh khóa học này</strong> để viết đánh giá và chia sẻ trải nghiệm của bạn với các học viên khác.
           </p>
         </div>
       )}
@@ -95,7 +95,7 @@ export default function ReviewsSection({
       {showForm && isEnrolled && currentUserId && (
         <div className="p-6 bg-white border-2 border-blue-200 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {editingReview ? 'Edit Your Review' : 'Write Your Review'}
+            {editingReview ? 'Chỉnh sửa đánh giá của bạn' : 'Viết đánh giá của bạn'}
           </h3>
           <ReviewForm
             courseId={courseId}
