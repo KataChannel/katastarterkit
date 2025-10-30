@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EnrollmentStatus } from '@prisma/client';
 import { CreateQuizInput, UpdateQuizInput, SubmitQuizInput } from './dto/quiz.input';
 
 @Injectable()
@@ -294,7 +295,55 @@ export class QuizzesService {
       },
     });
 
+    // Update enrollment progress after quiz completion
+    await this.updateEnrollmentProgress(enrollmentId);
+
     return attempt;
+  }
+
+  // Update enrollment progress based on completed lessons and quizzes
+  private async updateEnrollmentProgress(enrollmentId: string) {
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: { id: enrollmentId },
+      include: {
+        course: {
+          include: {
+            modules: {
+              include: {
+                lessons: true,
+              },
+            },
+          },
+        },
+        lessonProgress: true,
+      },
+    });
+
+    if (!enrollment) return;
+
+    // Calculate total lessons
+    const totalLessons = enrollment.course.modules.reduce(
+      (acc, module) => acc + module.lessons.length,
+      0
+    );
+
+    if (totalLessons === 0) return;
+
+    // Calculate completed lessons
+    const completedLessons = enrollment.lessonProgress.filter(p => p.completed).length;
+
+    const progress = (completedLessons / totalLessons) * 100;
+
+    // Update enrollment
+    await this.prisma.enrollment.update({
+      where: { id: enrollmentId },
+      data: {
+        progress,
+        status: progress === 100 ? EnrollmentStatus.COMPLETED : EnrollmentStatus.ACTIVE,
+        completedAt: progress === 100 ? new Date() : null,
+        lastAccessedAt: new Date(),
+      },
+    });
   }
 
   // Get quiz attempts for a user

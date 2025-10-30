@@ -131,6 +131,11 @@ export default function LessonViewer({
       }
       
       setCompleted(true);
+      
+      // Refetch enrollment progress
+      await refetchProgress();
+      
+      // Call parent onComplete callback
       onComplete?.();
     } catch (error) {
       console.error('Failed to mark lesson complete:', error);
@@ -234,6 +239,8 @@ export default function LessonViewer({
             onComplete={(attemptId) => {
               setQuizAttemptId(attemptId);
               handleMarkComplete();
+              // Also call parent onComplete to refetch enrollment
+              onComplete?.();
             }}
           />
         );
