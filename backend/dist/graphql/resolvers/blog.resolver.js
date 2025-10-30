@@ -42,10 +42,10 @@ let BlogResolver = class BlogResolver {
         return this.blogService.getFeaturedBlogs(limit);
     }
     async getBlogsByCategory(categoryId, page, limit) {
-        return this.blogService.getBlogsByCategory(categoryId, page, limit);
+        return this.blogService.getBlogsByCategory(categoryId, { page, limit });
     }
-    async getRelatedBlogs(categoryId, excludeBlogId, limit) {
-        return this.blogService.getRelatedBlogs(categoryId, excludeBlogId, limit);
+    async getRelatedBlogs(blogId, limit) {
+        return this.blogService.getRelatedBlogs(blogId, limit);
     }
     async getCategories() {
         return this.blogService.getCategories();
@@ -56,11 +56,13 @@ let BlogResolver = class BlogResolver {
     async getTags() {
         return this.blogService.getTags();
     }
-    async createBlog(input) {
-        return this.blogService.createBlog(input);
+    async createBlog(input, context) {
+        const userId = context.req?.user?.id || input.author;
+        return this.blogService.createBlog(input, userId);
     }
     async updateBlog(input) {
-        return this.blogService.updateBlog(input);
+        const { id, ...updateData } = input;
+        return this.blogService.updateBlog(id, updateData);
     }
     async deleteBlog(id) {
         return this.blogService.deleteBlog(id);
@@ -69,7 +71,8 @@ let BlogResolver = class BlogResolver {
         return this.blogService.createCategory(input);
     }
     async updateCategory(input) {
-        return this.blogService.updateCategory(input);
+        const { id, ...updateData } = input;
+        return this.blogService.updateCategory(id, updateData);
     }
     async deleteCategory(id) {
         return this.blogService.deleteCategory(id);
@@ -78,7 +81,8 @@ let BlogResolver = class BlogResolver {
         return this.blogService.createTag(input);
     }
     async updateTag(input) {
-        return this.blogService.updateTag(input);
+        const { id, ...updateData } = input;
+        return this.blogService.updateTag(id, updateData);
     }
     async deleteTag(id) {
         return this.blogService.deleteTag(id);
@@ -128,11 +132,10 @@ __decorate([
 ], BlogResolver.prototype, "getBlogsByCategory", null);
 __decorate([
     (0, graphql_1.Query)(() => [blog_type_1.BlogType], { name: 'relatedBlogs' }),
-    __param(0, (0, graphql_1.Args)('categoryId', { type: () => graphql_1.ID })),
-    __param(1, (0, graphql_1.Args)('excludeBlogId', { type: () => graphql_1.ID })),
-    __param(2, (0, graphql_1.Args)('limit', { type: () => graphql_1.Int, nullable: true })),
+    __param(0, (0, graphql_1.Args)('blogId', { type: () => graphql_1.ID })),
+    __param(1, (0, graphql_1.Args)('limit', { type: () => graphql_1.Int, nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Number]),
+    __metadata("design:paramtypes", [String, Number]),
     __metadata("design:returntype", Promise)
 ], BlogResolver.prototype, "getRelatedBlogs", null);
 __decorate([
@@ -158,8 +161,9 @@ __decorate([
     (0, graphql_1.Mutation)(() => blog_type_1.BlogType, { name: 'createBlog' }),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, graphql_1.Args)('input')),
+    __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [blog_input_1.CreateBlogInput]),
+    __metadata("design:paramtypes", [blog_input_1.CreateBlogInput, Object]),
     __metadata("design:returntype", Promise)
 ], BlogResolver.prototype, "createBlog", null);
 __decorate([

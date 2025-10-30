@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID, Int } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Int, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { BlogService } from '../../services/blog.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -62,16 +62,15 @@ export class BlogResolver {
     @Args('page', { type: () => Int, nullable: true }) page?: number,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ) {
-    return this.blogService.getBlogsByCategory(categoryId, page, limit);
+    return this.blogService.getBlogsByCategory(categoryId, { page, limit });
   }
 
   @Query(() => [BlogType], { name: 'relatedBlogs' })
   async getRelatedBlogs(
-    @Args('categoryId', { type: () => ID }) categoryId: string,
-    @Args('excludeBlogId', { type: () => ID }) excludeBlogId: string,
+    @Args('blogId', { type: () => ID }) blogId: string,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
   ) {
-    return this.blogService.getRelatedBlogs(categoryId, excludeBlogId, limit);
+    return this.blogService.getRelatedBlogs(blogId, limit);
   }
 
   @Query(() => [BlogCategoryType], { name: 'blogCategories' })
@@ -95,14 +94,16 @@ export class BlogResolver {
 
   @Mutation(() => BlogType, { name: 'createBlog' })
   @UseGuards(JwtAuthGuard)
-  async createBlog(@Args('input') input: CreateBlogInput) {
-    return this.blogService.createBlog(input);
+  async createBlog(@Args('input') input: CreateBlogInput, @Context() context: any) {
+    const userId = context.req?.user?.id || input.author;
+    return this.blogService.createBlog(input, userId);
   }
 
   @Mutation(() => BlogType, { name: 'updateBlog' })
   @UseGuards(JwtAuthGuard)
   async updateBlog(@Args('input') input: UpdateBlogInput) {
-    return this.blogService.updateBlog(input);
+    const { id, ...updateData } = input;
+    return this.blogService.updateBlog(id, updateData);
   }
 
   @Mutation(() => Boolean, { name: 'deleteBlog' })
@@ -124,7 +125,8 @@ export class BlogResolver {
   @Mutation(() => BlogCategoryType, { name: 'updateBlogCategory' })
   @UseGuards(JwtAuthGuard)
   async updateCategory(@Args('input') input: UpdateBlogCategoryInput) {
-    return this.blogService.updateCategory(input);
+    const { id, ...updateData } = input;
+    return this.blogService.updateCategory(id, updateData);
   }
 
   @Mutation(() => Boolean, { name: 'deleteBlogCategory' })
@@ -146,7 +148,8 @@ export class BlogResolver {
   @Mutation(() => BlogTagType, { name: 'updateBlogTag' })
   @UseGuards(JwtAuthGuard)
   async updateTag(@Args('input') input: UpdateBlogTagInput) {
-    return this.blogService.updateTag(input);
+    const { id, ...updateData } = input;
+    return this.blogService.updateTag(id, updateData);
   }
 
   @Mutation(() => Boolean, { name: 'deleteBlogTag' })

@@ -27,7 +27,7 @@ let OrderResolver = class OrderResolver {
             return {
                 success: true,
                 message: `Order ${order.orderNumber} created successfully`,
-                order,
+                order: order,
             };
         }
         catch (error) {
@@ -50,7 +50,6 @@ let OrderResolver = class OrderResolver {
             const userId = context?.req?.user?.id;
             const result = await this.orderService.listOrders(filter, userId);
             return {
-                success: true,
                 orders: result.orders,
                 total: result.total,
                 hasMore: result.hasMore,
@@ -58,7 +57,6 @@ let OrderResolver = class OrderResolver {
         }
         catch (error) {
             return {
-                success: false,
                 message: error.message,
                 errors: [error.message],
                 orders: [],
@@ -76,7 +74,6 @@ let OrderResolver = class OrderResolver {
             const filter = { skip, take };
             const result = await this.orderService.listOrders(filter, userId);
             return {
-                success: true,
                 orders: result.orders,
                 total: result.total,
                 hasMore: result.hasMore,
@@ -84,7 +81,6 @@ let OrderResolver = class OrderResolver {
         }
         catch (error) {
             return {
-                success: false,
                 message: error.message,
                 errors: [error.message],
                 orders: [],
@@ -100,7 +96,7 @@ let OrderResolver = class OrderResolver {
             return {
                 success: true,
                 message: `Order status updated to ${input.status}`,
-                order,
+                order: order,
             };
         }
         catch (error) {
@@ -118,7 +114,7 @@ let OrderResolver = class OrderResolver {
             return {
                 success: true,
                 message: 'Order cancelled successfully',
-                order,
+                order: order,
             };
         }
         catch (error) {
