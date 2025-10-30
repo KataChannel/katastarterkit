@@ -295,12 +295,11 @@ describe('EnrollmentsService', () => {
       });
     });
 
-    it('should throw NotFoundException if enrollment not found', async () => {
+    it('should return null if enrollment not found', async () => {
       mockPrismaService.enrollment.findUnique.mockResolvedValue(null);
 
-      await expect(service.getEnrollment('user-1', 'course-1')).rejects.toThrow(
-        new NotFoundException('Enrollment not found'),
-      );
+      const result = await service.getEnrollment('user-1', 'course-1');
+      expect(result).toBeNull();
     });
   });
 

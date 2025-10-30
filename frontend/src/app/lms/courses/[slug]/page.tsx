@@ -28,7 +28,7 @@ export default function CourseDetailPage() {
   });
 
   const { data: enrollmentData, refetch: refetchEnrollment } = useQuery(GET_ENROLLMENT, {
-    variables: { courseId: data?.courseBySlug?.id },
+    variables: { courseId: data?.courseBySlug?.id || '' },
     skip: !data?.courseBySlug?.id || !isAuthenticated,
   });
 

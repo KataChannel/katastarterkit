@@ -19,8 +19,7 @@ export default function ModulesStep({ courseId, onNext, onBack }: ModulesStepPro
   const [formData, setFormData] = useState({ title: '', description: '' });
 
   // ✅ Migrated to Dynamic GraphQL
-  const { data: course, loading, refetch } = useFindUnique('course', {
-    id: courseId,
+  const { data: course, loading, refetch } = useFindUnique('course', courseId, {
     include: { modules: { orderBy: { order: 'asc' } } },
   });
 

@@ -40,11 +40,11 @@ export default function LessonViewer({
   const [progress, setProgress] = useState(0);
   const [completed, setCompleted] = useState(isCompleted);
   const [quizAttemptId, setQuizAttemptId] = useState<string | null>(null);
+  const [markingComplete, setMarkingComplete] = useState(false);
 
-  // ✅ Migrated: Custom mutation for marking lesson complete
-  // Note: This is a custom business logic mutation, keep as-is or migrate to useUpdateOne
-  // For now, we'll use useUpdateOne to update enrollment progress
-  const [updateProgress, { loading: markingComplete }] = useUpdateOne('enrollment');
+  // ✅ Migrated: Create or update lesson progress
+  const [createLessonProgress] = useCreateOne('lessonProgress');
+  const [updateLessonProgress] = useUpdateOne('lessonProgress');
 
   // ✅ Migrated: Fetch quizzes by lesson (only if lesson type is QUIZ)
   const { data: quizzes, loading: loadingQuizzes } = useFindMany('quiz', {
@@ -53,6 +53,17 @@ export default function LessonViewer({
       ...(lesson.type === 'QUIZ' ? {} : { id: 'never-match' }) // Only fetch if QUIZ type
     },
   });
+
+  // Check if lesson progress already exists using findMany with composite filter
+  const { data: progressRecords, refetch: refetchProgress } = useFindMany('lessonProgress', {
+    where: { 
+      enrollmentId: enrollmentId || 'skip',
+      lessonId: lesson.id,
+    },
+    take: 1,
+  });
+
+  const existingProgress = progressRecords?.[0];
 
   const handleVideoProgress = (progressPercent: number) => {
     setProgress(progressPercent);
@@ -70,23 +81,61 @@ export default function LessonViewer({
   };
 
   const handleMarkComplete = async () => {
-    if (!enrollmentId) return;
+    if (!enrollmentId || markingComplete) return;
 
+    setMarkingComplete(true);
     try {
-      // Update enrollment to mark this lesson as complete
-      await updateProgress({
-        where: { id: enrollmentId },
-        data: {
-          completedLessons: {
-            connect: { id: lesson.id }
+      // Refetch to ensure we have the latest progress data
+      await refetchProgress();
+      
+      // Create or update lesson progress
+      if (existingProgress?.id) {
+        // Update existing progress
+        await updateLessonProgress({
+          where: { id: existingProgress.id },
+          data: {
+            completed: true,
+            completedAt: new Date().toISOString(),
+          },
+        });
+      } else {
+        // Try to create new progress record, handle duplicate error
+        try {
+          await createLessonProgress({
+            data: {
+              enrollmentId,
+              lessonId: lesson.id,
+              completed: true,
+              completedAt: new Date().toISOString(),
+            },
+          });
+        } catch (createError: any) {
+          // If record already exists (race condition), refetch and update instead
+          if (createError?.message?.includes('unique constraint') || 
+              createError?.message?.includes('already exists')) {
+            await refetchProgress();
+            const latestProgress = progressRecords?.[0];
+            if (latestProgress?.id) {
+              await updateLessonProgress({
+                where: { id: latestProgress.id },
+                data: {
+                  completed: true,
+                  completedAt: new Date().toISOString(),
+                },
+              });
+            }
+          } else {
+            throw createError;
           }
-        },
-      });
+        }
+      }
       
       setCompleted(true);
       onComplete?.();
     } catch (error) {
       console.error('Failed to mark lesson complete:', error);
+    } finally {
+      setMarkingComplete(false);
     }
   };
 

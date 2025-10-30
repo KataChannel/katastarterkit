@@ -20,7 +20,7 @@ export default function LearnCoursePage() {
   });
 
   const { data: enrollmentData, loading: enrollmentLoading, refetch: refetchEnrollment } = useQuery(GET_ENROLLMENT, {
-    variables: { courseId: courseData?.courseBySlug?.id },
+    variables: { courseId: courseData?.courseBySlug?.id || '' },
     skip: !courseData?.courseBySlug?.id,
   });
 
