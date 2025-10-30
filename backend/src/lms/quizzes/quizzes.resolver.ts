@@ -14,9 +14,9 @@ import { UserRoleType } from '@prisma/client';
 export class QuizzesResolver {
   constructor(private readonly quizzesService: QuizzesService) {}
 
+  // ✅ FIXED: Chuyển từ @Roles(ADMIN) sang JwtAuthGuard
+  // Service layer sẽ kiểm tra ownership của course/lesson
   @Mutation(() => Quiz)
-  @UseGuards(RolesGuard)
-  @Roles(UserRoleType.ADMIN)
   async createQuiz(
     @CurrentUser('id') userId: string,
     @Args('input') createQuizInput: CreateQuizInput,
@@ -40,8 +40,6 @@ export class QuizzesResolver {
   }
 
   @Mutation(() => Quiz)
-  @UseGuards(RolesGuard)
-  @Roles(UserRoleType.ADMIN)
   async updateQuiz(
     @CurrentUser('id') userId: string,
     @Args('id') id: string,
@@ -51,8 +49,6 @@ export class QuizzesResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(RolesGuard)
-  @Roles(UserRoleType.ADMIN)
   async deleteQuiz(
     @CurrentUser('id') userId: string,
     @Args('id') id: string,
