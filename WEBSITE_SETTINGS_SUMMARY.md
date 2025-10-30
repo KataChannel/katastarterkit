@@ -52,6 +52,14 @@
 - **Root cause**: Prisma model name là `WebsiteSetting`, không phải `websiteSetting`
 - **Fixed files**: `useWebsiteSettings.ts` (5 hooks) + `page.tsx` (2 chỗ)
 
+### Fix #3: NestJS HttpAdapterHost Dependency Error 🔥 **CRITICAL**
+**File**: [FIX_NESTJS_HTTPADAPTERHOST_DEPENDENCY.md](./FIX_NESTJS_HTTPADAPTERHOST_DEPENDENCY.md)
+- ❌ Before: Duplicate @nestjs packages (root + backend node_modules)
+- ✅ After: Removed backend/node_modules, use symlinks to root
+- **Root cause**: TypeScript type mismatch, DynamicModule not assignable
+- **Fixed**: `rm -rf backend/node_modules && bun install && pkill -f tsserver`
+- **Impact**: Backend can now start successfully
+
 ## 📊 Settings Created (36)
 
 | Category | Count | Examples |
@@ -153,6 +161,37 @@ query {
 - GraphQL Playground: `http://localhost:13000/graphql`
 - Full Documentation: [WEBSITE_SETTINGS_SYSTEM.md](./WEBSITE_SETTINGS_SYSTEM.md)
 
+## 🚀 Restart Backend (Required)
+
+**Sau khi fix bugs, cần khởi động lại backend**:
+
+```bash
+# 1. Generate Prisma Client (REQUIRED)
+cd backend
+bunx prisma generate
+
+# 2. Start backend
+bun dev
+
+# 3. Verify backend started
+# → Should see: "Nest application successfully started"
+# → GraphQL Playground: http://localhost:13000/graphql
+
+# 4. Test WebsiteSetting query
+# → Query: findMany(modelName: "WebsiteSetting", input: {})
+# → Should return 36 settings
+```
+
+**Frontend**:
+```bash
+# Terminal mới
+cd frontend
+bun dev
+
+# → http://localhost:13001
+# → Admin UI: http://localhost:13001/admin/settings/website
+```
+
 ---
 
-**Status**: ✅ 100% Complete | **Date**: 2025-10-30
+**Status**: ✅ 100% Complete | **Date**: 2025-10-30 | **Bugs Fixed**: 3
