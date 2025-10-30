@@ -3,10 +3,11 @@
 ## ✅ Hoàn thành
 
 ### Backend
-1. **Database Schema** (`websiteSetting` model)
+1. **Database Schema** (`WebsiteSetting` model) ⚠️ **PascalCase**
    - 11 fields với types: TEXT, NUMBER, BOOLEAN, COLOR, IMAGE, URL, JSON, SELECT
    - 10 categories: GENERAL, HEADER, FOOTER, SEO, SOCIAL, CONTACT, APPEARANCE, etc.
    - Relations với User (creator, updater)
+   - **Table name**: `website_settings` (snake_case từ `@@map()`)
 
 2. **Migration & Seed**
    ```bash
@@ -23,7 +24,7 @@
 
 ### Frontend
 4. **Hooks** (`useWebsiteSettings.ts`)
-   - 7 custom hooks
+   - 7 custom hooks - ✅ **Fixed: dùng `'WebsiteSetting'` (PascalCase)**
    - Helper functions (parseSettingValue, settingsToMap)
    - TypeScript interfaces đầy đủ
 
@@ -32,10 +33,24 @@
    - ✅ `website-footer.tsx` - Dynamic company info, social links, colors
 
 6. **Admin UI** (`/admin/settings/website`)
-   - 7 category tabs
+   - 7 category tabs - ✅ **Fixed: dùng `'WebsiteSetting'` (PascalCase)**
    - Smart input rendering theo type
    - Real-time editing + bulk save
    - Change tracking
+
+## 🐛 Bug Fixes
+
+### Fix #1: GraphQL orderBy Array Error
+**File**: [FIX_GRAPHQL_ORDERBY_ARRAY_ERROR.md](./FIX_GRAPHQL_ORDERBY_ARRAY_ERROR.md)
+- ❌ Before: `orderBy: [{ category: 'asc' }, { order: 'asc' }]` (array)
+- ✅ After: `orderBy: { order: 'asc' }` (object) + client-side sort
+
+### Fix #2: Model Name Casing Error ⚠️ **CRITICAL**
+**File**: [FIX_MODEL_NAME_CASING.md](./FIX_MODEL_NAME_CASING.md)
+- ❌ Before: `useFindMany('websiteSetting', ...)` (camelCase)
+- ✅ After: `useFindMany('WebsiteSetting', ...)` (PascalCase)
+- **Root cause**: Prisma model name là `WebsiteSetting`, không phải `websiteSetting`
+- **Fixed files**: `useWebsiteSettings.ts` (5 hooks) + `page.tsx` (2 chỗ)
 
 ## 📊 Settings Created (36)
 
@@ -50,6 +65,16 @@
 | APPEARANCE | 3 | primary_color, secondary_color, accent_color |
 
 ## 🚀 Cách sử dụng
+
+### ⚠️ QUAN TRỌNG: Model Name Convention
+```typescript
+// ✅ ĐÚNG - PascalCase (match Prisma model)
+useFindMany<WebsiteSetting>('WebsiteSetting', { ... })
+useUpdateOne('WebsiteSetting')
+
+// ❌ SAI - camelCase (lỗi "Model not found")
+useFindMany<WebsiteSetting>('websiteSetting', { ... })  // ← Sai!
+```
 
 ### Quản trị viên
 ```
