@@ -70,8 +70,8 @@ export default function CourseDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Course not found</h1>
-          <p className="text-gray-600">The course you're looking for doesn't exist.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy khóa học</h1>
+          <p className="text-gray-600">Khóa học bạn đang tìm kiếm không tồn tại.</p>
         </div>
       </div>
     );
@@ -203,7 +203,7 @@ export default function CourseDetailPage() {
                   <div className="flex items-center gap-3">
                     <Award className="w-5 h-5 text-gray-500" />
                     <div>
-                      <p className="text-sm text-gray-600">Level</p>
+                      <p className="text-sm text-gray-600">Cấp độ</p>
                       <p className="font-medium">{course.level}</p>
                     </div>
                   </div>
@@ -212,7 +212,7 @@ export default function CourseDetailPage() {
                     <div className="flex items-center gap-3">
                       <Clock className="w-5 h-5 text-gray-500" />
                       <div>
-                        <p className="text-sm text-gray-600">Duration</p>
+                        <p className="text-sm text-gray-600">Thời lượng</p>
                         <p className="font-medium">
                           {Math.floor(course.duration / 60)}h {course.duration % 60}m
                         </p>
@@ -223,16 +223,16 @@ export default function CourseDetailPage() {
                   <div className="flex items-center gap-3">
                     <BookOpen className="w-5 h-5 text-gray-500" />
                     <div>
-                      <p className="text-sm text-gray-600">Lessons</p>
-                      <p className="font-medium">{totalLessons} lessons</p>
+                      <p className="text-sm text-gray-600">Bài học</p>
+                      <p className="font-medium">{totalLessons} bài học</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <Globe className="w-5 h-5 text-gray-500" />
                     <div>
-                      <p className="text-sm text-gray-600">Language</p>
-                      <p className="font-medium">English</p>
+                      <p className="text-sm text-gray-600">Ngôn ngữ</p>
+                      <p className="font-medium">Tiếng Việt</p>
                     </div>
                   </div>
                 </div>
@@ -277,7 +277,7 @@ export default function CourseDetailPage() {
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Reviews
+                  Đánh giá
                 </button>
                 <button
                   onClick={() => setActiveTab('discussions')}
@@ -288,7 +288,7 @@ export default function CourseDetailPage() {
                   }`}
                 >
                   <MessageSquare className="w-4 h-4" />
-                  Discussions
+                  Thảo luận
                 </button>
               </div>
 
@@ -299,7 +299,7 @@ export default function CourseDetailPage() {
                     {/* What You'll Learn */}
                     {course.whatYouWillLearn && course.whatYouWillLearn.length > 0 && (
                       <div>
-                        <h2 className="text-2xl font-bold mb-6">What you'll learn</h2>
+                        <h2 className="text-2xl font-bold mb-6">Bạn sẽ học được gì</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {course.whatYouWillLearn.map((item: string, index: number) => (
                             <div key={index} className="flex items-start gap-3">
@@ -314,7 +314,7 @@ export default function CourseDetailPage() {
                     {/* Requirements */}
                     {course.requirements && course.requirements.length > 0 && (
                       <div>
-                        <h2 className="text-2xl font-bold mb-6">Requirements</h2>
+                        <h2 className="text-2xl font-bold mb-6">Yêu cầu</h2>
                         <ul className="space-y-2">
                           {course.requirements.map((req: string, index: number) => (
                             <li key={index} className="flex items-start gap-3 text-gray-700">
@@ -342,7 +342,7 @@ export default function CourseDetailPage() {
                                 </span>
                               </div>
                               <span className="text-sm text-gray-600">
-                                {module.lessons?.length || 0} lessons
+                                {module.lessons?.length || 0} bài học
                               </span>
                             </summary>
                             <div className="mt-2 ml-4 space-y-2">
@@ -371,7 +371,7 @@ export default function CourseDetailPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500">No course content available yet.</p>
+                      <p className="text-gray-500">Chưa có nội dung khóa học.</p>
                     )}
                   </div>
                 )}
@@ -395,20 +395,20 @@ export default function CourseDetailPage() {
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                       >
                         <Plus className="w-5 h-5" />
-                        Start New Discussion
+                        Bắt đầu thảo luận mới
                       </button>
                     )}
 
                     {/* New Discussion Form */}
                     {showNewDiscussion && (
                       <form onSubmit={handleCreateDiscussion} className="bg-gray-50 rounded-lg p-6 space-y-4">
-                        <h3 className="text-lg font-semibold">New Discussion</h3>
+                        <h3 className="text-lg font-semibold">Thảo luận mới</h3>
                         <div>
                           <input
                             type="text"
                             value={discussionTitle}
                             onChange={(e) => setDiscussionTitle(e.target.value)}
-                            placeholder="Discussion title..."
+                            placeholder="Tiêu đề thảo luận..."
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required
                           />
@@ -417,7 +417,7 @@ export default function CourseDetailPage() {
                           <textarea
                             value={discussionContent}
                             onChange={(e) => setDiscussionContent(e.target.value)}
-                            placeholder="What would you like to discuss?"
+                            placeholder="Bạn muốn thảo luận điều gì?"
                             rows={4}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                             required
@@ -428,7 +428,7 @@ export default function CourseDetailPage() {
                             type="submit"
                             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                           >
-                            Post Discussion
+                            Đăng thảo luận
                           </button>
                           <button
                             type="button"
@@ -439,7 +439,7 @@ export default function CourseDetailPage() {
                             }}
                             className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                           >
-                            Cancel
+                            Hủy
                           </button>
                         </div>
                       </form>
@@ -449,7 +449,7 @@ export default function CourseDetailPage() {
                     {!enrollmentData?.enrollment && (
                       <div className="text-center py-8">
                         <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                        <p className="text-gray-600 mb-4">Enroll in this course to join discussions</p>
+                        <p className="text-gray-600 mb-4">Ghi danh khóa học này để tham gia thảo luận</p>
                       </div>
                     )}
 
@@ -468,7 +468,7 @@ export default function CourseDetailPage() {
                     ) : enrollmentData?.enrollment ? (
                       <div className="text-center py-8">
                         <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                        <p className="text-gray-600">No discussions yet. Be the first to start one!</p>
+                        <p className="text-gray-600">Chưa có thảo luận nào. Hãy là người đầu tiên bắt đầu!</p>
                       </div>
                     ) : null}
                   </div>
