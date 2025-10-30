@@ -39,7 +39,7 @@ interface CarouselBlockProps {
   onDelete?: () => void;
 }
 
-export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete }: CarouselBlockProps) {
+export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete }: CarouselBlockProps) {
   const [api, setApi] = useState<any>();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
