@@ -22,7 +22,7 @@ const SectionBlock = lazy(() => import('./SectionBlock').then(m => ({ default: m
 const GridBlock = lazy(() => import('./GridBlock').then(m => ({ default: m.GridBlock })));
 const FlexBlock = lazy(() => import('./FlexBlock').then(m => ({ default: m.FlexBlock })));
 const DynamicBlock = lazy(() => import('./DynamicBlock').then(m => ({ default: m.DynamicBlock })));
-const CarouselBlock = lazy(() => import('./CarouselBlock'));
+const CarouselBlock = lazy(() => import('./CarouselBlock').then(m => ({ default: m.CarouselBlock })));
 const ProductListBlock = lazy(() => import('./ProductListBlock').then(m => ({ default: m.ProductListBlock })));
 const ProductDetailBlock = lazy(() => import('./ProductDetailBlock').then(m => ({ default: m.ProductDetailBlock })));
 const VideoBlock = lazy(() => import('./VideoBlock').then(m => ({ default: m.VideoBlock })));
