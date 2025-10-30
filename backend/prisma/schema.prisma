@@ -186,6 +186,9 @@ model User {
   enrollments       Enrollment[]  @relation("UserEnrollments")
   quizAttempts      QuizAttempt[]
   courseReviews     Review[]      @relation("UserReviews")
+  certificates      Certificate[] @relation("UserCertificates")
+  discussions       Discussion[]  @relation("UserDiscussions")
+  discussionReplies DiscussionReply[] @relation("UserDiscussionReplies")
   department        Department?   @relation("DepartmentUsers", fields: [departmentId], references: [id])
   departmentId      String?
 
@@ -3010,9 +3013,11 @@ model Course {
   avgRating       Float @default(0) // Average rating from reviews
 
   // Modules & Enrollments
-  modules     CourseModule[]
-  enrollments Enrollment[]
-  reviews     Review[]       @relation("CourseReviews")
+  modules      CourseModule[]
+  enrollments  Enrollment[]
+  reviews      Review[]       @relation("CourseReviews")
+  certificates Certificate[]  @relation("CourseCertificates")
+  discussions  Discussion[]   @relation("CourseDiscussions")
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -3055,6 +3060,7 @@ model Lesson {
 
   module  LessonProgress[]
   quizzes Quiz[]
+  discussions Discussion[] @relation("LessonDiscussions")
 
   courseModule CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
@@ -3077,6 +3083,7 @@ model Enrollment {
 
   lessonProgress LessonProgress[]
   quizAttempts   QuizAttempt[]
+  certificate    Certificate?
 
   // Timestamps
   enrolledAt  DateTime  @default(now())
@@ -3217,6 +3224,84 @@ model Review {
   @@index([userId])
   @@index([rating])
   @@map("reviews")
+}
+
+// ==================== COURSE CERTIFICATES ====================
+
+model Certificate {
+  id           String   @id @default(uuid())
+  enrollmentId String   @unique
+  userId       String
+  courseId     String
+  certificateNumber String @unique // Auto-generated unique number
+  issueDate    DateTime @default(now())
+  
+  // Certificate details
+  courseName   String
+  instructorName String
+  completionDate DateTime
+  grade        String? // Optional: A, B, C, Pass, etc.
+  
+  // Verification
+  verificationUrl String? // Public verification URL
+  
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  user       User       @relation("UserCertificates", fields: [userId], references: [id], onDelete: Cascade)
+  course     Course     @relation("CourseCertificates", fields: [courseId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([courseId])
+  @@index([certificateNumber])
+  @@map("certificates")
+}
+
+// ==================== COURSE DISCUSSIONS ====================
+
+model Discussion {
+  id       String  @id @default(uuid())
+  courseId String
+  userId   String
+  lessonId String? // Optional: discussion for specific lesson
+  title    String
+  content  String
+  isPinned Boolean @default(false)
+  
+  course  Course    @relation("CourseDiscussions", fields: [courseId], references: [id], onDelete: Cascade)
+  user    User      @relation("UserDiscussions", fields: [userId], references: [id], onDelete: Cascade)
+  lesson  Lesson?   @relation("LessonDiscussions", fields: [lessonId], references: [id], onDelete: SetNull)
+  replies DiscussionReply[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([courseId])
+  @@index([userId])
+  @@index([lessonId])
+  @@map("discussions")
+}
+
+model DiscussionReply {
+  id           String  @id @default(uuid())
+  discussionId String
+  userId       String
+  content      String
+  parentId     String? // For nested replies
+  
+  discussion Discussion         @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user       User               @relation("UserDiscussionReplies", fields: [userId], references: [id], onDelete: Cascade)
+  parent     DiscussionReply?   @relation("ReplyThread", fields: [parentId], references: [id], onDelete: Cascade)
+  children   DiscussionReply[]  @relation("ReplyThread")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([discussionId])
+  @@index([userId])
+  @@index([parentId])
+  @@map("discussion_replies")
 }
 
 model Department {

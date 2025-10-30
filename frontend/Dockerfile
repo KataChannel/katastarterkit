@@ -40,11 +40,9 @@ ENV HOSTNAME="0.0.0.0"
 # We copy everything from .next/standalone root directly to container root
 
 # Copy entire .next/standalone as /app root (already contains everything)
+# .next/standalone includes: frontend/ + node_modules/ + package.json + server.js
+# No need to copy node_modules separately - standalone build has optimized production deps
 COPY --chown=nextjs:nodejs frontend/.next/standalone/ ./
-
-# Overwrite with fresh node_modules to avoid any symlink issues from build
-# This ensures clean, production-only dependencies
-COPY --chown=nextjs:nodejs frontend/node_modules/ ./node_modules/
 
 # Copy static files to the correct location (frontend/.next/static/)
 # Server runs from /app/frontend/, so it looks for static files at /app/frontend/.next/static/

@@ -13,9 +13,9 @@ export declare class FileService {
     getFiles(input: GetFilesInput, userId: string): Promise<{
         items: ({
             shares: {
-                password: string | null;
                 id: string;
                 createdAt: Date;
+                password: string | null;
                 token: string;
                 expiresAt: Date | null;
                 sharedBy: string;
@@ -27,41 +27,41 @@ export declare class FileService {
                 lastAccess: Date | null;
             }[];
             folder: {
-                path: string;
                 id: string;
-                createdAt: Date;
                 userId: string;
-                name: string;
+                createdAt: Date;
                 updatedAt: Date;
-                parentId: string | null;
+                name: string;
                 description: string | null;
+                parentId: string | null;
                 color: string | null;
                 icon: string | null;
+                path: string;
                 isSystem: boolean;
             };
         } & {
-            path: string;
             id: string;
-            createdAt: Date;
-            size: number;
             userId: string;
+            createdAt: Date;
             updatedAt: Date;
-            tags: string[];
             title: string | null;
             description: string | null;
-            metadata: Prisma.JsonValue | null;
-            url: string;
+            size: number;
+            tags: string[];
             filename: string;
+            url: string;
             mimeType: string;
             width: number | null;
+            metadata: Prisma.JsonValue | null;
             viewCount: number;
-            etag: string | null;
-            bucket: string;
+            path: string;
             alt: string | null;
             folderId: string | null;
             visibility: import("@prisma/client").$Enums.FileVisibility;
             fileType: import("@prisma/client").$Enums.FileType;
             originalName: string;
+            bucket: string;
+            etag: string | null;
             height: number | null;
             thumbnailUrl: string | null;
             downloadCount: number;
@@ -89,7 +89,7 @@ export declare class FileService {
         totalSize: number;
         totalFolders: number;
         filesByType: {
-            type: "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER" | "AUDIO" | "ARCHIVE";
+            type: "VIDEO" | "IMAGE" | "DOCUMENT" | "OTHER" | "AUDIO" | "ARCHIVE";
             count: number;
             totalSize: number;
         }[];
@@ -100,36 +100,36 @@ export declare class FileService {
     }>;
     createFileShare(input: CreateFileShareInput, userId: string): Promise<{
         file: {
-            path: string;
             id: string;
-            createdAt: Date;
-            size: number;
             userId: string;
+            createdAt: Date;
             updatedAt: Date;
-            tags: string[];
             title: string | null;
             description: string | null;
-            metadata: Prisma.JsonValue | null;
-            url: string;
+            size: number;
+            tags: string[];
             filename: string;
+            url: string;
             mimeType: string;
             width: number | null;
+            metadata: Prisma.JsonValue | null;
             viewCount: number;
-            etag: string | null;
-            bucket: string;
+            path: string;
             alt: string | null;
             folderId: string | null;
             visibility: import("@prisma/client").$Enums.FileVisibility;
             fileType: import("@prisma/client").$Enums.FileType;
             originalName: string;
+            bucket: string;
+            etag: string | null;
             height: number | null;
             thumbnailUrl: string | null;
             downloadCount: number;
         };
     } & {
-        password: string | null;
         id: string;
         createdAt: Date;
+        password: string | null;
         token: string;
         expiresAt: Date | null;
         sharedBy: string;

@@ -11,12 +11,12 @@ export declare class CategoryService {
             parent: {
                 id: string;
                 createdAt: Date;
-                isActive: boolean;
-                name: string;
                 updatedAt: Date;
+                name: string;
+                isActive: boolean;
                 slug: string;
-                parentId: string | null;
                 description: string | null;
+                parentId: string | null;
                 createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
@@ -30,12 +30,12 @@ export declare class CategoryService {
             children: {
                 id: string;
                 createdAt: Date;
-                isActive: boolean;
-                name: string;
                 updatedAt: Date;
+                name: string;
+                isActive: boolean;
                 slug: string;
-                parentId: string | null;
                 description: string | null;
+                parentId: string | null;
                 createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
@@ -49,12 +49,12 @@ export declare class CategoryService {
         } & {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -82,12 +82,12 @@ export declare class CategoryService {
             children: {
                 id: string;
                 createdAt: Date;
-                isActive: boolean;
-                name: string;
                 updatedAt: Date;
+                name: string;
+                isActive: boolean;
                 slug: string;
-                parentId: string | null;
                 description: string | null;
+                parentId: string | null;
                 createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
@@ -101,12 +101,12 @@ export declare class CategoryService {
         } & {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -120,12 +120,12 @@ export declare class CategoryService {
     } & {
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
@@ -143,12 +143,12 @@ export declare class CategoryService {
         parent: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -162,12 +162,12 @@ export declare class CategoryService {
         children: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -181,12 +181,12 @@ export declare class CategoryService {
     } & {
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
@@ -204,12 +204,12 @@ export declare class CategoryService {
         parent: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -223,12 +223,12 @@ export declare class CategoryService {
         children: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -242,12 +242,12 @@ export declare class CategoryService {
     } & {
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
@@ -265,12 +265,12 @@ export declare class CategoryService {
         parent: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -284,12 +284,12 @@ export declare class CategoryService {
         children: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -303,12 +303,12 @@ export declare class CategoryService {
     } & {
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
@@ -326,12 +326,12 @@ export declare class CategoryService {
         parent: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -345,12 +345,12 @@ export declare class CategoryService {
         children: {
             id: string;
             createdAt: Date;
-            isActive: boolean;
-            name: string;
             updatedAt: Date;
+            name: string;
+            isActive: boolean;
             slug: string;
-            parentId: string | null;
             description: string | null;
+            parentId: string | null;
             createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
@@ -364,12 +364,12 @@ export declare class CategoryService {
     } & {
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
@@ -383,12 +383,12 @@ export declare class CategoryService {
     deleteCategory(id: string, deleteProducts?: boolean): Promise<{
         id: string;
         createdAt: Date;
-        isActive: boolean;
-        name: string;
         updatedAt: Date;
+        name: string;
+        isActive: boolean;
         slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         createdBy: string | null;
         updatedBy: string | null;
         image: string | null;

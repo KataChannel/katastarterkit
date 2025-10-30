@@ -71,13 +71,13 @@ export declare class EnhancedAuditService {
             };
         } & {
             id: string;
+            userId: string | null;
             createdAt: Date;
             sessionId: string | null;
             ipAddress: string | null;
             userAgent: string | null;
             action: string;
             details: Prisma.JsonValue | null;
-            userId: string | null;
             resourceType: string;
             resourceId: string | null;
             method: string | null;

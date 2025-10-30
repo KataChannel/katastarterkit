@@ -1,0 +1,190 @@
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateDiscussionInput, CreateReplyInput, UpdateDiscussionInput } from './dto/discussion.input';
+export declare class DiscussionsService {
+    private prisma;
+    constructor(prisma: PrismaService);
+    createDiscussion(userId: string, input: CreateDiscussionInput): Promise<{
+        user: {
+            id: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+            avatar: string;
+        };
+        lesson: {
+            id: string;
+            title: string;
+        };
+        replies: {
+            id: string;
+            userId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            content: string;
+            discussionId: string;
+            parentId: string | null;
+        }[];
+    } & {
+        id: string;
+        userId: string;
+        courseId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
+        content: string;
+        isPinned: boolean;
+        lessonId: string | null;
+    }>;
+    getCourseDiscussions(courseId: string, lessonId?: string): Promise<({
+        user: {
+            id: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+            avatar: string;
+        };
+        lesson: {
+            id: string;
+            title: string;
+        };
+        replies: ({
+            user: {
+                id: string;
+                username: string;
+                firstName: string;
+                lastName: string;
+                avatar: string;
+            };
+        } & {
+            id: string;
+            userId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            content: string;
+            discussionId: string;
+            parentId: string | null;
+        })[];
+    } & {
+        id: string;
+        userId: string;
+        courseId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
+        content: string;
+        isPinned: boolean;
+        lessonId: string | null;
+    })[]>;
+    getDiscussion(id: string): Promise<{
+        user: {
+            id: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+            avatar: string;
+        };
+        course: {
+            id: string;
+            title: string;
+            slug: string;
+        };
+        lesson: {
+            id: string;
+            title: string;
+        };
+        replies: ({
+            user: {
+                id: string;
+                username: string;
+                firstName: string;
+                lastName: string;
+                avatar: string;
+            };
+            children: ({
+                user: {
+                    id: string;
+                    username: string;
+                    firstName: string;
+                    lastName: string;
+                    avatar: string;
+                };
+            } & {
+                id: string;
+                userId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                content: string;
+                discussionId: string;
+                parentId: string | null;
+            })[];
+        } & {
+            id: string;
+            userId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            content: string;
+            discussionId: string;
+            parentId: string | null;
+        })[];
+    } & {
+        id: string;
+        userId: string;
+        courseId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
+        content: string;
+        isPinned: boolean;
+        lessonId: string | null;
+    }>;
+    createReply(userId: string, input: CreateReplyInput): Promise<{
+        user: {
+            id: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+            avatar: string;
+        };
+    } & {
+        id: string;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        content: string;
+        discussionId: string;
+        parentId: string | null;
+    }>;
+    updateDiscussion(userId: string, input: UpdateDiscussionInput): Promise<{
+        user: {
+            id: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+            avatar: string;
+        };
+    } & {
+        id: string;
+        userId: string;
+        courseId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
+        content: string;
+        isPinned: boolean;
+        lessonId: string | null;
+    }>;
+    deleteDiscussion(userId: string, id: string): Promise<{
+        success: boolean;
+    }>;
+    togglePin(userId: string, id: string): Promise<{
+        id: string;
+        userId: string;
+        courseId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
+        content: string;
+        isPinned: boolean;
+        lessonId: string | null;
+    }>;
+}
