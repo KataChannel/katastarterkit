@@ -188,7 +188,16 @@ export class QuizzesService {
 
   // Submit quiz attempt with auto-grading
   async submitQuiz(userId: string, submitQuizInput: SubmitQuizInput) {
+    console.log('submitQuizInput:', JSON.stringify(submitQuizInput, null, 2));
+    
     const { quizId, enrollmentId, answers, timeSpent } = submitQuizInput;
+
+    console.log('Destructured - quizId:', quizId, 'enrollmentId:', enrollmentId, 'answers:', answers, 'timeSpent:', timeSpent);
+
+    // Validate answers
+    if (!answers || !Array.isArray(answers)) {
+      throw new BadRequestException('Answers are required and must be an array');
+    }
 
     // Verify enrollment
     const enrollment = await this.prisma.enrollment.findUnique({

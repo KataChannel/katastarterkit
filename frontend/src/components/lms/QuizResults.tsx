@@ -51,8 +51,7 @@ interface QuizAttempt {
 
 export default function QuizResults({ attemptId, onRetake, onContinue }: QuizResultsProps) {
   // ✅ Migrated to Dynamic GraphQL
-  const { data: attempt, loading, error } = useFindUnique('quizAttempt', {
-    id: attemptId,
+  const { data: attempt, loading, error } = useFindUnique('quizAttempt', attemptId, {
     include: {
       quiz: {
         include: {
@@ -79,6 +78,16 @@ export default function QuizResults({ attemptId, onRetake, onContinue }: QuizRes
         <XCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-red-900 mb-2">Failed to load results</h3>
         <p className="text-red-700">{error?.message || 'Results not found'}</p>
+      </div>
+    );
+  }
+
+  if (!attempt.quiz || !attempt.quiz.questions) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+        <AlertCircle className="w-12 h-12 text-yellow-600 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-yellow-900 mb-2">Incomplete Data</h3>
+        <p className="text-yellow-700">Quiz data is not available for this attempt</p>
       </div>
     );
   }
@@ -180,7 +189,7 @@ export default function QuizResults({ attemptId, onRetake, onContinue }: QuizRes
         </h2>
 
         <div className="space-y-6">
-          {attempt.quiz.questions
+          {[...attempt.quiz.questions]
             .sort((a: any, b: any) => a.order - b.order)
             .map((question: any, index: any) => {
               const userAnswers = userAnswersMap[question.id] || [];
@@ -220,7 +229,7 @@ export default function QuizResults({ attemptId, onRetake, onContinue }: QuizRes
 
                       {/* Answer Options */}
                       <div className="space-y-2">
-                        {question.answers
+                        {[...question.answers]
                           .sort((a: any, b: any) => a.order - b.order)
                           .map((answer: any) => {
                             const isUserAnswer = userAnswers.includes(answer.id);

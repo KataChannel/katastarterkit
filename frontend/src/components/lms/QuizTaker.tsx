@@ -4,7 +4,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useFindUnique, useCreateOne } from '@/hooks/useDynamicGraphQL';
+import { useFindUnique } from '@/hooks/useDynamicGraphQL';
+import { useMutation } from '@apollo/client';
+import { SUBMIT_QUIZ } from '@/graphql/lms/quizzes.graphql';
 import { Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 interface QuizTakerProps {
@@ -47,8 +49,7 @@ export default function QuizTaker({ quizId, enrollmentId, onComplete }: QuizTake
   const [startTime] = useState(Date.now());
 
   // ✅ Migrated to Dynamic GraphQL
-  const { data: quiz, loading, error } = useFindUnique('quiz', {
-    id: quizId,
+  const { data: quiz, loading, error } = useFindUnique('quiz', quizId, {
     include: {
       questions: {
         include: { answers: true },
@@ -57,8 +58,8 @@ export default function QuizTaker({ quizId, enrollmentId, onComplete }: QuizTake
     },
   });
 
-  // ✅ Migrated: Submit quiz attempt
-  const [submitQuizAttempt] = useCreateOne('quizAttempt');
+  // ✅ Use custom mutation instead of dynamic CRUD
+  const [submitQuiz] = useMutation(SUBMIT_QUIZ);
 
   // Initialize timer
   useEffect(() => {
@@ -129,17 +130,19 @@ export default function QuizTaker({ quizId, enrollmentId, onComplete }: QuizTake
         selectedAnswerIds,
       }));
 
-      const attempt = await submitQuizAttempt({
-        data: {
-          quizId,
-          enrollmentId,
-          answers,
-          timeSpent,
+      const { data } = await submitQuiz({
+        variables: {
+          input: {
+            quizId,
+            enrollmentId,
+            answers,
+            timeSpent,
+          },
         },
       });
 
-      if (attempt?.id) {
-        onComplete(attempt.id);
+      if (data?.submitQuiz?.id) {
+        onComplete(data.submitQuiz.id);
       }
     } catch (error) {
       console.error('Error submitting quiz:', error);
@@ -280,7 +283,7 @@ export default function QuizTaker({ quizId, enrollmentId, onComplete }: QuizTake
 
         {/* Answer Options */}
         <div className="space-y-3">
-          {currentQuestion.answers
+          {[...currentQuestion.answers]
             .sort((a: any, b: any) => a.order - b.order)
             .map((answer: any) => {
               const isSelected = userAnswers[currentQuestion.id]?.includes(answer.id);
