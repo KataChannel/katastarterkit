@@ -10,6 +10,11 @@ export class DiscussionsService {
    * Create new discussion
    */
   async createDiscussion(userId: string, input: CreateDiscussionInput) {
+    // Validate input
+    if (!input.courseId) {
+      throw new BadRequestException('Course ID is required');
+    }
+
     // Verify user is enrolled in course
     const enrollment = await this.prisma.enrollment.findUnique({
       where: {
@@ -183,6 +188,11 @@ export class DiscussionsService {
    * Create reply to discussion
    */
   async createReply(userId: string, input: CreateReplyInput) {
+    // Validate input
+    if (!input.discussionId) {
+      throw new BadRequestException('Discussion ID is required');
+    }
+
     // Verify discussion exists
     const discussion = await this.prisma.discussion.findUnique({
       where: { id: input.discussionId },

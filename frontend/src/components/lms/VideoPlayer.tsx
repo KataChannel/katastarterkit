@@ -1,8 +1,18 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
-import Plyr from 'plyr-react';
+import React, { useRef, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import 'plyr-react/plyr.css';
+
+// Dynamic import Plyr to avoid SSR issues
+const Plyr = dynamic(() => import('plyr-react'), { 
+  ssr: false,
+  loading: () => (
+    <div className="w-full aspect-video bg-gray-900 flex items-center justify-center">
+      <div className="text-white">Loading player...</div>
+    </div>
+  )
+});
 
 interface VideoPlayerProps {
   src: string;
