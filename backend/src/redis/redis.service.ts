@@ -9,15 +9,52 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly configService: ConfigService) {}
 
   async onModuleInit() {
-    const redisUrl = this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
+    // Detect Docker environment
+    const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
     
-    this.client = new Redis(redisUrl, {
+    // Use Docker Redis host/port if in Docker, otherwise use configured server
+    const host = isDockerEnv
+      ? this.configService.get('DOCKER_REDIS_HOST', 'redis')
+      : this.configService.get('REDIS_HOST', '116.118.49.243');
+    
+    // Always use configured port from .env
+    const portConfig = isDockerEnv
+      ? this.configService.get('DOCKER_REDIS_PORT', '6379')
+      : this.configService.get('REDIS_PORT', '12004');
+    
+    const port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
+    const password = this.configService.get('REDIS_PASSWORD');
+    const db = this.configService.get('REDIS_DB', 0);
+    
+    console.log(`[RedisService] Connecting to Redis: host=${host}, port=${port}, dockerEnv=${isDockerEnv}`);
+    
+    this.client = new Redis({
+      host,
+      port,
+      password,
+      db,
       maxRetriesPerRequest: 3,
       retryStrategy: (times: number) => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
       lazyConnect: true,
+      enableOfflineQueue: true,
+      connectTimeout: 10000,
+      commandTimeout: 5000,
+    });
+
+    // Set up error handlers
+    this.client.on('error', (err) => {
+      console.warn(`[RedisService] Connection error: ${err.message}`);
+    });
+
+    this.client.on('connect', () => {
+      console.log('[RedisService] ✅ Connected successfully');
+    });
+
+    this.client.on('reconnecting', () => {
+      console.log('[RedisService] 🔄 Attempting to reconnect...');
     });
 
     try {

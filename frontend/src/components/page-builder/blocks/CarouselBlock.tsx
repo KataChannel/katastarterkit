@@ -26,7 +26,7 @@ interface CarouselSlide {
   imagePosition?: 'left' | 'right' | 'top' | 'bottom' | 'background';
   imageOverlay?: number; // 0-100
   animation?: 'fade' | 'slide' | 'zoom' | 'none';
-  mediaType?: 'image' | 'video'; // For filtering
+  mediaType?: 'image' | 'video' | 'embed'; // Hỗ trợ cả embed
   videoUrl?: string; // YouTube, Vimeo, etc.
 }
 
@@ -60,20 +60,12 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
   const indicatorStyle = content.indicatorStyle || 'dots'; // dots, lines, numbers, thumbnails
   const arrowStyle = content.arrowStyle || 'default'; // default, circle, square, minimal
   const slidesPerView = content.slidesPerView || 1; // 1-5 slides displayed
-  const mediaFilter = content.mediaFilter || 'all'; // all, images, videos
   const animationType = content.animationType || 'fade'; // fade, slide, zoom, none
   const animationDuration = content.animationDuration || 600; // ms
 
-  // Filter slides based on media type
+  // Filter slides - show only image slides (không hiển thị video)
   const filteredSlides = slides.filter((slide) => {
-    if (mediaFilter === 'all') return true;
-    if (mediaFilter === 'images') {
-      return !slide.videoUrl && slide.image; // Has image, no video
-    }
-    if (mediaFilter === 'videos') {
-      return slide.videoUrl || slide.mediaType === 'video'; // Has video
-    }
-    return true;
+    return !slide.videoUrl && slide.image; // Chỉ hiển thị slide có hình, không có video
   });
 
   // Auto-slide functionality
@@ -384,20 +376,22 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
             slidesToScroll: 1,
           }}
         >
-          <CarouselContent className="h-full">
+          <CarouselContent className="h-full -ml-2 md:-ml-4">
             {filteredSlides.map((slide, index) => {
               const slideTextColor = slide.textColor || 'text-white';
               const imagePos = (slide.imagePosition || 'right') as 'left' | 'right' | 'top' | 'bottom' | 'background';
               
+              // Calculate width percentage based on slidesPerView
+              const slideWidth = slidesPerView > 1 ? `${100 / slidesPerView}%` : '100%';
+              
               return (
                 <CarouselItem 
                   key={slide.id || index} 
-                  className={`h-full ${
-                    slidesPerView > 1 ? `basis-1/${slidesPerView}` : ''
-                  }`}
+                  className="h-full pl-2 md:pl-4"
                   style={{
                     ...getAnimationStyle(),
-                    minWidth: slidesPerView > 1 ? `${100 / slidesPerView}%` : 'auto',
+                    flex: `0 0 ${slideWidth}`,
+                    maxWidth: slideWidth,
                   }}
                 >
                   <Card className="border-0 rounded-lg overflow-hidden h-full">
@@ -621,7 +615,6 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
           indicatorStyle,
           arrowStyle,
           slidesPerView,
-          mediaFilter,
           animationType,
           animationDuration,
         }}

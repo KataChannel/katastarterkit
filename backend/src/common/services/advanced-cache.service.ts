@@ -74,9 +74,23 @@ export class AdvancedCacheService implements OnModuleInit {
   }
 
   private async initializeRedisConnections() {
+    // Detect Docker environment
+    const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
+    
+    // Use Docker Redis host/port if in Docker, otherwise use configured server
+    const host = isDockerEnv
+      ? this.configService.get('DOCKER_REDIS_HOST', 'redis')
+      : this.configService.get('REDIS_HOST', '116.118.49.243');
+    
+    const portConfig = isDockerEnv
+      ? this.configService.get('DOCKER_REDIS_PORT', '6379')
+      : this.configService.get('REDIS_PORT', '12004');
+    
+    const port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
+    
     const baseConfig = {
-      host: this.configService.get('REDIS_HOST', 'localhost'),
-      port: this.configService.get('REDIS_PORT', 6379),
+      host,
+      port,
       password: this.configService.get('REDIS_PASSWORD'),
       maxRetriesPerRequest: 3,
       retryDelayOnFailover: 100,
