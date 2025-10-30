@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 // ✅ MIGRATED: Import Dynamic GraphQL
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
+import { useHeaderSettings, useContactSettings, settingsToMap } from '@/hooks/useWebsiteSettings';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +27,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Phone, Search, ShoppingCart, User, LogIn } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import React from 'react';
 
@@ -64,6 +65,14 @@ export function WebsiteHeader() {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
 
+  // ✅ Load Header Settings
+  const { data: headerSettingsRaw = [], loading: headerLoading } = useHeaderSettings();
+  const headerSettings = useMemo(() => settingsToMap(headerSettingsRaw), [headerSettingsRaw]);
+
+  // ✅ Load Contact Settings
+  const { data: contactSettingsRaw = [], loading: contactLoading } = useContactSettings();
+  const contactSettings = useMemo(() => settingsToMap(contactSettingsRaw), [contactSettingsRaw]);
+
   // ✅ MIGRATED: Fetch header menus with Dynamic GraphQL
   const { data: headerMenus = [], loading: menuLoading, error: menuError } = useFindMany('menu', {
     where: { 
@@ -86,6 +95,8 @@ export function WebsiteHeader() {
     }
   });
 
+  console.log('headerSettings', headerSettings);
+  console.log('contactSettings', contactSettings);
   console.log('headerMenus',headerMenus);
   
   // Banner data
@@ -203,67 +214,80 @@ export function WebsiteHeader() {
   return (
     <header className="bg-white border-b border-gray-200">
       {/* Carousel Banner */}
-      <div className="relative overflow-hidden">
-        <Carousel 
-          className="w-full mx-auto"
-          setApi={setApi}
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-        >
-          <CarouselContent>
-            {bannerItems.map((item, index) => (
-              <CarouselItem key={item.id}>
-                <div className="relative">
-                  <Card className="border-0 rounded-none">
-                    <CardContent className={`relative p-0 ${item.bgColor} overflow-hidden`}>
-                      <div className="relative z-10 h-full flex items-center">
-                        <div className="mx-auto">
-                            <div className="hidden lg:block w-full h-52 overflow-hidden shadow-2xl flex-shrink-0">
-                              <img 
-                                src={item.image} 
-                                alt={item.title}
-                                className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
-                              />
-                            </div>
+      {headerSettings['header.banner_enabled'] && (
+        <div className="relative overflow-hidden">
+          <Carousel 
+            className="w-full mx-auto"
+            setApi={setApi}
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+          >
+            <CarouselContent>
+              {bannerItems.map((item, index) => (
+                <CarouselItem key={item.id}>
+                  <div className="relative">
+                    <Card className="border-0 rounded-none">
+                      <CardContent className={`relative p-0 ${item.bgColor} overflow-hidden`}>
+                        <div className="relative z-10 h-full flex items-center">
+                          <div className="mx-auto">
+                              <div 
+                                className="hidden lg:block w-full overflow-hidden shadow-2xl flex-shrink-0"
+                                style={{ height: `${headerSettings['header.banner_height'] || 208}px` }}
+                              >
+                                <img 
+                                  src={item.image} 
+                                  alt={item.title}
+                                  className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
+                                />
+                              </div>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-4 bg-white/20 border-white/30 text-white hover:bg-white/40 transition-all duration-300 backdrop-blur-sm" />
+            <CarouselNext className="right-4 bg-white/20 border-white/30 text-white hover:bg-white/40 transition-all duration-300 backdrop-blur-sm" />
+          </Carousel>
+          
+          {/* Slide Indicators */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+            {bannerItems.map((_, index) => (
+              <button
+                key={index}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentSlide ? 'bg-white w-6' : 'bg-white/50'
+                }`}
+                onClick={() => {
+                  if (api) {
+                    api.scrollTo(index);
+                  }
+                }}
+              />
             ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-4 bg-white/20 border-white/30 text-white hover:bg-white/40 transition-all duration-300 backdrop-blur-sm" />
-          <CarouselNext className="right-4 bg-white/20 border-white/30 text-white hover:bg-white/40 transition-all duration-300 backdrop-blur-sm" />
-        </Carousel>
-        
-        {/* Slide Indicators */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          {bannerItems.map((_, index) => (
-            <button
-              key={index}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentSlide ? 'bg-white w-6' : 'bg-white/50'
-              }`}
-              onClick={() => {
-                if (api) {
-                  api.scrollTo(index);
-                }
-              }}
-            />
-          ))}
+          </div>
         </div>
-      </div>
+      )}
       <div className="w-full mx-auto">
-        <div className="bg-[#57A345] grid grid-cols-6 items-center">
+        <div 
+          className="grid grid-cols-6 items-center"
+          style={{ backgroundColor: headerSettings['header.background_color'] || '#57A345' }}
+        >
           <div className="bg-white col-span-2 flex justify-end p-4 rounded-e-full pe-8">
-            <Link
-              href="/"
-              className="text-2xl font-bold text-blue-600"
-              >
-              <img src="/assets/images/logo.svg" alt="Logo" className="max-h-20 h-20" />
+            <Link href="/" className="text-2xl font-bold text-blue-600">
+              <img 
+                src={headerSettings['header.logo'] || '/assets/images/logo.svg'} 
+                alt="Logo" 
+                className="max-h-20" 
+                style={{ 
+                  height: `${headerSettings['header.logo_width'] || 80}px`,
+                  maxHeight: `${headerSettings['header.logo_width'] || 80}px` 
+                }}
+              />
             </Link>
           </div>  
 
@@ -294,75 +318,86 @@ export function WebsiteHeader() {
           </NavigationMenu>
 
           {/* Search Bar */}
-          <div className="flex flex-row items-center max-w-lg mx-8 mb-2 space-x-4">
-            <Phone className="w-8 h-8 text-[#FAA61A]" />
-            <a href="tel:0865770009" className="text-[#FAA61A] font-bold text-lg">0865.77.0009</a>
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Tìm kiếm sản phẩm..."
-                className="w-full pl-4 pr-10 py-2 bg-white/90 backdrop-blur-sm border-white/20 focus:bg-white focus:border-blue-300 transition-all"
-              />
-              <Button
-                size="sm"
-                variant="ghost"
-                className="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:text-gray-600"
+          {headerSettings['header.show_search'] && (
+            <div className="flex flex-row items-center max-w-lg mx-8 mb-2 space-x-4">
+              <Phone className="w-8 h-8 text-[#FAA61A]" />
+              <a 
+                href={`tel:${contactSettings['contact.phone'] || '0865770009'}`} 
+                className="text-[#FAA61A] font-bold text-lg"
               >
-                <Search className="w-4 h-4" />
-              </Button>
+                {contactSettings['contact.phone_display'] || '0865.77.0009'}
+              </a>
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Tìm kiếm sản phẩm..."
+                  className="w-full pl-4 pr-10 py-2 bg-white/90 backdrop-blur-sm border-white/20 focus:bg-white focus:border-blue-300 transition-all"
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:text-gray-600"
+                >
+                  <Search className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>                 
          <div className="flex items-center space-x-3 text-white">
                   {/* User Profile */}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center space-x-2">
-                          {isAuthenticated && user ? (
-                            // Đã đăng nhập: Hiện chữ cái đầu của email
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full p-0 text-white font-semibold"
-                              onClick={() => router.push('/admin')}
-                            >
-                              {user.email?.charAt(0).toUpperCase() || 'U'}
-                            </Button>
-                          ) : (
-                            // Chưa đăng nhập: Hiện icon Login
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="flex items-center space-x-1 px-3 py-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                              onClick={() => router.push('/auth/login')}
-                            >
-                              <LogIn className="w-4 h-4" />
-                              <span className="text-sm font-medium hidden md:inline">Đăng nhập</span>
-                            </Button>
-                          )}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{isAuthenticated && user ? user.email : 'Đăng nhập để tiếp tục'}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {headerSettings['header.show_user_menu'] && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center space-x-2">
+                            {isAuthenticated && user ? (
+                              // Đã đăng nhập: Hiện chữ cái đầu của email
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full p-0 text-white font-semibold"
+                                onClick={() => router.push('/admin')}
+                              >
+                                {user.email?.charAt(0).toUpperCase() || 'U'}
+                              </Button>
+                            ) : (
+                              // Chưa đăng nhập: Hiện icon Login
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="flex items-center space-x-1 px-3 py-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
+                                onClick={() => router.push('/auth/login')}
+                              >
+                                <LogIn className="w-4 h-4" />
+                                <span className="text-sm font-medium hidden md:inline">Đăng nhập</span>
+                              </Button>
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{isAuthenticated && user ? user.email : 'Đăng nhập để tiếp tục'}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   
                   {/* Shopping Cart */}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                  {headerSettings['header.show_cart'] && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
                     >
-                      0
-                    </Badge>
-                  </Button>
+                      <ShoppingCart className="w-5 h-5" />
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                      >
+                        0
+                      </Badge>
+                    </Button>
+                  )}
           </div>    
         </div>
       </div>
