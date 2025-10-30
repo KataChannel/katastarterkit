@@ -17,13 +17,13 @@ export class EnrollmentsResolver {
     @CurrentUser() user: any,
     @Args('enrollCourseInput') enrollCourseInput: EnrollCourseInput,
   ) {
-    return this.enrollmentsService.enroll(user.userId, enrollCourseInput.courseId);
+    return this.enrollmentsService.enroll(user.id, enrollCourseInput.courseId);
   }
 
   @Query(() => [Enrollment], { name: 'myEnrollments' })
   @UseGuards(JwtAuthGuard)
   getMyEnrollments(@CurrentUser() user: any) {
-    return this.enrollmentsService.getMyEnrollments(user.userId);
+    return this.enrollmentsService.getMyEnrollments(user.id);
   }
 
   @Query(() => Enrollment, { name: 'enrollment' })
@@ -32,7 +32,7 @@ export class EnrollmentsResolver {
     @CurrentUser() user: any,
     @Args('courseId', { type: () => ID }) courseId: string,
   ) {
-    return this.enrollmentsService.getEnrollment(user.userId, courseId);
+    return this.enrollmentsService.getEnrollment(user.id, courseId);
   }
 
   @Mutation(() => Enrollment, { name: 'dropCourse' })
@@ -41,7 +41,7 @@ export class EnrollmentsResolver {
     @CurrentUser() user: any,
     @Args('courseId', { type: () => ID }) courseId: string,
   ) {
-    return this.enrollmentsService.dropCourse(user.userId, courseId);
+    return this.enrollmentsService.dropCourse(user.id, courseId);
   }
 
   @Query(() => [Enrollment], { name: 'courseEnrollments' })
@@ -50,7 +50,7 @@ export class EnrollmentsResolver {
     @CurrentUser() user: any,
     @Args('courseId', { type: () => ID }) courseId: string,
   ) {
-    return this.enrollmentsService.getCourseEnrollments(courseId, user.userId);
+    return this.enrollmentsService.getCourseEnrollments(courseId, user.id);
   }
 
   @Mutation(() => LessonProgress, { name: 'markLessonComplete' })
@@ -60,6 +60,6 @@ export class EnrollmentsResolver {
     @Args('enrollmentId', { type: () => ID }) enrollmentId: string,
     @Args('lessonId', { type: () => ID }) lessonId: string,
   ) {
-    return this.enrollmentsService.markLessonComplete(user.userId, enrollmentId, lessonId);
+    return this.enrollmentsService.markLessonComplete(user.id, enrollmentId, lessonId);
   }
 }

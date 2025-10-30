@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_COURSE_BY_SLUG, GET_ENROLLMENT } from '@/graphql/lms/courses.graphql';
 import { GET_COURSE_DISCUSSIONS, CREATE_DISCUSSION } from '@/graphql/lms/discussions.graphql';
@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function CourseDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'reviews' | 'discussions'>('overview');
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
   const [discussionTitle, setDiscussionTitle] = useState('');
@@ -27,10 +27,17 @@ export default function CourseDetailPage() {
     skip: !slug,
   });
 
-  const { data: enrollmentData } = useQuery(GET_ENROLLMENT, {
+  const { data: enrollmentData, refetch: refetchEnrollment } = useQuery(GET_ENROLLMENT, {
     variables: { courseId: data?.courseBySlug?.id },
-    skip: !data?.courseBySlug?.id,
+    skip: !data?.courseBySlug?.id || !isAuthenticated,
   });
+
+  // Refetch enrollment when user authentication changes
+  useEffect(() => {
+    if (isAuthenticated && data?.courseBySlug?.id) {
+      refetchEnrollment();
+    }
+  }, [isAuthenticated, data?.courseBySlug?.id, refetchEnrollment]);
 
   const { data: discussionsData, refetch: refetchDiscussions } = useQuery(GET_COURSE_DISCUSSIONS, {
     variables: { courseId: data?.courseBySlug?.id },
@@ -122,7 +129,7 @@ export default function CourseDetailPage() {
               {/* Stats */}
               <div className="flex flex-wrap items-center gap-6 mb-6">
                 <RatingStars 
-                  rating={course.rating} 
+                  rating={course.avgRating} 
                   size="lg" 
                   showNumber 
                   reviewCount={course.reviewCount}

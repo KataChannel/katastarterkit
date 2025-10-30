@@ -102,7 +102,7 @@ export default function LearnCoursePage() {
         <aside className="w-96 bg-white border-r border-gray-200 h-screen overflow-y-auto sticky top-0">
           {/* Course Header */}
           <div className="p-6 border-b border-gray-200">
-            <Link href={`/courses/${slug}`} className="text-sm text-blue-600 hover:text-blue-700 mb-2 block">
+            <Link href={`/lms/courses/${slug}`} className="text-sm text-blue-600 hover:text-blue-700 mb-2 block">
               ← Back to course
             </Link>
             <h2 className="text-lg font-bold text-gray-900">{course.title}</h2>

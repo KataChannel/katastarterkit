@@ -2986,18 +2986,20 @@ model CourseCategory {
 
 model Course {
   id          String       @id @default(uuid())
-  title       String
-  slug        String       @unique
-  description String?
-  thumbnail   String?
-  price       Float        @default(0)
+  title       String       @db.VarChar(255)
+  slug        String       @unique @db.VarChar(255)
+  description String?      @db.Text
+  thumbnail   String?      @db.VarChar(500)
+  price       Decimal      @default(0) @db.Decimal(10, 2)
   level       CourseLevel  @default(BEGINNER)
   status      CourseStatus @default(DRAFT)
-  duration    Int? // in minutes
+  duration    Int?         // in minutes
+  language    String?      @default("vi") @db.VarChar(10) // vi, en, etc.
 
   // Learning objectives
   whatYouWillLearn String[] @default([])
   requirements     String[] @default([])
+  targetAudience   String[] @default([]) // Who should take this course
 
   // Category & Instructor
   categoryId   String?
@@ -3006,11 +3008,16 @@ model Course {
   category   CourseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   instructor User            @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
 
-  // Stats
-  rating          Float @default(0) // Deprecated: use avgRating
+  // Stats (denormalized for performance)
+  avgRating       Float @default(0) @db.DoublePrecision
   reviewCount     Int   @default(0)
   enrollmentCount Int   @default(0)
-  avgRating       Float @default(0) // Average rating from reviews
+  viewCount       Int   @default(0) // Track popularity
+
+  // SEO & Marketing
+  metaTitle       String? @db.VarChar(255)
+  metaDescription String? @db.VarChar(500)
+  tags            String[] @default([]) // For search & filtering
 
   // Modules & Enrollments
   modules      CourseModule[]
@@ -3020,23 +3027,29 @@ model Course {
   discussions  Discussion[]   @relation("CourseDiscussions")
 
   // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime? // When published
 
   @@index([slug])
   @@index([categoryId])
   @@index([instructorId])
   @@index([status])
   @@index([level])
+  @@index([avgRating])
+  @@index([price])
+  @@index([publishedAt])
+  @@index([createdAt])
   @@map("courses")
 }
 
 model CourseModule {
   id          String  @id @default(uuid())
-  title       String
-  description String?
+  title       String  @db.VarChar(255)
+  description String? @db.Text
   order       Int
   courseId    String
+  isPublished Boolean @default(true)
 
   course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons Lesson[]
@@ -3045,22 +3058,28 @@ model CourseModule {
   updatedAt DateTime @updatedAt
 
   @@index([courseId])
+  @@index([courseId, order]) // Composite index for ordering
   @@map("course_modules")
 }
 
 model Lesson {
   id          String     @id @default(uuid())
-  title       String
-  description String?
+  title       String     @db.VarChar(255)
+  description String?    @db.Text
   type        LessonType @default(VIDEO)
-  content     String? // URL for video, HTML for text
-  duration    Int? // in minutes
+  content     String?    @db.Text // URL for video, HTML for text, file path
+  duration    Int?       // in minutes
   order       Int
   moduleId    String
+  isPreview   Boolean    @default(false) // Allow preview before enrollment
+  isFree      Boolean    @default(false) // Free lesson
 
-  module  LessonProgress[]
-  quizzes Quiz[]
-  discussions Discussion[] @relation("LessonDiscussions")
+  // Resource attachments
+  attachments Json? // Array of {name, url, size, type}
+
+  progress    LessonProgress[]
+  quizzes     Quiz[]
+  discussions Discussion[]     @relation("LessonDiscussions")
 
   courseModule CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
@@ -3068,6 +3087,8 @@ model Lesson {
   updatedAt DateTime @updatedAt
 
   @@index([moduleId])
+  @@index([moduleId, order]) // Composite index for ordering
+  @@index([type])
   @@map("lessons")
 }
 
@@ -3076,7 +3097,12 @@ model Enrollment {
   userId   String
   courseId String
   status   EnrollmentStatus @default(ACTIVE)
-  progress Float            @default(0) // percentage 0-100
+  progress Float            @default(0) @db.DoublePrecision // percentage 0-100
+
+  // Payment & Access
+  paymentAmount Decimal?  @db.Decimal(10, 2)
+  paymentMethod String?   @db.VarChar(50)
+  expiresAt     DateTime? // For time-limited access
 
   user   User   @relation("UserEnrollments", fields: [userId], references: [id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -3088,11 +3114,14 @@ model Enrollment {
   // Timestamps
   enrolledAt  DateTime  @default(now())
   completedAt DateTime?
+  lastAccessedAt DateTime? @default(now()) // Track engagement
 
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
   @@index([status])
+  @@index([enrolledAt])
+  @@index([userId, status]) // Composite for user's active enrollments
   @@map("enrollments")
 }
 
@@ -3101,6 +3130,7 @@ model LessonProgress {
   enrollmentId String
   lessonId     String
   completed    Boolean @default(false)
+  watchTime    Int?    @default(0) // Seconds watched for video lessons
 
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   lesson     Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -3112,16 +3142,19 @@ model LessonProgress {
   @@unique([enrollmentId, lessonId])
   @@index([enrollmentId])
   @@index([lessonId])
+  @@index([completed])
   @@map("lesson_progress")
 }
 
 model Quiz {
   id           String  @id @default(uuid())
-  title        String
-  description  String?
+  title        String  @db.VarChar(255)
+  description  String? @db.Text
   lessonId     String
   passingScore Int     @default(70) // Percentage required to pass
-  timeLimit    Int? // Time limit in minutes (null = no limit)
+  timeLimit    Int?    // Time limit in minutes (null = no limit)
+  maxAttempts  Int?    @default(3) // Maximum attempts allowed
+  isRequired   Boolean @default(false) // Required to complete course
 
   lesson    Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   questions Question[]
@@ -3138,10 +3171,13 @@ model Question {
   id          String       @id @default(uuid())
   quizId      String
   type        QuestionType @default(MULTIPLE_CHOICE)
-  question    String // The question text
+  question    String       @db.Text // The question text
   points      Int          @default(1)
   order       Int
-  explanation String? // Explanation shown after answering
+  explanation String?      @db.Text // Explanation shown after answering
+  
+  // For media attachments (images, code snippets)
+  mediaUrl    String?      @db.VarChar(500)
 
   quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   answers Answer[]
@@ -3150,6 +3186,7 @@ model Question {
   updatedAt DateTime @updatedAt
 
   @@index([quizId])
+  @@index([quizId, order]) // Composite for ordering
   @@map("questions")
 }
 
@@ -3174,10 +3211,11 @@ model QuizAttempt {
   quizId       String
   userId       String
   enrollmentId String
-  score        Float? // Percentage score (0-100)
+  score        Float?  @db.DoublePrecision // Percentage score (0-100)
   passed       Boolean @default(false)
-  answers      Json? // Store user's answers: { questionId: selectedAnswerId[] }
-  timeSpent    Int? // Time spent in seconds
+  answers      Json?   // Store user's answers: { questionId: selectedAnswerId[] }
+  timeSpent    Int?    // Time spent in seconds
+  attemptNumber Int    @default(1) // Track which attempt this is
 
   quiz       Quiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -3191,6 +3229,8 @@ model QuizAttempt {
   @@index([quizId])
   @@index([userId])
   @@index([enrollmentId])
+  @@index([passed])
+  @@index([userId, quizId]) // Composite for user's attempts on specific quiz
   @@map("quiz_attempts")
 }
 
@@ -3206,8 +3246,8 @@ model Review {
   id       String  @id @default(uuid())
   courseId String
   userId   String
-  rating   Int // 1-5 stars
-  comment  String?
+  rating   Int     // 1-5 stars
+  comment  String? @db.Text
 
   // Helpful voting
   helpfulCount  Int      @default(0)
@@ -3223,38 +3263,41 @@ model Review {
   @@index([courseId])
   @@index([userId])
   @@index([rating])
+  @@index([courseId, rating]) // Composite for filtering course reviews by rating
+  @@index([createdAt])
   @@map("reviews")
 }
 
 // ==================== COURSE CERTIFICATES ====================
 
 model Certificate {
-  id           String   @id @default(uuid())
-  enrollmentId String   @unique
-  userId       String
-  courseId     String
-  certificateNumber String @unique // Auto-generated unique number
-  issueDate    DateTime @default(now())
-  
+  id                String   @id @default(uuid())
+  enrollmentId      String   @unique
+  userId            String
+  courseId          String
+  certificateNumber String   @unique @db.VarChar(100) // Auto-generated unique number
+  issueDate         DateTime @default(now())
+
   // Certificate details
-  courseName   String
-  instructorName String
+  courseName     String   @db.VarChar(255)
+  instructorName String   @db.VarChar(255)
   completionDate DateTime
-  grade        String? // Optional: A, B, C, Pass, etc.
-  
+  grade          String?  @db.VarChar(10) // Optional: A, B, C, Pass, etc.
+
   // Verification
-  verificationUrl String? // Public verification URL
-  
+  verificationUrl String? @db.VarChar(500) // Public verification URL
+
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   user       User       @relation("UserCertificates", fields: [userId], references: [id], onDelete: Cascade)
   course     Course     @relation("CourseCertificates", fields: [courseId], references: [id], onDelete: Cascade)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([userId])
   @@index([courseId])
   @@index([certificateNumber])
+  @@index([issueDate])
   @@map("certificates")
 }
 
@@ -3265,21 +3308,27 @@ model Discussion {
   courseId String
   userId   String
   lessonId String? // Optional: discussion for specific lesson
-  title    String
-  content  String
+  title    String  @db.VarChar(255)
+  content  String  @db.Text
   isPinned Boolean @default(false)
-  
-  course  Course    @relation("CourseDiscussions", fields: [courseId], references: [id], onDelete: Cascade)
-  user    User      @relation("UserDiscussions", fields: [userId], references: [id], onDelete: Cascade)
-  lesson  Lesson?   @relation("LessonDiscussions", fields: [lessonId], references: [id], onDelete: SetNull)
+
+  // Stats
+  replyCount Int @default(0) // Denormalized for performance
+
+  course  Course             @relation("CourseDiscussions", fields: [courseId], references: [id], onDelete: Cascade)
+  user    User               @relation("UserDiscussions", fields: [userId], references: [id], onDelete: Cascade)
+  lesson  Lesson?            @relation("LessonDiscussions", fields: [lessonId], references: [id], onDelete: SetNull)
   replies DiscussionReply[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([courseId])
   @@index([userId])
   @@index([lessonId])
+  @@index([isPinned])
+  @@index([courseId, isPinned]) // Composite for pinned discussions
+  @@index([createdAt])
   @@map("discussions")
 }
 
@@ -3287,20 +3336,21 @@ model DiscussionReply {
   id           String  @id @default(uuid())
   discussionId String
   userId       String
-  content      String
+  content      String  @db.Text
   parentId     String? // For nested replies
-  
-  discussion Discussion         @relation(fields: [discussionId], references: [id], onDelete: Cascade)
-  user       User               @relation("UserDiscussionReplies", fields: [userId], references: [id], onDelete: Cascade)
-  parent     DiscussionReply?   @relation("ReplyThread", fields: [parentId], references: [id], onDelete: Cascade)
-  children   DiscussionReply[]  @relation("ReplyThread")
-  
+
+  discussion Discussion        @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user       User              @relation("UserDiscussionReplies", fields: [userId], references: [id], onDelete: Cascade)
+  parent     DiscussionReply?  @relation("ReplyThread", fields: [parentId], references: [id], onDelete: Cascade)
+  children   DiscussionReply[] @relation("ReplyThread")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([discussionId])
   @@index([userId])
   @@index([parentId])
+  @@index([createdAt])
   @@map("discussion_replies")
 }
 

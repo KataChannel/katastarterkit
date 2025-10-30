@@ -61,6 +61,21 @@ export class CreateCourseInput {
   @IsString({ each: true })
   tags: string[] = [];
 
+  @Field(() => [String], { defaultValue: [] })
+  @IsArray()
+  @IsString({ each: true })
+  whatYouWillLearn: string[] = [];
+
+  @Field(() => [String], { defaultValue: [] })
+  @IsArray()
+  @IsString({ each: true })
+  requirements: string[] = [];
+
+  @Field(() => [String], { defaultValue: [] })
+  @IsArray()
+  @IsString({ each: true })
+  targetAudience: string[] = [];
+
   @Field({ nullable: true })
   @IsString()
   @IsOptional()

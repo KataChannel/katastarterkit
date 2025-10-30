@@ -126,7 +126,7 @@ async function seedLMSData() {
         title: 'Advanced Node.js Development',
         slug: 'nodejs-advanced',
         description: 'Build scalable backend applications with Node.js, Express, MongoDB, and microservices.',
-        thumbnail: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800',
+        thumbnail: 'https://placehold.co/800x400',
         price: 89.99,
         level: CourseLevel.ADVANCED,
         status: CourseStatus.PUBLISHED,

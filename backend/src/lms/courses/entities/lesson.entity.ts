@@ -33,6 +33,9 @@ export class Lesson {
   @Field(() => ID)
   moduleId: string;
 
+  @Field({ defaultValue: false })
+  isFree: boolean;
+
   @Field()
   createdAt: Date;
 

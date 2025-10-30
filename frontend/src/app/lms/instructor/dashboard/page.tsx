@@ -68,7 +68,7 @@ export default function InstructorDashboardPage() {
               <p className="text-gray-600">Manage your courses and track performance</p>
             </div>
             <Link
-              href="/instructor/courses/create"
+              href="/lms/instructor/courses/create"
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
             >
               <Plus className="w-5 h-5" />
@@ -145,7 +145,7 @@ export default function InstructorDashboardPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-2">No courses yet</h3>
               <p className="text-gray-600 mb-6">Start creating your first course</p>
               <Link
-                href="/instructor/courses/create"
+                href="/lms/instructor/courses/create"
                 className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
               >
                 <Plus className="w-5 h-5" />
@@ -221,19 +221,19 @@ export default function InstructorDashboardPage() {
                         ${(course.price * course.enrollmentCount).toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        ⭐ {course.rating.toFixed(1)} ({course.reviewCount})
+                        ⭐ {course.avgRating.toFixed(1)} ({course.reviewCount})
                       </td>
                       <td className="px-6 py-4 text-right text-sm font-medium">
                         <div className="flex items-center justify-end gap-2">
                           <Link
-                            href={`/courses/${course.slug}`}
+                            href={`/lms/courses/${course.slug}`}
                             className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded transition-colors"
                             title="View"
                           >
                             <Eye className="w-4 h-4" />
                           </Link>
                           <Link
-                            href={`/instructor/courses/${course.id}/edit`}
+                            href={`/lms/instructor/courses/${course.id}/edit`}
                             className="text-gray-600 hover:text-gray-900 p-2 hover:bg-gray-100 rounded transition-colors"
                             title="Edit"
                           >

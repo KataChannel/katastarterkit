@@ -809,27 +809,32 @@ input CountInput {
 
 type Course {
   avgRating: Float!
+  category: CourseCategory
   categoryId: String
   createdAt: DateTime!
   description: String
   duration: Int
   enrollmentCount: Int!
   id: ID!
+  instructor: User
   instructorId: String!
   level: CourseLevel!
   metaDescription: String
   metaTitle: String
+  modules: [CourseModule!]
   price: Float!
   publishedAt: DateTime
-  rating: Float!
+  requirements: [String!]!
   reviewCount: Int!
   slug: String!
   status: CourseStatus!
   tags: [String!]!
+  targetAudience: [String!]!
   thumbnail: String
   title: String!
   trailer: String
   updatedAt: DateTime!
+  whatYouWillLearn: [String!]!
 }
 
 type CourseCategory {
@@ -1008,11 +1013,14 @@ input CreateCourseInput {
   metaDescription: String
   metaTitle: String
   price: Float! = 0
+  requirements: [String!]! = []
   status: CourseStatus! = DRAFT
   tags: [String!]! = []
+  targetAudience: [String!]! = []
   thumbnail: String
   title: String!
   trailer: String
+  whatYouWillLearn: [String!]! = []
 }
 
 input CreateCustomTemplateInput {
@@ -1668,11 +1676,13 @@ input EnrollCourseInput {
 
 type Enrollment {
   completedAt: DateTime
+  course: Course
   courseId: ID!
   enrolledAt: DateTime!
   expiresAt: DateTime
   id: ID!
   lastAccessedAt: DateTime
+  lessonProgress: [LessonProgress!]
   progress: Int!
   status: EnrollmentStatus!
   userId: ID!
@@ -2039,6 +2049,7 @@ type Lesson {
   description: String
   duration: Int
   id: ID!
+  isFree: Boolean!
   moduleId: ID!
   order: Int!
   title: String!
@@ -2852,6 +2863,14 @@ type PaginatedCategories {
   totalPages: Int!
 }
 
+type PaginatedCourses {
+  data: [Course!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
+}
+
 type PaginatedFiles {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
@@ -3277,7 +3296,7 @@ type Query {
   courseCategoryTree: [CourseCategory!]!
   courseDiscussions(courseId: ID!, lessonId: ID): [Discussion!]!
   courseEnrollments(courseId: ID!): [Enrollment!]!
-  courses(filters: CourseFiltersInput): [Course!]!
+  courses(filters: CourseFiltersInput): PaginatedCourses!
   discussion(id: ID!): Discussion!
 
   """Compute aggregations (sum, avg, min, max, count)"""
@@ -4283,11 +4302,14 @@ input UpdateCourseInput {
   metaDescription: String
   metaTitle: String
   price: Float = 0
+  requirements: [String!] = []
   status: CourseStatus = DRAFT
   tags: [String!] = []
+  targetAudience: [String!] = []
   thumbnail: String
   title: String
   trailer: String
+  whatYouWillLearn: [String!] = []
 }
 
 input UpdateCustomTemplateInput {
