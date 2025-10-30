@@ -28,6 +28,7 @@ interface CarouselSlide {
   animation?: 'fade' | 'slide' | 'zoom' | 'none';
   mediaType?: 'image' | 'video' | 'embed'; // Hỗ trợ cả embed
   videoUrl?: string; // YouTube, Vimeo, etc.
+  mediaOnly?: boolean; // Show only media, hide all text content
 }
 
 interface CarouselBlockProps {
@@ -374,22 +375,24 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
             slidesToScroll: 1,
           }}
         >
-          <CarouselContent className="h-full -ml-2 md:-ml-4">
+          <CarouselContent className={`h-full ${slidesPerView > 1 ? '-ml-2 md:-ml-3' : '-ml-2 md:-ml-4'}`}>
             {displaySlides.map((slide, index) => {
               const slideTextColor = slide.textColor || 'text-white';
               const imagePos = (slide.imagePosition || 'right') as 'left' | 'right' | 'top' | 'bottom' | 'background';
               
               // Calculate width percentage based on slidesPerView
-              const slideWidth = slidesPerView > 1 ? `${100 / slidesPerView}%` : '100%';
+              const slideWidthPercent = 100 / slidesPerView;
+              const itemPadding = slidesPerView > 1 ? 'pl-2 md:pl-3' : 'pl-2 md:pl-4';
               
               return (
                 <CarouselItem 
                   key={slide.id || index} 
-                  className="h-full pl-2 md:pl-4"
+                  className={`h-full ${itemPadding} shrink-0`}
                   style={{
                     ...getAnimationStyle(),
-                    flex: `0 0 ${slideWidth}`,
-                    maxWidth: slideWidth,
+                    flexBasis: `${slideWidthPercent}%`,
+                    minWidth: `${slideWidthPercent}%`,
+                    maxWidth: `${slideWidthPercent}%`,
                   }}
                 >
                   <Card className="border-0 rounded-lg overflow-hidden h-full">
@@ -426,100 +429,104 @@ export default function CarouselBlock({ block, isEditing, isEditable, onUpdate, 
                                 </div>
                               )}
                               
-                              {/* Text Content */}
-                              <div className={`${slideTextColor} space-y-4 text-center`}>
-                                {slide.badge && (
-                                  <Badge variant="secondary" className="mb-2 text-sm font-semibold">
-                                    {slide.badge}
-                                  </Badge>
-                                )}
-                                
-                                {slide.title && (
-                                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                                    {slide.title}
-                                  </h2>
-                                )}
-                                
-                                {slide.subtitle && (
-                                  <p className="text-xl md:text-2xl font-semibold">
-                                    {slide.subtitle}
-                                  </p>
-                                )}
-                                
-                                {slide.description && (
-                                  <p className="text-base md:text-lg opacity-90 max-w-2xl mx-auto">
-                                    {slide.description}
-                                  </p>
-                                )}
-                                
-                                {slide.cta && (
-                                  <div className="pt-4">
-                                    <Button 
-                                      size="lg" 
-                                      variant="secondary"
-                                      className="font-semibold hover:scale-105 transition-transform"
-                                      onClick={() => {
-                                        if (slide.cta?.link && !editMode) {
-                                          window.location.href = slide.cta.link;
-                                        }
-                                      }}
-                                    >
-                                      {slide.cta.text}
-                                    </Button>
-                                  </div>
-                                )}
-                              </div>
+                              {/* Text Content - Hidden when mediaOnly is true */}
+                              {!slide.mediaOnly && (
+                                <div className={`${slideTextColor} space-y-4 text-center`}>
+                                  {slide.badge && (
+                                    <Badge variant="secondary" className="mb-2 text-sm font-semibold">
+                                      {slide.badge}
+                                    </Badge>
+                                  )}
+                                  
+                                  {slide.title && (
+                                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                                      {slide.title}
+                                    </h2>
+                                  )}
+                                  
+                                  {slide.subtitle && (
+                                    <p className="text-xl md:text-2xl font-semibold">
+                                      {slide.subtitle}
+                                    </p>
+                                  )}
+                                  
+                                  {slide.description && (
+                                    <p className="text-base md:text-lg opacity-90 max-w-2xl mx-auto">
+                                      {slide.description}
+                                    </p>
+                                  )}
+                                  
+                                  {slide.cta && (
+                                    <div className="pt-4">
+                                      <Button 
+                                        size="lg" 
+                                        variant="secondary"
+                                        className="font-semibold hover:scale-105 transition-transform"
+                                        onClick={() => {
+                                          if (slide.cta?.link && !editMode) {
+                                            window.location.href = slide.cta.link;
+                                          }
+                                        }}
+                                      >
+                                        {slide.cta.text}
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           ) : (
                             <div className={`grid md:grid-cols-2 gap-8 items-center ${imagePos === 'left' ? 'md:flex-row-reverse' : ''}`}>
-                              {/* Text Content */}
-                              <div className={`${slideTextColor} space-y-4 ${imagePos === 'left' ? 'md:order-2' : ''}`}>
-                                {slide.badge && (
-                                  <Badge variant="secondary" className="mb-2 text-sm font-semibold">
-                                    {slide.badge}
-                                  </Badge>
-                                )}
-                                
-                                {slide.title && (
-                                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                                    {slide.title}
-                                  </h2>
-                                )}
-                                
-                                {slide.subtitle && (
-                                  <p className="text-xl md:text-2xl font-semibold">
-                                    {slide.subtitle}
-                                  </p>
-                                )}
-                                
-                                {slide.description && (
-                                  <p className="text-base md:text-lg opacity-90">
-                                    {slide.description}
-                                  </p>
-                                )}
-                                
-                                {slide.cta && (
-                                  <div className="pt-4">
-                                    <Button 
-                                      size="lg" 
-                                      variant="secondary"
-                                      className="font-semibold hover:scale-105 transition-transform"
-                                      onClick={() => {
-                                        if (slide.cta?.link && !editMode) {
-                                          window.location.href = slide.cta.link;
-                                        }
-                                      }}
-                                    >
-                                      {slide.cta.text}
-                                    </Button>
-                                  </div>
-                                )}
-                              </div>
+                              {/* Text Content - Hidden when mediaOnly is true */}
+                              {!slide.mediaOnly && (
+                                <div className={`${slideTextColor} space-y-4 ${imagePos === 'left' ? 'md:order-2' : ''}`}>
+                                  {slide.badge && (
+                                    <Badge variant="secondary" className="mb-2 text-sm font-semibold">
+                                      {slide.badge}
+                                    </Badge>
+                                  )}
+                                  
+                                  {slide.title && (
+                                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                                      {slide.title}
+                                    </h2>
+                                  )}
+                                  
+                                  {slide.subtitle && (
+                                    <p className="text-xl md:text-2xl font-semibold">
+                                      {slide.subtitle}
+                                    </p>
+                                  )}
+                                  
+                                  {slide.description && (
+                                    <p className="text-base md:text-lg opacity-90">
+                                      {slide.description}
+                                    </p>
+                                  )}
+                                  
+                                  {slide.cta && (
+                                    <div className="pt-4">
+                                      <Button 
+                                        size="lg" 
+                                        variant="secondary"
+                                        className="font-semibold hover:scale-105 transition-transform"
+                                        onClick={() => {
+                                          if (slide.cta?.link && !editMode) {
+                                            window.location.href = slide.cta.link;
+                                          }
+                                        }}
+                                      >
+                                        {slide.cta.text}
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
 
                               {/* Image */}
                               {slide.image && (
-                                <div className={`hidden md:block ${imagePos === 'left' ? 'md:order-1' : ''}`}>
-                                  <div className="w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg shadow-2xl">
+                                <div className={`${slide.mediaOnly ? 'w-full' : 'hidden md:block'} ${imagePos === 'left' ? 'md:order-1' : ''}`}>
+                                  <div className={`w-full ${slide.mediaOnly ? 'h-96 md:h-[500px]' : 'h-64 md:h-80 lg:h-96'} overflow-hidden rounded-lg shadow-2xl`}>
                                     <img 
                                       src={slide.image} 
                                       alt={slide.title || 'Carousel slide'}
