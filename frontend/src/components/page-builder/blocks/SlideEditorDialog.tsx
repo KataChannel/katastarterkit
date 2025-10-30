@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { Pencil } from 'lucide-react';
 
 interface CarouselSlide {
@@ -18,6 +19,7 @@ interface CarouselSlide {
   image?: string;
   videoUrl?: string;
   mediaType?: 'image' | 'video' | 'embed';
+  mediaOnly?: boolean; // Show only media, hide all text content
   cta?: {
     text: string;
     link: string;
@@ -82,6 +84,22 @@ export function SlideEditorDialog({ open, onOpenChange, slide, onSave }: SlideEd
           </TabsList>
 
           <TabsContent value="content" className="space-y-4 mt-4">
+            {/* Media Only Warning */}
+            {localSlide.mediaOnly && (
+              <div className="p-4 bg-amber-50 border-2 border-amber-400 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <h4 className="font-semibold text-amber-900 mb-1">Media Only Mode Active</h4>
+                    <p className="text-sm text-amber-800">
+                      Content fields below will be hidden when "Show Media Only" is enabled. 
+                      Go to <strong>Media</strong> tab to disable this mode if you want to show text content.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Badge */}
             <div className="space-y-2">
               <Label htmlFor="badge">Badge (Optional)</Label>
@@ -172,6 +190,34 @@ export function SlideEditorDialog({ open, onOpenChange, slide, onSave }: SlideEd
           </TabsContent>
 
           <TabsContent value="media" className="space-y-4 mt-4">
+            {/* Show Media Only Toggle */}
+            <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label htmlFor="mediaOnly" className="text-base font-semibold text-purple-900">
+                    🎯 Show Media Only
+                  </Label>
+                  <p className="text-sm text-purple-700">
+                    Display only media (image/video) - hide all text content (title, description, etc.)
+                  </p>
+                </div>
+                <Switch
+                  id="mediaOnly"
+                  checked={localSlide.mediaOnly || false}
+                  onCheckedChange={(checked) =>
+                    setLocalSlide({ ...localSlide, mediaOnly: checked })
+                  }
+                />
+              </div>
+              {localSlide.mediaOnly && (
+                <div className="mt-3 p-3 bg-white rounded border border-purple-200">
+                  <p className="text-sm text-purple-800">
+                    ✓ <strong>Media Only Mode Active:</strong> Only media will be displayed. All text content will be hidden.
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Media Type Selection */}
             <div className="space-y-2">
               <Label htmlFor="mediaType">Media Type</Label>
