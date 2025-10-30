@@ -242,26 +242,11 @@ export function CarouselSettingsDialog({ open, onOpenChange, settings, onSave }:
               </p>
             </div>
 
-            {/* Media Filter */}
-            <div className="space-y-2">
-              <Label htmlFor="mediaFilter">Show Media Type</Label>
-              <Select
-                value={localSettings.mediaFilter || 'all'}
-                onValueChange={(value) =>
-                  setLocalSettings({ ...localSettings, mediaFilter: value as any })
-                }
-              >
-                <SelectTrigger id="mediaFilter">
-                  <SelectValue placeholder="Select media type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Media</SelectItem>
-                  <SelectItem value="images">Images Only</SelectItem>
-                  <SelectItem value="videos">Videos Only</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Filter slides by media type. Slides with video embeds will be identified by video URLs (YouTube, Vimeo, etc.)
+            {/* Info box */}
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>💡 Note:</strong> Media type (image/video) is configured per slide. 
+                Click "Edit" on individual slides in the Media tab to set their media type.
               </p>
             </div>
           </TabsContent>

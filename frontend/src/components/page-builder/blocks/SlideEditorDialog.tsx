@@ -16,6 +16,8 @@ interface CarouselSlide {
   subtitle?: string;
   description?: string;
   image?: string;
+  videoUrl?: string;
+  mediaType?: 'image' | 'video' | 'embed';
   cta?: {
     text: string;
     link: string;
@@ -73,9 +75,10 @@ export function SlideEditorDialog({ open, onOpenChange, slide, onSave }: SlideEd
         </DialogHeader>
 
         <Tabs defaultValue="content" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
+            <TabsTrigger value="mediatype">Media Type</TabsTrigger>
             <TabsTrigger value="styling">Styling</TabsTrigger>
           </TabsList>
 
@@ -170,76 +173,204 @@ export function SlideEditorDialog({ open, onOpenChange, slide, onSave }: SlideEd
           </TabsContent>
 
           <TabsContent value="media" className="space-y-4 mt-4">
-            {/* Image URL */}
+            {/* Media Type Selection */}
             <div className="space-y-2">
-              <Label htmlFor="image">Image URL</Label>
-              <Input
-                id="image"
-                value={localSlide.image || ''}
-                onChange={(e) =>
-                  setLocalSlide({ ...localSlide, image: e.target.value })
-                }
-                placeholder="https://example.com/image.jpg"
-              />
-              {localSlide.image && (
-                <div className="mt-2 border rounded-lg overflow-hidden">
-                  <img
-                    src={localSlide.image}
-                    alt="Preview"
-                    className="w-full h-48 object-cover"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Image Position */}
-            <div className="space-y-2">
-              <Label htmlFor="imagePosition">Image Position</Label>
+              <Label htmlFor="mediaType">Media Type</Label>
               <Select
-                value={localSlide.imagePosition || 'right'}
+                value={localSlide.mediaType || 'image'}
                 onValueChange={(value: any) =>
-                  setLocalSlide({ ...localSlide, imagePosition: value })
+                  setLocalSlide({ ...localSlide, mediaType: value })
                 }
               >
-                <SelectTrigger id="imagePosition">
-                  <SelectValue placeholder="Select position" />
+                <SelectTrigger id="mediaType">
+                  <SelectValue placeholder="Select media type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="left">Left</SelectItem>
-                  <SelectItem value="right">Right</SelectItem>
-                  <SelectItem value="top">Top</SelectItem>
-                  <SelectItem value="bottom">Bottom</SelectItem>
-                  <SelectItem value="background">Background</SelectItem>
+                  <SelectItem value="image">Image</SelectItem>
+                  <SelectItem value="video">Video URL</SelectItem>
+                  <SelectItem value="embed">Video Embed (YouTube/Vimeo)</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Choose the type of media to display on this slide
+              </p>
             </div>
 
-            {/* Image Overlay (only for background) */}
-            {localSlide.imagePosition === 'background' && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="imageOverlay">Image Overlay</Label>
-                  <span className="text-sm text-muted-foreground">
-                    {localSlide.imageOverlay || 50}%
-                  </span>
+            {/* Image Controls - Only show for image type */}
+            {(!localSlide.mediaType || localSlide.mediaType === 'image') && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="image">Image URL</Label>
+                  <Input
+                    id="image"
+                    value={localSlide.image || ''}
+                    onChange={(e) =>
+                      setLocalSlide({ ...localSlide, image: e.target.value })
+                    }
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {localSlide.image && (
+                    <div className="mt-2 border rounded-lg overflow-hidden">
+                      <img
+                        src={localSlide.image}
+                        alt="Preview"
+                        className="w-full h-48 object-cover"
+                      />
+                    </div>
+                  )}
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="imagePosition">Image Position</Label>
+                  <Select
+                    value={localSlide.imagePosition || 'right'}
+                    onValueChange={(value: any) =>
+                      setLocalSlide({ ...localSlide, imagePosition: value })
+                    }
+                  >
+                    <SelectTrigger id="imagePosition">
+                      <SelectValue placeholder="Select position" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="left">Left</SelectItem>
+                      <SelectItem value="right">Right</SelectItem>
+                      <SelectItem value="top">Top</SelectItem>
+                      <SelectItem value="bottom">Bottom</SelectItem>
+                      <SelectItem value="background">Background</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {localSlide.imagePosition === 'background' && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="imageOverlay">Image Overlay</Label>
+                      <span className="text-sm text-muted-foreground">
+                        {localSlide.imageOverlay || 50}%
+                      </span>
+                    </div>
+                    <Input
+                      id="imageOverlay"
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={localSlide.imageOverlay || 50}
+                      onChange={(e) =>
+                        setLocalSlide({ ...localSlide, imageOverlay: parseInt(e.target.value) })
+                      }
+                      className="w-full"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Darkness of overlay on background image
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Video Controls - Only show for video and embed types */}
+            {(localSlide.mediaType === 'video' || localSlide.mediaType === 'embed') && (
+              <div className="space-y-2">
+                <Label htmlFor="videoUrl">
+                  {localSlide.mediaType === 'embed' ? 'Video Embed URL' : 'Video File URL'}
+                </Label>
                 <Input
-                  id="imageOverlay"
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={5}
-                  value={localSlide.imageOverlay || 50}
+                  id="videoUrl"
+                  value={localSlide.videoUrl || ''}
                   onChange={(e) =>
-                    setLocalSlide({ ...localSlide, imageOverlay: parseInt(e.target.value) })
+                    setLocalSlide({ ...localSlide, videoUrl: e.target.value })
                   }
-                  className="w-full"
+                  placeholder={
+                    localSlide.mediaType === 'embed'
+                      ? 'https://www.youtube.com/watch?v=... or https://vimeo.com/...'
+                      : 'https://example.com/video.mp4'
+                  }
                 />
                 <p className="text-xs text-muted-foreground">
-                  Darkness of overlay on background image
+                  {localSlide.mediaType === 'embed'
+                    ? 'Supports YouTube, Vimeo, and other embed services'
+                    : 'Direct link to video file (MP4, WebM, etc.)'}
                 </p>
+                {localSlide.videoUrl && localSlide.mediaType === 'embed' && (
+                  <div className="mt-2 border rounded-lg overflow-hidden bg-gray-100 p-4">
+                    <p className="text-sm text-gray-600">
+                      ✓ Video URL detected. Will be embedded in the slide.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="mediatype" className="space-y-4 mt-4">
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-blue-900 mb-2">Media Type Guide</h4>
+                <div className="space-y-3 text-sm text-blue-800">
+                  <div>
+                    <strong>Image:</strong>
+                    <p className="text-blue-700">Display static images with customizable position and overlay</p>
+                  </div>
+                  <div>
+                    <strong>Video URL:</strong>
+                    <p className="text-blue-700">Direct video file (MP4, WebM) - plays inline with controls</p>
+                  </div>
+                  <div>
+                    <strong>Video Embed:</strong>
+                    <p className="text-blue-700">YouTube, Vimeo embeds - responsive player with full features</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Current Media Type Info */}
+              <div className="p-4 border rounded-lg bg-gray-50">
+                <h4 className="font-semibold mb-2">Current Configuration</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Media Type:</span>
+                    <span className="font-medium capitalize">
+                      {localSlide.mediaType || 'Image'}
+                    </span>
+                  </div>
+                  {localSlide.image && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Image URL:</span>
+                      <span className="font-medium text-xs truncate max-w-[200px]">
+                        {localSlide.image}
+                      </span>
+                    </div>
+                  )}
+                  {localSlide.videoUrl && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Video URL:</span>
+                      <span className="font-medium text-xs truncate max-w-[200px]">
+                        {localSlide.videoUrl}
+                      </span>
+                    </div>
+                  )}
+                  {localSlide.imagePosition && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Position:</span>
+                      <span className="font-medium capitalize">
+                        {localSlide.imagePosition}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick Tips */}
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <h4 className="font-semibold text-amber-900 mb-2">💡 Tips</h4>
+                <ul className="list-disc list-inside space-y-1 text-sm text-amber-800">
+                  <li>Use high-quality images (1920x1080 recommended)</li>
+                  <li>Video embeds are more performant than video files</li>
+                  <li>Background images work best with overlay enabled</li>
+                  <li>Each slide can have different media types</li>
+                </ul>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="styling" className="space-y-4 mt-4">
