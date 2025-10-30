@@ -1,113 +1,649 @@
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateBlogInput, UpdateBlogInput, GetBlogsInput, CreateBlogCategoryInput, UpdateBlogCategoryInput, CreateBlogTagInput, UpdateBlogTagInput } from '../graphql/inputs/blog.input';
 export declare class BlogService {
     private prisma;
     constructor(prisma: PrismaService);
-    getBlogs(input: GetBlogsInput): Promise<{
-        items: any;
-        total: any;
-        page: number;
-        pageSize: number;
+    getBlogs(input?: any): Promise<{
+        items: {
+            tags: {
+                id: string;
+                slug: string;
+                createdAt: Date;
+                name: string;
+                description: string | null;
+                color: string | null;
+            }[];
+            author: {
+                id: string;
+                email: string;
+                username: string;
+                firstName: string;
+                lastName: string;
+            };
+            category: {
+                id: string;
+                slug: string;
+                metaTitle: string | null;
+                metaDescription: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                isActive: boolean;
+                name: string;
+                description: string | null;
+                parentId: string | null;
+                thumbnail: string | null;
+                order: number;
+            };
+            id: string;
+            title: string;
+            slug: string;
+            excerpt: string | null;
+            content: string;
+            authorId: string;
+            categoryId: string | null;
+            featuredImage: string | null;
+            images: string[];
+            metaTitle: string | null;
+            metaDescription: string | null;
+            metaKeywords: string[];
+            canonicalUrl: string | null;
+            status: import("@prisma/client").$Enums.PostStatus;
+            visibility: import("@prisma/client").$Enums.PostVisibility;
+            password: string | null;
+            isFeatured: boolean;
+            isPinned: boolean;
+            displayOrder: number;
+            viewCount: number;
+            readingTime: number | null;
+            commentsEnabled: boolean;
+            publishedAt: Date | null;
+            scheduledAt: Date | null;
+            createdAt: Date;
+            updatedAt: Date;
+        }[];
+        total: number;
+        page: any;
+        pageSize: any;
         totalPages: number;
         hasMore: boolean;
     }>;
-    getBlogById(id: string): Promise<any>;
-    getBlogBySlug(slug: string): Promise<any>;
-    getFeaturedBlogs(limit?: number): Promise<any>;
-    getBlogsByCategory(categoryId: string, page?: number, limit?: number): Promise<{
-        items: any;
-        total: any;
-        page: number;
-        pageSize: number;
-        totalPages: number;
-        hasMore: boolean;
-    }>;
-    getRelatedBlogs(categoryId: string, excludeBlogId: string, limit?: number): Promise<any>;
-    createBlog(input: CreateBlogInput): Promise<any>;
-    updateBlog(input: UpdateBlogInput): Promise<any>;
-    deleteBlog(id: string): Promise<boolean>;
-    getCategories(): Promise<{
-        postCount: any;
-        order: number;
+    getBlogById(id: string): Promise<{
+        tags: {
+            id: string;
+            slug: string;
+            createdAt: Date;
+            name: string;
+            description: string | null;
+            color: string | null;
+        }[];
+        author: {
+            id: string;
+            email: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+        };
+        category: {
+            id: string;
+            slug: string;
+            metaTitle: string | null;
+            metaDescription: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            name: string;
+            description: string | null;
+            parentId: string | null;
+            thumbnail: string | null;
+            order: number;
+        };
         id: string;
-        createdAt: Date;
-        isActive: boolean;
-        name: string;
-        updatedAt: Date;
+        title: string;
         slug: string;
-        parentId: string | null;
-        description: string | null;
-        thumbnail: string | null;
+        excerpt: string | null;
+        content: string;
+        authorId: string;
+        categoryId: string | null;
+        featuredImage: string | null;
+        images: string[];
         metaTitle: string | null;
         metaDescription: string | null;
+        metaKeywords: string[];
+        canonicalUrl: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        visibility: import("@prisma/client").$Enums.PostVisibility;
+        password: string | null;
+        isFeatured: boolean;
+        isPinned: boolean;
+        displayOrder: number;
+        viewCount: number;
+        readingTime: number | null;
+        commentsEnabled: boolean;
+        publishedAt: Date | null;
+        scheduledAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    getBlogBySlug(slug: string): Promise<{
+        tags: {
+            id: string;
+            slug: string;
+            createdAt: Date;
+            name: string;
+            description: string | null;
+            color: string | null;
+        }[];
+        author: {
+            id: string;
+            email: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+        };
+        category: {
+            id: string;
+            slug: string;
+            metaTitle: string | null;
+            metaDescription: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            name: string;
+            description: string | null;
+            parentId: string | null;
+            thumbnail: string | null;
+            order: number;
+        };
+        id: string;
+        title: string;
+        slug: string;
+        excerpt: string | null;
+        content: string;
+        authorId: string;
+        categoryId: string | null;
+        featuredImage: string | null;
+        images: string[];
+        metaTitle: string | null;
+        metaDescription: string | null;
+        metaKeywords: string[];
+        canonicalUrl: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        visibility: import("@prisma/client").$Enums.PostVisibility;
+        password: string | null;
+        isFeatured: boolean;
+        isPinned: boolean;
+        displayOrder: number;
+        viewCount: number;
+        readingTime: number | null;
+        commentsEnabled: boolean;
+        publishedAt: Date | null;
+        scheduledAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    getFeaturedBlogs(limit?: number): Promise<({
+        author: {
+            id: string;
+            email: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+        };
+        category: {
+            id: string;
+            slug: string;
+            metaTitle: string | null;
+            metaDescription: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            name: string;
+            description: string | null;
+            parentId: string | null;
+            thumbnail: string | null;
+            order: number;
+        };
+    } & {
+        id: string;
+        title: string;
+        slug: string;
+        excerpt: string | null;
+        content: string;
+        authorId: string;
+        categoryId: string | null;
+        featuredImage: string | null;
+        images: string[];
+        metaTitle: string | null;
+        metaDescription: string | null;
+        metaKeywords: string[];
+        canonicalUrl: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        visibility: import("@prisma/client").$Enums.PostVisibility;
+        password: string | null;
+        isFeatured: boolean;
+        isPinned: boolean;
+        displayOrder: number;
+        viewCount: number;
+        readingTime: number | null;
+        commentsEnabled: boolean;
+        publishedAt: Date | null;
+        scheduledAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    })[]>;
+    getRecentBlogs(limit?: number): Promise<({
+        author: {
+            id: string;
+            email: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+        };
+        category: {
+            id: string;
+            slug: string;
+            metaTitle: string | null;
+            metaDescription: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            name: string;
+            description: string | null;
+            parentId: string | null;
+            thumbnail: string | null;
+            order: number;
+        };
+    } & {
+        id: string;
+        title: string;
+        slug: string;
+        excerpt: string | null;
+        content: string;
+        authorId: string;
+        categoryId: string | null;
+        featuredImage: string | null;
+        images: string[];
+        metaTitle: string | null;
+        metaDescription: string | null;
+        metaKeywords: string[];
+        canonicalUrl: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        visibility: import("@prisma/client").$Enums.PostVisibility;
+        password: string | null;
+        isFeatured: boolean;
+        isPinned: boolean;
+        displayOrder: number;
+        viewCount: number;
+        readingTime: number | null;
+        commentsEnabled: boolean;
+        publishedAt: Date | null;
+        scheduledAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    })[]>;
+    createBlog(input: any, userId: string): Promise<{
+        author: {
+            id: string;
+            email: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+        };
+        category: {
+            id: string;
+            slug: string;
+            metaTitle: string | null;
+            metaDescription: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            name: string;
+            description: string | null;
+            parentId: string | null;
+            thumbnail: string | null;
+            order: number;
+        };
+        tags: ({
+            tag: {
+                id: string;
+                slug: string;
+                createdAt: Date;
+                name: string;
+                description: string | null;
+                color: string | null;
+            };
+        } & {
+            postId: string;
+            tagId: string;
+        })[];
+    } & {
+        id: string;
+        title: string;
+        slug: string;
+        excerpt: string | null;
+        content: string;
+        authorId: string;
+        categoryId: string | null;
+        featuredImage: string | null;
+        images: string[];
+        metaTitle: string | null;
+        metaDescription: string | null;
+        metaKeywords: string[];
+        canonicalUrl: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        visibility: import("@prisma/client").$Enums.PostVisibility;
+        password: string | null;
+        isFeatured: boolean;
+        isPinned: boolean;
+        displayOrder: number;
+        viewCount: number;
+        readingTime: number | null;
+        commentsEnabled: boolean;
+        publishedAt: Date | null;
+        scheduledAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    updateBlog(id: string, input: any): Promise<{
+        author: {
+            id: string;
+            email: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+        };
+        category: {
+            id: string;
+            slug: string;
+            metaTitle: string | null;
+            metaDescription: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            name: string;
+            description: string | null;
+            parentId: string | null;
+            thumbnail: string | null;
+            order: number;
+        };
+        tags: ({
+            tag: {
+                id: string;
+                slug: string;
+                createdAt: Date;
+                name: string;
+                description: string | null;
+                color: string | null;
+            };
+        } & {
+            postId: string;
+            tagId: string;
+        })[];
+    } & {
+        id: string;
+        title: string;
+        slug: string;
+        excerpt: string | null;
+        content: string;
+        authorId: string;
+        categoryId: string | null;
+        featuredImage: string | null;
+        images: string[];
+        metaTitle: string | null;
+        metaDescription: string | null;
+        metaKeywords: string[];
+        canonicalUrl: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        visibility: import("@prisma/client").$Enums.PostVisibility;
+        password: string | null;
+        isFeatured: boolean;
+        isPinned: boolean;
+        displayOrder: number;
+        viewCount: number;
+        readingTime: number | null;
+        commentsEnabled: boolean;
+        publishedAt: Date | null;
+        scheduledAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    deleteBlog(id: string): Promise<{
+        success: boolean;
+    }>;
+    getCategories(): Promise<{
+        postCount: number;
+        _count: {
+            posts: number;
+        };
+        id: string;
+        slug: string;
+        metaTitle: string | null;
+        metaDescription: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        isActive: boolean;
+        name: string;
+        description: string | null;
+        parentId: string | null;
+        thumbnail: string | null;
+        order: number;
     }[]>;
     getCategoryById(id: string): Promise<{
-        postCount: any;
-        order: number;
+        postCount: number;
+        _count: {
+            posts: number;
+        };
         id: string;
-        createdAt: Date;
-        isActive: boolean;
-        name: string;
-        updatedAt: Date;
         slug: string;
-        parentId: string | null;
-        description: string | null;
-        thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
-    }>;
-    createCategory(input: CreateBlogCategoryInput): Promise<{
-        order: number;
-        id: string;
         createdAt: Date;
+        updatedAt: Date;
         isActive: boolean;
         name: string;
-        updatedAt: Date;
-        slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         thumbnail: string | null;
+        order: number;
+    }>;
+    createCategory(input: any): Promise<{
+        id: string;
+        slug: string;
         metaTitle: string | null;
         metaDescription: string | null;
-    }>;
-    updateCategory(input: UpdateBlogCategoryInput): Promise<{
-        order: number;
-        id: string;
         createdAt: Date;
+        updatedAt: Date;
         isActive: boolean;
         name: string;
-        updatedAt: Date;
-        slug: string;
-        parentId: string | null;
         description: string | null;
+        parentId: string | null;
         thumbnail: string | null;
+        order: number;
+    }>;
+    updateCategory(id: string, input: any): Promise<{
+        id: string;
+        slug: string;
         metaTitle: string | null;
         metaDescription: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        isActive: boolean;
+        name: string;
+        description: string | null;
+        parentId: string | null;
+        thumbnail: string | null;
+        order: number;
     }>;
-    deleteCategory(id: string): Promise<boolean>;
-    getTags(): Promise<{
+    deleteCategory(id: string): Promise<{
+        success: boolean;
+    }>;
+    getTags(): Promise<({
+        _count: {
+            posts: number;
+        };
+    } & {
         id: string;
+        slug: string;
         createdAt: Date;
         name: string;
-        slug: string;
         description: string | null;
         color: string | null;
-    }[]>;
-    createTag(input: CreateBlogTagInput): Promise<{
+    })[]>;
+    getTagById(id: string): Promise<{
+        _count: {
+            posts: number;
+        };
+    } & {
         id: string;
+        slug: string;
         createdAt: Date;
         name: string;
-        slug: string;
         description: string | null;
         color: string | null;
     }>;
-    updateTag(input: UpdateBlogTagInput): Promise<{
+    createTag(input: any): Promise<{
         id: string;
+        slug: string;
         createdAt: Date;
         name: string;
-        slug: string;
         description: string | null;
         color: string | null;
     }>;
-    deleteTag(id: string): Promise<boolean>;
+    updateTag(id: string, input: any): Promise<{
+        id: string;
+        slug: string;
+        createdAt: Date;
+        name: string;
+        description: string | null;
+        color: string | null;
+    }>;
+    deleteTag(id: string): Promise<{
+        success: boolean;
+    }>;
+    getBlogsByCategory(categoryId: string, input?: any): Promise<{
+        items: {
+            tags: {
+                id: string;
+                slug: string;
+                createdAt: Date;
+                name: string;
+                description: string | null;
+                color: string | null;
+            }[];
+            author: {
+                id: string;
+                email: string;
+                username: string;
+                firstName: string;
+                lastName: string;
+            };
+            category: {
+                id: string;
+                slug: string;
+                metaTitle: string | null;
+                metaDescription: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                isActive: boolean;
+                name: string;
+                description: string | null;
+                parentId: string | null;
+                thumbnail: string | null;
+                order: number;
+            };
+            id: string;
+            title: string;
+            slug: string;
+            excerpt: string | null;
+            content: string;
+            authorId: string;
+            categoryId: string | null;
+            featuredImage: string | null;
+            images: string[];
+            metaTitle: string | null;
+            metaDescription: string | null;
+            metaKeywords: string[];
+            canonicalUrl: string | null;
+            status: import("@prisma/client").$Enums.PostStatus;
+            visibility: import("@prisma/client").$Enums.PostVisibility;
+            password: string | null;
+            isFeatured: boolean;
+            isPinned: boolean;
+            displayOrder: number;
+            viewCount: number;
+            readingTime: number | null;
+            commentsEnabled: boolean;
+            publishedAt: Date | null;
+            scheduledAt: Date | null;
+            createdAt: Date;
+            updatedAt: Date;
+        }[];
+        total: number;
+        page: any;
+        pageSize: any;
+        totalPages: number;
+        hasMore: boolean;
+    }>;
+    getRelatedBlogs(blogId: string, limit?: number): Promise<({
+        author: {
+            id: string;
+            email: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+        };
+        category: {
+            id: string;
+            slug: string;
+            metaTitle: string | null;
+            metaDescription: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            name: string;
+            description: string | null;
+            parentId: string | null;
+            thumbnail: string | null;
+            order: number;
+        };
+        tags: ({
+            tag: {
+                id: string;
+                slug: string;
+                createdAt: Date;
+                name: string;
+                description: string | null;
+                color: string | null;
+            };
+        } & {
+            postId: string;
+            tagId: string;
+        })[];
+    } & {
+        id: string;
+        title: string;
+        slug: string;
+        excerpt: string | null;
+        content: string;
+        authorId: string;
+        categoryId: string | null;
+        featuredImage: string | null;
+        images: string[];
+        metaTitle: string | null;
+        metaDescription: string | null;
+        metaKeywords: string[];
+        canonicalUrl: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        visibility: import("@prisma/client").$Enums.PostVisibility;
+        password: string | null;
+        isFeatured: boolean;
+        isPinned: boolean;
+        displayOrder: number;
+        viewCount: number;
+        readingTime: number | null;
+        commentsEnabled: boolean;
+        publishedAt: Date | null;
+        scheduledAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+    })[]>;
 }

@@ -33,7 +33,7 @@ export class OrderResolver {
       return {
         success: true,
         message: `Order ${order.orderNumber} created successfully`,
-        order,
+        order: order as any,
       };
     } catch (error) {
       return {
@@ -80,14 +80,12 @@ export class OrderResolver {
       const result = await this.orderService.listOrders(filter, userId);
       
       return {
-        success: true,
-        orders: result.orders,
+        orders: result.orders as any[],
         total: result.total,
         hasMore: result.hasMore,
       };
     } catch (error) {
       return {
-        success: false,
         message: error.message,
         errors: [error.message],
         orders: [],
@@ -117,14 +115,12 @@ export class OrderResolver {
       const result = await this.orderService.listOrders(filter, userId);
       
       return {
-        success: true,
-        orders: result.orders,
+        orders: result.orders as any[],
         total: result.total,
         hasMore: result.hasMore,
       };
     } catch (error) {
       return {
-        success: false,
         message: error.message,
         errors: [error.message],
         orders: [],
@@ -150,7 +146,7 @@ export class OrderResolver {
       return {
         success: true,
         message: `Order status updated to ${input.status}`,
-        order,
+        order: order as any,
       };
     } catch (error) {
       return {
@@ -176,7 +172,7 @@ export class OrderResolver {
       return {
         success: true,
         message: 'Order cancelled successfully',
-        order,
+        order: order as any,
       };
     } catch (error) {
       return {

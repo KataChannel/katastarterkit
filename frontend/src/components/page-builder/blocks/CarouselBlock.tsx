@@ -121,7 +121,7 @@ export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete
 
   const handleAddSlide = () => {
     const newSlide: CarouselSlide = {
-      id: `slide-${Date.now()}`,
+      id: `slide-${new Date().getTime().toString()}`,
       title: 'New Slide',
       subtitle: '',
       description: '',

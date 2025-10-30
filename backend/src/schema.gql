@@ -3415,7 +3415,7 @@ type Query {
   quizAttempt(id: String!): QuizAttempt!
   quizAttempts(quizId: String!): [QuizAttempt!]!
   quizzesByLesson(lessonId: String!): [Quiz!]!
-  relatedBlogs(categoryId: ID!, excludeBlogId: ID!, limit: Int): [BlogType!]!
+  relatedBlogs(blogId: ID!, limit: Int): [BlogType!]!
   review(id: ID!): ProductReviewType
   reviewStats(courseId: ID!): ReviewStats!
   reviews(input: GetReviewsInput!): ReviewsWithStats!
