@@ -7,12 +7,12 @@ export declare class CallCenterService {
     constructor(prisma: PrismaService);
     getConfig(): Promise<{
         id: string;
-        batchSize: number;
         createdAt: Date;
         isActive: boolean;
         updatedAt: Date;
-        apiUrl: string;
+        batchSize: number;
         domain: string;
+        apiUrl: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -24,12 +24,12 @@ export declare class CallCenterService {
     }>;
     createConfig(input: CreateCallCenterConfigInput): Promise<{
         id: string;
-        batchSize: number;
         createdAt: Date;
         isActive: boolean;
         updatedAt: Date;
-        apiUrl: string;
+        batchSize: number;
         domain: string;
+        apiUrl: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -41,12 +41,12 @@ export declare class CallCenterService {
     }>;
     updateConfig(id: string, input: UpdateCallCenterConfigInput): Promise<{
         id: string;
-        batchSize: number;
         createdAt: Date;
         isActive: boolean;
         updatedAt: Date;
-        apiUrl: string;
+        batchSize: number;
         domain: string;
+        apiUrl: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -58,12 +58,12 @@ export declare class CallCenterService {
     }>;
     deleteConfig(id: string): Promise<{
         id: string;
-        batchSize: number;
         createdAt: Date;
         isActive: boolean;
         updatedAt: Date;
-        apiUrl: string;
+        batchSize: number;
         domain: string;
+        apiUrl: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -90,7 +90,6 @@ export declare class CallCenterService {
             updatedAt: Date;
             duration: string | null;
             direction: import("@prisma/client").$Enums.CallDirection;
-            domain: string | null;
             externalUuid: string;
             callerIdNumber: string | null;
             outboundCallerIdNumber: string | null;
@@ -102,6 +101,7 @@ export declare class CallCenterService {
             sipHangupDisposition: string | null;
             callStatus: import("@prisma/client").$Enums.CallStatus;
             recordPath: string | null;
+            domain: string | null;
             rawData: import("@prisma/client/runtime/library").JsonValue | null;
             syncedAt: Date;
         }[];
@@ -118,7 +118,6 @@ export declare class CallCenterService {
         updatedAt: Date;
         duration: string | null;
         direction: import("@prisma/client").$Enums.CallDirection;
-        domain: string | null;
         externalUuid: string;
         callerIdNumber: string | null;
         outboundCallerIdNumber: string | null;
@@ -130,6 +129,7 @@ export declare class CallCenterService {
         sipHangupDisposition: string | null;
         callStatus: import("@prisma/client").$Enums.CallStatus;
         recordPath: string | null;
+        domain: string | null;
         rawData: import("@prisma/client/runtime/library").JsonValue | null;
         syncedAt: Date;
     }>;
@@ -139,11 +139,10 @@ export declare class CallCenterService {
             errorMessage: string | null;
             status: string;
             completedAt: Date | null;
-            duration: number | null;
             fromDate: Date;
             toDate: Date;
-            startedAt: Date;
             offset: number;
+            duration: number | null;
             configId: string | null;
             syncType: import("@prisma/client").$Enums.CallCenterSyncMode;
             recordsFetched: number;
@@ -151,6 +150,7 @@ export declare class CallCenterService {
             recordsUpdated: number;
             recordsSkipped: number;
             errorDetails: import("@prisma/client/runtime/library").JsonValue | null;
+            startedAt: Date;
         }[];
         total: number;
     }>;

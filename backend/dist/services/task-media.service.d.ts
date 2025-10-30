@@ -4,18 +4,18 @@ export declare class TaskMediaService {
     constructor(prisma: PrismaService);
     findByTaskId(taskId: string): Promise<({
         uploader: {
+            password: string | null;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
-            password: string | null;
             phone: string | null;
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
@@ -24,32 +24,32 @@ export declare class TaskMediaService {
             departmentId: string | null;
         };
     } & {
+        type: import("@prisma/client").$Enums.MediaType;
         id: string;
         createdAt: Date;
+        size: number;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.MediaType;
         url: string;
         filename: string;
         mimeType: string;
-        size: number;
-        taskId: string;
         caption: string | null;
+        taskId: string;
         uploadedBy: string;
     })[]>;
     create(taskId: string, uploaderId: string, mediaData: any): Promise<{
         uploader: {
+            password: string | null;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
-            password: string | null;
             phone: string | null;
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
@@ -58,16 +58,16 @@ export declare class TaskMediaService {
             departmentId: string | null;
         };
     } & {
+        type: import("@prisma/client").$Enums.MediaType;
         id: string;
         createdAt: Date;
+        size: number;
         updatedAt: Date;
-        type: import("@prisma/client").$Enums.MediaType;
         url: string;
         filename: string;
         mimeType: string;
-        size: number;
-        taskId: string;
         caption: string | null;
+        taskId: string;
         uploadedBy: string;
     }>;
     delete(mediaId: string, userId: string): Promise<void>;

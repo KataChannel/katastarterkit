@@ -5,18 +5,18 @@ export declare class TaskCommentService {
     constructor(prisma: PrismaService);
     create(input: CreateTaskCommentInput, authorId: string): Promise<{
         user: {
+            password: string | null;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
-            password: string | null;
             phone: string | null;
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
@@ -24,69 +24,39 @@ export declare class TaskCommentService {
             updatedAt: Date;
             departmentId: string | null;
         };
-        parent: {
-            user: {
-                id: string;
-                createdAt: Date;
-                email: string | null;
-                username: string;
-                password: string | null;
-                phone: string | null;
-                firstName: string | null;
-                lastName: string | null;
-                avatar: string | null;
-                roleType: import("@prisma/client").$Enums.UserRoleType;
-                isActive: boolean;
-                isVerified: boolean;
-                isTwoFactorEnabled: boolean;
-                failedLoginAttempts: number;
-                lockedUntil: Date | null;
-                lastLoginAt: Date | null;
-                updatedAt: Date;
-                departmentId: string | null;
-            };
-        } & {
-            id: string;
-            userId: string;
-            createdAt: Date;
-            updatedAt: Date;
-            parentId: string | null;
-            content: string;
-            taskId: string;
-        };
         task: {
-            id: string;
-            userId: string;
-            tags: string[];
-            createdAt: Date;
-            updatedAt: Date;
-            description: string | null;
-            status: import("@prisma/client").$Enums.TaskStatus;
-            completedAt: Date | null;
-            title: string;
             category: import("@prisma/client").$Enums.TaskCategory;
-            parentId: string | null;
             order: number;
+            id: string;
+            createdAt: Date;
+            userId: string;
+            updatedAt: Date;
+            tags: string[];
+            title: string;
+            status: import("@prisma/client").$Enums.TaskStatus;
+            parentId: string | null;
+            description: string | null;
             priority: import("@prisma/client").$Enums.TaskPriority;
             dueDate: Date | null;
+            completedAt: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
         };
-        replies: ({
+        parent: {
             user: {
+                password: string | null;
                 id: string;
+                isVerified: boolean;
                 createdAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
-                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
-                isActive: boolean;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
@@ -96,36 +66,66 @@ export declare class TaskCommentService {
             };
         } & {
             id: string;
-            userId: string;
             createdAt: Date;
+            userId: string;
             updatedAt: Date;
-            parentId: string | null;
             content: string;
+            parentId: string | null;
+            taskId: string;
+        };
+        replies: ({
+            user: {
+                password: string | null;
+                id: string;
+                isVerified: boolean;
+                createdAt: Date;
+                isActive: boolean;
+                email: string | null;
+                username: string;
+                phone: string | null;
+                firstName: string | null;
+                lastName: string | null;
+                avatar: string | null;
+                roleType: import("@prisma/client").$Enums.UserRoleType;
+                isTwoFactorEnabled: boolean;
+                failedLoginAttempts: number;
+                lockedUntil: Date | null;
+                lastLoginAt: Date | null;
+                updatedAt: Date;
+                departmentId: string | null;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            userId: string;
+            updatedAt: Date;
+            content: string;
+            parentId: string | null;
             taskId: string;
         })[];
     } & {
         id: string;
-        userId: string;
         createdAt: Date;
+        userId: string;
         updatedAt: Date;
-        parentId: string | null;
         content: string;
+        parentId: string | null;
         taskId: string;
     }>;
     findByTaskId(taskId: string): Promise<({
         user: {
+            password: string | null;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
-            password: string | null;
             phone: string | null;
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
@@ -135,18 +135,18 @@ export declare class TaskCommentService {
         };
         replies: ({
             user: {
+                password: string | null;
                 id: string;
+                isVerified: boolean;
                 createdAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
-                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
-                isActive: boolean;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
@@ -156,36 +156,36 @@ export declare class TaskCommentService {
             };
         } & {
             id: string;
-            userId: string;
             createdAt: Date;
+            userId: string;
             updatedAt: Date;
-            parentId: string | null;
             content: string;
+            parentId: string | null;
             taskId: string;
         })[];
     } & {
         id: string;
-        userId: string;
         createdAt: Date;
+        userId: string;
         updatedAt: Date;
-        parentId: string | null;
         content: string;
+        parentId: string | null;
         taskId: string;
     })[]>;
     findById(id: string): Promise<{
         user: {
+            password: string | null;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
-            password: string | null;
             phone: string | null;
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
@@ -195,18 +195,18 @@ export declare class TaskCommentService {
         };
         parent: {
             user: {
+                password: string | null;
                 id: string;
+                isVerified: boolean;
                 createdAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
-                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
-                isActive: boolean;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
@@ -216,27 +216,27 @@ export declare class TaskCommentService {
             };
         } & {
             id: string;
-            userId: string;
             createdAt: Date;
+            userId: string;
             updatedAt: Date;
-            parentId: string | null;
             content: string;
+            parentId: string | null;
             taskId: string;
         };
         replies: ({
             user: {
+                password: string | null;
                 id: string;
+                isVerified: boolean;
                 createdAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
-                password: string | null;
                 phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
-                isActive: boolean;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
@@ -246,36 +246,36 @@ export declare class TaskCommentService {
             };
         } & {
             id: string;
-            userId: string;
             createdAt: Date;
+            userId: string;
             updatedAt: Date;
-            parentId: string | null;
             content: string;
+            parentId: string | null;
             taskId: string;
         })[];
     } & {
         id: string;
-        userId: string;
         createdAt: Date;
+        userId: string;
         updatedAt: Date;
-        parentId: string | null;
         content: string;
+        parentId: string | null;
         taskId: string;
     }>;
     findReplies(parentId: string): Promise<({
         user: {
+            password: string | null;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
-            password: string | null;
             phone: string | null;
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
@@ -285,27 +285,27 @@ export declare class TaskCommentService {
         };
     } & {
         id: string;
-        userId: string;
         createdAt: Date;
+        userId: string;
         updatedAt: Date;
-        parentId: string | null;
         content: string;
+        parentId: string | null;
         taskId: string;
     })[]>;
     update(input: UpdateTaskCommentInput, userId: string): Promise<{
         user: {
+            password: string | null;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
-            password: string | null;
             phone: string | null;
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
@@ -314,31 +314,31 @@ export declare class TaskCommentService {
             departmentId: string | null;
         };
         task: {
-            id: string;
-            userId: string;
-            tags: string[];
-            createdAt: Date;
-            updatedAt: Date;
-            description: string | null;
-            status: import("@prisma/client").$Enums.TaskStatus;
-            completedAt: Date | null;
-            title: string;
             category: import("@prisma/client").$Enums.TaskCategory;
-            parentId: string | null;
             order: number;
+            id: string;
+            createdAt: Date;
+            userId: string;
+            updatedAt: Date;
+            tags: string[];
+            title: string;
+            status: import("@prisma/client").$Enums.TaskStatus;
+            parentId: string | null;
+            description: string | null;
             priority: import("@prisma/client").$Enums.TaskPriority;
             dueDate: Date | null;
+            completedAt: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
         };
     } & {
         id: string;
-        userId: string;
         createdAt: Date;
+        userId: string;
         updatedAt: Date;
-        parentId: string | null;
         content: string;
+        parentId: string | null;
         taskId: string;
     }>;
     delete(commentId: string, userId: string): Promise<void>;
