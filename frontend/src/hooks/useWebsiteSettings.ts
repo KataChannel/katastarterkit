@@ -85,9 +85,9 @@ export function useWebsiteSettings(category?: string) {
     where.category = category;
   }
 
-  return useFindMany<WebsiteSetting>('websiteSetting', {
+  return useFindMany<WebsiteSetting>('WebsiteSetting', {
     where,
-    orderBy: [{ category: 'asc' }, { order: 'asc' }],
+    orderBy: { order: 'asc' }, // Fix: orderBy must be object, not array
   });
 }
 
@@ -95,7 +95,7 @@ export function useWebsiteSettings(category?: string) {
  * Hook để lấy header settings
  */
 export function useHeaderSettings() {
-  return useFindMany<WebsiteSetting>('websiteSetting', {
+  return useFindMany<WebsiteSetting>('WebsiteSetting', {
     where: {
       category: 'HEADER',
       isActive: true,
@@ -109,7 +109,7 @@ export function useHeaderSettings() {
  * Hook để lấy footer settings
  */
 export function useFooterSettings() {
-  return useFindMany<WebsiteSetting>('websiteSetting', {
+  return useFindMany<WebsiteSetting>('WebsiteSetting', {
     where: {
       category: 'FOOTER',
       isActive: true,
@@ -123,7 +123,7 @@ export function useFooterSettings() {
  * Hook để lấy contact settings
  */
 export function useContactSettings() {
-  return useFindMany<WebsiteSetting>('websiteSetting', {
+  return useFindMany<WebsiteSetting>('WebsiteSetting', {
     where: {
       category: 'CONTACT',
       isActive: true,
@@ -137,7 +137,7 @@ export function useContactSettings() {
  * Hook để lấy social settings
  */
 export function useSocialSettings() {
-  return useFindMany<WebsiteSetting>('websiteSetting', {
+  return useFindMany<WebsiteSetting>('WebsiteSetting', {
     where: {
       category: 'SOCIAL',
       isActive: true,

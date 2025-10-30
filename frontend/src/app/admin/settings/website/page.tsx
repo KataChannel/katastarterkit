@@ -42,14 +42,16 @@ export default function WebsiteSettingsPage() {
   const [hasChanges, setHasChanges] = useState(false);
 
   // Fetch settings
-  const { data: settings = [], loading, error, refetch } = useFindMany<WebsiteSetting>('websiteSetting', {
-    orderBy: [{ category: 'asc' }, { order: 'asc' }],
+  const { data: settings = [], loading, error, refetch } = useFindMany<WebsiteSetting>('WebsiteSetting', {
+    orderBy: { order: 'asc' }, // Fix: orderBy must be object, not array
   });
 
-  const [updateOne, { loading: updating }] = useUpdateOne('websiteSetting');
+  const [updateOne, { loading: updating }] = useUpdateOne('WebsiteSetting');
 
-  // Filter settings by category
-  const categorySettings = settings.filter(s => s.category === selectedCategory);
+  // Filter settings by category and sort by order
+  const categorySettings = settings
+    .filter(s => s.category === selectedCategory)
+    .sort((a, b) => a.order - b.order);
 
   // Group settings by group
   const groupedSettings = categorySettings.reduce((acc, setting) => {
