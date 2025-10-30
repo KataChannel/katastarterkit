@@ -94,10 +94,11 @@ export class CoursesResolver {
   }
 
   // ==================== MODULE MUTATIONS ====================
+  // ✅ FIXED: Chuyển từ @Roles(ADMIN) sang JwtAuthGuard để instructor có thể tạo module
+  // Service layer sẽ kiểm tra ownership của course
 
   @Mutation(() => CourseModule, { name: 'createModule' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   createModule(
     @CurrentUser() user: any,
     @Args('input') input: CreateModuleInput,
@@ -106,8 +107,7 @@ export class CoursesResolver {
   }
 
   @Mutation(() => CourseModule, { name: 'updateModule' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   updateModule(
     @CurrentUser() user: any,
     @Args('input') input: UpdateModuleInput,
@@ -116,8 +116,7 @@ export class CoursesResolver {
   }
 
   @Mutation(() => Boolean, { name: 'deleteModule' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   async deleteModule(
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
@@ -127,8 +126,7 @@ export class CoursesResolver {
   }
 
   @Mutation(() => [CourseModule], { name: 'reorderModules' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   reorderModules(
     @CurrentUser() user: any,
     @Args('input') input: ReorderModulesInput,
@@ -137,10 +135,10 @@ export class CoursesResolver {
   }
 
   // ==================== LESSON MUTATIONS ====================
+  // ✅ FIXED: Chuyển từ @Roles(ADMIN) sang JwtAuthGuard để instructor có thể tạo lesson
 
   @Mutation(() => Lesson, { name: 'createLesson' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   createLesson(
     @CurrentUser() user: any,
     @Args('input') input: CreateLessonInput,
@@ -149,8 +147,7 @@ export class CoursesResolver {
   }
 
   @Mutation(() => Lesson, { name: 'updateLesson' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   updateLesson(
     @CurrentUser() user: any,
     @Args('input') input: UpdateLessonInput,
@@ -159,8 +156,7 @@ export class CoursesResolver {
   }
 
   @Mutation(() => Boolean, { name: 'deleteLesson' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   async deleteLesson(
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
@@ -170,8 +166,7 @@ export class CoursesResolver {
   }
 
   @Mutation(() => [Lesson], { name: 'reorderLessons' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   reorderLessons(
     @CurrentUser() user: any,
     @Args('input') input: ReorderLessonsInput,

@@ -14,7 +14,10 @@ import {
   Eye,
   Archive,
   Plus,
-  BarChart3
+  BarChart3,
+  List,
+  PlayCircle,
+  HelpCircle
 } from 'lucide-react';
 
 export default function InstructorDashboardPage() {
@@ -231,6 +234,27 @@ export default function InstructorDashboardPage() {
                             title="Xem"
                           >
                             <Eye className="w-4 h-4" />
+                          </Link>
+                          <Link
+                            href={`/lms/instructor/courses/${course.id}/manage`}
+                            className="text-purple-600 hover:text-purple-900 p-2 hover:bg-purple-50 rounded transition-colors"
+                            title="Quản lý Module"
+                          >
+                            <List className="w-4 h-4" />
+                          </Link>
+                          <Link
+                            href={`/lms/instructor/courses/${course.id}/lessons`}
+                            className="text-green-600 hover:text-green-900 p-2 hover:bg-green-50 rounded transition-colors"
+                            title="Quản lý Bài học"
+                          >
+                            <PlayCircle className="w-4 h-4" />
+                          </Link>
+                          <Link
+                            href={`/lms/instructor/courses/${course.id}/quizzes`}
+                            className="text-amber-600 hover:text-amber-900 p-2 hover:bg-amber-50 rounded transition-colors"
+                            title="Quản lý Quiz"
+                          >
+                            <HelpCircle className="w-4 h-4" />
                           </Link>
                           <Link
                             href={`/lms/instructor/courses/${course.id}/edit`}
