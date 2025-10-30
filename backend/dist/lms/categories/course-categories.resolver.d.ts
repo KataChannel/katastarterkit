@@ -8,32 +8,32 @@ export declare class CourseCategoriesResolver {
         parent: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
-            description: string | null;
+            updatedAt: Date;
             slug: string;
-            icon: string | null;
             parentId: string | null;
+            description: string | null;
+            icon: string | null;
         };
         children: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
-            description: string | null;
+            updatedAt: Date;
             slug: string;
-            icon: string | null;
             parentId: string | null;
+            description: string | null;
+            icon: string | null;
         }[];
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
-        description: string | null;
+        updatedAt: Date;
         slug: string;
-        icon: string | null;
         parentId: string | null;
+        description: string | null;
+        icon: string | null;
     }>;
     findAllCategories(): Promise<({
         _count: {
@@ -42,32 +42,32 @@ export declare class CourseCategoriesResolver {
         parent: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
-            description: string | null;
+            updatedAt: Date;
             slug: string;
-            icon: string | null;
             parentId: string | null;
+            description: string | null;
+            icon: string | null;
         };
         children: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
-            description: string | null;
+            updatedAt: Date;
             slug: string;
-            icon: string | null;
             parentId: string | null;
+            description: string | null;
+            icon: string | null;
         }[];
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
-        description: string | null;
+        updatedAt: Date;
         slug: string;
-        icon: string | null;
         parentId: string | null;
+        description: string | null;
+        icon: string | null;
     })[]>;
     findCategoryTree(): Promise<({
         _count: {
@@ -80,32 +80,32 @@ export declare class CourseCategoriesResolver {
             children: {
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 name: string;
-                description: string | null;
+                updatedAt: Date;
                 slug: string;
-                icon: string | null;
                 parentId: string | null;
+                description: string | null;
+                icon: string | null;
             }[];
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
-            description: string | null;
+            updatedAt: Date;
             slug: string;
-            icon: string | null;
             parentId: string | null;
+            description: string | null;
+            icon: string | null;
         })[];
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
-        description: string | null;
+        updatedAt: Date;
         slug: string;
-        icon: string | null;
         parentId: string | null;
+        description: string | null;
+        icon: string | null;
     })[]>;
     findOneCategory(id: string): Promise<{
         _count: {
@@ -114,63 +114,63 @@ export declare class CourseCategoriesResolver {
         parent: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
-            description: string | null;
+            updatedAt: Date;
             slug: string;
-            icon: string | null;
             parentId: string | null;
+            description: string | null;
+            icon: string | null;
         };
         children: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
-            description: string | null;
+            updatedAt: Date;
             slug: string;
-            icon: string | null;
             parentId: string | null;
+            description: string | null;
+            icon: string | null;
         }[];
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
-        description: string | null;
+        updatedAt: Date;
         slug: string;
-        icon: string | null;
         parentId: string | null;
+        description: string | null;
+        icon: string | null;
     }>;
     updateCategory(updateCourseCategoryInput: UpdateCourseCategoryInput): Promise<{
         parent: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
-            description: string | null;
+            updatedAt: Date;
             slug: string;
-            icon: string | null;
             parentId: string | null;
+            description: string | null;
+            icon: string | null;
         };
         children: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
-            description: string | null;
+            updatedAt: Date;
             slug: string;
-            icon: string | null;
             parentId: string | null;
+            description: string | null;
+            icon: string | null;
         }[];
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
-        description: string | null;
+        updatedAt: Date;
         slug: string;
-        icon: string | null;
         parentId: string | null;
+        description: string | null;
+        icon: string | null;
     }>;
     removeCategory(id: string): Promise<boolean>;
 }

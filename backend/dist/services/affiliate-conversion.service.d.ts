@@ -43,24 +43,24 @@ export declare class AffiliateConversionService {
     getRecentConversions(limit?: number): Promise<({
         link: {
             campaign: {
+                productImage: string | null;
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 name: string;
-                description: string | null;
+                updatedAt: Date;
                 status: import("@prisma/client").$Enums.AffCampaignStatus;
-                productImage: string | null;
-                totalClicks: number;
-                totalConversions: number;
+                description: string | null;
+                commissionType: string;
+                startDate: Date | null;
+                endDate: Date | null;
                 productName: string;
                 productUrl: string;
                 commissionRate: import("@prisma/client/runtime/library").Decimal;
-                commissionType: string;
                 fixedAmount: import("@prisma/client/runtime/library").Decimal | null;
-                startDate: Date | null;
-                endDate: Date | null;
                 maxAffiliates: number | null;
                 requireApproval: boolean;
+                totalClicks: number;
+                totalConversions: number;
                 totalRevenue: import("@prisma/client/runtime/library").Decimal;
                 totalCommission: import("@prisma/client/runtime/library").Decimal;
                 creatorId: string;
@@ -73,32 +73,34 @@ export declare class AffiliateConversionService {
                     lastName: string;
                 };
             } & {
+                role: import("@prisma/client").$Enums.AffUserRole;
                 id: string;
-                userId: string;
                 createdAt: Date;
                 isActive: boolean;
+                userId: string;
                 updatedAt: Date;
                 description: string | null;
-                role: import("@prisma/client").$Enums.AffUserRole;
+                website: string | null;
+                joinedAt: Date;
                 companyName: string | null;
                 businessType: string | null;
-                website: string | null;
                 paymentMethod: import("@prisma/client").$Enums.AffPaymentMethod | null;
                 bankAccount: string | null;
                 paypalEmail: string | null;
                 taxId: string | null;
-                joinedAt: Date;
                 lastActiveAt: Date | null;
             };
         } & {
             id: string;
             createdAt: Date;
+            expiresAt: Date | null;
             isActive: boolean;
             updatedAt: Date;
-            description: string | null;
             title: string | null;
-            expiresAt: Date | null;
+            description: string | null;
             campaignId: string;
+            totalClicks: number;
+            totalConversions: number;
             affiliateId: string;
             trackingCode: string;
             originalUrl: string;
@@ -108,8 +110,6 @@ export declare class AffiliateConversionService {
             utmMedium: string | null;
             utmCampaign: string | null;
             utmContent: string | null;
-            totalClicks: number;
-            totalConversions: number;
             totalEarnings: import("@prisma/client/runtime/library").Decimal;
         };
     } & {
@@ -117,21 +117,21 @@ export declare class AffiliateConversionService {
         createdAt: Date;
         updatedAt: Date;
         status: import("@prisma/client").$Enums.AffConversionStatus;
-        saleAmount: import("@prisma/client/runtime/library").Decimal;
-        commission: import("@prisma/client/runtime/library").Decimal;
-        linkId: string;
         campaignId: string;
         affiliateId: string;
         orderId: string | null;
         customerEmail: string | null;
-        clickId: string | null;
+        saleAmount: import("@prisma/client/runtime/library").Decimal;
         conversionType: string;
+        notes: string | null;
+        linkId: string;
+        commission: import("@prisma/client/runtime/library").Decimal;
+        clickId: string | null;
         currency: string;
         convertedAt: Date;
         approvedAt: Date | null;
         rejectedAt: Date | null;
         paidAt: Date | null;
-        notes: string | null;
         validatedBy: string | null;
     })[]>;
 }

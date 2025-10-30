@@ -21,14 +21,40 @@ let RedisService = class RedisService {
         this.configService = configService;
     }
     async onModuleInit() {
-        const redisUrl = this.configService.get('REDIS_URL') || 'redis://localhost:6379';
-        this.client = new ioredis_1.default(redisUrl, {
+        const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
+        const host = isDockerEnv
+            ? this.configService.get('DOCKER_REDIS_HOST', 'redis')
+            : this.configService.get('REDIS_HOST', '116.118.49.243');
+        const portConfig = isDockerEnv
+            ? this.configService.get('DOCKER_REDIS_PORT', '6379')
+            : this.configService.get('REDIS_PORT', '12004');
+        const port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
+        const password = this.configService.get('REDIS_PASSWORD');
+        const db = this.configService.get('REDIS_DB', 0);
+        console.log(`[RedisService] Connecting to Redis: host=${host}, port=${port}, dockerEnv=${isDockerEnv}`);
+        this.client = new ioredis_1.default({
+            host,
+            port,
+            password,
+            db,
             maxRetriesPerRequest: 3,
             retryStrategy: (times) => {
                 const delay = Math.min(times * 50, 2000);
                 return delay;
             },
             lazyConnect: true,
+            enableOfflineQueue: true,
+            connectTimeout: 10000,
+            commandTimeout: 5000,
+        });
+        this.client.on('error', (err) => {
+            console.warn(`[RedisService] Connection error: ${err.message}`);
+        });
+        this.client.on('connect', () => {
+            console.log('[RedisService] ✅ Connected successfully');
+        });
+        this.client.on('reconnecting', () => {
+            console.log('[RedisService] 🔄 Attempting to reconnect...');
         });
         try {
             await this.client.connect();
