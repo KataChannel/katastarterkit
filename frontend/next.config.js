@@ -48,6 +48,10 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
         hostname: 'minio',
         pathname: '/uploads/**',
       },
