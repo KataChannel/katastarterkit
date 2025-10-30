@@ -1,0 +1,55 @@
+import { Module } from '@nestjs/common';
+import { PrismaModule } from '../prisma/prisma.module';
+import { RedisModule } from '../redis/redis.module';
+import { SupportConversationService } from './services/support-conversation.service';
+import { SupportMessageService } from './services/support-message.service';
+import { SupportTicketService } from './services/support-ticket.service';
+import { ChatIntegrationService } from './services/chat-integration.service';
+import { ChatQuickReplyService } from './services/chat-quick-reply.service';
+import { ChatBotRuleService } from './services/chat-bot-rule.service';
+import { SupportAnalyticsService } from './services/support-analytics.service';
+import { AIAssistantService } from './services/ai-assistant.service';
+import { SupportConversationResolver } from './resolvers/support-conversation.resolver';
+import { SupportMessageResolver } from './resolvers/support-message.resolver';
+import { SupportTicketResolver } from './resolvers/support-ticket.resolver';
+import { ChatIntegrationResolver } from './resolvers/chat-integration.resolver';
+import { ChatQuickReplyResolver } from './resolvers/chat-quick-reply.resolver';
+import { ChatBotRuleResolver } from './resolvers/chat-bot-rule.resolver';
+import { SupportAnalyticsResolver } from './resolvers/support-analytics.resolver';
+import { ZaloWebhookController } from './controllers/zalo-webhook.controller';
+import { FacebookWebhookController } from './controllers/facebook-webhook.controller';
+import { SupportChatGateway } from './gateways/support-chat.gateway';
+
+@Module({
+  imports: [PrismaModule, RedisModule],
+  controllers: [ZaloWebhookController, FacebookWebhookController],
+  providers: [
+    // Services
+    SupportConversationService,
+    SupportMessageService,
+    SupportTicketService,
+    ChatIntegrationService,
+    ChatQuickReplyService,
+    ChatBotRuleService,
+    SupportAnalyticsService,
+    AIAssistantService,
+    // Resolvers
+    SupportConversationResolver,
+    SupportMessageResolver,
+    SupportTicketResolver,
+    ChatIntegrationResolver,
+    ChatQuickReplyResolver,
+    ChatBotRuleResolver,
+    SupportAnalyticsResolver,
+    // Gateway
+    SupportChatGateway,
+  ],
+  exports: [
+    SupportConversationService,
+    SupportMessageService,
+    SupportTicketService,
+    ChatIntegrationService,
+    AIAssistantService,
+  ],
+})
+export class SupportChatModule {}
