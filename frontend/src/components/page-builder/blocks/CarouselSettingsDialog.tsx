@@ -24,7 +24,6 @@ interface CarouselSettingsDialogProps {
     indicatorStyle: string;
     arrowStyle: string;
     slidesPerView?: number;
-    mediaFilter?: 'all' | 'images' | 'videos';
     animationType?: 'fade' | 'slide' | 'zoom' | 'none';
     animationDuration?: number;
   };
@@ -245,8 +244,8 @@ export function CarouselSettingsDialog({ open, onOpenChange, settings, onSave }:
             {/* Info box */}
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>💡 Note:</strong> Media type (image/video) is configured per slide. 
-                Click "Edit" on individual slides in the Media tab to set their media type.
+                <strong>💡 Note:</strong> Each slide can have different media types (image/video). 
+                Use "Edit Slide" to configure media type and content for individual slides.
               </p>
             </div>
           </TabsContent>
