@@ -1,10 +1,11 @@
-// ✅ MIGRATED TO DYNAMIC GRAPHQL - 2025-10-29
-// Original backup: ReviewForm.tsx.backup
+// ✅ MIGRATED TO LMS REVIEW MUTATIONS - 2025-10-30
+// Original backup: ReviewForm.DYNAMIC.tsx
 
 'use client';
 
 import { useState } from 'react';
-import { useCreateOne, useUpdateOne } from '@/hooks/useDynamicGraphQL';
+import { useMutation } from '@apollo/client';
+import { CREATE_REVIEW, UPDATE_REVIEW } from '@/graphql/lms/reviews.graphql';
 import { Star } from 'lucide-react';
 
 interface ReviewFormProps {
@@ -29,9 +30,24 @@ export default function ReviewForm({
   const [comment, setComment] = useState(existingReview?.comment || '');
   const [error, setError] = useState('');
 
-  // ✅ Migrated to Dynamic GraphQL
-  const [createReview, { loading: creating }] = useCreateOne('review');
-  const [updateReview, { loading: updating }] = useUpdateOne('review');
+  // ✅ Use custom LMS mutations
+  const [createReview, { loading: creating }] = useMutation(CREATE_REVIEW, {
+    onCompleted: () => {
+      onSuccess?.();
+    },
+    onError: (err) => {
+      setError(err.message || 'Không thể tạo đánh giá');
+    },
+  });
+
+  const [updateReview, { loading: updating }] = useMutation(UPDATE_REVIEW, {
+    onCompleted: () => {
+      onSuccess?.();
+    },
+    onError: (err) => {
+      setError(err.message || 'Không thể cập nhật đánh giá');
+    },
+  });
 
   const loading = creating || updating;
 
@@ -48,26 +64,28 @@ export default function ReviewForm({
       if (existingReview) {
         // Update existing review
         await updateReview({
-          where: { id: existingReview.id },
-          data: {
-            rating,
-            comment: comment.trim() || undefined,
+          variables: {
+            input: {
+              reviewId: existingReview.id,
+              rating,
+              comment: comment.trim() || undefined,
+            },
           },
         });
       } else {
         // Create new review
         await createReview({
-          data: {
-            courseId,
-            rating,
-            comment: comment.trim() || undefined,
+          variables: {
+            input: {
+              courseId,
+              rating,
+              comment: comment.trim() || undefined,
+            },
           },
         });
       }
-
-      onSuccess?.();
     } catch (err: any) {
-      setError(err.message || 'Không thể gửi đánh giá');
+      // Error handled in onError callback
     }
   };
 

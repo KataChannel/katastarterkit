@@ -326,7 +326,6 @@ export class ReviewsService {
       data: {
         avgRating: stats.avgRating,
         reviewCount: stats.totalReviews,
-        rating: stats.avgRating, // Also update deprecated rating field for backward compatibility
       },
     });
   }
