@@ -1,4 +1,11 @@
+'use client';
+
+import { useSiteName } from '@/hooks/useSiteName';
+
 export function AdminFooter() {
+  const { siteName } = useSiteName();
+  const currentYear = new Date().getFullYear();
+  
   return (
     <footer className="bg-gray-800 border-t border-gray-700">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -26,7 +33,7 @@ export function AdminFooter() {
           <div className="mt-4 md:mt-0 md:order-1">
             <div className="flex items-center justify-center md:justify-start space-x-4">
               <p className="text-sm text-gray-400">
-                &copy; 2025 rausachcore Admin Panel
+                &copy; {currentYear} {siteName} Admin Panel
               </p>
               <span className="text-gray-600">|</span>
               <p className="text-sm text-gray-500">

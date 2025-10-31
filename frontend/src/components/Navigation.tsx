@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { Bot, Home, MessageSquare, User, LogOut, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSiteName } from '@/hooks/useSiteName';
 
 export function Navigation() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { siteName } = useSiteName();
 
   return (
     <nav className="bg-white border-b border-gray-200">
@@ -14,7 +16,7 @@ export function Navigation() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="text-xl font-bold text-gray-900">
-                rausachcore
+                {siteName}
               </Link>
             </div>
             <div className="ml-6 flex space-x-8">

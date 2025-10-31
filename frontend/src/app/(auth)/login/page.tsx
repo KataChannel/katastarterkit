@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 import FacebookLoginButton from "@/components/auth/FacebookLoginButton";
+import { useSiteName } from "@/hooks/useSiteName";
 
 // Validation schema
 const loginSchema = yup.object({
@@ -33,6 +34,7 @@ function LoginPageContent() {
   const { login, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { siteName } = useSiteName();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -77,7 +79,7 @@ function LoginPageContent() {
         {/* Header */}
         <div>
           <div className="mx-auto h-12 w-auto flex items-center justify-center">
-            <h1 className="text-3xl font-bold text-blue-600">rausachcore</h1>
+            <h1 className="text-3xl font-bold text-blue-600">{siteName}</h1>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Đăng nhập vào tài khoản của bạn
