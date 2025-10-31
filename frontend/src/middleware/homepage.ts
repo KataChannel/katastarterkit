@@ -53,21 +53,31 @@ export async function homepageMiddleware(request: NextRequest) {
 
     // Find homepage setting
     const homepageSetting = settings.find((s: any) => s.key === 'site.homepage_url');
-    const homepageUrl = homepageSetting?.value;
+    const homepageUrl = homepageSetting?.value?.trim();
 
-    // If custom homepage is set and not root path
-    if (homepageUrl && homepageUrl !== '/' && homepageUrl !== '') {
-      // Check if redirect URL is external
-      if (homepageUrl.startsWith('http://') || homepageUrl.startsWith('https://')) {
-        return NextResponse.redirect(homepageUrl);
-      } else {
-        // Internal redirect
-        const url = request.nextUrl.clone();
-        url.pathname = homepageUrl;
-        return NextResponse.redirect(url);
-      }
+    // Logic: Nếu có giá trị homepage_url (khác null, undefined, empty, hoặc "/")
+    // thì redirect về URL đó
+    if (!homepageUrl || homepageUrl === '' || homepageUrl === '/') {
+      // Không có custom homepage hoặc là root path => không redirect
+      return NextResponse.next();
     }
 
+    // Có custom homepage URL => thực hiện redirect
+    console.log(`[Homepage Middleware] Redirecting / to ${homepageUrl}`);
+
+    // Check if redirect URL is external (bắt đầu với http:// hoặc https://)
+    if (homepageUrl.startsWith('http://') || homepageUrl.startsWith('https://')) {
+      // External redirect (sang domain khác)
+      return NextResponse.redirect(homepageUrl);
+    } else {
+      // Internal redirect (trong cùng domain)
+      const url = request.nextUrl.clone();
+      url.pathname = homepageUrl;
+      return NextResponse.redirect(url);
+    }
+
+    // Code này không bao giờ chạy vì đã return ở trên
+    // Nhưng giữ lại để TypeScript không warning
     return NextResponse.next();
   } catch (error) {
     console.error('Error in homepage middleware:', error);

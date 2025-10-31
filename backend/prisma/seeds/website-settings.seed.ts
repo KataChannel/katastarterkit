@@ -46,7 +46,7 @@ export async function seedWebsiteSettings() {
       type: 'TEXT',
       category: 'GENERAL',
       label: 'URL Trang chủ',
-      description: 'Đường dẫn trang chủ mặc định (ví dụ: /, /home, /landing, https://example.com)',
+      description: 'Nếu có giá trị (khác "/" hoặc rỗng), truy cập "/" sẽ redirect về URL này. Ví dụ: /landing, /home, https://example.com',
       group: 'basic',
       order: 4,
       isPublic: true,

@@ -2,20 +2,59 @@
 
 ## Tổng quan
 
-Tính năng này cho phép quản trị viên chỉ định một URL tùy chỉnh làm trang chủ mặc định thay vì `/`. Khi người dùng truy cập root path (`/`), họ sẽ được redirect đến URL đã cấu hình.
+Tính năng này cho phép quản trị viên chỉ định một URL tùy chỉnh làm trang chủ mặc định. **Logic chính: Nếu `site.homepage_url` có giá trị (khác `/` hoặc rỗng), thì khi người dùng truy cập root path (`/`) sẽ được redirect về URL đó.**
 
 ## Setting mới
 
 ### site.homepage_url (TEXT)
-- **Mô tả**: URL trang chủ mặc định
-- **Giá trị mặc định**: `/`
+- **Mô tả**: Nếu có giá trị (khác "/" hoặc rỗng), truy cập "/" sẽ redirect về URL này
+- **Giá trị mặc định**: `/` (không redirect)
 - **Hỗ trợ**: 
-  - Root path: `/` (mặc định, không redirect)
-  - Internal path: `/home`, `/landing`, `/lms`, `/san-pham`, etc.
-  - External URL: `https://example.com`, `https://blog.example.com`
+  - Root path: `/` (mặc định, **KHÔNG REDIRECT**)
+  - Empty string: `""` (không redirect)
+  - Internal path: `/home`, `/landing`, `/lms`, `/san-pham` (**REDIRECT**)
+  - External URL: `https://example.com`, `https://blog.example.com` (**REDIRECT**)
 - **Category**: `GENERAL`
 - **Group**: `basic`
 - **Order**: 4
+
+## Logic Redirect (Cập nhật mới)
+
+### ✅ Các trường hợp REDIRECT (có giá trị)
+
+```typescript
+// Case 1: Internal path
+site.homepage_url = "/lms"
+→ Truy cập "/" → Redirect to "/lms"
+
+// Case 2: Internal path khác
+site.homepage_url = "/san-pham"
+→ Truy cập "/" → Redirect to "/san-pham"
+
+// Case 3: External URL
+site.homepage_url = "https://blog.example.com"
+→ Truy cập "/" → Redirect to "https://blog.example.com"
+
+// Case 4: Subdomain
+site.homepage_url = "https://shop.example.com"
+→ Truy cập "/" → Redirect to "https://shop.example.com"
+```
+
+### ❌ Các trường hợp KHÔNG REDIRECT (không có giá trị)
+
+```typescript
+// Case 1: Default root
+site.homepage_url = "/"
+→ Truy cập "/" → Hiển thị homepage bình thường
+
+// Case 2: Empty string
+site.homepage_url = ""
+→ Truy cập "/" → Hiển thị homepage bình thường
+
+// Case 3: Null/undefined (setting chưa tồn tại)
+site.homepage_url = null
+→ Truy cập "/" → Hiển thị homepage bình thường
+```
 
 ## Cách sử dụng
 
@@ -57,9 +96,10 @@ homepage_url = /
 
 File: `frontend/src/middleware/homepage.ts`
 
-### Cách hoạt động:
+### Cách hoạt động (Logic mới):
 
 1. **Check root path**: Chỉ xử lý khi `pathname === '/'`
+   - Nếu không phải `/` → Bỏ qua middleware (return next)
 
 2. **Fetch setting**: Query GraphQL public endpoint để lấy `site.homepage_url`
    ```graphql
@@ -71,12 +111,63 @@ File: `frontend/src/middleware/homepage.ts`
    }
    ```
 
-3. **Redirect logic**:
-   - Nếu `homepage_url === '/'` hoặc empty → Không redirect
-   - Nếu `homepage_url` là external URL → External redirect
-   - Nếu `homepage_url` là internal path → Internal redirect
+3. **Redirect logic** (KEY CHANGE):
+   ```typescript
+   const homepageUrl = homepageSetting?.value?.trim();
+   
+   // Nếu KHÔNG có giá trị hoặc giá trị là "/" → KHÔNG redirect
+   if (!homepageUrl || homepageUrl === '' || homepageUrl === '/') {
+     return NextResponse.next(); // Hiển thị homepage bình thường
+   }
+   
+   // Nếu CÓ giá trị (khác "/" và không rỗng) → REDIRECT
+   if (homepageUrl.startsWith('http://') || homepageUrl.startsWith('https://')) {
+     // External redirect
+     return NextResponse.redirect(homepageUrl);
+   } else {
+     // Internal redirect
+     const url = request.nextUrl.clone();
+     url.pathname = homepageUrl;
+     return NextResponse.redirect(url);
+   }
+   ```
 
 4. **Fail open**: Nếu có lỗi khi fetch settings → Allow access (không redirect)
+
+### Ví dụ flow:
+
+**Scenario 1: Có giá trị redirect (Internal)**
+```
+1. User: GET http://example.com/
+2. Middleware: Check pathname === '/'? ✅
+3. Middleware: Fetch site.homepage_url
+4. Response: homepage_url = "/lms"
+5. Check: "/lms" !== "/" && "/lms" !== "" ✅
+6. Middleware: NextResponse.redirect("/lms")
+7. Browser: GET http://example.com/lms
+```
+
+**Scenario 2: Có giá trị redirect (External)**
+```
+1. User: GET http://example.com/
+2. Middleware: Check pathname === '/'? ✅
+3. Middleware: Fetch site.homepage_url
+4. Response: homepage_url = "https://blog.example.com"
+5. Check: URL starts with "https://"? ✅
+6. Middleware: NextResponse.redirect("https://blog.example.com")
+7. Browser: GET https://blog.example.com
+```
+
+**Scenario 3: KHÔNG có giá trị redirect (Default)**
+```
+1. User: GET http://example.com/
+2. Middleware: Check pathname === '/'? ✅
+3. Middleware: Fetch site.homepage_url
+4. Response: homepage_url = "/"
+5. Check: "/" === "/" ✅
+6. Middleware: return NextResponse.next()
+7. Next.js: Render homepage component
+```
 
 ## Integration với Offline Middleware
 
