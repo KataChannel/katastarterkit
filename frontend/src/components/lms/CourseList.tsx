@@ -18,7 +18,7 @@ export default function CourseList({
 }: CourseListProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse">
             <div className="h-48 bg-gray-200" />
@@ -60,7 +60,7 @@ export default function CourseList({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {courses.map((course) => (
         <CourseCard 
           key={course.id} 

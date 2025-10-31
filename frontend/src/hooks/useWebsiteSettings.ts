@@ -25,6 +25,7 @@ export interface WebsiteSettings {
   'site.description'?: string;
 
   // Header
+  'header.enabled'?: boolean;
   'header.logo'?: string;
   'header.logo_width'?: number;
   'header.background_color'?: string;
@@ -38,6 +39,7 @@ export interface WebsiteSettings {
   'header.banner_interval'?: number;
 
   // Footer
+  'footer.enabled'?: boolean;
   'footer.background_color'?: string;
   'footer.text_color'?: string;
   'footer.show_visitor_stats'?: boolean;

@@ -72,7 +72,7 @@ export default function LearnCoursePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading course...</p>
+          <p className="text-gray-600">Đang tải khóa học...</p>
         </div>
       </div>
     );
@@ -82,13 +82,13 @@ export default function LearnCoursePage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Course not found</h1>
-          <p className="text-gray-600 mb-4">You may not be enrolled in this course</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy khóa học</h1>
+          <p className="text-gray-600 mb-4">Bạn có thể chưa đăng ký khóa học này</p>
           <Link
             href="/lms/courses"
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
-            Browse Courses
+            Khám phá khóa học
           </Link>
         </div>
       </div>
@@ -103,12 +103,12 @@ export default function LearnCoursePage() {
           {/* Course Header */}
           <div className="p-6 border-b border-gray-200">
             <Link href={`/lms/courses/${slug}`} className="text-sm text-blue-600 hover:text-blue-700 mb-2 block">
-              ← Back to course
+              ← Quay lại khóa học
             </Link>
             <h2 className="text-lg font-bold text-gray-900">{course.title}</h2>
             <div className="mt-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">Your Progress</span>
+                <span className="text-sm text-gray-600">Tiến độ của bạn</span>
                 <span className="text-sm font-bold text-blue-600">{enrollment.progress}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -183,7 +183,7 @@ export default function LearnCoursePage() {
             />
           ) : (
             <div className="text-center py-16">
-              <p className="text-gray-600">No lessons available</p>
+              <p className="text-gray-600">Chưa có bài học nào</p>
             </div>
           )}
         </main>
