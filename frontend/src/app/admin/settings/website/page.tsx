@@ -119,8 +119,15 @@ export default function WebsiteSettingsPage() {
   const handleSave = async () => {
     try {
       const updatePromises = Object.entries(editedSettings).map(([key, value]) => {
+        // Tìm setting để lấy id
+        const setting = settings.find(s => s.key === key);
+        if (!setting) {
+          console.warn(`Setting not found for key: ${key}`);
+          return Promise.resolve();
+        }
+
         return updateOne({
-          where: { key },
+          where: { id: setting.id },
           data: { value },
         });
       });
@@ -224,7 +231,22 @@ export default function WebsiteSettingsPage() {
         );
 
       case 'SELECT':
-        const options = setting.options as string[] || [];
+        // Parse options - có thể là JSON string hoặc array
+        let options: string[] = [];
+        try {
+          if (typeof setting.options === 'string') {
+            options = JSON.parse(setting.options);
+          } else if (Array.isArray(setting.options)) {
+            options = setting.options;
+          } else if (setting.options && typeof setting.options === 'object') {
+            // Nếu là object, lấy values hoặc convert thành array
+            options = Object.values(setting.options as Record<string, any>);
+          }
+        } catch (e) {
+          console.error('Error parsing options for', setting.key, e);
+          options = [];
+        }
+        
         return (
           <Select
             value={parsedValue}
@@ -294,7 +316,7 @@ export default function WebsiteSettingsPage() {
 
       {/* Categories Tabs */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-        <TabsList className="grid grid-cols-7 w-full">
+        <TabsList className={`grid grid-cols-${CATEGORIES.length} w-full`}>
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             return (
