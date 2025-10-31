@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSiteName } from '@/hooks/useSiteName';
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
+  const { siteName } = useSiteName();
 
   const handleLogout = async () => {
     await logout();
@@ -19,7 +21,7 @@ export function Header() {
         <div className="flex justify-between items-center py-6">
           <div className="flex justify-start lg:w-0 lg:flex-1">
             <Link href="/" className="text-2xl font-bold text-gray-900">
-              rausachcore
+              {siteName}
             </Link>
           </div>
           

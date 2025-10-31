@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePWA } from '../../hooks/usePWA';
+import { useSiteName } from '@/hooks/useSiteName';
 
 interface PWAInstallPromptProps {
   className?: string;
@@ -17,6 +18,7 @@ export function PWAInstallPrompt({
   const [showPrompt, setShowPrompt] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const { siteName } = useSiteName();
   
   const { 
     capabilities, 
@@ -62,7 +64,7 @@ export function PWAInstallPrompt({
       // Show success notification
       if (capabilities.hasNotificationSupport) {
         await showNotification('App Installed Successfully!', {
-          body: 'rausachcore has been installed to your device. You can now access it from your home screen.',
+          body: `${siteName} has been installed to your device. You can now access it from your home screen.`,
           tag: 'pwa-install-success'
         });
       }
@@ -122,7 +124,7 @@ export function PWAInstallPrompt({
             
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-gray-900">
-                Install rausachcore
+                Install {siteName}
               </h3>
               <p className="text-sm text-gray-600 mt-1">
                 Add to your home screen for quick access

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSiteName } from '@/hooks/useSiteName';
 import { 
   HomeIcon, 
   ClipboardDocumentListIcon, 
@@ -16,6 +17,7 @@ export function AdminHeader() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { siteName } = useSiteName();
 
   const handleLogout = async () => {
     await logout();
@@ -39,7 +41,7 @@ export function AdminHeader() {
               href="/admin/dashboard"
               className="text-2xl font-bold text-white"
               >
-              rausachcore <span className="text-blue-400">Admin</span>
+              {siteName} <span className="text-blue-400">Admin</span>
             </Link>
             
             <nav className="hidden md:flex space-x-1">

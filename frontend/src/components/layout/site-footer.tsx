@@ -1,6 +1,12 @@
+'use client';
+
 import Link from 'next/link';
+import { useSiteName } from '@/hooks/useSiteName';
 
 export function SiteFooter() {
+  const { siteName } = useSiteName();
+  const currentYear = new Date().getFullYear();
+  
   const footerLinks = {
     product: [
       { name: 'Features', href: '#features' },
@@ -34,7 +40,7 @@ export function SiteFooter() {
           <div className="space-y-8 xl:col-span-1">
             <div>
               <Link href="/" className="text-2xl font-bold text-white">
-                rausachcore
+                {siteName}
               </Link>
               <p className="mt-4 text-gray-400 text-base">
                 Enterprise Fullstack Starter Kit with Next.js, NestJS, GraphQL, Prisma, Redis, and Minio.
@@ -142,7 +148,7 @@ export function SiteFooter() {
         </div>
         <div className="mt-12 border-t border-gray-700 pt-8">
           <p className="text-base text-gray-400 xl:text-center">
-            &copy; 2025 rausachcore. All rights reserved. Built with ❤️ for developers.
+            &copy; {currentYear} {siteName}. All rights reserved. Built with ❤️ for developers.
           </p>
         </div>
       </div>

@@ -38,6 +38,7 @@ import { UniversalSearch } from '@/components/search/universal-search';
 import { useAdminMenus } from '@/lib/hooks/useMenus';
 import { Loader2 } from 'lucide-react';
 import { filterMenuByPermissions, debugMenuPermissions } from '@/lib/utils/permission-utils';
+import { useSiteName } from '@/hooks/useSiteName';
 
 interface AdminSidebarLayoutProps {
   children: React.ReactNode;
@@ -49,6 +50,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { siteName } = useSiteName();
 
   // Fetch dynamic menus from database with user permissions
   // Using Universal Dynamic Query System
@@ -177,7 +179,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                   <span className="text-primary-foreground font-bold text-lg">K</span>
                 </div>
-                <span className="font-semibold text-lg">rausachcore</span>
+                <span className="font-semibold text-lg">{siteName}</span>
               </Link>
             )}
             <Button
@@ -291,7 +293,7 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
                   <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                     <span className="text-primary-foreground font-bold text-lg">K</span>
                   </div>
-                  <span className="font-semibold text-lg">rausachcore</span>
+                  <span className="font-semibold text-lg">{siteName}</span>
                 </Link>
                 <Button
                   variant="ghost"
