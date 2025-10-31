@@ -108,17 +108,11 @@ export const GET_SUPPORT_CONVERSATION = gql`
       messages {
         id
         content
-        messageType
         senderType
         senderName
         isAIGenerated
         aiConfidence
-        aiSuggestions
-        metadata
         isRead
-        readAt
-        isEdited
-        editedAt
         sentAt
         createdAt
         sender {
@@ -127,15 +121,6 @@ export const GET_SUPPORT_CONVERSATION = gql`
           firstName
           lastName
           avatar
-        }
-        attachments {
-          id
-          fileName
-          fileSize
-          fileType
-          fileUrl
-          thumbnailUrl
-          createdAt
         }
       }
     }

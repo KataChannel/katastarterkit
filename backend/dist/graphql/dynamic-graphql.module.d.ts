@@ -14,11 +14,11 @@ export declare class DynamicGraphQLModule {
         };
     }>): {
         module: typeof DynamicGraphQLModule;
-        providers: (typeof DynamicResolverService | typeof UniversalDynamicResolver | typeof PrismaService | typeof DynamicCRUDService | {
+        providers: (typeof PrismaService | typeof DynamicCRUDService | typeof DynamicResolverService | typeof UniversalDynamicResolver | {
             provide: string;
             useFactory: (prismaService: PrismaService) => import("@nestjs/common").Type<any>;
             inject: (typeof PrismaService)[];
         })[];
-        exports: (typeof DynamicResolverService | typeof UniversalDynamicResolver | typeof DynamicCRUDService)[];
+        exports: (typeof DynamicCRUDService | typeof DynamicResolverService | typeof UniversalDynamicResolver)[];
     };
 }

@@ -6,6 +6,7 @@ export declare class AffiliateUserService {
     constructor(prisma: PrismaService);
     createAffiliateUser(userId: string, input: CreateAffUserInput): Promise<{
         user: {
+            isActive: boolean;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -17,7 +18,6 @@ export declare class AffiliateUserService {
             lastName: string | null;
             avatar: string | null;
             roleType: $Enums.UserRoleType;
-            isActive: boolean;
             isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
@@ -26,18 +26,18 @@ export declare class AffiliateUserService {
             departmentId: string | null;
         };
     } & {
+        isActive: boolean;
+        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isActive: boolean;
-        description: string | null;
-        paymentMethod: $Enums.AffPaymentMethod | null;
         role: $Enums.AffUserRole;
+        userId: string;
         joinedAt: Date;
         companyName: string | null;
         businessType: string | null;
         website: string | null;
+        paymentMethod: $Enums.AffPaymentMethod | null;
         bankAccount: string | null;
         paypalEmail: string | null;
         taxId: string | null;
@@ -46,6 +46,7 @@ export declare class AffiliateUserService {
     getAffiliateUser(userId: string): Promise<any | null>;
     updateAffiliateUser(userId: string, input: UpdateAffUserInput): Promise<{
         user: {
+            isActive: boolean;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -57,7 +58,6 @@ export declare class AffiliateUserService {
             lastName: string | null;
             avatar: string | null;
             roleType: $Enums.UserRoleType;
-            isActive: boolean;
             isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
@@ -66,18 +66,18 @@ export declare class AffiliateUserService {
             departmentId: string | null;
         };
     } & {
+        isActive: boolean;
+        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isActive: boolean;
-        description: string | null;
-        paymentMethod: $Enums.AffPaymentMethod | null;
         role: $Enums.AffUserRole;
+        userId: string;
         joinedAt: Date;
         companyName: string | null;
         businessType: string | null;
         website: string | null;
+        paymentMethod: $Enums.AffPaymentMethod | null;
         bankAccount: string | null;
         paypalEmail: string | null;
         taxId: string | null;
@@ -87,13 +87,8 @@ export declare class AffiliateUserService {
         role?: $Enums.AffUserRole;
         isActive?: boolean;
     }): Promise<({
-        _count: {
-            campaignsCreated: number;
-            campaignJoins: number;
-            links: number;
-            conversions: number;
-        };
         user: {
+            isActive: boolean;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -105,7 +100,6 @@ export declare class AffiliateUserService {
             lastName: string | null;
             avatar: string | null;
             roleType: $Enums.UserRoleType;
-            isActive: boolean;
             isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
@@ -113,19 +107,25 @@ export declare class AffiliateUserService {
             lastLoginAt: Date | null;
             departmentId: string | null;
         };
+        _count: {
+            conversions: number;
+            links: number;
+            campaignsCreated: number;
+            campaignJoins: number;
+        };
     } & {
+        isActive: boolean;
+        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        isActive: boolean;
-        description: string | null;
-        paymentMethod: $Enums.AffPaymentMethod | null;
         role: $Enums.AffUserRole;
+        userId: string;
         joinedAt: Date;
         companyName: string | null;
         businessType: string | null;
         website: string | null;
+        paymentMethod: $Enums.AffPaymentMethod | null;
         bankAccount: string | null;
         paypalEmail: string | null;
         taxId: string | null;
@@ -148,6 +148,7 @@ export declare class AffiliateCampaignService {
     createCampaign(creatorUserId: string, input: CreateCampaignInput): Promise<{
         creator: {
             user: {
+                isActive: boolean;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
@@ -159,7 +160,6 @@ export declare class AffiliateCampaignService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isActive: boolean;
                 isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
@@ -168,49 +168,50 @@ export declare class AffiliateCampaignService {
                 departmentId: string | null;
             };
         } & {
+            isActive: boolean;
+            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
-            isActive: boolean;
-            description: string | null;
-            paymentMethod: $Enums.AffPaymentMethod | null;
             role: $Enums.AffUserRole;
+            userId: string;
             joinedAt: Date;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
+            paymentMethod: $Enums.AffPaymentMethod | null;
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
             lastActiveAt: Date | null;
         };
     } & {
+        name: string;
+        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: $Enums.AffCampaignStatus;
-        name: string;
-        description: string | null;
-        productName: string;
         productImage: string | null;
+        status: $Enums.AffCampaignStatus;
+        commissionType: string;
         startDate: Date | null;
         endDate: Date | null;
-        totalRevenue: import("@prisma/client/runtime/library").Decimal;
+        productName: string;
         productUrl: string;
         commissionRate: import("@prisma/client/runtime/library").Decimal;
-        commissionType: string;
         fixedAmount: import("@prisma/client/runtime/library").Decimal | null;
         maxAffiliates: number | null;
         requireApproval: boolean;
         totalClicks: number;
         totalConversions: number;
+        totalRevenue: import("@prisma/client/runtime/library").Decimal;
         totalCommission: import("@prisma/client/runtime/library").Decimal;
         creatorId: string;
     }>;
     updateCampaign(campaignId: string, creatorUserId: string, input: UpdateCampaignInput): Promise<{
         creator: {
             user: {
+                isActive: boolean;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
@@ -222,7 +223,6 @@ export declare class AffiliateCampaignService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isActive: boolean;
                 isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
@@ -231,18 +231,18 @@ export declare class AffiliateCampaignService {
                 departmentId: string | null;
             };
         } & {
+            isActive: boolean;
+            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
-            isActive: boolean;
-            description: string | null;
-            paymentMethod: $Enums.AffPaymentMethod | null;
             role: $Enums.AffUserRole;
+            userId: string;
             joinedAt: Date;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
+            paymentMethod: $Enums.AffPaymentMethod | null;
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
@@ -253,109 +253,66 @@ export declare class AffiliateCampaignService {
             createdAt: Date;
             updatedAt: Date;
             status: string;
-            approvedAt: Date | null;
             reason: string | null;
+            campaignId: string;
             totalClicks: number;
             totalConversions: number;
-            appliedAt: Date;
-            rejectedAt: Date | null;
-            totalEarnings: import("@prisma/client/runtime/library").Decimal;
-            campaignId: string;
             affiliateId: string;
+            totalEarnings: import("@prisma/client/runtime/library").Decimal;
+            appliedAt: Date;
+            approvedAt: Date | null;
+            rejectedAt: Date | null;
         }[];
     } & {
+        name: string;
+        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: $Enums.AffCampaignStatus;
-        name: string;
-        description: string | null;
-        productName: string;
         productImage: string | null;
+        status: $Enums.AffCampaignStatus;
+        commissionType: string;
         startDate: Date | null;
         endDate: Date | null;
-        totalRevenue: import("@prisma/client/runtime/library").Decimal;
+        productName: string;
         productUrl: string;
         commissionRate: import("@prisma/client/runtime/library").Decimal;
-        commissionType: string;
         fixedAmount: import("@prisma/client/runtime/library").Decimal | null;
         maxAffiliates: number | null;
         requireApproval: boolean;
         totalClicks: number;
         totalConversions: number;
+        totalRevenue: import("@prisma/client/runtime/library").Decimal;
         totalCommission: import("@prisma/client/runtime/library").Decimal;
         creatorId: string;
     }>;
     deleteCampaign(campaignId: string, creatorUserId: string): Promise<{
+        name: string;
+        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: $Enums.AffCampaignStatus;
-        name: string;
-        description: string | null;
-        productName: string;
         productImage: string | null;
+        status: $Enums.AffCampaignStatus;
+        commissionType: string;
         startDate: Date | null;
         endDate: Date | null;
-        totalRevenue: import("@prisma/client/runtime/library").Decimal;
+        productName: string;
         productUrl: string;
         commissionRate: import("@prisma/client/runtime/library").Decimal;
-        commissionType: string;
         fixedAmount: import("@prisma/client/runtime/library").Decimal | null;
         maxAffiliates: number | null;
         requireApproval: boolean;
         totalClicks: number;
         totalConversions: number;
+        totalRevenue: import("@prisma/client/runtime/library").Decimal;
         totalCommission: import("@prisma/client/runtime/library").Decimal;
         creatorId: string;
     }>;
     getCampaign(campaignId: string): Promise<{
-        links: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            isActive: boolean;
-            description: string | null;
-            title: string | null;
-            expiresAt: Date | null;
-            totalClicks: number;
-            totalConversions: number;
-            totalEarnings: import("@prisma/client/runtime/library").Decimal;
-            campaignId: string;
-            affiliateId: string;
-            trackingCode: string;
-            originalUrl: string;
-            shortUrl: string | null;
-            customAlias: string | null;
-            utmSource: string | null;
-            utmMedium: string | null;
-            utmCampaign: string | null;
-            utmContent: string | null;
-        }[];
-        conversions: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            customerEmail: string | null;
-            status: $Enums.AffConversionStatus;
-            notes: string | null;
-            orderId: string | null;
-            currency: string;
-            paidAt: Date | null;
-            approvedAt: Date | null;
-            rejectedAt: Date | null;
-            campaignId: string;
-            affiliateId: string;
-            linkId: string;
-            saleAmount: import("@prisma/client/runtime/library").Decimal;
-            commission: import("@prisma/client/runtime/library").Decimal;
-            clickId: string | null;
-            conversionType: string;
-            convertedAt: Date;
-            validatedBy: string | null;
-        }[];
         creator: {
             user: {
+                isActive: boolean;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
@@ -367,7 +324,6 @@ export declare class AffiliateCampaignService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isActive: boolean;
                 isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
@@ -376,26 +332,49 @@ export declare class AffiliateCampaignService {
                 departmentId: string | null;
             };
         } & {
+            isActive: boolean;
+            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
-            isActive: boolean;
-            description: string | null;
-            paymentMethod: $Enums.AffPaymentMethod | null;
             role: $Enums.AffUserRole;
+            userId: string;
             joinedAt: Date;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
+            paymentMethod: $Enums.AffPaymentMethod | null;
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
             lastActiveAt: Date | null;
         };
+        conversions: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            status: $Enums.AffConversionStatus;
+            campaignId: string;
+            affiliateId: string;
+            orderId: string | null;
+            customerEmail: string | null;
+            saleAmount: import("@prisma/client/runtime/library").Decimal;
+            conversionType: string;
+            notes: string | null;
+            approvedAt: Date | null;
+            rejectedAt: Date | null;
+            linkId: string;
+            commission: import("@prisma/client/runtime/library").Decimal;
+            clickId: string | null;
+            currency: string;
+            convertedAt: Date;
+            paidAt: Date | null;
+            validatedBy: string | null;
+        }[];
         affiliates: ({
             affiliate: {
                 user: {
+                    isActive: boolean;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
@@ -407,7 +386,6 @@ export declare class AffiliateCampaignService {
                     lastName: string | null;
                     avatar: string | null;
                     roleType: $Enums.UserRoleType;
-                    isActive: boolean;
                     isVerified: boolean;
                     isTwoFactorEnabled: boolean;
                     failedLoginAttempts: number;
@@ -416,18 +394,18 @@ export declare class AffiliateCampaignService {
                     departmentId: string | null;
                 };
             } & {
+                isActive: boolean;
+                description: string | null;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                userId: string;
-                isActive: boolean;
-                description: string | null;
-                paymentMethod: $Enums.AffPaymentMethod | null;
                 role: $Enums.AffUserRole;
+                userId: string;
                 joinedAt: Date;
                 companyName: string | null;
                 businessType: string | null;
                 website: string | null;
+                paymentMethod: $Enums.AffPaymentMethod | null;
                 bankAccount: string | null;
                 paypalEmail: string | null;
                 taxId: string | null;
@@ -438,48 +416,66 @@ export declare class AffiliateCampaignService {
             createdAt: Date;
             updatedAt: Date;
             status: string;
-            approvedAt: Date | null;
             reason: string | null;
+            campaignId: string;
             totalClicks: number;
             totalConversions: number;
-            appliedAt: Date;
-            rejectedAt: Date | null;
-            totalEarnings: import("@prisma/client/runtime/library").Decimal;
-            campaignId: string;
             affiliateId: string;
+            totalEarnings: import("@prisma/client/runtime/library").Decimal;
+            appliedAt: Date;
+            approvedAt: Date | null;
+            rejectedAt: Date | null;
         })[];
+        links: {
+            isActive: boolean;
+            description: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            expiresAt: Date | null;
+            title: string | null;
+            campaignId: string;
+            totalClicks: number;
+            totalConversions: number;
+            affiliateId: string;
+            trackingCode: string;
+            originalUrl: string;
+            shortUrl: string | null;
+            customAlias: string | null;
+            utmSource: string | null;
+            utmMedium: string | null;
+            utmCampaign: string | null;
+            utmContent: string | null;
+            totalEarnings: import("@prisma/client/runtime/library").Decimal;
+        }[];
     } & {
+        name: string;
+        description: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        status: $Enums.AffCampaignStatus;
-        name: string;
-        description: string | null;
-        productName: string;
         productImage: string | null;
+        status: $Enums.AffCampaignStatus;
+        commissionType: string;
         startDate: Date | null;
         endDate: Date | null;
-        totalRevenue: import("@prisma/client/runtime/library").Decimal;
+        productName: string;
         productUrl: string;
         commissionRate: import("@prisma/client/runtime/library").Decimal;
-        commissionType: string;
         fixedAmount: import("@prisma/client/runtime/library").Decimal | null;
         maxAffiliates: number | null;
         requireApproval: boolean;
         totalClicks: number;
         totalConversions: number;
+        totalRevenue: import("@prisma/client/runtime/library").Decimal;
         totalCommission: import("@prisma/client/runtime/library").Decimal;
         creatorId: string;
     }>;
     searchCampaigns(input: CampaignSearchInput): Promise<{
         campaigns: ({
-            _count: {
-                links: number;
-                conversions: number;
-                affiliates: number;
-            };
             creator: {
                 user: {
+                    isActive: boolean;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
@@ -491,7 +487,6 @@ export declare class AffiliateCampaignService {
                     lastName: string | null;
                     avatar: string | null;
                     roleType: $Enums.UserRoleType;
-                    isActive: boolean;
                     isVerified: boolean;
                     isTwoFactorEnabled: boolean;
                     failedLoginAttempts: number;
@@ -500,43 +495,48 @@ export declare class AffiliateCampaignService {
                     departmentId: string | null;
                 };
             } & {
+                isActive: boolean;
+                description: string | null;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                userId: string;
-                isActive: boolean;
-                description: string | null;
-                paymentMethod: $Enums.AffPaymentMethod | null;
                 role: $Enums.AffUserRole;
+                userId: string;
                 joinedAt: Date;
                 companyName: string | null;
                 businessType: string | null;
                 website: string | null;
+                paymentMethod: $Enums.AffPaymentMethod | null;
                 bankAccount: string | null;
                 paypalEmail: string | null;
                 taxId: string | null;
                 lastActiveAt: Date | null;
             };
+            _count: {
+                conversions: number;
+                affiliates: number;
+                links: number;
+            };
         } & {
+            name: string;
+            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            status: $Enums.AffCampaignStatus;
-            name: string;
-            description: string | null;
-            productName: string;
             productImage: string | null;
+            status: $Enums.AffCampaignStatus;
+            commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
-            totalRevenue: import("@prisma/client/runtime/library").Decimal;
+            productName: string;
             productUrl: string;
             commissionRate: import("@prisma/client/runtime/library").Decimal;
-            commissionType: string;
             fixedAmount: import("@prisma/client/runtime/library").Decimal | null;
             maxAffiliates: number | null;
             requireApproval: boolean;
             totalClicks: number;
             totalConversions: number;
+            totalRevenue: import("@prisma/client/runtime/library").Decimal;
             totalCommission: import("@prisma/client/runtime/library").Decimal;
             creatorId: string;
         })[];
@@ -547,30 +547,31 @@ export declare class AffiliateCampaignService {
     }>;
     joinCampaign(affiliateUserId: string, input: JoinCampaignInput): Promise<{
         campaign: {
+            name: string;
+            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            status: $Enums.AffCampaignStatus;
-            name: string;
-            description: string | null;
-            productName: string;
             productImage: string | null;
+            status: $Enums.AffCampaignStatus;
+            commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
-            totalRevenue: import("@prisma/client/runtime/library").Decimal;
+            productName: string;
             productUrl: string;
             commissionRate: import("@prisma/client/runtime/library").Decimal;
-            commissionType: string;
             fixedAmount: import("@prisma/client/runtime/library").Decimal | null;
             maxAffiliates: number | null;
             requireApproval: boolean;
             totalClicks: number;
             totalConversions: number;
+            totalRevenue: import("@prisma/client/runtime/library").Decimal;
             totalCommission: import("@prisma/client/runtime/library").Decimal;
             creatorId: string;
         };
         affiliate: {
             user: {
+                isActive: boolean;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
@@ -582,7 +583,6 @@ export declare class AffiliateCampaignService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isActive: boolean;
                 isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
@@ -591,18 +591,18 @@ export declare class AffiliateCampaignService {
                 departmentId: string | null;
             };
         } & {
+            isActive: boolean;
+            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
-            isActive: boolean;
-            description: string | null;
-            paymentMethod: $Enums.AffPaymentMethod | null;
             role: $Enums.AffUserRole;
+            userId: string;
             joinedAt: Date;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
+            paymentMethod: $Enums.AffPaymentMethod | null;
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
@@ -613,42 +613,43 @@ export declare class AffiliateCampaignService {
         createdAt: Date;
         updatedAt: Date;
         status: string;
-        approvedAt: Date | null;
         reason: string | null;
+        campaignId: string;
         totalClicks: number;
         totalConversions: number;
-        appliedAt: Date;
-        rejectedAt: Date | null;
-        totalEarnings: import("@prisma/client/runtime/library").Decimal;
-        campaignId: string;
         affiliateId: string;
+        totalEarnings: import("@prisma/client/runtime/library").Decimal;
+        appliedAt: Date;
+        approvedAt: Date | null;
+        rejectedAt: Date | null;
     }>;
     reviewCampaignApplication(merchantUserId: string, input: ReviewCampaignApplicationInput): Promise<{
         campaign: {
+            name: string;
+            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            status: $Enums.AffCampaignStatus;
-            name: string;
-            description: string | null;
-            productName: string;
             productImage: string | null;
+            status: $Enums.AffCampaignStatus;
+            commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
-            totalRevenue: import("@prisma/client/runtime/library").Decimal;
+            productName: string;
             productUrl: string;
             commissionRate: import("@prisma/client/runtime/library").Decimal;
-            commissionType: string;
             fixedAmount: import("@prisma/client/runtime/library").Decimal | null;
             maxAffiliates: number | null;
             requireApproval: boolean;
             totalClicks: number;
             totalConversions: number;
+            totalRevenue: import("@prisma/client/runtime/library").Decimal;
             totalCommission: import("@prisma/client/runtime/library").Decimal;
             creatorId: string;
         };
         affiliate: {
             user: {
+                isActive: boolean;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
@@ -660,7 +661,6 @@ export declare class AffiliateCampaignService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isActive: boolean;
                 isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
@@ -669,18 +669,18 @@ export declare class AffiliateCampaignService {
                 departmentId: string | null;
             };
         } & {
+            isActive: boolean;
+            description: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
-            isActive: boolean;
-            description: string | null;
-            paymentMethod: $Enums.AffPaymentMethod | null;
             role: $Enums.AffUserRole;
+            userId: string;
             joinedAt: Date;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
+            paymentMethod: $Enums.AffPaymentMethod | null;
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
@@ -691,15 +691,15 @@ export declare class AffiliateCampaignService {
         createdAt: Date;
         updatedAt: Date;
         status: string;
-        approvedAt: Date | null;
         reason: string | null;
+        campaignId: string;
         totalClicks: number;
         totalConversions: number;
-        appliedAt: Date;
-        rejectedAt: Date | null;
-        totalEarnings: import("@prisma/client/runtime/library").Decimal;
-        campaignId: string;
         affiliateId: string;
+        totalEarnings: import("@prisma/client/runtime/library").Decimal;
+        appliedAt: Date;
+        approvedAt: Date | null;
+        rejectedAt: Date | null;
     }>;
     getMerchantStats(merchantUserId: string): Promise<{
         totalCampaigns: number;

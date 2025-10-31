@@ -222,6 +222,9 @@ model User {
   supportTicketsResolved         SupportTicket[]       @relation("ResolvedTickets")
   quickRepliesCreated            ChatQuickReply[]      @relation("CreatedQuickReplies")
   supportAnalytics               SupportAnalytics[]    @relation("SupportAgentAnalytics")
+  
+  // AI Provider Relations
+  aiProvidersCreated             AIProvider[]          @relation("AIProviderCreator")
 
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
@@ -4269,6 +4272,52 @@ enum TicketStatus {
   WAITING_CUSTOMER
   RESOLVED
   CLOSED
+}
+
+enum AIProviderType {
+  CHATGPT
+  GROK
+  GEMINI
+}
+
+model AIProvider {
+  id            String          @id @default(uuid())
+  provider      AIProviderType  // Loại AI: ChatGPT, Grok, Gemini
+  name          String          // Tên mô tả (ví dụ: "ChatGPT Production")
+  apiKey        String          // API Key (encrypted)
+  model         String          // Model name (gpt-4, grok-2, gemini-pro)
+  
+  // Configuration
+  temperature   Float           @default(0.7) // Độ ngẫu nhiên (0.0 - 2.0)
+  maxTokens     Int             @default(2000) // Giới hạn tokens
+  systemPrompt  String?         @db.Text // System prompt tùy chỉnh
+  
+  // Settings
+  isActive      Boolean         @default(false) // Đang sử dụng
+  priority      Int             @default(0) // Độ ưu tiên (cao hơn = ưu tiên hơn)
+  isDefault     Boolean         @default(false) // Provider mặc định
+  
+  // Metadata
+  description   String?         @db.Text // Mô tả chi tiết
+  tags          String[]        // Tags phân loại
+  
+  // Stats & Monitoring
+  totalRequests Int             @default(0) // Tổng số requests
+  successCount  Int             @default(0) // Số requests thành công
+  failureCount  Int             @default(0) // Số requests thất bại
+  avgResponseTime Float?        // Thời gian phản hồi trung bình (ms)
+  lastUsedAt    DateTime?       // Lần sử dụng cuối
+  lastError     String?         @db.Text // Lỗi cuối cùng
+  
+  // Timestamps
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  createdBy     String?
+  creator       User?           @relation("AIProviderCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  
+  @@index([provider, isActive])
+  @@index([priority, isActive])
+  @@map("ai_providers")
 }
 
 model SupportConversation {

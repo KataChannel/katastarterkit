@@ -6,14 +6,14 @@ export declare class CallCenterService {
     private readonly logger;
     constructor(prisma: PrismaService);
     getConfig(): Promise<{
+        apiKey: string | null;
+        isActive: boolean;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        isActive: boolean;
         batchSize: number;
         apiUrl: string;
         domain: string;
-        apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
         defaultDaysBack: number;
@@ -23,14 +23,14 @@ export declare class CallCenterService {
         totalRecordsSynced: number;
     }>;
     createConfig(input: CreateCallCenterConfigInput): Promise<{
+        apiKey: string | null;
+        isActive: boolean;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        isActive: boolean;
         batchSize: number;
         apiUrl: string;
         domain: string;
-        apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
         defaultDaysBack: number;
@@ -40,14 +40,14 @@ export declare class CallCenterService {
         totalRecordsSynced: number;
     }>;
     updateConfig(id: string, input: UpdateCallCenterConfigInput): Promise<{
+        apiKey: string | null;
+        isActive: boolean;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        isActive: boolean;
         batchSize: number;
         apiUrl: string;
         domain: string;
-        apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
         defaultDaysBack: number;
@@ -57,14 +57,14 @@ export declare class CallCenterService {
         totalRecordsSynced: number;
     }>;
     deleteConfig(id: string): Promise<{
+        apiKey: string | null;
+        isActive: boolean;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        isActive: boolean;
         batchSize: number;
         apiUrl: string;
         domain: string;
-        apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
         defaultDaysBack: number;
@@ -136,21 +136,21 @@ export declare class CallCenterService {
     getSyncLogs(pagination: PaginationInput): Promise<{
         items: {
             id: string;
+            errorMessage: string | null;
             status: string;
-            startedAt: Date;
-            duration: number | null;
             completedAt: Date | null;
-            configId: string | null;
-            syncType: import("@prisma/client").$Enums.CallCenterSyncMode;
             fromDate: Date;
             toDate: Date;
+            duration: number | null;
             offset: number;
+            configId: string | null;
+            syncType: import("@prisma/client").$Enums.CallCenterSyncMode;
             recordsFetched: number;
             recordsCreated: number;
             recordsUpdated: number;
             recordsSkipped: number;
-            errorMessage: string | null;
             errorDetails: import("@prisma/client/runtime/library").JsonValue | null;
+            startedAt: Date;
         }[];
         total: number;
     }>;

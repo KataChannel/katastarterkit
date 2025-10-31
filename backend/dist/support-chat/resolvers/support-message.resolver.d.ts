@@ -13,8 +13,8 @@ export declare class SupportMessageResolver {
         };
         attachments: {
             id: string;
-            conversationId: string | null;
             createdAt: Date;
+            conversationId: string | null;
             messageId: string | null;
             fileName: string;
             fileSize: number;
@@ -25,11 +25,9 @@ export declare class SupportMessageResolver {
         }[];
     } & {
         id: string;
-        conversationId: string;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         content: string;
         senderType: import("@prisma/client").$Enums.SupportSender;
-        senderId: string | null;
         senderName: string | null;
         isAIGenerated: boolean;
         aiConfidence: number | null;
@@ -42,6 +40,8 @@ export declare class SupportMessageResolver {
         sentAt: Date;
         createdAt: Date;
         updatedAt: Date;
+        conversationId: string;
+        senderId: string | null;
     })[]>;
     sendSupportMessage(input: CreateSupportMessageInput): Promise<{
         sender: {
@@ -53,8 +53,8 @@ export declare class SupportMessageResolver {
         };
         attachments: {
             id: string;
-            conversationId: string | null;
             createdAt: Date;
+            conversationId: string | null;
             messageId: string | null;
             fileName: string;
             fileSize: number;
@@ -65,11 +65,9 @@ export declare class SupportMessageResolver {
         }[];
     } & {
         id: string;
-        conversationId: string;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         content: string;
         senderType: import("@prisma/client").$Enums.SupportSender;
-        senderId: string | null;
         senderName: string | null;
         isAIGenerated: boolean;
         aiConfidence: number | null;
@@ -82,6 +80,8 @@ export declare class SupportMessageResolver {
         sentAt: Date;
         createdAt: Date;
         updatedAt: Date;
+        conversationId: string;
+        senderId: string | null;
     }>;
     markMessagesAsRead(conversationId: string, userId: string): Promise<number>;
 }

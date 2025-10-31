@@ -7,10 +7,10 @@ export declare class CertificatesService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
+        issueDate: Date;
         courseId: string;
         enrollmentId: string;
         certificateNumber: string;
-        issueDate: Date;
         courseName: string;
         instructorName: string;
         completionDate: Date;
@@ -19,19 +19,19 @@ export declare class CertificatesService {
     }>;
     getMyCertificates(userId: string): Promise<({
         course: {
-            thumbnail: string;
-            slug: string;
             title: string;
+            slug: string;
+            thumbnail: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
+        issueDate: Date;
         courseId: string;
         enrollmentId: string;
         certificateNumber: string;
-        issueDate: Date;
         courseName: string;
         instructorName: string;
         completionDate: Date;
@@ -45,9 +45,9 @@ export declare class CertificatesService {
             lastName: string;
         };
         course: {
-            thumbnail: string;
-            slug: string;
             title: string;
+            slug: string;
+            thumbnail: string;
             duration: number;
         };
     } & {
@@ -55,10 +55,10 @@ export declare class CertificatesService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
+        issueDate: Date;
         courseId: string;
         enrollmentId: string;
         certificateNumber: string;
-        issueDate: Date;
         courseName: string;
         instructorName: string;
         completionDate: Date;
@@ -74,18 +74,18 @@ export declare class CertificatesService {
                 lastName: string;
             };
             course: {
-                thumbnail: string;
                 title: string;
+                thumbnail: string;
             };
         } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
+            issueDate: Date;
             courseId: string;
             enrollmentId: string;
             certificateNumber: string;
-            issueDate: Date;
             courseName: string;
             instructorName: string;
             completionDate: Date;

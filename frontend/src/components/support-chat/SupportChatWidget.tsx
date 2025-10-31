@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
+import { useMutation } from '@apollo/client';
+import { CREATE_SUPPORT_CONVERSATION, SEND_SUPPORT_MESSAGE } from '@/graphql/support-chat/support-chat.graphql';
 import {
   MessageCircle,
   X,
@@ -55,6 +57,10 @@ export default function SupportChatWidget({
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Apollo mutations
+  const [createConversationMutation] = useMutation(CREATE_SUPPORT_CONVERSATION);
+  const [sendMessageMutation] = useMutation(SEND_SUPPORT_MESSAGE);
 
   // Initialize Socket.IO connection
   useEffect(() => {
@@ -113,31 +119,20 @@ export default function SupportChatWidget({
     if (!customerName.trim()) return;
 
     try {
-      const response = await fetch(`${apiUrl}/graphql`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: `
-            mutation CreateConversation($input: CreateConversationInput!) {
-              createSupportConversation(input: $input) {
-                id
-                conversationCode
-              }
-            }
-          `,
-          variables: {
-            input: {
-              customerName,
-              platform: 'WEBSITE',
-            },
+      const { data } = await createConversationMutation({
+        variables: {
+          input: {
+            customerName,
+            platform: 'WEBSITE',
           },
-        }),
+        },
       });
 
-      const data = await response.json();
-      const conversation = data.data.createSupportConversation;
+      if (!data?.createSupportConversation) {
+        throw new Error('Failed to create conversation');
+      }
+      
+      const conversation = data.createSupportConversation;
       
       setConversationId(conversation.id);
       setShowNameInput(false);
@@ -170,26 +165,45 @@ export default function SupportChatWidget({
   const sendMessage = async () => {
     if (!inputMessage.trim() || !conversationId) return;
 
-    const tempMessage: Message = {
-      id: Date.now().toString(),
-      content: inputMessage,
-      senderType: 'CUSTOMER',
-      senderName: customerName,
-      sentAt: new Date().toISOString(),
-      isRead: false,
-    };
+    const messageContent = inputMessage;
+    setInputMessage(''); // Clear input immediately
 
-    setMessages(prev => [...prev, tempMessage]);
-    setInputMessage('');
+    try {
+      // Send via GraphQL mutation to save in DB
+      const { data } = await sendMessageMutation({
+        variables: {
+          input: {
+            conversationId,
+            content: messageContent,
+            senderType: 'CUSTOMER',
+            senderName: customerName,
+          },
+        },
+      });
 
-    // Send via WebSocket
-    if (socket) {
-      socket.emit('send_message', {
-        conversationId,
-        content: inputMessage,
+      // Also send via WebSocket for real-time
+      if (socket && data?.sendSupportMessage) {
+        socket.emit('send_message', {
+          conversationId,
+          messageId: data.sendSupportMessage.id,
+          content: messageContent,
+          senderType: 'CUSTOMER',
+          senderName: customerName,
+        });
+      }
+
+      // Add to local messages (optimistic update)
+      setMessages(prev => [...prev, {
+        id: data?.sendSupportMessage?.id || Date.now().toString(),
+        content: messageContent,
         senderType: 'CUSTOMER',
         senderName: customerName,
-      });
+        sentAt: new Date().toISOString(),
+        isRead: false,
+      }]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setInputMessage(messageContent); // Restore message on error
     }
   };
 

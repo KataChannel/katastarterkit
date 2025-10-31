@@ -126,12 +126,25 @@ export class SupportConversationService {
   }
 
   async assignToAgent(conversationId: string, agentId: string) {
+    // Validate agent exists if agentId is provided
+    if (agentId && agentId !== 'unassigned') {
+      const agentExists = await this.prisma.user.findUnique({
+        where: { id: agentId },
+      });
+      
+      if (!agentExists) {
+        throw new Error(`Agent with ID ${agentId} not found`);
+      }
+    }
+
     return this.prisma.supportConversation.update({
       where: { id: conversationId },
       data: {
-        assignedAgentId: agentId,
-        assignedAt: new Date(),
-        status: SupportConversationStatus.ASSIGNED,
+        assignedAgentId: agentId === 'unassigned' ? null : agentId,
+        assignedAt: agentId === 'unassigned' ? null : new Date(),
+        status: agentId === 'unassigned' 
+          ? SupportConversationStatus.WAITING 
+          : SupportConversationStatus.ASSIGNED,
       },
       include: {
         customer: true,
