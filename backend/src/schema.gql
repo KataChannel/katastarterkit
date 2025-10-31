@@ -3670,7 +3670,7 @@ type Query {
 
   """Get tasks by project ID (for TaskFeed)"""
   projectTasks(filters: TaskFilterInput, projectId: ID!): [Task!]!
-  publicWebsiteSettings(category: String, group: String): [WebsiteSetting!]!
+  publicWebsiteSettings(category: String, group: String, keys: [String!]): [WebsiteSetting!]!
   quiz(id: String!): Quiz!
   quizAttempt(id: String!): QuizAttempt!
   quizAttempts(quizId: String!): [QuizAttempt!]!

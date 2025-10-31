@@ -1,7 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@apollo/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 import { GET_MY_COURSES } from '@/graphql/lms/courses.graphql';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -21,7 +23,36 @@ import {
 } from 'lucide-react';
 
 export default function InstructorDashboardPage() {
-  const { data, loading, error } = useQuery(GET_MY_COURSES);
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login?redirect=/lms/instructor/dashboard');
+    }
+  }, [user, authLoading, router]);
+
+  const { data, loading, error } = useQuery(GET_MY_COURSES, {
+    skip: !user, // Skip query if user is not logged in
+  });
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang kiểm tra đăng nhập...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   if (loading) {
     return (

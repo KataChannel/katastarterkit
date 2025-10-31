@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 import { GET_MY_ENROLLMENTS } from '@/graphql/lms/enrollments.graphql';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,9 +11,37 @@ import ProgressBar from '@/components/lms/ProgressBar';
 import { BookOpen, Clock, TrendingUp, Award } from 'lucide-react';
 
 export default function MyLearningPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const [filter, setFilter] = useState<'ALL' | 'IN_PROGRESS' | 'COMPLETED'>('ALL');
 
-  const { data, loading, error } = useQuery(GET_MY_ENROLLMENTS);
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login?redirect=/lms/my-learning');
+    }
+  }, [user, authLoading, router]);
+
+  const { data, loading, error } = useQuery(GET_MY_ENROLLMENTS, {
+    skip: !user, // Skip query if user is not logged in
+  });
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang kiểm tra đăng nhập...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   if (loading) {
     return (

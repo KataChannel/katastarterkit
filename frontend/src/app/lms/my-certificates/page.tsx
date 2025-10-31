@@ -1,13 +1,43 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@apollo/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 import { GET_MY_CERTIFICATES } from '@/graphql/lms/certificates.graphql';
 import CertificateCard from '@/components/lms/CertificateCard';
 import { Award, TrendingUp, Calendar } from 'lucide-react';
 
 export default function MyCertificatesPage() {
-  const { data, loading, error } = useQuery(GET_MY_CERTIFICATES);
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login?redirect=/lms/my-certificates');
+    }
+  }, [user, authLoading, router]);
+
+  const { data, loading, error } = useQuery(GET_MY_CERTIFICATES, {
+    skip: !user, // Skip query if user is not logged in
+  });
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   if (loading) {
     return (
