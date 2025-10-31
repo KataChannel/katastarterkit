@@ -25,16 +25,16 @@ export declare class TaskMediaService {
         };
     } & {
         id: string;
-        type: import("@prisma/client").$Enums.MediaType;
         createdAt: Date;
         updatedAt: Date;
-        taskId: string;
+        uploadedBy: string;
+        type: import("@prisma/client").$Enums.MediaType;
         url: string;
-        size: number;
         filename: string;
+        size: number;
+        taskId: string;
         mimeType: string;
         caption: string | null;
-        uploadedBy: string;
     })[]>;
     create(taskId: string, uploaderId: string, mediaData: any): Promise<{
         uploader: {
@@ -59,16 +59,16 @@ export declare class TaskMediaService {
         };
     } & {
         id: string;
-        type: import("@prisma/client").$Enums.MediaType;
         createdAt: Date;
         updatedAt: Date;
-        taskId: string;
+        uploadedBy: string;
+        type: import("@prisma/client").$Enums.MediaType;
         url: string;
-        size: number;
         filename: string;
+        size: number;
+        taskId: string;
         mimeType: string;
         caption: string | null;
-        uploadedBy: string;
     }>;
     delete(mediaId: string, userId: string): Promise<void>;
 }

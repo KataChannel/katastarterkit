@@ -340,6 +340,14 @@ enum AffUserRole {
   MERCHANT
 }
 
+type AgentPerformance {
+  agentId: String!
+  agentName: String!
+  averageResponseTime: Int!
+  conversationsHandled: Int!
+  satisfactionScore: Float!
+}
+
 input AggregateInput {
   _avg: JSONObject
   _count: JSONObject
@@ -1457,6 +1465,28 @@ input CreateRoleInput {
   priority: Int! = 0
 }
 
+input CreateSupportConversationInput {
+  customerEmail: String
+  customerId: String
+  customerIp: String
+  customerName: String
+  customerPhone: String
+  platform: String
+  platformUserId: String
+  platformUserName: String
+  subject: String
+}
+
+input CreateSupportMessageInput {
+  content: String!
+  conversationId: String!
+  messageType: String
+  metadata: JSON
+  senderId: String
+  senderName: String
+  senderType: String!
+}
+
 input CreateTaskCommentInput {
   content: String!
   parentId: String
@@ -1988,6 +2018,14 @@ type ImportStatistics {
   validationErrors: Int!
 }
 
+enum IntegrationPlatform {
+  FACEBOOK
+  TELEGRAM
+  WEBSITE
+  WHATSAPP
+  ZALO
+}
+
 type InvoiceCreated {
   detailsCount: Int!
   id: ID!
@@ -2218,6 +2256,7 @@ type Mutation {
   applyCoupon(input: ApplyCouponInput!): ApplyCouponResponse!
   approveConversion(id: String!): Boolean!
   archiveCourse(id: ID!): Course!
+  assignConversationToAgent(agentId: String!, conversationId: String!): SupportConversation!
   assignRolePermissions(input: AssignRolePermissionInput!): Boolean!
 
   """Assign task to users"""
@@ -2283,6 +2322,7 @@ type Mutation {
   createReview(input: CreateReviewInput!): Review!
   createRole(input: CreateRoleInput!): Role!
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
+  createSupportConversation(input: CreateSupportConversationInput!): SupportConversation!
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
 
@@ -2368,6 +2408,7 @@ type Mutation {
   loginWithGoogle(input: SocialLoginInput!): AuthResponse!
   loginWithPhone(input: PhoneLoginInput!): AuthResponse!
   markLessonComplete(enrollmentId: ID!, lessonId: ID!): LessonProgress!
+  markMessagesAsRead(conversationId: String!, userId: String!): Int!
   markReviewHelpful(reviewId: ID!): Review!
   mergeCarts(input: MergeCartsInput!): MergeCartsResponse!
 
@@ -2405,6 +2446,7 @@ type Mutation {
   reorderModules(input: ReorderModulesInput!): [CourseModule!]!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   reviewCampaignApplication(input: ReviewCampaignApplicationInput!): String!
+  sendSupportMessage(input: CreateSupportMessageInput!): SupportMessage!
   setPassword(input: SetPasswordInput!): Boolean!
   shareTask(input: ShareTaskInput!): TaskShare!
   shareTemplate(input: ShareTemplateInput!): [TemplateShare!]!
@@ -3006,6 +3048,11 @@ input PhoneLoginInput {
   rememberMe: Boolean
 }
 
+type PlatformBreakdown {
+  count: Int!
+  platform: String!
+}
+
 type Post {
   author: User!
   authorId: String!
@@ -3534,6 +3581,10 @@ type Query {
   """Search users using Orama full-text search engine"""
   searchUsers(input: OramaSearchInput!): OramaSearchResult!
   sidebarMenus: [MenuResponseDto!]!
+  supportAnalytics: SupportAnalytics!
+  supportConversation(id: String!): SupportConversation!
+  supportConversations(take: Int, where: SupportConversationWhereInput): [SupportConversation!]!
+  supportMessages(conversationId: String!): [SupportMessage!]!
 
   """Test similarity between two products"""
   testProductSimilarity(productId1: String!, productId2: String!): ProductSimilarityTest
@@ -3849,6 +3900,81 @@ type Subscription {
   userRegistered: User!
 }
 
+type SupportAnalytics {
+  activeConversations: Int!
+  agentPerformance: [AgentPerformance!]!
+  aiGeneratedMessages: Int!
+  averageResolutionTime: Int!
+  averageResponseTime: Int!
+  closedConversations: Int!
+  customerSatisfactionScore: Float!
+  platformBreakdown: [PlatformBreakdown!]!
+  totalConversations: Int!
+  totalMessages: Int!
+  waitingConversations: Int!
+}
+
+type SupportConversation {
+  assignedAgent: User
+  assignedAgentId: String
+  assignedAt: DateTime
+  closedAt: DateTime
+  conversationCode: String!
+  createdAt: DateTime!
+  customer: User
+  customerEmail: String
+  customerId: String
+  customerIp: String
+  customerLocation: String
+  customerName: String
+  customerPhone: String
+  feedback: String
+  id: ID!
+  lastMessageAt: DateTime
+  lastMessagePreview: String
+  messages: [SupportMessage!]
+  notes: String
+  platform: IntegrationPlatform!
+  platformUserId: String
+  platformUserName: String
+  priority: TicketPriority!
+  rating: Float
+  startedAt: DateTime!
+  status: SupportConversationStatus!
+  subject: String
+  tags: [String!]!
+  updatedAt: DateTime!
+}
+
+enum SupportConversationStatus {
+  ACTIVE
+  ASSIGNED
+  CLOSED
+  RESOLVED
+  WAITING
+}
+
+input SupportConversationWhereInput {
+  assignedAgentId: String
+  customerId: String
+  platform: String
+  status: String
+}
+
+type SupportMessage {
+  aiConfidence: Float
+  content: String!
+  conversationId: String!
+  createdAt: DateTime!
+  id: ID!
+  isAIGenerated: Boolean!
+  isRead: Boolean!
+  sender: User
+  senderName: String
+  senderType: String!
+  sentAt: DateTime!
+}
+
 input SyncCallCenterInput {
   configId: String
   fromDate: DateTime
@@ -4031,6 +4157,13 @@ enum TerminationType {
   RESIGNATION
   RETIREMENT
   TERMINATION
+}
+
+enum TicketPriority {
+  HIGH
+  LOW
+  MEDIUM
+  URGENT
 }
 
 input UnifiedBulkCreateInput {

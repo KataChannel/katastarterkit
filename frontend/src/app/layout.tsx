@@ -4,6 +4,7 @@ import './globals.css';
 import { Providers } from '@/components/providers';
 import { Navigation } from '@/components/Navigation';
 import { PWAProvider } from '@/components/pwa';
+import SupportChatWidget from '@/components/support-chat/SupportChatWidget';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -75,6 +76,12 @@ export default function RootLayout({
                 {children}
               </main>
             </div>
+            <SupportChatWidget 
+              apiUrl={process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '') || "http://116.118.49.243:12001"}
+              websocketUrl={process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '/support-chat') || "http://116.118.49.243:12001/support-chat"}
+              primaryColor="#16a34a"
+              position="bottom-right"
+            />
           </PWAProvider>
         </Providers>
       </body>

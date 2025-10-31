@@ -36,11 +36,11 @@ import { SupportChatGateway } from './gateways/support-chat.gateway';
     // Resolvers
     SupportConversationResolver,
     SupportMessageResolver,
-    SupportTicketResolver,
-    ChatIntegrationResolver,
-    ChatQuickReplyResolver,
-    ChatBotRuleResolver,
     SupportAnalyticsResolver,
+    // SupportTicketResolver, // TODO: Implement
+    // ChatIntegrationResolver, // TODO: Implement
+    // ChatQuickReplyResolver, // TODO: Implement
+    // ChatBotRuleResolver, // TODO: Implement
     // Gateway
     SupportChatGateway,
   ],

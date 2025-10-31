@@ -118,7 +118,10 @@ export class FacebookWebhookController {
         customerName: senderName,
       });
       
-      conversation = [newConversation];
+      conversation = [{
+        ...newConversation,
+        messages: [],
+      }];
       this.chatGateway.notifyNewConversation(newConversation);
     }
 

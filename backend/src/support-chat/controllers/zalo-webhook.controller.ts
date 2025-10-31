@@ -94,7 +94,10 @@ export class ZaloWebhookController {
         customerName: userName,
       });
       
-      conversation = [newConversation];
+      conversation = [{
+        ...newConversation,
+        messages: [],
+      }];
       this.chatGateway.notifyNewConversation(newConversation);
     }
 
