@@ -23,7 +23,7 @@ export default function MyCertificatesPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          Error loading certificates: {error.message}
+          Lỗi tải chứng chỉ: {error.message}
         </div>
       </div>
     );
@@ -41,8 +41,8 @@ export default function MyCertificatesPage() {
             <Award className="w-10 h-10 text-amber-600" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">My Certificates</h1>
-            <p className="text-gray-600 mt-1">Your earned course completion certificates</p>
+            <h1 className="text-4xl font-bold text-gray-900">Chứng chỉ của tôi</h1>
+            <p className="text-gray-600 mt-1">Các chứng chỉ hoàn thành khóa học bạn đã đạt được</p>
           </div>
         </div>
 
@@ -51,7 +51,7 @@ export default function MyCertificatesPage() {
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-xl shadow-md border border-amber-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-amber-600 font-medium mb-1">Total Certificates</p>
+                <p className="text-sm text-amber-600 font-medium mb-1">Tổng số chứng chỉ</p>
                 <p className="text-3xl font-bold text-amber-700">{stats.total}</p>
               </div>
               <div className="p-3 bg-amber-100 rounded-lg">
@@ -63,7 +63,7 @@ export default function MyCertificatesPage() {
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl shadow-md border border-blue-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 font-medium mb-1">This Month</p>
+                <p className="text-sm text-blue-600 font-medium mb-1">Tháng này</p>
                 <p className="text-3xl font-bold text-blue-700">{stats.thisMonth}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
@@ -75,7 +75,7 @@ export default function MyCertificatesPage() {
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl shadow-md border border-green-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-600 font-medium mb-1">This Year</p>
+                <p className="text-sm text-green-600 font-medium mb-1">Năm nay</p>
                 <p className="text-3xl font-bold text-green-700">{stats.thisYear}</p>
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
@@ -98,15 +98,15 @@ export default function MyCertificatesPage() {
               <div className="p-4 bg-gray-100 rounded-full w-24 h-24 mx-auto mb-4 flex items-center justify-center">
                 <Award className="w-12 h-12 text-gray-400" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No Certificates Yet</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Chưa có chứng chỉ nào</h3>
               <p className="text-gray-600 mb-6">
-                Complete a course to earn your first certificate and showcase your achievements!
+                Hoàn thành khóa học để nhận chứng chỉ đầu tiên và thể hiện thành tích của bạn!
               </p>
               <a
                 href="/lms/courses"
                 className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
-                Browse Courses
+                Khám phá khóa học
               </a>
             </div>
           </div>

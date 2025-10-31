@@ -43,6 +43,17 @@ export async function seedWebsiteSettings() {
 
     // ===== HEADER SETTINGS =====
     {
+      key: 'header.enabled',
+      value: 'true',
+      type: 'BOOLEAN',
+      category: 'HEADER',
+      label: 'Hiển thị Header',
+      description: 'Bật/tắt header trên toàn bộ website',
+      group: 'visibility',
+      order: 0,
+      isPublic: true,
+    },
+    {
       key: 'header.logo',
       value: '/assets/images/logo.svg',
       type: 'IMAGE',
@@ -168,6 +179,17 @@ export async function seedWebsiteSettings() {
     },
 
     // ===== FOOTER SETTINGS =====
+    {
+      key: 'footer.enabled',
+      value: 'true',
+      type: 'BOOLEAN',
+      category: 'FOOTER',
+      label: 'Hiển thị Footer',
+      description: 'Bật/tắt footer trên toàn bộ website',
+      group: 'visibility',
+      order: 0,
+      isPublic: true,
+    },
     {
       key: 'footer.background_color',
       value: '#000000',

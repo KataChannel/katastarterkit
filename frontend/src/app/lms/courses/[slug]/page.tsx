@@ -159,7 +159,7 @@ export default function CourseDetailPage() {
                     </div>
                   )}
                   <div>
-                    <p className="text-sm text-gray-400">Created by</p>
+                    <p className="text-sm text-gray-400">Tạo bởi</p>
                     <p className="font-medium">
                       {course.instructor.firstName && course.instructor.lastName
                         ? `${course.instructor.firstName} ${course.instructor.lastName}`
