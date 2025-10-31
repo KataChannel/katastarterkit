@@ -89,6 +89,7 @@ export class WebsiteSettingResolver {
   async getPublicWebsiteSettings(
     @Args('category', { nullable: true }) category?: string,
     @Args('group', { nullable: true }) group?: string,
+    @Args('keys', { type: () => [String], nullable: true }) keys?: string[],
   ): Promise<WebsiteSetting[]> {
     const where: any = {
       isActive: true,
@@ -96,6 +97,7 @@ export class WebsiteSettingResolver {
     };
     if (category) where.category = category;
     if (group) where.group = group;
+    if (keys && keys.length > 0) where.key = { in: keys };
 
     return await this.prisma.websiteSetting.findMany({
       where,
