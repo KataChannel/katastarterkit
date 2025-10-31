@@ -3670,6 +3670,12 @@ type Query {
 
   """Get tasks by project ID (for TaskFeed)"""
   projectTasks(filters: TaskFilterInput, projectId: ID!): [Task!]!
+
+  """Get a specific public menu item by ID (no authentication required)"""
+  publicMenuById(id: String!, includeChildren: Boolean = true): JSON
+
+  """Get public menu items (no authentication required)"""
+  publicMenus(includeChildren: Boolean = true, isActive: Boolean, isVisible: Boolean, orderBy: JSON, skip: Int, take: Int, type: String): [JSON!]!
   publicWebsiteSettings(category: String, group: String, keys: [String!]): [WebsiteSetting!]!
   quiz(id: String!): Quiz!
   quizAttempt(id: String!): QuizAttempt!

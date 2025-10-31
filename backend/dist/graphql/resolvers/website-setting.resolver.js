@@ -118,7 +118,7 @@ let WebsiteSettingResolver = class WebsiteSettingResolver {
             orderBy: [{ category: 'asc' }, { order: 'asc' }],
         });
     }
-    async getPublicWebsiteSettings(category, group) {
+    async getPublicWebsiteSettings(category, group, keys) {
         const where = {
             isActive: true,
             isPublic: true,
@@ -127,6 +127,8 @@ let WebsiteSettingResolver = class WebsiteSettingResolver {
             where.category = category;
         if (group)
             where.group = group;
+        if (keys && keys.length > 0)
+            where.key = { in: keys };
         return await this.prisma.websiteSetting.findMany({
             where,
             orderBy: [{ category: 'asc' }, { order: 'asc' }],
@@ -204,8 +206,9 @@ __decorate([
     (0, graphql_1.Query)(() => [WebsiteSetting], { name: 'publicWebsiteSettings' }),
     __param(0, (0, graphql_1.Args)('category', { nullable: true })),
     __param(1, (0, graphql_1.Args)('group', { nullable: true })),
+    __param(2, (0, graphql_1.Args)('keys', { type: () => [String], nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Array]),
     __metadata("design:returntype", Promise)
 ], WebsiteSettingResolver.prototype, "getPublicWebsiteSettings", null);
 __decorate([

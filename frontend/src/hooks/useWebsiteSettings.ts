@@ -1,4 +1,6 @@
 import { useFindMany } from './useDynamicGraphQL';
+import { useQuery } from '@apollo/client';
+import { GET_PUBLIC_WEBSITE_SETTINGS, GET_HEADER_SETTINGS, GET_FOOTER_SETTINGS } from '@/graphql/website-settings.queries';
 
 export interface WebsiteSetting {
   id: string;
@@ -76,77 +78,91 @@ export interface WebsiteSettings {
 
 /**
  * Hook để lấy tất cả website settings
+ * Uses public GraphQL query (no authentication required)
  */
 export function useWebsiteSettings(category?: string) {
-  const where: any = {
-    isActive: true,
-    isPublic: true,
-  };
-
-  if (category) {
-    where.category = category;
-  }
-
-  return useFindMany<WebsiteSetting>('WebsiteSetting', {
-    where,
-    orderBy: { order: 'asc' }, // Fix: orderBy must be object, not array
+  const { data, loading, error } = useQuery(GET_PUBLIC_WEBSITE_SETTINGS, {
+    variables: {
+      category,
+    },
+    fetchPolicy: 'network-only',
   });
+
+  return {
+    data: data?.publicWebsiteSettings || [],
+    loading,
+    error,
+  };
 }
 
 /**
  * Hook để lấy header settings
+ * Uses public GraphQL query (no authentication required)
  */
 export function useHeaderSettings() {
-  return useFindMany<WebsiteSetting>('WebsiteSetting', {
-    where: {
-      category: 'HEADER',
-      isActive: true,
-      isPublic: true,
-    },
-    orderBy: { order: 'asc' },
+  const { data, loading, error } = useQuery(GET_HEADER_SETTINGS, {
+    fetchPolicy: 'network-only',
   });
+
+  return {
+    data: data?.headerSettings || [],
+    loading,
+    error,
+  };
 }
 
 /**
  * Hook để lấy footer settings
+ * Uses public GraphQL query (no authentication required)
  */
 export function useFooterSettings() {
-  return useFindMany<WebsiteSetting>('WebsiteSetting', {
-    where: {
-      category: 'FOOTER',
-      isActive: true,
-      isPublic: true,
-    },
-    orderBy: { order: 'asc' },
+  const { data, loading, error } = useQuery(GET_FOOTER_SETTINGS, {
+    fetchPolicy: 'network-only',
   });
+
+  return {
+    data: data?.footerSettings || [],
+    loading,
+    error,
+  };
 }
 
 /**
  * Hook để lấy contact settings
+ * Uses public GraphQL query (no authentication required)
  */
 export function useContactSettings() {
-  return useFindMany<WebsiteSetting>('WebsiteSetting', {
-    where: {
+  const { data, loading, error } = useQuery(GET_PUBLIC_WEBSITE_SETTINGS, {
+    variables: {
       category: 'CONTACT',
-      isActive: true,
-      isPublic: true,
     },
-    orderBy: { order: 'asc' },
+    fetchPolicy: 'network-only',
   });
+
+  return {
+    data: data?.publicWebsiteSettings || [],
+    loading,
+    error,
+  };
 }
 
 /**
  * Hook để lấy social settings
+ * Uses public GraphQL query (no authentication required)
  */
 export function useSocialSettings() {
-  return useFindMany<WebsiteSetting>('WebsiteSetting', {
-    where: {
+  const { data, loading, error } = useQuery(GET_PUBLIC_WEBSITE_SETTINGS, {
+    variables: {
       category: 'SOCIAL',
-      isActive: true,
-      isPublic: true,
     },
-    orderBy: { order: 'asc' },
+    fetchPolicy: 'network-only',
   });
+
+  return {
+    data: data?.publicWebsiteSettings || [],
+    loading,
+    error,
+  };
 }
 
 /**

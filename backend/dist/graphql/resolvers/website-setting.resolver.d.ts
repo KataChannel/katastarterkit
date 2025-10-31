@@ -23,7 +23,7 @@ export declare class WebsiteSettingResolver {
     private prisma;
     constructor(prisma: PrismaService);
     getWebsiteSettings(category?: string, group?: string, isActive?: boolean, isPublic?: boolean): Promise<WebsiteSetting[]>;
-    getPublicWebsiteSettings(category?: string, group?: string): Promise<WebsiteSetting[]>;
+    getPublicWebsiteSettings(category?: string, group?: string, keys?: string[]): Promise<WebsiteSetting[]>;
     getWebsiteSetting(key: string): Promise<WebsiteSetting | null>;
     getWebsiteSettingsByCategory(category: string): Promise<WebsiteSetting[]>;
     getHeaderSettings(): Promise<WebsiteSetting[]>;
