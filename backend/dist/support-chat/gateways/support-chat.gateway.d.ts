@@ -35,6 +35,13 @@ export declare class SupportChatGateway implements OnGatewayConnection, OnGatewa
     }, client: Socket): Promise<{
         success: boolean;
         message: {
+            sender: {
+                id: string;
+                username: string;
+                firstName: string;
+                lastName: string;
+                avatar: string;
+            };
             attachments: {
                 id: string;
                 createdAt: Date;
@@ -47,23 +54,11 @@ export declare class SupportChatGateway implements OnGatewayConnection, OnGatewa
                 thumbnailUrl: string | null;
                 uploadedById: string | null;
             }[];
-            sender: {
-                id: string;
-                username: string;
-                firstName: string;
-                lastName: string;
-                avatar: string;
-            };
         } & {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            sentAt: Date;
-            conversationId: string;
             messageType: import("@prisma/client").$Enums.SupportMessageType;
             content: string;
             senderType: import("@prisma/client").$Enums.SupportSender;
-            senderId: string | null;
             senderName: string | null;
             isAIGenerated: boolean;
             aiConfidence: number | null;
@@ -73,6 +68,11 @@ export declare class SupportChatGateway implements OnGatewayConnection, OnGatewa
             readAt: Date | null;
             isEdited: boolean;
             editedAt: Date | null;
+            sentAt: Date;
+            createdAt: Date;
+            updatedAt: Date;
+            conversationId: string;
+            senderId: string | null;
         };
     }>;
     handleTypingStart(data: {

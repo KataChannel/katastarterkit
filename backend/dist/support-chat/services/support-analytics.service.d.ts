@@ -20,8 +20,10 @@ export declare class SupportAnalyticsService {
     }>;
     getDailyStats(date: Date): Promise<{
         id: string;
+        avgResponseTime: number | null;
         createdAt: Date;
         updatedAt: Date;
+        avgRating: number | null;
         date: Date;
         totalConversations: number;
         activeConversations: number;
@@ -30,18 +32,18 @@ export declare class SupportAnalyticsService {
         customerMessages: number;
         agentMessages: number;
         botMessages: number;
-        avgResponseTime: number | null;
         avgResolutionTime: number | null;
         firstResponseTime: number | null;
         platformStats: import("@prisma/client/runtime/library").JsonValue | null;
         agentId: string | null;
-        avgRating: number | null;
         totalRatings: number;
     }>;
     getAgentStats(agentId: string, startDate: Date, endDate: Date): Promise<{
         id: string;
+        avgResponseTime: number | null;
         createdAt: Date;
         updatedAt: Date;
+        avgRating: number | null;
         date: Date;
         totalConversations: number;
         activeConversations: number;
@@ -50,12 +52,10 @@ export declare class SupportAnalyticsService {
         customerMessages: number;
         agentMessages: number;
         botMessages: number;
-        avgResponseTime: number | null;
         avgResolutionTime: number | null;
         firstResponseTime: number | null;
         platformStats: import("@prisma/client/runtime/library").JsonValue | null;
         agentId: string | null;
-        avgRating: number | null;
         totalRatings: number;
     }[]>;
 }

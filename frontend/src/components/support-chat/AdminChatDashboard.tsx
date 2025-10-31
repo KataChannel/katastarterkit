@@ -3,6 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
+import { useQuery, useMutation } from '@apollo/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { 
+  GET_SUPPORT_CONVERSATIONS, 
+  GET_SUPPORT_CONVERSATION,
+  SEND_SUPPORT_MESSAGE,
+  ASSIGN_CONVERSATION_TO_AGENT,
+  UPDATE_CONVERSATION_STATUS
+} from '@/graphql/support-chat/support-chat.graphql';
 import {
   MessageSquare,
   Users,
@@ -42,7 +51,7 @@ interface Conversation {
 }
 
 export default function AdminChatDashboard() {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const { user } = useAuth(); // Get current user
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -56,6 +65,46 @@ export default function AdminChatDashboard() {
     avgResponseTime: 0,
   });
 
+  // Apollo queries and mutations
+  const { data: conversationsData, refetch: refetchConversations } = useQuery(GET_SUPPORT_CONVERSATIONS, {
+    variables: {
+      where: filter !== 'all' ? { status: filter.toUpperCase() } : undefined,
+      take: 50,
+    },
+  });
+
+  const { data: conversationData } = useQuery(GET_SUPPORT_CONVERSATION, {
+    variables: { id: selectedConversation?.id },
+    skip: !selectedConversation,
+  });
+
+  const [sendMessageMutation] = useMutation(SEND_SUPPORT_MESSAGE);
+  const [assignToAgentMutation] = useMutation(ASSIGN_CONVERSATION_TO_AGENT);
+  const [updateStatusMutation] = useMutation(UPDATE_CONVERSATION_STATUS);
+
+  const conversations = conversationsData?.supportConversations || [];
+
+  // Update stats when conversations change
+  useEffect(() => {
+    const total = conversations.length;
+    const active = conversations.filter((c: Conversation) => c.status === 'ACTIVE').length;
+    const waiting = conversations.filter((c: Conversation) => c.status === 'WAITING').length;
+    
+    setStats({
+      total,
+      active,
+      waiting,
+      avgResponseTime: 45, // Mock data
+    });
+  }, [conversations]);
+
+  // Update messages when conversation data changes
+  useEffect(() => {
+    if (conversationData?.supportConversation?.messages) {
+      setMessages(conversationData.supportConversation.messages);
+    }
+  }, [conversationData]);
+
   // Initialize Socket.IO
   useEffect(() => {
     const newSocket = io('http://localhost:3001/support-chat');
@@ -64,27 +113,15 @@ export default function AdminChatDashboard() {
       console.log('Admin connected to support chat');
     });
 
-    newSocket.on('new_conversation', (conversation: Conversation) => {
-      setConversations(prev => [conversation, ...prev]);
-      updateStats();
+    newSocket.on('new_conversation', () => {
+      refetchConversations();
     });
 
     newSocket.on('new_message', (message: any) => {
       if (selectedConversation && message.conversationId === selectedConversation.id) {
         setMessages(prev => [...prev, message]);
       }
-      // Update conversation preview
-      setConversations(prev =>
-        prev.map(conv =>
-          conv.id === message.conversationId
-            ? {
-                ...conv,
-                lastMessagePreview: message.content,
-                lastMessageAt: message.sentAt,
-              }
-            : conv
-        )
-      );
+      refetchConversations();
     });
 
     setSocket(newSocket);
@@ -92,175 +129,72 @@ export default function AdminChatDashboard() {
     return () => {
       newSocket.disconnect();
     };
-  }, [selectedConversation]);
+  }, [selectedConversation, refetchConversations]);
 
-  // Load conversations
+  // Refetch when filter changes
   useEffect(() => {
-    loadConversations();
-  }, [filter]);
+    refetchConversations();
+  }, [filter, refetchConversations]);
 
-  const loadConversations = async () => {
-    try {
-      const response = await fetch('http://localhost:3001/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: `
-            query GetConversations($where: ConversationWhereInput) {
-              supportConversations(where: $where, take: 50) {
-                id
-                conversationCode
-                customerName
-                customerEmail
-                customerPhone
-                platform
-                status
-                priority
-                lastMessagePreview
-                lastMessageAt
-                customer {
-                  id
-                  username
-                  firstName
-                  lastName
-                  avatar
-                }
-                assignedAgent {
-                  id
-                  username
-                  firstName
-                  lastName
-                }
-              }
-            }
-          `,
-          variables: {
-            where: filter !== 'all' ? { status: filter.toUpperCase() } : {},
-          },
-        }),
+  const selectConversation = (conversation: Conversation) => {
+    setSelectedConversation(conversation);
+
+    // Join conversation via WebSocket
+    if (socket && user) {
+      socket.emit('join_conversation', {
+        conversationId: conversation.id,
+        userId: user.id,
       });
-
-      const data = await response.json();
-      setConversations(data.data.supportConversations || []);
-      updateStats();
-    } catch (error) {
-      console.error('Error loading conversations:', error);
     }
   };
 
-  const updateStats = () => {
-    const total = conversations.length;
-    const active = conversations.filter(c => c.status === 'ACTIVE').length;
-    const waiting = conversations.filter(c => c.status === 'WAITING').length;
-    
-    setStats({
-      total,
-      active,
-      waiting,
-      avgResponseTime: 45, // Mock data
-    });
-  };
+  const sendMessage = async () => {
+    if (!inputMessage.trim() || !selectedConversation || !user) return;
 
-  const selectConversation = async (conversation: Conversation) => {
-    setSelectedConversation(conversation);
+    const messageContent = inputMessage;
+    setInputMessage(''); // Clear immediately
 
-    // Load messages
     try {
-      const response = await fetch('http://localhost:3001/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      await sendMessageMutation({
+        variables: {
+          input: {
+            conversationId: selectedConversation.id,
+            content: messageContent,
+            senderType: 'AGENT',
+            senderId: user.id,
+            senderName: user.username || 'Agent',
+          },
         },
-        body: JSON.stringify({
-          query: `
-            query GetConversation($id: String!) {
-              supportConversation(id: $id) {
-                id
-                messages {
-                  id
-                  content
-                  senderType
-                  senderName
-                  sentAt
-                  isRead
-                  isAIGenerated
-                  sender {
-                    id
-                    username
-                    firstName
-                    lastName
-                    avatar
-                  }
-                }
-              }
-            }
-          `,
-          variables: { id: conversation.id },
-        }),
       });
 
-      const data = await response.json();
-      setMessages(data.data.supportConversation.messages || []);
-
-      // Join conversation via WebSocket
+      // Also send via WebSocket
       if (socket) {
-        socket.emit('join_conversation', {
-          conversationId: conversation.id,
-          userId: 'agent-id', // Replace with actual agent ID
+        socket.emit('send_message', {
+          conversationId: selectedConversation.id,
+          content: messageContent,
+          senderType: 'AGENT',
+          senderId: user.id,
+          senderName: user.username || 'Agent',
         });
       }
     } catch (error) {
-      console.error('Error loading messages:', error);
+      console.error('Error sending message:', error);
+      setInputMessage(messageContent); // Restore on error
     }
-  };
-
-  const sendMessage = () => {
-    if (!inputMessage.trim() || !selectedConversation) return;
-
-    if (socket) {
-      socket.emit('send_message', {
-        conversationId: selectedConversation.id,
-        content: inputMessage,
-        senderType: 'AGENT',
-        senderId: 'agent-id', // Replace with actual agent ID
-        senderName: 'Admin',
-      });
-    }
-
-    setInputMessage('');
   };
 
   const assignToMe = async () => {
-    if (!selectedConversation) return;
+    if (!selectedConversation || !user) return;
 
     try {
-      await fetch('http://localhost:3001/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      await assignToAgentMutation({
+        variables: {
+          conversationId: selectedConversation.id,
+          agentId: user.id, // Use actual logged-in user ID
         },
-        body: JSON.stringify({
-          query: `
-            mutation AssignConversation($conversationId: String!, $agentId: String!) {
-              assignConversationToAgent(conversationId: $conversationId, agentId: $agentId) {
-                id
-                assignedAgent {
-                  id
-                  username
-                }
-              }
-            }
-          `,
-          variables: {
-            conversationId: selectedConversation.id,
-            agentId: 'agent-id', // Replace with actual agent ID
-          },
-        }),
       });
 
-      loadConversations();
+      refetchConversations();
     } catch (error) {
       console.error('Error assigning conversation:', error);
     }
@@ -373,7 +307,7 @@ export default function AdminChatDashboard() {
       <div className="flex-1 flex overflow-hidden">
         {/* Conversations List */}
         <div className="w-96 bg-white border-r border-gray-200 overflow-y-auto">
-          {conversations.map((conversation) => (
+          {conversations.map((conversation: Conversation) => (
             <motion.div
               key={conversation.id}
               whileHover={{ backgroundColor: '#f9fafb' }}

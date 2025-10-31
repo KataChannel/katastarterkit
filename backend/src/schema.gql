@@ -2,6 +2,55 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AIProvider {
+  apiKey: String!
+  avgResponseTime: Float
+  createdAt: DateTime!
+  createdBy: String
+  creator: User
+  description: String
+  failureCount: Int!
+  id: String!
+  isActive: Boolean!
+  isDefault: Boolean!
+  lastError: String
+  lastUsedAt: DateTime
+  maxTokens: Int!
+  model: String!
+  name: String!
+  priority: Int!
+  provider: AIProviderType!
+  successCount: Int!
+  systemPrompt: String
+  tags: [String!]
+  temperature: Float!
+  totalRequests: Int!
+  updatedAt: DateTime!
+}
+
+type AIProviderStats {
+  activeProviders: Int!
+  avgResponseTime: Float!
+  successRate: Float!
+  totalProviders: Int!
+  totalRequests: Int!
+}
+
+type AIProviderTestResult {
+  error: String
+  response: String
+  responseTime: Float!
+  success: Boolean!
+  tokensUsed: Int!
+}
+
+"""AI Provider types: ChatGPT, Grok, Gemini"""
+enum AIProviderType {
+  CHATGPT
+  GEMINI
+  GROK
+}
+
 input AddMemberInput {
   role: String = "member"
   userId: ID!
@@ -896,6 +945,21 @@ enum CourseStatus {
   ARCHIVED
   DRAFT
   PUBLISHED
+}
+
+input CreateAIProviderInput {
+  apiKey: String!
+  description: String
+  isActive: Boolean = false
+  isDefault: Boolean = false
+  maxTokens: Int = 2000
+  model: String!
+  name: String!
+  priority: Int = 0
+  provider: String!
+  systemPrompt: String
+  tags: [String!]
+  temperature: Float = 0.7
 }
 
 input CreateAffLinkInput {
@@ -2275,6 +2339,9 @@ type Mutation {
   clearCart(sessionId: String): ClearCartResponse!
   completeOffboarding(id: ID!): OffboardingProcess!
   completeOnboardingTask(checklistId: ID!, taskId: ID!): OnboardingChecklist!
+
+  """Tạo AI provider mới"""
+  createAIProvider(input: CreateAIProviderInput!): AIProvider!
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
   createAffiliateLink(input: CreateAffLinkInput!): AffLink!
   createAffiliateUser(input: CreateAffUserInput!): AffUser!
@@ -2328,6 +2395,9 @@ type Mutation {
 
   """Create new ext_sanphamhoadon"""
   createext_sanphamhoadon(data: JSON!, options: JSON): JSON!
+
+  """Xóa AI provider"""
+  deleteAIProvider(id: String!): Boolean!
   deleteAffiliateCampaign(id: String!): Boolean!
   deleteBlog(id: ID!): Boolean!
   deleteBlogCategory(id: ID!): Boolean!
@@ -2447,11 +2517,20 @@ type Mutation {
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   reviewCampaignApplication(input: ReviewCampaignApplicationInput!): String!
   sendSupportMessage(input: CreateSupportMessageInput!): SupportMessage!
+
+  """Đặt AI provider làm mặc định"""
+  setDefaultAIProvider(id: String!): AIProvider!
   setPassword(input: SetPasswordInput!): Boolean!
   shareTask(input: ShareTaskInput!): TaskShare!
   shareTemplate(input: ShareTemplateInput!): [TemplateShare!]!
   submitQuiz(input: SubmitQuizInput!): QuizAttempt!
   syncCallCenterData(input: SyncCallCenterInput): SyncCallCenterResponse!
+
+  """Test kết nối AI provider"""
+  testAIProvider(input: TestAIProviderInput!): AIProviderTestResult!
+
+  """Bật/tắt AI provider"""
+  toggleAIProviderStatus(id: String!, isActive: Boolean!): AIProvider!
   toggleDiscussionPin(id: ID!): Discussion!
   toggleMenuActive(id: ID!): MenuResponseDto!
   toggleMenuVisibility(id: ID!): MenuResponseDto!
@@ -2459,6 +2538,9 @@ type Mutation {
   """Execute any Prisma mutation operation dynamically"""
   universalMutation(input: UniversalQueryInput!): JSONObject!
   unshareTemplate(templateId: String!, userId: String!): Boolean!
+
+  """Cập nhật AI provider"""
+  updateAIProvider(id: String!, input: UpdateAIProviderInput!): AIProvider!
   updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
   updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
   updateBlog(input: UpdateBlogInput!): BlogType!
@@ -3431,6 +3513,18 @@ type Query {
   folders: [FileFolder!]!
   footerMenus: [MenuHierarchicalDto!]!
 
+  """Lấy AI provider theo ID"""
+  getAIProvider(id: String!): AIProvider
+
+  """Lấy thống kê AI providers"""
+  getAIProviderStats: AIProviderStats!
+
+  """Lấy danh sách tất cả AI providers"""
+  getAIProviders: [AIProvider!]!
+
+  """Lấy AI provider đang active"""
+  getActiveAIProvider(providerType: AIProviderType): AIProvider
+
   """Get list of all available Prisma models"""
   getAvailableModels: [String!]!
   getCallCenterConfig: CallCenterConfig!
@@ -4159,6 +4253,11 @@ enum TerminationType {
   TERMINATION
 }
 
+input TestAIProviderInput {
+  providerId: String!
+  testMessage: String = "Hello, how are you?"
+}
+
 enum TicketPriority {
   HIGH
   LOW
@@ -4312,6 +4411,20 @@ type UniversalSearchResult {
   projects: OramaSearchResult!
   tasks: OramaSearchResult!
   users: OramaSearchResult!
+}
+
+input UpdateAIProviderInput {
+  apiKey: String
+  description: String
+  isActive: Boolean
+  isDefault: Boolean
+  maxTokens: Int
+  model: String
+  name: String
+  priority: Int
+  systemPrompt: String
+  tags: [String!]
+  temperature: Float
 }
 
 input UpdateAffUserInput {

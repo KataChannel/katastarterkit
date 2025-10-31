@@ -4,6 +4,7 @@ export declare class TaskMediaService {
     constructor(prisma: PrismaService);
     findByTaskId(taskId: string): Promise<({
         uploader: {
+            isActive: boolean;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -15,7 +16,6 @@ export declare class TaskMediaService {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
             isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
@@ -25,19 +25,20 @@ export declare class TaskMediaService {
         };
     } & {
         id: string;
+        type: import("@prisma/client").$Enums.MediaType;
         createdAt: Date;
         updatedAt: Date;
-        uploadedBy: string;
-        type: import("@prisma/client").$Enums.MediaType;
-        url: string;
-        filename: string;
         size: number;
-        taskId: string;
+        filename: string;
+        url: string;
         mimeType: string;
         caption: string | null;
+        taskId: string;
+        uploadedBy: string;
     })[]>;
     create(taskId: string, uploaderId: string, mediaData: any): Promise<{
         uploader: {
+            isActive: boolean;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -49,7 +50,6 @@ export declare class TaskMediaService {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
             isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
@@ -59,16 +59,16 @@ export declare class TaskMediaService {
         };
     } & {
         id: string;
+        type: import("@prisma/client").$Enums.MediaType;
         createdAt: Date;
         updatedAt: Date;
-        uploadedBy: string;
-        type: import("@prisma/client").$Enums.MediaType;
-        url: string;
-        filename: string;
         size: number;
-        taskId: string;
+        filename: string;
+        url: string;
         mimeType: string;
         caption: string | null;
+        taskId: string;
+        uploadedBy: string;
     }>;
     delete(mediaId: string, userId: string): Promise<void>;
 }

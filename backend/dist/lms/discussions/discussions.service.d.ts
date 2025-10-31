@@ -21,20 +21,20 @@ export declare class DiscussionsService {
             updatedAt: Date;
             userId: string;
             content: string;
-            discussionId: string;
             parentId: string | null;
+            discussionId: string;
         }[];
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        content: string;
         title: string;
+        content: string;
         isPinned: boolean;
-        replyCount: number;
         courseId: string;
         lessonId: string | null;
+        replyCount: number;
     }>;
     getCourseDiscussions(courseId: string, lessonId?: string): Promise<({
         user: {
@@ -62,20 +62,20 @@ export declare class DiscussionsService {
             updatedAt: Date;
             userId: string;
             content: string;
-            discussionId: string;
             parentId: string | null;
+            discussionId: string;
         })[];
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        content: string;
         title: string;
+        content: string;
         isPinned: boolean;
-        replyCount: number;
         courseId: string;
         lessonId: string | null;
+        replyCount: number;
     })[]>;
     getDiscussion(id: string): Promise<{
         user: {
@@ -87,8 +87,8 @@ export declare class DiscussionsService {
         };
         course: {
             id: string;
-            slug: string;
             title: string;
+            slug: string;
         };
         lesson: {
             id: string;
@@ -116,8 +116,8 @@ export declare class DiscussionsService {
                 updatedAt: Date;
                 userId: string;
                 content: string;
-                discussionId: string;
                 parentId: string | null;
+                discussionId: string;
             })[];
         } & {
             id: string;
@@ -125,20 +125,20 @@ export declare class DiscussionsService {
             updatedAt: Date;
             userId: string;
             content: string;
-            discussionId: string;
             parentId: string | null;
+            discussionId: string;
         })[];
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        content: string;
         title: string;
+        content: string;
         isPinned: boolean;
-        replyCount: number;
         courseId: string;
         lessonId: string | null;
+        replyCount: number;
     }>;
     createReply(userId: string, input: CreateReplyInput): Promise<{
         user: {
@@ -154,8 +154,8 @@ export declare class DiscussionsService {
         updatedAt: Date;
         userId: string;
         content: string;
-        discussionId: string;
         parentId: string | null;
+        discussionId: string;
     }>;
     updateDiscussion(userId: string, input: UpdateDiscussionInput): Promise<{
         user: {
@@ -170,12 +170,12 @@ export declare class DiscussionsService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        content: string;
         title: string;
+        content: string;
         isPinned: boolean;
-        replyCount: number;
         courseId: string;
         lessonId: string | null;
+        replyCount: number;
     }>;
     deleteDiscussion(userId: string, id: string): Promise<{
         success: boolean;
@@ -185,11 +185,11 @@ export declare class DiscussionsService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        content: string;
         title: string;
+        content: string;
         isPinned: boolean;
-        replyCount: number;
         courseId: string;
         lessonId: string | null;
+        replyCount: number;
     }>;
 }

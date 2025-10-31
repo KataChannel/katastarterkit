@@ -1,8 +1,11 @@
 import { PrismaService } from '../../prisma/prisma.service';
 import { SupportMessageType, SupportSender } from '@prisma/client';
+import { AIResponseService } from './ai-response.service';
 export declare class SupportMessageService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private aiResponseService;
+    private readonly logger;
+    constructor(prisma: PrismaService, aiResponseService: AIResponseService);
     createMessage(data: {
         conversationId: string;
         content: string;
@@ -14,7 +17,16 @@ export declare class SupportMessageService {
         aiConfidence?: number;
         aiSuggestions?: any;
         metadata?: any;
+    }, options?: {
+        autoAIResponse?: boolean;
     }): Promise<{
+        sender: {
+            id: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+            avatar: string;
+        };
         attachments: {
             id: string;
             createdAt: Date;
@@ -27,23 +39,11 @@ export declare class SupportMessageService {
             thumbnailUrl: string | null;
             uploadedById: string | null;
         }[];
-        sender: {
-            id: string;
-            username: string;
-            firstName: string;
-            lastName: string;
-            avatar: string;
-        };
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        sentAt: Date;
-        conversationId: string;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         content: string;
         senderType: import("@prisma/client").$Enums.SupportSender;
-        senderId: string | null;
         senderName: string | null;
         isAIGenerated: boolean;
         aiConfidence: number | null;
@@ -53,11 +53,24 @@ export declare class SupportMessageService {
         readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
+        sentAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
+        conversationId: string;
+        senderId: string | null;
     }>;
+    generateAIResponse(conversationId: string): Promise<void>;
     findByConversation(conversationId: string, params?: {
         skip?: number;
         take?: number;
     }): Promise<({
+        sender: {
+            id: string;
+            username: string;
+            firstName: string;
+            lastName: string;
+            avatar: string;
+        };
         attachments: {
             id: string;
             createdAt: Date;
@@ -70,23 +83,11 @@ export declare class SupportMessageService {
             thumbnailUrl: string | null;
             uploadedById: string | null;
         }[];
-        sender: {
-            id: string;
-            username: string;
-            firstName: string;
-            lastName: string;
-            avatar: string;
-        };
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        sentAt: Date;
-        conversationId: string;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         content: string;
         senderType: import("@prisma/client").$Enums.SupportSender;
-        senderId: string | null;
         senderName: string | null;
         isAIGenerated: boolean;
         aiConfidence: number | null;
@@ -96,17 +97,17 @@ export declare class SupportMessageService {
         readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
+        sentAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
+        conversationId: string;
+        senderId: string | null;
     })[]>;
     markAsRead(messageId: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        sentAt: Date;
-        conversationId: string;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         content: string;
         senderType: import("@prisma/client").$Enums.SupportSender;
-        senderId: string | null;
         senderName: string | null;
         isAIGenerated: boolean;
         aiConfidence: number | null;
@@ -116,18 +117,18 @@ export declare class SupportMessageService {
         readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
+        sentAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
+        conversationId: string;
+        senderId: string | null;
     }>;
     markConversationMessagesAsRead(conversationId: string, userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
     updateMessage(messageId: string, content: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        sentAt: Date;
-        conversationId: string;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         content: string;
         senderType: import("@prisma/client").$Enums.SupportSender;
-        senderId: string | null;
         senderName: string | null;
         isAIGenerated: boolean;
         aiConfidence: number | null;
@@ -137,17 +138,17 @@ export declare class SupportMessageService {
         readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
+        sentAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
+        conversationId: string;
+        senderId: string | null;
     }>;
     delete(id: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        sentAt: Date;
-        conversationId: string;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         content: string;
         senderType: import("@prisma/client").$Enums.SupportSender;
-        senderId: string | null;
         senderName: string | null;
         isAIGenerated: boolean;
         aiConfidence: number | null;
@@ -157,6 +158,11 @@ export declare class SupportMessageService {
         readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
+        sentAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
+        conversationId: string;
+        senderId: string | null;
     }>;
     getUnreadCount(conversationId: string, userId: string): Promise<number>;
 }
