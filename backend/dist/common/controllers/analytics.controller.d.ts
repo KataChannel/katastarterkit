@@ -80,7 +80,7 @@ export declare class AnalyticsController {
     }>;
     getHistoricalMetrics(timeRange?: '1h' | '6h' | '24h' | '7d', metrics?: string): Promise<any[]>;
     getSystemHealth(): Promise<{
-        status: "healthy" | "critical" | "warning";
+        status: "critical" | "healthy" | "warning";
         score: number;
         timestamp: number;
         components: {
@@ -150,7 +150,7 @@ export declare class AnalyticsController {
     }>;
     getPerformanceComparison(period1?: '24h' | '7d', period2?: '24h' | '7d'): Promise<{
         period1: {
-            period: "24h" | "7d";
+            period: "7d" | "24h";
             data: {
                 period: string;
                 summary: any;
@@ -161,7 +161,7 @@ export declare class AnalyticsController {
             };
         };
         period2: {
-            period: "24h" | "7d";
+            period: "7d" | "24h";
             data: {
                 period: string;
                 summary: any;

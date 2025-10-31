@@ -15,19 +15,19 @@ export declare class CallCenterResolver {
     getSyncLogs(pagination: PaginationInput): Promise<{
         id: string;
         status: string;
+        startedAt: Date;
         duration: number | null;
         completedAt: Date | null;
-        startedAt: Date;
-        errorMessage: string | null;
+        configId: string | null;
+        syncType: import("@prisma/client").$Enums.CallCenterSyncMode;
         fromDate: Date;
         toDate: Date;
         offset: number;
-        configId: string | null;
-        syncType: import("@prisma/client").$Enums.CallCenterSyncMode;
         recordsFetched: number;
         recordsCreated: number;
         recordsUpdated: number;
         recordsSkipped: number;
+        errorMessage: string | null;
         errorDetails: import("@prisma/client/runtime/library").JsonValue | null;
     }[]>;
 }

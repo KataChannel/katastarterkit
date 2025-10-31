@@ -44,6 +44,7 @@ const seed_module_1 = require("./seed/seed.module");
 const callcenter_module_1 = require("./callcenter/callcenter.module");
 const lms_module_1 = require("./lms/lms.module");
 const ecommerce_module_1 = require("./ecommerce/ecommerce.module");
+const support_chat_module_1 = require("./support-chat/support-chat.module");
 const validation_1 = require("./config/validation");
 const env_config_service_1 = require("./config/env-config.service");
 const log_controller_1 = require("./controllers/log.controller");
@@ -133,6 +134,7 @@ exports.AppModule = AppModule = __decorate([
             lms_module_1.LmsModule,
             project_module_1.ProjectModule,
             ecommerce_module_1.EcommerceModule,
+            support_chat_module_1.SupportChatModule,
         ],
         controllers: [
             log_controller_1.LogController,

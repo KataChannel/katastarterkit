@@ -72,21 +72,20 @@ export declare class EnhancedAuditService {
         } & {
             id: string;
             createdAt: Date;
-            tags: string[];
             userId: string | null;
-            action: string;
+            tags: string[];
+            method: string | null;
             errorMessage: string | null;
-            success: boolean;
             sessionId: string | null;
-            ipAddress: string | null;
-            userAgent: string | null;
-            details: Prisma.JsonValue | null;
+            action: string;
             resourceType: string;
             resourceId: string | null;
-            method: string | null;
+            ipAddress: string | null;
+            userAgent: string | null;
             endpoint: string | null;
             oldValues: Prisma.JsonValue | null;
             newValues: Prisma.JsonValue | null;
+            details: Prisma.JsonValue | null;
             entityName: string | null;
             parentResourceType: string | null;
             parentResourceId: string | null;
@@ -95,6 +94,7 @@ export declare class EnhancedAuditService {
             batchId: string | null;
             batchSize: number | null;
             batchIndex: number | null;
+            success: boolean;
             errorCode: string | null;
             responseTime: number | null;
             requestSize: number | null;

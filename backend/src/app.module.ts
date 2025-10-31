@@ -39,6 +39,7 @@ import { SeedModule } from './seed/seed.module';
 import { CallCenterModule } from './callcenter/callcenter.module';
 import { LmsModule } from './lms/lms.module';
 import { EcommerceModule } from './ecommerce/ecommerce.module';
+import { SupportChatModule } from './support-chat/support-chat.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -149,6 +150,7 @@ import { ProjectModule } from './project/project.module';
     LmsModule,
     ProjectModule,
     EcommerceModule,
+    SupportChatModule,
   ],
   controllers: [
     LogController,
