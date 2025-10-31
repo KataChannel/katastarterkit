@@ -77,18 +77,18 @@ export declare class SecurityDashboardController {
                 username: string;
             };
         } & {
-            description: string;
+            category: string;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            category: string;
             sessionId: string | null;
             ipAddress: string;
             userAgent: string | null;
             details: import("@prisma/client/runtime/library").JsonValue | null;
             userId: string | null;
+            updatedAt: Date;
             severity: string;
             correlationId: string | null;
+            description: string;
             eventType: string;
             location: string | null;
             riskScore: number | null;

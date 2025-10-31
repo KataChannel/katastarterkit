@@ -4,16 +4,16 @@ export declare class EnrollmentsService {
     constructor(prisma: PrismaService);
     enroll(userId: string, courseId: string): Promise<{
         course: {
-            description: string | null;
-            tags: string[];
-            id: string;
             level: import("@prisma/client").$Enums.CourseLevel;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            tags: string[];
             title: string;
             slug: string;
             status: import("@prisma/client").$Enums.CourseStatus;
             publishedAt: Date | null;
+            description: string | null;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -47,13 +47,13 @@ export declare class EnrollmentsService {
     getMyEnrollments(userId: string): Promise<({
         course: {
             category: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 updatedAt: Date;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
                 icon: string | null;
             };
             instructor: {
@@ -64,16 +64,16 @@ export declare class EnrollmentsService {
                 avatar: string;
             };
         } & {
-            description: string | null;
-            tags: string[];
-            id: string;
             level: import("@prisma/client").$Enums.CourseLevel;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            tags: string[];
             title: string;
             slug: string;
             status: import("@prisma/client").$Enums.CourseStatus;
             publishedAt: Date | null;
+            description: string | null;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -108,14 +108,14 @@ export declare class EnrollmentsService {
         course: {
             modules: ({
                 lessons: {
-                    description: string | null;
-                    id: string;
-                    type: import("@prisma/client").$Enums.LessonType;
-                    createdAt: Date;
-                    updatedAt: Date;
                     order: number;
+                    id: string;
+                    createdAt: Date;
+                    type: import("@prisma/client").$Enums.LessonType;
+                    updatedAt: Date;
                     title: string;
                     content: string | null;
+                    description: string | null;
                     duration: number | null;
                     moduleId: string;
                     isPreview: boolean;
@@ -123,26 +123,26 @@ export declare class EnrollmentsService {
                     attachments: import("@prisma/client/runtime/library").JsonValue | null;
                 }[];
             } & {
-                description: string | null;
+                order: number;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                order: number;
                 title: string;
+                description: string | null;
                 isPublished: boolean;
                 courseId: string;
             })[];
         } & {
-            description: string | null;
-            tags: string[];
-            id: string;
             level: import("@prisma/client").$Enums.CourseLevel;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            tags: string[];
             title: string;
             slug: string;
             status: import("@prisma/client").$Enums.CourseStatus;
             publishedAt: Date | null;
+            description: string | null;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -162,14 +162,14 @@ export declare class EnrollmentsService {
         };
         lessonProgress: ({
             lesson: {
-                description: string | null;
-                id: string;
-                type: import("@prisma/client").$Enums.LessonType;
-                createdAt: Date;
-                updatedAt: Date;
                 order: number;
+                id: string;
+                createdAt: Date;
+                type: import("@prisma/client").$Enums.LessonType;
+                updatedAt: Date;
                 title: string;
                 content: string | null;
+                description: string | null;
                 duration: number | null;
                 moduleId: string;
                 isPreview: boolean;

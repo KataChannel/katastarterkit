@@ -15,9 +15,9 @@ export declare class FileService {
             shares: {
                 id: string;
                 createdAt: Date;
-                password: string | null;
                 token: string;
                 expiresAt: Date | null;
+                password: string | null;
                 sharedBy: string;
                 sharedWith: string | null;
                 fileId: string;
@@ -27,27 +27,27 @@ export declare class FileService {
                 lastAccess: Date | null;
             }[];
             folder: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 userId: string;
+                name: string;
+                updatedAt: Date;
                 parentId: string | null;
+                description: string | null;
                 color: string | null;
                 icon: string | null;
                 path: string;
                 isSystem: boolean;
             };
         } & {
-            description: string | null;
-            tags: string[];
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             size: number;
             userId: string;
+            updatedAt: Date;
+            tags: string[];
             title: string | null;
+            description: string | null;
             filename: string;
             url: string;
             mimeType: string;
@@ -100,14 +100,14 @@ export declare class FileService {
     }>;
     createFileShare(input: CreateFileShareInput, userId: string): Promise<{
         file: {
-            description: string | null;
-            tags: string[];
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             size: number;
             userId: string;
+            updatedAt: Date;
+            tags: string[];
             title: string | null;
+            description: string | null;
             filename: string;
             url: string;
             mimeType: string;
@@ -129,9 +129,9 @@ export declare class FileService {
     } & {
         id: string;
         createdAt: Date;
-        password: string | null;
         token: string;
         expiresAt: Date | null;
+        password: string | null;
         sharedBy: string;
         sharedWith: string | null;
         fileId: string;

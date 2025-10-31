@@ -18,8 +18,8 @@ export declare class DiscussionsResolver {
         replies: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             content: string;
             parentId: string | null;
             discussionId: string;
@@ -27,8 +27,8 @@ export declare class DiscussionsResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
         content: string;
         isPinned: boolean;
@@ -59,8 +59,8 @@ export declare class DiscussionsResolver {
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             content: string;
             parentId: string | null;
             discussionId: string;
@@ -68,8 +68,8 @@ export declare class DiscussionsResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
         content: string;
         isPinned: boolean;
@@ -113,8 +113,8 @@ export declare class DiscussionsResolver {
             } & {
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 userId: string;
+                updatedAt: Date;
                 content: string;
                 parentId: string | null;
                 discussionId: string;
@@ -122,8 +122,8 @@ export declare class DiscussionsResolver {
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             content: string;
             parentId: string | null;
             discussionId: string;
@@ -131,8 +131,8 @@ export declare class DiscussionsResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
         content: string;
         isPinned: boolean;
@@ -151,8 +151,8 @@ export declare class DiscussionsResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         content: string;
         parentId: string | null;
         discussionId: string;
@@ -168,8 +168,8 @@ export declare class DiscussionsResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
         content: string;
         isPinned: boolean;
@@ -183,8 +183,8 @@ export declare class DiscussionsResolver {
     togglePin(user: any, id: string): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
         content: string;
         isPinned: boolean;

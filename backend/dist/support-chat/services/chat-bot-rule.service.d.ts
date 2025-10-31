@@ -3,17 +3,17 @@ export declare class ChatBotRuleService {
     private prisma;
     constructor(prisma: PrismaService);
     findAll(): Promise<{
-        name: string;
-        isActive: boolean;
-        priority: number;
-        description: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        successRate: number | null;
+        description: string | null;
+        priority: number;
         pattern: string | null;
         conditions: import("@prisma/client/runtime/library").JsonValue | null;
         platform: import("@prisma/client").$Enums.IntegrationPlatform[];
+        successRate: number | null;
         keywords: string[];
         responseType: string;
         responseContent: string;
@@ -23,17 +23,17 @@ export declare class ChatBotRuleService {
         triggerCount: number;
     }[]>;
     matchRule(message: string, platform: string): Promise<{
-        name: string;
-        isActive: boolean;
-        priority: number;
-        description: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        successRate: number | null;
+        description: string | null;
+        priority: number;
         pattern: string | null;
         conditions: import("@prisma/client/runtime/library").JsonValue | null;
         platform: import("@prisma/client").$Enums.IntegrationPlatform[];
+        successRate: number | null;
         keywords: string[];
         responseType: string;
         responseContent: string;

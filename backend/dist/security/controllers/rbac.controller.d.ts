@@ -72,15 +72,15 @@ export declare class RbacController {
     createPermission(req: any, createPermissionDto: CreatePermissionDto): Promise<{
         success: boolean;
         data: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            category: string;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            category: string;
+            isActive: boolean;
             action: string;
+            name: string;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             displayName: string;
             resource: string;
             scope: string | null;
@@ -99,15 +99,15 @@ export declare class RbacController {
     getAllPermissions(req: any, category?: string, resource?: string): Promise<{
         success: boolean;
         data: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            category: string;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            category: string;
+            isActive: boolean;
             action: string;
+            name: string;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             displayName: string;
             resource: string;
             scope: string | null;
@@ -126,15 +126,15 @@ export declare class RbacController {
     getPermissionById(req: any, permissionId: string): Promise<{
         success: boolean;
         data: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            category: string;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            category: string;
+            isActive: boolean;
             action: string;
+            name: string;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             displayName: string;
             resource: string;
             scope: string | null;
@@ -153,15 +153,15 @@ export declare class RbacController {
     updatePermission(req: any, permissionId: string, updatePermissionDto: Partial<CreatePermissionDto>): Promise<{
         success: boolean;
         data: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            category: string;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
-            category: string;
+            isActive: boolean;
             action: string;
+            name: string;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             displayName: string;
             resource: string;
             scope: string | null;
@@ -213,9 +213,9 @@ export declare class RbacController {
         data: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             expiresAt: Date | null;
             userId: string;
+            updatedAt: Date;
             scope: string | null;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
@@ -246,9 +246,9 @@ export declare class RbacController {
         data: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             expiresAt: Date | null;
             userId: string;
+            updatedAt: Date;
             scope: string | null;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;

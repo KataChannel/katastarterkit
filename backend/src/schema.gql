@@ -1571,6 +1571,23 @@ input CreateTaskInput {
   title: String!
 }
 
+input CreateWebsiteSettingInput {
+  category: String!
+  createdBy: String
+  description: String
+  group: String
+  isActive: Boolean
+  isPublic: Boolean
+  key: String!
+  label: String!
+  options: JSON
+  order: Float
+  type: String!
+  updatedBy: String
+  validation: JSON
+  value: String
+}
+
 type CustomTemplate {
   blocks: JSON!
   category: TemplateCategory!
@@ -2392,6 +2409,7 @@ type Mutation {
   createSupportConversation(input: CreateSupportConversationInput!): SupportConversation!
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
+  createWebsiteSetting(input: CreateWebsiteSettingInput!): WebsiteSetting!
 
   """Create new ext_sanphamhoadon"""
   createext_sanphamhoadon(data: JSON!, options: JSON): JSON!
@@ -2438,6 +2456,7 @@ type Mutation {
   deleteTask(id: String!): Boolean!
   deleteTaskMedia(mediaId: String!): Boolean!
   deleteUser(id: String!): Boolean!
+  deleteWebsiteSetting(key: String!): WebsiteSetting!
 
   """Delete ext_sanphamhoadon"""
   deleteext_sanphamhoadon(id: String!, options: JSON): JSON!
@@ -2604,6 +2623,7 @@ type Mutation {
   updateTaskOrder(newOrder: Int!, taskId: String!): Task!
   updateTemplatePublicity(input: UpdateTemplatePublicityInput!): CustomTemplate!
   updateUser(id: String!, input: UpdateUserInput!): User!
+  updateWebsiteSetting(input: UpdateWebsiteSettingInput!, key: String!): WebsiteSetting!
 
   """Update ext_sanphamhoadon"""
   updateext_sanphamhoadon(data: JSON!, id: String!, options: JSON): JSON!
@@ -3512,6 +3532,7 @@ type Query {
   folder(id: ID!): FileFolder!
   folders: [FileFolder!]!
   footerMenus: [MenuHierarchicalDto!]!
+  footerSettings: [WebsiteSetting!]!
 
   """Lấy AI provider theo ID"""
   getAIProvider(id: String!): AIProvider
@@ -3597,6 +3618,7 @@ type Query {
   groupBy(model: String!, options: JSON!): [JSON!]!
   hasPassword: Boolean!
   headerMenus: [MenuHierarchicalDto!]!
+  headerSettings: [WebsiteSetting!]!
 
   """Hello world query"""
   hello: String!
@@ -3648,6 +3670,7 @@ type Query {
 
   """Get tasks by project ID (for TaskFeed)"""
   projectTasks(filters: TaskFilterInput, projectId: ID!): [Task!]!
+  publicWebsiteSettings(category: String, group: String): [WebsiteSetting!]!
   quiz(id: String!): Quiz!
   quizAttempt(id: String!): QuizAttempt!
   quizAttempts(quizId: String!): [QuizAttempt!]!
@@ -3699,6 +3722,9 @@ type Query {
 
   """Get API version"""
   version: String!
+  websiteSetting(key: String!): WebsiteSetting
+  websiteSettings(category: String, group: String, isActive: Boolean, isPublic: Boolean): [WebsiteSetting!]!
+  websiteSettingsByCategory(category: String!): [WebsiteSetting!]!
 }
 
 type Question {
@@ -4980,6 +5006,21 @@ input UpdateUserInput {
   username: String
 }
 
+input UpdateWebsiteSettingInput {
+  category: String
+  description: String
+  group: String
+  isActive: Boolean
+  isPublic: Boolean
+  label: String
+  options: JSON
+  order: Float
+  type: String
+  updatedBy: String
+  validation: JSON
+  value: String
+}
+
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
 
@@ -5106,4 +5147,24 @@ type ValidateCartResponse {
 type VisibilityCount {
   count: Int!
   visibility: FileVisibility!
+}
+
+type WebsiteSetting {
+  category: String!
+  createdAt: DateTime!
+  createdBy: String
+  description: String
+  group: String
+  id: String!
+  isActive: Boolean!
+  isPublic: Boolean!
+  key: String!
+  label: String!
+  options: JSON
+  order: Float!
+  type: String!
+  updatedAt: DateTime!
+  updatedBy: String
+  validation: JSON
+  value: String
 }

@@ -3,12 +3,12 @@ export declare class ChatQuickReplyService {
     private prisma;
     constructor(prisma: PrismaService);
     findAll(): Promise<{
-        isActive: boolean;
-        tags: string[];
+        category: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
         updatedAt: Date;
-        category: string | null;
+        tags: string[];
         message: string;
         title: string;
         usageCount: number;
@@ -16,12 +16,12 @@ export declare class ChatQuickReplyService {
         createdById: string | null;
     }[]>;
     create(data: any): Promise<{
-        isActive: boolean;
-        tags: string[];
+        category: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
         updatedAt: Date;
-        category: string | null;
+        tags: string[];
         message: string;
         title: string;
         usageCount: number;
@@ -29,12 +29,12 @@ export declare class ChatQuickReplyService {
         createdById: string | null;
     }>;
     incrementUsage(id: string): Promise<{
-        isActive: boolean;
-        tags: string[];
+        category: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
         updatedAt: Date;
-        category: string | null;
+        tags: string[];
         message: string;
         title: string;
         usageCount: number;

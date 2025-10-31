@@ -6,23 +6,23 @@ export declare class BlogResolver {
     getBlogs(page?: number, limit?: number, search?: string, categoryId?: string, sort?: string): Promise<{
         items: {
             tags: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 slug: string;
+                description: string | null;
                 color: string | null;
             }[];
             category: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
                 thumbnail: string | null;
                 metaTitle: string | null;
                 metaDescription: string | null;
@@ -36,8 +36,8 @@ export declare class BlogResolver {
             };
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             password: string | null;
+            updatedAt: Date;
             title: string;
             content: string;
             excerpt: string | null;
@@ -69,23 +69,23 @@ export declare class BlogResolver {
     }>;
     getBlog(id: string): Promise<{
         tags: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             slug: string;
+            description: string | null;
             color: string | null;
         }[];
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             slug: string;
             parentId: string | null;
+            description: string | null;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -99,8 +99,8 @@ export declare class BlogResolver {
         };
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -126,23 +126,23 @@ export declare class BlogResolver {
     }>;
     getBlogBySlug(slug: string): Promise<{
         tags: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             slug: string;
+            description: string | null;
             color: string | null;
         }[];
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             slug: string;
             parentId: string | null;
+            description: string | null;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -156,8 +156,8 @@ export declare class BlogResolver {
         };
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -183,15 +183,15 @@ export declare class BlogResolver {
     }>;
     getFeaturedBlogs(limit?: number): Promise<({
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             slug: string;
             parentId: string | null;
+            description: string | null;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -206,8 +206,8 @@ export declare class BlogResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -234,23 +234,23 @@ export declare class BlogResolver {
     getBlogsByCategory(categoryId: string, page?: number, limit?: number): Promise<{
         items: {
             tags: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 slug: string;
+                description: string | null;
                 color: string | null;
             }[];
             category: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
                 thumbnail: string | null;
                 metaTitle: string | null;
                 metaDescription: string | null;
@@ -264,8 +264,8 @@ export declare class BlogResolver {
             };
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             password: string | null;
+            updatedAt: Date;
             title: string;
             content: string;
             excerpt: string | null;
@@ -296,33 +296,33 @@ export declare class BlogResolver {
         hasMore: boolean;
     }>;
     getRelatedBlogs(blogId: string, limit?: number): Promise<({
+        category: {
+            order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            slug: string;
+            parentId: string | null;
+            description: string | null;
+            thumbnail: string | null;
+            metaTitle: string | null;
+            metaDescription: string | null;
+        };
         tags: ({
             tag: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 slug: string;
+                description: string | null;
                 color: string | null;
             };
         } & {
             postId: string;
             tagId: string;
         })[];
-        category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            order: number;
-            slug: string;
-            parentId: string | null;
-            thumbnail: string | null;
-            metaTitle: string | null;
-            metaDescription: string | null;
-        };
         author: {
             id: string;
             email: string;
@@ -333,8 +333,8 @@ export declare class BlogResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -363,15 +363,15 @@ export declare class BlogResolver {
         _count: {
             posts: number;
         };
-        name: string;
-        isActive: boolean;
-        description: string | null;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         slug: string;
         parentId: string | null;
+        description: string | null;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -381,15 +381,15 @@ export declare class BlogResolver {
         _count: {
             posts: number;
         };
-        name: string;
-        isActive: boolean;
-        description: string | null;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         slug: string;
         parentId: string | null;
+        description: string | null;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -399,41 +399,41 @@ export declare class BlogResolver {
             posts: number;
         };
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         slug: string;
+        description: string | null;
         color: string | null;
     })[]>;
     createBlog(input: CreateBlogInput, context: any): Promise<{
+        category: {
+            order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            slug: string;
+            parentId: string | null;
+            description: string | null;
+            thumbnail: string | null;
+            metaTitle: string | null;
+            metaDescription: string | null;
+        };
         tags: ({
             tag: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 slug: string;
+                description: string | null;
                 color: string | null;
             };
         } & {
             postId: string;
             tagId: string;
         })[];
-        category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            order: number;
-            slug: string;
-            parentId: string | null;
-            thumbnail: string | null;
-            metaTitle: string | null;
-            metaDescription: string | null;
-        };
         author: {
             id: string;
             email: string;
@@ -444,8 +444,8 @@ export declare class BlogResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -470,33 +470,33 @@ export declare class BlogResolver {
         scheduledAt: Date | null;
     }>;
     updateBlog(input: UpdateBlogInput): Promise<{
+        category: {
+            order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            slug: string;
+            parentId: string | null;
+            description: string | null;
+            thumbnail: string | null;
+            metaTitle: string | null;
+            metaDescription: string | null;
+        };
         tags: ({
             tag: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 slug: string;
+                description: string | null;
                 color: string | null;
             };
         } & {
             postId: string;
             tagId: string;
         })[];
-        category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            order: number;
-            slug: string;
-            parentId: string | null;
-            thumbnail: string | null;
-            metaTitle: string | null;
-            metaDescription: string | null;
-        };
         author: {
             id: string;
             email: string;
@@ -507,8 +507,8 @@ export declare class BlogResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -536,29 +536,29 @@ export declare class BlogResolver {
         success: boolean;
     }>;
     createCategory(input: CreateBlogCategoryInput): Promise<{
-        name: string;
-        isActive: boolean;
-        description: string | null;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         slug: string;
         parentId: string | null;
+        description: string | null;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
     }>;
     updateCategory(input: UpdateBlogCategoryInput): Promise<{
-        name: string;
-        isActive: boolean;
-        description: string | null;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         slug: string;
         parentId: string | null;
+        description: string | null;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -567,19 +567,19 @@ export declare class BlogResolver {
         success: boolean;
     }>;
     createTag(input: CreateBlogTagInput): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         slug: string;
+        description: string | null;
         color: string | null;
     }>;
     updateTag(input: UpdateBlogTagInput): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         slug: string;
+        description: string | null;
         color: string | null;
     }>;
     deleteTag(id: string): Promise<{

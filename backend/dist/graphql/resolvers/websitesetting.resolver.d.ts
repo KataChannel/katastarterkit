@@ -1,15 +1,15 @@
 export declare const websiteSettingResolvers: {
     Query: {
         websiteSettings: (_: any, args: any, context: any) => Promise<{
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            type: import("@prisma/client").$Enums.SettingType;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
             category: import("@prisma/client").$Enums.SettingCategory;
             order: number;
+            id: string;
+            createdAt: Date;
+            type: import("@prisma/client").$Enums.SettingType;
+            isActive: boolean;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             options: import("@prisma/client/runtime/library").JsonValue | null;
             key: string;
@@ -20,15 +20,15 @@ export declare const websiteSettingResolvers: {
             validation: import("@prisma/client/runtime/library").JsonValue | null;
         }[]>;
         publicWebsiteSettings: (_: any, args: any) => Promise<{
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            type: import("@prisma/client").$Enums.SettingType;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
             category: import("@prisma/client").$Enums.SettingCategory;
             order: number;
+            id: string;
+            createdAt: Date;
+            type: import("@prisma/client").$Enums.SettingType;
+            isActive: boolean;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             options: import("@prisma/client/runtime/library").JsonValue | null;
             key: string;
@@ -39,15 +39,15 @@ export declare const websiteSettingResolvers: {
             validation: import("@prisma/client/runtime/library").JsonValue | null;
         }[]>;
         websiteSetting: (_: any, { key }: any) => Promise<{
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            type: import("@prisma/client").$Enums.SettingType;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
             category: import("@prisma/client").$Enums.SettingCategory;
             order: number;
+            id: string;
+            createdAt: Date;
+            type: import("@prisma/client").$Enums.SettingType;
+            isActive: boolean;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             options: import("@prisma/client/runtime/library").JsonValue | null;
             key: string;
@@ -58,15 +58,15 @@ export declare const websiteSettingResolvers: {
             validation: import("@prisma/client/runtime/library").JsonValue | null;
         }>;
         websiteSettingsByCategory: (_: any, { category }: any) => Promise<{
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            type: import("@prisma/client").$Enums.SettingType;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
             category: import("@prisma/client").$Enums.SettingCategory;
             order: number;
+            id: string;
+            createdAt: Date;
+            type: import("@prisma/client").$Enums.SettingType;
+            isActive: boolean;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             options: import("@prisma/client/runtime/library").JsonValue | null;
             key: string;
@@ -77,15 +77,15 @@ export declare const websiteSettingResolvers: {
             validation: import("@prisma/client/runtime/library").JsonValue | null;
         }[]>;
         headerSettings: () => Promise<{
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            type: import("@prisma/client").$Enums.SettingType;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
             category: import("@prisma/client").$Enums.SettingCategory;
             order: number;
+            id: string;
+            createdAt: Date;
+            type: import("@prisma/client").$Enums.SettingType;
+            isActive: boolean;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             options: import("@prisma/client/runtime/library").JsonValue | null;
             key: string;
@@ -96,15 +96,15 @@ export declare const websiteSettingResolvers: {
             validation: import("@prisma/client/runtime/library").JsonValue | null;
         }[]>;
         footerSettings: () => Promise<{
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            type: import("@prisma/client").$Enums.SettingType;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
             category: import("@prisma/client").$Enums.SettingCategory;
             order: number;
+            id: string;
+            createdAt: Date;
+            type: import("@prisma/client").$Enums.SettingType;
+            isActive: boolean;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             options: import("@prisma/client/runtime/library").JsonValue | null;
             key: string;
@@ -118,15 +118,15 @@ export declare const websiteSettingResolvers: {
     };
     Mutation: {
         createWebsiteSetting: (_: any, { input }: any, context: any) => Promise<{
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            type: import("@prisma/client").$Enums.SettingType;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
             category: import("@prisma/client").$Enums.SettingCategory;
             order: number;
+            id: string;
+            createdAt: Date;
+            type: import("@prisma/client").$Enums.SettingType;
+            isActive: boolean;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             options: import("@prisma/client/runtime/library").JsonValue | null;
             key: string;
@@ -137,15 +137,15 @@ export declare const websiteSettingResolvers: {
             validation: import("@prisma/client/runtime/library").JsonValue | null;
         }>;
         updateWebsiteSetting: (_: any, { key, input }: any, context: any) => Promise<{
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            type: import("@prisma/client").$Enums.SettingType;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
             category: import("@prisma/client").$Enums.SettingCategory;
             order: number;
+            id: string;
+            createdAt: Date;
+            type: import("@prisma/client").$Enums.SettingType;
+            isActive: boolean;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             options: import("@prisma/client/runtime/library").JsonValue | null;
             key: string;
@@ -157,15 +157,15 @@ export declare const websiteSettingResolvers: {
         }>;
         updateWebsiteSettings: (_: any, { settings }: any, context: any) => Promise<any[]>;
         deleteWebsiteSetting: (_: any, { key }: any, context: any) => Promise<{
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            type: import("@prisma/client").$Enums.SettingType;
-            createdAt: Date;
-            updatedAt: Date;
-            createdBy: string | null;
             category: import("@prisma/client").$Enums.SettingCategory;
             order: number;
+            id: string;
+            createdAt: Date;
+            type: import("@prisma/client").$Enums.SettingType;
+            isActive: boolean;
+            updatedAt: Date;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             options: import("@prisma/client/runtime/library").JsonValue | null;
             key: string;
@@ -179,10 +179,10 @@ export declare const websiteSettingResolvers: {
     };
     WebsiteSetting: {
         creator: (parent: any) => Promise<{
-            isActive: boolean;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
-            updatedAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -191,18 +191,18 @@ export declare const websiteSettingResolvers: {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         }>;
         updater: (parent: any) => Promise<{
-            isActive: boolean;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
-            updatedAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -211,11 +211,11 @@ export declare const websiteSettingResolvers: {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         }>;
     };

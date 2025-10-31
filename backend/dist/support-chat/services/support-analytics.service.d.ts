@@ -20,10 +20,10 @@ export declare class SupportAnalyticsService {
     }>;
     getDailyStats(date: Date): Promise<{
         id: string;
-        avgResponseTime: number | null;
         createdAt: Date;
         updatedAt: Date;
         avgRating: number | null;
+        avgResponseTime: number | null;
         date: Date;
         totalConversations: number;
         activeConversations: number;
@@ -40,10 +40,10 @@ export declare class SupportAnalyticsService {
     }>;
     getAgentStats(agentId: string, startDate: Date, endDate: Date): Promise<{
         id: string;
-        avgResponseTime: number | null;
         createdAt: Date;
         updatedAt: Date;
         avgRating: number | null;
+        avgResponseTime: number | null;
         date: Date;
         totalConversations: number;
         activeConversations: number;

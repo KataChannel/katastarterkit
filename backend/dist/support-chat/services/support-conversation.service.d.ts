@@ -15,10 +15,10 @@ export declare class SupportConversationService {
         subject?: string;
     }): Promise<{
         customer: {
-            isActive: boolean;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
-            updatedAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -27,18 +27,18 @@ export declare class SupportConversationService {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
         assignedAgent: {
-            isActive: boolean;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
-            updatedAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -47,20 +47,20 @@ export declare class SupportConversationService {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        tags: string[];
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        tags: string[];
         status: import("@prisma/client").$Enums.SupportConversationStatus;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         customerEmail: string | null;
         notes: string | null;
@@ -124,12 +124,12 @@ export declare class SupportConversationService {
             avatar: string;
         };
     } & {
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        tags: string[];
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        tags: string[];
         status: import("@prisma/client").$Enums.SupportConversationStatus;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         customerEmail: string | null;
         notes: string | null;
@@ -209,14 +209,14 @@ export declare class SupportConversationService {
             avatar: string;
         };
         tickets: {
-            priority: import("@prisma/client").$Enums.TicketPriority;
-            description: string;
-            tags: string[];
+            category: string | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            category: string | null;
+            tags: string[];
             status: import("@prisma/client").$Enums.TicketStatus;
+            description: string;
+            priority: import("@prisma/client").$Enums.TicketPriority;
             assignedAt: Date | null;
             conversationId: string | null;
             resolvedAt: Date | null;
@@ -231,12 +231,12 @@ export declare class SupportConversationService {
             resolvedById: string | null;
         }[];
     } & {
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        tags: string[];
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        tags: string[];
         status: import("@prisma/client").$Enums.SupportConversationStatus;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         customerEmail: string | null;
         notes: string | null;
@@ -260,10 +260,10 @@ export declare class SupportConversationService {
     }>;
     assignToAgent(conversationId: string, agentId: string): Promise<{
         customer: {
-            isActive: boolean;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
-            updatedAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -272,18 +272,18 @@ export declare class SupportConversationService {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
         assignedAgent: {
-            isActive: boolean;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
-            updatedAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -292,20 +292,20 @@ export declare class SupportConversationService {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        tags: string[];
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        tags: string[];
         status: import("@prisma/client").$Enums.SupportConversationStatus;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         customerEmail: string | null;
         notes: string | null;
@@ -329,10 +329,10 @@ export declare class SupportConversationService {
     }>;
     updateStatus(conversationId: string, status: SupportConversationStatus): Promise<{
         customer: {
-            isActive: boolean;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
-            updatedAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -341,18 +341,18 @@ export declare class SupportConversationService {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
         assignedAgent: {
-            isActive: boolean;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
-            updatedAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -361,20 +361,20 @@ export declare class SupportConversationService {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        tags: string[];
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        tags: string[];
         status: import("@prisma/client").$Enums.SupportConversationStatus;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         customerEmail: string | null;
         notes: string | null;
@@ -397,12 +397,12 @@ export declare class SupportConversationService {
         assignedAgentId: string | null;
     }>;
     updatePriority(conversationId: string, priority: TicketPriority): Promise<{
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        tags: string[];
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        tags: string[];
         status: import("@prisma/client").$Enums.SupportConversationStatus;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         customerEmail: string | null;
         notes: string | null;
@@ -425,12 +425,12 @@ export declare class SupportConversationService {
         assignedAgentId: string | null;
     }>;
     addRating(conversationId: string, rating: number, feedback?: string): Promise<{
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        tags: string[];
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        tags: string[];
         status: import("@prisma/client").$Enums.SupportConversationStatus;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         customerEmail: string | null;
         notes: string | null;
@@ -489,12 +489,12 @@ export declare class SupportConversationService {
             avatar: string;
         };
     } & {
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        tags: string[];
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        tags: string[];
         status: import("@prisma/client").$Enums.SupportConversationStatus;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         customerEmail: string | null;
         notes: string | null;
@@ -531,10 +531,10 @@ export declare class SupportConversationService {
                 uploadedById: string | null;
             }[];
             sender: {
-                isActive: boolean;
                 id: string;
+                isVerified: boolean;
                 createdAt: Date;
-                updatedAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -543,11 +543,11 @@ export declare class SupportConversationService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
+                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
@@ -571,10 +571,10 @@ export declare class SupportConversationService {
             editedAt: Date | null;
         })[];
         customer: {
-            isActive: boolean;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
-            updatedAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -583,18 +583,18 @@ export declare class SupportConversationService {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
         assignedAgent: {
-            isActive: boolean;
             id: string;
+            isVerified: boolean;
             createdAt: Date;
-            updatedAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -603,20 +603,20 @@ export declare class SupportConversationService {
             lastName: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        tags: string[];
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        tags: string[];
         status: import("@prisma/client").$Enums.SupportConversationStatus;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         customerEmail: string | null;
         notes: string | null;
@@ -639,12 +639,12 @@ export declare class SupportConversationService {
         assignedAgentId: string | null;
     }>;
     delete(id: string): Promise<{
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        tags: string[];
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        tags: string[];
         status: import("@prisma/client").$Enums.SupportConversationStatus;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         customerEmail: string | null;
         notes: string | null;
