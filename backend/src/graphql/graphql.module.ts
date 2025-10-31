@@ -13,6 +13,7 @@ import { OramaSearchResolver } from './resolvers/orama-search.resolver';
 import { UniversalQueryResolver } from './resolvers/universal-query.resolver';
 import { ExtModelsResolver } from './resolvers/ext-models.resolver';
 import { CustomTemplateResolver } from './resolvers/custom-template.resolver';
+import { WebsiteSettingResolver } from './resolvers/website-setting.resolver';
 
 // 🚀 NEW: Universal Dynamic GraphQL Resolver
 import { UniversalDynamicResolver } from './resolvers/universal-dynamic.resolver';
@@ -116,6 +117,9 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     
     // Custom templates resolver
     CustomTemplateResolver,
+    
+    // Website settings resolver
+    WebsiteSettingResolver,
     
     // Services
     UserService,

@@ -5,23 +5,23 @@ export declare class BlogService {
     getBlogs(input?: any): Promise<{
         items: {
             tags: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 slug: string;
+                description: string | null;
                 color: string | null;
             }[];
             category: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
                 thumbnail: string | null;
                 metaTitle: string | null;
                 metaDescription: string | null;
@@ -35,8 +35,8 @@ export declare class BlogService {
             };
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             password: string | null;
+            updatedAt: Date;
             title: string;
             content: string;
             excerpt: string | null;
@@ -68,23 +68,23 @@ export declare class BlogService {
     }>;
     getBlogById(id: string): Promise<{
         tags: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             slug: string;
+            description: string | null;
             color: string | null;
         }[];
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             slug: string;
             parentId: string | null;
+            description: string | null;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -98,8 +98,8 @@ export declare class BlogService {
         };
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -125,23 +125,23 @@ export declare class BlogService {
     }>;
     getBlogBySlug(slug: string): Promise<{
         tags: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             slug: string;
+            description: string | null;
             color: string | null;
         }[];
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             slug: string;
             parentId: string | null;
+            description: string | null;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -155,8 +155,8 @@ export declare class BlogService {
         };
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -182,15 +182,15 @@ export declare class BlogService {
     }>;
     getFeaturedBlogs(limit?: number): Promise<({
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             slug: string;
             parentId: string | null;
+            description: string | null;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -205,8 +205,8 @@ export declare class BlogService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -232,15 +232,15 @@ export declare class BlogService {
     })[]>;
     getRecentBlogs(limit?: number): Promise<({
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             slug: string;
             parentId: string | null;
+            description: string | null;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
@@ -255,8 +255,8 @@ export declare class BlogService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -281,33 +281,33 @@ export declare class BlogService {
         scheduledAt: Date | null;
     })[]>;
     createBlog(input: any, userId: string): Promise<{
+        category: {
+            order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            slug: string;
+            parentId: string | null;
+            description: string | null;
+            thumbnail: string | null;
+            metaTitle: string | null;
+            metaDescription: string | null;
+        };
         tags: ({
             tag: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 slug: string;
+                description: string | null;
                 color: string | null;
             };
         } & {
             postId: string;
             tagId: string;
         })[];
-        category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            order: number;
-            slug: string;
-            parentId: string | null;
-            thumbnail: string | null;
-            metaTitle: string | null;
-            metaDescription: string | null;
-        };
         author: {
             id: string;
             email: string;
@@ -318,8 +318,8 @@ export declare class BlogService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -344,33 +344,33 @@ export declare class BlogService {
         scheduledAt: Date | null;
     }>;
     updateBlog(id: string, input: any): Promise<{
+        category: {
+            order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            slug: string;
+            parentId: string | null;
+            description: string | null;
+            thumbnail: string | null;
+            metaTitle: string | null;
+            metaDescription: string | null;
+        };
         tags: ({
             tag: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 slug: string;
+                description: string | null;
                 color: string | null;
             };
         } & {
             postId: string;
             tagId: string;
         })[];
-        category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            order: number;
-            slug: string;
-            parentId: string | null;
-            thumbnail: string | null;
-            metaTitle: string | null;
-            metaDescription: string | null;
-        };
         author: {
             id: string;
             email: string;
@@ -381,8 +381,8 @@ export declare class BlogService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;
@@ -414,15 +414,15 @@ export declare class BlogService {
         _count: {
             posts: number;
         };
-        name: string;
-        isActive: boolean;
-        description: string | null;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         slug: string;
         parentId: string | null;
+        description: string | null;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -432,43 +432,43 @@ export declare class BlogService {
         _count: {
             posts: number;
         };
-        name: string;
-        isActive: boolean;
-        description: string | null;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         slug: string;
         parentId: string | null;
+        description: string | null;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
     }>;
     createCategory(input: any): Promise<{
-        name: string;
-        isActive: boolean;
-        description: string | null;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         slug: string;
         parentId: string | null;
+        description: string | null;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
     }>;
     updateCategory(id: string, input: any): Promise<{
-        name: string;
-        isActive: boolean;
-        description: string | null;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         slug: string;
         parentId: string | null;
+        description: string | null;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
@@ -481,11 +481,11 @@ export declare class BlogService {
             posts: number;
         };
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         slug: string;
+        description: string | null;
         color: string | null;
     })[]>;
     getTagById(id: string): Promise<{
@@ -493,27 +493,27 @@ export declare class BlogService {
             posts: number;
         };
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         slug: string;
+        description: string | null;
         color: string | null;
     }>;
     createTag(input: any): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         slug: string;
+        description: string | null;
         color: string | null;
     }>;
     updateTag(id: string, input: any): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         slug: string;
+        description: string | null;
         color: string | null;
     }>;
     deleteTag(id: string): Promise<{
@@ -522,23 +522,23 @@ export declare class BlogService {
     getBlogsByCategory(categoryId: string, input?: any): Promise<{
         items: {
             tags: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 slug: string;
+                description: string | null;
                 color: string | null;
             }[];
             category: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
                 thumbnail: string | null;
                 metaTitle: string | null;
                 metaDescription: string | null;
@@ -552,8 +552,8 @@ export declare class BlogService {
             };
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             password: string | null;
+            updatedAt: Date;
             title: string;
             content: string;
             excerpt: string | null;
@@ -584,33 +584,33 @@ export declare class BlogService {
         hasMore: boolean;
     }>;
     getRelatedBlogs(blogId: string, limit?: number): Promise<({
+        category: {
+            order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            slug: string;
+            parentId: string | null;
+            description: string | null;
+            thumbnail: string | null;
+            metaTitle: string | null;
+            metaDescription: string | null;
+        };
         tags: ({
             tag: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 slug: string;
+                description: string | null;
                 color: string | null;
             };
         } & {
             postId: string;
             tagId: string;
         })[];
-        category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            order: number;
-            slug: string;
-            parentId: string | null;
-            thumbnail: string | null;
-            metaTitle: string | null;
-            metaDescription: string | null;
-        };
         author: {
             id: string;
             email: string;
@@ -621,8 +621,8 @@ export declare class BlogService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         password: string | null;
+        updatedAt: Date;
         title: string;
         content: string;
         excerpt: string | null;

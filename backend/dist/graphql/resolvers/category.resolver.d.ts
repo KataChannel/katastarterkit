@@ -10,15 +10,15 @@ export declare class CategoryResolver {
                 products: number;
             };
             parent: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                createdBy: string | null;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
+                createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
                 icon: string | null;
@@ -29,15 +29,15 @@ export declare class CategoryResolver {
                 metaKeywords: string | null;
             };
             children: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                createdBy: string | null;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
+                createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
                 icon: string | null;
@@ -48,15 +48,15 @@ export declare class CategoryResolver {
                 metaKeywords: string | null;
             }[];
         } & {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -81,15 +81,15 @@ export declare class CategoryResolver {
                 products: number;
             };
             children: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                createdBy: string | null;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
+                createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
                 icon: string | null;
@@ -100,15 +100,15 @@ export declare class CategoryResolver {
                 metaKeywords: string | null;
             }[];
         } & {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -119,15 +119,15 @@ export declare class CategoryResolver {
             metaKeywords: string | null;
         })[];
     } & {
-        name: string;
-        isActive: boolean;
-        description: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         parentId: string | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
         icon: string | null;
@@ -142,15 +142,15 @@ export declare class CategoryResolver {
             products: number;
         };
         parent: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -161,15 +161,15 @@ export declare class CategoryResolver {
             metaKeywords: string | null;
         };
         children: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -180,15 +180,15 @@ export declare class CategoryResolver {
             metaKeywords: string | null;
         }[];
     } & {
-        name: string;
-        isActive: boolean;
-        description: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         parentId: string | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
         icon: string | null;
@@ -203,15 +203,15 @@ export declare class CategoryResolver {
             products: number;
         };
         parent: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -222,15 +222,15 @@ export declare class CategoryResolver {
             metaKeywords: string | null;
         };
         children: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -241,15 +241,15 @@ export declare class CategoryResolver {
             metaKeywords: string | null;
         }[];
     } & {
-        name: string;
-        isActive: boolean;
-        description: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         parentId: string | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
         icon: string | null;
@@ -264,15 +264,15 @@ export declare class CategoryResolver {
             products: number;
         };
         parent: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -283,15 +283,15 @@ export declare class CategoryResolver {
             metaKeywords: string | null;
         };
         children: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -302,15 +302,15 @@ export declare class CategoryResolver {
             metaKeywords: string | null;
         }[];
     } & {
-        name: string;
-        isActive: boolean;
-        description: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         parentId: string | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
         icon: string | null;
@@ -325,15 +325,15 @@ export declare class CategoryResolver {
             products: number;
         };
         parent: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -344,15 +344,15 @@ export declare class CategoryResolver {
             metaKeywords: string | null;
         };
         children: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -363,15 +363,15 @@ export declare class CategoryResolver {
             metaKeywords: string | null;
         }[];
     } & {
-        name: string;
-        isActive: boolean;
-        description: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         parentId: string | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
         icon: string | null;
@@ -382,15 +382,15 @@ export declare class CategoryResolver {
         metaKeywords: string | null;
     }>;
     deleteCategory(id: string, deleteProducts: boolean): Promise<{
-        name: string;
-        isActive: boolean;
-        description: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         parentId: string | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
         icon: string | null;

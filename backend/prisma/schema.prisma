@@ -4187,6 +4187,7 @@ enum SettingCategory {
   ANALYTICS
   PAYMENT
   SHIPPING
+  SUPPORT_CHAT
 }
 
 model WebsiteSetting {

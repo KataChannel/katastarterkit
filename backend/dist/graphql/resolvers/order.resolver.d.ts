@@ -5,17 +5,33 @@ export declare class OrderResolver {
     constructor(orderService: OrderService);
     createOrder(input: CreateOrderInput, context?: any): Promise<CreateOrderResponse>;
     getOrder(orderId: string, context?: any): Promise<{
+        payment: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            method: import("@prisma/client").$Enums.PaymentMethod;
+            status: import("@prisma/client").$Enums.PaymentStatus;
+            orderId: string;
+            amount: number;
+            currency: string;
+            paidAt: Date | null;
+            failedAt: Date | null;
+            gatewayTransactionId: string | null;
+            gatewayResponse: import("@prisma/client/runtime/library").JsonValue | null;
+            refundedAmount: number | null;
+            refundedAt: Date | null;
+        };
         items: ({
             product: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 updatedAt: Date;
-                createdBy: string | null;
                 slug: string;
                 status: import("@prisma/client").$Enums.ProductStatus;
                 publishedAt: Date | null;
+                description: string | null;
+                createdBy: string | null;
                 updatedBy: string | null;
                 thumbnail: string | null;
                 displayOrder: number;
@@ -44,12 +60,12 @@ export declare class OrderResolver {
                 soldCount: number;
             };
             variant: {
-                name: string;
-                isActive: boolean;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
@@ -72,28 +88,12 @@ export declare class OrderResolver {
             variantId: string | null;
             variantName: string | null;
         })[];
-        payment: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            method: import("@prisma/client").$Enums.PaymentMethod;
-            status: import("@prisma/client").$Enums.PaymentStatus;
-            orderId: string;
-            amount: number;
-            currency: string;
-            paidAt: Date | null;
-            failedAt: Date | null;
-            gatewayTransactionId: string | null;
-            gatewayResponse: import("@prisma/client/runtime/library").JsonValue | null;
-            refundedAmount: number | null;
-            refundedAt: Date | null;
-        };
         tracking: {
             events: {
-                description: string;
                 id: string;
                 createdAt: Date;
                 status: string;
+                description: string;
                 location: string | null;
                 eventTime: Date;
                 trackingId: string;
@@ -114,11 +114,11 @@ export declare class OrderResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
         userId: string | null;
+        updatedAt: Date;
         status: import("@prisma/client").$Enums.OrderStatus;
         total: number;
+        createdBy: string | null;
         updatedBy: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
         paymentMethod: import("@prisma/client").$Enums.PaymentMethod;
@@ -142,17 +142,33 @@ export declare class OrderResolver {
         cancelledAt: Date | null;
     }>;
     getOrderByNumber(orderNumber: string, email?: string): Promise<{
+        payment: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            method: import("@prisma/client").$Enums.PaymentMethod;
+            status: import("@prisma/client").$Enums.PaymentStatus;
+            orderId: string;
+            amount: number;
+            currency: string;
+            paidAt: Date | null;
+            failedAt: Date | null;
+            gatewayTransactionId: string | null;
+            gatewayResponse: import("@prisma/client/runtime/library").JsonValue | null;
+            refundedAmount: number | null;
+            refundedAt: Date | null;
+        };
         items: ({
             product: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 updatedAt: Date;
-                createdBy: string | null;
                 slug: string;
                 status: import("@prisma/client").$Enums.ProductStatus;
                 publishedAt: Date | null;
+                description: string | null;
+                createdBy: string | null;
                 updatedBy: string | null;
                 thumbnail: string | null;
                 displayOrder: number;
@@ -181,12 +197,12 @@ export declare class OrderResolver {
                 soldCount: number;
             };
             variant: {
-                name: string;
-                isActive: boolean;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
@@ -209,28 +225,12 @@ export declare class OrderResolver {
             variantId: string | null;
             variantName: string | null;
         })[];
-        payment: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            method: import("@prisma/client").$Enums.PaymentMethod;
-            status: import("@prisma/client").$Enums.PaymentStatus;
-            orderId: string;
-            amount: number;
-            currency: string;
-            paidAt: Date | null;
-            failedAt: Date | null;
-            gatewayTransactionId: string | null;
-            gatewayResponse: import("@prisma/client/runtime/library").JsonValue | null;
-            refundedAmount: number | null;
-            refundedAt: Date | null;
-        };
         tracking: {
             events: {
-                description: string;
                 id: string;
                 createdAt: Date;
                 status: string;
+                description: string;
                 location: string | null;
                 eventTime: Date;
                 trackingId: string;
@@ -251,11 +251,11 @@ export declare class OrderResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
         userId: string | null;
+        updatedAt: Date;
         status: import("@prisma/client").$Enums.OrderStatus;
         total: number;
+        createdBy: string | null;
         updatedBy: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
         paymentMethod: import("@prisma/client").$Enums.PaymentMethod;
@@ -283,17 +283,33 @@ export declare class OrderResolver {
     updateOrderStatus(input: UpdateOrderStatusInput, context?: any): Promise<UpdateOrderResponse>;
     cancelOrder(input: CancelOrderInput, context?: any): Promise<CancelOrderResponse>;
     addTrackingEvent(orderId: string, description: string, location: string, status?: string): Promise<{
+        payment: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            method: import("@prisma/client").$Enums.PaymentMethod;
+            status: import("@prisma/client").$Enums.PaymentStatus;
+            orderId: string;
+            amount: number;
+            currency: string;
+            paidAt: Date | null;
+            failedAt: Date | null;
+            gatewayTransactionId: string | null;
+            gatewayResponse: import("@prisma/client/runtime/library").JsonValue | null;
+            refundedAmount: number | null;
+            refundedAt: Date | null;
+        };
         items: ({
             product: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 updatedAt: Date;
-                createdBy: string | null;
                 slug: string;
                 status: import("@prisma/client").$Enums.ProductStatus;
                 publishedAt: Date | null;
+                description: string | null;
+                createdBy: string | null;
                 updatedBy: string | null;
                 thumbnail: string | null;
                 displayOrder: number;
@@ -322,12 +338,12 @@ export declare class OrderResolver {
                 soldCount: number;
             };
             variant: {
-                name: string;
-                isActive: boolean;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
@@ -350,28 +366,12 @@ export declare class OrderResolver {
             variantId: string | null;
             variantName: string | null;
         })[];
-        payment: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            method: import("@prisma/client").$Enums.PaymentMethod;
-            status: import("@prisma/client").$Enums.PaymentStatus;
-            orderId: string;
-            amount: number;
-            currency: string;
-            paidAt: Date | null;
-            failedAt: Date | null;
-            gatewayTransactionId: string | null;
-            gatewayResponse: import("@prisma/client/runtime/library").JsonValue | null;
-            refundedAmount: number | null;
-            refundedAt: Date | null;
-        };
         tracking: {
             events: {
-                description: string;
                 id: string;
                 createdAt: Date;
                 status: string;
+                description: string;
                 location: string | null;
                 eventTime: Date;
                 trackingId: string;
@@ -392,11 +392,11 @@ export declare class OrderResolver {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        createdBy: string | null;
         userId: string | null;
+        updatedAt: Date;
         status: import("@prisma/client").$Enums.OrderStatus;
         total: number;
+        createdBy: string | null;
         updatedBy: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
         paymentMethod: import("@prisma/client").$Enums.PaymentMethod;

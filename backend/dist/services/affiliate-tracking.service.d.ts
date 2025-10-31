@@ -7,13 +7,13 @@ export declare class AffiliateTrackingService {
     private generateTrackingCode;
     findLinkByCode(trackingCode: string): Promise<{
         campaign: {
-            name: string;
-            description: string | null;
+            productImage: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
-            productImage: string | null;
             status: $Enums.AffCampaignStatus;
+            description: string | null;
             commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
@@ -31,10 +31,10 @@ export declare class AffiliateTrackingService {
         };
         affiliate: {
             user: {
-                isActive: boolean;
                 id: string;
+                isVerified: boolean;
                 createdAt: Date;
-                updatedAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -43,21 +43,21 @@ export declare class AffiliateTrackingService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
+                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            isActive: boolean;
-            description: string | null;
+            role: $Enums.AffUserRole;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            role: $Enums.AffUserRole;
+            isActive: boolean;
             userId: string;
+            updatedAt: Date;
+            description: string | null;
             joinedAt: Date;
             companyName: string | null;
             businessType: string | null;
@@ -69,13 +69,13 @@ export declare class AffiliateTrackingService {
             lastActiveAt: Date | null;
         };
     } & {
-        isActive: boolean;
-        description: string | null;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         expiresAt: Date | null;
+        isActive: boolean;
+        updatedAt: Date;
         title: string | null;
+        description: string | null;
         campaignId: string;
         totalClicks: number;
         totalConversions: number;
@@ -92,13 +92,13 @@ export declare class AffiliateTrackingService {
     }>;
     createAffiliateLink(affiliateUserId: string, input: CreateAffLinkInput): Promise<{
         campaign: {
-            name: string;
-            description: string | null;
+            productImage: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
-            productImage: string | null;
             status: $Enums.AffCampaignStatus;
+            description: string | null;
             commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
@@ -116,10 +116,10 @@ export declare class AffiliateTrackingService {
         };
         affiliate: {
             user: {
-                isActive: boolean;
                 id: string;
+                isVerified: boolean;
                 createdAt: Date;
-                updatedAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -128,21 +128,21 @@ export declare class AffiliateTrackingService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
+                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            isActive: boolean;
-            description: string | null;
+            role: $Enums.AffUserRole;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            role: $Enums.AffUserRole;
+            isActive: boolean;
             userId: string;
+            updatedAt: Date;
+            description: string | null;
             joinedAt: Date;
             companyName: string | null;
             businessType: string | null;
@@ -154,13 +154,13 @@ export declare class AffiliateTrackingService {
             lastActiveAt: Date | null;
         };
     } & {
-        isActive: boolean;
-        description: string | null;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         expiresAt: Date | null;
+        isActive: boolean;
+        updatedAt: Date;
         title: string | null;
+        description: string | null;
         campaignId: string;
         totalClicks: number;
         totalConversions: number;
@@ -182,13 +182,13 @@ export declare class AffiliateTrackingService {
                 conversions: number;
             };
             campaign: {
-                name: string;
-                description: string | null;
+                productImage: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 updatedAt: Date;
-                productImage: string | null;
                 status: $Enums.AffCampaignStatus;
+                description: string | null;
                 commissionType: string;
                 startDate: Date | null;
                 endDate: Date | null;
@@ -205,13 +205,13 @@ export declare class AffiliateTrackingService {
                 creatorId: string;
             };
         } & {
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             expiresAt: Date | null;
+            isActive: boolean;
+            updatedAt: Date;
             title: string | null;
+            description: string | null;
             campaignId: string;
             totalClicks: number;
             totalConversions: number;
@@ -233,13 +233,13 @@ export declare class AffiliateTrackingService {
     }>;
     updateAffiliateLink(linkId: string, affiliateUserId: string, input: UpdateAffLinkInput): Promise<{
         campaign: {
-            name: string;
-            description: string | null;
+            productImage: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
-            productImage: string | null;
             status: $Enums.AffCampaignStatus;
+            description: string | null;
             commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
@@ -256,13 +256,13 @@ export declare class AffiliateTrackingService {
             creatorId: string;
         };
     } & {
-        isActive: boolean;
-        description: string | null;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         expiresAt: Date | null;
+        isActive: boolean;
+        updatedAt: Date;
         title: string | null;
+        description: string | null;
         campaignId: string;
         totalClicks: number;
         totalConversions: number;
@@ -306,13 +306,13 @@ export declare class AffiliateTrackingService {
     }>;
     trackConversion(input: TrackConversionInput): Promise<{
         link: {
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             expiresAt: Date | null;
+            isActive: boolean;
+            updatedAt: Date;
             title: string | null;
+            description: string | null;
             campaignId: string;
             totalClicks: number;
             totalConversions: number;
@@ -328,13 +328,13 @@ export declare class AffiliateTrackingService {
             totalEarnings: import("@prisma/client/runtime/library").Decimal;
         };
         campaign: {
-            name: string;
-            description: string | null;
+            productImage: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
-            productImage: string | null;
             status: $Enums.AffCampaignStatus;
+            description: string | null;
             commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
@@ -352,10 +352,10 @@ export declare class AffiliateTrackingService {
         };
         affiliate: {
             user: {
-                isActive: boolean;
                 id: string;
+                isVerified: boolean;
                 createdAt: Date;
-                updatedAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -364,21 +364,21 @@ export declare class AffiliateTrackingService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
+                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            isActive: boolean;
-            description: string | null;
+            role: $Enums.AffUserRole;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            role: $Enums.AffUserRole;
+            isActive: boolean;
             userId: string;
+            updatedAt: Date;
+            description: string | null;
             joinedAt: Date;
             companyName: string | null;
             businessType: string | null;
@@ -413,13 +413,13 @@ export declare class AffiliateTrackingService {
     }>;
     reviewConversion(reviewerUserId: string, input: ReviewConversionInput): Promise<{
         link: {
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             expiresAt: Date | null;
+            isActive: boolean;
+            updatedAt: Date;
             title: string | null;
+            description: string | null;
             campaignId: string;
             totalClicks: number;
             totalConversions: number;
@@ -435,13 +435,13 @@ export declare class AffiliateTrackingService {
             totalEarnings: import("@prisma/client/runtime/library").Decimal;
         };
         campaign: {
-            name: string;
-            description: string | null;
+            productImage: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
-            productImage: string | null;
             status: $Enums.AffCampaignStatus;
+            description: string | null;
             commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
@@ -459,10 +459,10 @@ export declare class AffiliateTrackingService {
         };
         affiliate: {
             user: {
-                isActive: boolean;
                 id: string;
+                isVerified: boolean;
                 createdAt: Date;
-                updatedAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -471,21 +471,21 @@ export declare class AffiliateTrackingService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
+                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            isActive: boolean;
-            description: string | null;
+            role: $Enums.AffUserRole;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            role: $Enums.AffUserRole;
+            isActive: boolean;
             userId: string;
+            updatedAt: Date;
+            description: string | null;
             joinedAt: Date;
             companyName: string | null;
             businessType: string | null;
@@ -521,13 +521,13 @@ export declare class AffiliateTrackingService {
     getConversions(input: AffConversionSearchInput, userRole?: $Enums.AffUserRole, userId?: string): Promise<{
         conversions: ({
             link: {
-                isActive: boolean;
-                description: string | null;
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 expiresAt: Date | null;
+                isActive: boolean;
+                updatedAt: Date;
                 title: string | null;
+                description: string | null;
                 campaignId: string;
                 totalClicks: number;
                 totalConversions: number;
@@ -543,13 +543,13 @@ export declare class AffiliateTrackingService {
                 totalEarnings: import("@prisma/client/runtime/library").Decimal;
             };
             campaign: {
-                name: string;
-                description: string | null;
+                productImage: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 updatedAt: Date;
-                productImage: string | null;
                 status: $Enums.AffCampaignStatus;
+                description: string | null;
                 commissionType: string;
                 startDate: Date | null;
                 endDate: Date | null;
@@ -567,10 +567,10 @@ export declare class AffiliateTrackingService {
             };
             affiliate: {
                 user: {
-                    isActive: boolean;
                     id: string;
+                    isVerified: boolean;
                     createdAt: Date;
-                    updatedAt: Date;
+                    isActive: boolean;
                     email: string | null;
                     username: string;
                     password: string | null;
@@ -579,21 +579,21 @@ export declare class AffiliateTrackingService {
                     lastName: string | null;
                     avatar: string | null;
                     roleType: $Enums.UserRoleType;
-                    isVerified: boolean;
                     isTwoFactorEnabled: boolean;
                     failedLoginAttempts: number;
                     lockedUntil: Date | null;
                     lastLoginAt: Date | null;
+                    updatedAt: Date;
                     departmentId: string | null;
                 };
             } & {
-                isActive: boolean;
-                description: string | null;
+                role: $Enums.AffUserRole;
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
-                role: $Enums.AffUserRole;
+                isActive: boolean;
                 userId: string;
+                updatedAt: Date;
+                description: string | null;
                 joinedAt: Date;
                 companyName: string | null;
                 businessType: string | null;

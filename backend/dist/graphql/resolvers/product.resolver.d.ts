@@ -9,15 +9,15 @@ export declare class ProductResolver {
     getProducts(input?: GetProductsInput): Promise<{
         items: ({
             category: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                createdBy: string | null;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
+                createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
                 icon: string | null;
@@ -28,10 +28,10 @@ export declare class ProductResolver {
                 metaKeywords: string | null;
             };
             images: {
+                order: number;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                order: number;
                 title: string | null;
                 url: string;
                 productId: string;
@@ -39,12 +39,12 @@ export declare class ProductResolver {
                 isPrimary: boolean;
             }[];
             variants: {
-                name: string;
-                isActive: boolean;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
@@ -53,15 +53,15 @@ export declare class ProductResolver {
                 productId: string;
             }[];
         } & {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             status: import("@prisma/client").$Enums.ProductStatus;
             publishedAt: Date | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             thumbnail: string | null;
             displayOrder: number;
@@ -97,15 +97,15 @@ export declare class ProductResolver {
     }>;
     getProduct(id: string): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -116,10 +116,10 @@ export declare class ProductResolver {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -127,12 +127,12 @@ export declare class ProductResolver {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -141,15 +141,15 @@ export declare class ProductResolver {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -179,15 +179,15 @@ export declare class ProductResolver {
     }>;
     getProductBySlug(slug: string): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -198,10 +198,10 @@ export declare class ProductResolver {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -209,12 +209,12 @@ export declare class ProductResolver {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -223,15 +223,15 @@ export declare class ProductResolver {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -262,15 +262,15 @@ export declare class ProductResolver {
     getProductsByCategory(categoryId: string, input?: GetProductsInput): Promise<{
         items: ({
             category: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                createdBy: string | null;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
+                createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
                 icon: string | null;
@@ -281,10 +281,10 @@ export declare class ProductResolver {
                 metaKeywords: string | null;
             };
             images: {
+                order: number;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                order: number;
                 title: string | null;
                 url: string;
                 productId: string;
@@ -292,12 +292,12 @@ export declare class ProductResolver {
                 isPrimary: boolean;
             }[];
             variants: {
-                name: string;
-                isActive: boolean;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
@@ -306,15 +306,15 @@ export declare class ProductResolver {
                 productId: string;
             }[];
         } & {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             status: import("@prisma/client").$Enums.ProductStatus;
             publishedAt: Date | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             thumbnail: string | null;
             displayOrder: number;
@@ -350,15 +350,15 @@ export declare class ProductResolver {
     }>;
     createProduct(input: CreateProductInput): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -369,10 +369,10 @@ export declare class ProductResolver {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -380,12 +380,12 @@ export declare class ProductResolver {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -394,15 +394,15 @@ export declare class ProductResolver {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -432,15 +432,15 @@ export declare class ProductResolver {
     }>;
     updateProduct(input: UpdateProductInput): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -451,10 +451,10 @@ export declare class ProductResolver {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -462,12 +462,12 @@ export declare class ProductResolver {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -476,15 +476,15 @@ export declare class ProductResolver {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -513,15 +513,15 @@ export declare class ProductResolver {
         soldCount: number;
     }>;
     deleteProduct(id: string): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -551,15 +551,15 @@ export declare class ProductResolver {
     }>;
     addProductImage(input: CreateProductImageInput): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -570,10 +570,10 @@ export declare class ProductResolver {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -581,12 +581,12 @@ export declare class ProductResolver {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -595,15 +595,15 @@ export declare class ProductResolver {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -634,15 +634,15 @@ export declare class ProductResolver {
     deleteProductImage(id: string): Promise<boolean>;
     addProductVariant(input: CreateProductVariantInput): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -653,10 +653,10 @@ export declare class ProductResolver {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -664,12 +664,12 @@ export declare class ProductResolver {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -678,15 +678,15 @@ export declare class ProductResolver {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -716,15 +716,15 @@ export declare class ProductResolver {
     }>;
     updateProductVariant(input: UpdateProductVariantInput): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -735,10 +735,10 @@ export declare class ProductResolver {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -746,12 +746,12 @@ export declare class ProductResolver {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -760,15 +760,15 @@ export declare class ProductResolver {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -798,15 +798,15 @@ export declare class ProductResolver {
     }>;
     deleteProductVariant(id: string): Promise<boolean>;
     updateProductStock(id: string, quantity: number): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -839,15 +839,15 @@ export declare class ProductResolver {
             products: number;
         };
         parent: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -858,15 +858,15 @@ export declare class ProductResolver {
             metaKeywords: string | null;
         };
         children: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -877,15 +877,15 @@ export declare class ProductResolver {
             metaKeywords: string | null;
         }[];
     } & {
-        name: string;
-        isActive: boolean;
-        description: string | null;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         parentId: string | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         image: string | null;
         icon: string | null;

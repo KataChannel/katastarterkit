@@ -6,33 +6,33 @@ export declare class CourseCategoriesService {
     constructor(prisma: PrismaService);
     create(createCourseCategoryInput: CreateCourseCategoryInput): Promise<{
         parent: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
+            description: string | null;
             icon: string | null;
         };
         children: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
+            description: string | null;
             icon: string | null;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
         slug: string;
         parentId: string | null;
+        description: string | null;
         icon: string | null;
     }>;
     findAll(): Promise<({
@@ -40,33 +40,33 @@ export declare class CourseCategoriesService {
             courses: number;
         };
         parent: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
+            description: string | null;
             icon: string | null;
         };
         children: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
+            description: string | null;
             icon: string | null;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
         slug: string;
         parentId: string | null;
+        description: string | null;
         icon: string | null;
     })[]>;
     findTree(): Promise<({
@@ -78,33 +78,33 @@ export declare class CourseCategoriesService {
                 courses: number;
             };
             children: {
-                name: string;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                name: string;
                 updatedAt: Date;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
                 icon: string | null;
             }[];
         } & {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
+            description: string | null;
             icon: string | null;
         })[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
         slug: string;
         parentId: string | null;
+        description: string | null;
         icon: string | null;
     })[]>;
     findOne(id: string): Promise<{
@@ -112,64 +112,64 @@ export declare class CourseCategoriesService {
             courses: number;
         };
         parent: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
+            description: string | null;
             icon: string | null;
         };
         children: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
+            description: string | null;
             icon: string | null;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
         slug: string;
         parentId: string | null;
+        description: string | null;
         icon: string | null;
     }>;
     update(id: string, updateCourseCategoryInput: UpdateCourseCategoryInput): Promise<{
         parent: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
+            description: string | null;
             icon: string | null;
         };
         children: {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
             slug: string;
             parentId: string | null;
+            description: string | null;
             icon: string | null;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
         slug: string;
         parentId: string | null;
+        description: string | null;
         icon: string | null;
     }>;
     remove(id: string): Promise<{

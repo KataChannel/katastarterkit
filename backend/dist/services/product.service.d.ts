@@ -7,15 +7,15 @@ export declare class ProductService {
     getProducts(input: GetProductsInput): Promise<{
         items: ({
             category: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                createdBy: string | null;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
+                createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
                 icon: string | null;
@@ -26,10 +26,10 @@ export declare class ProductService {
                 metaKeywords: string | null;
             };
             images: {
+                order: number;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                order: number;
                 title: string | null;
                 url: string;
                 productId: string;
@@ -37,12 +37,12 @@ export declare class ProductService {
                 isPrimary: boolean;
             }[];
             variants: {
-                name: string;
-                isActive: boolean;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
@@ -51,15 +51,15 @@ export declare class ProductService {
                 productId: string;
             }[];
         } & {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             status: import("@prisma/client").$Enums.ProductStatus;
             publishedAt: Date | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             thumbnail: string | null;
             displayOrder: number;
@@ -95,15 +95,15 @@ export declare class ProductService {
     }>;
     getProductById(id: string): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -114,10 +114,10 @@ export declare class ProductService {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -125,12 +125,12 @@ export declare class ProductService {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -139,15 +139,15 @@ export declare class ProductService {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -177,15 +177,15 @@ export declare class ProductService {
     }>;
     getProductBySlug(slug: string): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -196,10 +196,10 @@ export declare class ProductService {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -207,12 +207,12 @@ export declare class ProductService {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -221,15 +221,15 @@ export declare class ProductService {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -260,15 +260,15 @@ export declare class ProductService {
     getProductsByCategory(categoryId: string, input?: GetProductsInput): Promise<{
         items: ({
             category: {
-                name: string;
-                isActive: boolean;
-                description: string | null;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                createdBy: string | null;
                 slug: string;
                 parentId: string | null;
+                description: string | null;
+                createdBy: string | null;
                 updatedBy: string | null;
                 image: string | null;
                 icon: string | null;
@@ -279,10 +279,10 @@ export declare class ProductService {
                 metaKeywords: string | null;
             };
             images: {
+                order: number;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                order: number;
                 title: string | null;
                 url: string;
                 productId: string;
@@ -290,12 +290,12 @@ export declare class ProductService {
                 isPrimary: boolean;
             }[];
             variants: {
-                name: string;
-                isActive: boolean;
+                order: number;
                 id: string;
                 createdAt: Date;
+                isActive: boolean;
+                name: string;
                 updatedAt: Date;
-                order: number;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
@@ -304,15 +304,15 @@ export declare class ProductService {
                 productId: string;
             }[];
         } & {
-            name: string;
-            description: string | null;
             id: string;
             createdAt: Date;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             status: import("@prisma/client").$Enums.ProductStatus;
             publishedAt: Date | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             thumbnail: string | null;
             displayOrder: number;
@@ -348,15 +348,15 @@ export declare class ProductService {
     }>;
     createProduct(input: CreateProductInput): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -367,10 +367,10 @@ export declare class ProductService {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -378,12 +378,12 @@ export declare class ProductService {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -392,15 +392,15 @@ export declare class ProductService {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -430,15 +430,15 @@ export declare class ProductService {
     }>;
     updateProduct(input: UpdateProductInput): Promise<{
         category: {
-            name: string;
-            isActive: boolean;
-            description: string | null;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            createdBy: string | null;
             slug: string;
             parentId: string | null;
+            description: string | null;
+            createdBy: string | null;
             updatedBy: string | null;
             image: string | null;
             icon: string | null;
@@ -449,10 +449,10 @@ export declare class ProductService {
             metaKeywords: string | null;
         };
         images: {
+            order: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            order: number;
             title: string | null;
             url: string;
             productId: string;
@@ -460,12 +460,12 @@ export declare class ProductService {
             isPrimary: boolean;
         }[];
         variants: {
-            name: string;
-            isActive: boolean;
+            order: number;
             id: string;
             createdAt: Date;
+            isActive: boolean;
+            name: string;
             updatedAt: Date;
-            order: number;
             price: number;
             sku: string | null;
             barcode: string | null;
@@ -474,15 +474,15 @@ export declare class ProductService {
             productId: string;
         }[];
     } & {
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -511,15 +511,15 @@ export declare class ProductService {
         soldCount: number;
     }>;
     deleteProduct(id: string): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;
@@ -548,10 +548,10 @@ export declare class ProductService {
         soldCount: number;
     }>;
     addProductImage(input: CreateProductImageInput): Promise<{
+        order: number;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        order: number;
         title: string | null;
         url: string;
         productId: string;
@@ -559,10 +559,10 @@ export declare class ProductService {
         isPrimary: boolean;
     }>;
     deleteProductImage(id: string): Promise<{
+        order: number;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        order: number;
         title: string | null;
         url: string;
         productId: string;
@@ -570,12 +570,12 @@ export declare class ProductService {
         isPrimary: boolean;
     }>;
     addProductVariant(input: CreateProductVariantInput): Promise<{
-        name: string;
-        isActive: boolean;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         price: number;
         sku: string | null;
         barcode: string | null;
@@ -584,12 +584,12 @@ export declare class ProductService {
         productId: string;
     }>;
     updateProductVariant(input: UpdateProductVariantInput): Promise<{
-        name: string;
-        isActive: boolean;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         price: number;
         sku: string | null;
         barcode: string | null;
@@ -598,12 +598,12 @@ export declare class ProductService {
         productId: string;
     }>;
     deleteProductVariant(id: string): Promise<{
-        name: string;
-        isActive: boolean;
+        order: number;
         id: string;
         createdAt: Date;
+        isActive: boolean;
+        name: string;
         updatedAt: Date;
-        order: number;
         price: number;
         sku: string | null;
         barcode: string | null;
@@ -612,15 +612,15 @@ export declare class ProductService {
         productId: string;
     }>;
     updateStock(id: string, quantity: number): Promise<{
-        name: string;
-        description: string | null;
         id: string;
         createdAt: Date;
+        name: string;
         updatedAt: Date;
-        createdBy: string | null;
         slug: string;
         status: import("@prisma/client").$Enums.ProductStatus;
         publishedAt: Date | null;
+        description: string | null;
+        createdBy: string | null;
         updatedBy: string | null;
         thumbnail: string | null;
         displayOrder: number;

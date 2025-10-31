@@ -3,14 +3,14 @@ export declare class SupportTicketService {
     private prisma;
     constructor(prisma: PrismaService);
     createTicket(data: any): Promise<{
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        description: string;
-        tags: string[];
+        category: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        category: string | null;
+        tags: string[];
         status: import("@prisma/client").$Enums.TicketStatus;
+        description: string;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         conversationId: string | null;
         resolvedAt: Date | null;
@@ -25,14 +25,14 @@ export declare class SupportTicketService {
         resolvedById: string | null;
     }>;
     findAll(params?: any): Promise<{
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        description: string;
-        tags: string[];
+        category: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        category: string | null;
+        tags: string[];
         status: import("@prisma/client").$Enums.TicketStatus;
+        description: string;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         conversationId: string | null;
         resolvedAt: Date | null;
@@ -47,14 +47,14 @@ export declare class SupportTicketService {
         resolvedById: string | null;
     }[]>;
     findOne(id: string): Promise<{
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        description: string;
-        tags: string[];
+        category: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        category: string | null;
+        tags: string[];
         status: import("@prisma/client").$Enums.TicketStatus;
+        description: string;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         conversationId: string | null;
         resolvedAt: Date | null;
@@ -69,14 +69,14 @@ export declare class SupportTicketService {
         resolvedById: string | null;
     }>;
     update(id: string, data: any): Promise<{
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        description: string;
-        tags: string[];
+        category: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        category: string | null;
+        tags: string[];
         status: import("@prisma/client").$Enums.TicketStatus;
+        description: string;
+        priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         conversationId: string | null;
         resolvedAt: Date | null;

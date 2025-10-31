@@ -70,11 +70,8 @@ export declare class EnhancedAuditService {
                 lastName: string;
             };
         } & {
-            tags: string[];
             id: string;
             createdAt: Date;
-            success: boolean;
-            responseTime: number | null;
             sessionId: string | null;
             ipAddress: string | null;
             userAgent: string | null;
@@ -92,11 +89,14 @@ export declare class EnhancedAuditService {
             parentResourceId: string | null;
             operationType: string | null;
             severity: string;
+            tags: string[];
             batchId: string | null;
             batchSize: number | null;
             batchIndex: number | null;
+            success: boolean;
             errorMessage: string | null;
             errorCode: string | null;
+            responseTime: number | null;
             requestSize: number | null;
             responseSize: number | null;
             dbQueryTime: number | null;

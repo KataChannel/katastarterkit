@@ -6,14 +6,14 @@ export declare class FileController {
     uploadFile(file: Express.Multer.File, folderId: string, metadataStr: string, req: any): Promise<{
         success: boolean;
         data: {
-            description: string | null;
-            tags: string[];
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             size: number;
             userId: string;
+            updatedAt: Date;
+            tags: string[];
             title: string | null;
+            description: string | null;
             filename: string;
             url: string;
             mimeType: string;
@@ -37,14 +37,14 @@ export declare class FileController {
     uploadFiles(files: Express.Multer.File[], folderId: string, req: any): Promise<{
         success: boolean;
         data: {
-            description: string | null;
-            tags: string[];
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             size: number;
             userId: string;
+            updatedAt: Date;
+            tags: string[];
             title: string | null;
+            description: string | null;
             filename: string;
             url: string;
             mimeType: string;
@@ -68,14 +68,14 @@ export declare class FileController {
     getFile(id: string, req: any): Promise<{
         success: boolean;
         data: {
-            description: string | null;
-            tags: string[];
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             size: number;
             userId: string;
+            updatedAt: Date;
+            tags: string[];
             title: string | null;
+            description: string | null;
             filename: string;
             url: string;
             mimeType: string;
@@ -102,9 +102,9 @@ export declare class FileController {
                 shares: {
                     id: string;
                     createdAt: Date;
-                    password: string | null;
                     token: string;
                     expiresAt: Date | null;
+                    password: string | null;
                     sharedBy: string;
                     sharedWith: string | null;
                     fileId: string;
@@ -114,27 +114,27 @@ export declare class FileController {
                     lastAccess: Date | null;
                 }[];
                 folder: {
-                    name: string;
-                    description: string | null;
                     id: string;
                     createdAt: Date;
-                    updatedAt: Date;
                     userId: string;
+                    name: string;
+                    updatedAt: Date;
                     parentId: string | null;
+                    description: string | null;
                     color: string | null;
                     icon: string | null;
                     path: string;
                     isSystem: boolean;
                 };
             } & {
-                description: string | null;
-                tags: string[];
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 size: number;
                 userId: string;
+                updatedAt: Date;
+                tags: string[];
                 title: string | null;
+                description: string | null;
                 filename: string;
                 url: string;
                 mimeType: string;
@@ -164,14 +164,14 @@ export declare class FileController {
     updateFile(id: string, input: Partial<UpdateFileInput>, req: any): Promise<{
         success: boolean;
         data: {
-            description: string | null;
-            tags: string[];
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             size: number;
             userId: string;
+            updatedAt: Date;
+            tags: string[];
             title: string | null;
+            description: string | null;
             filename: string;
             url: string;
             mimeType: string;

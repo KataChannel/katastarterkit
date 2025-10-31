@@ -39,16 +39,16 @@ export declare class ReviewService {
             avatar: string;
         };
         product: {
-            name: string;
             id: string;
+            name: string;
             slug: string;
         };
     } & {
+        comment: string | null;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        comment: string | null;
         userId: string | null;
+        updatedAt: Date;
         title: string | null;
         images: string[];
         orderId: string | null;
@@ -72,11 +72,11 @@ export declare class ReviewService {
                 avatar: string;
             };
         } & {
+            comment: string | null;
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            comment: string | null;
             userId: string | null;
+            updatedAt: Date;
             title: string | null;
             images: string[];
             orderId: string | null;
@@ -105,16 +105,16 @@ export declare class ReviewService {
             avatar: string;
         };
         product: {
-            name: string;
             id: string;
+            name: string;
             slug: string;
         };
     } & {
+        comment: string | null;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        comment: string | null;
         userId: string | null;
+        updatedAt: Date;
         title: string | null;
         images: string[];
         orderId: string | null;
@@ -137,11 +137,11 @@ export declare class ReviewService {
             avatar: string;
         };
     } & {
+        comment: string | null;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        comment: string | null;
         userId: string | null;
+        updatedAt: Date;
         title: string | null;
         images: string[];
         orderId: string | null;
