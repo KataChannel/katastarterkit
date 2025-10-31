@@ -14,6 +14,7 @@ import { UniversalQueryResolver } from './resolvers/universal-query.resolver';
 import { ExtModelsResolver } from './resolvers/ext-models.resolver';
 import { CustomTemplateResolver } from './resolvers/custom-template.resolver';
 import { WebsiteSettingResolver } from './resolvers/website-setting.resolver';
+import { MenuPublicResolver } from './resolvers/menu-public.resolver';
 
 // 🚀 NEW: Universal Dynamic GraphQL Resolver
 import { UniversalDynamicResolver } from './resolvers/universal-dynamic.resolver';
@@ -120,6 +121,9 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     
     // Website settings resolver
     WebsiteSettingResolver,
+    
+    // Menu public resolver
+    MenuPublicResolver,
     
     // Services
     UserService,

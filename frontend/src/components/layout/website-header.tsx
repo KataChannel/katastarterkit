@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 // ✅ MIGRATED: Import Dynamic GraphQL
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
+import { useQuery } from '@apollo/client';
+import { GET_PUBLIC_MENUS } from '@/graphql/menu.queries';
 import { useHeaderSettings, useContactSettings, settingsToMap } from '@/hooks/useWebsiteSettings';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
@@ -74,26 +76,27 @@ export function WebsiteHeader() {
   const contactSettings = useMemo(() => settingsToMap(contactSettingsRaw), [contactSettingsRaw]);
 
   // ✅ MIGRATED: Fetch header menus with Dynamic GraphQL
-  const { data: headerMenus = [], loading: menuLoading, error: menuError } = useFindMany('menu', {
-    where: { 
+  // Note: If authentication fails, fallback to empty array (no menu items)
+  // ✅ USE PUBLIC MENU QUERY: No authentication required
+  const { data, loading: menuLoading, error: menuError } = useQuery(GET_PUBLIC_MENUS, {
+    variables: {
       type: 'HEADER',
       isActive: true,
-      isVisible: true 
+      isVisible: true,
+      orderBy: { order: 'asc' },
+      includeChildren: true,
     },
-    orderBy: { order: 'asc' },
-    include: {
-      children: {
-        where: { isActive: true, isVisible: true },
-        orderBy: { order: 'asc' },
-        include: {
-          children: {
-            where: { isActive: true, isVisible: true },
-            orderBy: { order: 'asc' },
-          }
-        }
-      }
-    }
+    fetchPolicy: 'network-only', // Always fetch fresh data
   });
+
+  const headerMenus = data?.publicMenus || [];
+
+  // Log any errors (shouldn't happen with public query)
+  useEffect(() => {
+    if (menuError) {
+      console.error('[WebsiteHeader] Failed to load menu:', menuError.message);
+    }
+  }, [menuError]);
 
   console.log('headerSettings', headerSettings);
   console.log('contactSettings', contactSettings);

@@ -22,6 +22,7 @@ const universal_query_resolver_1 = require("./resolvers/universal-query.resolver
 const ext_models_resolver_1 = require("./resolvers/ext-models.resolver");
 const custom_template_resolver_1 = require("./resolvers/custom-template.resolver");
 const website_setting_resolver_1 = require("./resolvers/website-setting.resolver");
+const menu_public_resolver_1 = require("./resolvers/menu-public.resolver");
 const universal_dynamic_resolver_1 = require("./resolvers/universal-dynamic.resolver");
 const dynamic_graphql_engine_1 = require("./core/dynamic-graphql.engine");
 const invoice_controller_1 = require("../controllers/invoice.controller");
@@ -107,6 +108,7 @@ exports.GraphQLResolversModule = GraphQLResolversModule = __decorate([
             ext_models_resolver_1.ExtModelsResolver,
             custom_template_resolver_1.CustomTemplateResolver,
             website_setting_resolver_1.WebsiteSettingResolver,
+            menu_public_resolver_1.MenuPublicResolver,
             user_service_1.UserService,
             post_service_1.PostService,
             comment_service_1.CommentService,

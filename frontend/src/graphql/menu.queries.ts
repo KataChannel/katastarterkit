@@ -1,7 +1,54 @@
 import { gql } from '@apollo/client';
 
 // ============================================================================
-// QUERIES
+// PUBLIC QUERIES (NO AUTHENTICATION REQUIRED)
+// ============================================================================
+
+/**
+ * Get Public Menus
+ * Used for website header, footer, and navigation
+ * No authentication required
+ */
+export const GET_PUBLIC_MENUS = gql`
+  query GetPublicMenus(
+    $type: String
+    $isActive: Boolean
+    $isVisible: Boolean
+    $orderBy: JSON
+    $skip: Int
+    $take: Int
+    $includeChildren: Boolean
+  ) {
+    publicMenus(
+      type: $type
+      isActive: $isActive
+      isVisible: $isVisible
+      orderBy: $orderBy
+      skip: $skip
+      take: $take
+      includeChildren: $includeChildren
+    )
+  }
+`;
+
+/**
+ * Get Public Menu by ID
+ * No authentication required
+ */
+export const GET_PUBLIC_MENU_BY_ID = gql`
+  query GetPublicMenuById(
+    $id: String!
+    $includeChildren: Boolean
+  ) {
+    publicMenuById(
+      id: $id
+      includeChildren: $includeChildren
+    )
+  }
+`;
+
+// ============================================================================
+// QUERIES (REQUIRES AUTHENTICATION)
 // ============================================================================
 
 export const GET_HEADER_MENUS = gql`
