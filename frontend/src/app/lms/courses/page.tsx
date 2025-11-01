@@ -1,16 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_COURSES, GET_COURSE_CATEGORIES } from '@/graphql/lms/courses.graphql';
 import CourseList from '@/components/lms/CourseList';
 import { Search, Filter, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function CoursesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
 
   const { data: categoriesData } = useQuery(GET_COURSE_CATEGORIES);
 
@@ -30,21 +37,19 @@ export default function CoursesPage() {
   });
 
   const courses = data?.courses?.data || [];
-  const pagination = {
-    total: data?.courses?.total || 0,
-    page: data?.courses?.page || 1,
-    limit: data?.courses?.limit || 100,
-    totalPages: data?.courses?.totalPages || 0,
-  };
   const categories = categoriesData?.courseCategories || [];
 
-  const levels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'];
-  const levelLabels: Record<string, string> = {
-    'BEGINNER': 'Cơ bản',
-    'INTERMEDIATE': 'Trung cấp',
-    'ADVANCED': 'Nâng cao',
-    'EXPERT': 'Chuyên gia'
-  };
+  const levels = [
+    { value: 'BEGINNER', label: 'Cơ bản' },
+    { value: 'INTERMEDIATE', label: 'Trung cấp' },
+    { value: 'ADVANCED', label: 'Nâng cao' },
+    { value: 'EXPERT', label: 'Chuyên gia' },
+  ];
+
+  const hasActiveFilters = useMemo(
+    () => searchTerm || selectedCategory || selectedLevel,
+    [searchTerm, selectedCategory, selectedLevel]
+  );
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -52,138 +57,196 @@ export default function CoursesPage() {
     setSelectedLevel(null);
   };
 
-  const hasActiveFilters = searchTerm || selectedCategory || selectedLevel;
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Khám phá Khóa học
-          </h1>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl">
-            Học kỹ năng mới, thăng tiến sự nghiệp và đạt được mục tiêu với các khóa học chuyên nghiệp
-          </p>
+      <div className="bg-gradient-to-r from-primary to-indigo-700 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+                Khám phá Khóa học
+              </h1>
+              <p className="text-base sm:text-lg md:text-xl text-blue-100 mt-2 md:mt-4 max-w-2xl">
+                Học kỹ năng mới, thăng tiến sự nghiệp và đạt được mục tiêu với các khóa học chuyên nghiệp
+              </p>
+            </div>
 
-          {/* Search Bar */}
-          <div className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm khóa học..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            {/* Search Bar */}
+            <div className="relative max-w-2xl w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
+              <Input
+                type="text"
+                placeholder="Tìm kiếm khóa học..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-10 md:h-12 text-base text-white placeholder:text-white/70 bg-white/20 border-white/30"
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <aside className="lg:w-64 flex-shrink-0">
-            {/* Mobile Filter Toggle */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden w-full flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow-sm mb-4"
-            >
-              <span className="font-medium flex items-center gap-2">
-                <Filter className="w-5 h-5" />
-                Bộ lọc
-              </span>
-              {hasActiveFilters && (
-                <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                  Đang lọc
-                </span>
-              )}
-            </button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+        <div className="flex flex-col lg:flex-row gap-6 md:gap-8">
+          {/* Sidebar Filters - Desktop */}
+          <aside className="hidden lg:block w-72 flex-shrink-0">
+            <ScrollArea className="h-full">
+              <div className="space-y-6 pr-4">
+                {/* Clear Filters */}
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="w-full"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Xóa tất cả bộ lọc
+                  </Button>
+                )}
 
-            <div className={`${showFilters ? 'block' : 'hidden'} lg:block space-y-6`}>
-              {/* Clear Filters */}
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="w-full flex items-center justify-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  <X className="w-4 h-4" />
-                  Xóa tất cả bộ lọc
-                </button>
-              )}
+                {/* Category Filter */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Danh mục</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <RadioGroup value={selectedCategory || ''} onValueChange={(value) => setSelectedCategory(value || null)}>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <RadioGroupItem value="" id="category-all" />
+                        <Label htmlFor="category-all" className="font-normal cursor-pointer">
+                          Tất cả danh mục
+                        </Label>
+                      </div>
+                      {categories.map((category: any) => (
+                        <div key={category.id} className="flex items-center space-x-2 mb-2">
+                          <RadioGroupItem value={category.id} id={`category-${category.id}`} />
+                          <Label htmlFor={`category-${category.id}`} className="font-normal cursor-pointer">
+                            {category.name}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </CardContent>
+                </Card>
 
-              {/* Category Filter */}
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">Danh mục</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="category"
-                      checked={!selectedCategory}
-                      onChange={() => setSelectedCategory(null)}
-                      className="text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Tất cả danh mục</span>
-                  </label>
-                  {categories.map((category: any) => (
-                    <label key={category.id} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        checked={selectedCategory === category.id}
-                        onChange={() => setSelectedCategory(category.id)}
-                        className="text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">{category.name}</span>
-                    </label>
-                  ))}
-                </div>
+                {/* Level Filter */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Cấp độ</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <RadioGroup value={selectedLevel || ''} onValueChange={(value) => setSelectedLevel(value || null)}>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <RadioGroupItem value="" id="level-all" />
+                        <Label htmlFor="level-all" className="font-normal cursor-pointer">
+                          Tất cả cấp độ
+                        </Label>
+                      </div>
+                      {levels.map((level) => (
+                        <div key={level.value} className="flex items-center space-x-2 mb-2">
+                          <RadioGroupItem value={level.value} id={`level-${level.value}`} />
+                          <Label htmlFor={`level-${level.value}`} className="font-normal cursor-pointer">
+                            {level.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </CardContent>
+                </Card>
               </div>
-
-              {/* Level Filter */}
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <h3 className="font-semibold text-gray-900 mb-3">Cấp độ</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="level"
-                      checked={!selectedLevel}
-                      onChange={() => setSelectedLevel(null)}
-                      className="text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Tất cả cấp độ</span>
-                  </label>
-                  {levels.map((level) => (
-                    <label key={level} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="level"
-                        checked={selectedLevel === level}
-                        onChange={() => setSelectedLevel(level)}
-                        className="text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">
-                        {levelLabels[level]}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
+            </ScrollArea>
           </aside>
 
+          {/* Mobile Filter Sheet */}
+          <Sheet>
+            <SheetTrigger asChild className="lg:hidden">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Filter className="w-4 h-4" />
+                Bộ lọc
+                {hasActiveFilters && (
+                  <Badge variant="secondary" className="ml-1">
+                    Đang lọc
+                  </Badge>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72">
+              <SheetHeader>
+                <SheetTitle>Bộ lọc</SheetTitle>
+              </SheetHeader>
+              <ScrollArea className="h-full pr-4 mt-6">
+                <div className="space-y-6">
+                  {/* Clear Filters */}
+                  {hasActiveFilters && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearFilters}
+                      className="w-full"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Xóa tất cả
+                    </Button>
+                  )}
+
+                  {/* Category Filter */}
+                  <div>
+                    <h3 className="font-semibold mb-3">Danh mục</h3>
+                    <RadioGroup value={selectedCategory || ''} onValueChange={(value) => setSelectedCategory(value || null)}>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <RadioGroupItem value="" id="m-category-all" />
+                        <Label htmlFor="m-category-all" className="font-normal cursor-pointer">
+                          Tất cả danh mục
+                        </Label>
+                      </div>
+                      {categories.map((category: any) => (
+                        <div key={category.id} className="flex items-center space-x-2 mb-2">
+                          <RadioGroupItem value={category.id} id={`m-category-${category.id}`} />
+                          <Label htmlFor={`m-category-${category.id}`} className="font-normal cursor-pointer">
+                            {category.name}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+
+                  {/* Level Filter */}
+                  <div>
+                    <h3 className="font-semibold mb-3">Cấp độ</h3>
+                    <RadioGroup value={selectedLevel || ''} onValueChange={(value) => setSelectedLevel(value || null)}>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <RadioGroupItem value="" id="m-level-all" />
+                        <Label htmlFor="m-level-all" className="font-normal cursor-pointer">
+                          Tất cả cấp độ
+                        </Label>
+                      </div>
+                      {levels.map((level) => (
+                        <div key={level.value} className="flex items-center space-x-2 mb-2">
+                          <RadioGroupItem value={level.value} id={`m-level-${level.value}`} />
+                          <Label htmlFor={`m-level-${level.value}`} className="font-normal cursor-pointer">
+                            {level.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                </div>
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
+
           {/* Course Grid */}
-          <main className="flex-1">
+          <main className="flex-1 min-w-0">
             {/* Results Header */}
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl md:text-3xl font-bold">
                 {loading ? 'Đang tải...' : `${courses.length} khóa học`}
               </h2>
               {hasActiveFilters && (
-                <p className="text-gray-600 mt-1">
+                <p className="text-muted-foreground text-sm mt-2">
                   Hiển thị kết quả đã lọc
                 </p>
               )}
@@ -191,14 +254,16 @@ export default function CoursesPage() {
 
             {/* Error State */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <p className="text-red-800">Không thể tải khóa học. Vui lòng thử lại.</p>
-              </div>
+              <Card className="border-destructive bg-destructive/10 mb-6">
+                <CardContent className="pt-6">
+                  <p className="text-destructive">Không thể tải khóa học. Vui lòng thử lại.</p>
+                </CardContent>
+              </Card>
             )}
 
             {/* Course List */}
-            <CourseList 
-              courses={courses} 
+            <CourseList
+              courses={courses}
               loading={loading}
               emptyMessage={hasActiveFilters ? 'Không có khóa học phù hợp với bộ lọc' : 'Chưa có khóa học nào'}
             />
