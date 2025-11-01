@@ -17,6 +17,10 @@ interface UIStateContextType {
   setShowPreview: (show: boolean) => void;
   setShowAddChildDialog: (show: boolean) => void;
   setAddChildParentId: (id: string | null) => void;
+  
+  // Combined setter for atomic updates
+  openAddChildDialog: (parentId: string) => void;
+  closeAddChildDialog: () => void;
 }
 
 const UIStateContext = createContext<UIStateContextType | undefined>(undefined);
@@ -31,6 +35,23 @@ export function UIStateProvider({ children }: UIStateProviderProps) {
   const [showAddChildDialog, setShowAddChildDialogState] = useState(false);
   const [addChildParentId, setAddChildParentIdState] = useState<string | null>(null);
   
+  // Version counter to force context updates
+  const [version, setVersion] = useState(0);
+  
+  // Debug: Log state changes
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[UIStateContext] State changed:`, {
+        showAddChildDialog,
+        addChildParentId,
+        version,
+        timestamp: Date.now(),
+      });
+    }
+    // Increment version when critical state changes
+    setVersion(v => v + 1);
+  }, [showAddChildDialog, addChildParentId]);
+  
   // Memoized setters for stable references - prevents unnecessary re-renders
   const setShowPageSettings = useCallback((show: boolean) => {
     setShowPageSettingsState(show);
@@ -41,15 +62,37 @@ export function UIStateProvider({ children }: UIStateProviderProps) {
   }, []);
   
   const setShowAddChildDialog = useCallback((show: boolean) => {
+    console.log(`[UIStateContext] setShowAddChildDialog called with:`, show);
     setShowAddChildDialogState(show);
+    console.log(`[UIStateContext] showAddChildDialog state will be:`, show);
   }, []);
   
   const setAddChildParentId = useCallback((id: string | null) => {
+    console.log(`[UIStateContext] setAddChildParentId called with:`, id);
     setAddChildParentIdState(id);
   }, []);
   
-  // Memoize context value to prevent unnecessary re-renders
-  const value: UIStateContextType = useMemo(() => ({
+  // Atomic operations for Add Child Dialog
+  const openAddChildDialog = useCallback((parentId: string) => {
+    console.log(`[UIStateContext] openAddChildDialog called with parentId:`, parentId);
+    
+    // Use functional updates to ensure both states update together
+    setAddChildParentIdState(parentId);
+    setShowAddChildDialogState(true);
+    
+    console.log(`[UIStateContext] Dialog should open for parent:`, parentId);
+  }, []); // Empty deps - uses setter functions which are stable
+  
+  const closeAddChildDialog = useCallback(() => {
+    console.log(`[UIStateContext] closeAddChildDialog called`);
+    setShowAddChildDialogState(false);
+    setAddChildParentIdState(null);
+  }, []);
+  
+  // Context value WITHOUT memoization for testing
+  // This ensures consumers always get fresh state
+  // Include version to force new object reference
+  const value: UIStateContextType = {
     showPageSettings,
     showPreview,
     showAddChildDialog,
@@ -58,16 +101,20 @@ export function UIStateProvider({ children }: UIStateProviderProps) {
     setShowPreview,
     setShowAddChildDialog,
     setAddChildParentId,
-  }), [
-    showPageSettings,
-    showPreview,
-    showAddChildDialog,
-    addChildParentId,
-    setShowPageSettings,
-    setShowPreview,
-    setShowAddChildDialog,
-    setAddChildParentId,
-  ]);
+    openAddChildDialog,
+    closeAddChildDialog,
+    _version: version, // Internal version tracker
+  } as any;
+  
+  // Log when context value changes
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[UIStateContext] Context value updated (v${version}):`, {
+        showAddChildDialog: value.showAddChildDialog,
+        addChildParentId: value.addChildParentId,
+      });
+    }
+  }, [value.showAddChildDialog, value.addChildParentId, version]);
   
   return (
     <UIStateContext.Provider value={value}>
@@ -90,6 +137,8 @@ export function useUIState() {
         setShowPreview: () => {},
         setShowAddChildDialog: () => {},
         setAddChildParentId: () => {},
+        openAddChildDialog: () => {},
+        closeAddChildDialog: () => {},
       } as UIStateContextType;
     }
     throw new Error(

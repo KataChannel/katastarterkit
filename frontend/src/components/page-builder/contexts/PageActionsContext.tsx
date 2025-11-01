@@ -506,9 +506,9 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   // Nested block operations
   const handleAddChild = useCallback((parentId: string) => {
     console.log(`[PageActionsContext] handleAddChild called with parentId:`, parentId);
-    uiState.setAddChildParentId(parentId);
-    uiState.setShowAddChildDialog(true);
-    console.log(`[PageActionsContext] showAddChildDialog and parentId set`);
+    // Use atomic operation to set both states together
+    uiState.openAddChildDialog(parentId);
+    console.log(`[PageActionsContext] openAddChildDialog called`);
   }, [uiState]);
   
   const handleAddChildBlock = useCallback(async (parentId: string, blockType: BlockType) => {
@@ -527,8 +527,8 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_CREATE, 'Child block added', { parentId, blockType });
       toast.success('Child block added!');
       
-      uiState.setShowAddChildDialog(false);
-      uiState.setAddChildParentId(null);
+      // Use atomic close operation
+      uiState.closeAddChildDialog();
       
       await refetch();
     } catch (error: any) {
@@ -538,8 +538,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   }, [pageState, uiState, nestedOps]);
   
   const handleCloseAddChildDialog = useCallback(() => {
-    uiState.setShowAddChildDialog(false);
-    uiState.setAddChildParentId(null);
+    uiState.closeAddChildDialog();
   }, [uiState]);
   
   // Template operations

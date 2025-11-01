@@ -29,7 +29,8 @@ function PageBuilderInternal() {
   // Use individual hooks for better performance
   // These are safe to call here because PageBuilderInternal is always
   // rendered inside PageBuilderProvider
-  const { showAddChildDialog, addChildParentId } = useUIState();
+  const uiState = useUIState();
+  const { showAddChildDialog, addChildParentId } = uiState;
   const { 
     showPreviewModal, 
     selectedTemplate, 
@@ -43,11 +44,60 @@ function PageBuilderInternal() {
   const { blocks } = usePageState();
   const { handleApplyTemplate, handleAddChildBlock, handleCloseAddChildDialog, handlePageSave } = usePageActions();
   
+  // Render counter for debugging
+  const renderCount = React.useRef(0);
+  renderCount.current++;
+  
+  // Debug logging
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[PageBuilder #${renderCount.current}] UI State:`, {
+        showAddChildDialog,
+        addChildParentId,
+        showPreviewModal,
+        showSaveTemplateDialog,
+      });
+      console.log(`[PageBuilder #${renderCount.current}] Dialog should be:`, showAddChildDialog ? '✅ VISIBLE' : '❌ HIDDEN');
+    }
+  }, [showAddChildDialog, addChildParentId, showPreviewModal, showSaveTemplateDialog]);
+  
   // Setup keyboard shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+S)
   useKeyboardShortcuts(handlePageSave);
 
+  // Direct render log
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[PageBuilder RENDER #${renderCount.current}] Direct values:`, {
+      showAddChildDialog,
+      addChildParentId,
+    });
+  }
+
   return (
     <div className="h-full flex flex-col bg-gray-50">
+      {/* Debug Badge */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed bottom-4 right-4 bg-black text-white text-xs p-2 rounded z-[9999] pointer-events-none space-y-1">
+          <div>Render #{renderCount.current}</div>
+          <div>Dialog State: {showAddChildDialog ? '✅ OPEN' : '❌ CLOSED'}</div>
+          <div>Parent ID: {addChildParentId ? `${addChildParentId.substring(0, 8)}...` : '❌ null'}</div>
+          <div>Timestamp: {Date.now()}</div>
+        </div>
+      )}
+      
+      {/* Test Button - Direct State Toggle */}
+      {process.env.NODE_ENV === 'development' && (
+        <button
+          onClick={() => {
+            console.log('[TEST BUTTON] Clicked - calling openAddChildDialog');
+            uiState.openAddChildDialog('test-parent-12345678');
+          }}
+          className="fixed top-20 right-4 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded shadow-lg z-[9999] cursor-pointer"
+          style={{ pointerEvents: 'auto' }}
+        >
+          🧪 TEST OPEN DIALOG
+        </button>
+      )}
+      
       {/* Top Bar: Page title, status, actions (simplified for normal mode) */}
       <PageBuilderTopBar
         showEditorControls={false}
@@ -64,10 +114,24 @@ function PageBuilderInternal() {
       </div>
       
       {/* Add Child Block Dialog */}
-      <Dialog open={showAddChildDialog} onOpenChange={(open) => !open && handleCloseAddChildDialog()}>
+      <Dialog 
+        open={showAddChildDialog} 
+        onOpenChange={(open) => {
+          console.log(`[PageBuilder Dialog] onOpenChange:`, open);
+          if (!open) handleCloseAddChildDialog();
+        }}
+      >
+        {(() => {
+          console.log(`[PageBuilder Dialog] RENDERING with open=${showAddChildDialog}`);
+          return null;
+        })()}
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add Child Block</DialogTitle>
+            <DialogTitle>Add Child Block to Container</DialogTitle>
+            <p className="text-sm text-gray-600 mt-1">
+              Select a block type to add to the container
+              {addChildParentId && ` (Parent: ${addChildParentId.substring(0, 8)}...)`}
+            </p>
           </DialogHeader>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 py-4">
             {BLOCK_TYPES.map(({ type, label, icon: Icon, color }) => (
@@ -75,7 +139,12 @@ function PageBuilderInternal() {
                 key={type}
                 variant="outline"
                 className="h-auto p-4 flex flex-col items-center justify-center space-y-2 hover:border-blue-500"
-                onClick={() => addChildParentId && handleAddChildBlock(addChildParentId, type)}
+                onClick={() => {
+                  console.log(`[PageBuilder] Block selected:`, type, 'parentId:', addChildParentId);
+                  if (addChildParentId) {
+                    handleAddChildBlock(addChildParentId, type);
+                  }
+                }}
               >
                 <div className={`p-3 rounded-lg ${color}`}>
                   <Icon size={24} />

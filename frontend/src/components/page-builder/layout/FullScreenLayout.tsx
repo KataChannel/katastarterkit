@@ -7,10 +7,13 @@ import { EditorCanvas } from './EditorCanvas';
 import { EditorFooter } from './EditorFooter';
 import { LeftPanel } from '../panels/LeftPanel/LeftPanel';
 import { RightPanel } from '../panels/RightPanel/RightPanel';
-import { usePageState, usePageActions } from '../PageBuilderProvider';
+import { usePageState, usePageActions, useUIState } from '../PageBuilderProvider';
 import { useToast } from '@/hooks/use-toast';
 import { UPDATE_PAGE } from '@/graphql/queries/pages';
-import { UpdatePageInput } from '@/types/page-builder';
+import { UpdatePageInput, BlockType } from '@/types/page-builder';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { BLOCK_TYPES } from '@/constants/blockTypes';
 
 interface FullScreenLayoutProps {
   editorMode: 'visual' | 'code';
@@ -31,7 +34,8 @@ export function FullScreenLayout({
   
   // Get block selection and loading state from context
   const { selectedBlockId, loading, editingPage, setEditingPage } = usePageState();
-  const { handleSelectBlock } = usePageActions();
+  const { handleSelectBlock, handleAddChildBlock, handleCloseAddChildDialog } = usePageActions();
+  const { showAddChildDialog, addChildParentId } = useUIState();
   const { toast } = useToast();
 
   // GraphQL mutation for updating page
@@ -169,6 +173,45 @@ export function FullScreenLayout({
         selectedBlockId={selectedBlockId}
         device={device}
       />
+      
+      {/* Add Child Block Dialog */}
+      <Dialog 
+        open={showAddChildDialog} 
+        onOpenChange={(open) => {
+          console.log(`[FullScreenLayout] Dialog onOpenChange:`, open);
+          if (!open) handleCloseAddChildDialog();
+        }}
+      >
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add Child Block to Container</DialogTitle>
+            <p className="text-sm text-gray-600 mt-1">
+              Select a block type to add to the container
+              {addChildParentId && ` (Parent: ${addChildParentId.substring(0, 8)}...)`}
+            </p>
+          </DialogHeader>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 py-4">
+            {BLOCK_TYPES.map(({ type, label, icon: Icon, color }) => (
+              <Button
+                key={type}
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-center justify-center space-y-2 hover:border-blue-500"
+                onClick={() => {
+                  console.log(`[FullScreenLayout] Block selected:`, type, 'parentId:', addChildParentId);
+                  if (addChildParentId) {
+                    handleAddChildBlock(addChildParentId, type);
+                  }
+                }}
+              >
+                <div className={`p-3 rounded-lg ${color}`}>
+                  <Icon size={24} />
+                </div>
+                <span className="text-sm font-medium text-center">{label}</span>
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
