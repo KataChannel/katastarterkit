@@ -4,6 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Clock, Users, Star, BookOpen } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface CourseCardProps {
   course: {
@@ -29,11 +32,11 @@ interface CourseCardProps {
   showInstructor?: boolean;
 }
 
-const LEVEL_COLORS = {
-  BEGINNER: 'bg-green-100 text-green-800',
-  INTERMEDIATE: 'bg-blue-100 text-blue-800',
-  ADVANCED: 'bg-purple-100 text-purple-800',
-  EXPERT: 'bg-red-100 text-red-800',
+const LEVEL_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  BEGINNER: 'default',
+  INTERMEDIATE: 'secondary',
+  ADVANCED: 'outline',
+  EXPERT: 'destructive',
 };
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -44,13 +47,13 @@ const LEVEL_LABELS: Record<string, string> = {
 };
 
 export default function CourseCard({ course, showInstructor = true }: CourseCardProps) {
-  const levelColor = LEVEL_COLORS[course.level as keyof typeof LEVEL_COLORS] || 'bg-gray-100 text-gray-800';
+  const levelVariant = LEVEL_VARIANTS[course.level as keyof typeof LEVEL_VARIANTS] || 'secondary';
 
   return (
-    <Link href={`/lms/courses/${course.slug}`}>
-      <div className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-blue-200 h-full flex flex-col">
+    <Link href={`/lms/courses/${course.slug}`} className="block h-full">
+      <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-primary h-full flex flex-col">
         {/* Thumbnail */}
-        <div className="relative h-48 bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
+        <div className="relative h-48 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 overflow-hidden">
           {course.thumbnail ? (
             <Image
               src={course.thumbnail}
@@ -60,64 +63,55 @@ export default function CourseCard({ course, showInstructor = true }: CourseCard
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <BookOpen className="w-16 h-16 text-blue-300" />
+              <BookOpen className="w-16 h-16 text-muted-foreground" />
             </div>
           )}
           
           {/* Price Badge */}
           <div className="absolute top-3 right-3">
             {course.price > 0 ? (
-              <span className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-gray-900 shadow-sm">
-                ${course.price}
-              </span>
+              <Badge variant="secondary" className="shadow-sm">
+                {course.price.toLocaleString('vi-VN')}đ
+              </Badge>
             ) : (
-              <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
+              <Badge className="bg-green-600 hover:bg-green-700 text-white shadow-sm">
                 Miễn phí
-              </span>
+              </Badge>
             )}
           </div>
 
           {/* Level Badge */}
           <div className="absolute top-3 left-3">
-            <span className={`${levelColor} px-2 py-1 rounded text-xs font-medium`}>
+            <Badge variant={levelVariant} className="text-xs">
               {LEVEL_LABELS[course.level] || course.level}
-            </span>
+            </Badge>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-5 flex-1 flex flex-col">
+        <CardContent className="p-5 flex-1 flex flex-col">
           {/* Title */}
-          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+          <h3 className="text-lg font-bold mb-2 line-clamp-2 group-hover:text-primary transition-colors">
             {course.title}
           </h3>
 
           {/* Description */}
           {course.description && (
-            <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-1">
+            <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
               {course.description}
             </p>
           )}
 
           {/* Instructor */}
           {showInstructor && course.instructor && (
-            <div className="flex items-center gap-2 mb-4 text-sm text-gray-700">
-              {course.instructor.avatar ? (
-                <Image
-                  src={course.instructor.avatar}
-                  alt={course.instructor.username}
-                  width={24}
-                  height={24}
-                  className="rounded-full"
-                />
-              ) : (
-                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-600">
-                    {course.instructor.firstName?.[0] || course.instructor.username[0]}
-                  </span>
-                </div>
-              )}
-              <span className="truncate">
+            <div className="flex items-center gap-2 mb-4 text-sm">
+              <Avatar className="w-6 h-6">
+                <AvatarImage src={course.instructor.avatar || ''} alt={course.instructor.username} />
+                <AvatarFallback className="text-xs">
+                  {course.instructor.firstName?.[0] || course.instructor.username[0]}
+                </AvatarFallback>
+              </Avatar>
+              <span className="truncate text-muted-foreground">
                 {course.instructor.firstName && course.instructor.lastName
                   ? `${course.instructor.firstName} ${course.instructor.lastName}`
                   : course.instructor.username}
@@ -126,12 +120,12 @@ export default function CourseCard({ course, showInstructor = true }: CourseCard
           )}
 
           {/* Stats */}
-          <div className="flex items-center gap-4 text-sm text-gray-600 pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground pt-4 border-t">
             {/* Rating */}
             <div className="flex items-center gap-1">
-              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-              <span className="font-medium">{course.avgRating.toFixed(1)}</span>
-              <span className="text-gray-400">({course.reviewCount})</span>
+              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+              <span className="font-medium text-foreground">{course.avgRating.toFixed(1)}</span>
+              <span className="text-xs">({course.reviewCount})</span>
             </div>
 
             {/* Students */}
@@ -144,12 +138,12 @@ export default function CourseCard({ course, showInstructor = true }: CourseCard
             {course.duration && (
               <div className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
-                <span>{Math.floor(course.duration / 60)}h {course.duration % 60}m</span>
+                <span className="text-xs">{Math.floor(course.duration / 60)}h {course.duration % 60}m</span>
               </div>
             )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </Link>
   );
 }

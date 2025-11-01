@@ -9,6 +9,7 @@ import { ENROLL_COURSE } from '@/graphql/lms/enrollments.graphql';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 interface EnrollButtonProps {
   courseId: string;
@@ -81,25 +82,27 @@ export default function EnrollButton({
 
   if (enrolled) {
     return (
-      <button
+      <Button
         onClick={() => router.push(`/lms/learn/${courseSlug}`)}
-        className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+        className="w-full bg-green-600 hover:bg-green-700"
+        size="lg"
       >
-        <CheckCircle className="w-5 h-5" />
+        <CheckCircle className="w-5 h-5 mr-2" />
         Vào học
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
+    <Button
       onClick={handleEnroll}
       disabled={loading}
-      className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+      className="w-full"
+      size="lg"
     >
       {loading ? (
         <>
-          <Loader2 className="w-5 h-5 animate-spin" />
+          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
           Đang ghi danh...
         </>
       ) : !isAuthenticated ? (
@@ -108,9 +111,9 @@ export default function EnrollButton({
         </>
       ) : (
         <>
-          {price > 0 ? `Ghi danh - $${price}` : 'Ghi danh miễn phí'}
+          {price > 0 ? `Ghi danh - ${price.toLocaleString('vi-VN')}đ` : 'Ghi danh miễn phí'}
         </>
       )}
-    </button>
+    </Button>
   );
 }

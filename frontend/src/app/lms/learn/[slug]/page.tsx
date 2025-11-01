@@ -5,8 +5,13 @@ import { useQuery } from '@apollo/client';
 import { useParams, useSearchParams } from 'next/navigation';
 import { GET_COURSE_BY_SLUG, GET_ENROLLMENT } from '@/graphql/lms/courses.graphql';
 import LessonViewer from '@/components/lms/LessonViewer';
-import { CheckCircle, Lock, PlayCircle, FileText, ChevronRight } from 'lucide-react';
+import { CheckCircle, Lock, PlayCircle, FileText, ChevronRight, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 export default function LearnCoursePage() {
   const params = useParams();
@@ -69,109 +74,127 @@ export default function LearnCoursePage() {
 
   if (courseLoading || enrollmentLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Đang tải khóa học...</p>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6 text-center">
+            <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Đang tải khóa học...</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   if (!course || !enrollment) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy khóa học</h1>
-          <p className="text-gray-600 mb-4">Bạn có thể chưa đăng ký khóa học này</p>
-          <Link
-            href="/lms/courses"
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-          >
-            Khám phá khóa học
-          </Link>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6 text-center space-y-4">
+            <h1 className="text-2xl font-bold">Không tìm thấy khóa học</h1>
+            <p className="text-muted-foreground">Bạn có thể chưa đăng ký khóa học này</p>
+            <Button asChild>
+              <Link href="/lms/courses">
+                Khám phá khóa học
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex">
+    <div className="min-h-screen bg-background">
+      <div className="flex flex-col lg:flex-row">
         {/* Sidebar - Course Content */}
-        <aside className="w-96 bg-white border-r border-gray-200 h-screen overflow-y-auto sticky top-0">
-          {/* Course Header */}
-          <div className="p-6 border-b border-gray-200">
-            <Link href={`/lms/courses/${slug}`} className="text-sm text-blue-600 hover:text-blue-700 mb-2 block">
-              ← Quay lại khóa học
-            </Link>
-            <h2 className="text-lg font-bold text-gray-900">{course.title}</h2>
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">Tiến độ của bạn</span>
-                <span className="text-sm font-bold text-blue-600">{enrollment.progress}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${enrollment.progress}%` }}
-                />
+        <aside className="w-full lg:w-96 bg-card border-b lg:border-r lg:border-b-0 lg:h-screen lg:sticky lg:top-0">
+          <ScrollArea className="h-[400px] lg:h-screen">
+            {/* Course Header */}
+            <div className="p-4 md:p-6 border-b">
+              <Button variant="ghost" size="sm" asChild className="mb-3 -ml-2">
+                <Link href={`/lms/courses/${slug}`}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Quay lại
+                </Link>
+              </Button>
+              <h2 className="text-lg font-bold mb-4">{course.title}</h2>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-muted-foreground">Tiến độ của bạn</span>
+                  <span className="text-sm font-bold text-primary">{enrollment.progress}%</span>
+                </div>
+                <Progress value={enrollment.progress} className="h-2" />
               </div>
             </div>
-          </div>
 
-          {/* Lesson List */}
-          <div className="p-4">
-            {course.modules?.map((module: any, moduleIndex: number) => (
-              <div key={module.id} className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3 px-2">
-                  {moduleIndex + 1}. {module.title}
-                </h3>
-                <div className="space-y-1">
-                  {module.lessons.map((lesson: any, lessonIndex: number) => {
-                    const globalIndex = allLessons.findIndex((l: any) => l.id === lesson.id);
-                    const isCompleted = isLessonCompleted(lesson.id);
-                    const isCurrent = globalIndex === currentLessonIndex;
+            {/* Lesson List */}
+            <div className="p-4">
+              {course.modules?.map((module: any, moduleIndex: number) => (
+                <div key={module.id} className="mb-6">
+                  <h3 className="text-sm font-semibold mb-3 px-2">
+                    {moduleIndex + 1}. {module.title}
+                  </h3>
+                  <div className="space-y-1">
+                    {module.lessons.map((lesson: any, lessonIndex: number) => {
+                      const globalIndex = allLessons.findIndex((l: any) => l.id === lesson.id);
+                      const isCompleted = isLessonCompleted(lesson.id);
+                      const isCurrent = globalIndex === currentLessonIndex;
 
-                    return (
-                      <button
-                        key={lesson.id}
-                        onClick={() => handleSelectLesson(globalIndex)}
-                        className={`w-full text-left p-3 rounded-lg transition-colors flex items-start gap-3 ${
-                          isCurrent
-                            ? 'bg-blue-50 border-2 border-blue-500'
-                            : 'hover:bg-gray-50 border-2 border-transparent'
-                        }`}
-                      >
-                        <div className="flex-shrink-0 mt-0.5">
-                          {isCompleted ? (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                          ) : lesson.type === 'VIDEO' ? (
-                            <PlayCircle className="w-5 h-5 text-gray-400" />
-                          ) : (
-                            <FileText className="w-5 h-5 text-gray-400" />
+                      return (
+                        <Button
+                          key={lesson.id}
+                          onClick={() => handleSelectLesson(globalIndex)}
+                          variant={isCurrent ? "default" : "ghost"}
+                          className={cn(
+                            "w-full justify-start h-auto py-3 px-3",
+                            isCurrent && "bg-primary text-primary-foreground"
                           )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium ${isCurrent ? 'text-blue-900' : 'text-gray-900'}`}>
-                            {lesson.title}
-                          </p>
-                          {lesson.duration && (
-                            <p className="text-xs text-gray-500 mt-1">{lesson.duration} min</p>
-                          )}
-                        </div>
-                        {isCurrent && <ChevronRight className="w-5 h-5 text-blue-600 flex-shrink-0" />}
-                      </button>
-                    );
-                  })}
+                        >
+                          <div className="flex items-start gap-3 w-full">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {isCompleted ? (
+                                <CheckCircle className="w-5 h-5 text-green-600" />
+                              ) : lesson.type === 'VIDEO' ? (
+                                <PlayCircle className={cn(
+                                  "w-5 h-5",
+                                  isCurrent ? "text-primary-foreground" : "text-muted-foreground"
+                                )} />
+                              ) : (
+                                <FileText className={cn(
+                                  "w-5 h-5",
+                                  isCurrent ? "text-primary-foreground" : "text-muted-foreground"
+                                )} />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                              <p className="text-sm font-medium">
+                                {lesson.title}
+                              </p>
+                              {lesson.duration && (
+                                <p className={cn(
+                                  "text-xs mt-1",
+                                  isCurrent ? "text-primary-foreground/70" : "text-muted-foreground"
+                                )}>
+                                  {lesson.duration} phút
+                                </p>
+                              )}
+                            </div>
+                            {isCurrent && (
+                              <ChevronRight className="w-5 h-5 flex-shrink-0" />
+                            )}
+                          </div>
+                        </Button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </ScrollArea>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8 max-w-5xl mx-auto">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-5xl mx-auto w-full">
           {currentLesson ? (
             <LessonViewer
               lesson={currentLesson}
@@ -182,9 +205,11 @@ export default function LearnCoursePage() {
               onNextLesson={handleNextLesson}
             />
           ) : (
-            <div className="text-center py-16">
-              <p className="text-gray-600">Chưa có bài học nào</p>
-            </div>
+            <Card>
+              <CardContent className="text-center py-16">
+                <p className="text-muted-foreground">Chưa có bài học nào</p>
+              </CardContent>
+            </Card>
           )}
         </main>
       </div>
