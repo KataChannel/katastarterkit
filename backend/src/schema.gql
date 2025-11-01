@@ -823,6 +823,21 @@ input ChangePasswordInput {
   newPassword: String!
 }
 
+type ChatMedia {
+  caption: String
+  createdAt: DateTime!
+  filename: String!
+  id: ID!
+  messageId: String!
+  mimeType: String!
+  size: Int!
+  type: MediaType!
+  updatedAt: DateTime!
+  uploadedBy: String!
+  uploader: MediaUploader
+  url: String!
+}
+
 type ClearCartResponse {
   cart: CartType
   errors: [String!]
@@ -2210,11 +2225,19 @@ enum MaritalStatus {
   WIDOWED
 }
 
-"""The type of media file"""
+"""Type of uploaded media"""
 enum MediaType {
   DOCUMENT
   IMAGE
   VIDEO
+}
+
+type MediaUploader {
+  avatar: String
+  email: String
+  firstName: String
+  id: ID!
+  lastName: String
 }
 
 input MenuFilterDto {
@@ -2432,7 +2455,9 @@ type Mutation {
   deleteCustomTemplate(id: String!): Boolean!
   deleteDiscussion(id: ID!): Boolean!
   deleteEmployeeProfile(id: ID!): DeleteResponse!
-  deleteFile(bucket: String!, fileId: String!): Boolean!
+
+  """Delete a file"""
+  deleteFile(fileId: ID!, type: String!): Boolean!
   deleteFolder(id: ID!): Boolean!
   deleteInvoice(id: ID!): Boolean!
   deleteLesson(id: ID!): Boolean!
@@ -2638,12 +2663,21 @@ type Mutation {
   """Update ext_sanphamhoadon"""
   updateext_sanphamhoadon(data: JSON!, id: String!, options: JSON): JSON!
   uploadAndMapImage(editOptions: JSON, file: Upload!, mappingConfig: JSON!): JSON!
+
+  """Upload file to chat message - Use Dynamic GraphQL createOne instead"""
+  uploadChatFile(caption: String, filename: String!, messageId: ID!, mimetype: String!, size: Float!, url: String!): ChatMedia!
   uploadCourseMaterial(courseId: String!, file: Upload!): FileUploadResult!
   uploadCourseThumbnail(courseId: String, file: Upload!): FileUploadResult!
   uploadFile(file: JSON!, folderId: ID, metadata: JSON): FileUploadResponse!
   uploadImage(bucket: String = "images", editOptions: JSON, file: Upload!): JSON!
   uploadLessonVideo(courseId: String!, file: Upload!): FileUploadResult!
   uploadMultipleImages(bucket: String = "images", editOptions: JSON, files: [Upload!]!): JSON!
+
+  """Upload file to project - Use Dynamic GraphQL createOne instead"""
+  uploadProjectFile(caption: String, filename: String!, mimetype: String!, projectId: ID!, size: Float!, url: String!): ProjectMedia!
+
+  """Upload file to task - Use Dynamic GraphQL createOne instead"""
+  uploadTaskFile(caption: String, filename: String!, mimetype: String!, size: Float!, taskId: ID!, url: String!): ProjectMedia!
   uploadTaskMedia(input: UploadTaskMediaInput!): TaskMedia!
 
   """Create or update a record based on criteria"""
@@ -3402,6 +3436,21 @@ type Project {
   updatedAt: DateTime!
 }
 
+type ProjectMedia {
+  caption: String
+  createdAt: DateTime!
+  filename: String!
+  id: ID!
+  mimeType: String!
+  projectId: String!
+  size: Int!
+  type: MediaType!
+  updatedAt: DateTime!
+  uploadedBy: String!
+  uploader: MediaUploader
+  url: String!
+}
+
 type ProjectMember {
   id: ID!
   joinedAt: DateTime!
@@ -3443,6 +3492,18 @@ type Query {
   blogTags: [BlogTagType!]!
   blogs(categoryId: ID, limit: Int, page: Int, search: String, sort: String): PaginatedBlogs!
   blogsByCategory(categoryId: ID!, limit: Int, page: Int): PaginatedBlogs!
+
+  """Get month view for calendar"""
+  calendarMonthView(month: Float!, projectId: ID, year: Float!): String!
+
+  """Get calendar statistics for a period"""
+  calendarStatistics(endDate: DateTime!, projectId: ID, startDate: DateTime!): String!
+
+  """Get tasks for calendar view (returned as JSON string)"""
+  calendarTasks(endDate: DateTime!, projectId: ID, startDate: DateTime!): String!
+
+  """Get week view for calendar"""
+  calendarWeekView(projectId: ID, startDate: DateTime!): String!
   canReviewProduct(productId: ID!): CanReviewResponse!
   categories(input: GetCategoriesInput): PaginatedCategories!
   category(id: ID!): CategoryType!
@@ -3488,6 +3549,9 @@ type Query {
 
   """Check if a record exists matching the criteria"""
   exists(modelName: String!, where: JSONObject!): Boolean!
+
+  """Export tasks as iCal format (.ics file)"""
+  exportICalendar(projectId: ID): String!
   featuredBlogs(limit: Int): [BlogType!]!
   file(id: ID!): File!
   fileStorageStats: FileStorageStats!
@@ -3645,6 +3709,9 @@ type Query {
   listOffboardingProcesses(clearanceStatus: ClearanceStatus, skip: Int, status: OffboardingStatus, take: Int): OffboardingListResponse!
   listOnboardingChecklists(skip: Int, status: OnboardingStatus, take: Int): OnboardingListResponse!
   listOrders(filter: OrderFilterInput): OrderListResponse!
+
+  """Get member performance statistics"""
+  memberStatistics(projectId: ID!): String!
   menu(id: ID!): MenuResponseDto
   menuBySlug(slug: String!): MenuResponseDto
   menuTree(parentId: String, type: String): [MenuResponseDto!]!
@@ -3669,6 +3736,9 @@ type Query {
 
   """Check Orama search engine health status"""
   oramaHealthCheck: OramaHealthCheck!
+
+  """Get overdue tasks"""
+  overdueTasks(projectId: ID!): String!
   product(id: ID!): ProductType!
   productBySlug(slug: String!): ProductType!
   productRatingSummary(productId: ID!): ProductRatingSummaryType!
@@ -3678,6 +3748,15 @@ type Query {
 
   """Lấy chi tiết 1 project"""
   project(id: String!): Project!
+
+  """Get comprehensive project analytics (returned as JSON string)"""
+  projectAnalytics(endDate: DateTime, projectId: ID!, startDate: DateTime): String!
+
+  """Get all files for a project"""
+  projectFiles(projectId: ID!): [ProjectMedia!]!
+
+  """Get project health score (0-100)"""
+  projectHealthScore(projectId: ID!): String!
 
   """Lấy danh sách members (dùng cho @mention autocomplete)"""
   projectMembers(projectId: ID!): [ProjectMember!]!
@@ -3723,6 +3802,18 @@ type Query {
   supportConversations(take: Int, where: SupportConversationWhereInput): [SupportConversation!]!
   supportMessages(conversationId: String!): [SupportMessage!]!
 
+  """Get tag usage statistics"""
+  tagStatistics(projectId: ID!): String!
+
+  """Get all files for a task"""
+  taskFiles(taskId: ID!): [ProjectMedia!]!
+
+  """Get task statistics by status and priority"""
+  taskStatistics(projectId: ID!): String!
+
+  """Get task completion velocity"""
+  taskVelocity(days: Float! = 30, projectId: ID!): String!
+
   """Test similarity between two products"""
   testProductSimilarity(productId1: String!, productId2: String!): ProductSimilarityTest
 
@@ -3736,6 +3827,12 @@ type Query {
   Search across all entity types (tasks, users, projects, affiliate campaigns, affiliate links)
   """
   universalSearch(input: OramaSearchInput!): UniversalSearchResult!
+
+  """Get tasks with upcoming deadlines (next 7 days)"""
+  upcomingDeadlines(projectId: ID!): String!
+
+  """Get upcoming tasks for reminders"""
+  upcomingTasks(hours: Float! = 24): String!
   userReview(courseId: ID!): Review
   validateCart(sessionId: String): ValidateCartResponse!
   validateImportData(data: JSON!, requiredFields: [String!]!): JSON!
