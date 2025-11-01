@@ -54,7 +54,7 @@ import { PageTemplate, PageElement, ImportTemplateData } from '@/types/template'
 import { useTemplates } from '@/hooks/useTemplates';
 import { useToast } from '@/hooks/use-toast';
 import { GET_PAGE_BY_ID } from '@/graphql/queries/pages';
-import { usePageState, useUIState } from './PageBuilderProvider';
+import { usePageState, useUIState, usePageActions, useHistory } from './PageBuilderProvider';
 import { PageStatus } from '@/types/page-builder';
 import PageSettingsForm from './PageSettingsForm';
 
@@ -554,6 +554,10 @@ const ToolbarRightSection = React.memo(function ToolbarRightSection({
   isLoading: boolean;
   showEditorControls?: boolean;
 }) {
+  // Get history and actions from context
+  const history = useHistory();
+  const pageActions = usePageActions();
+  
   return (
     <div className="flex items-center space-x-2 flex-shrink-0 px-4">
       {/* Panel Toggles - Only show in fullscreen with editor controls */}
@@ -589,20 +593,22 @@ const ToolbarRightSection = React.memo(function ToolbarRightSection({
 
           <div className="w-px h-6 bg-gray-300" />
 
-          {/* Undo/Redo */}
+          {/* Undo/Redo with History */}
           <Button
             variant="ghost"
             size="icon"
-            disabled
-            title="Undo (Ctrl+Z)"
+            onClick={pageActions.handleUndo}
+            disabled={!history.canUndo || isLoading}
+            title={`Undo${history.canUndo ? `: ${history.getUndoAction()}` : ''} (Ctrl+Z)`}
           >
             <Undo className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            disabled
-            title="Redo (Ctrl+Y)"
+            onClick={pageActions.handleRedo}
+            disabled={!history.canRedo || isLoading}
+            title={`Redo${history.canRedo ? `: ${history.getRedoAction()}` : ''} (Ctrl+Y)`}
           >
             <Redo className="w-4 h-4" />
           </Button>

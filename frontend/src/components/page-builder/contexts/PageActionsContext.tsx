@@ -9,6 +9,7 @@ import { pageBuilderLogger, LOG_OPERATIONS } from '../utils/pageBuilderLogger';
 import { usePageState } from './PageStateContext';
 import { useTemplate } from './TemplateContext';
 import { useUIState } from './UIStateContext';
+import { useHistory } from './HistoryContext';
 import { BlockTemplate } from '@/data/blockTemplates';
 
 /**
@@ -153,6 +154,10 @@ interface PageActionsContextType {
   handleSelectBlock: (blockId: string | null) => void;
   handleUpdateBlockStyle: (blockId: string, style: any) => Promise<void>;
   
+  // History operations
+  handleUndo: () => Promise<void>;
+  handleRedo: () => Promise<void>;
+  
   // Nested block operations
   handleAddChild: (parentId: string) => void;
   handleAddChildBlock: (parentId: string, blockType: BlockType) => Promise<void>;
@@ -178,6 +183,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   const pageState = usePageState();
   const templateState = useTemplate();
   const uiState = useUIState();
+  const history = useHistory();
   
   const { createPage, updatePage, deletePage } = usePageOperations();
   // Initialize with pageId from props, but fall back to state's page ID
@@ -264,7 +270,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   // Block operations
   const handleAddBlock = useCallback(async (blockType: BlockType) => {
     try {
-      const { page, refetch } = pageState;
+      const { page, refetch, blocks } = pageState;
       
       if (!page?.id) {
         toast.error('Please create a page first');
@@ -304,12 +310,18 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       
       console.log('[PageBuilder] Block added successfully:', result);
       await refetch();
+      
+      // Push to history after successful add
+      const newBlocks = await refetch();
+      if (newBlocks?.data?.page?.blocks) {
+        history.pushHistory(newBlocks.data.page.blocks, `Added ${blockType} block`);
+      }
     } catch (error: any) {
       console.error('[PageBuilder] Block add error:', error);
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_CREATE, 'Failed to add block', { error });
       toast.error(error?.message || 'Failed to add block');
     }
-  }, [pageState, addBlock]);
+  }, [pageState, addBlock, history]);
   
   const handleAddTemplateBlock = useCallback(async (templateConfig: any) => {
     try {
@@ -353,24 +365,34 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       
       await updateBlock(blockId, input);
       pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_UPDATE, 'Block updated', { blockId, content, style });
-      await pageState.refetch();
+      const result = await pageState.refetch();
+      
+      // Push to history after successful update
+      if (result?.data?.page?.blocks) {
+        history.pushHistory(result.data.page.blocks, `Updated block`);
+      }
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_UPDATE, 'Failed to update block', { error });
       toast.error(error?.message || 'Failed to update block');
     }
-  }, [updateBlock, pageState]);
+  }, [updateBlock, pageState, history]);
   
   const handleBlockDelete = useCallback(async (blockId: string) => {
     try {
       await deleteBlock(blockId);
       pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_DELETE, 'Block deleted', { blockId });
       toast.success('Block deleted!');
-      await pageState.refetch();
+      const result = await pageState.refetch();
+      
+      // Push to history after successful delete
+      if (result?.data?.page?.blocks) {
+        history.pushHistory(result.data.page.blocks, `Deleted block`);
+      }
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_DELETE, 'Failed to delete block', { error });
       toast.error(error?.message || 'Failed to delete block');
     }
-  }, [deleteBlock, pageState]);
+  }, [deleteBlock, pageState, history]);
   
   const handleBlocksReorder = useCallback(async (newBlocks: PageBlock[]) => {
     try {
@@ -387,7 +409,12 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       await updateBlocksOrder(updates);
       
       pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_REORDER, 'Blocks reordered', { count: newBlocks.length });
-      await refetch();
+      const result = await refetch();
+      
+      // Push to history after successful reorder
+      if (result?.data?.page?.blocks) {
+        history.pushHistory(result.data.page.blocks, `Reordered blocks`);
+      }
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_REORDER, 'Failed to reorder blocks', { error });
       toast.error('Failed to reorder blocks');
@@ -405,12 +432,76 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       const input: any = { style };
       await updateBlock(blockId, input);
       pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_STYLE_UPDATE, 'Block style updated', { blockId, style });
-      await refetch();
+      const result = await refetch();
+      
+      // Push to history after successful style update
+      if (result?.data?.page?.blocks) {
+        history.pushHistory(result.data.page.blocks, `Updated block style`);
+      }
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_STYLE_UPDATE, 'Failed to update style', { error });
       toast.error('Failed to update style');
     }
-  }, [pageState, updateBlock]);
+  }, [pageState, updateBlock, history]);
+  
+  // History operations
+  const handleUndo = useCallback(async () => {
+    try {
+      const previousBlocks = history.undo();
+      
+      if (!previousBlocks) {
+        toast.info('Nothing to undo');
+        return;
+      }
+      
+      // Update blocks state
+      pageState.setBlocks(previousBlocks);
+      
+      // Sync with backend
+      const updates = previousBlocks.map((b, index) => ({
+        id: b.id,
+        order: index,
+      }));
+      await updateBlocksOrder(updates);
+      await pageState.refetch();
+      
+      const action = history.getUndoAction();
+      toast.success(`Undo: ${action || 'Previous action'}`);
+      pageBuilderLogger.debug('UNDO', 'Undo performed', { action });
+    } catch (error: any) {
+      pageBuilderLogger.error('UNDO', 'Failed to undo', { error });
+      toast.error('Failed to undo');
+    }
+  }, [history, pageState, updateBlocksOrder]);
+  
+  const handleRedo = useCallback(async () => {
+    try {
+      const nextBlocks = history.redo();
+      
+      if (!nextBlocks) {
+        toast.info('Nothing to redo');
+        return;
+      }
+      
+      // Update blocks state
+      pageState.setBlocks(nextBlocks);
+      
+      // Sync with backend
+      const updates = nextBlocks.map((b, index) => ({
+        id: b.id,
+        order: index,
+      }));
+      await updateBlocksOrder(updates);
+      await pageState.refetch();
+      
+      const action = history.getRedoAction();
+      toast.success(`Redo: ${action || 'Next action'}`);
+      pageBuilderLogger.debug('REDO', 'Redo performed', { action });
+    } catch (error: any) {
+      pageBuilderLogger.error('REDO', 'Failed to redo', { error });
+      toast.error('Failed to redo');
+    }
+  }, [history, pageState, updateBlocksOrder]);
   
   // Nested block operations
   const handleAddChild = useCallback((parentId: string) => {
@@ -611,6 +702,8 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
     handleBlocksReorder,
     handleSelectBlock,
     handleUpdateBlockStyle,
+    handleUndo,
+    handleRedo,
     handleAddChild,
     handleAddChildBlock,
     handleCloseAddChildDialog,
@@ -641,6 +734,8 @@ export function usePageActions() {
         handleBlocksReorder: async () => {},
         handleSelectBlock: () => {},
         handleUpdateBlockStyle: async () => {},
+        handleUndo: async () => {},
+        handleRedo: async () => {},
         handleAddChild: () => {},
         handleAddChildBlock: async () => {},
         handleCloseAddChildDialog: () => {},

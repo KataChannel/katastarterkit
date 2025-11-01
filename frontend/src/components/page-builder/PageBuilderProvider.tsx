@@ -9,10 +9,12 @@ import {
   UIStateProvider,
   TemplateProvider,
   PageActionsProvider,
+  HistoryProvider,
   usePageState,
   usePageActions,
   useUIState,
   useTemplate,
+  useHistory,
 } from './contexts';
 import ErrorBoundary from './ErrorBoundary';
 import { pageBuilderLogger } from './utils/pageBuilderLogger';
@@ -42,11 +44,13 @@ export function PageBuilderProvider({ children, pageId }: PageBuilderProviderPro
       <PageStateProvider pageId={pageId}>
         <UIStateProvider>
           <TemplateProvider>
-            <PageActionsProvider pageId={pageId}>
-              <DndContextWrapper>
-                {children}
-              </DndContextWrapper>
-            </PageActionsProvider>
+            <HistoryProvider maxHistorySize={50}>
+              <PageActionsProvider pageId={pageId}>
+                <DndContextWrapper>
+                  {children}
+                </DndContextWrapper>
+              </PageActionsProvider>
+            </HistoryProvider>
           </TemplateProvider>
         </UIStateProvider>
       </PageStateProvider>
@@ -115,4 +119,4 @@ const DragOverlayContent = React.memo(function DragOverlayContent({ draggedBlock
   );
 });
 // Export individual hooks for better tree-shaking and clear API
-export { usePageState, useUIState, useTemplate, usePageActions } from './contexts';
+export { usePageState, useUIState, useTemplate, usePageActions, useHistory } from './contexts';
