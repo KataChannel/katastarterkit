@@ -257,6 +257,38 @@ Database → GraphQL Query → Apollo Client → useQuery Hook
 - [ ] A/B testing support
 - [ ] Analytics tracking integration
 
+## 🐛 Bug Fixes
+
+### Maximum Update Depth Exceeded (Fixed ✅)
+**Issue**: Infinite loop trong useEffect khi transform products → slides
+
+**Root Cause**: Dependency array có object `dataSource` được recreate mỗi render
+
+**Before (Bug)**:
+```typescript
+useEffect(() => {
+  // transform logic
+}, [dataSource, productsData]); // ❌ dataSource changes every render!
+```
+
+**After (Fixed)**:
+```typescript
+useEffect(() => {
+  // same transform logic
+}, [
+  dataSource.type,              // ✅ primitive dependencies only
+  dataSource.queryType,
+  dataSource.titleField,
+  dataSource.subtitleField,
+  dataSource.descriptionField,
+  dataSource.imageField,
+  dataSource.badgeField,
+  productsData
+]);
+```
+
+**Result**: No more infinite re-renders, stable performance ✅
+
 ## ✅ Kết Quả
 
 ### Trước Update

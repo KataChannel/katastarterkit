@@ -134,7 +134,17 @@ export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete
     } else {
       setDynamicSlides([]);
     }
-  }, [dataSource, productsData]);
+    // Only depend on primitive values to avoid infinite loop
+  }, [
+    dataSource.type, 
+    dataSource.queryType, 
+    dataSource.titleField, 
+    dataSource.subtitleField, 
+    dataSource.descriptionField, 
+    dataSource.imageField, 
+    dataSource.badgeField,
+    productsData
+  ]);
 
   // Use manual slides or dynamic slides based on data source
   const displaySlides = dataSource.type === 'manual' ? slides : dynamicSlides;
