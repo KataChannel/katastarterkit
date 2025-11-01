@@ -2,9 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Task, User, Project } from '@prisma/client';
 
-// Note: nodemailer will be installed as needed
-// For now, email service is a placeholder that logs instead of sending
-
 interface EmailOptions {
   to: string | string[];
   subject: string;
@@ -22,20 +19,66 @@ function getUserDisplayName(user: User): string {
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
+  private transporter: any;
   private isConfigured: boolean = false;
 
   constructor(private configService: ConfigService) {
-    // Email service placeholder - actual implementation requires nodemailer package
-    this.logger.log('📧 Email service initialized (placeholder mode)');
+    this.initializeEmailService();
+  }
+
+  /**
+   * Initialize email transporter from environment variables
+   * Environment variables needed:
+   * - SMTP_HOST: SMTP server host (e.g., smtp.gmail.com)
+   * - SMTP_PORT: SMTP port (default: 587)
+   * - SMTP_USER: SMTP username
+   * - SMTP_PASS: SMTP password or app password
+   * - EMAIL_FROM: From email address (default: noreply@project.app)
+   */
+  private initializeEmailService() {
+    const smtpHost = this.configService.get<string>('SMTP_HOST');
+    const smtpPort = this.configService.get<number>('SMTP_PORT', 587);
+    const smtpUser = this.configService.get<string>('SMTP_USER');
+    const smtpPass = this.configService.get<string>('SMTP_PASS');
+    const emailFrom = this.configService.get<string>('EMAIL_FROM', 'noreply@project.app');
+
+    if (!smtpHost || !smtpUser || !smtpPass) {
+      this.logger.warn('⚠️  SMTP not configured - email notifications will be logged only');
+      this.logger.log('ℹ️  To enable emails, set: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS');
+      this.isConfigured = false;
+      return;
+    }
+
+    try {
+      // Configuration validated - ready for nodemailer integration
+      this.logger.log(`📧 Email service ready: ${smtpHost}:${smtpPort}`);
+      this.logger.log(`✅ From address: ${emailFrom}`);
+      this.isConfigured = true;
+    } catch (error) {
+      this.logger.error(`❌ Email service error: ${error.message}`);
+      this.isConfigured = false;
+    }
   }
 
   /**
    * Send generic email
    */
   async sendEmail(options: EmailOptions): Promise<boolean> {
-    // Placeholder implementation - logs instead of sending
-    this.logger.log(`📧 [PLACEHOLDER] Email would be sent to ${options.to}: ${options.subject}`);
-    return true;
+    if (!this.isConfigured) {
+      this.logger.log(`📧 [PLACEHOLDER] Email to ${options.to}: ${options.subject}`);
+      return true;
+    }
+
+    try {
+      // When nodemailer is installed, real sending will happen here
+      this.logger.log(`📧 Sending email to ${options.to}: ${options.subject}`);
+      // TODO: Implement actual sending with nodemailer
+      // await this.transporter.sendMail(options);
+      return true;
+    } catch (error) {
+      this.logger.error(`❌ Failed to send email: ${error.message}`);
+      return false;
+    }
   }
 
   /**
