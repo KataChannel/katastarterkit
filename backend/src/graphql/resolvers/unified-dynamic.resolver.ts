@@ -195,10 +195,15 @@ export class UnifiedDynamicResolver {
     @Context() context?: any
   ): Promise<any> {
     try {
+      // For Project model, ensure ownerId is set from context
+      if (modelName === 'Project' && !input.data.ownerId && context?.req?.user?.id) {
+        input.data.ownerId = context.req.user.id;
+      }
+      
       return await this.dynamicCrud.create(modelName, input.data, {
         select: input.select,
         include: input.include
-      });
+      }, context); // Pass context as 4th parameter
     } catch (error) {
       throw new Error(`Failed to create ${modelName}: ${error.message}`);
     }
@@ -277,11 +282,19 @@ export class UnifiedDynamicResolver {
     @Context() context?: any
   ): Promise<any> {
     try {
+      // Ensure all Project items have ownerId from context
+      if (modelName === 'Project' && context?.req?.user?.id) {
+        input.data = input.data.map(item => ({
+          ...item,
+          ownerId: item.ownerId || context.req.user.id
+        }));
+      }
+      
       return await this.dynamicCrud.bulkCreate(modelName, input.data, {
         skipDuplicates: input.skipDuplicates,
         select: input.select,
         include: input.include
-      });
+      }, context); // Pass context as 4th parameter
     } catch (error) {
       throw new Error(`Failed to bulk create ${modelName}: ${error.message}`);
     }

@@ -70,7 +70,8 @@ export class ProjectMediaService {
             uploader: {
               select: {
                 id: true,
-                name: true,
+                firstName: true,
+                lastName: true,
                 avatar: true,
               },
             },
@@ -146,7 +147,8 @@ export class ProjectMediaService {
         uploader: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             avatar: true,
           },
         },
@@ -265,7 +267,7 @@ export class ProjectMediaService {
   private getMediaType(mimetype: string): MediaType {
     if (mimetype.startsWith('image/')) return MediaType.IMAGE;
     if (mimetype.startsWith('video/')) return MediaType.VIDEO;
-    if (mimetype.startsWith('audio/')) return MediaType.AUDIO;
+    // Audio files and other file types return DOCUMENT
     return MediaType.DOCUMENT;
   }
 
@@ -331,7 +333,6 @@ export class ProjectMediaService {
         images: files.filter((f) => f.type === MediaType.IMAGE).length,
         documents: files.filter((f) => f.type === MediaType.DOCUMENT).length,
         videos: files.filter((f) => f.type === MediaType.VIDEO).length,
-        audio: files.filter((f) => f.type === MediaType.AUDIO).length,
       },
     };
 

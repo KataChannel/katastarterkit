@@ -86,14 +86,64 @@ export class DynamicCRUDService {
   async create<T>(
     modelName: string, 
     data: any, 
-    options?: { select?: any; include?: any }
+    options?: { select?: any; include?: any },
+    context?: any // Add context parameter
   ): Promise<T> {
     try {
       const delegate = this.getModelDelegate(modelName);
-      const result = await delegate.create({
-        data,
-        ...options
+      
+      // Fallback: If Project and no ownerId, try to get from context
+      if (modelName === 'Project' && !data.ownerId) {
+        console.warn('⚠️ No ownerId in data, checking context...');
+        
+        // Try multiple ways to get userId
+        const userId = 
+          context?.req?.user?.id || 
+          context?.user?.id || 
+          context?.userId ||
+          data.userId;
+        
+        if (userId) {
+          console.log(`🔄 FALLBACK: Setting ownerId from context:`, userId);
+          data.ownerId = userId;
+        }
+      }
+      
+      // Validate Project model has ownerId
+      if (modelName === 'Project') {
+        if (!data.ownerId) {
+          console.error('❌ Project create failed: Missing ownerId', { data, context: !!context });
+          throw new BadRequestException('Project ownerId is required. Please ensure you are authenticated.');
+        }
+        // Ensure ownerId is a string
+        if (typeof data.ownerId !== 'string') {
+          console.error('❌ Project create failed: Invalid ownerId type', { 
+            ownerId: data.ownerId, 
+            type: typeof data.ownerId 
+          });
+          throw new BadRequestException('Project ownerId must be a valid user ID');
+        }
+      }
+      
+      // Build query object - prioritize include over select
+      const queryOptions: any = { data };
+      if (options?.include) {
+        queryOptions.include = options.include;
+      } else if (options?.select) {
+        queryOptions.select = options.select;
+      }
+      
+      console.log(`📝 Creating ${modelName}:`, {
+        data: {
+          ...data,
+          password: data.password ? '[REDACTED]' : undefined
+        },
+        options: queryOptions
       });
+      
+      const result = await delegate.create(queryOptions);
+      
+      console.log(`✅ Created ${modelName}:`, result.id || result);
       
       // Clear cache for this model
       this.clearModelCache(modelName);
@@ -104,6 +154,11 @@ export class DynamicCRUDService {
         if (error.code === 'P2002') {
           throw new ConflictException(`Record with unique constraint already exists`);
         }
+        // Better error message for missing required fields
+        if (error.message.includes('Argument')) {
+          console.error(`❌ Prisma validation error for ${modelName}:`, error.message);
+          throw new BadRequestException(`Missing required field(s): ${error.message.split('Argument ')[1]?.split('.')[0] || 'unknown'}`);
+        }
       }
       throw new BadRequestException(`Failed to create ${modelName}: ${error.message}`);
     }
@@ -113,7 +168,8 @@ export class DynamicCRUDService {
   async createBulk<T>(
     modelName: string, 
     input: BulkCreateInput<T>,
-    options?: { select?: any; include?: any }
+    options?: { select?: any; include?: any },
+    context?: any  // Add context parameter
   ): Promise<BulkOperationResult<T>> {
     const delegate = this.getModelDelegate(modelName);
     const results: T[] = [];
@@ -122,6 +178,14 @@ export class DynamicCRUDService {
     // Use transaction for better performance and consistency
     try {
       await this.prisma.$transaction(async (tx) => {
+        // Build query options - prioritize include over select
+        const queryOptions: any = {};
+        if (options?.include) {
+          queryOptions.include = options.include;
+        } else if (options?.select) {
+          queryOptions.select = options.select;
+        }
+        
         // Batch create for better performance
         if (input.skipDuplicates) {
           const result = await (tx as any)[modelName].createMany({
@@ -136,7 +200,7 @@ export class DynamicCRUDService {
                 // This is tricky - we need a way to identify the newly created records
                 // This would need to be customized based on your data structure
               },
-              ...options
+              ...queryOptions
             });
             results.push(...created);
           }
@@ -146,7 +210,7 @@ export class DynamicCRUDService {
             try {
               const result = await (tx as any)[modelName].create({
                 data: input.data[i],
-                ...options
+                ...queryOptions
               });
               results.push(result);
             } catch (error) {
@@ -190,10 +254,16 @@ export class DynamicCRUDService {
     }
 
     const delegate = this.getModelDelegate(modelName);
-    const result = await delegate.findUnique({
-      where: { id },
-      ...options
-    });
+    
+    // Build query options - prioritize include over select
+    const queryOptions: any = { where: { id } };
+    if (options?.include) {
+      queryOptions.include = options.include;
+    } else if (options?.select) {
+      queryOptions.select = options.select;
+    }
+    
+    const result = await delegate.findUnique(queryOptions);
 
     // Cache simple queries
     if (result && !options?.select && !options?.include) {
@@ -218,14 +288,22 @@ export class DynamicCRUDService {
   ): Promise<T[]> {
     try {
       const delegate = this.getModelDelegate(modelName);
-      return await delegate.findMany({
+      
+      // Build query options - prioritize include over select
+      const queryOptions: any = {
         where: input?.where,
         orderBy: input?.orderBy,
         skip: input?.skip,
         take: input?.take,
-        select: input?.select,
-        include: input?.include
-      });
+      };
+      
+      if (input?.include) {
+        queryOptions.include = input.include;
+      } else if (input?.select) {
+        queryOptions.select = input.select;
+      }
+      
+      return await delegate.findMany(queryOptions);
     } catch (error) {
       throw new BadRequestException(`Failed to find many ${modelName}: ${error.message}`);
     }
@@ -252,15 +330,22 @@ export class DynamicCRUDService {
       const page = filter?.skip ? Math.floor(filter.skip / (filter.take || 10)) + 1 : 1;
       const limit = filter?.take || 10;
       
+      // Build query options - prioritize include over select
+      const queryOptions: any = {
+        where: filter?.where,
+        orderBy: filter?.orderBy,
+        skip: filter?.skip,
+        take: filter?.take,
+      };
+      
+      if (filter?.include) {
+        queryOptions.include = filter.include;
+      } else if (filter?.select) {
+        queryOptions.select = filter.select;
+      }
+      
       const [data, total] = await Promise.all([
-        delegate.findMany({
-          where: filter?.where,
-          orderBy: filter?.orderBy,
-          skip: filter?.skip,
-          take: filter?.take,
-          select: filter?.select,
-          include: filter?.include
-        }),
+        delegate.findMany(queryOptions),
         delegate.count({
           where: filter?.where
         })
@@ -300,11 +385,19 @@ export class DynamicCRUDService {
         throw new NotFoundException(`${modelName} with ID ${id} not found`);
       }
 
-      const result = await delegate.update({
+      // Build query options - prioritize include over select
+      const queryOptions: any = {
         where: { id },
         data,
-        ...options
-      });
+      };
+      
+      if (options?.include) {
+        queryOptions.include = options.include;
+      } else if (options?.select) {
+        queryOptions.select = options.select;
+      }
+
+      const result = await delegate.update(queryOptions);
 
       // Clear cache
       this.clearModelCache(modelName);
@@ -326,6 +419,14 @@ export class DynamicCRUDService {
   ): Promise<BulkOperationResult<T>> {
     try {
       const delegate = this.getModelDelegate(modelName);
+      
+      // Build query options - prioritize include over select
+      const queryOptions: any = {};
+      if (options?.include) {
+        queryOptions.include = options.include;
+      } else if (options?.select) {
+        queryOptions.select = options.select;
+      }
       
       // Get records that will be updated (for returning data)
       let updatedRecords: T[] = [];
@@ -350,7 +451,7 @@ export class DynamicCRUDService {
             delegate.update({
               where: { id: record.id },
               data: input.data,
-              ...options
+              ...queryOptions
             })
           )
         );
@@ -578,12 +679,32 @@ export class DynamicCRUDService {
       skipDuplicates?: boolean;
       select?: any;
       include?: any;
-    }
+    },
+    context?: any  // Add context parameter
   ): Promise<BulkOperationResult<T>> {
     try {
       const delegate = this.getModelDelegate(modelName);
       const results: T[] = [];
       const errors: Array<{ index: number; error: string; data?: any }> = [];
+
+      // Ensure Project items have ownerId
+      if (modelName === 'Project') {
+        data = data.map((item, index) => {
+          if (!item.ownerId) {
+            const userId = 
+              context?.req?.user?.id || 
+              context?.user?.id || 
+              context?.userId ||
+              item.userId;
+            
+            if (userId) {
+              console.log(`🔄 FALLBACK (bulk): Setting ownerId for item ${index} from context:`, userId);
+              return { ...item, ownerId: userId };
+            }
+          }
+          return item;
+        });
+      }
 
       // Use createMany for better performance if no select/include needed
       if (!options?.select && !options?.include) {

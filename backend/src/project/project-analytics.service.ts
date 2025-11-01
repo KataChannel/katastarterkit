@@ -40,7 +40,6 @@ export class ProjectAnalyticsService {
       completionRate,
       averageCompletionTime,
       upcomingDeadlines,
-      overdueTasks,
       generatedAt: new Date(),
     };
   }
@@ -117,7 +116,8 @@ export class ProjectAnalyticsService {
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
             avatar: true,
           },
@@ -169,7 +169,7 @@ export class ProjectAnalyticsService {
         });
 
         return {
-          user: member.user,
+          user: (member as any).user,
           role: member.role,
           totalTasks,
           completedTasks,
@@ -334,7 +334,8 @@ export class ProjectAnalyticsService {
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             avatar: true,
           },
         },
@@ -373,7 +374,8 @@ export class ProjectAnalyticsService {
         user: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             avatar: true,
           },
         },
