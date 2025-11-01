@@ -12,6 +12,17 @@ import ReviewsSection from '@/components/lms/ReviewsSection';
 import DiscussionThread from '@/components/lms/DiscussionThread';
 import { Clock, Users, BookOpen, Globe, Award, CheckCircle, PlayCircle, FileText, MessageSquare, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -55,11 +66,21 @@ export default function CourseDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 animate-pulse">
-        <div className="bg-gray-900 text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="h-10 bg-gray-700 rounded w-3/4 mb-4" />
-            <div className="h-6 bg-gray-700 rounded w-1/2" />
+      <div className="min-h-screen bg-background">
+        <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
+          <div className="container mx-auto px-4 py-8 md:py-16">
+            <Skeleton className="h-10 w-3/4 mb-4 bg-primary-foreground/20" />
+            <Skeleton className="h-6 w-1/2 bg-primary-foreground/20" />
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <Skeleton className="h-[400px] w-full" />
+            </div>
+            <div className="lg:col-span-1">
+              <Skeleton className="h-[500px] w-full" />
+            </div>
           </div>
         </div>
       </div>
@@ -68,11 +89,15 @@ export default function CourseDetailPage() {
 
   if (error || !data?.courseBySlug) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy khóa học</h1>
-          <p className="text-gray-600">Khóa học bạn đang tìm kiếm không tồn tại.</p>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle>Không tìm thấy khóa học</CardTitle>
+            <CardDescription>
+              Khóa học bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
@@ -103,32 +128,31 @@ export default function CourseDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div className="lg:col-span-2">
-              {/* Breadcrumb */}
+      <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground">
+        <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="lg:col-span-2 space-y-4 md:space-y-6">
+              {/* Category Badge */}
               {course.category && (
-                <p className="text-blue-300 text-sm mb-4">
+                <Badge variant="secondary" className="mb-2">
                   {course.category.name}
-                </p>
+                </Badge>
               )}
 
               {/* Title */}
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
                 {course.title}
               </h1>
 
               {/* Description */}
-              <p className="text-xl text-gray-300 mb-6">
+              <p className="text-lg md:text-xl text-primary-foreground/90">
                 {course.description}
               </p>
 
               {/* Stats */}
-              <div className="flex flex-wrap items-center gap-6 mb-6">
+              <div className="flex flex-wrap items-center gap-4 md:gap-6">
                 <RatingStars 
                   rating={course.avgRating} 
                   size="lg" 
@@ -136,32 +160,23 @@ export default function CourseDetailPage() {
                   reviewCount={course.reviewCount}
                 />
                 <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  <span>{course.enrollmentCount} students</span>
+                  <Users className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="text-sm md:text-base">{course.enrollmentCount} học viên</span>
                 </div>
               </div>
 
               {/* Instructor */}
               {course.instructor && (
-                <div className="flex items-center gap-3">
-                  {course.instructor.avatar ? (
-                    <Image
-                      src={course.instructor.avatar}
-                      alt={course.instructor.username}
-                      width={48}
-                      height={48}
-                      className="rounded-full"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
-                      <span className="text-lg font-medium">
-                        {course.instructor.firstName?.[0] || course.instructor.username[0]}
-                      </span>
-                    </div>
-                  )}
+                <div className="flex items-center gap-3 pt-2">
+                  <Avatar className="w-10 h-10 md:w-12 md:h-12">
+                    <AvatarImage src={course.instructor.avatar || ''} alt={course.instructor.username} />
+                    <AvatarFallback>
+                      {course.instructor.firstName?.[0] || course.instructor.username[0]}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <p className="text-sm text-gray-400">Tạo bởi</p>
-                    <p className="font-medium">
+                    <p className="text-xs md:text-sm text-primary-foreground/70">Tạo bởi</p>
+                    <p className="font-medium text-sm md:text-base">
                       {course.instructor.firstName && course.instructor.lastName
                         ? `${course.instructor.firstName} ${course.instructor.lastName}`
                         : course.instructor.username}
@@ -169,320 +184,377 @@ export default function CourseDetailPage() {
                   </div>
                 </div>
               )}
+            </div>
 
-     {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            {/* Tabs */}
-            <div className="bg-white rounded-xl shadow-sm">
-              <div className="flex border-b">
-                <button
-                  onClick={() => setActiveTab('overview')}
-                  className={`px-6 py-4 font-medium ${
-                    activeTab === 'overview'
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Overview
-                </button>
-                <button
-                  onClick={() => setActiveTab('content')}
-                  className={`px-6 py-4 font-medium ${
-                    activeTab === 'content'
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Course Content
-                </button>
-                <button
-                  onClick={() => setActiveTab('reviews')}
-                  className={`px-6 py-4 font-medium ${
-                    activeTab === 'reviews'
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Đánh giá
-                </button>
-                <button
-                  onClick={() => setActiveTab('discussions')}
-                  className={`px-6 py-4 font-medium flex items-center gap-2 ${
-                    activeTab === 'discussions'
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  Thảo luận
-                </button>
-              </div>
+            {/* Sidebar Card - Hidden on mobile, shown on desktop */}
+            <div className="hidden lg:block">
+              <Card className="sticky top-4 shadow-lg">
+                <CardContent className="p-6 space-y-6">
+                  {/* Thumbnail */}
+                  {course.thumbnail && (
+                    <div className="relative h-48 rounded-lg overflow-hidden">
+                      <Image
+                        src={course.thumbnail}
+                        alt={course.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
 
-              <div className="p-8">
-                {/* Overview Tab */}
-                {activeTab === 'overview' && (
-                  <div className="space-y-8">
-                    {/* What You'll Learn */}
-                    {course.whatYouWillLearn && course.whatYouWillLearn.length > 0 && (
-                      <div>
-                        <h2 className="text-2xl font-bold mb-6">Bạn sẽ học được gì</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {course.whatYouWillLearn.map((item: string, index: number) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                              <span className="text-gray-700">{item}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Requirements */}
-                    {course.requirements && course.requirements.length > 0 && (
-                      <div>
-                        <h2 className="text-2xl font-bold mb-6">Yêu cầu</h2>
-                        <ul className="space-y-2">
-                          {course.requirements.map((req: string, index: number) => (
-                            <li key={index} className="flex items-start gap-3 text-gray-700">
-                              <span className="text-gray-400">•</span>
-                              {req}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                  {/* Price */}
+                  <div className="text-3xl font-bold">
+                    {course.price > 0 ? `${course.price.toLocaleString('vi-VN')}đ` : 'Miễn phí'}
                   </div>
-                )}
 
-                {/* Content Tab */}
-                {activeTab === 'content' && (
-                  <div>
-                    {course.modules && course.modules.length > 0 ? (
-                      <div className="space-y-4">
-                        {course.modules.map((module: any, moduleIndex: number) => (
-                          <details key={module.id} className="group" open={moduleIndex === 0}>
-                            <summary className="flex items-center justify-between cursor-pointer bg-gray-50 hover:bg-gray-100 p-4 rounded-lg transition-colors">
-                              <div className="flex items-center gap-3">
-                                <span className="font-semibold text-gray-900">
-                                  {moduleIndex + 1}. {module.title}
-                                </span>
-                              </div>
-                              <span className="text-sm text-gray-600">
-                                {module.lessons?.length || 0} bài học
-                              </span>
-                            </summary>
-                            <div className="mt-2 ml-4 space-y-2">
-                              {module.lessons?.map((lesson: any, lessonIndex: number) => (
-                                <div
-                                  key={lesson.id}
-                                  className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
-                                >
-                                  {lesson.type === 'VIDEO' ? (
-                                    <PlayCircle className="w-4 h-4 text-gray-400" />
-                                  ) : (
-                                    <FileText className="w-4 h-4 text-gray-400" />
-                                  )}
-                                  <span className="text-gray-700">
-                                    {moduleIndex + 1}.{lessonIndex + 1} {lesson.title}
-                                  </span>
-                                  {lesson.duration && (
-                                    <span className="ml-auto text-sm text-gray-500">
-                                      {lesson.duration} min
-                                    </span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </details>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500">Chưa có nội dung khóa học.</p>
-                    )}
-                  </div>
-                )}
-
-                {/* Reviews Tab */}
-                {activeTab === 'reviews' && (
-                  <ReviewsSection
+                  {/* Enroll Button */}
+                  <EnrollButton 
                     courseId={course.id}
-                    currentUserId={user?.id}
+                    courseSlug={course.slug}
+                    price={course.price}
                     isEnrolled={!!enrollmentData?.enrollment}
                   />
-                )}
 
-                {/* Discussions Tab */}
-                {activeTab === 'discussions' && (
-                  <div className="space-y-6">
-                    {/* New Discussion Button */}
-                    {enrollmentData?.enrollment && !showNewDiscussion && (
-                      <button
-                        onClick={() => setShowNewDiscussion(true)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                      >
-                        <Plus className="w-5 h-5" />
-                        Bắt đầu thảo luận mới
-                      </button>
-                    )}
+                  <Separator />
 
-                    {/* New Discussion Form */}
-                    {showNewDiscussion && (
-                      <form onSubmit={handleCreateDiscussion} className="bg-gray-50 rounded-lg p-6 space-y-4">
-                        <h3 className="text-lg font-semibold">Thảo luận mới</h3>
-                        <div>
-                          <input
-                            type="text"
-                            value={discussionTitle}
-                            onChange={(e) => setDiscussionTitle(e.target.value)}
-                            placeholder="Tiêu đề thảo luận..."
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <textarea
-                            value={discussionContent}
-                            onChange={(e) => setDiscussionContent(e.target.value)}
-                            placeholder="Bạn muốn thảo luận điều gì?"
-                            rows={4}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                            required
-                          />
-                        </div>
-                        <div className="flex gap-3">
-                          <button
-                            type="submit"
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                          >
-                            Đăng thảo luận
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setShowNewDiscussion(false);
-                              setDiscussionTitle('');
-                              setDiscussionContent('');
-                            }}
-                            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                          >
-                            Hủy
-                          </button>
-                        </div>
-                      </form>
-                    )}
+                  {/* Course Info */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Award className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">Cấp độ</p>
+                        <p className="font-medium">{course.level}</p>
+                      </div>
+                    </div>
 
-                    {/* Discussions List */}
-                    {!enrollmentData?.enrollment && (
-                      <div className="text-center py-8">
-                        <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                        <p className="text-gray-600 mb-4">Ghi danh khóa học này để tham gia thảo luận</p>
+                    {course.duration && (
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-muted-foreground" />
+                        <div className="flex-1">
+                          <p className="text-xs text-muted-foreground">Thời lượng</p>
+                          <p className="font-medium">
+                            {Math.floor(course.duration / 60)}h {course.duration % 60}m
+                          </p>
+                        </div>
                       </div>
                     )}
 
-                    {discussionsData?.courseDiscussions && discussionsData.courseDiscussions.length > 0 ? (
-                      <div className="space-y-4">
-                        {discussionsData.courseDiscussions.map((discussion: any) => (
-                          <DiscussionThread
-                            key={discussion.id}
-                            discussion={discussion}
-                            refetch={refetchDiscussions}
-                            canModerate={course.instructor?.id === user?.id}
-                            isOwner={discussion.user.id === user?.id}
-                          />
-                        ))}
+                    <div className="flex items-center gap-3">
+                      <BookOpen className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">Bài học</p>
+                        <p className="font-medium">{totalLessons} bài học</p>
                       </div>
-                    ) : enrollmentData?.enrollment ? (
-                      <div className="text-center py-8">
-                        <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                        <p className="text-gray-600">Chưa có thảo luận nào. Hãy là người đầu tiên bắt đầu!</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Globe className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">Ngôn ngữ</p>
+                        <p className="font-medium">Tiếng Việt</p>
                       </div>
-                    ) : null}
+                    </div>
                   </div>
-                )}
-              </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            {/* Empty for now - could add related courses, etc */}
           </div>
         </div>
       </div>
-            </div>
 
-            {/* Sidebar Card */}
-            <div className="lg:col-span-1">
-              <div className="bg-white text-gray-900 rounded-xl shadow-xl p-6 sticky top-4">
-                {/* Thumbnail */}
-                {course.thumbnail && (
-                  <div className="relative h-48 mb-6 rounded-lg overflow-hidden">
-                    <Image
-                      src={course.thumbnail}
-                      alt={course.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
+      {/* Mobile Sticky Footer - Course Info */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs text-muted-foreground">Giá khóa học</p>
+            <p className="text-xl font-bold">
+              {course.price > 0 ? `${course.price.toLocaleString('vi-VN')}đ` : 'Miễn phí'}
+            </p>
+          </div>
+          <EnrollButton 
+            courseId={course.id}
+            courseSlug={course.slug}
+            price={course.price}
+            isEnrolled={!!enrollmentData?.enrollment}
+          />
+        </div>
+      </div>
 
-                {/* Price */}
-                <div className="text-3xl font-bold mb-6">
-                  {course.price > 0 ? `$${course.price}` : 'Free'}
-                </div>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-6 md:py-8 lg:py-12 pb-24 lg:pb-12">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap h-auto p-1">
+            <TabsTrigger value="overview" className="text-xs md:text-sm">
+              Tổng quan
+            </TabsTrigger>
+            <TabsTrigger value="content" className="text-xs md:text-sm">
+              <BookOpen className="w-4 h-4 mr-1.5" />
+              Nội dung
+            </TabsTrigger>
+            <TabsTrigger value="reviews" className="text-xs md:text-sm">
+              Đánh giá
+            </TabsTrigger>
+            <TabsTrigger value="discussions" className="text-xs md:text-sm">
+              <MessageSquare className="w-4 h-4 mr-1.5" />
+              Thảo luận
+            </TabsTrigger>
+          </TabsList>
 
-                {/* Enroll Button */}
-                <EnrollButton 
-                  courseId={course.id}
-                  courseSlug={course.slug}
-                  price={course.price}
-                  isEnrolled={!!enrollmentData?.enrollment}
-                />
-
-                {/* Course Info */}
-                <div className="mt-6 pt-6 border-t space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Award className="w-5 h-5 text-gray-500" />
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="mt-6 space-y-6">
+            {/* Mobile Course Info Card */}
+            <Card className="lg:hidden">
+              <CardHeader>
+                <CardTitle className="text-lg">Thông tin khóa học</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-start gap-2">
+                    <Award className="w-4 h-4 text-muted-foreground mt-0.5" />
                     <div>
-                      <p className="text-sm text-gray-600">Cấp độ</p>
-                      <p className="font-medium">{course.level}</p>
+                      <p className="text-xs text-muted-foreground">Cấp độ</p>
+                      <p className="text-sm font-medium">{course.level}</p>
                     </div>
                   </div>
-
                   {course.duration && (
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-5 h-5 text-gray-500" />
+                    <div className="flex items-start gap-2">
+                      <Clock className="w-4 h-4 text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-sm text-gray-600">Thời lượng</p>
-                        <p className="font-medium">
+                        <p className="text-xs text-muted-foreground">Thời lượng</p>
+                        <p className="text-sm font-medium">
                           {Math.floor(course.duration / 60)}h {course.duration % 60}m
                         </p>
                       </div>
                     </div>
                   )}
-
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-gray-500" />
+                  <div className="flex items-start gap-2">
+                    <BookOpen className="w-4 h-4 text-muted-foreground mt-0.5" />
                     <div>
-                      <p className="text-sm text-gray-600">Bài học</p>
-                      <p className="font-medium">{totalLessons} bài học</p>
+                      <p className="text-xs text-muted-foreground">Bài học</p>
+                      <p className="text-sm font-medium">{totalLessons} bài học</p>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    <Globe className="w-5 h-5 text-gray-500" />
+                  <div className="flex items-start gap-2">
+                    <Globe className="w-4 h-4 text-muted-foreground mt-0.5" />
                     <div>
-                      <p className="text-sm text-gray-600">Ngôn ngữ</p>
-                      <p className="font-medium">Tiếng Việt</p>
+                      <p className="text-xs text-muted-foreground">Ngôn ngữ</p>
+                      <p className="text-sm font-medium">Tiếng Việt</p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
+              </CardContent>
+            </Card>
+
+            {/* What You'll Learn */}
+            {course.whatYouWillLearn && course.whatYouWillLearn.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Bạn sẽ học được gì</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    {course.whatYouWillLearn.map((item: string, index: number) => (
+                      <div key={index} className="flex items-start gap-2 md:gap-3">
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm md:text-base">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Requirements */}
+            {course.requirements && course.requirements.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Yêu cầu</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {course.requirements.map((req: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2 md:gap-3 text-sm md:text-base">
+                        <span className="text-muted-foreground">•</span>
+                        {req}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Content Tab */}
+          <TabsContent value="content" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Nội dung khóa học</CardTitle>
+                <CardDescription>
+                  {course.modules?.length || 0} chương • {totalLessons} bài học
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {course.modules && course.modules.length > 0 ? (
+                  <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
+                    {course.modules.map((module: any, moduleIndex: number) => (
+                      <AccordionItem key={module.id} value={`item-${moduleIndex}`}>
+                        <AccordionTrigger className="hover:no-underline">
+                          <div className="flex items-center justify-between w-full pr-4 text-left">
+                            <span className="font-semibold text-sm md:text-base">
+                              {moduleIndex + 1}. {module.title}
+                            </span>
+                            <Badge variant="secondary" className="text-xs">
+                              {module.lessons?.length || 0} bài
+                            </Badge>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-1 pt-2">
+                            {module.lessons?.map((lesson: any, lessonIndex: number) => (
+                              <div
+                                key={lesson.id}
+                                className="flex items-center gap-2 md:gap-3 p-2 md:p-3 hover:bg-accent rounded-lg transition-colors"
+                              >
+                                {lesson.type === 'VIDEO' ? (
+                                  <PlayCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                ) : (
+                                  <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                )}
+                                <span className="text-sm md:text-base flex-1">
+                                  {moduleIndex + 1}.{lessonIndex + 1} {lesson.title}
+                                </span>
+                                {lesson.duration && (
+                                  <span className="text-xs md:text-sm text-muted-foreground">
+                                    {lesson.duration} phút
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                ) : (
+                  <Alert>
+                    <AlertDescription>
+                      Chưa có nội dung khóa học.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Reviews Tab */}
+          <TabsContent value="reviews" className="mt-6">
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <ReviewsSection
+                  courseId={course.id}
+                  currentUserId={user?.id}
+                  isEnrolled={!!enrollmentData?.enrollment}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Discussions Tab */}
+          <TabsContent value="discussions" className="mt-6">
+            <Card>
+              <CardContent className="p-4 md:p-6 space-y-6">
+                {/* New Discussion Button */}
+                {enrollmentData?.enrollment && !showNewDiscussion && (
+                  <Button
+                    onClick={() => setShowNewDiscussion(true)}
+                    className="w-full"
+                    size="lg"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Bắt đầu thảo luận mới
+                  </Button>
+                )}
+
+                {/* New Discussion Form */}
+                {showNewDiscussion && (
+                  <Card className="border-2">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Thảo luận mới</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleCreateDiscussion} className="space-y-4">
+                        <div>
+                          <Input
+                            type="text"
+                            value={discussionTitle}
+                            onChange={(e) => setDiscussionTitle(e.target.value)}
+                            placeholder="Tiêu đề thảo luận..."
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Textarea
+                            value={discussionContent}
+                            onChange={(e) => setDiscussionContent(e.target.value)}
+                            placeholder="Bạn muốn thảo luận điều gì?"
+                            rows={4}
+                            required
+                          />
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Button type="submit" className="flex-1 sm:flex-none">
+                            Đăng thảo luận
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setShowNewDiscussion(false);
+                              setDiscussionTitle('');
+                              setDiscussionContent('');
+                            }}
+                            className="flex-1 sm:flex-none"
+                          >
+                            Hủy
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Discussions List */}
+                {!enrollmentData?.enrollment ? (
+                  <Alert>
+                    <MessageSquare className="w-4 h-4" />
+                    <AlertDescription>
+                      Ghi danh khóa học này để tham gia thảo luận
+                    </AlertDescription>
+                  </Alert>
+                ) : discussionsData?.courseDiscussions && discussionsData.courseDiscussions.length > 0 ? (
+                  <div className="space-y-4">
+                    {discussionsData.courseDiscussions.map((discussion: any) => (
+                      <DiscussionThread
+                        key={discussion.id}
+                        discussion={discussion}
+                        refetch={refetchDiscussions}
+                        canModerate={course.instructor?.id === user?.id}
+                        isOwner={discussion.user.id === user?.id}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <Alert>
+                    <MessageSquare className="w-4 h-4" />
+                    <AlertDescription>
+                      Chưa có thảo luận nào. Hãy là người đầu tiên bắt đầu!
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
