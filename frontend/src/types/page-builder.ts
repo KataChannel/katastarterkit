@@ -39,6 +39,7 @@ export enum BlockType {
   // E-commerce Blocks (Data-driven)
   PRODUCT_LIST = 'PRODUCT_LIST',
   PRODUCT_DETAIL = 'PRODUCT_DETAIL',
+  PRODUCT_CAROUSEL = 'PRODUCT_CAROUSEL',
 }
 
 export enum PageStatus {
@@ -325,6 +326,25 @@ export interface ContactFormBlockContent {
   }>;
   submitText?: string;
   successMessage?: string;
+}
+
+export interface ProductCarouselBlockContent {
+  title?: string;
+  category?: string; // Danh mục sản phẩm
+  filterType?: 'all' | 'featured' | 'bestseller' | 'category' | 'custom'; // Loại lọc
+  customQuery?: string; // GraphQL query tùy chỉnh
+  itemsToShow?: number; // Số sản phẩm hiển thị
+  showViewAllButton?: boolean; // Ẩn/hiện nút "Xem tất cả"
+  viewAllLink?: string; // Link khi click "Xem tất cả"
+  autoplay?: boolean;
+  autoplayDelay?: number; // ms
+  loop?: boolean;
+  showNavigation?: boolean; // Hiện nút Next/Prev
+  responsive?: {
+    mobile?: number; // Số items hiển thị trên mobile
+    tablet?: number; // Số items hiển thị trên tablet
+    desktop?: number; // Số items hiển thị trên desktop
+  };
 }
 
 export interface TeamBlockContent {
