@@ -48,6 +48,7 @@ export enum BlockType {
   // E-commerce Blocks (Data-driven)
   PRODUCT_LIST = 'PRODUCT_LIST',
   PRODUCT_DETAIL = 'PRODUCT_DETAIL',
+  PRODUCT_CAROUSEL = 'PRODUCT_CAROUSEL',
 }
 
 // Register enums for GraphQL

@@ -35,6 +35,7 @@ export const BLOCK_TYPE_NUMERIC_TO_STRING: Record<number, string> = {
   24: 'DYNAMIC',
   25: 'PRODUCT_LIST',
   26: 'PRODUCT_DETAIL',
+  27: 'PRODUCT_CAROUSEL',
 };
 
 // String to Numeric mapping (Backend to Frontend)
@@ -66,6 +67,7 @@ export const BLOCK_TYPE_STRING_TO_NUMERIC: Record<string, number> = {
   'DYNAMIC': 24,
   'PRODUCT_LIST': 25,
   'PRODUCT_DETAIL': 26,
+  'PRODUCT_CAROUSEL': 27,
 };
 
 /**
