@@ -4,11 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ShoppingCart, Eye, Settings, Trash2 } from 'lucide-react';
 import { PageBlock, ProductCarouselBlockContent } from '@/types/page-builder';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { useDynamicQuery } from '@/lib/graphql/dynamic-hooks';
+import { ProductCarouselSettingsDialog } from './ProductCarouselSettingsDialog';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -309,10 +306,11 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
         <Button
           size="sm"
           variant="outline"
-          onClick={() => setIsEditing(!isEditing)}
-          className="bg-white shadow-sm"
+          onClick={() => setIsEditing(true)}
+          className="bg-white shadow-sm hover:bg-blue-50"
         >
-          <Settings className="w-4 h-4" />
+          <Settings className="w-4 h-4 mr-1" />
+          Settings
         </Button>
         <Button
           size="sm"
@@ -324,201 +322,16 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
         </Button>
       </div>
 
-      {/* Settings Panel */}
-      {isEditing && (
-        <div className="absolute top-12 right-2 bg-white p-4 rounded-lg shadow-lg border border-gray-200 z-20 w-96 max-h-[80vh] overflow-y-auto">
-          <h3 className="font-semibold mb-4 text-lg">Product Carousel Settings</h3>
-          
-          <div className="space-y-4">
-            {/* Title */}
-            <div>
-              <Label>Tiêu đề</Label>
-              <Input
-                value={editContent.title || ''}
-                onChange={(e) => setEditContent({ ...editContent, title: e.target.value })}
-                placeholder="Sản phẩm nổi bật"
-              />
-            </div>
-
-            {/* Filter Type */}
-            <div>
-              <Label>Loại sản phẩm</Label>
-              <Select
-                value={editContent.filterType || 'all'}
-                onValueChange={(value: any) => setEditContent({ ...editContent, filterType: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả sản phẩm</SelectItem>
-                  <SelectItem value="featured">Sản phẩm nổi bật</SelectItem>
-                  <SelectItem value="bestseller">Sản phẩm bán chạy</SelectItem>
-                  <SelectItem value="category">Theo danh mục</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Category (if filterType is category) */}
-            {editContent.filterType === 'category' && (
-              <div>
-                <Label>Danh mục</Label>
-                <Input
-                  value={editContent.category || ''}
-                  onChange={(e) => setEditContent({ ...editContent, category: e.target.value })}
-                  placeholder="Nhập tên danh mục"
-                />
-              </div>
-            )}
-
-            {/* Items to Show */}
-            <div>
-              <Label>Số lượng sản phẩm</Label>
-              <Input
-                type="number"
-                min="1"
-                max="50"
-                value={editContent.itemsToShow || 8}
-                onChange={(e) => setEditContent({ ...editContent, itemsToShow: parseInt(e.target.value) })}
-              />
-              <p className="text-xs text-gray-500 mt-1">Tổng số sản phẩm hiển thị trong carousel</p>
-            </div>
-
-            {/* Responsive Settings */}
-            <div className="border-t pt-4">
-              <Label className="mb-3 block font-semibold">Số sản phẩm hiển thị/màn hình</Label>
-              
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-sm">📱 Mobile (≤640px)</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="6"
-                    value={editContent.responsive?.mobile || 2}
-                    onChange={(e) => setEditContent({
-                      ...editContent,
-                      responsive: { ...editContent.responsive, mobile: parseInt(e.target.value) }
-                    })}
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-sm">💻 Tablet (641-1024px)</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="6"
-                    value={editContent.responsive?.tablet || 3}
-                    onChange={(e) => setEditContent({
-                      ...editContent,
-                      responsive: { ...editContent.responsive, tablet: parseInt(e.target.value) }
-                    })}
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-sm">🖥️ Desktop (≥1024px)</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="8"
-                    value={editContent.responsive?.desktop || 4}
-                    onChange={(e) => setEditContent({
-                      ...editContent,
-                      responsive: { ...editContent.responsive, desktop: parseInt(e.target.value) }
-                    })}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <div className="flex items-center justify-between">
-              <Label>Hiển thị nút điều hướng</Label>
-              <Switch
-                checked={editContent.showNavigation ?? true}
-                onCheckedChange={(checked) => setEditContent({ ...editContent, showNavigation: checked })}
-              />
-            </div>
-
-            {/* Autoplay */}
-            <div className="flex items-center justify-between">
-              <Label>Tự động chạy</Label>
-              <Switch
-                checked={editContent.autoplay ?? false}
-                onCheckedChange={(checked) => setEditContent({ ...editContent, autoplay: checked })}
-              />
-            </div>
-
-            {editContent.autoplay && (
-              <div>
-                <Label>Thời gian chuyển slide (ms)</Label>
-                <Input
-                  type="number"
-                  min="1000"
-                  max="10000"
-                  step="500"
-                  value={editContent.autoplayDelay || 3000}
-                  onChange={(e) => setEditContent({ ...editContent, autoplayDelay: parseInt(e.target.value) })}
-                />
-              </div>
-            )}
-
-            {/* Loop */}
-            <div className="flex items-center justify-between">
-              <Label>Lặp vô hạn</Label>
-              <Switch
-                checked={editContent.loop ?? true}
-                onCheckedChange={(checked) => setEditContent({ ...editContent, loop: checked })}
-              />
-            </div>
-
-            {/* View All Button */}
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between mb-3">
-                <Label>Nút "Xem tất cả"</Label>
-                <Switch
-                  checked={editContent.showViewAllButton ?? true}
-                  onCheckedChange={(checked) => setEditContent({ ...editContent, showViewAllButton: checked })}
-                />
-              </div>
-
-              {editContent.showViewAllButton && (
-                <div>
-                  <Label>Link "Xem tất cả"</Label>
-                  <Input
-                    value={editContent.viewAllLink || ''}
-                    onChange={(e) => setEditContent({ ...editContent, viewAllLink: e.target.value })}
-                    placeholder="/san-pham"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Preview Info */}
-            <div className="border-t pt-4 bg-gray-50 p-3 rounded">
-              <Label className="block mb-2">Preview Info</Label>
-              <div className="text-xs space-y-1 text-gray-600">
-                <div>Tổng sản phẩm: {filteredProducts.length}</div>
-                <div>Mobile: {editContent.responsive?.mobile || 2} items</div>
-                <div>Tablet: {editContent.responsive?.tablet || 3} items</div>
-                <div>Desktop: {editContent.responsive?.desktop || 4} items</div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-2 pt-2">
-              <Button onClick={handleSave} className="flex-1">
-                Lưu
-              </Button>
-              <Button onClick={() => setIsEditing(false)} variant="outline" className="flex-1">
-                Hủy
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Settings Dialog */}
+      <ProductCarouselSettingsDialog
+        open={isEditing}
+        onOpenChange={setIsEditing}
+        settings={editContent}
+        onSave={(newSettings) => {
+          setEditContent(newSettings);
+          onUpdate(newSettings);
+        }}
+      />
 
       {/* Preview */}
       <div className="pointer-events-none">
