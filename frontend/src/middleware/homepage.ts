@@ -8,14 +8,18 @@ import type { NextRequest } from 'next/server';
 export async function homepageMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  console.log('[Homepage Middleware] Processing:', pathname);
+
   // Only process root path
   if (pathname !== '/') {
     return NextResponse.next();
   }
 
+  console.log('[Homepage Middleware] Root path detected, checking for redirect...');
+
   try {
     // Check custom homepage URL by calling GraphQL API
-    const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql';
+    const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:12001/graphql';
     
     const response = await fetch(graphqlUrl, {
       method: 'POST',
@@ -51,14 +55,25 @@ export async function homepageMiddleware(request: NextRequest) {
 
     const settings = data?.publicWebsiteSettings || [];
 
+    console.log('[Homepage Middleware] Settings fetched:', settings);
+
     // Find homepage setting
     const homepageSetting = settings.find((s: any) => s.key === 'site.homepage_url');
     const homepageUrl = homepageSetting?.value?.trim();
+
+    console.log('[Homepage Middleware] Homepage URL:', homepageUrl);
+    console.log('[Homepage Middleware] Homepage URL type:', typeof homepageUrl);
+    console.log('[Homepage Middleware] Homepage URL length:', homepageUrl?.length);
+    console.log('[Homepage Middleware] Checking conditions:');
+    console.log('  - !homepageUrl:', !homepageUrl);
+    console.log('  - homepageUrl === "":', homepageUrl === '');
+    console.log('  - homepageUrl === "/":', homepageUrl === '/');
 
     // Logic: Nếu có giá trị homepage_url (khác null, undefined, empty, hoặc "/")
     // thì redirect về URL đó
     if (!homepageUrl || homepageUrl === '' || homepageUrl === '/') {
       // Không có custom homepage hoặc là root path => không redirect
+      console.log('[Homepage Middleware] No redirect needed (conditions met)');
       return NextResponse.next();
     }
 
