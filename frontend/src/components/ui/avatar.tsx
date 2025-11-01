@@ -17,13 +17,21 @@ Avatar.displayName = "Avatar"
 const AvatarImage = React.forwardRef<
   HTMLImageElement,
   React.ImgHTMLAttributes<HTMLImageElement>
->(({ className, ...props }, ref) => (
-  <img
-    ref={ref}
-    className={`aspect-square h-full w-full ${className || ''}`}
-    {...props}
-  />
-))
+>(({ className, src, ...props }, ref) => {
+  // Don't render if src is empty string
+  if (!src) {
+    return null
+  }
+  
+  return (
+    <img
+      ref={ref}
+      src={src}
+      className={`aspect-square h-full w-full ${className || ''}`}
+      {...props}
+    />
+  )
+})
 AvatarImage.displayName = "AvatarImage"
 
 const AvatarFallback = React.forwardRef<
@@ -32,7 +40,7 @@ const AvatarFallback = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={`flex h-full w-full items-center justify-center rounded-full bg-gray-100 ${className || ''}`}
+    className={`flex h-full w-full items-center justify-center rounded-full bg-muted ${className || ''}`}
     {...props}
   />
 ))
