@@ -68,11 +68,21 @@ export default function LMSHomePage() {
               >
                 Khám phá Khóa học
               </Button>
+
+             <Button
+                onClick={() => router.push('/lms/instructor/dashboard')}
+                size="lg"
+                variant="secondary"
+                className="text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8"
+              >
+                Trở thành Giảng viên
+              </Button>
+
               <Button
                 onClick={() => router.push('/lms/my-learning')}
                 size="lg"
-                variant="outline"
-                className="text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8 border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
+                variant="secondary"
+                className="text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8"
               >
                 Học tập của tôi
               </Button>
@@ -138,7 +148,7 @@ export default function LMSHomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-primary to-indigo-600 text-primary-foreground">
+      {/* <section className="bg-gradient-to-r from-primary to-indigo-600 text-primary-foreground">
         <div className="container mx-auto px-4 py-12 sm:py-16">
           <div className="text-center space-y-6 sm:space-y-8">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold px-4">
@@ -159,15 +169,15 @@ export default function LMSHomePage() {
               <Button
                 onClick={() => router.push('/lms/instructor/dashboard')}
                 size="lg"
-                variant="outline"
-                className="text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8 border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
+                variant="secondary"
+                className="text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8"
               >
                 Trở thành Giảng viên
               </Button>
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Quick Links Section */}
       <section className="container mx-auto px-4 py-12 sm:py-16">
