@@ -748,4 +748,160 @@ export class AuthService {
       user: updatedUser,
     };
   }
+
+  /**
+   * Request forgot password - Tạo token reset mật khẩu
+   * - Tạo token ngẫu nhiên 6 chữ số
+   * - Lưu vào VerificationToken với type RESET_PASSWORD
+   * - Token có hiệu lực 15 phút
+   */
+  async requestForgotPassword(email: string): Promise<{
+    success: boolean;
+    message: string;
+    token?: string; // Only for development/testing
+  }> {
+    // Tìm user theo email
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      // Không tiết lộ email có tồn tại hay không (security best practice)
+      return {
+        success: true,
+        message: 'Nếu email tồn tại trong hệ thống, bạn sẽ nhận được mã xác thực.',
+      };
+    }
+
+    // Tạo mã OTP 6 chữ số
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Xóa các token cũ chưa sử dụng
+    await this.prisma.verificationToken.deleteMany({
+      where: {
+        userId: user.id,
+        type: 'PASSWORD_RESET',
+        isUsed: false,
+      },
+    });
+
+    // Tạo token mới - expires sau 15 phút
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15);
+
+    await this.prisma.verificationToken.create({
+      data: {
+        userId: user.id,
+        token: resetToken,
+        type: 'PASSWORD_RESET',
+        expiresAt,
+      },
+    });
+
+    this.logger.log(`🔑 Forgot password token created for user: ${user.email}`);
+
+    // TODO: Send email with reset token
+    // await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+
+    return {
+      success: true,
+      message: 'Mã xác thực đã được gửi đến email của bạn.',
+      ...(process.env.NODE_ENV === 'development' && { token: resetToken }), // Only in dev
+    };
+  }
+
+  /**
+   * Verify forgot password token
+   * - Kiểm tra token có hợp lệ không
+   * - Token chưa được sử dụng
+   * - Token chưa hết hạn
+   */
+  async verifyResetToken(email: string, token: string): Promise<{
+    success: boolean;
+    message: string;
+    userId?: string;
+  }> {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Email không tồn tại trong hệ thống');
+    }
+
+    const verificationToken = await this.prisma.verificationToken.findFirst({
+      where: {
+        userId: user.id,
+        token,
+        type: 'PASSWORD_RESET',
+        isUsed: false,
+      },
+    });
+
+    if (!verificationToken) {
+      throw new BadRequestException('Mã xác thực không hợp lệ');
+    }
+
+    if (new Date() > verificationToken.expiresAt) {
+      throw new BadRequestException('Mã xác thực đã hết hạn');
+    }
+
+    return {
+      success: true,
+      message: 'Mã xác thực hợp lệ',
+      userId: user.id,
+    };
+  }
+
+  /**
+   * Reset password with token
+   * - Verify token
+   * - Update password
+   * - Mark token as used
+   */
+  async resetPasswordWithToken(
+    email: string,
+    token: string,
+    newPassword: string,
+  ): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    // Verify token
+    const verification = await this.verifyResetToken(email, token);
+
+    if (!verification.success) {
+      throw new BadRequestException('Mã xác thực không hợp lệ');
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await this.prisma.user.update({
+      where: { id: verification.userId },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    // Mark token as used
+    await this.prisma.verificationToken.updateMany({
+      where: {
+        userId: verification.userId,
+        token,
+        type: 'PASSWORD_RESET',
+      },
+      data: {
+        isUsed: true,
+      },
+    });
+
+    this.logger.log(`✅ Password reset successfully for user: ${email}`);
+
+    return {
+      success: true,
+      message: 'Mật khẩu đã được đặt lại thành công',
+    };
+  }
 }

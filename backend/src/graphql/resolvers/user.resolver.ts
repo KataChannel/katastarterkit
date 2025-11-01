@@ -262,6 +262,50 @@ export class UserResolver {
     return this.userService.adminResetPassword(input.userId, adminUser.id);
   }
 
+  /**
+   * Request forgot password - Gửi mã OTP reset mật khẩu
+   */
+  @Mutation(() => OtpResponse, { name: 'requestForgotPassword' })
+  async requestForgotPassword(@Args('email') email: string): Promise<OtpResponse> {
+    const result = await this.authService.requestForgotPassword(email);
+    return {
+      success: result.success,
+      message: result.message,
+      ...(result.token && { token: result.token }), // Only in development
+    };
+  }
+
+  /**
+   * Verify forgot password token
+   */
+  @Mutation(() => OtpResponse, { name: 'verifyResetToken' })
+  async verifyResetToken(
+    @Args('email') email: string,
+    @Args('token') token: string,
+  ): Promise<OtpResponse> {
+    const result = await this.authService.verifyResetToken(email, token);
+    return {
+      success: result.success,
+      message: result.message,
+    };
+  }
+
+  /**
+   * Reset password with token
+   */
+  @Mutation(() => OtpResponse, { name: 'resetPasswordWithToken' })
+  async resetPasswordWithToken(
+    @Args('email') email: string,
+    @Args('token') token: string,
+    @Args('newPassword') newPassword: string,
+  ): Promise<OtpResponse> {
+    const result = await this.authService.resetPasswordWithToken(email, token, newPassword);
+    return {
+      success: result.success,
+      message: result.message,
+    };
+  }
+
   // Field resolvers
   @ResolveField('role', () => String)
   async role(@Parent() user: User): Promise<string> {
