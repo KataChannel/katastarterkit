@@ -11,7 +11,7 @@ set -e
 # Configuration
 SERVER_IP="116.118.49.243"
 SERVER_USER="root"
-REMOTE_DIR="/root/shoprausach"
+REMOTE_DIR="/root/tazagroup_2025"
 LOCAL_DIR="$(pwd)"
 
 # Parse command line arguments
@@ -295,7 +295,7 @@ restart_docker() {
     
     ssh "${SERVER_USER}@${SERVER_IP}" bash -s << 'REMOTE_EOF'
         set -e
-        cd /root/shoprausach || exit 1
+        cd /root/tazagroup_2025 || exit 1
         
         # Rebuild and restart containers
         # docker compose -f docker-compose.yml up -d --build --remove-orphans --pull missing
@@ -329,8 +329,8 @@ show_summary() {
     log_success "DEPLOYMENT COMPLETED SUCCESSFULLY"
     log_success "═══════════════════════════════════════════════════════"
     log_success "Server: ${SERVER_IP}"
-    log_success "Frontend: http://${SERVER_IP}:12000"
-    log_success "Backend: http://${SERVER_IP}:12001"
+    log_success "Frontend: http://${SERVER_IP}:13000"
+    log_success "Backend: http://${SERVER_IP}:13001"
     log_success "Remote Directory: ${REMOTE_DIR}"
     log_success "═══════════════════════════════════════════════════════"
     log_success "⏱️  Deployment Time: $(date)"
