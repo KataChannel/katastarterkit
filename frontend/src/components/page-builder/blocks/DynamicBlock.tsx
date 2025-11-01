@@ -389,32 +389,285 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
 
             {/* Fullscreen Editor Modal */}
             {state.isFullscreenEditor && (
-              <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-lg shadow-2xl w-full h-full max-w-5xl max-h-[90vh] flex flex-col">
-                  <div className="border-b px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
-                    <h2 className="text-lg font-bold">Edit Template HTML</h2>
+              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-xl shadow-2xl w-full h-full max-w-7xl max-h-[95vh] flex flex-col overflow-hidden">
+                  {/* Header */}
+                  <div className="border-b px-8 py-5 flex items-center justify-between bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50">
+                    <div className="flex items-center gap-4">
+                      <Code className="w-6 h-6 text-blue-600" />
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-900">Template HTML Editor</h2>
+                        <p className="text-sm text-gray-600 mt-0.5">
+                          {state.selectedTemplate ? `Editing: ${state.selectedTemplate.name}` : 'Blank Template'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {/* Format Button */}
+                      <Button
+                        onClick={() => {
+                          try {
+                            let formatted = state.templateEdit;
+                            let indent = 0;
+                            const lines = formatted.split('\n');
+                            const formattedLines = lines.map(line => {
+                              const trimmed = line.trim();
+                              if (!trimmed) return '';
+                              
+                              if (trimmed.startsWith('</')) {
+                                indent = Math.max(0, indent - 1);
+                              }
+                              
+                              const indented = '  '.repeat(indent) + trimmed;
+                              
+                              if (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>')) {
+                                indent++;
+                              }
+                              
+                              return indented;
+                            });
+                            
+                            setTemplateEdit(formattedLines.join('\n'));
+                          } catch (error) {
+                            console.error('Format error:', error);
+                          }
+                        }}
+                        variant="outline"
+                        size="sm"
+                        className="h-9 gap-2"
+                      >
+                        <Settings className="w-4 h-4" />
+                        Format
+                      </Button>
+                      
+                      {/* Close Button */}
+                      <Button
+                        onClick={() => setFullscreenEditor(false)}
+                        variant="outline"
+                        size="sm"
+                        className="h-9 w-9 p-0"
+                        title="Exit fullscreen"
+                      >
+                        <Minimize2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Quick Insert Bar */}
+                  <div className="border-b px-8 py-3 bg-gray-50 flex items-center gap-2">
+                    <span className="text-xs font-semibold text-gray-700 mr-2">Quick Insert:</span>
                     <Button
-                      onClick={() => setFullscreenEditor(false)}
-                      variant="outline"
+                      onClick={() => {
+                        const snippet = '{{variable}}';
+                        setTemplateEdit(state.templateEdit + snippet);
+                      }}
+                      variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0"
+                      className="h-7 px-3 text-xs font-mono hover:bg-blue-100"
                     >
-                      <Minimize2 className="w-4 h-4" />
+                      {'{{var}}'}
                     </Button>
+                    <Button
+                      onClick={() => {
+                        const snippet = '{{#each items}}\n  \n{{/each}}';
+                        setTemplateEdit(state.templateEdit + '\n' + snippet);
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-3 text-xs font-mono hover:bg-blue-100"
+                    >
+                      {'{{#each}}'}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const snippet = '{{#if condition}}\n  \n{{/if}}';
+                        setTemplateEdit(state.templateEdit + '\n' + snippet);
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-3 text-xs font-mono hover:bg-blue-100"
+                    >
+                      {'{{#if}}'}
+                    </Button>
+                    <div className="h-4 w-px bg-gray-300 mx-1" />
+                    <Button
+                      onClick={() => {
+                        const snippet = '<div class="container">\n  \n</div>';
+                        setTemplateEdit(state.templateEdit + '\n' + snippet);
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-3 text-xs font-mono hover:bg-green-100"
+                    >
+                      {'<div>'}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const snippet = '<h2 class="title"></h2>';
+                        setTemplateEdit(state.templateEdit + '\n' + snippet);
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-3 text-xs font-mono hover:bg-green-100"
+                    >
+                      {'<h2>'}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const snippet = '<p class="text"></p>';
+                        setTemplateEdit(state.templateEdit + '\n' + snippet);
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-3 text-xs font-mono hover:bg-green-100"
+                    >
+                      {'<p>'}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const snippet = '<button class="btn"></button>';
+                        setTemplateEdit(state.templateEdit + '\n' + snippet);
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-3 text-xs font-mono hover:bg-green-100"
+                    >
+                      {'<button>'}
+                    </Button>
+                    <div className="flex-1" />
+                    <div className="flex items-center gap-2 text-xs text-gray-600">
+                      <span className="font-mono bg-white px-2 py-1 rounded border">
+                        {state.templateEdit.split('\n').length} lines
+                      </span>
+                      <span className="font-mono bg-white px-2 py-1 rounded border">
+                        {state.templateEdit.length} chars
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex-1 overflow-hidden flex flex-col p-4">
-                    <textarea
-                      placeholder={`<div class="p-6">\n  <h2>{{title}}</h2>\n  {{#each items}}\n    <p>{{this.name}}</p>\n  {{/each}}\n</div>`}
-                      value={state.templateEdit}
-                      onChange={(e) => setTemplateEdit(e.target.value)}
-                      className="font-mono text-sm resize-none flex-1 p-4 border border-gray-300 rounded-lg"
-                    />
+                  {/* Editor Area */}
+                  <div className="flex-1 overflow-hidden flex">
+                    {/* Left: Code Editor */}
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                      <div className="flex-1 overflow-auto p-6">
+                        <textarea
+                          placeholder={`<!-- Example HTML Template with Handlebars syntax -->\n<div class="container mx-auto p-6">\n  <h1 class="text-3xl font-bold">{{title}}</h1>\n  <p class="text-gray-600 mt-2">{{description}}</p>\n  \n  {{#each items}}\n    <div class="card mt-4 p-4 border rounded-lg shadow">\n      <h3 class="text-xl font-semibold">{{this.name}}</h3>\n      <p class="text-gray-700">{{this.description}}</p>\n      {{#if this.price}}\n        <span class="text-lg font-bold text-blue-600">\${{this.price}}</span>\n      {{/if}}\n    </div>\n  {{/each}}\n</div>`}
+                          value={state.templateEdit}
+                          onChange={(e) => setTemplateEdit(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Tab') {
+                              e.preventDefault();
+                              const start = e.currentTarget.selectionStart;
+                              const end = e.currentTarget.selectionEnd;
+                              const newValue = state.templateEdit.substring(0, start) + '  ' + state.templateEdit.substring(end);
+                              setTemplateEdit(newValue);
+                              setTimeout(() => {
+                                e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2;
+                              }, 0);
+                            }
+                          }}
+                          className="w-full h-full font-mono text-sm resize-none p-4 border-2 border-gray-200 rounded-lg focus:border-blue-400 focus:outline-none bg-white"
+                          style={{
+                            lineHeight: '1.6',
+                            tabSize: 2,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Right: Syntax Guide */}
+                    <div className="w-80 border-l border-gray-200 bg-gray-50 overflow-y-auto">
+                      <div className="p-6 space-y-6">
+                        <div>
+                          <h3 className="text-sm font-bold text-gray-900 mb-3">Handlebars Syntax</h3>
+                          <div className="space-y-3">
+                            <div className="bg-white p-3 rounded-lg border">
+                              <code className="text-xs font-mono text-blue-600">{'{{variable}}'}</code>
+                              <p className="text-xs text-gray-600 mt-1">Display variable value</p>
+                            </div>
+                            <div className="bg-white p-3 rounded-lg border">
+                              <code className="text-xs font-mono text-blue-600">{'{{#each items}}'}<br/>{'  {{this.name}}'}<br/>{'{{/each}}'}</code>
+                              <p className="text-xs text-gray-600 mt-1">Loop through array</p>
+                            </div>
+                            <div className="bg-white p-3 rounded-lg border">
+                              <code className="text-xs font-mono text-blue-600">{'{{#if condition}}'}<br/>{'  ...'}<br/>{'{{/if}}'}</code>
+                              <p className="text-xs text-gray-600 mt-1">Conditional rendering</p>
+                            </div>
+                            <div className="bg-white p-3 rounded-lg border">
+                              <code className="text-xs font-mono text-blue-600">{'{{this.property}}'}</code>
+                              <p className="text-xs text-gray-600 mt-1">Access property in loop</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="text-sm font-bold text-gray-900 mb-3">TailwindCSS Classes</h3>
+                          <div className="space-y-2 text-xs">
+                            <div className="bg-white p-2 rounded border">
+                              <code className="font-mono text-purple-600">container mx-auto</code>
+                              <p className="text-gray-600 mt-0.5">Center container</p>
+                            </div>
+                            <div className="bg-white p-2 rounded border">
+                              <code className="font-mono text-purple-600">p-4 m-2</code>
+                              <p className="text-gray-600 mt-0.5">Padding & margin</p>
+                            </div>
+                            <div className="bg-white p-2 rounded border">
+                              <code className="font-mono text-purple-600">text-xl font-bold</code>
+                              <p className="text-gray-600 mt-0.5">Text styles</p>
+                            </div>
+                            <div className="bg-white p-2 rounded border">
+                              <code className="font-mono text-purple-600">bg-blue-500 text-white</code>
+                              <p className="text-gray-600 mt-0.5">Colors</p>
+                            </div>
+                            <div className="bg-white p-2 rounded border">
+                              <code className="font-mono text-purple-600">rounded-lg shadow</code>
+                              <p className="text-gray-600 mt-0.5">Border & shadow</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="text-sm font-bold text-gray-900 mb-3">Tips</h3>
+                          <ul className="text-xs text-gray-700 space-y-2">
+                            <li className="flex gap-2">
+                              <span className="text-green-600">✓</span>
+                              <span>Press Tab for indentation</span>
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="text-green-600">✓</span>
+                              <span>Use Format button to auto-indent</span>
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="text-green-600">✓</span>
+                              <span>Quick insert adds snippets</span>
+                            </li>
+                            <li className="flex gap-2">
+                              <span className="text-green-600">✓</span>
+                              <span>Combine HTML + Tailwind CSS</span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="border-t px-6 py-3 flex gap-2 justify-end bg-gray-50">
-                    <Button onClick={() => setFullscreenEditor(false)} variant="outline" size="sm">
-                      Close
+                  {/* Footer */}
+                  <div className="border-t px-8 py-4 flex gap-3 justify-end bg-white">
+                    <Button 
+                      onClick={() => setFullscreenEditor(false)} 
+                      variant="outline" 
+                      size="sm"
+                      className="h-9 px-4"
+                    >
+                      Close Editor
+                    </Button>
+                    <Button 
+                      onClick={() => setFullscreenEditor(false)}
+                      size="sm"
+                      className="h-9 px-6 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Apply Changes
                     </Button>
                   </div>
                 </div>
