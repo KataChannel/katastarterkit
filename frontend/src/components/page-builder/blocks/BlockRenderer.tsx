@@ -57,10 +57,30 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   ].includes(block.type);
 
   const renderChildren = () => {
-    if (!block.children || block.children.length === 0) return undefined; // Return undefined instead of null
+    if (!block.children || block.children.length === 0) return undefined;
 
-    // Create a copy of children array before sorting (GraphQL returns read-only array)
-    // Wrap children với visual indicators cho nested blocks
+    // For GRID blocks: Render children directly without wrapper (each child is a grid cell)
+    if (block.type === BlockType.GRID) {
+      return [...block.children]
+        .sort((a, b) => a.order - b.order)
+        .map((childBlock) => (
+          <div key={childBlock.id} className="grid-item">
+            <BlockRenderer
+              block={childBlock}
+              isEditing={isEditing}
+              onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
+              onDelete={() => onDeleteChild?.(childBlock.id)}
+              onAddChild={onAddChild}
+              onUpdateChild={onUpdateChild}
+              onDeleteChild={onDeleteChild}
+              onSelect={onSelect}
+              depth={depth + 1}
+            />
+          </div>
+        ));
+    }
+
+    // For other container blocks: Keep visual indicators
     return (
       <div className="nested-blocks-container border-l-4 border-blue-200 ml-4 pl-4 mt-2 space-y-2">
         <div className="text-xs text-blue-600 font-semibold mb-2 flex items-center gap-1">
