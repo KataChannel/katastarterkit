@@ -64,21 +64,21 @@ export declare class ProjectAnalyticsService {
         } & {
             category: import("@prisma/client").$Enums.TaskCategory;
             order: number;
-            description: string | null;
             id: string;
-            updatedAt: Date;
-            projectId: string | null;
-            mentions: string[];
             createdAt: Date;
             userId: string;
+            updatedAt: Date;
+            tags: string[];
             title: string;
-            priority: import("@prisma/client").$Enums.TaskPriority;
             status: import("@prisma/client").$Enums.TaskStatus;
+            parentId: string | null;
+            description: string | null;
+            priority: import("@prisma/client").$Enums.TaskPriority;
             dueDate: Date | null;
             completedAt: Date | null;
+            projectId: string | null;
             assignedTo: string[];
-            tags: string[];
-            parentId: string | null;
+            mentions: string[];
         })[];
         generatedAt: Date;
     }>;
@@ -139,21 +139,21 @@ export declare class ProjectAnalyticsService {
     } & {
         category: import("@prisma/client").$Enums.TaskCategory;
         order: number;
-        description: string | null;
         id: string;
-        updatedAt: Date;
-        projectId: string | null;
-        mentions: string[];
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
+        tags: string[];
         title: string;
-        priority: import("@prisma/client").$Enums.TaskPriority;
         status: import("@prisma/client").$Enums.TaskStatus;
+        parentId: string | null;
+        description: string | null;
+        priority: import("@prisma/client").$Enums.TaskPriority;
         dueDate: Date | null;
         completedAt: Date | null;
+        projectId: string | null;
         assignedTo: string[];
-        tags: string[];
-        parentId: string | null;
+        mentions: string[];
     })[]>;
     getOverdueTasks(projectId: string): Promise<({
         user: {
@@ -169,21 +169,21 @@ export declare class ProjectAnalyticsService {
     } & {
         category: import("@prisma/client").$Enums.TaskCategory;
         order: number;
-        description: string | null;
         id: string;
-        updatedAt: Date;
-        projectId: string | null;
-        mentions: string[];
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
+        tags: string[];
         title: string;
-        priority: import("@prisma/client").$Enums.TaskPriority;
         status: import("@prisma/client").$Enums.TaskStatus;
+        parentId: string | null;
+        description: string | null;
+        priority: import("@prisma/client").$Enums.TaskPriority;
         dueDate: Date | null;
         completedAt: Date | null;
+        projectId: string | null;
         assignedTo: string[];
-        tags: string[];
-        parentId: string | null;
+        mentions: string[];
     })[]>;
     getTaskVelocity(projectId: string, days?: number): Promise<{
         totalCompleted: number;

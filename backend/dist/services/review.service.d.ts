@@ -39,23 +39,23 @@ export declare class ReviewService {
             avatar: string;
         };
         product: {
-            name: string;
             id: string;
+            name: string;
             slug: string;
         };
     } & {
         comment: string | null;
         id: string;
-        updatedAt: Date;
         createdAt: Date;
         userId: string | null;
+        updatedAt: Date;
         title: string | null;
+        images: string[];
         orderId: string | null;
         productId: string;
-        images: string[];
-        guestEmail: string | null;
-        guestName: string | null;
         rating: number;
+        guestName: string | null;
+        guestEmail: string | null;
         isVerifiedPurchase: boolean;
         isApproved: boolean;
         moderatedBy: string | null;
@@ -74,16 +74,16 @@ export declare class ReviewService {
         } & {
             comment: string | null;
             id: string;
-            updatedAt: Date;
             createdAt: Date;
             userId: string | null;
+            updatedAt: Date;
             title: string | null;
+            images: string[];
             orderId: string | null;
             productId: string;
-            images: string[];
-            guestEmail: string | null;
-            guestName: string | null;
             rating: number;
+            guestName: string | null;
+            guestEmail: string | null;
             isVerifiedPurchase: boolean;
             isApproved: boolean;
             moderatedBy: string | null;
@@ -105,23 +105,23 @@ export declare class ReviewService {
             avatar: string;
         };
         product: {
-            name: string;
             id: string;
+            name: string;
             slug: string;
         };
     } & {
         comment: string | null;
         id: string;
-        updatedAt: Date;
         createdAt: Date;
         userId: string | null;
+        updatedAt: Date;
         title: string | null;
+        images: string[];
         orderId: string | null;
         productId: string;
-        images: string[];
-        guestEmail: string | null;
-        guestName: string | null;
         rating: number;
+        guestName: string | null;
+        guestEmail: string | null;
         isVerifiedPurchase: boolean;
         isApproved: boolean;
         moderatedBy: string | null;
@@ -139,16 +139,16 @@ export declare class ReviewService {
     } & {
         comment: string | null;
         id: string;
-        updatedAt: Date;
         createdAt: Date;
         userId: string | null;
+        updatedAt: Date;
         title: string | null;
+        images: string[];
         orderId: string | null;
         productId: string;
-        images: string[];
-        guestEmail: string | null;
-        guestName: string | null;
         rating: number;
+        guestName: string | null;
+        guestEmail: string | null;
         isVerifiedPurchase: boolean;
         isApproved: boolean;
         moderatedBy: string | null;

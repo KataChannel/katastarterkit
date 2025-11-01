@@ -53,7 +53,32 @@ let DynamicCRUDService = class DynamicCRUDService {
     async create(modelName, data, options, context) {
         try {
             const delegate = this.getModelDelegate(modelName);
-            if (modelName === 'Project' && !data.ownerId) {
+            if (modelName === 'Task' || modelName === 'task') {
+                if (data.user?.connect?.id && !data.userId) {
+                    console.log(`🔄 Converting user.connect to userId:`, data.user.connect.id);
+                    data.userId = data.user.connect.id;
+                    delete data.user;
+                }
+                if (data.project?.connect?.id && !data.projectId) {
+                    console.log(`🔄 Converting project.connect to projectId:`, data.project.connect.id);
+                    data.projectId = data.project.connect.id;
+                    delete data.project;
+                }
+                if (!data.userId) {
+                    const userId = context?.req?.user?.id ||
+                        context?.user?.id ||
+                        context?.userId;
+                    if (userId) {
+                        console.log(`🔄 FALLBACK (task): Setting userId from context:`, userId);
+                        data.userId = userId;
+                    }
+                }
+                if (!data.userId) {
+                    console.error('❌ Task create failed: Missing userId', { data, context: !!context });
+                    throw new common_1.BadRequestException('Task userId is required. Please ensure you are authenticated.');
+                }
+            }
+            if ((modelName === 'Project' || modelName === 'project') && !data.ownerId) {
                 console.warn('⚠️ No ownerId in data, checking context...');
                 const userId = context?.req?.user?.id ||
                     context?.user?.id ||
@@ -64,7 +89,7 @@ let DynamicCRUDService = class DynamicCRUDService {
                     data.ownerId = userId;
                 }
             }
-            if (modelName === 'Project') {
+            if (modelName === 'Project' || modelName === 'project') {
                 if (!data.ownerId) {
                     console.error('❌ Project create failed: Missing ownerId', { data, context: !!context });
                     throw new common_1.BadRequestException('Project ownerId is required. Please ensure you are authenticated.');
@@ -76,6 +101,15 @@ let DynamicCRUDService = class DynamicCRUDService {
                     });
                     throw new common_1.BadRequestException('Project ownerId must be a valid user ID');
                 }
+                console.log(`🔍 Verifying owner exists:`, data.ownerId);
+                const ownerExists = await this.prisma.user.findUnique({
+                    where: { id: data.ownerId }
+                });
+                if (!ownerExists) {
+                    console.error('❌ Project owner not found:', data.ownerId);
+                    throw new common_1.BadRequestException(`Owner user with ID ${data.ownerId} not found`);
+                }
+                console.log(`✅ Owner verified:`, ownerExists.id);
             }
             const queryOptions = { data };
             if (options?.include) {
@@ -455,7 +489,7 @@ let DynamicCRUDService = class DynamicCRUDService {
             const delegate = this.getModelDelegate(modelName);
             const results = [];
             const errors = [];
-            if (modelName === 'Project') {
+            if (modelName === 'Project' || modelName === 'project') {
                 data = data.map((item, index) => {
                     if (!item.ownerId) {
                         const userId = context?.req?.user?.id ||
@@ -469,6 +503,20 @@ let DynamicCRUDService = class DynamicCRUDService {
                     }
                     return item;
                 });
+                const ownerIds = new Set(data.map(item => item.ownerId).filter(Boolean));
+                if (ownerIds.size > 0) {
+                    console.log(`🔍 Verifying ${ownerIds.size} owner(s) exist...`);
+                    const owners = await this.prisma.user.findMany({
+                        where: { id: { in: Array.from(ownerIds) } },
+                        select: { id: true }
+                    });
+                    const missingOwners = Array.from(ownerIds).filter(id => !owners.find(o => o.id === id));
+                    if (missingOwners.length > 0) {
+                        console.error('❌ Missing owners:', missingOwners);
+                        throw new common_1.BadRequestException(`Owner user(s) not found: ${missingOwners.join(', ')}`);
+                    }
+                    console.log(`✅ All ${owners.length} owner(s) verified`);
+                }
             }
             if (!options?.select && !options?.include) {
                 try {
