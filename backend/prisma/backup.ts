@@ -67,13 +67,15 @@ function parseSchemaModels(): { modelName: string; tableName: string }[] {
       
       // Look for @@map directive in the model body
       const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
-      const tableName = mapMatch ? mapMatch[1] : convertModelToTableName(modelName);
+      const tableName = mapMatch ? mapMatch[1] : camelToSnakeCase(modelName);
       
       models.push({ modelName, tableName });
     }
     
-    console.log(`📋 Found ${models.length} models in schema.prisma:`);
-    console.log(`   ${models.map(m => `${m.modelName} → ${m.tableName}`).join(', ')}`);
+    console.log(`📋 Found ${models.length} models in schema.prisma`);
+    if (models.length > 0) {
+      console.log(`   Examples: ${models.slice(0, 5).map(m => `${m.modelName} → ${m.tableName}`).join(', ')}`);
+    }
     return models;
   } catch (error) {
     console.error('❌ Error parsing schema.prisma:', error);
@@ -84,45 +86,74 @@ function parseSchemaModels(): { modelName: string; tableName: string }[] {
 
 /**
  * Convert Prisma model names to database table names
- * Based on Prisma's naming conventions and @@map directives
+ * Automatically builds mapping from schema.prisma by parsing @@map directives
+ * Falls back to snake_case conversion for models without explicit @@map
  */
+function buildModelTableMapping(): { [modelName: string]: string } {
+  try {
+    const schemaPath = path.join(__dirname, 'schema.prisma');
+    const schemaContent = fs.readFileSync(schemaPath, 'utf8');
+    
+    const mapping: { [modelName: string]: string } = {};
+    
+    // Extract model blocks with their bodies
+    const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*?)\}/gm;
+    let match;
+    
+    while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
+      const modelName = match[1];
+      const modelBody = match[2];
+      
+      // Look for @@map directive in the model body
+      const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
+      
+      if (mapMatch) {
+        // Use @@map value if present
+        mapping[modelName] = mapMatch[1];
+      } else {
+        // Auto-convert to snake_case if no @@map
+        mapping[modelName] = camelToSnakeCase(modelName);
+      }
+    }
+    
+    return mapping;
+  } catch (error) {
+    console.error('❌ Error building model mapping from schema:', error);
+    // Return empty mapping to fall back to direct parsing
+    return {};
+  }
+}
+
+/**
+ * Convert camelCase to snake_case
+ * Examples: User → user, UserSession → user_session, TaskComment → task_comment
+ */
+function camelToSnakeCase(str: string): string {
+  return str
+    .replace(/([A-Z])/g, '_$1')  // Add underscore before uppercase letters
+    .toLowerCase()              // Convert to lowercase
+    .replace(/^_/, '');         // Remove leading underscore
+}
+
+/**
+ * Get or create the model-to-table name mapping (cached for performance)
+ */
+let modelTableMappingCache: { [modelName: string]: string } | null = null;
+
 function convertModelToTableName(modelName: string): string {
-  // Handle special cases where model name != table name (snake_case conversion)
-  const specialMappings: { [key: string]: string } = {
-    'User': 'users',
-    'AuthMethod': 'auth_methods',
-    'VerificationToken': 'verification_tokens', 
-    'UserSession': 'user_sessions',
-    'AuditLog': 'audit_logs',
-    'Post': 'posts',
-    'Comment': 'comments',
-    'Tag': 'tags',
-    'Like': 'likes',
-    'PostTag': 'post_tags',
-    'Notification': 'notifications',
-    'Task': 'tasks',
-    'TaskComment': 'task_comments',
-    'TaskMedia': 'task_media',
-    'TaskShare': 'task_shares',
-    'ChatbotModel': 'chatbot_models',
-    'TrainingData': 'training_data',
-    'ChatConversation': 'chat_conversations',
-    'ChatMessage': 'chat_messages',
-    'Page': 'Page',
-    'PageBlock': 'PageBlock', 
-    'UserMfaSettings': 'UserMfaSettings',
-    'UserDevice': 'UserDevice',
-    'SecurityEvent': 'SecurityEvent',
-    'Role': 'Role',
-    'Permission': 'Permission',
-    'RolePermission': 'RolePermission',
-    'UserRoleAssignment': 'UserRoleAssignment',
-    'UserPermission': 'UserPermission',
-    'ResourceAccess': 'ResourceAccess'
-  };
+  // Initialize cache on first call
+  if (!modelTableMappingCache) {
+    modelTableMappingCache = buildModelTableMapping();
+    
+    if (Object.keys(modelTableMappingCache).length === 0) {
+      console.warn('⚠️  Could not parse schema.prisma, using default snake_case conversion');
+    } else {
+      console.log(`✅ Built mapping for ${Object.keys(modelTableMappingCache).length} models from schema.prisma`);
+    }
+  }
   
-  // Return mapped name or original name for models that match table names exactly
-  return specialMappings[modelName] || modelName;
+  // Return mapped name or convert to snake_case
+  return modelTableMappingCache[modelName] || camelToSnakeCase(modelName);
 }
 
 async function getTables(): Promise<string[]> {
@@ -130,27 +161,22 @@ async function getTables(): Promise<string[]> {
   const models = parseSchemaModels();
   
   if (models.length === 0) {
-    console.log('⚠️  No models found in schema.prisma, using fallback list');
-    // Fallback to manual list if parsing fails
-    return [
-      'users', 'auth_methods', 'verification_tokens', 'user_sessions', 'audit_logs',
-      'posts', 'comments', 'tags', 'likes', 'post_tags', 'notifications',
-      'tasks', 'task_comments', 'task_media', 'task_shares',
-      'chatbot_models', 'training_data', 'chat_conversations', 'chat_messages',
-      'Hoadon', 'HoadonChitiet',
-      'ext_listhoadon', 'ext_detailhoadon'
-    ];
+    console.log('⚠️  No models found in schema.prisma, querying database for tables...');
+    // Query database directly if schema parsing fails
+    const existingTables = await getExistingTables();
+    console.log(`📋 Found ${existingTables.length} tables in database`);
+    return existingTables;
   }
   
   const allTableNames = models.map(model => model.tableName);
-  console.log(`🗂️  Parsed ${allTableNames.length} table names from schema`);
+  console.log(`� Parsed ${allTableNames.length} table names from ${models.length} models`);
   
   // Get existing tables from database
   console.log('🔍 Checking which tables actually exist in database...');
   const existingTables = await getExistingTables();
   console.log(`📋 Found ${existingTables.length} existing tables in database`);
   
-  // Filter to only include tables that exist
+  // Filter to only include tables that exist in database
   const validTables = allTableNames.filter(tableName => {
     const exists = existingTables.includes(tableName);
     if (!exists) {
@@ -159,8 +185,8 @@ async function getTables(): Promise<string[]> {
     return exists;
   });
   
-  console.log(`✅ Final table list (${validTables.length} tables):`);
-  console.log(`   ${validTables.join(', ')}`);
+  console.log(`✅ Final table list (${validTables.length} tables to backup):`);
+  console.log(`   ${validTables.slice(0, 10).join(', ')}${validTables.length > 10 ? ` ... and ${validTables.length - 10} more` : ''}`);
   return validTables;
 }
 
