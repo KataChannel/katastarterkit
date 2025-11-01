@@ -80,7 +80,7 @@ export const TemplateSelectionPanel: React.FC<{
 );
 
 /**
- * Template Editor Panel
+ * Template Editor Panel - Enhanced with better UI
  */
 export const TemplateEditorPanel: React.FC<{
   templateEdit: string;
@@ -88,16 +88,105 @@ export const TemplateEditorPanel: React.FC<{
   selectedTemplate: any | null;
   isFullscreenEditor: boolean;
   onFullscreenToggle: (value: boolean) => void;
-}> = ({ templateEdit, onTemplateChange, selectedTemplate, onFullscreenToggle }) => (
-  <div className="flex-1 border-b border-gray-200 overflow-y-auto flex flex-col">
-    <div className="px-6 py-6 space-y-3 flex flex-col h-full">
-      <div className="flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-bold">Template HTML</h3>
-          <div className="flex items-center gap-2">
-            <div className="text-xs text-gray-500">
-              {selectedTemplate ? `Using: ${selectedTemplate.name}` : 'Blank template'}
+}> = ({ templateEdit, onTemplateChange, selectedTemplate, onFullscreenToggle }) => {
+  const [lineCount, setLineCount] = React.useState(0);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  // Count lines when template changes
+  React.useEffect(() => {
+    const lines = templateEdit.split('\n').length;
+    setLineCount(lines);
+  }, [templateEdit]);
+
+  // Handle Tab key for indentation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = e.currentTarget.selectionStart;
+      const end = e.currentTarget.selectionEnd;
+      const newValue = templateEdit.substring(0, start) + '  ' + templateEdit.substring(end);
+      onTemplateChange(newValue);
+      
+      // Set cursor position after the inserted tab
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + 2;
+        }
+      }, 0);
+    }
+  };
+
+  // Format HTML with basic indentation
+  const formatHTML = () => {
+    try {
+      let formatted = templateEdit;
+      let indent = 0;
+      const lines = formatted.split('\n');
+      const formattedLines = lines.map(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return '';
+        
+        // Decrease indent for closing tags
+        if (trimmed.startsWith('</')) {
+          indent = Math.max(0, indent - 1);
+        }
+        
+        const indented = '  '.repeat(indent) + trimmed;
+        
+        // Increase indent for opening tags (not self-closing)
+        if (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>')) {
+          indent++;
+        }
+        
+        return indented;
+      });
+      
+      onTemplateChange(formattedLines.join('\n'));
+    } catch (error) {
+      console.error('Format error:', error);
+    }
+  };
+
+  // Insert template snippet at cursor
+  const insertSnippet = (snippet: string) => {
+    if (!textareaRef.current) return;
+    
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    const newValue = templateEdit.substring(0, start) + snippet + templateEdit.substring(end);
+    onTemplateChange(newValue);
+    
+    // Set cursor position after the inserted snippet
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newPos = start + snippet.length;
+        textareaRef.current.selectionStart = textareaRef.current.selectionEnd = newPos;
+        textareaRef.current.focus();
+      }
+    }, 0);
+  };
+
+  return (
+    <div className="flex-1 border-b border-gray-200 overflow-hidden flex flex-col bg-gray-50">
+      <div className="px-6 py-4 space-y-3 flex flex-col h-full">
+        {/* Header with actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h3 className="text-base font-bold">Template HTML</h3>
+            <div className="flex items-center gap-1 text-xs text-gray-500 bg-white px-2 py-1 rounded border">
+              <span className="font-mono">{lineCount} lines</span>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={formatHTML}
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs"
+              title="Format HTML"
+            >
+              Format
+            </Button>
             <Button
               onClick={() => onFullscreenToggle(true)}
               variant="outline"
@@ -109,22 +198,109 @@ export const TemplateEditorPanel: React.FC<{
             </Button>
           </div>
         </div>
-        <Textarea
-          placeholder={`<div class="p-6">\n  <h2>{{title}}</h2>\n  {{#each items}}\n    <p>{{this.name}}</p>\n  {{/each}}\n</div>`}
-          value={templateEdit}
-          onChange={(e) => onTemplateChange(e.target.value)}
-          className="font-mono text-xs resize-none flex-1"
-        />
-        <p className="text-xs text-gray-500 mt-2">
-          Syntax:{' '}
-          <code className="bg-gray-100 px-1 rounded text-xs">{'{{var}}'}</code>
-          <code className="bg-gray-100 px-1 rounded text-xs ml-1">{'{{#each}}'}</code>
-          <code className="bg-gray-100 px-1 rounded text-xs ml-1">{'{{#if}}'}</code>
-        </p>
+
+        {/* Template info */}
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-gray-500">Template:</span>
+          <span className="font-semibold text-blue-600">
+            {selectedTemplate ? selectedTemplate.name : 'Blank'}
+          </span>
+        </div>
+
+        {/* Quick insert snippets */}
+        <div className="flex flex-wrap gap-1.5">
+          <Button
+            onClick={() => insertSnippet('{{variable}}')}
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs font-mono bg-white hover:bg-blue-50"
+          >
+            {'{{var}}'}
+          </Button>
+          <Button
+            onClick={() => insertSnippet('{{#each items}}\n  \n{{/each}}')}
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs font-mono bg-white hover:bg-blue-50"
+          >
+            {'{{#each}}'}
+          </Button>
+          <Button
+            onClick={() => insertSnippet('{{#if condition}}\n  \n{{/if}}')}
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs font-mono bg-white hover:bg-blue-50"
+          >
+            {'{{#if}}'}
+          </Button>
+          <Button
+            onClick={() => insertSnippet('<div class="container">\n  \n</div>')}
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs font-mono bg-white hover:bg-blue-50"
+          >
+            {'<div>'}
+          </Button>
+          <Button
+            onClick={() => insertSnippet('<h2 class="title"></h2>')}
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs font-mono bg-white hover:bg-blue-50"
+          >
+            {'<h2>'}
+          </Button>
+          <Button
+            onClick={() => insertSnippet('<button class="btn"></button>')}
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs font-mono bg-white hover:bg-blue-50"
+          >
+            {'<button>'}
+          </Button>
+        </div>
+
+        {/* Code editor */}
+        <div className="flex-1 flex flex-col overflow-hidden border border-gray-300 rounded-lg bg-white shadow-sm">
+          <Textarea
+            ref={textareaRef}
+            placeholder={`<!-- Example HTML Template with Handlebars syntax -->\n<div class="p-6 bg-white rounded-lg shadow">\n  <h2 class="text-2xl font-bold">{{title}}</h2>\n  <p class="text-gray-600">{{description}}</p>\n  \n  {{#each items}}\n    <div class="mt-4 p-4 border rounded">\n      <h3>{{this.name}}</h3>\n      <p>{{this.description}}</p>\n      {{#if this.price}}\n        <span class="font-bold">{{this.price}}</span>\n      {{/if}}\n    </div>\n  {{/each}}\n</div>`}
+            value={templateEdit}
+            onChange={(e) => onTemplateChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="font-mono text-xs resize-none flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            style={{
+              lineHeight: '1.5',
+              tabSize: 2,
+            }}
+          />
+        </div>
+
+        {/* Syntax help */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p className="text-xs font-semibold text-blue-900 mb-1.5">Syntax Guide:</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+            <div className="flex items-center gap-1.5">
+              <code className="bg-white px-1.5 py-0.5 rounded text-xs font-mono border">{'{{name}}'}</code>
+              <span className="text-gray-600">Variable</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <code className="bg-white px-1.5 py-0.5 rounded text-xs font-mono border">{'{{#each}}'}</code>
+              <span className="text-gray-600">Loop array</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <code className="bg-white px-1.5 py-0.5 rounded text-xs font-mono border">{'{{#if}}'}</code>
+              <span className="text-gray-600">Condition</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <code className="bg-white px-1.5 py-0.5 rounded text-xs font-mono border">{'{{this.prop}}'}</code>
+              <span className="text-gray-600">Loop item property</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 /**
  * Configuration Panel
