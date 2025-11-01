@@ -90,11 +90,6 @@ export default function ReviewList({
     );
   };
 
-  const renderRatingBars = () => {
-    // TODO: Add stats calculation from reviewsData or use separate aggregation query
-    return null;
-  };
-
   if (loading && !reviewsData) {
     return (
       <div className="space-y-3 md:space-y-4">
@@ -124,7 +119,6 @@ export default function ReviewList({
   }
 
   const reviews = reviewsData || [];
-  const stats = null; // TODO: Calculate stats from reviewsData if needed
   const total = reviews?.length || 0;
 
   return (
