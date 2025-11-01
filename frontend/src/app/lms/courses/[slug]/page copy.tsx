@@ -108,7 +108,6 @@ export default function CourseDetailPage() {
       <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
             <div className="lg:col-span-2">
               {/* Breadcrumb */}
               {course.category && (
@@ -169,10 +168,83 @@ export default function CourseDetailPage() {
                   </div>
                 </div>
               )}
+            </div>
 
-     {/* Main Content */}
+            {/* Sidebar Card */}
+            <div className="lg:col-span-1">
+              <div className="bg-white text-gray-900 rounded-xl shadow-xl p-6 sticky top-4">
+                {/* Thumbnail */}
+                {course.thumbnail && (
+                  <div className="relative h-48 mb-6 rounded-lg overflow-hidden">
+                    <Image
+                      src={course.thumbnail}
+                      alt={course.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Price */}
+                <div className="text-3xl font-bold mb-6">
+                  {course.price > 0 ? `$${course.price}` : 'Free'}
+                </div>
+
+                {/* Enroll Button */}
+                <EnrollButton 
+                  courseId={course.id}
+                  courseSlug={course.slug}
+                  price={course.price}
+                  isEnrolled={!!enrollmentData?.enrollment}
+                />
+
+                {/* Course Info */}
+                <div className="mt-6 pt-6 border-t space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Award className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Cấp độ</p>
+                      <p className="font-medium">{course.level}</p>
+                    </div>
+                  </div>
+
+                  {course.duration && (
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-5 h-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm text-gray-600">Thời lượng</p>
+                        <p className="font-medium">
+                          {Math.floor(course.duration / 60)}h {course.duration % 60}m
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Bài học</p>
+                      <p className="font-medium">{totalLessons} bài học</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Globe className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <p className="text-sm text-gray-600">Ngôn ngữ</p>
+                      <p className="font-medium">Tiếng Việt</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             {/* Tabs */}
             <div className="bg-white rounded-xl shadow-sm">
@@ -408,79 +480,6 @@ export default function CourseDetailPage() {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             {/* Empty for now - could add related courses, etc */}
-          </div>
-        </div>
-      </div>
-            </div>
-
-            {/* Sidebar Card */}
-            <div className="lg:col-span-1">
-              <div className="bg-white text-gray-900 rounded-xl shadow-xl p-6 sticky top-4">
-                {/* Thumbnail */}
-                {course.thumbnail && (
-                  <div className="relative h-48 mb-6 rounded-lg overflow-hidden">
-                    <Image
-                      src={course.thumbnail}
-                      alt={course.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-
-                {/* Price */}
-                <div className="text-3xl font-bold mb-6">
-                  {course.price > 0 ? `$${course.price}` : 'Free'}
-                </div>
-
-                {/* Enroll Button */}
-                <EnrollButton 
-                  courseId={course.id}
-                  courseSlug={course.slug}
-                  price={course.price}
-                  isEnrolled={!!enrollmentData?.enrollment}
-                />
-
-                {/* Course Info */}
-                <div className="mt-6 pt-6 border-t space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Award className="w-5 h-5 text-gray-500" />
-                    <div>
-                      <p className="text-sm text-gray-600">Cấp độ</p>
-                      <p className="font-medium">{course.level}</p>
-                    </div>
-                  </div>
-
-                  {course.duration && (
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-5 h-5 text-gray-500" />
-                      <div>
-                        <p className="text-sm text-gray-600">Thời lượng</p>
-                        <p className="font-medium">
-                          {Math.floor(course.duration / 60)}h {course.duration % 60}m
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-gray-500" />
-                    <div>
-                      <p className="text-sm text-gray-600">Bài học</p>
-                      <p className="font-medium">{totalLessons} bài học</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <Globe className="w-5 h-5 text-gray-500" />
-                    <div>
-                      <p className="text-sm text-gray-600">Ngôn ngữ</p>
-                      <p className="font-medium">Tiếng Việt</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
