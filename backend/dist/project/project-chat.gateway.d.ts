@@ -61,28 +61,28 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
                 };
             } & {
                 id: string;
+                createdAt: Date;
                 updatedAt: Date;
-                projectId: string;
                 content: string;
+                projectId: string;
                 mentions: string[];
-                reactions: import("@prisma/client/runtime/library").JsonValue | null;
+                senderId: string;
                 isEdited: boolean;
                 editedAt: Date | null;
-                createdAt: Date;
-                senderId: string;
+                reactions: import("@prisma/client/runtime/library").JsonValue | null;
                 replyToId: string | null;
             };
         } & {
             id: string;
+            createdAt: Date;
             updatedAt: Date;
-            projectId: string;
             content: string;
+            projectId: string;
             mentions: string[];
-            reactions: import("@prisma/client/runtime/library").JsonValue | null;
+            senderId: string;
             isEdited: boolean;
             editedAt: Date | null;
-            createdAt: Date;
-            senderId: string;
+            reactions: import("@prisma/client/runtime/library").JsonValue | null;
             replyToId: string | null;
         };
         error?: undefined;
@@ -138,15 +138,15 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
             };
         } & {
             id: string;
+            createdAt: Date;
             updatedAt: Date;
-            projectId: string;
             content: string;
+            projectId: string;
             mentions: string[];
-            reactions: import("@prisma/client/runtime/library").JsonValue | null;
+            senderId: string;
             isEdited: boolean;
             editedAt: Date | null;
-            createdAt: Date;
-            senderId: string;
+            reactions: import("@prisma/client/runtime/library").JsonValue | null;
             replyToId: string | null;
         };
         error?: undefined;

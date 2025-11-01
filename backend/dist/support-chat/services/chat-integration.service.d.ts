@@ -5,8 +5,8 @@ export declare class ChatIntegrationService {
     constructor(prisma: PrismaService);
     getIntegration(platform: IntegrationPlatform): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         accessToken: string | null;
         refreshToken: string | null;
         config: import("@prisma/client/runtime/library").JsonValue | null;
@@ -23,8 +23,8 @@ export declare class ChatIntegrationService {
     }>;
     getAllIntegrations(): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         accessToken: string | null;
         refreshToken: string | null;
         config: import("@prisma/client/runtime/library").JsonValue | null;
@@ -50,8 +50,8 @@ export declare class ChatIntegrationService {
         config?: any;
     }): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         accessToken: string | null;
         refreshToken: string | null;
         config: import("@prisma/client/runtime/library").JsonValue | null;
@@ -68,8 +68,8 @@ export declare class ChatIntegrationService {
     }>;
     verifyWebhook(platform: IntegrationPlatform): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         accessToken: string | null;
         refreshToken: string | null;
         config: import("@prisma/client/runtime/library").JsonValue | null;
@@ -86,8 +86,8 @@ export declare class ChatIntegrationService {
     }>;
     updateSyncStatus(platform: IntegrationPlatform, status: string, error?: string): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         accessToken: string | null;
         refreshToken: string | null;
         config: import("@prisma/client/runtime/library").JsonValue | null;

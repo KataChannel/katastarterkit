@@ -109,7 +109,7 @@ export default function TaskDetailModal({
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogContent className="max-w-4xl flex flex-col max-h-[90vh] p-0">
           <VisuallyHidden>
             <DialogTitle>Loading task details</DialogTitle>
           </VisuallyHidden>
@@ -124,7 +124,7 @@ export default function TaskDetailModal({
   if (error || !task) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogContent className="max-w-4xl flex flex-col max-h-[90vh] p-0">
           <VisuallyHidden>
             <DialogTitle>Error loading task</DialogTitle>
           </VisuallyHidden>
@@ -271,8 +271,9 @@ export default function TaskDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl flex flex-col max-h-[90vh] p-0">
+        {/* Header - Fixed */}
+        <DialogHeader className="px-6 pt-6 pb-4 border-b">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               {isEditing ? (
@@ -319,10 +320,11 @@ export default function TaskDetailModal({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(90vh-200px)]">
-          <div className="space-y-6 pr-4">
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="space-y-6">
             {/* Task Info */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Status */}
               <div className="space-y-2">
                 <Label>Status</Label>
@@ -376,7 +378,7 @@ export default function TaskDetailModal({
             </div>
 
             {/* Meta Information */}
-            <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -472,15 +474,20 @@ export default function TaskDetailModal({
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="comments">
                   <MessageSquare className="h-4 w-4 mr-2" />
-                  Comments ({task._count?.comments || 0})
+                  <span className="hidden sm:inline">Comments</span>
+                  <span className="sm:hidden">💬</span>
+                  <span className="ml-1">({task._count?.comments || 0})</span>
                 </TabsTrigger>
                 <TabsTrigger value="subtasks">
                   <CheckSquare className="h-4 w-4 mr-2" />
-                  Subtasks ({task._count?.subtasks || 0})
+                  <span className="hidden sm:inline">Subtasks</span>
+                  <span className="sm:hidden">✓</span>
+                  <span className="ml-1">({task._count?.subtasks || 0})</span>
                 </TabsTrigger>
                 <TabsTrigger value="activity">
                   <Clock className="h-4 w-4 mr-2" />
-                  Activity
+                  <span className="hidden sm:inline">Activity</span>
+                  <span className="sm:hidden">⏱</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -497,18 +504,19 @@ export default function TaskDetailModal({
               </TabsContent>
             </Tabs>
           </div>
-        </ScrollArea>
+        </div>
 
-        <DialogFooter>
-          <div className="flex items-center justify-between w-full">
-            <div className="text-xs text-muted-foreground">
+        {/* Footer - Fixed */}
+        <div className="px-6 py-4 border-t bg-muted/30">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="text-xs text-muted-foreground text-center sm:text-left">
               Last updated {format(new Date(task.updatedAt), 'PPp')}
             </div>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Close
             </Button>
           </div>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

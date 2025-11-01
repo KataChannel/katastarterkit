@@ -72,21 +72,21 @@ export declare class RbacController {
     createPermission(req: any, createPermissionDto: CreatePermissionDto): Promise<{
         success: boolean;
         data: {
-            name: string;
             category: string;
-            description: string | null;
             id: string;
-            updatedAt: Date;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
             isActive: boolean;
             action: string;
-            createdBy: string | null;
+            name: string;
+            updatedAt: Date;
             displayName: string;
+            description: string | null;
             resource: string;
             scope: string | null;
-            conditions: import("@prisma/client/runtime/library").JsonValue | null;
             isSystemPerm: boolean;
+            conditions: import("@prisma/client/runtime/library").JsonValue | null;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            createdBy: string | null;
         };
         message: string;
         error?: undefined;
@@ -99,21 +99,21 @@ export declare class RbacController {
     getAllPermissions(req: any, category?: string, resource?: string): Promise<{
         success: boolean;
         data: {
-            name: string;
             category: string;
-            description: string | null;
             id: string;
-            updatedAt: Date;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
             isActive: boolean;
             action: string;
-            createdBy: string | null;
+            name: string;
+            updatedAt: Date;
             displayName: string;
+            description: string | null;
             resource: string;
             scope: string | null;
-            conditions: import("@prisma/client/runtime/library").JsonValue | null;
             isSystemPerm: boolean;
+            conditions: import("@prisma/client/runtime/library").JsonValue | null;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            createdBy: string | null;
         }[];
         message: string;
         error?: undefined;
@@ -126,21 +126,21 @@ export declare class RbacController {
     getPermissionById(req: any, permissionId: string): Promise<{
         success: boolean;
         data: {
-            name: string;
             category: string;
-            description: string | null;
             id: string;
-            updatedAt: Date;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
             isActive: boolean;
             action: string;
-            createdBy: string | null;
+            name: string;
+            updatedAt: Date;
             displayName: string;
+            description: string | null;
             resource: string;
             scope: string | null;
-            conditions: import("@prisma/client/runtime/library").JsonValue | null;
             isSystemPerm: boolean;
+            conditions: import("@prisma/client/runtime/library").JsonValue | null;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            createdBy: string | null;
         };
         message: string;
         error?: undefined;
@@ -153,21 +153,21 @@ export declare class RbacController {
     updatePermission(req: any, permissionId: string, updatePermissionDto: Partial<CreatePermissionDto>): Promise<{
         success: boolean;
         data: {
-            name: string;
             category: string;
-            description: string | null;
             id: string;
-            updatedAt: Date;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
             isActive: boolean;
             action: string;
-            createdBy: string | null;
+            name: string;
+            updatedAt: Date;
             displayName: string;
+            description: string | null;
             resource: string;
             scope: string | null;
-            conditions: import("@prisma/client/runtime/library").JsonValue | null;
             isSystemPerm: boolean;
+            conditions: import("@prisma/client/runtime/library").JsonValue | null;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            createdBy: string | null;
         };
         message: string;
         error?: undefined;
@@ -212,13 +212,13 @@ export declare class RbacController {
         success: boolean;
         data: {
             id: string;
-            updatedAt: Date;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
-            userId: string;
             expiresAt: Date | null;
+            userId: string;
+            updatedAt: Date;
             scope: string | null;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             roleId: string;
             effect: string;
             assignedBy: string | null;
@@ -245,18 +245,18 @@ export declare class RbacController {
         success: boolean;
         data: {
             id: string;
-            updatedAt: Date;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
-            userId: string;
             expiresAt: Date | null;
-            reason: string | null;
+            userId: string;
+            updatedAt: Date;
             scope: string | null;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             effect: string;
             assignedBy: string | null;
             assignedAt: Date;
             permissionId: string;
+            reason: string | null;
         };
         message: string;
         error?: undefined;

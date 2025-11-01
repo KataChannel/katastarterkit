@@ -4,3 +4,4 @@
 4. Bỏ qua testing
 5. Không git
 6. Chỉ tạo 1 file .md tổng hợp ngắn gọn cuối cùng bằng tiếng việt
+7. Dialog sử dụng theo layout header, footer, content scrollable

@@ -7,10 +7,10 @@ export declare class OrderResolver {
     getOrder(orderId: string, context?: any): Promise<{
         payment: {
             id: string;
-            updatedAt: Date;
             createdAt: Date;
-            status: import("@prisma/client").$Enums.PaymentStatus;
+            updatedAt: Date;
             method: import("@prisma/client").$Enums.PaymentMethod;
+            status: import("@prisma/client").$Enums.PaymentStatus;
             orderId: string;
             amount: number;
             currency: string;
@@ -23,24 +23,22 @@ export declare class OrderResolver {
         };
         items: ({
             product: {
-                name: string;
-                description: string | null;
                 id: string;
-                updatedBy: string | null;
-                updatedAt: Date;
                 createdAt: Date;
-                status: import("@prisma/client").$Enums.ProductStatus;
-                createdBy: string | null;
-                viewCount: number;
-                categoryId: string;
+                name: string;
+                updatedAt: Date;
                 slug: string;
-                isFeatured: boolean;
+                status: import("@prisma/client").$Enums.ProductStatus;
                 publishedAt: Date | null;
+                description: string | null;
+                createdBy: string | null;
+                updatedBy: string | null;
+                thumbnail: string | null;
+                displayOrder: number;
+                isFeatured: boolean;
                 metaTitle: string | null;
                 metaDescription: string | null;
                 metaKeywords: string | null;
-                thumbnail: string | null;
-                displayOrder: number;
                 shortDesc: string | null;
                 price: number;
                 originalPrice: number | null;
@@ -49,23 +47,25 @@ export declare class OrderResolver {
                 barcode: string | null;
                 stock: number;
                 minStock: number;
-                maxStock: number | null;
                 unit: import("@prisma/client").$Enums.ProductUnit;
                 weight: number | null;
                 origin: string | null;
-                attributes: import("@prisma/client/runtime/library").JsonValue | null;
                 isNewArrival: boolean;
                 isBestSeller: boolean;
                 isOnSale: boolean;
+                maxStock: number | null;
+                categoryId: string;
+                attributes: import("@prisma/client/runtime/library").JsonValue | null;
+                viewCount: number;
                 soldCount: number;
             };
             variant: {
-                name: string;
                 order: number;
                 id: string;
-                updatedAt: Date;
                 createdAt: Date;
                 isActive: boolean;
+                name: string;
+                updatedAt: Date;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
@@ -75,35 +75,35 @@ export declare class OrderResolver {
             };
         } & {
             id: string;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             productName: string;
-            orderId: string;
             thumbnail: string | null;
             price: number;
             sku: string | null;
+            orderId: string;
             productId: string | null;
             quantity: number;
             subtotal: number;
-            variantName: string | null;
             variantId: string | null;
+            variantName: string | null;
         })[];
         tracking: {
             events: {
-                description: string;
                 id: string;
                 createdAt: Date;
                 status: string;
+                description: string;
+                location: string | null;
                 eventTime: Date;
                 trackingId: string;
-                location: string | null;
             }[];
         } & {
             id: string;
-            updatedAt: Date;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
+            updatedAt: Date;
             status: import("@prisma/client").$Enums.ShippingStatus;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             orderId: string;
             trackingUrl: string | null;
             carrier: string | null;
@@ -112,21 +112,21 @@ export declare class OrderResolver {
             actualDelivery: Date | null;
         };
     } & {
-        total: number;
         id: string;
-        updatedBy: string | null;
-        updatedAt: Date;
-        metadata: import("@prisma/client/runtime/library").JsonValue | null;
         createdAt: Date;
         userId: string | null;
+        updatedAt: Date;
         status: import("@prisma/client").$Enums.OrderStatus;
+        total: number;
+        metadata: import("@prisma/client/runtime/library").JsonValue | null;
         createdBy: string | null;
+        updatedBy: string | null;
         paymentMethod: import("@prisma/client").$Enums.PaymentMethod;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
-        orderNumber: string;
-        guestEmail: string | null;
-        guestPhone: string | null;
         guestName: string | null;
+        guestEmail: string | null;
+        orderNumber: string;
+        guestPhone: string | null;
         subtotal: number;
         shippingFee: number;
         tax: number;
@@ -144,10 +144,10 @@ export declare class OrderResolver {
     getOrderByNumber(orderNumber: string, email?: string): Promise<{
         payment: {
             id: string;
-            updatedAt: Date;
             createdAt: Date;
-            status: import("@prisma/client").$Enums.PaymentStatus;
+            updatedAt: Date;
             method: import("@prisma/client").$Enums.PaymentMethod;
+            status: import("@prisma/client").$Enums.PaymentStatus;
             orderId: string;
             amount: number;
             currency: string;
@@ -160,24 +160,22 @@ export declare class OrderResolver {
         };
         items: ({
             product: {
-                name: string;
-                description: string | null;
                 id: string;
-                updatedBy: string | null;
-                updatedAt: Date;
                 createdAt: Date;
-                status: import("@prisma/client").$Enums.ProductStatus;
-                createdBy: string | null;
-                viewCount: number;
-                categoryId: string;
+                name: string;
+                updatedAt: Date;
                 slug: string;
-                isFeatured: boolean;
+                status: import("@prisma/client").$Enums.ProductStatus;
                 publishedAt: Date | null;
+                description: string | null;
+                createdBy: string | null;
+                updatedBy: string | null;
+                thumbnail: string | null;
+                displayOrder: number;
+                isFeatured: boolean;
                 metaTitle: string | null;
                 metaDescription: string | null;
                 metaKeywords: string | null;
-                thumbnail: string | null;
-                displayOrder: number;
                 shortDesc: string | null;
                 price: number;
                 originalPrice: number | null;
@@ -186,23 +184,25 @@ export declare class OrderResolver {
                 barcode: string | null;
                 stock: number;
                 minStock: number;
-                maxStock: number | null;
                 unit: import("@prisma/client").$Enums.ProductUnit;
                 weight: number | null;
                 origin: string | null;
-                attributes: import("@prisma/client/runtime/library").JsonValue | null;
                 isNewArrival: boolean;
                 isBestSeller: boolean;
                 isOnSale: boolean;
+                maxStock: number | null;
+                categoryId: string;
+                attributes: import("@prisma/client/runtime/library").JsonValue | null;
+                viewCount: number;
                 soldCount: number;
             };
             variant: {
-                name: string;
                 order: number;
                 id: string;
-                updatedAt: Date;
                 createdAt: Date;
                 isActive: boolean;
+                name: string;
+                updatedAt: Date;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
@@ -212,35 +212,35 @@ export declare class OrderResolver {
             };
         } & {
             id: string;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             productName: string;
-            orderId: string;
             thumbnail: string | null;
             price: number;
             sku: string | null;
+            orderId: string;
             productId: string | null;
             quantity: number;
             subtotal: number;
-            variantName: string | null;
             variantId: string | null;
+            variantName: string | null;
         })[];
         tracking: {
             events: {
-                description: string;
                 id: string;
                 createdAt: Date;
                 status: string;
+                description: string;
+                location: string | null;
                 eventTime: Date;
                 trackingId: string;
-                location: string | null;
             }[];
         } & {
             id: string;
-            updatedAt: Date;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
+            updatedAt: Date;
             status: import("@prisma/client").$Enums.ShippingStatus;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             orderId: string;
             trackingUrl: string | null;
             carrier: string | null;
@@ -249,21 +249,21 @@ export declare class OrderResolver {
             actualDelivery: Date | null;
         };
     } & {
-        total: number;
         id: string;
-        updatedBy: string | null;
-        updatedAt: Date;
-        metadata: import("@prisma/client/runtime/library").JsonValue | null;
         createdAt: Date;
         userId: string | null;
+        updatedAt: Date;
         status: import("@prisma/client").$Enums.OrderStatus;
+        total: number;
+        metadata: import("@prisma/client/runtime/library").JsonValue | null;
         createdBy: string | null;
+        updatedBy: string | null;
         paymentMethod: import("@prisma/client").$Enums.PaymentMethod;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
-        orderNumber: string;
-        guestEmail: string | null;
-        guestPhone: string | null;
         guestName: string | null;
+        guestEmail: string | null;
+        orderNumber: string;
+        guestPhone: string | null;
         subtotal: number;
         shippingFee: number;
         tax: number;
@@ -285,10 +285,10 @@ export declare class OrderResolver {
     addTrackingEvent(orderId: string, description: string, location: string, status?: string): Promise<{
         payment: {
             id: string;
-            updatedAt: Date;
             createdAt: Date;
-            status: import("@prisma/client").$Enums.PaymentStatus;
+            updatedAt: Date;
             method: import("@prisma/client").$Enums.PaymentMethod;
+            status: import("@prisma/client").$Enums.PaymentStatus;
             orderId: string;
             amount: number;
             currency: string;
@@ -301,24 +301,22 @@ export declare class OrderResolver {
         };
         items: ({
             product: {
-                name: string;
-                description: string | null;
                 id: string;
-                updatedBy: string | null;
-                updatedAt: Date;
                 createdAt: Date;
-                status: import("@prisma/client").$Enums.ProductStatus;
-                createdBy: string | null;
-                viewCount: number;
-                categoryId: string;
+                name: string;
+                updatedAt: Date;
                 slug: string;
-                isFeatured: boolean;
+                status: import("@prisma/client").$Enums.ProductStatus;
                 publishedAt: Date | null;
+                description: string | null;
+                createdBy: string | null;
+                updatedBy: string | null;
+                thumbnail: string | null;
+                displayOrder: number;
+                isFeatured: boolean;
                 metaTitle: string | null;
                 metaDescription: string | null;
                 metaKeywords: string | null;
-                thumbnail: string | null;
-                displayOrder: number;
                 shortDesc: string | null;
                 price: number;
                 originalPrice: number | null;
@@ -327,23 +325,25 @@ export declare class OrderResolver {
                 barcode: string | null;
                 stock: number;
                 minStock: number;
-                maxStock: number | null;
                 unit: import("@prisma/client").$Enums.ProductUnit;
                 weight: number | null;
                 origin: string | null;
-                attributes: import("@prisma/client/runtime/library").JsonValue | null;
                 isNewArrival: boolean;
                 isBestSeller: boolean;
                 isOnSale: boolean;
+                maxStock: number | null;
+                categoryId: string;
+                attributes: import("@prisma/client/runtime/library").JsonValue | null;
+                viewCount: number;
                 soldCount: number;
             };
             variant: {
-                name: string;
                 order: number;
                 id: string;
-                updatedAt: Date;
                 createdAt: Date;
                 isActive: boolean;
+                name: string;
+                updatedAt: Date;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
@@ -353,35 +353,35 @@ export declare class OrderResolver {
             };
         } & {
             id: string;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             productName: string;
-            orderId: string;
             thumbnail: string | null;
             price: number;
             sku: string | null;
+            orderId: string;
             productId: string | null;
             quantity: number;
             subtotal: number;
-            variantName: string | null;
             variantId: string | null;
+            variantName: string | null;
         })[];
         tracking: {
             events: {
-                description: string;
                 id: string;
                 createdAt: Date;
                 status: string;
+                description: string;
+                location: string | null;
                 eventTime: Date;
                 trackingId: string;
-                location: string | null;
             }[];
         } & {
             id: string;
-            updatedAt: Date;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
+            updatedAt: Date;
             status: import("@prisma/client").$Enums.ShippingStatus;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
             orderId: string;
             trackingUrl: string | null;
             carrier: string | null;
@@ -390,21 +390,21 @@ export declare class OrderResolver {
             actualDelivery: Date | null;
         };
     } & {
-        total: number;
         id: string;
-        updatedBy: string | null;
-        updatedAt: Date;
-        metadata: import("@prisma/client/runtime/library").JsonValue | null;
         createdAt: Date;
         userId: string | null;
+        updatedAt: Date;
         status: import("@prisma/client").$Enums.OrderStatus;
+        total: number;
+        metadata: import("@prisma/client/runtime/library").JsonValue | null;
         createdBy: string | null;
+        updatedBy: string | null;
         paymentMethod: import("@prisma/client").$Enums.PaymentMethod;
         paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
-        orderNumber: string;
-        guestEmail: string | null;
-        guestPhone: string | null;
         guestName: string | null;
+        guestEmail: string | null;
+        orderNumber: string;
+        guestPhone: string | null;
         subtotal: number;
         shippingFee: number;
         tax: number;

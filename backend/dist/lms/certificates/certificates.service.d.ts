@@ -4,13 +4,13 @@ export declare class CertificatesService {
     constructor(prisma: PrismaService);
     generateCertificate(enrollmentId: string, userId: string): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
         issueDate: Date;
+        courseId: string;
         enrollmentId: string;
         certificateNumber: string;
-        courseId: string;
         courseName: string;
         instructorName: string;
         completionDate: Date;
@@ -25,13 +25,13 @@ export declare class CertificatesService {
         };
     } & {
         id: string;
-        updatedAt: Date;
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
         issueDate: Date;
+        courseId: string;
         enrollmentId: string;
         certificateNumber: string;
-        courseId: string;
         courseName: string;
         instructorName: string;
         completionDate: Date;
@@ -46,19 +46,19 @@ export declare class CertificatesService {
         };
         course: {
             title: string;
-            duration: number;
             slug: string;
             thumbnail: string;
+            duration: number;
         };
     } & {
         id: string;
-        updatedAt: Date;
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
         issueDate: Date;
+        courseId: string;
         enrollmentId: string;
         certificateNumber: string;
-        courseId: string;
         courseName: string;
         instructorName: string;
         completionDate: Date;
@@ -79,13 +79,13 @@ export declare class CertificatesService {
             };
         } & {
             id: string;
-            updatedAt: Date;
             createdAt: Date;
             userId: string;
+            updatedAt: Date;
             issueDate: Date;
+            courseId: string;
             enrollmentId: string;
             certificateNumber: string;
-            courseId: string;
             courseName: string;
             instructorName: string;
             completionDate: Date;

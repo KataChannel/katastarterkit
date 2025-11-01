@@ -17,24 +17,24 @@ export declare class DiscussionsResolver {
         };
         replies: {
             id: string;
-            updatedAt: Date;
-            content: string;
             createdAt: Date;
             userId: string;
+            updatedAt: Date;
+            content: string;
             parentId: string | null;
             discussionId: string;
         }[];
     } & {
         id: string;
-        updatedAt: Date;
-        content: string;
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
+        content: string;
         isPinned: boolean;
         courseId: string;
-        replyCount: number;
         lessonId: string | null;
+        replyCount: number;
     }>;
     getCourseDiscussions(courseId: string, lessonId?: string): Promise<({
         user: {
@@ -58,24 +58,24 @@ export declare class DiscussionsResolver {
             };
         } & {
             id: string;
-            updatedAt: Date;
-            content: string;
             createdAt: Date;
             userId: string;
+            updatedAt: Date;
+            content: string;
             parentId: string | null;
             discussionId: string;
         })[];
     } & {
         id: string;
-        updatedAt: Date;
-        content: string;
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
+        content: string;
         isPinned: boolean;
         courseId: string;
-        replyCount: number;
         lessonId: string | null;
+        replyCount: number;
     })[]>;
     getDiscussion(id: string): Promise<{
         user: {
@@ -112,33 +112,33 @@ export declare class DiscussionsResolver {
                 };
             } & {
                 id: string;
-                updatedAt: Date;
-                content: string;
                 createdAt: Date;
                 userId: string;
+                updatedAt: Date;
+                content: string;
                 parentId: string | null;
                 discussionId: string;
             })[];
         } & {
             id: string;
-            updatedAt: Date;
-            content: string;
             createdAt: Date;
             userId: string;
+            updatedAt: Date;
+            content: string;
             parentId: string | null;
             discussionId: string;
         })[];
     } & {
         id: string;
-        updatedAt: Date;
-        content: string;
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
+        content: string;
         isPinned: boolean;
         courseId: string;
-        replyCount: number;
         lessonId: string | null;
+        replyCount: number;
     }>;
     createReply(user: any, input: CreateReplyInput): Promise<{
         user: {
@@ -150,10 +150,10 @@ export declare class DiscussionsResolver {
         };
     } & {
         id: string;
-        updatedAt: Date;
-        content: string;
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
+        content: string;
         parentId: string | null;
         discussionId: string;
     }>;
@@ -167,29 +167,29 @@ export declare class DiscussionsResolver {
         };
     } & {
         id: string;
-        updatedAt: Date;
-        content: string;
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
+        content: string;
         isPinned: boolean;
         courseId: string;
-        replyCount: number;
         lessonId: string | null;
+        replyCount: number;
     }>;
     deleteDiscussion(user: any, id: string): Promise<{
         success: boolean;
     }>;
     togglePin(user: any, id: string): Promise<{
         id: string;
-        updatedAt: Date;
-        content: string;
         createdAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
+        content: string;
         isPinned: boolean;
         courseId: string;
-        replyCount: number;
         lessonId: string | null;
+        replyCount: number;
     }>;
 }
