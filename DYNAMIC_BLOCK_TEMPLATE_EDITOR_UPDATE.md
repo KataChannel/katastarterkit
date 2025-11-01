@@ -402,6 +402,7 @@ const insertSnippet = (snippet: string) => {
 - ❌ Không có line count, stats
 - ❌ Tab key không hoạt động
 - ❌ UI basic, thiếu professional
+- ❌ Bug: "Cannot set properties of null (setting 'selectionEnd')"
 
 ### After
 - ✅ Enhanced editor với đầy đủ tính năng
@@ -414,6 +415,7 @@ const insertSnippet = (snippet: string) => {
 - ✅ Professional UI với gradients, shadows
 - ✅ TailwindCSS reference
 - ✅ Tips & tricks panel
+- ✅ Bug fixed: Dùng ref thay vì e.currentTarget trong setTimeout
 
 ## 🚀 Cách Sử Dụng
 
@@ -481,6 +483,110 @@ const insertSnippet = (snippet: string) => {
 - ✅ **React hooks best practices**
 - ✅ **Senior-level code**
 - ✅ **Clean architecture**
+- ✅ **Bug fixed**: "Cannot set properties of null" - Sử dụng useRef thay vì e.currentTarget trong setTimeout
+
+## 🐛 Bug Fixes
+
+### Bug: "Cannot set properties of null (setting 'selectionEnd')"
+
+**Vấn đề**: 
+Khi nhấn Tab trong fullscreen editor, React re-render và `e.currentTarget` bị null trong setTimeout callback.
+
+**Lỗi**:
+```typescript
+onKeyDown={(e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const start = e.currentTarget.selectionStart;
+    const end = e.currentTarget.selectionEnd;
+    const newValue = state.templateEdit.substring(0, start) + '  ' + state.templateEdit.substring(end);
+    setTemplateEdit(newValue); // Re-render occurs
+    setTimeout(() => {
+      e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2;
+      // ❌ e.currentTarget is null here after re-render!
+    }, 0);
+  }
+}}
+```
+
+**Giải pháp**:
+Sử dụng `useRef` để giữ reference đến textarea element:
+
+```typescript
+// 1. Create ref
+const fullscreenTextareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+// 2. Attach ref to textarea
+<textarea
+  ref={fullscreenTextareaRef}
+  value={state.templateEdit}
+  onChange={(e) => setTemplateEdit(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = e.currentTarget.selectionStart;
+      const end = e.currentTarget.selectionEnd;
+      const newValue = state.templateEdit.substring(0, start) + '  ' + state.templateEdit.substring(end);
+      setTemplateEdit(newValue);
+      setTimeout(() => {
+        // ✅ Use ref instead of e.currentTarget
+        if (fullscreenTextareaRef.current) {
+          fullscreenTextareaRef.current.selectionStart = 
+          fullscreenTextareaRef.current.selectionEnd = start + 2;
+        }
+      }, 0);
+    }
+  }}
+/>
+
+// 3. Helper function for snippet insertion
+const insertSnippetFullscreen = (snippet: string) => {
+  if (!fullscreenTextareaRef.current) {
+    setTemplateEdit(state.templateEdit + '\n' + snippet);
+    return;
+  }
+
+  const textarea = fullscreenTextareaRef.current;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const newValue = state.templateEdit.substring(0, start) + snippet + state.templateEdit.substring(end);
+  
+  setTemplateEdit(newValue);
+  
+  setTimeout(() => {
+    if (fullscreenTextareaRef.current) {
+      const newPos = start + snippet.length;
+      fullscreenTextareaRef.current.selectionStart = 
+      fullscreenTextareaRef.current.selectionEnd = newPos;
+      fullscreenTextareaRef.current.focus();
+    }
+  }, 0);
+};
+
+// 4. Update all quick insert buttons
+<Button onClick={() => insertSnippetFullscreen('{{variable}}')}>
+  {'{{var}}'}
+</Button>
+```
+
+**Tại sao lỗi này xảy ra**:
+1. User nhấn Tab key
+2. Event handler chạy, lấy `e.currentTarget` reference
+3. `setTemplateEdit()` trigger re-render
+4. React re-render component, textarea element mới được tạo
+5. Trong setTimeout callback, `e.currentTarget` trỏ đến element cũ đã unmount → null
+6. Attempt to set `.selectionEnd` trên null → Error!
+
+**Giải pháp sử dụng ref**:
+- `useRef` giữ reference ổn định qua nhiều render
+- `ref.current` luôn trỏ đến element hiện tại (mới nhất)
+- Không bị ảnh hưởng bởi re-render
+
+**Kết quả**:
+- ✅ Tab key hoạt động mượt mà
+- ✅ Cursor positioning chính xác
+- ✅ Không có null reference errors
+- ✅ Quick insert snippets work perfectly
 
 ## 🎯 Best Practices Đã Áp Dụng
 

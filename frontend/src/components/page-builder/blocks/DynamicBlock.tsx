@@ -68,6 +68,34 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
   const config = block.config as DynamicBlockConfig;
   const sampleTemplates = getAllSampleTemplates();
 
+  // Ref for fullscreen textarea
+  const fullscreenTextareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  // Helper function to insert snippet in fullscreen editor
+  const insertSnippetFullscreen = (snippet: string) => {
+    if (!fullscreenTextareaRef.current) {
+      // Fallback: append to end
+      setTemplateEdit(state.templateEdit + '\n' + snippet);
+      return;
+    }
+
+    const textarea = fullscreenTextareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const newValue = state.templateEdit.substring(0, start) + snippet + state.templateEdit.substring(end);
+    
+    setTemplateEdit(newValue);
+    
+    // Focus and position cursor after snippet
+    setTimeout(() => {
+      if (fullscreenTextareaRef.current) {
+        const newPos = start + snippet.length;
+        fullscreenTextareaRef.current.selectionStart = fullscreenTextareaRef.current.selectionEnd = newPos;
+        fullscreenTextareaRef.current.focus();
+      }
+    }, 0);
+  };
+
   // State management using custom hook with reducer
   const {
     state,
@@ -457,10 +485,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                   <div className="border-b px-8 py-3 bg-gray-50 flex items-center gap-2">
                     <span className="text-xs font-semibold text-gray-700 mr-2">Quick Insert:</span>
                     <Button
-                      onClick={() => {
-                        const snippet = '{{variable}}';
-                        setTemplateEdit(state.templateEdit + snippet);
-                      }}
+                      onClick={() => insertSnippetFullscreen('{{variable}}')}
                       variant="ghost"
                       size="sm"
                       className="h-7 px-3 text-xs font-mono hover:bg-blue-100"
@@ -468,10 +493,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       {'{{var}}'}
                     </Button>
                     <Button
-                      onClick={() => {
-                        const snippet = '{{#each items}}\n  \n{{/each}}';
-                        setTemplateEdit(state.templateEdit + '\n' + snippet);
-                      }}
+                      onClick={() => insertSnippetFullscreen('{{#each items}}\n  \n{{/each}}')}
                       variant="ghost"
                       size="sm"
                       className="h-7 px-3 text-xs font-mono hover:bg-blue-100"
@@ -479,10 +501,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       {'{{#each}}'}
                     </Button>
                     <Button
-                      onClick={() => {
-                        const snippet = '{{#if condition}}\n  \n{{/if}}';
-                        setTemplateEdit(state.templateEdit + '\n' + snippet);
-                      }}
+                      onClick={() => insertSnippetFullscreen('{{#if condition}}\n  \n{{/if}}')}
                       variant="ghost"
                       size="sm"
                       className="h-7 px-3 text-xs font-mono hover:bg-blue-100"
@@ -491,10 +510,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                     </Button>
                     <div className="h-4 w-px bg-gray-300 mx-1" />
                     <Button
-                      onClick={() => {
-                        const snippet = '<div class="container">\n  \n</div>';
-                        setTemplateEdit(state.templateEdit + '\n' + snippet);
-                      }}
+                      onClick={() => insertSnippetFullscreen('<div class="container">\n  \n</div>')}
                       variant="ghost"
                       size="sm"
                       className="h-7 px-3 text-xs font-mono hover:bg-green-100"
@@ -502,10 +518,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       {'<div>'}
                     </Button>
                     <Button
-                      onClick={() => {
-                        const snippet = '<h2 class="title"></h2>';
-                        setTemplateEdit(state.templateEdit + '\n' + snippet);
-                      }}
+                      onClick={() => insertSnippetFullscreen('<h2 class="title"></h2>')}
                       variant="ghost"
                       size="sm"
                       className="h-7 px-3 text-xs font-mono hover:bg-green-100"
@@ -513,10 +526,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       {'<h2>'}
                     </Button>
                     <Button
-                      onClick={() => {
-                        const snippet = '<p class="text"></p>';
-                        setTemplateEdit(state.templateEdit + '\n' + snippet);
-                      }}
+                      onClick={() => insertSnippetFullscreen('<p class="text"></p>')}
                       variant="ghost"
                       size="sm"
                       className="h-7 px-3 text-xs font-mono hover:bg-green-100"
@@ -524,10 +534,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                       {'<p>'}
                     </Button>
                     <Button
-                      onClick={() => {
-                        const snippet = '<button class="btn"></button>';
-                        setTemplateEdit(state.templateEdit + '\n' + snippet);
-                      }}
+                      onClick={() => insertSnippetFullscreen('<button class="btn"></button>')}
                       variant="ghost"
                       size="sm"
                       className="h-7 px-3 text-xs font-mono hover:bg-green-100"
@@ -551,6 +558,7 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                     <div className="flex-1 flex flex-col overflow-hidden">
                       <div className="flex-1 overflow-auto p-6">
                         <textarea
+                          ref={fullscreenTextareaRef}
                           placeholder={`<!-- Example HTML Template with Handlebars syntax -->\n<div class="container mx-auto p-6">\n  <h1 class="text-3xl font-bold">{{title}}</h1>\n  <p class="text-gray-600 mt-2">{{description}}</p>\n  \n  {{#each items}}\n    <div class="card mt-4 p-4 border rounded-lg shadow">\n      <h3 class="text-xl font-semibold">{{this.name}}</h3>\n      <p class="text-gray-700">{{this.description}}</p>\n      {{#if this.price}}\n        <span class="text-lg font-bold text-blue-600">\${{this.price}}</span>\n      {{/if}}\n    </div>\n  {{/each}}\n</div>`}
                           value={state.templateEdit}
                           onChange={(e) => setTemplateEdit(e.target.value)}
@@ -562,7 +570,9 @@ export const DynamicBlock: React.FC<DynamicBlockProps> = ({
                               const newValue = state.templateEdit.substring(0, start) + '  ' + state.templateEdit.substring(end);
                               setTemplateEdit(newValue);
                               setTimeout(() => {
-                                e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2;
+                                if (fullscreenTextareaRef.current) {
+                                  fullscreenTextareaRef.current.selectionStart = fullscreenTextareaRef.current.selectionEnd = start + 2;
+                                }
                               }, 0);
                             }
                           }}

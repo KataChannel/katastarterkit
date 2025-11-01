@@ -12,6 +12,7 @@ import { PageBuilderCanvas } from './PageBuilderCanvas';
 import { BlockType } from '@/types/page-builder';
 import { BLOCK_TYPES } from '@/constants/blockTypes';
 import ErrorBoundary from './ErrorBoundary';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 /**
  * PageBuilder Internal Component
@@ -40,7 +41,10 @@ function PageBuilderInternal() {
     setShowSaveTemplateDialog
   } = useTemplate();
   const { blocks } = usePageState();
-  const { handleApplyTemplate, handleAddChildBlock, handleCloseAddChildDialog } = usePageActions();
+  const { handleApplyTemplate, handleAddChildBlock, handleCloseAddChildDialog, handlePageSave } = usePageActions();
+  
+  // Setup keyboard shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+S)
+  useKeyboardShortcuts(handlePageSave);
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
