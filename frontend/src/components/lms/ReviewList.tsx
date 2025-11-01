@@ -1,12 +1,17 @@
-// ✅ MIGRATED TO DYNAMIC GRAPHQL - 2025-10-29
+// ✅ MIGRATED TO DYNAMIC GRAPHQL + SHADCN/UI - 2025-11-01
 // Original backup: ReviewList.tsx.backup
 
 'use client';
 
 import { useState } from 'react';
 import { useFindMany, useUpdateOne, useDeleteOne } from '@/hooks/useDynamicGraphQL';
-import { Star, ThumbsUp, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Star, ThumbsUp, Edit, Trash2, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 
 interface ReviewListProps {
   courseId: string;
@@ -92,12 +97,16 @@ export default function ReviewList({
 
   if (loading && !reviewsData) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="p-6 border border-gray-200 rounded-lg animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-1/4 mb-4" />
-            <div className="h-20 bg-gray-200 rounded" />
-          </div>
+          <Card key={i}>
+            <CardContent className="pt-6">
+              <div className="space-y-3 animate-pulse">
+                <div className="h-4 bg-muted rounded w-1/4" />
+                <div className="h-20 bg-muted rounded" />
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     );
@@ -105,9 +114,12 @@ export default function ReviewList({
 
   if (error) {
     return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
-        <p className="text-red-600">Failed to load reviews: {error.message}</p>
-      </div>
+      <Alert className="border-destructive bg-destructive/10">
+        <AlertCircle className="h-4 w-4 text-destructive" />
+        <AlertDescription className="text-destructive">
+          Không thể tải đánh giá: {error.message}
+        </AlertDescription>
+      </Alert>
     );
   }
 
@@ -116,168 +128,158 @@ export default function ReviewList({
   const total = reviews?.length || 0;
 
   return (
-    <div className="space-y-6">
-      {/* Rating Summary - TODO: Add stats aggregation */}
-      {stats && (
-        <div className="grid md:grid-cols-3 gap-6 p-6 bg-gray-50 rounded-lg">
-          <div className="text-center">
-            <div className="text-5xl font-bold text-gray-900">
-              {(stats as any).avgRating.toFixed(1)}
-            </div>
-            <div className="flex justify-center mt-2">
-              {renderStars(Math.round((stats as any).avgRating))}
-            </div>
-            <p className="mt-2 text-sm text-gray-600">
-              {(stats as any).totalReviews} {(stats as any).totalReviews === 1 ? 'review' : 'reviews'}
-            </p>
-          </div>
-
-          {/* Rating Distribution */}
-          <div className="md:col-span-2">{renderRatingBars()}</div>
-        </div>
-      )}
-
-      {/* Filters and Sorting */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="space-y-4 md:space-y-6">
+      {/* Filters and Sorting - Mobile First */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 md:gap-4">
         <div>
           {filterByRating && (
-            <button
+            <Badge
+              variant="outline"
+              className="cursor-pointer hover:bg-muted text-xs md:text-sm"
               onClick={() => setFilterByRating(null)}
-              className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
             >
-              Clear filter: {filterByRating} stars ×
-            </button>
+              {filterByRating} sao ×
+            </Badge>
           )}
         </div>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as any)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="recent">Most Recent</option>
-          <option value="helpful">Most Helpful</option>
-          <option value="rating">Highest Rating</option>
-        </select>
+        <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+          <SelectTrigger className="w-full sm:w-auto md:text-base">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="recent">Mới nhất</SelectItem>
+            <SelectItem value="helpful">Hữu ích nhất</SelectItem>
+            <SelectItem value="rating">Đánh giá cao nhất</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Reviews List */}
+      {/* Reviews List - Mobile First */}
       {reviews.length === 0 ? (
-        <div className="p-12 text-center border-2 border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-500">
-            {filterByRating
-              ? `No ${filterByRating}-star reviews yet`
-              : 'No reviews yet. Be the first to review this course!'}
-          </p>
-        </div>
+        <Card>
+          <CardContent className="pt-12 pb-12 text-center">
+            <p className="text-muted-foreground text-sm md:text-base">
+              {filterByRating
+                ? `Chưa có đánh giá ${filterByRating} sao`
+                : 'Chưa có đánh giá nào. Hãy là người đầu tiên viết đánh giá!'}
+            </p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {reviews.map((review: any) => {
             const isOwner = currentUserId === review.userId;
             const hasVoted = currentUserId && review.helpfulVoters?.includes(currentUserId);
 
             return (
-              <div
-                key={review.id}
-                className="p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-              >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-start gap-3">
-                    {/* Avatar */}
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                      {review.user?.firstName?.[0] || review.user?.username?.[0] || 'U'}
+              <Card key={review.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="pt-4 md:pt-6">
+                  {/* Header - Mobile First */}
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                    <div className="flex items-start gap-3">
+                      {/* Avatar */}
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm md:text-base flex-shrink-0">
+                        {review.user?.firstName?.[0] || review.user?.username?.[0] || 'U'}
+                      </div>
+
+                      {/* User Info & Rating */}
+                      <div className="flex-1">
+                        <div className="font-medium text-foreground text-sm md:text-base">
+                          {review.user?.firstName && review.user?.lastName
+                            ? `${review.user.firstName} ${review.user.lastName}`
+                            : review.user?.username || 'Ẩn danh'}
+                        </div>
+                        <div className="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-2 mt-1">
+                          <div className="flex items-center gap-1">
+                            {renderStars(review.rating)}
+                          </div>
+                          <span className="text-xs md:text-sm text-muted-foreground">
+                            {formatDistanceToNow(new Date(review.createdAt), {
+                              addSuffix: true,
+                              locale: { formatDistance: () => 'Gần đây' } as any,
+                            })}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* User Info & Rating */}
-                    <div>
-                      <div className="font-medium text-gray-900">
-                        {review.user?.firstName && review.user?.lastName
-                          ? `${review.user.firstName} ${review.user.lastName}`
-                          : review.user?.username || 'Anonymous'}
+                    {/* Actions Menu (for owner) - Mobile Optimized */}
+                    {isOwner && (
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEditReview?.(review)}
+                          className="h-8 w-8 p-0"
+                          title="Chỉnh sửa đánh giá"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteReview(review.id)}
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                          title="Xóa đánh giá"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        {renderStars(review.rating)}
-                        <span className="text-sm text-gray-500">
-                          {formatDistanceToNow(new Date(review.createdAt), {
-                            addSuffix: true,
-                          })}
-                        </span>
-                      </div>
-                    </div>
+                    )}
                   </div>
 
-                  {/* Actions Menu (for owner) */}
-                  {isOwner && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => onEditReview?.(review)}
-                        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                        title="Edit review"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteReview(review.id)}
-                        className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                        title="Delete review"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                  {/* Comment */}
+                  {review.comment && (
+                    <p className="text-foreground text-sm md:text-base mb-4 whitespace-pre-wrap break-words">
+                      {review.comment}
+                    </p>
                   )}
-                </div>
 
-                {/* Comment */}
-                {review.comment && (
-                  <p className="text-gray-700 mb-4 whitespace-pre-wrap">
-                    {review.comment}
-                  </p>
-                )}
-
-                {/* Helpful Button */}
-                {currentUserId && !isOwner && (
-                  <button
-                    onClick={() => handleMarkHelpful(review.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                      hasVoted
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    <ThumbsUp
-                      className={`w-4 h-4 ${hasVoted ? 'fill-current' : ''}`}
-                    />
-                    <span className="text-sm font-medium">
-                      Helpful ({review.helpfulCount})
-                    </span>
-                  </button>
-                )}
-              </div>
+                  {/* Helpful Button - Mobile Responsive */}
+                  {currentUserId && !isOwner && (
+                    <Button
+                      variant={hasVoted ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleMarkHelpful(review.id)}
+                      className="w-full xs:w-auto gap-2 text-xs md:text-sm"
+                    >
+                      <ThumbsUp
+                        className={`w-3 h-3 md:w-4 md:h-4 ${hasVoted ? 'fill-current' : ''}`}
+                      />
+                      Hữu ích ({review.helpfulCount || 0})
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
             );
           })}
         </div>
       )}
 
-      {/* Pagination */}
+      {/* Pagination - Mobile Responsive */}
       {total > pageSize && (
-        <div className="flex items-center justify-center gap-2">
-          <button
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 md:gap-3 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+            className="w-full xs:w-auto"
           >
-            Previous
-          </button>
-          <span className="px-4 py-2 text-gray-700">
-            Page {page} of {Math.ceil(total / pageSize)}
+            Trước
+          </Button>
+          <span className="text-xs md:text-sm text-muted-foreground">
+            Trang {page} / {Math.ceil(total / pageSize)}
           </span>
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setPage((p) => p + 1)}
             disabled={page >= Math.ceil(total / pageSize)}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+            className="w-full xs:w-auto"
           >
-            Next
-          </button>
+            Sau
+          </Button>
         </div>
       )}
     </div>

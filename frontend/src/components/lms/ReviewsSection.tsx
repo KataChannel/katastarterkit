@@ -1,4 +1,4 @@
-// ✅ MIGRATED TO DYNAMIC GRAPHQL - 2025-10-29
+// ✅ MIGRATED TO DYNAMIC GRAPHQL + SHADCN/UI - 2025-11-01
 // Original backup: ReviewsSection.tsx.backup
 
 'use client';
@@ -6,6 +6,9 @@
 import { useState } from 'react';
 import { useFindMany, useFindUnique } from '@/hooks/useDynamicGraphQL';
 import { MessageSquare, Edit2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
 
@@ -46,37 +49,40 @@ export default function ReviewsSection({
   };
 
   return (
-    <div className="space-y-8">
-      {/* Section Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <MessageSquare className="w-6 h-6 text-blue-600" />
-          <h2 className="text-2xl font-bold text-gray-900">
+    <div className="space-y-6 md:space-y-8">
+      {/* Section Header - Mobile First Responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-2 md:gap-3">
+          <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-primary flex-shrink-0" />
+          <h2 className="text-xl md:text-2xl font-bold text-foreground">
             Đánh giá từ học viên
           </h2>
         </div>
 
-        {/* Add/Edit Review Button */}
+        {/* Add/Edit Review Button - Mobile Optimized */}
         {isEnrolled && currentUserId && (
           <div>
             {userReview && !showForm ? (
-              <button
+              <Button
                 onClick={() => {
                   setEditingReview(userReview);
                   setShowForm(true);
                 }}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                size="sm"
+                className="w-full sm:w-auto gap-2"
               >
                 <Edit2 className="w-4 h-4" />
-                Chỉnh sửa đánh giá
-              </button>
+                <span className="hidden xs:inline">Chỉnh sửa đánh giá</span>
+                <span className="xs:hidden">Chỉnh sửa</span>
+              </Button>
             ) : !userReview && !showForm ? (
-              <button
+              <Button
                 onClick={() => setShowForm(true)}
-                className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                size="sm"
+                className="w-full sm:w-auto"
               >
                 Viết đánh giá
-              </button>
+              </Button>
             ) : null}
           </div>
         )}
@@ -84,29 +90,34 @@ export default function ReviewsSection({
 
       {/* Enrollment Requirement Notice */}
       {!isEnrolled && currentUserId && (
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-700">
-            <strong>Ghi danh khóa học này</strong> để viết đánh giá và chia sẻ trải nghiệm của bạn với các học viên khác.
-          </p>
-        </div>
+        <Alert className="border-blue-200 bg-blue-50">
+          <AlertDescription className="text-sm text-blue-800">
+            <strong className="block sm:inline">Ghi danh khóa học này</strong>
+            <span className="block sm:inline sm:before:content-[' '] md:before:content-[' ']">
+              để viết đánh giá và chia sẻ trải nghiệm của bạn với các học viên khác.
+            </span>
+          </AlertDescription>
+        </Alert>
       )}
 
-      {/* Review Form */}
+      {/* Review Form - Mobile First */}
       {showForm && isEnrolled && currentUserId && (
-        <div className="p-6 bg-white border-2 border-blue-200 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {editingReview ? 'Chỉnh sửa đánh giá của bạn' : 'Viết đánh giá của bạn'}
-          </h3>
-          <ReviewForm
-            courseId={courseId}
-            existingReview={editingReview}
-            onSuccess={handleSuccess}
-            onCancel={() => {
-              setShowForm(false);
-              setEditingReview(null);
-            }}
-          />
-        </div>
+        <Card className="border-2 border-primary/20">
+          <CardContent className="pt-6">
+            <h3 className="text-base md:text-lg font-semibold text-foreground mb-4">
+              {editingReview ? 'Chỉnh sửa đánh giá của bạn' : 'Viết đánh giá của bạn'}
+            </h3>
+            <ReviewForm
+              courseId={courseId}
+              existingReview={editingReview}
+              onSuccess={handleSuccess}
+              onCancel={() => {
+                setShowForm(false);
+                setEditingReview(null);
+              }}
+            />
+          </CardContent>
+        </Card>
       )}
 
       {/* Review List */}

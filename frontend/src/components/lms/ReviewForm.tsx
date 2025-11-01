@@ -1,4 +1,4 @@
-// ✅ MIGRATED TO LMS REVIEW MUTATIONS - 2025-10-30
+// ✅ MIGRATED TO LMS REVIEW MUTATIONS + SHADCN/UI - 2025-11-01
 // Original backup: ReviewForm.DYNAMIC.tsx
 
 'use client';
@@ -6,7 +6,10 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_REVIEW, UPDATE_REVIEW } from '@/graphql/lms/reviews.graphql';
-import { Star } from 'lucide-react';
+import { Star, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ReviewFormProps {
   courseId: string;
@@ -90,13 +93,13 @@ export default function ReviewForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Star Rating */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Đánh giá của bạn *
-        </label>
-        <div className="flex items-center gap-1">
+    <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+      {/* Star Rating - Mobile First */}
+      <div className="space-y-2">
+        <Label className="text-sm md:text-base font-medium">
+          Đánh giá của bạn <span className="text-destructive">*</span>
+        </Label>
+        <div className="flex items-center gap-1 flex-wrap">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
@@ -104,33 +107,31 @@ export default function ReviewForm({
               onClick={() => setRating(star)}
               onMouseEnter={() => setHoveredRating(star)}
               onMouseLeave={() => setHoveredRating(0)}
-              className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+              className="focus:outline-none focus:ring-2 focus:ring-primary rounded-sm transition-transform hover:scale-110"
+              aria-label={`Rate ${star} stars`}
             >
               <Star
-                className={`w-8 h-8 transition-colors ${
+                className={`w-6 h-6 md:w-8 md:h-8 transition-colors ${
                   star <= (hoveredRating || rating)
                     ? 'fill-yellow-400 text-yellow-400'
-                    : 'text-gray-300'
+                    : 'text-muted-foreground'
                 }`}
               />
             </button>
           ))}
           {rating > 0 && (
-            <span className="ml-3 text-sm font-medium text-gray-700">
+            <span className="ml-2 md:ml-4 text-sm md:text-base font-medium text-foreground">
               {rating} sao
             </span>
           )}
         </div>
       </div>
 
-      {/* Comment */}
-      <div>
-        <label
-          htmlFor="comment"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Nhận xét của bạn (Tùy chọn)
-        </label>
+      {/* Comment - Mobile First */}
+      <div className="space-y-2">
+        <Label htmlFor="comment" className="text-sm md:text-base font-medium">
+          Nhận xét của bạn <span className="text-muted-foreground">(Tùy chọn)</span>
+        </Label>
         <textarea
           id="comment"
           rows={4}
@@ -138,42 +139,46 @@ export default function ReviewForm({
           onChange={(e) => setComment(e.target.value)}
           maxLength={1000}
           placeholder="Chia sẻ trải nghiệm của bạn về khóa học này..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          className="w-full px-3 md:px-4 py-2 md:py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 resize-none bg-background text-foreground text-sm md:text-base"
         />
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="text-xs md:text-sm text-muted-foreground">
           {comment.length} / 1000 ký tự
         </p>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
+        <Alert className="border-destructive bg-destructive/10">
+          <AlertCircle className="h-4 w-4 text-destructive" />
+          <AlertDescription className="text-sm md:text-base text-destructive">
+            {error}
+          </AlertDescription>
+        </Alert>
       )}
 
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <button
+      {/* Action Buttons - Mobile Responsive */}
+      <div className="flex flex-col-reverse sm:flex-row gap-2 md:gap-3">
+        <Button
           type="submit"
           disabled={loading}
-          className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full sm:flex-1 md:text-base"
         >
           {loading
             ? 'Đang gửi...'
             : existingReview
             ? 'Cập nhật đánh giá'
             : 'Gửi đánh giá'}
-        </button>
+        </Button>
         {onCancel && (
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onCancel}
             disabled={loading}
-            className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            className="w-full sm:flex-1 md:text-base"
           >
             Hủy
-          </button>
+          </Button>
         )}
       </div>
     </form>
