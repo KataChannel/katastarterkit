@@ -6,12 +6,17 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Link from 'next/link';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import GoogleLoginButton from '@/components/auth/GoogleLoginButton';
 import FacebookLoginButton from '@/components/auth/FacebookLoginButton';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
 // Validation schema
 const registerSchema = yup.object({
@@ -84,209 +89,176 @@ function RegisterPageContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-100">
-            <svg
-              className="h-6 w-6 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1 text-center">
+          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-primary/10 mb-2">
+            <UserPlus className="h-6 w-6 text-primary" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Tạo tài khoản của bạn
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <CardTitle className="text-2xl font-bold">Tạo tài khoản</CardTitle>
+          <CardDescription>
             Đã có tài khoản?{' '}
             <Link
               href="/login"
-              className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+              className="font-medium text-primary hover:underline transition-colors"
             >
               Đăng nhập tại đây
             </Link>
-          </p>
-        </div>
+          </CardDescription>
+        </CardHeader>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="space-y-4">
+        <CardContent>
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             {/* Name Field */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Họ và tên
-              </label>
-              <div className="mt-1">
-                <input
-                  {...register('name')}
-                  type="text"
-                  autoComplete="name"
-                  data-testid="name-input"
-                  className={`appearance-none relative block w-full px-3 py-2 border ${
-                    errors.name ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
-                  placeholder="Nhập họ và tên của bạn"
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">Họ và tên</Label>
+              <Input
+                {...register('name')}
+                id="name"
+                type="text"
+                autoComplete="name"
+                data-testid="name-input"
+                placeholder="Nhập họ và tên của bạn"
+                className={errors.name ? 'border-destructive' : ''}
+              />
+              {errors.name && (
+                <p className="text-sm text-destructive">{errors.name.message}</p>
+              )}
             </div>
 
             {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Địa chỉ email
-              </label>
-              <div className="mt-1">
-                <input
-                  {...register('email')}
-                  type="email"
-                  autoComplete="email"
-                  data-testid="email-input"
-                  className={`appearance-none relative block w-full px-3 py-2 border ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
-                  placeholder="Nhập email của bạn"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Địa chỉ email</Label>
+              <Input
+                {...register('email')}
+                id="email"
+                type="email"
+                autoComplete="email"
+                data-testid="email-input"
+                placeholder="Nhập email của bạn"
+                className={errors.email ? 'border-destructive' : ''}
+              />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
             </div>
 
             {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Mật khẩu
-              </label>
-              <div className="mt-1 relative">
-                <input
+            <div className="space-y-2">
+              <Label htmlFor="password">Mật khẩu</Label>
+              <div className="relative">
+                <Input
                   {...register('password')}
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   data-testid="password-input"
-                  className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
                   placeholder="Nhập mật khẩu của bạn"
+                  className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   data-testid="password-toggle"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowPassword(!showPassword);
+                  }}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <Eye className="h-4 w-4 text-muted-foreground" />
                   )}
-                </button>
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-                )}
+                </Button>
               </div>
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
             </div>
 
             {/* Confirm Password Field */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Xác nhận mật khẩu
-              </label>
-              <div className="mt-1 relative">
-                <input
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
+              <div className="relative">
+                <Input
                   {...register('confirmPassword')}
+                  id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   data-testid="confirm-password-input"
-                  className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors`}
                   placeholder="Xác nhận mật khẩu của bạn"
+                  className={errors.confirmPassword ? 'border-destructive pr-10' : 'pr-10'}
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   data-testid="confirm-password-toggle"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowConfirmPassword(!showConfirmPassword);
+                  }}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <Eye className="h-4 w-4 text-muted-foreground" />
                   )}
-                </button>
-                {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
-                )}
+                </Button>
               </div>
+              {errors.confirmPassword && (
+                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+              )}
             </div>
-          </div>
 
-          <div>
-            <button
+            <Button
               type="submit"
               disabled={!isValid || loading}
               data-testid="register-button"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full"
             >
               {loading ? (
-                <div className="flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Đang tạo tài khoản...
-                </div>
+                </>
               ) : (
-                'Tạo tài khoản'
+                <>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Tạo tài khoản
+                </>
               )}
-            </button>
-          </div>
+            </Button>
 
-          {/* Social Login */}
-          <div className="mt-6">
+            {/* Social Login */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <Separator />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-50 text-gray-500">Hoặc tiếp tục với</span>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Hoặc tiếp tục với
+                </span>
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="space-y-3">
               <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}>
                 <GoogleLoginButton />
               </GoogleOAuthProvider>
               <FacebookLoginButton />
             </div>
-          </div>
-        </form>
-      </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
