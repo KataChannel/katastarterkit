@@ -8,7 +8,7 @@ import {
   ResolveField,
   Parent
 } from '@nestjs/graphql';
-import { UseGuards, Injectable, Type } from '@nestjs/common';
+import { UseGuards, Injectable, Type, UnauthorizedException } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { 
   DynamicCRUDService, 
@@ -109,12 +109,39 @@ export function createDynamicResolver<TModel>(
       options?: { select?: any; include?: any },
       @Context() context?: any
     ): Promise<TModel> {
+      console.log(`📝 Dynamic create ${modelName}:`, {
+        authenticated: !!context?.req?.user,
+        userId: context?.req?.user?.id,
+        dataKeys: Object.keys(data || {}),
+        hasOwnerId: !!data?.ownerId
+      });
+      
       // Add user context if authenticated
       if (context?.req?.user && data) {
         data.userId = data.userId || context.req.user.id;
         data.createdBy = data.createdBy || context.req.user.id;
+        
+        // For Project model, map userId to ownerId
+        if (modelName === 'Project' && !data.ownerId) {
+          console.log(`🔄 Mapping userId to ownerId for Project:`, context.req.user.id);
+          data.ownerId = context.req.user.id;
+        }
+      } else if (modelName === 'Project') {
+        // Project requires authentication
+        console.error('❌ Project creation attempted without authentication', {
+          hasContext: !!context,
+          hasUser: !!context?.req?.user
+        });
+        throw new UnauthorizedException('Authentication required to create a project');
       }
-      return await this.dynamicCRUDService.create<TModel>(modelName, data, options);
+      
+      console.log(`✅ After context injection, data:`, {
+        name: data?.name,
+        ownerId: data?.ownerId,
+        userId: data?.userId
+      });
+      
+      return await this.dynamicCRUDService.create<TModel>(modelName, data, options, context);
     }
 
     // CREATE BULK
@@ -131,10 +158,12 @@ export function createDynamicResolver<TModel>(
         input.data = input.data.map(item => ({
           ...item,
           userId: item.userId || context.req.user.id,
-          createdBy: item.createdBy || context.req.user.id
+          createdBy: item.createdBy || context.req.user.id,
+          // For Project model, also set ownerId
+          ...(modelName === 'Project' && !item.ownerId ? { ownerId: context.req.user.id } : {})
         }));
       }
-      return await this.dynamicCRUDService.createBulk<TModel>(modelName, input, options);
+      return await this.dynamicCRUDService.createBulk<TModel>(modelName, input, options, context);
     }
 
     // UPDATE

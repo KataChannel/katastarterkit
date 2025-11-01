@@ -212,7 +212,8 @@ export class ProjectChatGateway implements OnGatewayConnection, OnGatewayDisconn
           sender: {
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               email: true,
               avatar: true,
             },
@@ -222,7 +223,8 @@ export class ProjectChatGateway implements OnGatewayConnection, OnGatewayDisconn
               sender: {
                 select: {
                   id: true,
-                  name: true,
+                  firstName: true,
+                  lastName: true,
                   avatar: true,
                 },
               },
@@ -236,11 +238,12 @@ export class ProjectChatGateway implements OnGatewayConnection, OnGatewayDisconn
 
       // Create notifications for @mentions
       if (data.mentions && data.mentions.length > 0) {
+        const senderName = `${message.sender.firstName} ${message.sender.lastName}`.trim();
         const notifications = data.mentions.map((mentionedUserId) => ({
           userId: mentionedUserId,
           type: 'PROJECT_MENTION',
           title: 'You were mentioned in a project chat',
-          message: `${message.sender.name} mentioned you: ${data.content.substring(0, 100)}`,
+          message: `${senderName} mentioned you: ${data.content.substring(0, 100)}`,
           projectId: data.projectId,
           mentionedBy: userId,
           isRead: false,
@@ -447,7 +450,8 @@ export class ProjectChatGateway implements OnGatewayConnection, OnGatewayDisconn
           sender: {
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
               avatar: true,
             },
           },
