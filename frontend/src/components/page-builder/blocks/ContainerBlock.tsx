@@ -286,17 +286,22 @@ export const ContainerBlock: React.FC<ContainerBlockProps> = ({
           {children}
         </div>
       ) : (
-        <div className={`empty-state text-center py-8 transition-colors duration-200 ${
+        <div className={`empty-state text-center py-8 transition-colors duration-200 border-2 border-dashed rounded-lg ${
           isOver 
-            ? 'text-blue-600' 
-            : 'text-gray-400'
+            ? 'text-blue-600 border-blue-400 bg-blue-50' 
+            : 'text-gray-400 border-gray-300 bg-gray-50/50'
         }`}>
           <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm font-medium">No nested blocks yet</p>
           <p className="text-xs mt-1 opacity-75">Drop blocks here or click "Add Child" to add nested content</p>
-          {process.env.NODE_ENV === 'development' && (
-            <div className="text-xs mt-2 text-red-500">
-              Debug: children prop is {children === undefined ? 'undefined' : children === null ? 'null' : 'defined but falsy'}
+          {process.env.NODE_ENV === 'development' && onAddChild && (
+            <div className="text-xs mt-2 text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded">
+              ✓ Ready to add blocks (onAddChild available)
+            </div>
+          )}
+          {process.env.NODE_ENV === 'development' && !onAddChild && (
+            <div className="text-xs mt-2 text-red-500 bg-red-50 inline-block px-2 py-1 rounded">
+              ⚠ onAddChild callback missing
             </div>
           )}
         </div>

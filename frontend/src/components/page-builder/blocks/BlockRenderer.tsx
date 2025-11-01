@@ -57,7 +57,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   ].includes(block.type);
 
   const renderChildren = () => {
-    if (!block.children || block.children.length === 0) return null;
+    if (!block.children || block.children.length === 0) return undefined; // Return undefined instead of null
 
     // Create a copy of children array before sorting (GraphQL returns read-only array)
     // Wrap children với visual indicators cho nested blocks

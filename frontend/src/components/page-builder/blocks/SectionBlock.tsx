@@ -248,12 +248,17 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
             {children}
           </div>
         ) : (
-          <div className="text-gray-400 text-center py-12">
+          <div className="text-gray-400 text-center py-12 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50/50">
             <div className="text-sm font-medium">Drop blocks here or click "Add Block"</div>
             <div className="text-xs mt-1 opacity-75">Add child blocks to section</div>
-            {process.env.NODE_ENV === 'development' && (
-              <div className="text-xs mt-2 text-red-500">
-                Debug: children prop is {children === undefined ? 'undefined' : children === null ? 'null' : 'defined but falsy'}
+            {process.env.NODE_ENV === 'development' && onAddChild && (
+              <div className="text-xs mt-2 text-blue-600 bg-blue-50 inline-block px-2 py-1 rounded">
+                ✓ Ready to add blocks (onAddChild available)
+              </div>
+            )}
+            {process.env.NODE_ENV === 'development' && !onAddChild && (
+              <div className="text-xs mt-2 text-red-500 bg-red-50 inline-block px-2 py-1 rounded">
+                ⚠ onAddChild callback missing
               </div>
             )}
           </div>
