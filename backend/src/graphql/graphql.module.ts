@@ -20,6 +20,9 @@ import { MenuPublicResolver } from './resolvers/menu-public.resolver';
 import { UniversalDynamicResolver } from './resolvers/universal-dynamic.resolver';
 import { DynamicGraphQLEngine } from './core/dynamic-graphql.engine';
 
+// 🚀 NEW: Data Import/Export and Image Upload Resolvers
+import { DataImportExportResolver, ImageUploadResolver } from './resolvers/data-import-export.resolver';
+
 import { InvoiceController } from '../controllers/invoice.controller';
 import { InvoiceImportController } from '../controllers/invoice-import.controller';
 import { CategoryImportExportController } from '../controllers/category-import-export.controller';
@@ -50,6 +53,10 @@ import { AffiliatePaymentService } from '../services/affiliate-payment.service';
 import { AffiliateConversionService } from '../services/affiliate-conversion.service';
 import { CustomTemplateService } from '../services/custom-template.service';
 import { DynamicQueryGeneratorService } from './services/dynamic-query-generator.service';
+
+// 🚀 NEW: Data Import/Export and Image Upload Services
+import { DataImportService } from '../services/data-import.service';
+import { ImageUploadService } from '../services/image-upload.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
@@ -86,6 +93,10 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     // 🚀 NEW: Universal Dynamic GraphQL System
     DynamicGraphQLEngine,
     UniversalDynamicResolver,
+    
+    // 🚀 NEW: Data Import/Export and Image Upload
+    DataImportExportResolver,
+    ImageUploadResolver,
     
     // Resolvers
     UserResolver,
@@ -153,6 +164,10 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     AffiliateTrackingService,
     AffiliatePaymentService,
     AffiliateConversionService,
+    
+    // 🚀 NEW: Data Import/Export and Image Upload Services
+    DataImportService,
+    ImageUploadService,
     
     // Dynamic Query service
     DynamicQueryGeneratorService,

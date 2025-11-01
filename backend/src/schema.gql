@@ -2345,8 +2345,10 @@ type Mutation {
   assignTask(taskId: String!, userIds: [ID!]!): Task!
   assignUserPermissions(input: AssignUserPermissionInput!): Boolean!
   assignUserRoles(input: AssignUserRoleInput!): Boolean!
+  batchUploadAndMap(items: JSON!): JSON!
   bulkCreateInvoices(input: BulkInvoiceInput!): DatabaseSyncResult!
   bulkDeleteFiles(input: BulkDeleteFilesInput!): Int!
+  bulkImportData(data: JSON!, mappingConfig: JSON, modelName: String!): JSON!
   bulkUpdateFiles(input: BulkUpdateFilesInput!): [File!]!
   bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!
   cancelOrder(input: CancelOrderInput!): CancelOrderResponse!
@@ -2357,6 +2359,7 @@ type Mutation {
   clearCart(sessionId: String): ClearCartResponse!
   completeOffboarding(id: ID!): OffboardingProcess!
   completeOnboardingTask(checklistId: ID!, taskId: ID!): OnboardingChecklist!
+  copyImageFromUrl(bucket: String = "images", editOptions: JSON, filename: String!, imageUrl: String!): JSON!
 
   """Tạo AI provider mới"""
   createAIProvider(input: CreateAIProviderInput!): AIProvider!
@@ -2486,10 +2489,14 @@ type Mutation {
   """Create or update a record (upsert)"""
   dynamicUpsert(input: UpsertInput!): JSONObject!
   enrollCourse(enrollCourseInput: EnrollCourseInput!): Enrollment!
+  exportDataToExcel(modelName: String!, select: JSON, where: JSON): String!
   generateCertificate(enrollmentId: ID!): Certificate!
   generatePostSummary(postId: String!): String!
   generateSummary(content: String!, maxLength: Float! = 200): String!
   generateTags(content: String!, maxTags: Float! = 5): [String!]!
+  importExcelData(file: Upload!, mappingConfig: JSON, modelName: String!): JSON!
+  importJSONData(jsonString: String!, mappingConfig: JSON, modelName: String!): JSON!
+  importTextData(delimiter: String = "\t", mappingConfig: JSON, modelName: String!, text: String!): JSON!
   improveContent(content: String!, instruction: String!): String!
   incrementTemplateUsage(templateId: String!): CustomTemplate!
   joinCampaign(input: JoinCampaignInput!): String!
@@ -2630,10 +2637,13 @@ type Mutation {
 
   """Update ext_sanphamhoadon"""
   updateext_sanphamhoadon(data: JSON!, id: String!, options: JSON): JSON!
+  uploadAndMapImage(editOptions: JSON, file: Upload!, mappingConfig: JSON!): JSON!
   uploadCourseMaterial(courseId: String!, file: Upload!): FileUploadResult!
   uploadCourseThumbnail(courseId: String, file: Upload!): FileUploadResult!
   uploadFile(file: JSON!, folderId: ID, metadata: JSON): FileUploadResponse!
+  uploadImage(bucket: String = "images", editOptions: JSON, file: Upload!): JSON!
   uploadLessonVideo(courseId: String!, file: Upload!): FileUploadResult!
+  uploadMultipleImages(bucket: String = "images", editOptions: JSON, files: [Upload!]!): JSON!
   uploadTaskMedia(input: UploadTaskMediaInput!): TaskMedia!
 
   """Create or update a record based on criteria"""
@@ -3728,6 +3738,7 @@ type Query {
   universalSearch(input: OramaSearchInput!): UniversalSearchResult!
   userReview(courseId: ID!): Review
   validateCart(sessionId: String): ValidateCartResponse!
+  validateImportData(data: JSON!, requiredFields: [String!]!): JSON!
   verifyCertificate(certificateNumber: String!): CertificateVerification!
 
   """Get API version"""
