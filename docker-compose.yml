@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
-      - "${POSTGRES_PORT:-12003}:5432"
+      - "${POSTGRES_PORT:-13003}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -29,7 +29,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - "${PGADMIN_PORT:-12002}:80"
+      - "${PGADMIN_PORT:-13002}:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
@@ -44,7 +44,7 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes --timeout 300
     ports:
-      - "${REDIS_PORT:-12004}:6379"
+      - "${REDIS_PORT:-13004}:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -71,8 +71,8 @@ services:
       - xpack.security.http.ssl.enabled=false
       - xpack.security.transport.ssl.enabled=false
     ports:
-      - "${ELASTICSEARCH_PORT:-12005}:9200"
-      - "${ELASTICSEARCH_TRANSPORT_PORT:-12006}:9300"
+      - "${ELASTICSEARCH_PORT:-13005}:9200"
+      - "${ELASTICSEARCH_TRANSPORT_PORT:-13006}:9300"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
@@ -93,8 +93,8 @@ services:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-rausachcore-admin}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-rausachcore-secret-2025}
     ports:
-      - "${MINIO_PORT:-12007}:9000"
-      - "${MINIO_CONSOLE_PORT:-12008}:9001"
+      - "${MINIO_PORT:-13007}:9000"
+      - "${MINIO_CONSOLE_PORT:-13008}:9001"
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
@@ -128,9 +128,9 @@ services:
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       MINIO_USE_SSL: false
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-uploads}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:12000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:13000}
     ports:
-      - "${PORT:-12001}:4000"
+      - "${PORT:-13001}:4000"
     # Note: Remove volumes for production deployment  
     # volumes:
     #   - ./backend:/app
@@ -154,16 +154,16 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      NEXT_PUBLIC_GRAPHQL_ENDPOINT: ${NEXT_PUBLIC_GRAPHQL_ENDPOINT:-http://localhost:12001/graphql}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:12000}
+      NEXT_PUBLIC_GRAPHQL_ENDPOINT: ${NEXT_PUBLIC_GRAPHQL_ENDPOINT:-http://localhost:13001/graphql}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:13000}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-nextauth-secret-change-in-production}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:12000}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:13000}
       # Disable Next.js instrumentation to avoid OpenTelemetry module loading issues
       NEXT_OTEL_ENABLED: "false"
       # Disable telemetry
       NEXT_TELEMETRY_DISABLED: "1"
     ports:
-      - "${FRONTEND_PORT:-12000}:3000"
+      - "${FRONTEND_PORT:-13000}:3000"
     # Note: Remove volumes for production deployment
     # volumes:
     #   - ./frontend:/app
