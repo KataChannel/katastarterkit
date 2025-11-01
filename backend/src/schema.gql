@@ -2533,7 +2533,9 @@ type Mutation {
   reorderLessons(input: ReorderLessonsInput!): [Lesson!]!
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
   reorderModules(input: ReorderModulesInput!): [CourseModule!]!
+  requestForgotPassword(email: String!): OtpResponse!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
+  resetPasswordWithToken(email: String!, newPassword: String!, token: String!): OtpResponse!
   reviewCampaignApplication(input: ReviewCampaignApplicationInput!): String!
   sendSupportMessage(input: CreateSupportMessageInput!): SupportMessage!
 
@@ -2635,6 +2637,7 @@ type Mutation {
 
   """Create or update a record based on criteria"""
   upsert(create: JSONObject!, include: JSONObject, modelName: String!, select: JSONObject, update: JSONObject!, where: JSONObject!): JSONObject!
+  verifyResetToken(email: String!, token: String!): OtpResponse!
 }
 
 type NormalizationStats {
