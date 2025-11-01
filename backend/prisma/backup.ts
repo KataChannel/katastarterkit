@@ -49,6 +49,17 @@ async function getExistingTables(): Promise<string[]> {
 }
 
 /**
+ * Check if table is a system/metadata table that should always be backed up
+ */
+function isSystemTable(tableName: string): boolean {
+  const systemTables = [
+    'website_settings', // WebsiteSetting model - important config
+    '_prisma_migrations', // Prisma migrations tracking
+  ];
+  return systemTables.includes(tableName);
+}
+
+/**
  * Parse schema.prisma file to extract all model names and their table mappings
  */
 function parseSchemaModels(): { modelName: string; tableName: string }[] {
@@ -169,7 +180,7 @@ async function getTables(): Promise<string[]> {
   }
   
   const allTableNames = models.map(model => model.tableName);
-  console.log(`� Parsed ${allTableNames.length} table names from ${models.length} models`);
+  console.log(`✅ Parsed ${allTableNames.length} table names from ${models.length} models`);
   
   // Get existing tables from database
   console.log('🔍 Checking which tables actually exist in database...');
@@ -184,6 +195,16 @@ async function getTables(): Promise<string[]> {
     }
     return exists;
   });
+  
+  // Add system tables that should always be included
+  for (const table of existingTables) {
+    if (isSystemTable(table) && !validTables.includes(table)) {
+      validTables.push(table);
+    }
+  }
+  
+  // Sort for consistency
+  validTables.sort();
   
   console.log(`✅ Final table list (${validTables.length} tables to backup):`);
   console.log(`   ${validTables.slice(0, 10).join(', ')}${validTables.length > 10 ? ` ... and ${validTables.length - 10} more` : ''}`);
