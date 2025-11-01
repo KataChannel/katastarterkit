@@ -377,7 +377,7 @@ cd frontend && bun run dev
 NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:12001/graphql
 
 # Database (đã có)
-DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/rausachcore"
+DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/tazagroupcore"
 ```
 
 ### Khuyến Nghị

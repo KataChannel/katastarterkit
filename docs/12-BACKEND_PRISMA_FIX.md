@@ -164,7 +164,7 @@ bun run build                  # Compile TypeScript
 ### Step 3: Verify
 Check backend logs:
 ```bash
-ssh root@116.118.49.243 docker logs rausachcore-backend -f
+ssh root@116.118.49.243 docker logs tazagroupcore-backend -f
 ```
 
 Expected output:
@@ -208,7 +208,7 @@ After deployment:
 docker ps | grep backend
 
 # Check logs for errors
-docker logs rausachcore-backend
+docker logs tazagroupcore-backend
 
 # Should see:
 # ✅ Redis is ready!
@@ -277,7 +277,7 @@ Docker Runtime:
 
 2. **Monitor logs**:
    ```bash
-   ssh root@116.118.49.243 docker logs rausachcore-backend -f
+   ssh root@116.118.49.243 docker logs tazagroupcore-backend -f
    ```
 
 3. **Verify API is responding**:
@@ -312,22 +312,22 @@ cd backend && bun install && bun run build
 ./scripts/95copy.sh --build
 
 # Check Docker logs
-docker logs rausachcore-backend
+docker logs tazagroupcore-backend
 ```
 
 ### Container starts but API doesn't respond?
 ```bash
 # Check if migrations completed
-docker logs rausachcore-backend | grep "migrations\|Database"
+docker logs tazagroupcore-backend | grep "migrations\|Database"
 
 # Check if Prisma generated
-docker logs rausachcore-backend | grep "Prisma client\|generate"
+docker logs tazagroupcore-backend | grep "Prisma client\|generate"
 ```
 
 ### Want to manually test in container?
 ```bash
 # Connect to running container
-docker exec -it rausachcore-backend sh
+docker exec -it tazagroupcore-backend sh
 
 # Check if Prisma client exists
 ls node_modules/@prisma/client

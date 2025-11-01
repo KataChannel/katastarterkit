@@ -2,7 +2,7 @@
 
 ## Tổng quan
 
-Đã cập nhật đầy đủ tính năng **Comments** và **Media** cho hệ thống Todo/Task management trong rausachcore. Bao gồm:
+Đã cập nhật đầy đủ tính năng **Comments** và **Media** cho hệ thống Todo/Task management trong tazagroupcore. Bao gồm:
 
 ### ✅ Tính năng đã hoàn thành
 

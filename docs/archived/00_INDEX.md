@@ -1,13 +1,13 @@
-# Index - Tài liệu dự án rausachcore
+# Index - Tài liệu dự án tazagroupcore
 
 Danh sách các tài liệu được sắp xếp theo thứ tự thời gian tạo:
 
 1. [Changelog](01_CHANGELOG.md) - *2025-09-04*
-2. [Contributing to rausachcore](02_CONTRIBUTING.md) - *2025-09-04*
+2. [Contributing to tazagroupcore](02_CONTRIBUTING.md) - *2025-09-04*
 3. [GraphQL Subscription Bug Fix](03_SUBSCRIPTION_BUG_FIX.md) - *2025-09-04*
 4. [Todo Features Implementation Summary](04_TODO_FEATURES_IMPLEMENTATION.md) - *2025-09-04*
-5. [Tính năng Quản lý Công việc (Todos) - rausachcore](05_TODOS_FEATURES_GUIDE.md) - *2025-09-04*
-6. [Cập nhật tính năng Todos - rausachcore Frontend](06_TODOS_IMPLEMENTATION_SUMMARY.md) - *2025-09-04*
+5. [Tính năng Quản lý Công việc (Todos) - tazagroupcore](05_TODOS_FEATURES_GUIDE.md) - *2025-09-04*
+6. [Cập nhật tính năng Todos - tazagroupcore Frontend](06_TODOS_IMPLEMENTATION_SUMMARY.md) - *2025-09-04*
 7. [USER_GUIDE](07_USER_GUIDE.md) - *2025-09-04*
 8. [Todo View Modes Implementation Summary](08_VIEW_MODES_IMPLEMENTATION_SUMMARY.md) - *2025-09-04*
 9. [Security Policy](09_SECURITY.md) - *2025-09-06*

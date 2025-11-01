@@ -217,8 +217,8 @@ let AnalyticsDashboardService = class AnalyticsDashboardService {
     initializeDefaultDashboard() {
         const defaultDashboard = {
             id: 'default',
-            name: 'rausachcore Analytics Dashboard',
-            description: 'Main analytics dashboard for rausachcore application',
+            name: 'tazagroupcore Analytics Dashboard',
+            description: 'Main analytics dashboard for tazagroupcore application',
             widgets: this.defaultWidgets,
             layout: 'grid',
             refreshRate: 5000,

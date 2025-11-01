@@ -427,7 +427,7 @@
   "schemaVersion": 27,
   "style": "dark",
   "tags": [
-    "rausachcore",
+    "tazagroupcore",
     "monitoring"
   ],
   "templating": {
@@ -439,7 +439,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "rausachcore Application Dashboard",
-  "uid": "rausachcore-main",
+  "title": "tazagroupcore Application Dashboard",
+  "uid": "tazagroupcore-main",
   "version": 1
 }

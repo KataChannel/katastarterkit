@@ -51,7 +51,7 @@ export class ElasticsearchService {
   private isConnected: boolean = false;
 
   constructor(private configService: ConfigService) {
-    this.indexPrefix = this.configService.get('ELASTICSEARCH_INDEX_PREFIX', 'rausachcore');
+    this.indexPrefix = this.configService.get('ELASTICSEARCH_INDEX_PREFIX', 'tazagroupcore');
     
     // Detect Docker environment
     const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;

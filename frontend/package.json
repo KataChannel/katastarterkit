@@ -1,5 +1,5 @@
 {
-  "name": "rausachcore-frontend",
+  "name": "tazagroupcore-frontend",
   "version": "1.0.0",
   "description": "Modern Frontend with Next.js 15, React 19, TailwindCSS v4, and GraphQL",
   "private": true,

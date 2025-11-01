@@ -15,12 +15,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     default: 'Rau Sạch Trần Gia',
-    template: '%s | rausachcore',
+    template: '%s | tazagroupcore',
   },
   description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data. Built with Next.js, NestJS, GraphQL, Prisma, Redis, and Minio.',
   keywords: ['ai', 'chatbot', 'fullstack', 'starter-kit', 'nextjs', 'nestjs', 'graphql', 'prisma', 'redis', 'minio', 'artificial intelligence', 'machine learning'],
-  authors: [{ name: 'rausachcore Team' }],
-  creator: 'rausachcore Team',
+  authors: [{ name: 'tazagroupcore Team' }],
+  creator: 'tazagroupcore Team',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:13000'),
   openGraph: {
     type: 'website',
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     url: '/',
     title: 'Rau Sạch Trần Gia',
     description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data.',
-    siteName: 'rausachcore',
+    siteName: 'tazagroupcore',
     images: [
       {
         url: '/og-image.png',

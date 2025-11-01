@@ -296,7 +296,7 @@ backend/prisma/migrations_manual/add_project_management.sql
 ### Check Tables Created
 ```bash
 # Connect to database
-psql -h 116.118.49.243 -p 12003 -U <user> -d rausachcore
+psql -h 116.118.49.243 -p 12003 -U <user> -d tazagroupcore
 
 # List new tables
 \dt projects

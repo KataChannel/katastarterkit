@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Test seed script for rausachcore Backend
+# Test seed script for tazagroupcore Backend
 
 echo "🧪 Testing Database Seed..."
 echo ""
@@ -55,9 +55,9 @@ echo ""
 echo -e "${GREEN}🎉 All tests passed!${NC}"
 echo ""
 echo "📊 Admin Credentials:"
-echo "   Email: admin@rausachcore.dev"
+echo "   Email: admin@tazagroupcore.dev"
 echo "   Password: admin123"
 echo ""
 echo "📊 Test User Credentials:"
-echo "   Email: user@rausachcore.dev"
+echo "   Email: user@tazagroupcore.dev"
 echo "   Password: user123"

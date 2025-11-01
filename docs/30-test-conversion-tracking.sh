@@ -115,12 +115,12 @@ echo ""
 
 # Query to check clicks
 echo "Recent clicks:"
-echo "psql -d rausachcore -c \"SELECT id, \\\"linkId\\\", \\\"ipAddress\\\", device, browser, \\\"clickedAt\\\" FROM \\\"AffClick\\\" ORDER BY \\\"clickedAt\\\" DESC LIMIT 5;\""
+echo "psql -d tazagroupcore -c \"SELECT id, \\\"linkId\\\", \\\"ipAddress\\\", device, browser, \\\"clickedAt\\\" FROM \\\"AffClick\\\" ORDER BY \\\"clickedAt\\\" DESC LIMIT 5;\""
 echo ""
 
 # Query to check conversions
 echo "Recent conversions:"
-echo "psql -d rausachcore -c \"SELECT id, \\\"orderId\\\", \\\"saleAmount\\\", commission, status, \\\"convertedAt\\\" FROM \\\"AffConversion\\\" ORDER BY \\\"convertedAt\\\" DESC LIMIT 5;\""
+echo "psql -d tazagroupcore -c \"SELECT id, \\\"orderId\\\", \\\"saleAmount\\\", commission, status, \\\"convertedAt\\\" FROM \\\"AffConversion\\\" ORDER BY \\\"convertedAt\\\" DESC LIMIT 5;\""
 echo ""
 
 # ============================================

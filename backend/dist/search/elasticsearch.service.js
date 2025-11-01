@@ -19,7 +19,7 @@ let ElasticsearchService = ElasticsearchService_1 = class ElasticsearchService {
         this.configService = configService;
         this.logger = new common_1.Logger(ElasticsearchService_1.name);
         this.isConnected = false;
-        this.indexPrefix = this.configService.get('ELASTICSEARCH_INDEX_PREFIX', 'rausachcore');
+        this.indexPrefix = this.configService.get('ELASTICSEARCH_INDEX_PREFIX', 'tazagroupcore');
         const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
         const elasticsearchUrl = isDockerEnv
             ? this.configService.get('DOCKER_ELASTICSEARCH_URL', 'http://elasticsearch:9200')

@@ -424,7 +424,7 @@ export const contactFormTemplate: SampleTemplate = {
     staticData: {
       title: 'Get in Touch',
       description: 'We are always ready to help. Leave your information and we will respond within 24 hours.',
-      email: 'hello@rausachcore.com',
+      email: 'hello@tazagroupcore.com',
       phone: '+84 (0) 123 456 789',
       address: 'Floor 10, ABC Building, 123 DEF Street, District 1, Ho Chi Minh City',
     },

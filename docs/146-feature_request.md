@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for rausachcore
+about: Suggest an idea for tazagroupcore
 title: '[FEATURE] '
 labels: ['enhancement']
 assignees: ''

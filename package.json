@@ -1,5 +1,5 @@
 {
-  "name": "rausachcore-starter",
+  "name": "tazagroupcore-starter",
   "version": "1.0.0",
   "description": "Modern Fullstack Starter Kit with Next.js + NestJS + GraphQL + Prisma + Redis + TailwindCSS v4",
   "private": true,
@@ -71,7 +71,7 @@
     "modern",
     "fast"
   ],
-  "author": "rausachcore Team",
+  "author": "tazagroupcore Team",
   "license": "MIT",
   "repository": {
     "type": "git",

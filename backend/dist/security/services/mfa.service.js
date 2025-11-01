@@ -73,8 +73,8 @@ let MfaService = MfaService_1 = class MfaService {
                 throw new common_1.BadRequestException('TOTP is already enabled for this user');
             }
             const secret = speakeasy.generateSecret({
-                name: `rausachcore (${userId})`,
-                issuer: 'rausachcore Enterprise',
+                name: `tazagroupcore (${userId})`,
+                issuer: 'tazagroupcore Enterprise',
                 length: 32
             });
             const backupCodes = await this.generateBackupCodes();

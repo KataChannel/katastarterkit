@@ -22,7 +22,7 @@ const DEFAULT_VARIANT = 'default' as const;
  * Standard header with logo left, menu center, actions right
  */
 export function DefaultHeader({
-  brand = { name: 'rausachcore', tagline: 'Enterprise Starter Kit' },
+  brand = { name: 'tazagroupcore', tagline: 'Enterprise Starter Kit' },
   menuItems = [],
   showSearch = true,
   showCart = false,
@@ -128,7 +128,7 @@ export function DefaultHeader({
  * Compact header with just logo and CTA
  */
 export function MinimalHeader({
-  brand = { name: 'rausachcore' },
+  brand = { name: 'tazagroupcore' },
   backgroundColor = 'bg-white',
   textColor = 'text-gray-900',
   ctaButton,
@@ -156,7 +156,7 @@ export function MinimalHeader({
  * Logo and menu centered
  */
 export function CenteredHeader({
-  brand = { name: 'rausachcore', tagline: 'Enterprise Starter Kit' },
+  brand = { name: 'tazagroupcore', tagline: 'Enterprise Starter Kit' },
   menuItems = [],
   backgroundColor = 'bg-white',
   textColor = 'text-gray-900',
@@ -208,7 +208,7 @@ export function CenteredHeader({
  * Header with large dropdown menus
  */
 export function MegaHeader({
-  brand = { name: 'rausachcore' },
+  brand = { name: 'tazagroupcore' },
   menuItems = [],
   backgroundColor = 'bg-white',
   textColor = 'text-gray-900',

@@ -1,5 +1,5 @@
 {
-  "name": "rausachcore-frontend",
+  "name": "tazagroupcore-frontend",
   "module": "src/app/layout.tsx",
   "type": "module",
   "scripts": {

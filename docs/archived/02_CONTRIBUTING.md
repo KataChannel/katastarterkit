@@ -1,6 +1,6 @@
-# Contributing to rausachcore
+# Contributing to tazagroupcore
 
-Thank you for your interest in contributing to rausachcore! 🎉
+Thank you for your interest in contributing to tazagroupcore! 🎉
 
 ## 🚀 Quick Start for Contributors
 

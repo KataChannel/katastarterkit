@@ -4,7 +4,7 @@ import { Query, Resolver } from '@nestjs/graphql';
 export class AppResolver {
   @Query(() => String, { name: 'hello', description: 'Hello world query' })
   hello(): string {
-    return 'Hello from rausachcore GraphQL API!';
+    return 'Hello from tazagroupcore GraphQL API!';
   }
 
   @Query(() => String, { name: 'version', description: 'Get API version' })

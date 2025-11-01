@@ -43,7 +43,7 @@ export function AccessDenied({
                 📌 Liên hệ quản trị viên để yêu cầu quyền truy cập:
               </p>
               <a
-                href="mailto:admin@rausachcore.dev?subject=Yêu cầu quyền truy cập quản trị"
+                href="mailto:admin@tazagroupcore.dev?subject=Yêu cầu quyền truy cập quản trị"
                 className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
               >
                 <Mail className="w-4 h-4" />

@@ -5,7 +5,7 @@ echo "🧪 Template Library Functionality Test"
 echo "====================================="
 echo
 
-cd /mnt/chikiet/kataoffical/fullstack/rausachcore/frontend
+cd /mnt/chikiet/kataoffical/fullstack/tazagroupcore/frontend
 
 # 1. Test Template Data Loading
 echo "📂 1. Testing Template Data Loading"

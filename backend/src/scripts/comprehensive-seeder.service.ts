@@ -512,7 +512,7 @@ export class ComprehensiveSeederService {
       data: {
         pageId: homePage.id,
         type: BlockType.HERO,
-        content: { heading: 'Welcome to rausachcore', subheading: 'Built with Next.js, NestJS, and Prisma' },
+        content: { heading: 'Welcome to tazagroupcore', subheading: 'Built with Next.js, NestJS, and Prisma' },
         order: 1,
       },
     });
@@ -538,10 +538,10 @@ export class ComprehensiveSeederService {
     const chatbot = await this.prisma.chatbotModel.create({
       data: {
         name: 'KataBot',
-        description: 'Official rausachcore chatbot assistant',
+        description: 'Official tazagroupcore chatbot assistant',
         status: ChatbotStatus.ACTIVE,
         userId: this.adminUser.id,
-        systemPrompt: 'You are a helpful assistant for rausachcore platform.',
+        systemPrompt: 'You are a helpful assistant for tazagroupcore platform.',
       },
     });
 
@@ -549,8 +549,8 @@ export class ComprehensiveSeederService {
       data: {
         chatbotId: chatbot.id,
         userId: this.adminUser.id,
-        title: 'rausachcore Introduction',
-        content: 'rausachcore is a modern fullstack starter kit.',
+        title: 'tazagroupcore Introduction',
+        content: 'tazagroupcore is a modern fullstack starter kit.',
         type: TrainingDataType.TEXT,
         status: TrainingStatus.COMPLETED,
       },
@@ -578,8 +578,8 @@ export class ComprehensiveSeederService {
       data: {
         name: 'Demo Campaign 2024',
         description: 'Demo affiliate campaign for testing',
-        productName: 'rausachcore Pro',
-        productUrl: 'https://rausachcore.dev/pro',
+        productName: 'tazagroupcore Pro',
+        productUrl: 'https://tazagroupcore.dev/pro',
         commissionRate: 10.0,
         commissionType: 'percentage',
         status: AffCampaignStatus.ACTIVE,
@@ -605,7 +605,7 @@ export class ComprehensiveSeederService {
         affiliateId: affUser.id,
         campaignId: campaign.id,
         trackingCode: 'KATA-DEMO-2024',
-        originalUrl: 'https://rausachcore.dev',
+        originalUrl: 'https://tazagroupcore.dev',
         shortUrl: 'https://kata.link/demo',
         isActive: true,
       },
@@ -644,7 +644,7 @@ export class ComprehensiveSeederService {
     await this.prisma.notification.create({
       data: {
         userId: this.adminUser.id,
-        title: 'Welcome to rausachcore!',
+        title: 'Welcome to tazagroupcore!',
         message: 'Your admin account has been set up successfully.',
         type: 'info',
         isRead: false,
@@ -693,7 +693,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor i
 
 ## Conclusion
 
-This post demonstrates the seeding functionality of rausachcore.
+This post demonstrates the seeding functionality of tazagroupcore.
     `.trim();
   }
 

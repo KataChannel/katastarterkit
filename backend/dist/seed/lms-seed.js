@@ -41,10 +41,10 @@ async function main() {
     console.log('👨‍🏫 Creating instructors...');
     const hashedPassword = await bcrypt.hash('password123', 10);
     const instructor1 = await prisma.user.upsert({
-        where: { email: 'john.instructor@rausachcore.com' },
+        where: { email: 'john.instructor@tazagroupcore.com' },
         update: {},
         create: {
-            email: 'john.instructor@rausachcore.com',
+            email: 'john.instructor@tazagroupcore.com',
             username: 'john_instructor',
             password: hashedPassword,
             firstName: 'John',
@@ -55,10 +55,10 @@ async function main() {
         },
     });
     const instructor2 = await prisma.user.upsert({
-        where: { email: 'jane.instructor@rausachcore.com' },
+        where: { email: 'jane.instructor@tazagroupcore.com' },
         update: {},
         create: {
-            email: 'jane.instructor@rausachcore.com',
+            email: 'jane.instructor@tazagroupcore.com',
             username: 'jane_instructor',
             password: hashedPassword,
             firstName: 'Jane',
@@ -71,10 +71,10 @@ async function main() {
     console.log(`✅ Created instructors: ${instructor1.username}, ${instructor2.username}`);
     console.log('👨‍🎓 Creating student...');
     const student = await prisma.user.upsert({
-        where: { email: 'alice.student@rausachcore.com' },
+        where: { email: 'alice.student@tazagroupcore.com' },
         update: {},
         create: {
-            email: 'alice.student@rausachcore.com',
+            email: 'alice.student@tazagroupcore.com',
             username: 'alice_student',
             password: hashedPassword,
             firstName: 'Alice',

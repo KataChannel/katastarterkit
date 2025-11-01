@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help us improve rausachcore
+about: Create a report to help us improve tazagroupcore
 title: '[BUG] '
 labels: ['bug']
 assignees: ''

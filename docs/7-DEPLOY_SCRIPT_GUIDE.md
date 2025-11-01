@@ -214,8 +214,8 @@ rm -rf frontend/.next
 
 === Container Status ===
 NAME                   IMAGE                      STATUS
-rausachcore-frontend   shoprausach-frontend       Up 5s
-rausachcore-backend    shoprausach-backend        Up 3s
+tazagroupcore-frontend   shoprausach-frontend       Up 5s
+tazagroupcore-backend    shoprausach-backend        Up 3s
 
 [SUCCESS] ═══════════════════════════════════════════════════════
 [SUCCESS] DEPLOYMENT COMPLETED SUCCESSFULLY

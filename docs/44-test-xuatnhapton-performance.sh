@@ -51,7 +51,7 @@ echo ""
 echo "================================================"
 echo "🔍 Checking TypeScript Compilation..."
 echo "================================================"
-cd /chikiet/kataoffical/fullstack/rausachcore/frontend
+cd /chikiet/kataoffical/fullstack/tazagroupcore/frontend
 
 # Check for TypeScript errors in the xuatnhapton directory
 npx tsc --noEmit --project tsconfig.json 2>&1 | grep -i "xuatnhapton" || echo "✅ No TypeScript errors in xuatnhapton"

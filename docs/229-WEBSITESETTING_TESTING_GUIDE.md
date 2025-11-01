@@ -186,7 +186,7 @@ cd /mnt/chikiet/kataoffical/shoprausach/backend
 bun run prisma/restore.ts
 
 # Output should show:
-# 🚀 STARTING OPTIMIZED rausachcore DATA RESTORE
+# 🚀 STARTING OPTIMIZED tazagroupcore DATA RESTORE
 # 🧹 Cleaning up existing data...
 # 🔄 Restoring 30 tables...
 # [1/30] Restoring: users

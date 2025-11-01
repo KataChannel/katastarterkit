@@ -1,6 +1,6 @@
-# 🚀 rausachcore - Modern Fullstack Starter Kit
+# 🚀 tazagroupcore - Modern Fullstack Starter Kit
 
-![rausachcore](https://img.shields.io/badge/rausachcore-Starter%20Kit-blue)
+![tazagroupcore](https://img.shields.io/badge/tazagroupcore-Starter%20Kit-blue)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black)](https://nextjs.org/)
@@ -42,8 +42,8 @@ A modern, production-ready fullstack starter kit built with the latest technolog
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/rausachcore/rausachcore.git
-   cd rausachcore
+   git clone https://github.com/tazagroupcore/tazagroupcore.git
+   cd tazagroupcore
    ```
 
 2. **Start development environment**
@@ -141,7 +141,7 @@ bun run dev
 ## 📁 Project Structure
 
 ```
-rausachcore/
+tazagroupcore/
 ├── frontend/                 # Next.js application
 │   ├── src/
 │   │   ├── app/             # App router pages
@@ -407,7 +407,7 @@ If this project helped you, please give it a ⭐ on GitHub!
 
 **Happy coding! 🎉**
 
-> **rausachcore** - Build faster, ship smarter.
+> **tazagroupcore** - Build faster, ship smarter.
 ```
 
 ## 🛠️ Technology Stack
@@ -576,10 +576,10 @@ make dev
 make deploy-staging
 
 # Check deployment status
-kubectl get pods -n rausachcore-staging
+kubectl get pods -n tazagroupcore-staging
 
 # View logs
-kubectl logs -f deployment/backend -n rausachcore-staging
+kubectl logs -f deployment/backend -n tazagroupcore-staging
 ```
 
 ### Production Deployment
@@ -588,8 +588,8 @@ kubectl logs -f deployment/backend -n rausachcore-staging
 make deploy-production
 
 # Monitor deployment
-kubectl rollout status deployment/backend -n rausachcore
-kubectl rollout status deployment/frontend -n rausachcore
+kubectl rollout status deployment/backend -n tazagroupcore
+kubectl rollout status deployment/frontend -n tazagroupcore
 
 # Verify deployment
 make verify-production
@@ -774,18 +774,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/rausachcore/rausachcore/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/rausachcore/rausachcore/discussions)
-- **Security**: [security@rausachcore.dev](mailto:security@rausachcore.dev)
+- **Issues**: [GitHub Issues](https://github.com/tazagroupcore/tazagroupcore/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/tazagroupcore/tazagroupcore/discussions)
+- **Security**: [security@tazagroupcore.dev](mailto:security@tazagroupcore.dev)
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=rausachcore/rausachcore&type=Date)](https://star-history.com/#rausachcore/rausachcore&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=tazagroupcore/tazagroupcore&type=Date)](https://star-history.com/#tazagroupcore/tazagroupcore&Date)
 
 ---
 
 <div align="center">
-  <strong>Built with ❤️ by the rausachcore Team</strong>
+  <strong>Built with ❤️ by the tazagroupcore Team</strong>
   <br>
   <sub>Making fullstack development accessible and scalable</sub>
 </div>
@@ -816,6 +816,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Happy coding! 🎉**
 
-> **rausachcore** - Build faster, ship smarter.
+> **tazagroupcore** - Build faster, ship smarter.
 
 ⭐ **If you find this project helpful, please give it a star on GitHub!**

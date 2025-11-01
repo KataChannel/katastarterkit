@@ -1,8 +1,8 @@
-# Tính năng Quản lý Công việc (Todos) - rausachcore
+# Tính năng Quản lý Công việc (Todos) - tazagroupcore
 
 ## Tổng quan
 
-Tính năng Todos trong rausachcore cung cấp một hệ thống quản lý công việc đầy đủ với các tính năng hiện đại như:
+Tính năng Todos trong tazagroupcore cung cấp một hệ thống quản lý công việc đầy đủ với các tính năng hiện đại như:
 
 - ✅ Tạo, sửa, xóa task
 - 📊 Theo dõi tiến độ và thống kê

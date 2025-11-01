@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "rausachcore",
+      "name": "tazagroupcore",
       "dependencies": {
         "@apollo/server": "^4.12.2",
         "@heroicons/react": "^2.2.0",
@@ -26,7 +26,7 @@
       },
     },
     "backend": {
-      "name": "rausachcore-backend",
+      "name": "tazagroupcore-backend",
       "version": "1.0.0",
       "dependencies": {
         "@apollo/server": "^4.11.2",
@@ -129,7 +129,7 @@
       },
     },
     "frontend": {
-      "name": "rausachcore-frontend",
+      "name": "tazagroupcore-frontend",
       "version": "1.0.0",
       "dependencies": {
         "@apollo/client": "^3.11.0",
@@ -3437,9 +3437,9 @@
 
     "rangetouch": ["rangetouch@2.0.1", "", {}, "sha512-sln+pNSc8NGaHoLzwNBssFSf/rSYkqeBXzX1AtJlkJiUaVSJSbRAWJk+4omsXkN+EJalzkZhWQ3th1m0FpR5xA=="],
 
-    "rausachcore-backend": ["rausachcore-backend@workspace:backend"],
+    "tazagroupcore-backend": ["tazagroupcore-backend@workspace:backend"],
 
-    "rausachcore-frontend": ["rausachcore-frontend@workspace:frontend"],
+    "tazagroupcore-frontend": ["tazagroupcore-frontend@workspace:frontend"],
 
     "raw-body": ["raw-body@3.0.0", "", { "dependencies": { "bytes": "3.1.2", "http-errors": "2.0.0", "iconv-lite": "0.6.3", "unpipe": "1.0.0" } }, "sha512-RmkhL8CAyCRPXCE28MMH0z2PNWQBNk2Q09ZdxM9IOOXwxwZbN+qbWaatPkdkWIKL2ZVDImrN/pK5HTRz2PcS4g=="],
 

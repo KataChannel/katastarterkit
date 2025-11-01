@@ -1,9 +1,9 @@
-# Prometheus configuration for rausachcore monitoring
+# Prometheus configuration for tazagroupcore monitoring
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    monitor: 'rausachcore-monitor'
+    monitor: 'tazagroupcore-monitor'
 
 rule_files:
   - "alert.rules.yml"

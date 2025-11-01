@@ -146,7 +146,7 @@ $ bun run dev
 ✅ GraphQL schema generated
 ✅ All routes mapped
 ✅ WebSocket gateway connected
-✅ Database connected: postgresql://116.118.49.243:12003/rausachcore
+✅ Database connected: postgresql://116.118.49.243:12003/tazagroupcore
 ✅ Redis connected: 116.118.49.243:12004
 ✅ Server running: http://localhost:12001
 ✅ GraphQL playground: http://localhost:12001/graphql

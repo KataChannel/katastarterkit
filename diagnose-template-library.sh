@@ -5,7 +5,7 @@ echo "🔍 Template Library Diagnostic and Fix Script"
 echo "============================================="
 echo
 
-cd /mnt/chikiet/kataoffical/fullstack/rausachcore/frontend
+cd /mnt/chikiet/kataoffical/fullstack/tazagroupcore/frontend
 
 # 1. Check Template Library File Structure
 echo "📁 1. Template Library File Structure Check"

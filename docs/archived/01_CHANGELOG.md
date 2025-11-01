@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to rausachcore will be documented in this file.
+All notable changes to tazagroupcore will be documented in this file.
 
 ## [1.0.0] - 2025-08-24
 
@@ -19,4 +19,4 @@ All notable changes to rausachcore will be documented in this file.
 
 ---
 
-**rausachcore** - Build faster, ship smarter! 🚀
+**tazagroupcore** - Build faster, ship smarter! 🚀

@@ -25,7 +25,7 @@ const SocialIcon = ({ platform }: { platform: SocialLink['platform'] }) => {
  * Full footer with multiple columns
  */
 export function DefaultFooter({
-  brand = { name: 'rausachcore', tagline: 'Enterprise Starter Kit' },
+  brand = { name: 'tazagroupcore', tagline: 'Enterprise Starter Kit' },
   columns = [],
   socialLinks = [],
   copyright,
@@ -93,7 +93,7 @@ export function DefaultFooter({
  * Compact footer with just copyright
  */
 export function MinimalFooter({
-  brand = { name: 'rausachcore' },
+  brand = { name: 'tazagroupcore' },
   copyright,
   backgroundColor = 'bg-gray-900',
   textColor = 'text-gray-400',
@@ -114,7 +114,7 @@ export function MinimalFooter({
  * Footer with newsletter signup
  */
 export function ExtendedFooter({
-  brand = { name: 'rausachcore', tagline: 'Enterprise Starter Kit' },
+  brand = { name: 'tazagroupcore', tagline: 'Enterprise Starter Kit' },
   columns = [],
   socialLinks = [],
   copyright,
@@ -208,7 +208,7 @@ export function ExtendedFooter({
  * Focus on newsletter signup with minimal links
  */
 export function NewsletterFooter({
-  brand = { name: 'rausachcore' },
+  brand = { name: 'tazagroupcore' },
   socialLinks = [],
   copyright,
   backgroundColor = 'bg-gradient-to-r from-blue-600 to-purple-600',

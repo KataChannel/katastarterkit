@@ -841,7 +841,7 @@ function printFinalStats(): void {
  * Main restore function
  */
 async function main(): Promise<void> {
-  console.log('🚀 STARTING OPTIMIZED rausachcore DATA RESTORE');
+  console.log('🚀 STARTING OPTIMIZED tazagroupcore DATA RESTORE');
   console.log(`⏰ Start time: ${new Date().toLocaleString()}`);
   console.log(`⚙️  Batch size: ${BATCH_SIZE.toLocaleString()} records`);
   console.log(`💾 Backup root: ${BACKUP_ROOT_DIR}\n`);

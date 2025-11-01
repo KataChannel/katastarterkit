@@ -1,5 +1,5 @@
 {
-  "name": "rausachcore-backend",
+  "name": "tazagroupcore-backend",
   "module": "dist/main.js",
   "type": "module",
   "scripts": {

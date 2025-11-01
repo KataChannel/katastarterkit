@@ -1,7 +1,7 @@
-// Service Worker for rausachcore PWA
+// Service Worker for tazagroupcore PWA
 // Version: 1.0.0
 
-const CACHE_VERSION = 'rausachcore-v1.0.0';
+const CACHE_VERSION = 'tazagroupcore-v1.0.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const API_CACHE = `${CACHE_VERSION}-api`;
@@ -44,7 +44,7 @@ const CACHE_MAX_AGE = {
 };
 
 // Background sync tag for offline actions
-const BACKGROUND_SYNC_TAG = 'rausachcore-background-sync';
+const BACKGROUND_SYNC_TAG = 'tazagroupcore-background-sync';
 
 // IndexedDB for offline data storage
 let db;
@@ -155,7 +155,7 @@ self.addEventListener('push', event => {
   };
   
   event.waitUntil(
-    self.registration.showNotification('rausachcore', options)
+    self.registration.showNotification('tazagroupcore', options)
   );
 });
 
@@ -177,7 +177,7 @@ self.addEventListener('notificationclick', event => {
 // Initialize IndexedDB for offline storage
 async function initIndexedDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('rausachcoreOfflineDB', 1);
+    const request = indexedDB.open('tazagroupcoreOfflineDB', 1);
     
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {

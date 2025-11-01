@@ -145,7 +145,7 @@ curl http://116.118.49.243:12001/health
 |---------|--------|---------|
 | Backend Container | ✅ Running | Port 12001 → 4000 |
 | Frontend Container | ✅ Running | Port 12000 → 3000 |
-| Database (PostgreSQL) | ✅ Healthy | rausachcore database |
+| Database (PostgreSQL) | ✅ Healthy | tazagroupcore database |
 | Redis | ✅ Healthy | Ready for caching |
 | MinIO | ✅ Healthy | 3 buckets (avatars, posts, uploads) |
 | Elasticsearch | ✅ Healthy | For search functionality |
@@ -197,7 +197,7 @@ file dist/cache/cache.module.js  # Should show proper filename
 ssh root@116.118.49.243 "cd /root/shoprausach && docker compose build --no-cache backend"
 
 # 4. Check server logs
-ssh root@116.118.49.243 "docker logs rausachcore-backend -f"
+ssh root@116.118.49.243 "docker logs tazagroupcore-backend -f"
 
 # 5. Test API
 curl http://116.118.49.243:12001/health | jq .

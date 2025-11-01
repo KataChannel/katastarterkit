@@ -235,7 +235,7 @@ curl http://116.118.49.243:12001/graphql
 ssh root@116.118.49.243 docker ps
 
 # Check logs?
-ssh root@116.118.49.243 docker logs -f rausachcore-frontend
+ssh root@116.118.49.243 docker logs -f tazagroupcore-frontend
 ```
 
 ## Documentation

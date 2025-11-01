@@ -35,7 +35,7 @@ After deployment, check if backend is working:
 
 ```bash
 # View backend logs
-ssh root@116.118.49.243 docker logs rausachcore-backend -f
+ssh root@116.118.49.243 docker logs tazagroupcore-backend -f
 
 # Look for these messages (means it worked):
 # ✅ Redis is ready!

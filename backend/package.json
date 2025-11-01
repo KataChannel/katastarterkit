@@ -1,8 +1,8 @@
 {
-  "name": "rausachcore-backend",
+  "name": "tazagroupcore-backend",
   "version": "1.0.0",
   "description": "Modern Backend with NestJS, GraphQL, Prisma, Redis, and Authentication",
-  "author": "rausachcore Team",
+  "author": "tazagroupcore Team",
   "private": true,
   "license": "MIT",
   "scripts": {

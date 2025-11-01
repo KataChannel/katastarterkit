@@ -74,7 +74,7 @@
 ```bash
 $ npm run build
 
-> rausachcore-starter@1.0.0 build
+> tazagroupcore-starter@1.0.0 build
 > bun run build:backend && bun run build:frontend
 
 $ cd backend && bun run build

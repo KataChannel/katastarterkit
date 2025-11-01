@@ -319,7 +319,7 @@ bun backend/check-website-settings.ts
 bun db:studio
 
 # View settings via SQL
-psql -U postgres -d rausachcore -c "SELECT key, value FROM website_setting ORDER BY key;"
+psql -U postgres -d tazagroupcore -c "SELECT key, value FROM website_setting ORDER BY key;"
 
 # Backup settings
 bun db:backup

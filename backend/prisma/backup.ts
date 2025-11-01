@@ -348,12 +348,12 @@ async function restoreAllTablesFromJson(): Promise<void> {
 }
 
 backupAllTablesToJson()
-  .then(() => console.log('🎉 rausachcore backup completed successfully!'))
+  .then(() => console.log('🎉 tazagroupcore backup completed successfully!'))
   .catch((err) => console.error('❌ Backup error:', err))
   .finally(() => prisma.$disconnect());
 
 // To restore data, uncomment and run restoreAllTablesFromJson()
 // restoreAllTablesFromJson()
-//   .then(() => console.log('🎉 rausachcore restore completed successfully!'))
+//   .then(() => console.log('🎉 tazagroupcore restore completed successfully!'))
 //   .catch((err) => console.error('❌ Restore error:', err))
 //   .finally(() => prisma.$disconnect());

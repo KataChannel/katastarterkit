@@ -1,6 +1,6 @@
 # 🚀 RAG Implementation Plan - Option C (Hybrid)
 
-**Project:** RauSachCore Support Chat with RAG  
+**Project:** tazagroupcore Support Chat with RAG  
 **Approach:** Hybrid (Backend Direct + n8n Workflows)  
 **Timeline:** 4 weeks  
 **Status:** Planning Phase  
@@ -1197,7 +1197,7 @@ REDIS_URL=redis://redis-staging:6379
 QDRANT_URL=http://qdrant-prod:6333
 QDRANT_API_KEY=prod-secure-key
 OPENAI_API_KEY=sk-prod-...
-N8N_WEBHOOK_URL=https://n8n.rausachcore.com/webhook
+N8N_WEBHOOK_URL=https://n8n.tazagroupcore.com/webhook
 N8N_API_KEY=n8n-api-key-prod-secure
 REDIS_URL=redis://redis-prod:6379
 
@@ -1863,7 +1863,7 @@ Papers:
 ```typescript
 // prompts.constants.ts
 
-export const RAG_SYSTEM_PROMPT = `You are a helpful customer support assistant for RauSachCore.
+export const RAG_SYSTEM_PROMPT = `You are a helpful customer support assistant for tazagroupcore.
 
 Use the following knowledge base context to answer the user's question accurately:
 

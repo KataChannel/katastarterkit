@@ -58,7 +58,7 @@ check_status() {
     echo -e "\n${CYAN}📊 Current Status:${NC}\n"
     
     # Use environment variable or default connection
-    DB_URL=${DATABASE_URL:-"postgresql://postgres:postgres@localhost:15432/rausachcore"}
+    DB_URL=${DATABASE_URL:-"postgresql://postgres:postgres@localhost:15432/tazagroupcore"}
     
     echo "Total products with ten:"
     node -e "

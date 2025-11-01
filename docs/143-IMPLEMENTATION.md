@@ -470,7 +470,7 @@ Optimizations:
 
 ## 📄 License
 
-MIT License - Part of rausachcore fullstack project
+MIT License - Part of tazagroupcore fullstack project
 
 ---
 

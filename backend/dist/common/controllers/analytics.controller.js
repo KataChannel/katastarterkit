@@ -151,13 +151,13 @@ let AnalyticsController = class AnalyticsController {
         if (format === 'csv') {
             return {
                 contentType: 'text/csv',
-                filename: `rausachcore-analytics-${timeRange}-${Date.now()}.csv`,
+                filename: `tazagroupcore-analytics-${timeRange}-${Date.now()}.csv`,
                 data: this.convertToCSV(report)
             };
         }
         return {
             contentType: 'application/json',
-            filename: `rausachcore-analytics-${timeRange}-${Date.now()}.json`,
+            filename: `tazagroupcore-analytics-${timeRange}-${Date.now()}.json`,
             data: report
         };
     }

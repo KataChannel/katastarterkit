@@ -1,6 +1,6 @@
-# Prometheus Alert Rules for rausachcore
+# Prometheus Alert Rules for tazagroupcore
 groups:
-  - name: rausachcore.rules
+  - name: tazagroupcore.rules
     rules:
       # High CPU usage
       - alert: HighCpuUsage

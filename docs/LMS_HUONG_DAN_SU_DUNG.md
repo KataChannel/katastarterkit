@@ -652,7 +652,7 @@ GIẢNG VIÊN                     HỆ THỐNG                    HỌC VIÊN
 
 ### Thông Tin Liên Hệ
 
-- **Email**: support@rausachcore.com
+- **Email**: support@tazagroupcore.com
 - **Documentation**: `/docs/LMS_SYSTEM_COMPLETE.md`
 - **GraphQL Playground**: `http://localhost:12001/graphql`
 - **API Reference**: Xem trong GraphQL Schema

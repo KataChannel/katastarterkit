@@ -13,7 +13,7 @@ exports.AppResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
 let AppResolver = class AppResolver {
     hello() {
-        return 'Hello from rausachcore GraphQL API!';
+        return 'Hello from tazagroupcore GraphQL API!';
     }
     version() {
         return '1.1.0';

@@ -52,14 +52,14 @@ Ensure the backend server is running:
 
 ```bash
 # From the backend directory
-cd /chikiet/kataoffical/fullstack/rausachcore/backend
+cd /chikiet/kataoffical/fullstack/tazagroupcore/backend
 bun run dev
 ```
 
 ### Install Test Dependencies
 
 ```bash
-cd /chikiet/kataoffical/fullstack/rausachcore/backend/tests/affiliate
+cd /chikiet/kataoffical/fullstack/tazagroupcore/backend/tests/affiliate
 bun install
 ```
 

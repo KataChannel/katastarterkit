@@ -426,7 +426,7 @@ Root/
 ## 🚨 Important Notes
 
 ### Before Running Migration
-1. **Backup database**: `pg_dump rausachcore > backup.sql`
+1. **Backup database**: `pg_dump tazagroupcore > backup.sql`
 2. **Review schema.prisma**: Check all relations
 3. **Test in development first**: Never run on production directly
 4. **Check conflicts**: Existing Blog/BlogCategory models removed

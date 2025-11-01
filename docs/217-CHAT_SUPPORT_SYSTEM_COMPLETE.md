@@ -113,7 +113,7 @@ Frontend will start on: http://localhost:12000
 
 ### Database:
 - **Server:** PostgreSQL at 116.118.49.243:12003
-- **Database:** rausachcore
+- **Database:** tazagroupcore
 - **Connection:** ✅ Active
 
 ### Redis Cache:
@@ -365,7 +365,7 @@ Required in `.env`:
 
 ```env
 # Database
-DATABASE_URL="postgresql://postgres:password@116.118.49.243:12003/rausachcore"
+DATABASE_URL="postgresql://postgres:password@116.118.49.243:12003/tazagroupcore"
 
 # Redis
 REDIS_HOST="116.118.49.243"

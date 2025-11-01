@@ -77,10 +77,10 @@ export function RequestAccessNotification({
                       Liên hệ với nhóm quản trị bằng email để yêu cầu quyền truy cập
                     </p>
                     <a 
-                      href="mailto:admin@rausachcore.dev?subject=Yêu cầu quyền truy cập quản trị&body=Tôi muốn yêu cầu quyền truy cập vào khu vực quản trị."
+                      href="mailto:admin@tazagroupcore.dev?subject=Yêu cầu quyền truy cập quản trị&body=Tôi muốn yêu cầu quyền truy cập vào khu vực quản trị."
                       className="text-sm font-medium text-blue-600 hover:text-blue-700 underline"
                     >
-                      admin@rausachcore.dev
+                      admin@tazagroupcore.dev
                     </a>
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export function RequestAccessNotification({
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>
             Nếu bạn cho rằng đây là một lỗi, vui lòng{' '}
-            <a href="mailto:admin@rausachcore.dev" className="text-blue-600 hover:text-blue-700 underline">
+            <a href="mailto:admin@tazagroupcore.dev" className="text-blue-600 hover:text-blue-700 underline">
               liên hệ với quản trị viên
             </a>
           </p>

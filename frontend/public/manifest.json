@@ -1,6 +1,6 @@
 {
-  "name": "rausachcore Task Management",
-  "short_name": "rausachcore",
+  "name": "tazagroupcore Task Management",
+  "short_name": "tazagroupcore",
   "description": "Advanced task management and collaboration platform",
   "version": "1.0.0",
   "start_url": "/",

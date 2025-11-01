@@ -13,7 +13,7 @@ async function createAboutUsPage() {
         slug: 'about-us',
         description: 'Learn more about our company, team, and mission',
         status: 'PUBLISHED',
-        seoTitle: 'About Us - rausachcore Enterprise Kit',
+        seoTitle: 'About Us - tazagroupcore Enterprise Kit',
         seoDescription: 'Discover our story, meet our team, and learn what drives us to build amazing enterprise solutions.',
         seoKeywords: ['about us', 'team', 'company', 'mission', 'enterprise'],
         createdBy: 'system',
@@ -25,7 +25,7 @@ async function createAboutUsPage() {
               order: 0,
               isVisible: true,
               content: {
-                title: 'About rausachcore',
+                title: 'About tazagroupcore',
                 subtitle: 'Building the Future of Enterprise Solutions',
                 description: 'We are passionate about creating innovative, scalable, and reliable enterprise solutions that empower businesses to achieve their goals.',
                 buttonText: 'Learn More',
@@ -49,7 +49,7 @@ async function createAboutUsPage() {
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 text-center">Our Story</h2>
                     <div class="prose prose-lg mx-auto">
                       <p class="text-lg text-gray-700 leading-relaxed mb-6">
-                        Founded in 2020, rausachcore emerged from a simple yet powerful vision: to bridge the gap between 
+                        Founded in 2020, tazagroupcore emerged from a simple yet powerful vision: to bridge the gap between 
                         innovative technology and practical business solutions. Our founders, experienced engineers and 
                         entrepreneurs, recognized the need for enterprise-grade applications that are not only powerful 
                         but also intuitive and scalable.
@@ -124,7 +124,7 @@ async function createAboutUsPage() {
               isVisible: true,
               content: {
                 title: 'Meet Our Team',
-                subtitle: 'The brilliant minds behind rausachcore\'s success',
+                subtitle: 'The brilliant minds behind tazagroupcore\'s success',
                 members: [
                   {
                     name: 'Alex Johnson',
@@ -134,7 +134,7 @@ async function createAboutUsPage() {
                     social: {
                       linkedin: 'https://linkedin.com/in/alexjohnson',
                       twitter: 'https://twitter.com/alexjohnson',
-                      email: 'alex@rausachcore.com'
+                      email: 'alex@tazagroupcore.com'
                     }
                   },
                   {
@@ -145,7 +145,7 @@ async function createAboutUsPage() {
                     social: {
                       linkedin: 'https://linkedin.com/in/sarahchen',
                       twitter: 'https://twitter.com/sarahchen',
-                      email: 'sarah@rausachcore.com'
+                      email: 'sarah@tazagroupcore.com'
                     }
                   },
                   {
@@ -155,7 +155,7 @@ async function createAboutUsPage() {
                     image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
                     social: {
                       linkedin: 'https://linkedin.com/in/michaelrodriguez',
-                      email: 'michael@rausachcore.com'
+                      email: 'michael@tazagroupcore.com'
                     }
                   },
                   {
@@ -166,7 +166,7 @@ async function createAboutUsPage() {
                     social: {
                       linkedin: 'https://linkedin.com/in/emilytaylor',
                       twitter: 'https://twitter.com/emilytaylor',
-                      email: 'emily@rausachcore.com'
+                      email: 'emily@tazagroupcore.com'
                     }
                   },
                   {
@@ -176,7 +176,7 @@ async function createAboutUsPage() {
                     image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
                     social: {
                       linkedin: 'https://linkedin.com/in/davidkim',
-                      email: 'david@rausachcore.com'
+                      email: 'david@tazagroupcore.com'
                     }
                   },
                   {
@@ -187,7 +187,7 @@ async function createAboutUsPage() {
                     social: {
                       linkedin: 'https://linkedin.com/in/lisawang',
                       twitter: 'https://twitter.com/lisawang',
-                      email: 'lisa@rausachcore.com'
+                      email: 'lisa@tazagroupcore.com'
                     }
                   }
                 ],
@@ -220,7 +220,7 @@ async function createAboutUsPage() {
                   {
                     type: 'email',
                     label: 'Email',
-                    value: 'hello@rausachcore.com',
+                    value: 'hello@tazagroupcore.com',
                     icon: 'email'
                   },
                   {
