@@ -26,6 +26,22 @@ interface CarouselSettingsDialogProps {
     slidesPerView?: number;
     animationType?: 'fade' | 'slide' | 'zoom' | 'none';
     animationDuration?: number;
+    dataSource?: {
+      type: 'manual' | 'api' | 'database';
+      endpoint?: string;
+      query?: string;
+      variables?: any;
+      queryType?: 'featured' | 'products' | 'custom';
+      limit?: number;
+      filters?: any;
+      titleField?: string;
+      subtitleField?: string;
+      descriptionField?: string;
+      imageField?: string;
+      priceField?: string;
+      linkField?: string;
+      badgeField?: string;
+    };
   };
   onSave: (settings: any) => void;
 }
@@ -51,12 +67,148 @@ export function CarouselSettingsDialog({ open, onOpenChange, settings, onSave }:
         </DialogHeader>
 
         <Tabs defaultValue="behavior" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="datasource">Data Source</TabsTrigger>
             <TabsTrigger value="behavior">Behavior</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="controls">Controls</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="datasource" className="space-y-4 mt-4">
+            {/* Data Source Type */}
+            <div className="space-y-2">
+              <Label htmlFor="dataSourceType">Data Source</Label>
+              <Select
+                value={localSettings.dataSource?.type || 'manual'}
+                onValueChange={(value: 'manual' | 'api' | 'database') =>
+                  setLocalSettings({
+                    ...localSettings,
+                    dataSource: {
+                      ...localSettings.dataSource,
+                      type: value,
+                    },
+                  })
+                }
+              >
+                <SelectTrigger id="dataSourceType">
+                  <SelectValue placeholder="Select data source" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manual">Manual Slides</SelectItem>
+                  <SelectItem value="database">Database (GraphQL)</SelectItem>
+                  <SelectItem value="api">API Endpoint</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Choose how carousel content is loaded
+              </p>
+            </div>
+
+            {/* Database Settings */}
+            {localSettings.dataSource?.type === 'database' && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="queryType">Query Type</Label>
+                  <Select
+                    value={localSettings.dataSource?.queryType || 'featured'}
+                    onValueChange={(value: 'featured' | 'products' | 'custom') =>
+                      setLocalSettings({
+                        ...localSettings,
+                        dataSource: {
+                          ...localSettings.dataSource,
+                          type: 'database',
+                          queryType: value,
+                        },
+                      })
+                    }
+                  >
+                    <SelectTrigger id="queryType">
+                      <SelectValue placeholder="Select query type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="featured">Featured Products</SelectItem>
+                      <SelectItem value="products">All Products</SelectItem>
+                      <SelectItem value="custom">Custom Query</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="limit">Number of Items</Label>
+                  <Input
+                    id="limit"
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={localSettings.dataSource?.limit || 10}
+                    onChange={(e) =>
+                      setLocalSettings({
+                        ...localSettings,
+                        dataSource: {
+                          ...localSettings.dataSource,
+                          type: 'database',
+                          limit: parseInt(e.target.value) || 10,
+                        },
+                      })
+                    }
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Maximum number of items to display (1-50)
+                  </p>
+                </div>
+
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-800">
+                    <strong>✅ Database Mode:</strong> Carousel will automatically load products from your database. 
+                    Field mappings are configured automatically for products.
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* API Settings */}
+            {localSettings.dataSource?.type === 'api' && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="endpoint">API Endpoint</Label>
+                  <Input
+                    id="endpoint"
+                    type="text"
+                    placeholder="/api/products"
+                    value={localSettings.dataSource?.endpoint || ''}
+                    onChange={(e) =>
+                      setLocalSettings({
+                        ...localSettings,
+                        dataSource: {
+                          ...localSettings.dataSource,
+                          type: 'api',
+                          endpoint: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>🔧 API Mode:</strong> Configure API endpoint to fetch carousel data dynamically. 
+                    Advanced configuration coming soon.
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* Manual Mode Info */}
+            {localSettings.dataSource?.type === 'manual' && (
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <p className="text-sm text-gray-800">
+                  <strong>✏️ Manual Mode:</strong> Add and edit slides manually using the "Add Slide" button. 
+                  Perfect for custom content and complete control.
+                </p>
+              </div>
+            )}
+          </TabsContent>
 
           <TabsContent value="behavior" className="space-y-4 mt-4">
             {/* Auto Play */}

@@ -1359,6 +1359,93 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
         }
       }
     ]
+  },
+
+  // Featured Products Carousel Template
+  {
+    id: 'carousel-featured-products',
+    name: 'Featured Products Carousel',
+    description: 'Carousel tự động hiển thị sản phẩm nổi bật từ database',
+    category: 'custom',
+    thumbnail: getThumbnailDataURL('carousel-featured-products'),
+    blocks: [
+      {
+        type: BlockType.SECTION,
+        order: 0,
+        depth: 0,
+        content: {
+          fullWidth: true,
+          containerWidth: 'xl',
+          backgroundColor: '#ffffff',
+          padding: { top: 80, bottom: 80 },
+          style: {}
+        },
+        children: [
+          {
+            type: BlockType.CONTAINER,
+            order: 0,
+            depth: 1,
+            content: {
+              layout: 'stack',
+              gap: 32,
+              padding: 0,
+              backgroundColor: 'transparent',
+              style: {}
+            },
+            children: [
+              {
+                type: BlockType.TEXT,
+                order: 0,
+                depth: 2,
+                content: {
+                  content: '<h2 style="text-align: center; font-size: 2.5rem; font-weight: bold; margin: 0 0 16px 0;">Sản Phẩm Nổi Bật</h2>',
+                  style: {}
+                }
+              },
+              {
+                type: BlockType.TEXT,
+                order: 1,
+                depth: 2,
+                content: {
+                  content: '<p style="text-align: center; font-size: 1.125rem; color: #64748b; margin: 0 0 32px 0;">Khám phá những sản phẩm được yêu thích nhất</p>',
+                  style: {}
+                }
+              },
+              {
+                type: BlockType.CAROUSEL,
+                order: 2,
+                depth: 2,
+                content: {
+                  slides: [], // Empty - will be loaded from database
+                  dataSource: {
+                    type: 'database',
+                    queryType: 'featured',
+                    limit: 12,
+                    titleField: 'name',
+                    descriptionField: 'shortDesc',
+                    imageField: 'thumbnail',
+                    badgeField: 'isFeatured'
+                  },
+                  autoPlay: true,
+                  autoPlayInterval: 4000,
+                  showIndicators: true,
+                  showArrows: true,
+                  loop: true,
+                  height: 'lg',
+                  transition: 'slide',
+                  indicatorStyle: 'dots',
+                  arrowStyle: 'circle',
+                  slidesPerView: 3,
+                  animationType: 'fade',
+                  animationDuration: 600,
+                  style: {}
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 ];
 

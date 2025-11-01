@@ -151,6 +151,54 @@ export const generateThumbnailSVG = (templateId: string): string => {
         <path d="M 300 215 L 305 220 L 300 225 M 305 215 L 310 220 L 305 225 M 310 215 L 315 220 L 310 225 M 315 215 L 320 220 L 315 225 M 320 215 L 325 220 L 320 225" stroke="#f59e0b" stroke-width="2" fill="none"/>
       </svg>
     `,
+    'carousel-featured-products': `
+      <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="300" fill="#ffffff"/>
+        <!-- Title -->
+        <rect x="100" y="20" width="200" height="12" rx="4" fill="#1e293b"/>
+        <rect x="120" y="40" width="160" height="8" rx="4" fill="#64748b" opacity="0.5"/>
+        
+        <!-- Carousel Container -->
+        <rect x="20" y="70" width="360" height="200" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+        
+        <!-- Product Cards -->
+        <rect x="35" y="85" width="100" height="170" rx="6" fill="white" stroke="#cbd5e1" stroke-width="1"/>
+        <rect x="40" y="90" width="90" height="90" rx="4" fill="#e0e7ff"/>
+        <rect x="50" y="100" width="70" height="70" rx="4" fill="#818cf8" opacity="0.3"/>
+        <rect x="45" y="190" width="80" height="8" rx="4" fill="#1e293b"/>
+        <rect x="45" y="205" width="60" height="6" rx="3" fill="#64748b" opacity="0.5"/>
+        <rect x="45" y="220" width="50" height="20" rx="4" fill="#3b82f6"/>
+        <text x="70" y="233" font-family="Arial" font-size="10" fill="white" text-anchor="middle">View</text>
+        
+        <rect x="150" y="85" width="100" height="170" rx="6" fill="white" stroke="#cbd5e1" stroke-width="1"/>
+        <rect x="155" y="90" width="90" height="90" rx="4" fill="#dbeafe"/>
+        <rect x="165" y="100" width="70" height="70" rx="4" fill="#60a5fa" opacity="0.3"/>
+        <rect x="160" y="190" width="80" height="8" rx="4" fill="#1e293b"/>
+        <rect x="160" y="205" width="60" height="6" rx="3" fill="#64748b" opacity="0.5"/>
+        <rect x="160" y="220" width="50" height="20" rx="4" fill="#3b82f6"/>
+        <text x="185" y="233" font-family="Arial" font-size="10" fill="white" text-anchor="middle">View</text>
+        
+        <rect x="265" y="85" width="100" height="170" rx="6" fill="white" stroke="#cbd5e1" stroke-width="1"/>
+        <rect x="270" y="90" width="90" height="90" rx="4" fill="#fef3c7"/>
+        <rect x="280" y="100" width="70" height="70" rx="4" fill="#fbbf24" opacity="0.3"/>
+        <rect x="275" y="190" width="80" height="8" rx="4" fill="#1e293b"/>
+        <rect x="275" y="205" width="60" height="6" rx="3" fill="#64748b" opacity="0.5"/>
+        <rect x="275" y="220" width="50" height="20" rx="4" fill="#3b82f6"/>
+        <text x="300" y="233" font-family="Arial" font-size="10" fill="white" text-anchor="middle">View</text>
+        
+        <!-- Navigation Arrows -->
+        <circle cx="15" cy="170" r="8" fill="#3b82f6" opacity="0.8"/>
+        <path d="M 17 170 L 14 167 L 14 173 Z" fill="white"/>
+        <circle cx="385" cy="170" r="8" fill="#3b82f6" opacity="0.8"/>
+        <path d="M 383 170 L 386 167 L 386 173 Z" fill="white"/>
+        
+        <!-- Indicators -->
+        <circle cx="180" cy="285" r="4" fill="#3b82f6"/>
+        <circle cx="195" cy="285" r="4" fill="#cbd5e1"/>
+        <circle cx="210" cy="285" r="4" fill="#cbd5e1"/>
+        <circle cx="225" cy="285" r="4" fill="#cbd5e1"/>
+      </svg>
+    `,
   };
 
   return thumbnails[templateId] || generateDefaultThumbnail();
