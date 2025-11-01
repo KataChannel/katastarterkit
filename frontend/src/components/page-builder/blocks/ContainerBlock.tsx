@@ -282,18 +282,23 @@ export const ContainerBlock: React.FC<ContainerBlockProps> = ({
 
       {/* Children Blocks */}
       {children ? (
-        <div className="w-full">
+        <div className="nested-children-wrapper w-full">
           {children}
         </div>
       ) : (
-        <div className={`text-center py-8 transition-colors duration-200 ${
+        <div className={`empty-state text-center py-8 transition-colors duration-200 ${
           isOver 
             ? 'text-blue-600' 
             : 'text-gray-400'
         }`}>
           <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No nested blocks</p>
-          <p className="text-xs mt-1">Drop blocks or click "Add Child" to add nested content</p>
+          <p className="text-sm font-medium">No nested blocks yet</p>
+          <p className="text-xs mt-1 opacity-75">Drop blocks here or click "Add Child" to add nested content</p>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs mt-2 text-red-500">
+              Debug: children prop is {children === undefined ? 'undefined' : children === null ? 'null' : 'defined but falsy'}
+            </div>
+          )}
         </div>
       )}
     </div>

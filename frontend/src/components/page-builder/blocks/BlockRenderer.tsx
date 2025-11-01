@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { PageBlock, BlockType } from '@/types/page-builder';
 import { PageStateContext } from '../contexts/PageStateContext';
 import { BlockLoader } from './BlockLoader';
@@ -60,28 +60,35 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
     if (!block.children || block.children.length === 0) return null;
 
     // Create a copy of children array before sorting (GraphQL returns read-only array)
-    // Just render children directly - parent container will handle layout
+    // Wrap children với visual indicators cho nested blocks
     return (
-      <>
+      <div className="nested-blocks-container border-l-4 border-blue-200 ml-4 pl-4 mt-2 space-y-2">
+        <div className="text-xs text-blue-600 font-semibold mb-2 flex items-center gap-1">
+          📦 Nested Blocks ({block.children.length})
+        </div>
         {[...block.children]
           .sort((a, b) => a.order - b.order)
           .map((childBlock) => {
             return (
-              <BlockRenderer
-                key={childBlock.id}
-                block={childBlock}
-                isEditing={isEditing}
-                onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
-                onDelete={() => onDeleteChild?.(childBlock.id)}
-                onAddChild={onAddChild}
-                onUpdateChild={onUpdateChild}
-                onDeleteChild={onDeleteChild}
-                onSelect={onSelect}
-                depth={depth + 1}
-              />
+              <div 
+                key={childBlock.id} 
+                className="nested-block-item bg-blue-50/30 rounded-lg p-2 border border-blue-100"
+              >
+                <BlockRenderer
+                  block={childBlock}
+                  isEditing={isEditing}
+                  onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
+                  onDelete={() => onDeleteChild?.(childBlock.id)}
+                  onAddChild={onAddChild}
+                  onUpdateChild={onUpdateChild}
+                  onDeleteChild={onDeleteChild}
+                  onSelect={onSelect}
+                  depth={depth + 1}
+                />
+              </div>
             );
           })}
-      </>
+      </div>
     );
   };
 
@@ -102,6 +109,22 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       blockType: block.type,
     });
   }
+
+  // Debug logging trong development mode
+  useEffect(() => {
+    if (isContainerBlock && process.env.NODE_ENV === 'development') {
+      console.log(`[BlockRenderer ${block.id}] Container Block Debug:`, {
+        blockType: block.type,
+        hasChildren: !!block.children,
+        childrenCount: block.children?.length || 0,
+        onAddChildDefined: !!onAddChild,
+        onUpdateChildDefined: !!onUpdateChild,
+        onDeleteChildDefined: !!onDeleteChild,
+        depth,
+        children: block.children?.map(c => ({ id: c.id, type: c.type })),
+      });
+    }
+  }, [block.id, isContainerBlock, block.children, onAddChild, onUpdateChild, onDeleteChild, depth, block.type]);
 
   // Render block based on type using lazy loading
   const renderBlockContent = () => {

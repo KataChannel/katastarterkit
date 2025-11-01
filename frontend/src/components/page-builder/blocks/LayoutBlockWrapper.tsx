@@ -47,6 +47,20 @@ export const LayoutBlockWrapper: React.FC<LayoutBlockWrapperProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
+  // Debug logging
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[LayoutBlockWrapper ${block.id}] Props Debug:`, {
+        hasOnAddChild: !!onAddChild,
+        onAddChildType: typeof onAddChild,
+        hasChildren: !!children,
+        childrenType: typeof children,
+        blockType: block.type,
+        blockId: block.id,
+      });
+    }
+  }, [onAddChild, children, block.id, block.type]);
+
   // Setup droppable zone
   const { droppableId, dropData } = useNestedDropZone({
     parentId: block.id,
@@ -88,11 +102,31 @@ export const LayoutBlockWrapper: React.FC<LayoutBlockWrapperProps> = ({
       {/* Control Bar */}
       {isEditable && (isHovering || isEditing) && (
         <div className="absolute top-2 right-2 flex gap-2 z-10 animate-in fade-in duration-200">
+          {/* Debug: Show button status in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs text-gray-500 absolute -bottom-6 right-0 whitespace-nowrap bg-white px-1 rounded">
+              canAdd={String(canAddChildren)} | onAddChild={String(!!onAddChild)}
+            </div>
+          )}
+          
           {canAddChildren && onAddChild && (
             <Button
               size="sm"
               variant="outline"
-              onClick={() => onAddChild(block.id)}
+              onClick={() => {
+                console.log(`[LayoutBlockWrapper ${block.id}] Add Child clicked:`, { 
+                  hasOnAddChild: !!onAddChild, 
+                  canAddChildren,
+                  childrenCount,
+                  blockId: block.id,
+                  blockType: block.type,
+                });
+                if (onAddChild) {
+                  onAddChild(block.id);
+                } else {
+                  console.error('[LayoutBlockWrapper] onAddChild is undefined!');
+                }
+              }}
               className="bg-white shadow-sm hover:shadow-md"
               title={`Add child block (${childrenCount} nested)`}
             >
@@ -100,6 +134,14 @@ export const LayoutBlockWrapper: React.FC<LayoutBlockWrapperProps> = ({
               <span className="text-xs">Add Child</span>
             </Button>
           )}
+          
+          {/* Show warning if onAddChild is missing in development */}
+          {process.env.NODE_ENV === 'development' && !onAddChild && (
+            <div className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded whitespace-nowrap">
+              ⚠️ No onAddChild
+            </div>
+          )}
+          
           <Button
             size="sm"
             variant="outline"
@@ -157,7 +199,7 @@ export const LayoutBlockWrapper: React.FC<LayoutBlockWrapperProps> = ({
 
       {/* Children Blocks */}
       {children ? (
-        <div className="w-full">
+        <div className="nested-children-wrapper w-full">
           {children}
         </div>
       ) : (
@@ -167,8 +209,13 @@ export const LayoutBlockWrapper: React.FC<LayoutBlockWrapperProps> = ({
           }`}
         >
           <Package className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">No nested blocks</p>
-          <p className="text-xs mt-1">Drop blocks or click "Add Child" to add content</p>
+          <p className="text-sm font-medium">No nested blocks yet</p>
+          <p className="text-xs mt-1 opacity-75">Drop blocks or click "Add Child" to add content</p>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs mt-2 text-red-500">
+              Debug: children prop is {children === undefined ? 'undefined' : children === null ? 'null' : 'defined but falsy'}
+            </div>
+          )}
         </div>
       )}
     </div>
