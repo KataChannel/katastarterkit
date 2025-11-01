@@ -33,6 +33,20 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
     padding: { top: 60, bottom: 60 },
   });
 
+  // Debug logging
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[SectionBlock ${block.id}] Props Debug:`, {
+        hasOnAddChild: !!onAddChild,
+        onAddChildType: typeof onAddChild,
+        hasChildren: !!children,
+        childrenType: typeof children,
+        blockType: block.type,
+        blockId: block.id,
+      });
+    }
+  }, [onAddChild, children, block.id, block.type]);
+
   const handleSave = () => {
     onUpdate(editContent);
     setIsEditing(false);
@@ -80,17 +94,44 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
       {/* Control Bar */}
       {isEditable && (
         <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          {/* Debug: Show button status in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs text-gray-500 absolute -bottom-6 right-0 whitespace-nowrap bg-white px-1 rounded">
+              onAddChild={String(!!onAddChild)}
+            </div>
+          )}
+          
           {onAddChild && (
             <Button
               size="sm"
               variant="outline"
-              onClick={() => onAddChild(block.id)}
-              className="bg-white shadow-sm"
+              onClick={() => {
+                console.log(`[SectionBlock ${block.id}] Add Block clicked:`, { 
+                  hasOnAddChild: !!onAddChild, 
+                  blockId: block.id,
+                  blockType: block.type,
+                });
+                if (onAddChild) {
+                  onAddChild(block.id);
+                } else {
+                  console.error('[SectionBlock] onAddChild is undefined!');
+                }
+              }}
+              className="bg-white shadow-sm hover:shadow-md"
+              title="Add nested block to section"
             >
               <Plus className="w-4 h-4 mr-1" />
               Add Block
             </Button>
           )}
+          
+          {/* Show warning if onAddChild is missing in development */}
+          {process.env.NODE_ENV === 'development' && !onAddChild && (
+            <div className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded whitespace-nowrap">
+              ⚠️ No onAddChild
+            </div>
+          )}
+          
           <Button
             size="sm"
             variant="outline"
@@ -202,9 +243,19 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
       )}
 
       <div style={containerStyles}>
-        {children || (
+        {children ? (
+          <div className="nested-children-wrapper w-full">
+            {children}
+          </div>
+        ) : (
           <div className="text-gray-400 text-center py-12">
-            Drop blocks here or click "Add Block" to add child blocks
+            <div className="text-sm font-medium">Drop blocks here or click "Add Block"</div>
+            <div className="text-xs mt-1 opacity-75">Add child blocks to section</div>
+            {process.env.NODE_ENV === 'development' && (
+              <div className="text-xs mt-2 text-red-500">
+                Debug: children prop is {children === undefined ? 'undefined' : children === null ? 'null' : 'defined but falsy'}
+              </div>
+            )}
           </div>
         )}
       </div>
