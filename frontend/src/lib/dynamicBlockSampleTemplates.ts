@@ -497,6 +497,552 @@ export const faqTemplate: SampleTemplate = {
 };
 
 /**
+ * Product Carousel Template
+ * Display products in an auto-scrolling carousel with data from database
+ */
+export const productCarouselTemplate: SampleTemplate = {
+  id: 'product-carousel',
+  name: 'Product Carousel',
+  description: 'Auto-scrolling carousel showcasing featured products from your database',
+  template: `
+<div class="product-carousel-container py-12 px-4 md:px-8 bg-gradient-to-b from-white to-gray-50 rounded-lg overflow-hidden">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h2 class="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        {{title}}
+      </h2>
+      <p class="text-gray-600 text-lg">{{subtitle}}</p>
+    </div>
+
+    <!-- Carousel Container -->
+    <div class="relative group">
+      <!-- Navigation Buttons -->
+      <button class="carousel-prev absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-4">
+        <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <button class="carousel-next absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -mr-4">
+        <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+
+      <!-- Carousel Track -->
+      <div class="overflow-hidden">
+        <div class="carousel-track flex gap-6 transition-transform duration-500 ease-out">
+          {{#each products}}
+          <div class="carousel-item flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4">
+            <div class="product-card bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group/card h-full flex flex-col">
+              <!-- Product Image -->
+              <div class="relative overflow-hidden aspect-square bg-gray-100">
+                {{#if this.thumbnail}}
+                  <img src="{{this.thumbnail}}" alt="{{this.name}}" class="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-500" />
+                {{else}}
+                  <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
+                    <svg class="w-20 h-20 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                {{/if}}
+                
+                <!-- Badges -->
+                <div class="absolute top-3 left-3 flex flex-col gap-2">
+                  {{#if this.isFeatured}}
+                    <span class="bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">⭐ Featured</span>
+                  {{/if}}
+                  {{#if this.isOnSale}}
+                    <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">🔥 Sale</span>
+                  {{/if}}
+                  {{#if this.isNewArrival}}
+                    <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">✨ New</span>
+                  {{/if}}
+                </div>
+
+                <!-- Discount Badge -->
+                {{#if this.discountPercentage}}
+                  <div class="absolute top-3 right-3">
+                    <span class="bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-bold px-3 py-2 rounded-lg shadow-lg">
+                      -{{this.discountPercentage}}%
+                    </span>
+                  </div>
+                {{/if}}
+              </div>
+
+              <!-- Product Info -->
+              <div class="p-4 flex-grow flex flex-col">
+                <!-- Category -->
+                {{#if this.category}}
+                  <p class="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-2">
+                    {{this.category.name}}
+                  </p>
+                {{/if}}
+
+                <!-- Product Name -->
+                <h3 class="font-bold text-lg mb-2 line-clamp-2 group-hover/card:text-blue-600 transition-colors">
+                  {{this.name}}
+                </h3>
+
+                <!-- Description -->
+                {{#if this.shortDesc}}
+                  <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{this.shortDesc}}</p>
+                {{/if}}
+
+                <!-- SKU & Stock -->
+                <div class="flex items-center gap-3 mb-3 text-xs text-gray-500">
+                  {{#if this.sku}}
+                    <span class="flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                      </svg>
+                      {{this.sku}}
+                    </span>
+                  {{/if}}
+                  <span class="flex items-center gap-1 {{#if this.stock}}{{#if (gt this.stock 0)}}text-green-600{{else}}text-red-600{{/if}}{{/if}}">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    {{#if this.stock}}
+                      {{#if (gt this.stock 0)}}
+                        Còn {{this.stock}} {{this.unit}}
+                      {{else}}
+                        Hết hàng
+                      {{/if}}
+                    {{else}}
+                      Liên hệ
+                    {{/if}}
+                  </span>
+                </div>
+
+                <!-- Pricing -->
+                <div class="mt-auto">
+                  <div class="flex items-baseline gap-2 mb-3">
+                    <span class="text-2xl font-bold text-blue-600">
+                      {{this.price}}đ
+                    </span>
+                    {{#if this.originalPrice}}
+                      {{#if (gt this.originalPrice this.price)}}
+                        <span class="text-sm text-gray-400 line-through">
+                          {{this.originalPrice}}đ
+                        </span>
+                      {{/if}}
+                    {{/if}}
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="flex gap-2">
+                    <button class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                      <span class="flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        Thêm giỏ
+                      </span>
+                    </button>
+                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-3 rounded-lg transition-colors">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+
+      <!-- Carousel Indicators -->
+      <div class="flex justify-center gap-2 mt-6">
+        {{#each products}}
+          <button class="carousel-indicator w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-colors" data-index="{{@index}}"></button>
+        {{/each}}
+      </div>
+    </div>
+
+    <!-- View All Button -->
+    <div class="text-center mt-8">
+      <button class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+        Xem tất cả sản phẩm →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Carousel Auto-scroll Script -->
+<script>
+(function() {
+  const track = document.querySelector('.carousel-track');
+  const prevBtn = document.querySelector('.carousel-prev');
+  const nextBtn = document.querySelector('.carousel-next');
+  const indicators = document.querySelectorAll('.carousel-indicator');
+  const items = document.querySelectorAll('.carousel-item');
+  
+  if (!track || items.length === 0) return;
+  
+  let currentIndex = 0;
+  const itemsPerView = window.innerWidth >= 1280 ? 4 : window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1;
+  const maxIndex = Math.max(0, items.length - itemsPerView);
+  let autoScrollInterval;
+  
+  function updateCarousel() {
+    const itemWidth = items[0].offsetWidth;
+    const gap = 24; // 1.5rem = 24px
+    const offset = -(currentIndex * (itemWidth + gap));
+    track.style.transform = \`translateX(\${offset}px)\`;
+    
+    indicators.forEach((indicator, i) => {
+      indicator.classList.toggle('bg-blue-600', i === currentIndex);
+      indicator.classList.toggle('bg-gray-300', i !== currentIndex);
+    });
+  }
+  
+  function nextSlide() {
+    currentIndex = currentIndex >= maxIndex ? 0 : currentIndex + 1;
+    updateCarousel();
+  }
+  
+  function prevSlide() {
+    currentIndex = currentIndex <= 0 ? maxIndex : currentIndex - 1;
+    updateCarousel();
+  }
+  
+  // Auto-scroll every 5 seconds
+  function startAutoScroll() {
+    autoScrollInterval = setInterval(nextSlide, 5000);
+  }
+  
+  function stopAutoScroll() {
+    clearInterval(autoScrollInterval);
+  }
+  
+  // Event Listeners
+  prevBtn?.addEventListener('click', () => {
+    prevSlide();
+    stopAutoScroll();
+    startAutoScroll();
+  });
+  
+  nextBtn?.addEventListener('click', () => {
+    nextSlide();
+    stopAutoScroll();
+    startAutoScroll();
+  });
+  
+  indicators.forEach((indicator, index) => {
+    indicator.addEventListener('click', () => {
+      currentIndex = index;
+      updateCarousel();
+      stopAutoScroll();
+      startAutoScroll();
+    });
+  });
+  
+  // Pause on hover
+  track.parentElement.addEventListener('mouseenter', stopAutoScroll);
+  track.parentElement.addEventListener('mouseleave', startAutoScroll);
+  
+  // Initialize
+  updateCarousel();
+  startAutoScroll();
+  
+  // Handle resize
+  window.addEventListener('resize', updateCarousel);
+})();
+</script>
+  `,
+  dataSource: {
+    type: 'static',
+    staticData: {
+      title: 'Sản Phẩm Nổi Bật',
+      subtitle: 'Khám phá những sản phẩm được yêu thích nhất',
+      products: [
+        {
+          id: '1',
+          name: 'Serum Vitamin C Dưỡng Trắng Da',
+          slug: 'serum-vitamin-c-duong-trang-da',
+          shortDesc: 'Làm sáng da, mờ thâm nám, tăng cường collagen tự nhiên',
+          description: 'Serum Vitamin C cao cấp giúp dưỡng trắng da hiệu quả',
+          sku: 'SER-VIT-C-001',
+          price: 299000,
+          originalPrice: 450000,
+          unit: 'Chai',
+          stock: 150,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop',
+          isFeatured: true,
+          isNewArrival: false,
+          isBestSeller: true,
+          isOnSale: true,
+          category: {
+            id: 'cat-1',
+            name: 'Chăm Sóc Da',
+            slug: 'cham-soc-da',
+          },
+        },
+        {
+          id: '2',
+          name: 'Bộ Dụng Cụ Nối Mi Chuyên Nghiệp',
+          slug: 'bo-dung-cu-noi-mi-chuyen-nghiep',
+          shortDesc: 'Bộ full dụng cụ nối mi cao cấp cho thợ chuyên nghiệp',
+          description: 'Bộ dụng cụ nối mi chuyên nghiệp đầy đủ nhất',
+          sku: 'NOI-MI-SET-001',
+          price: 1250000,
+          originalPrice: 1800000,
+          unit: 'Bộ',
+          stock: 45,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1631730486572-226d1f595b68?w=400&h=400&fit=crop',
+          isFeatured: true,
+          isNewArrival: true,
+          isBestSeller: false,
+          isOnSale: true,
+          category: {
+            id: 'cat-2',
+            name: 'Nối Mi',
+            slug: 'noi-mi',
+          },
+        },
+        {
+          id: '3',
+          name: 'Kem Dưỡng Ẩm Hyaluronic Acid',
+          slug: 'kem-duong-am-hyaluronic-acid',
+          shortDesc: 'Cấp ẩm sâu, làm mềm mịn da, chống lão hóa hiệu quả',
+          description: 'Kem dưỡng ẩm chuyên sâu với Hyaluronic Acid',
+          sku: 'CREAM-HYA-001',
+          price: 380000,
+          originalPrice: 520000,
+          unit: 'Hộp',
+          stock: 200,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop',
+          isFeatured: true,
+          isNewArrival: false,
+          isBestSeller: true,
+          isOnSale: false,
+          category: {
+            id: 'cat-1',
+            name: 'Chăm Sóc Da',
+            slug: 'cham-soc-da',
+          },
+        },
+        {
+          id: '4',
+          name: 'Keo Nối Mi Hàn Quốc Premium',
+          slug: 'keo-noi-mi-han-quoc-premium',
+          shortDesc: 'Keo nối mi siêu dính, giữ lâu, không gây kích ứng',
+          description: 'Keo nối mi nhập khẩu Hàn Quốc chất lượng cao',
+          sku: 'GLUE-KR-PREM-001',
+          price: 450000,
+          originalPrice: null,
+          unit: 'Chai',
+          stock: 89,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400&h=400&fit=crop',
+          isFeatured: true,
+          isNewArrival: true,
+          isBestSeller: false,
+          isOnSale: false,
+          category: {
+            id: 'cat-2',
+            name: 'Nối Mi',
+            slug: 'noi-mi',
+          },
+        },
+        {
+          id: '5',
+          name: 'Mực Phun Xăm Môi Organic',
+          slug: 'muc-phun-xam-moi-organic',
+          shortDesc: 'Mực phun xăm môi an toàn, màu chuẩn, lên màu đẹp tự nhiên',
+          description: 'Mực phun xăm môi organic cao cấp',
+          sku: 'INK-LIP-ORG-001',
+          price: 890000,
+          originalPrice: 1200000,
+          unit: 'Lọ',
+          stock: 67,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop',
+          isFeatured: true,
+          isNewArrival: false,
+          isBestSeller: true,
+          isOnSale: true,
+          category: {
+            id: 'cat-3',
+            name: 'Phun Xăm',
+            slug: 'phun-xam',
+          },
+        },
+        {
+          id: '6',
+          name: 'Sữa Rửa Mặt Tạo Bọt Nhẹ Nhàng',
+          slug: 'sua-rua-mat-tao-bot-nhe-nhang',
+          shortDesc: 'Làm sạch sâu, không làm khô da, phù hợp mọi loại da',
+          description: 'Sữa rửa mặt tạo bọt nhẹ nhàng cho mọi loại da',
+          sku: 'CLEAN-FOAM-001',
+          price: 180000,
+          originalPrice: 250000,
+          unit: 'Chai',
+          stock: 320,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400&h=400&fit=crop',
+          isFeatured: true,
+          isNewArrival: false,
+          isBestSeller: false,
+          isOnSale: true,
+          category: {
+            id: 'cat-1',
+            name: 'Chăm Sóc Da',
+            slug: 'cham-soc-da',
+          },
+        },
+        {
+          id: '7',
+          name: 'Mi Giả 3D Cao Cấp',
+          slug: 'mi-gia-3d-cao-cap',
+          shortDesc: 'Mi giả 3D siêu mềm, tự nhiên như mi thật',
+          description: 'Mi giả 3D chất lượng cao nhập khẩu',
+          sku: 'LASH-3D-001',
+          price: 120000,
+          originalPrice: 180000,
+          unit: 'Cặp',
+          stock: 250,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1583001809350-0b9c723cad97?w=400&h=400&fit=crop',
+          isFeatured: false,
+          isNewArrival: true,
+          isBestSeller: false,
+          isOnSale: true,
+          category: {
+            id: 'cat-2',
+            name: 'Nối Mi',
+            slug: 'noi-mi',
+          },
+        },
+        {
+          id: '8',
+          name: 'Máy Phun Xăm Chuyên Nghiệp',
+          slug: 'may-phun-xam-chuyen-nghiep',
+          shortDesc: 'Máy phun xăm hiện đại, êm ái, chính xác cao',
+          description: 'Máy phun xăm chuyên nghiệp cho thợ chuyên nghiệp',
+          sku: 'MACHINE-PMU-001',
+          price: 5500000,
+          originalPrice: 7200000,
+          unit: 'Máy',
+          stock: 12,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&h=400&fit=crop',
+          isFeatured: true,
+          isNewArrival: true,
+          isBestSeller: false,
+          isOnSale: true,
+          category: {
+            id: 'cat-3',
+            name: 'Phun Xăm',
+            slug: 'phun-xam',
+          },
+        },
+        {
+          id: '9',
+          name: 'Toner Cân Bằng Da pH5.5',
+          slug: 'toner-can-bang-da-ph55',
+          shortDesc: 'Cân bằng độ pH, se khít lỗ chân lông, làm mịn da',
+          description: 'Toner cân bằng da với độ pH lý tưởng',
+          sku: 'TONER-PH55-001',
+          price: 220000,
+          originalPrice: null,
+          unit: 'Chai',
+          stock: 180,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop',
+          isFeatured: false,
+          isNewArrival: false,
+          isBestSeller: true,
+          isOnSale: false,
+          category: {
+            id: 'cat-1',
+            name: 'Chăm Sóc Da',
+            slug: 'cham-soc-da',
+          },
+        },
+        {
+          id: '10',
+          name: 'Kim Phun Xăm Nano 1 Đầu',
+          slug: 'kim-phun-xam-nano-1-dau',
+          shortDesc: 'Kim phun nano siêu mỏng, không đau, lên màu chuẩn',
+          description: 'Kim phun xăm nano 1 đầu chuyên dụng',
+          sku: 'NEEDLE-NANO-001',
+          price: 35000,
+          originalPrice: 50000,
+          unit: 'Cái',
+          stock: 500,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1519494140681-8b17d830a3ec?w=400&h=400&fit=crop',
+          isFeatured: false,
+          isNewArrival: false,
+          isBestSeller: true,
+          isOnSale: true,
+          category: {
+            id: 'cat-3',
+            name: 'Phun Xăm',
+            slug: 'phun-xam',
+          },
+        },
+        {
+          id: '11',
+          name: 'Chổi Đánh Mi Mascara Dùng 1 Lần',
+          slug: 'choi-danh-mi-mascara-dung-1-lan',
+          shortDesc: 'Chổi đánh mi dùng 1 lần, vệ sinh, an toàn cho khách',
+          description: 'Chổi đánh mi mascara dùng 1 lần (50 cái/hộp)',
+          sku: 'BRUSH-MASC-DISP-001',
+          price: 45000,
+          originalPrice: null,
+          unit: 'Hộp',
+          stock: 400,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1512207736890-6ffed8a84e8d?w=400&h=400&fit=crop',
+          isFeatured: false,
+          isNewArrival: false,
+          isBestSeller: false,
+          isOnSale: false,
+          category: {
+            id: 'cat-2',
+            name: 'Nối Mi',
+            slug: 'noi-mi',
+          },
+        },
+        {
+          id: '12',
+          name: 'Kem Chống Nắng SPF50+ PA+++',
+          slug: 'kem-chong-nang-spf50-pa',
+          shortDesc: 'Bảo vệ da khỏi tia UV, không gây nhờn rít',
+          description: 'Kem chống nắng phổ rộng SPF50+ PA+++',
+          sku: 'SUN-SPF50-001',
+          price: 350000,
+          originalPrice: 480000,
+          unit: 'Tuýp',
+          stock: 156,
+          status: 'ACTIVE',
+          thumbnail: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&h=400&fit=crop',
+          isFeatured: true,
+          isNewArrival: false,
+          isBestSeller: true,
+          isOnSale: true,
+          category: {
+            id: 'cat-1',
+            name: 'Chăm Sóc Da',
+            slug: 'cham-soc-da',
+          },
+        },
+      ],
+    },
+  },
+  variables: {},
+};
+
+/**
  * Get all available sample templates
  */
 export const getAllSampleTemplates = (): SampleTemplate[] => {
@@ -508,6 +1054,7 @@ export const getAllSampleTemplates = (): SampleTemplate[] => {
     testimonialsTemplate,
     contactFormTemplate,
     faqTemplate,
+    productCarouselTemplate,
   ];
 };
 

@@ -1,14 +1,40 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, Settings, Pencil, Trash2, MoveUp, MoveDown, X } from 'lucide-react';
+import { Plus, Settings, Pencil, Trash2, MoveUp, MoveDown, X, Database, RefreshCw } from 'lucide-react';
 import type { PageBlock } from '@/types/page-builder';
 import { CarouselSettingsDialog } from './CarouselSettingsDialog';
 import { SlideEditorDialog } from './SlideEditorDialog';
+import { GET_FEATURED_PRODUCTS, GET_PRODUCTS } from '@/graphql/product.queries';
+import type { Product } from '@/graphql/product.queries';
+
+// Data source types
+type DataSourceType = 'manual' | 'api' | 'database';
+
+interface DataSourceConfig {
+  type: DataSourceType;
+  // For API source
+  endpoint?: string;
+  query?: string;
+  variables?: any;
+  // For Database source
+  queryType?: 'featured' | 'products' | 'custom';
+  limit?: number;
+  filters?: any;
+  // Field mappings
+  titleField?: string;
+  subtitleField?: string;
+  descriptionField?: string;
+  imageField?: string;
+  priceField?: string;
+  linkField?: string;
+  badgeField?: string;
+}
 
 interface CarouselSlide {
   id: string;
@@ -45,12 +71,14 @@ export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete
   const [showSettings, setShowSettings] = useState(false);
   const [showSlideEditor, setShowSlideEditor] = useState(false);
   const [editingSlideIndex, setEditingSlideIndex] = useState<number | null>(null);
+  const [dynamicSlides, setDynamicSlides] = useState<CarouselSlide[]>([]);
   
   // Use isEditable if provided, fallback to isEditing for backwards compatibility
   const editMode = isEditable ?? isEditing ?? false;
 
   const content = block.content || {};
   const slides: CarouselSlide[] = content.slides || [];
+  const dataSource: DataSourceConfig = content.dataSource || { type: 'manual' };
   const autoPlay = content.autoPlay !== false; // Default true
   const autoPlayInterval = content.autoPlayInterval || 5000; // Default 5s
   const showIndicators = content.showIndicators !== false; // Default true
@@ -64,8 +92,52 @@ export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete
   const animationType = content.animationType || 'fade'; // fade, slide, zoom, none
   const animationDuration = content.animationDuration || 600; // ms
 
-  // Use all slides - no filtering, each slide determines its own media type
-  const displaySlides = slides;
+  // Fetch data from database if using database source
+  const { data: productsData, loading: productsLoading, refetch: refetchProducts } = useQuery(
+    dataSource.queryType === 'featured' ? GET_FEATURED_PRODUCTS : GET_PRODUCTS,
+    {
+      variables: dataSource.queryType === 'featured' 
+        ? { limit: dataSource.limit || 10 }
+        : { input: { limit: dataSource.limit || 10, filters: dataSource.filters || {} } },
+      skip: dataSource.type !== 'database',
+    }
+  );
+
+  // Transform database/API data to slides
+  useEffect(() => {
+    if (dataSource.type === 'database' && productsData) {
+      const products: Product[] = productsData.products?.items || [];
+      const transformedSlides: CarouselSlide[] = products.map((product, index) => {
+        const productAny = product as any;
+        return {
+          id: product.id || `slide-${index}`,
+          title: productAny[dataSource.titleField || 'name'] || product.name,
+          subtitle: dataSource.subtitleField ? productAny[dataSource.subtitleField] : undefined,
+          description: productAny[dataSource.descriptionField || 'description'] || product.description,
+          image: productAny[dataSource.imageField || 'thumbnail'] || product.thumbnail,
+          cta: {
+            text: 'Xem chi tiết',
+            link: `/san-pham/${product.slug}`,
+          },
+          badge: dataSource.badgeField ? productAny[dataSource.badgeField] : 
+            (product.isFeatured ? 'Nổi bật' : product.isOnSale ? 'Giảm giá' : undefined),
+          bgColor: 'bg-gradient-to-r from-blue-500 to-purple-600',
+          textColor: 'text-white',
+          imagePosition: 'right',
+          animation: 'slide',
+        };
+      });
+      setDynamicSlides(transformedSlides);
+    } else if (dataSource.type === 'api') {
+      // TODO: Implement API data fetching
+      setDynamicSlides([]);
+    } else {
+      setDynamicSlides([]);
+    }
+  }, [dataSource, productsData]);
+
+  // Use manual slides or dynamic slides based on data source
+  const displaySlides = dataSource.type === 'manual' ? slides : dynamicSlides;
 
   // Auto-slide functionality
   useEffect(() => {
@@ -273,7 +345,7 @@ export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete
   };
 
   // If no slides, show placeholder in edit mode
-  if (slides.length === 0 && editMode) {
+  if (displaySlides.length === 0 && editMode) {
     return (
       <>
         <style>{`
@@ -295,17 +367,40 @@ export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete
           style={block.style}
         >
         <div className="text-center space-y-4">
-          <p className="text-gray-500 mb-4">Carousel Block - No slides added</p>
-          <div className="flex gap-2 justify-center">
-            <Button onClick={handleAddSlide} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Add First Slide
-            </Button>
-            <Button onClick={handleEdit} size="sm" variant="outline">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </Button>
-          </div>
+          {productsLoading ? (
+            <>
+              <RefreshCw className="w-8 h-8 mx-auto text-gray-400 animate-spin" />
+              <p className="text-gray-500">Loading products from database...</p>
+            </>
+          ) : (
+            <>
+              <Database className="w-12 h-12 mx-auto text-gray-400" />
+              <p className="text-gray-500 mb-2">
+                Carousel Block - {dataSource.type === 'database' ? 'Database Mode' : dataSource.type === 'api' ? 'API Mode' : 'No slides added'}
+              </p>
+              {dataSource.type === 'database' && (
+                <p className="text-sm text-gray-400">
+                  Query: {dataSource.queryType || 'products'} | Limit: {dataSource.limit || 10}
+                </p>
+              )}
+              <div className="flex gap-2 justify-center flex-wrap">
+                {dataSource.type === 'database' && (
+                  <Button onClick={() => refetchProducts()} size="sm" variant="outline">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh Data
+                  </Button>
+                )}
+                <Button onClick={handleAddSlide} size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Manual Slide
+                </Button>
+                <Button onClick={handleEdit} size="sm" variant="outline">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </Button>
+              </div>
+            </>
+          )}
         </div>
         </div>
       </>
@@ -313,7 +408,7 @@ export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete
   };
 
   // If no slides in preview mode, don't render
-  if (slides.length === 0) {
+  if (displaySlides.length === 0) {
     return null;
   }
 
@@ -336,15 +431,29 @@ export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete
       <div className={`relative ${getHeightClass()}`} style={block.style}>
         {editMode && (
           <div className="absolute top-2 right-2 z-20 flex gap-2">
-            <Button
-              onClick={handleAddSlide}
-              size="sm"
-              variant="outline"
-              className="bg-white shadow-lg"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Slide
-            </Button>
+            {dataSource.type === 'database' && (
+              <Button
+                onClick={() => refetchProducts()}
+                size="sm"
+                variant="outline"
+                className="bg-white shadow-lg"
+                disabled={productsLoading}
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${productsLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            )}
+            {dataSource.type === 'manual' && (
+              <Button
+                onClick={handleAddSlide}
+                size="sm"
+                variant="outline"
+                className="bg-white shadow-lg"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Slide
+              </Button>
+            )}
             <Button
               onClick={handleEdit}
               size="sm"
@@ -560,8 +669,8 @@ export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete
                         </div>
                       </div>
                       
-                      {/* Edit Controls in Editing Mode */}
-                      {editMode && (
+                      {/* Edit Controls in Editing Mode - Only for manual slides */}
+                      {editMode && dataSource.type === 'manual' && (
                         <div className="absolute top-2 left-2 z-20 flex gap-2">
                           <Button
                             onClick={() => handleEditSlide(index)}
@@ -642,6 +751,7 @@ export function CarouselBlock({ block, isEditing, isEditable, onUpdate, onDelete
           slidesPerView,
           animationType,
           animationDuration,
+          dataSource,
         }}
         onSave={handleSaveSettings}
       />
