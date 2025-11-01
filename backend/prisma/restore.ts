@@ -6,6 +6,9 @@ import * as readline from 'readline';
 
 const prisma = new PrismaClient();
 
+// Cache for schema-based model mappings
+let tableToModelMappingCache: { [tableName: string]: string } | null = null;
+
 const BACKUP_ROOT_DIR = './kata_json';
 const BATCH_SIZE = 1000; // Process records in batches of 1000
 const STREAM_BUFFER_SIZE = 50; // Keep 50 batches in memory
@@ -105,6 +108,30 @@ function transformRecord(record: any, tableName?: string): any {
   for (const field of dateFields) {
     if (transformed[field] && typeof transformed[field] === 'string') {
       transformed[field] = new Date(transformed[field]);
+    }
+  }
+
+  // Handle website_settings specific transformations
+  if (tableName === 'website_settings') {
+    // Ensure options is JSON object/array
+    if (transformed.options && typeof transformed.options === 'string') {
+      try {
+        transformed.options = JSON.parse(transformed.options);
+      } catch {
+        transformed.options = null;
+      }
+    }
+    // Ensure validation is JSON object
+    if (transformed.validation && typeof transformed.validation === 'string') {
+      try {
+        transformed.validation = JSON.parse(transformed.validation);
+      } catch {
+        transformed.validation = null;
+      }
+    }
+    // Ensure key field is not null (it's unique and required)
+    if (!transformed.key) {
+      transformed.key = `setting_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     }
   }
 
@@ -345,6 +372,8 @@ async function restoreTableOptimized(
       'offboarding_processes',
       // Pages with FK relationships
       'page_blocks',
+      // Website settings with FK to users
+      'website_settings',
     ];
     
     const effectiveBatchSize = tablesWithFKConstraints.includes(table)
@@ -454,56 +483,36 @@ async function restoreWithRawSQL(table: string, records: any[]): Promise<void> {
 
 /**
  * Clean up existing data with optimized batch deletes
+ * Uses dynamic model mapping from schema
  */
 async function cleanupBeforeRestore(): Promise<void> {
   console.log('🧹 Cleaning up existing data...');
 
-  const cleanupOrder = [
-    // LMS (children first)
-    'answers', 'questions', 'quizzes', 'lesson_progress', 'enrollments', 'lessons', 'course_modules', 'courses', 'course_categories',
-    // E-commerce (children first)
-    'ext_detailhoadon', 'ext_sanphamhoadon', 'ext_listhoadon',
-    // Chat
-    'chat_messages', 'chat_conversations', 'training_data', 'chatbot_models',
-    // Content
-    'task_shares', 'task_media', 'task_comments', 'tasks',
-    'post_tags', 'likes', 'comments', 'posts', 'notifications', 'tags',
-    // Security & RBAC
-    'RolePermission', 'UserRoleAssignment', 'UserPermission', 'ResourceAccess',
-    'Permission', 'Role', 'SecurityEvent', 'UserDevice', 'UserMfaSettings',
-    // Pages
-    'PageBlock', 'Page',
-    // Reviews
-    'reviews',
-    // Menus
-    'menus',
-    // Affiliate
-    'aff_payment_requests', 'aff_conversions', 'aff_clicks', 'aff_campaign_affiliates', 'aff_links', 'aff_campaigns', 'aff_users',
-    // Employee
-    'offboarding_processes', 'onboarding_checklists', 'employee_documents', 'employment_history', 'employee_profiles',
-    // E-commerce
-    'product_variants', 'product_images', 'products', 'categories',
-    // Files
-    'file_shares', 'files', 'file_folders',
-    // Core
-    'audit_logs', 'user_sessions', 'verification_tokens', 'auth_methods', 'users',
-  ];
+  // Initialize cache first
+  getTableToModelMapping();
+
+  // Get all tables from schema in reverse topological order (children first)
+  const restorationOrder = buildRestorationOrder();
+  const cleanupOrder = [...restorationOrder].reverse(); // Reverse for cleanup
 
   let totalDeleted = 0;
 
   for (const table of cleanupOrder) {
     try {
-      const model = (prisma as any)[toCamelCase(table)];
+      const modelName = toCamelCase(table);
+      const model = (prisma as any)[modelName];
+
       if (model && typeof model.deleteMany === 'function') {
         const result = await model.deleteMany({});
         const deleted = result.count || 0;
         totalDeleted += deleted;
         if (deleted > 0) {
-          console.log(`   🗑️  ${table}: ${deleted} records deleted`);
+          console.log(`   🗑️  ${table.padEnd(35)}: ${deleted} records deleted`);
         }
       }
     } catch (error) {
-      // Silently skip tables that don't exist
+      // Silently skip tables that don't exist or have errors
+      // console.log(`   ⚠️  ${table}: ${error}`);
     }
   }
 
@@ -511,95 +520,201 @@ async function cleanupBeforeRestore(): Promise<void> {
 }
 
 /**
- * Convert table name to camelCase for Prisma
+ * Convert camelCase to snake_case
+ * Examples: User → user, UserSession → user_session, TaskComment → task_comment
  */
-function toCamelCase(tableName: string): string {
-  const mapping: { [key: string]: string } = {
-    // Core users & auth
-    'users': 'user',
-    'auth_methods': 'authMethod',
-    'verification_tokens': 'verificationToken',
-    'user_sessions': 'userSession',
-    'audit_logs': 'auditLog',
-    // Content
-    'posts': 'post',
-    'comments': 'comment',
-    'tags': 'tag',
-    'likes': 'like',
-    'post_tags': 'postTag',
-    'notifications': 'notification',
-    // Tasks
-    'tasks': 'task',
-    'task_comments': 'taskComment',
-    'task_media': 'taskMedia',
-    'task_shares': 'taskShare',
-    // AI/Chat
-    'chatbot_models': 'chatbotModel',
-    'training_data': 'trainingData',
-    'chat_conversations': 'chatConversation',
-    'chat_messages': 'chatMessage',
-    // Affiliate
-    'aff_users': 'affUser',
-    'aff_campaigns': 'affCampaign',
-    'aff_campaign_affiliates': 'affCampaignAffiliate',
-    'aff_links': 'affLink',
-    'aff_clicks': 'affClick',
-    'aff_conversions': 'affConversion',
-    'aff_payment_requests': 'affPaymentRequest',
-    // Employee
-    'employee_profiles': 'employeeProfile',
-    'employment_history': 'employmentHistory',
-    'employee_documents': 'employeeDocument',
-    'onboarding_checklists': 'onboardingChecklist',
-    'offboarding_processes': 'offboardingProcess',
-    // E-Commerce
-    'categories': 'category',
-    'products': 'product',
-    'product_images': 'productImage',
-    'product_variants': 'productVariant',
-    // Pages & Menu
-    'pages': 'page',
-    'page_blocks': 'pageBlock',
-    'menus': 'menu',
-    // LMS - Courses
-    'course_categories': 'courseCategory',
-    'courses': 'course',
-    'course_modules': 'courseModule',
-    'lessons': 'lesson',
-    'enrollments': 'enrollment',
-    'lesson_progress': 'lessonProgress',
-    // LMS - Quizzes & Learning
-    'quizzes': 'quiz',
-    'questions': 'question',
-    'answers': 'answer',
-    'reviews': 'review',
-    // RBAC & Security
-    'rbac_roles': 'role',
-    'rbac_permissions': 'permission',
-    'rbac_role_permissions': 'rolePermission',
-    // Call Center
-    'call_center_config': 'callCenterConfig',
-  };
-
-  return mapping[tableName] || tableName;
+function camelToSnakeCase(str: string): string {
+  return str
+    .replace(/([A-Z])/g, '_$1')  // Add underscore before uppercase letters
+    .toLowerCase()              // Convert to lowercase
+    .replace(/^_/, '');         // Remove leading underscore
 }
 
 /**
- * Get list of tables to restore in proper dependency order
+ * Build table-to-model mapping from schema.prisma
+ * Returns { 'users': 'user', 'auth_methods': 'authMethod', ... }
  */
-async function getTablesToRestore(backupFolder: string): Promise<string[]> {
+function buildTableToModelMapping(): { [tableName: string]: string } {
   try {
-    const backupPath = path.join(BACKUP_ROOT_DIR, backupFolder);
-    const allFiles = fs.readdirSync(backupPath)
-      .filter(f => f.endsWith('.json'))
-      .map(f => f.replace('.json', ''));
+    const schemaPath = path.join(__dirname, 'schema.prisma');
+    const schemaContent = fs.readFileSync(schemaPath, 'utf8');
+    
+    const mapping: { [tableName: string]: string } = {};
+    
+    // Extract model blocks with their bodies
+    const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*?)\}/gm;
+    let match;
+    
+    while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
+      const modelName = match[1];
+      const modelBody = match[2];
+      
+      // Look for @@map directive in the model body
+      const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
+      const tableName = mapMatch ? mapMatch[1] : camelToSnakeCase(modelName);
+      
+      // Store mapping: table_name → modelName (for Prisma model access)
+      mapping[tableName] = modelName;
+    }
+    
+    return mapping;
+  } catch (error) {
+    console.error('❌ Error building table-to-model mapping from schema:', error);
+    return {};
+  }
+}
 
-    // Define restoration order - parent tables first
-    const restorationOrder = [
+/**
+ * Get or create the cached table-to-model mapping
+ */
+function getTableToModelMapping(): { [tableName: string]: string } {
+  if (!tableToModelMappingCache) {
+    tableToModelMappingCache = buildTableToModelMapping();
+    
+    if (Object.keys(tableToModelMappingCache).length === 0) {
+      console.warn('⚠️  Could not parse schema.prisma, restore may fail for some tables');
+    } else {
+      console.log(`✅ Loaded model mapping for ${Object.keys(tableToModelMappingCache).length} tables from schema.prisma`);
+    }
+  }
+  
+  return tableToModelMappingCache;
+}
+
+/**
+ * Convert table name to Prisma model name (camelCase)
+ * Examples: 
+ *   users → user
+ *   auth_methods → authMethod
+ *   ext_listhoadon → ext_listhoadon (returns as-is from mapping if exists)
+ */
+function toCamelCase(tableName: string): string {
+  // Get mapping from schema
+  const mapping = getTableToModelMapping();
+  
+  if (mapping[tableName]) {
+    // Found in schema - return the model name from @prisma/client
+    // But Prisma's ClientOptions use lowercase first letter for model access
+    const modelName = mapping[tableName];
+    return modelName.charAt(0).toLowerCase() + modelName.slice(1);
+  }
+  
+  // Fallback: use hardcoded mappings for edge cases
+  const legacyMappings: { [key: string]: string } = {
+    'Hoadon': 'hoadon',
+    'HoadonChitiet': 'hoadonChitiet',
+    'Page': 'page',
+    'PageBlock': 'pageBlock',
+    'UserMfaSettings': 'userMfaSettings',
+    'UserDevice': 'userDevice',
+    'SecurityEvent': 'securityEvent',
+    'Role': 'role',
+    'Permission': 'permission',
+    'RolePermission': 'rolePermission',
+    'UserRoleAssignment': 'userRoleAssignment',
+    'UserPermission': 'userPermission',
+    'ResourceAccess': 'resourceAccess',
+  };
+  
+  if (legacyMappings[tableName]) {
+    return legacyMappings[tableName];
+  }
+  
+  // Final fallback: convert table name using snake_case reverse
+  // users → user, auth_methods → authMethod
+  return convertSnakeCaseToCamelCase(tableName);
+}
+
+/**
+ * Convert snake_case to camelCase
+ * Examples: user → user, auth_methods → authMethod, task_comments → taskComments
+ */
+function convertSnakeCaseToCamelCase(str: string): string {
+  return str.toLowerCase().replace(/_([a-z])/g, (match, letter) => letter.toUpperCase());
+}
+
+/**
+ * Build dependency-aware restoration order from schema
+ */
+function buildRestorationOrder(): string[] {
+  try {
+    const schemaPath = path.join(__dirname, 'schema.prisma');
+    const schemaContent = fs.readFileSync(schemaPath, 'utf8');
+    
+    // Extract all model names
+    const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*?)\}/gm;
+    const models: { modelName: string; tableName: string; dependencies: string[] }[] = [];
+    let match;
+    
+    while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
+      const modelName = match[1];
+      const modelBody = match[2];
+      
+      // Get table name from @@map or convert from model name
+      const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
+      const tableName = mapMatch ? mapMatch[1] : camelToSnakeCase(modelName);
+      
+      // Find all @relation references to determine dependencies
+      const relationMatches = modelBody.match(/@relation\([^)]*\)/g) || [];
+      const dependencies: string[] = [];
+      
+      for (const relation of relationMatches) {
+        // Extract model references from relations
+        const refMatch = relation.match(/(?:to:\s*)?(\w+)(?:\s*,|\s*\))/);
+        if (refMatch && refMatch[1] !== modelName) {
+          dependencies.push(refMatch[1]);
+        }
+      }
+      
+      models.push({ modelName, tableName, dependencies });
+    }
+    
+    // Topological sort - models with no dependencies first, then dependents
+    const sorted: string[] = [];
+    const visited = new Set<string>();
+    
+    function visit(modelName: string): void {
+      if (visited.has(modelName)) return;
+      visited.add(modelName);
+      
+      const model = models.find(m => m.modelName === modelName);
+      if (!model) return;
+      
+      // Visit dependencies first
+      for (const dep of model.dependencies) {
+        const depModel = models.find(m => m.modelName === dep);
+        if (depModel && !visited.has(dep)) {
+          visit(dep);
+        }
+      }
+      
+      sorted.push(model.tableName);
+    }
+    
+    // Start with models that have no dependencies
+    for (const model of models) {
+      if (model.dependencies.length === 0) {
+        visit(model.modelName);
+      }
+    }
+    
+    // Then visit remaining models
+    for (const model of models) {
+      visit(model.modelName);
+    }
+    
+    console.log(`✅ Built restoration order for ${sorted.length} models from schema`);
+    return sorted;
+  } catch (error) {
+    console.error('❌ Error building restoration order:', error);
+    // Fallback to hardcoded order if schema parsing fails
+    return [
       // Core users & auth
       'users', 'auth_methods', 'user_sessions', 'verification_tokens',
       // Audit logs
       'audit_logs',
+      // Website settings (depends on users for createdBy/updatedBy FK)
+      'website_settings',
       // Core content
       'posts', 'tags', 'post_tags', 'comments', 'likes', 'notifications',
       // Tasks
@@ -612,29 +727,49 @@ async function getTablesToRestore(backupFolder: string): Promise<string[]> {
       'employee_profiles', 'employment_history', 'employee_documents', 'onboarding_checklists', 'offboarding_processes',
       // E-commerce
       'categories', 'products', 'product_images', 'product_variants',
-      // Invoice system (parent first)
+      // Invoice system
       'ext_listhoadon', 'ext_detailhoadon', 'ext_sanphamhoadon',
       // Pages & Menu
       'pages', 'page_blocks', 'menus',
-      // LMS - Courses (parent before children)
+      // LMS - Courses
       'course_categories', 'courses', 'course_modules', 'lessons', 'enrollments', 'lesson_progress',
-      // LMS - Quizzes & Learning (lessons first, then quizzes)
+      // LMS - Quizzes & Learning
       'quizzes', 'questions', 'answers',
       // Reviews
       'reviews',
-      // RBAC & Security
-      'rbac_roles', 'rbac_permissions', 'rbac_role_permissions',
     ];
+  }
+}
+
+/**
+ * Get list of tables to restore in proper dependency order
+ */
+async function getTablesToRestore(backupFolder: string): Promise<string[]> {
+  try {
+    const backupPath = path.join(BACKUP_ROOT_DIR, backupFolder);
+    
+    if (!fs.existsSync(backupPath)) {
+      console.error(`❌ Backup folder not found: ${backupPath}`);
+      return [];
+    }
+    
+    // Get all backup files
+    const allFiles = fs.readdirSync(backupPath)
+      .filter(f => f.endsWith('.json'))
+      .map(f => f.replace('.json', ''));
+
+    // Get schema-based restoration order
+    const restorationOrder = buildRestorationOrder();
 
     // Sort files according to restoration order
     const sortedFiles = restorationOrder.filter(table => allFiles.includes(table));
     
-    // Add any remaining files not in the order list (excluding non-existent tables)
+    // Add any remaining files not in the order list
     const remaining = allFiles.filter(f => !sortedFiles.includes(f));
     const finalOrder = [...sortedFiles, ...remaining.sort()];
 
     console.log(`📋 Found ${finalOrder.length} backup files`);
-    console.log(`📊 Restoration order optimized for dependencies\n`);
+    console.log(`📊 Restoration order optimized based on schema dependencies\n`);
     return finalOrder;
   } catch (error) {
     console.error(`❌ Error reading backup folder: ${error}`);
