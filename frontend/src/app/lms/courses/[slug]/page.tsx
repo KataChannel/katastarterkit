@@ -184,104 +184,8 @@ export default function CourseDetailPage() {
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* Sidebar Card - Hidden on mobile, shown on desktop */}
-            <div className="hidden lg:block">
-              <Card className="sticky top-4 shadow-lg">
-                <CardContent className="p-6 space-y-6">
-                  {/* Thumbnail */}
-                  {course.thumbnail && (
-                    <div className="relative h-48 rounded-lg overflow-hidden">
-                      <Image
-                        src={course.thumbnail}
-                        alt={course.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-
-                  {/* Price */}
-                  <div className="text-3xl font-bold">
-                    {course.price > 0 ? `${course.price.toLocaleString('vi-VN')}đ` : 'Miễn phí'}
-                  </div>
-
-                  {/* Enroll Button */}
-                  <EnrollButton 
-                    courseId={course.id}
-                    courseSlug={course.slug}
-                    price={course.price}
-                    isEnrolled={!!enrollmentData?.enrollment}
-                  />
-
-                  <Separator />
-
-                  {/* Course Info */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <Award className="w-5 h-5 text-muted-foreground" />
-                      <div className="flex-1">
-                        <p className="text-xs text-muted-foreground">Cấp độ</p>
-                        <p className="font-medium">{course.level}</p>
-                      </div>
-                    </div>
-
-                    {course.duration && (
-                      <div className="flex items-center gap-3">
-                        <Clock className="w-5 h-5 text-muted-foreground" />
-                        <div className="flex-1">
-                          <p className="text-xs text-muted-foreground">Thời lượng</p>
-                          <p className="font-medium">
-                            {Math.floor(course.duration / 60)}h {course.duration % 60}m
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-3">
-                      <BookOpen className="w-5 h-5 text-muted-foreground" />
-                      <div className="flex-1">
-                        <p className="text-xs text-muted-foreground">Bài học</p>
-                        <p className="font-medium">{totalLessons} bài học</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <Globe className="w-5 h-5 text-muted-foreground" />
-                      <div className="flex-1">
-                        <p className="text-xs text-muted-foreground">Ngôn ngữ</p>
-                        <p className="font-medium">Tiếng Việt</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Sticky Footer - Course Info */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs text-muted-foreground">Giá khóa học</p>
-            <p className="text-xl font-bold">
-              {course.price > 0 ? `${course.price.toLocaleString('vi-VN')}đ` : 'Miễn phí'}
-            </p>
-          </div>
-          <EnrollButton 
-            courseId={course.id}
-            courseSlug={course.slug}
-            price={course.price}
-            isEnrolled={!!enrollmentData?.enrollment}
-          />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-6 md:py-8 lg:py-12 pb-24 lg:pb-12">
+{/* Main Content */}
+      <div className="bg-white rounded-lg container mx-auto px-4 py-6 md:py-8 lg:py-12 pb-24 lg:pb-12">
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="w-full justify-start overflow-x-auto flex-nowrap h-auto p-1">
             <TabsTrigger value="overview" className="text-xs md:text-sm">
@@ -555,7 +459,104 @@ export default function CourseDetailPage() {
             </Card>
           </TabsContent>
         </Tabs>
+      </div> 
+            </div>
+
+            {/* Sidebar Card - Hidden on mobile, shown on desktop */}
+            <div className="hidden lg:block">
+              <Card className="sticky top-4 shadow-lg">
+                <CardContent className="p-6 space-y-6">
+                  {/* Thumbnail */}
+                  {course.thumbnail && (
+                    <div className="relative h-48 rounded-lg overflow-hidden">
+                      <Image
+                        src={course.thumbnail}
+                        alt={course.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+
+                  {/* Price */}
+                  <div className="text-3xl font-bold">
+                    {course.price > 0 ? `${course.price.toLocaleString('vi-VN')}đ` : 'Miễn phí'}
+                  </div>
+
+                  {/* Enroll Button */}
+                  <EnrollButton 
+                    courseId={course.id}
+                    courseSlug={course.slug}
+                    price={course.price}
+                    isEnrolled={!!enrollmentData?.enrollment}
+                  />
+
+                  <Separator />
+
+                  {/* Course Info */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Award className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">Cấp độ</p>
+                        <p className="font-medium">{course.level}</p>
+                      </div>
+                    </div>
+
+                    {course.duration && (
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-muted-foreground" />
+                        <div className="flex-1">
+                          <p className="text-xs text-muted-foreground">Thời lượng</p>
+                          <p className="font-medium">
+                            {Math.floor(course.duration / 60)}h {course.duration % 60}m
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3">
+                      <BookOpen className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">Bài học</p>
+                        <p className="font-medium">{totalLessons} bài học</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Globe className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex-1">
+                        <p className="text-xs text-muted-foreground">Ngôn ngữ</p>
+                        <p className="font-medium">Tiếng Việt</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Mobile Sticky Footer - Course Info */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs text-muted-foreground">Giá khóa học</p>
+            <p className="text-xl font-bold">
+              {course.price > 0 ? `${course.price.toLocaleString('vi-VN')}đ` : 'Miễn phí'}
+            </p>
+          </div>
+          <EnrollButton 
+            courseId={course.id}
+            courseSlug={course.slug}
+            price={course.price}
+            isEnrolled={!!enrollmentData?.enrollment}
+          />
+        </div>
+      </div>
+
+
     </div>
   );
 }
