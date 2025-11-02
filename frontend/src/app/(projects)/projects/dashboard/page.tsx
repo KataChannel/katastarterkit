@@ -265,21 +265,9 @@ export default function DashboardPage() {
     };
   }, [tasksData]);
 
-  const handleInviteMember = async (email: string, role: string, projectId?: string) => {
+  const handleInviteMember = async (email: string, role: string, projectId?: string, userId?: string) => {
     try {
-      // 1. Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!email || !emailRegex.test(email.trim())) {
-        toast({
-          title: 'Email không hợp lệ',
-          description: 'Vui lòng nhập địa chỉ email hợp lệ',
-          type: 'error',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // 2. Validate project selection
+      // Validate project selection
       const targetProjectId = projectId || selectedProjectId;
       if (!targetProjectId) {
         toast({
@@ -291,16 +279,14 @@ export default function DashboardPage() {
         return;
       }
 
-      console.log('[Dashboard] Adding member to project:', {
-        projectId: targetProjectId,
-        email: email.trim(),
-        role
-      });
+      let userIdValue = userId;
+      let userName = '';
 
-      // 3. Find user by email using Apollo Client
-      let userData;
-      try {
-        const result = await apolloClient.query({
+      // If userId not provided, query user by email
+      if (!userIdValue) {
+        console.log('[Dashboard] User ID not provided, querying by email:', email);
+
+        const { data: userData } = await apolloClient.query({
           query: gql`
             query FindUserByEmail($modelName: String!, $input: UnifiedFindManyInput) {
               findMany(modelName: $modelName, input: $input)
@@ -317,108 +303,55 @@ export default function DashboardPage() {
                 firstName: true,
                 lastName: true,
                 email: true,
-                avatar: true
               },
               take: 1
             }
           },
           fetchPolicy: 'network-only'
         });
-        userData = result.data;
-      } catch (queryError: any) {
-        console.error('[Dashboard] Error querying user:', queryError);
-        toast({
-          title: 'Lỗi truy vấn',
-          description: 'Không thể tìm kiếm người dùng. Vui lòng thử lại.',
-          type: 'error',
-          variant: 'destructive',
-        });
-        return;
-      }
 
-      console.log('[Dashboard] User query response:', userData);
-
-      let users = userData?.findMany;
-      
-      // Parse JSONObject if it's a string
-      if (typeof users === 'string') {
-        try {
+        let users = userData?.findMany;
+        
+        // Parse JSONObject if it's a string
+        if (typeof users === 'string') {
           users = JSON.parse(users);
-          console.log('[Dashboard] Parsed users from JSON:', users);
-        } catch (parseError) {
-          console.error('[Dashboard] Error parsing JSON:', parseError);
+        }
+        
+        // Validate user exists
+        if (!users || !Array.isArray(users) || users.length === 0) {
           toast({
-            title: 'Lỗi dữ liệu',
-            description: 'Dữ liệu người dùng không hợp lệ',
-            type: 'error',
+            title: 'Người dùng không tồn tại',
+            description: `Email "${email}" chưa được đăng ký trong hệ thống.`,
+            type: 'warning',
             variant: 'destructive',
           });
           return;
         }
-      }
-      
-      // Validate users array
-      if (!users || !Array.isArray(users) || users.length === 0) {
-        toast({
-          title: 'Người dùng không tồn tại',
-          description: `Email "${email}" chưa được đăng ký trong hệ thống. Vui lòng kiểm tra lại hoặc mời người dùng đăng ký trước.`,
-          type: 'warning',
-          variant: 'destructive',
-        });
-        return;
+
+        const user = users[0];
+        userIdValue = user.id?.trim();
+        userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Không có tên';
       }
 
-      const user = users[0];
-      console.log('[Dashboard] Found user:', {
-        id: user.id,
-        email: user.email,
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim()
-      });
-      
-      // Validate user ID exists and is valid
-      if (!user?.id || typeof user.id !== 'string' || user.id.trim() === '') {
-        console.error('[Dashboard] Invalid user ID:', user);
+      // Validate userId
+      if (!userIdValue || typeof userIdValue !== 'string' || userIdValue.trim() === '') {
+        console.error('[Dashboard] Invalid userId:', userIdValue);
         toast({
-          title: 'Lỗi dữ liệu người dùng',
-          description: 'Không thể lấy thông tin ID của người dùng. Dữ liệu có thể bị lỗi.',
+          title: 'Lỗi dữ liệu',
+          description: 'ID người dùng không hợp lệ',
           type: 'error',
           variant: 'destructive',
         });
         return;
       }
-
-      // 4. Show confirmation with user info
-      const userIdValue = user.id.trim();
-      const userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Không có tên';
-      const userFullInfo = userName !== 'Không có tên' 
-        ? `${userName} (${user.email})`
-        : user.email;
-
-      // Get project name for confirmation
-      const project = projectsData?.find((p: any) => p.id === targetProjectId);
-      const projectName = project?.name || 'dự án này';
-
-      const confirmed = window.confirm(
-        `🔍 Xác nhận thêm thành viên\n\n` +
-        `Người dùng: ${userFullInfo}\n` +
-        `Vai trò: ${role}\n` +
-        `Dự án: ${projectName}\n\n` +
-        `Bạn có chắc chắn muốn thêm người dùng này vào dự án không?`
-      );
-
-      if (!confirmed) {
-        console.log('[Dashboard] User cancelled invitation');
-        return;
-      }
       
-      console.log('[Dashboard] Confirmed - Adding member:', {
+      console.log('[Dashboard] Adding member:', {
         projectId: targetProjectId,
         userId: userIdValue,
-        userName: userName,
         role: role.toLowerCase()
       });
       
-      // 5. Add member using custom mutation
+      // Add member using custom mutation
       await addMember({
         variables: {
           projectId: targetProjectId,
@@ -429,25 +362,23 @@ export default function DashboardPage() {
         }
       });
 
-      // 6. Success feedback
+      // Success feedback
+      const project = projectsData?.find((p: any) => p.id === targetProjectId);
+      const projectName = project?.name || 'dự án';
+      
       toast({
         title: '✅ Thành công',
-        description: `Đã thêm ${userFullInfo} vào dự án ${projectName} với vai trò ${role}`,
+        description: userName 
+          ? `Đã thêm ${userName} vào ${projectName}`
+          : `Đã thêm thành viên vào ${projectName}`,
         type: 'success',
       });
 
       setIsInviteDialogOpen(false);
-      
-      // Refetch data
       refetchProjects();
 
     } catch (error: any) {
       console.error('[Dashboard] Error adding member:', error);
-      console.error('[Dashboard] Error details:', {
-        message: error.message,
-        graphQLErrors: error.graphQLErrors,
-        networkError: error.networkError
-      });
       
       // Handle specific errors
       let errorTitle = 'Lỗi thêm thành viên';
@@ -458,15 +389,7 @@ export default function DashboardPage() {
         errorMessage = 'Người dùng này đã là thành viên của dự án';
       } else if (error.message?.includes('permission') || error.message?.includes('not allowed')) {
         errorTitle = 'Không có quyền';
-        errorMessage = 'Bạn không có quyền thêm thành viên vào dự án này. Chỉ Owner hoặc Admin mới có thể thêm thành viên.';
-      } else if (error.message?.includes('userId') && error.message?.includes('missing')) {
-        errorTitle = 'Lỗi dữ liệu người dùng';
-        errorMessage = 'Không thể lấy thông tin người dùng. Email có thể chưa được đăng ký trong hệ thống. Vui lòng kiểm tra lại email hoặc mời người dùng đăng ký trước.';
-      } else if (error.message?.includes('not found') || error.message?.includes('does not exist')) {
-        errorTitle = 'Người dùng không tồn tại';
-        errorMessage = 'Người dùng với email này chưa có tài khoản trong hệ thống. Vui lòng mời họ đăng ký trước.';
-      } else if (error.graphQLErrors && error.graphQLErrors.length > 0) {
-        errorMessage = error.graphQLErrors[0].message;
+        errorMessage = 'Bạn không có quyền thêm thành viên vào dự án này.';
       } else if (error.message) {
         errorMessage = error.message;
       }

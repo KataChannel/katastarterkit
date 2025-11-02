@@ -134,7 +134,7 @@ export class UpdateProjectInput {
 
 @InputType('AddMemberInput')
 export class AddMemberInput {
-  @Field(() => ID)
+  @Field(() => String)
   userId: string;
 
   @Field({ nullable: true, defaultValue: 'member' })
