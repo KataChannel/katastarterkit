@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import ProjectSidebar from '@/components/project-management/ProjectSidebar';
 import TaskFeed from '@/components/project-management/TaskFeed';
 import ChatPanel from '@/components/project-management/ChatPanel';
@@ -8,10 +9,46 @@ import { Button } from '@/components/ui/button';
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function ProjectsPage() {
+function ProjectsPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showChat, setShowChat] = useState(true);
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('accessToken');
+      
+      if (!token) {
+        console.log('[ProjectsPage] No access token found, redirecting to login');
+        router.push('/login');
+        return;
+      }
+
+      console.log('[ProjectsPage] User authenticated');
+      setIsAuthenticated(true);
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [router]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="h-full flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="h-full flex overflow-hidden bg-background">
@@ -107,3 +144,5 @@ export default function ProjectsPage() {
     </div>
   );
 }
+
+export default ProjectsPage;

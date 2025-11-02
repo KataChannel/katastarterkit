@@ -56,8 +56,13 @@ export class ProjectChatGateway implements OnGatewayConnection, OnGatewayDisconn
   async handleConnection(client: AuthenticatedSocket) {
     console.log(`[ProjectChat] Client connected: ${client.id}`);
     
-    // Extract token from handshake auth
-    const token = client.handshake.auth?.token || client.handshake.headers?.authorization?.replace('Bearer ', '');
+    // Extract token from handshake auth or headers
+    let token = client.handshake.auth?.token || client.handshake.headers?.authorization;
+    
+    // Strip "Bearer " prefix if present
+    if (token && token.startsWith('Bearer ')) {
+      token = token.substring(7);
+    }
     
     if (token) {
       try {
@@ -181,6 +186,119 @@ export class ProjectChatGateway implements OnGatewayConnection, OnGatewayDisconn
     return { success: true };
   }
 
+  @SubscribeMessage('load_messages')
+  async handleLoadMessages(
+    @MessageBody()
+    data: {
+      projectId: string;
+      take?: number;
+      skip?: number;
+    },
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    const userId = client.userId;
+
+    if (!userId) {
+      client.emit('error', { message: 'Not authenticated' });
+      return;
+    }
+
+    try {
+      const take = data.take || 50;
+      const skip = data.skip || 0;
+
+      console.log('[load_messages] Checking membership:', {
+        projectId: data.projectId,
+        userId,
+        userIdType: typeof userId,
+      });
+
+      // Verify project membership - try finding any member first
+      const allMembers = await this.prisma.projectMember.findMany({
+        where: { projectId: data.projectId },
+        select: { userId: true, role: true },
+      });
+
+      console.log('[load_messages] Project members:', allMembers);
+
+      const member = await this.prisma.projectMember.findUnique({
+        where: {
+          projectId_userId: {
+            projectId: data.projectId,
+            userId: String(userId), // Ensure string type
+          },
+        },
+      });
+
+      console.log('[load_messages] Found member:', member);
+
+      if (!member) {
+        client.emit('error', { message: 'Not a project member' });
+        return;
+      }
+
+      // Load messages from database
+      const messages = await this.prisma.chatMessagePM.findMany({
+        where: {
+          projectId: data.projectId,
+        },
+        take,
+        skip,
+        orderBy: {
+          createdAt: 'asc',
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              avatar: true,
+            },
+          },
+          replyTo: {
+            include: {
+              sender: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Format messages for frontend
+      const formattedMessages = messages.map((msg) => ({
+        id: msg.id,
+        userId: msg.senderId,
+        userName: `${msg.sender.firstName || ''} ${msg.sender.lastName || ''}`.trim() || msg.sender.email,
+        userAvatar: msg.sender.avatar,
+        content: msg.content,
+        createdAt: msg.createdAt,
+        isEdited: msg.isEdited,
+        reactions: msg.reactions || {},
+        replyTo: msg.replyTo ? {
+          id: msg.replyTo.id,
+          content: msg.replyTo.content,
+          userName: `${msg.replyTo.sender.firstName || ''} ${msg.replyTo.sender.lastName || ''}`.trim(),
+        } : undefined,
+      }));
+
+      // Send messages to client
+      client.emit('messages_loaded', formattedMessages);
+
+      console.log(`📨 Loaded ${formattedMessages.length} messages for project ${data.projectId}`);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      client.emit('error', { message: 'Failed to load messages' });
+    }
+  }
+
   @SubscribeMessage('send_message')
   async handleSendMessage(
     @MessageBody()
@@ -233,8 +351,25 @@ export class ProjectChatGateway implements OnGatewayConnection, OnGatewayDisconn
         },
       });
 
+      // Format message for frontend (match messages_loaded format)
+      const formattedMessage = {
+        id: message.id,
+        userId: message.senderId,
+        userName: `${message.sender.firstName || ''} ${message.sender.lastName || ''}`.trim() || message.sender.email,
+        userAvatar: message.sender.avatar,
+        content: message.content,
+        createdAt: message.createdAt,
+        isEdited: message.isEdited || false,
+        reactions: message.reactions || {},
+        replyTo: message.replyTo ? {
+          id: message.replyTo.id,
+          content: message.replyTo.content,
+          userName: `${message.replyTo.sender.firstName || ''} ${message.replyTo.sender.lastName || ''}`.trim(),
+        } : undefined,
+      };
+
       // Broadcast to all clients in the project
-      this.server.to(`project_${data.projectId}`).emit('new_message', message);
+      this.server.to(`project_${data.projectId}`).emit('new_message', formattedMessage);
 
       // Create notifications for @mentions
       if (data.mentions && data.mentions.length > 0) {

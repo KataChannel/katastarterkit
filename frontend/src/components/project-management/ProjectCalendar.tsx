@@ -265,46 +265,11 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
               {/* Calendar Grid */}
               <CalendarUI
                 mode="single"
-                month={new Date(year, month - 1)}
                 selected={selectedDate || undefined}
                 onSelect={(newDate) => {
                   if (newDate) handleDateClick(newDate);
                 }}
-                disabled={(date) => {
-                  return date.getMonth() !== month - 1;
-                }}
-                components={{
-                  Day: ({ day }) => {
-                    if (day.getMonth() !== month - 1) {
-                      return <div className="text-gray-300">{day.getDate()}</div>;
-                    }
-
-                    const dateKey = day.toISOString().split('T')[0];
-                    const dayTasks = calendarData?.tasksByDate[dateKey] || [];
-                    const isSelected = selectedDate?.toDateString() === day.toDateString();
-
-                    return (
-                      <div
-                        className={`relative w-full aspect-square p-1 rounded-md cursor-pointer hover:bg-gray-100 transition-colors ${
-                          isSelected ? 'bg-blue-100 border border-blue-500' : ''
-                        }`}
-                        onClick={() => handleDateClick(day)}
-                      >
-                        <span className="text-sm font-medium">{day.getDate()}</span>
-                        {dayTasks.length > 0 && (
-                          <div className="flex gap-0.5 mt-1 flex-wrap">
-                            {dayTasks.slice(0, 2).map((task) => (
-                              <div key={task.id} className="w-1 h-1 rounded-full bg-blue-500" />
-                            ))}
-                            {dayTasks.length > 2 && (
-                              <div className="text-xs text-blue-600">+{dayTasks.length - 2}</div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  },
-                }}
+                className="rounded-md border"
               />
             </div>
           </CardContent>

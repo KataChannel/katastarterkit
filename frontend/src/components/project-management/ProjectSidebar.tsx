@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMyProjects } from '@/hooks/useProjects.dynamic';
 import { Plus, Archive, Users, MessageSquare, CheckSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,32 @@ export default function ProjectSidebar({
 }: ProjectSidebarProps) {
   const { data, loading, error } = useMyProjects(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent hydration mismatch by not rendering loading state on server
+  if (!mounted) {
+    return (
+      <div className="h-full flex flex-col bg-background border-r">
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Projects</h2>
+            <Button
+              size="sm"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="h-8 w-8 p-0"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1" />
+      </div>
+    );
+  }
 
   if (loading) {
     return (
