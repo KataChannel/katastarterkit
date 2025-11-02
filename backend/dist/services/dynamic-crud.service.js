@@ -78,6 +78,35 @@ let DynamicCRUDService = class DynamicCRUDService {
                     throw new common_1.BadRequestException('Task userId is required. Please ensure you are authenticated.');
                 }
             }
+            if (modelName === 'TaskComment' || modelName === 'taskComment') {
+                if (data.task?.connect?.id && !data.taskId) {
+                    console.log(`🔄 Converting task.connect to taskId:`, data.task.connect.id);
+                    data.taskId = data.task.connect.id;
+                    delete data.task;
+                }
+                if (data.user?.connect?.id && !data.userId) {
+                    console.log(`🔄 Converting user.connect to userId:`, data.user.connect.id);
+                    data.userId = data.user.connect.id;
+                    delete data.user;
+                }
+                if (!data.userId) {
+                    const userId = context?.req?.user?.id ||
+                        context?.user?.id ||
+                        context?.userId;
+                    if (userId) {
+                        console.log(`🔄 FALLBACK (taskComment): Setting userId from context:`, userId);
+                        data.userId = userId;
+                    }
+                }
+                if (!data.taskId) {
+                    console.error('❌ TaskComment create failed: Missing taskId', { data });
+                    throw new common_1.BadRequestException('TaskComment taskId is required.');
+                }
+                if (!data.userId) {
+                    console.error('❌ TaskComment create failed: Missing userId', { data, context: !!context });
+                    throw new common_1.BadRequestException('TaskComment userId is required. Please ensure you are authenticated.');
+                }
+            }
             if ((modelName === 'Project' || modelName === 'project') && !data.ownerId) {
                 console.warn('⚠️ No ownerId in data, checking context...');
                 const userId = context?.req?.user?.id ||

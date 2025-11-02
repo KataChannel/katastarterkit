@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import AnalyticsDashboard from '@/components/project-management/AnalyticsDashboard';
+import { AnalyticsDashboard } from '@/components/project-management/AnalyticsDashboard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -131,7 +131,7 @@ export default function DashboardPage() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-4">
-            <AnalyticsDashboard projectId={selectedProjectId} />
+            <AnalyticsDashboard projectId={selectedProjectId || ''} />
           </TabsContent>
 
           {/* Activity Tab */}
