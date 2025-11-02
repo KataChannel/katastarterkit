@@ -25,8 +25,11 @@ import { useToast } from '@/hooks/use-toast';
 interface InviteMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onInvite: (email: string, role: string) => Promise<void>;
+  onInvite: (email: string, role: string, projectId?: string) => Promise<void>;
   loading?: boolean;
+  projects?: Array<{ id: string; name: string }>;
+  selectedProjectId?: string | null;
+  onProjectChange?: (projectId: string) => void;
 }
 
 export function InviteMemberDialog({
@@ -34,11 +37,22 @@ export function InviteMemberDialog({
   onOpenChange,
   onInvite,
   loading = false,
+  projects,
+  selectedProjectId,
+  onProjectChange,
 }: InviteMemberDialogProps) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('MEMBER');
+  const [localProjectId, setLocalProjectId] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+
+  // Sync local project id with prop
+  React.useEffect(() => {
+    if (selectedProjectId) {
+      setLocalProjectId(selectedProjectId);
+    }
+  }, [selectedProjectId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +62,18 @@ export function InviteMemberDialog({
         title: 'Lỗi',
         description: 'Vui lòng nhập email và chọn vai trò',
         type: 'error',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate project selection if projects list is provided
+    if (projects && projects.length > 0 && !localProjectId) {
+      toast({
+        title: 'Lỗi',
+        description: 'Vui lòng chọn dự án',
+        type: 'error',
+        variant: 'destructive',
       });
       return;
     }
@@ -59,30 +85,23 @@ export function InviteMemberDialog({
         title: 'Lỗi',
         description: 'Email không hợp lệ',
         type: 'error',
+        variant: 'destructive',
       });
       return;
     }
 
     setSubmitting(true);
     try {
-      await onInvite(email, role);
+      await onInvite(email, role, localProjectId || undefined);
       
       // Reset form on success
       setEmail('');
       setRole('MEMBER');
-      onOpenChange(false);
+      // Don't reset project selection
       
-      toast({
-        title: 'Thành công',
-        description: `Đã gửi lời mời đến ${email}`,
-        type: 'success',
-      });
     } catch (error) {
-      toast({
-        title: 'Lỗi',
-        description: error instanceof Error ? error.message : 'Không thể gửi lời mời',
-        type: 'error',
-      });
+      // Error handled by parent component
+      console.error('[InviteMemberDialog] Error:', error);
     } finally {
       setSubmitting(false);
     }
@@ -108,7 +127,33 @@ export function InviteMemberDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+            {/* Project selection - only show if projects prop is provided */}
+            {projects && projects.length > 0 && (
+              <div className="grid gap-2">
+                <Label htmlFor="project">Dự án</Label>
+                <Select
+                  value={localProjectId}
+                  onValueChange={(value) => {
+                    setLocalProjectId(value);
+                    onProjectChange?.(value);
+                  }}
+                  disabled={submitting || loading}
+                >
+                  <SelectTrigger id="project">
+                    <SelectValue placeholder="Chọn dự án" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -160,7 +205,7 @@ export function InviteMemberDialog({
             </div>
 
             <div className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
-              <p>💡 Thành viên sẽ nhận email mời tham gia dự án</p>
+              <p>💡 Người dùng phải đã có tài khoản trong hệ thống</p>
             </div>
           </div>
 

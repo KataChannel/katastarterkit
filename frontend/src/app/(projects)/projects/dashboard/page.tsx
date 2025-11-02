@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { InviteMemberDialog } from '@/components/team/InviteMemberDialog';
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
+import { useAddMember } from '@/hooks/useProjects';
+import { useToast } from '@/hooks/use-toast';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -23,11 +25,15 @@ import {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Add member hook
+  const [addMember, { loading: addMemberLoading }] = useAddMember();
 
   // Check authentication
   useEffect(() => {
@@ -257,8 +263,111 @@ export default function DashboardPage() {
     };
   }, [tasksData]);
 
-  const handleInviteMember = async (email: string, role: string) => {
-    console.log('Inviting member:', email, role);
+  const handleInviteMember = async (email: string, role: string, projectId?: string) => {
+    try {
+      // 1. Validate project selection
+      const targetProjectId = projectId || selectedProjectId;
+      if (!targetProjectId) {
+        toast({
+          title: 'Lỗi',
+          description: 'Vui lòng chọn dự án trước khi thêm thành viên',
+          type: 'error',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // 2. Find user by email using dynamic GraphQL
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:12001'}/graphql`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify({
+          query: `
+            query FindUserByEmail($modelName: String!, $input: FindManyInput!) {
+              findMany(modelName: $modelName, input: $input) {
+                data
+              }
+            }
+          `,
+          variables: {
+            modelName: 'user',
+            input: {
+              where: {
+                email: { equals: email }
+              }
+            }
+          }
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.errors) {
+        throw new Error(result.errors[0]?.message || 'Lỗi khi tìm người dùng');
+      }
+
+      const users = JSON.parse(result.data.findMany.data);
+      
+      if (!users || users.length === 0) {
+        toast({
+          title: 'Không tìm thấy',
+          description: `Không tìm thấy người dùng với email: ${email}`,
+          type: 'error',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const user = users[0];
+
+      // 3. Add member using custom mutation
+      await addMember({
+        variables: {
+          projectId: targetProjectId,
+          input: {
+            userId: user.id,
+            role: role.toLowerCase() as 'owner' | 'admin' | 'member'
+          }
+        }
+      });
+
+      // 4. Success feedback
+      const userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+      toast({
+        title: 'Thành công',
+        description: `Đã thêm ${userName} vào dự án với vai trò ${role}`,
+        type: 'success',
+      });
+
+      setIsInviteDialogOpen(false);
+      
+      // Refetch data
+      refetchProjects();
+
+    } catch (error: any) {
+      console.error('[Dashboard] Error adding member:', error);
+      
+      // Handle specific errors
+      let errorMessage = 'Có lỗi xảy ra khi thêm thành viên';
+      
+      if (error.message?.includes('already a member')) {
+        errorMessage = 'Người dùng đã là thành viên của dự án này';
+      } else if (error.message?.includes('permission')) {
+        errorMessage = 'Bạn không có quyền thêm thành viên vào dự án này';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast({
+        title: 'Lỗi',
+        description: errorMessage,
+        type: 'error',
+        variant: 'destructive',
+      });
+    }
   };
 
   // Loading state
@@ -450,6 +559,10 @@ export default function DashboardPage() {
           open={isInviteDialogOpen}
           onOpenChange={setIsInviteDialogOpen}
           onInvite={handleInviteMember}
+          loading={addMemberLoading}
+          projects={projectsData?.map((p: any) => ({ id: p.id, name: p.name })) || []}
+          selectedProjectId={selectedProjectId}
+          onProjectChange={setSelectedProjectId}
         />
       </div>
     </div>
