@@ -38,7 +38,7 @@ const PROJECT_ANALYTICS_QUERY = gql`
     memberStatistics(projectId: $projectId)
     taskVelocity(projectId: $projectId, days: 30)
     projectHealthScore(projectId: $projectId)
-    upcomingDeadlines(projectId: $projectId, days: 7)
+    upcomingDeadlines(projectId: $projectId)
     overdueTasks(projectId: $projectId)
     tagStatistics(projectId: $projectId)
   }
@@ -104,16 +104,39 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
   const parsedData = useMemo(() => {
     if (!data) return null;
 
-    return {
-      analytics: JSON.parse(data.projectAnalytics || '{}') as ProjectAnalytics,
-      taskStats: JSON.parse(data.taskStatistics || '{}') as TaskStatistics,
-      memberStats: JSON.parse(data.memberStatistics || '[]') as MemberStats[],
-      velocity: JSON.parse(data.taskVelocity || '[]') as VelocityData[],
-      healthScore: parseInt(data.projectHealthScore || '0'),
-      upcomingDeadlines: JSON.parse(data.upcomingDeadlines || '[]'),
-      overdueTasks: JSON.parse(data.overdueTasks || '[]'),
-      tagStats: JSON.parse(data.tagStatistics || '[]') as TagStat[],
-    };
+    try {
+      const healthScoreData = JSON.parse(data.projectHealthScore || '{"score":0,"status":"poor","factors":{}}');
+      const velocityData = JSON.parse(data.taskVelocity || '{"totalCompleted":0,"averagePerDay":0,"chart":[]}');
+      const analyticsData = JSON.parse(data.projectAnalytics || '{}');
+      
+      // Extract completion rate properly
+      const completionRateData = analyticsData.completionRate || { total: 0, completed: 0, rate: 0 };
+      const completionRate = typeof completionRateData === 'object' ? completionRateData.rate : completionRateData;
+      
+      return {
+        analytics: {
+          ...analyticsData,
+          completionRate: completionRate || 0,
+          totalTasks: analyticsData.taskStats?.total || completionRateData.total || 0,
+          completedTasks: completionRateData.completed || 0,
+          totalMembers: analyticsData.memberStats?.length || 0,
+        },
+        taskStats: JSON.parse(data.taskStatistics || '{}') as TaskStatistics,
+        memberStats: JSON.parse(data.memberStatistics || '[]') as MemberStats[],
+        velocity: velocityData.chart || [],
+        velocityTotal: velocityData.totalCompleted || 0,
+        velocityAverage: velocityData.averagePerDay || 0,
+        healthScore: healthScoreData.score || 0,
+        healthStatus: healthScoreData.status || 'poor',
+        healthFactors: healthScoreData.factors || {},
+        upcomingDeadlines: JSON.parse(data.upcomingDeadlines || '[]'),
+        overdueTasks: JSON.parse(data.overdueTasks || '[]'),
+        tagStats: JSON.parse(data.tagStatistics || '[]') as TagStat[],
+      };
+    } catch (error) {
+      console.error('[AnalyticsDashboard] Error parsing data:', error);
+      return null;
+    }
   }, [data]);
 
   if (error) {
@@ -332,7 +355,7 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
                   <Legend />
                   <Line
                     type="monotone"
-                    dataKey="tasksCompleted"
+                    dataKey="count"
                     stroke="#10b981"
                     dot={{ fill: '#10b981' }}
                     name="Tasks Completed"

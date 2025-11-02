@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { gql, useApolloClient } from '@apollo/client';
 import { AnalyticsDashboard } from '@/components/project-management/AnalyticsDashboard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,6 +27,7 @@ import {
 export default function DashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const apolloClient = useApolloClient();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -92,7 +94,7 @@ export default function DashboardPage() {
   } = useFindMany('task', {
     where: userId ? {
       OR: [
-        { assigneeId: { equals: userId } },
+        { assignedTo: { has: userId } },
         { project: { 
           OR: [
             { ownerId: { equals: userId } },
@@ -102,7 +104,7 @@ export default function DashboardPage() {
       ]
     } : undefined,
     include: {
-      assignee: {
+      user: {
         select: {
           id: true,
           firstName: true,
@@ -210,8 +212,8 @@ export default function DashboardPage() {
   const recentActivity = useMemo(() => {
     const tasks = tasksData || [];
     return tasks.slice(0, 5).map((task: any) => {
-      const userName = task.assignee 
-        ? `${task.assignee.firstName || ''} ${task.assignee.lastName || ''}`.trim() || task.assignee.email
+      const userName = task.user 
+        ? `${task.user.firstName || ''} ${task.user.lastName || ''}`.trim() || task.user.email
         : 'Chưa gán';
       
       let action = 'updated';
@@ -265,11 +267,23 @@ export default function DashboardPage() {
 
   const handleInviteMember = async (email: string, role: string, projectId?: string) => {
     try {
-      // 1. Validate project selection
+      // 1. Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email.trim())) {
+        toast({
+          title: 'Email không hợp lệ',
+          description: 'Vui lòng nhập địa chỉ email hợp lệ',
+          type: 'error',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // 2. Validate project selection
       const targetProjectId = projectId || selectedProjectId;
       if (!targetProjectId) {
         toast({
-          title: 'Lỗi',
+          title: 'Chưa chọn dự án',
           description: 'Vui lòng chọn dự án trước khi thêm thành viên',
           type: 'error',
           variant: 'destructive',
@@ -277,68 +291,148 @@ export default function DashboardPage() {
         return;
       }
 
-      // 2. Find user by email using dynamic GraphQL
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:12001'}/graphql`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: JSON.stringify({
-          query: `
-            query FindUserByEmail($modelName: String!, $input: FindManyInput!) {
-              findMany(modelName: $modelName, input: $input) {
-                data
-              }
+      console.log('[Dashboard] Adding member to project:', {
+        projectId: targetProjectId,
+        email: email.trim(),
+        role
+      });
+
+      // 3. Find user by email using Apollo Client
+      let userData;
+      try {
+        const result = await apolloClient.query({
+          query: gql`
+            query FindUserByEmail($modelName: String!, $input: UnifiedFindManyInput) {
+              findMany(modelName: $modelName, input: $input)
             }
           `,
           variables: {
             modelName: 'user',
             input: {
               where: {
-                email: { equals: email }
-              }
+                email: { equals: email.trim().toLowerCase() }
+              },
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                avatar: true
+              },
+              take: 1
             }
-          }
-        })
-      });
-
-      const result = await response.json();
-      
-      if (result.errors) {
-        throw new Error(result.errors[0]?.message || 'Lỗi khi tìm người dùng');
-      }
-
-      const users = JSON.parse(result.data.findMany.data);
-      
-      if (!users || users.length === 0) {
+          },
+          fetchPolicy: 'network-only'
+        });
+        userData = result.data;
+      } catch (queryError: any) {
+        console.error('[Dashboard] Error querying user:', queryError);
         toast({
-          title: 'Không tìm thấy',
-          description: `Không tìm thấy người dùng với email: ${email}`,
+          title: 'Lỗi truy vấn',
+          description: 'Không thể tìm kiếm người dùng. Vui lòng thử lại.',
           type: 'error',
           variant: 'destructive',
         });
         return;
       }
 
-      const user = users[0];
+      console.log('[Dashboard] User query response:', userData);
 
-      // 3. Add member using custom mutation
+      let users = userData?.findMany;
+      
+      // Parse JSONObject if it's a string
+      if (typeof users === 'string') {
+        try {
+          users = JSON.parse(users);
+          console.log('[Dashboard] Parsed users from JSON:', users);
+        } catch (parseError) {
+          console.error('[Dashboard] Error parsing JSON:', parseError);
+          toast({
+            title: 'Lỗi dữ liệu',
+            description: 'Dữ liệu người dùng không hợp lệ',
+            type: 'error',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+      
+      // Validate users array
+      if (!users || !Array.isArray(users) || users.length === 0) {
+        toast({
+          title: 'Người dùng không tồn tại',
+          description: `Email "${email}" chưa được đăng ký trong hệ thống. Vui lòng kiểm tra lại hoặc mời người dùng đăng ký trước.`,
+          type: 'warning',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const user = users[0];
+      console.log('[Dashboard] Found user:', {
+        id: user.id,
+        email: user.email,
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim()
+      });
+      
+      // Validate user ID exists and is valid
+      if (!user?.id || typeof user.id !== 'string' || user.id.trim() === '') {
+        console.error('[Dashboard] Invalid user ID:', user);
+        toast({
+          title: 'Lỗi dữ liệu người dùng',
+          description: 'Không thể lấy thông tin ID của người dùng. Dữ liệu có thể bị lỗi.',
+          type: 'error',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // 4. Show confirmation with user info
+      const userIdValue = user.id.trim();
+      const userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Không có tên';
+      const userFullInfo = userName !== 'Không có tên' 
+        ? `${userName} (${user.email})`
+        : user.email;
+
+      // Get project name for confirmation
+      const project = projectsData?.find((p: any) => p.id === targetProjectId);
+      const projectName = project?.name || 'dự án này';
+
+      const confirmed = window.confirm(
+        `🔍 Xác nhận thêm thành viên\n\n` +
+        `Người dùng: ${userFullInfo}\n` +
+        `Vai trò: ${role}\n` +
+        `Dự án: ${projectName}\n\n` +
+        `Bạn có chắc chắn muốn thêm người dùng này vào dự án không?`
+      );
+
+      if (!confirmed) {
+        console.log('[Dashboard] User cancelled invitation');
+        return;
+      }
+      
+      console.log('[Dashboard] Confirmed - Adding member:', {
+        projectId: targetProjectId,
+        userId: userIdValue,
+        userName: userName,
+        role: role.toLowerCase()
+      });
+      
+      // 5. Add member using custom mutation
       await addMember({
         variables: {
           projectId: targetProjectId,
           input: {
-            userId: user.id,
+            userId: userIdValue,
             role: role.toLowerCase() as 'owner' | 'admin' | 'member'
           }
         }
       });
 
-      // 4. Success feedback
-      const userName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+      // 6. Success feedback
       toast({
-        title: 'Thành công',
-        description: `Đã thêm ${userName} vào dự án với vai trò ${role}`,
+        title: '✅ Thành công',
+        description: `Đã thêm ${userFullInfo} vào dự án ${projectName} với vai trò ${role}`,
         type: 'success',
       });
 
@@ -349,20 +443,36 @@ export default function DashboardPage() {
 
     } catch (error: any) {
       console.error('[Dashboard] Error adding member:', error);
+      console.error('[Dashboard] Error details:', {
+        message: error.message,
+        graphQLErrors: error.graphQLErrors,
+        networkError: error.networkError
+      });
       
       // Handle specific errors
-      let errorMessage = 'Có lỗi xảy ra khi thêm thành viên';
+      let errorTitle = 'Lỗi thêm thành viên';
+      let errorMessage = 'Có lỗi xảy ra khi thêm thành viên vào dự án';
       
       if (error.message?.includes('already a member')) {
-        errorMessage = 'Người dùng đã là thành viên của dự án này';
-      } else if (error.message?.includes('permission')) {
-        errorMessage = 'Bạn không có quyền thêm thành viên vào dự án này';
+        errorTitle = 'Thành viên đã tồn tại';
+        errorMessage = 'Người dùng này đã là thành viên của dự án';
+      } else if (error.message?.includes('permission') || error.message?.includes('not allowed')) {
+        errorTitle = 'Không có quyền';
+        errorMessage = 'Bạn không có quyền thêm thành viên vào dự án này. Chỉ Owner hoặc Admin mới có thể thêm thành viên.';
+      } else if (error.message?.includes('userId') && error.message?.includes('missing')) {
+        errorTitle = 'Lỗi dữ liệu người dùng';
+        errorMessage = 'Không thể lấy thông tin người dùng. Email có thể chưa được đăng ký trong hệ thống. Vui lòng kiểm tra lại email hoặc mời người dùng đăng ký trước.';
+      } else if (error.message?.includes('not found') || error.message?.includes('does not exist')) {
+        errorTitle = 'Người dùng không tồn tại';
+        errorMessage = 'Người dùng với email này chưa có tài khoản trong hệ thống. Vui lòng mời họ đăng ký trước.';
+      } else if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+        errorMessage = error.graphQLErrors[0].message;
       } else if (error.message) {
         errorMessage = error.message;
       }
 
       toast({
-        title: 'Lỗi',
+        title: errorTitle,
         description: errorMessage,
         type: 'error',
         variant: 'destructive',
