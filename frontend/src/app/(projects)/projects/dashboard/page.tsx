@@ -5,6 +5,7 @@ import { AnalyticsDashboard } from '@/components/project-management/AnalyticsDas
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { InviteMemberDialog } from '@/components/team/InviteMemberDialog';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -13,11 +14,19 @@ import {
   CheckCircle2,
   AlertCircle,
   Calendar,
-  Activity
+  Activity,
+  UserPlus
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+
+  const handleInviteMember = async (email: string, role: string) => {
+    // This will be handled by the InviteMemberDialog's internal logic
+    // which uses useTeamData hook
+    console.log('Inviting member:', email, role);
+  };
 
   // Mock stats data
   const stats = [
@@ -92,10 +101,19 @@ export default function DashboardPage() {
               Overview of your projects and team performance
             </p>
           </div>
-          <Button className="w-full sm:w-auto">
-            <Calendar className="mr-2 h-4 w-4" />
-            Select Date Range
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button 
+              className="flex-1 sm:flex-initial"
+              onClick={() => setIsInviteDialogOpen(true)}
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add User
+            </Button>
+            <Button variant="outline" className="flex-1 sm:flex-initial">
+              <Calendar className="mr-2 h-4 w-4" />
+              Date Range
+            </Button>
+          </div>
         </div>
 
         {/* Stats Grid - Mobile First */}
@@ -213,6 +231,13 @@ export default function DashboardPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Invite Member Dialog */}
+        <InviteMemberDialog 
+          open={isInviteDialogOpen}
+          onOpenChange={setIsInviteDialogOpen}
+          onInvite={handleInviteMember}
+        />
       </div>
     </div>
   );
