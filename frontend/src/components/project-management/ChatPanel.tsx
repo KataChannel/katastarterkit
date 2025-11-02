@@ -50,11 +50,26 @@ export default function ChatPanel({ projectId, userToken }: ChatPanelProps) {
 
   // Initialize Socket.IO connection
   useEffect(() => {
-    if (!projectId || !userToken) return;
+    // Get token from props or localStorage
+    const token = userToken || (typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null);
+    
+    // Silent return if no project selected (normal state)
+    if (!projectId) {
+      return;
+    }
 
-    const newSocket = io('http://localhost:3000/project-chat', {
+    // Log error only if missing token (actual error)
+    if (!token) {
+      console.error('[ChatPanel] Missing authentication token');
+      return;
+    }
+
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
+    console.log('[ChatPanel] Connecting to:', `${socketUrl}/project-chat`);
+    
+    const newSocket = io(`${socketUrl}/project-chat`, {
       auth: {
-        token: `Bearer ${userToken}`,
+        token: token.startsWith('Bearer ') ? token : `Bearer ${token}`,
       },
       reconnection: true,
       reconnectionDelay: 1000,
@@ -67,6 +82,13 @@ export default function ChatPanel({ projectId, userToken }: ChatPanelProps) {
       setIsConnected(true);
       console.log('✅ Connected to chat');
       newSocket.emit('join_project', { projectId });
+      
+      // Request to load messages after joining
+      newSocket.emit('load_messages', {
+        projectId,
+        take: 50,
+        skip: 0,
+      });
     });
 
     newSocket.on('disconnect', () => {
@@ -135,13 +157,17 @@ export default function ChatPanel({ projectId, userToken }: ChatPanelProps) {
 
     newSocket.on('user_joined', (data: { userId: string; userName: string }) => {
       toast({
+        title: 'User Joined',
         description: `${data.userName} joined the chat`,
+        type: 'info',
       });
     });
 
     newSocket.on('user_left', (data: { userId: string; userName: string }) => {
       toast({
+        title: 'User Left',
         description: `${data.userName} left the chat`,
+        type: 'info',
       });
     });
 

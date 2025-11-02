@@ -79,14 +79,18 @@ export interface MutationResult {
 export function useFindMany<T = any>(
   model: string,
   options?: QueryOptions,
-  config?: { skip?: boolean; fetchPolicy?: any }
+  config?: { skip?: boolean; fetchPolicy?: any; requireAuth?: boolean }
 ) {
+  // Auto-skip if auth is required but token not available
+  const hasToken = typeof window !== 'undefined' ? !!localStorage.getItem('accessToken') : false;
+  const shouldSkip = config?.skip || (config?.requireAuth !== false && !hasToken);
+
   const { data, loading, error, refetch } = useQuery(FIND_MANY, {
     variables: {
       modelName: model,
       input: options || {},
     },
-    skip: config?.skip,
+    skip: shouldSkip,
     fetchPolicy: config?.fetchPolicy || 'cache-and-network',
   });
 
@@ -106,8 +110,12 @@ export function useFindUnique<T = any>(
   model: string,
   where: any,
   options?: Omit<QueryOptions, 'where'>,
-  config?: { skip?: boolean }
+  config?: { skip?: boolean; requireAuth?: boolean }
 ) {
+  // Auto-skip if auth is required but token not available
+  const hasToken = typeof window !== 'undefined' ? !!localStorage.getItem('accessToken') : false;
+  const shouldSkip = config?.skip || !where || (config?.requireAuth !== false && !hasToken);
+
   const { data, loading, error, refetch } = useQuery(FIND_UNIQUE, {
     variables: {
       modelName: model,
@@ -117,7 +125,7 @@ export function useFindUnique<T = any>(
         include: options?.include,
       },
     },
-    skip: config?.skip || !where,
+    skip: shouldSkip,
   });
 
   return {
@@ -135,8 +143,12 @@ export function useFindUnique<T = any>(
 export function useFindFirst<T = any>(
   model: string,
   options?: QueryOptions,
-  config?: { skip?: boolean }
+  config?: { skip?: boolean; requireAuth?: boolean }
 ) {
+  // Auto-skip if auth is required but token not available
+  const hasToken = typeof window !== 'undefined' ? !!localStorage.getItem('accessToken') : false;
+  const shouldSkip = config?.skip || (config?.requireAuth !== false && !hasToken);
+
   const { data, loading, error, refetch } = useQuery(FIND_FIRST, {
     variables: {
       modelName: model,
@@ -145,7 +157,7 @@ export function useFindFirst<T = any>(
         take: 1,
       },
     },
-    skip: config?.skip,
+    skip: shouldSkip,
   });
 
   return {
@@ -163,10 +175,14 @@ export function useFindFirst<T = any>(
 export function useFindManyPaginated<T = any>(
   model: string,
   options?: PaginatedOptions,
-  config?: { skip?: boolean }
+  config?: { skip?: boolean; requireAuth?: boolean }
 ) {
   const [page, setPage] = useState(options?.page || 1);
   const [limit, setLimit] = useState(options?.limit || 10);
+
+  // Auto-skip if auth is required but token not available
+  const hasToken = typeof window !== 'undefined' ? !!localStorage.getItem('accessToken') : false;
+  const shouldSkip = config?.skip || (config?.requireAuth !== false && !hasToken);
 
   const { data, loading, error, refetch } = useQuery(FIND_MANY_PAGINATED, {
     variables: {
@@ -180,7 +196,7 @@ export function useFindManyPaginated<T = any>(
         include: options?.include,
       },
     },
-    skip: config?.skip,
+    skip: shouldSkip,
     fetchPolicy: 'cache-and-network',
   });
 

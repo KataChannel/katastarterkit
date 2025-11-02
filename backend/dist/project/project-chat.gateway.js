@@ -26,7 +26,10 @@ let ProjectChatGateway = class ProjectChatGateway {
     }
     async handleConnection(client) {
         console.log(`[ProjectChat] Client connected: ${client.id}`);
-        const token = client.handshake.auth?.token || client.handshake.headers?.authorization?.replace('Bearer ', '');
+        let token = client.handshake.auth?.token || client.handshake.headers?.authorization;
+        if (token && token.startsWith('Bearer ')) {
+            token = token.substring(7);
+        }
         if (token) {
             try {
                 const payload = this.jwtService.verify(token);
@@ -109,6 +112,94 @@ let ProjectChatGateway = class ProjectChatGateway {
         this.activeConnections.delete(client.id);
         return { success: true };
     }
+    async handleLoadMessages(data, client) {
+        const userId = client.userId;
+        if (!userId) {
+            client.emit('error', { message: 'Not authenticated' });
+            return;
+        }
+        try {
+            const take = data.take || 50;
+            const skip = data.skip || 0;
+            console.log('[load_messages] Checking membership:', {
+                projectId: data.projectId,
+                userId,
+                userIdType: typeof userId,
+            });
+            const allMembers = await this.prisma.projectMember.findMany({
+                where: { projectId: data.projectId },
+                select: { userId: true, role: true },
+            });
+            console.log('[load_messages] Project members:', allMembers);
+            const member = await this.prisma.projectMember.findUnique({
+                where: {
+                    projectId_userId: {
+                        projectId: data.projectId,
+                        userId: String(userId),
+                    },
+                },
+            });
+            console.log('[load_messages] Found member:', member);
+            if (!member) {
+                client.emit('error', { message: 'Not a project member' });
+                return;
+            }
+            const messages = await this.prisma.chatMessagePM.findMany({
+                where: {
+                    projectId: data.projectId,
+                },
+                take,
+                skip,
+                orderBy: {
+                    createdAt: 'asc',
+                },
+                include: {
+                    sender: {
+                        select: {
+                            id: true,
+                            firstName: true,
+                            lastName: true,
+                            email: true,
+                            avatar: true,
+                        },
+                    },
+                    replyTo: {
+                        include: {
+                            sender: {
+                                select: {
+                                    id: true,
+                                    firstName: true,
+                                    lastName: true,
+                                    avatar: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            const formattedMessages = messages.map((msg) => ({
+                id: msg.id,
+                userId: msg.senderId,
+                userName: `${msg.sender.firstName || ''} ${msg.sender.lastName || ''}`.trim() || msg.sender.email,
+                userAvatar: msg.sender.avatar,
+                content: msg.content,
+                createdAt: msg.createdAt,
+                isEdited: msg.isEdited,
+                reactions: msg.reactions || {},
+                replyTo: msg.replyTo ? {
+                    id: msg.replyTo.id,
+                    content: msg.replyTo.content,
+                    userName: `${msg.replyTo.sender.firstName || ''} ${msg.replyTo.sender.lastName || ''}`.trim(),
+                } : undefined,
+            }));
+            client.emit('messages_loaded', formattedMessages);
+            console.log(`📨 Loaded ${formattedMessages.length} messages for project ${data.projectId}`);
+        }
+        catch (error) {
+            console.error('Error loading messages:', error);
+            client.emit('error', { message: 'Failed to load messages' });
+        }
+    }
     async handleSendMessage(data, client) {
         const userId = client.userId;
         if (!userId) {
@@ -147,7 +238,22 @@ let ProjectChatGateway = class ProjectChatGateway {
                     },
                 },
             });
-            this.server.to(`project_${data.projectId}`).emit('new_message', message);
+            const formattedMessage = {
+                id: message.id,
+                userId: message.senderId,
+                userName: `${message.sender.firstName || ''} ${message.sender.lastName || ''}`.trim() || message.sender.email,
+                userAvatar: message.sender.avatar,
+                content: message.content,
+                createdAt: message.createdAt,
+                isEdited: message.isEdited || false,
+                reactions: message.reactions || {},
+                replyTo: message.replyTo ? {
+                    id: message.replyTo.id,
+                    content: message.replyTo.content,
+                    userName: `${message.replyTo.sender.firstName || ''} ${message.replyTo.sender.lastName || ''}`.trim(),
+                } : undefined,
+            };
+            this.server.to(`project_${data.projectId}`).emit('new_message', formattedMessage);
             if (data.mentions && data.mentions.length > 0) {
                 const senderName = `${message.sender.firstName} ${message.sender.lastName}`.trim();
                 const notifications = data.mentions.map((mentionedUserId) => ({
@@ -387,6 +493,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], ProjectChatGateway.prototype, "handleLeaveProject", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('load_messages'),
+    __param(0, (0, websockets_1.MessageBody)()),
+    __param(1, (0, websockets_1.ConnectedSocket)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], ProjectChatGateway.prototype, "handleLoadMessages", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)('send_message'),
     __param(0, (0, websockets_1.MessageBody)()),

@@ -37,6 +37,11 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
         success: boolean;
         error?: undefined;
     }>;
+    handleLoadMessages(data: {
+        projectId: string;
+        take?: number;
+        skip?: number;
+    }, client: AuthenticatedSocket): Promise<void>;
     handleSendMessage(data: {
         projectId: string;
         content: string;
@@ -60,29 +65,29 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
                     avatar: string;
                 };
             } & {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                content: string;
                 projectId: string;
+                id: string;
+                content: string;
                 mentions: string[];
-                senderId: string;
+                reactions: import("@prisma/client/runtime/library").JsonValue | null;
                 isEdited: boolean;
                 editedAt: Date | null;
-                reactions: import("@prisma/client/runtime/library").JsonValue | null;
+                createdAt: Date;
+                updatedAt: Date;
+                senderId: string;
                 replyToId: string | null;
             };
         } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            content: string;
             projectId: string;
+            id: string;
+            content: string;
             mentions: string[];
-            senderId: string;
+            reactions: import("@prisma/client/runtime/library").JsonValue | null;
             isEdited: boolean;
             editedAt: Date | null;
-            reactions: import("@prisma/client/runtime/library").JsonValue | null;
+            createdAt: Date;
+            updatedAt: Date;
+            senderId: string;
             replyToId: string | null;
         };
         error?: undefined;
@@ -137,16 +142,16 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
                 avatar: string;
             };
         } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            content: string;
             projectId: string;
+            id: string;
+            content: string;
             mentions: string[];
-            senderId: string;
+            reactions: import("@prisma/client/runtime/library").JsonValue | null;
             isEdited: boolean;
             editedAt: Date | null;
-            reactions: import("@prisma/client/runtime/library").JsonValue | null;
+            createdAt: Date;
+            updatedAt: Date;
+            senderId: string;
             replyToId: string | null;
         };
         error?: undefined;

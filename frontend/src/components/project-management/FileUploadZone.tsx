@@ -42,8 +42,9 @@ export function FileUploadZone({
   const validateFile = (file: File): boolean => {
     if (file.size > maxFileSize) {
       toast({
-        variant: 'destructive',
+        title: 'File too large',
         description: `File size exceeds ${maxFileSize / 1024 / 1024}MB limit`,
+        type: 'error',
       });
       return false;
     }
@@ -60,8 +61,9 @@ export function FileUploadZone({
 
     if (!isAccepted) {
       toast({
-        variant: 'destructive',
+        title: 'Invalid file type',
         description: 'File type not supported',
+        type: 'error',
       });
       return false;
     }
@@ -119,7 +121,9 @@ export function FileUploadZone({
           }
 
           toast({
+            title: 'Upload successful',
             description: `${file.file.name} uploaded successfully`,
+            type: 'success',
           });
         } else {
           throw new Error(`Upload failed with status ${xhr.status}`);
@@ -141,8 +145,9 @@ export function FileUploadZone({
         );
 
         toast({
-          variant: 'destructive',
+          title: 'Upload failed',
           description: `Failed to upload ${file.file.name}`,
+          type: 'error',
         });
       });
 

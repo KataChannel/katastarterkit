@@ -137,7 +137,8 @@ export function useFileUpload() {
       if (folderId) formData.append('folderId', folderId);
       if (metadata) formData.append('metadata', JSON.stringify(metadata));
 
-      const response = await fetch('http://localhost:3000/api/files/upload', {
+      const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
+      const response = await fetch(`${apiUrl}/api/files/upload`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -171,7 +172,8 @@ export function useFileUpload() {
       files.forEach((file) => formData.append('files', file as any));
       if (folderId) formData.append('folderId', folderId);
 
-      const response = await fetch('http://localhost:3000/api/files/upload/bulk', {
+      const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
+      const response = await fetch(`${apiUrl}/api/files/upload/bulk`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
