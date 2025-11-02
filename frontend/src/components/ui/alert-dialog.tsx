@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { createPortal } from "react-dom"
 
 const AlertDialog = ({ 
   children, 
@@ -11,6 +12,7 @@ const AlertDialog = ({
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) => {
+  if (!open) return null;
   return <>{children}</>
 }
 
@@ -39,15 +41,37 @@ AlertDialogTrigger.displayName = "AlertDialogTrigger"
 const AlertDialogContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-    <div
-      ref={ref}
-      className={`w-full max-w-lg p-6 bg-white rounded-lg shadow-lg ${className || ''}`}
-      {...props}
-    />
-  </div>
-))
+>(({ className, ...props }, ref) => {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  const content = (
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 pointer-events-auto"
+      onClick={(e) => {
+        // Close on backdrop click
+        if (e.target === e.currentTarget) {
+          // Don't close, let parent handle
+        }
+      }}
+    >
+      <div
+        ref={ref}
+        className={`w-full max-w-lg p-6 bg-white rounded-lg shadow-lg pointer-events-auto ${className || ''}`}
+        onClick={(e) => e.stopPropagation()}
+        {...props}
+      />
+    </div>
+  );
+
+  return createPortal(content, document.body);
+})
 AlertDialogContent.displayName = "AlertDialogContent"
 
 const AlertDialogHeader = React.forwardRef<

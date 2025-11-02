@@ -53,7 +53,7 @@ enum AIProviderType {
 
 input AddMemberInput {
   role: String = "member"
-  userId: ID!
+  userId: String!
 }
 
 input AddToCartInput {

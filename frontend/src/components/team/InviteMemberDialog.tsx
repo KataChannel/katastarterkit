@@ -9,6 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,7 +36,7 @@ import { useApolloClient, gql } from '@apollo/client';
 interface InviteMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onInvite: (email: string, role: string, projectId?: string) => Promise<void>;
+  onInvite: (email: string, role: string, projectId?: string, userId?: string) => Promise<void>;
   loading?: boolean;
   projects?: Array<{ id: string; name: string }>;
   selectedProjectId?: string | null;
@@ -52,6 +62,12 @@ export function InviteMemberDialog({
   const [isValidating, setIsValidating] = useState(false);
   const [existingRole, setExistingRole] = useState<string | null>(null);
   const [checkingMembership, setCheckingMembership] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmData, setConfirmData] = useState<{
+    userName: string;
+    currentRole: string;
+    newRole: string;
+  } | null>(null);
   const { toast } = useToast();
   const apolloClient = useApolloClient();
 
@@ -367,35 +383,26 @@ export function InviteMemberDialog({
         return;
       }
       
-      const confirmed = window.confirm(
-        `🔄 Thay đổi vai trò\n\n` +
-        `Người dùng: ${validatedUserName}\n` +
-        `Vai trò hiện tại: ${currentRoleName}\n` +
-        `Vai trò mới: ${newRoleName}\n\n` +
-        `Bạn có chắc chắn muốn thay đổi vai trò không?`
-      );
-      
-      if (!confirmed) {
-        console.log('[InviteMemberDialog] User cancelled role change');
-        return;
-      }
-    }
-
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast({
-        title: 'Lỗi',
-        description: 'Email không hợp lệ',
-        type: 'error',
-        variant: 'destructive',
+      // Show confirmation dialog
+      setConfirmData({
+        userName: validatedUserName,
+        currentRole: currentRoleName,
+        newRole: newRoleName,
       });
+      setShowConfirmDialog(true);
       return;
     }
 
+    // Proceed with adding member
+    await performAddMember();
+  };
+
+  // Perform the actual add member action
+  const performAddMember = async () => {
     setSubmitting(true);
     try {
-      await onInvite(email, role, localProjectId || undefined);
+      // Pass validatedUserId to avoid re-querying
+      await onInvite(email, role, localProjectId || undefined, validatedUserId || undefined);
       
       // Reset form on success
       setEmail('');
@@ -403,6 +410,8 @@ export function InviteMemberDialog({
       setValidatedUserId(null);
       setValidatedUserName('');
       setExistingRole(null);
+      setShowConfirmDialog(false);
+      setConfirmData(null);
       // Don't reset project selection
       
     } catch (error) {
@@ -411,6 +420,18 @@ export function InviteMemberDialog({
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Handle confirm role change
+  const handleConfirmRoleChange = async () => {
+    setShowConfirmDialog(false);
+    await performAddMember();
+  };
+
+  // Handle cancel role change
+  const handleCancelRoleChange = () => {
+    setShowConfirmDialog(false);
+    setConfirmData(null);
   };
 
   const handleCancel = () => {
@@ -423,19 +444,20 @@ export function InviteMemberDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            Mời thành viên
-          </DialogTitle>
-          <DialogDescription>
-            Nhập email và chọn vai trò cho thành viên mới
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              Mời thành viên
+            </DialogTitle>
+            <DialogDescription>
+              Nhập email và chọn vai trò cho thành viên mới
+            </DialogDescription>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
           <div className="grid gap-4 p-4 max-h-[60vh] overflow-y-auto">
             {/* Project selection - only show if projects prop is provided */}
             {projects && projects.length > 0 && (
@@ -625,5 +647,46 @@ export function InviteMemberDialog({
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Confirmation Dialog for Role Change */}
+    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            🔄 Thay đổi vai trò
+          </AlertDialogTitle>
+        </AlertDialogHeader>
+        
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <div className="text-sm">
+              <span className="font-medium">Người dùng:</span>{' '}
+              {confirmData?.userName}
+            </div>
+            <div className="text-sm">
+              <span className="font-medium">Vai trò hiện tại:</span>{' '}
+              <span className="text-amber-600">{confirmData?.currentRole}</span>
+            </div>
+            <div className="text-sm">
+              <span className="font-medium">Vai trò mới:</span>{' '}
+              <span className="text-green-600">{confirmData?.newRole}</span>
+            </div>
+          </div>
+          <div className="text-sm font-medium">
+            Bạn có chắc chắn muốn thay đổi vai trò không?
+          </div>
+        </div>
+        
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={handleCancelRoleChange}>
+            Hủy
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={handleConfirmRoleChange}>
+            Xác nhận thay đổi
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 }
