@@ -130,6 +130,46 @@ export class DynamicCRUDService {
           throw new BadRequestException('Task userId is required. Please ensure you are authenticated.');
         }
       }
+
+      // TaskComment model: Convert task/user relationships to scalar fields
+      if (modelName === 'TaskComment' || modelName === 'taskComment') {
+        // Convert task.connect to taskId
+        if (data.task?.connect?.id && !data.taskId) {
+          console.log(`🔄 Converting task.connect to taskId:`, data.task.connect.id);
+          data.taskId = data.task.connect.id;
+          delete data.task; // Remove relationship, use scalar
+        }
+        
+        // Convert user.connect to userId
+        if (data.user?.connect?.id && !data.userId) {
+          console.log(`🔄 Converting user.connect to userId:`, data.user.connect.id);
+          data.userId = data.user.connect.id;
+          delete data.user; // Remove relationship, use scalar
+        }
+        
+        // Fallback: Get userId from context if not set
+        if (!data.userId) {
+          const userId = 
+            context?.req?.user?.id || 
+            context?.user?.id || 
+            context?.userId;
+          
+          if (userId) {
+            console.log(`🔄 FALLBACK (taskComment): Setting userId from context:`, userId);
+            data.userId = userId;
+          }
+        }
+        
+        // Validate required fields
+        if (!data.taskId) {
+          console.error('❌ TaskComment create failed: Missing taskId', { data });
+          throw new BadRequestException('TaskComment taskId is required.');
+        }
+        if (!data.userId) {
+          console.error('❌ TaskComment create failed: Missing userId', { data, context: !!context });
+          throw new BadRequestException('TaskComment userId is required. Please ensure you are authenticated.');
+        }
+      }
       
       // Project model: Fallback for ownerId
       if ((modelName === 'Project' || modelName === 'project') && !data.ownerId) {

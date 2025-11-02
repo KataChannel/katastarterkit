@@ -1,7 +1,8 @@
-1. Sử dụng dynamic graphql cho tất cả model backend và frontend
-2. Code Like Senior
-3. Frontend chuẩn shadcn UI code giao diện Mobile First + Responsive + PWA
-4. Bỏ qua testing
-5. Không git
-6. Chỉ tạo 1 file .md tổng hợp ngắn gọn cuối cùng bằng tiếng việt
-7. Dialog sử dụng theo layout header, footer, content scrollable
+1. Code Like Senior
+2. Sử dụng dynamic graphql cho tất cả model backend và frontend
+3. Bỏ qua testing
+4. Không git
+5. Chỉ tạo 1 file .md tổng hợp ngắn gọn cuối cùng bằng tiếng việt
+6. Frontend chuẩn shadcn UI code giao diện Mobile First + Responsive + PWA
+7. Giao diện tiếng việt
+8. Dialog sử dụng theo layout header, footer, content scrollable

@@ -118,9 +118,11 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Failed to load analytics: {error.message}</AlertDescription>
+      <Alert className="border-destructive bg-destructive/10">
+        <AlertCircle className="h-4 w-4 text-destructive" />
+        <AlertDescription className="text-destructive">
+          Failed to load analytics: {error.message}
+        </AlertDescription>
       </Alert>
     );
   }
@@ -294,18 +296,18 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
           {/* Alerts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {parsedData.overdueTasks.length > 0 && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
+              <Alert className="border-destructive bg-destructive/10">
+                <AlertCircle className="h-4 w-4 text-destructive" />
+                <AlertDescription className="text-destructive">
                   {parsedData.overdueTasks.length} task(s) are overdue. Action required!
                 </AlertDescription>
               </Alert>
             )}
 
             {parsedData.upcomingDeadlines.length > 0 && (
-              <Alert>
-                <Calendar className="h-4 w-4" />
-                <AlertDescription>
+              <Alert className="border-blue-200 bg-blue-50">
+                <Calendar className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
                   {parsedData.upcomingDeadlines.length} task(s) with upcoming deadline (7 days)
                 </AlertDescription>
               </Alert>

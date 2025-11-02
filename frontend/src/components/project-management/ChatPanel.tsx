@@ -46,7 +46,7 @@ export default function ChatPanel({ projectId, userToken }: ChatPanelProps) {
   const [isConnected, setIsConnected] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Initialize Socket.IO connection
   useEffect(() => {
@@ -147,8 +147,9 @@ export default function ChatPanel({ projectId, userToken }: ChatPanelProps) {
 
     newSocket.on('error', (error: { message: string }) => {
       toast({
-        variant: 'destructive',
+        title: 'Error',
         description: `Chat error: ${error.message}`,
+        type: 'error',
       });
     });
 

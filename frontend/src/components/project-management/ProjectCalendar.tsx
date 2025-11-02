@@ -146,9 +146,11 @@ export function ProjectCalendar({ projectId }: ProjectCalendarProps) {
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Failed to load calendar: {error.message}</AlertDescription>
+      <Alert className="border-destructive bg-destructive/10">
+        <AlertCircle className="h-4 w-4 text-destructive" />
+        <AlertDescription className="text-destructive">
+          Failed to load calendar: {error.message}
+        </AlertDescription>
       </Alert>
     );
   }
