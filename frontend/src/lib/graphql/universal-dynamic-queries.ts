@@ -31,10 +31,21 @@ export const UNIVERSAL_MUTATION = gql`
 
 /**
  * Dynamic Find Many - Get multiple records with pagination
+ * Uses old API: dynamicFindMany
  */
 export const DYNAMIC_FIND_MANY = gql`
   query DynamicFindMany($input: FindManyInput!) {
     dynamicFindMany(input: $input)
+  }
+`;
+
+/**
+ * Find Many (New Unified API)
+ * Uses new API: findMany
+ */
+export const FIND_MANY_UNIFIED = gql`
+  query FindManyUnified($input: UnifiedFindManyInput, $modelName: String!) {
+    findMany(modelName: $modelName, input: $input)
   }
 `;
 
