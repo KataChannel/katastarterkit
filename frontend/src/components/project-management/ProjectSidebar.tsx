@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useMyProjects } from '@/hooks/useProjects.dynamic';
-import { Plus, Archive, Users, MessageSquare, CheckSquare } from 'lucide-react';
+import { Plus, Archive, Users, MessageSquare, CheckSquare, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,11 +12,13 @@ import CreateProjectModal from './CreateProjectModal';
 interface ProjectSidebarProps {
   selectedProjectId: string | null;
   onSelectProject: (projectId: string) => void;
+  onInviteClick?: (projectId: string) => void;
 }
 
 export default function ProjectSidebar({
   selectedProjectId,
   onSelectProject,
+  onInviteClick,
 }: ProjectSidebarProps) {
   const { data, loading, error } = useMyProjects(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -105,6 +107,7 @@ export default function ProjectSidebar({
                 project={project}
                 isSelected={project.id === selectedProjectId}
                 onClick={() => onSelectProject(project.id)}
+                onInviteClick={onInviteClick}
               />
             ))
           )}
@@ -126,18 +129,32 @@ interface ProjectItemProps {
   project: any;
   isSelected: boolean;
   onClick: () => void;
+  onInviteClick?: (projectId: string) => void;
 }
 
-function ProjectItem({ project, isSelected, onClick }: ProjectItemProps) {
+function ProjectItem({ project, isSelected, onClick, onInviteClick }: ProjectItemProps) {
   const getInitials = (firstName?: string, lastName?: string) => {
     return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || 'P';
   };
 
+  const handleInviteClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering project selection
+    onInviteClick?.(project.id);
+  };
+
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className={`
-        w-full p-3 rounded-lg text-left transition-colors
+        w-full p-3 rounded-lg text-left transition-colors relative group cursor-pointer
         ${
           isSelected
             ? 'bg-primary/10 border border-primary'
@@ -162,6 +179,19 @@ function ProjectItem({ project, isSelected, onClick }: ProjectItemProps) {
             </p>
           )}
         </div>
+
+        {/* Invite Button - Shows on hover */}
+        {onInviteClick && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={handleInviteClick}
+            title="Mời thành viên"
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+          </Button>
+        )}
       </div>
 
       {/* Stats */}
@@ -194,6 +224,6 @@ function ProjectItem({ project, isSelected, onClick }: ProjectItemProps) {
           Archived
         </Badge>
       )}
-    </button>
+    </div>
   );
 }
