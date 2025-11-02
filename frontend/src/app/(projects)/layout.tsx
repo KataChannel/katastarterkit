@@ -5,8 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
   LayoutDashboard, 
-  FolderKanban, 
-  Users, 
+  List, 
   Settings, 
   Bell,
   Search,
@@ -35,9 +34,8 @@ export default function ProjectsLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
-    { name: 'Dashboard', href: '/projects/dashboard', icon: LayoutDashboard },
-    { name: 'Projects', href: '/projects', icon: FolderKanban },
-    { name: 'Team', href: '/projects/team', icon: Users },
+    { name: 'Dashboard', href: '/projects', icon: LayoutDashboard },
+    { name: 'Views', href: '/projects/views', icon: List },
     { name: 'Settings', href: '/projects/settings', icon: Settings },
   ];
 
@@ -63,7 +61,7 @@ export default function ProjectsLayout({
             
             <Link href="/projects" className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <FolderKanban className="h-5 w-5 text-primary-foreground" />
+                <LayoutDashboard className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="hidden sm:inline-block font-semibold text-lg">
                 ProjectHub
@@ -75,7 +73,11 @@ export default function ProjectsLayout({
           <nav className="hidden lg:flex items-center gap-1">
             {navigation.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+              // Dashboard (/projects) is exact match or starts with /projects/dashboard
+              // Other routes use startsWith
+              const isActive = item.href === '/projects' 
+                ? (pathname === '/projects' || pathname === '/projects/dashboard' || pathname?.startsWith('/projects/dashboard/'))
+                : (pathname === item.href || pathname?.startsWith(item.href + '/'));
               
               return (
                 <Link
@@ -144,7 +146,11 @@ export default function ProjectsLayout({
             <nav className="grid gap-1 p-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+                // Dashboard (/projects) is exact match or starts with /projects/dashboard
+                // Other routes use startsWith
+                const isActive = item.href === '/projects' 
+                  ? (pathname === '/projects' || pathname === '/projects/dashboard' || pathname?.startsWith('/projects/dashboard/'))
+                  : (pathname === item.href || pathname?.startsWith(item.href + '/'));
                 
                 return (
                   <Link
