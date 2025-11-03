@@ -1,0 +1,240 @@
+version: '3.8'
+
+# Multi-Domain Deployment - Optimized for 1 Core, 1GB RAM, 5GB Storage
+# This configuration runs 2 domains (rausach + tazagroup) sharing infrastructure services
+
+services:
+  # ========================================
+  # SHARED INFRASTRUCTURE SERVICES
+  # ========================================
+  
+  # PostgreSQL Database - Shared by both domains (separate databases)
+  postgres:
+    image: postgres:16-alpine
+    container_name: shared-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      # Both databases will be created via init scripts
+    ports:
+      - "12003:5432"  # Main port for rausach
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-multi-db.sh:/docker-entrypoint-initdb.d/init-multi-db.sh:ro
+    networks:
+      - shared-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # Redis Cache - Shared by both domains (separate prefixes)
+  redis:
+    image: redis:7.4-alpine
+    container_name: shared-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --timeout 300 --maxmemory 128mb --maxmemory-policy allkeys-lru
+    ports:
+      - "12004:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - shared-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  # Minio Object Storage - Shared by both domains (separate buckets)
+  minio:
+    image: minio/minio:RELEASE.2024-08-26T15-33-07Z
+    container_name: shared-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minio-admin
+      MINIO_ROOT_PASSWORD: minio-secret-2025
+    ports:
+      - "12007:9000"
+      - "12008:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - shared-network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  # ========================================
+  # RAUSACH DOMAIN (Port 12xxx)
+  # ========================================
+  
+  rausach-backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    container_name: rausach-backend
+    restart: unless-stopped
+    env_file:
+      - .env.rausach
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/rausachcore
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: false
+      MINIO_BUCKET_NAME: rausach-uploads
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_INDEX_PREFIX: rausach
+    ports:
+      - "12001:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - shared-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  rausach-frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    container_name: rausach-frontend
+    restart: unless-stopped
+    env_file:
+      - .env.rausach
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.49.243:12001/graphql
+      NEXT_PUBLIC_APP_URL: http://116.118.49.243:12000
+      NEXTAUTH_URL: http://116.118.49.243:12000
+      NEXT_OTEL_ENABLED: "false"
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "12000:3000"
+    depends_on:
+      - rausach-backend
+    networks:
+      - shared-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # ========================================
+  # TAZAGROUP DOMAIN (Port 13xxx)
+  # ========================================
+  
+  tazagroup-backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    container_name: tazagroup-backend
+    restart: unless-stopped
+    env_file:
+      - .env.tazagroup
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/tazagroupcore
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: false
+      MINIO_BUCKET_NAME: tazagroup-uploads
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_INDEX_PREFIX: tazagroup
+    ports:
+      - "13001:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - shared-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  tazagroup-frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    container_name: tazagroup-frontend
+    restart: unless-stopped
+    env_file:
+      - .env.tazagroup
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.49.243:13001/graphql
+      NEXT_PUBLIC_APP_URL: http://116.118.49.243:13000
+      NEXTAUTH_URL: http://116.118.49.243:13000
+      NEXT_OTEL_ENABLED: "false"
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "13000:3000"
+    depends_on:
+      - tazagroup-backend
+    networks:
+      - shared-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  shared-network:
+    driver: bridge
+    name: multi-domain-network
