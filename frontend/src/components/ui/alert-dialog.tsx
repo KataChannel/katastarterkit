@@ -3,6 +3,11 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 
+// Create context to share onOpenChange
+const AlertDialogContext = React.createContext<{
+  onOpenChange?: (open: boolean) => void;
+}>({});
+
 const AlertDialog = ({ 
   children, 
   open, 
@@ -13,7 +18,11 @@ const AlertDialog = ({
   onOpenChange?: (open: boolean) => void;
 }) => {
   if (!open) return null;
-  return <>{children}</>
+  return (
+    <AlertDialogContext.Provider value={{ onOpenChange }}>
+      {children}
+    </AlertDialogContext.Provider>
+  );
 }
 
 const AlertDialogTrigger = React.forwardRef<
@@ -137,13 +146,27 @@ AlertDialogAction.displayName = "AlertDialogAction"
 const AlertDialogCancel = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ className, ...props }, ref) => (
-  <button
-    ref={ref}
-    className={`inline-flex h-10 items-center justify-center rounded-md border border-slate-200 bg-transparent px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 ${className || ''}`}
-    {...props}
-  />
-))
+>(({ className, onClick, ...props }, ref) => {
+  const { onOpenChange } = React.useContext(AlertDialogContext);
+  
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Call custom onClick first if provided
+    onClick?.(e);
+    // Then close the dialog
+    if (!e.defaultPrevented) {
+      onOpenChange?.(false);
+    }
+  };
+
+  return (
+    <button
+      ref={ref}
+      onClick={handleClick}
+      className={`inline-flex h-10 items-center justify-center rounded-md border border-slate-200 bg-transparent px-4 py-2 text-sm font-semibold transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 ${className || ''}`}
+      {...props}
+    />
+  );
+})
 AlertDialogCancel.displayName = "AlertDialogCancel"
 
 export {

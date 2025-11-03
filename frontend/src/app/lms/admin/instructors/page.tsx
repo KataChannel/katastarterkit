@@ -587,7 +587,7 @@ export default function AdminInstructorsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={updateLoading}>
+            <AlertDialogCancel>
               Hủy
             </AlertDialogCancel>
             <AlertDialogAction
