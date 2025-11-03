@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ interface Student {
 }
 
 export default function AdminStudentsPage() {
+  const router = useRouter();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
@@ -268,6 +270,7 @@ export default function AdminStudentsPage() {
                     variant="outline" 
                     size="sm" 
                     className="w-full"
+                    onClick={() => router.push(`/lms/admin/students/${student.id}`)}
                   >
                     Xem chi tiết
                   </Button>

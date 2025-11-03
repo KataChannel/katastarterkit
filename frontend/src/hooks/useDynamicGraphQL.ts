@@ -114,13 +114,26 @@ export function useFindUnique<T = any>(
 ) {
   // Auto-skip if auth is required but token not available
   const hasToken = typeof window !== 'undefined' ? !!localStorage.getItem('accessToken') : false;
-  const shouldSkip = config?.skip || !where || (config?.requireAuth !== false && !hasToken);
+  
+  // Extract ID from where parameter
+  const id = typeof where === 'string' ? where : where?.id;
+  
+  // Log warning if ID is missing (helps debugging)
+  if (!id && !config?.skip && process.env.NODE_ENV === 'development') {
+    console.warn(
+      `[useFindUnique] Missing ID for model "${model}". ` +
+      `Query will be skipped. Please provide where: { id: "..." } or where: "id-string"`
+    );
+  }
+  
+  // Skip if no ID provided or if auth required but no token
+  const shouldSkip = config?.skip || !id || (config?.requireAuth !== false && !hasToken);
 
   const { data, loading, error, refetch } = useQuery(FIND_UNIQUE, {
     variables: {
       modelName: model,
       input: {
-        id: typeof where === 'string' ? where : where?.id,
+        id: id || '',  // Provide empty string instead of undefined to avoid GraphQL error
         select: options?.select,
         include: options?.include,
       },
@@ -385,11 +398,19 @@ export function useUpdateOne<T = any>(model: string, config?: { refetchQueries?:
       select?: any;
       include?: any;
     }) => {
+      // Extract ID from where clause
+      const id = typeof input.where === 'string' ? input.where : input.where?.id;
+      
+      // Validate ID is provided
+      if (!id) {
+        throw new Error('ID is required for update operation. Please provide where: { id: "..." } or where: "id-string"');
+      }
+
       const result = await mutate({
         variables: {
           modelName: model,
           input: {
-            id: typeof input.where === 'string' ? input.where : input.where?.id,
+            id,
             data: input.data,
             select: input.select,
             include: input.include,
@@ -446,11 +467,19 @@ export function useDeleteOne<T = any>(model: string, config?: { refetchQueries?:
       where: any;
       select?: any;
     }) => {
+      // Extract ID from where clause
+      const id = typeof input.where === 'string' ? input.where : input.where?.id;
+      
+      // Validate ID is provided
+      if (!id) {
+        throw new Error('ID is required for delete operation. Please provide where: { id: "..." } or where: "id-string"');
+      }
+
       const result = await mutate({
         variables: {
           modelName: model,
           input: {
-            id: typeof input.where === 'string' ? input.where : input.where?.id,
+            id,
             select: input.select,
           },
         },
