@@ -9,6 +9,12 @@
 
 COMPOSE_FILE := docker-compose.hybrid.yml
 
+# Auto-detect docker compose command
+DOCKER_COMPOSE := $(shell which docker-compose 2>/dev/null)
+ifeq ($(DOCKER_COMPOSE),)
+    DOCKER_COMPOSE := docker compose
+endif
+
 # Colors
 BLUE := \033[0;34m
 GREEN := \033[0;32m
@@ -52,58 +58,58 @@ help: ## Show help menu
 # Start Commands
 start-all: ## Khởi động tất cả
 	@echo "$(GREEN)🚀 Starting ALL services...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d
 	@$(MAKE) status
 
 start-rausach: ## Khởi động Rausach
 	@echo "$(GREEN)🚀 Starting Rausach domain...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d redis minio rausach-postgres rausach-backend rausach-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d redis minio rausach-postgres rausach-backend rausach-frontend
 	@$(MAKE) status
 
 start-tazagroup: ## Khởi động Tazagroup
 	@echo "$(GREEN)🚀 Starting Tazagroup domain...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d redis minio tazagroup-postgres tazagroup-backend tazagroup-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d redis minio tazagroup-postgres tazagroup-backend tazagroup-frontend
 	@$(MAKE) status
 
 start-shared: ## Khởi động shared services
 	@echo "$(GREEN)🚀 Starting shared services (Redis + Minio)...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d redis minio
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d redis minio
 	@$(MAKE) status
 
 # Stop Commands
 stop-all: ## Dừng tất cả
 	@echo "$(YELLOW)🛑 Stopping ALL...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) down
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down
 	@echo "$(GREEN)✅ Stopped$(NC)"
 
 stop-rausach: ## Dừng Rausach
 	@echo "$(YELLOW)🛑 Stopping Rausach...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) stop rausach-postgres rausach-backend rausach-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) stop rausach-postgres rausach-backend rausach-frontend
 	@echo "$(GREEN)✅ Stopped$(NC)"
 
 stop-tazagroup: ## Dừng Tazagroup
 	@echo "$(YELLOW)🛑 Stopping Tazagroup...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) stop tazagroup-postgres tazagroup-backend tazagroup-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) stop tazagroup-postgres tazagroup-backend tazagroup-frontend
 	@echo "$(GREEN)✅ Stopped$(NC)"
 
 # Logs
 logs: ## Xem logs tất cả
-	@docker-compose -f $(COMPOSE_FILE) logs -f --tail=100
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs -f --tail=100
 
 logs-rausach: ## Xem logs Rausach
-	@docker-compose -f $(COMPOSE_FILE) logs -f --tail=100 rausach-postgres rausach-backend rausach-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs -f --tail=100 rausach-postgres rausach-backend rausach-frontend
 
 logs-tazagroup: ## Xem logs Tazagroup
-	@docker-compose -f $(COMPOSE_FILE) logs -f --tail=100 tazagroup-postgres tazagroup-backend tazagroup-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs -f --tail=100 tazagroup-postgres tazagroup-backend tazagroup-frontend
 
 # Status
 status: ## Trạng thái
 	@echo ""
 	@echo "$(BLUE)📊 Container Status:$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) ps
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps
 	@echo ""
 	@echo "$(BLUE)💾 Resource Usage:$(NC)"
-	@docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}" $$(docker-compose -f $(COMPOSE_FILE) ps -q 2>/dev/null) 2>/dev/null || echo "No containers"
+	@docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}" $$($(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps -q 2>/dev/null) 2>/dev/null || echo "No containers"
 	@echo ""
 	@echo "$(GREEN)🌐 URLs:$(NC)"
 	@echo "  $(YELLOW)Rausach:$(NC)"
@@ -123,18 +129,18 @@ status: ## Trạng thái
 
 restart: ## Restart tất cả
 	@echo "$(YELLOW)🔄 Restarting...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) restart
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) restart
 	@$(MAKE) status
 
 build: ## Build lại
 	@echo "$(YELLOW)🔨 Building...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) build --no-cache
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) build --no-cache
 	@echo "$(GREEN)✅ Done$(NC)"
 
 clean: ## Dọn dẹp
 	@echo "$(RED)🗑️  Cleaning (volumes will be REMOVED!)$(NC)"
 	@read -p "Sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
-	@docker-compose -f $(COMPOSE_FILE) down -v
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down -v
 	@docker system prune -f
 	@echo "$(GREEN)✅ Done$(NC)"
 
