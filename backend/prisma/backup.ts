@@ -55,6 +55,10 @@ function isSystemTable(tableName: string): boolean {
   const systemTables = [
     'website_settings', // WebsiteSetting model - important config
     '_prisma_migrations', // Prisma migrations tracking
+    'call_center_config', // Call center configuration
+    'call_center_sync_logs', // Call center sync history
+    'chat_integrations', // Chat platform integrations
+    'ai_providers', // AI provider configurations
   ];
   return systemTables.includes(tableName);
 }

@@ -190,6 +190,157 @@ function transformRecord(record: any, tableName?: string): any {
     }
   }
 
+  // Handle AI providers transformations
+  if (tableName === 'ai_providers') {
+    // Ensure tags is an array
+    if (!transformed.tags || !Array.isArray(transformed.tags)) {
+      transformed.tags = [];
+    }
+    // Ensure numeric fields have proper defaults
+    if (transformed.totalRequests === null || transformed.totalRequests === undefined) {
+      transformed.totalRequests = 0;
+    }
+    if (transformed.successCount === null || transformed.successCount === undefined) {
+      transformed.successCount = 0;
+    }
+    if (transformed.failureCount === null || transformed.failureCount === undefined) {
+      transformed.failureCount = 0;
+    }
+  }
+
+  // Handle support conversations transformations
+  if (tableName === 'support_conversations') {
+    // Ensure tags is an array
+    if (!transformed.tags || !Array.isArray(transformed.tags)) {
+      transformed.tags = [];
+    }
+  }
+
+  // Handle support tickets transformations
+  if (tableName === 'support_tickets') {
+    // Ensure tags is an array
+    if (!transformed.tags || !Array.isArray(transformed.tags)) {
+      transformed.tags = [];
+    }
+  }
+
+  // Handle chat bot rules transformations
+  if (tableName === 'chat_bot_rules') {
+    // Ensure arrays are properly formatted
+    if (!transformed.keywords || !Array.isArray(transformed.keywords)) {
+      transformed.keywords = [];
+    }
+    if (!transformed.platform || !Array.isArray(transformed.platform)) {
+      transformed.platform = [];
+    }
+  }
+
+  // Handle blog posts transformations
+  if (tableName === 'blog_posts') {
+    // Ensure arrays are properly formatted
+    if (!transformed.metaKeywords || !Array.isArray(transformed.metaKeywords)) {
+      transformed.metaKeywords = [];
+    }
+    if (!transformed.images || !Array.isArray(transformed.images)) {
+      transformed.images = [];
+    }
+  }
+
+  // Handle products transformations
+  if (tableName === 'products') {
+    // Ensure numeric fields
+    if (typeof transformed.viewCount !== 'number') {
+      transformed.viewCount = 0;
+    }
+    if (typeof transformed.soldCount !== 'number') {
+      transformed.soldCount = 0;
+    }
+  }
+
+  // Handle product reviews transformations
+  if (tableName === 'product_reviews') {
+    // Ensure images is an array
+    if (!transformed.images || !Array.isArray(transformed.images)) {
+      transformed.images = [];
+    }
+  }
+
+  // Handle orders transformations
+  if (tableName === 'orders') {
+    // Ensure numeric fields
+    if (typeof transformed.subtotal !== 'number') {
+      transformed.subtotal = 0;
+    }
+    if (typeof transformed.total !== 'number') {
+      transformed.total = 0;
+    }
+    if (typeof transformed.shippingFee !== 'number') {
+      transformed.shippingFee = 0;
+    }
+    if (typeof transformed.tax !== 'number') {
+      transformed.tax = 0;
+    }
+    if (typeof transformed.discount !== 'number') {
+      transformed.discount = 0;
+    }
+  }
+
+  // Handle courses transformations
+  if (tableName === 'courses') {
+    // Ensure arrays are properly formatted
+    if (!transformed.whatYouWillLearn || !Array.isArray(transformed.whatYouWillLearn)) {
+      transformed.whatYouWillLearn = [];
+    }
+    if (!transformed.requirements || !Array.isArray(transformed.requirements)) {
+      transformed.requirements = [];
+    }
+    if (!transformed.targetAudience || !Array.isArray(transformed.targetAudience)) {
+      transformed.targetAudience = [];
+    }
+    if (!transformed.tags || !Array.isArray(transformed.tags)) {
+      transformed.tags = [];
+    }
+  }
+
+  // Handle employee profiles transformations
+  if (tableName === 'employee_profiles') {
+    // Ensure skills is an array
+    if (!transformed.skills || !Array.isArray(transformed.skills)) {
+      transformed.skills = [];
+    }
+  }
+
+  // Handle tasks transformations
+  if (tableName === 'tasks') {
+    // Ensure arrays for project management fields
+    if (!transformed.assignedTo || !Array.isArray(transformed.assignedTo)) {
+      transformed.assignedTo = [];
+    }
+    if (!transformed.mentions || !Array.isArray(transformed.mentions)) {
+      transformed.mentions = [];
+    }
+    if (!transformed.tags || !Array.isArray(transformed.tags)) {
+      transformed.tags = [];
+    }
+  }
+
+  // Handle Hoadon transformations (Invoice)
+  if (tableName === 'Hoadon') {
+    // Ensure numeric fields have proper types
+    if (transformed.tgia !== null && transformed.tgia !== undefined) {
+      transformed.tgia = Number(transformed.tgia);
+    }
+    if (transformed.tgtcthue !== null && transformed.tgtcthue !== undefined) {
+      transformed.tgtcthue = Number(transformed.tgtcthue);
+    }
+    if (transformed.tgtthue !== null && transformed.tgtthue !== undefined) {
+      transformed.tgtthue = Number(transformed.tgtthue);
+    }
+    if (transformed.tgtttbso !== null && transformed.tgtttbso !== undefined) {
+      transformed.tgtttbso = Number(transformed.tgtttbso);
+    }
+  }
+
   return transformed;
 }
 
@@ -207,26 +358,51 @@ async function batchInsert(
 
   // Try batch insert first with dynamic batch sizing
   try {
-    // For menus table, use upsert to handle UNIQUE slug constraint
-    if (table === 'menus') {
+    // Tables that need special handling with upsert (have UNIQUE constraints other than id)
+    const tablesNeedingUpsert = [
+      'menus', // UNIQUE slug
+    ];
+
+    if (tablesNeedingUpsert.includes(table)) {
       const errors: any[] = [];
+      
       for (const record of records) {
         try {
+          // Determine the unique field for each table
+          let whereClause: any;
+          
+          if (table === 'menus') {
+            whereClause = { slug: record.slug };
+          } else {
+            whereClause = { id: record.id };
+          }
+
           await model.upsert({
-            where: { slug: record.slug },
+            where: whereClause,
             update: record,
             create: record,
           });
           inserted++;
         } catch (error: any) {
+          const errorMsg = error.message || String(error);
+          console.log(`   ❌ Failed to upsert record in ${table}: ${errorMsg.substring(0, 100)}`);
+          errors.push({ 
+            table, 
+            record: JSON.stringify(record).substring(0, 100),
+            error: errorMsg.substring(0, 100) 
+          });
           skipped++;
-          errors.push({ slug: record.slug, error: error.message });
         }
       }
-      if (errors.length > 0) {
-        console.log(`   ⚠️  ${errors.length} menus failed:`);
-        errors.forEach(e => console.log(`      - ${e.slug}: ${e.error.substring(0, 80)}`));
+      
+      if (errors.length > 0 && errors.length <= 5) {
+        console.log(`   ⚠️  ${errors.length} ${table} records failed:`);
+        errors.forEach(e => console.log(`      - ${e.error}`));
+      } else if (errors.length > 5) {
+        console.log(`   ⚠️  ${errors.length} ${table} records failed (showing first 5):`);
+        errors.slice(0, 5).forEach(e => console.log(`      - ${e.error}`));
       }
+      
       return { inserted, skipped };
     }
 
@@ -264,9 +440,22 @@ async function batchInsert(
           // Fall back to individual inserts for this chunk
           for (const record of chunk) {
             try {
-              await model.create({ data: record });
+              // For menus table with unique slug
+              if (table === 'menus') {
+                await model.upsert({
+                  where: { slug: record.slug },
+                  update: record,
+                  create: record,
+                });
+              } else {
+                await model.create({ data: record });
+              }
               inserted++;
-            } catch (recordError) {
+            } catch (recordError: any) {
+              const errorMsg = recordError.message || String(recordError);
+              if (skipped === 0) { // Only log first error
+                console.log(`   ❌ Error inserting record: ${errorMsg.substring(0, 80)}`);
+              }
               skipped++;
             }
           }
@@ -279,9 +468,28 @@ async function batchInsert(
       
       for (const record of records) {
         try {
-          await model.create({ data: record });
+          // For menus table with unique slug
+          if (table === 'menus') {
+            await model.upsert({
+              where: { slug: record.slug },
+              update: record,
+              create: record,
+            });
+          } else {
+            await model.create({ data: record });
+          }
           inserted++;
-        } catch (error) {
+        } catch (error: any) {
+          const errorMsg = error.message || String(error);
+          if (skipped === 0) { // Only log first error
+            console.log(`   ❌ First insert error:`);
+            console.log(`      ${errorMsg.substring(0, 200)}`);
+            
+            // Check for foreign key violations
+            if (errorMsg.includes('foreign key') || errorMsg.includes('violates')) {
+              console.log(`      💡 Foreign key constraint - parent records may not exist`);
+            }
+          }
           skipped++;
         }
       }
@@ -344,19 +552,41 @@ async function restoreTableOptimized(
       'ext_sanphamhoadon',
       'product_images',
       'product_variants',
+      'cart_items',
+      'order_items',
+      'order_tracking',
+      'order_tracking_events',
+      'payments',
+      'inventory_logs',
+      'product_reviews',
+      'review_helpful',
+      'wishlist_items',
+      
       // Content with FK relationships
       'comments',
       'likes',
       'post_tags',
+      'blog_comments',
+      'blog_post_tags',
+      'blog_post_shares',
+      
       // Tasks with FK relationships
       'task_comments',
       'task_media',
       'task_shares',
+      'task_activity_logs',
+      
+      // Project Management
+      'project_members',
+      'project_chat_messages',
+      
       // Affiliate with FK relationships
       'aff_clicks',
       'aff_conversions',
       'aff_payment_requests',
       'aff_campaign_affiliates',
+      'aff_links',
+      
       // LMS with FK relationships (courses → modules → lessons → progress)
       'course_modules',
       'lessons',
@@ -365,13 +595,44 @@ async function restoreTableOptimized(
       'quizzes',
       'questions',
       'answers',
+      'quiz_attempts',
+      'reviews',
+      'certificates',
+      'discussions',
+      'discussion_replies',
+      
       // Employee with FK relationships
       'employment_history',
       'employee_documents',
       'onboarding_checklists',
       'offboarding_processes',
+      
       // Pages with FK relationships
       'page_blocks',
+      'template_shares',
+      
+      // RBAC with FK relationships
+      'role_permissions',
+      'user_role_assignments',
+      'user_permissions',
+      'resource_accesses',
+      
+      // Auth & Security
+      'auth_methods',
+      'user_sessions',
+      'verification_tokens',
+      'user_devices',
+      'security_events',
+      
+      // Support System
+      'support_messages',
+      'support_attachments',
+      'support_tickets',
+      
+      // File Management
+      'files',
+      'file_shares',
+      
       // Website settings with FK to users
       'website_settings',
     ];
@@ -435,31 +696,142 @@ async function restoreTableOptimized(
 /**
  * Restore with raw SQL for tables without Prisma models
  */
+/**
+ * Restore with raw SQL for tables without Prisma models
+ */
 async function restoreWithRawSQL(table: string, records: any[]): Promise<void> {
   try {
-    const columns = Object.keys(records[0])
-      .map(col => `"${col}"`)
-      .join(', ');
-
     let inserted = 0;
     let skipped = 0;
 
+    // Determine conflict strategy based on table
+    const tablesWithUniqueKey: { [key: string]: string } = {
+      '_prisma_migrations': 'id',
+      'website_settings': 'key',
+    };
+
+    const conflictKey = tablesWithUniqueKey[table];
+
     // Process in batches for better performance
-    for (let i = 0; i < records.length; i += BATCH_SIZE) {
-      const batch = records.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < records.length; i += Math.min(BATCH_SIZE, 100)) {
+      const batch = records.slice(i, i + Math.min(BATCH_SIZE, 100));
 
       for (const row of batch) {
         try {
-          const values = Object.keys(records[0])
-            .map((_, idx) => `$${idx + 1}`)
-            .join(', ');
+          // Transform the record before inserting
+          const transformedRow = transformRecord(row, table);
+          
+          const columnNames = Object.keys(transformedRow);
 
-          await prisma.$queryRawUnsafe(
-            `INSERT INTO "${table}" (${columns}) VALUES (${values}) ON CONFLICT DO NOTHING`,
-            ...Object.values(row),
-          );
+          let query: string;
+          const pgValues: any[] = [];
+          
+          // Build parameterized values with proper type casting
+          const valuePlaceholders = columnNames.map((col, idx) => {
+            const val = transformedRow[col];
+            pgValues.push(val);
+            
+            // Apply type casting for PostgreSQL based on table
+            if (table === '_prisma_migrations') {
+              // _prisma_migrations columns don't need special casting - use defaults
+              if (col === 'finished_at' || col === 'started_at' || col === 'rolled_back_at') {
+                return `$${idx + 1}::timestamp with time zone`;
+              }
+            } else if (table === 'website_settings') {
+              if (col === 'type') {
+                return `$${idx + 1}::"SettingType"`;
+              } else if (col === 'category') {
+                return `$${idx + 1}::"SettingCategory"`;
+              } else if (col === 'validation' || col === 'options') {
+                return `$${idx + 1}::jsonb`;
+              }
+            }
+            
+            return `$${idx + 1}`;
+          }).join(', ');
+          
+          const columnsList = columnNames.map(col => `"${col}"`).join(', ');
+
+          if (conflictKey) {
+            // Use ON CONFLICT DO UPDATE for tables with unique constraints
+            const updateSetClause = columnNames
+              .filter(col => col !== conflictKey) // Don't update the unique key
+              .map(col => `"${col}" = EXCLUDED."${col}"`)
+              .join(', ');
+              
+            query = `
+              INSERT INTO "${table}" (${columnsList}) 
+              VALUES (${valuePlaceholders}) 
+              ON CONFLICT ("${conflictKey}") 
+              DO UPDATE SET ${updateSetClause}
+            `;
+          } else {
+            // Use ON CONFLICT DO NOTHING for tables without known unique constraint
+            query = `
+              INSERT INTO "${table}" (${columnsList}) 
+              VALUES (${valuePlaceholders}) 
+              ON CONFLICT DO NOTHING
+            `;
+          }
+
+          // Convert complex types for PostgreSQL
+          const finalValues = pgValues.map((val: any, idx: number) => {
+            const col = columnNames[idx];
+            
+            // Handle null values
+            if (val === null || val === undefined) {
+              return null;
+            }
+            
+            // Handle Date objects
+            if (val instanceof Date) {
+              return val;
+            }
+            
+            // Handle JSONB fields for website_settings
+            if (table === 'website_settings' && (col === 'options' || col === 'validation')) {
+              if (val === null || val === undefined) {
+                return null;
+              }
+              // If it's already an object, stringify it
+              if (typeof val === 'object') {
+                return JSON.stringify(val);
+              }
+              // If it's a string, try to parse and re-stringify to ensure valid JSON
+              if (typeof val === 'string') {
+                try {
+                  // Parse and re-stringify to ensure valid JSON format
+                  const parsed = JSON.parse(val);
+                  return JSON.stringify(parsed);
+                } catch {
+                  // If parse fails, wrap in quotes or return null
+                  return val === '' ? null : JSON.stringify(val);
+                }
+              }
+              return val;
+            }
+            
+            // Handle JSON/object fields for other tables
+            if (val !== null && typeof val === 'object' && !(val instanceof Date)) {
+              return JSON.stringify(val);
+            }
+            
+            return val;
+          });
+
+          await prisma.$queryRawUnsafe(query, ...finalValues);
           inserted++;
-        } catch (error) {
+        } catch (error: any) {
+          const errorMsg = error.message || String(error);
+          if (skipped === 0) { // Only log first error for debugging
+            console.log(`   ❌ First error in ${table}:`);
+            console.log(`      ${errorMsg.substring(0, 200)}`);
+            
+            // If it's a data type error, suggest checking the schema
+            if (errorMsg.includes('42804') || errorMsg.includes('type')) {
+              console.log(`      💡 This may be a data type mismatch. Checking schema may help.`);
+            }
+          }
           skipped++;
         }
       }
@@ -473,7 +845,9 @@ async function restoreWithRawSQL(table: string, records: any[]): Promise<void> {
       errors: 0,
     });
 
-    console.log(`✅ Table ${table} (raw SQL): ${inserted} inserted`);
+    if (inserted > 0 || skipped > 0) {
+      console.log(`✅ Table ${table} (raw SQL): ${inserted} inserted, ${skipped} skipped`);
+    }
   } catch (error) {
     const errorMsg = `Raw SQL insert failed for table ${table}: ${error}`;
     console.log(`⚠️  ${errorMsg}`);
@@ -517,6 +891,128 @@ async function cleanupBeforeRestore(): Promise<void> {
   }
 
   console.log(`✅ Cleanup completed: ${totalDeleted.toLocaleString()} records deleted\n`);
+}
+
+/**
+ * Create missing lessons that are referenced by quizzes
+ * This fixes FK constraint violations during restore
+ */
+async function createMissingLessons(backupFolder: string): Promise<void> {
+  try {
+    console.log('🔍 Checking for missing lessons referenced by quizzes...');
+    
+    // Read quizzes backup file
+    const quizzesFile = path.join(BACKUP_ROOT_DIR, backupFolder, 'quizzes.json');
+    if (!fs.existsSync(quizzesFile)) {
+      console.log('   ⏭️  No quizzes.json found - skipping\n');
+      return;
+    }
+
+    const quizzes = JSON.parse(fs.readFileSync(quizzesFile, 'utf8'));
+    if (!Array.isArray(quizzes) || quizzes.length === 0) {
+      console.log('   ⏭️  No quizzes to restore - skipping\n');
+      return;
+    }
+
+    // Extract unique lesson IDs
+    const lessonIds = [...new Set(quizzes.map((q: any) => q.lessonId).filter(Boolean))];
+    if (lessonIds.length === 0) {
+      console.log('   ⏭️  No lesson references found - skipping\n');
+      return;
+    }
+
+    console.log(`   📋 Found ${lessonIds.length} unique lesson IDs in quizzes`);
+
+    // Check which lessons already exist
+    const existingLessons = await prisma.lesson.findMany({
+      where: { id: { in: lessonIds as string[] } },
+      select: { id: true },
+    });
+
+    const existingIds = new Set(existingLessons.map(l => l.id));
+    const missingIds = lessonIds.filter(id => !existingIds.has(id as string));
+
+    if (missingIds.length === 0) {
+      console.log('   ✅ All lessons already exist\n');
+      return;
+    }
+
+    console.log(`   🔧 Creating ${missingIds.length} missing lessons...`);
+
+    // Get or create a course module to attach lessons to
+    let module = await prisma.courseModule.findFirst({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!module) {
+      // Get or create a course
+      let course = await prisma.course.findFirst({
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (!course) {
+        // Get first admin user
+        const admin = await prisma.user.findFirst({ 
+          where: { roleType: 'ADMIN' } 
+        });
+        
+        if (!admin) {
+          console.log('   ⚠️  No admin user found - cannot create course. Skipping lessons.\n');
+          return;
+        }
+
+        course = await prisma.course.create({
+          data: {
+            title: '[Restored] Default Course',
+            slug: 'restored-default-course-' + Date.now(),
+            description: 'Auto-created course for restored quiz data',
+            level: 'BEGINNER',
+            status: 'DRAFT',
+            instructorId: admin.id,
+          },
+        });
+        console.log(`   ✅ Created course: ${course.id}`);
+      }
+
+      module = await prisma.courseModule.create({
+        data: {
+          title: '[Restored] Default Module',
+          description: 'Auto-created module for restored quiz data',
+          order: 1,
+          courseId: course.id,
+        },
+      });
+      console.log(`   ✅ Created module: ${module.id}`);
+    }
+
+    // Create missing lessons
+    let created = 0;
+    for (const lessonId of missingIds) {
+      try {
+        await prisma.lesson.create({
+          data: {
+            id: lessonId as string,
+            title: `[Restored] Lesson ${(lessonId as string).substring(0, 8)}`,
+            description: 'Auto-created lesson to satisfy FK constraints during restore',
+            type: 'TEXT',
+            content: 'This lesson was auto-created during data restoration.',
+            order: created + 1,
+            moduleId: module.id,
+            isPreview: false,
+            isFree: false,
+          },
+        });
+        created++;
+      } catch (error: any) {
+        console.log(`   ⚠️  Failed to create lesson ${lessonId}: ${error.message}`);
+      }
+    }
+
+    console.log(`   ✅ Created ${created}/${missingIds.length} missing lessons\n`);
+  } catch (error) {
+    console.log(`   ⚠️  Error creating missing lessons: ${error}`);
+    console.log('   ⏭️  Continuing with restore...\n');
+  }
 }
 
 /**
@@ -709,34 +1205,165 @@ function buildRestorationOrder(): string[] {
     console.error('❌ Error building restoration order:', error);
     // Fallback to hardcoded order if schema parsing fails
     return [
-      // Core users & auth
-      'users', 'auth_methods', 'user_sessions', 'verification_tokens',
-      // Audit logs
+      // ===== CORE SYSTEM (Level 1 - No dependencies) =====
+      '_prisma_migrations', // System table
+      'departments', // Independent department structure
+      
+      // ===== USERS & AUTH (Level 2 - Depends on departments) =====
+      'users', 
+      'auth_methods', 
+      'user_sessions',
+      'verification_tokens',
+      'user_mfa_settings',
+      'user_devices',
+      'security_events',
+      
+      // ===== RBAC (Level 3 - Depends on users) =====
+      'roles',
+      'permissions',
+      'role_permissions',
+      'user_role_assignments',
+      'user_permissions',
+      'resource_accesses',
+      
+      // ===== SYSTEM CONFIGURATION (Level 3) =====
+      'ai_providers', // AI configuration
+      'website_settings', // Website configuration
+      'call_center_config', // Call center configuration
+      'call_center_sync_logs', // Call center logs
+      'chat_integrations', // Chat platform integrations
+      'chat_quick_replies', // Quick replies
+      'chat_bot_rules', // Bot rules
+      
+      // ===== AUDIT & LOGS (Level 3) =====
       'audit_logs',
-      // Website settings (depends on users for createdBy/updatedBy FK)
-      'website_settings',
-      // Core content
-      'posts', 'tags', 'post_tags', 'comments', 'likes', 'notifications',
-      // Tasks
-      'tasks', 'task_comments', 'task_media', 'task_shares',
-      // AI/Chat
-      'chatbot_models', 'training_data', 'chat_conversations', 'chat_messages',
-      // Affiliate system
-      'aff_users', 'aff_campaigns', 'aff_campaign_affiliates', 'aff_links', 'aff_clicks', 'aff_conversions', 'aff_payment_requests',
-      // Employee management
-      'employee_profiles', 'employment_history', 'employee_documents', 'onboarding_checklists', 'offboarding_processes',
-      // E-commerce
-      'categories', 'products', 'product_images', 'product_variants',
-      // Invoice system
-      'ext_listhoadon', 'ext_detailhoadon', 'ext_sanphamhoadon',
-      // Pages & Menu
-      'pages', 'page_blocks', 'menus',
-      // LMS - Courses
-      'course_categories', 'courses', 'course_modules', 'lessons', 'enrollments', 'lesson_progress',
-      // LMS - Quizzes & Learning
-      'quizzes', 'questions', 'answers',
-      // Reviews
+      
+      // ===== FILE MANAGEMENT (Level 3) =====
+      'file_folders',
+      'files',
+      'file_shares',
+      
+      // ===== CONTENT MANAGEMENT (Level 3) =====
+      'tags',
+      'posts',
+      'post_tags',
+      'comments',
+      'likes',
+      
+      // ===== BLOG SYSTEM (Level 3) =====
+      'blog_categories',
+      'blog_tags',
+      'blog_posts',
+      'blog_post_tags',
+      'blog_comments',
+      'blog_post_shares',
+      
+      // ===== MENUS (Level 3) =====
+      'menus',
+      
+      // ===== PAGES & PAGE BUILDER (Level 3) =====
+      'pages',
+      'page_blocks',
+      'custom_templates',
+      'template_shares',
+      
+      // ===== PROJECT MANAGEMENT (Level 3) =====
+      'projects',
+      'project_members',
+      'project_chat_messages',
+      
+      // ===== TASKS (Level 4 - Depends on projects) =====
+      'tasks',
+      'task_comments',
+      'task_media',
+      'task_shares',
+      'task_activity_logs',
+      'notifications',
+      
+      // ===== AI & CHATBOT (Level 3) =====
+      'chatbot_models',
+      'training_data',
+      'chat_conversations',
+      'chat_messages',
+      
+      // ===== AFFILIATE SYSTEM (Level 3) =====
+      'aff_users',
+      'aff_campaigns',
+      'aff_campaign_affiliates',
+      'aff_links',
+      'aff_clicks',
+      'aff_conversions',
+      'aff_payment_requests',
+      
+      // ===== HR MANAGEMENT (Level 3) =====
+      'employee_profiles',
+      'employment_history',
+      'employee_documents',
+      'onboarding_checklists',
+      'offboarding_processes',
+      
+      // ===== E-COMMERCE - CATEGORIES & PRODUCTS (Level 3) =====
+      'categories',
+      'products',
+      'product_images',
+      'product_variants',
+      'product_reviews',
+      'review_helpful',
+      
+      // ===== E-COMMERCE - SHOPPING (Level 4) =====
+      'carts',
+      'cart_items',
+      'wishlists',
+      'wishlist_items',
+      
+      // ===== E-COMMERCE - ORDERS (Level 4) =====
+      'orders',
+      'order_items',
+      'order_tracking',
+      'order_tracking_events',
+      'payments',
+      
+      // ===== E-COMMERCE - INVENTORY (Level 4) =====
+      'inventory_logs',
+      
+      // ===== INVOICE SYSTEM (Level 3) =====
+      'Hoadon', // ext_listhoadon mapped to Hoadon
+      'HoadonChitiet', // ext_detailhoadon mapped to HoadonChitiet
+      'ext_sanphamhoadon',
+      
+      // ===== CALL CENTER (Level 3) =====
+      'call_center_records',
+      
+      // ===== LMS SYSTEM (Level 3) =====
+      'course_categories',
+      
+      // ===== LMS - COURSES (Level 4) =====
+      'courses',
+      'course_modules',
+      'lessons',
+      
+      // ===== LMS - ENROLLMENT (Level 5) =====
+      'enrollments',
+      'lesson_progress',
+      
+      // ===== LMS - ASSESSMENTS (Level 5) =====
+      'quizzes',
+      'questions',
+      'answers',
+      'quiz_attempts',
+      
+      // ===== LMS - REVIEWS & COMMUNITY (Level 5) =====
       'reviews',
+      'certificates',
+      'discussions',
+      'discussion_replies',
+      
+      // ===== SUPPORT SYSTEM (Level 3) =====
+      'support_conversations',
+      'support_messages',
+      'support_attachments',
+      'support_tickets',
+      'support_analytics',
     ];
   }
 }
@@ -868,6 +1495,12 @@ async function main(): Promise<void> {
     console.log(`🔄 Restoring ${tables.length} tables...\n`);
     for (let i = 0; i < tables.length; i++) {
       const table = tables[i];
+      
+      // Before restoring quizzes, ensure lessons exist
+      if (table === 'quizzes') {
+        await createMissingLessons(backupFolder);
+      }
+      
       console.log(`[${i + 1}/${tables.length}] Restoring: ${table}`);
       await restoreTableOptimized(table, backupFolder);
       console.log('');
