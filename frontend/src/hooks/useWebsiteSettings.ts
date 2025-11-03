@@ -7,7 +7,7 @@ export interface WebsiteSetting {
   key: string;
   value: string | null;
   type: 'TEXT' | 'TEXTAREA' | 'NUMBER' | 'BOOLEAN' | 'COLOR' | 'IMAGE' | 'URL' | 'JSON' | 'SELECT';
-  category: 'GENERAL' | 'HEADER' | 'FOOTER' | 'SEO' | 'SOCIAL' | 'CONTACT' | 'APPEARANCE' | 'ANALYTICS' | 'PAYMENT' | 'SHIPPING';
+  category: 'GENERAL' | 'HEADER' | 'FOOTER' | 'SEO' | 'SOCIAL' | 'CONTACT' | 'APPEARANCE' | 'ANALYTICS' | 'PAYMENT' | 'SHIPPING' | 'SUPPORT_CHAT' | 'AUTH';
   label: string;
   description?: string | null;
   group?: string | null;
