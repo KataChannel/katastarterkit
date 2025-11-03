@@ -27,13 +27,13 @@ interface Instructor {
   phoneNumber: string;
   roleType: string;
   isActive: boolean;
-  createdCourses: {
+  coursesInstructed: {
     id: string;
     title: string;
-    isPublished: boolean;
+    status: string;
   }[];
   _count: {
-    createdCourses: number;
+    coursesInstructed: number;
   };
   createdAt: string;
 }
@@ -46,16 +46,16 @@ export default function AdminInstructorsPage() {
       roleType: 'GIANGVIEN'
     },
     include: {
-      createdCourses: {
+      coursesInstructed: {
         select: {
           id: true,
           title: true,
-          isPublished: true,
+          status: true,
         }
       },
       _count: {
         select: {
-          createdCourses: true,
+          coursesInstructed: true,
         }
       }
     },
@@ -159,7 +159,7 @@ export default function AdminInstructorsPage() {
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-5 h-5 text-blue-600" />
                     <div>
-                      <p className="text-xl font-bold">{instructor._count?.createdCourses || 0}</p>
+                      <p className="text-xl font-bold">{instructor._count?.coursesInstructed || 0}</p>
                       <p className="text-xs text-gray-500">Khóa học</p>
                     </div>
                   </div>
@@ -173,20 +173,20 @@ export default function AdminInstructorsPage() {
                 </div>
 
                 {/* Courses Preview */}
-                {instructor.createdCourses && instructor.createdCourses.length > 0 && (
+                {instructor.coursesInstructed && instructor.coursesInstructed.length > 0 && (
                   <div className="pt-3 border-t">
                     <p className="text-sm font-medium text-gray-700 mb-2">Khóa học đang dạy:</p>
                     <div className="space-y-1">
-                      {instructor.createdCourses.slice(0, 3).map((course) => (
+                      {instructor.coursesInstructed.slice(0, 3).map((course: any) => (
                         <div key={course.id} className="flex items-center justify-between text-sm">
                           <span className="text-gray-600 truncate flex-1">{course.title}</span>
-                          <Badge variant={course.isPublished ? 'default' : 'secondary'} className="ml-2 text-xs">
-                            {course.isPublished ? 'Public' : 'Draft'}
+                          <Badge variant={course.status === 'PUBLISHED' ? 'default' : 'secondary'} className="ml-2 text-xs">
+                            {course.status === 'PUBLISHED' ? 'Public' : 'Draft'}
                           </Badge>
                         </div>
                       ))}
-                      {instructor.createdCourses.length > 3 && (
-                        <p className="text-xs text-gray-500">+{instructor.createdCourses.length - 3} khóa khác</p>
+                      {instructor.coursesInstructed.length > 3 && (
+                        <p className="text-xs text-gray-500">+{instructor.coursesInstructed.length - 3} khóa khác</p>
                       )}
                     </div>
                   </div>
