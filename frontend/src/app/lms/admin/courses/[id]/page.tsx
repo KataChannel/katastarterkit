@@ -546,7 +546,7 @@ export default function CourseDetailPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteLoading}>Hủy</AlertDialogCancel>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleteLoading}
