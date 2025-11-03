@@ -39,17 +39,17 @@ export declare class ReviewService {
             avatar: string;
         };
         product: {
-            id: string;
             name: string;
+            id: string;
             slug: string;
         };
     } & {
-        comment: string | null;
         id: string;
         createdAt: Date;
-        userId: string | null;
         updatedAt: Date;
+        userId: string | null;
         title: string | null;
+        comment: string | null;
         images: string[];
         orderId: string | null;
         productId: string;
@@ -72,12 +72,12 @@ export declare class ReviewService {
                 avatar: string;
             };
         } & {
-            comment: string | null;
             id: string;
             createdAt: Date;
-            userId: string | null;
             updatedAt: Date;
+            userId: string | null;
             title: string | null;
+            comment: string | null;
             images: string[];
             orderId: string | null;
             productId: string;
@@ -105,17 +105,17 @@ export declare class ReviewService {
             avatar: string;
         };
         product: {
-            id: string;
             name: string;
+            id: string;
             slug: string;
         };
     } & {
-        comment: string | null;
         id: string;
         createdAt: Date;
-        userId: string | null;
         updatedAt: Date;
+        userId: string | null;
         title: string | null;
+        comment: string | null;
         images: string[];
         orderId: string | null;
         productId: string;
@@ -137,12 +137,12 @@ export declare class ReviewService {
             avatar: string;
         };
     } & {
-        comment: string | null;
         id: string;
         createdAt: Date;
-        userId: string | null;
         updatedAt: Date;
+        userId: string | null;
         title: string | null;
+        comment: string | null;
         images: string[];
         orderId: string | null;
         productId: string;

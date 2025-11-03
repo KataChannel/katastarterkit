@@ -27,6 +27,10 @@ __decorate([
     (0, graphql_1.Field)(() => user_model_1.User),
     __metadata("design:type", user_model_1.User)
 ], AuthResponse.prototype, "user", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], AuthResponse.prototype, "redirectUrl", void 0);
 exports.AuthResponse = AuthResponse = __decorate([
     (0, graphql_1.ObjectType)()
 ], AuthResponse);

@@ -13,6 +13,13 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+# Auto-detect docker-compose command (v1 vs v2)
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+else
+    DOCKER_COMPOSE="docker compose"
+fi
+
 COMPOSE_FILE="docker-compose.hybrid.yml"
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
@@ -55,8 +62,10 @@ check_prerequisites() {
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null; then
+    # Check Docker Compose (v1 or v2)
+    if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
         echo -e "${RED}❌ Docker Compose chưa được cài đặt!${NC}"
+        echo -e "${YELLOW}Cài đặt: apt install docker-compose hoặc docker-compose-plugin${NC}"
         exit 1
     fi
     
@@ -76,6 +85,7 @@ check_prerequisites() {
         echo -e "${YELLOW}   Nên có swap file hoặc nâng cấp RAM${NC}"
     fi
     
+    echo -e "${GREEN}✅ Sử dụng: $DOCKER_COMPOSE${NC}"
     echo -e "${GREEN}✅ Kiểm tra hoàn tất!${NC}"
     echo ""
 }
@@ -83,77 +93,77 @@ check_prerequisites() {
 # Start all
 start_all() {
     echo -e "${GREEN}🚀 Khởi động TẤT CẢ services...${NC}"
-    docker-compose -f "$COMPOSE_FILE" up -d
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d
     show_status
 }
 
 # Start only Rausach
 start_rausach() {
     echo -e "${GREEN}🚀 Khởi động RAUSACH domain...${NC}"
-    docker-compose -f "$COMPOSE_FILE" up -d redis minio rausach-postgres rausach-backend rausach-frontend
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d redis minio rausach-postgres rausach-backend rausach-frontend
     show_status
 }
 
 # Start only Tazagroup
 start_tazagroup() {
     echo -e "${GREEN}🚀 Khởi động TAZAGROUP domain...${NC}"
-    docker-compose -f "$COMPOSE_FILE" up -d redis minio tazagroup-postgres tazagroup-backend tazagroup-frontend
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d redis minio tazagroup-postgres tazagroup-backend tazagroup-frontend
     show_status
 }
 
 # Start shared services only
 start_shared() {
     echo -e "${GREEN}🚀 Khởi động SHARED services (Redis + Minio)...${NC}"
-    docker-compose -f "$COMPOSE_FILE" up -d redis minio
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d redis minio
     show_status
 }
 
 # Stop all
 stop_all() {
     echo -e "${YELLOW}🛑 Dừng TẤT CẢ services...${NC}"
-    docker-compose -f "$COMPOSE_FILE" down
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" down
     echo -e "${GREEN}✅ Đã dừng tất cả${NC}"
 }
 
 # Stop Rausach
 stop_rausach() {
     echo -e "${YELLOW}🛑 Dừng RAUSACH domain...${NC}"
-    docker-compose -f "$COMPOSE_FILE" stop rausach-postgres rausach-backend rausach-frontend
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" stop rausach-postgres rausach-backend rausach-frontend
     echo -e "${GREEN}✅ Đã dừng Rausach${NC}"
 }
 
 # Stop Tazagroup
 stop_tazagroup() {
     echo -e "${YELLOW}🛑 Dừng TAZAGROUP domain...${NC}"
-    docker-compose -f "$COMPOSE_FILE" stop tazagroup-postgres tazagroup-backend tazagroup-frontend
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" stop tazagroup-postgres tazagroup-backend tazagroup-frontend
     echo -e "${GREEN}✅ Đã dừng Tazagroup${NC}"
 }
 
 # View logs
 view_logs_all() {
     echo -e "${BLUE}📋 Logs tất cả...${NC}"
-    docker-compose -f "$COMPOSE_FILE" logs -f --tail=100
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100
 }
 
 view_logs_rausach() {
     echo -e "${BLUE}📋 Logs RAUSACH...${NC}"
-    docker-compose -f "$COMPOSE_FILE" logs -f --tail=100 rausach-postgres rausach-backend rausach-frontend
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 rausach-postgres rausach-backend rausach-frontend
 }
 
 view_logs_tazagroup() {
     echo -e "${BLUE}📋 Logs TAZAGROUP...${NC}"
-    docker-compose -f "$COMPOSE_FILE" logs -f --tail=100 tazagroup-postgres tazagroup-backend tazagroup-frontend
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 tazagroup-postgres tazagroup-backend tazagroup-frontend
 }
 
 # Show status
 show_status() {
     echo ""
     echo -e "${BLUE}📊 Trạng thái services:${NC}"
-    docker-compose -f "$COMPOSE_FILE" ps
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" ps
     echo ""
     
     echo -e "${BLUE}💾 Sử dụng tài nguyên:${NC}"
-    docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}" $(docker-compose -f "$COMPOSE_FILE" ps -q 2>/dev/null) 2>/dev/null || echo "Không có container nào"
+    docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}" $($DOCKER_COMPOSE -f "$COMPOSE_FILE" ps -q 2>/dev/null) 2>/dev/null || echo "Không có container nào"
     echo ""
     
     echo -e "${GREEN}🌐 URLs:${NC}"
@@ -176,7 +186,7 @@ show_status() {
 # Restart all
 restart_all() {
     echo -e "${YELLOW}🔄 Restart tất cả...${NC}"
-    docker-compose -f "$COMPOSE_FILE" restart
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" restart
     show_status
 }
 
@@ -230,7 +240,7 @@ restore_tazagroup() {
 # Rebuild
 rebuild() {
     echo -e "${YELLOW}🔨 Build lại images...${NC}"
-    docker-compose -f "$COMPOSE_FILE" build --no-cache
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" build --no-cache
     echo -e "${GREEN}✅ Build complete${NC}"
 }
 
@@ -240,7 +250,7 @@ clean_rebuild() {
     read -p "Chắc chắn? (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        docker-compose -f "$COMPOSE_FILE" down -v
+        $DOCKER_COMPOSE -f "$COMPOSE_FILE" down -v
         docker system prune -f
         rebuild
         echo -e "${GREEN}✅ Done${NC}"

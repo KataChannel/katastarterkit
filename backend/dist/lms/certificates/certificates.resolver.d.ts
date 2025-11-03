@@ -5,10 +5,10 @@ export declare class CertificatesResolver {
     generateCertificate(user: any, enrollmentId: string): Promise<{
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
-        issueDate: Date;
+        userId: string;
         courseId: string;
+        issueDate: Date;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -26,10 +26,10 @@ export declare class CertificatesResolver {
     } & {
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
-        issueDate: Date;
+        userId: string;
         courseId: string;
+        issueDate: Date;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -53,10 +53,10 @@ export declare class CertificatesResolver {
     } & {
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
-        issueDate: Date;
+        userId: string;
         courseId: string;
+        issueDate: Date;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -80,10 +80,10 @@ export declare class CertificatesResolver {
         } & {
             id: string;
             createdAt: Date;
-            userId: string;
             updatedAt: Date;
-            issueDate: Date;
+            userId: string;
             courseId: string;
+            issueDate: Date;
             enrollmentId: string;
             certificateNumber: string;
             courseName: string;

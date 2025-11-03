@@ -7,12 +7,12 @@ export declare class CallCenterService {
     constructor(prisma: PrismaService);
     getConfig(): Promise<{
         id: string;
-        createdAt: Date;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
         batchSize: number;
-        domain: string;
         apiUrl: string;
+        domain: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -24,12 +24,12 @@ export declare class CallCenterService {
     }>;
     createConfig(input: CreateCallCenterConfigInput): Promise<{
         id: string;
-        createdAt: Date;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
         batchSize: number;
-        domain: string;
         apiUrl: string;
+        domain: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -41,12 +41,12 @@ export declare class CallCenterService {
     }>;
     updateConfig(id: string, input: UpdateCallCenterConfigInput): Promise<{
         id: string;
-        createdAt: Date;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
         batchSize: number;
-        domain: string;
         apiUrl: string;
+        domain: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -58,12 +58,12 @@ export declare class CallCenterService {
     }>;
     deleteConfig(id: string): Promise<{
         id: string;
-        createdAt: Date;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
         batchSize: number;
-        domain: string;
         apiUrl: string;
+        domain: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -90,6 +90,7 @@ export declare class CallCenterService {
             updatedAt: Date;
             duration: string | null;
             direction: import("@prisma/client").$Enums.CallDirection;
+            domain: string | null;
             externalUuid: string;
             callerIdNumber: string | null;
             outboundCallerIdNumber: string | null;
@@ -101,7 +102,6 @@ export declare class CallCenterService {
             sipHangupDisposition: string | null;
             callStatus: import("@prisma/client").$Enums.CallStatus;
             recordPath: string | null;
-            domain: string | null;
             rawData: import("@prisma/client/runtime/library").JsonValue | null;
             syncedAt: Date;
         }[];
@@ -118,6 +118,7 @@ export declare class CallCenterService {
         updatedAt: Date;
         duration: string | null;
         direction: import("@prisma/client").$Enums.CallDirection;
+        domain: string | null;
         externalUuid: string;
         callerIdNumber: string | null;
         outboundCallerIdNumber: string | null;
@@ -129,20 +130,19 @@ export declare class CallCenterService {
         sipHangupDisposition: string | null;
         callStatus: import("@prisma/client").$Enums.CallStatus;
         recordPath: string | null;
-        domain: string | null;
         rawData: import("@prisma/client/runtime/library").JsonValue | null;
         syncedAt: Date;
     }>;
     getSyncLogs(pagination: PaginationInput): Promise<{
         items: {
             id: string;
-            errorMessage: string | null;
             status: string;
+            duration: number | null;
             completedAt: Date | null;
+            errorMessage: string | null;
             fromDate: Date;
             toDate: Date;
             offset: number;
-            duration: number | null;
             configId: string | null;
             syncType: import("@prisma/client").$Enums.CallCenterSyncMode;
             recordsFetched: number;

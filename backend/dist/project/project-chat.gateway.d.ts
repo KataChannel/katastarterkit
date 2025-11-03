@@ -65,30 +65,30 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
                     avatar: string;
                 };
             } & {
-                projectId: string;
                 id: string;
-                content: string;
-                mentions: string[];
-                reactions: import("@prisma/client/runtime/library").JsonValue | null;
-                isEdited: boolean;
-                editedAt: Date | null;
                 createdAt: Date;
                 updatedAt: Date;
+                content: string;
+                projectId: string;
+                mentions: string[];
                 senderId: string;
+                isEdited: boolean;
+                editedAt: Date | null;
                 replyToId: string | null;
+                reactions: import("@prisma/client/runtime/library").JsonValue | null;
             };
         } & {
-            projectId: string;
             id: string;
-            content: string;
-            mentions: string[];
-            reactions: import("@prisma/client/runtime/library").JsonValue | null;
-            isEdited: boolean;
-            editedAt: Date | null;
             createdAt: Date;
             updatedAt: Date;
+            content: string;
+            projectId: string;
+            mentions: string[];
             senderId: string;
+            isEdited: boolean;
+            editedAt: Date | null;
             replyToId: string | null;
+            reactions: import("@prisma/client/runtime/library").JsonValue | null;
         };
         error?: undefined;
     } | {
@@ -142,17 +142,17 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
                 avatar: string;
             };
         } & {
-            projectId: string;
             id: string;
-            content: string;
-            mentions: string[];
-            reactions: import("@prisma/client/runtime/library").JsonValue | null;
-            isEdited: boolean;
-            editedAt: Date | null;
             createdAt: Date;
             updatedAt: Date;
+            content: string;
+            projectId: string;
+            mentions: string[];
             senderId: string;
+            isEdited: boolean;
+            editedAt: Date | null;
             replyToId: string | null;
+            reactions: import("@prisma/client/runtime/library").JsonValue | null;
         };
         error?: undefined;
     } | {
