@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useFindMany, useCreateOne, useUpdateOne, useDeleteOne } from '@/hooks/useDynamicGraphQL';
+import { useFindMany, useUpdateOne, useDeleteOne } from '@/hooks/useDynamicGraphQL';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,9 @@ import {
   XCircle,
   AlertCircle,
   Save,
-  X
+  X,
+  UserCog,
+  Shield
 } from 'lucide-react';
 import {
   Dialog,
@@ -41,10 +43,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-interface Instructor {
+interface User {
   id: string;
   username: string;
   email: string;
@@ -68,23 +78,15 @@ interface Instructor {
 export default function AdminInstructorsPage() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedInstructor, setSelectedInstructor] = useState<Instructor | null>(null);
+  const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
 
-  // Form state
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    phone: '',
-    firstName: '',
-    lastName: '',
-    isActive: true,
-  });
-
-  const { data: instructors = [], loading, error, refetch } = useFindMany<Instructor>('User', {
+  // Lấy danh sách giảng viên hiện tại
+  const { data: instructors = [], loading, error, refetch } = useFindMany<User>('User', {
     where: {
       roleType: 'GIANGVIEN'
     },
@@ -117,9 +119,28 @@ export default function AdminInstructorsPage() {
     orderBy: { createdAt: 'desc' },
   });
 
-  const [createInstructor, { loading: createLoading }] = useCreateOne('User');
-  const [updateInstructor, { loading: updateLoading }] = useUpdateOne('User');
-  const [deleteInstructor, { loading: deleteLoading }] = useDeleteOne('User');
+  // Lấy danh sách tất cả user KHÔNG phải GIANGVIEN (để phân quyền)
+  const { data: availableUsers = [], loading: usersLoading, refetch: refetchUsers } = useFindMany<User>('User', {
+    where: {
+      roleType: {
+        not: 'GIANGVIEN'
+      }
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      phone: true,
+      firstName: true,
+      lastName: true,
+      roleType: true,
+      isActive: true,
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  const [updateUser, { loading: updateLoading }] = useUpdateOne('User');
+  const [deleteUser, { loading: deleteLoading }] = useDeleteOne('User');
 
   const filteredInstructors = instructors.filter(instructor =>
     instructor.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -128,157 +149,137 @@ export default function AdminInstructorsPage() {
     (instructor.lastName || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const resetForm = () => {
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      phone: '',
-      firstName: '',
-      lastName: '',
-      isActive: true,
-    });
+  const filteredAvailableUsers = availableUsers.filter(user =>
+    user.username.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+    (user.email || '').toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+    (user.firstName || '').toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+    (user.lastName || '').toLowerCase().includes(userSearchTerm.toLowerCase())
+  );
+
+  const handleAssignClick = () => {
+    setSelectedUserId('');
+    setUserSearchTerm('');
+    setAssignDialogOpen(true);
   };
 
-  const handleCreateClick = () => {
-    resetForm();
-    setCreateDialogOpen(true);
-  };
-
-  const handleEditClick = (instructor: Instructor) => {
-    setSelectedInstructor(instructor);
-    setFormData({
-      username: instructor.username,
-      email: instructor.email || '',
-      password: '',
-      phone: instructor.phone || '',
-      firstName: instructor.firstName || '',
-      lastName: instructor.lastName || '',
-      isActive: instructor.isActive,
-    });
+  const handleEditClick = (instructor: User) => {
+    setSelectedUser(instructor);
     setEditDialogOpen(true);
   };
 
-  const handleDeleteClick = (instructor: Instructor) => {
-    setSelectedInstructor(instructor);
-    setDeleteDialogOpen(true);
+  const handleRevokeClick = (instructor: User) => {
+    setSelectedUser(instructor);
+    setRevokeDialogOpen(true);
   };
 
-  const handleCreate = async () => {
-    if (!formData.username || !formData.email || !formData.password) {
+  // Phân quyền user thành giảng viên
+  const handleAssignInstructor = async () => {
+    if (!selectedUserId) {
       toast({
         title: 'Lỗi',
-        description: 'Vui lòng điền đầy đủ thông tin bắt buộc',
+        description: 'Vui lòng chọn user để phân quyền',
         type: 'error',
       });
       return;
     }
 
     try {
-      await createInstructor({
+      await updateUser({
+        where: { id: selectedUserId },
         data: {
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-          phone: formData.phone || null,
-          firstName: formData.firstName || null,
-          lastName: formData.lastName || null,
           roleType: 'GIANGVIEN',
-          isActive: formData.isActive,
         },
       });
 
       toast({
         title: 'Thành công',
-        description: 'Đã thêm giảng viên mới',
+        description: 'Đã phân quyền giảng viên thành công',
         type: 'success',
       });
 
-      setCreateDialogOpen(false);
-      resetForm();
+      setAssignDialogOpen(false);
+      setSelectedUserId('');
       refetch();
+      refetchUsers();
     } catch (error: any) {
       toast({
         title: 'Lỗi',
-        description: error.message || 'Không thể thêm giảng viên',
+        description: error.message || 'Không thể phân quyền giảng viên',
         type: 'error',
       });
     }
   };
 
-  const handleUpdate = async () => {
-    if (!selectedInstructor) return;
-
+  // Cập nhật trạng thái active
+  const handleUpdateStatus = async (userId: string, isActive: boolean) => {
     try {
-      const updateData: any = {
-        username: formData.username,
-        email: formData.email || null,
-        phone: formData.phone || null,
-        firstName: formData.firstName || null,
-        lastName: formData.lastName || null,
-        isActive: formData.isActive,
-      };
-
-      // Only include password if it's provided
-      if (formData.password) {
-        updateData.password = formData.password;
-      }
-
-      await updateInstructor({
-        where: { id: selectedInstructor.id },
-        data: updateData,
+      await updateUser({
+        where: { id: userId },
+        data: { isActive },
       });
 
       toast({
         title: 'Thành công',
-        description: 'Đã cập nhật thông tin giảng viên',
+        description: `Đã ${isActive ? 'kích hoạt' : 'vô hiệu hóa'} tài khoản`,
         type: 'success',
       });
 
-      setEditDialogOpen(false);
-      setSelectedInstructor(null);
-      resetForm();
       refetch();
     } catch (error: any) {
       toast({
         title: 'Lỗi',
-        description: error.message || 'Không thể cập nhật giảng viên',
+        description: error.message || 'Không thể cập nhật trạng thái',
         type: 'error',
       });
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedInstructor) return;
+  // Thu hồi quyền giảng viên (chuyển về USER)
+  const handleRevokeInstructor = async () => {
+    if (!selectedUser) return;
 
     try {
-      await deleteInstructor({
-        where: { id: selectedInstructor.id },
+      await updateUser({
+        where: { id: selectedUser.id },
+        data: {
+          roleType: 'USER',
+        },
       });
 
       toast({
         title: 'Thành công',
-        description: 'Đã xóa giảng viên',
+        description: 'Đã thu hồi quyền giảng viên',
         type: 'success',
       });
 
-      setDeleteDialogOpen(false);
-      setSelectedInstructor(null);
+      setRevokeDialogOpen(false);
+      setSelectedUser(null);
       refetch();
+      refetchUsers();
     } catch (error: any) {
       toast({
         title: 'Lỗi',
-        description: error.message || 'Không thể xóa giảng viên',
+        description: error.message || 'Không thể thu hồi quyền',
         type: 'error',
       });
     }
   };
 
-  const getFullName = (instructor: Instructor) => {
-    if (instructor.firstName && instructor.lastName) {
-      return `${instructor.firstName} ${instructor.lastName}`;
+  const getFullName = (user: User) => {
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
     }
-    return instructor.username;
+    return user.username;
+  };
+
+  const getRoleBadgeColor = (roleType: string) => {
+    switch (roleType) {
+      case 'ADMIN': return 'bg-red-100 text-red-800 border-red-300';
+      case 'GIANGVIEN': return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'USER': return 'bg-green-100 text-green-800 border-green-300';
+      case 'GUEST': return 'bg-gray-100 text-gray-800 border-gray-300';
+      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
   };
 
   return (
@@ -287,12 +288,14 @@ export default function AdminInstructorsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Quản lý giảng viên</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Tổng cộng {instructors.length} giảng viên</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
+            Tổng cộng {instructors.length} giảng viên | {availableUsers.length} user có thể phân quyền
+          </p>
         </div>
-        <Button onClick={handleCreateClick} className="gap-2">
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">Thêm giảng viên</span>
-          <span className="sm:hidden">Thêm mới</span>
+        <Button onClick={handleAssignClick} className="gap-2">
+          <UserCog className="w-4 h-4" />
+          <span className="hidden sm:inline">Phân quyền giảng viên</span>
+          <span className="sm:hidden">Phân quyền</span>
         </Button>
       </div>
 
@@ -325,9 +328,9 @@ export default function AdminInstructorsPage() {
           <CardContent className="py-12 text-center">
             <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500">Không tìm thấy giảng viên nào</p>
-            <Button onClick={handleCreateClick} className="mt-4 gap-2">
-              <Plus className="w-4 h-4" />
-              Thêm giảng viên đầu tiên
+            <Button onClick={handleAssignClick} className="mt-4 gap-2">
+              <UserCog className="w-4 h-4" />
+              Phân quyền user làm giảng viên
             </Button>
           </CardContent>
         </Card>
@@ -341,8 +344,8 @@ export default function AdminInstructorsPage() {
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
                       {instructor.username.charAt(0).toUpperCase()}
                     </div>
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <CardTitle className="flex items-center gap-2 flex-wrap">
                         {getFullName(instructor)}
                         {instructor.isActive ? (
                           <CheckCircle className="w-4 h-4 text-green-500" />
@@ -351,9 +354,18 @@ export default function AdminInstructorsPage() {
                         )}
                       </CardTitle>
                       <CardDescription className="mt-1">
-                        <Badge variant="outline" className="mr-2">GIẢNG VIÊN</Badge>
-                        <span className="text-xs">@{instructor.username}</span>
+                        <Badge className={getRoleBadgeColor(instructor.roleType)}>
+                          <Shield className="w-3 h-3 mr-1" />
+                          GIẢNG VIÊN
+                        </Badge>
+                        <span className="text-xs ml-2">@{instructor.username}</span>
                       </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={instructor.isActive}
+                        onCheckedChange={(checked) => handleUpdateStatus(instructor.id, checked)}
+                      />
                     </div>
                   </div>
                   <Button variant="ghost" size="sm">
@@ -422,26 +434,19 @@ export default function AdminInstructorsPage() {
                     variant="outline" 
                     size="sm" 
                     className="flex-1 gap-2"
-                    onClick={() => handleEditClick(instructor)}
-                  >
-                    <Edit className="w-4 h-4" />
-                    Sửa
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1 gap-2"
                   >
                     <BookOpen className="w-4 h-4" />
-                    Khóa học
+                    <span className="hidden sm:inline">Khóa học</span>
+                    <span className="sm:hidden">Khóa học ({instructor._count?.coursesInstructed || 0})</span>
                   </Button>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => handleDeleteClick(instructor)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-2"
+                    onClick={() => handleRevokeClick(instructor)}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <XCircle className="w-4 h-4" />
+                    <span className="hidden sm:inline">Thu hồi</span>
                   </Button>
                 </div>
               </CardContent>
@@ -450,222 +455,97 @@ export default function AdminInstructorsPage() {
         </div>
       )}
       
-      {/* Create Dialog */}
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+      {/* Assign Instructor Dialog - Phân quyền từ User */}
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>Thêm giảng viên mới</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCog className="w-5 h-5" />
+              Phân quyền giảng viên
+            </DialogTitle>
             <DialogDescription>
-              Nhập thông tin giảng viên. Các trường có dấu (*) là bắt buộc.
+              Chọn user từ hệ thống để phân quyền làm giảng viên. Có {availableUsers.length} user khả dụng.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto px-1">
-            <div className="space-y-4 py-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="username">Tên đăng nhập *</Label>
-                  <Input
-                    id="username"
-                    placeholder="Nhập tên đăng nhập"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Nhập email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password">Mật khẩu *</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Nhập mật khẩu"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Số điện thoại</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="Nhập số điện thoại"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">Họ</Label>
-                  <Input
-                    id="firstName"
-                    placeholder="Nhập họ"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Tên</Label>
-                  <Input
-                    id="lastName"
-                    placeholder="Nhập tên"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between space-x-2 p-4 border rounded-lg">
-                <div className="space-y-0.5">
-                  <Label htmlFor="isActive">Kích hoạt tài khoản</Label>
-                  <p className="text-sm text-gray-500">
-                    Cho phép giảng viên đăng nhập và sử dụng hệ thống
-                  </p>
-                </div>
-                <Switch
-                  id="isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+          <div className="flex-1 overflow-hidden flex flex-col">
+            {/* Search */}
+            <div className="px-1 pb-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Tìm kiếm user..."
+                  value={userSearchTerm}
+                  onChange={(e) => setUserSearchTerm(e.target.value)}
+                  className="pl-10"
                 />
               </div>
             </div>
+
+            {/* User List */}
+            <ScrollArea className="flex-1 px-1">
+              <div className="space-y-2 pr-4">
+                {usersLoading ? (
+                  <div className="text-center py-8 text-gray-500">Đang tải...</div>
+                ) : filteredAvailableUsers.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    Không tìm thấy user nào
+                  </div>
+                ) : (
+                  filteredAvailableUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      onClick={() => setSelectedUserId(user.id)}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                        selectedUserId === user.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-sm truncate">
+                              {getFullName(user)}
+                            </h4>
+                            <Badge className={getRoleBadgeColor(user.roleType)} variant="outline">
+                              {user.roleType}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-600 mb-2">@{user.username}</p>
+                          <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                            {user.email && (
+                              <div className="flex items-center gap-1">
+                                <Mail className="w-3 h-3" />
+                                <span className="truncate">{user.email}</span>
+                              </div>
+                            )}
+                            {user.phone && (
+                              <div className="flex items-center gap-1">
+                                <Phone className="w-3 h-3" />
+                                <span>{user.phone}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        {selectedUserId === user.id && (
+                          <CheckCircle className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
           </div>
 
           <DialogFooter className="gap-2">
             <Button
               variant="outline"
               onClick={() => {
-                setCreateDialogOpen(false);
-                resetForm();
-              }}
-              disabled={createLoading}
-            >
-              <X className="w-4 h-4 mr-2" />
-              Hủy
-            </Button>
-            <Button
-              onClick={handleCreate}
-              disabled={createLoading}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {createLoading ? 'Đang lưu...' : 'Lưu'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Chỉnh sửa giảng viên</DialogTitle>
-            <DialogDescription>
-              Cập nhật thông tin giảng viên. Để trống mật khẩu nếu không muốn thay đổi.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-y-auto px-1">
-            <div className="space-y-4 py-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-username">Tên đăng nhập *</Label>
-                  <Input
-                    id="edit-username"
-                    placeholder="Nhập tên đăng nhập"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-email">Email</Label>
-                  <Input
-                    id="edit-email"
-                    type="email"
-                    placeholder="Nhập email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-password">Mật khẩu mới</Label>
-                  <Input
-                    id="edit-password"
-                    type="password"
-                    placeholder="Để trống nếu không đổi"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-phone">Số điện thoại</Label>
-                  <Input
-                    id="edit-phone"
-                    type="tel"
-                    placeholder="Nhập số điện thoại"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-firstName">Họ</Label>
-                  <Input
-                    id="edit-firstName"
-                    placeholder="Nhập họ"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-lastName">Tên</Label>
-                  <Input
-                    id="edit-lastName"
-                    placeholder="Nhập tên"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between space-x-2 p-4 border rounded-lg">
-                <div className="space-y-0.5">
-                  <Label htmlFor="edit-isActive">Kích hoạt tài khoản</Label>
-                  <p className="text-sm text-gray-500">
-                    Cho phép giảng viên đăng nhập và sử dụng hệ thống
-                  </p>
-                </div>
-                <Switch
-                  id="edit-isActive"
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                />
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setEditDialogOpen(false);
-                setSelectedInstructor(null);
-                resetForm();
+                setAssignDialogOpen(false);
+                setSelectedUserId('');
+                setUserSearchTerm('');
               }}
               disabled={updateLoading}
             >
@@ -673,45 +553,49 @@ export default function AdminInstructorsPage() {
               Hủy
             </Button>
             <Button
-              onClick={handleUpdate}
-              disabled={updateLoading}
+              onClick={handleAssignInstructor}
+              disabled={updateLoading || !selectedUserId}
             >
-              <Save className="w-4 h-4 mr-2" />
-              {updateLoading ? 'Đang cập nhật...' : 'Cập nhật'}
+              <Shield className="w-4 h-4 mr-2" />
+              {updateLoading ? 'Đang phân quyền...' : 'Phân quyền'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      {/* Revoke Instructor Dialog - Thu hồi quyền */}
+      <AlertDialog open={revokeDialogOpen} onOpenChange={setRevokeDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa giảng viên</AlertDialogTitle>
+            <AlertDialogTitle>Thu hồi quyền giảng viên</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa giảng viên{' '}
+              Bạn có chắc chắn muốn thu hồi quyền giảng viên của{' '}
               <span className="font-semibold">
-                {selectedInstructor ? getFullName(selectedInstructor) : ''}
+                {selectedUser ? getFullName(selectedUser) : ''}
               </span>
-              ? Hành động này không thể hoàn tác.
-              {selectedInstructor && selectedInstructor._count?.coursesInstructed > 0 && (
-                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
+              ? 
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-blue-800 text-sm">
+                <AlertCircle className="w-4 h-4 inline mr-2" />
+                User sẽ được chuyển về quyền <strong>USER</strong> thông thường.
+              </div>
+              {selectedUser && selectedUser._count?.coursesInstructed > 0 && (
+                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm">
                   <AlertCircle className="w-4 h-4 inline mr-2" />
-                  Giảng viên này đang dạy {selectedInstructor._count.coursesInstructed} khóa học!
+                  Giảng viên này đang dạy <strong>{selectedUser._count.coursesInstructed} khóa học</strong>!
                 </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteLoading}>
+            <AlertDialogCancel disabled={updateLoading}>
               Hủy
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
-              disabled={deleteLoading}
+              onClick={handleRevokeInstructor}
+              disabled={updateLoading}
               className="bg-red-600 hover:bg-red-700"
             >
-              {deleteLoading ? 'Đang xóa...' : 'Xóa'}
+              {updateLoading ? 'Đang thu hồi...' : 'Thu hồi quyền'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
