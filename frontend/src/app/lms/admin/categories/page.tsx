@@ -62,7 +62,7 @@ export default function AdminCategoriesPage() {
     description: '',
   });
 
-  const { data: categories, loading, error, refetch } = useFindMany('Category', {
+  const { data: categories, loading, error, refetch } = useFindMany('CourseCategory', {
     select: {
       id: true,
       name: true,
@@ -81,9 +81,9 @@ export default function AdminCategoriesPage() {
     },
   });
 
-  const [createCategory, { loading: createLoading }] = useCreateOne('Category');
-  const [updateCategory, { loading: updateLoading }] = useUpdateOne('Category');
-  const [deleteCategory, { loading: deleteLoading }] = useDeleteOne('Category');
+  const [createCategory, { loading: createLoading }] = useCreateOne('CourseCategory');
+  const [updateCategory, { loading: updateLoading }] = useUpdateOne('CourseCategory');
+  const [deleteCategory, { loading: deleteLoading }] = useDeleteOne('CourseCategory');
 
   // Filter categories
   const filteredCategories = (categories || []).filter(category =>

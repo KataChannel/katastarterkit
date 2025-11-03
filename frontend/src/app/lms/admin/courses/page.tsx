@@ -40,11 +40,12 @@ interface Course {
   price: number;
   duration: number;
   thumbnailUrl: string;
-  isPublished: boolean;
+  status: string;
   instructor: {
     id: string;
+    firstName: string;
+    lastName: string;
     username: string;
-    email: string;
   };
   _count: {
     enrollments: number;
@@ -71,7 +72,7 @@ export default function AdminCoursesPage() {
       level: true,
       price: true,
       thumbnail: true,
-      isPublished: true,
+      status: true,
       createdAt: true,
       duration: true,
     },
@@ -79,14 +80,15 @@ export default function AdminCoursesPage() {
       _count: {
         select: {
           enrollments: true,
-          lessons: true,
+          modules: true,
           reviews: true,
         },
       },
       instructor: {
         select: {
           id: true,
-          name: true,
+          firstName: true,
+          lastName: true,
           username: true,
         },
       },
@@ -104,8 +106,8 @@ export default function AdminCoursesPage() {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (course.description || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === 'all' || 
-                         (filterStatus === 'published' && course.isPublished) ||
-                         (filterStatus === 'draft' && !course.isPublished);
+                         (filterStatus === 'published' && course.status === 'PUBLISHED') ||
+                         (filterStatus === 'draft' && course.status === 'DRAFT');
     return matchesSearch && matchesFilter;
   });
 
@@ -155,16 +157,17 @@ export default function AdminCoursesPage() {
 
   const handleTogglePublish = async (course: any) => {
     try {
+      const newStatus = course.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED';
       await updateCourse({
         where: { id: course.id },
         data: {
-          isPublished: !course.isPublished,
+          status: newStatus,
         },
       });
 
       toast({
         title: 'Thành công',
-        description: `Đã ${!course.isPublished ? 'xuất bản' : 'ẩn'} khóa học "${course.title}"`,
+        description: `Đã ${newStatus === 'PUBLISHED' ? 'xuất bản' : 'chuyển về nháp'} khóa học "${course.title}"`,
         type: 'success',
       });
 
@@ -263,11 +266,11 @@ export default function AdminCoursesPage() {
               <CardHeader>
                 <div className="flex items-start justify-between mb-2">
                   <Badge 
-                    variant={course.isPublished ? 'default' : 'secondary'}
+                    variant={course.status === 'PUBLISHED' ? 'default' : 'secondary'}
                     className="cursor-pointer"
                     onClick={() => handleTogglePublish(course)}
                   >
-                    {course.isPublished ? 'Đã xuất bản' : 'Nháp'}
+                    {course.status === 'PUBLISHED' ? 'Đã xuất bản' : 'Nháp'}
                   </Badge>
                   <Badge variant="outline">
                     {course.level || 'Beginner'}
@@ -283,7 +286,9 @@ export default function AdminCoursesPage() {
                 {course.instructor && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Users className="w-4 h-4" />
-                    <span>Giảng viên: {course.instructor.name || course.instructor.username}</span>
+                    <span>Giảng viên: {course.instructor.firstName && course.instructor.lastName 
+                      ? `${course.instructor.firstName} ${course.instructor.lastName}` 
+                      : course.instructor.username}</span>
                   </div>
                 )}
 
@@ -295,11 +300,11 @@ export default function AdminCoursesPage() {
                   </div>
                   <div className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
-                    <span>{course._count?.lessons || 0} bài</span>
+                    <span>{course._count?.modules || 0} modules</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    <span>{course.duration || 0}h</span>
+                    <span>{course.duration || 0}p</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 text-yellow-500" />
