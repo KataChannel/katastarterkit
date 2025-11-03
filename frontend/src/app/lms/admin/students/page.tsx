@@ -44,11 +44,14 @@ export default function AdminStudentsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'enrolled'>('all');
 
   const { data: students, loading, error, refetch } = useFindMany('User', {
     where: {
       roleType: 'USER',
+      enrollments: {
+        some: {},  // Chỉ lấy user có ít nhất 1 enrollment (học viên thực sự)
+      },
     },
     select: {
       id: true,
@@ -88,7 +91,8 @@ export default function AdminStudentsPage() {
     const matchesFilter = 
       filterStatus === 'all' || 
       (filterStatus === 'active' && student.isActive) ||
-      (filterStatus === 'inactive' && !student.isActive);
+      (filterStatus === 'inactive' && !student.isActive) ||
+      (filterStatus === 'enrolled' && student._count?.enrollments > 0);
     
     return matchesSearch && matchesFilter;
   });
@@ -111,7 +115,12 @@ export default function AdminStudentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Quản lý học viên</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Tổng cộng {students?.length || 0} học viên</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">
+            Tổng cộng {students?.length || 0} học viên đã đăng ký khóa học
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            💡 Chỉ hiển thị user có ít nhất 1 enrollment
+          </p>
         </div>
       </div>
 
@@ -126,7 +135,7 @@ export default function AdminStudentsPage() {
             className="pl-10"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant={filterStatus === 'all' ? 'default' : 'outline'}
             onClick={() => setFilterStatus('all')}
@@ -147,6 +156,13 @@ export default function AdminStudentsPage() {
             size="sm"
           >
             Không hoạt động
+          </Button>
+          <Button
+            variant={filterStatus === 'enrolled' ? 'default' : 'outline'}
+            onClick={() => setFilterStatus('enrolled')}
+            size="sm"
+          >
+            Có khóa học
           </Button>
         </div>
       </div>
