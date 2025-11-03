@@ -8,6 +8,12 @@
 
 COMPOSE_FILE := docker-compose.multi-domain.yml
 
+# Auto-detect docker compose command
+DOCKER_COMPOSE := $(shell which docker-compose 2>/dev/null)
+ifeq ($(DOCKER_COMPOSE),)
+    DOCKER_COMPOSE := docker compose
+endif
+
 # Colors
 BLUE := \033[0;34m
 GREEN := \033[0;32m
@@ -53,53 +59,53 @@ help: ## Hiển thị menu trợ giúp
 # Start Commands
 start-all: ## Khởi động tất cả services
 	@echo "$(GREEN)🚀 Starting ALL services (2 domains)...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d
 	@$(MAKE) status
 
 start-rausach: ## Khởi động domain Rausach
 	@echo "$(GREEN)🚀 Starting Rausach domain (12xxx)...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d postgres redis minio rausach-backend rausach-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d postgres redis minio rausach-backend rausach-frontend
 	@$(MAKE) status
 
 start-tazagroup: ## Khởi động domain Tazagroup
 	@echo "$(GREEN)🚀 Starting Tazagroup domain (13xxx)...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d postgres redis minio tazagroup-backend tazagroup-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) up -d postgres redis minio tazagroup-backend tazagroup-frontend
 	@$(MAKE) status
 
 # Stop Commands
 stop-all: ## Dừng tất cả services
 	@echo "$(YELLOW)🛑 Stopping ALL services...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) down
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down
 	@echo "$(GREEN)✅ All services stopped$(NC)"
 
 stop-rausach: ## Dừng domain Rausach
 	@echo "$(YELLOW)🛑 Stopping Rausach domain...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) stop rausach-backend rausach-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) stop rausach-backend rausach-frontend
 	@echo "$(GREEN)✅ Rausach stopped$(NC)"
 
 stop-tazagroup: ## Dừng domain Tazagroup
 	@echo "$(YELLOW)🛑 Stopping Tazagroup domain...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) stop tazagroup-backend tazagroup-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) stop tazagroup-backend tazagroup-frontend
 	@echo "$(GREEN)✅ Tazagroup stopped$(NC)"
 
 # Log Commands
 logs: ## Xem logs tất cả
-	@docker-compose -f $(COMPOSE_FILE) logs -f --tail=100
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs -f --tail=100
 
 logs-rausach: ## Xem logs Rausach
-	@docker-compose -f $(COMPOSE_FILE) logs -f --tail=100 rausach-backend rausach-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs -f --tail=100 rausach-backend rausach-frontend
 
 logs-tazagroup: ## Xem logs Tazagroup
-	@docker-compose -f $(COMPOSE_FILE) logs -f --tail=100 tazagroup-backend tazagroup-frontend
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) logs -f --tail=100 tazagroup-backend tazagroup-frontend
 
 # Status & Management
 status: ## Xem trạng thái services
 	@echo ""
 	@echo "$(BLUE)📊 Container Status:$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) ps
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps
 	@echo ""
 	@echo "$(BLUE)💾 Resource Usage:$(NC)"
-	@docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}" $$(docker-compose -f $(COMPOSE_FILE) ps -q 2>/dev/null) 2>/dev/null || echo "No containers running"
+	@docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}" $$($(DOCKER_COMPOSE) -f $(COMPOSE_FILE) ps -q 2>/dev/null) 2>/dev/null || echo "No containers running"
 	@echo ""
 	@echo "$(GREEN)🌐 Access URLs:$(NC)"
 	@echo "  $(YELLOW)Rausach:$(NC)"
@@ -116,18 +122,18 @@ status: ## Xem trạng thái services
 
 restart: ## Khởi động lại tất cả
 	@echo "$(YELLOW)🔄 Restarting all services...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) restart
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) restart
 	@$(MAKE) status
 
 build: ## Build lại images
 	@echo "$(YELLOW)🔨 Building images...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) build --no-cache
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) build --no-cache
 	@echo "$(GREEN)✅ Build complete$(NC)"
 
 clean: ## Dọn dẹp và xóa volumes
 	@echo "$(RED)🗑️  Cleaning up (volumes will be REMOVED!)$(NC)"
 	@read -p "Are you sure? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
-	@docker-compose -f $(COMPOSE_FILE) down -v
+	@$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) down -v
 	@docker system prune -f
 	@echo "$(GREEN)✅ Cleanup complete$(NC)"
 
