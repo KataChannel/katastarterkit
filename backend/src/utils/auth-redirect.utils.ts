@@ -38,6 +38,8 @@ export async function getLoginRedirectUrl(userRole: string): Promise<string> {
   switch (userRole.toUpperCase()) {
     case 'ADMIN':
       return settings['auth_redirect_admin'] || '/admin';
+    case 'GIANGVIEN':
+      return settings['auth_redirect_giangvien'] || '/giangvien/courses';
     case 'USER':
       return settings['auth_redirect_user'] || '/dashboard';
     case 'GUEST':

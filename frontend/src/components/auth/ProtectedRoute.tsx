@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'ADMIN' | 'USER';
+  allowedRoles?: ('ADMIN' | 'GIANGVIEN' | 'USER' | 'GUEST')[];
 }
 
-export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const router = useRouter();
 
   useEffect(() => {
@@ -16,18 +16,30 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     const token = localStorage.getItem('accessToken');
     
     if (!token) {
-      router.push('/login?redirect=' + window.location.pathname);
+      router.push('/login?redirect=' + encodeURIComponent(window.location.pathname));
       return;
     }
 
-    // If role is required, check user role
-    if (requiredRole) {
-      // Parse JWT to get user role (simplified - in production use proper JWT parsing)
+    // If roles are specified, check user role
+    if (allowedRoles && allowedRoles.length > 0) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         
-        if (payload.roleType !== requiredRole) {
-          router.push('/courses?error=unauthorized');
+        if (!allowedRoles.includes(payload.roleType)) {
+          // Redirect based on user's actual role
+          switch (payload.roleType) {
+            case 'ADMIN':
+              router.push('/lms/admin');
+              break;
+            case 'GIANGVIEN':
+              router.push('/lms/instructor');
+              break;
+            case 'USER':
+              router.push('/lms/student');
+              break;
+            default:
+              router.push('/lms/courses');
+          }
           return;
         }
       } catch (error) {
@@ -35,7 +47,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
         router.push('/login');
       }
     }
-  }, [router, requiredRole]);
+  }, [router, allowedRoles]);
 
   return <>{children}</>;
 }
