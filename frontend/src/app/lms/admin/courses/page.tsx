@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useFindMany } from '@/hooks/useDynamicGraphQL';
+import { useRouter } from 'next/navigation';
+import { useFindMany, useDeleteOne, useUpdateOne } from '@/hooks/useDynamicGraphQL';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,9 +16,20 @@ import {
   Users,
   Clock,
   Star,
-  Filter,
-  MoreVertical
+  AlertCircle,
+  BookOpen
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from '@/hooks/use-toast';
 
 interface Course {
   id: string;
@@ -43,37 +55,136 @@ interface Course {
 }
 
 export default function AdminCoursesPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState('all'); // all, published, draft
+  const router = useRouter();
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState<any>(null);
 
-  const { data: courses = [], loading, error, refetch } = useFindMany<Course>('Course', {
+  const { data: courses, loading, error, refetch } = useFindMany('Course', {
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      description: true,
+      level: true,
+      price: true,
+      thumbnail: true,
+      isPublished: true,
+      createdAt: true,
+      duration: true,
+    },
     include: {
-      instructor: {
-        select: {
-          id: true,
-          username: true,
-          email: true,
-        }
-      },
       _count: {
         select: {
           enrollments: true,
-          modules: true,
+          lessons: true,
           reviews: true,
-        }
-      }
+        },
+      },
+      instructor: {
+        select: {
+          id: true,
+          name: true,
+          username: true,
+        },
+      },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === 'all' || 
-                         (filter === 'published' && course.isPublished) ||
-                         (filter === 'draft' && !course.isPublished);
+  const [deleteCourse, { loading: deleteLoading }] = useDeleteOne('Course');
+  const [updateCourse] = useUpdateOne('Course');
+
+  // Filter courses
+  const filteredCourses = (courses || []).filter(course => {
+    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (course.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = filterStatus === 'all' || 
+                         (filterStatus === 'published' && course.isPublished) ||
+                         (filterStatus === 'draft' && !course.isPublished);
     return matchesSearch && matchesFilter;
   });
+
+  // Handlers
+  const handleCreateCourse = () => {
+    router.push('/lms/admin/courses/create');
+  };
+
+  const handleViewCourse = (courseId: string) => {
+    router.push(`/lms/admin/courses/${courseId}`);
+  };
+
+  const handleEditCourse = (courseId: string) => {
+    router.push(`/lms/admin/courses/${courseId}/edit`);
+  };
+
+  const handleDeleteClick = (course: any) => {
+    setCourseToDelete(course);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!courseToDelete) return;
+
+    try {
+      await deleteCourse({
+        where: { id: courseToDelete.id },
+      });
+
+      toast({
+        title: 'Thành công',
+        description: `Đã xóa khóa học "${courseToDelete.title}"`,
+        type: 'success',
+      });
+
+      setDeleteDialogOpen(false);
+      setCourseToDelete(null);
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: 'Lỗi',
+        description: error.message || 'Không thể xóa khóa học',
+        type: 'error',
+      });
+    }
+  };
+
+  const handleTogglePublish = async (course: any) => {
+    try {
+      await updateCourse({
+        where: { id: course.id },
+        data: {
+          isPublished: !course.isPublished,
+        },
+      });
+
+      toast({
+        title: 'Thành công',
+        description: `Đã ${!course.isPublished ? 'xuất bản' : 'ẩn'} khóa học "${course.title}"`,
+        type: 'success',
+      });
+
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: 'Lỗi',
+        description: error.message || 'Không thể cập nhật trạng thái',
+        type: 'error',
+      });
+    }
+  };
+
+  // Format price
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(price);
+  };
 
   return (
     <div className="p-8 space-y-6">
@@ -81,9 +192,9 @@ export default function AdminCoursesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Quản lý khóa học</h1>
-          <p className="text-gray-600 mt-1">Tổng cộng {courses.length} khóa học</p>
+          <p className="text-gray-600 mt-1">Tổng cộng {courses?.length || 0} khóa học</p>
         </div>
-        <Button className="gap-2">
+        <Button onClick={handleCreateCourse} className="gap-2">
           <Plus className="w-4 h-4" />
           Tạo khóa học mới
         </Button>
@@ -95,27 +206,27 @@ export default function AdminCoursesPage() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
             placeholder="Tìm kiếm khóa học..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>
         <div className="flex gap-2">
           <Button
-            variant={filter === 'all' ? 'default' : 'outline'}
-            onClick={() => setFilter('all')}
+            variant={filterStatus === 'all' ? 'default' : 'outline'}
+            onClick={() => setFilterStatus('all')}
           >
             Tất cả
           </Button>
           <Button
-            variant={filter === 'published' ? 'default' : 'outline'}
-            onClick={() => setFilter('published')}
+            variant={filterStatus === 'published' ? 'default' : 'outline'}
+            onClick={() => setFilterStatus('published')}
           >
             Đã xuất bản
           </Button>
           <Button
-            variant={filter === 'draft' ? 'default' : 'outline'}
-            onClick={() => setFilter('draft')}
+            variant={filterStatus === 'draft' ? 'default' : 'outline'}
+            onClick={() => setFilterStatus('draft')}
           >
             Nháp
           </Button>
@@ -131,13 +242,18 @@ export default function AdminCoursesPage() {
       ) : error ? (
         <Card>
           <CardContent className="py-12 text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <p className="text-red-600">Lỗi: {error.message}</p>
           </CardContent>
         </Card>
       ) : filteredCourses.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
+            <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500">Không tìm thấy khóa học nào</p>
+            <Button onClick={handleCreateCourse} className="mt-4">
+              Tạo khóa học đầu tiên
+            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -145,33 +261,41 @@ export default function AdminCoursesPage() {
           {filteredCourses.map((course) => (
             <Card key={course.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <Badge variant={course.isPublished ? 'default' : 'secondary'} className="mb-2">
-                      {course.isPublished ? 'Đã xuất bản' : 'Nháp'}
-                    </Badge>
-                    <CardTitle className="line-clamp-2">{course.title}</CardTitle>
-                    <CardDescription className="mt-2 line-clamp-2">
-                      {course.description}
-                    </CardDescription>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
+                <div className="flex items-start justify-between mb-2">
+                  <Badge 
+                    variant={course.isPublished ? 'default' : 'secondary'}
+                    className="cursor-pointer"
+                    onClick={() => handleTogglePublish(course)}
+                  >
+                    {course.isPublished ? 'Đã xuất bản' : 'Nháp'}
+                  </Badge>
+                  <Badge variant="outline">
+                    {course.level || 'Beginner'}
+                  </Badge>
                 </div>
+                <CardTitle className="line-clamp-2">{course.title}</CardTitle>
+                <CardDescription className="mt-2 line-clamp-2">
+                  {course.description || 'Chưa có mô tả'}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Instructor */}
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Users className="w-4 h-4" />
-                  <span>Giảng viên: {course.instructor?.username || 'Chưa có'}</span>
-                </div>
+                {course.instructor && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Users className="w-4 h-4" />
+                    <span>Giảng viên: {course.instructor.name || course.instructor.username}</span>
+                  </div>
+                )}
 
                 {/* Stats */}
                 <div className="flex items-center gap-4 text-sm text-gray-600">
                   <div className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    <span>{course._count?.enrollments || 0} học viên</span>
+                    <span>{course._count?.enrollments || 0}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <BookOpen className="w-4 h-4" />
+                    <span>{course._count?.lessons || 0} bài</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
@@ -183,25 +307,37 @@ export default function AdminCoursesPage() {
                   </div>
                 </div>
 
-                {/* Level & Price */}
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline">{course.level || 'Beginner'}</Badge>
-                  <span className="font-bold text-blue-600">
-                    {course.price > 0 ? `${course.price.toLocaleString()}đ` : 'Miễn phí'}
-                  </span>
+                {/* Price */}
+                <div className="text-lg font-bold text-blue-600">
+                  {course.price ? formatPrice(course.price) : 'Miễn phí'}
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-2 border-t">
-                  <Button variant="outline" size="sm" className="flex-1 gap-2">
+                <div className="flex gap-2 pt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 gap-2"
+                    onClick={() => handleViewCourse(course.id)}
+                  >
                     <Eye className="w-4 h-4" />
                     Xem
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 gap-2"
+                    onClick={() => handleEditCourse(course.id)}
+                  >
                     <Edit className="w-4 h-4" />
                     Sửa
                   </Button>
-                  <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => handleDeleteClick(course)}
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -210,6 +346,33 @@ export default function AdminCoursesPage() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa khóa học</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa khóa học <strong>&quot;{courseToDelete?.title}&quot;</strong>?
+              <br />
+              <br />
+              <span className="text-red-600 font-semibold">
+                Hành động này không thể hoàn tác và sẽ xóa tất cả dữ liệu liên quan (bài học, quiz, enrollment, v.v.)
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteLoading}>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleteLoading}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleteLoading ? 'Đang xóa...' : 'Xóa khóa học'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
