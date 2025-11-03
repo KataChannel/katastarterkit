@@ -11,6 +11,9 @@ export class AuthResponse {
 
   @Field(() => User)
   user: User;
+
+  @Field({ nullable: true })
+  redirectUrl?: string;
 }
 
 @ObjectType()
