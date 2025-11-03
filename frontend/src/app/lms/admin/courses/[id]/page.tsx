@@ -47,64 +47,41 @@ export default function CourseDetailPage() {
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const courseId = params.id as string;
+  const courseId = (params?.id as string) || '';
 
-  const { data: course, loading, error, refetch } = useFindUnique('Course', {
-    where: { id: courseId },
-    skip: !courseId,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      description: true,
-      thumbnail: true,
-      trailer: true,
-      price: true,
-      level: true,
-      status: true,
-      duration: true,
-      language: true,
-      whatYouWillLearn: true,
-      requirements: true,
-      targetAudience: true,
-      avgRating: true,
-      reviewCount: true,
-      enrollmentCount: true,
-      viewCount: true,
-      metaTitle: true,
-      metaDescription: true,
-      tags: true,
-      createdAt: true,
-      updatedAt: true,
-      publishedAt: true,
-    },
-    include: {
-      instructor: {
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          username: true,
-          email: true,
+  const { data: course, loading, error, refetch } = useFindUnique(
+    'Course',
+    { id: courseId },
+    {
+      include: {
+        instructor: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            email: true,
+          },
         },
-      },
-      category: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
         },
-      },
-      _count: {
-        select: {
-          modules: true,
-          enrollments: true,
-          reviews: true,
-          discussions: true,
+        _count: {
+          select: {
+            modules: true,
+            enrollments: true,
+            reviews: true,
+            discussions: true,
+          },
         },
       },
     },
-  });
+    { skip: !courseId || courseId === '' }
+  );
 
   const [deleteCourse, { loading: deleteLoading }] = useDeleteOne('Course');
   const [updateCourse] = useUpdateOne('Course');

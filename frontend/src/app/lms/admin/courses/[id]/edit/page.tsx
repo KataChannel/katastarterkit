@@ -30,33 +30,31 @@ export default function EditCoursePage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const courseId = params.id as string;
+  const courseId = (params?.id as string) || '';
 
-  const { data: course, loading, error } = useFindUnique('Course', {
-    where: { id: courseId },
-    skip: !courseId,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      description: true,
-      thumbnail: true,
-      trailer: true,
-      price: true,
-      level: true,
-      status: true,
-      duration: true,
-      language: true,
-      whatYouWillLearn: true,
-      requirements: true,
-      targetAudience: true,
-      metaTitle: true,
-      metaDescription: true,
-      tags: true,
-      categoryId: true,
-      instructorId: true,
+  const { data: course, loading, error } = useFindUnique(
+    'Course',
+    { id: courseId },
+    {
+      include: {
+        instructor: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     },
-  });
+    { skip: !courseId || courseId === '' }
+  );
 
   const { data: categories } = useFindMany('CourseCategory', {
     select: {
@@ -126,8 +124,8 @@ export default function EditCoursePage() {
         language: course.language || 'vi',
         metaTitle: course.metaTitle || '',
         metaDescription: course.metaDescription || '',
-        categoryId: course.categoryId || '',
-        instructorId: course.instructorId || '',
+        categoryId: course.category?.id || '',
+        instructorId: course.instructor?.id || '',
       });
       setWhatYouWillLearn(course.whatYouWillLearn || []);
       setRequirements(course.requirements || []);
