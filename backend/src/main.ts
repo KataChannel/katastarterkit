@@ -39,8 +39,12 @@ async function bootstrap() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ extended: true, limit: '50mb' }));
   
-  // Configure file upload middleware ONLY for GraphQL endpoint (not for REST API)
-  app.use('/graphql', graphqlUploadExpress({ maxFileSize: 500000000, maxFiles: 10 })); // 500MB max file size
+  // IMPORTANT: graphqlUploadExpress MUST be applied AFTER json/urlencoded middleware
+  // and BEFORE Apollo Server middleware to work correctly
+  app.use('/graphql', graphqlUploadExpress({ 
+    maxFileSize: 500000000, // 500MB max file size
+    maxFiles: 10 
+  }));
   
   // Serve static files for log viewer
   app.use('/logs', express.static(join(__dirname, '../public')));

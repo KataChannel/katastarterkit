@@ -83,9 +83,8 @@ import { ProjectModule } from './project/project.module';
         playground: configService.get('NODE_ENV') !== 'production',
         introspection: configService.get('NODE_ENV') !== 'production',
         context: ({ req, res }) => ({ req, res }),
-        bodyParserConfig: {
-          limit: '50mb',
-        },
+        // Disable Apollo's body parser - let Express handle it (configured in main.ts)
+        bodyParserConfig: false,
         subscriptions: {
           'graphql-ws': {
             path: '/graphql',
