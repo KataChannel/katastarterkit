@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Users, Award, TrendingUp, Play, FileText, CheckCircle } from 'lucide-react';
 import { useSiteName } from '@/hooks/useSiteName';
@@ -11,6 +11,35 @@ import { Badge } from '@/components/ui/badge';
 export default function LMSHomePage() {
   const router = useRouter();
   const { siteName } = useSiteName();
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check user role and redirect if authenticated
+    const token = localStorage.getItem('accessToken');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUserRole(payload.roleType);
+        
+        // Optional: Auto-redirect to role-specific dashboard
+        // Uncomment to enable auto-redirect:
+        // switch (payload.roleType) {
+        //   case 'ADMIN':
+        //     router.push('/lms/admin');
+        //     break;
+        //   case 'GIANGVIEN':
+        //     router.push('/lms/instructor');
+        //     break;
+        //   case 'USER':
+        //     router.push('/lms/student');
+        //     break;
+        // }
+      } catch (error) {
+        console.error('Failed to parse token:', error);
+      }
+    }
+  }, [router]);
 
   const features = [
     {
@@ -69,8 +98,8 @@ export default function LMSHomePage() {
                 Khám phá Khóa học
               </Button>
 
-             <Button
-                onClick={() => router.push('/lms/instructor/dashboard')}
+              <Button
+                onClick={() => router.push('/lms/instructor')}
                 size="lg"
                 variant="secondary"
                 className="text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8"
@@ -79,7 +108,7 @@ export default function LMSHomePage() {
               </Button>
 
               <Button
-                onClick={() => router.push('/lms/my-learning')}
+                onClick={() => router.push('/lms/student')}
                 size="lg"
                 variant="secondary"
                 className="text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8"
@@ -230,7 +259,7 @@ export default function LMSHomePage() {
                 </li>
               </ul>
               <Button
-                onClick={() => router.push('/lms/instructor/dashboard')}
+                onClick={() => router.push('/lms/instructor')}
                 className="w-full bg-purple-600 hover:bg-purple-700"
               >
                 Bắt đầu giảng dạy
