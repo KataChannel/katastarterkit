@@ -6,6 +6,43 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting LMS seeding with 4 Soft Skills Courses...\n');
 
+  // =============================================================================
+  // DELETE ALL EXISTING COURSES
+  // =============================================================================
+  console.log('🗑️  Deleting all existing courses and related data...\n');
+
+  try {
+    // Delete in correct order due to foreign key constraints
+    await prisma.answer.deleteMany({});
+    console.log('   ✅ Deleted all answers');
+
+    await prisma.question.deleteMany({});
+    console.log('   ✅ Deleted all questions');
+
+    await prisma.quiz.deleteMany({});
+    console.log('   ✅ Deleted all quizzes');
+
+    await prisma.lesson.deleteMany({});
+    console.log('   ✅ Deleted all lessons');
+
+    await prisma.courseModule.deleteMany({});
+    console.log('   ✅ Deleted all course modules');
+
+    await prisma.enrollment.deleteMany({});
+    console.log('   ✅ Deleted all enrollments');
+
+    await prisma.course.deleteMany({});
+    console.log('   ✅ Deleted all courses');
+
+    await prisma.courseCategory.deleteMany({});
+    console.log('   ✅ Deleted all course categories\n');
+
+    console.log('✨ All existing course data cleaned successfully!\n');
+  } catch (error) {
+    console.error('❌ Error deleting existing data:', error);
+    throw error;
+  }
+
   const hashedPassword = await bcrypt.hash('password123', 10);
 
   // 1. Create Users
