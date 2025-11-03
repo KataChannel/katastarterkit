@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_COURSES, GET_COURSE_CATEGORIES } from '@/graphql/lms/courses.graphql';
 import CourseList from '@/components/lms/CourseList';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, Grid, List, BookOpen, GraduationCap, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,11 +13,20 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+
+// Icon mapping cho categories
+const categoryIcons: Record<string, any> = {
+  'basic-skills': GraduationCap,
+  'advanced-skills': Award,
+  'default': BookOpen,
+};
 
 export default function CoursesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const { data: categoriesData } = useQuery(GET_COURSE_CATEGORIES);
 
@@ -39,6 +48,17 @@ export default function CoursesPage() {
   const courses = data?.courses?.data || [];
   const categories = categoriesData?.courseCategories || [];
 
+  // Đếm số khóa học theo category
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    courses.forEach((course: any) => {
+      if (course.categoryId) {
+        counts[course.categoryId] = (counts[course.categoryId] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [courses]);
+
   const levels = [
     { value: 'BEGINNER', label: 'Cơ bản' },
     { value: 'INTERMEDIATE', label: 'Trung cấp' },
@@ -55,6 +75,11 @@ export default function CoursesPage() {
     setSearchTerm('');
     setSelectedCategory(null);
     setSelectedLevel(null);
+  };
+
+  const getCategoryIcon = (slug: string) => {
+    const Icon = categoryIcons[slug] || categoryIcons.default;
+    return Icon;
   };
 
   return (
@@ -77,7 +102,7 @@ export default function CoursesPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70 w-5 h-5" />
               <Input
                 type="text"
-                placeholder="Tìm kiếm khóa học..."
+                placeholder="Tìm kiếm khóa học, giảng viên, kỹ năng..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 h-10 md:h-12 text-base text-white placeholder:text-white/70 bg-white/20 border-white/30"
@@ -114,20 +139,41 @@ export default function CoursesPage() {
                   </CardHeader>
                   <CardContent>
                     <RadioGroup value={selectedCategory || ''} onValueChange={(value) => setSelectedCategory(value || null)}>
-                      <div className="flex items-center space-x-2 mb-3">
+                      <div className="flex items-center space-x-2 mb-3 p-2 rounded-md hover:bg-accent cursor-pointer">
                         <RadioGroupItem value="" id="category-all" />
-                        <Label htmlFor="category-all" className="font-normal cursor-pointer">
-                          Tất cả danh mục
+                        <Label htmlFor="category-all" className="font-normal cursor-pointer flex items-center gap-2 flex-1">
+                          <BookOpen className="w-4 h-4 text-muted-foreground" />
+                          <span>Tất cả danh mục</span>
+                          <Badge variant="secondary" className="ml-auto">
+                            {courses.length}
+                          </Badge>
                         </Label>
                       </div>
-                      {categories.map((category: any) => (
-                        <div key={category.id} className="flex items-center space-x-2 mb-2">
-                          <RadioGroupItem value={category.id} id={`category-${category.id}`} />
-                          <Label htmlFor={`category-${category.id}`} className="font-normal cursor-pointer">
-                            {category.name}
-                          </Label>
-                        </div>
-                      ))}
+                      {categories.map((category: any) => {
+                        const Icon = getCategoryIcon(category.slug);
+                        const count = categoryCounts[category.id] || 0;
+                        
+                        return (
+                          <div 
+                            key={category.id} 
+                            className="flex items-center space-x-2 mb-2 p-2 rounded-md hover:bg-accent cursor-pointer"
+                          >
+                            <RadioGroupItem value={category.id} id={`category-${category.id}`} />
+                            <Label 
+                              htmlFor={`category-${category.id}`} 
+                              className="font-normal cursor-pointer flex items-center gap-2 flex-1"
+                            >
+                              <Icon className="w-4 h-4 text-primary" />
+                              <span>{category.name}</span>
+                              {count > 0 && (
+                                <Badge variant="secondary" className="ml-auto">
+                                  {count}
+                                </Badge>
+                              )}
+                            </Label>
+                          </div>
+                        );
+                      })}
                     </RadioGroup>
                   </CardContent>
                 </Card>
@@ -241,15 +287,39 @@ export default function CoursesPage() {
           {/* Course Grid */}
           <main className="flex-1 min-w-0">
             {/* Results Header */}
-            <div className="mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold">
-                {loading ? 'Đang tải...' : `${courses.length} khóa học`}
-              </h2>
-              {hasActiveFilters && (
-                <p className="text-muted-foreground text-sm mt-2">
-                  Hiển thị kết quả đã lọc
-                </p>
-              )}
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold">
+                  {loading ? 'Đang tải...' : `${courses.length} khóa học`}
+                </h2>
+                {hasActiveFilters && (
+                  <p className="text-muted-foreground text-sm mt-2">
+                    Hiển thị kết quả đã lọc
+                  </p>
+                )}
+              </div>
+
+              {/* View Mode Toggle */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="gap-2"
+                >
+                  <Grid className="w-4 h-4" />
+                  <span className="hidden sm:inline">Lưới</span>
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="gap-2"
+                >
+                  <List className="w-4 h-4" />
+                  <span className="hidden sm:inline">Danh sách</span>
+                </Button>
+              </div>
             </div>
 
             {/* Error State */}
