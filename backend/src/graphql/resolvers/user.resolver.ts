@@ -13,6 +13,7 @@ import { AuthService } from '../../auth/auth.service';
 import { OtpService } from '../../services/otp.service';
 import { PubSubService } from '../../services/pubsub.service';
 import { $Enums } from '@prisma/client';
+import { getLoginRedirectUrl, getRegisterRedirectUrl } from '../../utils/auth-redirect.utils';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -50,6 +51,7 @@ export class UserResolver {
   async registerUser(@Args('input') input: RegisterUserInput): Promise<AuthResponse> {
     const user = await this.userService.create(input);
     const tokens = await this.authService.generateTokens(user);
+    const redirectUrl = await getRegisterRedirectUrl();
     
     // Publish user registration event
     this.pubSubService.publishUserRegistered(user);
@@ -57,6 +59,7 @@ export class UserResolver {
     return {
       ...tokens,
       user,
+      redirectUrl,
     };
   }
 
@@ -64,10 +67,12 @@ export class UserResolver {
   async loginUser(@Args('input') input: LoginUserInput): Promise<AuthResponse> {
     const user = await this.authService.validateUser(input.emailOrUsername, input.password);
     const tokens = await this.authService.generateTokens(user);
+    const redirectUrl = await getLoginRedirectUrl(user.roleType);
     
     return {
       ...tokens,
       user,
+      redirectUrl,
     };
   }
 
@@ -77,11 +82,13 @@ export class UserResolver {
     
     const result = await this.authService.loginWithGoogle(input);
     console.log('Result from authService:', result);
+    const redirectUrl = await getLoginRedirectUrl(result.user.roleType);
     
     return {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
       user: result.user,
+      redirectUrl,
     };
   }
 
@@ -91,11 +98,13 @@ export class UserResolver {
       input.token,
       input.providerId
     );
+    const redirectUrl = await getLoginRedirectUrl(result.user.roleType);
     
     return {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
       user: result.user,
+      redirectUrl,
     };
   }
 
@@ -109,11 +118,13 @@ export class UserResolver {
     }
 
     const result = await this.authService.loginWithPhone(input.phone);
+    const redirectUrl = await getLoginRedirectUrl(result.user.roleType);
     
     return {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
       user: result.user,
+      redirectUrl,
     };
   }
 

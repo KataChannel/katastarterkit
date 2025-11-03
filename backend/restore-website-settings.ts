@@ -249,6 +249,57 @@ async function restoreWebsiteSettings() {
         description: 'Enable product reviews',
         type: 'boolean',
       },
+
+      // Auth & Redirect Settings
+      {
+        key: 'auth_login_redirect',
+        value: '/dashboard',
+        category: 'auth',
+        description: 'Redirect URL after successful login',
+        type: 'string',
+      },
+      {
+        key: 'auth_logout_redirect',
+        value: '/',
+        category: 'auth',
+        description: 'Redirect URL after logout',
+        type: 'string',
+      },
+      {
+        key: 'auth_register_redirect',
+        value: '/welcome',
+        category: 'auth',
+        description: 'Redirect URL after successful registration',
+        type: 'string',
+      },
+      {
+        key: 'auth_role_based_redirect',
+        value: 'true',
+        category: 'auth',
+        description: 'Enable role-based redirect (ADMIN -> /admin, USER -> /dashboard)',
+        type: 'boolean',
+      },
+      {
+        key: 'auth_redirect_admin',
+        value: '/admin',
+        category: 'auth',
+        description: 'Redirect URL for ADMIN role after login',
+        type: 'string',
+      },
+      {
+        key: 'auth_redirect_user',
+        value: '/dashboard',
+        category: 'auth',
+        description: 'Redirect URL for USER role after login',
+        type: 'string',
+      },
+      {
+        key: 'auth_redirect_guest',
+        value: '/courses',
+        category: 'auth',
+        description: 'Redirect URL for GUEST role after login',
+        type: 'string',
+      },
     ];
 
     console.log(`📝 Inserting ${defaultSettings.length} default settings...\n`);
