@@ -450,12 +450,12 @@ export async function seedWebsiteSettings() {
       isPublic: true,
     },
 
-    // ===== APPEARANCE SETTINGS =====
+    // ===== APPEARANCE SETTINGS (Gộp vào GENERAL) =====
     {
       key: 'appearance.primary_color',
       value: '#57A345',
       type: 'COLOR',
-      category: 'APPEARANCE',
+      category: 'GENERAL',
       label: 'Màu chính',
       description: 'Màu chủ đạo của website',
       group: 'colors',
@@ -466,7 +466,7 @@ export async function seedWebsiteSettings() {
       key: 'appearance.secondary_color',
       value: '#FAA61A',
       type: 'COLOR',
-      category: 'APPEARANCE',
+      category: 'GENERAL',
       label: 'Màu phụ',
       description: 'Màu phụ của website',
       group: 'colors',
@@ -477,7 +477,7 @@ export async function seedWebsiteSettings() {
       key: 'appearance.accent_color',
       value: '#65b009',
       type: 'COLOR',
-      category: 'APPEARANCE',
+      category: 'GENERAL',
       label: 'Màu nhấn',
       description: 'Màu nhấn (highlights)',
       group: 'colors',
