@@ -442,6 +442,47 @@ Cập nhật GraphQL queries để nhận `redirectUrl` field
 
 ---
 
-**Version**: 1.0.0  
+**Version**: 1.0.1  
 **Ngày cập nhật**: 03/11/2025  
-**Status**: ✅ Hoàn thành
+**Status**: ✅ Hoàn thành & Fixed Bugs
+
+---
+
+## 🐛 BUG FIXES (03/11/2025)
+
+### Vấn đề
+- ❌ AUTH category không hiển thị trong admin panel `/admin/settings/website`
+- ❌ GraphQL DTO thiếu AUTH enum
+- ❌ Frontend types thiếu SUPPORT_CHAT và AUTH categories
+
+### Đã sửa
+1. ✅ **Backend GraphQL DTO** (`backend/src/graphql/dto/website-setting.input.ts`)
+   - Thêm AUTH vào SettingCategory enum
+   - Thêm URL vào SettingType enum
+   - Sync với Prisma schema (12 categories, 10 types)
+
+2. ✅ **Frontend Types** (`frontend/src/hooks/useWebsiteSettings.ts`)
+   - Thêm SUPPORT_CHAT và AUTH vào category type
+   - Sync với backend enum
+
+3. ✅ **Frontend UI** (`frontend/src/app/admin/settings/website/page.tsx`)
+   - Thêm AUTH tab với icon Shield
+   - Import Shield icon từ lucide-react
+   - Hiển thị 8 tabs (GENERAL, HEADER, FOOTER, CONTACT, SOCIAL, SEO, SUPPORT_CHAT, AUTH)
+
+4. ✅ **Gộp APPEARANCE vào GENERAL**
+   - Xóa APPEARANCE tab khỏi frontend
+   - Update 3 settings (primary_color, secondary_color, accent_color) từ APPEARANCE → GENERAL
+   - Settings hiển thị trong group "colors" của tab GENERAL
+
+5. ✅ **Testing & Verification**
+   - Verified 7 AUTH settings trong database
+   - Tested GraphQL queries hoạt động bình thường
+   - Prisma Client regenerated
+
+### Kết quả
+✅ Tab AUTH hiển thị đầy đủ 7 settings  
+✅ GraphQL queries trả về đúng dữ liệu  
+✅ Frontend UI sync với backend enum  
+✅ APPEARANCE settings gộp vào GENERAL  
+✅ Tất cả components hoạt động bình thường

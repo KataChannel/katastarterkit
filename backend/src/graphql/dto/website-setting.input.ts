@@ -9,7 +9,12 @@ export enum SettingCategory {
   SEO = 'SEO',
   SOCIAL = 'SOCIAL',
   CONTACT = 'CONTACT',
+  APPEARANCE = 'APPEARANCE',
+  ANALYTICS = 'ANALYTICS',
+  PAYMENT = 'PAYMENT',
+  SHIPPING = 'SHIPPING',
   SUPPORT_CHAT = 'SUPPORT_CHAT',
+  AUTH = 'AUTH',
 }
 
 export enum SettingType {
@@ -21,6 +26,7 @@ export enum SettingType {
   JSON = 'JSON',
   COLOR = 'COLOR',
   IMAGE = 'IMAGE',
+  URL = 'URL',
 }
 
 @InputType()
