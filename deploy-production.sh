@@ -15,7 +15,7 @@ set -e
 # Server Configuration
 SERVER_IP="116.118.49.243"
 SERVER_USER="root"
-REMOTE_DIR="/root/shoprausach"
+REMOTE_DIR="/root/appfinal"
 LOCAL_DIR="$(pwd)"
 
 # Deployment Mode

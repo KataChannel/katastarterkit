@@ -49,27 +49,29 @@ fi
 
 # Wait for database to be ready
 echo "⏳ Waiting for database to be ready..."
-until ./node_modules/.bin/prisma db push --accept-data-loss 2>/dev/null; do
-  echo "Database is unavailable - sleeping"
+DB_HOST=$(echo $DATABASE_URL | sed 's/.*@\(.*\):.*/\1/')
+DB_PORT=$(echo $DATABASE_URL | sed 's/.*:\([0-9]*\)\/.*/\1/')
+
+for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+  echo "Database connection attempt $i/15..."
+  if nc -z "$DB_HOST" "$DB_PORT" 2>/dev/null; then
+    echo "✅ Database is ready!"
+    break
+  fi
   sleep 2
 done
 
-echo "✅ Database is ready!"
-
-# Run Prisma migrations (skip with resolve if they failed)
-echo "🔄 Running Prisma migrations..."
-./node_modules/.bin/prisma migrate resolve --rolled-back 20251024_add_blog_system 2>/dev/null || true
-./node_modules/.bin/prisma migrate deploy 2>/dev/null || echo "⚠️  Migrations already applied or contain errors, continuing..."
-
-# Generate Prisma client
-echo "🔧 Generating Prisma client..."
-./node_modules/.bin/prisma generate
-
-# Seed database if needed (optional)
-if [ "$NODE_ENV" = "development" ]; then
-  echo "🌱 Seeding database..."
-  bun prisma db seed 2>/dev/null || echo "⚠️  No seed script found or seeding failed"
+# Run Prisma migrations only if ENABLE_MIGRATIONS=true
+if [ "$ENABLE_MIGRATIONS" = "true" ]; then
+  echo "🔄 Running Prisma migrations..."
+  ./node_modules/.bin/prisma migrate deploy 2>/dev/null || echo "⚠️  Migrations already applied or contain errors, continuing..."
+else
+  echo "ℹ️  Skipping migrations (set ENABLE_MIGRATIONS=true to enable)"
 fi
+
+# NOTE: Prisma client is already generated during Docker build
+# Generating at runtime causes OOM with 256MB memory limit
+# If you need to regenerate, do it manually or increase memory limits
 
 echo "✅ Backend setup complete!"
 

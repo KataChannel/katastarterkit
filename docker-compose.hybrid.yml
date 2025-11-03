@@ -65,9 +65,9 @@ services:
   # ========================================
   
   # PostgreSQL for Rausach - Dedicated
-  rausach-postgres:
+  shoppostgres:
     image: postgres:16-alpine
-    container_name: rausach-postgres
+    container_name: shoppostgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: rausachcore
@@ -91,28 +91,31 @@ services:
         reservations:
           memory: 128M
 
-  rausach-backend:
+  shopbackend:
     build:
       context: .
       dockerfile: ./backend/Dockerfile
-    container_name: rausach-backend
+    container_name: shopbackend
     restart: unless-stopped
     env_file:
       - .env.rausach
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:postgres@rausach-postgres:5432/rausachcore
+      PORT: 4000
+      DATABASE_URL: postgresql://postgres:postgres@shoppostgres:5432/rausachcore
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_KEY_PREFIX: "rausach:"
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
-      MINIO_USE_SSL: false
-      MINIO_BUCKET_NAME: rausach-uploads
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: minio-admin
+      MINIO_SECRET_KEY: minio-secret-2025
+      MINIO_BUCKET_NAME: shopuploads
     ports:
       - "12001:4000"
     depends_on:
-      rausach-postgres:
+      shoppostgres:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -123,20 +126,21 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
 
-  rausach-frontend:
+  shopfrontend:
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
-    container_name: rausach-frontend
+    container_name: shopfrontend
     restart: unless-stopped
     env_file:
       - .env.rausach
     environment:
       NODE_ENV: production
+      PORT: 3000
       NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.49.243:12001/graphql
       NEXT_PUBLIC_APP_URL: http://116.118.49.243:12000
       NEXTAUTH_URL: http://116.118.49.243:12000
@@ -145,7 +149,7 @@ services:
     ports:
       - "12000:3000"
     depends_on:
-      - rausach-backend
+      - shopbackend
     networks:
       - hybrid-network
     deploy:
@@ -196,13 +200,16 @@ services:
       - .env.tazagroup
     environment:
       NODE_ENV: production
+      PORT: 4000
       DATABASE_URL: postgresql://postgres:postgres@tazagroup-postgres:5432/tazagroupcore
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_KEY_PREFIX: "tazagroup:"
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
-      MINIO_USE_SSL: false
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: minio-admin
+      MINIO_SECRET_KEY: minio-secret-2025
       MINIO_BUCKET_NAME: tazagroup-uploads
     ports:
       - "13001:4000"
@@ -218,9 +225,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
         reservations:
-          memory: 128M
+          memory: 256M
 
   tazagroup-frontend:
     build:
@@ -232,6 +239,7 @@ services:
       - .env.tazagroup
     environment:
       NODE_ENV: production
+      PORT: 3000
       NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.49.243:13001/graphql
       NEXT_PUBLIC_APP_URL: http://116.118.49.243:13000
       NEXTAUTH_URL: http://116.118.49.243:13000
