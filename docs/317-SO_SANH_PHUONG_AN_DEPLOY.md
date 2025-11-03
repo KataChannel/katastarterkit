@@ -116,8 +116,7 @@
 
 ---
 
-### Phương Án 3: Hybrid (Chia sẻ một phần) 🎯 **ĐỀ XUẤT CHO PRODUCTION**
-**File:** `docker-compose.hybrid.yml`
+### Phương Án 3: Hybrid (Chia sẻ một phần)
 
 ```
 ┌─────────────────────────────────────────┐
@@ -135,54 +134,34 @@
 │  ┌─▼──────────────┐    ┌──────────▼──┐  │
 │  │ Rausach Stack  │    │ Tazagroup   │  │
 │  │ - PostgreSQL   │    │ - PostgreSQL│  │
-│  │   (dedicated)  │    │   (dedicated)│  │
 │  │ - Backend      │    │ - Backend   │  │
 │  │ - Frontend     │    │ - Frontend  │  │
-│  │ Port: 12xxx    │    │ Port: 13xxx │  │
 │  └────────────────┘    └─────────────┘  │
 │                                         │
 └─────────────────────────────────────────┘
 ```
 
 **Resource Usage:**
-- PostgreSQL x2: 512MB (256MB each, **dedicated per domain**)
-- Redis: 128MB (**shared**)
-- Minio: 128MB (**shared**)
-- Backend x2: 512MB (256MB each)
-- Frontend x2: 512MB (256MB each)
+- PostgreSQL x2: 512MB (dedicated per domain)
+- Redis: 128MB (shared)
+- Minio: 128MB (shared)
+- Backend x2: 512MB
+- Frontend x2: 512MB
 - **TỔNG: ~1.8GB RAM**
 
 **Ưu điểm:**
-- ✅ **Database độc lập** - Quan trọng cho data integrity
-- ✅ **Dễ backup/restore** - Mỗi domain có DB riêng
-- ✅ **Performance tốt** - Database không bị shared
-- ✅ **Cache & storage shared** - Tiết kiệm tài nguyên
-- ✅ **Cân bằng tốt** - Giữa performance và cost
-- ✅ **Dễ scale** - Có thể tách database ra server riêng
-- ✅ **Isolation tốt** - Sự cố DB này không ảnh hưởng DB kia
+- ✅ Database độc lập (quan trọng)
+- ✅ Cache & storage shared (ít quan trọng)
+- ✅ Cân bằng giữa performance và tài nguyên
 
 **Nhược điểm:**
-- ⚠️ Tốn RAM hơn phương án 1 (~300MB)
-- ⚠️ Cần monitor 2 PostgreSQL instances
+- ⚠️ Phức tạp hơn phương án 1
+- ⚠️ Tốn RAM hơn phương án 1
 
 **Khi nào dùng:**
-- ✅ **Server có 1.5GB - 2GB RAM** 
-- ✅ **Production environment** - Cần reliability cao
-- ✅ **2 domain quan trọng** - Không muốn chia sẻ database
-- ✅ **Cần backup riêng** - Mỗi domain backup độc lập
-- ✅ **Chuẩn bị scale** - Dễ tách database sau này
-
-**Setup nhanh:**
-```bash
-# Sử dụng Makefile
-make -f Makefile.hybrid start-all
-
-# Hoặc script
-./deploy-hybrid.sh
-
-# Hoặc Docker Compose trực tiếp
-docker-compose -f docker-compose.hybrid.yml up -d
-```
+- ✅ Server có 1.5GB - 2GB RAM
+- ✅ Muốn database riêng biệt
+- ✅ Cache/storage có thể share
 
 ---
 
@@ -227,87 +206,28 @@ make -f Makefile.multi-domain start-tazagroup   # Chỉ Tazagroup
 ---
 
 ### Server 1-2 Core / 1.5GB RAM / 7GB Disk
-**➡️ Dùng Phương Án 3: Hybrid** 🎯 **KHUYẾN NGHỊ**
-
-```bash
-# Setup với swap
-sudo fallocate -l 1G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-
-# Khởi động
-make -f Makefile.hybrid start-all
-
-# Hoặc sử dụng menu
-./deploy-hybrid.sh
-```
+**➡️ Dùng Phương Án 3: Hybrid**
 
 **Tips:**
-- ✅ Database riêng cho mỗi domain - **Quan trọng nhất!**
-- ✅ Cache & storage shared - Tiết kiệm tài nguyên
-- ✅ Cân bằng tốt nhất giữa performance và cost
-- ✅ Phù hợp cho production
-- ✅ Dễ backup/restore từng domain riêng
-- ✅ Có thể chạy cả 2 domain ổn định
-- ✅ Sẵn sàng scale khi cần (tách DB ra server riêng)
-
-**Scenarios:**
-```bash
-# Chạy cả 2 domain (normal operation)
-make -f Makefile.hybrid start-all
-
-# Chỉ Rausach (tiết kiệm tài nguyên)
-make -f Makefile.hybrid start-rausach
-
-# Chỉ Tazagroup
-make -f Makefile.hybrid start-tazagroup
-
-# Backup riêng biệt
-make -f Makefile.hybrid backup-rausach
-make -f Makefile.hybrid backup-tazagroup
-```
+- Database riêng cho mỗi domain
+- Cache & storage shared
+- Cân bằng tốt
 
 ---
 
 ## 📈 So Sánh Chi Tiết
 
-| Tiêu chí | Phương án 1 | Phương án 2 | Phương án 3 🎯 |
-|----------|-------------|-------------|----------------|
-| **RAM Usage** | ~1.5GB | ~2.5GB | **~1.8GB** ✅ |
-| **Disk Usage** | ~3GB | ~5GB | **~4GB** ✅ |
-| **Min RAM** | 1GB (+swap) | 2GB | **1.5GB (+1GB swap)** ✅ |
-| **Database Isolation** | ❌ Shared | ✅ Dedicated | **✅ Dedicated** 🌟 |
-| **Cache Isolation** | ❌ Shared | ✅ Dedicated | ⚠️ Shared |
-| **Storage Isolation** | ❌ Shared | ✅ Dedicated | ⚠️ Shared |
-| **Complexity** | Thấp | Cao | **Trung bình** ✅ |
-| **Cost** | Thấp nhất | Cao nhất | **Trung bình** ✅ |
-| **Performance** | Tốt | Rất tốt | **Tốt** ✅ |
-| **Scalability** | Khó | Dễ | **Dễ** ✅ |
-| **Management** | Dễ | Khó | **Trung bình** ✅ |
-| **Backup Ease** | ⚠️ Phức tạp | ✅ Rất dễ | **✅ Dễ** 🌟 |
-| **Data Safety** | ⚠️ Trung bình | ✅ Cao | **✅ Cao** 🌟 |
-| **Production Ready** | ⚠️ Dev/Test | ✅ Yes | **✅ Yes** 🌟 |
-
-### 🏆 Điểm Số Tổng Hợp
-
-**Phương án 1 (Shared Infrastructure):** 6.5/10
-- ✅ Tiết kiệm tài nguyên tốt nhất
-- ❌ Database shared - Rủi ro cao
-- 👍 Phù hợp: Dev/Test, Budget thấp
-
-**Phương án 2 (Fully Isolated):** 8.5/10
-- ✅ Isolation tốt nhất
-- ❌ Tốn tài nguyên nhất
-- 👍 Phù hợp: Enterprise, Traffic cao
-
-**Phương án 3 (Hybrid):** 9/10 🏆
-- ✅ **Cân bằng tốt nhất**
-- ✅ **Database dedicated** - An toàn
-- ✅ **Cache/Storage shared** - Tiết kiệm
-- ✅ **Production-ready**
-- 👍 **Phù hợp: Hầu hết các trường hợp**
+| Tiêu chí | Phương án 1 | Phương án 2 | Phương án 3 |
+|----------|-------------|-------------|-------------|
+| **RAM Usage** | ~1.5GB | ~2.5GB | ~1.8GB |
+| **Disk Usage** | ~3GB | ~5GB | ~4GB |
+| **Min RAM** | 1GB (+swap) | 2GB | 1.5GB |
+| **Isolation** | Thấp | Cao | Trung bình |
+| **Complexity** | Thấp | Cao | Trung bình |
+| **Cost** | Thấp nhất | Cao nhất | Trung bình |
+| **Performance** | Tốt | Rất tốt | Tốt |
+| **Scalability** | Khó | Dễ | Trung bình |
+| **Management** | Dễ | Khó | Trung bình |
 
 ---
 
@@ -378,138 +298,22 @@ sudo sh -c 'truncate -s 0 /var/lib/docker/containers/*/*-json.log'
 
 ## 🎬 Kết Luận
 
-### 🥇 Khuyến Nghị Chính: Phương Án 3 - Hybrid
+**Phương án 1 (Shared Infrastructure)** là lựa chọn tối ưu cho:
+- Server cấu hình thấp (1GB RAM)
+- Budget hạn chế
+- Startup/MVPs
+- Development/Testing
 
-**Phương án 3 (Hybrid)** là lựa chọn **TỐI ƯU NHẤT** cho **hầu hết các trường hợp**:
-- ✅ Server cấu hình trung bình (1.5GB RAM)
-- ✅ **Production environment** - Đáng tin cậy
-- ✅ **Database isolation** - Data safety cao
-- ✅ Tiết kiệm tài nguyên hợp lý
-- ✅ Dễ quản lý và backup
-- ✅ Sẵn sàng scale khi cần
+**Phương án 2 (Fully Isolated)** phù hợp cho:
+- Production với traffic cao
+- Cần high availability
+- Budget thoải mái
+- Enterprise applications
 
-**Setup:**
-```bash
-./deploy-hybrid.sh
-# hoặc
-make -f Makefile.hybrid start-all
-```
-
----
-
-### 🥈 Phương Án 1 (Shared Infrastructure)
-
-Phù hợp cho:
-- ✅ Server cấu hình **cực thấp** (1GB RAM)
-- ✅ **Budget hạn chế** nhất
-- ✅ **Development/Testing** environment
-- ✅ Startup/MVPs giai đoạn đầu
-- ⚠️ **KHÔNG khuyến nghị cho production**
-
-**Lý do KHÔNG dùng cho production:**
-- ❌ Database shared - Nếu bị lỗi, cả 2 domain chết
-- ❌ Khó debug khi có vấn đề
-- ❌ Rủi ro data corruption cao hơn
-
----
-
-### 🥉 Phương Án 2 (Fully Isolated)
-
-Phù hợp cho:
-- ✅ Production với **traffic cao**
-- ✅ Cần **high availability** tối đa
-- ✅ **Budget thoải mái** (server >= 2GB RAM)
-- ✅ Enterprise applications
-- ✅ Compliance requirements (data isolation)
-
-**Khi nào nên upgrade từ Hybrid → Fully Isolated:**
-- Traffic > 10,000 requests/day per domain
-- Cần 99.9% uptime
-- Regulatory compliance yêu cầu isolation hoàn toàn
-- Budget cho server mạnh hơn
-
----
-
-## 🎯 Decision Matrix
-
-### Chọn Phương Án Dựa Trên Nhu Cầu:
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                     DECISION TREE                       │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  Server RAM?                                            │
-│     │                                                   │
-│     ├─ 1GB      → Phương án 1 (Dev/Test only)          │
-│     │                                                   │
-│     ├─ 1.5GB   → Phương án 3 (Hybrid) 🏆              │
-│     │              KHUYẾN NGHỊ CHO PRODUCTION           │
-│     │                                                   │
-│     └─ 2GB+     → Phương án 2 hoặc 3                   │
-│                    - Phương án 3: Cân bằng tốt         │
-│                    - Phương án 2: Max isolation        │
-│                                                         │
-│  Environment?                                           │
-│     ├─ Dev/Test     → Phương án 1                      │
-│     ├─ Production   → Phương án 3 🏆                   │
-│     └─ Enterprise   → Phương án 2 hoặc 3               │
-│                                                         │
-│  Budget?                                                │
-│     ├─ Low          → Phương án 1 (rủi ro cao)         │
-│     ├─ Medium       → Phương án 3 🏆                   │
-│     └─ High         → Phương án 2                      │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🔄 Migration Path Recommendations
-
-### Roadmap Tăng Trưởng:
-
-**Giai đoạn 1: Startup (0-100 users/day)**
-```
-Phương án 1 (Shared) trên 1GB RAM
-├─ Chi phí: $5-10/tháng
-├─ Rủi ro: Cao
-└─ Thời gian: 1-3 tháng
-```
-
-**Giai đoạn 2: Growth (100-1000 users/day)** 🎯
-```
-Phương án 3 (Hybrid) trên 1.5-2GB RAM
-├─ Chi phí: $10-20/tháng
-├─ Rủi ro: Thấp
-├─ Performance: Tốt
-└─ Khuyến nghị: NÊN UPGRADE NGAY
-```
-
-**Giai đoạn 3: Scale (1000+ users/day)**
-```
-Phương án 2 (Fully Isolated) trên 2-4GB RAM
-├─ Chi phí: $20-40/tháng
-├─ Rủi ro: Rất thấp
-├─ Performance: Xuất sắc
-└─ Hoặc: Tách riêng 2 servers
-```
-
----
-
-## 📊 Chi Phí So Sánh (VPS VN)
-
-| Phương án | RAM | CPU | Disk | Chi phí/tháng | Phù hợp |
-|-----------|-----|-----|------|---------------|---------|
-| Phương án 1 | 1GB | 1C | 5GB | ~150k VNĐ | Dev/Test |
-| **Phương án 3** 🏆 | **1.5-2GB** | **1-2C** | **7GB** | **~250k VNĐ** | **Production** |
-| Phương án 2 | 2-4GB | 2C | 10GB | ~400k VNĐ | Enterprise |
-
-**ROI Analysis cho Phương án 3:**
-- Chi phí thêm: +100k/tháng vs Phương án 1
-- Lợi ích: Database isolation, backup dễ, production-ready
-- **Break-even**: Ngay khi có > 10 users/day
-- **Khuyến nghị**: **ĐÁNG GIÁ** cho bất kỳ production nào
+**Phương án 3 (Hybrid)** là middle-ground cho:
+- Server cấu hình trung bình
+- Cần database isolation
+- Cân bằng cost-performance
 
 ---
 
