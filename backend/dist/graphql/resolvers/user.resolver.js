@@ -28,6 +28,7 @@ const auth_service_1 = require("../../auth/auth.service");
 const otp_service_1 = require("../../services/otp.service");
 const pubsub_service_1 = require("../../services/pubsub.service");
 const client_1 = require("@prisma/client");
+const auth_redirect_utils_1 = require("../../utils/auth-redirect.utils");
 let UserResolver = class UserResolver {
     constructor(userService, authService, otpService, pubSubService) {
         this.userService = userService;
@@ -47,36 +48,44 @@ let UserResolver = class UserResolver {
     async registerUser(input) {
         const user = await this.userService.create(input);
         const tokens = await this.authService.generateTokens(user);
+        const redirectUrl = await (0, auth_redirect_utils_1.getRegisterRedirectUrl)();
         this.pubSubService.publishUserRegistered(user);
         return {
             ...tokens,
             user,
+            redirectUrl,
         };
     }
     async loginUser(input) {
         const user = await this.authService.validateUser(input.emailOrUsername, input.password);
         const tokens = await this.authService.generateTokens(user);
+        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(user.roleType);
         return {
             ...tokens,
             user,
+            redirectUrl,
         };
     }
     async loginWithGoogle(input) {
         console.log('Input to loginWithGoogle:', input);
         const result = await this.authService.loginWithGoogle(input);
         console.log('Result from authService:', result);
+        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(result.user.roleType);
         return {
             accessToken: result.accessToken,
             refreshToken: result.refreshToken,
             user: result.user,
+            redirectUrl,
         };
     }
     async loginWithFacebook(input) {
         const result = await this.authService.loginWithFacebook(input.token, input.providerId);
+        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(result.user.roleType);
         return {
             accessToken: result.accessToken,
             refreshToken: result.refreshToken,
             user: result.user,
+            redirectUrl,
         };
     }
     async loginWithPhone(input) {
@@ -85,10 +94,12 @@ let UserResolver = class UserResolver {
             throw new Error('Invalid or expired OTP');
         }
         const result = await this.authService.loginWithPhone(input.phone);
+        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(result.user.roleType);
         return {
             accessToken: result.accessToken,
             refreshToken: result.refreshToken,
             user: result.user,
+            redirectUrl,
         };
     }
     async requestPhoneVerification(input) {

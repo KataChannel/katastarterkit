@@ -24,7 +24,12 @@ var SettingCategory;
     SettingCategory["SEO"] = "SEO";
     SettingCategory["SOCIAL"] = "SOCIAL";
     SettingCategory["CONTACT"] = "CONTACT";
+    SettingCategory["APPEARANCE"] = "APPEARANCE";
+    SettingCategory["ANALYTICS"] = "ANALYTICS";
+    SettingCategory["PAYMENT"] = "PAYMENT";
+    SettingCategory["SHIPPING"] = "SHIPPING";
     SettingCategory["SUPPORT_CHAT"] = "SUPPORT_CHAT";
+    SettingCategory["AUTH"] = "AUTH";
 })(SettingCategory || (exports.SettingCategory = SettingCategory = {}));
 var SettingType;
 (function (SettingType) {
@@ -36,6 +41,7 @@ var SettingType;
     SettingType["JSON"] = "JSON";
     SettingType["COLOR"] = "COLOR";
     SettingType["IMAGE"] = "IMAGE";
+    SettingType["URL"] = "URL";
 })(SettingType || (exports.SettingType = SettingType = {}));
 let CreateWebsiteSettingInput = class CreateWebsiteSettingInput {
 };

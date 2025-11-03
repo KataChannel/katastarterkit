@@ -22,9 +22,9 @@ export declare class SupportAnalyticsService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        date: Date;
         avgRating: number | null;
         avgResponseTime: number | null;
+        date: Date;
         totalConversations: number;
         activeConversations: number;
         closedConversations: number;
@@ -42,9 +42,9 @@ export declare class SupportAnalyticsService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        date: Date;
         avgRating: number | null;
         avgResponseTime: number | null;
+        date: Date;
         totalConversations: number;
         activeConversations: number;
         closedConversations: number;

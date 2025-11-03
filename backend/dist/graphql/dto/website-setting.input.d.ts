@@ -5,7 +5,12 @@ export declare enum SettingCategory {
     SEO = "SEO",
     SOCIAL = "SOCIAL",
     CONTACT = "CONTACT",
-    SUPPORT_CHAT = "SUPPORT_CHAT"
+    APPEARANCE = "APPEARANCE",
+    ANALYTICS = "ANALYTICS",
+    PAYMENT = "PAYMENT",
+    SHIPPING = "SHIPPING",
+    SUPPORT_CHAT = "SUPPORT_CHAT",
+    AUTH = "AUTH"
 }
 export declare enum SettingType {
     TEXT = "TEXT",
@@ -15,7 +20,8 @@ export declare enum SettingType {
     SELECT = "SELECT",
     JSON = "JSON",
     COLOR = "COLOR",
-    IMAGE = "IMAGE"
+    IMAGE = "IMAGE",
+    URL = "URL"
 }
 export declare class CreateWebsiteSettingInput {
     key: string;

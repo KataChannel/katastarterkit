@@ -133,10 +133,37 @@ let UserService = class UserService {
             }
         }
         const hashedPassword = await bcrypt.hash(input.password, 12);
+        const defaultRole = await this.prisma.role.findUnique({
+            where: { name: 'user' }
+        });
+        if (!defaultRole) {
+            throw new common_1.NotFoundException('Default user role not found. Please run RBAC seeder first.');
+        }
         return this.prisma.user.create({
             data: {
                 ...input,
                 password: hashedPassword,
+                userRoles: {
+                    create: {
+                        roleId: defaultRole.id,
+                        assignedBy: 'system',
+                    }
+                }
+            },
+            include: {
+                userRoles: {
+                    include: {
+                        role: {
+                            include: {
+                                permissions: {
+                                    include: {
+                                        permission: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
         });
     }

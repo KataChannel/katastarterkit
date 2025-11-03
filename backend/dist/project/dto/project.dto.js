@@ -189,7 +189,7 @@ let AddMemberInput = class AddMemberInput {
 };
 exports.AddMemberInput = AddMemberInput;
 __decorate([
-    (0, graphql_1.Field)(() => graphql_1.ID),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
 ], AddMemberInput.prototype, "userId", void 0);
 __decorate([

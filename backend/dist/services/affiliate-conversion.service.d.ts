@@ -43,13 +43,13 @@ export declare class AffiliateConversionService {
     getRecentConversions(limit?: number): Promise<({
         link: {
             campaign: {
-                productImage: string | null;
+                name: string;
                 id: string;
                 createdAt: Date;
-                name: string;
                 updatedAt: Date;
-                status: import("@prisma/client").$Enums.AffCampaignStatus;
                 description: string | null;
+                status: import("@prisma/client").$Enums.AffCampaignStatus;
+                productImage: string | null;
                 commissionType: string;
                 startDate: Date | null;
                 endDate: Date | null;
@@ -73,18 +73,18 @@ export declare class AffiliateConversionService {
                     lastName: string;
                 };
             } & {
-                role: import("@prisma/client").$Enums.AffUserRole;
                 id: string;
-                createdAt: Date;
                 isActive: boolean;
-                userId: string;
+                createdAt: Date;
                 updatedAt: Date;
                 description: string | null;
-                website: string | null;
+                role: import("@prisma/client").$Enums.AffUserRole;
+                userId: string;
                 joinedAt: Date;
+                paymentMethod: import("@prisma/client").$Enums.AffPaymentMethod | null;
                 companyName: string | null;
                 businessType: string | null;
-                paymentMethod: import("@prisma/client").$Enums.AffPaymentMethod | null;
+                website: string | null;
                 bankAccount: string | null;
                 paypalEmail: string | null;
                 taxId: string | null;
@@ -92,12 +92,12 @@ export declare class AffiliateConversionService {
             };
         } & {
             id: string;
-            createdAt: Date;
-            expiresAt: Date | null;
             isActive: boolean;
+            createdAt: Date;
             updatedAt: Date;
-            title: string | null;
             description: string | null;
+            expiresAt: Date | null;
+            title: string | null;
             campaignId: string;
             totalClicks: number;
             totalConversions: number;
