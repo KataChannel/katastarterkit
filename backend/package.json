@@ -31,6 +31,8 @@
     "seed:demo": "ts-node scripts/seed-demo-pages.ts",
     "cleanup:demo": "ts-node scripts/cleanup-demo-pages.ts",
     "reseed:demo": "npm run cleanup:demo && npm run seed:demo",
+    "seed:rbac": "bun run src/scripts/seed-rbac.ts",
+    "migrate:assign-roles": "bun run scripts/assign-default-roles.ts",
     "db:backup": "bun run prisma/backup.ts",
     "db:restore": "bun run prisma/restore.ts",
     "db:restore-optimized": "bun run prisma/restore-optimized.ts",

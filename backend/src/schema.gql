@@ -5226,6 +5226,7 @@ type UserRolePermissionSummary {
 
 enum UserRoleType {
   ADMIN
+  GIANGVIEN
   GUEST
   USER
 }
