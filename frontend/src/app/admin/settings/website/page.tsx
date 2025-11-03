@@ -23,7 +23,8 @@ import {
   BarChart,
   Layout,
   Mail,
-  MessageCircle
+  MessageCircle,
+  Shield
 } from 'lucide-react';
 import type { WebsiteSetting } from '@/hooks/useWebsiteSettings';
 
@@ -34,8 +35,8 @@ const CATEGORIES = [
   { value: 'CONTACT', label: 'Liên hệ', icon: Mail },
   { value: 'SOCIAL', label: 'Mạng xã hội', icon: MessageSquare },
   { value: 'SEO', label: 'SEO', icon: BarChart },
-  { value: 'APPEARANCE', label: 'Giao diện', icon: Palette },
   { value: 'SUPPORT_CHAT', label: 'Support Chat', icon: MessageCircle },
+  { value: 'AUTH', label: 'Xác thực', icon: Shield },
 ];
 
 export default function WebsiteSettingsPage() {
