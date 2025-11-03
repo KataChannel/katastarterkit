@@ -35,7 +35,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
               router.push('/lms/instructor');
               break;
             case 'USER':
-              router.push('/lms/student');
+              router.push('/lms/my-learning');
               break;
             default:
               router.push('/lms/courses');

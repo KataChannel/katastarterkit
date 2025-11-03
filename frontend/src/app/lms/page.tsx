@@ -32,7 +32,7 @@ export default function LMSHomePage() {
         //     router.push('/lms/instructor');
         //     break;
         //   case 'USER':
-        //     router.push('/lms/student');
+        //     router.push('/lms/my-learning');
         //     break;
         // }
       } catch (error) {
@@ -108,7 +108,7 @@ export default function LMSHomePage() {
               </Button>
 
               <Button
-                onClick={() => router.push('/lms/student')}
+                onClick={() => router.push('/lms/my-learning')}
                 size="lg"
                 variant="secondary"
                 className="text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8"
