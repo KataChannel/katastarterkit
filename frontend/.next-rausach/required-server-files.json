@@ -2,7 +2,7 @@
   "version": 1,
   "config": {
     "env": {
-      "NEXT_PUBLIC_GRAPHQL_ENDPOINT": "http://116.118.49.243:12001/graphql",
+      "NEXT_PUBLIC_GRAPHQL_ENDPOINT": "https://api.rausachtrangia.com/graphql",
       "NEXT_PUBLIC_WS_ENDPOINT": "ws://localhost:3001/graphql"
     },
     "typescript": {
