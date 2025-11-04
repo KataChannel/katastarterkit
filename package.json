@@ -42,7 +42,21 @@
     "db:pushforce": "cd backend && npx prisma db push --force-reset",
     "db:push": "cd backend && npx prisma db push",
     "db:restore": "cd backend && bun run prisma/restore.ts",
-    "db:backup": "cd backend && bun run prisma/backup.ts"
+    "db:backup": "cd backend && bun run prisma/backup.ts",
+    "db:migrate:rausach": "cp .env.rausach backend/.env && cd backend && npx prisma migrate dev",
+    "db:migrate:tazagroup": "cp .env.tazagroup backend/.env && cd backend && npx prisma migrate dev",
+    "db:reset:rausach": "cp .env.rausach backend/.env && cd backend && npx prisma migrate reset",
+    "db:reset:tazagroup": "cp .env.tazagroup backend/.env && cd backend && npx prisma migrate reset",
+    "db:push:rausach": "cp .env.rausach backend/.env && cd backend && npx prisma db push",
+    "db:push:tazagroup": "cp .env.tazagroup backend/.env && cd backend && npx prisma db push",
+    "db:studio:rausach": "cp .env.rausach backend/.env && cd backend && npx prisma studio",
+    "db:studio:tazagroup": "cp .env.tazagroup backend/.env && cd backend && npx prisma studio",
+    "db:seed:rausach": "cp .env.rausach backend/.env && cd backend && npx prisma db seed",
+    "db:seed:tazagroup": "cp .env.tazagroup backend/.env && cd backend && npx prisma db seed",
+    "db:backup:rausach": "cp .env.rausach backend/.env && cd backend && bun run prisma/backup.ts",
+    "db:backup:tazagroup": "cp .env.tazagroup backend/.env && cd backend && bun run prisma/backup.ts",
+    "db:restore:rausach": "cp .env.rausach backend/.env && cd backend && bun run prisma/restore.ts",
+    "db:restore:tazagroup": "cp .env.tazagroup backend/.env && cd backend && bun run prisma/restore.ts"
   },
   "devDependencies": {
     "@types/validator": "^13.15.3",

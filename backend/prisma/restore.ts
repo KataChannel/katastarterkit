@@ -9,7 +9,19 @@ const prisma = new PrismaClient();
 // Cache for schema-based model mappings
 let tableToModelMappingCache: { [tableName: string]: string } | null = null;
 
-const BACKUP_ROOT_DIR = './kata_json';
+// Determine environment from DATABASE_URL
+function getEnvironmentName(): string {
+  const databaseUrl = process.env.DATABASE_URL || '';
+  if (databaseUrl.includes('rausachcore')) {
+    return 'rausach';
+  } else if (databaseUrl.includes('tazagroupcore')) {
+    return 'tazagroup';
+  }
+  return 'default';
+}
+
+const ENV_NAME = getEnvironmentName();
+const BACKUP_ROOT_DIR = `./backups/${ENV_NAME}`;
 const BATCH_SIZE = 1000; // Process records in batches of 1000
 const STREAM_BUFFER_SIZE = 50; // Keep 50 batches in memory
 
@@ -1468,7 +1480,7 @@ function printFinalStats(): void {
  * Main restore function
  */
 async function main(): Promise<void> {
-  console.log('🚀 STARTING OPTIMIZED rausachcore DATA RESTORE');
+  console.log(`🚀 STARTING OPTIMIZED ${ENV_NAME.toUpperCase()} DATA RESTORE`);
   console.log(`⏰ Start time: ${new Date().toLocaleString()}`);
   console.log(`⚙️  Batch size: ${BATCH_SIZE.toLocaleString()} records`);
   console.log(`💾 Backup root: ${BACKUP_ROOT_DIR}\n`);

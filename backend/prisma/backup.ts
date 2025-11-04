@@ -3,7 +3,20 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const prisma = new PrismaClient();
-const BACKUP_ROOT_DIR = './kata_json';
+
+// Determine environment from DATABASE_URL
+function getEnvironmentName(): string {
+  const databaseUrl = process.env.DATABASE_URL || '';
+  if (databaseUrl.includes('rausachcore')) {
+    return 'rausach';
+  } else if (databaseUrl.includes('tazagroupcore')) {
+    return 'tazagroup';
+  }
+  return 'default';
+}
+
+const ENV_NAME = getEnvironmentName();
+const BACKUP_ROOT_DIR = `./backups/${ENV_NAME}`;
 
 function getFormattedDate(): string {
   const now = new Date();
@@ -250,6 +263,7 @@ async function backupAllTablesToJson(): Promise<void> {
     fs.mkdirSync(BACKUP_DIR, { recursive: true });
   }
 
+  console.log(`🏷️  Environment: ${ENV_NAME.toUpperCase()}`);
   console.log(`📂 Creating backup in directory: ${BACKUP_DIR}`);
   console.log(`⏰ Backup started at: ${new Date().toLocaleString()}`);
   
@@ -352,12 +366,12 @@ async function restoreAllTablesFromJson(): Promise<void> {
 }
 
 backupAllTablesToJson()
-  .then(() => console.log('🎉 rausachcore backup completed successfully!'))
+  .then(() => console.log(`🎉 ${ENV_NAME.toUpperCase()} backup completed successfully!`))
   .catch((err) => console.error('❌ Backup error:', err))
   .finally(() => prisma.$disconnect());
 
 // To restore data, uncomment and run restoreAllTablesFromJson()
 // restoreAllTablesFromJson()
-//   .then(() => console.log('🎉 rausachcore restore completed successfully!'))
+//   .then(() => console.log(`🎉 ${ENV_NAME.toUpperCase()} restore completed successfully!`))
 //   .catch((err) => console.error('❌ Restore error:', err))
 //   .finally(() => prisma.$disconnect());
