@@ -58,32 +58,6 @@ services:
     environment:
       - REDIS_REPLICATION_BACKLOG_TTL=3600
 
-  # Elasticsearch for Search
-  elasticsearch:
-    image: ${ELASTICSEARCH_IMAGE:-docker.elastic.co/elasticsearch/elasticsearch:8.15.0}
-    container_name: ${ELASTICSEARCH_CONTAINER_NAME:-rausachcore-elasticsearch}
-    restart: unless-stopped
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - xpack.security.enabled=false
-      - xpack.security.enrollment.enabled=false
-      - xpack.security.http.ssl.enabled=false
-      - xpack.security.transport.ssl.enabled=false
-    ports:
-      - "${ELASTICSEARCH_PORT:-12005}:9200"
-      - "${ELASTICSEARCH_TRANSPORT_PORT:-12006}:9300"
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    networks:
-      - rausachcore-network
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-
   # Minio Object Storage
   minio:
     image: ${MINIO_IMAGE:-minio/minio:RELEASE.2024-08-26T15-33-07Z}
@@ -180,8 +154,6 @@ volumes:
   pgadmin_data:
     driver: local
   redis_data:
-    driver: local
-  elasticsearch_data:
     driver: local
   minio_data:
     driver: local

@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Query, Body, Param, UseGuards, Request } from '@nestjs/common';
-import { SearchService, FacetedSearchOptions } from './search.service';
-import { SearchQuery } from './elasticsearch.service';
+import { SearchService, FacetedSearchOptions, SearchQuery } from './search.service';
 
 @Controller('search')
 // @UseGuards(AuthGuard) // Uncomment when auth is implemented
@@ -201,12 +200,9 @@ export class SearchController {
   @Get('fuzzy')
   async fuzzySearch(
     @Query('q') query: string,
-    @Query('maxEdits') maxEdits?: string,
     @Request() req?: any
   ) {
     const userId = req?.user?.id || 'anonymous';
-    const maxEditsNum = parseInt(maxEdits || '2');
-
-    return this.searchService.fuzzySearch(query, userId, maxEditsNum);
+    return this.searchService.fuzzySearch(query, userId);
   }
 }

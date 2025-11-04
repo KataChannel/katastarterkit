@@ -819,3 +819,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 > **rausachcore** - Build faster, ship smarter.
 
 ⭐ **If you find this project helpful, please give it a star on GitHub!**
+
+
+
+
+docker stop $(docker ps -q) 2>/dev/null
+docker container prune
+docker builder prune -f
+docker image prune -a -f
+docker network prune -f
+echo "Đã xóa sạch, GIỮ LẠI VOLUME!"

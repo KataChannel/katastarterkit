@@ -12,7 +12,6 @@ export interface HealthStatus {
   checks: {
     database: HealthCheckResult;
     redis: HealthCheckResult;
-    elasticsearch: HealthCheckResult;
     storage: HealthCheckResult;
     external_apis: HealthCheckResult;
     system_resources: HealthCheckResult;
@@ -81,14 +80,12 @@ export class HealthCheckService {
       const [
         databaseHealth,
         redisHealth,
-        elasticsearchHealth,
         storageHealth,
         externalApisHealth,
         systemResourcesHealth
       ] = await Promise.allSettled([
         this.checkDatabaseHealth(),
         this.checkRedisHealth(),
-        this.checkElasticsearchHealth(),
         this.checkStorageHealth(),
         this.checkExternalApisHealth(),
         this.checkSystemResourcesHealth()
@@ -98,7 +95,6 @@ export class HealthCheckService {
         status: this.determineOverallStatus([
           this.getResultFromSettled(databaseHealth),
           this.getResultFromSettled(redisHealth),
-          this.getResultFromSettled(elasticsearchHealth),
           this.getResultFromSettled(storageHealth),
           this.getResultFromSettled(externalApisHealth),
           this.getResultFromSettled(systemResourcesHealth)
@@ -108,7 +104,6 @@ export class HealthCheckService {
         checks: {
           database: this.getResultFromSettled(databaseHealth),
           redis: this.getResultFromSettled(redisHealth),
-          elasticsearch: this.getResultFromSettled(elasticsearchHealth),
           storage: this.getResultFromSettled(storageHealth),
           external_apis: this.getResultFromSettled(externalApisHealth),
           system_resources: this.getResultFromSettled(systemResourcesHealth)
@@ -203,40 +198,6 @@ export class HealthCheckService {
         status: 'down',
         responseTime: Date.now() - startTime,
         message: `Redis connection failed: ${error.message}`,
-        details: { error: error.message }
-      };
-    }
-  }
-
-  /**
-   * Check Elasticsearch connectivity and performance
-   */
-  async checkElasticsearchHealth(): Promise<HealthCheckResult> {
-    const startTime = Date.now();
-    
-    try {
-      // Mock Elasticsearch health check
-      await new Promise(resolve => setTimeout(resolve, 20)); // Simulate ES ping
-      
-      const responseTime = Date.now() - startTime;
-      
-      return {
-        status: 'up',
-        responseTime,
-        message: 'Elasticsearch is healthy',
-        details: {
-          cluster: 'green',
-          nodes: 1,
-          indices: 3,
-          shards: 5
-        }
-      };
-    } catch (error) {
-      this.logger.error('Elasticsearch health check failed:', error);
-      return {
-        status: 'down',
-        responseTime: Date.now() - startTime,
-        message: `Elasticsearch connection failed: ${error.message}`,
         details: { error: error.message }
       };
     }
@@ -439,7 +400,6 @@ export class HealthCheckService {
       checks: {
         database: { status: 'down', message: 'Not checked due to error' },
         redis: { status: 'down', message: 'Not checked due to error' },
-        elasticsearch: { status: 'down', message: 'Not checked due to error' },
         storage: { status: 'down', message: 'Not checked due to error' },
         external_apis: { status: 'down', message: 'Not checked due to error' },
         system_resources: { status: 'down', message: 'Not checked due to error' }

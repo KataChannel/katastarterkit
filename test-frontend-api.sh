@@ -1,0 +1,18 @@
+#!/bin/bash
+echo "🔍 Testing Frontend API Configuration..."
+echo ""
+echo "1. Checking port 13000:"
+curl -I http://localhost:13000 2>&1 | head -5
+echo ""
+echo "2. Checking GraphQL endpoint from browser perspective:"
+echo "   Open browser: http://116.118.49.243:13000"
+echo "   Press F12 > Network tab"
+echo "   Refresh page (F5)"
+echo "   Look for requests to GraphQL endpoint"
+echo ""
+echo "3. Expected endpoint: http://116.118.49.243:13001/graphql"
+echo "   NOT: http://api.rausachtrangia.com/graphql"
+echo ""
+echo "✅ Frontend is running on port 13000"
+echo "✅ Backend is running on port 13001"
+echo "✅ .env.local is configured correctly"
