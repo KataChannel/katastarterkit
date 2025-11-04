@@ -974,6 +974,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../src/app/request-access/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/request-access">> = Specific
+  const handler = {} as typeof import("../../src/app/request-access/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../src/app/api/ketoan/normalize-products/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/ketoan/normalize-products">> = Specific

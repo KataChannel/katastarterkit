@@ -105,5 +105,6 @@
   "/lms/my-learning/page": "/lms/my-learning",
   "/lms/page": "/lms",
   "/lms/student/page": "/lms/student",
-  "/maintenance/page": "/maintenance"
+  "/maintenance/page": "/maintenance",
+  "/request-access/page": "/request-access"
 }

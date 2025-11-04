@@ -1,9 +1,9 @@
 1:"$Sreact.fragment"
 2:I[655609,["/_next/static/chunks/3ca1aa8da486048f.js","/_next/static/chunks/8ad2c7f6bda6b033.js"],"ClientPageRoot"]
-3:I[821396,["/_next/static/chunks/87191c15fada840c.js","/_next/static/chunks/bfe77153dda48794.js","/_next/static/chunks/c8976782ffa6f8ae.js","/_next/static/chunks/2baadd2984613654.js","/_next/static/chunks/db157372de9e836b.js","/_next/static/chunks/66e29751149b08c7.js","/_next/static/chunks/0f9bbd2885deb508.js","/_next/static/chunks/5e1e2a8a6f7a479b.js","/_next/static/chunks/caaeeb2c04da468d.js","/_next/static/chunks/a4db939ef965b208.js","/_next/static/chunks/f5b39cf496e77ed1.js","/_next/static/chunks/6f0de76645c422b6.js"],"default"]
+3:I[821396,["/_next/static/chunks/87191c15fada840c.js","/_next/static/chunks/bfe77153dda48794.js","/_next/static/chunks/1bb668b2927918be.js","/_next/static/chunks/2baadd2984613654.js","/_next/static/chunks/db157372de9e836b.js","/_next/static/chunks/66e29751149b08c7.js","/_next/static/chunks/0f9bbd2885deb508.js","/_next/static/chunks/5e1e2a8a6f7a479b.js","/_next/static/chunks/caaeeb2c04da468d.js","/_next/static/chunks/a4db939ef965b208.js","/_next/static/chunks/f5b39cf496e77ed1.js","/_next/static/chunks/6f0de76645c422b6.js"],"default"]
 6:I[573040,["/_next/static/chunks/3ca1aa8da486048f.js","/_next/static/chunks/8ad2c7f6bda6b033.js"],"OutletBoundary"]
 7:"$Sreact.suspense"
-0:{"buildId":"rODlQG_QR-Xx1Qq0UG8Q-","rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/_next/static/chunks/6f0de76645c422b6.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"loading":null,"isPartial":false}
+0:{"buildId":"YiLDW0Bg5w_r3ZaXubpOb","rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/_next/static/chunks/6f0de76645c422b6.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"loading":null,"isPartial":false}
 4:{}
 5:{}
 8:null

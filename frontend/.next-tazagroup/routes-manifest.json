@@ -698,6 +698,12 @@
       "namedRegex": "^/register(?:/)?$"
     },
     {
+      "page": "/request-access",
+      "regex": "^/request\\-access(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/request\\-access(?:/)?$"
+    },
+    {
       "page": "/san-pham",
       "regex": "^/san\\-pham(?:/)?$",
       "routeKeys": {},

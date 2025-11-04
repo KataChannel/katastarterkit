@@ -105,5 +105,6 @@
   "/lms/my-learning/page": "app/lms/my-learning/page.js",
   "/lms/page": "app/lms/page.js",
   "/lms/student/page": "app/lms/student/page.js",
-  "/maintenance/page": "app/maintenance/page.js"
+  "/maintenance/page": "app/maintenance/page.js",
+  "/request-access/page": "app/request-access/page.js"
 }
