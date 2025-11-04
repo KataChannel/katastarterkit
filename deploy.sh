@@ -45,14 +45,15 @@ rsync -avz --delete \
     backend/entrypoint.sh \
     ${SERVER}:${REMOTE_DIR}/backend/
 
-# Sync frontend  
+# Sync frontend - IMPORTANT: Must include node_modules from .next-*/standalone/
 rsync -avz --delete \
-    --exclude 'node_modules' \
     --exclude '.git' \
-    frontend/.next \
+    frontend/.next-rausach \
+    frontend/.next-tazagroup \
     frontend/public \
     frontend/package.json \
-    frontend/Dockerfile \
+    frontend/Dockerfile.rausach \
+    frontend/Dockerfile.tazagroup \
     ${SERVER}:${REMOTE_DIR}/frontend/
 
 # Sync docker configs

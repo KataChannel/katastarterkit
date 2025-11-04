@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,784660,e=>{"use strict";var t=e.i(403055),u=e.i(130775);function c(){let e=(0,u.useRouter)();return(0,t.useEffect)(()=>{e.replace("/admin")},[e]),null}e.s(["default",()=>c])}]);

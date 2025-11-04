@@ -1,0 +1,15 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(website)/layout,_N_T_/(website)/san-pham/layout,_N_T_/(website)/san-pham/page,_N_T_/san-pham"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KHdlYnNpdGUp/san-pham/__PAGE__",
+    "/!KHdlYnNpdGUp/san-pham",
+    "/!KHdlYnNpdGUp",
+    "/_index"
+  ]
+}

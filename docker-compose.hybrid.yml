@@ -133,17 +133,12 @@ services:
   shopfrontend:
     build:
       context: .
-      dockerfile: ./frontend/Dockerfile
+      dockerfile: ./frontend/Dockerfile.rausach
     container_name: shopfrontend
     restart: unless-stopped
-    env_file:
-      - .env.rausach
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.49.243:12001/graphql
-      NEXT_PUBLIC_APP_URL: http://116.118.49.243:12000
-      NEXTAUTH_URL: http://116.118.49.243:12000
       NEXT_OTEL_ENABLED: "false"
       NEXT_TELEMETRY_DISABLED: "1"
     ports:
@@ -232,17 +227,12 @@ services:
   tazagroup-frontend:
     build:
       context: .
-      dockerfile: ./frontend/Dockerfile
+      dockerfile: ./frontend/Dockerfile.tazagroup
     container_name: tazagroup-frontend
     restart: unless-stopped
-    env_file:
-      - .env.tazagroup
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.49.243:13001/graphql
-      NEXT_PUBLIC_APP_URL: http://116.118.49.243:13000
-      NEXTAUTH_URL: http://116.118.49.243:13000
       NEXT_OTEL_ENABLED: "false"
       NEXT_TELEMETRY_DISABLED: "1"
     ports:

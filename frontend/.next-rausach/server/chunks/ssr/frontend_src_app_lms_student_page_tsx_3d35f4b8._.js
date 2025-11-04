@@ -1,0 +1,3 @@
+module.exports=[45410,a=>{"use strict";var b=a.i(321248),c=a.i(651332),d=a.i(53627);function e(){let a=(0,d.useRouter)();return(0,c.useEffect)(()=>{a.replace("/lms/my-learning")},[a]),(0,b.jsx)("div",{className:"min-h-screen flex items-center justify-center",children:(0,b.jsx)("div",{className:"text-center",children:(0,b.jsx)("p",{className:"text-gray-600",children:"Đang chuyển hướng..."})})})}a.s(["default",()=>e])}];
+
+//# sourceMappingURL=frontend_src_app_lms_student_page_tsx_3d35f4b8._.js.map

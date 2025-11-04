@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/hr/layout,_N_T_/admin/hr/employee/layout,_N_T_/admin/hr/employee/new/layout,_N_T_/admin/hr/employee/new/page,_N_T_/admin/hr/employee/new"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/admin/hr/employee/new/__PAGE__",
+    "/admin/hr/employee/new",
+    "/admin/hr/employee",
+    "/admin/hr",
+    "/admin",
+    "/_index"
+  ]
+}

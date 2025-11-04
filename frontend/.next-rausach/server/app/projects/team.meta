@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(projects)/layout,_N_T_/(projects)/projects/layout,_N_T_/(projects)/projects/team/layout,_N_T_/(projects)/projects/team/page,_N_T_/projects/team"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KHByb2plY3RzKQ/projects/team/__PAGE__",
+    "/!KHByb2plY3RzKQ/projects/team",
+    "/!KHByb2plY3RzKQ/projects",
+    "/!KHByb2plY3RzKQ",
+    "/_index"
+  ]
+}

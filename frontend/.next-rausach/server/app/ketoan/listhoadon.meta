@@ -1,0 +1,15 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/ketoan/layout,_N_T_/ketoan/listhoadon/layout,_N_T_/ketoan/listhoadon/page,_N_T_/ketoan/listhoadon"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/ketoan/listhoadon/__PAGE__",
+    "/ketoan/listhoadon",
+    "/ketoan",
+    "/_index"
+  ]
+}

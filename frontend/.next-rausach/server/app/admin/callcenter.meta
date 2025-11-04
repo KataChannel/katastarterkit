@@ -1,0 +1,15 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/admin/layout,_N_T_/admin/callcenter/layout,_N_T_/admin/callcenter/page,_N_T_/admin/callcenter"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/admin/callcenter/__PAGE__",
+    "/admin/callcenter",
+    "/admin",
+    "/_index"
+  ]
+}

@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,129903,e=>{"use strict";var o=e.i(44990);e.s(["VideoBlock",0,({block:e})=>(0,o.jsx)("div",{className:"p-4 bg-gray-100 border border-gray-300 rounded text-center",children:(0,o.jsx)("p",{className:"text-gray-600",children:"Video Block - Coming Soon"})})])}]);
