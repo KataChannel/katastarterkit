@@ -18,7 +18,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       router.push('/login?redirect=/admin');
     } else if (!loading && isAuthenticated && user?.roleType && user.roleType !== 'ADMIN') {
       // Redirect USER and other non-admin roles to request-access page
-      router.push('/admin/request-access');
+      router.push('/request-access');
     }
   }, [isAuthenticated, loading, user, router]);
 

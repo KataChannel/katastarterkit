@@ -53,7 +53,7 @@ export function AccessDenied({
 
             <div className="mt-6 pt-6 border-t border-gray-200">
               <Button 
-                onClick={() => router.push('/admin/request-access')}
+                onClick={() => router.push('/request-access')}
                 variant="outline"
                 className="w-full"
               >
