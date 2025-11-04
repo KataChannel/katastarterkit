@@ -5,7 +5,7 @@
 # ================================================================
 # Khởi động project ở chế độ development
 # - Frontend & Backend chạy trên localhost (12000-12001 hoặc 13000-13001)
-# - Database, Redis, Minio sử dụng từ server 116.118.49.243
+# - Database, Redis, Minio sử dụng từ server 116.118.48.208
 # ================================================================
 
 set -e
@@ -24,7 +24,7 @@ echo ""
 echo -e "${YELLOW}Chọn domain để khởi động:${NC}"
 echo ""
 echo "  1) 🌟 Rausach    (localhost:12000 + localhost:12001)"
-echo "  2) 🏢 Tazagroup  (localhost:13000 + localhost:13001)"
+echo "  2) 🏢 Innerv2  (localhost:13000 + localhost:13001)"
 echo "  3) 🔥 Both       (Cả 2 domain)"
 echo "  4) ❌ Exit"
 echo ""
@@ -37,7 +37,7 @@ case $choice in
         BACKEND_PORT=12001
         ;;
     2)
-        DOMAIN="tazagroup"
+        DOMAIN="innerv2"
         FRONTEND_PORT=13000
         BACKEND_PORT=13001
         ;;
@@ -61,23 +61,23 @@ case $choice in
         RAUSACH_FRONTEND_PID=$!
         cd ..
         
-        # Copy env for Tazagroup
-        cp .env.dev.tazagroup backend/.env
-        cp .env.dev.tazagroup frontend/.env.local
+        # Copy env for Innerv2
+        cp .env.dev.innerv2 backend/.env
+        cp .env.dev.innerv2 frontend/.env.local
         
         sleep 2
         
-        # Start Tazagroup
-        echo -e "${GREEN}Starting Tazagroup backend on port 13001...${NC}"
-        cd backend && PORT=13001 bun run dev > ../dev-tazagroup-backend.log 2>&1 &
-        TAZAGROUP_BACKEND_PID=$!
+        # Start Innerv2
+        echo -e "${GREEN}Starting Innerv2 backend on port 13001...${NC}"
+        cd backend && PORT=13001 bun run dev > ../dev-innerv2-backend.log 2>&1 &
+        INNERV2_BACKEND_PID=$!
         cd ..
         
         sleep 3
         
-        echo -e "${GREEN}Starting Tazagroup frontend on port 13000...${NC}"
-        cd frontend && bun run dev -- -p 13000 > ../dev-tazagroup-frontend.log 2>&1 &
-        TAZAGROUP_FRONTEND_PID=$!
+        echo -e "${GREEN}Starting Innerv2 frontend on port 13000...${NC}"
+        cd frontend && bun run dev -- -p 13000 > ../dev-innerv2-frontend.log 2>&1 &
+        INNERV2_FRONTEND_PID=$!
         cd ..
         
         echo ""
@@ -87,29 +87,29 @@ case $choice in
         echo -e "${YELLOW}📍 RAUSACH:${NC}"
         echo -e "   Frontend:  ${GREEN}http://localhost:12000${NC}"
         echo -e "   Backend:   ${GREEN}http://localhost:12001/graphql${NC}"
-        echo -e "   Database:  ${GREEN}116.118.49.243:12003${NC} (rausachcore)"
+        echo -e "   Database:  ${GREEN}116.118.48.208:12003${NC} (rausachcore)"
         echo ""
-        echo -e "${YELLOW}📍 TAZAGROUP:${NC}"
+        echo -e "${YELLOW}📍 INNERV2:${NC}"
         echo -e "   Frontend:  ${GREEN}http://localhost:13000${NC}"
         echo -e "   Backend:   ${GREEN}http://localhost:13001/graphql${NC}"
-        echo -e "   Database:  ${GREEN}116.118.49.243:13003${NC} (tazagroupcore)"
+        echo -e "   Database:  ${GREEN}116.118.48.208:13003${NC} (innerv2core)"
         echo ""
         echo -e "${YELLOW}📍 SHARED SERVICES (Remote):${NC}"
-        echo -e "   Redis:     ${GREEN}116.118.49.243:12004${NC}"
-        echo -e "   Minio:     ${GREEN}116.118.49.243:12007${NC}"
+        echo -e "   Redis:     ${GREEN}116.118.48.208:12004${NC}"
+        echo -e "   Minio:     ${GREEN}116.118.48.208:12007${NC}"
         echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo ""
         echo -e "${YELLOW}📝 Process IDs:${NC}"
         echo "   Rausach Backend PID: $RAUSACH_BACKEND_PID"
         echo "   Rausach Frontend PID: $RAUSACH_FRONTEND_PID"
-        echo "   Tazagroup Backend PID: $TAZAGROUP_BACKEND_PID"
-        echo "   Tazagroup Frontend PID: $TAZAGROUP_FRONTEND_PID"
+        echo "   Innerv2 Backend PID: $INNERV2_BACKEND_PID"
+        echo "   Innerv2 Frontend PID: $INNERV2_FRONTEND_PID"
         echo ""
         echo -e "${YELLOW}📋 Logs:${NC}"
         echo "   tail -f dev-rausach-backend.log"
         echo "   tail -f dev-rausach-frontend.log"
-        echo "   tail -f dev-tazagroup-backend.log"
-        echo "   tail -f dev-tazagroup-frontend.log"
+        echo "   tail -f dev-innerv2-backend.log"
+        echo "   tail -f dev-innerv2-frontend.log"
         echo ""
         echo -e "${RED}⚠️  Để dừng: ./dev-stop.sh${NC}"
         exit 0
@@ -166,9 +166,9 @@ echo -e "   Frontend:  ${GREEN}http://localhost:${FRONTEND_PORT}${NC}"
 echo -e "   Backend:   ${GREEN}http://localhost:${BACKEND_PORT}/graphql${NC}"
 echo ""
 echo -e "${YELLOW}📍 Remote Services:${NC}"
-echo -e "   Database:  ${GREEN}116.118.49.243${NC}"
-echo -e "   Redis:     ${GREEN}116.118.49.243:12004${NC}"
-echo -e "   Minio:     ${GREEN}116.118.49.243:12007${NC}"
+echo -e "   Database:  ${GREEN}116.118.48.208${NC}"
+echo -e "   Redis:     ${GREEN}116.118.48.208:12004${NC}"
+echo -e "   Minio:     ${GREEN}116.118.48.208:12007${NC}"
 echo ""
 echo -e "${YELLOW}📝 Process IDs:${NC}"
 echo "   Backend PID:  $BACKEND_PID"

@@ -18,7 +18,7 @@ const redisProvider = {
         const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
         const host = isDockerEnv
             ? configService.get('DOCKER_REDIS_HOST', 'redis')
-            : configService.get('REDIS_HOST', '116.118.49.243');
+            : configService.get('REDIS_HOST', '116.118.48.208');
         const portConfig = isDockerEnv
             ? configService.get('DOCKER_REDIS_PORT', '6379')
             : configService.get('REDIS_PORT', '12004');

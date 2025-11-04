@@ -50,18 +50,18 @@ echo ""
 # Check local dev ports
 check_port 12000 "Rausach Frontend"
 check_port 12001 "Rausach Backend"
-check_port 13000 "Tazagroup Frontend"
-check_port 13001 "Tazagroup Backend"
+check_port 13000 "Innerv2 Frontend"
+check_port 13001 "Innerv2 Backend"
 
 echo ""
-echo -e "${YELLOW}🌐 REMOTE SERVICES (116.118.49.243):${NC}"
+echo -e "${YELLOW}🌐 REMOTE SERVICES (116.118.48.208):${NC}"
 echo ""
 
 # Check remote services
-check_remote "116.118.49.243" 12003 "PostgreSQL Rausach"
-check_remote "116.118.49.243" 13003 "PostgreSQL Tazagroup"
-check_remote "116.118.49.243" 12004 "Redis"
-check_remote "116.118.49.243" 12007 "Minio"
+check_remote "116.118.48.208" 12003 "PostgreSQL Rausach"
+check_remote "116.118.48.208" 13003 "PostgreSQL Innerv2"
+check_remote "116.118.48.208" 12004 "Redis"
+check_remote "116.118.48.208" 12007 "Minio"
 
 echo ""
 echo -e "${YELLOW}🐳 DOCKER CONTAINERS:${NC}"
@@ -77,12 +77,12 @@ if command -v docker &> /dev/null; then
         echo -e "${RED}❌ No Rausach containers running${NC}"
     fi
     
-    # Check Tazagroup containers
-    if docker ps --format '{{.Names}}' | grep -q "tazagroup"; then
-        echo -e "${GREEN}✅ Tazagroup containers running:${NC}"
-        docker ps --filter "name=tazagroup" --format "   - {{.Names}} ({{.Status}})"
+    # Check Innerv2 containers
+    if docker ps --format '{{.Names}}' | grep -q "innerv2"; then
+        echo -e "${GREEN}✅ Innerv2 containers running:${NC}"
+        docker ps --filter "name=innerv2" --format "   - {{.Names}} ({{.Status}})"
     else
-        echo -e "${RED}❌ No Tazagroup containers running${NC}"
+        echo -e "${RED}❌ No Innerv2 containers running${NC}"
     fi
 else
     echo -e "${YELLOW}⚠️  Docker not installed or not running${NC}"

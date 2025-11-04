@@ -2,18 +2,18 @@
 
 ## ❌ Vấn đề
 
-Frontend trên server `http://116.118.49.243:13000` đang gọi sai API endpoint:
+Frontend trên server `http://116.118.48.208:13000` đang gọi sai API endpoint:
 
 ```
 ❌ SAI:  http://api.rausachtrangia.com/graphql (hoặc https)
-✅ ĐÚNG: http://116.118.49.243:13001/graphql
+✅ ĐÚNG: http://116.118.48.208:13001/graphql
 ```
 
 ### Triệu chứng
 
 ```
 Access to fetch at 'http://api.rausachtrangia.com/graphql' 
-from origin 'http://116.118.49.243:13000' has been blocked by CORS policy
+from origin 'http://116.118.48.208:13000' has been blocked by CORS policy
 ```
 
 ## 🎯 Nguyên nhân
@@ -24,7 +24,7 @@ File `.env.production` có cấu hình sai:
 NEXT_PUBLIC_GRAPHQL_ENDPOINT=https://api.rausachtrangia.com/graphql
 
 # ĐÚNG
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
+NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql
 ```
 
 ## ✅ Giải pháp đã áp dụng
@@ -34,19 +34,19 @@ NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
 ```bash
 # Next.js Frontend - CRITICAL: Use correct server IP and port
 # Frontend runs on port 13000, Backend API runs on port 13001
-NEXT_PUBLIC_APP_URL=http://116.118.49.243:13000
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
-NEXT_PUBLIC_BACKEND_URL=http://116.118.49.243:13001
-NEXT_PUBLIC_SOCKET_URL=http://116.118.49.243:13001
+NEXT_PUBLIC_APP_URL=http://116.118.48.208:13000
+NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql
+NEXT_PUBLIC_BACKEND_URL=http://116.118.48.208:13001
+NEXT_PUBLIC_SOCKET_URL=http://116.118.48.208:13001
 ```
 
 ### 2. Đã sửa file `.env.local`
 
 File này đã có cấu hình đúng từ trước:
 ```bash
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
-NEXT_PUBLIC_BACKEND_URL=http://116.118.49.243:13001
-NEXT_PUBLIC_SOCKET_URL=http://116.118.49.243:13001
+NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql
+NEXT_PUBLIC_BACKEND_URL=http://116.118.48.208:13001
+NEXT_PUBLIC_SOCKET_URL=http://116.118.48.208:13001
 ```
 
 ### 3. Đã tạo scripts hỗ trợ
@@ -107,7 +107,7 @@ NODE_ENV=production bun run dev
 
 ### 1. Mở trình duyệt
 
-Truy cập: `http://116.118.49.243:13000`
+Truy cập: `http://116.118.48.208:13000`
 
 ### 2. Mở DevTools
 
@@ -124,7 +124,7 @@ Truy cập: `http://116.118.49.243:13000`
 
 Tất cả GraphQL requests phải gọi đến:
 ```
-✅ http://116.118.49.243:13001/graphql
+✅ http://116.118.48.208:13001/graphql
 ```
 
 **KHÔNG ĐƯỢC** có requests đến:
@@ -138,15 +138,15 @@ Tất cả GraphQL requests phải gọi đến:
 
 ```
 ┌─────────────────────────────────────────┐
-│   Server: 116.118.49.243                │
+│   Server: 116.118.48.208                │
 ├─────────────────────────────────────────┤
 │   Port 13000: Frontend (Next.js)        │
 │   Port 13001: Backend API (GraphQL)     │
 └─────────────────────────────────────────┘
 
 Flow:
-Browser → http://116.118.49.243:13000 (Frontend)
-Frontend → http://116.118.49.243:13001/graphql (Backend API)
+Browser → http://116.118.48.208:13000 (Frontend)
+Frontend → http://116.118.48.208:13001/graphql (Backend API)
 ```
 
 ## ⚠️ Lưu ý quan trọng
@@ -207,14 +207,14 @@ NODE_ENV=production bun run dev
 1. Backend có đang chạy trên port 13001?
    ```bash
    lsof -ti:13001
-   curl http://116.118.49.243:13001/graphql
+   curl http://116.118.48.208:13001/graphql
    ```
 
 2. Backend có cấu hình CORS đúng?
    ```typescript
    // backend/src/main.ts
    app.enableCors({
-     origin: 'http://116.118.49.243:13000',
+     origin: 'http://116.118.48.208:13000',
      credentials: true,
    });
    ```

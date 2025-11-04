@@ -66,9 +66,9 @@ export default function SupportChatWidgetWrapper() {
 
   // Get API URLs from env
   const apiUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '') || 
-                 "http://116.118.49.243:12001";
+                 "http://116.118.48.208:12001";
   const websocketUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '/support-chat') || 
-                       "http://116.118.49.243:12001/support-chat";
+                       "http://116.118.48.208:12001/support-chat";
 
   return (
     <SupportChatWidget

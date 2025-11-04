@@ -52,7 +52,7 @@ If you put file upload middleware first:
 
 ### Test 1: GraphQL Introspection (POST)
 ```bash
-curl -X POST http://116.118.49.243:12001/graphql \
+curl -X POST http://116.118.48.208:12001/graphql \
   -H "Content-Type: application/json" \
   -d '{"query":"{ __schema { types { name } } }"}'
 # ✅ Result: Returns full schema with 400+ types
@@ -60,7 +60,7 @@ curl -X POST http://116.118.49.243:12001/graphql \
 
 ### Test 2: Simple Query (POST)
 ```bash
-curl -X POST http://116.118.49.243:12001/graphql \
+curl -X POST http://116.118.48.208:12001/graphql \
   -H "Content-Type: application/json" \
   -d '{"query":"query { __typename }"}'
 # ✅ Result: {"data":{"__typename":"Query"}}
@@ -68,7 +68,7 @@ curl -X POST http://116.118.49.243:12001/graphql \
 
 ### Test 3: Health Check
 ```bash
-curl http://116.118.49.243:12001/health
+curl http://116.118.48.208:12001/health
 # ✅ Result: All services healthy
 ```
 
@@ -109,10 +109,10 @@ cd backend && npm run build
 ```
 
 ## Backend URLs
-- **GraphQL Endpoint**: http://116.118.49.243:12001/graphql
-- **GraphQL Playground**: http://116.118.49.243:12001/graphql (Apollo Sandbox)
-- **Health Check**: http://116.118.49.243:12001/health
-- **Health Detailed**: http://116.118.49.243:12001/health/detailed
+- **GraphQL Endpoint**: http://116.118.48.208:12001/graphql
+- **GraphQL Playground**: http://116.118.48.208:12001/graphql (Apollo Sandbox)
+- **Health Check**: http://116.118.48.208:12001/health
+- **Health Detailed**: http://116.118.48.208:12001/health/detailed
 
 ## Related Configuration
 
@@ -175,7 +175,7 @@ graphqlUploadExpress({
 
 **Status**: ✅ FIXED  
 **Date**: October 27, 2025  
-**Deployment**: Production (116.118.49.243)  
+**Deployment**: Production (116.118.48.208)  
 **GraphQL API**: ✅ Working  
 **File Uploads**: ✅ Configured  
 **Introspection**: ✅ Enabled  

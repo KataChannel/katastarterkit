@@ -21,21 +21,21 @@ Menu sẽ cung cấp tất cả các tùy chọn cần thiết!
 - Frontend: http://localhost:12000
 - Backend: http://localhost:12001
 
-**Tazagroup:**
+**Innerv2:**
 - Frontend: http://localhost:13000
 - Backend: http://localhost:13001
 
-**Remote Services:** 116.118.49.243 (Database, Redis, Minio)
+**Remote Services:** 116.118.48.208 (Database, Redis, Minio)
 
 ### 2️⃣ Production (Server)
 
 **Rausach:**
-- Frontend: http://116.118.49.243:12000
-- Backend: http://116.118.49.243:12001
+- Frontend: http://116.118.48.208:12000
+- Backend: http://116.118.48.208:12001
 
-**Tazagroup:**
-- Frontend: http://116.118.49.243:13000
-- Backend: http://116.118.49.243:13001
+**Innerv2:**
+- Frontend: http://116.118.48.208:13000
+- Backend: http://116.118.48.208:13001
 
 ---
 
@@ -65,7 +65,7 @@ Menu sẽ cung cấp tất cả các tùy chọn cần thiết!
 
 # NPM scripts
 bun run dev:rausach    # Rausach dev
-bun run dev:tazagroup  # Tazagroup dev
+bun run dev:innerv2  # Innerv2 dev
 ```
 
 ### Production
@@ -75,7 +75,7 @@ bun run dev:tazagroup  # Tazagroup dev
 
 # Hoặc NPM scripts
 bun run docker:prod:rausach    # Deploy Rausach
-bun run docker:prod:tazagroup  # Deploy Tazagroup
+bun run docker:prod:innerv2  # Deploy Innerv2
 bun run docker:prod:multi      # Deploy cả 2
 ```
 
@@ -86,7 +86,7 @@ bun run docker:prod:multi      # Deploy cả 2
 
 # Logs development
 tail -f dev-rausach-backend.log
-tail -f dev-tazagroup-frontend.log
+tail -f dev-innerv2-frontend.log
 
 # Logs production
 docker-compose -f docker-compose.rausach.yml logs -f
@@ -98,9 +98,9 @@ docker-compose -f docker-compose.rausach.yml logs -f
 
 ```
 .env.dev.rausach       # Dev - Rausach
-.env.dev.tazagroup     # Dev - Tazagroup
+.env.dev.innerv2     # Dev - Innerv2
 .env.prod.rausach      # Prod - Rausach
-.env.prod.tazagroup    # Prod - Tazagroup
+.env.prod.innerv2    # Prod - Innerv2
 
 dev-start.sh           # Start dev
 dev-stop.sh            # Stop dev
@@ -110,7 +110,7 @@ switch-env.sh          # Switch env
 menu.sh                # Main menu
 
 docker-compose.rausach.yml
-docker-compose.tazagroup.yml
+docker-compose.innerv2.yml
 docker-compose.multi-domain.yml
 ```
 

@@ -142,7 +142,7 @@ const getAnimationStyle = (): React.CSSProperties => {
 
 ## 🧪 Cách Kiểm Tra
 
-1. **Navigate to**: http://116.118.49.243:12000 (hoặc localhost:12000)
+1. **Navigate to**: http://116.118.48.208:12000 (hoặc localhost:12000)
 2. **Vào Admin → Page Builder**
 3. **Thêm hoặc chỉnh sửa Carousel Block**
 4. **Bấm Settings button**

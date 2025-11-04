@@ -24,11 +24,11 @@
 │          ┌─────────┴──────────┴─────────┐          │
 │          │                              │          │
 │  ┌───────▼────────────┐      ┌─────────▼────────┐ │
-│  │  RAUSACH DOMAIN    │      │  TAZAGROUP       │ │
+│  │  RAUSACH DOMAIN    │      │  INNERV2       │ │
 │  ├────────────────────┤      ├──────────────────┤ │
 │  │ PostgreSQL         │      │ PostgreSQL       │ │
 │  │  (dedicated)       │      │  (dedicated)     │ │
-│  │ • rausachcore DB   │      │ • tazagroupcore  │ │
+│  │ • rausachcore DB   │      │ • innerv2core  │ │
 │  │ • Port: 12003      │      │ • Port: 13003    │ │
 │  ├────────────────────┤      ├──────────────────┤ │
 │  │ Backend (12001)    │      │ Backend (13001)  │ │
@@ -43,13 +43,13 @@
 | Service | Memory | Port | Dedicated/Shared |
 |---------|--------|------|------------------|
 | **Rausach PostgreSQL** | 256MB | 12003 | Dedicated |
-| **Tazagroup PostgreSQL** | 256MB | 13003 | Dedicated |
+| **Innerv2 PostgreSQL** | 256MB | 13003 | Dedicated |
 | **Redis** | 128MB | 12004 | **Shared** |
 | **Minio** | 128MB | 12007/12008 | **Shared** |
 | Rausach Backend | 256MB | 12001 | Dedicated |
 | Rausach Frontend | 256MB | 12000 | Dedicated |
-| Tazagroup Backend | 256MB | 13001 | Dedicated |
-| Tazagroup Frontend | 256MB | 13000 | Dedicated |
+| Innerv2 Backend | 256MB | 13001 | Dedicated |
+| Innerv2 Frontend | 256MB | 13000 | Dedicated |
 | **TOTAL** | **~1.8GB** | - | - |
 
 ---
@@ -98,7 +98,7 @@ free -h
 cd /path/to/project
 
 # Kiểm tra files cần thiết
-ls -la .env.rausach .env.tazagroup docker-compose.hybrid.yml
+ls -la .env.rausach .env.innerv2 docker-compose.hybrid.yml
 
 # Cấp quyền
 chmod +x deploy-hybrid.sh
@@ -127,8 +127,8 @@ make -f Makefile.hybrid status
 make -f Makefile.hybrid logs
 
 # Test URLs
-curl http://116.118.49.243:12000  # Rausach
-curl http://116.118.49.243:13000  # Tazagroup
+curl http://116.118.48.208:12000  # Rausach
+curl http://116.118.48.208:13000  # Innerv2
 ```
 
 ---
@@ -147,23 +147,23 @@ make -f Makefile.hybrid stop-all
 
 # Khởi động riêng từng domain
 make -f Makefile.hybrid start-rausach
-make -f Makefile.hybrid start-tazagroup
+make -f Makefile.hybrid start-innerv2
 
 # Xem logs
 make -f Makefile.hybrid logs              # Tất cả
 make -f Makefile.hybrid logs-rausach      # Chỉ Rausach
-make -f Makefile.hybrid logs-tazagroup    # Chỉ Tazagroup
+make -f Makefile.hybrid logs-innerv2    # Chỉ Innerv2
 
 # Trạng thái
 make -f Makefile.hybrid status
 
 # Backup
 make -f Makefile.hybrid backup-rausach
-make -f Makefile.hybrid backup-tazagroup
+make -f Makefile.hybrid backup-innerv2
 
 # Restore
 make -f Makefile.hybrid restore-rausach BACKUP_FILE=./backups/rausach_20250103.sql
-make -f Makefile.hybrid restore-tazagroup BACKUP_FILE=./backups/tazagroup_20250103.sql
+make -f Makefile.hybrid restore-innerv2 BACKUP_FILE=./backups/innerv2_20250103.sql
 ```
 
 ### Sử Dụng Script Menu
@@ -175,7 +175,7 @@ make -f Makefile.hybrid restore-tazagroup BACKUP_FILE=./backups/tazagroup_202501
 Menu options:
 1. Khởi động tất cả
 2. Khởi động chỉ Rausach
-3. Khởi động chỉ Tazagroup
+3. Khởi động chỉ Innerv2
 4. Khởi động chỉ shared services
 5-7. Dừng services
 8-10. Xem logs
@@ -196,7 +196,7 @@ crontab -e
 
 # Thêm dòng sau (backup lúc 2AM và 3AM mỗi ngày)
 0 2 * * * cd /path/to/project && make -f Makefile.hybrid backup-rausach
-0 3 * * * cd /path/to/project && make -f Makefile.hybrid backup-tazagroup
+0 3 * * * cd /path/to/project && make -f Makefile.hybrid backup-innerv2
 ```
 
 ### Backup Thủ Công
@@ -205,11 +205,11 @@ crontab -e
 # Backup Rausach
 make -f Makefile.hybrid backup-rausach
 
-# Backup Tazagroup
-make -f Makefile.hybrid backup-tazagroup
+# Backup Innerv2
+make -f Makefile.hybrid backup-innerv2
 
 # Backup cả 2
-make -f Makefile.hybrid backup-rausach && make -f Makefile.hybrid backup-tazagroup
+make -f Makefile.hybrid backup-rausach && make -f Makefile.hybrid backup-innerv2
 ```
 
 ### Restore
@@ -221,8 +221,8 @@ ls -lh backups/
 # Restore Rausach
 make -f Makefile.hybrid restore-rausach BACKUP_FILE=./backups/rausach_20250103_120000.sql
 
-# Restore Tazagroup
-make -f Makefile.hybrid restore-tazagroup BACKUP_FILE=./backups/tazagroup_20250103_120000.sql
+# Restore Innerv2
+make -f Makefile.hybrid restore-innerv2 BACKUP_FILE=./backups/innerv2_20250103_120000.sql
 ```
 
 ### Backup Remote (Khuyến nghị)
@@ -264,13 +264,13 @@ swapon --show
 ```bash
 # Container logs
 docker logs rausach-postgres -f
-docker logs tazagroup-postgres -f
+docker logs innerv2-postgres -f
 docker logs shared-redis -f
 docker logs shared-minio -f
 
 # Application logs
 docker logs rausach-backend -f
-docker logs tazagroup-backend -f
+docker logs innerv2-backend -f
 ```
 
 ### Common Issues
@@ -281,11 +281,11 @@ docker logs tazagroup-backend -f
 # Check PostgreSQL
 docker ps | grep postgres
 docker logs rausach-postgres
-docker logs tazagroup-postgres
+docker logs innerv2-postgres
 
 # Restart database
 docker restart rausach-postgres
-docker restart tazagroup-postgres
+docker restart innerv2-postgres
 ```
 
 #### Out of Memory
@@ -328,8 +328,8 @@ sudo apt install ufw -y
 sudo ufw allow 22/tcp       # SSH
 sudo ufw allow 12000/tcp    # Rausach Frontend
 sudo ufw allow 12001/tcp    # Rausach Backend
-sudo ufw allow 13000/tcp    # Tazagroup Frontend
-sudo ufw allow 13001/tcp    # Tazagroup Backend
+sudo ufw allow 13000/tcp    # Innerv2 Frontend
+sudo ufw allow 13001/tcp    # Innerv2 Backend
 sudo ufw allow 12008/tcp    # Minio Console (optional, có thể block)
 
 # Enable
@@ -350,10 +350,10 @@ JWT_SECRET=<random-32-char-string>
 NEXTAUTH_SECRET=<random-32-char-string>
 ```
 
-**File `.env.tazagroup`:**
+**File `.env.innerv2`:**
 ```bash
-POSTGRES_PASSWORD=<strong-password-tazagroup>
-MINIO_ACCESS_KEY=tazagroup-admin-<random>
+POSTGRES_PASSWORD=<strong-password-innerv2>
+MINIO_ACCESS_KEY=innerv2-admin-<random>
 MINIO_SECRET_KEY=<strong-secret-key>
 JWT_SECRET=<random-32-char-string>
 NEXTAUTH_SECRET=<random-32-char-string>
@@ -371,16 +371,16 @@ sudo apt install certbot python3-certbot-nginx -y
 # Tạo config cho Rausach
 sudo nano /etc/nginx/sites-available/rausach
 
-# Tạo config cho Tazagroup
-sudo nano /etc/nginx/sites-available/tazagroup
+# Tạo config cho Innerv2
+sudo nano /etc/nginx/sites-available/innerv2
 
 # Enable sites
 sudo ln -s /etc/nginx/sites-available/rausach /etc/nginx/sites-enabled/
-sudo ln -s /etc/nginx/sites-available/tazagroup /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/innerv2 /etc/nginx/sites-enabled/
 
 # Get SSL certificates
 sudo certbot --nginx -d rausach.com -d www.rausach.com
-sudo certbot --nginx -d tazagroup.com -d www.tazagroup.com
+sudo certbot --nginx -d innerv2.com -d www.innerv2.com
 ```
 
 ---
@@ -456,7 +456,7 @@ Nâng cấp server hiện tại:
 # Migration từ Hybrid → Fully Isolated
 # 1. Backup databases
 make -f Makefile.hybrid backup-rausach
-make -f Makefile.hybrid backup-tazagroup
+make -f Makefile.hybrid backup-innerv2
 
 # 2. Stop current
 make -f Makefile.hybrid stop-all
@@ -527,7 +527,7 @@ docker-compose -f docker-compose.fully-isolated.yml up -d
 
 # Application logs (if configured)
 ./logs/rausach/
-./logs/tazagroup/
+./logs/innerv2/
 ```
 
 ### Useful Commands

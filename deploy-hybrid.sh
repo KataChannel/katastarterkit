@@ -33,20 +33,20 @@ show_menu() {
     echo -e "${YELLOW}Chọn hành động:${NC}"
     echo "1) Khởi động tất cả services (cả 2 domain)"
     echo "2) Khởi động chỉ domain Rausach"
-    echo "3) Khởi động chỉ domain Tazagroup"
+    echo "3) Khởi động chỉ domain Innerv2"
     echo "4) Khởi động chỉ shared services (Redis + Minio)"
     echo "5) Dừng tất cả services"
     echo "6) Dừng chỉ domain Rausach"
-    echo "7) Dừng chỉ domain Tazagroup"
+    echo "7) Dừng chỉ domain Innerv2"
     echo "8) Xem logs tất cả"
     echo "9) Xem logs Rausach"
-    echo "10) Xem logs Tazagroup"
+    echo "10) Xem logs Innerv2"
     echo "11) Xem trạng thái và resource usage"
     echo "12) Restart tất cả"
     echo "13) Backup database Rausach"
-    echo "14) Backup database Tazagroup"
+    echo "14) Backup database Innerv2"
     echo "15) Restore database Rausach"
-    echo "16) Restore database Tazagroup"
+    echo "16) Restore database Innerv2"
     echo "17) Build lại images"
     echo "18) Dọn dẹp và rebuild"
     echo "0) Thoát"
@@ -74,8 +74,8 @@ check_prerequisites() {
         exit 1
     fi
     
-    if [ ! -f ".env.tazagroup" ]; then
-        echo -e "${RED}❌ File .env.tazagroup không tồn tại!${NC}"
+    if [ ! -f ".env.innerv2" ]; then
+        echo -e "${RED}❌ File .env.innerv2 không tồn tại!${NC}"
         exit 1
     fi
     
@@ -104,10 +104,10 @@ start_rausach() {
     show_status
 }
 
-# Start only Tazagroup
-start_tazagroup() {
-    echo -e "${GREEN}🚀 Khởi động TAZAGROUP domain...${NC}"
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d redis minio tazagroup-postgres tazagroup-backend tazagroup-frontend
+# Start only Innerv2
+start_innerv2() {
+    echo -e "${GREEN}🚀 Khởi động INNERV2 domain...${NC}"
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d redis minio innerv2-postgres innerv2-backend innerv2-frontend
     show_status
 }
 
@@ -132,11 +132,11 @@ stop_rausach() {
     echo -e "${GREEN}✅ Đã dừng Rausach${NC}"
 }
 
-# Stop Tazagroup
-stop_tazagroup() {
-    echo -e "${YELLOW}🛑 Dừng TAZAGROUP domain...${NC}"
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" stop tazagroup-postgres tazagroup-backend tazagroup-frontend
-    echo -e "${GREEN}✅ Đã dừng Tazagroup${NC}"
+# Stop Innerv2
+stop_innerv2() {
+    echo -e "${YELLOW}🛑 Dừng INNERV2 domain...${NC}"
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" stop innerv2-postgres innerv2-backend innerv2-frontend
+    echo -e "${GREEN}✅ Đã dừng Innerv2${NC}"
 }
 
 # View logs
@@ -150,9 +150,9 @@ view_logs_rausach() {
     $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 rausach-postgres rausach-backend rausach-frontend
 }
 
-view_logs_tazagroup() {
-    echo -e "${BLUE}📋 Logs TAZAGROUP...${NC}"
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 tazagroup-postgres tazagroup-backend tazagroup-frontend
+view_logs_innerv2() {
+    echo -e "${BLUE}📋 Logs INNERV2...${NC}"
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 innerv2-postgres innerv2-backend innerv2-frontend
 }
 
 # Show status
@@ -168,18 +168,18 @@ show_status() {
     
     echo -e "${GREEN}🌐 URLs:${NC}"
     echo -e "  ${YELLOW}Rausach:${NC}"
-    echo -e "    Frontend:  ${BLUE}http://116.118.49.243:12000${NC}"
-    echo -e "    Backend:   ${BLUE}http://116.118.49.243:12001/graphql${NC}"
-    echo -e "    Database:  ${BLUE}116.118.49.243:12003${NC}"
+    echo -e "    Frontend:  ${BLUE}http://116.118.48.208:12000${NC}"
+    echo -e "    Backend:   ${BLUE}http://116.118.48.208:12001/graphql${NC}"
+    echo -e "    Database:  ${BLUE}116.118.48.208:12003${NC}"
     echo ""
-    echo -e "  ${YELLOW}Tazagroup:${NC}"
-    echo -e "    Frontend:  ${BLUE}http://116.118.49.243:13000${NC}"
-    echo -e "    Backend:   ${BLUE}http://116.118.49.243:13001/graphql${NC}"
-    echo -e "    Database:  ${BLUE}116.118.49.243:13003${NC}"
+    echo -e "  ${YELLOW}Innerv2:${NC}"
+    echo -e "    Frontend:  ${BLUE}http://116.118.48.208:13000${NC}"
+    echo -e "    Backend:   ${BLUE}http://116.118.48.208:13001/graphql${NC}"
+    echo -e "    Database:  ${BLUE}116.118.48.208:13003${NC}"
     echo ""
     echo -e "  ${YELLOW}Shared:${NC}"
-    echo -e "    Minio:     ${BLUE}http://116.118.49.243:12008${NC}"
-    echo -e "    Redis:     ${BLUE}116.118.49.243:12004${NC}"
+    echo -e "    Minio:     ${BLUE}http://116.118.48.208:12008${NC}"
+    echo -e "    Redis:     ${BLUE}116.118.48.208:12004${NC}"
     echo ""
 }
 
@@ -201,11 +201,11 @@ backup_rausach() {
     echo -e "${GREEN}✅ Saved: $BACKUP_DIR/rausach_${DATE}.sql${NC}"
 }
 
-backup_tazagroup() {
-    echo -e "${YELLOW}💾 Backup database Tazagroup...${NC}"
+backup_innerv2() {
+    echo -e "${YELLOW}💾 Backup database Innerv2...${NC}"
     mkdir -p "$BACKUP_DIR"
-    docker exec tazagroup-postgres pg_dump -U postgres tazagroupcore > "$BACKUP_DIR/tazagroup_${DATE}.sql"
-    echo -e "${GREEN}✅ Saved: $BACKUP_DIR/tazagroup_${DATE}.sql${NC}"
+    docker exec innerv2-postgres pg_dump -U postgres innerv2core > "$BACKUP_DIR/innerv2_${DATE}.sql"
+    echo -e "${GREEN}✅ Saved: $BACKUP_DIR/innerv2_${DATE}.sql${NC}"
 }
 
 # Restore
@@ -223,14 +223,14 @@ restore_rausach() {
     fi
 }
 
-restore_tazagroup() {
-    echo -e "${YELLOW}📥 Restore database Tazagroup...${NC}"
+restore_innerv2() {
+    echo -e "${YELLOW}📥 Restore database Innerv2...${NC}"
     echo -e "${YELLOW}Available backups:${NC}"
-    ls -lh "$BACKUP_DIR"/tazagroup_*.sql 2>/dev/null || echo "No backups found"
+    ls -lh "$BACKUP_DIR"/innerv2_*.sql 2>/dev/null || echo "No backups found"
     echo ""
     read -p "Enter backup file path: " backup_file
     if [ -f "$backup_file" ]; then
-        docker exec -i tazagroup-postgres psql -U postgres tazagroupcore < "$backup_file"
+        docker exec -i innerv2-postgres psql -U postgres innerv2core < "$backup_file"
         echo -e "${GREEN}✅ Restore complete${NC}"
     else
         echo -e "${RED}❌ File not found${NC}"
@@ -271,20 +271,20 @@ main() {
         case $choice in
             1) start_all ;;
             2) start_rausach ;;
-            3) start_tazagroup ;;
+            3) start_innerv2 ;;
             4) start_shared ;;
             5) stop_all ;;
             6) stop_rausach ;;
-            7) stop_tazagroup ;;
+            7) stop_innerv2 ;;
             8) view_logs_all ;;
             9) view_logs_rausach ;;
-            10) view_logs_tazagroup ;;
+            10) view_logs_innerv2 ;;
             11) show_status ;;
             12) restart_all ;;
             13) backup_rausach ;;
-            14) backup_tazagroup ;;
+            14) backup_innerv2 ;;
             15) restore_rausach ;;
-            16) restore_tazagroup ;;
+            16) restore_innerv2 ;;
             17) rebuild ;;
             18) clean_rebuild ;;
             0) 

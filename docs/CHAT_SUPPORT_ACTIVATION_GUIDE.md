@@ -72,7 +72,7 @@ Hệ thống Chat Support đã được **KÍCH HOẠT HOÀN TOÀN** với các 
 
 1. **Truy Cập Dashboard:**
    ```
-   http://116.118.49.243:12000/admin/support-chat
+   http://116.118.48.208:12000/admin/support-chat
    ```
 
 2. **Quản Lý Conversations:**
@@ -158,7 +158,7 @@ Hệ thống Chat Support đã được **KÍCH HOẠT HOÀN TOÀN** với các 
 
 ```bash
 # Truy cập GraphQL Playground
-http://116.118.49.243:12001/graphql
+http://116.118.48.208:12001/graphql
 
 # Test query
 query {
@@ -234,7 +234,7 @@ query {
 │ Phone: 0912345678                   │
 │ Platform: Website                   │
 │ Location: Ho Chi Minh City          │
-│ IP: 116.118.49.243                  │
+│ IP: 116.118.48.208                  │
 ├─────────────────────────────────────┤
 │ 📦 Recent Orders: 3                 │
 │ ⭐ Rating: 4.5 stars                │
@@ -401,10 +401,10 @@ curl https://api.openai.com/v1/models \
 **Giải pháp:**
 ```bash
 # Check backend running
-curl http://116.118.49.243:12001/graphql
+curl http://116.118.48.208:12001/graphql
 
 # Check WebSocket
-wscat -c ws://116.118.49.243:12001/support-chat
+wscat -c ws://116.118.48.208:12001/support-chat
 ```
 
 ---

@@ -2,7 +2,7 @@
 
 ## 🎯 Tổng Quan
 
-Hệ thống hỗ trợ **3 phương án** triển khai 2 domain (Rausach + Tazagroup) trên cùng source code.
+Hệ thống hỗ trợ **3 phương án** triển khai 2 domain (Rausach + Innerv2) trên cùng source code.
 
 ## 📊 So Sánh Nhanh
 
@@ -144,7 +144,7 @@ HUONG_DAN_HYBRID_DEPLOYMENT.md
 ### Chung
 ```
 .env.rausach
-.env.tazagroup
+.env.innerv2
 SO_SANH_PHUONG_AN_DEPLOY.md
 check-system-multi-domain.sh
 ```

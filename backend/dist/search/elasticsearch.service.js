@@ -23,7 +23,7 @@ let ElasticsearchService = ElasticsearchService_1 = class ElasticsearchService {
         const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
         const elasticsearchUrl = isDockerEnv
             ? this.configService.get('DOCKER_ELASTICSEARCH_URL', 'http://elasticsearch:9200')
-            : this.configService.get('ELASTICSEARCH_URL', 'http://116.118.49.243:12005');
+            : this.configService.get('ELASTICSEARCH_URL', 'http://116.118.48.208:12005');
         this.client = new elasticsearch_1.Client({
             node: elasticsearchUrl,
             auth: {

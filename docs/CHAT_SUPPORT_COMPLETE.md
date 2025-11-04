@@ -74,8 +74,8 @@ FACEBOOK_VERIFY_TOKEN=
 ```typescript
 // Thêm SupportChatWidget
 <SupportChatWidget 
-  apiUrl={process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '') || "http://116.118.49.243:12001"}
-  websocketUrl={process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '/support-chat') || "http://116.118.49.243:12001/support-chat"}
+  apiUrl={process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '') || "http://116.118.48.208:12001"}
+  websocketUrl={process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '/support-chat') || "http://116.118.48.208:12001/support-chat"}
   primaryColor="#16a34a"
   position="bottom-right"
 />
@@ -352,10 +352,10 @@ cd frontend && bun run dev
 
 ### Truy Cập
 
-- **Website:** http://116.118.49.243:12000
+- **Website:** http://116.118.48.208:12000
 - **Chat Widget:** Góc dưới phải website
-- **Admin Dashboard:** http://116.118.49.243:12000/admin/support-chat
-- **GraphQL Playground:** http://116.118.49.243:12001/graphql
+- **Admin Dashboard:** http://116.118.48.208:12000/admin/support-chat
+- **GraphQL Playground:** http://116.118.48.208:12001/graphql
 
 ### Workflow Cơ Bản
 
@@ -374,10 +374,10 @@ cd frontend && bun run dev
 
 ```env
 # Backend URL (đã có)
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:12001/graphql
+NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:12001/graphql
 
 # Database (đã có)
-DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/rausachcore"
+DATABASE_URL="postgresql://postgres:postgres@116.118.48.208:12003/rausachcore"
 ```
 
 ### Khuyến Nghị

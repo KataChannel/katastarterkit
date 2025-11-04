@@ -191,7 +191,7 @@ Done! ✅
 2. Commit changes
 3. Run: ./scripts/95copy.sh --build
 4. Wait 2-5 minutes
-5. Check: http://116.118.49.243:12000
+5. Check: http://116.118.48.208:12000
 6. Done! ✅
 ```
 
@@ -201,7 +201,7 @@ Done! ✅
 2. Commit changes
 3. Run: ./scripts/95copy.sh
 4. Wait 30-60 seconds
-5. Check: http://116.118.49.243:12001
+5. Check: http://116.118.48.208:12001
 6. Done! ✅
 ```
 
@@ -218,7 +218,7 @@ Done! ✅
 1. Production showing 404s
 2. Run: ./scripts/95copy.sh --fix
 3. Wait 1-2 minutes
-4. Check: http://116.118.49.243:12000
+4. Check: http://116.118.48.208:12000
 5. Done! ✅
 ```
 
@@ -260,7 +260,7 @@ For backend changes: `./95copy.sh`
 **A**: See DEPLOY_QUICK_REFERENCE.md or run `./95copy.sh --help`
 
 ### Q: Where's the server?
-**A**: Production: `116.118.49.243:12000` (frontend), `:12001` (backend)
+**A**: Production: `116.118.48.208:12000` (frontend), `:12001` (backend)
 
 ---
 

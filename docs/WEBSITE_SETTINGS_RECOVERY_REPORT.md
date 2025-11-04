@@ -9,7 +9,7 @@
 Dữ liệu WebsiteSetting **không bị mất**. Tất cả 57 settings vẫn an toàn trong database:
 
 ```
-Database: tazagroupcore
+Database: innerv2core
 Table: "WebsiteSetting"
 Records: 57 entries
 Status: ✅ Intact & Accessible

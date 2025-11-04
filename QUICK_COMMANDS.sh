@@ -14,18 +14,18 @@ cat << 'EOF'
   Khởi động:
     ./start-hybrid.sh all          # Tất cả services
     ./start-hybrid.sh rausach      # Chỉ Rausach
-    ./start-hybrid.sh tazagroup    # Chỉ Tazagroup
+    ./start-hybrid.sh innerv2    # Chỉ Innerv2
     ./start-hybrid.sh shared       # Chỉ Redis + Minio
 
   Dừng:
     ./stop-hybrid.sh all           # Dừng tất cả
     ./stop-hybrid.sh rausach       # Dừng Rausach
-    ./stop-hybrid.sh tazagroup     # Dừng Tazagroup
+    ./stop-hybrid.sh innerv2     # Dừng Innerv2
 
   Quản lý:
     ./logs-hybrid.sh all           # Xem logs tất cả
     ./logs-hybrid.sh rausach       # Logs Rausach
-    ./logs-hybrid.sh tazagroup     # Logs Tazagroup
+    ./logs-hybrid.sh innerv2     # Logs Innerv2
     ./status-hybrid.sh             # Trạng thái & resource
 
   Menu tương tác:
@@ -39,12 +39,12 @@ cat << 'EOF'
   Khởi động:
     ./start-multi-domain.sh all          # Tất cả
     ./start-multi-domain.sh rausach      # Chỉ Rausach
-    ./start-multi-domain.sh tazagroup    # Chỉ Tazagroup
+    ./start-multi-domain.sh innerv2    # Chỉ Innerv2
 
   Dừng:
     ./stop-multi-domain.sh all           # Dừng tất cả
     ./stop-multi-domain.sh rausach       # Dừng Rausach
-    ./stop-multi-domain.sh tazagroup     # Dừng Tazagroup
+    ./stop-multi-domain.sh innerv2     # Dừng Innerv2
 
   Menu tương tác:
     ./deploy-multi-domain.sh             # Menu interactive
@@ -72,18 +72,18 @@ cat << 'EOF'
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   Rausach (12xxx):
-    Frontend:  http://116.118.49.243:12000
-    Backend:   http://116.118.49.243:12001/graphql
-    Database:  116.118.49.243:12003
+    Frontend:  http://116.118.48.208:12000
+    Backend:   http://116.118.48.208:12001/graphql
+    Database:  116.118.48.208:12003
 
-  Tazagroup (13xxx):
-    Frontend:  http://116.118.49.243:13000
-    Backend:   http://116.118.49.243:13001/graphql
-    Database:  116.118.49.243:13003
+  Innerv2 (13xxx):
+    Frontend:  http://116.118.48.208:13000
+    Backend:   http://116.118.48.208:13001/graphql
+    Database:  116.118.48.208:13003
 
   Shared:
-    Minio:     http://116.118.49.243:12008
-    Redis:     116.118.49.243:12004
+    Minio:     http://116.118.48.208:12008
+    Redis:     116.118.48.208:12004
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

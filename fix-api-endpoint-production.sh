@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script sửa lỗi API endpoint cho production
-# Vấn đề: Frontend đang gọi https://api.rausachtrangia.com/graphql thay vì http://116.118.49.243:13001/graphql
+# Vấn đề: Frontend đang gọi https://api.rausachtrangia.com/graphql thay vì http://116.118.48.208:13001/graphql
 
 set -e
 
@@ -11,7 +11,7 @@ echo "================================================"
 echo ""
 echo "📋 Chi tiết vấn đề:"
 echo "   ❌ SAI:  https://api.rausachtrangia.com/graphql"
-echo "   ✅ ĐÚNG: http://116.118.49.243:13001/graphql"
+echo "   ✅ ĐÚNG: http://116.118.48.208:13001/graphql"
 echo ""
 
 # Bước 1: Kiểm tra cấu hình hiện tại
@@ -73,7 +73,7 @@ sleep 5
 echo "🧪 Bước 7: Kiểm tra API endpoint..."
 echo ""
 echo "   Testing GraphQL API..."
-RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://116.118.49.243:13001/graphql \
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://116.118.48.208:13001/graphql \
   -H "Content-Type: application/json" \
   -d '{"query":"{ __typename }"}')
 
@@ -90,17 +90,17 @@ echo "✅ HOÀN TẤT KHẮC PHỤC"
 echo "================================================"
 echo ""
 echo "📊 Thông tin:"
-echo "   • Frontend URL:  http://116.118.49.243:13000"
-echo "   • Backend API:   http://116.118.49.243:13001/graphql"
+echo "   • Frontend URL:  http://116.118.48.208:13000"
+echo "   • Backend API:   http://116.118.48.208:13001/graphql"
 echo "   • Process ID:    $FRONTEND_PID"
 echo "   • Log file:      /tmp/frontend-13000.log"
 echo ""
 echo "🔍 Kiểm tra:"
-echo "   1. Mở trình duyệt: http://116.118.49.243:13000"
+echo "   1. Mở trình duyệt: http://116.118.48.208:13000"
 echo "   2. Mở DevTools > Network > XHR"
 echo "   3. Tải lại trang"
 echo "   4. Kiểm tra GraphQL request gọi đến:"
-echo "      ✅ http://116.118.49.243:13001/graphql"
+echo "      ✅ http://116.118.48.208:13001/graphql"
 echo "      ❌ KHÔNG PHẢI: https://api.rausachtrangia.com/graphql"
 echo ""
 echo "📝 Xem log:"

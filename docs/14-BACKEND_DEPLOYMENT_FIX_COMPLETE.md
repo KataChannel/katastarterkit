@@ -112,7 +112,7 @@ timeout 10 bun start:prod
 
 ### Step 4: Verify Backend on Server
 ```bash
-curl http://116.118.49.243:12001/health
+curl http://116.118.48.208:12001/health
 # ✅ Result: 
 {
   "status": "ok",
@@ -151,10 +151,10 @@ curl http://116.118.49.243:12001/health
 | Elasticsearch | ✅ Healthy | For search functionality |
 
 ## Production Deployment URLs
-- **Frontend**: http://116.118.49.243:12000
-- **Backend API**: http://116.118.49.243:12001
-- **GraphQL Playground**: http://116.118.49.243:12001/graphql
-- **Health Check**: http://116.118.49.243:12001/health
+- **Frontend**: http://116.118.48.208:12000
+- **Backend API**: http://116.118.48.208:12001
+- **GraphQL Playground**: http://116.118.48.208:12001/graphql
+- **Health Check**: http://116.118.48.208:12001/health
 
 ## Key Learnings
 
@@ -194,13 +194,13 @@ file dist/cache/cache.module.js  # Should show proper filename
 
 # 3. Deploy with clean Docker build
 ./scripts/95copy.sh --build
-ssh root@116.118.49.243 "cd /root/shoprausach && docker compose build --no-cache backend"
+ssh root@116.118.48.208 "cd /root/shoprausach && docker compose build --no-cache backend"
 
 # 4. Check server logs
-ssh root@116.118.49.243 "docker logs rausachcore-backend -f"
+ssh root@116.118.48.208 "docker logs rausachcore-backend -f"
 
 # 5. Test API
-curl http://116.118.49.243:12001/health | jq .
+curl http://116.118.48.208:12001/health | jq .
 ```
 
 ## Related Documentation
@@ -212,7 +212,7 @@ curl http://116.118.49.243:12001/health | jq .
 
 **Status**: ✅ RESOLVED  
 **Date**: October 27, 2025  
-**Deployment**: Production (116.118.49.243)  
+**Deployment**: Production (116.118.48.208)  
 **Frontend**: ✅ Healthy  
 **Backend**: ✅ Healthy  
 **Database**: ✅ Healthy  

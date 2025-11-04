@@ -1,6 +1,6 @@
 # 🚀 Quick Start - Multi-Domain Deployment
 
-Triển khai 2 domain (Rausach + Tazagroup) trên server 1 Core / 1GB RAM / 5GB Storage
+Triển khai 2 domain (Rausach + Innerv2) trên server 1 Core / 1GB RAM / 5GB Storage
 
 ## ⚡ Khởi Động Nhanh
 
@@ -40,8 +40,8 @@ make -f Makefile.multi-domain start-all
 # Chỉ Rausach
 make -f Makefile.multi-domain start-rausach
 
-# Chỉ Tazagroup
-make -f Makefile.multi-domain start-tazagroup
+# Chỉ Innerv2
+make -f Makefile.multi-domain start-innerv2
 ```
 
 ### 4️⃣ Kiểm Tra Trạng Thái
@@ -53,16 +53,16 @@ make -f Makefile.multi-domain status
 ## 🌐 URLs Truy Cập
 
 **Rausach Domain (Port 12xxx):**
-- Frontend: http://116.118.49.243:12000
-- Backend GraphQL: http://116.118.49.243:12001/graphql
+- Frontend: http://116.118.48.208:12000
+- Backend GraphQL: http://116.118.48.208:12001/graphql
 
-**Tazagroup Domain (Port 13xxx):**
-- Frontend: http://116.118.49.243:13000
-- Backend GraphQL: http://116.118.49.243:13001/graphql
+**Innerv2 Domain (Port 13xxx):**
+- Frontend: http://116.118.48.208:13000
+- Backend GraphQL: http://116.118.48.208:13001/graphql
 
 **Shared Services:**
-- Minio Console: http://116.118.49.243:12008
-- PostgreSQL: 116.118.49.243:12003
+- Minio Console: http://116.118.48.208:12008
+- PostgreSQL: 116.118.48.208:12003
 
 ## 📋 Lệnh Hay Dùng
 
@@ -73,20 +73,20 @@ make -f Makefile.multi-domain help
 # Xem logs
 make -f Makefile.multi-domain logs              # Tất cả
 make -f Makefile.multi-domain logs-rausach      # Chỉ Rausach
-make -f Makefile.multi-domain logs-tazagroup    # Chỉ Tazagroup
+make -f Makefile.multi-domain logs-innerv2    # Chỉ Innerv2
 
 # Dừng services
 make -f Makefile.multi-domain stop-all          # Dừng tất cả
 make -f Makefile.multi-domain stop-rausach      # Dừng Rausach
-make -f Makefile.multi-domain stop-tazagroup    # Dừng Tazagroup
+make -f Makefile.multi-domain stop-innerv2    # Dừng Innerv2
 
 # Backup database
 make -f Makefile.multi-domain backup-rausach
-make -f Makefile.multi-domain backup-tazagroup
+make -f Makefile.multi-domain backup-innerv2
 
 # Restore database
 make -f Makefile.multi-domain restore-rausach BACKUP_FILE=./backups/rausach_20250103.sql
-make -f Makefile.multi-domain restore-tazagroup BACKUP_FILE=./backups/tazagroup_20250103.sql
+make -f Makefile.multi-domain restore-innerv2 BACKUP_FILE=./backups/innerv2_20250103.sql
 ```
 
 ## 🔧 Sử Dụng Scripts
@@ -99,13 +99,13 @@ chmod +x deploy-multi-domain.sh
 
 **Scripts nhanh:**
 ```bash
-chmod +x start-rausach-only.sh start-tazagroup-only.sh
-chmod +x stop-rausach-only.sh stop-tazagroup-only.sh
+chmod +x start-rausach-only.sh start-innerv2-only.sh
+chmod +x stop-rausach-only.sh stop-innerv2-only.sh
 
 ./start-rausach-only.sh      # Khởi động Rausach
-./start-tazagroup-only.sh    # Khởi động Tazagroup
+./start-innerv2-only.sh    # Khởi động Innerv2
 ./stop-rausach-only.sh       # Dừng Rausach
-./stop-tazagroup-only.sh     # Dừng Tazagroup
+./stop-innerv2-only.sh     # Dừng Innerv2
 ```
 
 ## 📊 Giám Sát Tài Nguyên
@@ -166,8 +166,8 @@ docker logs shared-postgres
 ```bash
 sudo ufw allow 12000/tcp  # Rausach Frontend
 sudo ufw allow 12001/tcp  # Rausach Backend
-sudo ufw allow 13000/tcp  # Tazagroup Frontend
-sudo ufw allow 13001/tcp  # Tazagroup Backend
+sudo ufw allow 13000/tcp  # Innerv2 Frontend
+sudo ufw allow 13001/tcp  # Innerv2 Backend
 sudo ufw allow 12008/tcp  # Minio Console
 sudo ufw allow 22/tcp     # SSH
 sudo ufw enable
@@ -175,7 +175,7 @@ sudo ufw enable
 
 ### Đổi mật khẩu
 
-Cập nhật trong `.env.rausach` và `.env.tazagroup`:
+Cập nhật trong `.env.rausach` và `.env.innerv2`:
 - POSTGRES_PASSWORD
 - REDIS_PASSWORD
 - MINIO_ACCESS_KEY

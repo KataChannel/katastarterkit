@@ -32,7 +32,7 @@ while true; do
     echo ""
     echo -e "${CYAN}📌 QUICK ACTIONS:${NC}"
     echo "  8) 🌟 Quick Start - Rausach Dev (localhost:12000-12001)"
-    echo "  9) 🏢 Quick Start - Tazagroup Dev (localhost:13000-13001)"
+    echo "  9) 🏢 Quick Start - Innerv2 Dev (localhost:13000-13001)"
     echo " 10) 🔥 Quick Start - Both Domains"
     echo ""
     echo -e "${CYAN}📌 UTILITIES:${NC}"
@@ -75,12 +75,12 @@ while true; do
         6)
             echo "Chọn domain để xem logs:"
             echo "  1) Rausach"
-            echo "  2) Tazagroup"
+            echo "  2) Innerv2"
             echo "  3) Multi-domain"
             read -p "Lựa chọn: " log_choice
             case $log_choice in
                 1) docker-compose -f docker-compose.rausach.yml logs -f ;;
-                2) docker-compose -f docker-compose.tazagroup.yml logs -f ;;
+                2) docker-compose -f docker-compose.innerv2.yml logs -f ;;
                 3) docker-compose -f docker-compose.multi-domain.yml logs -f ;;
                 *) echo "Invalid choice" ;;
             esac
@@ -90,17 +90,17 @@ while true; do
         7)
             echo "Chọn domain để dừng:"
             echo "  1) Rausach"
-            echo "  2) Tazagroup"
+            echo "  2) Innerv2"
             echo "  3) Multi-domain"
             echo "  4) All"
             read -p "Lựa chọn: " stop_choice
             case $stop_choice in
                 1) docker-compose -f docker-compose.rausach.yml down ;;
-                2) docker-compose -f docker-compose.tazagroup.yml down ;;
+                2) docker-compose -f docker-compose.innerv2.yml down ;;
                 3) docker-compose -f docker-compose.multi-domain.yml down ;;
                 4) 
                     docker-compose -f docker-compose.rausach.yml down
-                    docker-compose -f docker-compose.tazagroup.yml down
+                    docker-compose -f docker-compose.innerv2.yml down
                     docker-compose -f docker-compose.multi-domain.yml down
                     ;;
                 *) echo "Invalid choice" ;;
@@ -123,9 +123,9 @@ while true; do
             clear
             ;;
         9)
-            echo -e "${GREEN}🏢 Starting Tazagroup Development...${NC}"
-            cp .env.dev.tazagroup backend/.env
-            cp .env.dev.tazagroup frontend/.env.local
+            echo -e "${GREEN}🏢 Starting Innerv2 Development...${NC}"
+            cp .env.dev.innerv2 backend/.env
+            cp .env.dev.innerv2 frontend/.env.local
             echo "Backend: http://localhost:13001"
             echo "Frontend: http://localhost:13000"
             echo ""
@@ -155,7 +155,7 @@ while true; do
         12)
             echo "Chọn database:"
             echo "  1) Rausach (12003)"
-            echo "  2) Tazagroup (13003)"
+            echo "  2) Innerv2 (13003)"
             read -p "Lựa chọn: " db_choice
             case $db_choice in
                 1) 
@@ -163,7 +163,7 @@ while true; do
                     cd backend && bun run db:studio
                     ;;
                 2) 
-                    cp .env.dev.tazagroup backend/.env
+                    cp .env.dev.innerv2 backend/.env
                     cd backend && bun run db:studio
                     ;;
                 *) echo "Invalid choice" ;;

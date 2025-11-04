@@ -13,13 +13,13 @@ set -e
 # ==============================================================================
 
 # Server Configuration
-SERVER_IP="116.118.49.243"
+SERVER_IP="116.118.48.208"
 SERVER_USER="root"
 REMOTE_DIR="/root/appfinal"
 LOCAL_DIR="$(pwd)"
 
 # Deployment Mode
-DEPLOYMENT_MODE="hybrid"  # hybrid, rausach-only, tazagroup-only, shared-only
+DEPLOYMENT_MODE="hybrid"  # hybrid, rausach-only, innerv2-only, shared-only
 BUILD_FRONTEND=false
 BUILD_BACKEND=false
 VERIFY_ONLY=false
@@ -58,7 +58,7 @@ OPTIONS:
     --mode <mode>       Deployment mode (default: hybrid)
                         - hybrid: Deploy both domains with shared services
                         - rausach: Deploy only Rausach domain
-                        - tazagroup: Deploy only Tazagroup domain
+                        - innerv2: Deploy only Innerv2 domain
                         - shared: Deploy only shared services (Redis+Minio)
     
     --build             Build frontend & backend locally before deploy
@@ -105,7 +105,7 @@ DEPLOYMENT FLOW:
 HYBRID ARCHITECTURE:
     Shared Services:  Redis (128MB) + Minio (128MB)
     Rausach Domain:   PostgreSQL + Backend + Frontend (768MB)
-    Tazagroup Domain: PostgreSQL + Backend + Frontend (768MB)
+    Innerv2 Domain: PostgreSQL + Backend + Frontend (768MB)
     Total: ~1.8GB RAM
 
 For more info:
@@ -238,16 +238,16 @@ check_prerequisites() {
         fi
     fi
     
-    if [[ ! -f ".env.tazagroup" ]]; then
-        log_error ".env.tazagroup not found"
+    if [[ ! -f ".env.innerv2" ]]; then
+        log_error ".env.innerv2 not found"
         checks_passed=false
     else
-        log_success ".env.tazagroup exists"
+        log_success ".env.innerv2 exists"
         # Verify shared ports
-        if grep -q "REDIS_PORT=12004" .env.tazagroup && grep -q "MINIO_PORT=12007" .env.tazagroup; then
-            log_success ".env.tazagroup shared ports correct (12004, 12007)"
+        if grep -q "REDIS_PORT=12004" .env.innerv2 && grep -q "MINIO_PORT=12007" .env.innerv2; then
+            log_success ".env.innerv2 shared ports correct (12004, 12007)"
         else
-            log_warning ".env.tazagroup shared ports may be incorrect"
+            log_warning ".env.innerv2 shared ports may be incorrect"
         fi
     fi
     
@@ -423,8 +423,8 @@ backup_databases() {
         echo "Backing up Rausach database..."
         docker exec rausach-postgres pg_dump -U postgres rausachcore > ${backup_dir}/rausach.sql 2>/dev/null || echo "Rausach DB not running"
         
-        echo "Backing up Tazagroup database..."
-        docker exec tazagroup-postgres pg_dump -U postgres tazagroupcore > ${backup_dir}/tazagroup.sql 2>/dev/null || echo "Tazagroup DB not running"
+        echo "Backing up Innerv2 database..."
+        docker exec innerv2-postgres pg_dump -U postgres innerv2core > ${backup_dir}/innerv2.sql 2>/dev/null || echo "Innerv2 DB not running"
         
         echo "Backup completed: ${backup_dir}"
         ls -lh ${backup_dir}/
@@ -591,8 +591,8 @@ deploy_docker_hybrid() {
             rausach)
                 \$DOCKER_COMPOSE -f docker-compose.hybrid.yml up -d ${build_flag} redis minio rausach-postgres rausach-backend rausach-frontend
                 ;;
-            tazagroup)
-                \$DOCKER_COMPOSE -f docker-compose.hybrid.yml up -d ${build_flag} redis minio tazagroup-postgres tazagroup-backend tazagroup-frontend
+            innerv2)
+                \$DOCKER_COMPOSE -f docker-compose.hybrid.yml up -d ${build_flag} redis minio innerv2-postgres innerv2-backend innerv2-frontend
                 ;;
             shared)
                 \$DOCKER_COMPOSE -f docker-compose.hybrid.yml up -d ${build_flag} redis minio
@@ -655,18 +655,18 @@ health_check() {
     fi
     
     if [[ "$DEPLOYMENT_MODE" == "hybrid" ]]; then
-        log_info "Checking Tazagroup frontend..."
+        log_info "Checking Innerv2 frontend..."
         if curl -s -o /dev/null -w "%{http_code}" "http://${SERVER_IP}:13000" | grep -q "200\|301\|302"; then
-            log_success "Tazagroup frontend: OK (http://${SERVER_IP}:13000)"
+            log_success "Innerv2 frontend: OK (http://${SERVER_IP}:13000)"
         else
-            log_warning "Tazagroup frontend: Not responding yet"
+            log_warning "Innerv2 frontend: Not responding yet"
         fi
         
-        log_info "Checking Tazagroup backend..."
+        log_info "Checking Innerv2 backend..."
         if curl -s -o /dev/null -w "%{http_code}" "http://${SERVER_IP}:13001/graphql" | grep -q "200\|400"; then
-            log_success "Tazagroup backend: OK (http://${SERVER_IP}:13001/graphql)"
+            log_success "Innerv2 backend: OK (http://${SERVER_IP}:13001/graphql)"
         else
-            log_warning "Tazagroup backend: Not responding yet"
+            log_warning "Innerv2 backend: Not responding yet"
         fi
     fi
     
@@ -696,7 +696,7 @@ show_deployment_summary() {
     echo ""
     
     if [[ "$DEPLOYMENT_MODE" == "hybrid" ]]; then
-        echo -e "   ${YELLOW}Tazagroup Domain:${NC}"
+        echo -e "   ${YELLOW}Innerv2 Domain:${NC}"
         echo -e "      Frontend:    ${BLUE}http://${SERVER_IP}:13000${NC}"
         echo -e "      Backend:     ${BLUE}http://${SERVER_IP}:13001/graphql${NC}"
         echo -e "      Database:    ${BLUE}${SERVER_IP}:13003${NC}"
@@ -731,7 +731,7 @@ interactive_menu() {
         echo "  1) Full Deployment - Hybrid (Build + Deploy)"
         echo "  2) Quick Deployment - Hybrid (No Build)"
         echo "  3) Deploy Rausach Only (Build + Deploy)"
-        echo "  4) Deploy Tazagroup Only (Build + Deploy)"
+        echo "  4) Deploy Innerv2 Only (Build + Deploy)"
         echo "  5) Deploy Shared Services Only"
         echo ""
         echo "  6) Fix Mode - Sync Critical Files Only"
@@ -764,7 +764,7 @@ interactive_menu() {
                 main
                 ;;
             4)
-                DEPLOYMENT_MODE="tazagroup"
+                DEPLOYMENT_MODE="innerv2"
                 BUILD_FRONTEND=true
                 BUILD_BACKEND=true
                 main

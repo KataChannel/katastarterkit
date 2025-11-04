@@ -20,7 +20,7 @@ export class RedisHealthIndicator extends HealthIndicator {
     // Use Docker Redis host/port if in Docker, otherwise use configured server
     const host = isDockerEnv
       ? this.configService.get('DOCKER_REDIS_HOST', 'redis')
-      : this.configService.get('REDIS_HOST', '116.118.49.243');
+      : this.configService.get('REDIS_HOST', '116.118.48.208');
     
     const portConfig = isDockerEnv
       ? this.configService.get('DOCKER_REDIS_PORT', '6379')

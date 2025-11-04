@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Quick Start Script - Hybrid Deployment
-# Usage: ./start-hybrid.sh [all|rausach|tazagroup|shared]
+# Usage: ./start-hybrid.sh [all|rausach|innerv2|shared]
 
 set -e
 
@@ -24,9 +24,9 @@ case "$MODE" in
         echo "🚀 Khởi động RAUSACH domain..."
         $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d redis minio rausach-postgres rausach-backend rausach-frontend
         ;;
-    tazagroup)
-        echo "🚀 Khởi động TAZAGROUP domain..."
-        $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d redis minio tazagroup-postgres tazagroup-backend tazagroup-frontend
+    innerv2)
+        echo "🚀 Khởi động INNERV2 domain..."
+        $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d redis minio innerv2-postgres innerv2-backend innerv2-frontend
         ;;
     shared)
         echo "🚀 Khởi động SHARED services (Redis + Minio)..."
@@ -34,12 +34,12 @@ case "$MODE" in
         ;;
     *)
         echo "❌ Tham số không hợp lệ!"
-        echo "Usage: ./start-hybrid.sh [all|rausach|tazagroup|shared]"
+        echo "Usage: ./start-hybrid.sh [all|rausach|innerv2|shared]"
         echo ""
         echo "Examples:"
         echo "  ./start-hybrid.sh all       # Khởi động tất cả"
         echo "  ./start-hybrid.sh rausach   # Chỉ Rausach"
-        echo "  ./start-hybrid.sh tazagroup # Chỉ Tazagroup"
+        echo "  ./start-hybrid.sh innerv2 # Chỉ Innerv2"
         echo "  ./start-hybrid.sh shared    # Chỉ Redis + Minio"
         exit 1
         ;;

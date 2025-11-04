@@ -2,7 +2,7 @@
 
 ## 📋 Tổng Quan
 
-Hệ thống này cho phép chạy **2 domain** (rausach.com + tazagroup.com) trên **cùng một source code** và **cùng một server** với cấu hình thấp:
+Hệ thống này cho phép chạy **2 domain** (rausach.com + innerv2.com) trên **cùng một source code** và **cùng một server** với cấu hình thấp:
 
 - **CPU**: 1 Core
 - **RAM**: 1GB
@@ -15,23 +15,23 @@ Hệ thống này cho phép chạy **2 domain** (rausach.com + tazagroup.com) tr
 
 1. **PostgreSQL** - 1 instance, 2 databases riêng biệt
    - `rausachcore` - Database cho domain Rausach
-   - `tazagroupcore` - Database cho domain Tazagroup
+   - `innerv2core` - Database cho domain Innerv2
    
 2. **Redis** - 1 instance, sử dụng key prefix để phân biệt
    
 3. **Minio** - 1 instance, 2 buckets riêng biệt
    - `rausach-uploads` - Bucket cho domain Rausach
-   - `tazagroup-uploads` - Bucket cho domain Tazagroup
+   - `innerv2-uploads` - Bucket cho domain Innerv2
 
 ### Services Riêng Biệt Cho Mỗi Domain
 
 **Domain Rausach (Ports 12xxx):**
-- Frontend: `http://116.118.49.243:12000`
-- Backend: `http://116.118.49.243:12001/graphql`
+- Frontend: `http://116.118.48.208:12000`
+- Backend: `http://116.118.48.208:12001/graphql`
 
-**Domain Tazagroup (Ports 13xxx):**
-- Frontend: `http://116.118.49.243:13000`
-- Backend: `http://116.118.49.243:13001/graphql`
+**Domain Innerv2 (Ports 13xxx):**
+- Frontend: `http://116.118.48.208:13000`
+- Backend: `http://116.118.48.208:13001/graphql`
 
 **Shared Services:**
 - PostgreSQL: Port `12003`
@@ -44,7 +44,7 @@ Hệ thống này cho phép chạy **2 domain** (rausach.com + tazagroup.com) tr
 ```
 .
 ├── .env.rausach              # Environment variables cho domain Rausach
-├── .env.tazagroup            # Environment variables cho domain Tazagroup
+├── .env.innerv2            # Environment variables cho domain Innerv2
 ├── docker-compose.multi-domain.yml  # Docker Compose cho multi-domain
 ├── deploy-multi-domain.sh    # Script quản lý deployment
 ├── scripts/
@@ -108,7 +108,7 @@ git clone <your-repo-url>
 cd shoprausach
 
 # Đảm bảo files env đã có
-ls -la .env.rausach .env.tazagroup
+ls -la .env.rausach .env.innerv2
 ```
 
 ### 4. Kiểm Tra Cấu Hình ENV Files
@@ -117,20 +117,20 @@ ls -la .env.rausach .env.tazagroup
 ```bash
 # Các port quan trọng cho domain Rausach
 PORT=12001
-FRONTEND_URL=http://116.118.49.243:12000
+FRONTEND_URL=http://116.118.48.208:12000
 POSTGRES_DB=rausachcore
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/rausachcore
 MINIO_BUCKET_NAME=rausach-uploads
 ```
 
-**File `.env.tazagroup`:**
+**File `.env.innerv2`:**
 ```bash
-# Các port quan trọng cho domain Tazagroup
+# Các port quan trọng cho domain Innerv2
 PORT=13001
-FRONTEND_URL=http://116.118.49.243:13000
-POSTGRES_DB=tazagroupcore
-DATABASE_URL=postgresql://postgres:postgres@postgres:5432/tazagroupcore
-MINIO_BUCKET_NAME=tazagroup-uploads
+FRONTEND_URL=http://116.118.48.208:13000
+POSTGRES_DB=innerv2core
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/innerv2core
+MINIO_BUCKET_NAME=innerv2-uploads
 ```
 
 ### 5. Cấp Quyền và Khởi Chạy
@@ -151,13 +151,13 @@ Script `deploy-multi-domain.sh` cung cấp menu tương tác:
 ```
 1) Khởi động tất cả services (cả 2 domain)
 2) Khởi động chỉ domain Rausach (12xxx)
-3) Khởi động chỉ domain Tazagroup (13xxx)
+3) Khởi động chỉ domain Innerv2 (13xxx)
 4) Dừng tất cả services
 5) Dừng chỉ domain Rausach
-6) Dừng chỉ domain Tazagroup
+6) Dừng chỉ domain Innerv2
 7) Xem logs tất cả services
 8) Xem logs domain Rausach
-9) Xem logs domain Tazagroup
+9) Xem logs domain Innerv2
 10) Xem trạng thái services
 11) Khởi động lại tất cả
 12) Build lại images
@@ -176,7 +176,7 @@ Script `deploy-multi-domain.sh` cung cấp menu tương tác:
 **Khởi động chỉ 1 domain để tiết kiệm tài nguyên:**
 ```bash
 ./deploy-multi-domain.sh
-# Chọn option 2 (Rausach) hoặc 3 (Tazagroup)
+# Chọn option 2 (Rausach) hoặc 3 (Innerv2)
 ```
 
 **Xem logs realtime:**
@@ -206,8 +206,8 @@ docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsa
 | Minio | 128MB | 64MB | Shared |
 | Rausach Backend | 256MB | 128MB | Shared |
 | Rausach Frontend | 256MB | 128MB | Shared |
-| Tazagroup Backend | 256MB | 128MB | Shared |
-| Tazagroup Frontend | 256MB | 128MB | Shared |
+| Innerv2 Backend | 256MB | 128MB | Shared |
+| Innerv2 Frontend | 256MB | 128MB | Shared |
 | **TỔNG** | **~1.4GB** | **~700MB** | 1 Core |
 
 **Lưu ý:** Nhờ có swap file 2GB, hệ thống có thể chạy ổn định.
@@ -220,8 +220,8 @@ docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsa
 # Backup database Rausach
 docker exec shared-postgres pg_dump -U postgres rausachcore > backup-rausach-$(date +%Y%m%d).sql
 
-# Backup database Tazagroup
-docker exec shared-postgres pg_dump -U postgres tazagroupcore > backup-tazagroup-$(date +%Y%m%d).sql
+# Backup database Innerv2
+docker exec shared-postgres pg_dump -U postgres innerv2core > backup-innerv2-$(date +%Y%m%d).sql
 ```
 
 ### Restore Database
@@ -230,8 +230,8 @@ docker exec shared-postgres pg_dump -U postgres tazagroupcore > backup-tazagroup
 # Restore database Rausach
 docker exec -i shared-postgres psql -U postgres rausachcore < backup-rausach.sql
 
-# Restore database Tazagroup
-docker exec -i shared-postgres psql -U postgres tazagroupcore < backup-tazagroup.sql
+# Restore database Innerv2
+docker exec -i shared-postgres psql -U postgres innerv2core < backup-innerv2.sql
 ```
 
 ### Xóa Logs Cũ (Giải Phóng Dung Lượng)
@@ -263,8 +263,8 @@ git pull origin main
 # Cho phép các ports cần thiết
 sudo ufw allow 12000/tcp  # Rausach Frontend
 sudo ufw allow 12001/tcp  # Rausach Backend
-sudo ufw allow 13000/tcp  # Tazagroup Frontend
-sudo ufw allow 13001/tcp  # Tazagroup Backend
+sudo ufw allow 13000/tcp  # Innerv2 Frontend
+sudo ufw allow 13001/tcp  # Innerv2 Backend
 sudo ufw allow 12008/tcp  # Minio Console
 sudo ufw allow 22/tcp     # SSH
 sudo ufw enable
@@ -272,7 +272,7 @@ sudo ufw enable
 
 ### Đổi Mật Khẩu Mặc Định
 
-Nhớ cập nhật trong files `.env.rausach` và `.env.tazagroup`:
+Nhớ cập nhật trong files `.env.rausach` và `.env.innerv2`:
 
 ```bash
 # PostgreSQL
@@ -366,11 +366,11 @@ server {
 }
 ```
 
-**File `/etc/nginx/sites-available/tazagroup`:**
+**File `/etc/nginx/sites-available/innerv2`:**
 ```nginx
 server {
     listen 80;
-    server_name tazagroup.com www.tazagroup.com;
+    server_name innerv2.com www.innerv2.com;
 
     location / {
         proxy_pass http://localhost:13000;
@@ -393,7 +393,7 @@ server {
 
 ```bash
 sudo ln -s /etc/nginx/sites-available/rausach /etc/nginx/sites-enabled/
-sudo ln -s /etc/nginx/sites-available/tazagroup /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/innerv2 /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -403,7 +403,7 @@ sudo systemctl reload nginx
 ```bash
 sudo apt install certbot python3-certbot-nginx -y
 sudo certbot --nginx -d rausach.com -d www.rausach.com
-sudo certbot --nginx -d tazagroup.com -d www.tazagroup.com
+sudo certbot --nginx -d innerv2.com -d www.innerv2.com
 ```
 
 ## 📈 Tối Ưu Hiệu Năng

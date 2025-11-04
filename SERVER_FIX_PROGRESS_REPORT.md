@@ -2,10 +2,10 @@
 
 ## 🎯 Vấn đề
 
-Frontend trên server `http://116.118.49.243:13000` đang gọi **SAI API**:
+Frontend trên server `http://116.118.48.208:13000` đang gọi **SAI API**:
 ```
 ❌ SAI:  http://api.rausachtrangia.com/graphql (hoặc https)
-✅ ĐÚNG: http://116.118.49.243:13001/graphql
+✅ ĐÚNG: http://116.118.48.208:13001/graphql
 ```
 
 ## 🔍 Nguyên nhân gốc rễ
@@ -22,7 +22,7 @@ NEXT_PUBLIC_GRAPHQL_ENDPOINT=https://api.rausachtrangia.com/graphql  ❌ SAI
 ```
 
 ### 3. **Container đang chạy image đã build với config cũ**
-- Image: `appfinal-tazagroup-frontend`
+- Image: `appfinal-innerv2-frontend`
 - File `server.js` trong image có hardcoded endpoint SAI
 - Dù có set environment variable runtime cũng KHÔNG có tác dụng
 
@@ -32,15 +32,15 @@ NEXT_PUBLIC_GRAPHQL_ENDPOINT=https://api.rausachtrangia.com/graphql  ❌ SAI
 
 #### Thử 1: Sửa `.env` trong container đang chạy
 ```bash
-✅ docker exec tazagroup-frontend sed -i "..." /app/.env.production
-✅ docker exec tazagroup-frontend sed -i "..." /app/frontend/.env.production
+✅ docker exec innerv2-frontend sed -i "..." /app/.env.production
+✅ docker exec innerv2-frontend sed -i "..." /app/frontend/.env.production
 ❌ Restart container → VẪN gọi API SAI
 ```
 **Kết quả:** THẤT BẠI - Next.js dùng baked config trong server.js
 
 #### Thử 2: Patch trực tiếp file `server.js`
 ```bash
-✅ docker exec tazagroup-frontend sed -i "..." /app/frontend/server.js
+✅ docker exec innerv2-frontend sed -i "..." /app/frontend/server.js
 ✅ Restart container
 ❌ Container bị restart loop
 ```
@@ -48,7 +48,7 @@ NEXT_PUBLIC_GRAPHQL_ENDPOINT=https://api.rausachtrangia.com/graphql  ❌ SAI
 
 #### Thử 3: Tạo container mới với env variables
 ```bash
-✅ docker run -e NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql ...
+✅ docker run -e NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql ...
 ✅ Container chạy được
 ❌ Code client-side VẪN gọi API SAI
 ```
@@ -58,16 +58,16 @@ NEXT_PUBLIC_GRAPHQL_ENDPOINT=https://api.rausachtrangia.com/graphql  ❌ SAI
 
 #### Bước 1: Sửa `.env.production` trên server
 ```bash
-ssh root@116.118.49.243
+ssh root@116.118.48.208
 cd /root/appfinal/frontend
-sed -i 's|https://api.rausachtrangia.com/graphql|http://116.118.49.243:13001/graphql|g' .env.production
+sed -i 's|https://api.rausachtrangia.com/graphql|http://116.118.48.208:13001/graphql|g' .env.production
 ```
 ✅ Hoàn tất
 
 #### Bước 2: Sửa `.env.production` local
 ```bash
 # File: /mnt/chikiet/kataoffical/shoprausach/frontend/.env.production
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
+NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql
 ```
 ✅ Hoàn tất
 
@@ -87,25 +87,25 @@ NODE_ENV=production bun run build
 
 #### Bước 5: Sync build lên server
 ```bash
-rsync -avz .next/standalone/ root@116.118.49.243:/root/appfinal/frontend/.next/standalone/
-rsync -avz .next/static/ root@116.118.49.243:/root/appfinal/frontend/.next/static/
-rsync -avz public/ root@116.118.49.243:/root/appfinal/frontend/public/
+rsync -avz .next/standalone/ root@116.118.48.208:/root/appfinal/frontend/.next/standalone/
+rsync -avz .next/static/ root@116.118.48.208:/root/appfinal/frontend/.next/static/
+rsync -avz public/ root@116.118.48.208:/root/appfinal/frontend/public/
 ```
 ⏳ Chờ build hoàn tất
 
 #### Bước 6: Rebuild Docker image
 ```bash
-ssh root@116.118.49.243
+ssh root@116.118.48.208
 cd /root/appfinal
-docker-compose -f docker-compose.hybrid.yml build --no-cache tazagroup-frontend
+docker-compose -f docker-compose.hybrid.yml build --no-cache innerv2-frontend
 ```
 ⏳ Chờ build hoàn tất
 
 #### Bước 7: Recreate container
 ```bash
-docker stop tazagroup-frontend-new
-docker rm tazagroup-frontend-new
-docker-compose -f docker-compose.hybrid.yml up -d tazagroup-frontend
+docker stop innerv2-frontend-new
+docker rm innerv2-frontend-new
+docker-compose -f docker-compose.hybrid.yml up -d innerv2-frontend
 ```
 ⏳ Chờ deploy hoàn tất
 
@@ -114,19 +114,19 @@ docker-compose -f docker-compose.hybrid.yml up -d tazagroup-frontend
 ### 1. Server: `/root/appfinal/frontend/.env.production`
 ```bash
 BEFORE: NEXT_PUBLIC_GRAPHQL_ENDPOINT=https://api.rausachtrangia.com/graphql
-AFTER:  NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
+AFTER:  NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql
 ```
 
 ### 2. Local: `/mnt/chikiet/kataoffical/shoprausach/frontend/.env.production`
 ```bash
 BEFORE: NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:13001/graphql
-AFTER:  NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
+AFTER:  NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql
 ```
 
 ### 3. Server: `/root/shoprausach/frontend/.env.production`
 ```bash
 BEFORE: NEXT_PUBLIC_GRAPHQL_ENDPOINT=https://api.rausachtrangia.com/graphql
-AFTER:  NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
+AFTER:  NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql
 ```
 
 ## 🔧 Scripts đã tạo
@@ -153,27 +153,27 @@ Auto fix và restart (cho server có bun/npm)
 
 ### Kiểm tra 1: Container status
 ```bash
-ssh root@116.118.49.243 "docker ps | grep tazagroup-frontend"
+ssh root@116.118.48.208 "docker ps | grep innerv2-frontend"
 ```
 Kỳ vọng: `Up X minutes (healthy)`
 
 ### Kiểm tra 2: Environment variables
 ```bash
-ssh root@116.118.49.243 "docker exec tazagroup-frontend printenv | grep NEXT_PUBLIC_GRAPHQL"
+ssh root@116.118.48.208 "docker exec innerv2-frontend printenv | grep NEXT_PUBLIC_GRAPHQL"
 ```
-Kỳ vọng: `NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql`
+Kỳ vọng: `NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql`
 
 ### Kiểm tra 3: Frontend response
 ```bash
-curl -I http://116.118.49.243:13000
+curl -I http://116.118.48.208:13000
 ```
 Kỳ vọng: `HTTP/1.1 200 OK`
 
 ### Kiểm tra 4: Browser DevTools (QUAN TRỌNG NHẤT)
-1. Mở: `http://116.118.49.243:13000`
+1. Mở: `http://116.118.48.208:13000`
 2. Nhấn **F12** → Tab **Network** → Filter **XHR**
 3. Hard reload: **Ctrl+Shift+R**
-4. Xem GraphQL requests → Phải gọi: `http://116.118.49.243:13001/graphql` ✅
+4. Xem GraphQL requests → Phải gọi: `http://116.118.48.208:13001/graphql` ✅
 
 ## ⏳ Trạng thái hiện tại
 
@@ -210,6 +210,6 @@ Kỳ vọng: `HTTP/1.1 200 OK`
 ---
 
 **Ngày:** 2025-11-04  
-**Server:** 116.118.49.243  
-**Container:** tazagroup-frontend  
+**Server:** 116.118.48.208  
+**Container:** innerv2-frontend  
 **Trạng thái:** 🔄 ĐANG TRIỂN KHAI

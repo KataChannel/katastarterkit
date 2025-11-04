@@ -54,8 +54,8 @@
 [SUCCESS] ✅ Docker containers restarted successfully
 
 [SUCCESS] DEPLOYMENT COMPLETED SUCCESSFULLY
-[SUCCESS] Frontend: http://116.118.49.243:12000
-[SUCCESS] Backend: http://116.118.49.243:12001
+[SUCCESS] Frontend: http://116.118.48.208:12000
+[SUCCESS] Backend: http://116.118.48.208:12001
 ```
 
 ## Common Tasks
@@ -65,7 +65,7 @@
 cd /mnt/chikiet/kataoffical/shoprausach
 ./scripts/95copy.sh --build
 # Wait 2-5 minutes
-# Check: http://116.118.49.243:12000
+# Check: http://116.118.48.208:12000
 ```
 
 ### Task: Deploy API changes only
@@ -73,7 +73,7 @@ cd /mnt/chikiet/kataoffical/shoprausach
 cd /mnt/chikiet/kataoffical/shoprausach
 ./scripts/95copy.sh
 # Wait 30-60 seconds
-# Check: http://116.118.49.243:12001/graphql
+# Check: http://116.118.48.208:12001/graphql
 ```
 
 ### Task: Check if ready to deploy
@@ -90,7 +90,7 @@ cd /mnt/chikiet/kataoffical/shoprausach
 cd /mnt/chikiet/kataoffical/shoprausach
 ./scripts/95copy.sh --fix
 # Wait 1-2 minutes
-# Check: http://116.118.49.243:12000
+# Check: http://116.118.48.208:12000
 ```
 
 ### Task: Full rebuild everything
@@ -107,9 +107,9 @@ rm -rf frontend/.next frontend/node_modules
 |-------|----------|
 | `Missing frontend/.next/standalone` | Run `./95copy.sh --build` |
 | `Build verification failed` | Run `./95copy.sh --verify` to see what's missing |
-| `Rsync failed` | Check SSH: `ssh root@116.118.49.243 "echo OK"` |
+| `Rsync failed` | Check SSH: `ssh root@116.118.48.208 "echo OK"` |
 | `Frontend 404s` | Run `./95copy.sh --fix` |
-| `Docker failed to restart` | Check server: `ssh root@116.118.49.243 docker ps` |
+| `Docker failed to restart` | Check server: `ssh root@116.118.48.208 docker ps` |
 
 ## What Each Mode Does
 
@@ -156,7 +156,7 @@ Time: ~1-2 minutes
 
 Edit in `scripts/95copy.sh`:
 ```bash
-SERVER_IP="116.118.49.243"        # Production server
+SERVER_IP="116.118.48.208"        # Production server
 SERVER_USER="root"                 # SSH user
 REMOTE_DIR="/root/shoprausach"    # Remote path
 LOCAL_DIR="$(pwd)"                 # Local path (stays as-is)
@@ -226,16 +226,16 @@ After deployment, verify:
 
 ```bash
 # Frontend loaded?
-curl http://116.118.49.243:12000
+curl http://116.118.48.208:12000
 
 # Backend running?
-curl http://116.118.49.243:12001/graphql
+curl http://116.118.48.208:12001/graphql
 
 # Containers healthy?
-ssh root@116.118.49.243 docker ps
+ssh root@116.118.48.208 docker ps
 
 # Check logs?
-ssh root@116.118.49.243 docker logs -f rausachcore-frontend
+ssh root@116.118.48.208 docker logs -f rausachcore-frontend
 ```
 
 ## Documentation

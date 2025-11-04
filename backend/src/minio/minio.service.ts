@@ -21,7 +21,7 @@ export class MinioService implements OnModuleInit {
         const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
         const endpoint = isDockerEnv 
           ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
-          : this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
+          : this.configService.get('MINIO_ENDPOINT', '116.118.48.208');
         
         // Always use configured port from .env
         const portConfig = isDockerEnv

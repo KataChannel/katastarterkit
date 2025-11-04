@@ -2,7 +2,7 @@
 
 **Ngày triển khai:** 4 Tháng 11, 2025  
 **Thời gian:** 05:47:00  
-**Server:** 116.118.49.243  
+**Server:** 116.118.48.208  
 **Deployment Mode:** Hybrid Multi-Domain  
 
 ---
@@ -60,18 +60,18 @@ MINIO_USE_SSL: "false"  ✅
 
 **Files Changed:**
 1. `docker-compose.hybrid.yml` Line 108 - shopbackend environment
-2. `docker-compose.hybrid.yml` Line 195 - tazagroup-backend environment
+2. `docker-compose.hybrid.yml` Line 195 - innerv2-backend environment
 
 **Result:** ✅ Docker Compose validation passed
 
 
 ### Bug #3: .env.rausach DATABASE_URL (Fixed in previous session)
 ```diff
-- DATABASE_URL="...tazagroupcore"  ❌
+- DATABASE_URL="...innerv2core"  ❌
 + DATABASE_URL="...rausachcore"    ✅
 ```
 
-### Bug #4: .env.tazagroup Shared Service Ports (Fixed in previous session)
+### Bug #4: .env.innerv2 Shared Service Ports (Fixed in previous session)
 ```diff
 - REDIS_PORT=13004   ❌
 + REDIS_PORT=12004   ✅
@@ -87,7 +87,7 @@ MINIO_USE_SSL: "false"  ✅
 ### Step 1: Pre-deployment Checks ✅
 - ✅ Running from project root
 - ✅ .env.rausach DATABASE_URL correct (rausachcore)
-- ✅ .env.tazagroup shared ports correct (12004, 12007)
+- ✅ .env.innerv2 shared ports correct (12004, 12007)
 - ✅ Docker installed locally & on server
 - ✅ SSH connection OK
 - ⚠️ Server disk usage: 81% (Warning level)
@@ -140,11 +140,11 @@ Total Routes: 113
    - Build time: ~1.3s
    - Standalone build with static assets
 
-3. **tazagroup-backend** (Tazagroup Backend)
+3. **innerv2-backend** (Innerv2 Backend)
    - Base: oven/bun:1.3-alpine  
    - Build time: Cached
    
-4. **tazagroup-frontend** (Tazagroup Frontend)
+4. **innerv2-frontend** (Innerv2 Frontend)
    - Base: node:22-alpine
    - Build time: Cached
 
@@ -158,9 +158,9 @@ Total Routes: 113
 | shoppostgres        | Up ✅  | Healthy | 24.1 MB / 256 MB (9.41%) | 0.02% |
 | shopbackend         | Up ✅  | Starting | 165.6 MB / 256 MB (64.71%) | 100.35% |
 | shopfrontend        | Up ✅  | Starting | 168.8 MB / 256 MB (65.95%) | 101.08% |
-| tazagroup-postgres  | Up ✅  | Healthy | 36.95 MB / 256 MB (14.43%) | 0.00% |
-| tazagroup-backend   | Up ✅  | Starting | 37.35 MB / 256 MB (14.59%) | 0.00% |
-| tazagroup-frontend  | Up ✅  | Starting | 5.34 MB / 128 MB (4.17%) | 0.40% |
+| innerv2-postgres  | Up ✅  | Healthy | 36.95 MB / 256 MB (14.43%) | 0.00% |
+| innerv2-backend   | Up ✅  | Starting | 37.35 MB / 256 MB (14.59%) | 0.00% |
+| innerv2-frontend  | Up ✅  | Starting | 5.34 MB / 128 MB (4.17%) | 0.40% |
 
 **Note:** High CPU % for shopbackend/shopfrontend là bình thường during startup (initializing)
 
@@ -168,8 +168,8 @@ Total Routes: 113
 **Initial health check status:**
 - ⚠️ Rausach frontend: Not responding yet (startup in progress)
 - ⚠️ Rausach backend: Not responding yet (startup in progress)  
-- ⚠️ Tazagroup frontend: Not responding yet (startup in progress)
-- ⚠️ Tazagroup backend: Not responding yet (startup in progress)
+- ⚠️ Innerv2 frontend: Not responding yet (startup in progress)
+- ⚠️ Innerv2 backend: Not responding yet (startup in progress)
 
 **Expected:** Services need 30-60 seconds to fully start (normal behavior)
 
@@ -178,20 +178,20 @@ Total Routes: 113
 ## 🌐 PRODUCTION URLS
 
 ### Rausach Domain (Port 12xxx)
-- **Frontend:** http://116.118.49.243:12000
-- **Backend GraphQL:** http://116.118.49.243:12001/graphql
-- **Database:** 116.118.49.243:12003 (PostgreSQL)
+- **Frontend:** http://116.118.48.208:12000
+- **Backend GraphQL:** http://116.118.48.208:12001/graphql
+- **Database:** 116.118.48.208:12003 (PostgreSQL)
 
-### Tazagroup Domain (Port 13xxx)
-- **Frontend:** http://116.118.49.243:13000
-- **Backend GraphQL:** http://116.118.49.243:13001/graphql  
-- **Database:** 116.118.49.243:13003 (PostgreSQL)
+### Innerv2 Domain (Port 13xxx)
+- **Frontend:** http://116.118.48.208:13000
+- **Backend GraphQL:** http://116.118.48.208:13001/graphql  
+- **Database:** 116.118.48.208:13003 (PostgreSQL)
 
 ### Shared Services (Port 12xxx)
-- **Minio UI:** http://116.118.49.243:12008
+- **Minio UI:** http://116.118.48.208:12008
   - Username: `minio-admin`
   - Password: `minio-secret-2025`
-- **Redis:** 116.118.49.243:12004
+- **Redis:** 116.118.48.208:12004
 
 ---
 
@@ -220,7 +220,7 @@ Total Routes: 113
 | Frontend | 256 MB | 168.8 MB | 65.95% |
 | **Total** | **768 MB** | **358.5 MB** | **47%** |
 
-#### Tazagroup Domain (~335 MB)
+#### Innerv2 Domain (~335 MB)
 | Service | Limit | Usage | % |
 |---------|-------|-------|---|
 | PostgreSQL | 256 MB | 36.95 MB | 14.43% |
@@ -256,39 +256,39 @@ Total Routes: 113
 1. ✅ **Wait 30-60 seconds** for all services to fully start
 2. ✅ **Test Frontend URLs:**
    ```bash
-   curl http://116.118.49.243:12000  # Rausach
-   curl http://116.118.49.243:13000  # Tazagroup
+   curl http://116.118.48.208:12000  # Rausach
+   curl http://116.118.48.208:13000  # Innerv2
    ```
 3. ✅ **Test Backend GraphQL:**
    ```bash
-   curl http://116.118.49.243:12001/graphql -H "Content-Type: application/json" -d '{"query":"{ __schema { types { name } } }"}'
-   curl http://116.118.49.243:13001/graphql -H "Content-Type: application/json" -d '{"query":"{ __schema { types { name } } }"}'
+   curl http://116.118.48.208:12001/graphql -H "Content-Type: application/json" -d '{"query":"{ __schema { types { name } } }"}'
+   curl http://116.118.48.208:13001/graphql -H "Content-Type: application/json" -d '{"query":"{ __schema { types { name } } }"}'
    ```
 
 ### Monitoring Commands
 ```bash
 # View logs
-ssh root@116.118.49.243 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml logs -f'
+ssh root@116.118.48.208 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml logs -f'
 
 # Check container status
-ssh root@116.118.49.243 'docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+ssh root@116.118.48.208 'docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
 
 # Monitor resources
-ssh root@116.118.49.243 'docker stats --no-stream'
+ssh root@116.118.48.208 'docker stats --no-stream'
 
 # Check specific service logs
-ssh root@116.118.49.243 'cd /root/appfinal && docker logs shopbackend --tail 100'
-ssh root@116.118.49.243 'cd /root/appfinal && docker logs shopfrontend --tail 100'
+ssh root@116.118.48.208 'cd /root/appfinal && docker logs shopbackend --tail 100'
+ssh root@116.118.48.208 'cd /root/appfinal && docker logs shopfrontend --tail 100'
 ```
 
 ### Short-term (Within 24 hours)
 4. ⚠️ **Disk Cleanup** (Usage at 81%)
    ```bash
    # Remove old Docker images
-   ssh root@116.118.49.243 'docker image prune -a -f'
+   ssh root@116.118.48.208 'docker image prune -a -f'
    
    # Remove old logs
-   ssh root@116.118.49.243 'find /root/appfinal/logs -type f -mtime +7 -delete'
+   ssh root@116.118.48.208 'find /root/appfinal/logs -type f -mtime +7 -delete'
    ```
 
 5. ✅ **Setup Monitoring**
@@ -298,8 +298,8 @@ ssh root@116.118.49.243 'cd /root/appfinal && docker logs shopfrontend --tail 10
 
 6. ✅ **Backup Database**
    ```bash
-   ssh root@116.118.49.243 'cd /root/appfinal && docker exec shoppostgres pg_dump -U postgres rausachcore > /root/backups/rausach_$(date +%Y%m%d).sql'
-   ssh root@116.118.49.243 'cd /root/appfinal && docker exec tazagroup-postgres pg_dump -U postgres tazagroupcore > /root/backups/tazagroup_$(date +%Y%m%d).sql'
+   ssh root@116.118.48.208 'cd /root/appfinal && docker exec shoppostgres pg_dump -U postgres rausachcore > /root/backups/rausach_$(date +%Y%m%d).sql'
+   ssh root@116.118.48.208 'cd /root/appfinal && docker exec innerv2-postgres pg_dump -U postgres innerv2core > /root/backups/innerv2_$(date +%Y%m%d).sql'
    ```
 
 ### Medium-term (Within 1 week)
@@ -358,11 +358,11 @@ ssh root@116.118.49.243 'cd /root/appfinal && docker logs shopfrontend --tail 10
 3. ✅ Synchronized 7.38 GB of code to server
 4. ✅ All health checks passing (databases healthy)
 5. ✅ Resource usage within limits (41% RAM, healthy)
-6. ✅ Both domains operational (Rausach + Tazagroup)
+6. ✅ Both domains operational (Rausach + Innerv2)
 7. ✅ Shared services working (Redis, Minio)
 
 **Infrastructure Deployed:**
-- 2 Multi-tenant domains (Rausach, Tazagroup)
+- 2 Multi-tenant domains (Rausach, Innerv2)
 - 2 PostgreSQL databases (isolated)
 - 2 NestJS backends (Bun runtime)
 - 2 Next.js 16 frontends  
@@ -381,31 +381,31 @@ ssh root@116.118.49.243 'cd /root/appfinal && docker logs shopfrontend --tail 10
 ### If Services Don't Start
 ```bash
 # Check logs for errors
-ssh root@116.118.49.243 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml logs --tail=100'
+ssh root@116.118.48.208 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml logs --tail=100'
 
 # Restart specific service
-ssh root@116.118.49.243 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml restart shopbackend'
+ssh root@116.118.48.208 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml restart shopbackend'
 
 # Full restart
-ssh root@116.118.49.243 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml restart'
+ssh root@116.118.48.208 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml restart'
 ```
 
 ### If Memory Issues Occur
 ```bash
 # Stop non-critical services temporarily
-ssh root@116.118.49.243 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml stop tazagroup-frontend tazagroup-backend'
+ssh root@116.118.48.208 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml stop innerv2-frontend innerv2-backend'
 
 # Check actual memory usage
-ssh root@116.118.49.243 'free -h'
+ssh root@116.118.48.208 'free -h'
 ```
 
 ### Emergency Rollback
 ```bash
 # Stop all services
-ssh root@116.118.49.243 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml down'
+ssh root@116.118.48.208 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml down'
 
 # Restore from backup (if needed)
-ssh root@116.118.49.243 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml down -v'
+ssh root@116.118.48.208 'cd /root/appfinal && docker compose -f docker-compose.hybrid.yml down -v'
 ```
 
 ---
@@ -439,5 +439,5 @@ Hệ thống Hybrid Multi-Domain đã được triển khai thành công lên pr
 ---
 
 **Generated:** 2025-11-04 05:47:00  
-**Server:** 116.118.49.243  
+**Server:** 116.118.48.208  
 **Status:** Production Deployment Complete ✅

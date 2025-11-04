@@ -37,8 +37,8 @@ Script này kết hợp điểm mạnh của:
 # Chỉ Rausach
 ./deploy-production.sh --mode rausach --build-frontend
 
-# Chỉ Tazagroup
-./deploy-production.sh --mode tazagroup --build-frontend
+# Chỉ Innerv2
+./deploy-production.sh --mode innerv2 --build-frontend
 
 # Chỉ shared services (Redis + Minio)
 ./deploy-production.sh --mode shared
@@ -61,7 +61,7 @@ Script này kết hợp điểm mạnh của:
 ## 📋 Các Options
 
 ```bash
---mode <mode>       # hybrid, rausach, tazagroup, shared
+--mode <mode>       # hybrid, rausach, innerv2, shared
 --build             # Build frontend + backend
 --build-frontend    # Chỉ build frontend
 --build-backend     # Chỉ build backend
@@ -126,7 +126,7 @@ Script này kết hợp điểm mạnh của:
 
 4. Backup Databases (auto)
    ✓ Rausach DB
-   ✓ Tazagroup DB
+   ✓ Innerv2 DB
 
 5. Deploy to Server
    ✓ Rsync với exclude list
@@ -152,18 +152,18 @@ Script này kết hợp điểm mạnh của:
 ## 🌐 URLs Sau Khi Deploy
 
 ### Rausach Domain
-- Frontend: http://116.118.49.243:12000
-- Backend: http://116.118.49.243:12001/graphql
-- Database: 116.118.49.243:12003
+- Frontend: http://116.118.48.208:12000
+- Backend: http://116.118.48.208:12001/graphql
+- Database: 116.118.48.208:12003
 
-### Tazagroup Domain
-- Frontend: http://116.118.49.243:13000
-- Backend: http://116.118.49.243:13001/graphql
-- Database: 116.118.49.243:13003
+### Innerv2 Domain
+- Frontend: http://116.118.48.208:13000
+- Backend: http://116.118.48.208:13001/graphql
+- Database: 116.118.48.208:13003
 
 ### Shared Services
-- Minio Console: http://116.118.49.243:12008
-- Redis: 116.118.49.243:12004
+- Minio Console: http://116.118.48.208:12008
+- Redis: 116.118.48.208:12004
 
 ---
 
@@ -172,7 +172,7 @@ Script này kết hợp điểm mạnh của:
 ### Lỗi: SSH connection failed
 ```bash
 # Cấu hình SSH key
-ssh-copy-id root@116.118.49.243
+ssh-copy-id root@116.118.48.208
 ```
 
 ### Lỗi: Build verification failed
@@ -189,7 +189,7 @@ cd ..
 ### Lỗi: Docker container failed
 ```bash
 # SSH vào server kiểm tra
-ssh root@116.118.49.243
+ssh root@116.118.48.208
 cd /root/shoprausach
 docker compose -f docker-compose.hybrid.yml logs -f
 ```
@@ -197,7 +197,7 @@ docker compose -f docker-compose.hybrid.yml logs -f
 ### Lỗi: Port already in use
 ```bash
 # SSH vào server
-ssh root@116.118.49.243
+ssh root@116.118.48.208
 
 # Kiểm tra port
 netstat -tlnp | grep 12000
@@ -210,7 +210,7 @@ docker stop <container_id>
 ### Memory cao (>90%)
 ```bash
 # SSH vào server
-ssh root@116.118.49.243
+ssh root@116.118.48.208
 
 # Check memory
 free -h
@@ -245,7 +245,7 @@ docker compose -f docker-compose.hybrid.yml restart
 
 - [ ] Code đã commit và push lên Git
 - [ ] .env.rausach DATABASE_URL = rausachcore ✅
-- [ ] .env.tazagroup Redis/Minio ports = 12004/12007 ✅
+- [ ] .env.innerv2 Redis/Minio ports = 12004/12007 ✅
 - [ ] Frontend build thành công (nếu --build)
 - [ ] SSH key đã cấu hình
 - [ ] Server có đủ disk space (>2GB free)
@@ -265,11 +265,11 @@ docker compose -f docker-compose.hybrid.yml restart
 ./deploy-production.sh --mode hybrid --build
 
 # Step 3: Test URLs
-curl http://116.118.49.243:12000
-curl http://116.118.49.243:13000
+curl http://116.118.48.208:12000
+curl http://116.118.48.208:13000
 
 # Step 4: Check logs
-ssh root@116.118.49.243 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml logs -f --tail=50'
+ssh root@116.118.48.208 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml logs -f --tail=50'
 ```
 
 ### Example 2: Quick Update (Code change only)
@@ -303,7 +303,7 @@ ssh root@116.118.49.243 'cd /root/shoprausach && docker compose -f docker-compos
 1. **BAO_CAO_HYBRID_DEPLOYMENT_VA_BUG_FIXES.md** - Báo cáo tổng hợp (700+ lines)
 2. **docs/320-HUONG_DAN_HYBRID_DEPLOYMENT.md** - Hướng dẫn chi tiết
 3. **HE_THONG_USER_VA_PHAN_QUYEN.md** - Auth & Authorization
-4. **.env.rausach** & **.env.tazagroup** - Environment configs
+4. **.env.rausach** & **.env.innerv2** - Environment configs
 
 ---
 
@@ -314,22 +314,22 @@ ssh root@116.118.49.243 'cd /root/shoprausach && docker compose -f docker-compos
 ./deploy-production.sh --help
 
 # SSH to server
-ssh root@116.118.49.243
+ssh root@116.118.48.208
 
 # Check server status
-ssh root@116.118.49.243 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml ps'
+ssh root@116.118.48.208 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml ps'
 
 # View logs
-ssh root@116.118.49.243 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml logs -f'
+ssh root@116.118.48.208 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml logs -f'
 
 # Check resource usage
-ssh root@116.118.49.243 'docker stats'
+ssh root@116.118.48.208 'docker stats'
 
 # Manual backup
-ssh root@116.118.49.243 'cd /root/shoprausach && mkdir -p backups && docker exec rausach-postgres pg_dump -U postgres rausachcore > backups/manual_$(date +%Y%m%d).sql'
+ssh root@116.118.48.208 'cd /root/shoprausach && mkdir -p backups && docker exec rausach-postgres pg_dump -U postgres rausachcore > backups/manual_$(date +%Y%m%d).sql'
 
 # Restart specific service
-ssh root@116.118.49.243 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml restart rausach-frontend'
+ssh root@116.118.48.208 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml restart rausach-frontend'
 ```
 
 ---

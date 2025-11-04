@@ -10,7 +10,7 @@ echo "🚀 BUILD & DEPLOY FRONTEND FIX API TO SERVER"
 echo "================================================"
 echo ""
 
-SERVER="root@116.118.49.243"
+SERVER="root@116.118.48.208"
 LOCAL_FRONTEND="/mnt/chikiet/kataoffical/shoprausach/frontend"
 SERVER_PATH="/root/appfinal/frontend"
 
@@ -18,9 +18,9 @@ SERVER_PATH="/root/appfinal/frontend"
 echo "📋 Bước 1: Kiểm tra cấu hình local..."
 cd $LOCAL_FRONTEND
 
-if ! grep -q "NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql" .env.production; then
+if ! grep -q "NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql" .env.production; then
     echo "   ⚠️  .env.production có endpoint SAI, đang sửa..."
-    sed -i 's|NEXT_PUBLIC_GRAPHQL_ENDPOINT=.*|NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql|g' .env.production
+    sed -i 's|NEXT_PUBLIC_GRAPHQL_ENDPOINT=.*|NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql|g' .env.production
 fi
 
 echo "   ✅ Cấu hình:"
@@ -58,13 +58,13 @@ echo ""
 
 # Bước 6: Rebuild Docker image
 echo "🐳 Bước 6: Rebuild Docker image..."
-ssh $SERVER "cd /root/appfinal && docker-compose -f docker-compose.hybrid.yml build --no-cache tazagroup-frontend"
+ssh $SERVER "cd /root/appfinal && docker-compose -f docker-compose.hybrid.yml build --no-cache innerv2-frontend"
 echo "   ✅ Đã rebuild image"
 echo ""
 
 # Bước 7: Recreate container
 echo "🔄 Bước 7: Recreate container..."
-ssh $SERVER "cd /root/appfinal && docker-compose -f docker-compose.hybrid.yml up -d tazagroup-frontend"
+ssh $SERVER "cd /root/appfinal && docker-compose -f docker-compose.hybrid.yml up -d innerv2-frontend"
 echo "   ✅ Container đã được tạo lại"
 echo ""
 
@@ -76,15 +76,15 @@ sleep 15
 echo "🧪 Bước 9: Kiểm tra kết quả..."
 echo ""
 echo "   Container status:"
-ssh $SERVER "docker ps | grep tazagroup-frontend"
+ssh $SERVER "docker ps | grep innerv2-frontend"
 echo ""
 echo "   Environment variables:"
-ssh $SERVER "docker exec tazagroup-frontend printenv | grep NEXT_PUBLIC_GRAPHQL"
+ssh $SERVER "docker exec innerv2-frontend printenv | grep NEXT_PUBLIC_GRAPHQL"
 echo ""
 
 # Bước 10: Test API endpoint
 echo "🌐 Bước 10: Test frontend..."
-RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://116.118.49.243:13000)
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://116.118.48.208:13000)
 if [ "$RESPONSE" = "200" ]; then
     echo "   ✅ Frontend phản hồi HTTP $RESPONSE"
 else
@@ -97,16 +97,16 @@ echo "✅ HOÀN TẤT DEPLOYMENT"
 echo "================================================"
 echo ""
 echo "📊 Thông tin:"
-echo "   • Frontend: http://116.118.49.243:13000"
-echo "   • API: http://116.118.49.243:13001/graphql"
+echo "   • Frontend: http://116.118.48.208:13000"
+echo "   • API: http://116.118.48.208:13001/graphql"
 echo ""
 echo "🔍 Kiểm tra trên browser:"
-echo "   1. Mở: http://116.118.49.243:13000"
+echo "   1. Mở: http://116.118.48.208:13000"
 echo "   2. F12 → Network → XHR/Fetch"
 echo "   3. Reload: Ctrl+Shift+R"
 echo "   4. Xác nhận GraphQL calls đến:"
-echo "      ✅ http://116.118.49.243:13001/graphql"
+echo "      ✅ http://116.118.48.208:13001/graphql"
 echo ""
 echo "📝 Xem logs:"
-echo "   ssh root@116.118.49.243 'docker logs -f tazagroup-frontend'"
+echo "   ssh root@116.118.48.208 'docker logs -f innerv2-frontend'"
 echo ""

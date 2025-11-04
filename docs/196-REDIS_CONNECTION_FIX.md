@@ -2,7 +2,7 @@
 
 ## Vấn đề
 - **Error**: `[ioredis] Unhandled error event: Error: connect ECONNREFUSED 127.0.0.1:6379`
-- **Nguyên nhân**: Backend đang kết nối Redis mặc định `localhost:6379` thay vì server thực tế `116.118.49.243:12004`
+- **Nguyên nhân**: Backend đang kết nối Redis mặc định `localhost:6379` thay vì server thực tế `116.118.48.208:12004`
 
 ## Giải pháp đã thực hiện
 
@@ -13,7 +13,7 @@
 - ✅ Thêm error handlers để graceful degradation
 
 ### 2. **backend/src/health/redis.health.ts**
-- ✅ Fix default values `localhost:6379` → `116.118.49.243:12004`
+- ✅ Fix default values `localhost:6379` → `116.118.48.208:12004`
 - ✅ Áp dụng logic Docker environment detection
 
 ### 3. **backend/src/common/services/advanced-cache.service.ts**
@@ -22,13 +22,13 @@
 
 ## Cấu hình Redis hiện tại (.env)
 ```env
-REDIS_HOST=116.118.49.243
+REDIS_HOST=116.118.48.208
 REDIS_PORT=12004
 REDIS_PASSWORD=123456
 ```
 
 ## Kết quả
-- ✅ Kết nối Redis server đúng địa chỉ `116.118.49.243:12004`
+- ✅ Kết nối Redis server đúng địa chỉ `116.118.48.208:12004`
 - ✅ Hỗ trợ cả local development và Docker environment
 - ✅ Graceful degradation nếu Redis không available
 - ✅ Auto-reconnect với retry strategy
@@ -56,7 +56,7 @@ bun run dev
 
 Logs sẽ hiển thị:
 ```
-[RedisService] Connecting to Redis: host=116.118.49.243, port=12004, dockerEnv=false
+[RedisService] Connecting to Redis: host=116.118.48.208, port=12004, dockerEnv=false
 [RedisService] ✅ Connected successfully
 [Redis] ✅ Connected successfully
 ```

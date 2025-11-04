@@ -141,9 +141,9 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.49.243:12001/graphql
-      NEXT_PUBLIC_APP_URL: http://116.118.49.243:12000
-      NEXTAUTH_URL: http://116.118.49.243:12000
+      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.48.208:12001/graphql
+      NEXT_PUBLIC_APP_URL: http://116.118.48.208:12000
+      NEXTAUTH_URL: http://116.118.48.208:12000
       NEXT_OTEL_ENABLED: "false"
       NEXT_TELEMETRY_DISABLED: "1"
     ports:
@@ -160,22 +160,22 @@ services:
           memory: 128M
 
   # ========================================
-  # TAZAGROUP DOMAIN (Port 13xxx) - Dedicated Stack
+  # INNERV2 DOMAIN (Port 13xxx) - Dedicated Stack
   # ========================================
   
-  # PostgreSQL for Tazagroup - Dedicated
-  tazagroup-postgres:
+  # PostgreSQL for Innerv2 - Dedicated
+  innerv2-postgres:
     image: postgres:16-alpine
-    container_name: tazagroup-postgres
+    container_name: innerv2-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: tazagroupcore
+      POSTGRES_DB: innerv2core
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "13003:5432"
     volumes:
-      - tazagroup_postgres_data:/var/lib/postgresql/data
+      - innerv2_postgres_data:/var/lib/postgresql/data
     networks:
       - hybrid-network
     healthcheck:
@@ -190,31 +190,31 @@ services:
         reservations:
           memory: 128M
 
-  tazagroup-backend:
+  innerv2-backend:
     build:
       context: .
       dockerfile: ./backend/Dockerfile
-    container_name: tazagroup-backend
+    container_name: innerv2-backend
     restart: unless-stopped
     env_file:
-      - .env.tazagroup
+      - .env.innerv2
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: postgresql://postgres:postgres@tazagroup-postgres:5432/tazagroupcore
+      DATABASE_URL: postgresql://postgres:postgres@innerv2-postgres:5432/innerv2core
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_KEY_PREFIX: "tazagroup:"
+      REDIS_KEY_PREFIX: "innerv2:"
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
       MINIO_USE_SSL: "false"
       MINIO_ACCESS_KEY: minio-admin
       MINIO_SECRET_KEY: minio-secret-2025
-      MINIO_BUCKET_NAME: tazagroup-uploads
+      MINIO_BUCKET_NAME: innerv2-uploads
     ports:
       - "13001:4000"
     depends_on:
-      tazagroup-postgres:
+      innerv2-postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -229,26 +229,26 @@ services:
         reservations:
           memory: 256M
 
-  tazagroup-frontend:
+  innerv2-frontend:
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
-    container_name: tazagroup-frontend
+    container_name: innerv2-frontend
     restart: unless-stopped
     env_file:
-      - .env.tazagroup
+      - .env.innerv2
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.49.243:13001/graphql
-      NEXT_PUBLIC_APP_URL: http://116.118.49.243:13000
-      NEXTAUTH_URL: http://116.118.49.243:13000
+      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.48.208:13001/graphql
+      NEXT_PUBLIC_APP_URL: http://116.118.48.208:13000
+      NEXTAUTH_URL: http://116.118.48.208:13000
       NEXT_OTEL_ENABLED: "false"
       NEXT_TELEMETRY_DISABLED: "1"
     ports:
       - "13000:3000"
     depends_on:
-      - tazagroup-backend
+      - innerv2-backend
     networks:
       - hybrid-network
     deploy:
@@ -261,7 +261,7 @@ services:
 volumes:
   rausach_postgres_data:
     driver: local
-  tazagroup_postgres_data:
+  innerv2_postgres_data:
     driver: local
   redis_data:
     driver: local

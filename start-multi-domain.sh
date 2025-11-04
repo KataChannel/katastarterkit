@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Quick Start Script - Multi-Domain Deployment
-# Usage: ./start-multi-domain.sh [all|rausach|tazagroup]
+# Usage: ./start-multi-domain.sh [all|rausach|innerv2]
 
 set -e
 
@@ -24,18 +24,18 @@ case "$MODE" in
         echo "🚀 Khởi động RAUSACH domain..."
         $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d postgres redis minio rausach-backend rausach-frontend
         ;;
-    tazagroup)
-        echo "🚀 Khởi động TAZAGROUP domain..."
-        $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d postgres redis minio tazagroup-backend tazagroup-frontend
+    innerv2)
+        echo "🚀 Khởi động INNERV2 domain..."
+        $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d postgres redis minio innerv2-backend innerv2-frontend
         ;;
     *)
         echo "❌ Tham số không hợp lệ!"
-        echo "Usage: ./start-multi-domain.sh [all|rausach|tazagroup]"
+        echo "Usage: ./start-multi-domain.sh [all|rausach|innerv2]"
         echo ""
         echo "Examples:"
         echo "  ./start-multi-domain.sh all       # Khởi động tất cả"
         echo "  ./start-multi-domain.sh rausach   # Chỉ Rausach"
-        echo "  ./start-multi-domain.sh tazagroup # Chỉ Tazagroup"
+        echo "  ./start-multi-domain.sh innerv2 # Chỉ Innerv2"
         exit 1
         ;;
 esac

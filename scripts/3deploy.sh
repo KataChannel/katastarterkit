@@ -6,7 +6,7 @@ git commit -m "update"
 git push
 
 # Remote server operations
-ssh root@116.118.49.243 << 'EOF'
+ssh root@116.118.48.208 << 'EOF'
 cd shoprausach
 
 # Pre-deployment checks

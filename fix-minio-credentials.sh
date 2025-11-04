@@ -18,11 +18,11 @@ if [ -f ".env.rausach" ]; then
     echo "✅ Updated .env.rausach"
 fi
 
-# Update .env.tazagroup
-if [ -f ".env.tazagroup" ]; then
-    sed -i 's/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=minio-admin/' .env.tazagroup
-    sed -i 's/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=minio-secret-2025/' .env.tazagroup
-    echo "✅ Updated .env.tazagroup"
+# Update .env.innerv2
+if [ -f ".env.innerv2" ]; then
+    sed -i 's/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=minio-admin/' .env.innerv2
+    sed -i 's/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=minio-secret-2025/' .env.innerv2
+    echo "✅ Updated .env.innerv2"
 fi
 
 echo ""
@@ -31,8 +31,8 @@ echo ""
 echo "📋 Thông tin Minio:"
 echo "   Access Key: minio-admin"
 echo "   Secret Key: minio-secret-2025"
-echo "   Endpoint:   116.118.49.243:12007"
-echo "   Console:    http://116.118.49.243:12008"
+echo "   Endpoint:   116.118.48.208:12007"
+echo "   Console:    http://116.118.48.208:12008"
 echo ""
 echo "🔄 Bây giờ hãy restart backend:"
 echo "   cd backend && npm run start:dev"

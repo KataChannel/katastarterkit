@@ -106,13 +106,13 @@ bash DEPLOY_CHEATSHEET.sh
 ./deploy-optimized.sh
 
 # Just check server status
-ssh root@116.118.49.243 "cd /root/shoprausach && docker compose ps"
+ssh root@116.118.48.208 "cd /root/shoprausach && docker compose ps"
 
 # View server logs
-ssh root@116.118.49.243 "cd /root/shoprausach && docker compose logs -f"
+ssh root@116.118.48.208 "cd /root/shoprausach && docker compose logs -f"
 
 # Just restart containers
-ssh root@116.118.49.243 "cd /root/shoprausach && docker compose restart"
+ssh root@116.118.48.208 "cd /root/shoprausach && docker compose restart"
 ```
 
 ---
@@ -121,17 +121,17 @@ ssh root@116.118.49.243 "cd /root/shoprausach && docker compose restart"
 
 ### Connection refused
 ```bash
-ssh root@116.118.49.243 "echo OK"
+ssh root@116.118.48.208 "echo OK"
 ```
 
 ### Permission denied
 ```bash
-ssh-copy-id root@116.118.49.243
+ssh-copy-id root@116.118.48.208
 ```
 
 ### Port already in use
 ```bash
-ssh root@116.118.49.243 "docker compose down"
+ssh root@116.118.48.208 "docker compose down"
 ```
 
 ### View full guide
@@ -144,7 +144,7 @@ cat DEPLOY_GUIDE.md
 ## 📞 Server Info
 
 ```
-IP: 116.118.49.243
+IP: 116.118.48.208
 User: root
 Path: /root/shoprausach
 Backend: port 3000
@@ -173,8 +173,8 @@ Frontend: port 3001
 1. **Make code changes locally**
 2. **Test locally** - `bun run dev`
 3. **Deploy to server** - `./copy-and-deploy.sh`
-4. **Check status** - `ssh root@116.118.49.243 "docker compose ps"`
-5. **View logs if needed** - `ssh root@116.118.49.243 "docker compose logs"`
+4. **Check status** - `ssh root@116.118.48.208 "docker compose ps"`
+5. **View logs if needed** - `ssh root@116.118.48.208 "docker compose logs"`
 
 ---
 

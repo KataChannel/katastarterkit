@@ -164,7 +164,7 @@ bun run build                  # Compile TypeScript
 ### Step 3: Verify
 Check backend logs:
 ```bash
-ssh root@116.118.49.243 docker logs rausachcore-backend -f
+ssh root@116.118.48.208 docker logs rausachcore-backend -f
 ```
 
 Expected output:
@@ -277,12 +277,12 @@ Docker Runtime:
 
 2. **Monitor logs**:
    ```bash
-   ssh root@116.118.49.243 docker logs rausachcore-backend -f
+   ssh root@116.118.48.208 docker logs rausachcore-backend -f
    ```
 
 3. **Verify API is responding**:
    ```bash
-   curl http://116.118.49.243:12001/graphql
+   curl http://116.118.48.208:12001/graphql
    ```
 
 4. **Optional cleanup** (after confirming it works):

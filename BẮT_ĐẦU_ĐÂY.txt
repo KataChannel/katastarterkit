@@ -14,25 +14,25 @@
    • Frontend:  http://localhost:12000
    • Backend:   http://localhost:12001/graphql
    
-   🏢 Tazagroup:
+   🏢 Innerv2:
    • Frontend:  http://localhost:13000
    • Backend:   http://localhost:13001/graphql
    
    📦 Services (Remote từ server):
-   • Database:  116.118.49.243:12003 (rausach)
-   •            116.118.49.243:13003 (tazagroup)
-   • Redis:     116.118.49.243:12004
-   • Minio:     116.118.49.243:12007
+   • Database:  116.118.48.208:12003 (rausach)
+   •            116.118.48.208:13003 (innerv2)
+   • Redis:     116.118.48.208:12004
+   • Minio:     116.118.48.208:12007
 
 ✅ YÊU CẦU 2: PRODUCTION (SERVER)
    
    🌟 Rausach:
-   • Frontend:  http://116.118.49.243:12000
-   • Backend:   http://116.118.49.243:12001/graphql
+   • Frontend:  http://116.118.48.208:12000
+   • Backend:   http://116.118.48.208:12001/graphql
    
-   🏢 Tazagroup:
-   • Frontend:  http://116.118.49.243:13000
-   • Backend:   http://116.118.49.243:13001/graphql
+   🏢 Innerv2:
+   • Frontend:  http://116.118.48.208:13000
+   • Backend:   http://116.118.48.208:13001/graphql
 
 ✅ YÊU CẦU 3: THAO TÁC DỄ DÀNG
    
@@ -72,11 +72,11 @@
 
    Development:
    bun run dev:rausach    # Dev Rausach
-   bun run dev:tazagroup  # Dev Tazagroup
+   bun run dev:innerv2  # Dev Innerv2
    
    Production:
    bun run docker:prod:rausach    # Deploy Rausach
-   bun run docker:prod:tazagroup  # Deploy Tazagroup
+   bun run docker:prod:innerv2  # Deploy Innerv2
    bun run docker:prod:multi      # Deploy cả 2
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -85,9 +85,9 @@
 
 🔧 Environment Files:
    • .env.dev.rausach
-   • .env.dev.tazagroup
+   • .env.dev.innerv2
    • .env.prod.rausach
-   • .env.prod.tazagroup
+   • .env.prod.innerv2
 
 🚀 Scripts:
    • menu.sh              (Menu chính)
@@ -100,7 +100,7 @@
 
 🐳 Docker Compose:
    • docker-compose.rausach.yml
-   • docker-compose.tazagroup.yml
+   • docker-compose.innerv2.yml
    • docker-compose.multi-domain.yml
 
 📖 Documentation:
@@ -145,23 +145,23 @@
    # Frontend: http://localhost:12000
    # Backend:  http://localhost:12001/graphql
 
-📝 Scenario 2: Deploy Tazagroup lên production
+📝 Scenario 2: Deploy Innerv2 lên production
 
    # Cách đơn giản nhất
    ./menu.sh
    # Chọn option 5
-   # Chọn option 2 (Tazagroup)
+   # Chọn option 2 (Innerv2)
    
    # Hoặc
    ./prod-deploy.sh
    # Chọn option 2
    
    # Hoặc dùng NPM
-   bun run docker:prod:tazagroup
+   bun run docker:prod:innerv2
    
    # Truy cập:
-   # Frontend: http://116.118.49.243:13000
-   # Backend:  http://116.118.49.243:13001/graphql
+   # Frontend: http://116.118.48.208:13000
+   # Backend:  http://116.118.48.208:13001/graphql
 
 📝 Scenario 3: Dev cả 2 domain cùng lúc
 
@@ -174,7 +174,7 @@
    
    # Truy cập:
    # Rausach:   localhost:12000, localhost:12001
-   # Tazagroup: localhost:13000, localhost:13001
+   # Innerv2: localhost:13000, localhost:13001
 
 ┌─────────────────────────────────────────────────────────────┐
 │  🔥 TIPS & TRICKS                                            │
@@ -193,7 +193,7 @@
 
 💡 Xem logs development:
    tail -f dev-rausach-backend.log
-   tail -f dev-tazagroup-frontend.log
+   tail -f dev-innerv2-frontend.log
 
 💡 Xem logs production:
    docker-compose -f docker-compose.rausach.yml logs -f
@@ -222,7 +222,7 @@
 └─────────────────────────────────────────────────────────────┘
 
 ✅ Tự động chuyển đổi giữa Dev và Production
-✅ Hỗ trợ đa domain (Rausach & Tazagroup)
+✅ Hỗ trợ đa domain (Rausach & Innerv2)
 ✅ Scripts tự động hóa mọi thao tác
 ✅ Hot reload trong Development mode
 ✅ Docker containerization cho Production

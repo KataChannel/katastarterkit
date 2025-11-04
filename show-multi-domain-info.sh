@@ -12,8 +12,8 @@ cat << 'EOF'
 📦 Setup: 2 Domains on 1 Server (1 Core / 1GB RAM / 5GB Disk)
 
 🌐 DOMAINS:
-   • Rausach    → http://116.118.49.243:12000 (Backend: 12001)
-   • Tazagroup  → http://116.118.49.243:13000 (Backend: 13001)
+   • Rausach    → http://116.118.48.208:12000 (Backend: 12001)
+   • Innerv2  → http://116.118.48.208:13000 (Backend: 13001)
 
 🚀 QUICK START:
 
@@ -28,7 +28,7 @@ cat << 'EOF'
       
       OR start individually:
       make -f Makefile.multi-domain start-rausach
-      make -f Makefile.multi-domain start-tazagroup
+      make -f Makefile.multi-domain start-innerv2
 
    4. Check status:
       make -f Makefile.multi-domain status
@@ -54,7 +54,7 @@ cat << 'EOF'
 
    ✓ docker-compose.multi-domain.yml  - Main compose file
    ✓ .env.rausach                     - Rausach config
-   ✓ .env.tazagroup                   - Tazagroup config
+   ✓ .env.innerv2                   - Innerv2 config
 
 💾 RESOURCE ALLOCATION:
 
@@ -65,8 +65,8 @@ cat << 'EOF'
    Minio (shared)       128MB     12007, 12008
    Rausach Backend      256MB     12001
    Rausach Frontend     256MB     12000
-   Tazagroup Backend    256MB     13001
-   Tazagroup Frontend   256MB     13000
+   Innerv2 Backend    256MB     13001
+   Innerv2 Frontend   256MB     13000
    ────────────────────────────────────────
    TOTAL               ~1.4GB
 

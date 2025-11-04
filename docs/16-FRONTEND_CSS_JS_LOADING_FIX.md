@@ -1,7 +1,7 @@
 # Frontend CSS/JS Loading Fix ✅
 
 ## Issue
-Frontend at http://116.118.49.243:12000 was not loading CSS and JavaScript files, showing plain HTML without styling.
+Frontend at http://116.118.48.208:12000 was not loading CSS and JavaScript files, showing plain HTML without styling.
 
 ```
 HTTP/1.1 404 Not Found
@@ -55,13 +55,13 @@ COPY --chown=nextjs:nodejs frontend/.next/static/ ./frontend/.next/static/
 
 ### Test 1: CSS File Access
 ```bash
-curl -sI http://116.118.49.243:12000/_next/static/css/35b2bf174148f9cd.css
+curl -sI http://116.118.48.208:12000/_next/static/css/35b2bf174148f9cd.css
 # ✅ Result: HTTP/1.1 200 OK
 ```
 
 ### Test 2: HTML Includes CSS/JS
 ```bash
-curl http://116.118.49.243:12000 | grep "stylesheet\|<script"
+curl http://116.118.48.208:12000 | grep "stylesheet\|<script"
 # ✅ Result: Multiple CSS and JS files loaded
 ```
 
@@ -147,17 +147,17 @@ Cache-Control: public, max-age=31536000, immutable
 
 ```bash
 # Test CSS loads
-curl -I http://116.118.49.243:12000/_next/static/css/35b2bf174148f9cd.css
+curl -I http://116.118.48.208:12000/_next/static/css/35b2bf174148f9cd.css
 
 # Test JavaScript loads
-curl -I http://116.118.49.243:12000/_next/static/chunks/webpack-8ea77f8cbd5bd9c0.js
+curl -I http://116.118.48.208:12000/_next/static/chunks/webpack-8ea77f8cbd5bd9c0.js
 
 # Test images load
-curl -I http://116.118.49.243:12000/_next/static/media/e4af272ccee01ff0-s.p.woff2
+curl -I http://116.118.48.208:12000/_next/static/media/e4af272ccee01ff0-s.p.woff2
 
 # Verify HTML includes references
-curl http://116.118.49.243:12000 | grep "stylesheet"
-curl http://116.118.49.243:12000 | grep "<script"
+curl http://116.118.48.208:12000 | grep "stylesheet"
+curl http://116.118.48.208:12000 | grep "<script"
 ```
 
 ## Related Configuration
@@ -190,7 +190,7 @@ The server.js expects:
 
 **Status**: ✅ FIXED  
 **Date**: October 27, 2025  
-**Deployment**: Production (116.118.49.243)  
+**Deployment**: Production (116.118.48.208)  
 **Frontend**: ✅ Loading with CSS/JS  
 **CSS Files**: ✅ 200 OK  
 **JavaScript**: ✅ 200 OK  

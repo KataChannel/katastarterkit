@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Quick Logs Script - Hybrid Deployment
-# Usage: ./logs-hybrid.sh [all|rausach|tazagroup]
+# Usage: ./logs-hybrid.sh [all|rausach|innerv2]
 
 set -e
 
@@ -24,18 +24,18 @@ case "$MODE" in
         echo "📋 Xem logs RAUSACH domain..."
         $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 rausach-postgres rausach-backend rausach-frontend
         ;;
-    tazagroup)
-        echo "📋 Xem logs TAZAGROUP domain..."
-        $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 tazagroup-postgres tazagroup-backend tazagroup-frontend
+    innerv2)
+        echo "📋 Xem logs INNERV2 domain..."
+        $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 innerv2-postgres innerv2-backend innerv2-frontend
         ;;
     *)
         echo "❌ Tham số không hợp lệ!"
-        echo "Usage: ./logs-hybrid.sh [all|rausach|tazagroup]"
+        echo "Usage: ./logs-hybrid.sh [all|rausach|innerv2]"
         echo ""
         echo "Examples:"
         echo "  ./logs-hybrid.sh all       # Logs tất cả"
         echo "  ./logs-hybrid.sh rausach   # Logs Rausach"
-        echo "  ./logs-hybrid.sh tazagroup # Logs Tazagroup"
+        echo "  ./logs-hybrid.sh innerv2 # Logs Innerv2"
         exit 1
         ;;
 esac

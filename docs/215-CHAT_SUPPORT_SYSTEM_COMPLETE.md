@@ -112,12 +112,12 @@ Frontend will start on: http://localhost:12000
 - **Real-time:** Socket.IO Client
 
 ### Database:
-- **Server:** PostgreSQL at 116.118.49.243:12003
+- **Server:** PostgreSQL at 116.118.48.208:12003
 - **Database:** rausachcore
 - **Connection:** ✅ Active
 
 ### Redis Cache:
-- **Server:** 116.118.49.243:12004
+- **Server:** 116.118.48.208:12004
 - **Status:** ✅ Connected
 
 ---
@@ -365,10 +365,10 @@ Required in `.env`:
 
 ```env
 # Database
-DATABASE_URL="postgresql://postgres:password@116.118.49.243:12003/rausachcore"
+DATABASE_URL="postgresql://postgres:password@116.118.48.208:12003/rausachcore"
 
 # Redis
-REDIS_HOST="116.118.49.243"
+REDIS_HOST="116.118.48.208"
 REDIS_PORT="12004"
 
 # OpenAI

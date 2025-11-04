@@ -46,7 +46,7 @@
 │  └────────────┬──────────────────┬──────────────────┘  │
 │               │                  │                     │
 │       ┌───────▼────────┐  ┌─────▼──────────┐         │
-│       │  RAUSACH       │  │  TAZAGROUP     │         │
+│       │  RAUSACH       │  │  INNERV2     │         │
 │       ├────────────────┤  ├────────────────┤         │
 │       │ PostgreSQL     │  │ PostgreSQL     │         │
 │       │ 256MB (12003)  │  │ 256MB (13003)  │         │
@@ -86,7 +86,7 @@
 /chikiet/kataoffical/shoprausach/
 ├── docker-compose.hybrid.yml         # ⭐ Main config file (267 lines)
 ├── .env.rausach                      # Rausach domain config (138 lines)
-├── .env.tazagroup                    # Tazagroup domain config (137 lines)
+├── .env.innerv2                    # Innerv2 domain config (137 lines)
 │
 ├── deploy-hybrid.sh                  # 🎮 Interactive menu (306 lines)
 ├── start-hybrid.sh                   # 🚀 Quick start (51 lines)
@@ -109,51 +109,51 @@
 | **rausach-postgres** | postgres:16-alpine | 12003 | 256MB | rausach_postgres_data | 🔒 Dedicated |
 | **rausach-backend** | Custom build | 12001 | 256MB | - | 🔒 Dedicated |
 | **rausach-frontend** | Custom build | 12000 | 256MB | - | 🔒 Dedicated |
-| **tazagroup-postgres** | postgres:16-alpine | 13003 | 256MB | tazagroup_postgres_data | 🔒 Dedicated |
-| **tazagroup-backend** | Custom build | 13001 | 256MB | - | 🔒 Dedicated |
-| **tazagroup-frontend** | Custom build | 13000 | 256MB | - | 🔒 Dedicated |
+| **innerv2-postgres** | postgres:16-alpine | 13003 | 256MB | innerv2_postgres_data | 🔒 Dedicated |
+| **innerv2-backend** | Custom build | 13001 | 256MB | - | 🔒 Dedicated |
+| **innerv2-frontend** | Custom build | 13000 | 256MB | - | 🔒 Dedicated |
 
 **TỔNG:** 8 services, ~1.8GB RAM
 
 ### 🌐 URL Schema
 
 #### Rausach Domain (Port 12xxx)
-- Frontend: `http://116.118.49.243:12000`
-- Backend GraphQL: `http://116.118.49.243:12001/graphql`
-- PostgreSQL: `116.118.49.243:12003`
+- Frontend: `http://116.118.48.208:12000`
+- Backend GraphQL: `http://116.118.48.208:12001/graphql`
+- PostgreSQL: `116.118.48.208:12003`
 
-#### Tazagroup Domain (Port 13xxx)
-- Frontend: `http://116.118.49.243:13000`
-- Backend GraphQL: `http://116.118.49.243:13001/graphql`
-- PostgreSQL: `116.118.49.243:13003`
+#### Innerv2 Domain (Port 13xxx)
+- Frontend: `http://116.118.48.208:13000`
+- Backend GraphQL: `http://116.118.48.208:13001/graphql`
+- PostgreSQL: `116.118.48.208:13003`
 
 #### Shared Services (Port 12xxx)
-- Minio Console: `http://116.118.49.243:12008`
-- Minio API: `http://116.118.49.243:12007`
-- Redis: `116.118.49.243:12004`
+- Minio Console: `http://116.118.48.208:12008`
+- Minio API: `http://116.118.48.208:12007`
+- Redis: `116.118.48.208:12004`
 
 ### 🔐 Environment Variables
 
 **Rausach (.env.rausach):**
 ```bash
-DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/rausachcore"
-REDIS_HOST=116.118.49.243
+DATABASE_URL="postgresql://postgres:postgres@116.118.48.208:12003/rausachcore"
+REDIS_HOST=116.118.48.208
 REDIS_PORT=12004
 REDIS_KEY_PREFIX="rausach:"      # ⭐ Namespace isolation
-MINIO_ENDPOINT=116.118.49.243
+MINIO_ENDPOINT=116.118.48.208
 MINIO_PORT=12007
 MINIO_BUCKET_NAME=rausach-uploads # ⭐ Bucket riêng
 ```
 
-**Tazagroup (.env.tazagroup):**
+**Innerv2 (.env.innerv2):**
 ```bash
-DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:13003/tazagroupcore"
-REDIS_HOST=116.118.49.243
+DATABASE_URL="postgresql://postgres:postgres@116.118.48.208:13003/innerv2core"
+REDIS_HOST=116.118.48.208
 REDIS_PORT=12004                  # ⭐ Shared Redis
-REDIS_KEY_PREFIX="tazagroup:"     # ⭐ Namespace isolation
-MINIO_ENDPOINT=116.118.49.243
+REDIS_KEY_PREFIX="innerv2:"     # ⭐ Namespace isolation
+MINIO_ENDPOINT=116.118.48.208
 MINIO_PORT=12007                  # ⭐ Shared Minio
-MINIO_BUCKET_NAME=tazagroup-uploads # ⭐ Bucket riêng
+MINIO_BUCKET_NAME=innerv2-uploads # ⭐ Bucket riêng
 ```
 
 ---
@@ -168,14 +168,14 @@ MINIO_BUCKET_NAME=tazagroup-uploads # ⭐ Bucket riêng
 ```bash
 # File: .env.rausach (Line 11)
 # SAI ❌
-DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/tazagroupcore"
+DATABASE_URL="postgresql://postgres:postgres@116.118.48.208:12003/innerv2core"
 
 # ĐÚNG ✅
-DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/rausachcore"
+DATABASE_URL="postgresql://postgres:postgres@116.118.48.208:12003/rausachcore"
 ```
 
 **Nguyên nhân:**
-- Copy-paste từ .env.tazagroup
+- Copy-paste từ .env.innerv2
 - Quên uncomment dòng đúng
 
 **Ảnh hưởng:**
@@ -186,24 +186,24 @@ DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/rausachcore"
 **Fix:**
 ```bash
 # File: .env.rausach
-- #DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/rausachcore"
-- DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/tazagroupcore"
-+ DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/rausachcore"
-+ #DATABASE_URL="postgresql://postgres:postgres@116.118.49.243:12003/tazagroupcore"
+- #DATABASE_URL="postgresql://postgres:postgres@116.118.48.208:12003/rausachcore"
+- DATABASE_URL="postgresql://postgres:postgres@116.118.48.208:12003/innerv2core"
++ DATABASE_URL="postgresql://postgres:postgres@116.118.48.208:12003/rausachcore"
++ #DATABASE_URL="postgresql://postgres:postgres@116.118.48.208:12003/innerv2core"
 ```
 
 **Status:** ✅ **FIXED** (3/11/2025)
 
 ---
 
-### 🐛 Bug #2: .env.tazagroup Shared Services Port Conflict ⚠️
+### 🐛 Bug #2: .env.innerv2 Shared Services Port Conflict ⚠️
 
 **Phát hiện:** Ngày 3/11/2025 lúc kiểm tra config
 
 **Mô tả:**
 ```bash
-# File: .env.tazagroup
-# SAI ❌ (Port riêng cho Tazagroup)
+# File: .env.innerv2
+# SAI ❌ (Port riêng cho Innerv2)
 REDIS_PORT=13004
 MINIO_PORT=13007
 
@@ -223,7 +223,7 @@ MINIO_PORT=12007
 
 **Fix:**
 ```bash
-# File: .env.tazagroup
+# File: .env.innerv2
 
 # Redis - Shared service
 - REDIS_PORT=13004
@@ -294,7 +294,7 @@ endif
 | Bug ID | Severity | Component | Status | Fix Date |
 |--------|----------|-----------|--------|----------|
 | #1 | 🔴 Critical | .env.rausach | ✅ Fixed | 3/11/2025 |
-| #2 | 🟡 High | .env.tazagroup | ✅ Fixed | 3/11/2025 |
+| #2 | 🟡 High | .env.innerv2 | ✅ Fixed | 3/11/2025 |
 | #3 | 🟢 Medium | Makefile | ✅ Fixed | - |
 | #4 | 🔴 Critical | LMS System | ✅ Fixed | - |
 
@@ -325,8 +325,8 @@ endif
   - [ ] `DATABASE_URL` = `rausachcore` ✅
   - [ ] `REDIS_PORT` = `12004` ✅
   - [ ] `MINIO_PORT` = `12007` ✅
-- [ ] `.env.tazagroup` exists và đúng config
-  - [ ] `DATABASE_URL` = `tazagroupcore` ✅
+- [ ] `.env.innerv2` exists và đúng config
+  - [ ] `DATABASE_URL` = `innerv2core` ✅
   - [ ] `REDIS_PORT` = `12004` (shared) ✅
   - [ ] `MINIO_PORT` = `12007` (shared) ✅
 - [ ] Scripts có permission execute:
@@ -337,11 +337,11 @@ endif
 #### Pre-flight Checks
 - [ ] No conflicting containers running
   ```bash
-  docker ps -a | grep -E "rausach|tazagroup|shared"
+  docker ps -a | grep -E "rausach|innerv2|shared"
   ```
 - [ ] Volumes clean (nếu fresh install)
   ```bash
-  docker volume ls | grep -E "rausach|tazagroup|redis|minio"
+  docker volume ls | grep -E "rausach|innerv2|redis|minio"
   ```
 - [ ] Network available
   ```bash
@@ -359,16 +359,16 @@ git pull origin main  # Hoặc upload code
 #### Step 2: Verify Configuration
 ```bash
 # Check files
-ls -la .env.rausach .env.tazagroup docker-compose.hybrid.yml
+ls -la .env.rausach .env.innerv2 docker-compose.hybrid.yml
 
 # Verify DATABASE_URL
-grep "DATABASE_URL" .env.rausach .env.tazagroup
+grep "DATABASE_URL" .env.rausach .env.innerv2
 # Expected:
 # .env.rausach:DATABASE_URL="...rausachcore"
-# .env.tazagroup:DATABASE_URL="...tazagroupcore"
+# .env.innerv2:DATABASE_URL="...innerv2core"
 
 # Verify shared ports
-grep -E "REDIS_PORT|MINIO_PORT" .env.rausach .env.tazagroup
+grep -E "REDIS_PORT|MINIO_PORT" .env.rausach .env.innerv2
 # Expected: Both files should have REDIS_PORT=12004, MINIO_PORT=12007
 ```
 
@@ -385,7 +385,7 @@ grep -E "REDIS_PORT|MINIO_PORT" .env.rausach .env.tazagroup
 ./start-hybrid.sh all
 # Hoặc từng domain:
 ./start-hybrid.sh rausach
-./start-hybrid.sh tazagroup
+./start-hybrid.sh innerv2
 ```
 
 **Option C: Docker Compose Direct**
@@ -409,15 +409,15 @@ docker stats --no-stream
 #### Step 5: Test URLs
 ```bash
 # Rausach
-curl http://116.118.49.243:12000  # Frontend
-curl http://116.118.49.243:12001/graphql  # Backend
+curl http://116.118.48.208:12000  # Frontend
+curl http://116.118.48.208:12001/graphql  # Backend
 
-# Tazagroup
-curl http://116.118.49.243:13000  # Frontend
-curl http://116.118.49.243:13001/graphql  # Backend
+# Innerv2
+curl http://116.118.48.208:13000  # Frontend
+curl http://116.118.48.208:13001/graphql  # Backend
 
 # Shared
-curl http://116.118.49.243:12008  # Minio Console
+curl http://116.118.48.208:12008  # Minio Console
 ```
 
 #### Step 6: Database Migration (Nếu cần)
@@ -425,8 +425,8 @@ curl http://116.118.49.243:12008  # Minio Console
 # Rausach
 docker exec -it rausach-backend bun prisma migrate deploy
 
-# Tazagroup
-docker exec -it tazagroup-backend bun prisma migrate deploy
+# Innerv2
+docker exec -it innerv2-backend bun prisma migrate deploy
 ```
 
 ### ✅ Post-Deployment Verification
@@ -456,20 +456,20 @@ docker exec -it tazagroup-backend bun prisma migrate deploy
 ```
 1)  Khởi động tất cả services (cả 2 domain)
 2)  Khởi động chỉ domain Rausach
-3)  Khởi động chỉ domain Tazagroup
+3)  Khởi động chỉ domain Innerv2
 4)  Khởi động chỉ shared services (Redis + Minio)
 5)  Dừng tất cả services
 6)  Dừng chỉ domain Rausach
-7)  Dừng chỉ domain Tazagroup
+7)  Dừng chỉ domain Innerv2
 8)  Xem logs tất cả
 9)  Xem logs Rausach
-10) Xem logs Tazagroup
+10) Xem logs Innerv2
 11) Xem trạng thái và resource usage
 12) Restart tất cả
 13) Backup database Rausach
-14) Backup database Tazagroup
+14) Backup database Innerv2
 15) Restore database Rausach
-16) Restore database Tazagroup
+16) Restore database Innerv2
 17) Build lại images
 18) Dọn dẹp và rebuild
 0)  Thoát
@@ -485,8 +485,8 @@ docker exec -it tazagroup-backend bun prisma migrate deploy
 # Chỉ Rausach
 ./start-hybrid.sh rausach
 
-# Chỉ Tazagroup
-./start-hybrid.sh tazagroup
+# Chỉ Innerv2
+./start-hybrid.sh innerv2
 
 # Chỉ shared (Redis + Minio)
 ./start-hybrid.sh shared
@@ -522,8 +522,8 @@ docker compose -f docker-compose.hybrid.yml logs -f rausach-backend
 mkdir -p backups
 docker exec rausach-postgres pg_dump -U postgres rausachcore > backups/rausach_$(date +%Y%m%d_%H%M%S).sql
 
-# Tazagroup
-docker exec tazagroup-postgres pg_dump -U postgres tazagroupcore > backups/tazagroup_$(date +%Y%m%d_%H%M%S).sql
+# Innerv2
+docker exec innerv2-postgres pg_dump -U postgres innerv2core > backups/innerv2_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 #### Restore Database
@@ -531,8 +531,8 @@ docker exec tazagroup-postgres pg_dump -U postgres tazagroupcore > backups/tazag
 # Rausach
 docker exec -i rausach-postgres psql -U postgres rausachcore < backups/rausach_YYYYMMDD_HHMMSS.sql
 
-# Tazagroup
-docker exec -i tazagroup-postgres psql -U postgres tazagroupcore < backups/tazagroup_YYYYMMDD_HHMMSS.sql
+# Innerv2
+docker exec -i innerv2-postgres psql -U postgres innerv2core < backups/innerv2_YYYYMMDD_HHMMSS.sql
 ```
 
 ### 🔄 Update & Rebuild
@@ -645,7 +645,7 @@ docker exec -it rausach-backend nc -zv redis 6379
 2. **Wrong Redis host in .env**
    ```bash
    # Should be (for local dev):
-   REDIS_HOST=116.118.49.243
+   REDIS_HOST=116.118.48.208
    REDIS_PORT=12004
    
    # Or (for Docker internal):
@@ -674,7 +674,7 @@ docker exec -it rausach-backend nc -zv redis 6379
 **Diagnosis:**
 ```bash
 # Access Minio console
-# URL: http://116.118.49.243:12008
+# URL: http://116.118.48.208:12008
 # User: minio-admin
 # Pass: minio-secret-2025
 
@@ -690,13 +690,13 @@ docker logs shared-minio
    # Or via mc CLI:
    docker exec -it shared-minio mc alias set local http://localhost:9000 minio-admin minio-secret-2025
    docker exec -it shared-minio mc mb local/rausach-uploads
-   docker exec -it shared-minio mc mb local/tazagroup-uploads
+   docker exec -it shared-minio mc mb local/innerv2-uploads
    ```
 
 2. **Set bucket policy (public read)**
    ```bash
    docker exec -it shared-minio mc anonymous set download local/rausach-uploads
-   docker exec -it shared-minio mc anonymous set download local/tazagroup-uploads
+   docker exec -it shared-minio mc anonymous set download local/innerv2-uploads
    ```
 
 ---
@@ -796,7 +796,7 @@ docker compose build
 docker logs rausach-backend
 
 # Test GraphQL endpoint
-curl http://116.118.49.243:12001/graphql
+curl http://116.118.48.208:12001/graphql
 
 # Check backend health
 docker exec rausach-backend curl http://localhost:4000/health
@@ -847,9 +847,9 @@ docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsa
 | rausach-postgres | <10% | 150-200MB | 100-500MB |
 | rausach-backend | 5-15% | 180-220MB | 50MB |
 | rausach-frontend | <5% | 180-220MB | 50MB |
-| tazagroup-postgres | <10% | 150-200MB | 100-500MB |
-| tazagroup-backend | 5-15% | 180-220MB | 50MB |
-| tazagroup-frontend | <5% | 180-220MB | 50MB |
+| innerv2-postgres | <10% | 150-200MB | 100-500MB |
+| innerv2-backend | 5-15% | 180-220MB | 50MB |
+| innerv2-frontend | <5% | 180-220MB | 50MB |
 | **TOTAL** | **<60%** | **~1.8GB** | **~3-5GB** |
 
 ### 🔔 Alerts
@@ -955,7 +955,7 @@ logging:
 **📅 Cập nhật:** 3 tháng 11, 2025  
 **👤 Tác giả:** Development Team  
 **📧 Liên hệ:** support@rausachcore.com  
-**🌐 Production:** http://116.118.49.243:12000 (Rausach) | http://116.118.49.243:13000 (Tazagroup)
+**🌐 Production:** http://116.118.48.208:12000 (Rausach) | http://116.118.48.208:13000 (Innerv2)
 
 ---
 

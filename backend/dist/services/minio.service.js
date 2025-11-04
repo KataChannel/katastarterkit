@@ -54,7 +54,7 @@ let MinioService = MinioService_1 = class MinioService {
         const isDocker = process.env.DOCKER_NETWORK_NAME !== undefined;
         this.endpoint = isDocker
             ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
-            : this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
+            : this.configService.get('MINIO_ENDPOINT', '116.118.48.208');
         const portConfig = isDocker
             ? this.configService.get('DOCKER_MINIO_PORT', '9000')
             : this.configService.get('MINIO_PORT', '12007');

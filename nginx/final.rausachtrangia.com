@@ -10,7 +10,7 @@ server {
     }
 
     location / {
-        proxy_pass http://116.118.49.243:54301;
+        proxy_pass http://116.118.48.208:54301;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -37,7 +37,7 @@ server {
     }
 
     location / {
-        proxy_pass http://116.118.49.243:59000;
+        proxy_pass http://116.118.48.208:59000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Stop Tazagroup Domain
+# Stop Innerv2 Domain
 
 set -e
 
@@ -10,8 +10,8 @@ NC='\033[0m'
 
 COMPOSE_FILE="docker-compose.multi-domain.yml"
 
-echo -e "${YELLOW}🛑 Stopping Tazagroup Domain...${NC}"
+echo -e "${YELLOW}🛑 Stopping Innerv2 Domain...${NC}"
 
-docker-compose -f "$COMPOSE_FILE" stop tazagroup-backend tazagroup-frontend
+docker-compose -f "$COMPOSE_FILE" stop innerv2-backend innerv2-frontend
 
-echo -e "${GREEN}✅ Tazagroup Domain Stopped${NC}"
+echo -e "${GREEN}✅ Innerv2 Domain Stopped${NC}"

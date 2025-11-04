@@ -2,10 +2,10 @@
 
 ## 🐛 Hiện Tượng
 
-Khi truy cập http://116.118.49.243:13000:
+Khi truy cập http://116.118.48.208:13000:
 - ✅ Trang web hiển thị OK
 - ❌ **Đang gọi:** `http://api.rausachtrangia.com/graphql`
-- ✅ **Cần gọi:** `http://116.118.49.243:13001/graphql`
+- ✅ **Cần gọi:** `http://116.118.48.208:13001/graphql`
 
 ## 🔍 Phân Tích
 
@@ -67,7 +67,7 @@ cd /mnt/chikiet/kataoffical/shoprausach/frontend
 rm -rf .next
 
 # Start trên port 13000
-./start-frontend-tazagroup.sh
+./start-frontend-innerv2.sh
 
 # HOẶC thủ công:
 npm run dev -- -p 13000
@@ -103,11 +103,11 @@ crontab -l | grep -E "next|frontend"
 **Tạo file `.env.production.local`:**
 ```env
 # Production environment for LOCAL server
-NEXT_PUBLIC_APP_URL=http://116.118.49.243:13000
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
-NEXT_PUBLIC_BACKEND_URL=http://116.118.49.243:13001
-NEXT_PUBLIC_SOCKET_URL=http://116.118.49.243:13001
-NEXTAUTH_URL=http://116.118.49.243:13000
+NEXT_PUBLIC_APP_URL=http://116.118.48.208:13000
+NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql
+NEXT_PUBLIC_BACKEND_URL=http://116.118.48.208:13001
+NEXT_PUBLIC_SOCKET_URL=http://116.118.48.208:13001
+NEXTAUTH_URL=http://116.118.48.208:13000
 ```
 
 **Build lại:**
@@ -141,7 +141,7 @@ sudo ufw status | grep 13000
 ### Kiểm Tra 2: DNS/Proxy
 ```bash
 # Hosts file
-cat /etc/hosts | grep -E "116.118.49.243|rausachtrangia|tazagroup"
+cat /etc/hosts | grep -E "116.118.48.208|rausachtrangia|innerv2"
 
 # Apache vhosts
 ls -la /etc/apache2/sites-enabled/
@@ -197,4 +197,4 @@ cat frontend/.env.production
 
 **Status:** 🔴 CRITICAL - Frontend đang kết nối API sai  
 **Priority:** P0 - Fix ngay lập tức  
-**Impact:** Users không thể sử dụng trang http://116.118.49.243:13000
+**Impact:** Users không thể sử dụng trang http://116.118.48.208:13000

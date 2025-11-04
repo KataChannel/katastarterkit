@@ -3,9 +3,9 @@ version: '3.8'
 # ================================================================
 # RAUSACH DOMAIN - PRODUCTION DEPLOYMENT
 # ================================================================
-# Frontend: http://116.118.49.243:12000
-# Backend: http://116.118.49.243:12001
-# Database: 116.118.49.243:12003
+# Frontend: http://116.118.48.208:12000
+# Backend: http://116.118.48.208:12001
+# Database: 116.118.48.208:12003
 # ================================================================
 
 services:
@@ -21,10 +21,10 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: postgresql://postgres:postgres@116.118.49.243:12003/rausachcore
-      REDIS_HOST: 116.118.49.243
+      DATABASE_URL: postgresql://postgres:postgres@116.118.48.208:12003/rausachcore
+      REDIS_HOST: 116.118.48.208
       REDIS_PORT: 12004
-      MINIO_ENDPOINT: 116.118.49.243
+      MINIO_ENDPOINT: 116.118.48.208
       MINIO_PORT: 12007
       MINIO_USE_SSL: false
       MINIO_BUCKET_NAME: rausach-uploads
@@ -44,9 +44,9 @@ services:
       - .env.prod.rausach
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.49.243:12001/graphql
-      NEXT_PUBLIC_APP_URL: http://116.118.49.243:12000
-      NEXTAUTH_URL: http://116.118.49.243:12000
+      NEXT_PUBLIC_GRAPHQL_ENDPOINT: http://116.118.48.208:12001/graphql
+      NEXT_PUBLIC_APP_URL: http://116.118.48.208:12000
+      NEXTAUTH_URL: http://116.118.48.208:12000
       NEXT_OTEL_ENABLED: "false"
       NEXT_TELEMETRY_DISABLED: "1"
     ports:

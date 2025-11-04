@@ -20,8 +20,8 @@ Có 2 phương án deploy:
 # Chỉ Rausach
 ./start-hybrid.sh rausach
 
-# Chỉ Tazagroup
-./start-hybrid.sh tazagroup
+# Chỉ Innerv2
+./start-hybrid.sh innerv2
 
 # Chỉ Redis + Minio (shared)
 ./start-hybrid.sh shared
@@ -35,8 +35,8 @@ Có 2 phương án deploy:
 # Dừng Rausach
 ./stop-hybrid.sh rausach
 
-# Dừng Tazagroup
-./stop-hybrid.sh tazagroup
+# Dừng Innerv2
+./stop-hybrid.sh innerv2
 ```
 
 #### Logs
@@ -47,8 +47,8 @@ Có 2 phương án deploy:
 # Logs Rausach
 ./logs-hybrid.sh rausach
 
-# Logs Tazagroup
-./logs-hybrid.sh tazagroup
+# Logs Innerv2
+./logs-hybrid.sh innerv2
 ```
 
 #### Trạng thái
@@ -62,12 +62,12 @@ Có 2 phương án deploy:
 # Khởi động
 ./start-multi-domain.sh all          # Tất cả
 ./start-multi-domain.sh rausach      # Chỉ Rausach
-./start-multi-domain.sh tazagroup    # Chỉ Tazagroup
+./start-multi-domain.sh innerv2    # Chỉ Innerv2
 
 # Dừng
 ./stop-multi-domain.sh all           # Tất cả
 ./stop-multi-domain.sh rausach       # Chỉ Rausach
-./stop-multi-domain.sh tazagroup     # Chỉ Tazagroup
+./stop-multi-domain.sh innerv2     # Chỉ Innerv2
 ```
 
 ---
@@ -84,9 +84,9 @@ docker compose -f docker-compose.hybrid.yml up -d
 docker compose -f docker-compose.hybrid.yml up -d \
   redis minio rausach-postgres rausach-backend rausach-frontend
 
-# Chỉ Tazagroup
+# Chỉ Innerv2
 docker compose -f docker-compose.hybrid.yml up -d \
-  redis minio tazagroup-postgres tazagroup-backend tazagroup-frontend
+  redis minio innerv2-postgres innerv2-backend innerv2-frontend
 
 # Dừng tất cả
 docker compose -f docker-compose.hybrid.yml down
@@ -108,9 +108,9 @@ docker compose -f docker-compose.multi-domain.yml up -d
 docker compose -f docker-compose.multi-domain.yml up -d \
   postgres redis minio rausach-backend rausach-frontend
 
-# Chỉ Tazagroup
+# Chỉ Innerv2
 docker compose -f docker-compose.multi-domain.yml up -d \
-  postgres redis minio tazagroup-backend tazagroup-frontend
+  postgres redis minio innerv2-backend innerv2-frontend
 
 # Dừng tất cả
 docker compose -f docker-compose.multi-domain.yml down
@@ -134,7 +134,7 @@ docker compose -f docker-compose.multi-domain.yml ps
 Sau đó chọn số để thực hiện hành động:
 - 1: Khởi động tất cả
 - 2: Khởi động Rausach
-- 3: Khởi động Tazagroup
+- 3: Khởi động Innerv2
 - 5: Dừng tất cả
 - 11: Xem trạng thái
 - ... (xem menu để biết thêm)
@@ -149,18 +149,18 @@ Sau đó chọn số để thực hiện hành động:
 ## 📊 URLs Truy Cập
 
 ### Rausach (12xxx ports)
-- Frontend: http://116.118.49.243:12000
-- Backend: http://116.118.49.243:12001/graphql
-- Database: 116.118.49.243:12003
+- Frontend: http://116.118.48.208:12000
+- Backend: http://116.118.48.208:12001/graphql
+- Database: 116.118.48.208:12003
 
-### Tazagroup (13xxx ports)
-- Frontend: http://116.118.49.243:13000
-- Backend: http://116.118.49.243:13001/graphql
-- Database: 116.118.49.243:13003
+### Innerv2 (13xxx ports)
+- Frontend: http://116.118.48.208:13000
+- Backend: http://116.118.48.208:13001/graphql
+- Database: 116.118.48.208:13003
 
 ### Shared Services
-- Minio: http://116.118.49.243:12008
-- Redis: 116.118.49.243:12004
+- Minio: http://116.118.48.208:12008
+- Redis: 116.118.48.208:12004
 
 ---
 
@@ -175,7 +175,7 @@ docker stats
 ```bash
 # Hybrid
 docker compose -f docker-compose.hybrid.yml logs -f rausach-backend
-docker compose -f docker-compose.hybrid.yml logs -f tazagroup-frontend
+docker compose -f docker-compose.hybrid.yml logs -f innerv2-frontend
 
 # Multi-Domain
 docker compose -f docker-compose.multi-domain.yml logs -f rausach-backend

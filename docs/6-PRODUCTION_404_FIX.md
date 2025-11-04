@@ -4,7 +4,7 @@
 
 ## Problem Summary
 
-After deploying with `scripts/95copy.sh`, the production frontend at http://116.118.49.243:12000 was returning 404 errors for all static assets:
+After deploying with `scripts/95copy.sh`, the production frontend at http://116.118.48.208:12000 was returning 404 errors for all static assets:
 
 ```
 Failed to load resource: the server responded with a status of 404
@@ -88,7 +88,7 @@ Created `scripts/98deploy-fix.sh` which:
 Verified frontend is now serving all assets correctly:
 
 ```bash
-curl http://116.118.49.243:12000 | grep -o 'href="/_next/static' | head -5
+curl http://116.118.48.208:12000 | grep -o 'href="/_next/static' | head -5
 ```
 
 Output shows all resources are available:
@@ -99,7 +99,7 @@ Output shows all resources are available:
 
 ## Current Status
 
-**Frontend**: ✅ http://116.118.49.243:12000 - **WORKING**
+**Frontend**: ✅ http://116.118.48.208:12000 - **WORKING**
 - All CSS/JS/images loading
 - Layout rendered with proper styling
 - React components hydrating correctly
@@ -194,7 +194,7 @@ Frontend running on port 12000
 If you need to revert to previous state:
 
 ```bash
-ssh root@116.118.49.243 "cd /root/shoprausach && git checkout frontend/.next/ frontend/public/ && docker compose down && docker compose up -d --build"
+ssh root@116.118.48.208 "cd /root/shoprausach && git checkout frontend/.next/ frontend/public/ && docker compose down && docker compose up -d --build"
 ```
 
 ---

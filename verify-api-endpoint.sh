@@ -14,10 +14,10 @@ echo ""
 echo "1️⃣  .env.production:"
 if [ -f "frontend/.env.production" ]; then
     PROD_ENDPOINT=$(grep "NEXT_PUBLIC_GRAPHQL_ENDPOINT" frontend/.env.production | cut -d'=' -f2)
-    if [ "$PROD_ENDPOINT" = "http://116.118.49.243:13001/graphql" ]; then
+    if [ "$PROD_ENDPOINT" = "http://116.118.48.208:13001/graphql" ]; then
         echo "   ✅ $PROD_ENDPOINT (ĐÚNG)"
     else
-        echo "   ❌ $PROD_ENDPOINT (SAI - Cần sửa thành http://116.118.49.243:13001/graphql)"
+        echo "   ❌ $PROD_ENDPOINT (SAI - Cần sửa thành http://116.118.48.208:13001/graphql)"
     fi
 else
     echo "   ⚠️  File không tồn tại"
@@ -27,10 +27,10 @@ echo ""
 echo "2️⃣  .env.local:"
 if [ -f "frontend/.env.local" ]; then
     LOCAL_ENDPOINT=$(grep "NEXT_PUBLIC_GRAPHQL_ENDPOINT" frontend/.env.local | cut -d'=' -f2)
-    if [ "$LOCAL_ENDPOINT" = "http://116.118.49.243:13001/graphql" ]; then
+    if [ "$LOCAL_ENDPOINT" = "http://116.118.48.208:13001/graphql" ]; then
         echo "   ✅ $LOCAL_ENDPOINT (ĐÚNG)"
     else
-        echo "   ❌ $LOCAL_ENDPOINT (SAI - Cần sửa thành http://116.118.49.243:13001/graphql)"
+        echo "   ❌ $LOCAL_ENDPOINT (SAI - Cần sửa thành http://116.118.48.208:13001/graphql)"
     fi
 else
     echo "   ⚠️  File không tồn tại"
@@ -70,7 +70,7 @@ echo ""
 
 # Test backend API
 echo "🧪 Test Backend API:"
-RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://116.118.49.243:13001/graphql \
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://116.118.48.208:13001/graphql \
   -H "Content-Type: application/json" \
   -d '{"query":"{ __typename }"}')
 
@@ -88,7 +88,7 @@ echo "📊 TÓM TẮT"
 echo "================================================"
 echo ""
 echo "✅ Cấu hình ĐÚNG nếu tất cả endpoint là:"
-echo "   http://116.118.49.243:13001/graphql"
+echo "   http://116.118.48.208:13001/graphql"
 echo ""
 echo "❌ Cấu hình SAI nếu có endpoint:"
 echo "   https://api.rausachtrangia.com/graphql"

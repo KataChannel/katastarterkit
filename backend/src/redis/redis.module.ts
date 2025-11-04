@@ -14,7 +14,7 @@ const redisProvider = {
     // Use Docker Redis host/port if in Docker, otherwise use configured server
     const host = isDockerEnv
       ? configService.get('DOCKER_REDIS_HOST', 'redis')
-      : configService.get('REDIS_HOST', '116.118.49.243');
+      : configService.get('REDIS_HOST', '116.118.48.208');
     
     // Always use configured port from .env
     const portConfig = isDockerEnv

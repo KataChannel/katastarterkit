@@ -12,9 +12,9 @@ scripts/init-multi-db.sh         - Script khởi tạo 2 databases
 ```
 deploy-multi-domain.sh           - Script quản lý deployment (Interactive Menu)
 start-rausach-only.sh            - Khởi động chỉ domain Rausach
-start-tazagroup-only.sh          - Khởi động chỉ domain Tazagroup
+start-innerv2-only.sh          - Khởi động chỉ domain Innerv2
 stop-rausach-only.sh             - Dừng domain Rausach
-stop-tazagroup-only.sh           - Dừng domain Tazagroup
+stop-innerv2-only.sh           - Dừng domain Innerv2
 check-system-multi-domain.sh     - Kiểm tra hệ thống trước khi deploy
 ```
 
@@ -48,21 +48,21 @@ MULTI_DOMAIN_SETUP_COMPLETE.md   - File này (summary)
 │  │                                              │ │
 │  │  PostgreSQL (Port 12003)                     │ │
 │  │    ├─ Database: rausachcore                  │ │
-│  │    └─ Database: tazagroupcore                │ │
+│  │    └─ Database: innerv2core                │ │
 │  │                                              │ │
 │  │  Redis (Port 12004)                          │ │
 │  │    └─ Shared cache with key prefixes         │ │
 │  │                                              │ │
 │  │  Minio (Port 12007, Console 12008)           │ │
 │  │    ├─ Bucket: rausach-uploads                │ │
-│  │    └─ Bucket: tazagroup-uploads              │ │
+│  │    └─ Bucket: innerv2-uploads              │ │
 │  │                                              │ │
 │  └──────────────────────────────────────────────┘ │
 │                     │                             │
 │         ┌───────────┴────────────┐                │
 │         │                        │                │
 │  ┌──────▼─────────┐      ┌──────▼─────────┐      │
-│  │ RAUSACH DOMAIN │      │ TAZAGROUP      │      │
+│  │ RAUSACH DOMAIN │      │ INNERV2      │      │
 │  ├────────────────┤      ├────────────────┤      │
 │  │ Backend  12001 │      │ Backend  13001 │      │
 │  │ Frontend 12000 │      │ Frontend 13000 │      │
@@ -80,8 +80,8 @@ MULTI_DOMAIN_SETUP_COMPLETE.md   - File này (summary)
 | Minio (shared) | 128MB | 64MB | 12007, 12008 |
 | Rausach Backend | 256MB | 128MB | 12001 |
 | Rausach Frontend | 256MB | 128MB | 12000 |
-| Tazagroup Backend | 256MB | 128MB | 13001 |
-| Tazagroup Frontend | 256MB | 128MB | 13000 |
+| Innerv2 Backend | 256MB | 128MB | 13001 |
+| Innerv2 Frontend | 256MB | 128MB | 13000 |
 | **TOTAL** | **~1.4GB** | **~700MB** | - |
 
 ---
@@ -119,8 +119,8 @@ make -f Makefile.multi-domain start-all
 # Chỉ khởi động Rausach (tiết kiệm RAM)
 ./start-rausach-only.sh
 
-# Hoặc chỉ khởi động Tazagroup
-./start-tazagroup-only.sh
+# Hoặc chỉ khởi động Innerv2
+./start-innerv2-only.sh
 ```
 
 **Cách 4: Sử dụng Docker Compose Trực Tiếp**
@@ -137,15 +137,15 @@ make -f Makefile.multi-domain status
 ### Bước 4: Truy Cập Ứng Dụng
 
 **Rausach Domain:**
-- Frontend: http://116.118.49.243:12000
-- Backend GraphQL: http://116.118.49.243:12001/graphql
+- Frontend: http://116.118.48.208:12000
+- Backend GraphQL: http://116.118.48.208:12001/graphql
 
-**Tazagroup Domain:**
-- Frontend: http://116.118.49.243:13000
-- Backend GraphQL: http://116.118.49.243:13001/graphql
+**Innerv2 Domain:**
+- Frontend: http://116.118.48.208:13000
+- Backend GraphQL: http://116.118.48.208:13001/graphql
 
 **Shared Services:**
-- Minio Console: http://116.118.49.243:12008
+- Minio Console: http://116.118.48.208:12008
   - Username: minio-admin
   - Password: minio-secret-2025
 
@@ -161,14 +161,14 @@ make -f Makefile.multi-domain start-all
 
 # Khởi động từng domain
 make -f Makefile.multi-domain start-rausach
-make -f Makefile.multi-domain start-tazagroup
+make -f Makefile.multi-domain start-innerv2
 
 # Dừng tất cả
 make -f Makefile.multi-domain stop-all
 
 # Dừng từng domain
 make -f Makefile.multi-domain stop-rausach
-make -f Makefile.multi-domain stop-tazagroup
+make -f Makefile.multi-domain stop-innerv2
 ```
 
 ### Monitoring Commands
@@ -180,7 +180,7 @@ make -f Makefile.multi-domain status
 # Xem logs
 make -f Makefile.multi-domain logs              # Tất cả
 make -f Makefile.multi-domain logs-rausach      # Chỉ Rausach
-make -f Makefile.multi-domain logs-tazagroup    # Chỉ Tazagroup
+make -f Makefile.multi-domain logs-innerv2    # Chỉ Innerv2
 
 # Monitor realtime
 docker stats
@@ -191,11 +191,11 @@ docker stats
 ```bash
 # Backup
 make -f Makefile.multi-domain backup-rausach
-make -f Makefile.multi-domain backup-tazagroup
+make -f Makefile.multi-domain backup-innerv2
 
 # Restore
 make -f Makefile.multi-domain restore-rausach BACKUP_FILE=./backups/rausach_20250103.sql
-make -f Makefile.multi-domain restore-tazagroup BACKUP_FILE=./backups/tazagroup_20250103.sql
+make -f Makefile.multi-domain restore-innerv2 BACKUP_FILE=./backups/innerv2_20250103.sql
 ```
 
 ### Maintenance Commands
@@ -219,30 +219,30 @@ make -f Makefile.multi-domain clean
 
 Bạn đã có sẵn 2 files:
 - `.env.rausach` - Configuration cho domain Rausach
-- `.env.tazagroup` - Configuration cho domain Tazagroup
+- `.env.innerv2` - Configuration cho domain Innerv2
 
 **Lưu ý:** Đảm bảo các thông tin sau đã được cập nhật đúng:
 
 **File `.env.rausach`:**
 ```bash
 PORT=12001
-FRONTEND_URL=http://116.118.49.243:12000
+FRONTEND_URL=http://116.118.48.208:12000
 POSTGRES_DB=rausachcore
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/rausachcore
 MINIO_BUCKET_NAME=rausach-uploads
-NEXT_PUBLIC_APP_URL=http://116.118.49.243:12000
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:12001/graphql
+NEXT_PUBLIC_APP_URL=http://116.118.48.208:12000
+NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:12001/graphql
 ```
 
-**File `.env.tazagroup`:**
+**File `.env.innerv2`:**
 ```bash
 PORT=13001
-FRONTEND_URL=http://116.118.49.243:13000
-POSTGRES_DB=tazagroupcore
-DATABASE_URL=postgresql://postgres:postgres@postgres:5432/tazagroupcore
-MINIO_BUCKET_NAME=tazagroup-uploads
-NEXT_PUBLIC_APP_URL=http://116.118.49.243:13000
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
+FRONTEND_URL=http://116.118.48.208:13000
+POSTGRES_DB=innerv2core
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/innerv2core
+MINIO_BUCKET_NAME=innerv2-uploads
+NEXT_PUBLIC_APP_URL=http://116.118.48.208:13000
+NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql
 ```
 
 ---
@@ -256,9 +256,9 @@ NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
    # Buổi sáng: Làm việc với Rausach
    make -f Makefile.multi-domain start-rausach
    
-   # Buổi chiều: Chuyển sang Tazagroup
+   # Buổi chiều: Chuyển sang Innerv2
    make -f Makefile.multi-domain stop-rausach
-   make -f Makefile.multi-domain start-tazagroup
+   make -f Makefile.multi-domain start-innerv2
    ```
 
 2. **Tắt services không dùng:**
@@ -306,7 +306,7 @@ docker image prune -a
    crontab -e
    # Thêm dòng:
    0 2 * * * cd /path/to/project && make -f Makefile.multi-domain backup-rausach
-   0 3 * * * cd /path/to/project && make -f Makefile.multi-domain backup-tazagroup
+   0 3 * * * cd /path/to/project && make -f Makefile.multi-domain backup-innerv2
    ```
 
 ---
@@ -326,7 +326,7 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 
 # Giải pháp 2: Chỉ chạy 1 domain
-make -f Makefile.multi-domain stop-tazagroup
+make -f Makefile.multi-domain stop-innerv2
 ```
 
 ### Port đã được sử dụng

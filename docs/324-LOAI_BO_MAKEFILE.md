@@ -37,18 +37,18 @@
 # Khởi động
 ./start-hybrid.sh all          # Tất cả services
 ./start-hybrid.sh rausach      # Chỉ Rausach
-./start-hybrid.sh tazagroup    # Chỉ Tazagroup
+./start-hybrid.sh innerv2    # Chỉ Innerv2
 ./start-hybrid.sh shared       # Chỉ Redis + Minio
 
 # Dừng
 ./stop-hybrid.sh all           # Tất cả
 ./stop-hybrid.sh rausach       # Chỉ Rausach
-./stop-hybrid.sh tazagroup     # Chỉ Tazagroup
+./stop-hybrid.sh innerv2     # Chỉ Innerv2
 
 # Logs
 ./logs-hybrid.sh all           # Logs tất cả
 ./logs-hybrid.sh rausach       # Logs Rausach
-./logs-hybrid.sh tazagroup     # Logs Tazagroup
+./logs-hybrid.sh innerv2     # Logs Innerv2
 
 # Trạng thái
 ./status-hybrid.sh
@@ -60,12 +60,12 @@
 # Khởi động
 ./start-multi-domain.sh all          # Tất cả
 ./start-multi-domain.sh rausach      # Chỉ Rausach
-./start-multi-domain.sh tazagroup    # Chỉ Tazagroup
+./start-multi-domain.sh innerv2    # Chỉ Innerv2
 
 # Dừng
 ./stop-multi-domain.sh all           # Tất cả
 ./stop-multi-domain.sh rausach       # Chỉ Rausach
-./stop-multi-domain.sh tazagroup     # Chỉ Tazagroup
+./stop-multi-domain.sh innerv2     # Chỉ Innerv2
 ```
 
 ### Hoặc Dùng Docker Compose Trực Tiếp
@@ -132,10 +132,10 @@ fi
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
-│  Tazagroup Domain (13xxx)               │
-│  - tazagroup-postgres (13003)           │
-│  - tazagroup-backend (13001)            │
-│  - tazagroup-frontend (13000)           │
+│  Innerv2 Domain (13xxx)               │
+│  - innerv2-postgres (13003)           │
+│  - innerv2-backend (13001)            │
+│  - innerv2-frontend (13000)           │
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
@@ -165,9 +165,9 @@ fi
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
-│  Tazagroup (13xxx)                      │
-│  - tazagroup-backend (13001)            │
-│  - tazagroup-frontend (13000)           │
+│  Innerv2 (13xxx)                      │
+│  - innerv2-backend (13001)            │
+│  - innerv2-frontend (13000)           │
 └─────────────────────────────────────────┘
 ```
 

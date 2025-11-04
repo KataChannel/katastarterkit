@@ -22,8 +22,8 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo -e "${YELLOW}Chọn domain để deploy:${NC}"
 echo ""
-echo "  1) 🌟 Rausach    (116.118.49.243:12000-12001)"
-echo "  2) 🏢 Tazagroup  (116.118.49.243:13000-13001)"
+echo "  1) 🌟 Rausach    (116.118.48.208:12000-12001)"
+echo "  2) 🏢 Innerv2  (116.118.48.208:13000-13001)"
 echo "  3) 🔥 Multi-domain (Cả 2 domain)"
 echo "  4) ❌ Exit"
 echo ""
@@ -37,9 +37,9 @@ case $choice in
         PORTS="12000-12001"
         ;;
     2)
-        DOMAIN="tazagroup"
-        ENV_FILE=".env.prod.tazagroup"
-        COMPOSE_FILE="docker-compose.tazagroup.yml"
+        DOMAIN="innerv2"
+        ENV_FILE=".env.prod.innerv2"
+        COMPOSE_FILE="docker-compose.innerv2.yml"
         PORTS="13000-13001"
         ;;
     3)
@@ -90,21 +90,21 @@ echo ""
 
 if [ "$DOMAIN" = "multi-domain" ]; then
     echo -e "${YELLOW}📍 RAUSACH:${NC}"
-    echo -e "   Frontend:  ${GREEN}http://116.118.49.243:12000${NC}"
-    echo -e "   Backend:   ${GREEN}http://116.118.49.243:12001/graphql${NC}"
+    echo -e "   Frontend:  ${GREEN}http://116.118.48.208:12000${NC}"
+    echo -e "   Backend:   ${GREEN}http://116.118.48.208:12001/graphql${NC}"
     echo ""
-    echo -e "${YELLOW}📍 TAZAGROUP:${NC}"
-    echo -e "   Frontend:  ${GREEN}http://116.118.49.243:13000${NC}"
-    echo -e "   Backend:   ${GREEN}http://116.118.49.243:13001/graphql${NC}"
+    echo -e "${YELLOW}📍 INNERV2:${NC}"
+    echo -e "   Frontend:  ${GREEN}http://116.118.48.208:13000${NC}"
+    echo -e "   Backend:   ${GREEN}http://116.118.48.208:13001/graphql${NC}"
     echo ""
     echo -e "${YELLOW}📍 SHARED SERVICES:${NC}"
-    echo -e "   Database:  ${GREEN}116.118.49.243:12003${NC}"
-    echo -e "   Redis:     ${GREEN}116.118.49.243:12004${NC}"
-    echo -e "   Minio:     ${GREEN}116.118.49.243:12007${NC}"
+    echo -e "   Database:  ${GREEN}116.118.48.208:12003${NC}"
+    echo -e "   Redis:     ${GREEN}116.118.48.208:12004${NC}"
+    echo -e "   Minio:     ${GREEN}116.118.48.208:12007${NC}"
 else
     echo -e "${YELLOW}📍 URLs:${NC}"
-    echo -e "   Frontend:  ${GREEN}http://116.118.49.243:${PORTS%%-*}${NC}"
-    echo -e "   Backend:   ${GREEN}http://116.118.49.243:${PORTS##*-}/graphql${NC}"
+    echo -e "   Frontend:  ${GREEN}http://116.118.48.208:${PORTS%%-*}${NC}"
+    echo -e "   Backend:   ${GREEN}http://116.118.48.208:${PORTS##*-}/graphql${NC}"
 fi
 
 echo ""

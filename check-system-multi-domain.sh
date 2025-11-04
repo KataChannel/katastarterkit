@@ -142,12 +142,12 @@ else
     check_result "fail" ".env.rausach not found" "Create this file with domain configuration"
 fi
 
-# 11. Check .env.tazagroup
-echo -e "${BLUE}[11/15] Checking .env.tazagroup...${NC}"
-if [ -f ".env.tazagroup" ]; then
-    check_result "pass" ".env.tazagroup exists" ""
+# 11. Check .env.innerv2
+echo -e "${BLUE}[11/15] Checking .env.innerv2...${NC}"
+if [ -f ".env.innerv2" ]; then
+    check_result "pass" ".env.innerv2 exists" ""
 else
-    check_result "fail" ".env.tazagroup not found" "Create this file with domain configuration"
+    check_result "fail" ".env.innerv2 not found" "Create this file with domain configuration"
 fi
 
 # 12. Check required ports availability
@@ -218,7 +218,7 @@ if [ $CHECKS_FAILED -eq 0 ]; then
         echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
         echo ""
         echo -e "${YELLOW}Next steps:${NC}"
-        echo -e "  1. Review .env.rausach and .env.tazagroup configurations"
+        echo -e "  1. Review .env.rausach and .env.innerv2 configurations"
         echo -e "  2. Run: ${BLUE}./deploy-multi-domain.sh${NC}"
         echo -e "  3. Or use: ${BLUE}make -f Makefile.multi-domain start-all${NC}"
     else

@@ -35,7 +35,7 @@ After deployment, check if backend is working:
 
 ```bash
 # View backend logs
-ssh root@116.118.49.243 docker logs rausachcore-backend -f
+ssh root@116.118.48.208 docker logs rausachcore-backend -f
 
 # Look for these messages (means it worked):
 # ✅ Redis is ready!
@@ -46,7 +46,7 @@ ssh root@116.118.49.243 docker logs rausachcore-backend -f
 
 Or test the API:
 ```bash
-curl http://116.118.49.243:12001/health
+curl http://116.118.48.208:12001/health
 # Should respond with 200
 ```
 

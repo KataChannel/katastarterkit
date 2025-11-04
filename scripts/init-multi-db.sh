@@ -7,9 +7,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
     CREATE DATABASE rausachcore;
     GRANT ALL PRIVILEGES ON DATABASE rausachcore TO postgres;
     
-    -- Create tazagroup database
-    CREATE DATABASE tazagroupcore;
-    GRANT ALL PRIVILEGES ON DATABASE tazagroupcore TO postgres;
+    -- Create innerv2 database
+    CREATE DATABASE innerv2core;
+    GRANT ALL PRIVILEGES ON DATABASE innerv2core TO postgres;
     
     -- Show created databases
     \l

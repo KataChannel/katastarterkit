@@ -204,7 +204,7 @@ rm -rf frontend/.next
 [INFO] ✅ Build verification passed - ready for deployment
 
 [INFO] Step 3: Deploying to server (standard mode)...
-[INFO] 📤 Uploading to server (116.118.49.243)...
+[INFO] 📤 Uploading to server (116.118.48.208)...
 [INFO] Total project size: 1.2G
 [SUCCESS] ✅ Upload completed
 
@@ -220,9 +220,9 @@ rausachcore-backend    shoprausach-backend        Up 3s
 [SUCCESS] ═══════════════════════════════════════════════════════
 [SUCCESS] DEPLOYMENT COMPLETED SUCCESSFULLY
 [SUCCESS] ═══════════════════════════════════════════════════════
-[SUCCESS] Server: 116.118.49.243
-[SUCCESS] Frontend: http://116.118.49.243:12000
-[SUCCESS] Backend: http://116.118.49.243:12001
+[SUCCESS] Server: 116.118.48.208
+[SUCCESS] Frontend: http://116.118.48.208:12000
+[SUCCESS] Backend: http://116.118.48.208:12001
 ```
 
 ---
@@ -248,7 +248,7 @@ rm -rf frontend/.next frontend/node_modules
 ### Issue: "Rsync failed"
 ```bash
 # Check SSH connection
-ssh root@116.118.49.243 "echo 'SSH OK'"
+ssh root@116.118.48.208 "echo 'SSH OK'"
 
 # Try deployment again
 ./scripts/95copy.sh --build
@@ -260,7 +260,7 @@ ssh root@116.118.49.243 "echo 'SSH OK'"
 ./scripts/95copy.sh --fix
 
 # Verify on server
-curl http://116.118.49.243:12000
+curl http://116.118.48.208:12000
 ```
 
 ---
@@ -339,7 +339,7 @@ The script excludes the following from rsync:
 Edit these values in `scripts/95copy.sh`:
 
 ```bash
-SERVER_IP="116.118.49.243"        # Production server
+SERVER_IP="116.118.48.208"        # Production server
 SERVER_USER="root"                 # SSH user
 REMOTE_DIR="/root/shoprausach"    # Remote project path
 LOCAL_DIR="$(pwd)"                 # Local project path

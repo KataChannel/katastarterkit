@@ -59,7 +59,7 @@ Hệ thống LMS (Learning Management System) đã được **hoàn thiện 100%
 **Backend:**
 - NestJS 11.1.6
 - Prisma 6.18.0
-- PostgreSQL (116.118.49.243:12003)
+- PostgreSQL (116.118.48.208:12003)
 - GraphQL với Apollo Server
 - TypeScript strict mode
 

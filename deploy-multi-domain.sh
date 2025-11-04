@@ -2,7 +2,7 @@
 
 # Multi-Domain Deployment Script
 # Optimized for Cloud Server: 1 Core, 1GB RAM, 5GB Storage
-# Supports: rausach.com (12xxx ports) + tazagroup.com (13xxx ports)
+# Supports: rausach.com (12xxx ports) + innerv2.com (13xxx ports)
 
 set -e
 
@@ -33,13 +33,13 @@ show_menu() {
     echo -e "${YELLOW}Chọn hành động:${NC}"
     echo "1) Khởi động tất cả services (cả 2 domain)"
     echo "2) Khởi động chỉ domain Rausach (12xxx)"
-    echo "3) Khởi động chỉ domain Tazagroup (13xxx)"
+    echo "3) Khởi động chỉ domain Innerv2 (13xxx)"
     echo "4) Dừng tất cả services"
     echo "5) Dừng chỉ domain Rausach"
-    echo "6) Dừng chỉ domain Tazagroup"
+    echo "6) Dừng chỉ domain Innerv2"
     echo "7) Xem logs tất cả services"
     echo "8) Xem logs domain Rausach"
-    echo "9) Xem logs domain Tazagroup"
+    echo "9) Xem logs domain Innerv2"
     echo "10) Xem trạng thái services"
     echo "11) Khởi động lại tất cả"
     echo "12) Build lại images"
@@ -71,8 +71,8 @@ check_prerequisites() {
         exit 1
     fi
     
-    if [ ! -f ".env.tazagroup" ]; then
-        echo -e "${RED}❌ File .env.tazagroup không tồn tại!${NC}"
+    if [ ! -f ".env.innerv2" ]; then
+        echo -e "${RED}❌ File .env.innerv2 không tồn tại!${NC}"
         exit 1
     fi
     
@@ -102,10 +102,10 @@ start_rausach() {
     show_status
 }
 
-# Start only Tazagroup domain
-start_tazagroup() {
-    echo -e "${GREEN}🚀 Khởi động domain TAZAGROUP (13xxx)...${NC}"
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d postgres redis minio tazagroup-backend tazagroup-frontend
+# Start only Innerv2 domain
+start_innerv2() {
+    echo -e "${GREEN}🚀 Khởi động domain INNERV2 (13xxx)...${NC}"
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" up -d postgres redis minio innerv2-backend innerv2-frontend
     show_status
 }
 
@@ -123,11 +123,11 @@ stop_rausach() {
     echo -e "${GREEN}✅ Đã dừng domain Rausach${NC}"
 }
 
-# Stop only Tazagroup domain
-stop_tazagroup() {
-    echo -e "${YELLOW}🛑 Dừng domain TAZAGROUP...${NC}"
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" stop tazagroup-backend tazagroup-frontend
-    echo -e "${GREEN}✅ Đã dừng domain Tazagroup${NC}"
+# Stop only Innerv2 domain
+stop_innerv2() {
+    echo -e "${YELLOW}🛑 Dừng domain INNERV2...${NC}"
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" stop innerv2-backend innerv2-frontend
+    echo -e "${GREEN}✅ Đã dừng domain Innerv2${NC}"
 }
 
 # View logs
@@ -141,9 +141,9 @@ view_logs_rausach() {
     $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 rausach-backend rausach-frontend
 }
 
-view_logs_tazagroup() {
-    echo -e "${BLUE}📋 Logs domain TAZAGROUP...${NC}"
-    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 tazagroup-backend tazagroup-frontend
+view_logs_innerv2() {
+    echo -e "${BLUE}📋 Logs domain INNERV2...${NC}"
+    $DOCKER_COMPOSE -f "$COMPOSE_FILE" logs -f --tail=100 innerv2-backend innerv2-frontend
 }
 
 # Show status
@@ -161,16 +161,16 @@ show_status() {
     # Show URLs
     echo -e "${GREEN}🌐 URLs truy cập:${NC}"
     echo -e "  ${YELLOW}Rausach:${NC}"
-    echo -e "    - Frontend:  ${BLUE}http://116.118.49.243:12000${NC}"
-    echo -e "    - Backend:   ${BLUE}http://116.118.49.243:12001/graphql${NC}"
+    echo -e "    - Frontend:  ${BLUE}http://116.118.48.208:12000${NC}"
+    echo -e "    - Backend:   ${BLUE}http://116.118.48.208:12001/graphql${NC}"
     echo ""
-    echo -e "  ${YELLOW}Tazagroup:${NC}"
-    echo -e "    - Frontend:  ${BLUE}http://116.118.49.243:13000${NC}"
-    echo -e "    - Backend:   ${BLUE}http://116.118.49.243:13001/graphql${NC}"
+    echo -e "  ${YELLOW}Innerv2:${NC}"
+    echo -e "    - Frontend:  ${BLUE}http://116.118.48.208:13000${NC}"
+    echo -e "    - Backend:   ${BLUE}http://116.118.48.208:13001/graphql${NC}"
     echo ""
     echo -e "  ${YELLOW}Shared Services:${NC}"
-    echo -e "    - Minio:     ${BLUE}http://116.118.49.243:12008${NC}"
-    echo -e "    - PostgreSQL: ${BLUE}116.118.49.243:12003${NC}"
+    echo -e "    - Minio:     ${BLUE}http://116.118.48.208:12008${NC}"
+    echo -e "    - PostgreSQL: ${BLUE}116.118.48.208:12003${NC}"
     echo ""
 }
 
@@ -215,13 +215,13 @@ main() {
         case $choice in
             1) start_all ;;
             2) start_rausach ;;
-            3) start_tazagroup ;;
+            3) start_innerv2 ;;
             4) stop_all ;;
             5) stop_rausach ;;
-            6) stop_tazagroup ;;
+            6) stop_innerv2 ;;
             7) view_logs_all ;;
             8) view_logs_rausach ;;
-            9) view_logs_tazagroup ;;
+            9) view_logs_innerv2 ;;
             10) show_status ;;
             11) restart_all ;;
             12) rebuild ;;

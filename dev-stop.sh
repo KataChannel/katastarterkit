@@ -34,8 +34,8 @@ kill_port() {
 # Kill all dev ports
 kill_port 12000 "Rausach Frontend"
 kill_port 12001 "Rausach Backend"
-kill_port 13000 "Tazagroup Frontend"
-kill_port 13001 "Tazagroup Backend"
+kill_port 13000 "Innerv2 Frontend"
+kill_port 13001 "Innerv2 Backend"
 
 # Also kill any remaining bun/node dev processes
 echo ""

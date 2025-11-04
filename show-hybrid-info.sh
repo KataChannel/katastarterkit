@@ -13,7 +13,7 @@ cat << 'EOF'
    ┌────────────────────────────────────────┐
    │  Database: DEDICATED (Quan trọng!)    │
    │  • Rausach DB:    Port 12003          │
-   │  • Tazagroup DB:  Port 13003          │
+   │  • Innerv2 DB:  Port 13003          │
    └────────────────────────────────────────┘
    ┌────────────────────────────────────────┐
    │  Cache & Storage: SHARED (Tiết kiệm)  │
@@ -51,18 +51,18 @@ cat << 'EOF'
 
 🌐 URLS:
    Rausach:
-   • Frontend:   http://116.118.49.243:12000
-   • Backend:    http://116.118.49.243:12001/graphql
-   • Database:   116.118.49.243:12003
+   • Frontend:   http://116.118.48.208:12000
+   • Backend:    http://116.118.48.208:12001/graphql
+   • Database:   116.118.48.208:12003
 
-   Tazagroup:
-   • Frontend:   http://116.118.49.243:13000
-   • Backend:    http://116.118.49.243:13001/graphql
-   • Database:   116.118.49.243:13003
+   Innerv2:
+   • Frontend:   http://116.118.48.208:13000
+   • Backend:    http://116.118.48.208:13001/graphql
+   • Database:   116.118.48.208:13003
 
    Shared:
-   • Minio:      http://116.118.49.243:12008
-   • Redis:      116.118.49.243:12004
+   • Minio:      http://116.118.48.208:12008
+   • Redis:      116.118.48.208:12004
 
 📋 LỆNH HAY DÙNG:
 
@@ -71,15 +71,15 @@ cat << 'EOF'
    make -f Makefile.hybrid status            # Trạng thái
    make -f Makefile.hybrid logs              # Logs tất cả
    make -f Makefile.hybrid logs-rausach      # Logs Rausach
-   make -f Makefile.hybrid logs-tazagroup    # Logs Tazagroup
+   make -f Makefile.hybrid logs-innerv2    # Logs Innerv2
 
    # Khởi động riêng lẻ (tiết kiệm RAM)
    make -f Makefile.hybrid start-rausach     # Chỉ Rausach
-   make -f Makefile.hybrid start-tazagroup   # Chỉ Tazagroup
+   make -f Makefile.hybrid start-innerv2   # Chỉ Innerv2
 
    # Backup
    make -f Makefile.hybrid backup-rausach
-   make -f Makefile.hybrid backup-tazagroup
+   make -f Makefile.hybrid backup-innerv2
 
    # Restore
    make -f Makefile.hybrid restore-rausach BACKUP_FILE=./backups/file.sql

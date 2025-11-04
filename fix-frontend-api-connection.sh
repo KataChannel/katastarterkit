@@ -10,11 +10,11 @@ cat << 'EOF'
 
   Frontend đang chạy trên CỔNG SAI:
   ❌ Đang chạy: Port 12000 (Rausach)
-  ✅ Cần chạy:  Port 13000 (Tazagroup)
+  ✅ Cần chạy:  Port 13000 (Innerv2)
 
   Frontend .env đang cấu hình SAI:
   ❌ NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:12001/graphql
-  ✅ Cần:      NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.49.243:13001/graphql
+  ✅ Cần:      NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://116.118.48.208:13001/graphql
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -26,8 +26,8 @@ cat << 'EOF'
 
 2️⃣  KHỞI ĐỘNG LẠI TRÊN PORT ĐÚNG
 
-   🔵 Cho TAZAGROUP (Port 13000):
-      ./start-frontend-tazagroup.sh
+   🔵 Cho INNERV2 (Port 13000):
+      ./start-frontend-innerv2.sh
    
    🟢 Cho RAUSACH (Port 12000):
       ./start-frontend-rausach.sh
@@ -37,7 +37,7 @@ cat << 'EOF'
 📋 CÁCH KHỞI ĐỘNG THỦ CÔNG
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Tazagroup (13000):
+Innerv2 (13000):
    cd frontend
    npm run dev -- -p 13000
 
@@ -50,13 +50,13 @@ Rausach (12000):
 🌐 URLS SAU KHI FIX
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Tazagroup:
-  Frontend:  http://116.118.49.243:13000 ✅
-  Backend:   http://116.118.49.243:13001/graphql ✅
+Innerv2:
+  Frontend:  http://116.118.48.208:13000 ✅
+  Backend:   http://116.118.48.208:13001/graphql ✅
   
 Rausach:
-  Frontend:  http://116.118.49.243:12000 ✅
-  Backend:   http://116.118.49.243:12001/graphql ✅
+  Frontend:  http://116.118.48.208:12000 ✅
+  Backend:   http://116.118.48.208:12001/graphql ✅
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -64,14 +64,14 @@ Rausach:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 1. Mở trình duyệt:
-   http://116.118.49.243:13000
+   http://116.118.48.208:13000
 
 2. Mở Developer Tools (F12) > Network tab
 
 3. Reload trang (F5)
 
 4. Kiểm tra requests đến:
-   ✅ http://116.118.49.243:13001/graphql
+   ✅ http://116.118.48.208:13001/graphql
    (Không phải localhost hoặc 12001)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -79,8 +79,8 @@ Rausach:
 📁 FILES ĐÃ TẠO/SỬA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ frontend/.env.local              - Config cho Tazagroup
-✅ start-frontend-tazagroup.sh      - Script khởi động Tazagroup  
+✅ frontend/.env.local              - Config cho Innerv2
+✅ start-frontend-innerv2.sh      - Script khởi động Innerv2  
 ✅ start-frontend-rausach.sh        - Script khởi động Rausach
 ✅ fix-frontend-api-connection.sh   - File này
 
@@ -93,17 +93,17 @@ Rausach:
    rm -rf frontend/.next
    
 2. Kiểm tra backend có chạy:
-   curl http://116.118.49.243:13001/graphql \
+   curl http://116.118.48.208:13001/graphql \
      -H "Content-Type: application/json" \
      -d '{"query":"{__typename}"}'
    
    Phải trả về: {"data":{"__typename":"Query"}}
 
 3. Kiểm tra CORS:
-   curl -I -X OPTIONS http://116.118.49.243:13001/graphql \
-     -H "Origin: http://116.118.49.243:13000"
+   curl -I -X OPTIONS http://116.118.48.208:13001/graphql \
+     -H "Origin: http://116.118.48.208:13000"
    
-   Phải thấy: Access-Control-Allow-Origin: http://116.118.49.243:13000
+   Phải thấy: Access-Control-Allow-Origin: http://116.118.48.208:13000
 
 4. Xem logs backend:
    Tìm lỗi CORS hoặc authentication

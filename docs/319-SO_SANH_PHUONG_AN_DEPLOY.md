@@ -20,7 +20,7 @@
 │    ┌─────────┘          └─────────┐     │
 │    │                              │     │
 │  ┌─▼──────────────┐    ┌──────────▼──┐  │
-│  │ Rausach Domain │    │ Tazagroup   │  │
+│  │ Rausach Domain │    │ Innerv2   │  │
 │  │ - Backend      │    │ - Backend   │  │
 │  │ - Frontend     │    │ - Frontend  │  │
 │  │ Port: 12xxx    │    │ Port: 13xxx │  │
@@ -76,7 +76,7 @@
 │  └───────────────────────────────────┘  │
 │                                         │
 │  ┌───────────────────────────────────┐  │
-│  │   TAZAGROUP STACK                 │  │
+│  │   INNERV2 STACK                 │  │
 │  │  - PostgreSQL (dedicated)         │  │
 │  │  - Redis (dedicated)              │  │
 │  │  - Minio (dedicated)              │  │
@@ -133,7 +133,7 @@
 │    ┌─────────┴──────────┴─────────┐     │
 │    │                              │     │
 │  ┌─▼──────────────┐    ┌──────────▼──┐  │
-│  │ Rausach Stack  │    │ Tazagroup   │  │
+│  │ Rausach Stack  │    │ Innerv2   │  │
 │  │ - PostgreSQL   │    │ - PostgreSQL│  │
 │  │   (dedicated)  │    │   (dedicated)│  │
 │  │ - Backend      │    │ - Backend   │  │
@@ -200,7 +200,7 @@ make -f Makefile.multi-domain start-all         # Khởi động
 # Hoặc chỉ chạy 1 domain tại 1 thời điểm
 make -f Makefile.multi-domain start-rausach     # Chỉ Rausach
 # hoặc
-make -f Makefile.multi-domain start-tazagroup   # Chỉ Tazagroup
+make -f Makefile.multi-domain start-innerv2   # Chỉ Innerv2
 ```
 
 **Tips:**
@@ -261,12 +261,12 @@ make -f Makefile.hybrid start-all
 # Chỉ Rausach (tiết kiệm tài nguyên)
 make -f Makefile.hybrid start-rausach
 
-# Chỉ Tazagroup
-make -f Makefile.hybrid start-tazagroup
+# Chỉ Innerv2
+make -f Makefile.hybrid start-innerv2
 
 # Backup riêng biệt
 make -f Makefile.hybrid backup-rausach
-make -f Makefile.hybrid backup-tazagroup
+make -f Makefile.hybrid backup-innerv2
 ```
 
 ---
@@ -320,13 +320,13 @@ Khi traffic tăng, cần scale:
 ```bash
 # 1. Backup databases
 make -f Makefile.multi-domain backup-rausach
-make -f Makefile.multi-domain backup-tazagroup
+make -f Makefile.multi-domain backup-innerv2
 
 # 2. Stop current setup
 make -f Makefile.multi-domain stop-all
 
 # 3. Deploy isolated stacks
-# Tạo docker-compose.rausach.yml và docker-compose.tazagroup.yml
+# Tạo docker-compose.rausach.yml và docker-compose.innerv2.yml
 
 # 4. Restore databases
 # Restore vào các PostgreSQL instances riêng

@@ -19,7 +19,7 @@
 
 - ✅ 8 services configured (2 shared + 6 dedicated)
 - ✅ Memory limits: ~1.8GB total
-- ✅ Ports schema: 12xxx (Rausach), 13xxx (Tazagroup)
+- ✅ Ports schema: 12xxx (Rausach), 13xxx (Innerv2)
 - ✅ Volumes & networks correct
 - ✅ Health checks configured
 
@@ -29,7 +29,7 @@
 
 #### 🔴 Critical Bugs (3)
 1. ✅ `.env.rausach` DATABASE_URL sai → Fixed
-2. ✅ `.env.tazagroup` shared ports sai → Fixed  
+2. ✅ `.env.innerv2` shared ports sai → Fixed  
 3. ✅ LMS enrollment mutation error → Fixed
 
 #### 🟡 High Priority Bugs (4)
@@ -61,7 +61,7 @@ Kết hợp điểm mạnh:
 **Features:**
 ```bash
 # Modes
---mode hybrid|rausach|tazagroup|shared
+--mode hybrid|rausach|innerv2|shared
 
 # Build options
 --build                  # Full build
@@ -104,9 +104,9 @@ Kết hợp điểm mạnh:
 **Trước:**
 ```bash
 # .env.rausach (SAI ❌)
-DATABASE_URL="...tazagroupcore"  # Wrong DB!
+DATABASE_URL="...innerv2core"  # Wrong DB!
 
-# .env.tazagroup (SAI ❌)
+# .env.innerv2 (SAI ❌)
 REDIS_PORT=13004   # Should be shared
 MINIO_PORT=13007   # Should be shared
 ```
@@ -116,7 +116,7 @@ MINIO_PORT=13007   # Should be shared
 # .env.rausach (ĐÚNG ✅)
 DATABASE_URL="...rausachcore"
 
-# .env.tazagroup (ĐÚNG ✅)
+# .env.innerv2 (ĐÚNG ✅)
 REDIS_PORT=12004   # Shared
 MINIO_PORT=12007   # Shared
 ```
@@ -147,7 +147,7 @@ MINIO_PORT=12007   # Shared
 
 ### ✅ Đã Sửa
 1. `.env.rausach` - Fixed DATABASE_URL
-2. `.env.tazagroup` - Fixed shared ports
+2. `.env.innerv2` - Fixed shared ports
 
 ### ✅ Đã Verified
 1. `docker-compose.hybrid.yml` - Configuration correct
@@ -190,16 +190,16 @@ MINIO_PORT=12007   # Shared
 ### URLs Sau Deployment
 
 **Rausach:**
-- Frontend: http://116.118.49.243:12000
-- Backend: http://116.118.49.243:12001/graphql
+- Frontend: http://116.118.48.208:12000
+- Backend: http://116.118.48.208:12001/graphql
 
-**Tazagroup:**
-- Frontend: http://116.118.49.243:13000
-- Backend: http://116.118.49.243:13001/graphql
+**Innerv2:**
+- Frontend: http://116.118.48.208:13000
+- Backend: http://116.118.48.208:13001/graphql
 
 **Shared:**
-- Minio: http://116.118.49.243:12008
-- Redis: 116.118.49.243:12004
+- Minio: http://116.118.48.208:12008
+- Redis: 116.118.48.208:12004
 
 ---
 
@@ -215,7 +215,7 @@ Project Root
 │
 ├── docker-compose.hybrid.yml      🐳 Hybrid config
 ├── .env.rausach                   ⚙️ Rausach config (FIXED)
-├── .env.tazagroup                 ⚙️ Tazagroup config (FIXED)
+├── .env.innerv2                 ⚙️ Innerv2 config (FIXED)
 │
 ├── deploy-hybrid.sh               🎮 Interactive menu
 ├── start-hybrid.sh                ▶️ Quick start
@@ -243,7 +243,7 @@ Project Root
 
 2. **Backup hiện tại:**
    ```bash
-   ssh root@116.118.49.243 'cd /root/shoprausach && docker exec rausach-postgres pg_dump -U postgres rausachcore > backup_before_deploy.sql'
+   ssh root@116.118.48.208 'cd /root/shoprausach && docker exec rausach-postgres pg_dump -U postgres rausachcore > backup_before_deploy.sql'
    ```
 
 3. **Deploy:**
@@ -260,13 +260,13 @@ Project Root
 
 ```bash
 # Check status
-ssh root@116.118.49.243 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml ps'
+ssh root@116.118.48.208 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml ps'
 
 # Check resources
-ssh root@116.118.49.243 'docker stats'
+ssh root@116.118.48.208 'docker stats'
 
 # Check logs
-ssh root@116.118.49.243 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml logs -f --tail=50'
+ssh root@116.118.48.208 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml logs -f --tail=50'
 ```
 
 ---

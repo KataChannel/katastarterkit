@@ -24,7 +24,7 @@ let RedisHealthIndicator = class RedisHealthIndicator extends terminus_1.HealthI
         const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
         const host = isDockerEnv
             ? this.configService.get('DOCKER_REDIS_HOST', 'redis')
-            : this.configService.get('REDIS_HOST', '116.118.49.243');
+            : this.configService.get('REDIS_HOST', '116.118.48.208');
         const portConfig = isDockerEnv
             ? this.configService.get('DOCKER_REDIS_PORT', '6379')
             : this.configService.get('REDIS_PORT', '12004');

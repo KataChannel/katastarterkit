@@ -19,8 +19,8 @@ make -f Makefile.multi-domain start-all
 
 ### 🌐 URLs Truy Cập
 
-- **Rausach**: http://116.118.49.243:12000
-- **Tazagroup**: http://116.118.49.243:13000
+- **Rausach**: http://116.118.48.208:12000
+- **Innerv2**: http://116.118.48.208:13000
 
 ### 📋 Lệnh Thường Dùng
 

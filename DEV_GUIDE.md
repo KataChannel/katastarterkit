@@ -5,7 +5,7 @@
 Dự án hỗ trợ **2 chế độ làm việc**:
 
 1. **Development (localhost)** - Phát triển trên máy local
-2. **Production (server)** - Triển khai lên server 116.118.49.243
+2. **Production (server)** - Triển khai lên server 116.118.48.208
 
 ### 🏗️ Kiến trúc Multi-Domain
 
@@ -19,7 +19,7 @@ Dự án hỗ trợ **2 chế độ làm việc**:
           ↑                              ↑
           │                              │
 ┌─────────┴──────────┐        ┌─────────┴──────────┐
-│   RAUSACH DOMAIN   │        │ TAZAGROUP DOMAIN   │
+│   RAUSACH DOMAIN   │        │ INNERV2 DOMAIN   │
 │ Frontend:  12000   │        │ Frontend:  13000   │
 │ Backend:   12001   │        │ Backend:   13001   │
 └────────────────────┘        └────────────────────┘
@@ -33,7 +33,7 @@ Dự án hỗ trợ **2 chế độ làm việc**:
 
 - Bun >= 1.1.0
 - Node.js >= 18
-- Access tới server 116.118.49.243 (Database, Redis, Minio)
+- Access tới server 116.118.48.208 (Database, Redis, Minio)
 
 ### 🚀 Khởi động Development
 
@@ -48,7 +48,7 @@ chmod +x dev-start.sh dev-stop.sh switch-env.sh
 
 # Menu sẽ hiện:
 # 1) Rausach    (localhost:12000 + localhost:12001)
-# 2) Tazagroup  (localhost:13000 + localhost:13001)
+# 2) Innerv2  (localhost:13000 + localhost:13001)
 # 3) Both       (Cả 2 domain)
 # 4) Exit
 ```
@@ -68,15 +68,15 @@ cd frontend
 bun run dev -- -p 12000
 ```
 
-**Tazagroup Domain:**
+**Innerv2 Domain:**
 ```bash
 # Terminal 1 - Backend
-cp .env.dev.tazagroup backend/.env
+cp .env.dev.innerv2 backend/.env
 cd backend
 PORT=13001 bun run dev
 
 # Terminal 2 - Frontend
-cp .env.dev.tazagroup frontend/.env.local
+cp .env.dev.innerv2 frontend/.env.local
 cd frontend
 bun run dev -- -p 13000
 ```
@@ -94,9 +94,9 @@ bun run dev -- -p 13000
 
 # Menu:
 # 1) Dev - Rausach      (localhost:12000-12001)
-# 2) Dev - Tazagroup    (localhost:13000-13001)
-# 3) Prod - Rausach     (116.118.49.243:12000-12001)
-# 4) Prod - Tazagroup   (116.118.49.243:13000-13001)
+# 2) Dev - Innerv2    (localhost:13000-13001)
+# 3) Prod - Rausach     (116.118.48.208:12000-12001)
+# 4) Prod - Innerv2   (116.118.48.208:13000-13001)
 ```
 
 ---
@@ -115,8 +115,8 @@ chmod +x prod-deploy.sh
 ./prod-deploy.sh
 
 # Menu:
-# 1) Rausach         (116.118.49.243:12000-12001)
-# 2) Tazagroup       (116.118.49.243:13000-13001)
+# 1) Rausach         (116.118.48.208:12000-12001)
+# 2) Innerv2       (116.118.48.208:13000-13001)
 # 3) Multi-domain    (Cả 2 domain)
 # 4) Exit
 ```
@@ -128,9 +128,9 @@ chmod +x prod-deploy.sh
 docker-compose -f docker-compose.rausach.yml up -d --build
 ```
 
-**Deploy Tazagroup:**
+**Deploy Innerv2:**
 ```bash
-docker-compose -f docker-compose.tazagroup.yml up -d --build
+docker-compose -f docker-compose.innerv2.yml up -d --build
 ```
 
 **Deploy Multi-domain (cả 2):**
@@ -143,27 +143,27 @@ docker-compose -f docker-compose.multi-domain.yml up -d --build
 **Xem logs:**
 ```bash
 docker-compose -f docker-compose.rausach.yml logs -f
-docker-compose -f docker-compose.tazagroup.yml logs -f
+docker-compose -f docker-compose.innerv2.yml logs -f
 docker-compose -f docker-compose.multi-domain.yml logs -f
 ```
 
 **Kiểm tra status:**
 ```bash
 docker-compose -f docker-compose.rausach.yml ps
-docker-compose -f docker-compose.tazagroup.yml ps
+docker-compose -f docker-compose.innerv2.yml ps
 ```
 
 **Dừng services:**
 ```bash
 docker-compose -f docker-compose.rausach.yml down
-docker-compose -f docker-compose.tazagroup.yml down
+docker-compose -f docker-compose.innerv2.yml down
 docker-compose -f docker-compose.multi-domain.yml down
 ```
 
 **Restart services:**
 ```bash
 docker-compose -f docker-compose.rausach.yml restart
-docker-compose -f docker-compose.tazagroup.yml restart
+docker-compose -f docker-compose.innerv2.yml restart
 ```
 
 ---
@@ -173,15 +173,15 @@ docker-compose -f docker-compose.tazagroup.yml restart
 ```
 .
 ├── .env.dev.rausach      # Dev - Rausach (localhost)
-├── .env.dev.tazagroup    # Dev - Tazagroup (localhost)
+├── .env.dev.innerv2    # Dev - Innerv2 (localhost)
 ├── .env.prod.rausach     # Production - Rausach (server)
-├── .env.prod.tazagroup   # Production - Tazagroup (server)
+├── .env.prod.innerv2   # Production - Innerv2 (server)
 ├── dev-start.sh          # Script khởi động dev
 ├── dev-stop.sh           # Script dừng dev
 ├── prod-deploy.sh        # Script deploy production
 ├── switch-env.sh         # Script chuyển môi trường nhanh
 ├── docker-compose.rausach.yml      # Docker cho Rausach
-├── docker-compose.tazagroup.yml    # Docker cho Tazagroup
+├── docker-compose.innerv2.yml    # Docker cho Innerv2
 └── docker-compose.multi-domain.yml # Docker cho cả 2
 ```
 
@@ -194,19 +194,19 @@ docker-compose -f docker-compose.tazagroup.yml restart
 | Domain    | Frontend | Backend | GraphQL |
 |-----------|----------|---------|---------|
 | Rausach   | http://localhost:12000 | http://localhost:12001 | http://localhost:12001/graphql |
-| Tazagroup | http://localhost:13000 | http://localhost:13001 | http://localhost:13001/graphql |
+| Innerv2 | http://localhost:13000 | http://localhost:13001 | http://localhost:13001/graphql |
 
 **Shared Services (Remote):**
-- Database: `116.118.49.243:12003` (rausachcore), `116.118.49.243:13003` (tazagroupcore)
-- Redis: `116.118.49.243:12004`
-- Minio: `116.118.49.243:12007`
+- Database: `116.118.48.208:12003` (rausachcore), `116.118.48.208:13003` (innerv2core)
+- Redis: `116.118.48.208:12004`
+- Minio: `116.118.48.208:12007`
 
 ### Production (Server)
 
 | Domain    | Frontend | Backend | GraphQL |
 |-----------|----------|---------|---------|
-| Rausach   | http://116.118.49.243:12000 | http://116.118.49.243:12001 | http://116.118.49.243:12001/graphql |
-| Tazagroup | http://116.118.49.243:13000 | http://116.118.49.243:13001 | http://116.118.49.243:13001/graphql |
+| Rausach   | http://116.118.48.208:12000 | http://116.118.48.208:12001 | http://116.118.48.208:12001/graphql |
+| Innerv2 | http://116.118.48.208:13000 | http://116.118.48.208:13001 | http://116.118.48.208:13001/graphql |
 
 ---
 
@@ -226,8 +226,8 @@ docker-compose -f docker-compose.tazagroup.yml restart
 # Xem logs
 tail -f dev-rausach-backend.log
 tail -f dev-rausach-frontend.log
-tail -f dev-tazagroup-backend.log
-tail -f dev-tazagroup-frontend.log
+tail -f dev-innerv2-backend.log
+tail -f dev-innerv2-frontend.log
 ```
 
 ### Production
@@ -237,7 +237,7 @@ tail -f dev-tazagroup-frontend.log
 
 # Hoặc thủ công
 docker-compose -f docker-compose.rausach.yml up -d --build
-docker-compose -f docker-compose.tazagroup.yml up -d --build
+docker-compose -f docker-compose.innerv2.yml up -d --build
 docker-compose -f docker-compose.multi-domain.yml up -d --build
 
 # Logs
@@ -269,13 +269,13 @@ kill -9 $(lsof -ti:12000)
 ### Không kết nối được database/redis/minio
 ```bash
 # Kiểm tra kết nối tới server
-ping 116.118.49.243
+ping 116.118.48.208
 
 # Test port
-telnet 116.118.49.243 12003  # PostgreSQL Rausach
-telnet 116.118.49.243 13003  # PostgreSQL Tazagroup
-telnet 116.118.49.243 12004  # Redis
-telnet 116.118.49.243 12007  # Minio
+telnet 116.118.48.208 12003  # PostgreSQL Rausach
+telnet 116.118.48.208 13003  # PostgreSQL Innerv2
+telnet 116.118.48.208 12004  # Redis
+telnet 116.118.48.208 12007  # Minio
 ```
 
 ### Environment variables không đúng
@@ -315,7 +315,7 @@ docker-compose -f docker-compose.rausach.yml up -d --build --force-recreate
 Nếu gặp vấn đề, kiểm tra:
 1. File `.env` có đúng không
 2. Ports có bị chiếm không
-3. Kết nối tới server 116.118.49.243 có ổn không
+3. Kết nối tới server 116.118.48.208 có ổn không
 4. Logs của backend/frontend
 
 ---
@@ -325,4 +325,4 @@ Nếu gặp vấn đề, kiểm tra:
 - **Dev mode**: Backend và Frontend chạy trực tiếp với Bun (nhanh, hot reload)
 - **Prod mode**: Chạy trong Docker containers (isolated, production-ready)
 - **Database/Redis/Minio**: Dev dùng remote server, Prod cũng dùng server
-- **Port allocation**: Rausach (12xxx), Tazagroup (13xxx)
+- **Port allocation**: Rausach (12xxx), Innerv2 (13xxx)

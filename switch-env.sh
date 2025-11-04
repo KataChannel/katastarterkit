@@ -17,9 +17,9 @@ echo -e "${GREEN}   🔄 QUICK ENVIRONMENT SWITCH${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "  1) Dev - Rausach      (localhost:12000-12001)"
-echo "  2) Dev - Tazagroup    (localhost:13000-13001)"
-echo "  3) Prod - Rausach     (116.118.49.243:12000-12001)"
-echo "  4) Prod - Tazagroup   (116.118.49.243:13000-13001)"
+echo "  2) Dev - Innerv2    (localhost:13000-13001)"
+echo "  3) Prod - Rausach     (116.118.48.208:12000-12001)"
+echo "  4) Prod - Innerv2   (116.118.48.208:13000-13001)"
 echo ""
 read -p "Chọn môi trường [1-4]: " choice
 
@@ -30,9 +30,9 @@ case $choice in
         echo -e "${GREEN}✅ Switched to Dev - Rausach (localhost)${NC}"
         ;;
     2)
-        cp .env.dev.tazagroup backend/.env
-        cp .env.dev.tazagroup frontend/.env.local
-        echo -e "${GREEN}✅ Switched to Dev - Tazagroup (localhost)${NC}"
+        cp .env.dev.innerv2 backend/.env
+        cp .env.dev.innerv2 frontend/.env.local
+        echo -e "${GREEN}✅ Switched to Dev - Innerv2 (localhost)${NC}"
         ;;
     3)
         cp .env.prod.rausach backend/.env
@@ -40,9 +40,9 @@ case $choice in
         echo -e "${GREEN}✅ Switched to Prod - Rausach (server)${NC}"
         ;;
     4)
-        cp .env.prod.tazagroup backend/.env
-        cp .env.prod.tazagroup frontend/.env.local
-        echo -e "${GREEN}✅ Switched to Prod - Tazagroup (server)${NC}"
+        cp .env.prod.innerv2 backend/.env
+        cp .env.prod.innerv2 frontend/.env.local
+        echo -e "${GREEN}✅ Switched to Prod - Innerv2 (server)${NC}"
         ;;
     *)
         echo -e "${RED}❌ Invalid choice!${NC}"

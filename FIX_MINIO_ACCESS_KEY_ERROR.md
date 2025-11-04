@@ -39,7 +39,7 @@ Trong `docker-compose.hybrid.yml` và `docker-compose.multi-domain.yml`, Minio �
 Script sẽ tự động cập nhật:
 - ✅ `backend/.env`
 - ✅ `.env.rausach`
-- ✅ `.env.tazagroup`
+- ✅ `.env.innerv2`
 
 ### Cách 2: Sửa Thủ Công
 
@@ -48,7 +48,7 @@ Mở các file `.env` và cập nhật:
 **1. File: `backend/.env`**
 ```env
 # Minio Object Storage
-MINIO_ENDPOINT=116.118.49.243
+MINIO_ENDPOINT=116.118.48.208
 MINIO_PORT=12007
 MINIO_ACCESS_KEY=minio-admin          # ✅ ĐỔI TỪ rausachcore-admin
 MINIO_SECRET_KEY=minio-secret-2025    # ✅ GIỮ NGUYÊN
@@ -63,11 +63,11 @@ MINIO_SECRET_KEY=minio-secret-2025    # ✅ GIỮ NGUYÊN
 MINIO_BUCKET_NAME=rausach-uploads
 ```
 
-**3. File: `.env.tazagroup`**
+**3. File: `.env.innerv2`**
 ```env
 MINIO_ACCESS_KEY=minio-admin          # ✅ ĐỔI
 MINIO_SECRET_KEY=minio-secret-2025    # ✅ GIỮ NGUYÊN
-MINIO_BUCKET_NAME=tazagroup-uploads
+MINIO_BUCKET_NAME=innerv2-uploads
 ```
 
 ## 🔄 Restart Backend
@@ -92,11 +92,11 @@ yarn start:dev
 ```bash
 # Hybrid
 docker compose -f docker-compose.hybrid.yml restart rausach-backend
-docker compose -f docker-compose.hybrid.yml restart tazagroup-backend
+docker compose -f docker-compose.hybrid.yml restart innerv2-backend
 
 # Multi-Domain
 docker compose -f docker-compose.multi-domain.yml restart rausach-backend
-docker compose -f docker-compose.multi-domain.yml restart tazagroup-backend
+docker compose -f docker-compose.multi-domain.yml restart innerv2-backend
 ```
 
 ## ✅ Kiểm Tra Đã Fix
@@ -136,7 +136,7 @@ mutation {
 
 Để kiểm tra trực tiếp:
 
-**URL:** http://116.118.49.243:12008
+**URL:** http://116.118.48.208:12008
 
 **Đăng nhập:**
 - Username: `minio-admin`
@@ -146,12 +146,12 @@ mutation {
 
 | Thông tin | Giá trị |
 |-----------|---------|
-| **Endpoint** | 116.118.49.243:12007 (API) |
-| **Console** | http://116.118.49.243:12008 |
+| **Endpoint** | 116.118.48.208:12007 (API) |
+| **Console** | http://116.118.48.208:12008 |
 | **Access Key** | minio-admin |
 | **Secret Key** | minio-secret-2025 |
 | **SSL** | false |
-| **Buckets** | rausach-uploads, tazagroup-uploads |
+| **Buckets** | rausach-uploads, innerv2-uploads |
 
 ## 🔧 Nếu Muốn Đổi Credentials
 
@@ -207,7 +207,7 @@ docker compose -f docker-compose.hybrid.yml restart minio
 
 4. **Test connection:**
    ```bash
-   curl http://116.118.49.243:12007/minio/health/live
+   curl http://116.118.48.208:12007/minio/health/live
    # Phải trả về OK
    ```
 
@@ -218,4 +218,4 @@ docker compose -f docker-compose.hybrid.yml restart minio
 **Files đã sửa:**
 - ✅ `backend/.env`
 - ✅ `.env.rausach`
-- ✅ `.env.tazagroup`
+- ✅ `.env.innerv2`

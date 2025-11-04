@@ -8,7 +8,7 @@
 set -e
 
 # Configuration
-SERVER_IP="116.118.49.243"
+SERVER_IP="116.118.48.208"
 SERVER_USER="root"
 REMOTE_DIR="/root/shoprausach"
 LOCAL_DIR="$(pwd)"

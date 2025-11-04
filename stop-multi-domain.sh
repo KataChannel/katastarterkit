@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Quick Stop Script - Multi-Domain Deployment
-# Usage: ./stop-multi-domain.sh [all|rausach|tazagroup]
+# Usage: ./stop-multi-domain.sh [all|rausach|innerv2]
 
 set -e
 
@@ -24,18 +24,18 @@ case "$MODE" in
         echo "🛑 Dừng RAUSACH domain..."
         $DOCKER_COMPOSE -f "$COMPOSE_FILE" stop rausach-backend rausach-frontend
         ;;
-    tazagroup)
-        echo "🛑 Dừng TAZAGROUP domain..."
-        $DOCKER_COMPOSE -f "$COMPOSE_FILE" stop tazagroup-backend tazagroup-frontend
+    innerv2)
+        echo "🛑 Dừng INNERV2 domain..."
+        $DOCKER_COMPOSE -f "$COMPOSE_FILE" stop innerv2-backend innerv2-frontend
         ;;
     *)
         echo "❌ Tham số không hợp lệ!"
-        echo "Usage: ./stop-multi-domain.sh [all|rausach|tazagroup]"
+        echo "Usage: ./stop-multi-domain.sh [all|rausach|innerv2]"
         echo ""
         echo "Examples:"
         echo "  ./stop-multi-domain.sh all       # Dừng tất cả"
         echo "  ./stop-multi-domain.sh rausach   # Dừng Rausach"
-        echo "  ./stop-multi-domain.sh tazagroup # Dừng Tazagroup"
+        echo "  ./stop-multi-domain.sh innerv2 # Dừng Innerv2"
         exit 1
         ;;
 esac

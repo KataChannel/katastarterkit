@@ -10,9 +10,9 @@ Hệ thống quản lý môi trường phát triển và triển khai đa domain
 
 ### 🔧 Environment Files
 - `.env.dev.rausach` - Development Rausach (localhost:12000-12001)
-- `.env.dev.tazagroup` - Development Tazagroup (localhost:13000-13001)
-- `.env.prod.rausach` - Production Rausach (116.118.49.243:12000-12001)
-- `.env.prod.tazagroup` - Production Tazagroup (116.118.49.243:13000-13001)
+- `.env.dev.innerv2` - Development Innerv2 (localhost:13000-13001)
+- `.env.prod.rausach` - Production Rausach (116.118.48.208:12000-12001)
+- `.env.prod.innerv2` - Production Innerv2 (116.118.48.208:13000-13001)
 
 ### 🚀 Scripts
 - `menu.sh` - Menu chính điều khiển tất cả
@@ -25,7 +25,7 @@ Hệ thống quản lý môi trường phát triển và triển khai đa domain
 
 ### 🐳 Docker Compose Files
 - `docker-compose.rausach.yml` - Deploy Rausach
-- `docker-compose.tazagroup.yml` - Deploy Tazagroup
+- `docker-compose.innerv2.yml` - Deploy Innerv2
 - `docker-compose.multi-domain.yml` - Deploy cả 2 domain
 
 ### 📖 Documentation
@@ -52,23 +52,23 @@ Hệ thống quản lý môi trường phát triển và triển khai đa domain
 
 # Cách 2: Script trực tiếp
 ./dev-start.sh
-# Chọn Rausach, Tazagroup, hoặc Both
+# Chọn Rausach, Innerv2, hoặc Both
 
 # Cách 3: NPM scripts
 bun run dev:rausach    # Rausach (localhost:12000-12001)
-bun run dev:tazagroup  # Tazagroup (localhost:13000-13001)
+bun run dev:innerv2  # Innerv2 (localhost:13000-13001)
 ```
 
 **Development URLs:**
 - Rausach Frontend: http://localhost:12000
 - Rausach Backend: http://localhost:12001/graphql
-- Tazagroup Frontend: http://localhost:13000
-- Tazagroup Backend: http://localhost:13001/graphql
+- Innerv2 Frontend: http://localhost:13000
+- Innerv2 Backend: http://localhost:13001/graphql
 
 **Remote Services (Shared):**
-- Database: 116.118.49.243:12003 (rausach), 116.118.49.243:13003 (tazagroup)
-- Redis: 116.118.49.243:12004
-- Minio: 116.118.49.243:12007
+- Database: 116.118.48.208:12003 (rausach), 116.118.48.208:13003 (innerv2)
+- Redis: 116.118.48.208:12004
+- Minio: 116.118.48.208:12007
 
 ### 🛑 Dừng Development
 
@@ -85,17 +85,17 @@ bun run dev:tazagroup  # Tazagroup (localhost:13000-13001)
 
 # Cách 2: Script trực tiếp
 ./prod-deploy.sh
-# Chọn Rausach, Tazagroup, hoặc Multi-domain
+# Chọn Rausach, Innerv2, hoặc Multi-domain
 
 # Cách 3: NPM scripts
 bun run docker:prod:rausach    # Deploy Rausach
-bun run docker:prod:tazagroup  # Deploy Tazagroup
+bun run docker:prod:innerv2  # Deploy Innerv2
 bun run docker:prod:multi      # Deploy cả 2
 ```
 
 **Production URLs:**
-- Rausach: http://116.118.49.243:12000 (frontend), http://116.118.49.243:12001/graphql (backend)
-- Tazagroup: http://116.118.49.243:13000 (frontend), http://116.118.49.243:13001/graphql (backend)
+- Rausach: http://116.118.48.208:12000 (frontend), http://116.118.48.208:12001/graphql (backend)
+- Innerv2: http://116.118.48.208:13000 (frontend), http://116.118.48.208:13001/graphql (backend)
 
 ### 📊 Kiểm tra Status
 
@@ -121,15 +121,15 @@ bun run docker:prod:multi      # Deploy cả 2
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│           REMOTE SERVER (116.118.49.243)                    │
-│  📦 PostgreSQL - Port 12003 (rausach), 13003 (tazagroup)   │
+│           REMOTE SERVER (116.118.48.208)                    │
+│  📦 PostgreSQL - Port 12003 (rausach), 13003 (innerv2)   │
 │  🔴 Redis - Port 12004                                      │
 │  📁 Minio - Port 12007                                      │
 └─────────────────────────────────────────────────────────────┘
           ↑                              ↑
           │                              │
 ┌─────────┴──────────┐        ┌─────────┴──────────┐
-│   RAUSACH          │        │   TAZAGROUP        │
+│   RAUSACH          │        │   INNERV2        │
 │                    │        │                    │
 │ Development:       │        │ Development:       │
 │  Frontend: 12000   │        │  Frontend: 13000   │
@@ -160,7 +160,7 @@ bun run docker:prod:multi      # Deploy cả 2
 1. **Development mode**: Backend và Frontend chạy trực tiếp với Bun (nhanh, hot reload)
 2. **Production mode**: Chạy trong Docker containers (isolated, production-ready)
 3. **Database/Redis/Minio**: Cả dev và prod đều dùng remote server
-4. **Port allocation**: Rausach (12xxx), Tazagroup (13xxx)
+4. **Port allocation**: Rausach (12xxx), Innerv2 (13xxx)
 
 ---
 
