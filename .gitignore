@@ -14,7 +14,11 @@ build/
 
 # Environment variables
 .env*
-# Exception: Include production environment files in repository
+# Exception: Include template environment files
+!.env.dev.rausach
+!.env.dev.tazagroup
+!.env.prod.rausach
+!.env.prod.tazagroup
 !.env.production
 !frontend/.env.production
 !backend/.env.production
@@ -38,6 +42,7 @@ backend/kata_json
 logs/
 *.log
 .pnpm-debug.log*
+dev-*.log
 
 # Runtime data
 pids/
@@ -101,3 +106,4 @@ backups/
 
 # Local development
 .local/
+
