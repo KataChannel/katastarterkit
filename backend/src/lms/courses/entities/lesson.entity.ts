@@ -1,5 +1,6 @@
 import { ObjectType, Field, ID, Int, registerEnumType } from '@nestjs/graphql';
 import { LessonType } from '@prisma/client';
+import { Quiz } from '../../quizzes/entities/quiz.entity';
 
 // Register enum for GraphQL
 registerEnumType(LessonType, {
@@ -35,6 +36,9 @@ export class Lesson {
 
   @Field({ defaultValue: false })
   isFree: boolean;
+
+  @Field(() => [Quiz], { nullable: true })
+  quizzes?: Quiz[];
 
   @Field()
   createdAt: Date;

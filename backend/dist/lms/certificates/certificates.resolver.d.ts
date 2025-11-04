@@ -6,9 +6,8 @@ export declare class CertificatesResolver {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         courseId: string;
-        issueDate: Date;
+        userId: string;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -16,6 +15,7 @@ export declare class CertificatesResolver {
         completionDate: Date;
         grade: string | null;
         verificationUrl: string | null;
+        issueDate: Date;
     }>;
     getMyCertificates(user: any): Promise<({
         course: {
@@ -27,9 +27,8 @@ export declare class CertificatesResolver {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         courseId: string;
-        issueDate: Date;
+        userId: string;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -37,26 +36,26 @@ export declare class CertificatesResolver {
         completionDate: Date;
         grade: string | null;
         verificationUrl: string | null;
+        issueDate: Date;
     })[]>;
     getCertificate(user: any, id: string): Promise<{
-        user: {
-            username: string;
-            firstName: string;
-            lastName: string;
-        };
         course: {
             title: string;
             slug: string;
             thumbnail: string;
             duration: number;
         };
+        user: {
+            username: string;
+            firstName: string;
+            lastName: string;
+        };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         courseId: string;
-        issueDate: Date;
+        userId: string;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -64,26 +63,26 @@ export declare class CertificatesResolver {
         completionDate: Date;
         grade: string | null;
         verificationUrl: string | null;
+        issueDate: Date;
     }>;
     verifyCertificate(certificateNumber: string): Promise<{
         valid: boolean;
         certificate: {
+            course: {
+                title: string;
+                thumbnail: string;
+            };
             user: {
                 username: string;
                 firstName: string;
                 lastName: string;
             };
-            course: {
-                title: string;
-                thumbnail: string;
-            };
         } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
             courseId: string;
-            issueDate: Date;
+            userId: string;
             enrollmentId: string;
             certificateNumber: string;
             courseName: string;
@@ -91,6 +90,7 @@ export declare class CertificatesResolver {
             completionDate: Date;
             grade: string | null;
             verificationUrl: string | null;
+            issueDate: Date;
         };
     }>;
     getCertificateStats(user: any): Promise<{

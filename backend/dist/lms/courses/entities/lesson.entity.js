@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Lesson = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const client_1 = require("@prisma/client");
+const quiz_entity_1 = require("../../quizzes/entities/quiz.entity");
 (0, graphql_1.registerEnumType)(client_1.LessonType, {
     name: 'LessonType',
     description: 'Type of lesson content',
@@ -55,6 +56,10 @@ __decorate([
     (0, graphql_1.Field)({ defaultValue: false }),
     __metadata("design:type", Boolean)
 ], Lesson.prototype, "isFree", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [quiz_entity_1.Quiz], { nullable: true }),
+    __metadata("design:type", Array)
+], Lesson.prototype, "quizzes", void 0);
 __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)

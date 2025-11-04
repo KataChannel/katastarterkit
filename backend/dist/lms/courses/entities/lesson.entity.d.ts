@@ -1,4 +1,5 @@
 import { LessonType } from '@prisma/client';
+import { Quiz } from '../../quizzes/entities/quiz.entity';
 export declare class Lesson {
     id: string;
     title: string;
@@ -9,6 +10,7 @@ export declare class Lesson {
     order: number;
     moduleId: string;
     isFree: boolean;
+    quizzes?: Quiz[];
     createdAt: Date;
     updatedAt: Date;
 }

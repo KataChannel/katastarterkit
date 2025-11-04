@@ -194,7 +194,6 @@ export default function CreateCourseWithAIPage() {
                       <SelectValue placeholder="Chọn danh mục" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Không chọn</SelectItem>
                       {categories?.map((cat: any) => (
                         <SelectItem key={cat.id} value={cat.id}>
                           {cat.name}

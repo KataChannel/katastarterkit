@@ -19,7 +19,7 @@ export class AICourseGeneratorService {
       console.warn('⚠️  GOOGLE_GEMINI_API_KEY not set. AI course generation will not work.');
     } else {
       this.genAI = new GoogleGenerativeAI(apiKey);
-      this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     }
   }
 

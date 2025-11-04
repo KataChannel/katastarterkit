@@ -2189,6 +2189,7 @@ type Lesson {
   isFree: Boolean!
   moduleId: ID!
   order: Int!
+  quizzes: [Quiz!]
   title: String!
   type: LessonType!
   updatedAt: DateTime!
