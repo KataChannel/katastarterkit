@@ -1,151 +1,183 @@
-# 🚀 Multi-Domain Development & Deployment System
+# 🎯 HƯỚNG DẪN NHANH - BẮT ĐẦU NGAY
 
-## ⚡ Quick Start
+## ✅ Setup lần đầu (1 phút)
 
-### 🎯 Menu Chính (Khuyến nghị)
+### Bước 1: Đảm bảo server đang chạy
+
+Trên server `116.118.49.243`, các services sau phải đang chạy:
+- PostgreSQL (ports: 12003, 13003)
+- Redis (port: 12004)
+- Minio (port: 12007)
+
+### Bước 2: Test kết nối
 
 ```bash
-chmod +x *.sh
-./menu.sh
+./test-connection.sh
 ```
 
-Menu sẽ cung cấp tất cả các tùy chọn cần thiết!
+Nếu tất cả ✅ OK → Tiếp tục
+Nếu có ❌ FAILED → Liên hệ admin server
 
 ---
 
-## 📋 Chế độ làm việc
+## 🚀 Khởi động Development (10 giây)
 
-### 1️⃣ Development (Localhost)
+### Cách 1: Dùng Menu (Khuyến nghị)
+
+```bash
+./menu.sh
+```
+
+Chọn:
+- `1` - Rausach (localhost:12000)
+- `2` - Tazagroup (localhost:13000)
+- `3` - Cả 2 domain
+
+### Cách 2: Lệnh trực tiếp
 
 **Rausach:**
+```bash
+./dev-start.sh
+# Nhập: 1
+```
+
+**Tazagroup:**
+```bash
+./dev-start.sh
+# Nhập: 2
+```
+
+**Cả 2:**
+```bash
+./dev-start.sh
+# Nhập: 3
+```
+
+---
+
+## 🛑 Dừng Development
+
+```bash
+./dev-stop.sh
+```
+
+---
+
+## 📍 URLs sau khi khởi động
+
+### Rausach Dev
 - Frontend: http://localhost:12000
-- Backend: http://localhost:12001
+- Backend: http://localhost:12001/graphql
+- Database: 116.118.49.243:12003
 
-**Tazagroup:**
+### Tazagroup Dev
 - Frontend: http://localhost:13000
-- Backend: http://localhost:13001
-
-**Remote Services:** 116.118.49.243 (Database, Redis, Minio)
-
-### 2️⃣ Production (Server)
-
-**Rausach:**
-- Frontend: http://116.118.49.243:12000
-- Backend: http://116.118.49.243:12001
-
-**Tazagroup:**
-- Frontend: http://116.118.49.243:13000
-- Backend: http://116.118.49.243:13001
+- Backend: http://localhost:13001/graphql
+- Database: 116.118.49.243:13003
 
 ---
 
-## 🎯 Script Commands
-
-| Script | Mô tả |
-|--------|-------|
-| `./menu.sh` | 🎯 Menu chính - Tất cả các lựa chọn |
-| `./dev-start.sh` | 🚀 Khởi động development |
-| `./dev-stop.sh` | 🛑 Dừng development |
-| `./prod-deploy.sh` | 🌐 Deploy production |
-| `./status.sh` | 📊 Kiểm tra trạng thái |
-| `./switch-env.sh` | 🔄 Chuyển môi trường |
-
----
-
-## 🔥 Quick Commands
-
-### Development
-```bash
-# Menu chính
-./menu.sh
-
-# Hoặc start trực tiếp
-./dev-start.sh    # Chọn domain
-./dev-stop.sh     # Dừng tất cả
-
-# NPM scripts
-bun run dev:rausach    # Rausach dev
-bun run dev:tazagroup  # Tazagroup dev
-```
-
-### Production
-```bash
-# Deploy với menu
-./prod-deploy.sh
-
-# Hoặc NPM scripts
-bun run docker:prod:rausach    # Deploy Rausach
-bun run docker:prod:tazagroup  # Deploy Tazagroup
-bun run docker:prod:multi      # Deploy cả 2
-```
-
-### Status & Logs
-```bash
-# Kiểm tra status
-./status.sh
-
-# Logs development
-tail -f dev-rausach-backend.log
-tail -f dev-tazagroup-frontend.log
-
-# Logs production
-docker-compose -f docker-compose.rausach.yml logs -f
-```
-
----
-
-## 📂 File Structure
-
-```
-.env.dev.rausach       # Dev - Rausach
-.env.dev.tazagroup     # Dev - Tazagroup
-.env.prod.rausach      # Prod - Rausach
-.env.prod.tazagroup    # Prod - Tazagroup
-
-dev-start.sh           # Start dev
-dev-stop.sh            # Stop dev
-prod-deploy.sh         # Deploy prod
-status.sh              # Check status
-switch-env.sh          # Switch env
-menu.sh                # Main menu
-
-docker-compose.rausach.yml
-docker-compose.tazagroup.yml
-docker-compose.multi-domain.yml
-```
-
----
-
-## 🔧 Setup
+## 🔥 Workflow hàng ngày
 
 ```bash
-# Install dependencies
-bun install
-cd backend && bun install
-cd ../frontend && bun install
+# Sáng: Bật project
+./dev-start.sh
+# Chọn domain cần làm
 
-# Make scripts executable
-chmod +x *.sh
+# Code, code, code... ☕
 
-# Start development
-./menu.sh
+# Tối: Tắt project
+./dev-stop.sh
 ```
 
 ---
 
-## 📖 Documentation
+## 🚢 Deploy lên Server Production
 
-Xem chi tiết trong: **[DEV_GUIDE.md](./DEV_GUIDE.md)**
+### Rausach
+```bash
+./prod-deploy.sh rausach
+```
+
+### Tazagroup
+```bash
+./prod-deploy.sh tazagroup
+```
+
+Sau khi deploy:
+- Rausach: http://116.118.49.243:12000
+- Tazagroup: http://116.118.49.243:13000
+
+---
+
+## 📋 Các lệnh hay dùng
+
+| Lệnh | Chức năng |
+|------|-----------|
+| `./menu.sh` | Menu chính (dễ nhất) |
+| `./dev-start.sh` | Bật dev |
+| `./dev-stop.sh` | Tắt dev |
+| `./status.sh` | Xem trạng thái |
+| `./test-connection.sh` | Test kết nối server |
+
+---
+
+## 🐛 Gặp lỗi?
+
+### "Can't reach database"
+→ Server chưa bật database. Liên hệ admin hoặc SSH vào server bật lại
+
+### "Port already in use"
+```bash
+./dev-stop.sh
+```
+
+### "Connection refused"
+```bash
+./test-connection.sh
+# Check xem service nào bị lỗi
+```
 
 ---
 
 ## 💡 Tips
 
-1. ✅ Luôn dùng `./menu.sh` để dễ dàng nhất
-2. ✅ Kiểm tra `./status.sh` khi gặp vấn đề
-3. ✅ Dùng `./switch-env.sh` để chuyển môi trường nhanh
-4. ✅ Check logs thường xuyên
+### Xem logs
+```bash
+# Backend
+tail -f dev-rausach-backend.log
+tail -f dev-tazagroup-backend.log
+
+# Frontend
+tail -f dev-rausach-frontend.log
+tail -f dev-tazagroup-frontend.log
+```
+
+### Làm 2 domain cùng lúc
+```bash
+./dev-start.sh
+# Chọn 3 (Both)
+
+# Mở 2 tab browser:
+# Tab 1: localhost:12000 (Rausach)
+# Tab 2: localhost:13000 (Tazagroup)
+```
 
 ---
 
-**Made with ❤️ for Multi-Domain Development**
+## ⚠️ Lưu ý
+
+- **Development**: Frontend/Backend chạy localhost, Database/Redis/Minio dùng server
+- **Production**: Tất cả chạy trên server 116.118.49.243
+- Không commit file `.env.dev.*` và `.env.prod.*`
+- File này chỉ dùng cho môi trường local/server của team
+
+---
+
+## 🎓 Tài liệu chi tiết
+
+Đọc thêm: [DEV_GUIDE.md](./DEV_GUIDE.md)
+
+---
+
+**Chúc code vui vẻ! 🎉**

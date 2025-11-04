@@ -1,328 +1,294 @@
-# 🚀 HƯỚNG DẪN PHÁT TRIỂN VÀ TRIỂN KHAI
+# 🚀 HƯỚNG DẪN SỬ DỤNG - MULTI-DOMAIN DEVELOPMENT
 
 ## 📋 Tổng quan
 
-Dự án hỗ trợ **2 chế độ làm việc**:
+Hệ thống hỗ trợ **2 domain** (Rausach & Tazagroup) với **2 môi trường** (Development & Production):
 
-1. **Development (localhost)** - Phát triển trên máy local
-2. **Production (server)** - Triển khai lên server 116.118.49.243
+### 🏠 Development (localhost)
+- **Rausach**: `localhost:12000` (frontend) + `localhost:12001` (backend)
+- **Tazagroup**: `localhost:13000` (frontend) + `localhost:13001` (backend)
+- Database, Redis, Minio: Sử dụng **remote server** `116.118.49.243`
 
-### 🏗️ Kiến trúc Multi-Domain
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    SHARED INFRASTRUCTURE                     │
-│  📦 PostgreSQL (12003, 13003)                               │
-│  🔴 Redis (12004)                                           │
-│  📁 Minio (12007)                                           │
-└─────────────────────────────────────────────────────────────┘
-          ↑                              ↑
-          │                              │
-┌─────────┴──────────┐        ┌─────────┴──────────┐
-│   RAUSACH DOMAIN   │        │ TAZAGROUP DOMAIN   │
-│ Frontend:  12000   │        │ Frontend:  13000   │
-│ Backend:   12001   │        │ Backend:   13001   │
-└────────────────────┘        └────────────────────┘
-```
+### 🚢 Production (server)
+- **Rausach**: `116.118.49.243:12000` + `116.118.49.243:12001`
+- **Tazagroup**: `116.118.49.243:13000` + `116.118.49.243:13001`
+- Database, Redis, Minio: Chạy trên **cùng server** `116.118.49.243`
 
 ---
 
-## 🛠️ DEVELOPMENT MODE (Localhost)
+## 🎯 Cách sử dụng
 
-### ✅ Yêu cầu
-
-- Bun >= 1.1.0
-- Node.js >= 18
-- Access tới server 116.118.49.243 (Database, Redis, Minio)
-
-### 🚀 Khởi động Development
-
-#### Cách 1: Sử dụng script tự động (Khuyến nghị)
+### Option 1: Menu tương tác (Đơn giản nhất)
 
 ```bash
-# Cho phép thực thi script
-chmod +x dev-start.sh dev-stop.sh switch-env.sh
+./menu.sh
+```
 
-# Khởi động với menu lựa chọn
+Chọn các option:
+- `1-2`: Khởi động dev (Rausach/Tazagroup)
+- `4-5`: Deploy production
+- `7`: Xem status
+- `9`: Test kết nối remote services
+
+### Option 2: Scripts trực tiếp
+
+#### 🧑‍💻 Development Mode
+
+**Khởi động Rausach:**
+```bash
 ./dev-start.sh
-
-# Menu sẽ hiện:
-# 1) Rausach    (localhost:12000 + localhost:12001)
-# 2) Tazagroup  (localhost:13000 + localhost:13001)
-# 3) Both       (Cả 2 domain)
-# 4) Exit
+# Chọn option 1
 ```
 
-#### Cách 2: Thủ công
-
-**Rausach Domain:**
+**Khởi động Tazagroup:**
 ```bash
-# Terminal 1 - Backend
-cp .env.dev.rausach backend/.env
-cd backend
-PORT=12001 bun run dev
-
-# Terminal 2 - Frontend
-cp .env.dev.rausach frontend/.env.local
-cd frontend
-bun run dev -- -p 12000
+./dev-start.sh
+# Chọn option 2
 ```
 
-**Tazagroup Domain:**
+**Khởi động cả 2:**
 ```bash
-# Terminal 1 - Backend
-cp .env.dev.tazagroup backend/.env
-cd backend
-PORT=13001 bun run dev
-
-# Terminal 2 - Frontend
-cp .env.dev.tazagroup frontend/.env.local
-cd frontend
-bun run dev -- -p 13000
+./dev-start.sh
+# Chọn option 3
 ```
 
-### 🛑 Dừng Development
-
+**Dừng development:**
 ```bash
 ./dev-stop.sh
 ```
 
-### 🔄 Chuyển đổi môi trường nhanh
-
-```bash
-./switch-env.sh
-
-# Menu:
-# 1) Dev - Rausach      (localhost:12000-12001)
-# 2) Dev - Tazagroup    (localhost:13000-13001)
-# 3) Prod - Rausach     (116.118.49.243:12000-12001)
-# 4) Prod - Tazagroup   (116.118.49.243:13000-13001)
-```
-
----
-
-## 🌐 PRODUCTION MODE (Server)
-
-### 🚀 Deploy lên Server
-
-#### Cách 1: Sử dụng script tự động (Khuyến nghị)
-
-```bash
-# Cho phép thực thi
-chmod +x prod-deploy.sh
-
-# Deploy với menu
-./prod-deploy.sh
-
-# Menu:
-# 1) Rausach         (116.118.49.243:12000-12001)
-# 2) Tazagroup       (116.118.49.243:13000-13001)
-# 3) Multi-domain    (Cả 2 domain)
-# 4) Exit
-```
-
-#### Cách 2: Thủ công với Docker Compose
+#### 🚀 Production Mode
 
 **Deploy Rausach:**
 ```bash
-docker-compose -f docker-compose.rausach.yml up -d --build
+./prod-deploy.sh rausach
 ```
 
 **Deploy Tazagroup:**
 ```bash
-docker-compose -f docker-compose.tazagroup.yml up -d --build
+./prod-deploy.sh tazagroup
 ```
 
-**Deploy Multi-domain (cả 2):**
-```bash
-docker-compose -f docker-compose.multi-domain.yml up -d --build
-```
-
-### 📊 Quản lý Production
-
-**Xem logs:**
-```bash
-docker-compose -f docker-compose.rausach.yml logs -f
-docker-compose -f docker-compose.tazagroup.yml logs -f
-docker-compose -f docker-compose.multi-domain.yml logs -f
-```
-
-**Kiểm tra status:**
-```bash
-docker-compose -f docker-compose.rausach.yml ps
-docker-compose -f docker-compose.tazagroup.yml ps
-```
-
-**Dừng services:**
+**Dừng production:**
 ```bash
 docker-compose -f docker-compose.rausach.yml down
 docker-compose -f docker-compose.tazagroup.yml down
-docker-compose -f docker-compose.multi-domain.yml down
-```
-
-**Restart services:**
-```bash
-docker-compose -f docker-compose.rausach.yml restart
-docker-compose -f docker-compose.tazagroup.yml restart
 ```
 
 ---
 
-## 📂 Cấu trúc File Môi trường
+## 📦 Cấu trúc Services
 
-```
-.
-├── .env.dev.rausach      # Dev - Rausach (localhost)
-├── .env.dev.tazagroup    # Dev - Tazagroup (localhost)
-├── .env.prod.rausach     # Production - Rausach (server)
-├── .env.prod.tazagroup   # Production - Tazagroup (server)
-├── dev-start.sh          # Script khởi động dev
-├── dev-stop.sh           # Script dừng dev
-├── prod-deploy.sh        # Script deploy production
-├── switch-env.sh         # Script chuyển môi trường nhanh
-├── docker-compose.rausach.yml      # Docker cho Rausach
-├── docker-compose.tazagroup.yml    # Docker cho Tazagroup
-└── docker-compose.multi-domain.yml # Docker cho cả 2
-```
+### Rausach
+- **Database**: `116.118.49.243:12003` - `rausachcore`
+- **Redis**: `116.118.49.243:12004` (shared)
+- **Minio**: `116.118.49.243:12007` (shared)
+- **PgAdmin**: `116.118.49.243:12002`
+
+### Tazagroup
+- **Database**: `116.118.49.243:13003` - `tazagroupcore`
+- **Redis**: `116.118.49.243:12004` (shared)
+- **Minio**: `116.118.49.243:12007` (shared)
+- **PgAdmin**: `116.118.49.243:13002`
 
 ---
 
-## 🌍 URL và Port Mapping
+## ⚙️ Environment Files
 
-### Development (Localhost)
-
-| Domain    | Frontend | Backend | GraphQL |
-|-----------|----------|---------|---------|
-| Rausach   | http://localhost:12000 | http://localhost:12001 | http://localhost:12001/graphql |
-| Tazagroup | http://localhost:13000 | http://localhost:13001 | http://localhost:13001/graphql |
-
-**Shared Services (Remote):**
-- Database: `116.118.49.243:12003` (rausachcore), `116.118.49.243:13003` (tazagroupcore)
-- Redis: `116.118.49.243:12004`
-- Minio: `116.118.49.243:12007`
-
-### Production (Server)
-
-| Domain    | Frontend | Backend | GraphQL |
-|-----------|----------|---------|---------|
-| Rausach   | http://116.118.49.243:12000 | http://116.118.49.243:12001 | http://116.118.49.243:12001/graphql |
-| Tazagroup | http://116.118.49.243:13000 | http://116.118.49.243:13001 | http://116.118.49.243:13001/graphql |
-
----
-
-## 🔥 Quick Commands
+Mỗi domain có 2 environment files:
 
 ### Development
-```bash
-# Khởi động dev
-./dev-start.sh
-
-# Dừng dev
-./dev-stop.sh
-
-# Chuyển môi trường
-./switch-env.sh
-
-# Xem logs
-tail -f dev-rausach-backend.log
-tail -f dev-rausach-frontend.log
-tail -f dev-tazagroup-backend.log
-tail -f dev-tazagroup-frontend.log
-```
+- `.env.dev.rausach` - Localhost ports, remote services
+- `.env.dev.tazagroup` - Localhost ports, remote services
 
 ### Production
+- `.env.prod.rausach` - Server ports, remote services
+- `.env.prod.tazagroup` - Server ports, remote services
+
+---
+
+## 🔄 Workflow thông thường
+
+### 1. Khởi động Development
+
 ```bash
-# Deploy
-./prod-deploy.sh
+# Bước 1: Đảm bảo remote services đang chạy trên server
+./test-connection.sh
 
-# Hoặc thủ công
-docker-compose -f docker-compose.rausach.yml up -d --build
-docker-compose -f docker-compose.tazagroup.yml up -d --build
-docker-compose -f docker-compose.multi-domain.yml up -d --build
+# Bước 2: Khởi động domain cần làm việc
+./dev-start.sh
+# Chọn domain: Rausach (1) hoặc Tazagroup (2)
 
-# Logs
-docker-compose -f docker-compose.multi-domain.yml logs -f
-
-# Stop
-docker-compose -f docker-compose.multi-domain.yml down
+# Bước 3: Mở browser
+# Rausach: http://localhost:12000
+# Tazagroup: http://localhost:13000
 ```
+
+### 2. Chuyển đổi domain
+
+```bash
+# Dừng domain hiện tại
+./dev-stop.sh
+
+# Khởi động domain khác
+./dev-start.sh
+```
+
+### 3. Deploy lên Production
+
+```bash
+# Rausach
+./prod-deploy.sh rausach
+
+# Tazagroup
+./prod-deploy.sh tazagroup
+```
+
+---
+
+## 📝 Các Scripts quan trọng
+
+| Script | Mô tả |
+|--------|-------|
+| `menu.sh` | Menu tương tác chính |
+| `dev-start.sh` | Khởi động development |
+| `dev-stop.sh` | Dừng development |
+| `prod-deploy.sh` | Deploy production |
+| `status.sh` | Kiểm tra trạng thái services |
+| `switch-env.sh` | Chuyển đổi environment |
+| `test-connection.sh` | Test kết nối remote services |
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Port đã được sử dụng
+### Lỗi: "Can't reach database server"
+
+**Nguyên nhân:** Server `116.118.49.243` chưa chạy database services
+
+**Giải pháp:**
 ```bash
-# Kiểm tra port đang dùng
-lsof -ti:12000
-lsof -ti:12001
-lsof -ti:13000
-lsof -ti:13001
+# 1. SSH vào server
+ssh user@116.118.49.243
 
-# Kill process trên port cụ thể
-kill -9 $(lsof -ti:12000)
+# 2. Khởi động database services trên server
+cd /path/to/project
+docker-compose up -d postgres redis minio
 
-# Hoặc dùng script
+# 3. Kiểm tra services đang chạy
+docker-compose ps
+```
+
+### Lỗi: "Port already in use"
+
+**Giải pháp:**
+```bash
+# Dừng process đang dùng port
 ./dev-stop.sh
+
+# Hoặc kill process thủ công
+lsof -ti:12000 | xargs kill -9
+lsof -ti:12001 | xargs kill -9
 ```
 
-### Không kết nối được database/redis/minio
+### Lỗi: "Connection refused to Redis/Minio"
+
+**Giải pháp:**
 ```bash
-# Kiểm tra kết nối tới server
-ping 116.118.49.243
+# Test connection
+./test-connection.sh
 
-# Test port
-telnet 116.118.49.243 12003  # PostgreSQL Rausach
-telnet 116.118.49.243 13003  # PostgreSQL Tazagroup
-telnet 116.118.49.243 12004  # Redis
-telnet 116.118.49.243 12007  # Minio
-```
-
-### Environment variables không đúng
-```bash
-# Kiểm tra file .env hiện tại
-cat backend/.env | head -10
-cat frontend/.env.local | head -10
-
-# Dùng switch-env.sh để chuyển đúng môi trường
-./switch-env.sh
-```
-
-### Docker container không start
-```bash
-# Xem logs chi tiết
-docker-compose -f docker-compose.rausach.yml logs
-
-# Rebuild từ đầu
-docker-compose -f docker-compose.rausach.yml down
-docker-compose -f docker-compose.rausach.yml up -d --build --force-recreate
+# Nếu failed, check server
+ssh user@116.118.49.243
+docker-compose ps
+docker-compose logs redis
+docker-compose logs minio
 ```
 
 ---
 
-## 💡 Best Practices
+## 🎨 Development Tips
 
-1. **Development**: Luôn dùng `dev-start.sh` để tránh nhầm lẫn môi trường
-2. **Production**: Test kỹ trên localhost trước khi deploy
-3. **Environment**: Dùng `switch-env.sh` khi cần chuyển đổi nhanh
-4. **Logs**: Thường xuyên check logs để phát hiện lỗi sớm
-5. **Backup**: Backup database trước khi deploy phiên bản mới
+### 1. Xem logs realtime
+
+```bash
+# Backend logs
+tail -f dev-rausach-backend.log
+tail -f dev-tazagroup-backend.log
+
+# Frontend logs
+tail -f dev-rausach-frontend.log
+tail -f dev-tazagroup-frontend.log
+```
+
+### 2. Restart một service
+
+```bash
+# Tìm PID của service
+ps aux | grep "bun run dev"
+
+# Kill process cụ thể
+kill <PID>
+
+# Restart lại với dev-start.sh
+```
+
+### 3. Debug database
+
+```bash
+# Connect vào PostgreSQL
+psql -h 116.118.49.243 -p 12003 -U postgres -d rausachcore
+
+# Hoặc dùng PgAdmin
+# Rausach: http://116.118.49.243:12002
+# Tazagroup: http://116.118.49.243:13002
+```
+
+---
+
+## ⚡ Quick Commands
+
+```bash
+# Setup lần đầu
+./menu.sh
+
+# Development thường ngày
+./dev-start.sh   # Chọn domain
+# Code...
+./dev-stop.sh    # Khi xong
+
+# Deploy
+./prod-deploy.sh rausach
+
+# Check status
+./status.sh
+
+# Test connections
+./test-connection.sh
+```
+
+---
+
+## 🔐 Security Notes
+
+- **KHÔNG** commit các file `.env.dev.*` và `.env.prod.*`
+- File `.gitignore` đã được cấu hình để block tất cả `.env*` files
+- Chỉ `.env.example` được commit (template)
+- Thay đổi các secrets trong production:
+  - `JWT_SECRET`
+  - `NEXTAUTH_SECRET`
+  - `POSTGRES_PASSWORD`
+  - `MINIO_SECRET_KEY`
 
 ---
 
 ## 📞 Support
 
-Nếu gặp vấn đề, kiểm tra:
-1. File `.env` có đúng không
-2. Ports có bị chiếm không
-3. Kết nối tới server 116.118.49.243 có ổn không
-4. Logs của backend/frontend
+Nếu gặp vấn đề:
+1. Chạy `./test-connection.sh` để kiểm tra kết nối
+2. Chạy `./status.sh` để xem trạng thái services
+3. Check logs trong các file `dev-*-backend.log` và `dev-*-frontend.log`
 
 ---
 
-## 📝 Notes
-
-- **Dev mode**: Backend và Frontend chạy trực tiếp với Bun (nhanh, hot reload)
-- **Prod mode**: Chạy trong Docker containers (isolated, production-ready)
-- **Database/Redis/Minio**: Dev dùng remote server, Prod cũng dùng server
-- **Port allocation**: Rausach (12xxx), Tazagroup (13xxx)
+**Happy coding! 🚀**

@@ -1,82 +1,95 @@
 #!/bin/bash
 
 # ================================================================
-# CONNECTION TEST - Test connectivity to remote services
+# TEST CONNECTION TO REMOTE SERVICES
 # ================================================================
 
-# Colors
+set -e
+
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
 RED='\033[0;31m'
+YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}   🔌 CONNECTION TEST - Remote Services${NC}"
+echo -e "${GREEN}   🧪 TESTING REMOTE SERVICES CONNECTION${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
 SERVER="116.118.49.243"
 
-# Test network connectivity
-echo -e "${YELLOW}1️⃣  Testing network connectivity to $SERVER...${NC}"
-if ping -c 1 -W 2 $SERVER &> /dev/null; then
-    echo -e "   ${GREEN}✅ Server is reachable${NC}"
-else
-    echo -e "   ${RED}❌ Cannot reach server${NC}"
-    exit 1
-fi
+# Function to test port
+test_port() {
+    local service=$1
+    local port=$2
+    local timeout=3
+    
+    echo -n "Testing $service ($SERVER:$port)... "
+    
+    if timeout $timeout bash -c "cat < /dev/null > /dev/tcp/$SERVER/$port" 2>/dev/null; then
+        echo -e "${GREEN}✅ OK${NC}"
+        return 0
+    else
+        echo -e "${RED}❌ FAILED${NC}"
+        return 1
+    fi
+}
+
+echo -e "${YELLOW}📍 Testing Database Connections:${NC}"
+test_port "Rausach PostgreSQL " 12003
+test_port "Tazagroup PostgreSQL " 13003
 echo ""
 
-# Test PostgreSQL Rausach
-echo -e "${YELLOW}2️⃣  Testing PostgreSQL Rausach (Port 12003)...${NC}"
-if timeout 2 bash -c "echo > /dev/tcp/$SERVER/12003" 2>/dev/null; then
-    echo -e "   ${GREEN}✅ PostgreSQL Rausach is accessible${NC}"
-else
-    echo -e "   ${RED}❌ PostgreSQL Rausach is not accessible${NC}"
-fi
-
-# Test PostgreSQL Tazagroup
-echo -e "${YELLOW}3️⃣  Testing PostgreSQL Tazagroup (Port 13003)...${NC}"
-if timeout 2 bash -c "echo > /dev/tcp/$SERVER/13003" 2>/dev/null; then
-    echo -e "   ${GREEN}✅ PostgreSQL Tazagroup is accessible${NC}"
-else
-    echo -e "   ${RED}❌ PostgreSQL Tazagroup is not accessible${NC}"
-fi
-
-# Test Redis
-echo -e "${YELLOW}4️⃣  Testing Redis (Port 12004)...${NC}"
-if timeout 2 bash -c "echo > /dev/tcp/$SERVER/12004" 2>/dev/null; then
-    echo -e "   ${GREEN}✅ Redis is accessible${NC}"
-else
-    echo -e "   ${RED}❌ Redis is not accessible${NC}"
-fi
-
-# Test Minio
-echo -e "${YELLOW}5️⃣  Testing Minio (Port 12007)...${NC}"
-if timeout 2 bash -c "echo > /dev/tcp/$SERVER/12007" 2>/dev/null; then
-    echo -e "   ${GREEN}✅ Minio is accessible${NC}"
-else
-    echo -e "   ${RED}❌ Minio is not accessible${NC}"
-fi
-
-# Test Minio Console
-echo -e "${YELLOW}6️⃣  Testing Minio Console (Port 12008)...${NC}"
-if timeout 2 bash -c "echo > /dev/tcp/$SERVER/12008" 2>/dev/null; then
-    echo -e "   ${GREEN}✅ Minio Console is accessible${NC}"
-else
-    echo -e "   ${RED}❌ Minio Console is not accessible${NC}"
-fi
-
+echo -e "${YELLOW}📍 Testing Shared Services:${NC}"
+test_port "Redis              " 12004
+test_port "Minio              " 12007
+test_port "Minio Console      " 12008
 echo ""
+
+echo -e "${YELLOW}📍 Testing PgAdmin:${NC}"
+test_port "PgAdmin Rausach    " 12002
+test_port "PgAdmin Tazagroup  " 13002
+echo ""
+
+# PostgreSQL connection test (if psql is available)
+if command -v psql &> /dev/null; then
+    echo -e "${YELLOW}📍 Testing PostgreSQL Authentication:${NC}"
+    
+    echo -n "Rausach Database... "
+    if PGPASSWORD=postgres psql -h $SERVER -p 12003 -U postgres -d rausachcore -c "SELECT 1;" &>/dev/null; then
+        echo -e "${GREEN}✅ Connected${NC}"
+    else
+        echo -e "${RED}❌ Failed${NC}"
+    fi
+    
+    echo -n "Tazagroup Database... "
+    if PGPASSWORD=postgres psql -h $SERVER -p 13003 -U postgres -d tazagroupcore -c "SELECT 1;" &>/dev/null; then
+        echo -e "${GREEN}✅ Connected${NC}"
+    else
+        echo -e "${RED}❌ Failed${NC}"
+    fi
+    echo ""
+fi
+
+# Redis connection test (if redis-cli is available)
+if command -v redis-cli &> /dev/null; then
+    echo -e "${YELLOW}📍 Testing Redis Connection:${NC}"
+    echo -n "Redis PING... "
+    if redis-cli -h $SERVER -p 12004 -a "123456" PING 2>/dev/null | grep -q PONG; then
+        echo -e "${GREEN}✅ PONG${NC}"
+    else
+        echo -e "${RED}❌ Failed${NC}"
+    fi
+    echo ""
+fi
+
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}   ✅ Connection test completed!${NC}"
+echo -e "${GREEN}   ✅ Connection test complete!${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-echo -e "${YELLOW}📋 Service URLs:${NC}"
-echo -e "   PostgreSQL Rausach:   ${GREEN}$SERVER:12003${NC}"
-echo -e "   PostgreSQL Tazagroup: ${GREEN}$SERVER:13003${NC}"
-echo -e "   Redis:                ${GREEN}$SERVER:12004${NC}"
-echo -e "   Minio API:            ${GREEN}http://$SERVER:12007${NC}"
-echo -e "   Minio Console:        ${GREEN}http://$SERVER:12008${NC}"
+echo -e "${YELLOW}💡 Tip:${NC} Nếu có lỗi kết nối, kiểm tra:"
+echo "  1. Server $SERVER có đang chạy không?"
+echo "  2. Firewall có block ports không?"
+echo "  3. Database/Redis/Minio services có running không?"
 echo ""
