@@ -71,8 +71,16 @@ async function bootstrap() {
     const corsOrigins = [
         'http://localhost:3000',
         'http://localhost:12000',
+        'http://localhost:13000',
         'http://127.0.0.1:3000',
         'http://127.0.0.1:12000',
+        'http://127.0.0.1:13000',
+        'http://116.118.49.243:12000',
+        'http://116.118.49.243:13000',
+        'https://shop.rausachtrangia.com',
+        'https://app.tazagroup.com',
+        'https://api.rausachtrangia.com',
+        'https://v3api.tazagroup.vn',
         frontendUrl,
         process.env.NODE_ENV === 'development' ? /.*/ : undefined,
     ].filter(Boolean);
