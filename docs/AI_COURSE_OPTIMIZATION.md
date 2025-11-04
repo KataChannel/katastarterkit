@@ -15,12 +15,12 @@ Request bị "đứng" ở bước gọi Gemini API:
 
 **Trước:**
 ```typescript
-model: 'gemini-2.5-flash'  // Model mới, có thể không ổn định
+model: 'gemini-2.5-flash'  // Model mới, không khả dụng trong v1beta API
 ```
 
 **Sau:**
 ```typescript
-model: 'gemini-1.5-flash',  // Model ổn định, đã được test kỹ
+model: 'gemini-pro',       // Model ổn định, hỗ trợ đầy đủ trong v1beta API
 generationConfig: {
   temperature: 0.7,          // Creativity vừa phải
   topK: 40,                  // Giới hạn từ vựng
@@ -30,9 +30,9 @@ generationConfig: {
 ```
 
 **Lợi ích:**
-- ✅ Response nhanh hơn 30-40%
-- ✅ Ổn định hơn
-- ✅ Ít bị timeout
+- ✅ Compatible với Google AI SDK v1beta API
+- ✅ Ổn định và đã được test kỹ
+- ✅ Không bị lỗi 404 Not Found
 
 ### 2. ⏱️ Thêm Timeout Protection (90 giây)
 

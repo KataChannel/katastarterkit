@@ -19,9 +19,9 @@ export class AICourseGeneratorService {
       console.warn('⚠️  GOOGLE_GEMINI_API_KEY not set. AI course generation will not work.');
     } else {
       this.genAI = new GoogleGenerativeAI(apiKey);
-      // Sử dụng model ổn định hơn
+      // Sử dụng model ổn định - gemini-pro cho v1beta API
       this.model = this.genAI.getGenerativeModel({ 
-        model: 'gemini-1.5-flash',
+        model: 'gemini-pro',
         generationConfig: {
           temperature: 0.7,
           topK: 40,
@@ -29,7 +29,7 @@ export class AICourseGeneratorService {
           maxOutputTokens: 8192,
         },
       });
-      console.log('✅ AI Course Generator initialized with Gemini 1.5 Flash');
+      console.log('✅ AI Course Generator initialized with Gemini Pro');
       console.log(`🔑 API Key: ${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 4)}`);
     }
   }
