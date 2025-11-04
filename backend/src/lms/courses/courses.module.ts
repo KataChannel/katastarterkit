@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CoursesResolver } from './courses.resolver';
+import { AICourseGeneratorService } from './ai-course-generator.service';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { AuthModule } from '../../auth/auth.module';
 import { UserService } from '../../services/user.service';
@@ -10,7 +11,7 @@ import { UserService } from '../../services/user.service';
     PrismaModule,
     AuthModule, // Import AuthModule for JwtAuthGuard (provides JwtModule + UserService)
   ],
-  providers: [CoursesService, CoursesResolver, UserService],
-  exports: [CoursesService],
+  providers: [CoursesService, CoursesResolver, AICourseGeneratorService, UserService],
+  exports: [CoursesService, AICourseGeneratorService],
 })
 export class CoursesModule {}

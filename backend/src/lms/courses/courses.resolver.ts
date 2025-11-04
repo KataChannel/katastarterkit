@@ -1,6 +1,7 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { CoursesService } from './courses.service';
+import { AICourseGeneratorService } from './ai-course-generator.service';
 import { Course } from './entities/course.entity';
 import { PaginatedCourses } from './entities/paginated-courses.entity';
 import { CreateCourseInput } from './dto/create-course.input';
@@ -15,10 +16,14 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { UserRoleType } from '@prisma/client';
 import { CourseModule } from './entities/course-module.entity';
 import { Lesson } from './entities/lesson.entity';
+import GraphQLJSON from 'graphql-type-json';
 
 @Resolver(() => Course)
 export class CoursesResolver {
-  constructor(private readonly coursesService: CoursesService) {}
+  constructor(
+    private readonly coursesService: CoursesService,
+    private readonly aiCourseGeneratorService: AICourseGeneratorService,
+  ) {}
 
   @Mutation(() => Course, { name: 'createCourse' })
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -172,5 +177,31 @@ export class CoursesResolver {
     @Args('input') input: ReorderLessonsInput,
   ) {
     return this.coursesService.reorderLessons(user.id, input);
+  }
+
+  // ==================== AI COURSE GENERATOR ====================
+
+  @Mutation(() => Course, { name: 'generateCourseFromPrompt' })
+  @UseGuards(JwtAuthGuard)
+  async generateCourseFromPrompt(
+    @CurrentUser() user: any,
+    @Args('prompt') prompt: string,
+    @Args('categoryId', { nullable: true }) categoryId?: string,
+  ) {
+    return this.aiCourseGeneratorService.generateCourseFromPrompt({
+      prompt,
+      categoryId,
+      instructorId: user.id,
+    });
+  }
+
+  @Query(() => [String], { name: 'sampleCoursePrompts' })
+  getSampleCoursePrompts() {
+    return this.aiCourseGeneratorService.getSamplePrompts();
+  }
+
+  @Query(() => GraphQLJSON, { name: 'coursePromptTemplates' })
+  getCoursePromptTemplates() {
+    return this.aiCourseGeneratorService.getPromptTemplates();
   }
 }

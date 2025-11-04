@@ -10,6 +10,7 @@ exports.CoursesModule = void 0;
 const common_1 = require("@nestjs/common");
 const courses_service_1 = require("./courses.service");
 const courses_resolver_1 = require("./courses.resolver");
+const ai_course_generator_service_1 = require("./ai-course-generator.service");
 const prisma_module_1 = require("../../prisma/prisma.module");
 const auth_module_1 = require("../../auth/auth.module");
 const user_service_1 = require("../../services/user.service");
@@ -22,8 +23,8 @@ exports.CoursesModule = CoursesModule = __decorate([
             prisma_module_1.PrismaModule,
             auth_module_1.AuthModule,
         ],
-        providers: [courses_service_1.CoursesService, courses_resolver_1.CoursesResolver, user_service_1.UserService],
-        exports: [courses_service_1.CoursesService],
+        providers: [courses_service_1.CoursesService, courses_resolver_1.CoursesResolver, ai_course_generator_service_1.AICourseGeneratorService, user_service_1.UserService],
+        exports: [courses_service_1.CoursesService, ai_course_generator_service_1.AICourseGeneratorService],
     })
 ], CoursesModule);
 //# sourceMappingURL=courses.module.js.map

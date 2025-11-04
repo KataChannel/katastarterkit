@@ -12,31 +12,57 @@ var SearchService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SearchService = void 0;
 const common_1 = require("@nestjs/common");
-const elasticsearch_service_1 = require("./elasticsearch.service");
 const prisma_service_1 = require("../prisma/prisma.service");
 let SearchService = SearchService_1 = class SearchService {
-    constructor(elasticsearchService, prisma) {
-        this.elasticsearchService = elasticsearchService;
+    constructor(prisma) {
         this.prisma = prisma;
         this.logger = new common_1.Logger(SearchService_1.name);
     }
     async searchTasks(query, userId) {
         const startTime = Date.now();
         try {
-            const enhancedQuery = {
-                ...query,
-                filters: {
-                    ...query.filters,
-                    ...this.addUserAccessFilter(userId, query.filters)
+            const { q, filters, sort, pagination } = query;
+            const page = pagination?.page || 1;
+            const size = pagination?.size || 20;
+            const skip = (page - 1) * size;
+            const where = {};
+            if (q) {
+                where.OR = [
+                    { title: { contains: q, mode: 'insensitive' } },
+                    { description: { contains: q, mode: 'insensitive' } },
+                ];
+            }
+            if (filters) {
+                if (filters.status?.length)
+                    where.status = { in: filters.status };
+                if (filters.priority?.length)
+                    where.priority = { in: filters.priority };
+                if (filters.assigneeId?.length)
+                    where.assigneeId = { in: filters.assigneeId };
+                if (filters.authorId?.length)
+                    where.authorId = { in: filters.authorId };
+                if (filters.tags?.length)
+                    where.tags = { hasSome: filters.tags };
+                if (filters.dateRange) {
+                    const { start, end, field } = filters.dateRange;
+                    where[field] = { gte: start, lte: end };
                 }
-            };
-            const result = await this.elasticsearchService.search('tasks', enhancedQuery);
+            }
+            where.OR = [{ authorId: userId }, { assigneeId: userId }, ...(where.OR || [])];
+            const orderBy = {};
+            if (sort) {
+                orderBy[sort.field] = sort.direction;
+            }
+            else {
+                orderBy.updatedAt = 'desc';
+            }
+            const [items, total] = await Promise.all([
+                this.prisma.task.findMany({ where, orderBy, skip, take: size }),
+                this.prisma.task.count({ where }),
+            ]);
             const took = Date.now() - startTime;
-            await this.elasticsearchService.logSearch(query, result.total, took);
-            return {
-                ...result,
-                took
-            };
+            this.logger.debug(`Search completed in ${took}ms, found ${total} results`);
+            return { items, total, took };
         }
         catch (error) {
             this.logger.error('Error searching tasks:', error);
@@ -48,44 +74,42 @@ let SearchService = SearchService_1 = class SearchService {
             q: options.query,
             filters: options.filters,
             facets: options.facets,
-            pagination: { page: 1, size: 0 }
+            pagination: { page: 1, size: 0 },
         };
         const result = await this.searchTasks(query, userId);
-        return {
-            facets: result.facets || {},
-            total: result.total
-        };
+        return { facets: {}, total: result.total };
     }
     async getSearchSuggestions(query, type = 'tasks') {
         try {
-            const suggestions = await this.elasticsearchService.getSuggestions(type, query, 10);
-            const recentSearches = await this.getRecentSearches(5);
-            return {
-                suggestions,
-                recent: recentSearches.filter(search => search.toLowerCase().includes(query.toLowerCase()))
-            };
+            if (type === 'tasks') {
+                const suggestions = await this.prisma.task.findMany({
+                    where: {
+                        OR: [
+                            { title: { contains: query, mode: 'insensitive' } },
+                            { description: { contains: query, mode: 'insensitive' } },
+                        ],
+                    },
+                    select: { title: true },
+                    take: 5,
+                    distinct: ['title'],
+                });
+                return {
+                    suggestions: suggestions.map(s => ({ text: s.title, score: 1.0, type: 'completion' })),
+                    recent: [],
+                };
+            }
+            return { suggestions: [], recent: [] };
         }
         catch (error) {
             this.logger.error('Error getting search suggestions:', error);
             return { suggestions: [], recent: [] };
         }
     }
-    async fuzzySearch(query, userId, maxEdits = 2) {
-        const searchQuery = {
-            q: query,
-        };
-        return this.searchTasks(searchQuery, userId);
+    async fuzzySearch(query, userId) {
+        return this.searchTasks({ q: query }, userId);
     }
     async saveSearch(name, query, userId, isPublic = false) {
-        return {
-            id: `search_${Date.now()}`,
-            name,
-            query,
-            userId,
-            isPublic,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        };
+        return { id: `search_${Date.now()}`, name, query, userId, isPublic, createdAt: new Date(), updatedAt: new Date() };
     }
     async getSavedSearches(userId) {
         return [];
@@ -106,149 +130,42 @@ let SearchService = SearchService_1 = class SearchService {
         if (filters.tags?.length)
             searchFilters.tags = filters.tags;
         if (filters.dateCreated) {
-            searchFilters.dateRange = {
-                start: filters.dateCreated.start,
-                end: filters.dateCreated.end,
-                field: 'createdAt'
-            };
+            searchFilters.dateRange = { start: filters.dateCreated.start, end: filters.dateCreated.end, field: 'createdAt' };
         }
         const query = {
             q: filters.text,
             filters: searchFilters,
             pagination,
             facets: ['status', 'priority', 'assigneeId', 'authorId', 'tags'],
-            highlight: !!filters.text
+            highlight: !!filters.text,
         };
         const result = await this.searchTasks(query, userId);
         let filteredItems = result.items;
-        if (filters.hasAttachments !== undefined) {
-            filteredItems = filteredItems.filter(task => filters.hasAttachments ? (task.attachments?.length > 0) : !(task.attachments?.length > 0));
-        }
-        if (filters.hasComments !== undefined) {
-            filteredItems = filteredItems.filter(task => filters.hasComments ? (task.comments?.length > 0) : !(task.comments?.length > 0));
-        }
         if (filters.isOverdue !== undefined && filters.isOverdue) {
             const now = new Date();
             filteredItems = filteredItems.filter(task => task.dueDate && new Date(task.dueDate) < now && task.status !== 'COMPLETED');
         }
-        return {
-            ...result,
-            items: filteredItems,
-            total: filteredItems.length
-        };
+        return { ...result, items: filteredItems, total: filteredItems.length };
     }
     async getSearchAnalytics(userId, dateRange) {
-        try {
-            const analytics = await this.elasticsearchService.getSearchAnalytics(dateRange);
-            return {
-                global: analytics,
-                user: {
-                    searchCount: 0,
-                    avgResultsCount: 0,
-                    topQueries: [],
-                    recentSearches: []
-                }
-            };
-        }
-        catch (error) {
-            this.logger.error('Error getting search analytics:', error);
-            return null;
-        }
+        return { global: null, user: { searchCount: 0, avgResultsCount: 0, topQueries: [], recentSearches: [] } };
     }
     async indexTask(task) {
-        try {
-            await this.elasticsearchService.indexDocument('tasks', task.id, {
-                id: task.id,
-                title: task.title,
-                description: task.description,
-                status: task.status,
-                priority: task.priority,
-                tags: task.tags || [],
-                authorId: task.authorId,
-                assigneeId: task.assigneeId,
-                projectId: task.projectId,
-                teamId: task.teamId,
-                createdAt: task.createdAt,
-                updatedAt: task.updatedAt,
-                dueDate: task.dueDate,
-                completedAt: task.completedAt
-            });
-        }
-        catch (error) {
-            this.logger.error(`Error indexing task ${task.id}:`, error);
-        }
+        this.logger.debug(`Task ${task.id} indexed (using PostgreSQL)`);
     }
     async removeTaskFromIndex(taskId) {
-        try {
-            await this.elasticsearchService.deleteDocument('tasks', taskId);
-        }
-        catch (error) {
-            this.logger.error(`Error removing task ${taskId} from index:`, error);
-        }
+        this.logger.debug(`Task ${taskId} removed from index (using PostgreSQL)`);
     }
     async bulkIndexTasks(tasks) {
-        try {
-            const documents = tasks.map(task => ({
-                id: task.id,
-                doc: {
-                    id: task.id,
-                    title: task.title,
-                    description: task.description,
-                    status: task.status,
-                    priority: task.priority,
-                    tags: task.tags || [],
-                    authorId: task.authorId,
-                    assigneeId: task.assigneeId,
-                    projectId: task.projectId,
-                    teamId: task.teamId,
-                    createdAt: task.createdAt,
-                    updatedAt: task.updatedAt,
-                    dueDate: task.dueDate,
-                    completedAt: task.completedAt
-                }
-            }));
-            await this.elasticsearchService.bulkIndex('tasks', documents);
-        }
-        catch (error) {
-            this.logger.error('Error bulk indexing tasks:', error);
-        }
+        this.logger.debug(`Bulk indexed ${tasks.length} tasks (using PostgreSQL)`);
     }
     async reindexAllTasks() {
-        try {
-            const tasks = await this.prisma.task.findMany();
-            await this.bulkIndexTasks(tasks);
-            this.logger.log(`Reindexed ${tasks.length} tasks`);
-        }
-        catch (error) {
-            this.logger.error('Error reindexing all tasks:', error);
-            throw error;
-        }
-    }
-    addUserAccessFilter(userId, existingFilters) {
-        return {
-            ...existingFilters
-        };
-    }
-    async getRecentSearches(limit) {
-        return [];
-    }
-    getTopQueries(searchHistory) {
-        const queryCount = searchHistory.reduce((acc, log) => {
-            if (log.query) {
-                acc[log.query] = (acc[log.query] || 0) + 1;
-            }
-            return acc;
-        }, {});
-        return Object.entries(queryCount)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 10)
-            .map(([query, count]) => ({ query, count: count }));
+        this.logger.log('Reindex completed (using PostgreSQL)');
     }
 };
 exports.SearchService = SearchService;
 exports.SearchService = SearchService = SearchService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [elasticsearch_service_1.ElasticsearchService,
-        prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], SearchService);
 //# sourceMappingURL=search.service.js.map

@@ -11,11 +11,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoursesResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const common_1 = require("@nestjs/common");
 const courses_service_1 = require("./courses.service");
+const ai_course_generator_service_1 = require("./ai-course-generator.service");
 const course_entity_1 = require("./entities/course.entity");
 const paginated_courses_entity_1 = require("./entities/paginated-courses.entity");
 const create_course_input_1 = require("./dto/create-course.input");
@@ -30,9 +34,11 @@ const roles_guard_1 = require("../../common/guards/roles.guard");
 const client_1 = require("@prisma/client");
 const course_module_entity_1 = require("./entities/course-module.entity");
 const lesson_entity_1 = require("./entities/lesson.entity");
+const graphql_type_json_1 = __importDefault(require("graphql-type-json"));
 let CoursesResolver = class CoursesResolver {
-    constructor(coursesService) {
+    constructor(coursesService, aiCourseGeneratorService) {
         this.coursesService = coursesService;
+        this.aiCourseGeneratorService = aiCourseGeneratorService;
     }
     createCourse(user, createCourseInput) {
         return this.coursesService.create(user.id, createCourseInput);
@@ -87,6 +93,19 @@ let CoursesResolver = class CoursesResolver {
     }
     reorderLessons(user, input) {
         return this.coursesService.reorderLessons(user.id, input);
+    }
+    async generateCourseFromPrompt(user, prompt, categoryId) {
+        return this.aiCourseGeneratorService.generateCourseFromPrompt({
+            prompt,
+            categoryId,
+            instructorId: user.id,
+        });
+    }
+    getSampleCoursePrompts() {
+        return this.aiCourseGeneratorService.getSamplePrompts();
+    }
+    getCoursePromptTemplates() {
+        return this.aiCourseGeneratorService.getPromptTemplates();
     }
 };
 exports.CoursesResolver = CoursesResolver;
@@ -242,8 +261,31 @@ __decorate([
     __metadata("design:paramtypes", [Object, lesson_input_1.ReorderLessonsInput]),
     __metadata("design:returntype", void 0)
 ], CoursesResolver.prototype, "reorderLessons", null);
+__decorate([
+    (0, graphql_1.Mutation)(() => course_entity_1.Course, { name: 'generateCourseFromPrompt' }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, graphql_1.Args)('prompt')),
+    __param(2, (0, graphql_1.Args)('categoryId', { nullable: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], CoursesResolver.prototype, "generateCourseFromPrompt", null);
+__decorate([
+    (0, graphql_1.Query)(() => [String], { name: 'sampleCoursePrompts' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], CoursesResolver.prototype, "getSampleCoursePrompts", null);
+__decorate([
+    (0, graphql_1.Query)(() => graphql_type_json_1.default, { name: 'coursePromptTemplates' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], CoursesResolver.prototype, "getCoursePromptTemplates", null);
 exports.CoursesResolver = CoursesResolver = __decorate([
     (0, graphql_1.Resolver)(() => course_entity_1.Course),
-    __metadata("design:paramtypes", [courses_service_1.CoursesService])
+    __metadata("design:paramtypes", [courses_service_1.CoursesService,
+        ai_course_generator_service_1.AICourseGeneratorService])
 ], CoursesResolver);
 //# sourceMappingURL=courses.resolver.js.map

@@ -1,5 +1,38 @@
-import { ElasticsearchService, SearchQuery } from './elasticsearch.service';
 import { PrismaService } from '../prisma/prisma.service';
+export interface SearchQuery {
+    q?: string;
+    filters?: {
+        status?: string[];
+        priority?: string[];
+        assigneeId?: string[];
+        authorId?: string[];
+        tags?: string[];
+        dateRange?: {
+            start: Date;
+            end: Date;
+            field: 'createdAt' | 'updatedAt' | 'dueDate';
+        };
+    };
+    sort?: {
+        field: string;
+        direction: 'asc' | 'desc';
+    };
+    pagination?: {
+        page: number;
+        size: number;
+    };
+    facets?: string[];
+    highlight?: boolean;
+}
+export interface SearchResult<T> {
+    items: T[];
+    total: number;
+    took: number;
+    facets?: Record<string, Array<{
+        key: string;
+        count: number;
+    }>>;
+}
 export interface SavedSearch {
     id: string;
     name: string;
@@ -15,42 +48,66 @@ export interface FacetedSearchOptions {
     query?: string;
 }
 export declare class SearchService {
-    private elasticsearchService;
     private prisma;
     private readonly logger;
-    constructor(elasticsearchService: ElasticsearchService, prisma: PrismaService);
+    constructor(prisma: PrismaService);
     searchTasks(query: SearchQuery, userId: string): Promise<{
-        took: number;
-        items: any[];
+        items: {
+            category: import("@prisma/client").$Enums.TaskCategory;
+            order: number;
+            id: string;
+            title: string;
+            description: string | null;
+            priority: import("@prisma/client").$Enums.TaskPriority;
+            status: import("@prisma/client").$Enums.TaskStatus;
+            dueDate: Date | null;
+            completedAt: Date | null;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            projectId: string | null;
+            assignedTo: string[];
+            mentions: string[];
+            tags: string[];
+            parentId: string | null;
+        }[];
         total: number;
-        facets?: Record<string, Array<{
-            key: string;
-            count: number;
-        }>>;
-        suggestions?: string[];
-        aggregations?: Record<string, any>;
+        took: number;
     }>;
     getFacetedSearch(options: FacetedSearchOptions, userId: string): Promise<{
-        facets: Record<string, {
-            key: string;
-            count: number;
-        }[]>;
+        facets: {};
         total: number;
     }>;
     getSearchSuggestions(query: string, type?: 'tasks' | 'users' | 'projects'): Promise<{
-        suggestions: import("./elasticsearch.service").SearchSuggestion[];
-        recent: string[];
+        suggestions: {
+            text: string;
+            score: number;
+            type: "completion";
+        }[];
+        recent: any[];
     }>;
-    fuzzySearch(query: string, userId: string, maxEdits?: number): Promise<{
-        took: number;
-        items: any[];
+    fuzzySearch(query: string, userId: string): Promise<{
+        items: {
+            category: import("@prisma/client").$Enums.TaskCategory;
+            order: number;
+            id: string;
+            title: string;
+            description: string | null;
+            priority: import("@prisma/client").$Enums.TaskPriority;
+            status: import("@prisma/client").$Enums.TaskStatus;
+            dueDate: Date | null;
+            completedAt: Date | null;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            projectId: string | null;
+            assignedTo: string[];
+            mentions: string[];
+            tags: string[];
+            parentId: string | null;
+        }[];
         total: number;
-        facets?: Record<string, Array<{
-            key: string;
-            count: number;
-        }>>;
-        suggestions?: string[];
-        aggregations?: Record<string, any>;
+        took: number;
     }>;
     saveSearch(name: string, query: SearchQuery, userId: string, isPublic?: boolean): Promise<SavedSearch>;
     getSavedSearches(userId: string): Promise<SavedSearch[]>;
@@ -58,42 +115,31 @@ export declare class SearchService {
         page: number;
         size: number;
     }): Promise<void>;
-    advancedSearch(filters: {
-        text?: string;
-        status?: string[];
-        priority?: string[];
-        assignees?: string[];
-        authors?: string[];
-        tags?: string[];
-        projects?: string[];
-        dateCreated?: {
-            start: Date;
-            end: Date;
-        };
-        dateDue?: {
-            start: Date;
-            end: Date;
-        };
-        dateCompleted?: {
-            start: Date;
-            end: Date;
-        };
-        hasAttachments?: boolean;
-        hasComments?: boolean;
-        isOverdue?: boolean;
-    }, userId: string, pagination?: {
+    advancedSearch(filters: any, userId: string, pagination?: {
         page: number;
         size: number;
     }): Promise<{
-        items: any[];
+        items: {
+            category: import("@prisma/client").$Enums.TaskCategory;
+            order: number;
+            id: string;
+            title: string;
+            description: string | null;
+            priority: import("@prisma/client").$Enums.TaskPriority;
+            status: import("@prisma/client").$Enums.TaskStatus;
+            dueDate: Date | null;
+            completedAt: Date | null;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            projectId: string | null;
+            assignedTo: string[];
+            mentions: string[];
+            tags: string[];
+            parentId: string | null;
+        }[];
         total: number;
         took: number;
-        facets?: Record<string, Array<{
-            key: string;
-            count: number;
-        }>>;
-        suggestions?: string[];
-        aggregations?: Record<string, any>;
     }>;
     getSearchAnalytics(userId: string, dateRange: {
         start: Date;
@@ -111,7 +157,4 @@ export declare class SearchService {
     removeTaskFromIndex(taskId: string): Promise<void>;
     bulkIndexTasks(tasks: any[]): Promise<void>;
     reindexAllTasks(): Promise<void>;
-    private addUserAccessFilter;
-    private getRecentSearches;
-    private getTopQueries;
 }

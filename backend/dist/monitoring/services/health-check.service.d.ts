@@ -8,7 +8,6 @@ export interface HealthStatus {
     checks: {
         database: HealthCheckResult;
         redis: HealthCheckResult;
-        elasticsearch: HealthCheckResult;
         storage: HealthCheckResult;
         external_apis: HealthCheckResult;
         system_resources: HealthCheckResult;
@@ -55,7 +54,6 @@ export declare class HealthCheckService {
     performHealthCheck(): Promise<HealthStatus>;
     checkDatabaseHealth(): Promise<HealthCheckResult>;
     checkRedisHealth(): Promise<HealthCheckResult>;
-    checkElasticsearchHealth(): Promise<HealthCheckResult>;
     checkStorageHealth(): Promise<HealthCheckResult>;
     checkExternalApisHealth(): Promise<HealthCheckResult>;
     checkSystemResourcesHealth(): Promise<HealthCheckResult>;

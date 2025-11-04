@@ -118,10 +118,9 @@ let SearchController = class SearchController {
     async reindexTasks(req) {
         return this.searchService.reindexAllTasks();
     }
-    async fuzzySearch(query, maxEdits, req) {
+    async fuzzySearch(query, req) {
         const userId = req?.user?.id || 'anonymous';
-        const maxEditsNum = parseInt(maxEdits || '2');
-        return this.searchService.fuzzySearch(query, userId, maxEditsNum);
+        return this.searchService.fuzzySearch(query, userId);
     }
 };
 exports.SearchController = SearchController;
@@ -214,10 +213,9 @@ __decorate([
 __decorate([
     (0, common_1.Get)('fuzzy'),
     __param(0, (0, common_1.Query)('q')),
-    __param(1, (0, common_1.Query)('maxEdits')),
-    __param(2, (0, common_1.Request)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], SearchController.prototype, "fuzzySearch", null);
 exports.SearchController = SearchController = __decorate([

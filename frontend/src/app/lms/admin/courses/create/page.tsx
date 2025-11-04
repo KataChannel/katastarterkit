@@ -12,6 +12,7 @@ import {
   Save,
   Plus,
   X,
+  Sparkles,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -192,10 +193,18 @@ export default function CreateCoursePage() {
         <Button variant="outline" size="icon" onClick={handleBack}>
           <ArrowLeft className="w-4 h-4" />
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Tạo khóa học mới</h1>
           <p className="text-sm text-gray-600 mt-1">Nhập thông tin khóa học</p>
         </div>
+        <Button
+          variant="outline"
+          onClick={() => router.push('/lms/admin/courses/create-with-ai')}
+          className="gap-2 bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 border-purple-200"
+        >
+          <Sparkles className="w-4 h-4 text-purple-600" />
+          <span className="hidden sm:inline">Tạo Với AI</span>
+        </Button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

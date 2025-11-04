@@ -2517,6 +2517,7 @@ type Mutation {
   enrollCourse(enrollCourseInput: EnrollCourseInput!): Enrollment!
   exportDataToExcel(modelName: String!, select: JSON, where: JSON): String!
   generateCertificate(enrollmentId: ID!): Certificate!
+  generateCourseFromPrompt(categoryId: String, prompt: String!): Course!
   generatePostSummary(postId: String!): String!
   generateSummary(content: String!, maxLength: Float! = 200): String!
   generateTags(content: String!, maxTags: Float! = 5): [String!]!
@@ -3522,6 +3523,7 @@ type Query {
   courseCategoryTree: [CourseCategory!]!
   courseDiscussions(courseId: ID!, lessonId: ID): [Discussion!]!
   courseEnrollments(courseId: ID!): [Enrollment!]!
+  coursePromptTemplates: JSON!
   courses(filters: CourseFiltersInput): PaginatedCourses!
   discussion(id: ID!): Discussion!
 
@@ -3779,6 +3781,7 @@ type Query {
   review(id: ID!): ProductReviewType
   reviewStats(courseId: ID!): ReviewStats!
   reviews(input: GetReviewsInput!): ReviewsWithStats!
+  sampleCoursePrompts: [String!]!
 
   """Search affiliate campaigns using Orama full-text search engine"""
   searchAffiliateCampaigns(input: OramaSearchInput!): OramaSearchResult!

@@ -65,10 +65,9 @@ let HealthCheckService = HealthCheckService_1 = class HealthCheckService {
         const startTime = Date.now();
         this.logger.debug('Starting comprehensive health check');
         try {
-            const [databaseHealth, redisHealth, elasticsearchHealth, storageHealth, externalApisHealth, systemResourcesHealth] = await Promise.allSettled([
+            const [databaseHealth, redisHealth, storageHealth, externalApisHealth, systemResourcesHealth] = await Promise.allSettled([
                 this.checkDatabaseHealth(),
                 this.checkRedisHealth(),
-                this.checkElasticsearchHealth(),
                 this.checkStorageHealth(),
                 this.checkExternalApisHealth(),
                 this.checkSystemResourcesHealth()
@@ -77,7 +76,6 @@ let HealthCheckService = HealthCheckService_1 = class HealthCheckService {
                 status: this.determineOverallStatus([
                     this.getResultFromSettled(databaseHealth),
                     this.getResultFromSettled(redisHealth),
-                    this.getResultFromSettled(elasticsearchHealth),
                     this.getResultFromSettled(storageHealth),
                     this.getResultFromSettled(externalApisHealth),
                     this.getResultFromSettled(systemResourcesHealth)
@@ -87,7 +85,6 @@ let HealthCheckService = HealthCheckService_1 = class HealthCheckService {
                 checks: {
                     database: this.getResultFromSettled(databaseHealth),
                     redis: this.getResultFromSettled(redisHealth),
-                    elasticsearch: this.getResultFromSettled(elasticsearchHealth),
                     storage: this.getResultFromSettled(storageHealth),
                     external_apis: this.getResultFromSettled(externalApisHealth),
                     system_resources: this.getResultFromSettled(systemResourcesHealth)
@@ -162,33 +159,6 @@ let HealthCheckService = HealthCheckService_1 = class HealthCheckService {
                 status: 'down',
                 responseTime: Date.now() - startTime,
                 message: `Redis connection failed: ${error.message}`,
-                details: { error: error.message }
-            };
-        }
-    }
-    async checkElasticsearchHealth() {
-        const startTime = Date.now();
-        try {
-            await new Promise(resolve => setTimeout(resolve, 20));
-            const responseTime = Date.now() - startTime;
-            return {
-                status: 'up',
-                responseTime,
-                message: 'Elasticsearch is healthy',
-                details: {
-                    cluster: 'green',
-                    nodes: 1,
-                    indices: 3,
-                    shards: 5
-                }
-            };
-        }
-        catch (error) {
-            this.logger.error('Elasticsearch health check failed:', error);
-            return {
-                status: 'down',
-                responseTime: Date.now() - startTime,
-                message: `Elasticsearch connection failed: ${error.message}`,
                 details: { error: error.message }
             };
         }
@@ -349,7 +319,6 @@ let HealthCheckService = HealthCheckService_1 = class HealthCheckService {
             checks: {
                 database: { status: 'down', message: 'Not checked due to error' },
                 redis: { status: 'down', message: 'Not checked due to error' },
-                elasticsearch: { status: 'down', message: 'Not checked due to error' },
                 storage: { status: 'down', message: 'Not checked due to error' },
                 external_apis: { status: 'down', message: 'Not checked due to error' },
                 system_resources: { status: 'down', message: 'Not checked due to error' }

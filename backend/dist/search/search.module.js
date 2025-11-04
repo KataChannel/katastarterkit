@@ -10,7 +10,6 @@ exports.SearchModule = void 0;
 const common_1 = require("@nestjs/common");
 const search_service_1 = require("./search.service");
 const search_controller_1 = require("./search.controller");
-const elasticsearch_service_1 = require("./elasticsearch.service");
 const orama_service_1 = require("./orama.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 let SearchModule = class SearchModule {
@@ -19,9 +18,9 @@ exports.SearchModule = SearchModule;
 exports.SearchModule = SearchModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule],
-        providers: [search_service_1.SearchService, elasticsearch_service_1.ElasticsearchService, orama_service_1.OramaService],
+        providers: [search_service_1.SearchService, orama_service_1.OramaService],
         controllers: [search_controller_1.SearchController],
-        exports: [search_service_1.SearchService, elasticsearch_service_1.ElasticsearchService, orama_service_1.OramaService],
+        exports: [search_service_1.SearchService, orama_service_1.OramaService],
     })
 ], SearchModule);
 //# sourceMappingURL=search.module.js.map

@@ -17,7 +17,8 @@ import {
   Clock,
   Star,
   AlertCircle,
-  BookOpen
+  BookOpen,
+  Sparkles,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -116,6 +117,10 @@ export default function AdminCoursesPage() {
     router.push('/lms/admin/courses/create');
   };
 
+  const handleCreateWithAI = () => {
+    router.push('/lms/admin/courses/create-with-ai');
+  };
+
   const handleViewCourse = (courseId: string) => {
     router.push(`/lms/admin/courses/${courseId}`);
   };
@@ -192,15 +197,24 @@ export default function AdminCoursesPage() {
   return (
     <div className="p-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Quản lý khóa học</h1>
           <p className="text-gray-600 mt-1">Tổng cộng {courses?.length || 0} khóa học</p>
         </div>
-        <Button onClick={handleCreateCourse} className="gap-2">
-          <Plus className="w-4 h-4" />
-          Tạo khóa học mới
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleCreateCourse} variant="outline" className="gap-2">
+            <Plus className="w-4 h-4" />
+            Tạo thủ công
+          </Button>
+          <Button 
+            onClick={handleCreateWithAI} 
+            className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          >
+            <Sparkles className="w-4 h-4" />
+            Tạo với AI
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
