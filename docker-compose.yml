@@ -100,7 +100,7 @@ services:
       MINIO_PORT: 9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      MINIO_USE_SSL: false
+      MINIO_USE_SSL: "false"
       MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-uploads}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:12000}
     ports:

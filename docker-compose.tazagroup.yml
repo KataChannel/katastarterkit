@@ -13,7 +13,7 @@ services:
   tazagroup-backend:
     build:
       context: .
-      dockerfile: ./backend/Dockerfile
+      dockerfile: ./backend/Dockerfile.production
     container_name: tazagroup-backend
     restart: unless-stopped
     env_file:
@@ -26,7 +26,7 @@ services:
       REDIS_PORT: 12004
       MINIO_ENDPOINT: 116.118.49.243
       MINIO_PORT: 12007
-      MINIO_USE_SSL: false
+      MINIO_USE_SSL: "false"
       MINIO_BUCKET_NAME: tazagroup-uploads
     ports:
       - "13001:4000"
@@ -37,7 +37,13 @@ services:
   tazagroup-frontend:
     build:
       context: .
-      dockerfile: ./frontend/Dockerfile
+      dockerfile: ./frontend/Dockerfile.production
+      args:
+        NEXT_PUBLIC_API_URL: http://116.118.49.243:13001
+        NEXT_PUBLIC_GRAPHQL_URL: http://116.118.49.243:13001/graphql
+        NEXT_PUBLIC_UPLOAD_URL: http://116.118.49.243:13001
+        NEXT_PUBLIC_WEBSITE_URL: http://116.118.49.243:13000
+        NEXT_PUBLIC_WEBSITE_NAME: Tazagroup
     container_name: tazagroup-frontend
     restart: unless-stopped
     env_file:

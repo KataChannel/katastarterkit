@@ -95,7 +95,7 @@ services:
   rausach-backend:
     build:
       context: .
-      dockerfile: ./backend/Dockerfile
+      dockerfile: ./backend/Dockerfile.production
     container_name: rausach-backend
     restart: unless-stopped
     env_file:
@@ -107,7 +107,7 @@ services:
       REDIS_PORT: 6379
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
-      MINIO_USE_SSL: false
+      MINIO_USE_SSL: "false"
       MINIO_BUCKET_NAME: rausach-uploads
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_INDEX_PREFIX: rausach
@@ -132,7 +132,13 @@ services:
   rausach-frontend:
     build:
       context: .
-      dockerfile: ./frontend/Dockerfile
+      dockerfile: ./frontend/Dockerfile.production
+      args:
+        NEXT_PUBLIC_API_URL: http://116.118.49.243:12001
+        NEXT_PUBLIC_GRAPHQL_URL: http://116.118.49.243:12001/graphql
+        NEXT_PUBLIC_UPLOAD_URL: http://116.118.49.243:12001
+        NEXT_PUBLIC_WEBSITE_URL: http://116.118.49.243:12000
+        NEXT_PUBLIC_WEBSITE_NAME: Rausach
     container_name: rausach-frontend
     restart: unless-stopped
     env_file:
@@ -164,7 +170,7 @@ services:
   tazagroup-backend:
     build:
       context: .
-      dockerfile: ./backend/Dockerfile
+      dockerfile: ./backend/Dockerfile.production
     container_name: tazagroup-backend
     restart: unless-stopped
     env_file:
@@ -176,7 +182,7 @@ services:
       REDIS_PORT: 6379
       MINIO_ENDPOINT: minio
       MINIO_PORT: 9000
-      MINIO_USE_SSL: false
+      MINIO_USE_SSL: "false"
       MINIO_BUCKET_NAME: tazagroup-uploads
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_INDEX_PREFIX: tazagroup
@@ -201,7 +207,13 @@ services:
   tazagroup-frontend:
     build:
       context: .
-      dockerfile: ./frontend/Dockerfile
+      dockerfile: ./frontend/Dockerfile.production
+      args:
+        NEXT_PUBLIC_API_URL: http://116.118.49.243:13001
+        NEXT_PUBLIC_GRAPHQL_URL: http://116.118.49.243:13001/graphql
+        NEXT_PUBLIC_UPLOAD_URL: http://116.118.49.243:13001
+        NEXT_PUBLIC_WEBSITE_URL: http://116.118.49.243:13000
+        NEXT_PUBLIC_WEBSITE_NAME: Tazagroup
     container_name: tazagroup-frontend
     restart: unless-stopped
     env_file:

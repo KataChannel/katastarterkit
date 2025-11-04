@@ -30,7 +30,8 @@ REMOTE_PATH_MULTI="$REMOTE_BASE_PATH/multi-domain"
 LOCAL_PATH="$(pwd)"
 
 # Files to exclude from sync
-EXCLUDE_PATTERN="node_modules .git .env* *.log dist build .next .DS_Store"
+# Note: We exclude most .env files but keep .env.prod.* for production deployment
+EXCLUDE_PATTERN="node_modules .git .env.local .env.development .env.dev.* *.log dist build .next .DS_Store"
 
 # ============ FUNCTIONS ============
 
@@ -56,6 +57,19 @@ sync_code_to_server() {
     
     echo ""
     echo -e "${YELLOW}📦 Syncing code to server: $remote_path${NC}"
+    echo ""
+    
+    # Create remote directory if not exists
+    echo -e "${CYAN}📁 Creating remote directory if needed...${NC}"
+    ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_SERVER "mkdir -p $remote_path"
+    
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✅ Remote directory ready${NC}"
+    else
+        echo -e "${RED}❌ Failed to create remote directory${NC}"
+        return 1
+    fi
+    
     echo ""
     
     # Build exclude arguments
