@@ -53,14 +53,14 @@ export declare class SearchService {
     constructor(prisma: PrismaService);
     searchTasks(query: SearchQuery, userId: string): Promise<{
         items: {
-            id: string;
             category: import(".prisma/client").$Enums.TaskCategory;
-            description: string | null;
             order: number;
+            id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             parentId: string | null;
             priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
@@ -88,14 +88,14 @@ export declare class SearchService {
     }>;
     fuzzySearch(query: string, userId: string): Promise<{
         items: {
-            id: string;
             category: import(".prisma/client").$Enums.TaskCategory;
-            description: string | null;
             order: number;
+            id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             parentId: string | null;
             priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
@@ -120,14 +120,14 @@ export declare class SearchService {
         size: number;
     }): Promise<{
         items: {
-            id: string;
             category: import(".prisma/client").$Enums.TaskCategory;
-            description: string | null;
             order: number;
+            id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             parentId: string | null;
             priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;

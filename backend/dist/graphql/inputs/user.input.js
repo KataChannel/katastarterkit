@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminResetPasswordInput = exports.SetPasswordInput = exports.UpdateProfileInput = exports.AdminCreateUserInput = exports.AdminUpdateUserInput = exports.BulkUserActionInput = exports.UserSearchInput = exports.RequestPhoneVerificationInput = exports.ChangePasswordInput = exports.UpdateUserInput = exports.VerifyPhoneInput = exports.VerifyEmailInput = exports.ResetPasswordInput = exports.ForgotPasswordInput = exports.SocialLoginInput = exports.PhoneLoginInput = exports.LoginUserInput = exports.RegisterUserInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -117,7 +118,7 @@ __decorate([
 __decorate([
     (0, graphql_1.Field)(() => AuthProvider),
     (0, class_validator_1.IsEnum)(AuthProvider),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AuthProvider) === "function" ? _a : Object)
 ], SocialLoginInput.prototype, "provider", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -285,7 +286,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.UserRoleType, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.$Enums.UserRoleType),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.$Enums !== "undefined" && client_1.$Enums.UserRoleType) === "function" ? _b : Object)
 ], UserSearchInput.prototype, "roleType", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -360,7 +361,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.UserRoleType, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.$Enums.UserRoleType),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_c = typeof client_1.$Enums !== "undefined" && client_1.$Enums.UserRoleType) === "function" ? _c : Object)
 ], BulkUserActionInput.prototype, "newRole", void 0);
 exports.BulkUserActionInput = BulkUserActionInput = __decorate([
     (0, graphql_1.InputType)()
@@ -402,7 +403,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.UserRoleType, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.$Enums.UserRoleType),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_d = typeof client_1.$Enums !== "undefined" && client_1.$Enums.UserRoleType) === "function" ? _d : Object)
 ], AdminUpdateUserInput.prototype, "roleType", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -471,7 +472,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.UserRoleType, { nullable: true, defaultValue: client_1.$Enums.UserRoleType.USER }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.$Enums.UserRoleType),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_e = typeof client_1.$Enums !== "undefined" && client_1.$Enums.UserRoleType) === "function" ? _e : Object)
 ], AdminCreateUserInput.prototype, "roleType", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true, defaultValue: true }),

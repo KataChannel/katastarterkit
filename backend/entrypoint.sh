@@ -47,19 +47,10 @@ if [ "$MINIO_READY" -eq 0 ]; then
   echo "⚠️  Minio not responding, but continuing (will retry on demand)..."
 fi
 
-# Wait for database to be ready
+# Wait for database to be ready - simplified (Prisma will handle retries)
 echo "⏳ Waiting for database to be ready..."
-DB_HOST=$(echo $DATABASE_URL | sed 's/.*@\(.*\):.*/\1/')
-DB_PORT=$(echo $DATABASE_URL | sed 's/.*:\([0-9]*\)\/.*/\1/')
-
-for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
-  echo "Database connection attempt $i/15..."
-  if nc -z "$DB_HOST" "$DB_PORT" 2>/dev/null; then
-    echo "✅ Database is ready!"
-    break
-  fi
-  sleep 2
-done
+sleep 10
+echo "✅ Proceeding with startup (Prisma will retry connections)..."
 
 # Run Prisma migrations only if ENABLE_MIGRATIONS=true
 if [ "$ENABLE_MIGRATIONS" = "true" ]; then

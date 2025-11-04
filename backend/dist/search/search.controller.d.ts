@@ -4,14 +4,14 @@ export declare class SearchController {
     constructor(searchService: SearchService);
     searchTasks(query?: string, status?: string, priority?: string, assignee?: string, author?: string, tags?: string, page?: string, size?: string, sort?: string, sortOrder?: 'asc' | 'desc', req?: any): Promise<{
         items: {
-            id: string;
             category: import(".prisma/client").$Enums.TaskCategory;
-            description: string | null;
             order: number;
+            id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             parentId: string | null;
             priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
@@ -50,14 +50,14 @@ export declare class SearchController {
         isOverdue?: boolean;
     }, page?: string, size?: string, req?: any): Promise<{
         items: {
-            id: string;
             category: import(".prisma/client").$Enums.TaskCategory;
-            description: string | null;
             order: number;
+            id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             parentId: string | null;
             priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
@@ -102,14 +102,14 @@ export declare class SearchController {
     reindexTasks(req?: any): Promise<void>;
     fuzzySearch(query: string, req?: any): Promise<{
         items: {
-            id: string;
             category: import(".prisma/client").$Enums.TaskCategory;
-            description: string | null;
             order: number;
+            id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             parentId: string | null;
             priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;

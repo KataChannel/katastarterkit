@@ -7,12 +7,12 @@ export declare class FileController {
         success: boolean;
         data: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             size: number;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
             title: string | null;
             filename: string;
@@ -38,12 +38,12 @@ export declare class FileController {
         success: boolean;
         data: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             size: number;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
             title: string | null;
             filename: string;
@@ -69,12 +69,12 @@ export declare class FileController {
         success: boolean;
         data: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             size: number;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
             title: string | null;
             filename: string;
@@ -115,11 +115,11 @@ export declare class FileController {
                 }[];
                 folder: {
                     id: string;
-                    description: string | null;
                     createdAt: Date;
-                    updatedAt: Date;
-                    name: string;
                     userId: string;
+                    name: string;
+                    updatedAt: Date;
+                    description: string | null;
                     parentId: string | null;
                     color: string | null;
                     path: string;
@@ -128,12 +128,12 @@ export declare class FileController {
                 };
             } & {
                 id: string;
-                description: string | null;
                 createdAt: Date;
-                updatedAt: Date;
                 size: number;
                 userId: string;
+                updatedAt: Date;
                 tags: string[];
+                description: string | null;
                 metadata: import("@prisma/client/runtime/library").JsonValue | null;
                 title: string | null;
                 filename: string;
@@ -165,12 +165,12 @@ export declare class FileController {
         success: boolean;
         data: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             size: number;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
             title: string | null;
             filename: string;

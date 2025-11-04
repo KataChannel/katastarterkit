@@ -5,10 +5,9 @@ export declare class TaskMediaService {
     findByTaskId(taskId: string): Promise<({
         uploader: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -21,14 +20,15 @@ export declare class TaskMediaService {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
         id: string;
-        type: import(".prisma/client").$Enums.MediaType;
         createdAt: Date;
-        updatedAt: Date;
+        type: import(".prisma/client").$Enums.MediaType;
         size: number;
+        updatedAt: Date;
         filename: string;
         url: string;
         mimeType: string;
@@ -39,10 +39,9 @@ export declare class TaskMediaService {
     create(taskId: string, uploaderId: string, mediaData: any): Promise<{
         uploader: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -55,14 +54,15 @@ export declare class TaskMediaService {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
         id: string;
-        type: import(".prisma/client").$Enums.MediaType;
         createdAt: Date;
-        updatedAt: Date;
+        type: import(".prisma/client").$Enums.MediaType;
         size: number;
+        updatedAt: Date;
         filename: string;
         url: string;
         mimeType: string;

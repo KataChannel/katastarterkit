@@ -6,10 +6,9 @@ export declare class TaskCommentService {
     create(input: CreateTaskCommentInput, authorId: string): Promise<{
         user: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -22,17 +21,18 @@ export declare class TaskCommentService {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
         task: {
-            id: string;
             category: import(".prisma/client").$Enums.TaskCategory;
-            description: string | null;
             order: number;
+            id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             parentId: string | null;
             priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
@@ -46,10 +46,9 @@ export declare class TaskCommentService {
         parent: {
             user: {
                 id: string;
-                isActive: boolean;
-                createdAt: Date;
-                updatedAt: Date;
                 isVerified: boolean;
+                createdAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -62,13 +61,14 @@ export declare class TaskCommentService {
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
+                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             parentId: string | null;
             content: string;
             taskId: string;
@@ -76,10 +76,9 @@ export declare class TaskCommentService {
         replies: ({
             user: {
                 id: string;
-                isActive: boolean;
-                createdAt: Date;
-                updatedAt: Date;
                 isVerified: boolean;
+                createdAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -92,13 +91,14 @@ export declare class TaskCommentService {
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
+                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             parentId: string | null;
             content: string;
             taskId: string;
@@ -106,8 +106,8 @@ export declare class TaskCommentService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         parentId: string | null;
         content: string;
         taskId: string;
@@ -115,10 +115,9 @@ export declare class TaskCommentService {
     findByTaskId(taskId: string): Promise<({
         user: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -131,15 +130,15 @@ export declare class TaskCommentService {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
         replies: ({
             user: {
                 id: string;
-                isActive: boolean;
-                createdAt: Date;
-                updatedAt: Date;
                 isVerified: boolean;
+                createdAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -152,13 +151,14 @@ export declare class TaskCommentService {
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
+                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             parentId: string | null;
             content: string;
             taskId: string;
@@ -166,8 +166,8 @@ export declare class TaskCommentService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         parentId: string | null;
         content: string;
         taskId: string;
@@ -175,10 +175,9 @@ export declare class TaskCommentService {
     findById(id: string): Promise<{
         user: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -191,15 +190,15 @@ export declare class TaskCommentService {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
         parent: {
             user: {
                 id: string;
-                isActive: boolean;
-                createdAt: Date;
-                updatedAt: Date;
                 isVerified: boolean;
+                createdAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -212,13 +211,14 @@ export declare class TaskCommentService {
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
+                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             parentId: string | null;
             content: string;
             taskId: string;
@@ -226,10 +226,9 @@ export declare class TaskCommentService {
         replies: ({
             user: {
                 id: string;
-                isActive: boolean;
-                createdAt: Date;
-                updatedAt: Date;
                 isVerified: boolean;
+                createdAt: Date;
+                isActive: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -242,13 +241,14 @@ export declare class TaskCommentService {
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
+                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             parentId: string | null;
             content: string;
             taskId: string;
@@ -256,8 +256,8 @@ export declare class TaskCommentService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         parentId: string | null;
         content: string;
         taskId: string;
@@ -265,10 +265,9 @@ export declare class TaskCommentService {
     findReplies(parentId: string): Promise<({
         user: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -281,13 +280,14 @@ export declare class TaskCommentService {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         parentId: string | null;
         content: string;
         taskId: string;
@@ -295,10 +295,9 @@ export declare class TaskCommentService {
     update(input: UpdateTaskCommentInput, userId: string): Promise<{
         user: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -311,17 +310,18 @@ export declare class TaskCommentService {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
         task: {
-            id: string;
             category: import(".prisma/client").$Enums.TaskCategory;
-            description: string | null;
             order: number;
+            id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             tags: string[];
+            description: string | null;
             parentId: string | null;
             priority: import(".prisma/client").$Enums.TaskPriority;
             title: string;
@@ -335,8 +335,8 @@ export declare class TaskCommentService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         parentId: string | null;
         content: string;
         taskId: string;

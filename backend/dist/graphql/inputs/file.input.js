@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GetFilesInput = exports.BulkUpdateFilesInput = exports.BulkDeleteFilesInput = exports.MoveFilesInput = exports.CreateFileShareInput = exports.FileFiltersInput = exports.UpdateFileInput = exports.UpdateFolderInput = exports.CreateFolderInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -135,7 +136,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.FileVisibility, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.FileVisibility),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.FileVisibility !== "undefined" && client_1.FileVisibility) === "function" ? _a : Object)
 ], UpdateFileInput.prototype, "visibility", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
@@ -152,7 +153,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.FileType, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.FileType),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.FileType !== "undefined" && client_1.FileType) === "function" ? _b : Object)
 ], FileFiltersInput.prototype, "fileType", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
@@ -164,7 +165,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.FileVisibility, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.FileVisibility),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_c = typeof client_1.FileVisibility !== "undefined" && client_1.FileVisibility) === "function" ? _c : Object)
 ], FileFiltersInput.prototype, "visibility", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -265,7 +266,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.FileVisibility, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.FileVisibility),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_d = typeof client_1.FileVisibility !== "undefined" && client_1.FileVisibility) === "function" ? _d : Object)
 ], BulkUpdateFilesInput.prototype, "visibility", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),

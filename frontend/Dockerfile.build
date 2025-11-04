@@ -1,0 +1,60 @@
+# ============================================================================
+# Frontend Dockerfile - Multi-stage build inside Docker
+# No local pre-build required - builds everything in Docker
+# ============================================================================
+
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY frontend/package.json ./
+COPY frontend/package-lock.json* ./
+
+# Install dependencies (use legacy-peer-deps to handle Storybook conflict)
+RUN npm install --legacy-peer-deps
+
+# Copy source code and config
+COPY frontend/. ./
+
+# Build Next.js with standalone output
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
+
+# Production stage
+FROM node:22-alpine AS runtime
+
+# Install minimal dependencies
+RUN apk add --no-cache curl dumb-init && \
+    rm -rf /var/cache/apk/* && \
+    addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs --ingroup nodejs
+
+WORKDIR /app
+
+# Set environment variables
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME="0.0.0.0"
+
+# Copy standalone build from builder
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/ ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static/ ./frontend/.next/static/
+COPY --from=builder --chown=nextjs:nodejs /app/public/ ./frontend/public/
+
+# Switch to non-root user
+USER nextjs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Use dumb-init for signal handling
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start Next.js server from standalone directory
+CMD ["node", "frontend/server.js"]

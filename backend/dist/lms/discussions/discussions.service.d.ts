@@ -18,8 +18,8 @@ export declare class DiscussionsService {
         replies: {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             parentId: string | null;
             content: string;
             discussionId: string;
@@ -27,8 +27,8 @@ export declare class DiscussionsService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
         content: string;
         isPinned: boolean;
@@ -59,8 +59,8 @@ export declare class DiscussionsService {
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             parentId: string | null;
             content: string;
             discussionId: string;
@@ -68,8 +68,8 @@ export declare class DiscussionsService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
         content: string;
         isPinned: boolean;
@@ -113,8 +113,8 @@ export declare class DiscussionsService {
             } & {
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 userId: string;
+                updatedAt: Date;
                 parentId: string | null;
                 content: string;
                 discussionId: string;
@@ -122,8 +122,8 @@ export declare class DiscussionsService {
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
             userId: string;
+            updatedAt: Date;
             parentId: string | null;
             content: string;
             discussionId: string;
@@ -131,8 +131,8 @@ export declare class DiscussionsService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
         content: string;
         isPinned: boolean;
@@ -151,8 +151,8 @@ export declare class DiscussionsService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         parentId: string | null;
         content: string;
         discussionId: string;
@@ -168,8 +168,8 @@ export declare class DiscussionsService {
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
         content: string;
         isPinned: boolean;
@@ -183,8 +183,8 @@ export declare class DiscussionsService {
     togglePin(userId: string, id: string): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         userId: string;
+        updatedAt: Date;
         title: string;
         content: string;
         isPinned: boolean;

@@ -7,30 +7,30 @@ export declare class CourseCategoriesResolver {
     createCategory(createCourseCategoryInput: CreateCourseCategoryInput): Promise<{
         parent: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
             slug: string;
             icon: string | null;
         };
         children: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
             slug: string;
             icon: string | null;
         }[];
     } & {
         id: string;
-        description: string | null;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
+        description: string | null;
         parentId: string | null;
         slug: string;
         icon: string | null;
@@ -41,30 +41,30 @@ export declare class CourseCategoriesResolver {
         };
         parent: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
             slug: string;
             icon: string | null;
         };
         children: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
             slug: string;
             icon: string | null;
         }[];
     } & {
         id: string;
-        description: string | null;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
+        description: string | null;
         parentId: string | null;
         slug: string;
         icon: string | null;
@@ -79,30 +79,30 @@ export declare class CourseCategoriesResolver {
             };
             children: {
                 id: string;
-                description: string | null;
                 createdAt: Date;
-                updatedAt: Date;
                 name: string;
+                updatedAt: Date;
+                description: string | null;
                 parentId: string | null;
                 slug: string;
                 icon: string | null;
             }[];
         } & {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
             slug: string;
             icon: string | null;
         })[];
     } & {
         id: string;
-        description: string | null;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
+        description: string | null;
         parentId: string | null;
         slug: string;
         icon: string | null;
@@ -113,30 +113,30 @@ export declare class CourseCategoriesResolver {
         };
         parent: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
             slug: string;
             icon: string | null;
         };
         children: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
             slug: string;
             icon: string | null;
         }[];
     } & {
         id: string;
-        description: string | null;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
+        description: string | null;
         parentId: string | null;
         slug: string;
         icon: string | null;
@@ -144,30 +144,30 @@ export declare class CourseCategoriesResolver {
     updateCategory(updateCourseCategoryInput: UpdateCourseCategoryInput): Promise<{
         parent: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
             slug: string;
             icon: string | null;
         };
         children: {
             id: string;
-            description: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
             slug: string;
             icon: string | null;
         }[];
     } & {
         id: string;
-        description: string | null;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
+        description: string | null;
         parentId: string | null;
         slug: string;
         icon: string | null;

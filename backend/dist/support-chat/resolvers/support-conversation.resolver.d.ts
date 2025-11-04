@@ -125,12 +125,12 @@ export declare class SupportConversationResolver {
             avatar: string;
         };
         tickets: {
-            id: string;
             category: string | null;
-            description: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             tags: string[];
+            description: string;
             priority: import(".prisma/client").$Enums.TicketPriority;
             assignedAt: Date | null;
             status: import(".prisma/client").$Enums.TicketStatus;
@@ -177,10 +177,9 @@ export declare class SupportConversationResolver {
     createSupportConversation(input: CreateSupportConversationInput): Promise<{
         customer: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -193,14 +192,14 @@ export declare class SupportConversationResolver {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
         assignedAgent: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -213,6 +212,7 @@ export declare class SupportConversationResolver {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
@@ -246,10 +246,9 @@ export declare class SupportConversationResolver {
     assignConversationToAgent(conversationId: string, agentId: string): Promise<{
         customer: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -262,14 +261,14 @@ export declare class SupportConversationResolver {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
         assignedAgent: {
             id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             isVerified: boolean;
+            createdAt: Date;
+            isActive: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -282,6 +281,7 @@ export declare class SupportConversationResolver {
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            updatedAt: Date;
             departmentId: string | null;
         };
     } & {

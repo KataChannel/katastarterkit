@@ -44,9 +44,13 @@ COPY backend/bun.lockb* ./
 COPY backend/entrypoint.sh ./entrypoint.sh
 
 # Install dependencies with prisma CLI (needed for client generation)
-# Using frozen-lockfile ensures exact versions
+# Using frozen-lockfile if lockb exists, otherwise regular install
 # Note: Keep full dependencies (not just --production) so we can generate Prisma client
-RUN bun install --frozen-lockfile
+RUN if [ -f "bun.lockb" ] && [ -s "bun.lockb" ]; then \
+      bun install --frozen-lockfile; \
+    else \
+      bun install; \
+    fi
 
 # Generate Prisma client at build time
 # This creates @prisma/client for runtime use

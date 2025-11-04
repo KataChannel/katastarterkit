@@ -3,12 +3,12 @@ export declare class SupportTicketService {
     private prisma;
     constructor(prisma: PrismaService);
     createTicket(data: any): Promise<{
-        id: string;
         category: string | null;
-        description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         tags: string[];
+        description: string;
         priority: import(".prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         status: import(".prisma/client").$Enums.TicketStatus;
@@ -25,12 +25,12 @@ export declare class SupportTicketService {
         resolvedById: string | null;
     }>;
     findAll(params?: any): Promise<{
-        id: string;
         category: string | null;
-        description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         tags: string[];
+        description: string;
         priority: import(".prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         status: import(".prisma/client").$Enums.TicketStatus;
@@ -47,12 +47,12 @@ export declare class SupportTicketService {
         resolvedById: string | null;
     }[]>;
     findOne(id: string): Promise<{
-        id: string;
         category: string | null;
-        description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         tags: string[];
+        description: string;
         priority: import(".prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         status: import(".prisma/client").$Enums.TicketStatus;
@@ -69,12 +69,12 @@ export declare class SupportTicketService {
         resolvedById: string | null;
     }>;
     update(id: string, data: any): Promise<{
-        id: string;
         category: string | null;
-        description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         tags: string[];
+        description: string;
         priority: import(".prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
         status: import(".prisma/client").$Enums.TicketStatus;

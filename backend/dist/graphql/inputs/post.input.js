@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostFiltersInput = exports.UpdatePostInput = exports.CreatePostInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -45,7 +46,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.PostStatus, { defaultValue: client_1.PostStatus.DRAFT }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.PostStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.PostStatus !== "undefined" && client_1.PostStatus) === "function" ? _a : Object)
 ], CreatePostInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),
@@ -87,7 +88,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.PostStatus, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.PostStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.PostStatus !== "undefined" && client_1.PostStatus) === "function" ? _b : Object)
 ], UpdatePostInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),
@@ -109,7 +110,7 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.PostStatus, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.PostStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_c = typeof client_1.PostStatus !== "undefined" && client_1.PostStatus) === "function" ? _c : Object)
 ], PostFiltersInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),

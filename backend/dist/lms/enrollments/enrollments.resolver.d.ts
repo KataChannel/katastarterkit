@@ -7,10 +7,10 @@ export declare class EnrollmentsResolver {
         course: {
             level: import(".prisma/client").$Enums.CourseLevel;
             id: string;
-            description: string | null;
             createdAt: Date;
             updatedAt: Date;
             tags: string[];
+            description: string | null;
             title: string;
             slug: string;
             status: import(".prisma/client").$Enums.CourseStatus;
@@ -49,10 +49,10 @@ export declare class EnrollmentsResolver {
         course: {
             category: {
                 id: string;
-                description: string | null;
                 createdAt: Date;
-                updatedAt: Date;
                 name: string;
+                updatedAt: Date;
+                description: string | null;
                 parentId: string | null;
                 slug: string;
                 icon: string | null;
@@ -67,10 +67,10 @@ export declare class EnrollmentsResolver {
         } & {
             level: import(".prisma/client").$Enums.CourseLevel;
             id: string;
-            description: string | null;
             createdAt: Date;
             updatedAt: Date;
             tags: string[];
+            description: string | null;
             title: string;
             slug: string;
             status: import(".prisma/client").$Enums.CourseStatus;
@@ -109,12 +109,12 @@ export declare class EnrollmentsResolver {
         course: {
             modules: ({
                 lessons: {
-                    id: string;
-                    type: import(".prisma/client").$Enums.LessonType;
-                    description: string | null;
                     order: number;
+                    id: string;
                     createdAt: Date;
+                    type: import(".prisma/client").$Enums.LessonType;
                     updatedAt: Date;
+                    description: string | null;
                     title: string;
                     content: string | null;
                     duration: number | null;
@@ -124,11 +124,11 @@ export declare class EnrollmentsResolver {
                     attachments: import("@prisma/client/runtime/library").JsonValue | null;
                 }[];
             } & {
-                id: string;
-                description: string | null;
                 order: number;
+                id: string;
                 createdAt: Date;
                 updatedAt: Date;
+                description: string | null;
                 title: string;
                 isPublished: boolean;
                 courseId: string;
@@ -136,10 +136,10 @@ export declare class EnrollmentsResolver {
         } & {
             level: import(".prisma/client").$Enums.CourseLevel;
             id: string;
-            description: string | null;
             createdAt: Date;
             updatedAt: Date;
             tags: string[];
+            description: string | null;
             title: string;
             slug: string;
             status: import(".prisma/client").$Enums.CourseStatus;
@@ -163,12 +163,12 @@ export declare class EnrollmentsResolver {
         };
         lessonProgress: ({
             lesson: {
-                id: string;
-                type: import(".prisma/client").$Enums.LessonType;
-                description: string | null;
                 order: number;
+                id: string;
                 createdAt: Date;
+                type: import(".prisma/client").$Enums.LessonType;
                 updatedAt: Date;
+                description: string | null;
                 title: string;
                 content: string | null;
                 duration: number | null;

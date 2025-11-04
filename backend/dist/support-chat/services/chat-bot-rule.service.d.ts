@@ -4,11 +4,11 @@ export declare class ChatBotRuleService {
     constructor(prisma: PrismaService);
     findAll(): Promise<{
         id: string;
-        description: string | null;
-        isActive: boolean;
         createdAt: Date;
-        updatedAt: Date;
+        isActive: boolean;
         name: string;
+        updatedAt: Date;
+        description: string | null;
         priority: number;
         conditions: import("@prisma/client/runtime/library").JsonValue | null;
         pattern: string | null;
@@ -24,11 +24,11 @@ export declare class ChatBotRuleService {
     }[]>;
     matchRule(message: string, platform: string): Promise<{
         id: string;
-        description: string | null;
-        isActive: boolean;
         createdAt: Date;
-        updatedAt: Date;
+        isActive: boolean;
         name: string;
+        updatedAt: Date;
+        description: string | null;
         priority: number;
         conditions: import("@prisma/client/runtime/library").JsonValue | null;
         pattern: string | null;

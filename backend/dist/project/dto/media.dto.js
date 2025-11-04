@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeleteFileInput = exports.UploadFileInput = exports.ChatMediaType = exports.ProjectMediaType = exports.MediaUploaderType = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -51,7 +52,7 @@ __decorate([
 ], ProjectMediaType.prototype, "id", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.MediaType),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.MediaType !== "undefined" && client_1.MediaType) === "function" ? _a : Object)
 ], ProjectMediaType.prototype, "type", void 0);
 __decorate([
     (0, graphql_1.Field)(),
@@ -105,7 +106,7 @@ __decorate([
 ], ChatMediaType.prototype, "id", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.MediaType),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.MediaType !== "undefined" && client_1.MediaType) === "function" ? _b : Object)
 ], ChatMediaType.prototype, "type", void 0);
 __decorate([
     (0, graphql_1.Field)(),

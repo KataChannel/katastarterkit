@@ -7,8 +7,8 @@ export declare class CallCenterService {
     constructor(prisma: PrismaService);
     getConfig(): Promise<{
         id: string;
-        isActive: boolean;
         createdAt: Date;
+        isActive: boolean;
         updatedAt: Date;
         batchSize: number;
         apiUrl: string;
@@ -24,8 +24,8 @@ export declare class CallCenterService {
     }>;
     createConfig(input: CreateCallCenterConfigInput): Promise<{
         id: string;
-        isActive: boolean;
         createdAt: Date;
+        isActive: boolean;
         updatedAt: Date;
         batchSize: number;
         apiUrl: string;
@@ -41,8 +41,8 @@ export declare class CallCenterService {
     }>;
     updateConfig(id: string, input: UpdateCallCenterConfigInput): Promise<{
         id: string;
-        isActive: boolean;
         createdAt: Date;
+        isActive: boolean;
         updatedAt: Date;
         batchSize: number;
         apiUrl: string;
@@ -58,8 +58,8 @@ export declare class CallCenterService {
     }>;
     deleteConfig(id: string): Promise<{
         id: string;
-        isActive: boolean;
         createdAt: Date;
+        isActive: boolean;
         updatedAt: Date;
         batchSize: number;
         apiUrl: string;

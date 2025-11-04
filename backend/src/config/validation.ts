@@ -48,7 +48,10 @@ export const validationSchema = Joi.object({
   // Production-specific variables
   DOMAIN: Joi.when('NODE_ENV', {
     is: 'production',
-    then: Joi.string().domain().required(),
+    then: Joi.alternatives().try(
+      Joi.string().domain(),
+      Joi.string().ip()
+    ).required(),
     otherwise: Joi.string().optional(),
   }),
   SSL_EMAIL: Joi.when('NODE_ENV', {

@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuditLog = exports.UserSession = exports.VerificationToken = exports.AuthMethod = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -30,7 +31,7 @@ __decorate([
 ], AuthMethod.prototype, "id", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AuthProvider),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AuthProvider) === "function" ? _a : Object)
 ], AuthMethod.prototype, "provider", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -60,7 +61,7 @@ __decorate([
 ], VerificationToken.prototype, "token", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.TokenType),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.$Enums !== "undefined" && client_1.$Enums.TokenType) === "function" ? _b : Object)
 ], VerificationToken.prototype, "type", void 0);
 __decorate([
     (0, graphql_1.Field)(),
