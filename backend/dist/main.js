@@ -62,7 +62,10 @@ async function bootstrap() {
     console.log(`   FRONTEND_URL: ${configService.get('FRONTEND_URL', 'http://localhost:3000')}`);
     app.use(express.json({ limit: '50mb' }));
     app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-    app.use('/graphql', (0, graphql_upload_ts_1.graphqlUploadExpress)({ maxFileSize: 500000000, maxFiles: 10 }));
+    app.use('/graphql', (0, graphql_upload_ts_1.graphqlUploadExpress)({
+        maxFileSize: 500000000,
+        maxFiles: 10
+    }));
     app.use('/logs', express.static((0, path_1.join)(__dirname, '../public')));
     const frontendUrl = configService.get('FRONTEND_URL', 'http://localhost:3000');
     const corsOrigins = [

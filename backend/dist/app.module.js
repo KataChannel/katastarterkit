@@ -78,9 +78,7 @@ exports.AppModule = AppModule = __decorate([
                     playground: configService.get('NODE_ENV') !== 'production',
                     introspection: configService.get('NODE_ENV') !== 'production',
                     context: ({ req, res }) => ({ req, res }),
-                    bodyParserConfig: {
-                        limit: '50mb',
-                    },
+                    bodyParserConfig: false,
                     subscriptions: {
                         'graphql-ws': {
                             path: '/graphql',
