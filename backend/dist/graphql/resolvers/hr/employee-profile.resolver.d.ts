@@ -6,6 +6,10 @@ export declare class EmployeeProfileResolver {
     createEmployeeProfile(input: CreateEmployeeProfileInput, currentUser: any): Promise<{
         user: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -13,28 +17,24 @@ export declare class EmployeeProfileResolver {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
+        level: string | null;
         id: string;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        level: string | null;
-        department: string | null;
-        displayName: string | null;
         createdBy: string | null;
-        userId: string;
         updatedBy: string | null;
+        department: string | null;
+        userId: string;
+        displayName: string | null;
         skills: string[];
         startDate: Date | null;
         notes: string | null;
@@ -52,8 +52,8 @@ export declare class EmployeeProfileResolver {
         passportExpiryDate: Date | null;
         dateOfBirth: Date | null;
         placeOfBirth: string | null;
-        gender: import("@prisma/client").$Enums.Gender | null;
-        maritalStatus: import("@prisma/client").$Enums.MaritalStatus | null;
+        gender: import(".prisma/client").$Enums.Gender | null;
+        maritalStatus: import(".prisma/client").$Enums.MaritalStatus | null;
         nationality: string | null;
         personalEmail: string | null;
         personalPhone: string | null;
@@ -77,19 +77,19 @@ export declare class EmployeeProfileResolver {
         team: string | null;
         directManager: string | null;
         probationEndDate: Date | null;
-        contractType: import("@prisma/client").$Enums.ContractType | null;
+        contractType: import(".prisma/client").$Enums.ContractType | null;
         workLocation: string | null;
         salaryGrade: string | null;
     }>;
     employeeProfile(id: string): Promise<{
         user: {
             id: string;
+            isActive: boolean;
             email: string;
             username: string;
             firstName: string;
             lastName: string;
             avatar: string;
-            isActive: boolean;
         };
         employmentHistory: {
             id: string;
@@ -99,8 +99,8 @@ export declare class EmployeeProfileResolver {
             notes: string | null;
             approvedAt: Date | null;
             processedBy: string | null;
-            eventType: import("@prisma/client").$Enums.EmploymentEventType;
-            contractType: import("@prisma/client").$Enums.ContractType | null;
+            eventType: import(".prisma/client").$Enums.EmploymentEventType;
+            contractType: import(".prisma/client").$Enums.ContractType | null;
             eventDate: Date;
             employeeProfileId: string;
             effectiveDate: Date;
@@ -117,7 +117,7 @@ export declare class EmployeeProfileResolver {
             contractEndDate: Date | null;
             salaryChangePercentage: number | null;
             newSalaryGrade: string | null;
-            terminationType: import("@prisma/client").$Enums.TerminationType | null;
+            terminationType: import(".prisma/client").$Enums.TerminationType | null;
             terminationReason: string | null;
             lastWorkingDay: Date | null;
             noticePeriodDays: number | null;
@@ -126,40 +126,14 @@ export declare class EmployeeProfileResolver {
             approvedBy: string | null;
             internalNotes: string | null;
         }[];
-        documents: {
-            id: string;
-            isVerified: boolean;
-            updatedAt: Date;
-            description: string | null;
-            userId: string;
-            title: string;
-            uploadedBy: string;
-            fileName: string;
-            fileSize: number | null;
-            fileId: string;
-            employeeProfileId: string;
-            uploadedAt: Date;
-            documentType: import("@prisma/client").$Enums.DocumentType;
-            fileUrl: string;
-            fileMimeType: string | null;
-            documentNumber: string | null;
-            issueDate: Date | null;
-            expiryDate: Date | null;
-            issuingAuthority: string | null;
-            verifiedBy: string | null;
-            verifiedAt: Date | null;
-            verificationNotes: string | null;
-            isConfidential: boolean;
-            accessibleBy: string[];
-        }[];
         onboardingChecklist: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            tasks: import("@prisma/client/runtime/library").JsonValue;
             createdBy: string | null;
             userId: string;
-            status: import("@prisma/client").$Enums.OnboardingStatus;
+            tasks: import("@prisma/client/runtime/library").JsonValue;
+            status: import(".prisma/client").$Enums.OnboardingStatus;
             assignedTo: string | null;
             startDate: Date;
             completedTasks: number;
@@ -176,19 +150,45 @@ export declare class EmployeeProfileResolver {
             employeeFeedback: string | null;
             managerFeedback: string | null;
         };
+        documents: {
+            id: string;
+            description: string | null;
+            updatedAt: Date;
+            isVerified: boolean;
+            userId: string;
+            title: string;
+            uploadedBy: string;
+            fileName: string;
+            fileSize: number | null;
+            fileId: string;
+            employeeProfileId: string;
+            uploadedAt: Date;
+            documentType: import(".prisma/client").$Enums.DocumentType;
+            fileUrl: string;
+            fileMimeType: string | null;
+            documentNumber: string | null;
+            issueDate: Date | null;
+            expiryDate: Date | null;
+            issuingAuthority: string | null;
+            verifiedBy: string | null;
+            verifiedAt: Date | null;
+            verificationNotes: string | null;
+            isConfidential: boolean;
+            accessibleBy: string[];
+        }[];
         offboardingProcesses: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            status: import("@prisma/client").$Enums.OffboardingStatus;
+            status: import(".prisma/client").$Enums.OffboardingStatus;
             completedAt: Date | null;
             employeeProfileId: string;
             effectiveDate: Date | null;
             lastWorkingDay: Date;
             noticePeriodDays: number | null;
             exitReason: string;
-            exitType: import("@prisma/client").$Enums.TerminationType;
+            exitType: import(".prisma/client").$Enums.TerminationType;
             resignationLetter: string | null;
             noticeGivenDate: Date | null;
             noticeRequired: boolean;
@@ -208,7 +208,7 @@ export declare class EmployeeProfileResolver {
             totalSettlement: number | null;
             paymentDate: Date | null;
             paymentStatus: string | null;
-            clearanceStatus: import("@prisma/client").$Enums.ClearanceStatus;
+            clearanceStatus: import(".prisma/client").$Enums.ClearanceStatus;
             clearanceSteps: import("@prisma/client/runtime/library").JsonValue | null;
             referenceLetterRequested: boolean;
             referenceLetterProvided: boolean;
@@ -227,16 +227,16 @@ export declare class EmployeeProfileResolver {
             employeeComments: string | null;
         }[];
     } & {
+        level: string | null;
         id: string;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        level: string | null;
-        department: string | null;
-        displayName: string | null;
         createdBy: string | null;
-        userId: string;
         updatedBy: string | null;
+        department: string | null;
+        userId: string;
+        displayName: string | null;
         skills: string[];
         startDate: Date | null;
         notes: string | null;
@@ -254,8 +254,8 @@ export declare class EmployeeProfileResolver {
         passportExpiryDate: Date | null;
         dateOfBirth: Date | null;
         placeOfBirth: string | null;
-        gender: import("@prisma/client").$Enums.Gender | null;
-        maritalStatus: import("@prisma/client").$Enums.MaritalStatus | null;
+        gender: import(".prisma/client").$Enums.Gender | null;
+        maritalStatus: import(".prisma/client").$Enums.MaritalStatus | null;
         nationality: string | null;
         personalEmail: string | null;
         personalPhone: string | null;
@@ -279,19 +279,19 @@ export declare class EmployeeProfileResolver {
         team: string | null;
         directManager: string | null;
         probationEndDate: Date | null;
-        contractType: import("@prisma/client").$Enums.ContractType | null;
+        contractType: import(".prisma/client").$Enums.ContractType | null;
         workLocation: string | null;
         salaryGrade: string | null;
     }>;
     employeeProfileByUserId(userId: string): Promise<{
         user: {
             id: string;
+            isActive: boolean;
             email: string;
             username: string;
             firstName: string;
             lastName: string;
             avatar: string;
-            isActive: boolean;
         };
         employmentHistory: {
             id: string;
@@ -301,8 +301,8 @@ export declare class EmployeeProfileResolver {
             notes: string | null;
             approvedAt: Date | null;
             processedBy: string | null;
-            eventType: import("@prisma/client").$Enums.EmploymentEventType;
-            contractType: import("@prisma/client").$Enums.ContractType | null;
+            eventType: import(".prisma/client").$Enums.EmploymentEventType;
+            contractType: import(".prisma/client").$Enums.ContractType | null;
             eventDate: Date;
             employeeProfileId: string;
             effectiveDate: Date;
@@ -319,7 +319,7 @@ export declare class EmployeeProfileResolver {
             contractEndDate: Date | null;
             salaryChangePercentage: number | null;
             newSalaryGrade: string | null;
-            terminationType: import("@prisma/client").$Enums.TerminationType | null;
+            terminationType: import(".prisma/client").$Enums.TerminationType | null;
             terminationReason: string | null;
             lastWorkingDay: Date | null;
             noticePeriodDays: number | null;
@@ -328,40 +328,14 @@ export declare class EmployeeProfileResolver {
             approvedBy: string | null;
             internalNotes: string | null;
         }[];
-        documents: {
-            id: string;
-            isVerified: boolean;
-            updatedAt: Date;
-            description: string | null;
-            userId: string;
-            title: string;
-            uploadedBy: string;
-            fileName: string;
-            fileSize: number | null;
-            fileId: string;
-            employeeProfileId: string;
-            uploadedAt: Date;
-            documentType: import("@prisma/client").$Enums.DocumentType;
-            fileUrl: string;
-            fileMimeType: string | null;
-            documentNumber: string | null;
-            issueDate: Date | null;
-            expiryDate: Date | null;
-            issuingAuthority: string | null;
-            verifiedBy: string | null;
-            verifiedAt: Date | null;
-            verificationNotes: string | null;
-            isConfidential: boolean;
-            accessibleBy: string[];
-        }[];
         onboardingChecklist: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            tasks: import("@prisma/client/runtime/library").JsonValue;
             createdBy: string | null;
             userId: string;
-            status: import("@prisma/client").$Enums.OnboardingStatus;
+            tasks: import("@prisma/client/runtime/library").JsonValue;
+            status: import(".prisma/client").$Enums.OnboardingStatus;
             assignedTo: string | null;
             startDate: Date;
             completedTasks: number;
@@ -378,19 +352,45 @@ export declare class EmployeeProfileResolver {
             employeeFeedback: string | null;
             managerFeedback: string | null;
         };
+        documents: {
+            id: string;
+            description: string | null;
+            updatedAt: Date;
+            isVerified: boolean;
+            userId: string;
+            title: string;
+            uploadedBy: string;
+            fileName: string;
+            fileSize: number | null;
+            fileId: string;
+            employeeProfileId: string;
+            uploadedAt: Date;
+            documentType: import(".prisma/client").$Enums.DocumentType;
+            fileUrl: string;
+            fileMimeType: string | null;
+            documentNumber: string | null;
+            issueDate: Date | null;
+            expiryDate: Date | null;
+            issuingAuthority: string | null;
+            verifiedBy: string | null;
+            verifiedAt: Date | null;
+            verificationNotes: string | null;
+            isConfidential: boolean;
+            accessibleBy: string[];
+        }[];
         offboardingProcesses: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            status: import("@prisma/client").$Enums.OffboardingStatus;
+            status: import(".prisma/client").$Enums.OffboardingStatus;
             completedAt: Date | null;
             employeeProfileId: string;
             effectiveDate: Date | null;
             lastWorkingDay: Date;
             noticePeriodDays: number | null;
             exitReason: string;
-            exitType: import("@prisma/client").$Enums.TerminationType;
+            exitType: import(".prisma/client").$Enums.TerminationType;
             resignationLetter: string | null;
             noticeGivenDate: Date | null;
             noticeRequired: boolean;
@@ -410,7 +410,7 @@ export declare class EmployeeProfileResolver {
             totalSettlement: number | null;
             paymentDate: Date | null;
             paymentStatus: string | null;
-            clearanceStatus: import("@prisma/client").$Enums.ClearanceStatus;
+            clearanceStatus: import(".prisma/client").$Enums.ClearanceStatus;
             clearanceSteps: import("@prisma/client/runtime/library").JsonValue | null;
             referenceLetterRequested: boolean;
             referenceLetterProvided: boolean;
@@ -429,16 +429,16 @@ export declare class EmployeeProfileResolver {
             employeeComments: string | null;
         }[];
     } & {
+        level: string | null;
         id: string;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        level: string | null;
-        department: string | null;
-        displayName: string | null;
         createdBy: string | null;
-        userId: string;
         updatedBy: string | null;
+        department: string | null;
+        userId: string;
+        displayName: string | null;
         skills: string[];
         startDate: Date | null;
         notes: string | null;
@@ -456,8 +456,8 @@ export declare class EmployeeProfileResolver {
         passportExpiryDate: Date | null;
         dateOfBirth: Date | null;
         placeOfBirth: string | null;
-        gender: import("@prisma/client").$Enums.Gender | null;
-        maritalStatus: import("@prisma/client").$Enums.MaritalStatus | null;
+        gender: import(".prisma/client").$Enums.Gender | null;
+        maritalStatus: import(".prisma/client").$Enums.MaritalStatus | null;
         nationality: string | null;
         personalEmail: string | null;
         personalPhone: string | null;
@@ -481,13 +481,17 @@ export declare class EmployeeProfileResolver {
         team: string | null;
         directManager: string | null;
         probationEndDate: Date | null;
-        contractType: import("@prisma/client").$Enums.ContractType | null;
+        contractType: import(".prisma/client").$Enums.ContractType | null;
         workLocation: string | null;
         salaryGrade: string | null;
     }>;
     employeeProfileByCode(employeeCode: string): Promise<{
         user: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -495,15 +499,11 @@ export declare class EmployeeProfileResolver {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
         employmentHistory: {
@@ -514,8 +514,8 @@ export declare class EmployeeProfileResolver {
             notes: string | null;
             approvedAt: Date | null;
             processedBy: string | null;
-            eventType: import("@prisma/client").$Enums.EmploymentEventType;
-            contractType: import("@prisma/client").$Enums.ContractType | null;
+            eventType: import(".prisma/client").$Enums.EmploymentEventType;
+            contractType: import(".prisma/client").$Enums.ContractType | null;
             eventDate: Date;
             employeeProfileId: string;
             effectiveDate: Date;
@@ -532,7 +532,7 @@ export declare class EmployeeProfileResolver {
             contractEndDate: Date | null;
             salaryChangePercentage: number | null;
             newSalaryGrade: string | null;
-            terminationType: import("@prisma/client").$Enums.TerminationType | null;
+            terminationType: import(".prisma/client").$Enums.TerminationType | null;
             terminationReason: string | null;
             lastWorkingDay: Date | null;
             noticePeriodDays: number | null;
@@ -542,16 +542,16 @@ export declare class EmployeeProfileResolver {
             internalNotes: string | null;
         }[];
     } & {
+        level: string | null;
         id: string;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        level: string | null;
-        department: string | null;
-        displayName: string | null;
         createdBy: string | null;
-        userId: string;
         updatedBy: string | null;
+        department: string | null;
+        userId: string;
+        displayName: string | null;
         skills: string[];
         startDate: Date | null;
         notes: string | null;
@@ -569,8 +569,8 @@ export declare class EmployeeProfileResolver {
         passportExpiryDate: Date | null;
         dateOfBirth: Date | null;
         placeOfBirth: string | null;
-        gender: import("@prisma/client").$Enums.Gender | null;
-        maritalStatus: import("@prisma/client").$Enums.MaritalStatus | null;
+        gender: import(".prisma/client").$Enums.Gender | null;
+        maritalStatus: import(".prisma/client").$Enums.MaritalStatus | null;
         nationality: string | null;
         personalEmail: string | null;
         personalPhone: string | null;
@@ -594,7 +594,7 @@ export declare class EmployeeProfileResolver {
         team: string | null;
         directManager: string | null;
         probationEndDate: Date | null;
-        contractType: import("@prisma/client").$Enums.ContractType | null;
+        contractType: import(".prisma/client").$Enums.ContractType | null;
         workLocation: string | null;
         salaryGrade: string | null;
     }>;
@@ -602,24 +602,24 @@ export declare class EmployeeProfileResolver {
         employees: ({
             user: {
                 id: string;
+                isActive: boolean;
                 email: string;
                 username: string;
                 firstName: string;
                 lastName: string;
                 avatar: string;
-                isActive: boolean;
             };
         } & {
+            level: string | null;
             id: string;
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
-            level: string | null;
-            department: string | null;
-            displayName: string | null;
             createdBy: string | null;
-            userId: string;
             updatedBy: string | null;
+            department: string | null;
+            userId: string;
+            displayName: string | null;
             skills: string[];
             startDate: Date | null;
             notes: string | null;
@@ -637,8 +637,8 @@ export declare class EmployeeProfileResolver {
             passportExpiryDate: Date | null;
             dateOfBirth: Date | null;
             placeOfBirth: string | null;
-            gender: import("@prisma/client").$Enums.Gender | null;
-            maritalStatus: import("@prisma/client").$Enums.MaritalStatus | null;
+            gender: import(".prisma/client").$Enums.Gender | null;
+            maritalStatus: import(".prisma/client").$Enums.MaritalStatus | null;
             nationality: string | null;
             personalEmail: string | null;
             personalPhone: string | null;
@@ -662,7 +662,7 @@ export declare class EmployeeProfileResolver {
             team: string | null;
             directManager: string | null;
             probationEndDate: Date | null;
-            contractType: import("@prisma/client").$Enums.ContractType | null;
+            contractType: import(".prisma/client").$Enums.ContractType | null;
             workLocation: string | null;
             salaryGrade: string | null;
         })[];
@@ -672,6 +672,10 @@ export declare class EmployeeProfileResolver {
     updateEmployeeProfile(id: string, input: UpdateEmployeeProfileInput, currentUser: any): Promise<{
         user: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -679,28 +683,24 @@ export declare class EmployeeProfileResolver {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
+        level: string | null;
         id: string;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        level: string | null;
-        department: string | null;
-        displayName: string | null;
         createdBy: string | null;
-        userId: string;
         updatedBy: string | null;
+        department: string | null;
+        userId: string;
+        displayName: string | null;
         skills: string[];
         startDate: Date | null;
         notes: string | null;
@@ -718,8 +718,8 @@ export declare class EmployeeProfileResolver {
         passportExpiryDate: Date | null;
         dateOfBirth: Date | null;
         placeOfBirth: string | null;
-        gender: import("@prisma/client").$Enums.Gender | null;
-        maritalStatus: import("@prisma/client").$Enums.MaritalStatus | null;
+        gender: import(".prisma/client").$Enums.Gender | null;
+        maritalStatus: import(".prisma/client").$Enums.MaritalStatus | null;
         nationality: string | null;
         personalEmail: string | null;
         personalPhone: string | null;
@@ -743,7 +743,7 @@ export declare class EmployeeProfileResolver {
         team: string | null;
         directManager: string | null;
         probationEndDate: Date | null;
-        contractType: import("@prisma/client").$Enums.ContractType | null;
+        contractType: import(".prisma/client").$Enums.ContractType | null;
         workLocation: string | null;
         salaryGrade: string | null;
     }>;

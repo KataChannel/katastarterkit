@@ -63,8 +63,8 @@ export declare class SupportChatGateway implements OnGatewayConnection, OnGatewa
             isRead: boolean;
             conversationId: string;
             sentAt: Date;
-            messageType: import("@prisma/client").$Enums.SupportMessageType;
-            senderType: import("@prisma/client").$Enums.SupportSender;
+            messageType: import(".prisma/client").$Enums.SupportMessageType;
+            senderType: import(".prisma/client").$Enums.SupportSender;
             senderId: string | null;
             senderName: string | null;
             isAIGenerated: boolean;

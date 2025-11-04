@@ -13,8 +13,8 @@ export declare class SupportConversationResolver {
             isRead: boolean;
             conversationId: string;
             sentAt: Date;
-            messageType: import("@prisma/client").$Enums.SupportMessageType;
-            senderType: import("@prisma/client").$Enums.SupportSender;
+            messageType: import(".prisma/client").$Enums.SupportMessageType;
+            senderType: import(".prisma/client").$Enums.SupportSender;
             senderId: string | null;
             senderName: string | null;
             isAIGenerated: boolean;
@@ -43,10 +43,10 @@ export declare class SupportConversationResolver {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportConversationStatus;
         tags: string[];
+        priority: import(".prisma/client").$Enums.TicketPriority;
+        assignedAt: Date | null;
+        status: import(".prisma/client").$Enums.SupportConversationStatus;
         customerEmail: string | null;
         notes: string | null;
         rating: number | null;
@@ -56,7 +56,7 @@ export declare class SupportConversationResolver {
         customerPhone: string | null;
         customerIp: string | null;
         customerLocation: string | null;
-        platform: import("@prisma/client").$Enums.IntegrationPlatform;
+        platform: import(".prisma/client").$Enums.IntegrationPlatform;
         platformUserId: string | null;
         platformUserName: string | null;
         subject: string | null;
@@ -97,8 +97,8 @@ export declare class SupportConversationResolver {
             isRead: boolean;
             conversationId: string;
             sentAt: Date;
-            messageType: import("@prisma/client").$Enums.SupportMessageType;
-            senderType: import("@prisma/client").$Enums.SupportSender;
+            messageType: import(".prisma/client").$Enums.SupportMessageType;
+            senderType: import(".prisma/client").$Enums.SupportSender;
             senderId: string | null;
             senderName: string | null;
             isAIGenerated: boolean;
@@ -126,14 +126,14 @@ export declare class SupportConversationResolver {
         };
         tickets: {
             id: string;
+            category: string | null;
+            description: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string;
-            priority: import("@prisma/client").$Enums.TicketPriority;
-            assignedAt: Date | null;
-            status: import("@prisma/client").$Enums.TicketStatus;
             tags: string[];
-            category: string | null;
+            priority: import(".prisma/client").$Enums.TicketPriority;
+            assignedAt: Date | null;
+            status: import(".prisma/client").$Enums.TicketStatus;
             conversationId: string | null;
             resolvedAt: Date | null;
             resolution: string | null;
@@ -150,10 +150,10 @@ export declare class SupportConversationResolver {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportConversationStatus;
         tags: string[];
+        priority: import(".prisma/client").$Enums.TicketPriority;
+        assignedAt: Date | null;
+        status: import(".prisma/client").$Enums.SupportConversationStatus;
         customerEmail: string | null;
         notes: string | null;
         rating: number | null;
@@ -163,7 +163,7 @@ export declare class SupportConversationResolver {
         customerPhone: string | null;
         customerIp: string | null;
         customerLocation: string | null;
-        platform: import("@prisma/client").$Enums.IntegrationPlatform;
+        platform: import(".prisma/client").$Enums.IntegrationPlatform;
         platformUserId: string | null;
         platformUserName: string | null;
         subject: string | null;
@@ -177,6 +177,10 @@ export declare class SupportConversationResolver {
     createSupportConversation(input: CreateSupportConversationInput): Promise<{
         customer: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -184,19 +188,19 @@ export declare class SupportConversationResolver {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
         assignedAgent: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -204,25 +208,21 @@ export declare class SupportConversationResolver {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportConversationStatus;
         tags: string[];
+        priority: import(".prisma/client").$Enums.TicketPriority;
+        assignedAt: Date | null;
+        status: import(".prisma/client").$Enums.SupportConversationStatus;
         customerEmail: string | null;
         notes: string | null;
         rating: number | null;
@@ -232,7 +232,7 @@ export declare class SupportConversationResolver {
         customerPhone: string | null;
         customerIp: string | null;
         customerLocation: string | null;
-        platform: import("@prisma/client").$Enums.IntegrationPlatform;
+        platform: import(".prisma/client").$Enums.IntegrationPlatform;
         platformUserId: string | null;
         platformUserName: string | null;
         subject: string | null;
@@ -246,6 +246,10 @@ export declare class SupportConversationResolver {
     assignConversationToAgent(conversationId: string, agentId: string): Promise<{
         customer: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -253,19 +257,19 @@ export declare class SupportConversationResolver {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
         assignedAgent: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -273,25 +277,21 @@ export declare class SupportConversationResolver {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        priority: import("@prisma/client").$Enums.TicketPriority;
-        assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportConversationStatus;
         tags: string[];
+        priority: import(".prisma/client").$Enums.TicketPriority;
+        assignedAt: Date | null;
+        status: import(".prisma/client").$Enums.SupportConversationStatus;
         customerEmail: string | null;
         notes: string | null;
         rating: number | null;
@@ -301,7 +301,7 @@ export declare class SupportConversationResolver {
         customerPhone: string | null;
         customerIp: string | null;
         customerLocation: string | null;
-        platform: import("@prisma/client").$Enums.IntegrationPlatform;
+        platform: import(".prisma/client").$Enums.IntegrationPlatform;
         platformUserId: string | null;
         platformUserName: string | null;
         subject: string | null;

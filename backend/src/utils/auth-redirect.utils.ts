@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, SettingCategory } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export async function getAuthRedirectSettings() {
   const settings = await prisma.websiteSetting.findMany({
     where: {
-      category: 'AUTH',
+      category: SettingCategory.AUTH,
       group: 'redirect',
       isActive: true
     }

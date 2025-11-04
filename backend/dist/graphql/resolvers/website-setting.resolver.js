@@ -170,18 +170,20 @@ let WebsiteSettingResolver = class WebsiteSettingResolver {
         });
     }
     async updateWebsiteSetting(key, input) {
+        const { createdBy, updatedBy, ...data } = input;
         return await this.prisma.websiteSetting.update({
             where: { key },
             data: {
-                ...input,
+                ...data,
                 updatedAt: new Date(),
             },
         });
     }
     async createWebsiteSetting(input) {
+        const { createdBy, updatedBy, ...data } = input;
         return await this.prisma.websiteSetting.create({
             data: {
-                ...input,
+                ...data,
             },
         });
     }

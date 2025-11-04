@@ -11,7 +11,7 @@ const prisma = new client_1.PrismaClient();
 async function getAuthRedirectSettings() {
     const settings = await prisma.websiteSetting.findMany({
         where: {
-            category: 'AUTH',
+            category: client_1.SettingCategory.AUTH,
             group: 'redirect',
             isActive: true
         }

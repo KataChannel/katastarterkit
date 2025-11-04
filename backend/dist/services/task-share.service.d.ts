@@ -6,25 +6,29 @@ export declare class TaskShareService {
     create(input: ShareTaskInput, sharedById: string): Promise<{
         task: {
             id: string;
+            category: import(".prisma/client").$Enums.TaskCategory;
+            description: string | null;
+            order: number;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
             userId: string;
-            title: string;
-            status: import("@prisma/client").$Enums.TaskStatus;
             tags: string[];
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
-            projectId: string | null;
-            completedAt: Date | null;
+            parentId: string | null;
+            priority: import(".prisma/client").$Enums.TaskPriority;
+            title: string;
+            status: import(".prisma/client").$Enums.TaskStatus;
             dueDate: Date | null;
+            completedAt: Date | null;
+            projectId: string | null;
             assignedTo: string[];
             mentions: string[];
         };
         sharedByUser: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -32,19 +36,19 @@ export declare class TaskShareService {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
         sharedWithUser: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -52,15 +56,11 @@ export declare class TaskShareService {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
@@ -68,8 +68,8 @@ export declare class TaskShareService {
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        permission: import(".prisma/client").$Enums.SharePermission;
         expiresAt: Date | null;
-        permission: import("@prisma/client").$Enums.SharePermission;
         taskId: string;
         shareToken: string;
         sharedBy: string;
@@ -78,6 +78,10 @@ export declare class TaskShareService {
     findByTaskId(taskId: string): Promise<({
         sharedByUser: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -85,19 +89,19 @@ export declare class TaskShareService {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
         sharedWithUser: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -105,15 +109,11 @@ export declare class TaskShareService {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
@@ -121,8 +121,8 @@ export declare class TaskShareService {
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        permission: import(".prisma/client").$Enums.SharePermission;
         expiresAt: Date | null;
-        permission: import("@prisma/client").$Enums.SharePermission;
         taskId: string;
         shareToken: string;
         sharedBy: string;
@@ -131,25 +131,29 @@ export declare class TaskShareService {
     update(input: UpdateTaskShareInput, userId: string): Promise<{
         task: {
             id: string;
+            category: import(".prisma/client").$Enums.TaskCategory;
+            description: string | null;
+            order: number;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
             userId: string;
-            title: string;
-            status: import("@prisma/client").$Enums.TaskStatus;
             tags: string[];
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
-            projectId: string | null;
-            completedAt: Date | null;
+            parentId: string | null;
+            priority: import(".prisma/client").$Enums.TaskPriority;
+            title: string;
+            status: import(".prisma/client").$Enums.TaskStatus;
             dueDate: Date | null;
+            completedAt: Date | null;
+            projectId: string | null;
             assignedTo: string[];
             mentions: string[];
         };
         sharedByUser: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -157,19 +161,19 @@ export declare class TaskShareService {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
         sharedWithUser: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -177,15 +181,11 @@ export declare class TaskShareService {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
@@ -193,8 +193,8 @@ export declare class TaskShareService {
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        permission: import(".prisma/client").$Enums.SharePermission;
         expiresAt: Date | null;
-        permission: import("@prisma/client").$Enums.SharePermission;
         taskId: string;
         shareToken: string;
         sharedBy: string;

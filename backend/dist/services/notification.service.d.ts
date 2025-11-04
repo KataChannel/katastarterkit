@@ -4,56 +4,56 @@ export declare class NotificationService {
     constructor(prisma: PrismaService);
     createTaskAssignedNotification(taskId: string, assignedUserId: string): Promise<{
         id: string;
+        type: string;
         createdAt: Date;
         updatedAt: Date;
         data: import("@prisma/client/runtime/library").JsonValue | null;
         userId: string;
-        title: string;
         message: string;
-        type: string;
+        title: string;
         taskId: string | null;
         isRead: boolean;
         mentionedBy: string | null;
     }>;
     createTaskCompletedNotification(taskId: string, userId: string): Promise<{
         id: string;
+        type: string;
         createdAt: Date;
         updatedAt: Date;
         data: import("@prisma/client/runtime/library").JsonValue | null;
         userId: string;
-        title: string;
         message: string;
-        type: string;
+        title: string;
         taskId: string | null;
         isRead: boolean;
         mentionedBy: string | null;
     }[]>;
     createTaskCommentNotification(taskId: string, commentAuthorId: string): Promise<{
         id: string;
+        type: string;
         createdAt: Date;
         updatedAt: Date;
         data: import("@prisma/client/runtime/library").JsonValue | null;
         userId: string;
-        title: string;
         message: string;
-        type: string;
+        title: string;
         taskId: string | null;
         isRead: boolean;
         mentionedBy: string | null;
     }[]>;
     findByUserId(userId: string, limit?: number): Promise<{
         id: string;
+        type: string;
         createdAt: Date;
         updatedAt: Date;
         data: import("@prisma/client/runtime/library").JsonValue | null;
         userId: string;
-        title: string;
         message: string;
-        type: string;
+        title: string;
         taskId: string | null;
         isRead: boolean;
         mentionedBy: string | null;
     }[]>;
-    markAsRead(notificationId: string, userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
-    markAllAsRead(userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
+    markAsRead(notificationId: string, userId: string): Promise<import(".prisma/client").Prisma.BatchPayload>;
+    markAllAsRead(userId: string): Promise<import(".prisma/client").Prisma.BatchPayload>;
 }

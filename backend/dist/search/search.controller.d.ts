@@ -4,23 +4,23 @@ export declare class SearchController {
     constructor(searchService: SearchService);
     searchTasks(query?: string, status?: string, priority?: string, assignee?: string, author?: string, tags?: string, page?: string, size?: string, sort?: string, sortOrder?: 'asc' | 'desc', req?: any): Promise<{
         items: {
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
             id: string;
-            title: string;
+            category: import(".prisma/client").$Enums.TaskCategory;
             description: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
-            status: import("@prisma/client").$Enums.TaskStatus;
-            dueDate: Date | null;
-            completedAt: Date | null;
+            order: number;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
+            tags: string[];
+            parentId: string | null;
+            priority: import(".prisma/client").$Enums.TaskPriority;
+            title: string;
+            status: import(".prisma/client").$Enums.TaskStatus;
+            dueDate: Date | null;
+            completedAt: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
-            tags: string[];
-            parentId: string | null;
         }[];
         total: number;
         took: number;
@@ -50,23 +50,23 @@ export declare class SearchController {
         isOverdue?: boolean;
     }, page?: string, size?: string, req?: any): Promise<{
         items: {
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
             id: string;
-            title: string;
+            category: import(".prisma/client").$Enums.TaskCategory;
             description: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
-            status: import("@prisma/client").$Enums.TaskStatus;
-            dueDate: Date | null;
-            completedAt: Date | null;
+            order: number;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
+            tags: string[];
+            parentId: string | null;
+            priority: import(".prisma/client").$Enums.TaskPriority;
+            title: string;
+            status: import(".prisma/client").$Enums.TaskStatus;
+            dueDate: Date | null;
+            completedAt: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
-            tags: string[];
-            parentId: string | null;
         }[];
         total: number;
         took: number;
@@ -102,23 +102,23 @@ export declare class SearchController {
     reindexTasks(req?: any): Promise<void>;
     fuzzySearch(query: string, req?: any): Promise<{
         items: {
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
             id: string;
-            title: string;
+            category: import(".prisma/client").$Enums.TaskCategory;
             description: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
-            status: import("@prisma/client").$Enums.TaskStatus;
-            dueDate: Date | null;
-            completedAt: Date | null;
+            order: number;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
+            tags: string[];
+            parentId: string | null;
+            priority: import(".prisma/client").$Enums.TaskPriority;
+            title: string;
+            status: import(".prisma/client").$Enums.TaskStatus;
+            dueDate: Date | null;
+            completedAt: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
-            tags: string[];
-            parentId: string | null;
         }[];
         total: number;
         took: number;

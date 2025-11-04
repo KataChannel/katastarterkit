@@ -13,7 +13,7 @@ export declare class SupportAnalyticsResolver {
         totalMessages: number;
         aiGeneratedMessages: number;
         platformBreakdown: {
-            platform: import("@prisma/client").$Enums.IntegrationPlatform;
+            platform: import(".prisma/client").$Enums.IntegrationPlatform;
             count: number;
         }[];
         agentPerformance: any[];

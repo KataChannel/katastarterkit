@@ -4,39 +4,39 @@ export declare class ChatQuickReplyService {
     constructor(prisma: PrismaService);
     findAll(): Promise<{
         id: string;
+        category: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
         tags: string[];
         message: string;
-        category: string | null;
+        title: string;
         usageCount: number;
         shortcut: string;
         createdById: string | null;
     }[]>;
     create(data: any): Promise<{
         id: string;
+        category: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
         tags: string[];
         message: string;
-        category: string | null;
+        title: string;
         usageCount: number;
         shortcut: string;
         createdById: string | null;
     }>;
     incrementUsage(id: string): Promise<{
         id: string;
+        category: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
         tags: string[];
         message: string;
-        category: string | null;
+        title: string;
         usageCount: number;
         shortcut: string;
         createdById: string | null;

@@ -7,8 +7,8 @@ export declare class CertificatesService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        courseId: string;
         issueDate: Date;
+        courseId: string;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -28,8 +28,8 @@ export declare class CertificatesService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        courseId: string;
         issueDate: Date;
+        courseId: string;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -55,8 +55,8 @@ export declare class CertificatesService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        courseId: string;
         issueDate: Date;
+        courseId: string;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -82,8 +82,8 @@ export declare class CertificatesService {
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            courseId: string;
             issueDate: Date;
+            courseId: string;
             enrollmentId: string;
             certificateNumber: string;
             courseName: string;

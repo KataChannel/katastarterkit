@@ -155,10 +155,11 @@ export class WebsiteSettingResolver {
     @Args('key') key: string,
     @Args('input') input: UpdateWebsiteSettingInput,
   ): Promise<WebsiteSetting> {
+    const { createdBy, updatedBy, ...data } = input as any;
     return await this.prisma.websiteSetting.update({
       where: { key },
       data: {
-        ...input,
+        ...data,
         updatedAt: new Date(),
       },
     }) as WebsiteSetting;
@@ -168,9 +169,10 @@ export class WebsiteSettingResolver {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRoleType.ADMIN)
   async createWebsiteSetting(@Args('input') input: CreateWebsiteSettingInput): Promise<WebsiteSetting> {
+    const { createdBy, updatedBy, ...data } = input as any;
     return await this.prisma.websiteSetting.create({
       data: {
-        ...input,
+        ...data,
       },
     }) as WebsiteSetting;
   }

@@ -7,6 +7,10 @@ export declare class AffiliateUserService {
     createAffiliateUser(userId: string, input: CreateAffUserInput): Promise<{
         user: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -15,29 +19,25 @@ export declare class AffiliateUserService {
             lastName: string | null;
             avatar: string | null;
             roleType: $Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
         id: string;
+        description: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
         role: $Enums.AffUserRole;
         userId: string;
         joinedAt: Date;
-        paymentMethod: $Enums.AffPaymentMethod | null;
         companyName: string | null;
         businessType: string | null;
         website: string | null;
+        paymentMethod: $Enums.AffPaymentMethod | null;
         bankAccount: string | null;
         paypalEmail: string | null;
         taxId: string | null;
@@ -47,6 +47,10 @@ export declare class AffiliateUserService {
     updateAffiliateUser(userId: string, input: UpdateAffUserInput): Promise<{
         user: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -55,29 +59,25 @@ export declare class AffiliateUserService {
             lastName: string | null;
             avatar: string | null;
             roleType: $Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
         id: string;
+        description: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
         role: $Enums.AffUserRole;
         userId: string;
         joinedAt: Date;
-        paymentMethod: $Enums.AffPaymentMethod | null;
         companyName: string | null;
         businessType: string | null;
         website: string | null;
+        paymentMethod: $Enums.AffPaymentMethod | null;
         bankAccount: string | null;
         paypalEmail: string | null;
         taxId: string | null;
@@ -89,6 +89,10 @@ export declare class AffiliateUserService {
     }): Promise<({
         user: {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -97,35 +101,31 @@ export declare class AffiliateUserService {
             lastName: string | null;
             avatar: string | null;
             roleType: $Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
             departmentId: string | null;
         };
         _count: {
-            links: number;
             conversions: number;
+            links: number;
             campaignsCreated: number;
             campaignJoins: number;
         };
     } & {
         id: string;
+        description: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
         role: $Enums.AffUserRole;
         userId: string;
         joinedAt: Date;
-        paymentMethod: $Enums.AffPaymentMethod | null;
         companyName: string | null;
         businessType: string | null;
         website: string | null;
+        paymentMethod: $Enums.AffPaymentMethod | null;
         bankAccount: string | null;
         paypalEmail: string | null;
         taxId: string | null;
@@ -149,6 +149,10 @@ export declare class AffiliateCampaignService {
         creator: {
             user: {
                 id: string;
+                isActive: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                isVerified: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -157,42 +161,38 @@ export declare class AffiliateCampaignService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isActive: boolean;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                createdAt: Date;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
             id: string;
+            description: string | null;
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             role: $Enums.AffUserRole;
             userId: string;
             joinedAt: Date;
-            paymentMethod: $Enums.AffPaymentMethod | null;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
+            paymentMethod: $Enums.AffPaymentMethod | null;
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
             lastActiveAt: Date | null;
         };
     } & {
-        name: string;
         id: string;
+        description: string | null;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
-        status: $Enums.AffCampaignStatus;
+        name: string;
         productImage: string | null;
+        status: $Enums.AffCampaignStatus;
         commissionType: string;
         startDate: Date | null;
         endDate: Date | null;
@@ -212,6 +212,10 @@ export declare class AffiliateCampaignService {
         creator: {
             user: {
                 id: string;
+                isActive: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                isVerified: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -220,29 +224,25 @@ export declare class AffiliateCampaignService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isActive: boolean;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                createdAt: Date;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
             id: string;
+            description: string | null;
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             role: $Enums.AffUserRole;
             userId: string;
             joinedAt: Date;
-            paymentMethod: $Enums.AffPaymentMethod | null;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
+            paymentMethod: $Enums.AffPaymentMethod | null;
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
@@ -264,13 +264,13 @@ export declare class AffiliateCampaignService {
             rejectedAt: Date | null;
         }[];
     } & {
-        name: string;
         id: string;
+        description: string | null;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
-        status: $Enums.AffCampaignStatus;
+        name: string;
         productImage: string | null;
+        status: $Enums.AffCampaignStatus;
         commissionType: string;
         startDate: Date | null;
         endDate: Date | null;
@@ -287,13 +287,13 @@ export declare class AffiliateCampaignService {
         creatorId: string;
     }>;
     deleteCampaign(campaignId: string, creatorUserId: string): Promise<{
-        name: string;
         id: string;
+        description: string | null;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
-        status: $Enums.AffCampaignStatus;
+        name: string;
         productImage: string | null;
+        status: $Enums.AffCampaignStatus;
         commissionType: string;
         startDate: Date | null;
         endDate: Date | null;
@@ -313,6 +313,10 @@ export declare class AffiliateCampaignService {
         creator: {
             user: {
                 id: string;
+                isActive: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                isVerified: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -321,56 +325,30 @@ export declare class AffiliateCampaignService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isActive: boolean;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                createdAt: Date;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
             id: string;
+            description: string | null;
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             role: $Enums.AffUserRole;
             userId: string;
             joinedAt: Date;
-            paymentMethod: $Enums.AffPaymentMethod | null;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
+            paymentMethod: $Enums.AffPaymentMethod | null;
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
             lastActiveAt: Date | null;
         };
-        links: {
-            id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string | null;
-            expiresAt: Date | null;
-            title: string | null;
-            campaignId: string;
-            totalClicks: number;
-            totalConversions: number;
-            affiliateId: string;
-            trackingCode: string;
-            originalUrl: string;
-            shortUrl: string | null;
-            customAlias: string | null;
-            utmSource: string | null;
-            utmMedium: string | null;
-            utmCampaign: string | null;
-            utmContent: string | null;
-            totalEarnings: import("@prisma/client/runtime/library").Decimal;
-        }[];
         conversions: {
             id: string;
             createdAt: Date;
@@ -397,6 +375,10 @@ export declare class AffiliateCampaignService {
             affiliate: {
                 user: {
                     id: string;
+                    isActive: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    isVerified: boolean;
                     email: string | null;
                     username: string;
                     password: string | null;
@@ -405,29 +387,25 @@ export declare class AffiliateCampaignService {
                     lastName: string | null;
                     avatar: string | null;
                     roleType: $Enums.UserRoleType;
-                    isActive: boolean;
-                    isVerified: boolean;
                     isTwoFactorEnabled: boolean;
                     failedLoginAttempts: number;
                     lockedUntil: Date | null;
                     lastLoginAt: Date | null;
-                    createdAt: Date;
-                    updatedAt: Date;
                     departmentId: string | null;
                 };
             } & {
                 id: string;
+                description: string | null;
                 isActive: boolean;
                 createdAt: Date;
                 updatedAt: Date;
-                description: string | null;
                 role: $Enums.AffUserRole;
                 userId: string;
                 joinedAt: Date;
-                paymentMethod: $Enums.AffPaymentMethod | null;
                 companyName: string | null;
                 businessType: string | null;
                 website: string | null;
+                paymentMethod: $Enums.AffPaymentMethod | null;
                 bankAccount: string | null;
                 paypalEmail: string | null;
                 taxId: string | null;
@@ -448,14 +426,36 @@ export declare class AffiliateCampaignService {
             approvedAt: Date | null;
             rejectedAt: Date | null;
         })[];
+        links: {
+            id: string;
+            description: string | null;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            expiresAt: Date | null;
+            title: string | null;
+            campaignId: string;
+            totalClicks: number;
+            totalConversions: number;
+            affiliateId: string;
+            trackingCode: string;
+            originalUrl: string;
+            shortUrl: string | null;
+            customAlias: string | null;
+            utmSource: string | null;
+            utmMedium: string | null;
+            utmCampaign: string | null;
+            utmContent: string | null;
+            totalEarnings: import("@prisma/client/runtime/library").Decimal;
+        }[];
     } & {
-        name: string;
         id: string;
+        description: string | null;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
-        status: $Enums.AffCampaignStatus;
+        name: string;
         productImage: string | null;
+        status: $Enums.AffCampaignStatus;
         commissionType: string;
         startDate: Date | null;
         endDate: Date | null;
@@ -473,14 +473,13 @@ export declare class AffiliateCampaignService {
     }>;
     searchCampaigns(input: CampaignSearchInput): Promise<{
         campaigns: ({
-            _count: {
-                links: number;
-                conversions: number;
-                affiliates: number;
-            };
             creator: {
                 user: {
                     id: string;
+                    isActive: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    isVerified: boolean;
                     email: string | null;
                     username: string;
                     password: string | null;
@@ -489,42 +488,43 @@ export declare class AffiliateCampaignService {
                     lastName: string | null;
                     avatar: string | null;
                     roleType: $Enums.UserRoleType;
-                    isActive: boolean;
-                    isVerified: boolean;
                     isTwoFactorEnabled: boolean;
                     failedLoginAttempts: number;
                     lockedUntil: Date | null;
                     lastLoginAt: Date | null;
-                    createdAt: Date;
-                    updatedAt: Date;
                     departmentId: string | null;
                 };
             } & {
                 id: string;
+                description: string | null;
                 isActive: boolean;
                 createdAt: Date;
                 updatedAt: Date;
-                description: string | null;
                 role: $Enums.AffUserRole;
                 userId: string;
                 joinedAt: Date;
-                paymentMethod: $Enums.AffPaymentMethod | null;
                 companyName: string | null;
                 businessType: string | null;
                 website: string | null;
+                paymentMethod: $Enums.AffPaymentMethod | null;
                 bankAccount: string | null;
                 paypalEmail: string | null;
                 taxId: string | null;
                 lastActiveAt: Date | null;
             };
+            _count: {
+                conversions: number;
+                affiliates: number;
+                links: number;
+            };
         } & {
-            name: string;
             id: string;
+            description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            status: $Enums.AffCampaignStatus;
+            name: string;
             productImage: string | null;
+            status: $Enums.AffCampaignStatus;
             commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
@@ -547,13 +547,13 @@ export declare class AffiliateCampaignService {
     }>;
     joinCampaign(affiliateUserId: string, input: JoinCampaignInput): Promise<{
         campaign: {
-            name: string;
             id: string;
+            description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            status: $Enums.AffCampaignStatus;
+            name: string;
             productImage: string | null;
+            status: $Enums.AffCampaignStatus;
             commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
@@ -572,6 +572,10 @@ export declare class AffiliateCampaignService {
         affiliate: {
             user: {
                 id: string;
+                isActive: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                isVerified: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -580,29 +584,25 @@ export declare class AffiliateCampaignService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isActive: boolean;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                createdAt: Date;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
             id: string;
+            description: string | null;
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             role: $Enums.AffUserRole;
             userId: string;
             joinedAt: Date;
-            paymentMethod: $Enums.AffPaymentMethod | null;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
+            paymentMethod: $Enums.AffPaymentMethod | null;
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;
@@ -625,13 +625,13 @@ export declare class AffiliateCampaignService {
     }>;
     reviewCampaignApplication(merchantUserId: string, input: ReviewCampaignApplicationInput): Promise<{
         campaign: {
-            name: string;
             id: string;
+            description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            status: $Enums.AffCampaignStatus;
+            name: string;
             productImage: string | null;
+            status: $Enums.AffCampaignStatus;
             commissionType: string;
             startDate: Date | null;
             endDate: Date | null;
@@ -650,6 +650,10 @@ export declare class AffiliateCampaignService {
         affiliate: {
             user: {
                 id: string;
+                isActive: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                isVerified: boolean;
                 email: string | null;
                 username: string;
                 password: string | null;
@@ -658,29 +662,25 @@ export declare class AffiliateCampaignService {
                 lastName: string | null;
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
-                isActive: boolean;
-                isVerified: boolean;
                 isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                createdAt: Date;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
             id: string;
+            description: string | null;
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             role: $Enums.AffUserRole;
             userId: string;
             joinedAt: Date;
-            paymentMethod: $Enums.AffPaymentMethod | null;
             companyName: string | null;
             businessType: string | null;
             website: string | null;
+            paymentMethod: $Enums.AffPaymentMethod | null;
             bankAccount: string | null;
             paypalEmail: string | null;
             taxId: string | null;

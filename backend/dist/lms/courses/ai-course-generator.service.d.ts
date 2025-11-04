@@ -15,15 +15,17 @@ export declare class AICourseGeneratorService {
             description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            parentId: string | null;
             name: string;
+            parentId: string | null;
             slug: string;
             icon: string | null;
         };
         instructor: {
             id: string;
+            isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
+            isVerified: boolean;
             email: string | null;
             username: string;
             password: string | null;
@@ -31,9 +33,7 @@ export declare class AICourseGeneratorService {
             firstName: string | null;
             lastName: string | null;
             avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isActive: boolean;
-            isVerified: boolean;
+            roleType: import(".prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
@@ -45,8 +45,8 @@ export declare class AICourseGeneratorService {
                 quizzes: ({
                     questions: ({
                         answers: {
-                            order: number;
                             id: string;
+                            order: number;
                             createdAt: Date;
                             updatedAt: Date;
                             text: string;
@@ -54,23 +54,23 @@ export declare class AICourseGeneratorService {
                             isCorrect: boolean;
                         }[];
                     } & {
-                        question: string;
-                        order: number;
                         id: string;
+                        type: import(".prisma/client").$Enums.QuestionType;
+                        order: number;
                         createdAt: Date;
                         updatedAt: Date;
-                        type: import("@prisma/client").$Enums.QuestionType;
-                        quizId: string;
+                        question: string;
                         points: number;
                         explanation: string | null;
                         mediaUrl: string | null;
+                        quizId: string;
                     })[];
                 } & {
                     id: string;
-                    title: string;
                     description: string | null;
                     createdAt: Date;
                     updatedAt: Date;
+                    title: string;
                     lessonId: string;
                     passingScore: number;
                     timeLimit: number | null;
@@ -78,57 +78,57 @@ export declare class AICourseGeneratorService {
                     isRequired: boolean;
                 })[];
             } & {
-                order: number;
                 id: string;
-                title: string;
+                type: import(".prisma/client").$Enums.LessonType;
                 description: string | null;
+                order: number;
                 createdAt: Date;
                 updatedAt: Date;
-                type: import("@prisma/client").$Enums.LessonType;
-                duration: number | null;
+                title: string;
                 content: string | null;
+                duration: number | null;
                 moduleId: string;
                 isPreview: boolean;
                 isFree: boolean;
                 attachments: import("@prisma/client/runtime/library").JsonValue | null;
             })[];
         } & {
-            order: number;
             id: string;
-            title: string;
             description: string | null;
+            order: number;
             createdAt: Date;
             updatedAt: Date;
+            title: string;
             isPublished: boolean;
             courseId: string;
         })[];
     } & {
-        level: import("@prisma/client").$Enums.CourseLevel;
+        level: import(".prisma/client").$Enums.CourseLevel;
         id: string;
-        title: string;
         description: string | null;
-        status: import("@prisma/client").$Enums.CourseStatus;
         createdAt: Date;
         updatedAt: Date;
         tags: string[];
-        duration: number | null;
+        title: string;
         slug: string;
+        status: import(".prisma/client").$Enums.CourseStatus;
+        publishedAt: Date | null;
         thumbnail: string | null;
-        trailer: string | null;
+        metaTitle: string | null;
+        metaDescription: string | null;
         price: import("@prisma/client/runtime/library").Decimal;
-        language: string | null;
+        categoryId: string | null;
+        viewCount: number;
+        duration: number | null;
+        trailer: string | null;
         whatYouWillLearn: string[];
         requirements: string[];
         targetAudience: string[];
-        categoryId: string | null;
         instructorId: string;
+        language: string | null;
         avgRating: number;
         reviewCount: number;
         enrollmentCount: number;
-        viewCount: number;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        publishedAt: Date | null;
     }>;
     private generateCourseStructure;
     private createCourseFromStructure;

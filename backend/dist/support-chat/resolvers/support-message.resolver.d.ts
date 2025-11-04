@@ -32,8 +32,8 @@ export declare class SupportMessageResolver {
         isRead: boolean;
         conversationId: string;
         sentAt: Date;
-        messageType: import("@prisma/client").$Enums.SupportMessageType;
-        senderType: import("@prisma/client").$Enums.SupportSender;
+        messageType: import(".prisma/client").$Enums.SupportMessageType;
+        senderType: import(".prisma/client").$Enums.SupportSender;
         senderId: string | null;
         senderName: string | null;
         isAIGenerated: boolean;
@@ -72,8 +72,8 @@ export declare class SupportMessageResolver {
         isRead: boolean;
         conversationId: string;
         sentAt: Date;
-        messageType: import("@prisma/client").$Enums.SupportMessageType;
-        senderType: import("@prisma/client").$Enums.SupportSender;
+        messageType: import(".prisma/client").$Enums.SupportMessageType;
+        senderType: import(".prisma/client").$Enums.SupportSender;
         senderId: string | null;
         senderName: string | null;
         isAIGenerated: boolean;

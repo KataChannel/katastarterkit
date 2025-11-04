@@ -22,7 +22,17 @@ let AICourseGeneratorService = class AICourseGeneratorService {
         }
         else {
             this.genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
-            this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+            this.model = this.genAI.getGenerativeModel({
+                model: 'gemini-pro',
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 8192,
+                },
+            });
+            console.log('✅ AI Course Generator initialized with Gemini Pro');
+            console.log(`🔑 API Key: ${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 4)}`);
         }
     }
     async generateCourseFromPrompt(input) {
@@ -30,45 +40,67 @@ let AICourseGeneratorService = class AICourseGeneratorService {
             throw new common_1.BadRequestException('AI service is not configured. Please set GOOGLE_GEMINI_API_KEY');
         }
         const { prompt, categoryId, instructorId } = input;
+        console.log('🤖 [AI Course Generator] Starting...');
+        console.log(`📝 Prompt: ${prompt.substring(0, 100)}...`);
+        console.log(`👤 Instructor ID: ${instructorId}`);
+        console.log(`📁 Category ID: ${categoryId || 'None'}`);
+        console.log('\n⏳ Step 1/3: Calling Google Gemini AI...');
+        const startAI = Date.now();
         const courseStructure = await this.generateCourseStructure(prompt);
+        const aiDuration = ((Date.now() - startAI) / 1000).toFixed(2);
+        console.log(`✅ AI Response received in ${aiDuration}s`);
+        console.log(`📚 Generated: ${courseStructure.modules?.length || 0} modules`);
+        console.log('\n⏳ Step 2/3: Creating course in database...');
+        const startDB = Date.now();
         const course = await this.createCourseFromStructure(courseStructure, instructorId, categoryId);
+        const dbDuration = ((Date.now() - startDB) / 1000).toFixed(2);
+        console.log(`✅ Course created in ${dbDuration}s`);
+        console.log(`📖 Course ID: ${course.id}`);
+        console.log(`📖 Course Title: ${course.title}`);
+        const totalDuration = ((Date.now() - startAI) / 1000).toFixed(2);
+        console.log('\n🎉 Course generation completed!');
+        console.log(`⏱️  Total time: ${totalDuration}s`);
+        console.log(`📊 Stats:`);
+        console.log(`   - Modules: ${course.modules?.length || 0}`);
+        console.log(`   - Lessons: ${course.modules?.reduce((sum, m) => sum + (m.lessons?.length || 0), 0) || 0}`);
+        console.log(`   - Quizzes: ${course.modules?.reduce((sum, m) => sum + (m.lessons?.reduce((s, l) => s + (l.quizzes?.length || 0), 0) || 0), 0) || 0}`);
+        console.log(`✨ Ready for editing at: /lms/admin/courses/${course.id}/edit\n`);
         return course;
     }
     async generateCourseStructure(prompt) {
-        const systemPrompt = `Bạn là chuyên gia thiết kế khóa học trực tuyến chuyên nghiệp.
-Nhiệm vụ: Tạo cấu trúc khóa học chi tiết bằng tiếng Việt từ mô tả của người dùng.
+        const systemPrompt = `Bạn là chuyên gia thiết kế khóa học. Tạo cấu trúc khóa học NGẮN GỌN bằng tiếng Việt.
 
 YÊU CẦU:
-- Mỗi khóa học có 4-6 modules
-- Mỗi module có 4-7 lessons
-- Mỗi module có 1 quiz cuối với 5-10 câu hỏi
-- Nội dung lesson phải chi tiết, thực tế, dễ hiểu
-- Quiz phải có câu hỏi chất lượng với 4 đáp án
+- 3-4 modules (KHÔNG quá 4)
+- Mỗi module: 3-4 lessons (KHÔNG quá 4)
+- Mỗi module: 1 quiz với 5 câu (KHÔNG quá 5)
+- Nội dung lesson: 300-800 ký tự (KHÔNG quá dài)
+- 4 đáp án/câu hỏi
 
-QUAN TRỌNG: Trả về JSON hợp lệ theo cấu trúc:
+JSON format:
 {
   "title": "Tên khóa học",
-  "description": "Mô tả chi tiết khóa học (500-1000 ký tự)",
-  "level": "BEGINNER|INTERMEDIATE|ADVANCED",
-  "duration": 180,
+  "description": "Mô tả (300-500 ký tự)",
+  "level": "BEGINNER",
+  "duration": 120,
   "price": 0,
-  "whatYouWillLearn": ["Kỹ năng 1", "Kỹ năng 2", "..."],
-  "requirements": ["Yêu cầu 1", "Yêu cầu 2", "..."],
-  "targetAudience": ["Đối tượng 1", "Đối tượng 2", "..."],
-  "tags": ["tag1", "tag2", "..."],
-  "metaTitle": "SEO title (max 60 ký tự)",
-  "metaDescription": "SEO description (max 160 ký tự)",
+  "whatYouWillLearn": ["Kỹ năng 1", "Kỹ năng 2"],
+  "requirements": ["Yêu cầu 1"],
+  "targetAudience": ["Đối tượng 1"],
+  "tags": ["tag1", "tag2"],
+  "metaTitle": "SEO (max 60)",
+  "metaDescription": "SEO (max 160)",
   "modules": [
     {
-      "title": "Tên module",
-      "description": "Mô tả module (200-500 ký tự)",
+      "title": "Module 1",
+      "description": "Mô tả ngắn",
       "order": 0,
       "lessons": [
         {
-          "title": "Tên bài học",
-          "description": "Mô tả bài học",
-          "type": "VIDEO|TEXT|DOCUMENT",
-          "content": "Nội dung chi tiết bài học (markdown format, 1000-3000 ký tự)",
+          "title": "Bài 1",
+          "description": "Mô tả",
+          "type": "TEXT",
+          "content": "# Tiêu đề\n\nNội dung ngắn gọn 300-500 ký tự...",
           "duration": 15,
           "order": 0,
           "isPreview": false,
@@ -76,40 +108,24 @@ QUAN TRỌNG: Trả về JSON hợp lệ theo cấu trúc:
         }
       ],
       "quiz": {
-        "title": "Kiểm tra cuối module",
-        "description": "Kiểm tra kiến thức đã học",
+        "title": "Quiz module 1",
+        "description": "Kiểm tra",
         "passingScore": 70,
-        "timeLimit": 20,
+        "timeLimit": 10,
         "maxAttempts": 3,
         "isRequired": true,
         "questions": [
           {
             "type": "MULTIPLE_CHOICE",
-            "question": "Câu hỏi?",
-            "points": 10,
+            "question": "Câu hỏi ngắn?",
+            "points": 20,
             "order": 0,
-            "explanation": "Giải thích đáp án",
+            "explanation": "Giải thích ngắn",
             "answers": [
-              {
-                "text": "Đáp án A",
-                "isCorrect": false,
-                "order": 0
-              },
-              {
-                "text": "Đáp án B",
-                "isCorrect": true,
-                "order": 1
-              },
-              {
-                "text": "Đáp án C",
-                "isCorrect": false,
-                "order": 2
-              },
-              {
-                "text": "Đáp án D",
-                "isCorrect": false,
-                "order": 3
-              }
+              {"text": "A", "isCorrect": false, "order": 0},
+              {"text": "B", "isCorrect": true, "order": 1},
+              {"text": "C", "isCorrect": false, "order": 2},
+              {"text": "D", "isCorrect": false, "order": 3}
             ]
           }
         ]
@@ -118,30 +134,50 @@ QUAN TRỌNG: Trả về JSON hợp lệ theo cấu trúc:
   ]
 }
 
-Lưu ý:
-- Nội dung phải chuyên nghiệp, thực tế
-- Lesson content dùng Markdown format
-- Duration tính bằng phút
-- Mỗi quiz có 5-10 câu hỏi
-- Mỗi câu hỏi có 4 đáp án, chỉ 1 đúng
-- Points cho mỗi câu: 10 điểm
-- Tổng points của quiz = 100`;
+LƯU Ý: 
+- NỘI DUNG NGẮN GỌN để response nhanh
+- Quiz: 5 câu x 20 điểm = 100 điểm
+- Chỉ trả JSON, KHÔNG giải thích thêm`;
         const fullPrompt = `${systemPrompt}\n\nMÔ TẢ KHÓA HỌC:\n${prompt}\n\nTrả về JSON:`;
         try {
-            const result = await this.model.generateContent(fullPrompt);
+            console.log('   🔄 Sending request to Gemini API...');
+            console.log(`   📊 Prompt length: ${fullPrompt.length} characters`);
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('AI request timeout after 90 seconds')), 90000);
+            });
+            const generatePromise = this.model.generateContent(fullPrompt);
+            const result = await Promise.race([generatePromise, timeoutPromise]);
+            console.log('   📥 Received response from Gemini');
             const response = await result.response;
             let text = response.text();
+            console.log(`   📏 Response length: ${text.length} characters`);
             text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            console.log('   🔍 Parsing JSON response...');
             const courseData = JSON.parse(text);
+            console.log('   ✅ JSON parsed successfully');
+            console.log(`   📚 Title: ${courseData.title}`);
+            console.log(`   📦 Modules: ${courseData.modules?.length || 0}`);
             return courseData;
         }
         catch (error) {
-            console.error('AI Generation Error:', error);
-            throw new common_1.BadRequestException('Failed to generate course structure from AI: ' + error.message);
+            console.error('❌ AI Generation Error:', error.message);
+            console.error('   Error name:', error.name);
+            console.error('   Error stack:', error.stack?.substring(0, 200));
+            if (error.message?.includes('timeout')) {
+                throw new common_1.BadRequestException('AI request timeout. Prompt có thể quá dài hoặc phức tạp. Hãy thử prompt ngắn gọn hơn.');
+            }
+            if (error.message?.includes('API key')) {
+                throw new common_1.BadRequestException('Invalid API key. Vui lòng kiểm tra GOOGLE_GEMINI_API_KEY.');
+            }
+            if (error.message?.includes('quota')) {
+                throw new common_1.BadRequestException('API quota exceeded. Vui lòng đợi hoặc upgrade plan.');
+            }
+            throw new common_1.BadRequestException('Failed to generate course: ' + error.message);
         }
     }
     async createCourseFromStructure(structure, instructorId, categoryId) {
         const { title, description, level, duration, price, whatYouWillLearn, requirements, targetAudience, tags, metaTitle, metaDescription, modules, } = structure;
+        console.log('   🔄 Generating unique slug...');
         const baseSlug = this.generateSlug(title);
         let slug = baseSlug;
         let counter = 1;
@@ -149,6 +185,8 @@ Lưu ý:
             slug = `${baseSlug}-${counter}`;
             counter++;
         }
+        console.log(`   ✅ Slug: ${slug}`);
+        console.log('   🔄 Creating course with modules and lessons...');
         const course = await this.prisma.course.create({
             data: {
                 title,
@@ -197,6 +235,9 @@ Lưu ý:
                 },
             },
         });
+        console.log(`   ✅ Course created with ${course.modules.length} modules`);
+        console.log('   🔄 Creating quizzes for modules...');
+        let quizCount = 0;
         for (let i = 0; i < modules.length; i++) {
             const moduleData = modules[i];
             const createdModule = course.modules[i];
@@ -229,8 +270,12 @@ Lưu ý:
                         },
                     },
                 });
+                quizCount++;
+                console.log(`   ✓ Quiz ${quizCount}/${modules.length} created for module: ${moduleData.title}`);
             }
         }
+        console.log(`   ✅ Created ${quizCount} quizzes`);
+        console.log('   🔄 Fetching complete course data...');
         return this.prisma.course.findUnique({
             where: { id: course.id },
             include: {

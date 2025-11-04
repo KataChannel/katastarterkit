@@ -19,21 +19,21 @@ export declare class DiscussionsResolver {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
             parentId: string | null;
             content: string;
-            userId: string;
             discussionId: string;
         }[];
     } & {
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
-        courseId: string;
-        content: string;
-        lessonId: string | null;
-        isPinned: boolean;
         userId: string;
+        title: string;
+        content: string;
+        isPinned: boolean;
+        courseId: string;
+        lessonId: string | null;
         replyCount: number;
     }>;
     getCourseDiscussions(courseId: string, lessonId?: string): Promise<({
@@ -60,29 +60,24 @@ export declare class DiscussionsResolver {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
             parentId: string | null;
             content: string;
-            userId: string;
             discussionId: string;
         })[];
     } & {
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
-        courseId: string;
-        content: string;
-        lessonId: string | null;
-        isPinned: boolean;
         userId: string;
+        title: string;
+        content: string;
+        isPinned: boolean;
+        courseId: string;
+        lessonId: string | null;
         replyCount: number;
     })[]>;
     getDiscussion(id: string): Promise<{
-        course: {
-            id: string;
-            title: string;
-            slug: string;
-        };
         user: {
             id: string;
             username: string;
@@ -90,11 +85,23 @@ export declare class DiscussionsResolver {
             lastName: string;
             avatar: string;
         };
+        course: {
+            id: string;
+            title: string;
+            slug: string;
+        };
         lesson: {
             id: string;
             title: string;
         };
         replies: ({
+            user: {
+                id: string;
+                username: string;
+                firstName: string;
+                lastName: string;
+                avatar: string;
+            };
             children: ({
                 user: {
                     id: string;
@@ -107,37 +114,30 @@ export declare class DiscussionsResolver {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
+                userId: string;
                 parentId: string | null;
                 content: string;
-                userId: string;
                 discussionId: string;
             })[];
-            user: {
-                id: string;
-                username: string;
-                firstName: string;
-                lastName: string;
-                avatar: string;
-            };
         } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
             parentId: string | null;
             content: string;
-            userId: string;
             discussionId: string;
         })[];
     } & {
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
-        courseId: string;
-        content: string;
-        lessonId: string | null;
-        isPinned: boolean;
         userId: string;
+        title: string;
+        content: string;
+        isPinned: boolean;
+        courseId: string;
+        lessonId: string | null;
         replyCount: number;
     }>;
     createReply(user: any, input: CreateReplyInput): Promise<{
@@ -152,9 +152,9 @@ export declare class DiscussionsResolver {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         parentId: string | null;
         content: string;
-        userId: string;
         discussionId: string;
     }>;
     updateDiscussion(user: any, input: UpdateDiscussionInput): Promise<{
@@ -167,14 +167,14 @@ export declare class DiscussionsResolver {
         };
     } & {
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
-        courseId: string;
-        content: string;
-        lessonId: string | null;
-        isPinned: boolean;
         userId: string;
+        title: string;
+        content: string;
+        isPinned: boolean;
+        courseId: string;
+        lessonId: string | null;
         replyCount: number;
     }>;
     deleteDiscussion(user: any, id: string): Promise<{
@@ -182,14 +182,14 @@ export declare class DiscussionsResolver {
     }>;
     togglePin(user: any, id: string): Promise<{
         id: string;
-        title: string;
         createdAt: Date;
         updatedAt: Date;
-        courseId: string;
-        content: string;
-        lessonId: string | null;
-        isPinned: boolean;
         userId: string;
+        title: string;
+        content: string;
+        isPinned: boolean;
+        courseId: string;
+        lessonId: string | null;
         replyCount: number;
     }>;
 }

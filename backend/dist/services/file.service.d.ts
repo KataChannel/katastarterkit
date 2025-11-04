@@ -14,10 +14,10 @@ export declare class FileService {
         items: ({
             shares: {
                 id: string;
-                password: string | null;
                 createdAt: Date;
-                expiresAt: Date | null;
                 token: string;
+                expiresAt: Date | null;
+                password: string | null;
                 sharedBy: string;
                 sharedWith: string | null;
                 fileId: string;
@@ -27,30 +27,28 @@ export declare class FileService {
                 lastAccess: Date | null;
             }[];
             folder: {
-                name: string;
                 id: string;
+                description: string | null;
                 createdAt: Date;
                 updatedAt: Date;
-                description: string | null;
-                parentId: string | null;
+                name: string;
                 userId: string;
-                icon: string | null;
+                parentId: string | null;
                 color: string | null;
                 path: string;
+                icon: string | null;
                 isSystem: boolean;
             };
         } & {
             id: string;
+            description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            metadata: Prisma.JsonValue | null;
-            userId: string;
             size: number;
-            title: string | null;
+            userId: string;
             tags: string[];
-            viewCount: number;
-            visibility: import("@prisma/client").$Enums.FileVisibility;
+            metadata: Prisma.JsonValue | null;
+            title: string | null;
             filename: string;
             url: string;
             mimeType: string;
@@ -58,9 +56,11 @@ export declare class FileService {
             path: string;
             height: number | null;
             bucket: string;
+            viewCount: number;
             alt: string | null;
             folderId: string | null;
-            fileType: import("@prisma/client").$Enums.FileType;
+            visibility: import(".prisma/client").$Enums.FileVisibility;
+            fileType: import(".prisma/client").$Enums.FileType;
             originalName: string;
             etag: string | null;
             thumbnailUrl: string | null;
@@ -101,16 +101,14 @@ export declare class FileService {
     createFileShare(input: CreateFileShareInput, userId: string): Promise<{
         file: {
             id: string;
+            description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            metadata: Prisma.JsonValue | null;
-            userId: string;
             size: number;
-            title: string | null;
+            userId: string;
             tags: string[];
-            viewCount: number;
-            visibility: import("@prisma/client").$Enums.FileVisibility;
+            metadata: Prisma.JsonValue | null;
+            title: string | null;
             filename: string;
             url: string;
             mimeType: string;
@@ -118,9 +116,11 @@ export declare class FileService {
             path: string;
             height: number | null;
             bucket: string;
+            viewCount: number;
             alt: string | null;
             folderId: string | null;
-            fileType: import("@prisma/client").$Enums.FileType;
+            visibility: import(".prisma/client").$Enums.FileVisibility;
+            fileType: import(".prisma/client").$Enums.FileType;
             originalName: string;
             etag: string | null;
             thumbnailUrl: string | null;
@@ -128,10 +128,10 @@ export declare class FileService {
         };
     } & {
         id: string;
-        password: string | null;
         createdAt: Date;
-        expiresAt: Date | null;
         token: string;
+        expiresAt: Date | null;
+        password: string | null;
         sharedBy: string;
         sharedWith: string | null;
         fileId: string;
