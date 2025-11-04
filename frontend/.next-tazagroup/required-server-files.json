@@ -2,7 +2,7 @@
   "version": 1,
   "config": {
     "env": {
-      "NEXT_PUBLIC_GRAPHQL_ENDPOINT": "https://v3api.tazagroup.com/graphql",
+      "NEXT_PUBLIC_GRAPHQL_ENDPOINT": "https://appapi.tazagroup.vn/graphql",
       "NEXT_PUBLIC_WS_ENDPOINT": "ws://localhost:3001/graphql"
     },
     "typescript": {

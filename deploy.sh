@@ -28,7 +28,24 @@ if [ ! -f ".env.rausach" ] || [ ! -f ".env.tazagroup" ]; then
     exit 1
 fi
 
-# Step 1: Sync files to server
+# Step 0: Build backend locally
+echo "🔨 Step 0: Building backend..."
+if [ ! -d "backend/dist" ]; then
+    echo "  → Backend not built, building now..."
+    cd backend
+    if [ ! -d "node_modules" ]; then
+        echo "  → Installing backend dependencies..."
+        bun install
+    fi
+    echo "  → Compiling TypeScript..."
+    bun run build
+    cd ..
+    echo "  ✅ Backend built successfully"
+else
+    echo "  ✅ Backend already built (backend/dist exists)"
+fi
+
+echo ""
 echo "📤 Step 1: Syncing files to server..."
 
 # Create proper directory structure on server
