@@ -29,8 +29,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (email: string, password: string, username: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; redirectUrl?: string }>;
+  register: (email: string, password: string, username: string) => Promise<{ success: boolean; error?: string; redirectUrl?: string }>;
   logout: () => void;
   loading: boolean;
   isAuthenticated: boolean;
@@ -160,7 +160,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [getCurrentUser]);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; redirectUrl?: string }> => {
     try {
       console.log('%c🔐 Login attempt started', 'color: #3498db; font-weight: bold;', { email, timestamp: new Date().toISOString() });
       const { data } = await loginMutation({
@@ -174,6 +174,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (data?.loginUser?.accessToken) {
         const token = data.loginUser.accessToken;
+        const redirectUrl = data.loginUser.redirectUrl;
         localStorage.setItem('accessToken', token);
         
         // Also notify apollo client of the token change
@@ -189,7 +190,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         // Refresh user data
         getCurrentUser();
-        return { success: true };
+        return { success: true, redirectUrl };
       } else {
         return { success: false, error: 'Login failed' };
       }
@@ -198,7 +199,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (email: string, password: string, username: string): Promise<{ success: boolean; error?: string }> => {
+  const register = async (email: string, password: string, username: string): Promise<{ success: boolean; error?: string; redirectUrl?: string }> => {
     try {
       const { data } = await registerMutation({
         variables: { 
@@ -212,6 +213,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (data?.registerUser?.accessToken) {
         const token = data.registerUser.accessToken;
+        const redirectUrl = data.registerUser.redirectUrl;
         localStorage.setItem('accessToken', token);
         
         // Also notify apollo client of the token change
@@ -226,7 +228,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         // Refresh user data
         getCurrentUser();
-        return { success: true };
+        return { success: true, redirectUrl };
       } else {
         return { success: false, error: 'Registration failed' };
       }

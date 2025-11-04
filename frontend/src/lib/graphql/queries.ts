@@ -13,6 +13,7 @@ export const LOGIN_MUTATION = gql`
         createdAt
       }
       accessToken
+      redirectUrl
     }
   }
 `;
@@ -29,6 +30,7 @@ export const REGISTER_MUTATION = gql`
         createdAt
       }
       accessToken
+      redirectUrl
     }
   }
 `;

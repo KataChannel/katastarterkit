@@ -28,7 +28,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
 
   const [loginWithFacebook] = useMutation(LOGIN_WITH_FACEBOOK, {
     onCompleted: (data) => {
-      const { token, user } = data.loginWithFacebook;
+      const { token, user, redirectUrl } = data.loginWithFacebook;
       
       // Store the token
       localStorage.setItem('authToken', token);
@@ -39,8 +39,9 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
         onSuccess(data.loginWithFacebook);
       }
       
-      // Redirect to dashboard or home
-      router.push('/admin');
+      // Use redirectUrl from backend settings or fallback to /dashboard
+      const targetUrl = redirectUrl || '/dashboard';
+      router.push(targetUrl);
     },
     onError: (error) => {
       console.error('Facebook login error:', error);

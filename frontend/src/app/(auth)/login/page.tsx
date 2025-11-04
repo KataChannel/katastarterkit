@@ -36,12 +36,13 @@ function LoginPageContent() {
   const [loading, setLoading] = useState(false);
   const { siteName } = useSiteName();
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated - use default from settings
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/admin");
+      const returnUrl = searchParams?.get("returnUrl") || "/dashboard";
+      router.push(returnUrl);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, searchParams]);
 
   const {
     register,
@@ -59,9 +60,9 @@ function LoginPageContent() {
 
       if (result.success) {
         toast.success("Chào mừng bạn quay lại!");
-        // Redirect to dashboard or intended page
-        const returnUrl = searchParams?.get("returnUrl") || "/admin";
-        router.push(returnUrl);
+        // Priority: 1. redirectUrl from backend settings, 2. returnUrl param, 3. default /dashboard
+        const redirectUrl = result.redirectUrl || searchParams?.get("returnUrl") || "/dashboard";
+        router.push(redirectUrl);
       } else {
         toast.error(result.error || "Đăng nhập thất bại. Vui lòng thử lại.");
       }

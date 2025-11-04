@@ -5,6 +5,7 @@ export const AUTH_RESPONSE_FRAGMENT = gql`
   fragment AuthResponseFragment on AuthResponse {
     accessToken
     refreshToken
+    redirectUrl
     user {
       id
       email

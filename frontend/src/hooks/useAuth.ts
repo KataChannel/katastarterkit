@@ -61,14 +61,14 @@ export const useAuth = () => {
         variables: { input },
       });
       
-      const { accessToken, refreshToken, user } = result.data.loginUser;
+      const { accessToken, refreshToken, user, redirectUrl } = result.data.loginUser;
       
       // Store tokens in localStorage
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       
-      return { success: true, user, accessToken, refreshToken };
+      return { success: true, user, accessToken, refreshToken, redirectUrl };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
@@ -80,14 +80,14 @@ export const useAuth = () => {
         variables: { input },
       });
       
-      const { accessToken, refreshToken, user } = result.data.loginWithGoogle;
+      const { accessToken, refreshToken, user, redirectUrl } = result.data.loginWithGoogle;
       
       // Store tokens in localStorage
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       
-      return { success: true, user, accessToken, refreshToken };
+      return { success: true, user, accessToken, refreshToken, redirectUrl };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
@@ -99,14 +99,14 @@ export const useAuth = () => {
         variables: { input },
       });
       
-      const { accessToken, refreshToken, user } = result.data.loginWithFacebook;
+      const { accessToken, refreshToken, user, redirectUrl } = result.data.loginWithFacebook;
       
       // Store tokens in localStorage
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       
-      return { success: true, user, accessToken, refreshToken };
+      return { success: true, user, accessToken, refreshToken, redirectUrl };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
@@ -118,14 +118,14 @@ export const useAuth = () => {
         variables: { input },
       });
       
-      const { accessToken, refreshToken, user } = result.data.loginWithPhone;
+      const { accessToken, refreshToken, user, redirectUrl } = result.data.loginWithPhone;
       
       // Store tokens in localStorage
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       
-      return { success: true, user, accessToken, refreshToken };
+      return { success: true, user, accessToken, refreshToken, redirectUrl };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
@@ -149,14 +149,14 @@ export const useAuth = () => {
         variables: { input },
       });
       
-      const { accessToken, refreshToken, user } = result.data.registerUser;
+      const { accessToken, refreshToken, user, redirectUrl } = result.data.registerUser;
       
       // Store tokens in localStorage
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       
-      return { success: true, user, accessToken, refreshToken };
+      return { success: true, user, accessToken, refreshToken, redirectUrl };
     } catch (error: any) {
       return { success: false, error: error.message };
     }

@@ -54,7 +54,7 @@ function RegisterPageContent() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/admin');
+      router.push('/dashboard');
     }
   }, [isAuthenticated, router]);
 
@@ -76,7 +76,9 @@ function RegisterPageContent() {
       
       if (result.success) {
         toast.success('Tài khoản đã được tạo thành công!');
-        router.push('/admin');
+        // Use redirectUrl from backend settings or fallback to /dashboard
+        const redirectUrl = result.redirectUrl || '/dashboard';
+        router.push(redirectUrl);
       } else {
         toast.error(result.error || 'Đăng ký thất bại');
       }

@@ -55,7 +55,7 @@ export default function GoogleLoginButton() {
       console.log('Login response:', data);
       
       if (data?.loginWithGoogle) {
-        const { accessToken, refreshToken, user } = data.loginWithGoogle;
+        const { accessToken, refreshToken, user, redirectUrl } = data.loginWithGoogle;
         
         // Store tokens in localStorage
         localStorage.setItem('accessToken', accessToken);
@@ -76,8 +76,9 @@ export default function GoogleLoginButton() {
         
         // Small delay to ensure toast is shown, then redirect
         setTimeout(() => {
-          // Use window.location for hard navigation to ensure new auth state
-          window.location.href = '/admin';
+          // Use redirectUrl from backend settings or fallback to /dashboard
+          const targetUrl = redirectUrl || '/dashboard';
+          window.location.href = targetUrl;
         }, 500);
       } else {
         toast.error('Google login failed. Please try again.');

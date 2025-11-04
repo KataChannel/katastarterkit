@@ -64,6 +64,20 @@ export default function WebsiteSettingsPage() {
     return acc;
   }, {} as Record<string, WebsiteSetting[]>);
 
+  // Get friendly group label
+  const getGroupLabel = (group: string) => {
+    const labels: Record<string, string> = {
+      'redirect': 'Chuyển hướng',
+      'other': 'Khác',
+      'header_main': 'Header chính',
+      'header_top': 'Header trên',
+      'footer_main': 'Footer chính',
+      'social_links': 'Liên kết mạng xã hội',
+      'contact_info': 'Thông tin liên hệ',
+    };
+    return labels[group] || group.replace(/_/g, ' ');
+  };
+
   // Handle setting value change
   const handleChange = (key: string, value: any, type: string) => {
     let processedValue = value;
@@ -317,7 +331,7 @@ export default function WebsiteSettingsPage() {
 
       {/* Categories Tabs */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-        <TabsList className={`grid grid-cols-${CATEGORIES.length} w-full`}>
+        <TabsList className="grid grid-cols-4 lg:grid-cols-8 w-full">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             return (
@@ -335,7 +349,7 @@ export default function WebsiteSettingsPage() {
               <Card key={group}>
                 <CardHeader>
                   <CardTitle className="capitalize">
-                    {group === 'other' ? 'Khác' : group.replace(/_/g, ' ')}
+                    {getGroupLabel(group)}
                   </CardTitle>
                   <CardDescription>
                     {groupSettings.length} cài đặt
