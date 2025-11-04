@@ -16,10 +16,8 @@ async function fetchSEOSettings(): Promise<Record<string, string>> {
           query: `
             query GetSEOSettings {
               websiteSettings(
-                where: { 
-                  category: { equals: SEO }
-                  isActive: { equals: true }
-                }
+                category: "SEO"
+                isActive: true
               ) {
                 key
                 value
@@ -84,6 +82,11 @@ export async function generateMetadata(): Promise<Metadata> {
   // Robots
   const robotsIndex = seo.robots_index !== 'false';
   const robotsFollow = seo.robots_follow !== 'false';
+  
+  // Icons
+  const iconFavicon = seo.icon_favicon || '/favicon.ico';
+  const iconShortcut = seo.icon_shortcut || '/favicon-16x16.png';
+  const iconApple = seo.icon_apple || '/apple-touch-icon.png';
 
   const metadata: Metadata = {
     title: {
@@ -124,9 +127,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     manifest: '/manifest.json',
     icons: {
-      icon: '/favicon.ico',
-      shortcut: '/favicon-16x16.png',
-      apple: '/apple-touch-icon.png',
+      icon: iconFavicon,
+      shortcut: iconShortcut,
+      apple: iconApple,
     },
   };
 

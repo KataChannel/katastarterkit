@@ -74,6 +74,13 @@ export default function WebsiteSettingsPage() {
       'footer_main': 'Footer chính',
       'social_links': 'Liên kết mạng xã hội',
       'contact_info': 'Thông tin liên hệ',
+      'basic': 'Cơ bản',
+      'meta': 'Meta Tags',
+      'opengraph': 'Open Graph',
+      'twitter': 'Twitter Card',
+      'robots': 'Robots & Indexing',
+      'additional': 'Bổ sung',
+      'icons': 'Icons',
     };
     return labels[group] || group.replace(/_/g, ' ');
   };

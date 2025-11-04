@@ -127,7 +127,7 @@ GRAPHQL_ENDPOINT=${NEXT_PUBLIC_GRAPHQL_ENDPOINT:-"http://localhost:3000/graphql"
 RESPONSE=$(curl -s -X POST "$GRAPHQL_ENDPOINT" \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "query { websiteSettings(where: { category: { equals: SEO } }) { key value } }"
+    "query": "query { websiteSettings(category: \"SEO\") { key value } }"
   }')
 
 if echo "$RESPONSE" | grep -q "websiteSettings"; then

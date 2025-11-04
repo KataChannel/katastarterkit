@@ -246,6 +246,44 @@ async function seedSEOSettings() {
       isPublic: true,
       isActive: true,
     },
+
+    // Icons
+    {
+      key: 'seo.icon_favicon',
+      value: '/favicon.ico',
+      category: SettingCategory.SEO,
+      label: 'Favicon',
+      description: 'Đường dẫn tới favicon.ico',
+      type: SettingType.IMAGE,
+      group: 'icons',
+      order: 20,
+      isPublic: true,
+      isActive: true,
+    },
+    {
+      key: 'seo.icon_shortcut',
+      value: '/favicon-16x16.png',
+      category: SettingCategory.SEO,
+      label: 'Shortcut Icon',
+      description: 'Đường dẫn tới shortcut icon (16x16px)',
+      type: SettingType.IMAGE,
+      group: 'icons',
+      order: 21,
+      isPublic: true,
+      isActive: true,
+    },
+    {
+      key: 'seo.icon_apple',
+      value: '/apple-touch-icon.png',
+      category: SettingCategory.SEO,
+      label: 'Apple Touch Icon',
+      description: 'Đường dẫn tới Apple touch icon (180x180px)',
+      type: SettingType.IMAGE,
+      group: 'icons',
+      order: 22,
+      isPublic: true,
+      isActive: true,
+    },
   ];
 
   let created = 0;
