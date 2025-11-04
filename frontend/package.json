@@ -4,7 +4,7 @@
   "description": "Modern Frontend with Next.js 15, React 19, TailwindCSS v4, and GraphQL",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 13000",
+    "dev": "next dev -p 12000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
