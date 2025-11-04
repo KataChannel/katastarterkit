@@ -63,7 +63,7 @@ async function bootstrap() {
     'https://shop.rausachtrangia.com',
     'https://app.tazagroup.com',
     'https://api.rausachtrangia.com',
-    'https://v3api.tazagroup.vn',
+    'https://appapi.tazagroup.vn',
     frontendUrl,
     // Allow any origin in development, or configure specific IPs in production
     process.env.NODE_ENV === 'development' ? /.*/ : undefined,
