@@ -98,7 +98,7 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
     skip: !projectId,
   });
 
-  const [selectedTab, setSelectedTab] = useState('overview');
+  const [selectedTab, setSelectedTab] = useState('tong-quan');
 
   // Parse JSON strings from GraphQL responses
   const parsedData = useMemo(() => {
@@ -159,10 +159,10 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
   }
 
   const getHealthStatus = (score: number) => {
-    if (score >= 80) return { label: 'Excellent', color: HEALTH_COLORS.excellent };
-    if (score >= 60) return { label: 'Good', color: HEALTH_COLORS.good };
-    if (score >= 40) return { label: 'Fair', color: HEALTH_COLORS.fair };
-    return { label: 'Poor', color: HEALTH_COLORS.poor };
+    if (score >= 80) return { label: 'Xuất sắc', color: HEALTH_COLORS.excellent };
+    if (score >= 60) return { label: 'Tốt', color: HEALTH_COLORS.good };
+    if (score >= 40) return { label: 'Khá', color: HEALTH_COLORS.fair };
+    return { label: 'Kém', color: HEALTH_COLORS.poor };
   };
 
   const healthStatus = getHealthStatus(parsedData.healthScore);
@@ -176,24 +176,24 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
   }));
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="space-y-4 md:space-y-6 px-4 md:px-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {/* Health Score */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Project Health</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Tình trạng dự án</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-3xl font-bold">{parsedData.healthScore}</div>
-                <p className="text-sm text-gray-500">{healthStatus.label}</p>
+                <div className="text-2xl md:text-3xl font-bold">{parsedData.healthScore}</div>
+                <p className="text-xs md:text-sm text-gray-500">{healthStatus.label}</p>
               </div>
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center"
+                className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: healthStatus.color + '20' }}
               >
-                <Zap className="h-6 w-6" style={{ color: healthStatus.color }} />
+                <Zap className="h-5 w-5 md:h-6 md:w-6" style={{ color: healthStatus.color }} />
               </div>
             </div>
           </CardContent>
@@ -202,18 +202,18 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
         {/* Completion Rate */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Completion Rate</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Tỷ lệ hoàn thành</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-3xl font-bold">{parsedData.analytics.completionRate.toFixed(1)}%</div>
-                <p className="text-sm text-gray-500">
+                <div className="text-2xl md:text-3xl font-bold">{parsedData.analytics.completionRate.toFixed(1)}%</div>
+                <p className="text-xs md:text-sm text-gray-500">
                   {parsedData.analytics.completedTasks}/{parsedData.analytics.totalTasks}
                 </p>
               </div>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-100">
-                <Target className="h-6 w-6 text-blue-600" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-blue-100">
+                <Target className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
@@ -222,16 +222,16 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
         {/* Team Members */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Team Size</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Quy mô nhóm</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-3xl font-bold">{parsedData.analytics.totalMembers}</div>
-                <p className="text-sm text-gray-500">Active Members</p>
+                <div className="text-2xl md:text-3xl font-bold">{parsedData.analytics.totalMembers}</div>
+                <p className="text-xs md:text-sm text-gray-500">Thành viên hoạt động</p>
               </div>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-green-100">
-                <Users className="h-6 w-6 text-green-600" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-green-100">
+                <Users className="h-5 w-5 md:h-6 md:w-6 text-green-600" />
               </div>
             </div>
           </CardContent>
@@ -240,16 +240,16 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
         {/* Active Tasks */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Active Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Công việc đang làm</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-3xl font-bold">{parsedData.analytics.inProgressTasks}</div>
-                <p className="text-sm text-gray-500">In Progress</p>
+                <div className="text-2xl md:text-3xl font-bold">{parsedData.analytics.inProgressTasks}</div>
+                <p className="text-xs md:text-sm text-gray-500">Đang tiến hành</p>
               </div>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-yellow-100">
-                <TrendingUp className="h-6 w-6 text-yellow-600" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-yellow-100">
+                <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-yellow-600" />
               </div>
             </div>
           </CardContent>
@@ -257,24 +257,24 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="velocity">Velocity</TabsTrigger>
-          <TabsTrigger value="team">Team</TabsTrigger>
-          <TabsTrigger value="details">Details</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1">
+          <TabsTrigger value="tong-quan" className="text-xs md:text-sm">Tổng quan</TabsTrigger>
+          <TabsTrigger value="toc-do" className="text-xs md:text-sm">Tốc độ</TabsTrigger>
+          <TabsTrigger value="nhom" className="text-xs md:text-sm">Nhóm</TabsTrigger>
+          <TabsTrigger value="chi-tiet" className="text-xs md:text-sm">Chi tiết</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-4">
+        <TabsContent value="tong-quan" className="space-y-4 mt-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Task Status Distribution */}
             <Card>
               <CardHeader>
-                <CardTitle>Task Status Distribution</CardTitle>
-                <CardDescription>Tasks by current status</CardDescription>
+                <CardTitle className="text-base md:text-lg">Phân bổ trạng thái công việc</CardTitle>
+                <CardDescription className="text-xs md:text-sm">Công việc theo trạng thái hiện tại</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250} className="md:h-[300px]">
                   <PieChart>
                     <Pie
                       data={taskStatusData}
@@ -282,7 +282,7 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
                       cy="50%"
                       labelLine={false}
                       label={({ name, value }) => `${name}: ${value}`}
-                      outerRadius={80}
+                      outerRadius={60}
                       fill="#8884d8"
                       dataKey="value"
                     >
@@ -299,15 +299,15 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
             {/* Task Priority Distribution */}
             <Card>
               <CardHeader>
-                <CardTitle>Task Priority Distribution</CardTitle>
-                <CardDescription>Tasks by priority level</CardDescription>
+                <CardTitle className="text-base md:text-lg">Phân bổ độ ưu tiên</CardTitle>
+                <CardDescription className="text-xs md:text-sm">Công việc theo mức độ ưu tiên</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250} className="md:h-[300px]">
                   <BarChart data={priorityData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
+                    <XAxis dataKey="name" style={{ fontSize: '12px' }} />
+                    <YAxis style={{ fontSize: '12px' }} />
                     <Tooltip />
                     <Bar dataKey="value" fill="#3b82f6" />
                   </BarChart>
@@ -321,8 +321,8 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
             {parsedData.overdueTasks.length > 0 && (
               <Alert className="border-destructive bg-destructive/10">
                 <AlertCircle className="h-4 w-4 text-destructive" />
-                <AlertDescription className="text-destructive">
-                  {parsedData.overdueTasks.length} task(s) are overdue. Action required!
+                <AlertDescription className="text-destructive text-xs md:text-sm">
+                  {parsedData.overdueTasks.length} công việc đã quá hạn. Cần xử lý ngay!
                 </AlertDescription>
               </Alert>
             )}
@@ -330,8 +330,8 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
             {parsedData.upcomingDeadlines.length > 0 && (
               <Alert className="border-blue-200 bg-blue-50">
                 <Calendar className="h-4 w-4 text-blue-600" />
-                <AlertDescription className="text-blue-800">
-                  {parsedData.upcomingDeadlines.length} task(s) with upcoming deadline (7 days)
+                <AlertDescription className="text-blue-800 text-xs md:text-sm">
+                  {parsedData.upcomingDeadlines.length} công việc sắp đến hạn (trong 7 ngày)
                 </AlertDescription>
               </Alert>
             )}
@@ -339,26 +339,26 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
         </TabsContent>
 
         {/* Velocity Tab */}
-        <TabsContent value="velocity">
+        <TabsContent value="toc-do" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Task Velocity (Last 30 Days)</CardTitle>
-              <CardDescription>Number of tasks completed per day</CardDescription>
+              <CardTitle className="text-base md:text-lg">Tốc độ hoàn thành (30 ngày gần nhất)</CardTitle>
+              <CardDescription className="text-xs md:text-sm">Số công việc hoàn thành mỗi ngày</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
+              <ResponsiveContainer width="100%" height={300} className="md:h-[400px]">
                 <LineChart data={parsedData.velocity}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
+                  <XAxis dataKey="date" style={{ fontSize: '10px' }} />
+                  <YAxis style={{ fontSize: '12px' }} />
                   <Tooltip />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
                   <Line
                     type="monotone"
                     dataKey="count"
                     stroke="#10b981"
                     dot={{ fill: '#10b981' }}
-                    name="Tasks Completed"
+                    name="Hoàn thành"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -367,25 +367,25 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
         </TabsContent>
 
         {/* Team Tab */}
-        <TabsContent value="team">
+        <TabsContent value="nhom" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Team Member Performance</CardTitle>
-              <CardDescription>Individual task completion rates</CardDescription>
+              <CardTitle className="text-base md:text-lg">Hiệu suất thành viên</CardTitle>
+              <CardDescription className="text-xs md:text-sm">Tỷ lệ hoàn thành cá nhân</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3 md:space-y-4">
                 {parsedData.memberStats.map((member) => (
-                  <div key={member.userId} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={member.userId} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                     <div className="flex-1">
-                      <p className="font-medium">{member.userName}</p>
-                      <p className="text-sm text-gray-500">
-                        {member.tasksCompleted}/{member.tasksAssigned} completed
+                      <p className="font-medium text-sm md:text-base">{member.userName}</p>
+                      <p className="text-xs md:text-sm text-gray-500">
+                        {member.tasksCompleted}/{member.tasksAssigned} hoàn thành
                       </p>
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold">{member.completionRate.toFixed(0)}%</div>
-                      <p className="text-sm text-gray-500">{member.averageCompletionTime}</p>
+                      <div className="text-base md:text-lg font-bold">{member.completionRate.toFixed(0)}%</div>
+                      <p className="text-xs md:text-sm text-gray-500">{member.averageCompletionTime}</p>
                     </div>
                   </div>
                 ))}
@@ -395,18 +395,18 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
         </TabsContent>
 
         {/* Details Tab */}
-        <TabsContent value="details" className="space-y-4">
+        <TabsContent value="chi-tiet" className="space-y-4 mt-4">
           {/* Top Tags */}
           {parsedData.tagStats.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Popular Tags</CardTitle>
-                <CardDescription>Most used tags in tasks</CardDescription>
+                <CardTitle className="text-base md:text-lg">Thẻ phổ biến</CardTitle>
+                <CardDescription className="text-xs md:text-sm">Thẻ được sử dụng nhiều nhất</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {parsedData.tagStats.map((tag) => (
-                    <Badge key={tag.tag} variant="secondary">
+                    <Badge key={tag.tag} variant="secondary" className="text-xs md:text-sm">
                       {tag.tag} ({tag.count})
                     </Badge>
                   ))}
@@ -418,29 +418,29 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
           {/* Statistics Summary */}
           <Card>
             <CardHeader>
-              <CardTitle>Statistics Summary</CardTitle>
+              <CardTitle className="text-base md:text-lg">Tổng hợp thống kê</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Total Tasks</p>
-                  <p className="text-2xl font-bold">{parsedData.analytics.totalTasks}</p>
+                  <p className="text-xs md:text-sm text-gray-500">Tổng công việc</p>
+                  <p className="text-xl md:text-2xl font-bold">{parsedData.analytics.totalTasks}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Completed</p>
-                  <p className="text-2xl font-bold text-green-600">{parsedData.analytics.completedTasks}</p>
+                  <p className="text-xs md:text-sm text-gray-500">Hoàn thành</p>
+                  <p className="text-xl md:text-2xl font-bold text-green-600">{parsedData.analytics.completedTasks}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">In Progress</p>
-                  <p className="text-2xl font-bold text-blue-600">{parsedData.analytics.inProgressTasks}</p>
+                  <p className="text-xs md:text-sm text-gray-500">Đang làm</p>
+                  <p className="text-xl md:text-2xl font-bold text-blue-600">{parsedData.analytics.inProgressTasks}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Pending</p>
-                  <p className="text-2xl font-bold text-yellow-600">{parsedData.analytics.pendingTasks}</p>
+                  <p className="text-xs md:text-sm text-gray-500">Chưa bắt đầu</p>
+                  <p className="text-xl md:text-2xl font-bold text-yellow-600">{parsedData.analytics.pendingTasks}</p>
                 </div>
-                <div className="md:col-span-2">
-                  <p className="text-sm text-gray-500">Avg Completion Time</p>
-                  <p className="text-2xl font-bold">{parsedData.analytics.averageCompletionTime}</p>
+                <div className="col-span-2 md:col-span-2">
+                  <p className="text-xs md:text-sm text-gray-500">Thời gian hoàn thành trung bình</p>
+                  <p className="text-xl md:text-2xl font-bold">{parsedData.analytics.averageCompletionTime}</p>
                 </div>
               </div>
             </CardContent>
@@ -453,26 +453,26 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
 
 function AnalyticsLoadingSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="space-y-4 md:space-y-6 px-4 md:px-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[1, 2, 3, 4].map((i) => (
           <Card key={i}>
             <CardHeader className="pb-2">
-              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-20 md:w-24" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-10 w-16 mb-2" />
-              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-8 md:h-10 w-12 md:w-16 mb-2" />
+              <Skeleton className="h-3 w-16 md:w-20" />
             </CardContent>
           </Card>
         ))}
       </div>
       <Card>
         <CardHeader>
-          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-5 md:h-6 w-24 md:w-32" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-48 md:h-64 w-full" />
         </CardContent>
       </Card>
     </div>
