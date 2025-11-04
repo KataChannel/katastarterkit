@@ -169,7 +169,7 @@ Mỗi domain có 2 environment files:
 **Giải pháp:**
 ```bash
 # 1. SSH vào server
-ssh user@116.118.49.243
+ssh root@116.118.49.243
 
 # 2. Khởi động database services trên server
 cd /path/to/project
@@ -199,7 +199,7 @@ lsof -ti:12001 | xargs kill -9
 ./test-connection.sh
 
 # Nếu failed, check server
-ssh user@116.118.49.243
+ssh root@116.118.49.243
 docker-compose ps
 docker-compose logs redis
 docker-compose logs minio

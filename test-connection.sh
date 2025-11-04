@@ -10,6 +10,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -18,6 +19,7 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 SERVER="116.118.49.243"
+FAILED=0
 
 # Function to test port
 test_port() {
@@ -32,6 +34,7 @@ test_port() {
         return 0
     else
         echo -e "${RED}❌ FAILED${NC}"
+        FAILED=$((FAILED + 1))
         return 1
     fi
 }
@@ -85,8 +88,34 @@ if command -v redis-cli &> /dev/null; then
 fi
 
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}   ✅ Connection test complete!${NC}"
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+if [ $FAILED -eq 0 ]; then
+    echo -e "${GREEN}   ✅ All services are available!${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${GREEN}🎉 Ready for development and deployment!${NC}"
+else
+    echo -e "${RED}   ❌ $FAILED service(s) failed!${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${YELLOW}⚠️  Some services are not available!${NC}"
+    echo ""
+    echo -e "${CYAN}To fix this issue:${NC}"
+    echo ""
+    echo "  1. SSH to server:"
+    echo -e "     ${CYAN}ssh user@$SERVER${NC}"
+    echo ""
+    echo "  2. Navigate to project directory and start services:"
+    echo -e "     ${CYAN}cd /path/to/project${NC}"
+    echo -e "     ${CYAN}docker-compose up -d postgres redis minio${NC}"
+    echo ""
+    echo "  3. Verify services are running:"
+    echo -e "     ${CYAN}docker-compose ps${NC}"
+    echo ""
+    echo "  4. Run this test again:"
+    echo -e "     ${CYAN}./test-connection.sh${NC}"
+    echo ""
+    exit 1
+fi
 echo ""
 echo -e "${YELLOW}💡 Tip:${NC} Nếu có lỗi kết nối, kiểm tra:"
 echo "  1. Server $SERVER có đang chạy không?"

@@ -17,6 +17,67 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Function to check remote service
+check_service() {
+    local service=$1
+    local host=$2
+    local port=$3
+    local timeout=3
+    
+    if timeout $timeout bash -c "cat < /dev/null > /dev/tcp/$host/$port" 2>/dev/null; then
+        echo -e "${GREEN}✅ $service${NC}"
+        return 0
+    else
+        echo -e "${RED}❌ $service${NC}"
+        return 1
+    fi
+}
+
+# Function to check all remote services
+check_remote_services() {
+    local domain=$1
+    local failed=0
+    
+    echo -e "${YELLOW}🔍 Checking remote services on 116.118.49.243...${NC}"
+    echo ""
+    
+    if [ "$domain" == "rausach" ] || [ "$domain" == "both" ]; then
+        check_service "PostgreSQL Rausach (12003)" "116.118.49.243" "12003" || failed=1
+    fi
+    
+    if [ "$domain" == "tazagroup" ] || [ "$domain" == "both" ]; then
+        check_service "PostgreSQL Tazagroup (13003)" "116.118.49.243" "13003" || failed=1
+    fi
+    
+    check_service "Redis (12004)" "116.118.49.243" "12004" || failed=1
+    check_service "Minio (12007)" "116.118.49.243" "12007" || failed=1
+    
+    echo ""
+    
+    if [ $failed -eq 1 ]; then
+        echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${RED}⚠️  WARNING: Some services are not available!${NC}"
+        echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
+        echo -e "${YELLOW}Please make sure services are running on server 116.118.49.243:${NC}"
+        echo ""
+        echo "  SSH to server:"
+        echo "    ssh root@116.118.49.243"
+        echo ""
+        echo "  Start services:"
+        echo "    docker-compose up -d postgres redis minio"
+        echo ""
+        read -p "Continue anyway? (y/N): " continue_choice
+        if [[ ! "$continue_choice" =~ ^[Yy]$ ]]; then
+            echo -e "${RED}Aborted.${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}✅ All remote services are available!${NC}"
+    fi
+    echo ""
+}
+
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${GREEN}   🚀 DEVELOPMENT MODE - LOCALHOST${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -35,14 +96,21 @@ case $choice in
         DOMAIN="rausach"
         FRONTEND_PORT=12000
         BACKEND_PORT=12001
+        # Check remote services
+        check_remote_services "rausach"
         ;;
     2)
         DOMAIN="tazagroup"
         FRONTEND_PORT=13000
         BACKEND_PORT=13001
+        # Check remote services
+        check_remote_services "tazagroup"
         ;;
     3)
         echo -e "${YELLOW}⚙️  Khởi động cả 2 domain...${NC}"
+        
+        # Check remote services for both domains
+        check_remote_services "both"
         
         # Copy env files
         cp .env.dev.rausach backend/.env
