@@ -1,253 +1,128 @@
-# Hybrid Multi-Domain E-commerce Platform# 🚀 rausachcore - Modern Fullstack Starter Kit
+# 🚀 rausachcore - Modern Fullstack Starter Kit
 
-
-
-Full-stack e-commerce platform với kiến trúc Hybrid Multi-Domain cho 2 domains độc lập.![rausachcore](https://img.shields.io/badge/rausachcore-Starter%20Kit-blue)
-
+![rausachcore](https://img.shields.io/badge/rausachcore-Starter%20Kit-blue)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-
-## 🚀 Quick Start[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black)](https://nextjs.org/)
-
-```bash[![NestJS](https://img.shields.io/badge/NestJS-11.1.6-red)](https://nestjs.com/)
-
-# Deploy to production server[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.1.12-38B2AC)](https://tailwindcss.com/)
-
-./deploy.sh
+[![NestJS](https://img.shields.io/badge/NestJS-11.1.6-red)](https://nestjs.com/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.1.12-38B2AC)](https://tailwindcss.com/)
 
 A modern, production-ready fullstack starter kit built with the latest technologies. Get your project up and running in minutes with best practices, modern tooling, and comprehensive features out of the box.
 
-# Or use interactive menu
-
-./menu.sh## ✨ Features
-
-```
+## ✨ Features
 
 ### 🎯 **Frontend (Next.js 15 + React 19)**
-
-## 🌐 Access URLs- ⚡ **Next.js 15** with App Router
-
+- ⚡ **Next.js 15** with App Router
 - ⚛️ **React 19** with latest features
-
-- **Rausach**: http://116.118.49.243:12000- 🎨 **TailwindCSS v4** with latest improvements
-
-- **Tazagroup**: http://116.118.49.243:13000- 📱 **Responsive Design** with mobile-first approach
-
+- 🎨 **TailwindCSS v4** with latest improvements
+- 📱 **Responsive Design** with mobile-first approach
 - 🔒 **NextAuth.js** authentication
-
-## 🏗️ Architecture- 📊 **Apollo Client** for GraphQL
-
+- 📊 **Apollo Client** for GraphQL
 - 🧪 **Comprehensive Testing** (Jest + Cypress)
 
-- **Backend**: NestJS + Bun.js + GraphQL + PostgreSQL
-
-- **Frontend**: Next.js 16 (App Router)### 🏗️ **Backend (NestJS + GraphQL)**
-
-- **Shared**: Redis (Cache) + Minio (Storage)- 🚀 **NestJS 11** with modern architecture
-
-- **Server**: 2 Core, 4GB RAM, Ubuntu 22.04- 🔗 **GraphQL API** with Apollo Server
-
+### 🏗️ **Backend (NestJS + GraphQL)**
+- 🚀 **NestJS 11** with modern architecture
+- 🔗 **GraphQL API** with Apollo Server
 - 🗄️ **Prisma ORM** with PostgreSQL
-
-## 📁 Project Structure- 🔐 **JWT Authentication** & authorization
-
+- 🔐 **JWT Authentication** & authorization
 - ⚡ **Redis** for caching and sessions
+- 📦 **File Upload** with MinIO
+- 🛡️ **Security** best practices
+- 📈 **Health Checks** and monitoring
 
-```- 📦 **File Upload** with MinIO
+### 🛠️ **Developer Experience**
+- 🏃‍♂️ **Bun.js** for ultra-fast package management
+- 🐳 **Docker** containerization
+- � **TypeScript** throughout the stack
+- 📝 **ESLint** and **Prettier** configured
+- 🧪 **Testing** setup for both frontend and backend
+- 📚 **Comprehensive documentation**
 
-├── backend/              # NestJS Backend- 🛡️ **Security** best practices
+### Local Development Setup
 
-├── frontend/             # Next.js Frontend  - 📈 **Health Checks** and monitoring
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/rausachcore/rausachcore.git
+   cd rausachcore
+   ```
 
-├── docker/               # Docker configs
-
-├── docker-compose.hybrid.yml### 🛠️ **Developer Experience**
-
-├── .env.rausach- 🏃‍♂️ **Bun.js** for ultra-fast package management
-
-├── .env.tazagroup- 🐳 **Docker** containerization
-
-├── deploy.sh            # Main deployment- � **TypeScript** throughout the stack
-
-├── cleanup-server.sh    # Disk cleanup- 📝 **ESLint** and **Prettier** configured
-
-└── menu.sh              # Interactive menu- 🧪 **Testing** setup for both frontend and backend
-
-```- 📚 **Comprehensive documentation**
-
-
-
-## 🛠️ Scripts### Local Development Setup
-
-
-
-| Command | Description |1. **Clone the repository**
-
-|---------|-------------|   ```bash
-
-| `./deploy.sh` | Deploy to production |   git clone https://github.com/rausachcore/rausachcore.git
-
-| `./menu.sh` | Management menu |   cd rausachcore
-
-| `./cleanup-server.sh` | Clean disk space |   ```
-
-
-
-## 📊 Monitoring2. **Start development environment**
-
+2. **Start development environment**
 ## 🏗️ Tech Stack
 
-```bash
-
-# Container status| Category | Technology | Version | Purpose |
-
-ssh root@116.118.49.243 'docker compose -f docker-compose.hybrid.yml ps'|----------|------------|---------|---------|
-
+| Category | Technology | Version | Purpose |
+|----------|------------|---------|---------|
 | **Frontend** | Next.js | 15.5.0 | React framework |
-
-# View logs| **Frontend** | React | 19.1.1 | UI library |
-
-ssh root@116.118.49.243 'docker compose -f docker-compose.hybrid.yml logs -f shopbackend'| **Frontend** | TailwindCSS | 4.1.12 | CSS framework |
-
+| **Frontend** | React | 19.1.1 | UI library |
+| **Frontend** | TailwindCSS | 4.1.12 | CSS framework |
 | **Backend** | NestJS | 11.1.6 | Node.js framework |
-
-# Resource usage| **Database** | PostgreSQL | 16+ | Primary database |
-
-ssh root@116.118.49.243 'docker stats'| **Cache** | Redis | 7+ | Caching and sessions |
-
-```| **Storage** | MinIO | Latest | Object storage |
-
+| **Database** | PostgreSQL | 16+ | Primary database |
+| **Cache** | Redis | 7+ | Caching and sessions |
+| **Storage** | MinIO | Latest | Object storage |
 | **ORM** | Prisma | 6+ | Database toolkit |
-
-## 🎯 Ports| **API** | GraphQL | 16+ | Query language |
-
+| **API** | GraphQL | 16+ | Query language |
 | **Runtime** | Bun.js | 1.0+ | JavaScript runtime |
+| **Container** | Docker | 20+ | Containerization |
 
-### Rausach| **Container** | Docker | 20+ | Containerization |
-
-- Frontend: 12000
-
-- Backend: 12001## 🚀 Quick Start
-
-- PostgreSQL: 12003
+## 🚀 Quick Start
 
 ### 1. Clone the Repository
 
-### Tazagroup
-
-- Frontend: 13000```bash
-
-- Backend: 13001  git clone https://github.com/KataChannel/katastarterkit.git
-
-- PostgreSQL: 13003cd katastarterkit
-
+```bash
+git clone https://github.com/KataChannel/katastarterkit.git
+cd katastarterkit
 ```
 
-### Shared
-
-- Redis: 12004### 2. Install Dependencies
-
-- Minio: 12007-12008
+### 2. Install Dependencies
 
 ```bash
-
-## 🧹 Maintenance# Install root dependencies
-
+# Install root dependencies
 bun install
 
-```bash
+# Install backend dependencies
+cd backend && bun install
 
-# Weekly cleanup# Install backend dependencies
-
-ssh root@116.118.49.243 'bash /root/cleanup-server.sh'cd backend && bun install
-
-
-
-# Restart services# Install frontend dependencies
-
-ssh root@116.118.49.243 'cd /root/shoprausach && docker compose -f docker-compose.hybrid.yml restart'cd ../frontend && bun install && cd ..
-
-``````
-
-
-
-## 💾 Memory Allocation (4GB Total)### 3. Setup Environment
-
-
-
-- Backend (2x): 512MB each = 1024MB```bash
-
-- Frontend (2x): 256MB each = 512MB# Copy environment files
-
-- PostgreSQL (2x): 256MB each = 512MBcp .env.example .env
-
-- Redis: 128MBcp backend/.env.example backend/.env.local
-
-- Minio: 128MBcp frontend/.env.example frontend/.env.local
-
-- **Total**: ~2.3GB (58%)
-
-# Edit environment variables as needed
-
-## 🐛 Troubleshootingnano .env
-
+# Install frontend dependencies
+cd ../frontend && bun install && cd ..
 ```
 
-### Containers unhealthy?
-
-```bash### 4. Start Infrastructure
-
-docker compose -f docker-compose.hybrid.yml logs shopbackend
-
-docker compose -f docker-compose.hybrid.yml restart shopbackend```bash
-
-```# Start PostgreSQL, Redis, and MinIO
-
-docker-compose up -d
-
-### Out of disk space?
-
-```bash# Wait for services to be ready
-
-bash cleanup-server.shsleep 10
-
-``````
-
-
-
-### Frontend not loading?### 5. Setup Database
+### 3. Setup Environment
 
 ```bash
+# Copy environment files
+cp .env.example .env
+cp backend/.env.example backend/.env.local
+cp frontend/.env.example frontend/.env.local
 
-curl http://116.118.49.243:12001/graphql -d '{"query":"{__typename}"}'```bash
+# Edit environment variables as needed
+nano .env
+```
 
-```# Generate Prisma client
+### 4. Start Infrastructure
 
+```bash
+# Start PostgreSQL, Redis, and MinIO
+docker-compose up -d
+
+# Wait for services to be ready
+sleep 10
+```
+
+### 5. Setup Database
+
+```bash
+# Generate Prisma client
 cd backend && bunx prisma generate
 
-## 📈 Optimizations
-
 # Run database migrations
+bunx prisma migrate dev
 
-✅ Multi-stage Docker builds (70% smaller)  bunx prisma migrate dev
+# Seed the database (optional)
+bunx prisma db seed
+```
 
-✅ Production dependencies only  
+### 6. Start Development Servers
 
-✅ PostgreSQL tuned for 2-core  # Seed the database (optional)
-
-✅ Redis LRU eviction  bunx prisma db seed
-
-✅ Optimized memory allocation  ```
-
-
-
-## 📄 License### 6. Start Development Servers
-
-
-
-MIT```bash
-
+```bash
 # Start both frontend and backend
 bun run dev
 

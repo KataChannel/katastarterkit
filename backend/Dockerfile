@@ -39,6 +39,9 @@ RUN apk add --no-cache curl netcat-openbsd dumb-init && \
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
+# Create logs directory with correct permissions BEFORE copying files
+RUN mkdir -p /app/logs && chown -R nestjs:nodejs /app
+
 # Copy only production dependencies and generated files from builder
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
