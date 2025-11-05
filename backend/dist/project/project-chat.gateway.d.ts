@@ -66,9 +66,9 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
                 };
             } & {
                 id: string;
+                content: string;
                 createdAt: Date;
                 updatedAt: Date;
-                content: string;
                 projectId: string;
                 mentions: string[];
                 senderId: string;
@@ -79,9 +79,9 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
             };
         } & {
             id: string;
+            content: string;
             createdAt: Date;
             updatedAt: Date;
-            content: string;
             projectId: string;
             mentions: string[];
             senderId: string;
@@ -143,9 +143,9 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
             };
         } & {
             id: string;
+            content: string;
             createdAt: Date;
             updatedAt: Date;
-            content: string;
             projectId: string;
             mentions: string[];
             senderId: string;

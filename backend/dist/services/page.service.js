@@ -84,7 +84,21 @@ let PageService = class PageService {
             },
             include: {
                 blocks: {
-                    orderBy: { order: 'asc' }
+                    where: { parentId: null },
+                    orderBy: { order: 'asc' },
+                    include: {
+                        children: {
+                            orderBy: { order: 'asc' },
+                            include: {
+                                children: {
+                                    orderBy: { order: 'asc' },
+                                    include: {
+                                        children: true
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -277,7 +291,21 @@ let PageService = class PageService {
             },
             include: {
                 blocks: {
-                    orderBy: { order: 'asc' }
+                    where: { parentId: null },
+                    orderBy: { order: 'asc' },
+                    include: {
+                        children: {
+                            orderBy: { order: 'asc' },
+                            include: {
+                                children: {
+                                    orderBy: { order: 'asc' },
+                                    include: {
+                                        children: true
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -419,7 +447,21 @@ let PageService = class PageService {
             },
             include: {
                 blocks: {
-                    orderBy: { order: 'asc' }
+                    where: { parentId: null },
+                    orderBy: { order: 'asc' },
+                    include: {
+                        children: {
+                            orderBy: { order: 'asc' },
+                            include: {
+                                children: {
+                                    orderBy: { order: 'asc' },
+                                    include: {
+                                        children: true
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         });

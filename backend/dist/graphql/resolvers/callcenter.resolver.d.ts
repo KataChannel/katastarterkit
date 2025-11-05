@@ -14,13 +14,13 @@ export declare class CallCenterResolver {
     getRecordById(id: string): Promise<CallCenterRecord>;
     getSyncLogs(pagination: PaginationInput): Promise<{
         id: string;
-        errorMessage: string | null;
         status: string;
+        duration: number | null;
+        errorMessage: string | null;
         completedAt: Date | null;
         fromDate: Date;
         toDate: Date;
         offset: number;
-        duration: number | null;
         configId: string | null;
         syncType: import("@prisma/client").$Enums.CallCenterSyncMode;
         recordsFetched: number;

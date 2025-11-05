@@ -23,12 +23,12 @@ let AICourseGeneratorService = class AICourseGeneratorService {
         else {
             this.genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
             this.model = this.genAI.getGenerativeModel({
-                model: 'gemini-pro',
+                model: 'gemini-1.5-flash',
                 generationConfig: {
                     temperature: 0.7,
                     topK: 40,
                     topP: 0.95,
-                    maxOutputTokens: 8192,
+                    maxOutputTokens: 16384,
                 },
             });
             console.log('✅ AI Course Generator initialized with Gemini Pro');
@@ -67,15 +67,37 @@ let AICourseGeneratorService = class AICourseGeneratorService {
         console.log(`✨ Ready for editing at: /lms/admin/courses/${course.id}/edit\n`);
         return course;
     }
+    repairIncompleteJSON(text) {
+        console.log('   🔧 Attempting to repair incomplete JSON...');
+        const openBraces = (text.match(/{/g) || []).length;
+        const closeBraces = (text.match(/}/g) || []).length;
+        const openBrackets = (text.match(/\[/g) || []).length;
+        const closeBrackets = (text.match(/\]/g) || []).length;
+        console.log(`   📊 Brackets: { ${openBraces} vs } ${closeBraces}, [ ${openBrackets} vs ] ${closeBrackets}`);
+        let repaired = text;
+        const missingCloseBrackets = openBrackets - closeBrackets;
+        if (missingCloseBrackets > 0) {
+            console.log(`   ✂️  Adding ${missingCloseBrackets} missing ]`);
+            repaired += ']'.repeat(missingCloseBrackets);
+        }
+        const missingCloseBraces = openBraces - closeBraces;
+        if (missingCloseBraces > 0) {
+            console.log(`   ✂️  Adding ${missingCloseBraces} missing }`);
+            repaired += '}'.repeat(missingCloseBraces);
+        }
+        repaired = repaired.replace(/,(\s*[}\]])/g, '$1');
+        return repaired;
+    }
     async generateCourseStructure(prompt) {
         const systemPrompt = `Bạn là chuyên gia thiết kế khóa học. Tạo cấu trúc khóa học NGẮN GỌN bằng tiếng Việt.
 
-YÊU CẦU:
-- 3-4 modules (KHÔNG quá 4)
-- Mỗi module: 3-4 lessons (KHÔNG quá 4)
-- Mỗi module: 1 quiz với 5 câu (KHÔNG quá 5)
-- Nội dung lesson: 300-800 ký tự (KHÔNG quá dài)
+YÊU CẦU QUAN TRỌNG:
+- CHÍNH XÁC 3 modules (không được nhiều hơn)
+- Mỗi module: CHÍNH XÁC 3 lessons (không được nhiều hơn)
+- Mỗi module: 1 quiz với CHÍNH XÁC 4 câu (không được nhiều hơn)
+- Nội dung lesson: 200-400 ký tự (NGẮN GỌN)
 - 4 đáp án/câu hỏi
+- Mô tả course: tối đa 300 ký tự
 
 JSON format:
 {
@@ -134,11 +156,15 @@ JSON format:
   ]
 }
 
-LƯU Ý: 
-- NỘI DUNG NGẮN GỌN để response nhanh
-- Quiz: 5 câu x 20 điểm = 100 điểm
-- Chỉ trả JSON, KHÔNG giải thích thêm`;
-        const fullPrompt = `${systemPrompt}\n\nMÔ TẢ KHÓA HỌC:\n${prompt}\n\nTrả về JSON:`;
+LƯU Ý QUAN TRỌNG: 
+- NGẮN GỌN để tránh response bị cắt
+- Quiz: 4 câu x 25 điểm = 100 điểm
+- Chỉ trả JSON, KHÔNG giải thích thêm
+- QUAN TRỌNG: Nội dung trong "content" và "description" phải NGẮN (200-400 ký tự)
+- Nội dung KHÔNG được chứa xuống dòng thật (newline), chỉ dùng \\n
+- Tất cả dấu ngoặc kép trong string phải escape thành \\"
+- PHẢI TRẢ VỀ JSON HOÀN CHỈNH với đầy đủ dấu đóng ]} ở cuối`;
+        const fullPrompt = `${systemPrompt}\n\nMÔ TẢ KHÓA HỌC:\n${prompt}\n\nTrả về COMPLETE VALID JSON (3 modules, 3 lessons each, 4 questions each):`;
         try {
             console.log('   🔄 Sending request to Gemini API...');
             console.log(`   📊 Prompt length: ${fullPrompt.length} characters`);
@@ -152,8 +178,42 @@ LƯU Ý:
             let text = response.text();
             console.log(`   📏 Response length: ${text.length} characters`);
             text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            text = text.trim();
+            const jsonStart = text.indexOf('{');
+            const jsonEnd = text.lastIndexOf('}');
+            if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+                text = text.substring(jsonStart, jsonEnd + 1);
+            }
             console.log('   🔍 Parsing JSON response...');
-            const courseData = JSON.parse(text);
+            console.log(`   📏 Cleaned JSON length: ${text.length} characters`);
+            let courseData;
+            try {
+                courseData = JSON.parse(text);
+            }
+            catch (parseError) {
+                console.error('   ❌ Initial JSON parse failed, attempting advanced cleaning...');
+                let cleaned = text.replace(/[\x00-\x09\x0B-\x1F\x7F]/g, '');
+                cleaned = cleaned.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
+                try {
+                    courseData = JSON.parse(cleaned);
+                    console.log('   ✅ JSON parsed successfully after advanced cleaning');
+                }
+                catch (secondError) {
+                    console.error('   ❌ Advanced cleaning also failed, attempting JSON repair...');
+                    try {
+                        let repaired = this.repairIncompleteJSON(cleaned);
+                        courseData = JSON.parse(repaired);
+                        console.log('   ✅ JSON parsed successfully after repair');
+                    }
+                    catch (thirdError) {
+                        console.error('   ❌ JSON repair also failed');
+                        console.error('   📄 First 500 chars of problematic JSON:', text.substring(0, 500));
+                        console.error('   📄 Last 500 chars:', text.substring(Math.max(0, text.length - 500)));
+                        console.error('   ⚠️ Parse error position:', parseError.message);
+                        throw new Error(`Failed to parse AI response as JSON: ${parseError.message}. Response length: ${text.length} chars. This may be due to incomplete AI response or special characters. Please try a simpler prompt.`);
+                    }
+                }
+            }
             console.log('   ✅ JSON parsed successfully');
             console.log(`   📚 Title: ${courseData.title}`);
             console.log(`   📦 Modules: ${courseData.modules?.length || 0}`);

@@ -5,55 +5,57 @@ export declare class WishlistService {
     getWishlist(userId: string): Promise<{
         items: ({
             product: {
-                category: {
-                    id: string;
-                    createdAt: Date;
-                    isActive: boolean;
-                    name: string;
-                    updatedAt: Date;
-                    description: string | null;
-                    parentId: string | null;
-                    createdBy: string | null;
-                    slug: string;
-                    updatedBy: string | null;
-                    icon: string | null;
-                    image: string | null;
-                    displayOrder: number;
-                    isFeatured: boolean;
-                    metaTitle: string | null;
-                    metaDescription: string | null;
-                    metaKeywords: string | null;
-                };
                 images: {
-                    order: number;
                     id: string;
+                    title: string | null;
                     createdAt: Date;
                     updatedAt: Date;
-                    title: string | null;
+                    order: number;
                     url: string;
                     productId: string;
                     alt: string | null;
                     isPrimary: boolean;
                 }[];
+                category: {
+                    id: string;
+                    slug: string;
+                    description: string | null;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    createdBy: string | null;
+                    updatedBy: string | null;
+                    name: string;
+                    parentId: string | null;
+                    metaTitle: string | null;
+                    metaDescription: string | null;
+                    icon: string | null;
+                    isActive: boolean;
+                    image: string | null;
+                    displayOrder: number;
+                    isFeatured: boolean;
+                    metaKeywords: string | null;
+                };
             } & {
                 id: string;
-                createdAt: Date;
-                name: string;
-                updatedAt: Date;
-                description: string | null;
-                createdBy: string | null;
                 slug: string;
+                description: string | null;
                 status: import("@prisma/client").$Enums.ProductStatus;
+                createdAt: Date;
+                updatedAt: Date;
                 publishedAt: Date | null;
+                createdBy: string | null;
                 updatedBy: string | null;
+                name: string;
                 thumbnail: string | null;
-                displayOrder: number;
-                isFeatured: boolean;
+                price: number;
+                categoryId: string;
+                viewCount: number;
                 metaTitle: string | null;
                 metaDescription: string | null;
+                displayOrder: number;
+                isFeatured: boolean;
                 metaKeywords: string | null;
                 shortDesc: string | null;
-                price: number;
                 originalPrice: number | null;
                 costPrice: number | null;
                 sku: string | null;
@@ -66,11 +68,17 @@ export declare class WishlistService {
                 isNewArrival: boolean;
                 isBestSeller: boolean;
                 isOnSale: boolean;
+                productCode: string | null;
+                nameEn: string | null;
+                subtitle: string | null;
+                vat: number | null;
+                stockInWare: number | null;
                 maxStock: number | null;
-                categoryId: string;
+                wastage: number;
+                loadpoint: number | null;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
-                viewCount: number;
                 soldCount: number;
+                notes: string | null;
             };
         } & {
             id: string;
@@ -81,61 +89,63 @@ export declare class WishlistService {
     } & {
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
+        userId: string;
     }>;
     addToWishlist(userId: string, productId: string): Promise<{
         items: ({
             product: {
-                category: {
-                    id: string;
-                    createdAt: Date;
-                    isActive: boolean;
-                    name: string;
-                    updatedAt: Date;
-                    description: string | null;
-                    parentId: string | null;
-                    createdBy: string | null;
-                    slug: string;
-                    updatedBy: string | null;
-                    icon: string | null;
-                    image: string | null;
-                    displayOrder: number;
-                    isFeatured: boolean;
-                    metaTitle: string | null;
-                    metaDescription: string | null;
-                    metaKeywords: string | null;
-                };
                 images: {
-                    order: number;
                     id: string;
+                    title: string | null;
                     createdAt: Date;
                     updatedAt: Date;
-                    title: string | null;
+                    order: number;
                     url: string;
                     productId: string;
                     alt: string | null;
                     isPrimary: boolean;
                 }[];
+                category: {
+                    id: string;
+                    slug: string;
+                    description: string | null;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    createdBy: string | null;
+                    updatedBy: string | null;
+                    name: string;
+                    parentId: string | null;
+                    metaTitle: string | null;
+                    metaDescription: string | null;
+                    icon: string | null;
+                    isActive: boolean;
+                    image: string | null;
+                    displayOrder: number;
+                    isFeatured: boolean;
+                    metaKeywords: string | null;
+                };
             } & {
                 id: string;
-                createdAt: Date;
-                name: string;
-                updatedAt: Date;
-                description: string | null;
-                createdBy: string | null;
                 slug: string;
+                description: string | null;
                 status: import("@prisma/client").$Enums.ProductStatus;
+                createdAt: Date;
+                updatedAt: Date;
                 publishedAt: Date | null;
+                createdBy: string | null;
                 updatedBy: string | null;
+                name: string;
                 thumbnail: string | null;
-                displayOrder: number;
-                isFeatured: boolean;
+                price: number;
+                categoryId: string;
+                viewCount: number;
                 metaTitle: string | null;
                 metaDescription: string | null;
+                displayOrder: number;
+                isFeatured: boolean;
                 metaKeywords: string | null;
                 shortDesc: string | null;
-                price: number;
                 originalPrice: number | null;
                 costPrice: number | null;
                 sku: string | null;
@@ -148,11 +158,17 @@ export declare class WishlistService {
                 isNewArrival: boolean;
                 isBestSeller: boolean;
                 isOnSale: boolean;
+                productCode: string | null;
+                nameEn: string | null;
+                subtitle: string | null;
+                vat: number | null;
+                stockInWare: number | null;
                 maxStock: number | null;
-                categoryId: string;
+                wastage: number;
+                loadpoint: number | null;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
-                viewCount: number;
                 soldCount: number;
+                notes: string | null;
             };
         } & {
             id: string;
@@ -163,61 +179,63 @@ export declare class WishlistService {
     } & {
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
+        userId: string;
     }>;
     removeFromWishlist(userId: string, productId: string): Promise<{
         items: ({
             product: {
-                category: {
-                    id: string;
-                    createdAt: Date;
-                    isActive: boolean;
-                    name: string;
-                    updatedAt: Date;
-                    description: string | null;
-                    parentId: string | null;
-                    createdBy: string | null;
-                    slug: string;
-                    updatedBy: string | null;
-                    icon: string | null;
-                    image: string | null;
-                    displayOrder: number;
-                    isFeatured: boolean;
-                    metaTitle: string | null;
-                    metaDescription: string | null;
-                    metaKeywords: string | null;
-                };
                 images: {
-                    order: number;
                     id: string;
+                    title: string | null;
                     createdAt: Date;
                     updatedAt: Date;
-                    title: string | null;
+                    order: number;
                     url: string;
                     productId: string;
                     alt: string | null;
                     isPrimary: boolean;
                 }[];
+                category: {
+                    id: string;
+                    slug: string;
+                    description: string | null;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    createdBy: string | null;
+                    updatedBy: string | null;
+                    name: string;
+                    parentId: string | null;
+                    metaTitle: string | null;
+                    metaDescription: string | null;
+                    icon: string | null;
+                    isActive: boolean;
+                    image: string | null;
+                    displayOrder: number;
+                    isFeatured: boolean;
+                    metaKeywords: string | null;
+                };
             } & {
                 id: string;
-                createdAt: Date;
-                name: string;
-                updatedAt: Date;
-                description: string | null;
-                createdBy: string | null;
                 slug: string;
+                description: string | null;
                 status: import("@prisma/client").$Enums.ProductStatus;
+                createdAt: Date;
+                updatedAt: Date;
                 publishedAt: Date | null;
+                createdBy: string | null;
                 updatedBy: string | null;
+                name: string;
                 thumbnail: string | null;
-                displayOrder: number;
-                isFeatured: boolean;
+                price: number;
+                categoryId: string;
+                viewCount: number;
                 metaTitle: string | null;
                 metaDescription: string | null;
+                displayOrder: number;
+                isFeatured: boolean;
                 metaKeywords: string | null;
                 shortDesc: string | null;
-                price: number;
                 originalPrice: number | null;
                 costPrice: number | null;
                 sku: string | null;
@@ -230,11 +248,17 @@ export declare class WishlistService {
                 isNewArrival: boolean;
                 isBestSeller: boolean;
                 isOnSale: boolean;
+                productCode: string | null;
+                nameEn: string | null;
+                subtitle: string | null;
+                vat: number | null;
+                stockInWare: number | null;
                 maxStock: number | null;
-                categoryId: string;
+                wastage: number;
+                loadpoint: number | null;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
-                viewCount: number;
                 soldCount: number;
+                notes: string | null;
             };
         } & {
             id: string;
@@ -245,61 +269,63 @@ export declare class WishlistService {
     } & {
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
+        userId: string;
     }>;
     clearWishlist(userId: string): Promise<{
         items: ({
             product: {
-                category: {
-                    id: string;
-                    createdAt: Date;
-                    isActive: boolean;
-                    name: string;
-                    updatedAt: Date;
-                    description: string | null;
-                    parentId: string | null;
-                    createdBy: string | null;
-                    slug: string;
-                    updatedBy: string | null;
-                    icon: string | null;
-                    image: string | null;
-                    displayOrder: number;
-                    isFeatured: boolean;
-                    metaTitle: string | null;
-                    metaDescription: string | null;
-                    metaKeywords: string | null;
-                };
                 images: {
-                    order: number;
                     id: string;
+                    title: string | null;
                     createdAt: Date;
                     updatedAt: Date;
-                    title: string | null;
+                    order: number;
                     url: string;
                     productId: string;
                     alt: string | null;
                     isPrimary: boolean;
                 }[];
+                category: {
+                    id: string;
+                    slug: string;
+                    description: string | null;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    createdBy: string | null;
+                    updatedBy: string | null;
+                    name: string;
+                    parentId: string | null;
+                    metaTitle: string | null;
+                    metaDescription: string | null;
+                    icon: string | null;
+                    isActive: boolean;
+                    image: string | null;
+                    displayOrder: number;
+                    isFeatured: boolean;
+                    metaKeywords: string | null;
+                };
             } & {
                 id: string;
-                createdAt: Date;
-                name: string;
-                updatedAt: Date;
-                description: string | null;
-                createdBy: string | null;
                 slug: string;
+                description: string | null;
                 status: import("@prisma/client").$Enums.ProductStatus;
+                createdAt: Date;
+                updatedAt: Date;
                 publishedAt: Date | null;
+                createdBy: string | null;
                 updatedBy: string | null;
+                name: string;
                 thumbnail: string | null;
-                displayOrder: number;
-                isFeatured: boolean;
+                price: number;
+                categoryId: string;
+                viewCount: number;
                 metaTitle: string | null;
                 metaDescription: string | null;
+                displayOrder: number;
+                isFeatured: boolean;
                 metaKeywords: string | null;
                 shortDesc: string | null;
-                price: number;
                 originalPrice: number | null;
                 costPrice: number | null;
                 sku: string | null;
@@ -312,11 +338,17 @@ export declare class WishlistService {
                 isNewArrival: boolean;
                 isBestSeller: boolean;
                 isOnSale: boolean;
+                productCode: string | null;
+                nameEn: string | null;
+                subtitle: string | null;
+                vat: number | null;
+                stockInWare: number | null;
                 maxStock: number | null;
-                categoryId: string;
+                wastage: number;
+                loadpoint: number | null;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
-                viewCount: number;
                 soldCount: number;
+                notes: string | null;
             };
         } & {
             id: string;
@@ -327,8 +359,8 @@ export declare class WishlistService {
     } & {
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
+        userId: string;
     }>;
     isInWishlist(userId: string, productId: string): Promise<boolean>;
 }

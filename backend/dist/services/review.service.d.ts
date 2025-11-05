@@ -40,17 +40,17 @@ export declare class ReviewService {
         };
         product: {
             id: string;
-            name: string;
             slug: string;
+            name: string;
         };
     } & {
-        comment: string | null;
-        id: string;
-        createdAt: Date;
-        userId: string | null;
-        updatedAt: Date;
-        title: string | null;
         images: string[];
+        id: string;
+        title: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        comment: string | null;
+        userId: string | null;
         orderId: string | null;
         productId: string;
         rating: number;
@@ -72,13 +72,13 @@ export declare class ReviewService {
                 avatar: string;
             };
         } & {
-            comment: string | null;
-            id: string;
-            createdAt: Date;
-            userId: string | null;
-            updatedAt: Date;
-            title: string | null;
             images: string[];
+            id: string;
+            title: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            comment: string | null;
+            userId: string | null;
             orderId: string | null;
             productId: string;
             rating: number;
@@ -106,17 +106,17 @@ export declare class ReviewService {
         };
         product: {
             id: string;
-            name: string;
             slug: string;
+            name: string;
         };
     } & {
-        comment: string | null;
-        id: string;
-        createdAt: Date;
-        userId: string | null;
-        updatedAt: Date;
-        title: string | null;
         images: string[];
+        id: string;
+        title: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        comment: string | null;
+        userId: string | null;
         orderId: string | null;
         productId: string;
         rating: number;
@@ -137,13 +137,13 @@ export declare class ReviewService {
             avatar: string;
         };
     } & {
-        comment: string | null;
-        id: string;
-        createdAt: Date;
-        userId: string | null;
-        updatedAt: Date;
-        title: string | null;
         images: string[];
+        id: string;
+        title: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        comment: string | null;
+        userId: string | null;
         orderId: string | null;
         productId: string;
         rating: number;

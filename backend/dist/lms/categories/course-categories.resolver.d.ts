@@ -7,169 +7,169 @@ export declare class CourseCategoriesResolver {
     createCategory(createCourseCategoryInput: CreateCourseCategoryInput): Promise<{
         parent: {
             id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
             slug: string;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            parentId: string | null;
             icon: string | null;
         };
         children: {
             id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
             slug: string;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            parentId: string | null;
             icon: string | null;
         }[];
     } & {
         id: string;
-        createdAt: Date;
-        name: string;
-        updatedAt: Date;
-        description: string | null;
-        parentId: string | null;
         slug: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        name: string;
+        parentId: string | null;
         icon: string | null;
     }>;
     findAllCategories(): Promise<({
-        _count: {
-            courses: number;
-        };
         parent: {
             id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
             slug: string;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            parentId: string | null;
             icon: string | null;
         };
         children: {
             id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
             slug: string;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            parentId: string | null;
             icon: string | null;
         }[];
+        _count: {
+            courses: number;
+        };
     } & {
         id: string;
-        createdAt: Date;
-        name: string;
-        updatedAt: Date;
-        description: string | null;
-        parentId: string | null;
         slug: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        name: string;
+        parentId: string | null;
         icon: string | null;
     })[]>;
     findCategoryTree(): Promise<({
-        _count: {
-            courses: number;
-        };
         children: ({
+            children: {
+                id: string;
+                slug: string;
+                description: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                parentId: string | null;
+                icon: string | null;
+            }[];
             _count: {
                 courses: number;
             };
-            children: {
-                id: string;
-                createdAt: Date;
-                name: string;
-                updatedAt: Date;
-                description: string | null;
-                parentId: string | null;
-                slug: string;
-                icon: string | null;
-            }[];
         } & {
             id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
             slug: string;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            parentId: string | null;
             icon: string | null;
         })[];
-    } & {
-        id: string;
-        createdAt: Date;
-        name: string;
-        updatedAt: Date;
-        description: string | null;
-        parentId: string | null;
-        slug: string;
-        icon: string | null;
-    })[]>;
-    findOneCategory(id: string): Promise<{
         _count: {
             courses: number;
         };
+    } & {
+        id: string;
+        slug: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        name: string;
+        parentId: string | null;
+        icon: string | null;
+    })[]>;
+    findOneCategory(id: string): Promise<{
         parent: {
             id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
             slug: string;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            parentId: string | null;
             icon: string | null;
         };
         children: {
             id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
             slug: string;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            parentId: string | null;
             icon: string | null;
         }[];
+        _count: {
+            courses: number;
+        };
     } & {
         id: string;
-        createdAt: Date;
-        name: string;
-        updatedAt: Date;
-        description: string | null;
-        parentId: string | null;
         slug: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        name: string;
+        parentId: string | null;
         icon: string | null;
     }>;
     updateCategory(updateCourseCategoryInput: UpdateCourseCategoryInput): Promise<{
         parent: {
             id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
             slug: string;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            parentId: string | null;
             icon: string | null;
         };
         children: {
             id: string;
-            createdAt: Date;
-            name: string;
-            updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
             slug: string;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            parentId: string | null;
             icon: string | null;
         }[];
     } & {
         id: string;
-        createdAt: Date;
-        name: string;
-        updatedAt: Date;
-        description: string | null;
-        parentId: string | null;
         slug: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        name: string;
+        parentId: string | null;
         icon: string | null;
     }>;
     removeCategory(id: string): Promise<boolean>;

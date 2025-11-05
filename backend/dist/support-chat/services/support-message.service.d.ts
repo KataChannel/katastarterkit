@@ -41,13 +41,12 @@ export declare class SupportMessageService {
         };
     } & {
         id: string;
+        content: string;
         createdAt: Date;
         updatedAt: Date;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
-        content: string;
         isRead: boolean;
         conversationId: string;
-        readAt: Date | null;
         sentAt: Date;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         senderType: import("@prisma/client").$Enums.SupportSender;
@@ -56,6 +55,7 @@ export declare class SupportMessageService {
         isAIGenerated: boolean;
         aiConfidence: number | null;
         aiSuggestions: import("@prisma/client/runtime/library").JsonValue | null;
+        readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
     }>;
@@ -85,13 +85,12 @@ export declare class SupportMessageService {
         };
     } & {
         id: string;
+        content: string;
         createdAt: Date;
         updatedAt: Date;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
-        content: string;
         isRead: boolean;
         conversationId: string;
-        readAt: Date | null;
         sentAt: Date;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         senderType: import("@prisma/client").$Enums.SupportSender;
@@ -100,18 +99,18 @@ export declare class SupportMessageService {
         isAIGenerated: boolean;
         aiConfidence: number | null;
         aiSuggestions: import("@prisma/client/runtime/library").JsonValue | null;
+        readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
     })[]>;
     markAsRead(messageId: string): Promise<{
         id: string;
+        content: string;
         createdAt: Date;
         updatedAt: Date;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
-        content: string;
         isRead: boolean;
         conversationId: string;
-        readAt: Date | null;
         sentAt: Date;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         senderType: import("@prisma/client").$Enums.SupportSender;
@@ -120,19 +119,19 @@ export declare class SupportMessageService {
         isAIGenerated: boolean;
         aiConfidence: number | null;
         aiSuggestions: import("@prisma/client/runtime/library").JsonValue | null;
+        readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
     }>;
     markConversationMessagesAsRead(conversationId: string, userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
     updateMessage(messageId: string, content: string): Promise<{
         id: string;
+        content: string;
         createdAt: Date;
         updatedAt: Date;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
-        content: string;
         isRead: boolean;
         conversationId: string;
-        readAt: Date | null;
         sentAt: Date;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         senderType: import("@prisma/client").$Enums.SupportSender;
@@ -141,18 +140,18 @@ export declare class SupportMessageService {
         isAIGenerated: boolean;
         aiConfidence: number | null;
         aiSuggestions: import("@prisma/client/runtime/library").JsonValue | null;
+        readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
     }>;
     delete(id: string): Promise<{
         id: string;
+        content: string;
         createdAt: Date;
         updatedAt: Date;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
-        content: string;
         isRead: boolean;
         conversationId: string;
-        readAt: Date | null;
         sentAt: Date;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         senderType: import("@prisma/client").$Enums.SupportSender;
@@ -161,6 +160,7 @@ export declare class SupportMessageService {
         isAIGenerated: boolean;
         aiConfidence: number | null;
         aiSuggestions: import("@prisma/client/runtime/library").JsonValue | null;
+        readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
     }>;
