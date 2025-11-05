@@ -432,3 +432,124 @@ export interface MenuQueryResponse {
   menuTree?: MenuItem[];
   menuBySlug?: MenuItem;
 }
+
+// ============================================================================
+// ADMIN QUERIES & MUTATIONS
+// ============================================================================
+
+export const GET_MENU_BY_ID_ADMIN = gql`
+  query GetMenuByIdAdmin($id: ID!) {
+    menu(id: $id) {
+      id
+      title
+      slug
+      description
+      type
+      parentId
+      order
+      level
+      url
+      route
+      externalUrl
+      target
+      linkType
+      productId
+      blogPostId
+      pageId
+      categoryId
+      blogCategoryId
+      queryConditions
+      icon
+      badge
+      badgeColor
+      image
+      isActive
+      isVisible
+      cssClass
+    }
+  }
+`;
+
+export const CREATE_MENU_ADMIN = gql`
+  mutation CreateMenuAdmin($input: CreateMenuInput!) {
+    createMenu(input: $input) {
+      id
+      title
+      slug
+    }
+  }
+`;
+
+export const UPDATE_MENU_ADMIN = gql`
+  mutation UpdateMenuAdmin($input: UpdateMenuInput!) {
+    updateMenu(input: $input) {
+      id
+      title
+      slug
+    }
+  }
+`;
+
+export const DELETE_MENU_ADMIN = gql`
+  mutation DeleteMenuAdmin($id: ID!) {
+    deleteMenu(id: $id)
+  }
+`;
+
+// Helper queries for dynamic selectors
+export const GET_PRODUCTS_FOR_MENU = gql`
+  query GetProductsForMenu($search: String, $limit: Int) {
+    products(search: $search, limit: $limit) {
+      items {
+        id
+        name
+        nameEn
+        slug
+      }
+    }
+  }
+`;
+
+export const GET_BLOGS_FOR_MENU = gql`
+  query GetBlogsForMenu($search: String, $limit: Int) {
+    blogs(search: $search, limit: $limit) {
+      items {
+        id
+        title
+        slug
+      }
+    }
+  }
+`;
+
+export const GET_CATEGORIES = gql`
+  query GetCategoriesForMenu {
+    categories {
+      id
+      name
+      slug
+    }
+  }
+`;
+
+export const GET_BLOG_CATEGORIES = gql`
+  query GetBlogCategoriesForMenu {
+    blogCategories {
+      id
+      name
+      slug
+    }
+  }
+`;
+
+export const GET_MENUS_TREE = gql`
+  query GetMenusTree($type: String) {
+    menuTree(type: $type) {
+      id
+      title
+      slug
+      level
+      order
+    }
+  }
+`;

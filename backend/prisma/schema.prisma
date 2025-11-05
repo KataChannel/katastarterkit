@@ -1798,6 +1798,17 @@ enum MenuTarget {
   MODAL // Open in modal
 }
 
+enum MenuLinkType {
+  URL // Custom URL
+  PRODUCT_LIST // List of products with conditions
+  PRODUCT_DETAIL // Single product detail
+  BLOG_LIST // List of blog posts with conditions
+  BLOG_DETAIL // Single blog post detail
+  PAGE // Page builder page
+  CATEGORY // Product category
+  BLOG_CATEGORY // Blog category
+}
+
 model Menu {
   id String @id @default(uuid())
 
@@ -1820,6 +1831,15 @@ model Menu {
   route       String? // Internal route path
   externalUrl String? // External URL
   target      MenuTarget @default(SELF) // Link target
+
+  // Dynamic Linking
+  linkType        MenuLinkType? // Type of dynamic link
+  productId       String? // For PRODUCT_DETAIL
+  blogPostId      String? // For BLOG_DETAIL
+  pageId          String? // For PAGE (page builder)
+  categoryId      String? // For CATEGORY
+  blogCategoryId  String? // For BLOG_CATEGORY
+  queryConditions Json? // For LIST types: { sort: "bestseller", limit: 10, featured: true }
 
   // Display
   icon       String? // Icon name/class (lucide-react icon name)
