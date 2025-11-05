@@ -61,6 +61,9 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
   };
 
   const sectionStyles: React.CSSProperties = {
+    // First apply block.style from Properties Panel
+    ...block.style,
+    // Then override with section-specific styles
     width: '100%',
     backgroundColor: content.backgroundColor || 'transparent',
     backgroundImage: content.backgroundImage ? `url(${content.backgroundImage})` : undefined,

@@ -77,6 +77,9 @@ export const ContainerBlock: React.FC<ContainerBlockProps> = ({
   };
 
   const containerStyles: React.CSSProperties = {
+    // First apply block.style from Properties Panel
+    ...block.style,
+    // Then override with container-specific styles
     display: 'flex',
     flexDirection: content.layout === 'stack' ? 'column' : content.layout === 'wrap' ? 'row' : 'column',
     flexWrap: content.layout === 'wrap' ? 'wrap' : 'nowrap',

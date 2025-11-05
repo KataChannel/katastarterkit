@@ -58,7 +58,11 @@ export const GridBlock: React.FC<GridBlockProps> = ({
   const responsive = content.responsive || { sm: 1, md: 2, lg: cols };
 
   // Grid inline styles (desktop default)
+  // Merge block.style first, then override with grid-specific styles to ensure they take precedence
   const gridStyles: React.CSSProperties = {
+    // First apply block.style from Properties Panel (padding, margin, background, etc.)
+    ...block.style,
+    // Then override with grid-specific styles that must not be changed
     display: 'grid',
     gap: `${content.gap || 16}px`,
     gridTemplateRows: content.rowTemplate || 'auto',
@@ -68,7 +72,10 @@ export const GridBlock: React.FC<GridBlockProps> = ({
     minHeight: children ? 'auto' : '200px',
     border: isEditable ? '2px dashed #cbd5e0' : 'none',
     borderRadius: '8px',
-    padding: isEditable ? '16px' : '0',
+    // Only apply default padding if not set in block.style
+    ...(isEditable && !block.style?.padding && !block.style?.paddingTop && !block.style?.paddingRight && !block.style?.paddingBottom && !block.style?.paddingLeft
+      ? { padding: '16px' }
+      : {}),
   };
 
   // Unique ID for responsive styles

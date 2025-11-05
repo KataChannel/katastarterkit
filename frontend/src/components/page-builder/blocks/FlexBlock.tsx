@@ -53,6 +53,9 @@ export const FlexBlock: React.FC<FlexBlockProps> = ({
   };
 
   const flexStyles: React.CSSProperties = {
+    // First apply block.style from Properties Panel
+    ...block.style,
+    // Then override with flex-specific styles that must not be changed
     display: 'flex',
     flexDirection: content.direction || 'row',
     justifyContent: justifyContentMap[content.justifyContent || 'start'],
@@ -63,7 +66,10 @@ export const FlexBlock: React.FC<FlexBlockProps> = ({
     position: 'relative',
     minHeight: children ? 'auto' : '150px',
     borderRadius: '8px',
-    padding: isEditable ? '16px' : '0',
+    // Only apply default padding if not set in block.style
+    ...(isEditable && !block.style?.padding && !block.style?.paddingTop && !block.style?.paddingRight && !block.style?.paddingBottom && !block.style?.paddingLeft
+      ? { padding: '16px' }
+      : {}),
   };
 
   const settingsPanel = (
