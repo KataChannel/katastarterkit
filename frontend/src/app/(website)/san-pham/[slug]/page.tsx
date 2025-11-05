@@ -210,11 +210,11 @@ export default function ProductDetailPage() {
                   />
                 ))}
                 <span className="ml-2 text-gray-600">
-                  {product.rating.toFixed(1)} ({product.reviewCount} đánh giá)
+                  {product?.rating?.toFixed(1)} ({product?.reviewCount} đánh giá)
                 </span>
               </div>
               <span className="text-gray-400">|</span>
-              <span className="text-gray-600">{product.viewCount} lượt xem</span>
+              <span className="text-gray-600">{product?.viewCount} lượt xem</span>
             </div>
 
             {/* Price */}

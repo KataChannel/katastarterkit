@@ -17,7 +17,12 @@ interface BlogDetailProps {
     slug: string;
     content: string;
     shortDescription: string;
-    author: string;
+    author: {
+      id: string;
+      username: string;
+      firstName: string;
+      lastName: string;
+    };
     thumbnailUrl: string;
     bannerUrl?: string;
     viewCount: number;
@@ -95,7 +100,11 @@ export function BlogDetail({
         <div className="flex flex-wrap gap-4 text-sm text-gray-600 pt-4 pb-4 border-y">
           <div className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            <span>Tác giả: <strong>{blog.author}</strong></span>
+            <span>Tác giả: <strong>
+              {blog.author?.firstName && blog.author?.lastName 
+                ? `${blog.author.firstName} ${blog.author.lastName}`
+                : blog.author?.username || 'Admin'}
+            </strong></span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
@@ -189,7 +198,11 @@ export function BlogDetail({
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-700">
-            <strong>{blog.author}</strong> là tác giả của bài viết này. Hãy theo dõi để cập nhật những bài viết mới nhất.
+            <strong>
+              {blog.author?.firstName && blog.author?.lastName 
+                ? `${blog.author.firstName} ${blog.author.lastName}`
+                : blog.author?.username || 'Admin'}
+            </strong> là tác giả của bài viết này. Hãy theo dõi để cập nhật những bài viết mới nhất.
           </p>
         </CardContent>
       </Card>

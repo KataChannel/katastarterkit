@@ -25,6 +25,25 @@ registerEnumType(BlogSortBy, {
   description: 'Sắp xếp bài viết',
 });
 
+// BlogAuthor Type
+@ObjectType()
+export class BlogAuthorType {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  username: string;
+
+  @Field()
+  firstName: string;
+
+  @Field()
+  lastName: string;
+
+  @Field()
+  email: string;
+}
+
 // BlogTag Type
 @ObjectType()
 export class BlogTagType {
@@ -99,8 +118,8 @@ export class BlogType {
   @Field({ nullable: true })
   excerpt?: string;
 
-  @Field()
-  author: string;
+  @Field(() => BlogAuthorType)
+  author: BlogAuthorType;
 
   @Field({ nullable: true })
   thumbnailUrl?: string;
@@ -126,7 +145,7 @@ export class BlogType {
   @Field()
   isFeatured: boolean;
 
-  @Field()
+  @Field({ defaultValue: false })
   isPublished: boolean;
 
   @Field({ nullable: true })

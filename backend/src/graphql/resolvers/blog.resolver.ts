@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID, Int, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Int, Context, ResolveField, Parent } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { BlogService } from '../../services/blog.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -21,6 +21,15 @@ import {
 @Resolver(() => BlogType)
 export class BlogResolver {
   constructor(private blogService: BlogService) {}
+
+  // ============================================================================
+  // FIELD RESOLVERS
+  // ============================================================================
+
+  @ResolveField(() => Boolean)
+  isPublished(@Parent() blog: any): boolean {
+    return blog.status === 'PUBLISHED';
+  }
 
   // ============================================================================
   // BLOG QUERIES

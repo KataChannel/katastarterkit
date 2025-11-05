@@ -39,7 +39,11 @@ export function CategorySelect({
   return (
     <div className="space-y-2">
       {label && <label className="text-sm font-medium">{label}</label>}
-      <Select value={value} onValueChange={onChange} disabled={disabled || loading}>
+      <Select 
+        value={value || "none"} 
+        onValueChange={(val) => onChange(val === "none" ? "" : val)} 
+        disabled={disabled || loading}
+      >
         <SelectTrigger className="w-full">
           <SelectValue placeholder={loading ? 'Đang tải...' : placeholder} />
         </SelectTrigger>
@@ -51,7 +55,7 @@ export function CategorySelect({
           ) : (
             <>
               {allowEmpty && (
-                <SelectItem value="">
+                <SelectItem value="none">
                   <span className="text-muted-foreground">Không chọn</span>
                 </SelectItem>
               )}

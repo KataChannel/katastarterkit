@@ -15,7 +15,12 @@ interface BlogCardProps {
     slug: string;
     shortDescription: string;
     excerpt?: string;
-    author: string;
+    author: {
+      id: string;
+      username: string;
+      firstName: string;
+      lastName: string;
+    };
     thumbnailUrl: string;
     viewCount: number;
     publishedAt: string;
@@ -102,7 +107,9 @@ export function BlogCard({
           </div>
           <div className="flex items-center gap-1">
             <User className="h-3.5 w-3.5" />
-            {blog.author}
+            {blog.author?.firstName && blog.author?.lastName 
+              ? `${blog.author.firstName} ${blog.author.lastName}`
+              : blog.author?.username || 'Admin'}
           </div>
           <div className="flex items-center gap-1">
             <Eye className="h-3.5 w-3.5" />

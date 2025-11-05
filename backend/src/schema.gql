@@ -508,6 +508,14 @@ enum BlockType {
   VIDEO
 }
 
+type BlogAuthorType {
+  email: String!
+  firstName: String!
+  id: ID!
+  lastName: String!
+  username: String!
+}
+
 type BlogCategoryType {
   createdAt: DateTime!
   description: String
@@ -530,7 +538,7 @@ type BlogTagType {
 }
 
 type BlogType {
-  author: String!
+  author: BlogAuthorType!
   bannerUrl: String
   category: BlogCategoryType
   content: String!

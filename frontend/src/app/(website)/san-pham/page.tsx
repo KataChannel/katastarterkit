@@ -218,7 +218,7 @@ export default function ProductsPage() {
                   {products.map((product: any) => (
                     <Link
                       key={product.id}
-                      href={`/products/${product.slug}`}
+                      href={`/san-pham/${product.slug}`}
                       className="bg-white rounded-lg shadow-sm hover:shadow-md transition group"
                     >
                       {/* Product Image */}
@@ -259,7 +259,7 @@ export default function ProductsPage() {
                               <Star
                                 key={i}
                                 className={`h-4 w-4 ${
-                                  i < Math.floor(product.rating)
+                                  i < Math.floor(product?.rating)
                                     ? 'fill-yellow-400 text-yellow-400'
                                     : 'text-gray-300'
                                 }`}

@@ -25,7 +25,12 @@ export const GET_BLOGS = gql`
         slug
         shortDescription
         excerpt
-        author
+        author {
+          id
+          username
+          firstName
+          lastName
+        }
         thumbnailUrl
         viewCount
         publishedAt
@@ -60,7 +65,12 @@ export const GET_BLOG_BY_SLUG = gql`
       content
       shortDescription
       excerpt
-      author
+      author {
+        id
+        username
+        firstName
+        lastName
+      }
       thumbnailUrl
       bannerUrl
       viewCount
@@ -94,7 +104,12 @@ export const GET_FEATURED_BLOGS = gql`
       slug
       shortDescription
       thumbnailUrl
-      author
+      author {
+        id
+        username
+        firstName
+        lastName
+      }
       publishedAt
       category {
         id
@@ -114,7 +129,12 @@ export const GET_BLOGS_BY_CATEGORY = gql`
         slug
         shortDescription
         excerpt
-        author
+        author {
+          id
+          username
+          firstName
+          lastName
+        }
         thumbnailUrl
         viewCount
         publishedAt
@@ -142,7 +162,12 @@ export const GET_RELATED_BLOGS = gql`
       slug
       shortDescription
       thumbnailUrl
-      author
+      author {
+        id
+        username
+        firstName
+        lastName
+      }
       publishedAt
       viewCount
       category {
@@ -184,6 +209,13 @@ export interface BlogTag {
   slug: string;
 }
 
+export interface BlogAuthor {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+}
+
 export interface Blog {
   id: string;
   title: string;
@@ -191,7 +223,7 @@ export interface Blog {
   content: string;
   shortDescription: string;
   excerpt?: string;
-  author: string;
+  author: BlogAuthor;
   thumbnailUrl: string;
   bannerUrl?: string;
   viewCount: number;
