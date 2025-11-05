@@ -104,7 +104,21 @@ export class PageService {
       },
       include: {
         blocks: {
-          orderBy: { order: 'asc' }
+          where: { parentId: null }, // Only get root-level blocks
+          orderBy: { order: 'asc' },
+          include: {
+            children: {
+              orderBy: { order: 'asc' },
+              include: {
+                children: {
+                  orderBy: { order: 'asc' },
+                  include: {
+                    children: true // Support up to 4 levels of nesting
+                  }
+                }
+              }
+            }
+          }
         }
       }
     });
@@ -342,7 +356,21 @@ export class PageService {
       },
       include: {
         blocks: {
-          orderBy: { order: 'asc' }
+          where: { parentId: null }, // Only get root-level blocks
+          orderBy: { order: 'asc' },
+          include: {
+            children: {
+              orderBy: { order: 'asc' },
+              include: {
+                children: {
+                  orderBy: { order: 'asc' },
+                  include: {
+                    children: true // Support up to 4 levels of nesting
+                  }
+                }
+              }
+            }
+          }
         }
       }
     });
@@ -550,7 +578,21 @@ export class PageService {
       },
       include: {
         blocks: {
-          orderBy: { order: 'asc' }
+          where: { parentId: null }, // Only get root-level blocks
+          orderBy: { order: 'asc' },
+          include: {
+            children: {
+              orderBy: { order: 'asc' },
+              include: {
+                children: {
+                  orderBy: { order: 'asc' },
+                  include: {
+                    children: true // Support up to 4 levels of nesting
+                  }
+                }
+              }
+            }
+          }
         }
       }
     });

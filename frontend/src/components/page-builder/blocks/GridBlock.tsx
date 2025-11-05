@@ -76,11 +76,16 @@ export const GridBlock: React.FC<GridBlockProps> = ({
 
   if (!isEditable) {
     return (
-      <>
-        <div style={gridStyles} className={gridId}>
-          {children}
-        </div>
+      <div style={gridStyles} className={gridId}>
+        {children}
         <style jsx>{`
+          .${gridId} {
+            display: grid;
+            gap: ${content.gap || 16}px;
+            grid-template-rows: ${content.rowTemplate || 'auto'};
+            grid-template-columns: ${content.columnTemplate || `repeat(${cols}, 1fr)`};
+            width: 100%;
+          }
           @media (max-width: 640px) {
             .${gridId} {
               grid-template-columns: repeat(${responsive.sm || 1}, 1fr) !important;
@@ -92,13 +97,12 @@ export const GridBlock: React.FC<GridBlockProps> = ({
             }
           }
         `}</style>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <div style={gridStyles} className={`group ${gridId}`}>
+    <div style={gridStyles} className={`group ${gridId}`}>
       {/* Control Bar */}
       {isEditable && (
         <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -379,21 +383,27 @@ export const GridBlock: React.FC<GridBlockProps> = ({
           )}
         </div>
       )}
-    </div>
 
-    {/* Responsive CSS */}
-    <style jsx>{`
-      @media (max-width: 640px) {
+      {/* Responsive CSS */}
+      <style jsx>{`
         .${gridId} {
-          grid-template-columns: repeat(${responsive.sm || 1}, 1fr) !important;
+          display: grid;
+          gap: ${content.gap || 16}px;
+          grid-template-rows: ${content.rowTemplate || 'auto'};
+          grid-template-columns: ${content.columnTemplate || `repeat(${cols}, 1fr)`};
+          width: 100%;
         }
-      }
-      @media (min-width: 641px) and (max-width: 1024px) {
-        .${gridId} {
-          grid-template-columns: repeat(${responsive.md || 2}, 1fr) !important;
+        @media (max-width: 640px) {
+          .${gridId} {
+            grid-template-columns: repeat(${responsive.sm || 1}, 1fr) !important;
+          }
         }
-      }
-    `}</style>
-  </>
+        @media (min-width: 641px) and (max-width: 1024px) {
+          .${gridId} {
+            grid-template-columns: repeat(${responsive.md || 2}, 1fr) !important;
+          }
+        }
+      `}</style>
+    </div>
   );
 };

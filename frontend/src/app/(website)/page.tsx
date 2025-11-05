@@ -68,14 +68,15 @@ export default function WebsitePage() {
               {[...page.blocks]
                 .sort((a, b) => (a.order || 0) - (b.order || 0))
                 .map((block) => (
-                  <div key={block.id} className="w-full">
-                    <BlockRenderer
-                      block={block}
-                      isEditing={false}
-                      onUpdate={() => {}} // No editing in public view
-                      onDelete={() => {}} // No deletion in public view
-                    />
-                  </div>
+                  <BlockRenderer
+                    key={block.id}
+                    block={block}
+                    isEditing={false}
+                    onUpdate={() => {}} // No editing in public view
+                    onDelete={() => {}} // No deletion in public view
+                    onUpdateChild={() => {}} // Required for rendering nested blocks
+                    onDeleteChild={() => {}} // Required for rendering nested blocks
+                  />
                 ))}
             </div>
           ) : (
