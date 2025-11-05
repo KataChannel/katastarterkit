@@ -10,15 +10,18 @@ import {
   X,
   Send,
   Paperclip,
-  Smile,
-  Phone,
-  Video,
-  MoreVertical,
   ChevronDown,
   CheckCheck,
   Bot,
   User,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 interface Message {
   id: string;
@@ -225,275 +228,325 @@ export default function SupportChatWidget({
   };
 
   const positionClasses = position === 'bottom-right' 
-    ? 'right-4 md:right-6' 
-    : 'left-4 md:left-6';
+    ? 'right-4 sm:right-6' 
+    : 'left-4 sm:left-6';
 
   return (
     <>
-      {/* Chat Button */}
+      {/* Chat Button - Shadcn UI Button with Motion */}
       <AnimatePresence>
         {!isOpen && (
-          <motion.button
+          <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsOpen(true)}
-            className={`fixed bottom-4 md:bottom-6 ${positionClasses} z-50 w-14 h-14 md:w-16 md:h-16 rounded-full shadow-2xl flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-opacity-50`}
-            style={{
-              backgroundColor: primaryColor,
-              boxShadow: `0 10px 40px rgba(0, 0, 0, 0.2), 0 0 0 4px ${primaryColor}20`,
-            }}
-          >
-            <MessageCircle className="w-6 h-6 md:w-8 md:h-8 text-white" />
-            {unreadCount > 0 && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center"
-              >
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </motion.div>
+            className={cn(
+              "fixed bottom-4 sm:bottom-6 z-50",
+              positionClasses
             )}
-          </motion.button>
+          >
+            <Button
+              size="lg"
+              className={cn(
+                "relative h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl text-white border-0",
+                "hover:scale-110 active:scale-95 transition-transform hover:opacity-90",
+                "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)]"
+              )}
+              style={{ '--chat-primary': primaryColor } as React.CSSProperties}
+              onClick={() => setIsOpen(true)}
+            >
+              <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8" />
+              {unreadCount > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs font-bold"
+                >
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </Badge>
+              )}
+            </Button>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Chat Window */}
+      {/* Chat Window - Shadcn UI Card */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ 
-              opacity: 1, 
-              y: 0, 
-              scale: 1,
-              height: isMinimized ? 'auto' : undefined,
-            }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`fixed bottom-4 md:bottom-6 ${positionClasses} z-50 w-[calc(100vw-2rem)] md:w-96 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col`}
+            className={cn(
+              "fixed bottom-4 sm:bottom-6 z-50",
+              "w-[calc(100vw-2rem)] sm:w-96",
+              positionClasses
+            )}
             style={{
-              maxHeight: isMinimized ? '60px' : 'calc(100vh - 8rem)',
+              maxHeight: isMinimized ? '64px' : 'calc(100vh - 8rem)',
               height: isMinimized ? 'auto' : '600px',
             }}
           >
-            {/* Header */}
-            <div
-              className="p-4 flex items-center justify-between text-white relative overflow-hidden"
-              style={{ backgroundColor: primaryColor }}
-            >
-              {/* Animated background */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute w-32 h-32 bg-white rounded-full -top-10 -left-10 animate-pulse" />
-                <div className="absolute w-24 h-24 bg-white rounded-full -bottom-5 -right-5 animate-pulse delay-300" />
-              </div>
-
-              <div className="flex items-center space-x-3 relative z-10">
-                <div className="relative">
-                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    {agentInfo?.avatar ? (
-                      <img 
-                        src={agentInfo.avatar} 
-                        alt={agentInfo.name}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <Bot className="w-6 h-6" />
-                    )}
-                  </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
+            <Card className="h-full flex flex-col shadow-2xl border-0">
+              {/* Header - Shadcn CardHeader */}
+              <CardHeader
+                className="p-4 text-white relative overflow-hidden cursor-pointer"
+                style={{ backgroundColor: primaryColor }}
+                onClick={() => setIsMinimized(!isMinimized)}
+              >
+                {/* Animated background */}
+                <div className="absolute inset-0 opacity-10 pointer-events-none">
+                  <div className="absolute w-32 h-32 bg-white rounded-full -top-10 -left-10 animate-pulse" />
+                  <div className="absolute w-24 h-24 bg-white rounded-full -bottom-5 -right-5 animate-pulse" 
+                       style={{ animationDelay: '300ms' }} />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-sm">
-                    {agentInfo ? agentInfo.name : 'Hỗ trợ khách hàng'}
-                  </h3>
-                  <p className="text-xs opacity-90">
-                    {isTyping ? 'Đang nhập...' : 'Trực tuyến'}
-                  </p>
-                </div>
-              </div>
 
-              <div className="flex items-center space-x-2 relative z-10">
-                <button
-                  onClick={() => setIsMinimized(!isMinimized)}
-                  className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
-                >
-                  <ChevronDown 
-                    className={`w-5 h-5 transition-transform ${isMinimized ? 'rotate-180' : ''}`} 
-                  />
-                </button>
-                <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    setUnreadCount(0);
-                  }}
-                  className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {!isMinimized && (
-              <>
-                {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-                  {showNameInput ? (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-white rounded-xl p-6 shadow-sm"
-                    >
-                      <h4 className="font-semibold mb-2 text-gray-900">
-                        Chào mừng bạn! 👋
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Vui lòng cho chúng tôi biết tên của bạn để bắt đầu hội thoại.
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-10 w-10 border-2 border-white/20">
+                      <AvatarImage src={agentInfo?.avatar} alt={agentInfo?.name} />
+                      <AvatarFallback className="bg-white/20">
+                        <Bot className="h-5 w-5" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-semibold text-sm leading-tight">
+                        {agentInfo?.name || 'Hỗ trợ khách hàng'}
+                      </h3>
+                      <p className="text-xs opacity-90">
+                        {isTyping ? 'Đang nhập...' : 'Trực tuyến'}
                       </p>
-                      <input
-                        type="text"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && startConversation()}
-                        placeholder="Nhập tên của bạn..."
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none mb-3"
-                      />
-                      <button
-                        onClick={startConversation}
-                        disabled={!customerName.trim()}
-                        className="w-full py-2 rounded-lg font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-                        style={{ backgroundColor: primaryColor }}
-                      >
-                        Bắt đầu chat
-                      </button>
-                    </motion.div>
-                  ) : (
-                    messages.map((message, index) => (
-                      <motion.div
-                        key={message.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className={`flex ${message.senderType === 'CUSTOMER' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
-                            message.senderType === 'CUSTOMER'
-                              ? 'text-white rounded-br-sm'
-                              : 'bg-white text-gray-900 rounded-bl-sm shadow-sm'
-                          }`}
-                          style={{
-                            backgroundColor: message.senderType === 'CUSTOMER' ? primaryColor : undefined,
-                          }}
-                        >
-                          {message.senderType !== 'CUSTOMER' && (
-                            <div className="flex items-center space-x-1 mb-1">
-                              {message.isAIGenerated ? (
-                                <Bot className="w-3 h-3 text-blue-500" />
-                              ) : (
-                                <User className="w-3 h-3 text-gray-500" />
-                              )}
-                              <span className="text-xs font-medium text-gray-600">
-                                {message.senderName}
-                              </span>
-                            </div>
-                          )}
-                          <p className="text-sm leading-relaxed">{message.content}</p>
-                          <div className="flex items-center justify-end space-x-1 mt-1">
-                            <span className={`text-xs ${message.senderType === 'CUSTOMER' ? 'text-white/70' : 'text-gray-400'}`}>
-                              {new Date(message.sentAt).toLocaleTimeString('vi-VN', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                            {message.senderType === 'CUSTOMER' && (
-                              <CheckCheck
-                                className={`w-3.5 h-3.5 ${message.isRead ? 'text-blue-300' : 'text-white/50'}`}
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))
-                  )}
-
-                  {isTyping && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex justify-start"
-                    >
-                      <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  <div ref={messagesEndRef} />
-                </div>
-
-                {/* Input Area */}
-                {!showNameInput && (
-                  <div className="p-4 bg-white border-t border-gray-200">
-                    <div className="flex items-end space-x-2">
-                      <button
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
-                        title="Đính kèm file"
-                      >
-                        <Paperclip className="w-5 h-5 text-gray-500" />
-                      </button>
-
-                      <div className="flex-1 relative">
-                        <input
-                          ref={inputRef}
-                          type="text"
-                          value={inputMessage}
-                          onChange={(e) => {
-                            setInputMessage(e.target.value);
-                            handleTyping();
-                          }}
-                          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                          placeholder="Nhập tin nhắn..."
-                          className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
-                        />
-                      </div>
-
-                      <button
-                        onClick={sendMessage}
-                        disabled={!inputMessage.trim()}
-                        className="p-2.5 rounded-xl text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 flex-shrink-0"
-                        style={{ backgroundColor: primaryColor }}
-                      >
-                        <Send className="w-5 h-5" />
-                      </button>
                     </div>
+                  </div>
 
-                    {/* Quick Replies */}
-                    <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-white hover:bg-white/20"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMinimized(!isMinimized);
+                      }}
+                    >
+                      <ChevronDown 
+                        className={cn(
+                          "h-5 w-5 transition-transform",
+                          isMinimized && "rotate-180"
+                        )} 
+                      />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-white hover:bg-white/20"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsOpen(false);
+                        setUnreadCount(0);
+                      }}
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+
+              {!isMinimized && (
+                <>
+                  {/* Messages Area - Shadcn ScrollArea */}
+                  <CardContent className="flex-1 p-0">
+                    <ScrollArea className="h-full px-4 py-4">
+                      {showNameInput ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                        >
+                          <Card className="p-6 border-0 shadow-sm">
+                            <h4 className="font-semibold mb-2 text-foreground">
+                              Chào mừng bạn! 👋
+                            </h4>
+                            <p className="text-sm text-muted-foreground mb-4">
+                              Vui lòng cho chúng tôi biết tên của bạn để bắt đầu hội thoại.
+                            </p>
+                            <Input
+                              type="text"
+                              value={customerName}
+                              onChange={(e) => setCustomerName(e.target.value)}
+                              onKeyPress={(e) => e.key === 'Enter' && startConversation()}
+                              placeholder="Nhập tên của bạn..."
+                              className="mb-3"
+                            />
+                            <Button
+                              onClick={startConversation}
+                              disabled={!customerName.trim()}
+                              className={cn(
+                                "w-full text-white border-0",
+                                "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90"
+                              )}
+                              style={{ '--chat-primary': primaryColor } as React.CSSProperties}
+                            >
+                              Bắt đầu chat
+                            </Button>
+                          </Card>
+                        </motion.div>
+                      ) : (
+                        <div className="space-y-4">
+                          {messages.map((message, index) => (
+                            <motion.div
+                              key={message.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className={cn(
+                                "flex",
+                                message.senderType === 'CUSTOMER' ? 'justify-end' : 'justify-start'
+                              )}
+                            >
+                              <div
+                                className={cn(
+                                  "max-w-[80%] rounded-2xl px-4 py-2.5",
+                                  message.senderType === 'CUSTOMER'
+                                    ? 'text-white rounded-br-sm'
+                                    : 'bg-muted text-foreground rounded-bl-sm'
+                                )}
+                                style={{
+                                  backgroundColor: message.senderType === 'CUSTOMER' ? primaryColor : undefined,
+                                }}
+                              >
+                                {message.senderType !== 'CUSTOMER' && (
+                                  <div className="flex items-center space-x-1 mb-1">
+                                    {message.isAIGenerated ? (
+                                      <Bot className="h-3 w-3 text-primary" />
+                                    ) : (
+                                      <User className="h-3 w-3 text-muted-foreground" />
+                                    )}
+                                    <span className="text-xs font-medium text-muted-foreground">
+                                      {message.senderName}
+                                    </span>
+                                  </div>
+                                )}
+                                <p className="text-sm leading-relaxed">{message.content}</p>
+                                <div className="flex items-center justify-end space-x-1 mt-1">
+                                  <span className={cn(
+                                    "text-xs",
+                                    message.senderType === 'CUSTOMER' ? 'text-white/70' : 'text-muted-foreground'
+                                  )}>
+                                    {new Date(message.sentAt).toLocaleTimeString('vi-VN', {
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })}
+                                  </span>
+                                  {message.senderType === 'CUSTOMER' && (
+                                    <CheckCheck
+                                      className={cn(
+                                        "h-3.5 w-3.5",
+                                        message.isRead ? 'text-blue-300' : 'text-white/50'
+                                      )}
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+
+                          {isTyping && (
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="flex justify-start"
+                            >
+                              <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3">
+                                <div className="flex space-x-1">
+                                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" />
+                                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" 
+                                       style={{ animationDelay: '150ms' }} />
+                                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" 
+                                       style={{ animationDelay: '300ms' }} />
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+
+                          <div ref={messagesEndRef} />
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </CardContent>
+
+                  {/* Input Area - Shadcn UI Components */}
+                  {!showNameInput && (
+                    <div className="p-4 border-t bg-background">
+                      <div className="flex items-end space-x-2">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="flex-shrink-0"
+                          title="Đính kèm file"
+                        >
+                          <Paperclip className="h-5 w-5" />
+                        </Button>
+
+                        <div className="flex-1">
+                          <Input
+                            ref={inputRef}
+                            type="text"
+                            value={inputMessage}
+                            onChange={(e) => {
+                              setInputMessage(e.target.value);
+                              handleTyping();
+                            }}
+                            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                            placeholder="Nhập tin nhắn..."
+                            className="rounded-xl"
+                          />
+                        </div>
+
+                        <Button
+                          size="icon"
+                          onClick={sendMessage}
+                          disabled={!inputMessage.trim()}
+                          className={cn(
+                            "flex-shrink-0 rounded-xl text-white border-0",
+                            "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90"
+                          )}
+                          style={{ '--chat-primary': primaryColor } as React.CSSProperties}
+                        >
+                          <Send className="h-5 w-5" />
+                        </Button>
+                      </div>
+
+                      {/* Quick Replies */}
                       {messages.length === 1 && (
-                        <>
-                          <button className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="h-auto py-1.5 px-3 text-xs rounded-full"
+                          >
                             💰 Giá sản phẩm
-                          </button>
-                          <button className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="h-auto py-1.5 px-3 text-xs rounded-full"
+                          >
                             📦 Theo dõi đơn hàng
-                          </button>
-                          <button className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="h-auto py-1.5 px-3 text-xs rounded-full"
+                          >
                             🚚 Vận chuyển
-                          </button>
-                        </>
+                          </Button>
+                        </div>
                       )}
                     </div>
-                  </div>
-                )}
-              </>
-            )}
+                  )}
+                </>
+              )}
+            </Card>
           </motion.div>
         )}
       </AnimatePresence>

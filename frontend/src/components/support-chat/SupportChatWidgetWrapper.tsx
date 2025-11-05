@@ -18,16 +18,16 @@ const GET_SUPPORT_CHAT_SETTINGS = gql`
 
 interface SupportChatSettings {
   enabled: boolean;
-  position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
-  primaryColor: string;
-  welcomeMessage: string;
-  offlineMessage: string;
-  aiEnabled: boolean;
-  showAgentTyping: boolean;
-  enableFileUpload: boolean;
-  enableEmojis: boolean;
-  soundNotification: boolean;
-  desktopNotification: boolean;
+  widget_position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+  primary_color: string;
+  welcome_message: string;
+  offline_message: string;
+  ai_enabled: boolean;
+  show_agent_typing: boolean;
+  enable_file_upload: boolean;
+  enable_emojis: boolean;
+  sound_notification: boolean;
+  desktop_notification: boolean;
 }
 
 export default function SupportChatWidgetWrapper() {
@@ -37,9 +37,10 @@ export default function SupportChatWidgetWrapper() {
 
   const settings = data?.websiteSettings || [];
   
-  // Parse settings into object
+  // Parse settings into object with proper key mapping
   const config: Partial<SupportChatSettings> = {};
   settings.forEach((setting: any) => {
+    // Remove 'support_chat.' prefix to get the actual key
     const key = setting.key.replace('support_chat.', '');
     let value = setting.value;
 
@@ -54,6 +55,9 @@ export default function SupportChatWidgetWrapper() {
       } catch (e) {
         console.error('Failed to parse JSON setting:', key, value);
       }
+    } else if (setting.type === 'COLOR') {
+      // Ensure color value is valid
+      value = value || '#16a34a';
     }
 
     config[key as keyof SupportChatSettings] = value;
@@ -62,6 +66,16 @@ export default function SupportChatWidgetWrapper() {
   // Nếu disabled, không render widget
   if (config.enabled === false) {
     return null;
+  }
+
+  // Debug: Log config để kiểm tra
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔧 Support Chat Config:', {
+      enabled: config.enabled,
+      primary_color: config.primary_color,
+      widget_position: config.widget_position,
+      raw_settings: settings
+    });
   }
 
   // Get API URLs from env
@@ -74,8 +88,8 @@ export default function SupportChatWidgetWrapper() {
     <SupportChatWidget
       apiUrl={apiUrl}
       websocketUrl={websocketUrl}
-      primaryColor={config.primaryColor || '#16a34a'}
-      position={(config.position as 'bottom-right' | 'bottom-left') || 'bottom-right'}
+      primaryColor={config.primary_color || '#16a34a'}
+      position={(config.widget_position as 'bottom-right' | 'bottom-left') || 'bottom-right'}
     />
   );
 }
