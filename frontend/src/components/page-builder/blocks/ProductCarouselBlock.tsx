@@ -9,7 +9,7 @@ import { useQuery } from '@apollo/client';
 import { GET_PRODUCTS } from '@/graphql/product.queries';
 import { useDynamicQuery } from '@/lib/graphql/dynamic-hooks';
 import { ProductCarouselSettingsDialog } from './ProductCarouselSettingsDialog';
-import Image from 'next/image';
+import { ProductImage } from '@/components/ui/product-image';
 import Link from 'next/link';
 
 interface ProductCarouselBlockProps {
@@ -259,6 +259,12 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
     return product.slug || product.ma || product.id;
   };
 
+  const getProductUrl = (product: Product) => {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+    const slug = getProductSlug(product);
+    return `${baseUrl}/san-pham/${slug}`;
+  };
+
   const handleImagePreview = (product: Product, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -361,18 +367,12 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
                   <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
                     {/* Product Image */}
                     <div className="relative aspect-square bg-gray-200">
-                      {getProductImage(product) ? (
-                        <Image
-                          src={getProductImage(product)}
-                          alt={getProductName(product)}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400">
-                          <ShoppingCart className="w-12 h-12" />
-                        </div>
-                      )}
+                      <ProductImage
+                        src={getProductImage(product)}
+                        alt={getProductName(product)}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                       
                       {/* Quick View Button - Eye Icon */}
                       {getProductImage(product) && (
@@ -390,7 +390,7 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
                     <div className="p-4">
                       {/* Product Name - Clickable to detail page */}
                       <Link 
-                        href={`/san-pham/${getProductSlug(product)}`}
+                        href={getProductUrl(product)}
                         className="block hover:text-primary transition-colors"
                       >
                         <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3rem] hover:text-primary">
@@ -534,14 +534,13 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
           </button>
           
           <div className="relative w-full h-[70vh]">
-            {imagePreview.src && (
-              <Image
-                src={imagePreview.src}
-                alt={imagePreview.alt}
-                fill
-                className="object-contain"
-              />
-            )}
+            <ProductImage
+              src={imagePreview.src}
+              alt={imagePreview.alt}
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
         </DialogContent>
       </Dialog>

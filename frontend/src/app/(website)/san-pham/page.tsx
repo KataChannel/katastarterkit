@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import Link from 'next/link';
-import Image from 'next/image';
 import { GET_PRODUCTS, GET_PRODUCT_CATEGORIES } from '@/graphql/ecommerce.queries';
 import { ShoppingCart, Heart, Star, ChevronDown, Filter, Search } from 'lucide-react';
+import { ProductImage } from '@/components/ui/product-image';
 
 export default function ProductsPage() {
   const [page, setPage] = useState(1);
@@ -218,24 +218,24 @@ export default function ProductsPage() {
                   {products.map((product: any) => (
                     <Link
                       key={product.id}
-                      href={`/san-pham/${product.slug}`}
+                      href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/san-pham/${product.slug}`}
                       className="bg-white rounded-lg shadow-sm hover:shadow-md transition group"
                     >
                       {/* Product Image */}
                       <div className="relative aspect-square overflow-hidden rounded-t-lg">
-                        <Image
-                          src={product.featuredImage || '/placeholder-product.jpg'}
+                        <ProductImage
+                          src={product.featuredImage}
                           alt={product.name}
                           fill
                           className="object-cover group-hover:scale-105 transition duration-300"
                         />
                         {product.discount > 0 && (
-                          <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-bold">
+                          <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-bold z-10">
                             -{product.discount}%
                           </span>
                         )}
                         {product.isFeatured && (
-                          <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-bold">
+                          <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-bold z-10">
                             HOT
                           </span>
                         )}

@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { GET_PRODUCT_BY_SLUG, ADD_TO_CART, GET_CART } from '@/graphql/ecommerce.queries';
+import { ProductImage } from '@/components/ui/product-image';
 import {
   ShoppingCart,
   Heart,
@@ -156,17 +156,15 @@ export default function ProductDetailPage() {
           <div>
             {/* Main Image */}
             <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-gray-100">
-              {images[selectedImage] && (
-                <Image
-                  src={images[selectedImage]}
-                  alt={product.name}
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              )}
+              <ProductImage
+                src={images[selectedImage]}
+                alt={product.name}
+                fill
+                className="object-contain"
+                priority
+              />
               {product.discount > 0 && (
-                <span className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-md font-bold">
+                <span className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-md font-bold z-10">
                   -{product.discount}%
                 </span>
               )}
@@ -185,7 +183,7 @@ export default function ProductDetailPage() {
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <Image src={image} alt={`${product.name} ${index + 1}`} fill className="object-cover" />
+                    <ProductImage src={image} alt={`${product.name} ${index + 1}`} fill className="object-cover" />
                   </button>
                 ))}
               </div>
@@ -408,8 +406,8 @@ export default function ProductDetailPage() {
                   className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-4"
                 >
                   <div className="relative aspect-square rounded-md overflow-hidden mb-3">
-                    <Image
-                      src={related.featuredImage || '/placeholder-product.jpg'}
+                    <ProductImage
+                      src={related.featuredImage}
                       alt={related.name}
                       fill
                       className="object-cover"
