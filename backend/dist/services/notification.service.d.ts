@@ -2,58 +2,10 @@ import { PrismaService } from '../prisma/prisma.service';
 export declare class NotificationService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    createTaskAssignedNotification(taskId: string, assignedUserId: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        data: import("@prisma/client/runtime/library").JsonValue | null;
-        userId: string;
-        title: string;
-        message: string;
-        type: string;
-        taskId: string | null;
-        isRead: boolean;
-        mentionedBy: string | null;
-    }>;
-    createTaskCompletedNotification(taskId: string, userId: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        data: import("@prisma/client/runtime/library").JsonValue | null;
-        userId: string;
-        title: string;
-        message: string;
-        type: string;
-        taskId: string | null;
-        isRead: boolean;
-        mentionedBy: string | null;
-    }[]>;
-    createTaskCommentNotification(taskId: string, commentAuthorId: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        data: import("@prisma/client/runtime/library").JsonValue | null;
-        userId: string;
-        title: string;
-        message: string;
-        type: string;
-        taskId: string | null;
-        isRead: boolean;
-        mentionedBy: string | null;
-    }[]>;
-    findByUserId(userId: string, limit?: number): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        data: import("@prisma/client/runtime/library").JsonValue | null;
-        userId: string;
-        title: string;
-        message: string;
-        type: string;
-        taskId: string | null;
-        isRead: boolean;
-        mentionedBy: string | null;
-    }[]>;
-    markAsRead(notificationId: string, userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
-    markAllAsRead(userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
+    createTaskAssignedNotification(taskId: string, assignedUserId: string): Promise<any>;
+    createTaskCompletedNotification(taskId: string, userId: string): Promise<any>;
+    createTaskCommentNotification(taskId: string, commentAuthorId: string): Promise<any>;
+    findByUserId(userId: string, limit?: number): Promise<any>;
+    markAsRead(notificationId: string, userId: string): Promise<any>;
+    markAllAsRead(userId: string): Promise<any>;
 }

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TaskResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -528,8 +529,6 @@ exports.TaskResolver = TaskResolver = __decorate([
         task_media_service_1.TaskMediaService,
         notification_service_1.NotificationService,
         user_service_1.UserService,
-        pubsub_service_1.PubSubService,
-        task_data_loader_service_1.TaskDataLoaderService,
-        cache_invalidation_service_1.CacheInvalidationService])
+        pubsub_service_1.PubSubService, typeof (_a = typeof task_data_loader_service_1.TaskDataLoaderService !== "undefined" && task_data_loader_service_1.TaskDataLoaderService) === "function" ? _a : Object, cache_invalidation_service_1.CacheInvalidationService])
 ], TaskResolver);
 //# sourceMappingURL=task.resolver.js.map

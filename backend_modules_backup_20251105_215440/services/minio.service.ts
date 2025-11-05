@@ -1,0 +1,332 @@
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import * as Minio from 'minio';
+import { ConfigService } from '@nestjs/config';
+import { Readable } from 'stream';
+
+export interface UploadResult {
+  filename: string;
+  url: string;
+  size: number;
+  mimeType: string;
+  bucket: string;
+  path: string;
+  etag: string;
+}
+
+@Injectable()
+export class MinioService implements OnModuleInit {
+  private readonly logger = new Logger(MinioService.name);
+  private minioClient: Minio.Client;
+  private readonly bucketName: string;
+  private readonly endpoint: string;
+  private readonly port: number;
+  private readonly useSSL: boolean;
+  private readonly publicUrl: string;
+
+  constructor(private configService: ConfigService) {
+    // Determine if running in Docker
+    const isDocker = process.env.DOCKER_NETWORK_NAME !== undefined;
+    
+    this.endpoint = isDocker 
+      ? this.configService.get<string>('DOCKER_MINIO_ENDPOINT', 'minio')
+      : this.configService.get<string>('MINIO_ENDPOINT', '116.118.49.243');
+    
+    // Always use configured port from .env
+    const portConfig = isDocker
+      ? this.configService.get<string>('DOCKER_MINIO_PORT', '9000')
+      : this.configService.get<string>('MINIO_PORT', '12007');
+    this.port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
+    
+    this.useSSL = this.configService.get<string>('MINIO_USE_SSL', 'false') === 'true';
+    this.bucketName = this.configService.get<string>('MINIO_BUCKET_NAME', 'uploads');
+
+    // Public URL for file access
+    const protocol = this.useSSL ? 'https' : 'http';
+    const publicEndpoint = this.configService.get<string>('MINIO_PUBLIC_ENDPOINT', this.endpoint);
+    const publicPort = this.configService.get<string>('MINIO_PUBLIC_PORT', String(this.port));
+    this.publicUrl = `${protocol}://${publicEndpoint}:${publicPort}`;
+
+    this.minioClient = new Minio.Client({
+      endPoint: this.endpoint,
+      port: this.port,
+      useSSL: this.useSSL,
+      accessKey: this.configService.get<string>('MINIO_ACCESS_KEY', 'minioadmin'),
+      secretKey: this.configService.get<string>('MINIO_SECRET_KEY', 'minioadmin'),
+    });
+
+    this.logger.log(`MinIO configured: ${this.endpoint}:${this.port} (SSL: ${this.useSSL})`);
+  }
+
+  async onModuleInit() {
+    await this.ensureBucketExists();
+  }
+
+  /**
+   * Ensure the default bucket exists
+   */
+  private async ensureBucketExists(): Promise<void> {
+    try {
+      const exists = await this.minioClient.bucketExists(this.bucketName);
+      if (!exists) {
+        await this.minioClient.makeBucket(this.bucketName, 'us-east-1');
+        this.logger.log(`Bucket '${this.bucketName}' created successfully`);
+
+        // Set bucket policy to public read
+        const policy = {
+          Version: '2012-10-17',
+          Statement: [
+            {
+              Effect: 'Allow',
+              Principal: { AWS: ['*'] },
+              Action: ['s3:GetObject'],
+              Resource: [`arn:aws:s3:::${this.bucketName}/*`],
+            },
+          ],
+        };
+        await this.minioClient.setBucketPolicy(
+          this.bucketName,
+          JSON.stringify(policy),
+        );
+        this.logger.log(`Bucket '${this.bucketName}' policy set to public read`);
+      } else {
+        this.logger.log(`Bucket '${this.bucketName}' already exists`);
+      }
+    } catch (error) {
+      this.logger.error(`Error ensuring bucket exists: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Upload a file from buffer
+   */
+  async uploadFile(
+    file: Express.Multer.File,
+    folder: string = 'general',
+  ): Promise<UploadResult> {
+    try {
+      // Generate unique filename
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 15);
+      const ext = file.originalname.split('.').pop();
+      const filename = `${timestamp}-${randomStr}.${ext}`;
+      const objectPath = `${folder}/${filename}`;
+
+      // Upload to MinIO
+      const metaData = {
+        'Content-Type': file.mimetype,
+        'X-Original-Name': file.originalname,
+      };
+
+      const result = await this.minioClient.putObject(
+        this.bucketName,
+        objectPath,
+        file.buffer,
+        file.size,
+        metaData,
+      );
+
+      const url = `${this.publicUrl}/${this.bucketName}/${objectPath}`;
+
+      this.logger.log(`File uploaded: ${objectPath} (${file.size} bytes)`);
+
+      return {
+        filename,
+        url,
+        size: file.size,
+        mimeType: file.mimetype,
+        bucket: this.bucketName,
+        path: objectPath,
+        etag: result.etag,
+      };
+    } catch (error) {
+      this.logger.error(`Error uploading file: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Upload from stream
+   */
+  async uploadStream(
+    stream: Readable,
+    filename: string,
+    mimeType: string,
+    size: number,
+    folder: string = 'general',
+  ): Promise<UploadResult> {
+    try {
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 15);
+      const ext = filename.split('.').pop();
+      const newFilename = `${timestamp}-${randomStr}.${ext}`;
+      const objectPath = `${folder}/${newFilename}`;
+
+      const metaData = {
+        'Content-Type': mimeType,
+        'X-Original-Name': filename,
+      };
+
+      const result = await this.minioClient.putObject(
+        this.bucketName,
+        objectPath,
+        stream,
+        size,
+        metaData,
+      );
+
+      const url = `${this.publicUrl}/${this.bucketName}/${objectPath}`;
+
+      this.logger.log(`Stream uploaded: ${objectPath} (${size} bytes)`);
+
+      return {
+        filename: newFilename,
+        url,
+        size,
+        mimeType,
+        bucket: this.bucketName,
+        path: objectPath,
+        etag: result.etag,
+      };
+    } catch (error) {
+      this.logger.error(`Error uploading stream: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a file
+   */
+  async deleteFile(objectPath: string): Promise<void> {
+    try {
+      await this.minioClient.removeObject(this.bucketName, objectPath);
+      this.logger.log(`File deleted: ${objectPath}`);
+    } catch (error) {
+      this.logger.error(`Error deleting file: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Get file as buffer
+   */
+  async getFile(objectPath: string): Promise<Buffer> {
+    try {
+      const stream = await this.minioClient.getObject(this.bucketName, objectPath);
+      const chunks: Buffer[] = [];
+      
+      return new Promise((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(chunk));
+        stream.on('end', () => resolve(Buffer.concat(chunks)));
+        stream.on('error', reject);
+      });
+    } catch (error) {
+      this.logger.error(`Error getting file: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Get presigned URL for temporary access
+   */
+  async getPresignedUrl(objectPath: string, expirySeconds: number = 3600): Promise<string> {
+    try {
+      return await this.minioClient.presignedGetObject(
+        this.bucketName,
+        objectPath,
+        expirySeconds,
+      );
+    } catch (error) {
+      this.logger.error(`Error generating presigned URL: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * List files in a folder
+   */
+  async listFiles(folder: string = ''): Promise<Minio.BucketItem[]> {
+    try {
+      const objectsStream = this.minioClient.listObjectsV2(
+        this.bucketName,
+        folder,
+        true,
+      );
+
+      const objects: Minio.BucketItem[] = [];
+      
+      return new Promise((resolve, reject) => {
+        objectsStream.on('data', (obj) => objects.push(obj));
+        objectsStream.on('end', () => resolve(objects));
+        objectsStream.on('error', reject);
+      });
+    } catch (error) {
+      this.logger.error(`Error listing files: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Get file stats
+   */
+  async getFileStat(objectPath: string): Promise<Minio.BucketItemStat> {
+    try {
+      return await this.minioClient.statObject(this.bucketName, objectPath);
+    } catch (error) {
+      this.logger.error(`Error getting file stat: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Copy file
+   */
+  async copyFile(sourcePath: string, destPath: string): Promise<void> {
+    try {
+      await this.minioClient.copyObject(
+        this.bucketName,
+        destPath,
+        `/${this.bucketName}/${sourcePath}`,
+        null,
+      );
+      this.logger.log(`File copied: ${sourcePath} -> ${destPath}`);
+    } catch (error) {
+      this.logger.error(`Error copying file: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new bucket
+   */
+  async createBucket(bucketName: string): Promise<void> {
+    try {
+      await this.minioClient.makeBucket(bucketName, 'us-east-1');
+      this.logger.log(`Bucket '${bucketName}' created`);
+    } catch (error) {
+      this.logger.error(`Error creating bucket: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Get MinIO client instance
+   */
+  getClient(): Minio.Client {
+    return this.minioClient;
+  }
+
+  /**
+   * Get default bucket name
+   */
+  getBucketName(): string {
+    return this.bucketName;
+  }
+
+  /**
+   * Get public URL
+   */
+  getPublicUrl(): string {
+    return this.publicUrl;
+  }
+}

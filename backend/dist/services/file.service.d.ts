@@ -1,6 +1,6 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { MinioService } from './minio.service';
-import { File, FileFolder, Prisma } from '@prisma/client';
+import { File, FileFolder } from '@prisma/client';
 import { CreateFolderInput, UpdateFolderInput, UpdateFileInput, GetFilesInput, CreateFileShareInput, MoveFilesInput, BulkDeleteFilesInput, BulkUpdateFilesInput } from '../graphql/inputs/file.input';
 export declare class FileService {
     private prisma;
@@ -11,62 +11,8 @@ export declare class FileService {
     uploadFile(file: Express.Multer.File, userId: string, folderId?: string, metadata?: any): Promise<File>;
     getFile(id: string, userId: string): Promise<File>;
     getFiles(input: GetFilesInput, userId: string): Promise<{
-        items: ({
-            shares: {
-                id: string;
-                password: string | null;
-                createdAt: Date;
-                expiresAt: Date | null;
-                token: string;
-                sharedBy: string;
-                sharedWith: string | null;
-                fileId: string;
-                canDownload: boolean;
-                canView: boolean;
-                accessCount: number;
-                lastAccess: Date | null;
-            }[];
-            folder: {
-                name: string;
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                description: string | null;
-                parentId: string | null;
-                userId: string;
-                icon: string | null;
-                color: string | null;
-                path: string;
-                isSystem: boolean;
-            };
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string | null;
-            metadata: Prisma.JsonValue | null;
-            userId: string;
-            size: number;
-            title: string | null;
-            tags: string[];
-            viewCount: number;
-            visibility: import("@prisma/client").$Enums.FileVisibility;
-            filename: string;
-            url: string;
-            mimeType: string;
-            width: number | null;
-            path: string;
-            height: number | null;
-            bucket: string;
-            alt: string | null;
-            folderId: string | null;
-            fileType: import("@prisma/client").$Enums.FileType;
-            originalName: string;
-            etag: string | null;
-            thumbnailUrl: string | null;
-            downloadCount: number;
-        })[];
-        total: number;
+        items: any;
+        total: any;
         page: number;
         limit: number;
         totalPages: number;
@@ -85,59 +31,18 @@ export declare class FileService {
     bulkDeleteFiles(input: BulkDeleteFilesInput, userId: string): Promise<number>;
     bulkUpdateFiles(input: BulkUpdateFilesInput, userId: string): Promise<File[]>;
     getStorageStats(userId: string): Promise<{
-        totalFiles: number;
-        totalSize: number;
-        totalFolders: number;
+        totalFiles: any;
+        totalSize: any;
+        totalFolders: any;
         filesByType: {
-            type: "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER" | "AUDIO" | "ARCHIVE";
-            count: number;
-            totalSize: number;
+            type: unknown;
+            count: any;
+            totalSize: any;
         }[];
         filesByVisibility: {
-            visibility: "PUBLIC" | "PRIVATE" | "SHARED";
-            count: number;
+            visibility: unknown;
+            count: any;
         }[];
     }>;
-    createFileShare(input: CreateFileShareInput, userId: string): Promise<{
-        file: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string | null;
-            metadata: Prisma.JsonValue | null;
-            userId: string;
-            size: number;
-            title: string | null;
-            tags: string[];
-            viewCount: number;
-            visibility: import("@prisma/client").$Enums.FileVisibility;
-            filename: string;
-            url: string;
-            mimeType: string;
-            width: number | null;
-            path: string;
-            height: number | null;
-            bucket: string;
-            alt: string | null;
-            folderId: string | null;
-            fileType: import("@prisma/client").$Enums.FileType;
-            originalName: string;
-            etag: string | null;
-            thumbnailUrl: string | null;
-            downloadCount: number;
-        };
-    } & {
-        id: string;
-        password: string | null;
-        createdAt: Date;
-        expiresAt: Date | null;
-        token: string;
-        sharedBy: string;
-        sharedWith: string | null;
-        fileId: string;
-        canDownload: boolean;
-        canView: boolean;
-        accessCount: number;
-        lastAccess: Date | null;
-    }>;
+    createFileShare(input: CreateFileShareInput, userId: string): Promise<any>;
 }

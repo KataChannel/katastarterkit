@@ -3,19 +3,16 @@ export declare class SupportAnalyticsResolver {
     private analyticsService;
     constructor(analyticsService: SupportAnalyticsService);
     getSupportAnalytics(): Promise<{
-        totalConversations: number;
-        activeConversations: number;
-        waitingConversations: number;
-        closedConversations: number;
+        totalConversations: any;
+        activeConversations: any;
+        waitingConversations: any;
+        closedConversations: any;
         averageResponseTime: number;
         averageResolutionTime: number;
         customerSatisfactionScore: number;
-        totalMessages: number;
-        aiGeneratedMessages: number;
-        platformBreakdown: {
-            platform: import("@prisma/client").$Enums.IntegrationPlatform;
-            count: number;
-        }[];
+        totalMessages: any;
+        aiGeneratedMessages: any;
+        platformBreakdown: any;
         agentPerformance: any[];
     }>;
 }

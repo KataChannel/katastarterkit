@@ -49,47 +49,7 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
         mentions?: string[];
     }, client: AuthenticatedSocket): Promise<{
         success: boolean;
-        message: {
-            sender: {
-                id: string;
-                email: string;
-                firstName: string;
-                lastName: string;
-                avatar: string;
-            };
-            replyTo: {
-                sender: {
-                    id: string;
-                    firstName: string;
-                    lastName: string;
-                    avatar: string;
-                };
-            } & {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                content: string;
-                projectId: string;
-                mentions: string[];
-                senderId: string;
-                isEdited: boolean;
-                editedAt: Date | null;
-                replyToId: string | null;
-                reactions: import("@prisma/client/runtime/library").JsonValue | null;
-            };
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            content: string;
-            projectId: string;
-            mentions: string[];
-            senderId: string;
-            isEdited: boolean;
-            editedAt: Date | null;
-            replyToId: string | null;
-            reactions: import("@prisma/client/runtime/library").JsonValue | null;
-        };
+        message: any;
         error?: undefined;
     } | {
         success: boolean;
@@ -108,7 +68,7 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
         projectId: string;
     }, client: AuthenticatedSocket): Promise<{
         success: boolean;
-        reactions: import("@prisma/client/runtime/library").JsonValue;
+        reactions: any;
         error?: undefined;
     } | {
         success: boolean;
@@ -121,7 +81,7 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
         projectId: string;
     }, client: AuthenticatedSocket): Promise<{
         success: boolean;
-        reactions: import("@prisma/client/runtime/library").JsonValue;
+        reactions: any;
         error?: undefined;
     } | {
         success: boolean;
@@ -134,26 +94,7 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
         projectId: string;
     }, client: AuthenticatedSocket): Promise<{
         success: boolean;
-        message: {
-            sender: {
-                id: string;
-                firstName: string;
-                lastName: string;
-                avatar: string;
-            };
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            content: string;
-            projectId: string;
-            mentions: string[];
-            senderId: string;
-            isEdited: boolean;
-            editedAt: Date | null;
-            replyToId: string | null;
-            reactions: import("@prisma/client/runtime/library").JsonValue | null;
-        };
+        message: any;
         error?: undefined;
     } | {
         success: boolean;

@@ -13,9 +13,9 @@ export declare class ProductNormalizationController {
         message: string;
         output: string;
         stats: {
-            total: number;
-            normalized: number;
-            pending: number;
+            total: any;
+            normalized: any;
+            pending: any;
         };
     }>;
     private getStats;

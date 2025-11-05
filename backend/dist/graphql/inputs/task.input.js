@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TaskFilterInput = exports.UpdateTaskInput = exports.CreateTaskInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -30,18 +31,18 @@ __decorate([
 __decorate([
     (0, graphql_1.Field)(() => client_1.TaskCategory),
     (0, class_validator_1.IsEnum)(client_1.TaskCategory),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.TaskCategory !== "undefined" && client_1.TaskCategory) === "function" ? _a : Object)
 ], CreateTaskInput.prototype, "category", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.TaskPriority),
     (0, class_validator_1.IsEnum)(client_1.TaskPriority),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.TaskPriority !== "undefined" && client_1.TaskPriority) === "function" ? _b : Object)
 ], CreateTaskInput.prototype, "priority", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.TaskStatus, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.TaskStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_c = typeof client_1.TaskStatus !== "undefined" && client_1.TaskStatus) === "function" ? _c : Object)
 ], CreateTaskInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -105,19 +106,19 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.TaskCategory, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.TaskCategory),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_d = typeof client_1.TaskCategory !== "undefined" && client_1.TaskCategory) === "function" ? _d : Object)
 ], UpdateTaskInput.prototype, "category", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.TaskPriority, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.TaskPriority),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_e = typeof client_1.TaskPriority !== "undefined" && client_1.TaskPriority) === "function" ? _e : Object)
 ], UpdateTaskInput.prototype, "priority", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.TaskStatus, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.TaskStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_f = typeof client_1.TaskStatus !== "undefined" && client_1.TaskStatus) === "function" ? _f : Object)
 ], UpdateTaskInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -135,19 +136,19 @@ __decorate([
     (0, graphql_1.Field)(() => client_1.TaskCategory, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.TaskCategory),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_g = typeof client_1.TaskCategory !== "undefined" && client_1.TaskCategory) === "function" ? _g : Object)
 ], TaskFilterInput.prototype, "category", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.TaskPriority, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.TaskPriority),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_h = typeof client_1.TaskPriority !== "undefined" && client_1.TaskPriority) === "function" ? _h : Object)
 ], TaskFilterInput.prototype, "priority", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.TaskStatus, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.TaskStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_j = typeof client_1.TaskStatus !== "undefined" && client_1.TaskStatus) === "function" ? _j : Object)
 ], TaskFilterInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),

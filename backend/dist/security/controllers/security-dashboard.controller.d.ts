@@ -38,29 +38,12 @@ export declare class SecurityDashboardController {
                 endDate: Date;
             };
             summary: {
-                totalAuditLogs: number;
-                securityEventsBySeverity: Record<string, number>;
-                accessControlChanges: number;
+                totalAuditLogs: any;
+                securityEventsBySeverity: any;
+                accessControlChanges: any;
             };
-            userActivities: {
-                userId: string;
-                eventType: string;
-                count: number;
-            }[];
-            accessChanges: {
-                id: string;
-                action: string;
-                userId: string;
-                user: {
-                    id: string;
-                    email: string;
-                    username: string;
-                };
-                resourceType: string;
-                resourceId: string;
-                timestamp: Date;
-                details: import("@prisma/client/runtime/library").JsonValue;
-            }[];
+            userActivities: any;
+            accessChanges: any;
         };
         period: {
             startDate: Date;
@@ -70,39 +53,9 @@ export declare class SecurityDashboardController {
     }>;
     getSecurityAlerts(severity?: 'low' | 'medium' | 'high' | 'critical', limit?: string): Promise<{
         success: boolean;
-        alerts: ({
-            user: {
-                id: string;
-                email: string;
-                username: string;
-            };
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string;
-            userId: string | null;
-            category: string;
-            sessionId: string | null;
-            ipAddress: string;
-            userAgent: string | null;
-            details: import("@prisma/client/runtime/library").JsonValue | null;
-            severity: string;
-            correlationId: string | null;
-            eventType: string;
-            location: string | null;
-            riskScore: number | null;
-            isBlocked: boolean;
-            requiresAction: boolean;
-            isResolved: boolean;
-            resolvedBy: string | null;
-            resolvedAt: Date | null;
-            resolution: string | null;
-            detectedAt: Date;
-            parentEventId: string | null;
-        })[];
-        totalCount: number;
-        unresolved: number;
+        alerts: any;
+        totalCount: any;
+        unresolved: any;
     }>;
     getSecurityRecommendations(): Promise<{
         success: boolean;
@@ -122,7 +75,7 @@ export declare class SecurityDashboardController {
         assessment: {
             id: string;
             score: number;
-            riskLevel: "medium" | "low" | "high" | "critical";
+            riskLevel: "low" | "medium" | "high" | "critical";
             timestamp: Date;
         };
     }>;

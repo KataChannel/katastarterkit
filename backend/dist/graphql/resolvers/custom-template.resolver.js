@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomTemplateResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -74,7 +75,7 @@ __decorate([
     __param(1, (0, graphql_1.Args)('archived', { type: () => Boolean, nullable: true })),
     __param(2, (0, graphql_1.Args)('category', { type: () => client_1.TemplateCategory, nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_model_1.User, Boolean, String]),
+    __metadata("design:paramtypes", [user_model_1.User, Boolean, typeof (_a = typeof client_1.TemplateCategory !== "undefined" && client_1.TemplateCategory) === "function" ? _a : Object]),
     __metadata("design:returntype", Promise)
 ], CustomTemplateResolver.prototype, "getMyCustomTemplates", null);
 __decorate([
@@ -90,7 +91,7 @@ __decorate([
     (0, graphql_1.Query)(() => [custom_template_model_1.CustomTemplate], { name: 'getPublicTemplates' }),
     __param(0, (0, graphql_1.Args)('category', { type: () => client_1.TemplateCategory, nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [typeof (_b = typeof client_1.TemplateCategory !== "undefined" && client_1.TemplateCategory) === "function" ? _b : Object]),
     __metadata("design:returntype", Promise)
 ], CustomTemplateResolver.prototype, "getPublicTemplates", null);
 __decorate([

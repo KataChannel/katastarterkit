@@ -12,22 +12,5 @@ export declare class CallCenterResolver {
     syncData(input?: SyncCallCenterInput): Promise<SyncCallCenterResponse>;
     getRecords(pagination: PaginationInput, filters?: CallCenterRecordFiltersInput): Promise<PaginatedCallCenterRecords>;
     getRecordById(id: string): Promise<CallCenterRecord>;
-    getSyncLogs(pagination: PaginationInput): Promise<{
-        id: string;
-        status: string;
-        duration: number | null;
-        completedAt: Date | null;
-        errorMessage: string | null;
-        fromDate: Date;
-        toDate: Date;
-        offset: number;
-        configId: string | null;
-        syncType: import("@prisma/client").$Enums.CallCenterSyncMode;
-        recordsFetched: number;
-        recordsCreated: number;
-        recordsUpdated: number;
-        recordsSkipped: number;
-        errorDetails: import("@prisma/client/runtime/library").JsonValue | null;
-        startedAt: Date;
-    }[]>;
+    getSyncLogs(pagination: PaginationInput): Promise<any>;
 }

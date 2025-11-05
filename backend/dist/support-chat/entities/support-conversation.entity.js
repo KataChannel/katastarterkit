@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SupportConversation = exports.SupportMessage = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -123,15 +124,15 @@ __decorate([
 ], SupportConversation.prototype, "assignedAt", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.SupportConversationStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.SupportConversationStatus !== "undefined" && client_1.SupportConversationStatus) === "function" ? _a : Object)
 ], SupportConversation.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.TicketPriority),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.TicketPriority !== "undefined" && client_1.TicketPriority) === "function" ? _b : Object)
 ], SupportConversation.prototype, "priority", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.IntegrationPlatform),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_c = typeof client_1.IntegrationPlatform !== "undefined" && client_1.IntegrationPlatform) === "function" ? _c : Object)
 ], SupportConversation.prototype, "platform", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),

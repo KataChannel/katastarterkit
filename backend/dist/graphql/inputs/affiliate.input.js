@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AffPaymentRequestSearchInput = exports.AffConversionSearchInput = exports.AffLinkSearchInput = exports.AffPaginationInput = exports.AffAnalyticsInput = exports.AffDateRangeInput = exports.ProcessPaymentRequestInput = exports.CreatePaymentRequestInput = exports.ReviewConversionInput = exports.TrackConversionInput = exports.UpdateAffLinkInput = exports.CreateAffLinkInput = exports.ReviewCampaignApplicationInput = exports.JoinCampaignInput = exports.CampaignSearchInput = exports.UpdateCampaignInput = exports.CreateCampaignInput = exports.UpdateAffUserInput = exports.CreateAffUserInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -18,7 +19,7 @@ let CreateAffUserInput = class CreateAffUserInput {
 exports.CreateAffUserInput = CreateAffUserInput;
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffUserRole),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffUserRole) === "function" ? _a : Object)
 ], CreateAffUserInput.prototype, "role", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -38,7 +39,7 @@ __decorate([
 ], CreateAffUserInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffPaymentMethod, { nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffPaymentMethod) === "function" ? _b : Object)
 ], CreateAffUserInput.prototype, "paymentMethod", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -76,7 +77,7 @@ __decorate([
 ], UpdateAffUserInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffPaymentMethod, { nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_c = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffPaymentMethod) === "function" ? _c : Object)
 ], UpdateAffUserInput.prototype, "paymentMethod", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -188,7 +189,7 @@ __decorate([
 ], UpdateCampaignInput.prototype, "fixedAmount", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffCampaignStatus, { nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_d = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffCampaignStatus) === "function" ? _d : Object)
 ], UpdateCampaignInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -218,7 +219,7 @@ __decorate([
 ], CampaignSearchInput.prototype, "query", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffCampaignStatus, { nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_e = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffCampaignStatus) === "function" ? _e : Object)
 ], CampaignSearchInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -413,7 +414,7 @@ __decorate([
 ], ReviewConversionInput.prototype, "conversionId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffConversionStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_f = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffConversionStatus) === "function" ? _f : Object)
 ], ReviewConversionInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -431,7 +432,7 @@ __decorate([
 ], CreatePaymentRequestInput.prototype, "amount", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffPaymentMethod),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_g = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffPaymentMethod) === "function" ? _g : Object)
 ], CreatePaymentRequestInput.prototype, "paymentMethod", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -461,7 +462,7 @@ __decorate([
 ], ProcessPaymentRequestInput.prototype, "paymentRequestId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffPaymentStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_h = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffPaymentStatus) === "function" ? _h : Object)
 ], ProcessPaymentRequestInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -563,7 +564,7 @@ __decorate([
 ], AffConversionSearchInput.prototype, "affiliateId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffConversionStatus, { nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_j = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffConversionStatus) === "function" ? _j : Object)
 ], AffConversionSearchInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)(() => AffDateRangeInput, { nullable: true }),
@@ -585,7 +586,7 @@ __decorate([
 ], AffPaymentRequestSearchInput.prototype, "affiliateId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffPaymentStatus, { nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_k = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffPaymentStatus) === "function" ? _k : Object)
 ], AffPaymentRequestSearchInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)(() => AffDateRangeInput, { nullable: true }),

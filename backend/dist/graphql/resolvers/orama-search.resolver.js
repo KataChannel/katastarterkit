@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OramaSearchResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -158,6 +159,6 @@ exports.OramaSearchResolver = OramaSearchResolver = __decorate([
         whitelist: true,
         forbidNonWhitelisted: false,
     })),
-    __metadata("design:paramtypes", [orama_service_1.OramaService])
+    __metadata("design:paramtypes", [typeof (_a = typeof orama_service_1.OramaService !== "undefined" && orama_service_1.OramaService) === "function" ? _a : Object])
 ], OramaSearchResolver);
 //# sourceMappingURL=orama-search.resolver.js.map

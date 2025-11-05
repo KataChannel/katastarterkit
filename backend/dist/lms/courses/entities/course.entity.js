@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Course = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -56,11 +57,11 @@ __decorate([
 ], Course.prototype, "price", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.CourseLevel),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.CourseLevel !== "undefined" && client_1.CourseLevel) === "function" ? _a : Object)
 ], Course.prototype, "level", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.CourseStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.CourseStatus !== "undefined" && client_1.CourseStatus) === "function" ? _b : Object)
 ], Course.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),

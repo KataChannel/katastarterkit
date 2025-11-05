@@ -61,58 +61,17 @@ export declare class EnhancedAuditService {
         page?: number;
         limit?: number;
     }): Promise<{
-        logs: ({
-            user: {
-                id: string;
-                email: string;
-                username: string;
-                firstName: string;
-                lastName: string;
-            };
-        } & {
+        logs: {
             id: string;
             createdAt: Date;
             userId: string | null;
-            tags: string[];
             action: string;
-            success: boolean;
-            sessionId: string | null;
+            details: Prisma.JsonValue | null;
+            resource: string;
+            resourceId: string | null;
             ipAddress: string | null;
             userAgent: string | null;
-            details: Prisma.JsonValue | null;
-            resourceType: string;
-            resourceId: string | null;
-            method: string | null;
-            endpoint: string | null;
-            oldValues: Prisma.JsonValue | null;
-            newValues: Prisma.JsonValue | null;
-            entityName: string | null;
-            parentResourceType: string | null;
-            parentResourceId: string | null;
-            operationType: string | null;
-            severity: string;
-            batchId: string | null;
-            batchSize: number | null;
-            batchIndex: number | null;
-            errorMessage: string | null;
-            errorCode: string | null;
-            responseTime: number | null;
-            requestSize: number | null;
-            responseSize: number | null;
-            dbQueryTime: number | null;
-            dbQueryCount: number | null;
-            memoryUsage: number | null;
-            cpuUsage: number | null;
-            statusCode: number | null;
-            performanceData: Prisma.JsonValue | null;
-            requiresReview: boolean;
-            sensitiveData: boolean;
-            retentionPeriod: number | null;
-            correlationId: string | null;
-            sessionInfo: Prisma.JsonValue | null;
-            clientInfo: Prisma.JsonValue | null;
-            timestamp: Date;
-        })[];
+        }[];
         pagination: {
             page: number;
             limit: number;
@@ -125,24 +84,12 @@ export declare class EnhancedAuditService {
         dateFrom?: Date;
         dateTo?: Date;
     }): Promise<{
-        totalLogs: number;
-        successRate: number;
-        operationsByType: (Prisma.PickEnumerable<Prisma.AuditLogGroupByOutputType, "operationType"[]> & {
-            _count: {
-                operationType: number;
-            };
-        })[];
-        severityBreakdown: (Prisma.PickEnumerable<Prisma.AuditLogGroupByOutputType, "severity"[]> & {
-            _count: {
-                severity: number;
-            };
-        })[];
-        topResources: (Prisma.PickEnumerable<Prisma.AuditLogGroupByOutputType, "resourceType"[]> & {
-            _count: {
-                resourceType: number;
-            };
-        })[];
-        averageResponseTime: number;
+        totalLogs: any;
+        successRate: any;
+        operationsByType: any;
+        severityBreakdown: any;
+        topResources: any;
+        averageResponseTime: any;
     }>;
     private generateCorrelationId;
     private generateBatchId;

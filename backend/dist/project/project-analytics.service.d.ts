@@ -1,4 +1,5 @@
 import { PrismaService } from '../prisma/prisma.service';
+import { TaskStatus, TaskPriority } from '@prisma/client';
 interface DateRange {
     startDate?: Date;
     endDate?: Date;
@@ -7,108 +8,33 @@ export declare class ProjectAnalyticsService {
     private prisma;
     constructor(prisma: PrismaService);
     getProjectAnalytics(projectId: string, dateRange?: DateRange): Promise<{
-        taskStats: {
-            total: number;
-            byStatus: {
-                PENDING: number;
-                IN_PROGRESS: number;
-                COMPLETED: number;
-                CANCELLED: number;
-            };
-            byPriority: {
-                LOW: number;
-                MEDIUM: number;
-                HIGH: number;
-                URGENT: number;
-            };
-            overdue: number;
-        };
-        memberStats: {
-            user: any;
-            role: string;
-            totalTasks: number;
-            completedTasks: number;
-            inProgressTasks: number;
-            completionRate: number;
-            activityCount: number;
-        }[];
-        activityStats: {
-            total: number;
-            byType: Record<string, number>;
-            dailyChart: {
-                date: string;
-                count: number;
-            }[];
-        };
-        completionRate: {
-            total: number;
-            completed: number;
-            rate: number;
-        };
-        averageCompletionTime: {
-            averageDays: number;
-            averageHours: number;
-            totalCompleted: number;
-        };
-        upcomingDeadlines: ({
-            user: {
-                id: string;
-                firstName: string;
-                lastName: string;
-                avatar: string;
-            };
-            _count: {
-                comments: number;
-                subtasks: number;
-            };
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string | null;
-            parentId: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
-            userId: string;
-            title: string;
-            status: import("@prisma/client").$Enums.TaskStatus;
-            tags: string[];
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
-            projectId: string | null;
-            completedAt: Date | null;
-            dueDate: Date | null;
-            assignedTo: string[];
-            mentions: string[];
-        })[];
+        taskStats: any;
+        memberStats: any;
+        activityStats: any;
+        completionRate: any;
+        averageCompletionTime: any;
+        upcomingDeadlines: any;
         generatedAt: Date;
     }>;
     getTaskStatistics(projectId: string, dateRange?: DateRange): Promise<{
-        total: number;
+        total: any;
         byStatus: {
-            PENDING: number;
-            IN_PROGRESS: number;
-            COMPLETED: number;
-            CANCELLED: number;
+            [TaskStatus.PENDING]: number;
+            [TaskStatus.IN_PROGRESS]: number;
+            [TaskStatus.COMPLETED]: number;
+            [TaskStatus.CANCELLED]: number;
         };
         byPriority: {
-            LOW: number;
-            MEDIUM: number;
-            HIGH: number;
-            URGENT: number;
+            [TaskPriority.LOW]: number;
+            [TaskPriority.MEDIUM]: number;
+            [TaskPriority.HIGH]: number;
+            [TaskPriority.URGENT]: number;
         };
         overdue: number;
     }>;
-    getMemberStatistics(projectId: string, dateRange?: DateRange): Promise<{
-        user: any;
-        role: string;
-        totalTasks: number;
-        completedTasks: number;
-        inProgressTasks: number;
-        completionRate: number;
-        activityCount: number;
-    }[]>;
+    getMemberStatistics(projectId: string, dateRange?: DateRange): Promise<any>;
     getActivityStatistics(projectId: string, dateRange?: DateRange): Promise<{
-        total: number;
+        total: any;
         byType: Record<string, number>;
         dailyChart: {
             date: string;
@@ -116,77 +42,19 @@ export declare class ProjectAnalyticsService {
         }[];
     }>;
     getCompletionRate(projectId: string, dateRange?: DateRange): Promise<{
-        total: number;
-        completed: number;
+        total: any;
+        completed: any;
         rate: number;
     }>;
     getAverageCompletionTime(projectId: string): Promise<{
         averageDays: number;
         averageHours: number;
-        totalCompleted: number;
+        totalCompleted: any;
     }>;
-    getUpcomingDeadlines(projectId: string): Promise<({
-        user: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            avatar: string;
-        };
-        _count: {
-            comments: number;
-            subtasks: number;
-        };
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string | null;
-        parentId: string | null;
-        priority: import("@prisma/client").$Enums.TaskPriority;
-        userId: string;
-        title: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
-        tags: string[];
-        category: import("@prisma/client").$Enums.TaskCategory;
-        order: number;
-        projectId: string | null;
-        completedAt: Date | null;
-        dueDate: Date | null;
-        assignedTo: string[];
-        mentions: string[];
-    })[]>;
-    getOverdueTasks(projectId: string): Promise<({
-        user: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            avatar: string;
-        };
-        _count: {
-            comments: number;
-            subtasks: number;
-        };
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string | null;
-        parentId: string | null;
-        priority: import("@prisma/client").$Enums.TaskPriority;
-        userId: string;
-        title: string;
-        status: import("@prisma/client").$Enums.TaskStatus;
-        tags: string[];
-        category: import("@prisma/client").$Enums.TaskCategory;
-        order: number;
-        projectId: string | null;
-        completedAt: Date | null;
-        dueDate: Date | null;
-        assignedTo: string[];
-        mentions: string[];
-    })[]>;
+    getUpcomingDeadlines(projectId: string): Promise<any>;
+    getOverdueTasks(projectId: string): Promise<any>;
     getTaskVelocity(projectId: string, days?: number): Promise<{
-        totalCompleted: number;
+        totalCompleted: any;
         averagePerDay: number;
         chart: {
             date: string;
@@ -201,8 +69,8 @@ export declare class ProjectAnalyticsService {
         score: number;
         status: string;
         factors: {
-            overdueTasks: number;
-            completionRate: number;
+            overdueTasks: any;
+            completionRate: any;
             pendingRatio: number;
         };
     }>;

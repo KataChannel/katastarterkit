@@ -49,38 +49,8 @@ export declare class SecurityAuditService {
     logAudit(auditDto: AuditLogDto): Promise<void>;
     logAuditWithPerformance(auditDto: PerformanceAuditLogDto): Promise<void>;
     getSecurityEvents(userId?: string, eventType?: string, resourceType?: string, severity?: string, limit?: number, offset?: number): Promise<{
-        events: ({
-            user: {
-                id: string;
-                email: string;
-                username: string;
-            };
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string;
-            userId: string | null;
-            category: string;
-            sessionId: string | null;
-            ipAddress: string;
-            userAgent: string | null;
-            details: import("@prisma/client/runtime/library").JsonValue | null;
-            severity: string;
-            correlationId: string | null;
-            eventType: string;
-            location: string | null;
-            riskScore: number | null;
-            isBlocked: boolean;
-            requiresAction: boolean;
-            isResolved: boolean;
-            resolvedBy: string | null;
-            resolvedAt: Date | null;
-            resolution: string | null;
-            detectedAt: Date;
-            parentEventId: string | null;
-        })[];
-        total: number;
+        events: any;
+        total: any;
         limit: number;
         offset: number;
     }>;
@@ -94,98 +64,29 @@ export declare class SecurityAuditService {
         } & {
             id: string;
             createdAt: Date;
-            userId: string | null;
-            tags: string[];
-            action: string;
-            success: boolean;
-            sessionId: string | null;
             ipAddress: string | null;
             userAgent: string | null;
+            action: string;
             details: import("@prisma/client/runtime/library").JsonValue | null;
-            resourceType: string;
+            userId: string | null;
+            resource: string;
             resourceId: string | null;
-            method: string | null;
-            endpoint: string | null;
-            oldValues: import("@prisma/client/runtime/library").JsonValue | null;
-            newValues: import("@prisma/client/runtime/library").JsonValue | null;
-            entityName: string | null;
-            parentResourceType: string | null;
-            parentResourceId: string | null;
-            operationType: string | null;
-            severity: string;
-            batchId: string | null;
-            batchSize: number | null;
-            batchIndex: number | null;
-            errorMessage: string | null;
-            errorCode: string | null;
-            responseTime: number | null;
-            requestSize: number | null;
-            responseSize: number | null;
-            dbQueryTime: number | null;
-            dbQueryCount: number | null;
-            memoryUsage: number | null;
-            cpuUsage: number | null;
-            statusCode: number | null;
-            performanceData: import("@prisma/client/runtime/library").JsonValue | null;
-            requiresReview: boolean;
-            sensitiveData: boolean;
-            retentionPeriod: number | null;
-            correlationId: string | null;
-            sessionInfo: import("@prisma/client/runtime/library").JsonValue | null;
-            clientInfo: import("@prisma/client/runtime/library").JsonValue | null;
-            timestamp: Date;
         })[];
         total: number;
         limit: number;
         offset: number;
     }>;
     getSecurityDashboard(timeframe?: 'day' | 'week' | 'month'): Promise<{
-        timeframe: "day" | "month" | "week";
+        timeframe: "day" | "week" | "month";
         summary: {
-            totalEvents: number;
-            criticalEvents: number;
-            highEvents: number;
+            totalEvents: any;
+            criticalEvents: any;
+            highEvents: any;
             riskScore: number;
         };
-        eventsByType: {
-            eventType: string;
-            count: number;
-        }[];
-        eventsByUser: {
-            userId: string;
-            count: number;
-        }[];
-        recentEvents: ({
-            user: {
-                id: string;
-                email: string;
-                username: string;
-            };
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string;
-            userId: string | null;
-            category: string;
-            sessionId: string | null;
-            ipAddress: string;
-            userAgent: string | null;
-            details: import("@prisma/client/runtime/library").JsonValue | null;
-            severity: string;
-            correlationId: string | null;
-            eventType: string;
-            location: string | null;
-            riskScore: number | null;
-            isBlocked: boolean;
-            requiresAction: boolean;
-            isResolved: boolean;
-            resolvedBy: string | null;
-            resolvedAt: Date | null;
-            resolution: string | null;
-            detectedAt: Date;
-            parentEventId: string | null;
-        })[];
+        eventsByType: any;
+        eventsByUser: any;
+        recentEvents: any;
     }>;
     private calculateRiskScore;
     detectAnomalies(userId: string, timeframe?: 'hour' | 'day'): Promise<{
@@ -193,7 +94,7 @@ export declare class SecurityAuditService {
         timeframe: "day" | "hour";
         anomaliesDetected: number;
         anomalies: any[];
-        riskLevel: "medium" | "low" | "high" | "critical";
+        riskLevel: "low" | "medium" | "high" | "critical";
     }>;
     private calculateAnomalyRiskLevel;
     generateComplianceReport(startDate: Date, endDate: Date): Promise<{
@@ -206,29 +107,12 @@ export declare class SecurityAuditService {
             endDate: Date;
         };
         summary: {
-            totalAuditLogs: number;
-            securityEventsBySeverity: Record<string, number>;
-            accessControlChanges: number;
+            totalAuditLogs: any;
+            securityEventsBySeverity: any;
+            accessControlChanges: any;
         };
-        userActivities: {
-            userId: string;
-            eventType: string;
-            count: number;
-        }[];
-        accessChanges: {
-            id: string;
-            action: string;
-            userId: string;
-            user: {
-                id: string;
-                email: string;
-                username: string;
-            };
-            resourceType: string;
-            resourceId: string;
-            timestamp: Date;
-            details: import("@prisma/client/runtime/library").JsonValue;
-        }[];
+        userActivities: any;
+        accessChanges: any;
     }>;
     private calculateOverallComplianceScore;
     private generateBaseComplianceReport;

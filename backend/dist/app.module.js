@@ -19,43 +19,23 @@ const cache_module_1 = require("./cache/cache.module");
 const redis_module_1 = require("./redis/redis.module");
 const auth_module_1 = require("./auth/auth.module");
 const graphql_module_1 = require("./graphql/graphql.module");
-const grok_module_1 = require("./grok/grok.module");
 const minio_module_1 = require("./minio/minio.module");
 const logger_module_1 = require("./logger/logger.module");
-const ai_training_module_1 = require("./ai-training/ai-training.module");
-const chatbot_module_1 = require("./chatbot/chatbot.module");
-const ai_module_1 = require("./ai/ai.module");
 const data_loader_module_1 = require("./common/data-loaders/data-loader.module");
 const graphql_performance_module_1 = require("./common/graphql-performance/graphql-performance.module");
 const common_services_module_1 = require("./common/common-services.module");
-const real_time_module_1 = require("./realtime/real-time.module");
-const search_module_1 = require("./search/search.module");
 const security_module_1 = require("./security/security.module");
 const unified_dynamic_module_1 = require("./graphql/unified-dynamic.module");
-const ketoan_module_1 = require("./ketoan/ketoan.module");
 const menu_module_1 = require("./menu/menu.module");
-const file_module_1 = require("./graphql/modules/file.module");
-const hr_module_1 = require("./graphql/modules/hr.module");
-const product_module_1 = require("./graphql/modules/product.module");
 const blog_module_1 = require("./graphql/modules/blog.module");
-const review_module_1 = require("./graphql/modules/review.module");
 const test_controller_1 = require("./test.controller");
-const seed_module_1 = require("./seed/seed.module");
-const callcenter_module_1 = require("./callcenter/callcenter.module");
-const lms_module_1 = require("./lms/lms.module");
-const ecommerce_module_1 = require("./ecommerce/ecommerce.module");
-const support_chat_module_1 = require("./support-chat/support-chat.module");
 const validation_1 = require("./config/validation");
 const env_config_service_1 = require("./config/env-config.service");
-const log_controller_1 = require("./controllers/log.controller");
-const file_controller_1 = require("./controllers/file.controller");
-const product_normalization_controller_1 = require("./api/product-normalization.controller");
 const app_resolver_1 = require("./app.resolver");
 const graphql_logging_interceptor_1 = require("./interceptors/graphql-logging.interceptor");
 const input_sanitization_interceptor_1 = require("./common/interceptors/input-sanitization.interceptor");
 const graphql_performance_interceptor_1 = require("./common/interceptors/graphql-performance.interceptor");
 const performance_interceptor_1 = require("./interceptors/performance.interceptor");
-const project_module_1 = require("./project/project.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -78,9 +58,7 @@ exports.AppModule = AppModule = __decorate([
                     playground: configService.get('NODE_ENV') !== 'production',
                     introspection: configService.get('NODE_ENV') !== 'production',
                     context: ({ req, res }) => ({ req, res }),
-                    bodyParserConfig: {
-                        limit: '50mb',
-                    },
+                    bodyParserConfig: false,
                     subscriptions: {
                         'graphql-ws': {
                             path: '/graphql',
@@ -111,36 +89,16 @@ exports.AppModule = AppModule = __decorate([
             data_loader_module_1.DataLoaderModule,
             graphql_performance_module_1.GraphQLPerformanceModule,
             graphql_module_1.GraphQLResolversModule,
-            grok_module_1.GrokModule,
             minio_module_1.MinioModule,
             logger_module_1.LoggerModule,
-            ai_training_module_1.AiTrainingModule,
-            chatbot_module_1.ChatbotModule,
-            ai_module_1.AiModule,
             common_services_module_1.CommonServicesModule,
-            real_time_module_1.RealTimeModule,
-            search_module_1.SearchModule,
             security_module_1.SecurityModule,
             unified_dynamic_module_1.UnifiedDynamicModule,
-            ketoan_module_1.KetoAnModule,
             menu_module_1.MenuModule,
-            file_module_1.FileModule,
-            hr_module_1.HRModule,
-            product_module_1.ProductModule,
             blog_module_1.BlogModule,
-            review_module_1.ReviewModule,
-            seed_module_1.SeedModule,
-            callcenter_module_1.CallCenterModule,
-            lms_module_1.LmsModule,
-            project_module_1.ProjectModule,
-            ecommerce_module_1.EcommerceModule,
-            support_chat_module_1.SupportChatModule,
         ],
         controllers: [
-            log_controller_1.LogController,
             test_controller_1.TestController,
-            file_controller_1.FileController,
-            product_normalization_controller_1.ProductNormalizationController,
         ],
         providers: [
             env_config_service_1.EnvConfigService,

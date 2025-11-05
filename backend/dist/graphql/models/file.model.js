@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VisibilityCount = exports.FileTypeCount = exports.FileStorageStats = exports.FileUploadResponse = exports.PaginatedFolders = exports.PaginatedFiles = exports.FileShare = exports.File = exports.FileFolder = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -111,7 +112,7 @@ __decorate([
 ], File.prototype, "size", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.FileType),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.FileType !== "undefined" && client_1.FileType) === "function" ? _a : Object)
 ], File.prototype, "fileType", void 0);
 __decorate([
     (0, graphql_1.Field)(),
@@ -143,7 +144,7 @@ __decorate([
 ], File.prototype, "userId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.FileVisibility),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.FileVisibility !== "undefined" && client_1.FileVisibility) === "function" ? _b : Object)
 ], File.prototype, "visibility", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -375,7 +376,7 @@ let FileTypeCount = class FileTypeCount {
 exports.FileTypeCount = FileTypeCount;
 __decorate([
     (0, graphql_1.Field)(() => client_1.FileType),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_c = typeof client_1.FileType !== "undefined" && client_1.FileType) === "function" ? _c : Object)
 ], FileTypeCount.prototype, "type", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int),
@@ -393,7 +394,7 @@ let VisibilityCount = class VisibilityCount {
 exports.VisibilityCount = VisibilityCount;
 __decorate([
     (0, graphql_1.Field)(() => client_1.FileVisibility),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_d = typeof client_1.FileVisibility !== "undefined" && client_1.FileVisibility) === "function" ? _d : Object)
 ], VisibilityCount.prototype, "visibility", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int),

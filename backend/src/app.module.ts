@@ -7,48 +7,35 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { APP_INTERCEPTOR, HttpAdapterHost } from '@nestjs/core';
 import { join } from 'path';
 
-// Modules
+// Core Modules (Kept after cleanup)
 import { PrismaModule } from './prisma/prisma.module';
 import { CacheModule } from './cache/cache.module';
 import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import { GraphQLResolversModule } from './graphql/graphql.module';
-import { GrokModule } from './grok/grok.module';
 import { MinioModule } from './minio/minio.module';
 import { LoggerModule } from './logger/logger.module';
-import { AiTrainingModule } from './ai-training/ai-training.module';
-import { ChatbotModule } from './chatbot/chatbot.module';
-import { AiModule } from './ai/ai.module';
 import { DataLoaderModule } from './common/data-loaders/data-loader.module';
 import { GraphQLPerformanceModule } from './common/graphql-performance/graphql-performance.module';
 import { CommonServicesModule } from './common/common-services.module';
-import { RealTimeModule } from './realtime/real-time.module';
-import { SearchModule } from './search/search.module';
-import { MonitoringModule } from './monitoring/monitoring.module';
 import { SecurityModule } from './security/security.module';
 import { UnifiedDynamicModule } from './graphql/unified-dynamic.module';
-import { KetoAnModule } from './ketoan/ketoan.module';
 import { MenuModule } from './menu/menu.module';
-import { FileModule } from './graphql/modules/file.module';
-import { HRModule } from './graphql/modules/hr.module';
-import { ProductModule } from './graphql/modules/product.module';
 import { BlogModule } from './graphql/modules/blog.module';
-import { ReviewModule } from './graphql/modules/review.module';
 import { TestController } from './test.controller';
-import { SeedModule } from './seed/seed.module';
-import { CallCenterModule } from './callcenter/callcenter.module';
-import { LmsModule } from './lms/lms.module';
-import { EcommerceModule } from './ecommerce/ecommerce.module';
-import { SupportChatModule } from './support-chat/support-chat.module';
+
+// Removed modules (deleted during cleanup):
+// - GrokModule, AiTrainingModule, ChatbotModule, AiModule
+// - RealTimeModule, SearchModule, MonitoringModule
+// - KetoAnModule, FileModule, HRModule, ProductModule, ReviewModule
+// - SeedModule, CallCenterModule, LmsModule, EcommerceModule, SupportChatModule
 
 // Configuration
 import { validationSchema } from './config/validation';
 import { EnvConfigService } from './config/env-config.service';
 
-// Controllers
-import { LogController } from './controllers/log.controller';
-import { FileController } from './controllers/file.controller';
-import { ProductNormalizationController } from './api/product-normalization.controller';
+// Removed controllers (deleted during cleanup):
+// - LogController, FileController, ProductNormalizationController
 
 // Resolvers
 import { AppResolver } from './app.resolver';
@@ -58,7 +45,9 @@ import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interc
 import { InputSanitizationInterceptor } from './common/interceptors/input-sanitization.interceptor';
 import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-performance.interceptor';
 import { PerformanceInterceptor } from './interceptors/performance.interceptor';
-import { ProjectModule } from './project/project.module';
+
+// Removed module (deleted during cleanup):
+// - ProjectModule
 
 @Module({
   imports: [
@@ -118,44 +107,22 @@ import { ProjectModule } from './project/project.module';
     // Scheduling (global) - TODO: Fix Reflector dependency issue
     // ScheduleModule.forRoot(),
 
-    // Application Modules
+    // Application Modules (Core features only - after cleanup)
     CacheModule,
     RedisModule,
     DataLoaderModule,
     GraphQLPerformanceModule,
     GraphQLResolversModule,
-    GrokModule,
     MinioModule,
     LoggerModule,
-    // HealthModule, // TODO: Fix TypeOrmHealthIndicator issue with Terminus - using Prisma only
-    AiTrainingModule,
-    ChatbotModule,
-    AiModule,
     CommonServicesModule,
-    RealTimeModule,
-    SearchModule,
-    // MonitoringModule, // TODO: Fix TerminusModule/TypeORM dependency issue
     SecurityModule,
     UnifiedDynamicModule,
-    KetoAnModule,
     MenuModule,
-    FileModule,
-    HRModule,
-    ProductModule,
     BlogModule,
-    ReviewModule,
-    SeedModule,
-    CallCenterModule,
-    LmsModule,
-    ProjectModule,
-    EcommerceModule,
-    SupportChatModule,
   ],
   controllers: [
-    LogController,
     TestController,
-    FileController,
-    ProductNormalizationController,
   ],
   providers: [
     EnvConfigService,

@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AffTrackingUrl = exports.AffEarningsReport = exports.AffConversionsResponse = exports.AffCampaignSearchResult = exports.AffMerchantStats = exports.AffDashboardStats = exports.AffPaymentRequest = exports.AffConversion = exports.AffClick = exports.AffLink = exports.AffCampaignAffiliate = exports.AffCampaign = exports.AffUser = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -45,7 +46,7 @@ __decorate([
 ], AffUser.prototype, "userId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffUserRole),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffUserRole) === "function" ? _a : Object)
 ], AffUser.prototype, "role", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -65,7 +66,7 @@ __decorate([
 ], AffUser.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffPaymentMethod, { nullable: true }),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffPaymentMethod) === "function" ? _b : Object)
 ], AffUser.prototype, "paymentMethod", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -211,7 +212,7 @@ __decorate([
 ], AffCampaign.prototype, "fixedAmount", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffCampaignStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_c = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffCampaignStatus) === "function" ? _c : Object)
 ], AffCampaign.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -595,7 +596,7 @@ __decorate([
 ], AffConversion.prototype, "conversionType", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffConversionStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_d = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffConversionStatus) === "function" ? _d : Object)
 ], AffConversion.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)(),
@@ -669,11 +670,11 @@ __decorate([
 ], AffPaymentRequest.prototype, "currency", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffPaymentStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_e = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffPaymentStatus) === "function" ? _e : Object)
 ], AffPaymentRequest.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.$Enums.AffPaymentMethod),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_f = typeof client_1.$Enums !== "undefined" && client_1.$Enums.AffPaymentMethod) === "function" ? _f : Object)
 ], AffPaymentRequest.prototype, "paymentMethod", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),

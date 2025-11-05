@@ -27,26 +27,7 @@ export declare class ProjectMediaService {
     }): Promise<any[]>;
     getTaskFiles(taskId: string, filters?: {
         type?: MediaType;
-    }): Promise<({
-        uploader: {
-            id: string;
-            firstName: string;
-            lastName: string;
-            avatar: string;
-        };
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        size: number;
-        type: import("@prisma/client").$Enums.MediaType;
-        filename: string;
-        url: string;
-        mimeType: string;
-        caption: string | null;
-        taskId: string;
-        uploadedBy: string;
-    })[]>;
+    }): Promise<any>;
     deleteFile(fileId: string, userId: string, type: 'task' | 'project' | 'chat'): Promise<boolean>;
     private validateFile;
     private getMediaType;
@@ -63,12 +44,12 @@ export declare class ProjectMediaService {
         };
     }>;
     getTaskFileStats(taskId: string): Promise<{
-        totalFiles: number;
-        totalSize: number;
+        totalFiles: any;
+        totalSize: any;
         byType: {
-            images: number;
-            documents: number;
-            videos: number;
+            images: any;
+            documents: any;
+            videos: any;
         };
     }>;
 }

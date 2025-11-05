@@ -32,106 +32,13 @@ export declare class AffiliateConversionService {
     approveConversion(conversionId: string, approvedBy: string): Promise<any>;
     rejectConversion(conversionId: string, rejectedBy: string, reason?: string): Promise<any>;
     getConversionStats(campaignId: string): Promise<{
-        total: number;
-        pending: number;
-        approved: number;
-        rejected: number;
+        total: any;
+        pending: any;
+        approved: any;
+        rejected: any;
         approvalRate: string;
         totalRevenue: number;
         totalCommission: number;
     }>;
-    getRecentConversions(limit?: number): Promise<({
-        link: {
-            campaign: {
-                name: string;
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                description: string | null;
-                status: import("@prisma/client").$Enums.AffCampaignStatus;
-                productImage: string | null;
-                commissionType: string;
-                startDate: Date | null;
-                endDate: Date | null;
-                productName: string;
-                productUrl: string;
-                commissionRate: import("@prisma/client/runtime/library").Decimal;
-                fixedAmount: import("@prisma/client/runtime/library").Decimal | null;
-                maxAffiliates: number | null;
-                requireApproval: boolean;
-                totalClicks: number;
-                totalConversions: number;
-                totalRevenue: import("@prisma/client/runtime/library").Decimal;
-                totalCommission: import("@prisma/client/runtime/library").Decimal;
-                creatorId: string;
-            };
-            affiliate: {
-                user: {
-                    id: string;
-                    email: string;
-                    firstName: string;
-                    lastName: string;
-                };
-            } & {
-                id: string;
-                isActive: boolean;
-                createdAt: Date;
-                updatedAt: Date;
-                description: string | null;
-                role: import("@prisma/client").$Enums.AffUserRole;
-                userId: string;
-                joinedAt: Date;
-                paymentMethod: import("@prisma/client").$Enums.AffPaymentMethod | null;
-                companyName: string | null;
-                businessType: string | null;
-                website: string | null;
-                bankAccount: string | null;
-                paypalEmail: string | null;
-                taxId: string | null;
-                lastActiveAt: Date | null;
-            };
-        } & {
-            id: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string | null;
-            expiresAt: Date | null;
-            title: string | null;
-            campaignId: string;
-            totalClicks: number;
-            totalConversions: number;
-            affiliateId: string;
-            trackingCode: string;
-            originalUrl: string;
-            shortUrl: string | null;
-            customAlias: string | null;
-            utmSource: string | null;
-            utmMedium: string | null;
-            utmCampaign: string | null;
-            utmContent: string | null;
-            totalEarnings: import("@prisma/client/runtime/library").Decimal;
-        };
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        status: import("@prisma/client").$Enums.AffConversionStatus;
-        campaignId: string;
-        affiliateId: string;
-        orderId: string | null;
-        customerEmail: string | null;
-        saleAmount: import("@prisma/client/runtime/library").Decimal;
-        conversionType: string;
-        notes: string | null;
-        approvedAt: Date | null;
-        rejectedAt: Date | null;
-        linkId: string;
-        commission: import("@prisma/client/runtime/library").Decimal;
-        clickId: string | null;
-        currency: string;
-        convertedAt: Date;
-        paidAt: Date | null;
-        validatedBy: string | null;
-    })[]>;
+    getRecentConversions(limit?: number): Promise<any>;
 }

@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Task = exports.TaskCount = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -59,15 +60,15 @@ __decorate([
 ], Task.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.TaskCategory),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_a = typeof client_1.TaskCategory !== "undefined" && client_1.TaskCategory) === "function" ? _a : Object)
 ], Task.prototype, "category", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.TaskPriority),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_b = typeof client_1.TaskPriority !== "undefined" && client_1.TaskPriority) === "function" ? _b : Object)
 ], Task.prototype, "priority", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.TaskStatus),
-    __metadata("design:type", String)
+    __metadata("design:type", typeof (_c = typeof client_1.TaskStatus !== "undefined" && client_1.TaskStatus) === "function" ? _c : Object)
 ], Task.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),

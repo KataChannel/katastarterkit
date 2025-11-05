@@ -24,6 +24,6 @@ export declare class CartService {
     private getCartCacheKey;
     private invalidateCartCache;
     cleanupExpiredCarts(): Promise<{
-        deletedCount: number;
+        deletedCount: any;
     }>;
 }

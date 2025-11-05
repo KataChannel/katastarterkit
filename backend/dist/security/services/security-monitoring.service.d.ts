@@ -65,29 +65,12 @@ export declare class SecurityMonitoringService {
             endDate: Date;
         };
         summary: {
-            totalAuditLogs: number;
-            securityEventsBySeverity: Record<string, number>;
-            accessControlChanges: number;
+            totalAuditLogs: any;
+            securityEventsBySeverity: any;
+            accessControlChanges: any;
         };
-        userActivities: {
-            userId: string;
-            eventType: string;
-            count: number;
-        }[];
-        accessChanges: {
-            id: string;
-            action: string;
-            userId: string;
-            user: {
-                id: string;
-                email: string;
-                username: string;
-            };
-            resourceType: string;
-            resourceId: string;
-            timestamp: Date;
-            details: import("@prisma/client/runtime/library").JsonValue;
-        }[];
+        userActivities: any;
+        accessChanges: any;
     }>;
     performSecurityAssessment(): Promise<SecurityAssessment>;
     private assessAuthentication;

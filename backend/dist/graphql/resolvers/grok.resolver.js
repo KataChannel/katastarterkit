@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GrokResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -75,7 +76,6 @@ __decorate([
 ], GrokResolver.prototype, "improveContent", null);
 exports.GrokResolver = GrokResolver = __decorate([
     (0, graphql_1.Resolver)(),
-    __metadata("design:paramtypes", [grok_service_1.GrokService,
-        post_service_1.PostService])
+    __metadata("design:paramtypes", [typeof (_a = typeof grok_service_1.GrokService !== "undefined" && grok_service_1.GrokService) === "function" ? _a : Object, post_service_1.PostService])
 ], GrokResolver);
 //# sourceMappingURL=grok.resolver.js.map
