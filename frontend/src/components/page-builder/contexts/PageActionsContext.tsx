@@ -397,24 +397,31 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   
   const handleBlockCopy = useCallback(async (block: PageBlock) => {
     try {
-      const { page, refetch } = pageState;
+      const { page, blocks, refetch, setBlocks } = pageState;
       
       if (!page?.id) {
         toast.error('No page selected');
         return;
       }
       
-      // Create a copy of the block with new ID and adjusted order
-      const copiedContent = JSON.parse(JSON.stringify(block.content)); // Deep copy
+      // Find the position of the original block
+      const originalIndex = blocks.findIndex(b => b.id === block.id);
+      if (originalIndex === -1) {
+        toast.error('Block not found');
+        return;
+      }
+      
+      // Create a copy of the block with deep clone
+      const copiedContent = JSON.parse(JSON.stringify(block.content));
       const copiedStyle = block.style ? JSON.parse(JSON.stringify(block.style)) : undefined;
       
       const input = {
         type: block.type,
         content: copiedContent,
         style: copiedStyle,
-        // order is NOT sent, backend will auto-calculate
       };
       
+      // Add the new block
       await addBlock(input);
       
       pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_ADD, 'Block copied', { 
@@ -422,17 +429,55 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         type: block.type 
       });
       
+      // Refetch to get the new block
       const result = await refetch();
       
-      // Push to history after successful copy
       if (result?.data?.page?.blocks) {
-        history.pushHistory(result.data.page.blocks, `Copied ${block.type} block`);
+        const updatedBlocks = result.data.page.blocks;
+        
+        // Find the newly created block (should be at the end)
+        const newBlock = updatedBlocks[updatedBlocks.length - 1];
+        
+        // Reorder: move new block right after the original
+        const reorderedBlocks = [...updatedBlocks];
+        const newBlockAtEnd = reorderedBlocks.pop(); // Remove from end
+        
+        if (newBlockAtEnd) {
+          // Insert right after the original block (originalIndex + 1)
+          reorderedBlocks.splice(originalIndex + 1, 0, newBlockAtEnd);
+          
+          // Update order property for all blocks
+          const finalBlocks = reorderedBlocks.map((b, index) => ({
+            ...b,
+            order: index,
+          }));
+          
+          // Update local state first
+          setBlocks(finalBlocks);
+          
+          // Update order on server
+          const updates = finalBlocks.map((b, index) => ({
+            id: b.id,
+            order: index,
+          }));
+          await updateBlocksOrder(updates);
+          
+          pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_REORDER, 'Blocks reordered after copy', { 
+            count: finalBlocks.length 
+          });
+          
+          // Final refetch to ensure consistency
+          await refetch();
+        }
+        
+        // Push to history
+        history.pushHistory(updatedBlocks, `Copied ${block.type} block`);
       }
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_ADD, 'Failed to copy block', { error });
       toast.error(error?.message || 'Failed to copy block');
     }
-  }, [addBlock, pageState, history]);
+  }, [addBlock, updateBlocksOrder, pageState, history]);
   
   const handleBlocksReorder = useCallback(async (newBlocks: PageBlock[]) => {
     try {

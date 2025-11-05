@@ -94,6 +94,19 @@ export function SortableBlockWrapper({
             ? 'ring-4 ring-blue-400 shadow-2xl scale-102' 
             : 'hover:ring-2 hover:ring-gray-300'
         }`}>
+          {/* Block Order Number Badge */}
+          {isEditing && (
+            <div className="absolute -top-2 -left-2 z-20">
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md transition-all ${
+                isDragging 
+                  ? 'bg-blue-500 text-white scale-110' 
+                  : 'bg-gray-700 text-white group-hover:bg-blue-600'
+              }`}>
+                {block.order + 1}
+              </div>
+            </div>
+          )}
+
           {/* Drag Handle + Control Buttons - Only visible in edit mode */}
           {isEditing && (
             <div className="absolute -left-8 top-4 flex flex-col gap-1 z-10">
