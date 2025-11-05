@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ShoppingCart, Eye, Settings, Trash2 } from 'lucide-react';
 import { PageBlock, ProductCarouselBlockContent } from '@/types/page-builder';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@apollo/client';
+import { GET_PRODUCTS } from '@/graphql/product.queries';
 import { useDynamicQuery } from '@/lib/graphql/dynamic-hooks';
 import { ProductCarouselSettingsDialog } from './ProductCarouselSettingsDialog';
 import Image from 'next/image';
@@ -18,6 +20,7 @@ interface ProductCarouselBlockProps {
 
 interface Product {
   id: string;
+  // Old schema (ext_sanphamhoadon)
   ten?: string;
   tensanpham?: string;
   gia?: number;
@@ -28,6 +31,26 @@ interface Product {
   danhmuc?: string;
   noibat?: boolean;
   banchay?: boolean;
+  // New schema (Product table)
+  name?: string;
+  ten2?: string;
+  ma?: string;
+  price?: number;
+  dgia?: number;
+  unit?: string;
+  dvt?: string;
+  thumbnail?: string;
+  image?: string;
+  description?: string;
+  shortDesc?: string;
+  slug?: string;
+  isFeatured?: boolean;
+  isOnSale?: boolean;
+  category?: {
+    id: string;
+    name?: string;
+    ten?: string;
+  };
 }
 
 export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
@@ -58,12 +81,56 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  // Fetch products using dynamic GraphQL
-  const { data: productsData, loading } = useDynamicQuery('GET_ALL', 'ext_sanphamhoadon', {
+  // Determine data source table
+  const dataSourceTable = editContent.dataSourceTable || 'ext_sanphamhoadon';
+  
+  // Fetch products based on data source
+  // For new Product table, use GraphQL query
+  const { 
+    data: newProductsData, 
+    loading: newProductsLoading 
+  } = useQuery(GET_PRODUCTS, {
+    variables: { 
+      input: { 
+        limit: editContent.itemsToShow || 8,
+        page: 1 
+      } 
+    },
+    skip: dataSourceTable !== 'Product',
     fetchPolicy: 'cache-first',
   });
 
-  const rawProducts: Product[] = productsData?.getext_sanphamhoadons || [];
+  // For old ext_sanphamhoadon table, use dynamic query
+  const { 
+    data: oldProductsData, 
+    loading: oldProductsLoading 
+  } = useDynamicQuery('GET_ALL', dataSourceTable, {
+    fetchPolicy: 'cache-first',
+    skip: dataSourceTable === 'Product',
+  });
+
+  const loading = dataSourceTable === 'Product' ? newProductsLoading : oldProductsLoading;
+  const productsData = dataSourceTable === 'Product' ? newProductsData : oldProductsData;
+
+  // Extract products from response
+  const rawProducts: Product[] = React.useMemo(() => {
+    if (!productsData) return [];
+    
+    // For Product table (new schema)
+    if (dataSourceTable === 'Product') {
+      return productsData?.products?.items || [];
+    }
+    
+    // For ext_sanphamhoadon table (old schema)
+    if (dataSourceTable === 'ext_sanphamhoadon') {
+      return productsData?.getext_sanphamhoadons || [];
+    }
+    
+    // Generic fallback - try to find array in response
+    const keys = Object.keys(productsData);
+    const arrayKey = keys.find(key => Array.isArray(productsData[key]));
+    return arrayKey ? productsData[arrayKey] : [];
+  }, [productsData, dataSourceTable]);
 
   // Filter products based on settings
   const filteredProducts = React.useMemo(() => {
@@ -72,14 +139,21 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
     // Apply filter type
     switch (editContent.filterType) {
       case 'featured':
-        products = products.filter(p => p.noibat === true);
+        products = products.filter(p => p.noibat === true || p.isFeatured === true);
         break;
       case 'bestseller':
-        products = products.filter(p => p.banchay === true);
+        products = products.filter(p => p.banchay === true || p.isOnSale === true);
         break;
       case 'category':
         if (editContent.category) {
-          products = products.filter(p => p.danhmuc === editContent.category);
+          products = products.filter(p => {
+            // Old schema: danhmuc field
+            if (p.danhmuc === editContent.category) return true;
+            // New schema: category object
+            if (p.category?.name === editContent.category || p.category?.ten === editContent.category) return true;
+            if (p.category?.id === editContent.category) return true;
+            return false;
+          });
         }
         break;
       case 'custom':
@@ -160,12 +234,31 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
   };
 
   const getProductName = (product: Product) => {
-    return product.ten || product.tensanpham || 'Sản phẩm';
+    return product.name || product.ten || product.ten2 || product.tensanpham || 'Sản phẩm';
   };
 
   const getProductPrice = (product: Product) => {
-    return product.gia || product.dongia || 0;
+    return product.price || product.dgia || product.gia || product.dongia || 0;
   };
+
+  const getProductImage = (product: Product) => {
+    return product.thumbnail || product.image || product.hinhanh || '';
+  };
+
+  const getProductUnit = (product: Product) => {
+    return product.unit || product.dvt || product.donvitinh || '';
+  };
+
+  // Debug logging
+  useEffect(() => {
+    console.log('[ProductCarousel] Debug Info:', {
+      dataSourceTable,
+      productsData,
+      rawProducts: rawProducts.length,
+      loading,
+      editContent
+    });
+  }, [dataSourceTable, productsData, rawProducts, loading, editContent]);
 
   if (!isEditable) {
     // Frontend display mode
@@ -202,8 +295,28 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
             )}
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+              <p className="mt-4 text-gray-600">Đang tải sản phẩm...</p>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && filteredProducts.length === 0 && (
+            <div className="text-center py-12 bg-white rounded-lg">
+              <ShoppingCart className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600 text-lg">Không có sản phẩm nào</p>
+              <p className="text-gray-500 text-sm mt-2">
+                DataSource: {dataSourceTable} | Filter: {editContent.filterType}
+              </p>
+            </div>
+          )}
+
           {/* Carousel */}
-          <div className="relative overflow-hidden">
+          {!loading && filteredProducts.length > 0 && (
+            <div className="relative overflow-hidden">
             <div
               ref={carouselRef}
               className="flex transition-transform duration-300 ease-in-out"
@@ -220,9 +333,9 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
                   <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
                     {/* Product Image */}
                     <div className="relative aspect-square bg-gray-200">
-                      {product.hinhanh ? (
+                      {getProductImage(product) ? (
                         <Image
-                          src={product.hinhanh}
+                          src={getProductImage(product)}
                           alt={getProductName(product)}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -250,8 +363,8 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
                           <p className="text-lg font-bold text-primary">
                             {formatPrice(getProductPrice(product))}
                           </p>
-                          {product.donvitinh && (
-                            <p className="text-xs text-gray-500">/{product.donvitinh}</p>
+                          {getProductUnit(product) && (
+                            <p className="text-xs text-gray-500">/{getProductUnit(product)}</p>
                           )}
                         </div>
                       </div>
@@ -267,9 +380,10 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
               ))}
             </div>
           </div>
+          )}
 
           {/* View All Button */}
-          {editContent.showViewAllButton && editContent.viewAllLink && (
+          {!loading && filteredProducts.length > 0 && editContent.showViewAllButton && editContent.viewAllLink && (
             <div className="text-center mt-6">
               <Link href={editContent.viewAllLink}>
                 <Button variant="outline" size="lg">
