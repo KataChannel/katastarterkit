@@ -474,47 +474,43 @@ export default function ProductsPage() {
         }}
       />
 
-      {/* Import/Export Dialog mới với Drag-Drop Mapping */}
+      {/* Import/Export Dialog mới với Drag-Drop Mapping - Mobile First + Scrollable */}
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileSpreadsheet className="h-5 w-5" />
-              Import Sản Phẩm với Drag-Drop Mapping
+        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-[85vw] h-[95vh] flex flex-col p-0">
+          {/* Header - Fixed */}
+          <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b">
+            <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <FileSpreadsheet className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              Import Sản Phẩm (Drag-Drop)
             </DialogTitle>
-            <DialogDescription>
-              Copy dữ liệu từ Excel, JSON hoặc Text → Preview → Drag-Drop Mapping → Import vào database
+            <DialogDescription className="text-xs sm:text-sm mt-1">
+              Wizard 4 bước: Nhập → Preview → Mapping → Import
             </DialogDescription>
           </DialogHeader>
           
-          {/* Quick Guide */}
-          <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-sm text-blue-900 dark:text-blue-100">
-              <strong>Hướng dẫn nhanh:</strong>
-              <ol className="list-decimal list-inside mt-2 space-y-1">
-                <li>Copy dữ liệu từ Excel (bao gồm header) → Paste vào ô textarea</li>
-                <li>Click &quot;Preview Dữ Liệu&quot; → Hệ thống load schema Product</li>
-                <li><strong>Drag-Drop:</strong> Kéo field bên trái → Thả vào field bên phải</li>
-                <li>Kiểm tra: Cam = Required chưa map, Xanh lá = Đã map ✓</li>
-                <li>Click &quot;Import&quot; khi validation hoàn tất</li>
-              </ol>
-            </AlertDescription>
-          </Alert>
+          {/* Content - Scrollable */}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+            <DataImportComponent
+              modelName="Product"
+              onImportComplete={(result) => {
+                console.log('Import result:', result);
+                if (result.success) {
+                  refetch();
+                  toast.success(`✅ Import thành công ${result.successRows || 0} sản phẩm`);
+                  setImportDialogOpen(false);
+                } else {
+                  toast.error(`❌ Import thất bại: ${result.errors?.[0] || 'Unknown error'}`);
+                }
+              }}
+            />
+          </div>
           
-          <DataImportComponent
-            modelName="Product"
-            onImportComplete={(result) => {
-              console.log('Import result:', result);
-              if (result.success) {
-                refetch();
-                toast.success(`Import thành công ${result.successRows || 0} sản phẩm`);
-                setImportDialogOpen(false);
-              } else {
-                toast.error(`Import thất bại: ${result.errors?.[0] || 'Unknown error'}`);
-              }
-            }}
-          />
+          {/* Footer - Fixed (Optional help text) */}
+          <div className="px-4 sm:px-6 py-3 border-t bg-muted/50">
+            <p className="text-xs text-muted-foreground text-center">
+              💡 Mẹo: Sử dụng Ctrl+C để copy từ Excel, Ctrl+V để paste. Mobile: Long press → Copy/Paste
+            </p>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

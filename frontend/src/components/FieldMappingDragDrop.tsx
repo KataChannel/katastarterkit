@@ -203,16 +203,16 @@ export function FieldMappingDragDrop({
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-4">
-        {/* Header với stats */}
+        {/* Header với stats - Mobile optimized */}
         <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Mapping Fields</CardTitle>
+          <CardHeader className="pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <CardTitle className="text-base sm:text-lg">Mapping Fields</CardTitle>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleReset}
-                className="gap-2"
+                className="gap-2 self-start sm:self-auto"
               >
                 <RotateCcw className="w-4 h-4" />
                 Reset
@@ -220,28 +220,28 @@ export function FieldMappingDragDrop({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{stats.totalSource}</div>
-                <div className="text-sm text-muted-foreground">Nguồn</div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="text-center p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <div className="text-2xl sm:text-3xl font-bold text-blue-600">{stats.totalSource}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Nguồn</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{stats.totalMapped}</div>
-                <div className="text-sm text-muted-foreground">Đã map</div>
+              <div className="text-center p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                <div className="text-2xl sm:text-3xl font-bold text-green-600">{stats.totalMapped}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Đã map</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">
+              <div className="text-center p-3 bg-orange-50 dark:bg-orange-950 rounded-lg">
+                <div className="text-2xl sm:text-3xl font-bold text-orange-600">
                   {stats.requiredMapped}/{stats.totalRequired}
                 </div>
-                <div className="text-sm text-muted-foreground">Bắt buộc</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Bắt buộc</div>
               </div>
-              <div className="text-center">
+              <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                 {stats.isComplete ? (
                   <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto" />
                 ) : (
                   <XCircle className="w-8 h-8 text-red-600 mx-auto" />
                 )}
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs sm:text-sm text-muted-foreground mt-1">
                   {stats.isComplete ? 'Hoàn tất' : 'Chưa xong'}
                 </div>
               </div>
@@ -251,7 +251,7 @@ export function FieldMappingDragDrop({
             {validationErrors.length > 0 && (
               <Alert className="mt-4 border-red-500 bg-red-50 dark:bg-red-950">
                 <AlertTriangle className="w-4 h-4 text-red-600" />
-                <AlertDescription className="text-red-600">
+                <AlertDescription className="text-sm text-red-900 dark:text-red-100">
                   <ul className="list-disc list-inside space-y-1">
                     {validationErrors.map((error, idx) => (
                       <li key={idx}>{error}</li>
@@ -263,40 +263,50 @@ export function FieldMappingDragDrop({
           </CardContent>
         </Card>
 
-        {/* Hướng dẫn */}
-        <Alert>
-          <AlertDescription>
-            💡 <strong>Hướng dẫn:</strong> Kéo field từ bên trái (Dữ liệu nguồn) và thả vào
-            field tương ứng bên phải (Database). Thả vào &quot;Unmap&quot; để xóa mapping.
+        {/* Hướng dẫn - Mobile friendly */}
+        <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+          <AlertDescription className="text-sm">
+            💡 <strong>Hướng dẫn:</strong>
+            <div className="mt-2 space-y-1">
+              <div>• <strong>Kéo thả:</strong> Kéo field từ bên trái → Thả vào field bên phải</div>
+              <div>• <strong className="text-orange-600">Cam</strong> = Field bắt buộc phải map</div>
+              <div>• <strong className="text-green-600">Xanh lá</strong> = Đã map thành công</div>
+              <div>• <strong className="text-red-600">Đỏ (Unmap)</strong> = Kéo vào đây để xóa mapping</div>
+            </div>
           </AlertDescription>
         </Alert>
 
-        {/* Mapping interface */}
+        {/* Mapping interface - Responsive layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Source Fields - Bên trái */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Dữ Liệu Nguồn ({sourceFields.length})</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm sm:text-base flex items-center justify-between">
+                <span>📋 Dữ Liệu Nguồn</span>
+                <Badge variant="outline">{sourceFields.length}</Badge>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px] pr-4">
+              <ScrollArea className="h-[300px] sm:h-[400px] pr-2 sm:pr-4">
                 <div className="space-y-2">
                   {sourceFields.map((field) => {
                     const targetField = getTargetFieldForSource(field);
                     return (
-                      <div key={field} className="flex items-center gap-2">
+                      <div key={field} className="flex flex-col sm:flex-row sm:items-center gap-2">
                         <Draggable id={field}>
-                          <div className="flex-1 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-blue-200 dark:border-blue-800 cursor-move hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">
-                            <div className="font-medium">{field}</div>
+                          <div className="flex-1 p-2 sm:p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border-2 border-blue-200 dark:border-blue-800 cursor-move hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors active:scale-95">
+                            <div className="font-medium text-sm sm:text-base truncate" title={field}>
+                              {field}
+                            </div>
                           </div>
                         </Draggable>
 
                         {targetField && (
                           <>
-                            <ArrowRight className="w-4 h-4 text-green-600 flex-shrink-0" />
+                            <ArrowRight className="w-4 h-4 text-green-600 flex-shrink-0 hidden sm:block" />
                             <div className="flex-1 p-2 bg-green-50 dark:bg-green-950 rounded border border-green-200 dark:border-green-800 text-sm">
-                              <div className="font-medium">{targetField.name}</div>
-                              <div className="text-xs text-muted-foreground">
+                              <div className="font-medium truncate">{targetField.name}</div>
+                              <div className="text-xs text-muted-foreground truncate">
                                 {SchemaInspectorService.formatFieldType(targetField)}
                               </div>
                             </div>
@@ -312,13 +322,14 @@ export function FieldMappingDragDrop({
 
           {/* Target Fields - Bên phải */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                Database - {modelName} ({targetFields.length})
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm sm:text-base flex items-center justify-between">
+                <span className="truncate">🗄️ Database - {modelName}</span>
+                <Badge variant="outline">{targetFields.length}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px] pr-4">
+              <ScrollArea className="h-[300px] sm:h-[400px] pr-2 sm:pr-4">
                 <div className="space-y-2">
                   {targetFields.map((field) => {
                     const isMapped = isFieldMapped(field.name);
@@ -327,32 +338,32 @@ export function FieldMappingDragDrop({
                     return (
                       <Droppable key={field.name} id={field.name}>
                         <div
-                          className={`p-3 rounded-lg border-2 transition-colors ${
+                          className={`p-2 sm:p-3 rounded-lg border-2 transition-all ${
                             isMapped
-                              ? 'bg-green-50 dark:bg-green-950 border-green-500 dark:border-green-600'
+                              ? 'bg-green-50 dark:bg-green-950 border-green-500 dark:border-green-600 shadow-sm'
                               : isRequired
-                              ? 'bg-orange-50 dark:bg-orange-950 border-orange-300 dark:border-orange-700'
+                              ? 'bg-orange-50 dark:bg-orange-950 border-orange-300 dark:border-orange-700 animate-pulse'
                               : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700'
-                          } ${!isMapped && 'hover:border-blue-400 dark:hover:border-blue-600'}`}
+                          } ${!isMapped && 'hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-md'}`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium truncate">
+                              <div className="font-medium text-sm sm:text-base truncate" title={field.name}>
                                 {SchemaInspectorService.formatFieldName(field)}
                               </div>
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-xs text-muted-foreground truncate">
                                 {SchemaInspectorService.formatFieldType(field)}
                               </div>
                             </div>
-                            <div className="flex-shrink-0 flex gap-1">
+                            <div className="flex-shrink-0 flex flex-col sm:flex-row gap-1">
                               {isRequired && (
-                                <Badge variant="destructive" className="text-xs">
-                                  Required
+                                <Badge className="text-xs bg-orange-600 hover:bg-orange-700">
+                                  Bắt buộc
                                 </Badge>
                               )}
                               {isMapped && (
-                                <Badge variant="default" className="text-xs bg-green-600">
-                                  Mapped
+                                <Badge className="text-xs bg-green-600 hover:bg-green-700">
+                                  ✓
                                 </Badge>
                               )}
                             </div>
@@ -362,12 +373,12 @@ export function FieldMappingDragDrop({
                     );
                   })}
 
-                  {/* Unmap zone */}
+                  {/* Unmap zone - Mobile friendly */}
                   <Droppable id="unmap-zone">
-                    <div className="p-4 rounded-lg border-2 border-dashed border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950 text-center hover:border-red-500 dark:hover:border-red-500 transition-colors">
-                      <XCircle className="w-6 h-6 mx-auto mb-2 text-red-600" />
-                      <div className="text-sm font-medium text-red-600">
-                        Thả vào đây để xóa mapping
+                    <div className="p-4 sm:p-6 rounded-lg border-2 border-dashed border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950 text-center hover:border-red-500 dark:hover:border-red-500 transition-all hover:shadow-lg">
+                      <XCircle className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-red-600" />
+                      <div className="text-xs sm:text-sm font-medium text-red-600">
+                        🗑️ Thả vào đây để xóa mapping
                       </div>
                     </div>
                   </Droppable>
@@ -378,11 +389,11 @@ export function FieldMappingDragDrop({
         </div>
       </div>
 
-      {/* Drag Overlay */}
+      {/* Drag Overlay - Enhanced */}
       <DragOverlay>
         {activeId ? (
-          <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg border-2 border-blue-500 shadow-lg">
-            <div className="font-medium">{activeId}</div>
+          <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg border-2 border-blue-500 shadow-2xl transform scale-105">
+            <div className="font-medium text-sm sm:text-base">{activeId}</div>
           </div>
         ) : null}
       </DragOverlay>
