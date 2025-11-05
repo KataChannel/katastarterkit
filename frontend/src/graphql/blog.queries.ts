@@ -228,6 +228,36 @@ export interface BlogsByCategoryResponse {
   blogsByCategory: BlogsResponse;
 }
 
+// ============================================================================
+// MUTATIONS (Admin)
+// ============================================================================
+
+export const CREATE_BLOG = gql`
+  mutation CreateBlog($input: CreateBlogInput!) {
+    createBlog(input: $input) {
+      id
+      title
+      slug
+    }
+  }
+`;
+
+export const UPDATE_BLOG = gql`
+  mutation UpdateBlog($input: UpdateBlogInput!) {
+    updateBlog(input: $input) {
+      id
+      title
+      slug
+    }
+  }
+`;
+
+export const DELETE_BLOG = gql`
+  mutation DeleteBlog($id: ID!) {
+    deleteBlog(id: $id)
+  }
+`;
+
 export interface RelatedBlogsResponse {
   relatedBlogs: Blog[];
 }
