@@ -112,6 +112,8 @@ services:
       MINIO_ACCESS_KEY: minio-admin
       MINIO_SECRET_KEY: minio-secret-2025
       MINIO_BUCKET_NAME: shopuploads
+      # Support Chat AI Configuration
+      GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY}
     ports:
       - "12001:4000"
     depends_on:

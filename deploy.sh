@@ -42,6 +42,16 @@ if [ ! -f ".env.rausach" ] || [ ! -f ".env.tazagroup" ]; then
     exit 1
 fi
 
+# Check for .env.production (secrets)
+if [ -f ".env.production" ]; then
+    echo "🔐 Found .env.production (secrets will be synced)"
+    HAS_SECRETS=true
+else
+    echo "⚠️  No .env.production found (will use server's existing secrets)"
+    echo "   To deploy with new secrets, run: ./create-env-production.sh"
+    HAS_SECRETS=false
+fi
+
 # Step 0: Build backend locally
 echo "🔨 Step 0: Building backend..."
 if [ ! -d "$PROJECT_PATH/backend/dist" ]; then
@@ -97,11 +107,30 @@ rsync -avz \
     .env.tazagroup \
     ${SERVER}:${REMOTE_DIR}/
 
+# Sync .env.production if exists (secrets)
+if [ "$HAS_SECRETS" = true ]; then
+    echo "🔐 Syncing secrets (.env.production)..."
+    rsync -avz .env.production ${SERVER}:${REMOTE_DIR}/
+    
+    # Set secure permissions on server
+    ssh ${SERVER} "chmod 600 ${REMOTE_DIR}/.env.production"
+    echo "  ✅ Secrets synced and secured (chmod 600)"
+fi
+
 echo ""
 echo "🔨 Step 2: Building and deploying containers..."
 
 ssh ${SERVER} << 'ENDSSH'
     cd /root/shoprausach
+    
+    # Load secrets if .env.production exists
+    if [ -f ".env.production" ]; then
+        echo "🔐 Loading secrets from .env.production..."
+        set -a
+        source .env.production
+        set +a
+        echo "  ✅ Secrets loaded"
+    fi
     
     # Stop existing containers
     echo "  → Stopping existing containers..."
@@ -118,6 +147,17 @@ ssh ${SERVER} << 'ENDSSH'
     # Wait for services
     echo "  → Waiting for services to be ready..."
     sleep 30
+    
+    # Verify secrets in container
+    if [ -f ".env.production" ]; then
+        echo ""
+        echo "🔍 Verifying secrets in containers..."
+        if docker exec shopbackend env | grep -q "GOOGLE_GEMINI_API_KEY"; then
+            echo "  ✅ GOOGLE_GEMINI_API_KEY loaded in shopbackend"
+        else
+            echo "  ⚠️  GOOGLE_GEMINI_API_KEY not found in shopbackend"
+        fi
+    fi
     
     # Show status
     echo ""
