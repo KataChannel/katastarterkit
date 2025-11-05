@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FieldMappingDragDrop } from '@/components/FieldMappingDragDrop';
 import { 
   FileSpreadsheet, 
   FileText, 
@@ -45,6 +46,7 @@ export function DataImportComponent({ modelName = 'product', onImportComplete }:
   const [rawData, setRawData] = useState<string>('');
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
+  const [mappingConfig, setMappingConfig] = useState<Record<string, string>>({});
   const [selectedModel, setSelectedModel] = useState(modelName);
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<any>(null);
@@ -137,6 +139,11 @@ export function DataImportComponent({ modelName = 'product', onImportComplete }:
       return;
     }
 
+    if (Object.keys(mappingConfig).length === 0) {
+      toast.error('Vui lòng mapping các trường dữ liệu');
+      return;
+    }
+
     setIsImporting(true);
     
     try {
@@ -159,10 +166,10 @@ export function DataImportComponent({ modelName = 'product', onImportComplete }:
         });
       }
 
-      // Apply field mappings
+      // Apply field mappings từ drag-drop
       const mappedData = allData.map(row => {
         const mapped: any = {};
-        fieldMappings.forEach(({ source, target }) => {
+        Object.entries(mappingConfig).forEach(([source, target]) => {
           mapped[target] = row[source];
         });
         return mapped;
@@ -313,30 +320,6 @@ export function DataImportComponent({ modelName = 'product', onImportComplete }:
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Field Mapping */}
-            <div className="space-y-2">
-              <Label>Mapping Trường Dữ Liệu</Label>
-              <div className="grid gap-2">
-                {fieldMappings.map((mapping, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      value={mapping.source}
-                      onChange={(e) => updateMapping(index, 'source', e.target.value)}
-                      placeholder="Source field"
-                      className="flex-1"
-                    />
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                    <Input
-                      value={mapping.target}
-                      onChange={(e) => updateMapping(index, 'target', e.target.value)}
-                      placeholder="Target field"
-                      className="flex-1"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Data Preview Table */}
             <div className="border rounded-lg overflow-auto max-h-[400px]">
               <Table>
@@ -360,26 +343,39 @@ export function DataImportComponent({ modelName = 'product', onImportComplete }:
                 </TableBody>
               </Table>
             </div>
-
-            <Button 
-              onClick={handleImport}
-              className="w-full"
-              disabled={isImporting}
-            >
-              {isImporting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Đang import...
-                </>
-              ) : (
-                <>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Import vào {selectedModel}
-                </>
-              )}
-            </Button>
           </CardContent>
         </Card>
+      )}
+
+      {/* Drag-Drop Field Mapping */}
+      {previewData && previewData.headers.length > 0 && (
+        <FieldMappingDragDrop
+          sourceFields={previewData.headers}
+          modelName={selectedModel}
+          onMappingChange={setMappingConfig}
+        />
+      )}
+
+      {/* Import Button */}
+      {previewData && (
+        <Button 
+          onClick={handleImport}
+          className="w-full"
+          size="lg"
+          disabled={isImporting || Object.keys(mappingConfig).length === 0}
+        >
+          {isImporting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Đang import...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Import {previewData.totalRows} dòng vào {selectedModel}
+            </>
+          )}
+        </Button>
       )}
 
       {/* Import Result */}

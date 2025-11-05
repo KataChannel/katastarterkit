@@ -3627,6 +3627,7 @@ type Query {
 
   """Lấy AI provider đang active"""
   getActiveAIProvider(providerType: AIProviderType): AIProvider
+  getAllModels: [String!]!
 
   """Get list of all available Prisma models"""
   getAvailableModels: [String!]!
@@ -3641,7 +3642,9 @@ type Query {
   getHomepage: Page
   getInvoice(id: ID!): ExtListhoadon!
   getInvoiceStats: InvoiceStats!
+  getMappableFields(modelName: String!): JSON!
   getMe: User!
+  getModelSchema(modelName: String!): JSON!
   getMyCustomTemplates(archived: Boolean, category: TemplateCategory): [CustomTemplate!]!
   getMyOrders(skip: Float = 0, take: Float = 20): OrderListResponse!
   getMyPosts: [Post!]!
@@ -3668,6 +3671,7 @@ type Query {
   getProductGroupsAdvanced(minGroupSize: Float! = 2, priceTolerance: Float! = 10): [ProductGroupAdvanced!]!
   getPublicTemplates(category: TemplateCategory): [CustomTemplate!]!
   getPublishedPages(pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
+  getRequiredFields(modelName: String!): [String!]!
   getReservedSlugs: [String!]!
   getRoleById(id: String!): Role!
   getSharedTasks(filters: TaskFilterInput): [Task!]!
@@ -3802,6 +3806,7 @@ type Query {
   """Search users using Orama full-text search engine"""
   searchUsers(input: OramaSearchInput!): OramaSearchResult!
   sidebarMenus: [MenuResponseDto!]!
+  suggestMapping(modelName: String!, sourceFields: [String!]!): JSON!
   supportAnalytics: SupportAnalytics!
   supportConversation(id: String!): SupportConversation!
   supportConversations(take: Int, where: SupportConversationWhereInput): [SupportConversation!]!
@@ -3841,6 +3846,7 @@ type Query {
   userReview(courseId: ID!): Review
   validateCart(sessionId: String): ValidateCartResponse!
   validateImportData(data: JSON!, requiredFields: [String!]!): JSON!
+  validateMapping(mapping: JSON!, modelName: String!): JSON!
   verifyCertificate(certificateNumber: String!): CertificateVerification!
 
   """Get API version"""

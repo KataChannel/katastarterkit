@@ -57,6 +57,7 @@ import { DynamicQueryGeneratorService } from './services/dynamic-query-generator
 // 🚀 NEW: Data Import/Export and Image Upload Services
 import { DataImportService } from '../services/data-import.service';
 import { ImageUploadService } from '../services/image-upload.service';
+import { SchemaInspectorService } from '../services/schema-inspector.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
@@ -168,6 +169,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     // 🚀 NEW: Data Import/Export and Image Upload Services
     DataImportService,
     ImageUploadService,
+    SchemaInspectorService,
     
     // Dynamic Query service
     DynamicQueryGeneratorService,

@@ -14,7 +14,7 @@ export default function DataManagementPage() {
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Quản Lý Dữ Liệu</h1>
         <p className="text-muted-foreground">
-          Import/Export dữ liệu và quản lý hình ảnh với Dynamic GraphQL
+          Import/Export dữ liệu với <strong>Drag & Drop Mapping</strong> - Powered by Dynamic GraphQL
         </p>
       </div>
 
@@ -40,7 +40,7 @@ export default function DataManagementPage() {
                 Import & Export Dữ Liệu
               </CardTitle>
               <CardDescription>
-                Copy dữ liệu từ Excel, Text, JSON → Edit → Mapping → Lưu vào Database
+                Copy dữ liệu từ Excel, Text, JSON → Preview → <strong>Drag-Drop Mapping</strong> → Import vào Database
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
@@ -57,28 +57,28 @@ export default function DataManagementPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">📋 Copy & Paste</CardTitle>
+                <CardTitle className="text-lg">🎯 Drag & Drop</CardTitle>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
-                Copy dữ liệu từ Excel hoặc paste text/JSON trực tiếp vào ô nhập liệu
+                Kéo thả trường dữ liệu giữa source và database. Trực quan, dễ dùng, nhanh chóng!
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">🔄 Auto Mapping</CardTitle>
+                <CardTitle className="text-lg">🤖 Auto Mapping</CardTitle>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
-                Tự động mapping trường dữ liệu hoặc tùy chỉnh mapping theo ý muốn
+                AI tự động gợi ý mapping dựa trên tên trường. Tiết kiệm 80% thời gian!
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">💾 Dynamic Save</CardTitle>
+                <CardTitle className="text-lg">✅ Real-time Validate</CardTitle>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
-                Sử dụng Dynamic GraphQL để lưu vào bất kỳ model nào trong database
+                Kiểm tra required fields, validation errors ngay lập tức khi mapping
               </CardContent>
             </Card>
           </div>
@@ -156,13 +156,24 @@ export default function DataManagementPage() {
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div>
-            <h3 className="font-semibold mb-2">Import Dữ Liệu:</h3>
+            <h3 className="font-semibold mb-2">Import Dữ Liệu với Drag-Drop Mapping:</h3>
             <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-              <li>Chọn Model/Bảng dữ liệu cần import</li>
+              <li>Chọn Model/Bảng dữ liệu cần import (ví dụ: product, category, post...)</li>
               <li>Copy dữ liệu từ Excel/Text/JSON và paste vào ô nhập liệu</li>
-              <li>Click "Preview Dữ Liệu" để xem trước</li>
-              <li>Kiểm tra và điều chỉnh Field Mapping nếu cần</li>
-              <li>Click "Import" để lưu vào database</li>
+              <li>Click &quot;Preview Dữ Liệu&quot; để xem trước và load database schema</li>
+              <li>
+                <strong>Drag & Drop Mapping:</strong>
+                <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                  <li>Hệ thống tự động suggest mapping (AI-powered)</li>
+                  <li>Kéo field từ bên TRÁI (dữ liệu nguồn)</li>
+                  <li>Thả vào field tương ứng bên PHẢI (database)</li>
+                  <li>Màu cam = Required fields phải map</li>
+                  <li>Màu xanh lá = Fields đã map thành công</li>
+                  <li>Thả vào vùng ĐỎ để xóa mapping</li>
+                </ul>
+              </li>
+              <li>Kiểm tra stats: Nguồn/Đã map/Bắt buộc/Status</li>
+              <li>Click &quot;Import&quot; khi validation ✅ hoàn tất</li>
             </ol>
           </div>
 
@@ -179,8 +190,8 @@ export default function DataManagementPage() {
 
           <div className="pt-2 border-t">
             <p className="text-xs text-muted-foreground">
-              💡 Tip: Tất cả các tính năng đều sử dụng Dynamic GraphQL Engine để tự động
-              tạo queries/mutations cho bất kỳ model nào trong database.
+              💡 <strong>Tip:</strong> Tất cả tính năng sử dụng Dynamic GraphQL Engine + Schema Inspector.
+              Database schema được load real-time từ Prisma DMMF. Drag-drop mapping với @dnd-kit.
             </p>
           </div>
         </CardContent>

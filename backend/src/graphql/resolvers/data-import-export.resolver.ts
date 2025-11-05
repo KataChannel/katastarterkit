@@ -3,13 +3,17 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { DataImportService, MappingConfig } from '../../services/data-import.service';
 import { ImageUploadService, ImageEditOptions, ImageMappingConfig } from '../../services/image-upload.service';
+import { SchemaInspectorService } from '../../services/schema-inspector.service';
 import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
 import { GraphQLJSON } from 'graphql-type-json';
 
 @Resolver()
 @UseGuards(JwtAuthGuard)
 export class DataImportExportResolver {
-  constructor(private readonly dataImportService: DataImportService) {}
+  constructor(
+    private readonly dataImportService: DataImportService,
+    private readonly schemaInspectorService: SchemaInspectorService,
+  ) {}
 
   @Mutation(() => GraphQLJSON)
   async importExcelData(
@@ -128,7 +132,10 @@ export class DataImportExportResolver {
 @Resolver()
 @UseGuards(JwtAuthGuard)
 export class ImageUploadResolver {
-  constructor(private readonly imageUploadService: ImageUploadService) {}
+  constructor(
+    private readonly imageUploadService: ImageUploadService,
+    private readonly schemaInspectorService: SchemaInspectorService,
+  ) {}
 
   @Mutation(() => GraphQLJSON)
   async uploadImage(
@@ -286,5 +293,48 @@ export class ImageUploadResolver {
     const results = await this.imageUploadService.batchUploadAndMap(processedItems);
 
     return results;
+  }
+
+  // ============================================================================
+  // SCHEMA INSPECTOR QUERIES
+  // ============================================================================
+
+  @Query(() => [String])
+  async getAllModels(): Promise<string[]> {
+    return this.schemaInspectorService.getAllModels();
+  }
+
+  @Query(() => GraphQLJSON)
+  async getModelSchema(@Args('modelName') modelName: string) {
+    return this.schemaInspectorService.getModelSchema(modelName);
+  }
+
+  @Query(() => GraphQLJSON)
+  async getMappableFields(@Args('modelName') modelName: string) {
+    const fields = await this.schemaInspectorService.getMappableFields(modelName);
+    return fields;
+  }
+
+  @Query(() => [String])
+  async getRequiredFields(@Args('modelName') modelName: string): Promise<string[]> {
+    return this.schemaInspectorService.getRequiredFields(modelName);
+  }
+
+  @Query(() => GraphQLJSON)
+  async suggestMapping(
+    @Args({ name: 'sourceFields', type: () => [String] }) sourceFields: string[],
+    @Args('modelName') modelName: string,
+  ) {
+    const targetFields = await this.schemaInspectorService.getMappableFields(modelName);
+    const suggestions = this.schemaInspectorService.suggestMapping(sourceFields, targetFields);
+    return suggestions;
+  }
+
+  @Query(() => GraphQLJSON)
+  async validateMapping(
+    @Args('modelName') modelName: string,
+    @Args({ name: 'mapping', type: () => GraphQLJSON }) mapping: Record<string, string>,
+  ) {
+    return this.schemaInspectorService.validateMapping(modelName, mapping);
   }
 }
