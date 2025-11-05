@@ -1,3 +1,0 @@
-module.exports=[462656,a=>{"use strict";var b=a.i(321248),c=a.i(651332),d=a.i(53627);function e(){let a=(0,d.useRouter)();return(0,c.useEffect)(()=>{a.replace("/projects/dashboard")},[a]),(0,b.jsx)("div",{className:"h-full flex items-center justify-center bg-background",children:(0,b.jsx)("div",{className:"animate-spin rounded-full h-12 w-12 border-b-2 border-primary"})})}a.s(["default",()=>e])}];
-
-//# sourceMappingURL=frontend_src_app_%28projects%29_projects_page_tsx_7eb2adb1._.js.map

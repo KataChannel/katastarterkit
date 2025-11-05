@@ -1,1 +1,0 @@
-{"version":3,"sources":["turbopack:///[project]/frontend/src/app/(auth)/phone/page.tsx"],"sourcesContent":["export default function PhonePage() {\n  return (\n    <div>\n      <h1>Trang xác thực bằng điện thoại</h1>\n    </div>\n  );\n}"],"names":[],"mappings":"2XAAe,SAAS,IACtB,MACE,CAAA,EAAA,EAAA,GAAA,EAAC,MAAA,UACC,CAAA,EAAA,EAAA,GAAA,EAAC,KAAA,UAAG,oCAGV"}

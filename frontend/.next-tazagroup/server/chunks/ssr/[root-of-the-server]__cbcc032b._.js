@@ -1,3 +1,0 @@
-module.exports=[193695,(a,b,c)=>{b.exports=a.x("next/dist/shared/lib/no-fallback-error.external.js",()=>require("next/dist/shared/lib/no-fallback-error.external.js"))},36399,a=>{a.n(a.i(35829))},65845,a=>{a.n(a.i(969177))},766581,a=>{a.n(a.i(7199))},269142,a=>{a.n(a.i(564215))},468517,a=>{a.n(a.i(152622))},729358,a=>{a.n(a.i(269921))},656597,a=>{"use strict";var b=a.i(182334);function c(){return(0,b.jsx)("div",{children:(0,b.jsx)("h1",{children:"Trang xác thực bằng điện thoại"})})}a.s(["default",()=>c])}];
-
-//# sourceMappingURL=%5Broot-of-the-server%5D__cbcc032b._.js.map

@@ -1,1 +1,0 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,473109,t=>{"use strict";var e=t.i(194970);t.s(["Maximize2",()=>e.default])}]);
