@@ -4,9 +4,17 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useProducts, useDeleteProduct } from '@/hooks/useProducts';
 import { Product, GetProductsInput } from '@/graphql/product.queries';
+import { DataImportComponent } from '@/components/DataImport';
 import { ImportExportDialog } from '@/components/admin/ImportExportDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -24,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Plus,
   Search,
@@ -35,6 +44,8 @@ import {
   Loader2,
   Download,
   Upload,
+  FileSpreadsheet,
+  Info,
 } from 'lucide-react';
 import { useActiveCategories } from '@/hooks/useCategories';
 import { toast } from 'sonner';
@@ -67,6 +78,7 @@ export default function ProductsPage() {
   });
   const [searchTerm, setSearchTerm] = React.useState('');
   const [importDialogOpen, setImportDialogOpen] = React.useState(false);
+  const [importExcelDialogOpen, setImportExcelDialogOpen] = React.useState(false);
 
   const { products, pagination, loading, error, refetch } = useProducts(filters);
   const { categories } = useActiveCategories();
@@ -168,9 +180,13 @@ export default function ProductsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+          <Button variant="outline" onClick={() => setImportExcelDialogOpen(true)}>
             <Upload className="h-4 w-4 mr-2" />
             Import Excel
+          </Button>
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <FileSpreadsheet className="h-4 w-4 mr-2" />
+            Import (Drag-Drop)
           </Button>
           <Button variant="outline" onClick={handleExport}>
             <Download className="h-4 w-4 mr-2" />
@@ -443,19 +459,64 @@ export default function ProductsPage() {
         </CardContent>
       </Card>
 
-      {/* Import/Export Dialog */}
+      {/* Import/Export Dialog cũ (Template-based) */}
       <ImportExportDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        title="Import Sản Phẩm từ Excel"
-        description="Tải file mẫu, điền thông tin sản phẩm, và upload để import hàng loạt"
+        open={importExcelDialogOpen}
+        onOpenChange={setImportExcelDialogOpen}
+        title="Import Sản Phẩm (Template)"
+        description="Tải template Excel, điền dữ liệu và upload lại để import hàng loạt"
         templateUrl="/api/product-import-export/template"
         importUrl="/api/product-import-export/import"
         onImportSuccess={() => {
           refetch();
           toast.success('Import sản phẩm thành công');
+          setImportExcelDialogOpen(false);
         }}
       />
+
+      {/* Import/Export Dialog mới với Drag-Drop Mapping */}
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5" />
+              Import Sản Phẩm với Drag-Drop Mapping
+            </DialogTitle>
+            <DialogDescription>
+              Copy dữ liệu từ Excel, JSON hoặc Text → Preview → Drag-Drop Mapping → Import vào database
+            </DialogDescription>
+          </DialogHeader>
+          
+          {/* Quick Guide */}
+          <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-sm text-blue-900 dark:text-blue-100">
+              <strong>Hướng dẫn nhanh:</strong>
+              <ol className="list-decimal list-inside mt-2 space-y-1">
+                <li>Copy dữ liệu từ Excel (bao gồm header) → Paste vào ô textarea</li>
+                <li>Click &quot;Preview Dữ Liệu&quot; → Hệ thống load schema Product</li>
+                <li><strong>Drag-Drop:</strong> Kéo field bên trái → Thả vào field bên phải</li>
+                <li>Kiểm tra: Cam = Required chưa map, Xanh lá = Đã map ✓</li>
+                <li>Click &quot;Import&quot; khi validation hoàn tất</li>
+              </ol>
+            </AlertDescription>
+          </Alert>
+          
+          <DataImportComponent
+            modelName="Product"
+            onImportComplete={(result) => {
+              console.log('Import result:', result);
+              if (result.success) {
+                refetch();
+                toast.success(`Import thành công ${result.successRows || 0} sản phẩm`);
+                setImportDialogOpen(false);
+              } else {
+                toast.error(`Import thất bại: ${result.errors?.[0] || 'Unknown error'}`);
+              }
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
