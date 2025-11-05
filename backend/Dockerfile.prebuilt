@@ -1,0 +1,31 @@
+# ============================================================================
+# Backend Dockerfile - Use Pre-built Artifacts  
+# Assumes node_modules and Prisma Client are already installed locally
+# This Dockerfile only copies the files - NO compilation on server
+# ============================================================================
+
+FROM oven/bun:1.1-alpine AS runner
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json bun.lockb* ./
+
+# Copy pre-installed node_modules (built locally with Prisma)
+COPY node_modules ./node_modules
+
+# Copy all source code
+COPY . .
+
+# Create logs directory
+RUN mkdir -p logs && chmod 777 logs
+
+# Expose port
+EXPOSE 14001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:14001/health || exit 1
+
+# Start with Bun (runs TypeScript directly)
+CMD ["bun", "run", "src/main.ts"]

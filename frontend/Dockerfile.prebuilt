@@ -1,0 +1,52 @@
+# ============================================================================
+# Frontend Dockerfile - Use Pre-built Artifacts
+# Assumes .next directory is already built locally
+# This Dockerfile only copies the built files - NO compilation on server
+# ============================================================================
+
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Install only production dependencies
+ENV NODE_ENV=production
+
+# Copy package files
+COPY package.json bun.lockb* package-lock.json* yarn.lock* pnpm-lock.yaml* ./
+
+# Install production dependencies with Bun (fast)
+RUN apk add --no-cache curl && \
+    curl -fsSL https://bun.sh/install | bash && \
+    /root/.bun/bin/bun install --production --frozen-lockfile || \
+    /root/.bun/bin/bun install --production
+
+# Copy pre-built .next directory (built locally)
+COPY .next ./.next
+
+# Copy public assets
+COPY public ./public
+
+# Copy Next.js config
+COPY next.config.js ./
+
+# Copy other necessary files
+COPY postcss.config.js* ./
+
+# Create nextjs user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Set ownership
+RUN chown -R nextjs:nodejs /app
+
+USER nextjs
+
+# Expose port
+EXPOSE 14000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:14000/api/health || exit 1
+
+# Start Next.js
+CMD ["/root/.bun/bin/bun", "run", "start"]
