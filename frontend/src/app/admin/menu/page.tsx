@@ -21,13 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Plus, Search } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import {
   DndContext,
   closestCenter,
@@ -231,19 +225,21 @@ export default function MenuManagementPage() {
                 className="pl-10"
               />
             </div>
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Lọc theo loại" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
-                <SelectItem value="SIDEBAR">Thanh bên</SelectItem>
-                <SelectItem value="HEADER">Đầu trang</SelectItem>
-                <SelectItem value="FOOTER">Chân trang</SelectItem>
-                <SelectItem value="MOBILE">Di động</SelectItem>
-                <SelectItem value="CUSTOM">Tùy chỉnh</SelectItem>
-              </SelectContent>
-            </Select>
+            <Combobox
+              value={selectedType}
+              onChange={setSelectedType}
+              options={[
+                { value: 'all', label: 'Tất cả' },
+                { value: 'SIDEBAR', label: 'Thanh bên' },
+                { value: 'HEADER', label: 'Đầu trang' },
+                { value: 'FOOTER', label: 'Chân trang' },
+                { value: 'MOBILE', label: 'Di động' },
+                { value: 'CUSTOM', label: 'Tùy chỉnh' },
+              ]}
+              placeholder="Lọc theo loại"
+              searchPlaceholder="Tìm loại menu..."
+              emptyMessage="Không tìm thấy loại menu."
+            />
           </div>
         </CardContent>
       </Card>

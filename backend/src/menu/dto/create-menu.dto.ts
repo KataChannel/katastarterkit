@@ -2,6 +2,7 @@ import { IsString, IsOptional, IsEnum, IsBoolean, IsInt, IsArray, IsObject, Leng
 import { MenuType, MenuTarget } from '@prisma/client';
 import { Field, InputType, Int } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
+import { Transform } from 'class-transformer';
 
 @InputType('CreateMenuInput')
 export class CreateMenuDto {
@@ -24,6 +25,7 @@ export class CreateMenuDto {
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsEnum(MenuType)
+  @Transform(({ value }) => value === '' ? undefined : value)
   type?: MenuType;
 
   @Field({ nullable: true })
@@ -59,6 +61,7 @@ export class CreateMenuDto {
   @Field(() => String, { nullable: true })
   @IsOptional()
   @IsEnum(MenuTarget)
+  @Transform(({ value }) => value === '' ? undefined : value)
   target?: MenuTarget;
 
   @Field({ nullable: true })

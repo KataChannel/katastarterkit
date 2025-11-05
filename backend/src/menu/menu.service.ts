@@ -87,6 +87,9 @@ export class MenuService {
       parent: dto.parentId ? { connect: { id: dto.parentId } } : undefined,
     };
 
+    // Remove parentId from createData to avoid Prisma error (use parent relation instead)
+    delete createData.parentId;
+
     const menu = await this.menuRepository.create(createData);
     this.logger.log(`Menu created successfully: ${menu.id}`);
 
@@ -232,6 +235,9 @@ export class MenuService {
       updateData.parent = dto.parentId ? { connect: { id: dto.parentId } } : { disconnect: true };
     }
 
+    // Remove parentId from updateData to avoid Prisma error (use parent relation instead)
+    delete updateData.parentId;
+    
     updateData.updatedBy = userId;
 
     const menu = await this.menuRepository.update(id, updateData);

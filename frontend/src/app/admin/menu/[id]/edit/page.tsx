@@ -15,13 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { DynamicMenuLinkSelector } from '@/components/menu/DynamicMenuLinkSelector';
 import { Loader2, ArrowLeft, Save } from 'lucide-react';
 
@@ -125,7 +119,7 @@ export default function MenuFormPage() {
       title: formData.title,
       slug: formData.slug,
       description: formData.description || undefined,
-      type: formData.type,
+      type: formData.type || undefined,
       parentId: formData.parentId || undefined,
       order: parseInt(String(formData.order)) || 0,
       target: formData.target,
@@ -262,35 +256,38 @@ export default function MenuFormPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="type">Vị Trí Menu</Label>
-                <Select value={formData.type} onValueChange={(type) => setFormData({ ...formData, type })}>
-                  <SelectTrigger id="type">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="HEADER">Header</SelectItem>
-                    <SelectItem value="FOOTER">Footer</SelectItem>
-                    <SelectItem value="SIDEBAR">Sidebar</SelectItem>
-                    <SelectItem value="MOBILE">Mobile</SelectItem>
-                    <SelectItem value="CUSTOM">Custom</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Combobox
+                  value={formData.type}
+                  onChange={(type) => setFormData({ ...formData, type })}
+                  options={[
+                    { value: 'HEADER', label: 'Header' },
+                    { value: 'FOOTER', label: 'Footer' },
+                    { value: 'SIDEBAR', label: 'Sidebar' },
+                    { value: 'MOBILE', label: 'Mobile' },
+                    { value: 'CUSTOM', label: 'Custom' },
+                  ]}
+                  placeholder="Chọn vị trí menu"
+                  searchPlaceholder="Tìm vị trí..."
+                  emptyMessage="Không tìm thấy vị trí."
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="parentId">Menu Cha</Label>
-                <Select value={formData.parentId || 'none'} onValueChange={(parentId) => setFormData({ ...formData, parentId: parentId === 'none' ? '' : parentId })}>
-                  <SelectTrigger id="parentId">
-                    <SelectValue placeholder="-- Không có --" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">-- Không có --</SelectItem>
-                    {menus.map((menu: any) => (
-                      <SelectItem key={menu.id} value={menu.id}>
-                        {menu.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Combobox
+                  value={formData.parentId || 'none'}
+                  onChange={(parentId) => setFormData({ ...formData, parentId: parentId === 'none' ? '' : parentId })}
+                  options={[
+                    { value: 'none', label: '-- Không có --' },
+                    ...menus.map((menu: any) => ({
+                      value: menu.id,
+                      label: menu.title,
+                    })),
+                  ]}
+                  placeholder="Chọn menu cha"
+                  searchPlaceholder="Tìm menu cha..."
+                  emptyMessage="Không tìm thấy menu."
+                />
               </div>
 
               <div className="space-y-2">
@@ -315,21 +312,23 @@ export default function MenuFormPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="linkType">Loại Liên Kết</Label>
-              <Select value={formData.linkType} onValueChange={(linkType) => setFormData({ ...formData, linkType })}>
-                <SelectTrigger id="linkType">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="URL">URL Tùy Chỉnh</SelectItem>
-                  <SelectItem value="PRODUCT_LIST">Danh Sách Sản Phẩm (Có Điều Kiện)</SelectItem>
-                  <SelectItem value="PRODUCT_DETAIL">Chi Tiết Sản Phẩm</SelectItem>
-                  <SelectItem value="BLOG_LIST">Danh Sách Bài Viết (Có Điều Kiện)</SelectItem>
-                  <SelectItem value="BLOG_DETAIL">Chi Tiết Bài Viết</SelectItem>
-                  <SelectItem value="CATEGORY">Danh Mục Sản Phẩm</SelectItem>
-                  <SelectItem value="BLOG_CATEGORY">Danh Mục Bài Viết</SelectItem>
-                  <SelectItem value="PAGE">Trang (Page Builder)</SelectItem>
-                </SelectContent>
-              </Select>
+              <Combobox
+                value={formData.linkType}
+                onChange={(linkType) => setFormData({ ...formData, linkType })}
+                options={[
+                  { value: 'URL', label: 'URL Tùy Chỉnh' },
+                  { value: 'PRODUCT_LIST', label: 'Danh Sách Sản Phẩm (Có Điều Kiện)' },
+                  { value: 'PRODUCT_DETAIL', label: 'Chi Tiết Sản Phẩm' },
+                  { value: 'BLOG_LIST', label: 'Danh Sách Bài Viết (Có Điều Kiện)' },
+                  { value: 'BLOG_DETAIL', label: 'Chi Tiết Bài Viết' },
+                  { value: 'CATEGORY', label: 'Danh Mục Sản Phẩm' },
+                  { value: 'BLOG_CATEGORY', label: 'Danh Mục Bài Viết' },
+                  { value: 'PAGE', label: 'Trang (Page Builder)' },
+                ]}
+                placeholder="Chọn loại liên kết"
+                searchPlaceholder="Tìm loại liên kết..."
+                emptyMessage="Không tìm thấy loại liên kết."
+              />
             </div>
 
             {formData.linkType === 'URL' ? (
@@ -381,16 +380,18 @@ export default function MenuFormPage() {
 
             <div className="space-y-2">
               <Label htmlFor="target">Mở Liên Kết</Label>
-              <Select value={formData.target} onValueChange={(target) => setFormData({ ...formData, target })}>
-                <SelectTrigger id="target">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SELF">Cùng Tab</SelectItem>
-                  <SelectItem value="BLANK">Tab Mới</SelectItem>
-                  <SelectItem value="MODAL">Modal</SelectItem>
-                </SelectContent>
-              </Select>
+              <Combobox
+                value={formData.target}
+                onChange={(target) => setFormData({ ...formData, target })}
+                options={[
+                  { value: 'SELF', label: 'Cùng Tab' },
+                  { value: 'BLANK', label: 'Tab Mới' },
+                  { value: 'MODAL', label: 'Modal' },
+                ]}
+                placeholder="Chọn cách mở liên kết"
+                searchPlaceholder="Tìm..."
+                emptyMessage="Không tìm thấy."
+              />
             </div>
           </CardContent>
         </Card>

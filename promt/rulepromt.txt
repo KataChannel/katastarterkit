@@ -4,9 +4,10 @@
 4. Developer Experience
 5. User Experience
 6. Code Quality
-3. Bỏ qua testing
-4. Không git
-5. Chỉ tạo 1 file .md tổng hợp ngắn gọn cuối cùng bằng tiếng việt
-6. Frontend chuẩn shadcn UI code giao diện Mobile First + Responsive + PWA
-7. Giao diện tiếng việt
-8. Dialog sử dụng theo layout header, footer, content scrollable
+7. Bỏ qua testing
+8. Không git
+9. Chỉ tạo 1 file .md tổng hợp ngắn gọn cuối cùng bằng tiếng việt
+10. Frontend chuẩn shadcn UI code giao diện Mobile First + Responsive + PWA
+11. Tất cả Select đổi thành Combobox
+11. Giao diện tiếng việt
+12. Tất cả Dialog sử dụng theo layout header, footer, content scrollable
