@@ -54,7 +54,7 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
   // Use individual hooks for better performance
   const { blocks, draggedBlock } = usePageState();
   const { showPreview } = useUIState();
-  const { handleBlockUpdate, handleBlockDelete, handleAddChild, handleSelectBlock, handleAddBlock } = usePageActions();
+  const { handleBlockUpdate, handleBlockDelete, handleBlockCopy, handleAddChild, handleSelectBlock, handleAddBlock } = usePageActions();
   const [isAddingBlock, setIsAddingBlock] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -337,6 +337,7 @@ const PageBuilderCanvasComponent = React.memo(function PageBuilderCanvasComponen
                         isEditing={true}
                         onUpdate={(content: any, style: any) => handleBlockUpdate(block.id, content, style)}
                         onDelete={() => handleBlockDelete(block.id)}
+                        onCopy={handleBlockCopy}
                         onAddChild={handleAddChild}
                         onUpdateChild={handleBlockUpdate}
                         onDeleteChild={handleBlockDelete}

@@ -150,6 +150,7 @@ interface PageActionsContextType {
   }) => Promise<void>;
   handleBlockUpdate: (blockId: string, content: any, style?: any) => Promise<void>;
   handleBlockDelete: (blockId: string) => Promise<void>;
+  handleBlockCopy: (block: PageBlock) => Promise<void>; // 🆕 Copy block
   handleBlocksReorder: (newBlocks: PageBlock[]) => Promise<void>;
   handleSelectBlock: (blockId: string | null) => void;
   handleUpdateBlockStyle: (blockId: string, style: any) => Promise<void>;
@@ -393,6 +394,45 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       toast.error(error?.message || 'Failed to delete block');
     }
   }, [deleteBlock, pageState, history]);
+  
+  const handleBlockCopy = useCallback(async (block: PageBlock) => {
+    try {
+      const { page, refetch } = pageState;
+      
+      if (!page?.id) {
+        toast.error('No page selected');
+        return;
+      }
+      
+      // Create a copy of the block with new ID and adjusted order
+      const copiedContent = JSON.parse(JSON.stringify(block.content)); // Deep copy
+      const copiedStyle = block.style ? JSON.parse(JSON.stringify(block.style)) : undefined;
+      
+      const input = {
+        type: block.type,
+        content: copiedContent,
+        style: copiedStyle,
+        // order is NOT sent, backend will auto-calculate
+      };
+      
+      await addBlock(input);
+      
+      pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_ADD, 'Block copied', { 
+        originalId: block.id, 
+        type: block.type 
+      });
+      
+      const result = await refetch();
+      
+      // Push to history after successful copy
+      if (result?.data?.page?.blocks) {
+        history.pushHistory(result.data.page.blocks, `Copied ${block.type} block`);
+      }
+    } catch (error: any) {
+      pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_ADD, 'Failed to copy block', { error });
+      toast.error(error?.message || 'Failed to copy block');
+    }
+  }, [addBlock, pageState, history]);
   
   const handleBlocksReorder = useCallback(async (newBlocks: PageBlock[]) => {
     try {
@@ -698,6 +738,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
     handleAddTemplateBlock,
     handleBlockUpdate,
     handleBlockDelete,
+    handleBlockCopy,
     handleBlocksReorder,
     handleSelectBlock,
     handleUpdateBlockStyle,
@@ -730,6 +771,7 @@ export function usePageActions() {
         handleAddTemplateBlock: async () => {},
         handleBlockUpdate: async () => {},
         handleBlockDelete: async () => {},
+        handleBlockCopy: async () => {},
         handleBlocksReorder: async () => {},
         handleSelectBlock: () => {},
         handleUpdateBlockStyle: async () => {},
