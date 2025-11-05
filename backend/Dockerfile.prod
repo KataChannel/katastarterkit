@@ -13,8 +13,13 @@ RUN bun install --frozen-lockfile --production
 FROM base AS builder
 WORKDIR /app
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+# Copy dependency files for dev dependencies
+COPY backend/package.json backend/bun.lock* ./
+
+# Install ALL dependencies (including dev dependencies for build)
+RUN bun install --frozen-lockfile
+
+# Copy source code
 COPY backend/ ./
 
 # Generate Prisma Client
