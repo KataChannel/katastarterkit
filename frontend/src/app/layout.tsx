@@ -4,6 +4,7 @@ import { Providers } from '@/components/providers';
 import { Navigation } from '@/components/Navigation';
 import { PWAProvider } from '@/components/pwa';
 import SupportChatWidgetWrapper from '@/components/support-chat/SupportChatWidgetWrapper';
+import { Toaster } from '@/components/ui/sonner';
 import { generateMetadata as getMetadata } from '@/lib/metadata';
 
 const inter = Inter({ 
@@ -38,6 +39,7 @@ export default function RootLayout({
               </main>
             </div>
             <SupportChatWidgetWrapper />
+            <Toaster />
           </PWAProvider>
         </Providers>
       </body>
