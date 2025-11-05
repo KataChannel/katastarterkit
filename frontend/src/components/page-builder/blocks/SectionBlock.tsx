@@ -244,9 +244,9 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
 
       <div style={containerStyles}>
         {children ? (
-          <div className="nested-children-wrapper w-full">
+          <>
             {children}
-          </div>
+          </>
         ) : (
           <div className="text-gray-400 text-center py-12 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50/50">
             <div className="text-sm font-medium">Drop blocks here or click "Add Block"</div>

@@ -199,9 +199,9 @@ export const LayoutBlockWrapper: React.FC<LayoutBlockWrapperProps> = ({
 
       {/* Children Blocks */}
       {children ? (
-        <div className="nested-children-wrapper w-full">
+        <>
           {children}
-        </div>
+        </>
       ) : (
         <div
           className={`text-center py-8 transition-colors duration-200 ${

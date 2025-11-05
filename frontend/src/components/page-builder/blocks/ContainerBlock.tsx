@@ -282,9 +282,9 @@ export const ContainerBlock: React.FC<ContainerBlockProps> = ({
 
       {/* Children Blocks */}
       {children ? (
-        <div className="nested-children-wrapper w-full">
+        <>
           {children}
-        </div>
+        </>
       ) : (
         <div className={`empty-state text-center py-8 transition-colors duration-200 border-2 border-dashed rounded-lg ${
           isOver 
