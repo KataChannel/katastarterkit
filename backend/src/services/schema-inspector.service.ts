@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 /**
  * Schema Inspector Service
@@ -34,8 +35,12 @@ export class SchemaInspectorService {
   async getAllModels(): Promise<string[]> {
     try {
       // Lấy từ Prisma DMMF (Data Model Meta Format)
-      const models = (this.prisma as any)._baseDmmf?.datamodel?.models || [];
-      return models.map((model: any) => model.name);
+      const dmmf = Prisma.dmmf;
+      const models = dmmf.datamodel.models || [];
+      
+      console.log('[SchemaInspector] Found models:', models.map(m => m.name));
+      
+      return models.map((model) => model.name);
     } catch (error) {
       console.error('[SchemaInspector] Error getting models:', error);
       return [];
@@ -47,14 +52,16 @@ export class SchemaInspectorService {
    */
   async getModelSchema(modelName: string): Promise<ModelSchema | null> {
     try {
-      const models = (this.prisma as any)._baseDmmf?.datamodel?.models || [];
-      const model = models.find((m: any) => m.name.toLowerCase() === modelName.toLowerCase());
+      const dmmf = Prisma.dmmf;
+      const models = dmmf.datamodel.models || [];
+      const model = models.find((m) => m.name.toLowerCase() === modelName.toLowerCase());
 
       if (!model) {
+        console.warn(`[SchemaInspector] Model ${modelName} not found`);
         return null;
       }
 
-      const fields: FieldInfo[] = model.fields.map((field: any) => ({
+      const fields: FieldInfo[] = model.fields.map((field) => ({
         name: field.name,
         type: this.mapFieldType(field.type, field.kind),
         isRequired: field.isRequired,

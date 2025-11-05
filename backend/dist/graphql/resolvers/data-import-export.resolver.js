@@ -18,11 +18,13 @@ const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../../auth/jwt-auth.guard");
 const data_import_service_1 = require("../../services/data-import.service");
 const image_upload_service_1 = require("../../services/image-upload.service");
+const schema_inspector_service_1 = require("../../services/schema-inspector.service");
 const graphql_upload_ts_1 = require("graphql-upload-ts");
 const graphql_type_json_1 = require("graphql-type-json");
 let DataImportExportResolver = class DataImportExportResolver {
-    constructor(dataImportService) {
+    constructor(dataImportService, schemaInspectorService) {
         this.dataImportService = dataImportService;
+        this.schemaInspectorService = schemaInspectorService;
     }
     async importExcelData(file, modelName, mappingConfig) {
         const { createReadStream } = await file;
@@ -116,11 +118,13 @@ __decorate([
 exports.DataImportExportResolver = DataImportExportResolver = __decorate([
     (0, graphql_1.Resolver)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [data_import_service_1.DataImportService])
+    __metadata("design:paramtypes", [data_import_service_1.DataImportService,
+        schema_inspector_service_1.SchemaInspectorService])
 ], DataImportExportResolver);
 let ImageUploadResolver = class ImageUploadResolver {
-    constructor(imageUploadService) {
+    constructor(imageUploadService, schemaInspectorService) {
         this.imageUploadService = imageUploadService;
+        this.schemaInspectorService = schemaInspectorService;
     }
     async uploadImage(file, bucket, editOptions) {
         const { createReadStream, filename } = await file;
@@ -191,6 +195,27 @@ let ImageUploadResolver = class ImageUploadResolver {
         const results = await this.imageUploadService.batchUploadAndMap(processedItems);
         return results;
     }
+    async getAllModels() {
+        return this.schemaInspectorService.getAllModels();
+    }
+    async getModelSchema(modelName) {
+        return this.schemaInspectorService.getModelSchema(modelName);
+    }
+    async getMappableFields(modelName) {
+        const fields = await this.schemaInspectorService.getMappableFields(modelName);
+        return fields;
+    }
+    async getRequiredFields(modelName) {
+        return this.schemaInspectorService.getRequiredFields(modelName);
+    }
+    async suggestMapping(sourceFields, modelName) {
+        const targetFields = await this.schemaInspectorService.getMappableFields(modelName);
+        const suggestions = this.schemaInspectorService.suggestMapping(sourceFields, targetFields);
+        return suggestions;
+    }
+    async validateMapping(modelName, mapping) {
+        return this.schemaInspectorService.validateMapping(modelName, mapping);
+    }
 };
 exports.ImageUploadResolver = ImageUploadResolver;
 __decorate([
@@ -237,9 +262,53 @@ __decorate([
     __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", Promise)
 ], ImageUploadResolver.prototype, "batchUploadAndMap", null);
+__decorate([
+    (0, graphql_1.Query)(() => [String]),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ImageUploadResolver.prototype, "getAllModels", null);
+__decorate([
+    (0, graphql_1.Query)(() => graphql_type_json_1.GraphQLJSON),
+    __param(0, (0, graphql_1.Args)('modelName')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ImageUploadResolver.prototype, "getModelSchema", null);
+__decorate([
+    (0, graphql_1.Query)(() => graphql_type_json_1.GraphQLJSON),
+    __param(0, (0, graphql_1.Args)('modelName')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ImageUploadResolver.prototype, "getMappableFields", null);
+__decorate([
+    (0, graphql_1.Query)(() => [String]),
+    __param(0, (0, graphql_1.Args)('modelName')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ImageUploadResolver.prototype, "getRequiredFields", null);
+__decorate([
+    (0, graphql_1.Query)(() => graphql_type_json_1.GraphQLJSON),
+    __param(0, (0, graphql_1.Args)({ name: 'sourceFields', type: () => [String] })),
+    __param(1, (0, graphql_1.Args)('modelName')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array, String]),
+    __metadata("design:returntype", Promise)
+], ImageUploadResolver.prototype, "suggestMapping", null);
+__decorate([
+    (0, graphql_1.Query)(() => graphql_type_json_1.GraphQLJSON),
+    __param(0, (0, graphql_1.Args)('modelName')),
+    __param(1, (0, graphql_1.Args)({ name: 'mapping', type: () => graphql_type_json_1.GraphQLJSON })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ImageUploadResolver.prototype, "validateMapping", null);
 exports.ImageUploadResolver = ImageUploadResolver = __decorate([
     (0, graphql_1.Resolver)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [image_upload_service_1.ImageUploadService])
+    __metadata("design:paramtypes", [image_upload_service_1.ImageUploadService,
+        schema_inspector_service_1.SchemaInspectorService])
 ], ImageUploadResolver);
 //# sourceMappingURL=data-import-export.resolver.js.map

@@ -57,6 +57,7 @@ const custom_template_service_1 = require("../services/custom-template.service")
 const dynamic_query_generator_service_1 = require("./services/dynamic-query-generator.service");
 const data_import_service_1 = require("../services/data-import.service");
 const image_upload_service_1 = require("../services/image-upload.service");
+const schema_inspector_service_1 = require("../services/schema-inspector.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const auth_module_1 = require("../auth/auth.module");
 const grok_module_1 = require("../grok/grok.module");
@@ -139,6 +140,7 @@ exports.GraphQLResolversModule = GraphQLResolversModule = __decorate([
             affiliate_conversion_service_1.AffiliateConversionService,
             data_import_service_1.DataImportService,
             image_upload_service_1.ImageUploadService,
+            schema_inspector_service_1.SchemaInspectorService,
             dynamic_query_generator_service_1.DynamicQueryGeneratorService,
         ],
         exports: [

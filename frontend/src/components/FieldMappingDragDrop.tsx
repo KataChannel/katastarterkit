@@ -21,10 +21,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Draggable } from './Draggable';
-import { Droppable } from './Droppable';
 import SchemaInspectorService, { FieldInfo } from '@/services/schemaInspector';
 import { Loader2, AlertTriangle, CheckCircle2, XCircle, ArrowRight, RotateCcw } from 'lucide-react';
+import { Draggable } from './Draggable';
+import { Droppable } from './Droppable';
 
 interface FieldMappingDragDropProps {
   sourceFields: string[]; // Fields từ dữ liệu import

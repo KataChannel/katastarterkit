@@ -1,9 +1,11 @@
 import { DataImportService, MappingConfig } from '../../services/data-import.service';
 import { ImageUploadService, ImageEditOptions, ImageMappingConfig } from '../../services/image-upload.service';
+import { SchemaInspectorService } from '../../services/schema-inspector.service';
 import { FileUpload } from 'graphql-upload-ts';
 export declare class DataImportExportResolver {
     private readonly dataImportService;
-    constructor(dataImportService: DataImportService);
+    private readonly schemaInspectorService;
+    constructor(dataImportService: DataImportService, schemaInspectorService: SchemaInspectorService);
     importExcelData(file: FileUpload, modelName: string, mappingConfig?: MappingConfig): Promise<import("../../services/data-import.service").ImportDataResult>;
     importJSONData(jsonString: string, modelName: string, mappingConfig?: MappingConfig): Promise<import("../../services/data-import.service").ImportDataResult>;
     importTextData(text: string, modelName: string, delimiter: string, mappingConfig?: MappingConfig): Promise<import("../../services/data-import.service").ImportDataResult>;
@@ -16,7 +18,8 @@ export declare class DataImportExportResolver {
 }
 export declare class ImageUploadResolver {
     private readonly imageUploadService;
-    constructor(imageUploadService: ImageUploadService);
+    private readonly schemaInspectorService;
+    constructor(imageUploadService: ImageUploadService, schemaInspectorService: SchemaInspectorService);
     uploadImage(file: FileUpload, bucket: string, editOptions?: ImageEditOptions): Promise<import("../../services/image-upload.service").ImageUploadResult>;
     uploadAndMapImage(file: FileUpload, mappingConfig: ImageMappingConfig, editOptions?: ImageEditOptions): Promise<{
         uploadResult: import("../../services/image-upload.service").ImageUploadResult;
@@ -33,4 +36,13 @@ export declare class ImageUploadResolver {
         mappingResult: any;
         error?: string;
     }[]>;
+    getAllModels(): Promise<string[]>;
+    getModelSchema(modelName: string): Promise<import("../../services/schema-inspector.service").ModelSchema>;
+    getMappableFields(modelName: string): Promise<import("../../services/schema-inspector.service").FieldInfo[]>;
+    getRequiredFields(modelName: string): Promise<string[]>;
+    suggestMapping(sourceFields: string[], modelName: string): Promise<Record<string, string>>;
+    validateMapping(modelName: string, mapping: Record<string, string>): Promise<{
+        valid: boolean;
+        errors: string[];
+    }>;
 }
