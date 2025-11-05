@@ -88,7 +88,7 @@ export function SortableBlockWrapper({
 
   return (
     <>
-      <div ref={setNodeRef} style={style} {...attributes}>
+      <div ref={setNodeRef} style={style} {...attributes} data-block-id={block.id}>
         <div className={`relative group rounded-lg transition-all duration-200 ${
           isDragging 
             ? 'ring-4 ring-blue-400 shadow-2xl scale-102' 

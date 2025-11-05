@@ -316,6 +316,19 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       const newBlocks = await refetch();
       if (newBlocks?.data?.page?.blocks) {
         history.pushHistory(newBlocks.data.page.blocks, `Added ${blockType} block`);
+        
+        // Scroll to the newly added block (at the bottom)
+        setTimeout(() => {
+          const blockElements = document.querySelectorAll('[data-block-id]');
+          if (blockElements.length > 0) {
+            const lastBlock = blockElements[blockElements.length - 1];
+            lastBlock.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center',
+              inline: 'nearest'
+            });
+          }
+        }, 300); // Wait for DOM update
       }
     } catch (error: any) {
       console.error('[PageBuilder] Block add error:', error);
@@ -468,6 +481,24 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
           
           // Final refetch to ensure consistency
           await refetch();
+          
+          // Scroll to the newly copied block
+          setTimeout(() => {
+            const blockElement = document.querySelector(`[data-block-id="${newBlockAtEnd.id}"]`);
+            if (blockElement) {
+              blockElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center',
+                inline: 'nearest'
+              });
+              
+              // Add highlight effect
+              blockElement.classList.add('ring-4', 'ring-green-400');
+              setTimeout(() => {
+                blockElement.classList.remove('ring-4', 'ring-green-400');
+              }, 2000);
+            }
+          }, 300);
         }
         
         // Push to history
