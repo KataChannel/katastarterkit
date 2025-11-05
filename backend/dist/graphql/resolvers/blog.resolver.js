@@ -70,9 +70,8 @@ let BlogResolver = class BlogResolver {
     async createCategory(input) {
         return this.blogService.createCategory(input);
     }
-    async updateCategory(input) {
-        const { id, ...updateData } = input;
-        return this.blogService.updateCategory(id, updateData);
+    async updateCategory(id, input) {
+        return this.blogService.updateCategory(id, input);
     }
     async deleteCategory(id) {
         return this.blogService.deleteCategory(id);
@@ -193,9 +192,10 @@ __decorate([
 __decorate([
     (0, graphql_1.Mutation)(() => blog_type_1.BlogCategoryType, { name: 'updateBlogCategory' }),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __param(0, (0, graphql_1.Args)('input')),
+    __param(0, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
+    __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [blog_input_1.UpdateBlogCategoryInput]),
+    __metadata("design:paramtypes", [String, blog_input_1.UpdateBlogCategoryInput]),
     __metadata("design:returntype", Promise)
 ], BlogResolver.prototype, "updateCategory", null);
 __decorate([

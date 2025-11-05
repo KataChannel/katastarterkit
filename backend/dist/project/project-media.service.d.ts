@@ -35,13 +35,13 @@ export declare class ProjectMediaService {
             avatar: string;
         };
     } & {
+        type: import("@prisma/client").$Enums.MediaType;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        type: import("@prisma/client").$Enums.MediaType;
         size: number;
-        filename: string;
+        updatedAt: Date;
         url: string;
+        filename: string;
         mimeType: string;
         caption: string | null;
         taskId: string;

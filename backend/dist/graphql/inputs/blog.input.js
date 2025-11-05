@@ -200,16 +200,20 @@ __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], CreateBlogCategoryInput.prototype, "thumbnail", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true, defaultValue: 0 }),
+    __metadata("design:type", Number)
+], CreateBlogCategoryInput.prototype, "order", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true, defaultValue: true }),
+    __metadata("design:type", Boolean)
+], CreateBlogCategoryInput.prototype, "isActive", void 0);
 exports.CreateBlogCategoryInput = CreateBlogCategoryInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateBlogCategoryInput);
 let UpdateBlogCategoryInput = class UpdateBlogCategoryInput {
 };
 exports.UpdateBlogCategoryInput = UpdateBlogCategoryInput;
-__decorate([
-    (0, graphql_1.Field)(() => graphql_1.ID),
-    __metadata("design:type", String)
-], UpdateBlogCategoryInput.prototype, "id", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
@@ -226,6 +230,14 @@ __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], UpdateBlogCategoryInput.prototype, "thumbnail", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    __metadata("design:type", Number)
+], UpdateBlogCategoryInput.prototype, "order", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", Boolean)
+], UpdateBlogCategoryInput.prototype, "isActive", void 0);
 exports.UpdateBlogCategoryInput = UpdateBlogCategoryInput = __decorate([
     (0, graphql_1.InputType)()
 ], UpdateBlogCategoryInput);

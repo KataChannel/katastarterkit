@@ -66,29 +66,29 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
                 };
             } & {
                 id: string;
-                content: string;
                 createdAt: Date;
                 updatedAt: Date;
+                content: string;
                 projectId: string;
                 mentions: string[];
                 senderId: string;
                 isEdited: boolean;
                 editedAt: Date | null;
-                replyToId: string | null;
                 reactions: import("@prisma/client/runtime/library").JsonValue | null;
+                replyToId: string | null;
             };
         } & {
             id: string;
-            content: string;
             createdAt: Date;
             updatedAt: Date;
+            content: string;
             projectId: string;
             mentions: string[];
             senderId: string;
             isEdited: boolean;
             editedAt: Date | null;
-            replyToId: string | null;
             reactions: import("@prisma/client/runtime/library").JsonValue | null;
+            replyToId: string | null;
         };
         error?: undefined;
     } | {
@@ -143,16 +143,16 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
             };
         } & {
             id: string;
-            content: string;
             createdAt: Date;
             updatedAt: Date;
+            content: string;
             projectId: string;
             mentions: string[];
             senderId: string;
             isEdited: boolean;
             editedAt: Date | null;
-            replyToId: string | null;
             reactions: import("@prisma/client/runtime/library").JsonValue | null;
+            replyToId: string | null;
         };
         error?: undefined;
     } | {

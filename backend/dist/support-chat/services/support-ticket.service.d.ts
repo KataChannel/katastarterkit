@@ -3,15 +3,15 @@ export declare class SupportTicketService {
     private prisma;
     constructor(prisma: PrismaService);
     createTicket(data: any): Promise<{
+        category: string | null;
         id: string;
-        description: string;
-        status: import("@prisma/client").$Enums.TicketStatus;
         createdAt: Date;
         updatedAt: Date;
         tags: string[];
-        category: string | null;
+        description: string;
         priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
+        status: import("@prisma/client").$Enums.TicketStatus;
         conversationId: string | null;
         resolvedAt: Date | null;
         resolution: string | null;
@@ -21,19 +21,19 @@ export declare class SupportTicketService {
         closedAt: Date | null;
         assignedAgentId: string | null;
         ticketNumber: string;
-        relatedOrderId: string | null;
         resolvedById: string | null;
+        relatedOrderId: string | null;
     }>;
     findAll(params?: any): Promise<{
+        category: string | null;
         id: string;
-        description: string;
-        status: import("@prisma/client").$Enums.TicketStatus;
         createdAt: Date;
         updatedAt: Date;
         tags: string[];
-        category: string | null;
+        description: string;
         priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
+        status: import("@prisma/client").$Enums.TicketStatus;
         conversationId: string | null;
         resolvedAt: Date | null;
         resolution: string | null;
@@ -43,19 +43,19 @@ export declare class SupportTicketService {
         closedAt: Date | null;
         assignedAgentId: string | null;
         ticketNumber: string;
-        relatedOrderId: string | null;
         resolvedById: string | null;
+        relatedOrderId: string | null;
     }[]>;
     findOne(id: string): Promise<{
+        category: string | null;
         id: string;
-        description: string;
-        status: import("@prisma/client").$Enums.TicketStatus;
         createdAt: Date;
         updatedAt: Date;
         tags: string[];
-        category: string | null;
+        description: string;
         priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
+        status: import("@prisma/client").$Enums.TicketStatus;
         conversationId: string | null;
         resolvedAt: Date | null;
         resolution: string | null;
@@ -65,19 +65,19 @@ export declare class SupportTicketService {
         closedAt: Date | null;
         assignedAgentId: string | null;
         ticketNumber: string;
-        relatedOrderId: string | null;
         resolvedById: string | null;
+        relatedOrderId: string | null;
     }>;
     update(id: string, data: any): Promise<{
+        category: string | null;
         id: string;
-        description: string;
-        status: import("@prisma/client").$Enums.TicketStatus;
         createdAt: Date;
         updatedAt: Date;
         tags: string[];
-        category: string | null;
+        description: string;
         priority: import("@prisma/client").$Enums.TicketPriority;
         assignedAt: Date | null;
+        status: import("@prisma/client").$Enums.TicketStatus;
         conversationId: string | null;
         resolvedAt: Date | null;
         resolution: string | null;
@@ -87,7 +87,7 @@ export declare class SupportTicketService {
         closedAt: Date | null;
         assignedAgentId: string | null;
         ticketNumber: string;
-        relatedOrderId: string | null;
         resolvedById: string | null;
+        relatedOrderId: string | null;
     }>;
 }

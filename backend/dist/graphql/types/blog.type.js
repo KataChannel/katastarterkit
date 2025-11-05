@@ -82,6 +82,14 @@ __decorate([
     __metadata("design:type", String)
 ], BlogCategoryType.prototype, "thumbnail", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int, { defaultValue: 0 }),
+    __metadata("design:type", Number)
+], BlogCategoryType.prototype, "order", void 0);
+__decorate([
+    (0, graphql_1.Field)({ defaultValue: true }),
+    __metadata("design:type", Boolean)
+], BlogCategoryType.prototype, "isActive", void 0);
+__decorate([
     (0, graphql_1.Field)(() => graphql_1.Int),
     __metadata("design:type", Number)
 ], BlogCategoryType.prototype, "postCount", void 0);

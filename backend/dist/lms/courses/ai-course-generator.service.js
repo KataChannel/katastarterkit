@@ -23,7 +23,7 @@ let AICourseGeneratorService = class AICourseGeneratorService {
         else {
             this.genAI = new generative_ai_1.GoogleGenerativeAI(apiKey);
             this.model = this.genAI.getGenerativeModel({
-                model: 'gemini-1.5-flash',
+                model: 'gemini-flash-latest',
                 generationConfig: {
                     temperature: 0.7,
                     topK: 40,

@@ -22,6 +22,8 @@ export declare class BlogCategoryType {
     slug: string;
     description?: string;
     thumbnail?: string;
+    order: number;
+    isActive: boolean;
     postCount: number;
     createdAt: Date;
     updatedAt: Date;

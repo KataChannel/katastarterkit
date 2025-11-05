@@ -56,12 +56,13 @@ export declare class SupportChatGateway implements OnGatewayConnection, OnGatewa
             };
         } & {
             id: string;
-            content: string;
             createdAt: Date;
             updatedAt: Date;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            content: string;
             isRead: boolean;
             conversationId: string;
+            readAt: Date | null;
             sentAt: Date;
             messageType: import("@prisma/client").$Enums.SupportMessageType;
             senderType: import("@prisma/client").$Enums.SupportSender;
@@ -70,7 +71,6 @@ export declare class SupportChatGateway implements OnGatewayConnection, OnGatewa
             isAIGenerated: boolean;
             aiConfidence: number | null;
             aiSuggestions: import("@prisma/client/runtime/library").JsonValue | null;
-            readAt: Date | null;
             isEdited: boolean;
             editedAt: Date | null;
         };

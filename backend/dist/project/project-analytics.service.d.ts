@@ -51,29 +51,29 @@ export declare class ProjectAnalyticsService {
             totalCompleted: number;
         };
         upcomingDeadlines: ({
-            _count: {
-                comments: number;
-                subtasks: number;
-            };
             user: {
                 id: string;
                 firstName: string;
                 lastName: string;
                 avatar: string;
             };
+            _count: {
+                comments: number;
+                subtasks: number;
+            };
         } & {
-            id: string;
-            title: string;
-            description: string | null;
-            status: import("@prisma/client").$Enums.TaskStatus;
-            createdAt: Date;
-            updatedAt: Date;
-            order: number;
-            parentId: string | null;
-            tags: string[];
             category: import("@prisma/client").$Enums.TaskCategory;
+            order: number;
+            id: string;
+            createdAt: Date;
             userId: string;
+            updatedAt: Date;
+            tags: string[];
+            description: string | null;
+            parentId: string | null;
             priority: import("@prisma/client").$Enums.TaskPriority;
+            title: string;
+            status: import("@prisma/client").$Enums.TaskStatus;
             dueDate: Date | null;
             completedAt: Date | null;
             projectId: string | null;
@@ -126,29 +126,29 @@ export declare class ProjectAnalyticsService {
         totalCompleted: number;
     }>;
     getUpcomingDeadlines(projectId: string): Promise<({
-        _count: {
-            comments: number;
-            subtasks: number;
-        };
         user: {
             id: string;
             firstName: string;
             lastName: string;
             avatar: string;
         };
+        _count: {
+            comments: number;
+            subtasks: number;
+        };
     } & {
-        id: string;
-        title: string;
-        description: string | null;
-        status: import("@prisma/client").$Enums.TaskStatus;
-        createdAt: Date;
-        updatedAt: Date;
-        order: number;
-        parentId: string | null;
-        tags: string[];
         category: import("@prisma/client").$Enums.TaskCategory;
+        order: number;
+        id: string;
+        createdAt: Date;
         userId: string;
+        updatedAt: Date;
+        tags: string[];
+        description: string | null;
+        parentId: string | null;
         priority: import("@prisma/client").$Enums.TaskPriority;
+        title: string;
+        status: import("@prisma/client").$Enums.TaskStatus;
         dueDate: Date | null;
         completedAt: Date | null;
         projectId: string | null;
@@ -156,29 +156,29 @@ export declare class ProjectAnalyticsService {
         mentions: string[];
     })[]>;
     getOverdueTasks(projectId: string): Promise<({
-        _count: {
-            comments: number;
-            subtasks: number;
-        };
         user: {
             id: string;
             firstName: string;
             lastName: string;
             avatar: string;
         };
+        _count: {
+            comments: number;
+            subtasks: number;
+        };
     } & {
-        id: string;
-        title: string;
-        description: string | null;
-        status: import("@prisma/client").$Enums.TaskStatus;
-        createdAt: Date;
-        updatedAt: Date;
-        order: number;
-        parentId: string | null;
-        tags: string[];
         category: import("@prisma/client").$Enums.TaskCategory;
+        order: number;
+        id: string;
+        createdAt: Date;
         userId: string;
+        updatedAt: Date;
+        tags: string[];
+        description: string | null;
+        parentId: string | null;
         priority: import("@prisma/client").$Enums.TaskPriority;
+        title: string;
+        status: import("@prisma/client").$Enums.TaskStatus;
         dueDate: Date | null;
         completedAt: Date | null;
         projectId: string | null;

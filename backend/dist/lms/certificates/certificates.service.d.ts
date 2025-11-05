@@ -5,10 +5,10 @@ export declare class CertificatesService {
     generateCertificate(enrollmentId: string, userId: string): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        courseId: string;
         userId: string;
+        updatedAt: Date;
         issueDate: Date;
+        courseId: string;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -19,17 +19,17 @@ export declare class CertificatesService {
     }>;
     getMyCertificates(userId: string): Promise<({
         course: {
-            slug: string;
             title: string;
+            slug: string;
             thumbnail: string;
         };
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        courseId: string;
         userId: string;
+        updatedAt: Date;
         issueDate: Date;
+        courseId: string;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -39,24 +39,24 @@ export declare class CertificatesService {
         verificationUrl: string | null;
     })[]>;
     getCertificate(id: string, userId: string): Promise<{
-        course: {
-            slug: string;
-            title: string;
-            thumbnail: string;
-            duration: number;
-        };
         user: {
             username: string;
             firstName: string;
             lastName: string;
         };
+        course: {
+            title: string;
+            slug: string;
+            thumbnail: string;
+            duration: number;
+        };
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        courseId: string;
         userId: string;
+        updatedAt: Date;
         issueDate: Date;
+        courseId: string;
         enrollmentId: string;
         certificateNumber: string;
         courseName: string;
@@ -68,22 +68,22 @@ export declare class CertificatesService {
     verifyCertificate(certificateNumber: string): Promise<{
         valid: boolean;
         certificate: {
-            course: {
-                title: string;
-                thumbnail: string;
-            };
             user: {
                 username: string;
                 firstName: string;
                 lastName: string;
             };
+            course: {
+                title: string;
+                thumbnail: string;
+            };
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            courseId: string;
             userId: string;
+            updatedAt: Date;
             issueDate: Date;
+            courseId: string;
             enrollmentId: string;
             certificateNumber: string;
             courseName: string;

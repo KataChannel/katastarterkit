@@ -47,13 +47,16 @@ export declare class CreateBlogCategoryInput {
     slug: string;
     description?: string;
     thumbnail?: string;
+    order?: number;
+    isActive?: boolean;
 }
 export declare class UpdateBlogCategoryInput {
-    id: string;
     name?: string;
     slug?: string;
     description?: string;
     thumbnail?: string;
+    order?: number;
+    isActive?: boolean;
 }
 export declare class CreateBlogTagInput {
     name: string;

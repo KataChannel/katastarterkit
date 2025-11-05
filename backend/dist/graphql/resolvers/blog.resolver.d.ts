@@ -7,25 +7,25 @@ export declare class BlogResolver {
         items: {
             tags: {
                 id: string;
-                slug: string;
-                description: string | null;
                 createdAt: Date;
                 name: string;
+                description: string | null;
+                slug: string;
                 color: string | null;
             }[];
             category: {
-                id: string;
-                slug: string;
-                description: string | null;
-                createdAt: Date;
-                updatedAt: Date;
-                name: string;
                 order: number;
+                id: string;
+                createdAt: Date;
+                isActive: boolean;
+                name: string;
+                updatedAt: Date;
+                description: string | null;
                 parentId: string | null;
+                slug: string;
                 thumbnail: string | null;
                 metaTitle: string | null;
                 metaDescription: string | null;
-                isActive: boolean;
             };
             author: {
                 id: string;
@@ -34,26 +34,26 @@ export declare class BlogResolver {
                 firstName: string;
                 lastName: string;
             };
-            images: string[];
+            password: string | null;
             id: string;
-            slug: string;
-            title: string;
-            content: string;
-            status: import("@prisma/client").$Enums.PostStatus;
             createdAt: Date;
             updatedAt: Date;
-            publishedAt: Date | null;
-            categoryId: string | null;
-            viewCount: number;
-            metaTitle: string | null;
-            metaDescription: string | null;
-            password: string | null;
+            title: string;
+            content: string;
             excerpt: string | null;
+            slug: string;
             featuredImage: string | null;
+            status: import("@prisma/client").$Enums.PostStatus;
+            publishedAt: Date | null;
             authorId: string;
+            images: string[];
             displayOrder: number;
             isFeatured: boolean;
+            metaTitle: string | null;
+            metaDescription: string | null;
             metaKeywords: string[];
+            categoryId: string | null;
+            viewCount: number;
             visibility: import("@prisma/client").$Enums.PostVisibility;
             canonicalUrl: string | null;
             isPinned: boolean;
@@ -70,25 +70,25 @@ export declare class BlogResolver {
     getBlog(id: string): Promise<{
         tags: {
             id: string;
-            slug: string;
-            description: string | null;
             createdAt: Date;
             name: string;
+            description: string | null;
+            slug: string;
             color: string | null;
         }[];
         category: {
-            id: string;
-            slug: string;
-            description: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
             order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
+            slug: string;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
-            isActive: boolean;
         };
         author: {
             id: string;
@@ -97,26 +97,26 @@ export declare class BlogResolver {
             firstName: string;
             lastName: string;
         };
-        images: string[];
+        password: string | null;
         id: string;
-        slug: string;
-        title: string;
-        content: string;
-        status: import("@prisma/client").$Enums.PostStatus;
         createdAt: Date;
         updatedAt: Date;
-        publishedAt: Date | null;
-        categoryId: string | null;
-        viewCount: number;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        password: string | null;
+        title: string;
+        content: string;
         excerpt: string | null;
+        slug: string;
         featuredImage: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        publishedAt: Date | null;
         authorId: string;
+        images: string[];
         displayOrder: number;
         isFeatured: boolean;
+        metaTitle: string | null;
+        metaDescription: string | null;
         metaKeywords: string[];
+        categoryId: string | null;
+        viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
         isPinned: boolean;
@@ -127,25 +127,25 @@ export declare class BlogResolver {
     getBlogBySlug(slug: string): Promise<{
         tags: {
             id: string;
-            slug: string;
-            description: string | null;
             createdAt: Date;
             name: string;
+            description: string | null;
+            slug: string;
             color: string | null;
         }[];
         category: {
-            id: string;
-            slug: string;
-            description: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
             order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
+            slug: string;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
-            isActive: boolean;
         };
         author: {
             id: string;
@@ -154,26 +154,26 @@ export declare class BlogResolver {
             firstName: string;
             lastName: string;
         };
-        images: string[];
+        password: string | null;
         id: string;
-        slug: string;
-        title: string;
-        content: string;
-        status: import("@prisma/client").$Enums.PostStatus;
         createdAt: Date;
         updatedAt: Date;
-        publishedAt: Date | null;
-        categoryId: string | null;
-        viewCount: number;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        password: string | null;
+        title: string;
+        content: string;
         excerpt: string | null;
+        slug: string;
         featuredImage: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        publishedAt: Date | null;
         authorId: string;
+        images: string[];
         displayOrder: number;
         isFeatured: boolean;
+        metaTitle: string | null;
+        metaDescription: string | null;
         metaKeywords: string[];
+        categoryId: string | null;
+        viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
         isPinned: boolean;
@@ -183,18 +183,18 @@ export declare class BlogResolver {
     }>;
     getFeaturedBlogs(limit?: number): Promise<({
         category: {
-            id: string;
-            slug: string;
-            description: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
             order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            description: string | null;
             parentId: string | null;
+            slug: string;
             thumbnail: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
-            isActive: boolean;
         };
         author: {
             id: string;
@@ -204,26 +204,26 @@ export declare class BlogResolver {
             lastName: string;
         };
     } & {
-        images: string[];
+        password: string | null;
         id: string;
-        slug: string;
-        title: string;
-        content: string;
-        status: import("@prisma/client").$Enums.PostStatus;
         createdAt: Date;
         updatedAt: Date;
-        publishedAt: Date | null;
-        categoryId: string | null;
-        viewCount: number;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        password: string | null;
+        title: string;
+        content: string;
         excerpt: string | null;
+        slug: string;
         featuredImage: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        publishedAt: Date | null;
         authorId: string;
+        images: string[];
         displayOrder: number;
         isFeatured: boolean;
+        metaTitle: string | null;
+        metaDescription: string | null;
         metaKeywords: string[];
+        categoryId: string | null;
+        viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
         isPinned: boolean;
@@ -235,25 +235,25 @@ export declare class BlogResolver {
         items: {
             tags: {
                 id: string;
-                slug: string;
-                description: string | null;
                 createdAt: Date;
                 name: string;
+                description: string | null;
+                slug: string;
                 color: string | null;
             }[];
             category: {
-                id: string;
-                slug: string;
-                description: string | null;
-                createdAt: Date;
-                updatedAt: Date;
-                name: string;
                 order: number;
+                id: string;
+                createdAt: Date;
+                isActive: boolean;
+                name: string;
+                updatedAt: Date;
+                description: string | null;
                 parentId: string | null;
+                slug: string;
                 thumbnail: string | null;
                 metaTitle: string | null;
                 metaDescription: string | null;
-                isActive: boolean;
             };
             author: {
                 id: string;
@@ -262,26 +262,26 @@ export declare class BlogResolver {
                 firstName: string;
                 lastName: string;
             };
-            images: string[];
+            password: string | null;
             id: string;
-            slug: string;
-            title: string;
-            content: string;
-            status: import("@prisma/client").$Enums.PostStatus;
             createdAt: Date;
             updatedAt: Date;
-            publishedAt: Date | null;
-            categoryId: string | null;
-            viewCount: number;
-            metaTitle: string | null;
-            metaDescription: string | null;
-            password: string | null;
+            title: string;
+            content: string;
             excerpt: string | null;
+            slug: string;
             featuredImage: string | null;
+            status: import("@prisma/client").$Enums.PostStatus;
+            publishedAt: Date | null;
             authorId: string;
+            images: string[];
             displayOrder: number;
             isFeatured: boolean;
+            metaTitle: string | null;
+            metaDescription: string | null;
             metaKeywords: string[];
+            categoryId: string | null;
+            viewCount: number;
             visibility: import("@prisma/client").$Enums.PostVisibility;
             canonicalUrl: string | null;
             isPinned: boolean;
@@ -296,33 +296,33 @@ export declare class BlogResolver {
         hasMore: boolean;
     }>;
     getRelatedBlogs(blogId: string, limit?: number): Promise<({
+        category: {
+            order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            description: string | null;
+            parentId: string | null;
+            slug: string;
+            thumbnail: string | null;
+            metaTitle: string | null;
+            metaDescription: string | null;
+        };
         tags: ({
             tag: {
                 id: string;
-                slug: string;
-                description: string | null;
                 createdAt: Date;
                 name: string;
+                description: string | null;
+                slug: string;
                 color: string | null;
             };
         } & {
             postId: string;
             tagId: string;
         })[];
-        category: {
-            id: string;
-            slug: string;
-            description: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            order: number;
-            parentId: string | null;
-            thumbnail: string | null;
-            metaTitle: string | null;
-            metaDescription: string | null;
-            isActive: boolean;
-        };
         author: {
             id: string;
             email: string;
@@ -331,26 +331,26 @@ export declare class BlogResolver {
             lastName: string;
         };
     } & {
-        images: string[];
+        password: string | null;
         id: string;
-        slug: string;
-        title: string;
-        content: string;
-        status: import("@prisma/client").$Enums.PostStatus;
         createdAt: Date;
         updatedAt: Date;
-        publishedAt: Date | null;
-        categoryId: string | null;
-        viewCount: number;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        password: string | null;
+        title: string;
+        content: string;
         excerpt: string | null;
+        slug: string;
         featuredImage: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        publishedAt: Date | null;
         authorId: string;
+        images: string[];
         displayOrder: number;
         isFeatured: boolean;
+        metaTitle: string | null;
+        metaDescription: string | null;
         metaKeywords: string[];
+        categoryId: string | null;
+        viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
         isPinned: boolean;
@@ -363,36 +363,36 @@ export declare class BlogResolver {
         _count: {
             posts: number;
         };
-        id: string;
-        slug: string;
-        description: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        name: string;
         order: number;
+        id: string;
+        createdAt: Date;
+        isActive: boolean;
+        name: string;
+        updatedAt: Date;
+        description: string | null;
         parentId: string | null;
+        slug: string;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
-        isActive: boolean;
     }[]>;
     getCategory(id: string): Promise<{
         postCount: number;
         _count: {
             posts: number;
         };
-        id: string;
-        slug: string;
-        description: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        name: string;
         order: number;
+        id: string;
+        createdAt: Date;
+        isActive: boolean;
+        name: string;
+        updatedAt: Date;
+        description: string | null;
         parentId: string | null;
+        slug: string;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
-        isActive: boolean;
     }>;
     getTags(): Promise<({
         _count: {
@@ -400,40 +400,40 @@ export declare class BlogResolver {
         };
     } & {
         id: string;
-        slug: string;
-        description: string | null;
         createdAt: Date;
         name: string;
+        description: string | null;
+        slug: string;
         color: string | null;
     })[]>;
     createBlog(input: CreateBlogInput, context: any): Promise<{
+        category: {
+            order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            description: string | null;
+            parentId: string | null;
+            slug: string;
+            thumbnail: string | null;
+            metaTitle: string | null;
+            metaDescription: string | null;
+        };
         tags: ({
             tag: {
                 id: string;
-                slug: string;
-                description: string | null;
                 createdAt: Date;
                 name: string;
+                description: string | null;
+                slug: string;
                 color: string | null;
             };
         } & {
             postId: string;
             tagId: string;
         })[];
-        category: {
-            id: string;
-            slug: string;
-            description: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            order: number;
-            parentId: string | null;
-            thumbnail: string | null;
-            metaTitle: string | null;
-            metaDescription: string | null;
-            isActive: boolean;
-        };
         author: {
             id: string;
             email: string;
@@ -442,26 +442,26 @@ export declare class BlogResolver {
             lastName: string;
         };
     } & {
-        images: string[];
+        password: string | null;
         id: string;
-        slug: string;
-        title: string;
-        content: string;
-        status: import("@prisma/client").$Enums.PostStatus;
         createdAt: Date;
         updatedAt: Date;
-        publishedAt: Date | null;
-        categoryId: string | null;
-        viewCount: number;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        password: string | null;
+        title: string;
+        content: string;
         excerpt: string | null;
+        slug: string;
         featuredImage: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        publishedAt: Date | null;
         authorId: string;
+        images: string[];
         displayOrder: number;
         isFeatured: boolean;
+        metaTitle: string | null;
+        metaDescription: string | null;
         metaKeywords: string[];
+        categoryId: string | null;
+        viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
         isPinned: boolean;
@@ -470,33 +470,33 @@ export declare class BlogResolver {
         scheduledAt: Date | null;
     }>;
     updateBlog(input: UpdateBlogInput): Promise<{
+        category: {
+            order: number;
+            id: string;
+            createdAt: Date;
+            isActive: boolean;
+            name: string;
+            updatedAt: Date;
+            description: string | null;
+            parentId: string | null;
+            slug: string;
+            thumbnail: string | null;
+            metaTitle: string | null;
+            metaDescription: string | null;
+        };
         tags: ({
             tag: {
                 id: string;
-                slug: string;
-                description: string | null;
                 createdAt: Date;
                 name: string;
+                description: string | null;
+                slug: string;
                 color: string | null;
             };
         } & {
             postId: string;
             tagId: string;
         })[];
-        category: {
-            id: string;
-            slug: string;
-            description: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            order: number;
-            parentId: string | null;
-            thumbnail: string | null;
-            metaTitle: string | null;
-            metaDescription: string | null;
-            isActive: boolean;
-        };
         author: {
             id: string;
             email: string;
@@ -505,26 +505,26 @@ export declare class BlogResolver {
             lastName: string;
         };
     } & {
-        images: string[];
+        password: string | null;
         id: string;
-        slug: string;
-        title: string;
-        content: string;
-        status: import("@prisma/client").$Enums.PostStatus;
         createdAt: Date;
         updatedAt: Date;
-        publishedAt: Date | null;
-        categoryId: string | null;
-        viewCount: number;
-        metaTitle: string | null;
-        metaDescription: string | null;
-        password: string | null;
+        title: string;
+        content: string;
         excerpt: string | null;
+        slug: string;
         featuredImage: string | null;
+        status: import("@prisma/client").$Enums.PostStatus;
+        publishedAt: Date | null;
         authorId: string;
+        images: string[];
         displayOrder: number;
         isFeatured: boolean;
+        metaTitle: string | null;
+        metaDescription: string | null;
         metaKeywords: string[];
+        categoryId: string | null;
+        viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
         isPinned: boolean;
@@ -536,50 +536,50 @@ export declare class BlogResolver {
         success: boolean;
     }>;
     createCategory(input: CreateBlogCategoryInput): Promise<{
-        id: string;
-        slug: string;
-        description: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        name: string;
         order: number;
+        id: string;
+        createdAt: Date;
+        isActive: boolean;
+        name: string;
+        updatedAt: Date;
+        description: string | null;
         parentId: string | null;
+        slug: string;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
-        isActive: boolean;
     }>;
-    updateCategory(input: UpdateBlogCategoryInput): Promise<{
-        id: string;
-        slug: string;
-        description: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        name: string;
+    updateCategory(id: string, input: UpdateBlogCategoryInput): Promise<{
         order: number;
+        id: string;
+        createdAt: Date;
+        isActive: boolean;
+        name: string;
+        updatedAt: Date;
+        description: string | null;
         parentId: string | null;
+        slug: string;
         thumbnail: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
-        isActive: boolean;
     }>;
     deleteCategory(id: string): Promise<{
         success: boolean;
     }>;
     createTag(input: CreateBlogTagInput): Promise<{
         id: string;
-        slug: string;
-        description: string | null;
         createdAt: Date;
         name: string;
+        description: string | null;
+        slug: string;
         color: string | null;
     }>;
     updateTag(input: UpdateBlogTagInput): Promise<{
         id: string;
-        slug: string;
-        description: string | null;
         createdAt: Date;
         name: string;
+        description: string | null;
+        slug: string;
         color: string | null;
     }>;
     deleteTag(id: string): Promise<{
