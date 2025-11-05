@@ -183,14 +183,14 @@ model User {
   offboardingProcesses OffboardingProcess[]
 
   // LMS Relations
-  coursesInstructed Course[]      @relation("InstructorCourses")
-  enrollments       Enrollment[]  @relation("UserEnrollments")
+  coursesInstructed Course[]          @relation("InstructorCourses")
+  enrollments       Enrollment[]      @relation("UserEnrollments")
   quizAttempts      QuizAttempt[]
-  courseReviews     Review[]      @relation("UserReviews")
-  certificates      Certificate[] @relation("UserCertificates")
-  discussions       Discussion[]  @relation("UserDiscussions")
+  courseReviews     Review[]          @relation("UserReviews")
+  certificates      Certificate[]     @relation("UserCertificates")
+  discussions       Discussion[]      @relation("UserDiscussions")
   discussionReplies DiscussionReply[] @relation("UserDiscussionReplies")
-  department        Department?   @relation("DepartmentUsers", fields: [departmentId], references: [id])
+  department        Department?       @relation("DepartmentUsers", fields: [departmentId], references: [id])
   departmentId      String?
 
   // Page Builder - Custom Templates Relations
@@ -223,9 +223,9 @@ model User {
   supportTicketsResolved         SupportTicket[]       @relation("ResolvedTickets")
   quickRepliesCreated            ChatQuickReply[]      @relation("CreatedQuickReplies")
   supportAnalytics               SupportAnalytics[]    @relation("SupportAgentAnalytics")
-  
+
   // AI Provider Relations
-  aiProvidersCreated             AIProvider[]          @relation("AIProviderCreator")
+  aiProvidersCreated AIProvider[] @relation("AIProviderCreator")
 
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
@@ -2680,28 +2680,178 @@ model Category {
   @@map("categories")
 }
 
+// ============================================================================
+// SUPPLIER & PRICE LIST MODELS (From Internal System)
+// ============================================================================
+
+// Nhà cung cấp
+model Supplier {
+  id              String   @id @default(uuid())
+  name            String?
+  supplierCode    String   @unique @map("mancc") // Mã nhà cung cấp
+  supplierCodeOld String?  @map("manccold") // Mã cũ
+  address         String?  @map("diachi")
+  email           String?
+  phone           String?  @map("sdt")
+  notes           String?  @map("ghichu")
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isShowVAT       Boolean  @default(true) @map("isshowvat")
+  fileName        String?  @map("tenfile")
+
+  // Relations
+  products       Product[]       @relation("SupplierProducts")
+  supplierGroups SupplierGroup[] @relation("SupplierGroups")
+
+  @@index([supplierCode])
+  @@index([isActive])
+  @@map("suppliers")
+}
+
+// Nhóm nhà cung cấp
+model SupplierGroup {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  suppliers   Supplier[] @relation("SupplierGroups")
+
+  @@map("supplier_groups")
+}
+
+// Bảng giá
+model PriceList {
+  id            String    @id @default(uuid())
+  title         String?
+  priceListCode String?   @unique @map("mabanggia") // Mã bảng giá
+  type          String?
+  startDate     DateTime? @map("batdau")
+  endDate       DateTime? @map("ketthuc")
+  displayOrder  Int?      @default(1) @map("order")
+  notes         String?   @map("ghichu")
+  status        String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  isDefault     Boolean   @default(false)
+
+  // Relations
+  products  PriceListProduct[]
+  customers Customer[]         @relation("CustomerPriceList")
+  orders    Order[]            @relation("OrderPriceList")
+
+  @@unique([priceListCode, startDate, endDate], name: "unique_pricelist_time_range")
+  @@index([priceListCode])
+  @@index([startDate, endDate])
+  @@map("price_lists")
+}
+
+// Bảng giá sản phẩm
+model PriceListProduct {
+  id           String  @id @default(uuid())
+  price        Float   @map("giaban") // Giá bán
+  productId    String
+  priceListId  String
+  displayOrder Int?    @map("order")
+  isActive     Boolean @default(false)
+
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  priceList PriceList @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([priceListId])
+  @@map("price_list_products")
+}
+
+// Nhóm khách hàng
+model CustomerGroup {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  customers   Customer[] @relation("CustomerGroups")
+
+  @@map("customer_groups")
+}
+
+// Khách hàng (Customer - từ schema nội bộ Khachhang)
+model Customer {
+  id              String   @id @default(uuid())
+  name            String?
+  nameEn          String?  @map("namenn") // Tên tiếng Anh
+  subtitle        String?
+  customerCode    String   @unique @map("makh") // Mã khách hàng
+  customerCodeOld String?  @map("makhold") // Mã cũ
+  address         String?  @map("diachi")
+  phone           String?  @map("sdt")
+  taxCode         String?  @map("mst") // Mã số thuế
+  deliveryTime    String?  @map("gionhanhang") // Giờ nhận hàng
+  district        String?  @map("quan")
+  email           String?
+  phoneAlt        String?  @map("phone") // Phone phụ
+  addressAlt      String?  @map("address") // Address phụ
+  customerType    String?  @map("loaikh") // Loại khách hàng
+  notes           String?  @map("ghichu")
+  showPrice       Boolean  @default(false) @map("hiengia") // Hiển thị giá
+  isActive        Boolean  @default(false)
+  showTitle2      Boolean  @default(false) @map("istitle2")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  fileName        String?  @map("tenfile")
+  customerName    String?  @map("tenkh") // Tên khách hàng đầy đủ
+  priceListId     String?  @map("banggiaId")
+  isShowVAT       Boolean  @default(true) @map("isshowvat")
+  routeCode       String?  @map("machuyen") // Mã chuyến
+
+  // Relations
+  priceList      PriceList?      @relation("CustomerPriceList", fields: [priceListId], references: [id])
+  customerGroups CustomerGroup[] @relation("CustomerGroups")
+  orders         Order[]         @relation("CustomerOrders")
+
+  @@index([name])
+  @@index([customerCode])
+  @@index([isActive])
+  @@map("customers")
+}
+
+// ============================================================================
+// PRODUCT MODEL
+// ============================================================================
+
 // Product Model - Sản phẩm
 model Product {
   id          String  @id @default(uuid())
-  name        String
+  name        String // title (tiếng Việt)
+  nameEn      String? // title2 (tiếng Anh) 
   slug        String  @unique
   description String?
   shortDesc   String? // Mô tả ngắn
+  subtitle    String? // subtitle từ schema nội bộ
 
-  // Pricing
-  price         Float
-  originalPrice Float? // Giá gốc (để hiển thị giảm giá)
+  // Mã sản phẩm (từ schema nội bộ)
+  productCode String? @unique @map("masp") // Product code
+
+  // Pricing (giữ nguyên ecommerce + thêm từ nội bộ)
+  price         Float  @map("giaban") // Giá bán
+  originalPrice Float? @map("giagoc") // Giá gốc (để hiển thị giảm giá)
   costPrice     Float? // Giá vốn
+  vat           Float? @default(0) // VAT %
 
   // Inventory
-  sku      String? @unique
-  barcode  String? @unique
-  stock    Int     @default(0)
-  minStock Int     @default(0) // Ngưỡng tồn kho tối thiểu
-  maxStock Int? // Tồn kho tối đa
+  sku         String? @unique
+  barcode     String? @unique
+  stock       Int     @default(0) @map("soluong") // Số lượng
+  stockInWare Int?    @default(0) @map("soluongkho") // Số lượng kho
+  minStock    Int     @default(0) // Ngưỡng tồn kho tối thiểu
+  maxStock    Int? // Tồn kho tối đa
+  wastage     Float   @default(0) @map("haohut") // Hao hụt
+  loadpoint   Float?  @default(0) // Điểm tải
 
   // Product details
-  unit   ProductUnit   @default(KG)
+  unit   ProductUnit   @default(KG) @map("dvt") // Đơn vị tính
   weight Float? // Trọng lượng (gram)
   origin String? // Xuất xứ (VD: Đà Lạt, Lâm Đồng)
   status ProductStatus @default(ACTIVE)
@@ -2712,7 +2862,7 @@ model Product {
 
   // Images
   images    ProductImage[]
-  thumbnail String? // Ảnh đại diện
+  thumbnail String?        @map("hinhanh") // Ảnh đại diện
 
   // Variants (sizes, colors, etc.)
   variants ProductVariant[]
@@ -2723,6 +2873,10 @@ model Product {
   inventoryLogs InventoryLog[]
   reviews       ProductReview[]
   wishlistItems WishlistItem[]
+
+  // Nội bộ Relations
+  priceListItems PriceListProduct[] // Bảng giá sản phẩm
+  suppliers      Supplier[]         @relation("SupplierProducts") // Nhà cung cấp
 
   // Attributes - JSON field for flexible attributes
   // VD: {"organic": true, "pesticide_free": true, "harvest_date": "2025-01-08"}
@@ -2738,11 +2892,14 @@ model Product {
   isNewArrival Boolean @default(false)
   isBestSeller Boolean @default(false)
   isOnSale     Boolean @default(false)
-  displayOrder Int     @default(0)
+  displayOrder Int     @default(0) @map("order")
 
   // Statistics
   viewCount Int @default(0)
   soldCount Int @default(0)
+
+  // Notes
+  notes String? @map("ghichu")
 
   // Dates
   publishedAt DateTime?
@@ -2752,6 +2909,7 @@ model Product {
   updatedBy   String?
 
   @@index([slug])
+  @@index([productCode])
   @@index([categoryId])
   @@index([status])
   @@index([isFeatured])
@@ -3011,7 +3169,7 @@ model Course {
   price       Decimal      @default(0) @db.Decimal(10, 2)
   level       CourseLevel  @default(BEGINNER)
   status      CourseStatus @default(DRAFT)
-  duration    Int?         // in minutes
+  duration    Int? // in minutes
   language    String?      @default("vi") @db.VarChar(10) // vi, en, etc.
 
   // Learning objectives
@@ -3033,8 +3191,8 @@ model Course {
   viewCount       Int   @default(0) // Track popularity
 
   // SEO & Marketing
-  metaTitle       String? @db.VarChar(255)
-  metaDescription String? @db.VarChar(500)
+  metaTitle       String?  @db.VarChar(255)
+  metaDescription String?  @db.VarChar(500)
   tags            String[] @default([]) // For search & filtering
 
   // Modules & Enrollments
@@ -3086,7 +3244,7 @@ model Lesson {
   description String?    @db.Text
   type        LessonType @default(VIDEO)
   content     String?    @db.Text // URL for video, HTML for text, file path
-  duration    Int?       // in minutes
+  duration    Int? // in minutes
   order       Int
   moduleId    String
   isPreview   Boolean    @default(false) // Allow preview before enrollment
@@ -3130,8 +3288,8 @@ model Enrollment {
   certificate    Certificate?
 
   // Timestamps
-  enrolledAt  DateTime  @default(now())
-  completedAt DateTime?
+  enrolledAt     DateTime  @default(now())
+  completedAt    DateTime?
   lastAccessedAt DateTime? @default(now()) // Track engagement
 
   @@unique([userId, courseId])
@@ -3170,7 +3328,7 @@ model Quiz {
   description  String? @db.Text
   lessonId     String
   passingScore Int     @default(70) // Percentage required to pass
-  timeLimit    Int?    // Time limit in minutes (null = no limit)
+  timeLimit    Int? // Time limit in minutes (null = no limit)
   maxAttempts  Int?    @default(3) // Maximum attempts allowed
   isRequired   Boolean @default(false) // Required to complete course
 
@@ -3193,9 +3351,9 @@ model Question {
   points      Int          @default(1)
   order       Int
   explanation String?      @db.Text // Explanation shown after answering
-  
+
   // For media attachments (images, code snippets)
-  mediaUrl    String?      @db.VarChar(500)
+  mediaUrl String? @db.VarChar(500)
 
   quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   answers Answer[]
@@ -3225,15 +3383,15 @@ model Answer {
 }
 
 model QuizAttempt {
-  id           String  @id @default(uuid())
-  quizId       String
-  userId       String
-  enrollmentId String
-  score        Float?  @db.DoublePrecision // Percentage score (0-100)
-  passed       Boolean @default(false)
-  answers      Json?   // Store user's answers: { questionId: selectedAnswerId[] }
-  timeSpent    Int?    // Time spent in seconds
-  attemptNumber Int    @default(1) // Track which attempt this is
+  id            String  @id @default(uuid())
+  quizId        String
+  userId        String
+  enrollmentId  String
+  score         Float?  @db.DoublePrecision // Percentage score (0-100)
+  passed        Boolean @default(false)
+  answers       Json? // Store user's answers: { questionId: selectedAnswerId[] }
+  timeSpent     Int? // Time spent in seconds
+  attemptNumber Int     @default(1) // Track which attempt this is
 
   quiz       Quiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -3264,7 +3422,7 @@ model Review {
   id       String  @id @default(uuid())
   courseId String
   userId   String
-  rating   Int     // 1-5 stars
+  rating   Int // 1-5 stars
   comment  String? @db.Text
 
   // Helpful voting
@@ -3333,9 +3491,9 @@ model Discussion {
   // Stats
   replyCount Int @default(0) // Denormalized for performance
 
-  course  Course             @relation("CourseDiscussions", fields: [courseId], references: [id], onDelete: Cascade)
-  user    User               @relation("UserDiscussions", fields: [userId], references: [id], onDelete: Cascade)
-  lesson  Lesson?            @relation("LessonDiscussions", fields: [lessonId], references: [id], onDelete: SetNull)
+  course  Course            @relation("CourseDiscussions", fields: [courseId], references: [id], onDelete: Cascade)
+  user    User              @relation("UserDiscussions", fields: [userId], references: [id], onDelete: Cascade)
+  lesson  Lesson?           @relation("LessonDiscussions", fields: [lessonId], references: [id], onDelete: SetNull)
   replies DiscussionReply[]
 
   createdAt DateTime @default(now())
@@ -3657,12 +3815,16 @@ model CartItem {
 
 // Orders
 model Order {
-  id          String @id @default(uuid())
-  orderNumber String @unique // Human-readable order number (e.g., ORD-2025-0001)
+  id          String  @id @default(uuid())
+  orderNumber String  @unique @map("madonhang") // Human-readable order number (e.g., ORD-2025-0001)
+  title       String?
+  type        String?
 
-  // Customer
-  userId String?
-  user   User?   @relation("UserOrders", fields: [userId], references: [id], onDelete: SetNull)
+  // Customer Relations
+  userId     String?
+  user       User?     @relation("UserOrders", fields: [userId], references: [id], onDelete: SetNull)
+  customerId String?   @map("khachhangId") // Khách hàng nội bộ
+  customer   Customer? @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: SetNull)
 
   // Guest order info (if user is null)
   guestEmail String?
@@ -3677,11 +3839,25 @@ model Order {
   items OrderItem[]
 
   // Pricing
-  subtotal    Float // Tổng tiền hàng
+  subtotal    Float @map("tongtien") // Tổng tiền hàng
   shippingFee Float @default(0)
-  tax         Float @default(0)
+  tax         Float @default(0) @map("tongvat") // Tổng VAT
   discount    Float @default(0)
   total       Float // Tổng cuối cùng
+  vat         Float @default(0) // VAT %
+
+  // Price List (từ nội bộ)
+  priceListId String?    @map("banggiaId")
+  priceList   PriceList? @relation("OrderPriceList", fields: [priceListId], references: [id])
+
+  // Delivery info (từ nội bộ)
+  deliveryDate DateTime? @map("ngaygiao") // Ngày giao
+  isShowVAT    Boolean   @default(false) @map("isshowvat")
+  shipper      String? // Shipper
+  deliveryNote String?   @map("phieuve") // Phiếu về
+  departTime   String?   @map("giodi") // Giờ đi
+  returnTime   String?   @map("giove") // Giờ về
+  signature    String?   @map("kynhan") // Ký nhận
 
   // Shipping
   shippingMethod  ShippingMethod @default(STANDARD)
@@ -3695,9 +3871,12 @@ model Order {
   payment       Payment?
 
   // Notes & Metadata
-  customerNote String?
+  customerNote String? @map("ghichu")
   internalNote String? // Admin note
+  cancelReason String? @map("lydohuy") // Lý do hủy
   metadata     Json? // Coupon codes, gift wrapping, etc.
+  printCount   Int?    @default(0)
+  displayOrder Int?    @map("order")
 
   // Timestamps
   confirmedAt DateTime?
@@ -3713,11 +3892,14 @@ model Order {
   updatedBy String?
 
   @@index([userId])
+  @@index([customerId])
   @@index([orderNumber])
   @@index([status])
   @@index([paymentStatus])
+  @@index([deliveryDate])
   @@index([createdAt])
   @@index([status, createdAt])
+  @@index([customerId, deliveryDate])
   @@map("orders")
 }
 
@@ -3727,7 +3909,7 @@ model OrderItem {
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  productId String? // Nullable in case product is deleted
+  productId String?  @map("idSP") // Nullable in case product is deleted
   product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   variantId String?
@@ -3739,9 +3921,27 @@ model OrderItem {
   sku         String?
   thumbnail   String?
 
-  quantity Int
-  price    Float // Unit price at time of order
-  subtotal Float // quantity * price
+  // Quantities (từ nội bộ)
+  quantityOrdered   Int @map("sldat") // Số lượng đặt
+  quantityDelivered Int @default(0) @map("slgiao") // Số lượng giao
+  quantityReceived  Int @default(0) @map("slnhan") // Số lượng nhận
+  quantityCancelled Int @default(0) @map("slhuy") // Số lượng hủy
+
+  // Legacy quantity field (mapped to quantityOrdered)
+  quantity Int @default(0) // For backward compatibility
+
+  // Pricing
+  price          Float @map("giaban") // Unit price at time of order
+  subtotal       Float @default(0) @map("ttdat") // Tổng tiền đặt
+  totalDelivered Float @default(0) @map("ttgiao") // Tổng tiền giao
+  totalReceived  Float @default(0) @map("ttnhan") // Tổng tiền nhận
+  totalAfterVAT  Float @default(0) @map("ttsauvat") // Tổng sau VAT
+  vat            Float @default(0) // VAT %
+
+  // Notes & Display
+  notes        String? @map("ghichu")
+  displayOrder Int?    @map("order")
+  isActive     Boolean @default(false)
 
   // Metadata
   metadata Json?
@@ -3896,8 +4096,8 @@ model ProductReview {
   moderatedAt DateTime?
 
   // Helpful votes
-  helpfulCount   Int              @default(0)
-  helpfulVotes   ReviewHelpful[]
+  helpfulCount Int             @default(0)
+  helpfulVotes ReviewHelpful[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -4205,21 +4405,21 @@ model WebsiteSetting {
   order       Int             @default(0) // Thứ tự hiển thị
   isActive    Boolean         @default(true)
   isPublic    Boolean         @default(true) // Public settings có thể lấy không cần auth
-  
+
   // Metadata
-  options     Json? // Options cho SELECT type: ["option1", "option2"]
-  validation  Json? // Rules validation: { "min": 0, "max": 100, "required": true }
-  
+  options    Json? // Options cho SELECT type: ["option1", "option2"]
+  validation Json? // Rules validation: { "min": 0, "max": 100, "required": true }
+
   // Timestamps
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  createdBy   String?
-  updatedBy   String?
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+
   // Relations
-  creator     User?           @relation("SettingCreator", fields: [createdBy], references: [id], onDelete: SetNull)
-  updater     User?           @relation("SettingUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
-  
+  creator User? @relation("SettingCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater User? @relation("SettingUpdater", fields: [updatedBy], references: [id], onDelete: SetNull)
+
   @@index([category, isActive])
   @@index([key])
   @@map("website_settings")
@@ -4285,94 +4485,94 @@ enum AIProviderType {
 }
 
 model AIProvider {
-  id            String          @id @default(uuid())
-  provider      AIProviderType  // Loại AI: ChatGPT, Grok, Gemini
-  name          String          // Tên mô tả (ví dụ: "ChatGPT Production")
-  apiKey        String          // API Key (encrypted)
-  model         String          // Model name (gpt-4, grok-2, gemini-pro)
-  
+  id       String         @id @default(uuid())
+  provider AIProviderType // Loại AI: ChatGPT, Grok, Gemini
+  name     String // Tên mô tả (ví dụ: "ChatGPT Production")
+  apiKey   String // API Key (encrypted)
+  model    String // Model name (gpt-4, grok-2, gemini-pro)
+
   // Configuration
-  temperature   Float           @default(0.7) // Độ ngẫu nhiên (0.0 - 2.0)
-  maxTokens     Int             @default(2000) // Giới hạn tokens
-  systemPrompt  String?         @db.Text // System prompt tùy chỉnh
-  
+  temperature  Float   @default(0.7) // Độ ngẫu nhiên (0.0 - 2.0)
+  maxTokens    Int     @default(2000) // Giới hạn tokens
+  systemPrompt String? @db.Text // System prompt tùy chỉnh
+
   // Settings
-  isActive      Boolean         @default(false) // Đang sử dụng
-  priority      Int             @default(0) // Độ ưu tiên (cao hơn = ưu tiên hơn)
-  isDefault     Boolean         @default(false) // Provider mặc định
-  
+  isActive  Boolean @default(false) // Đang sử dụng
+  priority  Int     @default(0) // Độ ưu tiên (cao hơn = ưu tiên hơn)
+  isDefault Boolean @default(false) // Provider mặc định
+
   // Metadata
-  description   String?         @db.Text // Mô tả chi tiết
-  tags          String[]        // Tags phân loại
-  
+  description String?  @db.Text // Mô tả chi tiết
+  tags        String[] // Tags phân loại
+
   // Stats & Monitoring
-  totalRequests Int             @default(0) // Tổng số requests
-  successCount  Int             @default(0) // Số requests thành công
-  failureCount  Int             @default(0) // Số requests thất bại
-  avgResponseTime Float?        // Thời gian phản hồi trung bình (ms)
-  lastUsedAt    DateTime?       // Lần sử dụng cuối
-  lastError     String?         @db.Text // Lỗi cuối cùng
-  
+  totalRequests   Int       @default(0) // Tổng số requests
+  successCount    Int       @default(0) // Số requests thành công
+  failureCount    Int       @default(0) // Số requests thất bại
+  avgResponseTime Float? // Thời gian phản hồi trung bình (ms)
+  lastUsedAt      DateTime? // Lần sử dụng cuối
+  lastError       String?   @db.Text // Lỗi cuối cùng
+
   // Timestamps
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  createdBy     String?
-  creator       User?           @relation("AIProviderCreator", fields: [createdBy], references: [id], onDelete: SetNull)
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  creator   User?    @relation("AIProviderCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+
   @@index([provider, isActive])
   @@index([priority, isActive])
   @@map("ai_providers")
 }
 
 model SupportConversation {
-  id                String                    @id @default(uuid())
-  conversationCode  String                    @unique @default(cuid()) // Mã hội thoại duy nhất
-  
+  id               String @id @default(uuid())
+  conversationCode String @unique @default(cuid()) // Mã hội thoại duy nhất
+
   // Customer Info
-  customerId        String?
-  customer          User?                     @relation("SupportCustomerConversations", fields: [customerId], references: [id], onDelete: SetNull)
-  customerName      String? // Tên khách hàng (cho guest)
-  customerEmail     String?
-  customerPhone     String?
-  customerIp        String? // IP address
-  customerLocation  String? // Vị trí địa lý
-  
+  customerId       String?
+  customer         User?   @relation("SupportCustomerConversations", fields: [customerId], references: [id], onDelete: SetNull)
+  customerName     String? // Tên khách hàng (cho guest)
+  customerEmail    String?
+  customerPhone    String?
+  customerIp       String? // IP address
+  customerLocation String? // Vị trí địa lý
+
   // Agent Assignment
-  assignedAgentId   String?
-  assignedAgent     User?                     @relation("SupportAgentConversations", fields: [assignedAgentId], references: [id], onDelete: SetNull)
-  assignedAt        DateTime?
-  
+  assignedAgentId String?
+  assignedAgent   User?     @relation("SupportAgentConversations", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  assignedAt      DateTime?
+
   // Status & Priority
-  status            SupportConversationStatus @default(WAITING)
-  priority          TicketPriority            @default(MEDIUM)
-  
+  status   SupportConversationStatus @default(WAITING)
+  priority TicketPriority            @default(MEDIUM)
+
   // Integration
-  platform          IntegrationPlatform       @default(WEBSITE)
-  platformUserId    String? // ID của user trên platform (Zalo, FB)
-  platformUserName  String? // Tên user trên platform
-  
+  platform         IntegrationPlatform @default(WEBSITE)
+  platformUserId   String? // ID của user trên platform (Zalo, FB)
+  platformUserName String? // Tên user trên platform
+
   // Metadata
-  subject           String? // Chủ đề cuộc hội thoại
-  tags              String[] // Tags để phân loại
-  notes             String?  @db.Text // Ghi chú nội bộ
-  lastMessageAt     DateTime?
+  subject            String? // Chủ đề cuộc hội thoại
+  tags               String[] // Tags để phân loại
+  notes              String?   @db.Text // Ghi chú nội bộ
+  lastMessageAt      DateTime?
   lastMessagePreview String?
-  
+
   // Rating
-  rating            Int? // 1-5 stars
-  feedback          String? @db.Text
-  
+  rating   Int? // 1-5 stars
+  feedback String? @db.Text
+
   // Timestamps
-  startedAt         DateTime             @default(now())
-  closedAt          DateTime?
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  
+  startedAt DateTime  @default(now())
+  closedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
   // Relations
-  messages          SupportMessage[]
-  attachments       SupportAttachment[]
-  tickets           SupportTicket[]
-  
+  messages    SupportMessage[]
+  attachments SupportAttachment[]
+  tickets     SupportTicket[]
+
   @@index([customerId, status])
   @@index([assignedAgentId, status])
   @@index([platform, platformUserId])
@@ -4382,40 +4582,40 @@ model SupportConversation {
 }
 
 model SupportMessage {
-  id              String               @id @default(uuid())
-  conversationId  String
-  conversation    SupportConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  
+  id             String              @id @default(uuid())
+  conversationId String
+  conversation   SupportConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
   // Message Content
-  messageType     SupportMessageType   @default(TEXT)
-  content         String               @db.Text
-  senderType      SupportSender        @default(CUSTOMER)
-  
+  messageType SupportMessageType @default(TEXT)
+  content     String             @db.Text
+  senderType  SupportSender      @default(CUSTOMER)
+
   // Sender Info
-  senderId        String?
-  sender          User?                @relation("SupportSentMessages", fields: [senderId], references: [id], onDelete: SetNull)
-  senderName      String? // Tên hiển thị
-  
+  senderId   String?
+  sender     User?   @relation("SupportSentMessages", fields: [senderId], references: [id], onDelete: SetNull)
+  senderName String? // Tên hiển thị
+
   // AI Features
-  isAIGenerated   Boolean              @default(false)
-  aiConfidence    Float? // Độ tin cậy của AI response (0-1)
-  aiSuggestions   Json? // Gợi ý từ AI
-  
+  isAIGenerated Boolean @default(false)
+  aiConfidence  Float? // Độ tin cậy của AI response (0-1)
+  aiSuggestions Json? // Gợi ý từ AI
+
   // Metadata
-  metadata        Json? // Dữ liệu bổ sung (product info, order info, etc.)
-  isRead          Boolean              @default(false)
-  readAt          DateTime?
-  isEdited        Boolean              @default(false)
-  editedAt        DateTime?
-  
+  metadata Json? // Dữ liệu bổ sung (product info, order info, etc.)
+  isRead   Boolean   @default(false)
+  readAt   DateTime?
+  isEdited Boolean   @default(false)
+  editedAt DateTime?
+
   // Timestamps
-  sentAt          DateTime             @default(now())
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  
+  sentAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  attachments     SupportAttachment[]
-  
+  attachments SupportAttachment[]
+
   @@index([conversationId, sentAt])
   @@index([senderId])
   @@index([senderType, sentAt])
@@ -4423,73 +4623,73 @@ model SupportMessage {
 }
 
 model SupportAttachment {
-  id              String               @id @default(uuid())
-  conversationId  String?
-  conversation    SupportConversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  messageId       String?
-  message         SupportMessage?      @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  
+  id             String               @id @default(uuid())
+  conversationId String?
+  conversation   SupportConversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  messageId      String?
+  message        SupportMessage?      @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
   // File Info
-  fileName        String
-  fileSize        Int // bytes
-  fileType        String // MIME type
-  fileUrl         String
-  thumbnailUrl    String?
-  
+  fileName     String
+  fileSize     Int // bytes
+  fileType     String // MIME type
+  fileUrl      String
+  thumbnailUrl String?
+
   // Metadata
-  uploadedById    String?
-  uploadedBy      User?                @relation("SupportUploadedAttachments", fields: [uploadedById], references: [id], onDelete: SetNull)
-  
+  uploadedById String?
+  uploadedBy   User?   @relation("SupportUploadedAttachments", fields: [uploadedById], references: [id], onDelete: SetNull)
+
   // Timestamps
-  createdAt       DateTime             @default(now())
-  
+  createdAt DateTime @default(now())
+
   @@index([conversationId])
   @@index([messageId])
   @@map("support_attachments")
 }
 
 model SupportTicket {
-  id              String               @id @default(uuid())
-  ticketNumber    String               @unique @default(cuid())
-  
+  id           String @id @default(uuid())
+  ticketNumber String @unique @default(cuid())
+
   // Related Conversation
-  conversationId  String?
-  conversation    SupportConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
-  
+  conversationId String?
+  conversation   SupportConversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
   // Customer Info
-  customerId      String?
-  customer        User?                @relation("CustomerTickets", fields: [customerId], references: [id], onDelete: SetNull)
-  
+  customerId String?
+  customer   User?   @relation("CustomerTickets", fields: [customerId], references: [id], onDelete: SetNull)
+
   // Ticket Details
-  subject         String
-  description     String               @db.Text
-  status          TicketStatus         @default(OPEN)
-  priority        TicketPriority       @default(MEDIUM)
-  category        String? // Product, Shipping, Payment, etc.
-  
+  subject     String
+  description String         @db.Text
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  category    String? // Product, Shipping, Payment, etc.
+
   // Assignment
   assignedAgentId String?
-  assignedAgent   User?                @relation("AgentTickets", fields: [assignedAgentId], references: [id], onDelete: SetNull)
+  assignedAgent   User?     @relation("AgentTickets", fields: [assignedAgentId], references: [id], onDelete: SetNull)
   assignedAt      DateTime?
-  
+
   // Resolution
-  resolution      String?              @db.Text
-  resolvedAt      DateTime?
-  resolvedById    String?
-  resolvedBy      User?                @relation("ResolvedTickets", fields: [resolvedById], references: [id], onDelete: SetNull)
-  
+  resolution   String?   @db.Text
+  resolvedAt   DateTime?
+  resolvedById String?
+  resolvedBy   User?     @relation("ResolvedTickets", fields: [resolvedById], references: [id], onDelete: SetNull)
+
   // Related Order (for order support)
-  relatedOrderId  String?
-  
+  relatedOrderId String?
+
   // Metadata
-  tags            String[]
-  internalNotes   String?              @db.Text
-  
+  tags          String[]
+  internalNotes String?  @db.Text
+
   // Timestamps
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  closedAt        DateTime?
-  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  closedAt  DateTime?
+
   @@index([customerId, status])
   @@index([assignedAgentId, status])
   @@index([status, priority])
@@ -4498,142 +4698,142 @@ model SupportTicket {
 }
 
 model ChatIntegration {
-  id              String              @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Platform Info
-  platform        IntegrationPlatform @unique
-  isEnabled       Boolean             @default(false)
-  
+  platform  IntegrationPlatform @unique
+  isEnabled Boolean             @default(false)
+
   // Credentials
-  appId           String?
-  appSecret       String?
-  accessToken     String?             @db.Text
-  refreshToken    String?             @db.Text
-  webhookSecret   String?
-  
+  appId         String?
+  appSecret     String?
+  accessToken   String? @db.Text
+  refreshToken  String? @db.Text
+  webhookSecret String?
+
   // Configuration
-  config          Json? // Platform-specific config
-  
+  config Json? // Platform-specific config
+
   // Webhook Info
   webhookUrl      String?
-  webhookVerified Boolean             @default(false)
-  
+  webhookVerified Boolean @default(false)
+
   // Metadata
-  lastSyncAt      DateTime?
-  syncStatus      String? // success, failed, pending
-  errorLog        String?             @db.Text
-  
+  lastSyncAt DateTime?
+  syncStatus String? // success, failed, pending
+  errorLog   String?   @db.Text
+
   // Timestamps
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("chat_integrations")
 }
 
 model ChatQuickReply {
-  id              String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Quick Reply Info
-  title           String
-  shortcut        String   @unique // e.g., "/hello", "/price"
-  message         String   @db.Text
-  
+  title    String
+  shortcut String @unique // e.g., "/hello", "/price"
+  message  String @db.Text
+
   // Categorization
-  category        String? // greeting, product, shipping, etc.
-  tags            String[]
-  
+  category String? // greeting, product, shipping, etc.
+  tags     String[]
+
   // Usage
-  isActive        Boolean  @default(true)
-  usageCount      Int      @default(0)
-  
+  isActive   Boolean @default(true)
+  usageCount Int     @default(0)
+
   // Creator
-  createdById     String?
-  createdBy       User?    @relation("CreatedQuickReplies", fields: [createdById], references: [id], onDelete: SetNull)
-  
+  createdById String?
+  createdBy   User?   @relation("CreatedQuickReplies", fields: [createdById], references: [id], onDelete: SetNull)
+
   // Timestamps
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([category, isActive])
   @@index([shortcut])
   @@map("chat_quick_replies")
 }
 
 model ChatBotRule {
-  id              String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Rule Info
-  name            String
-  description     String?  @db.Text
-  
+  name        String
+  description String? @db.Text
+
   // Trigger
-  keywords        String[] // Keywords to trigger this rule
-  pattern         String? // Regex pattern
-  platform        IntegrationPlatform[] // Platforms where this rule applies
-  
+  keywords String[] // Keywords to trigger this rule
+  pattern  String? // Regex pattern
+  platform IntegrationPlatform[] // Platforms where this rule applies
+
   // Response
   responseType    String // text, quick_reply, product, order_lookup
-  responseContent String   @db.Text // Response template
+  responseContent String @db.Text // Response template
   responseData    Json? // Additional data for complex responses
-  
+
   // AI Integration
-  useAI           Boolean  @default(false)
-  aiPrompt        String?  @db.Text
-  
+  useAI    Boolean @default(false)
+  aiPrompt String? @db.Text
+
   // Conditions
-  conditions      Json? // Advanced conditions
-  priority        Int      @default(0)
-  
+  conditions Json? // Advanced conditions
+  priority   Int   @default(0)
+
   // Status
-  isActive        Boolean  @default(true)
-  
+  isActive Boolean @default(true)
+
   // Usage Stats
-  triggerCount    Int      @default(0)
-  successRate     Float?
-  
+  triggerCount Int    @default(0)
+  successRate  Float?
+
   // Timestamps
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([isActive, priority])
   @@map("chat_bot_rules")
 }
 
 model SupportAnalytics {
-  id              String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Date
-  date            DateTime @db.Date
-  
+  date DateTime @db.Date
+
   // Metrics
-  totalConversations    Int @default(0)
-  activeConversations   Int @default(0)
-  closedConversations   Int @default(0)
-  totalMessages         Int @default(0)
-  customerMessages      Int @default(0)
-  agentMessages         Int @default(0)
-  botMessages           Int @default(0)
-  
+  totalConversations  Int @default(0)
+  activeConversations Int @default(0)
+  closedConversations Int @default(0)
+  totalMessages       Int @default(0)
+  customerMessages    Int @default(0)
+  agentMessages       Int @default(0)
+  botMessages         Int @default(0)
+
   // Performance
-  avgResponseTime       Float? // seconds
-  avgResolutionTime     Float? // minutes
-  firstResponseTime     Float? // seconds
-  
+  avgResponseTime   Float? // seconds
+  avgResolutionTime Float? // minutes
+  firstResponseTime Float? // seconds
+
   // Platform breakdown
-  platformStats         Json? // Stats per platform
-  
+  platformStats Json? // Stats per platform
+
   // Agent performance
-  agentId               String?
-  agent                 User?  @relation("SupportAgentAnalytics", fields: [agentId], references: [id], onDelete: SetNull)
-  
+  agentId String?
+  agent   User?   @relation("SupportAgentAnalytics", fields: [agentId], references: [id], onDelete: SetNull)
+
   // Customer satisfaction
-  avgRating             Float?
-  totalRatings          Int    @default(0)
-  
+  avgRating    Float?
+  totalRatings Int    @default(0)
+
   // Timestamps
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([date, agentId])
   @@index([date])
   @@index([agentId, date])
