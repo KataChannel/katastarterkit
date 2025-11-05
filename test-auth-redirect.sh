@@ -1,13 +1,24 @@
 #!/bin/bash
 
+# Auto-detect project path
+if [ -d "/chikiet/kataoffical/shoprausach" ]; then
+    PROJECT_PATH="/chikiet/kataoffical/shoprausach"
+elif [ -d "/mnt/chikiet/kataoffical/shoprausach" ]; then
+    PROJECT_PATH="/mnt/chikiet/kataoffical/shoprausach"
+else
+    echo "❌ Error: Cannot find project directory!"
+    exit 1
+fi
+
 echo "========================================"
 echo "🔐 TEST AUTH REDIRECT CONFIGURATION"
 echo "========================================"
+echo "📂 Using path: $PROJECT_PATH"
 echo ""
 
 echo "📋 Kiểm tra AUTH settings trong database..."
 echo ""
-cd backend && bun run test-auth-settings.ts
+cd "$PROJECT_PATH/backend" && bun run test-auth-settings.ts
 echo ""
 
 echo "✅ Test hoàn tất!"

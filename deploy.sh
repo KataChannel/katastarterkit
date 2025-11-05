@@ -7,6 +7,20 @@
 
 set -e
 
+# Auto-detect project path
+if [ -d "/chikiet/kataoffical/shoprausach" ]; then
+    PROJECT_PATH="/chikiet/kataoffical/shoprausach"
+    echo "📂 Detected path: /chikiet/kataoffical/shoprausach"
+elif [ -d "/mnt/chikiet/kataoffical/shoprausach" ]; then
+    PROJECT_PATH="/mnt/chikiet/kataoffical/shoprausach"
+    echo "📂 Detected path: /mnt/chikiet/kataoffical/shoprausach"
+else
+    echo "❌ Error: Cannot find project directory!"
+    exit 1
+fi
+
+cd "$PROJECT_PATH"
+
 SERVER="root@116.118.49.243"
 REMOTE_DIR="/root/shoprausach"
 COMPOSE_FILE="docker-compose.hybrid.yml"
@@ -30,16 +44,16 @@ fi
 
 # Step 0: Build backend locally
 echo "🔨 Step 0: Building backend..."
-if [ ! -d "backend/dist" ]; then
+if [ ! -d "$PROJECT_PATH/backend/dist" ]; then
     echo "  → Backend not built, building now..."
-    cd backend
+    cd "$PROJECT_PATH/backend"
     if [ ! -d "node_modules" ]; then
         echo "  → Installing backend dependencies..."
         bun install
     fi
     echo "  → Compiling TypeScript..."
     bun run build
-    cd ..
+    cd "$PROJECT_PATH"
     echo "  ✅ Backend built successfully"
 else
     echo "  ✅ Backend already built (backend/dist exists)"

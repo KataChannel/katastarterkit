@@ -1,18 +1,29 @@
 #!/bin/bash
 
+# Auto-detect project path
+if [ -d "/chikiet/kataoffical/shoprausach" ]; then
+    PROJECT_PATH="/chikiet/kataoffical/shoprausach"
+elif [ -d "/mnt/chikiet/kataoffical/shoprausach" ]; then
+    PROJECT_PATH="/mnt/chikiet/kataoffical/shoprausach"
+else
+    echo "❌ Error: Cannot find project directory!"
+    exit 1
+fi
+
 echo "=========================================="
 echo "🔍 VERIFY AUTH REDIRECT FIX"
 echo "=========================================="
+echo "📂 Using path: $PROJECT_PATH"
 echo ""
 
 echo "1️⃣ Checking database settings..."
 echo ""
-cd /chikiet/kataoffical/shoprausach/backend && bun run test-auth-settings.ts 2>&1 | grep -A 2 "auth_login_redirect\|auth_redirect_admin\|auth_redirect_user\|auth_role_based"
+cd "$PROJECT_PATH/backend" && bun run test-auth-settings.ts 2>&1 | grep -A 2 "auth_login_redirect\|auth_redirect_admin\|auth_redirect_user\|auth_role_based"
 echo ""
 
 echo "2️⃣ Searching for hardcoded /admin redirects in auth flow..."
 echo ""
-cd /chikiet/kataoffical/shoprausach
+cd "$PROJECT_PATH"
 grep -n "router.push.*'/admin'" \
   frontend/src/app/\(auth\)/login/page.tsx \
   frontend/src/app/\(auth\)/register/page.tsx \
