@@ -19,7 +19,7 @@ datasource db {
 
 enum UserRoleType {
   ADMIN
-  INSTRUCTOR // Giảng viên
+  INSTRUCTOR  // Giảng viên
   USER
   GUEST
 }
@@ -84,25 +84,18 @@ model User {
   userRoles       UserRoleAssignment[]
   userPermissions UserPermission[]
 
-  // RBAC Creation relations
-  rolesCreated       Role[]       @relation("RoleCreator")
-  permissionsCreated Permission[] @relation("PermissionCreator")
-
   // Content relations
   posts    Post[]    @relation("PostAuthor")
   comments Comment[] @relation("CommentAuthor")
   likes    Like[]    @relation("UserLikes")
 
-  // Tag relations
-  tagsCreated Tag[] @relation("TagCreator")
-
   // Menu management
-  menusCreated Menu[]     @relation("MenuCreator")
-  menuItems    MenuItem[] @relation("MenuItemCreator")
+  menusCreated   Menu[]        @relation("MenuCreator")
+  menuItems      MenuItem[]    @relation("MenuItemCreator")
 
   // Page Builder
-  pagesCreated  Page[]  @relation("PageCreator")
-  blocksCreated Block[] @relation("BlockCreator")
+  pagesCreated   Page[]        @relation("PageCreator")
+  blocksCreated  Block[]       @relation("BlockCreator")
 
   @@map("users")
 }
@@ -204,7 +197,7 @@ model Permission {
 }
 
 model UserRoleAssignment {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   userId    String
   roleId    String
   expiresAt DateTime?
@@ -281,7 +274,7 @@ model MenuItem {
   id       String  @id @default(uuid())
   menuId   String
   parentId String?
-
+  
   title    String
   url      String?
   pageId   String? // Link to Page if menu points to a page
@@ -289,18 +282,18 @@ model MenuItem {
   icon     String?
   order    Int     @default(0)
   isActive Boolean @default(true)
-
-  metadata    Json? // Custom fields
-  createdById String
+  
+  metadata     Json? // Custom fields
+  createdById  String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  menu      Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
-  parent    MenuItem?  @relation("MenuItemChildren", fields: [parentId], references: [id], onDelete: Cascade)
-  children  MenuItem[] @relation("MenuItemChildren")
-  page      Page?      @relation(fields: [pageId], references: [id], onDelete: SetNull)
-  createdBy User       @relation("MenuItemCreator", fields: [createdById], references: [id])
+  menu      Menu        @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parent    MenuItem?   @relation("MenuItemChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children  MenuItem[]  @relation("MenuItemChildren")
+  page      Page?       @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  createdBy User        @relation("MenuItemCreator", fields: [createdById], references: [id])
 
   @@index([menuId])
   @@index([parentId])
@@ -319,19 +312,19 @@ model Page {
   slug        String  @unique
   description String?
   thumbnail   String?
-
+  
   // SEO
   metaTitle       String?
   metaDescription String?
   metaKeywords    String?
-
+  
   // Status
   isPublished Boolean   @default(false)
   publishedAt DateTime?
-
+  
   // Template
-  template String? // Default, Landing, Blog, etc.
-
+  template    String? // Default, Landing, Blog, etc.
+  
   createdById String
 
   createdAt DateTime @default(now())
@@ -349,22 +342,22 @@ model Page {
 model Block {
   id     String @id @default(uuid())
   pageId String
-
+  
   // Block identification
-  type String // hero, text, image, gallery, cta, testimonial, etc.
-  name String // User-friendly name
-
+  type   String // hero, text, image, gallery, cta, testimonial, etc.
+  name   String // User-friendly name
+  
   // Content (JSON structure depends on block type)
   content Json
-
+  
   // Layout
   order    Int     @default(0)
   isActive Boolean @default(true)
-
+  
   // Styling
   className String? // Tailwind classes
-  styles    Json? // Custom styles
-
+  styles    Json?   // Custom styles
+  
   createdById String
 
   createdAt DateTime @default(now())
@@ -475,10 +468,10 @@ model Comment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author  User      @relation("CommentAuthor", fields: [authorId], references: [id])
-  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies Comment[] @relation("CommentReplies")
+  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author   User      @relation("CommentAuthor", fields: [authorId], references: [id])
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
 
   @@index([postId])
   @@index([authorId])
@@ -487,7 +480,7 @@ model Comment {
 }
 
 model Like {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
   userId    String
   postId    String
   createdAt DateTime @default(now())

@@ -14,20 +14,21 @@ build/
 
 # Environment variables
 .env*
-# Exception: Include production environment files in repository
-!.env.production
-!frontend/.env.production
-!backend/.env.production
+# Exception: Include example files only
+!.env.example
+!.env.production.example
+!frontend/.env.example
+!backend/.env.example
 
 # Frontend environment files
 frontend/.env*
-# Exception: Include frontend production environment
-!frontend/.env.production
+# Exception: Include example files
+!frontend/.env.example
 
 # Backend environment files
 backend/.env*
-# Exception: Include backend production environment
-!backend/.env.production
+# Exception: Include example files
+!backend/.env.example
 backend/kata_json
 
 # Database
