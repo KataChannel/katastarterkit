@@ -21,7 +21,7 @@ export class AICourseGeneratorService {
       this.genAI = new GoogleGenerativeAI(apiKey);
       // Sử dụng model ổn định - gemini-pro cho v1beta API
       this.model = this.genAI.getGenerativeModel({ 
-        model: 'gemini-1.5-flash',
+        model: 'gemini-flash-latest',
         generationConfig: {
           temperature: 0.7,
           topK: 40,

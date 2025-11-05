@@ -1,10 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import { CREATE_BLOG, GET_BLOG_CATEGORIES } from '@/graphql/blog.queries';
 import { toast } from 'sonner';
+import { RichTextEditor } from '@/components/editor/RichTextEditor';
+import { CategorySelect } from '@/components/category/CategorySelect';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Loader2, ArrowLeft, Save } from 'lucide-react';
 
 export default function CreateBlogPage() {
   const router = useRouter();
@@ -17,22 +33,34 @@ export default function CreateBlogPage() {
     featuredImage: '',
     status: 'DRAFT',
     isFeatured: false,
+    metaTitle: '',
+    metaDescription: '',
   });
-
-  const { data: categoriesData } = useQuery(GET_BLOG_CATEGORIES);
-  const categories = categoriesData?.blogCategories || [];
 
   const [createBlog, { loading }] = useMutation(CREATE_BLOG, {
     onCompleted: () => {
-      toast.success('Đã tạo bài viết');
+      toast.success('Đã tạo bài viết thành công!');
       router.push('/admin/blog');
     },
-    onError: (error) => toast.error('Tạo thất bại: ' + error.message),
+    onError: (error) => toast.error('Lỗi: ' + error.message),
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createBlog({ variables: { input: formData } });
+    
+    if (!formData.title || !formData.slug || !formData.content) {
+      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+      return;
+    }
+
+    await createBlog({ 
+      variables: { 
+        input: {
+          ...formData,
+          categoryId: formData.categoryId || undefined,
+        }
+      } 
+    });
   };
 
   const generateSlug = (title: string) => {
@@ -48,143 +76,220 @@ export default function CreateBlogPage() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Tạo bài viết mới</h1>
-
-      <form onSubmit={handleSubmit} className="max-w-4xl space-y-6">
-        <div className="bg-white p-6 rounded-lg shadow space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Tiêu đề <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => {
-                setFormData({
-                  ...formData,
-                  title: e.target.value,
-                  slug: generateSlug(e.target.value),
-                });
-              }}
-              className="w-full px-4 py-2 border rounded-md"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Slug</label>
-            <input
-              type="text"
-              value={formData.slug}
-              onChange={(e) =>
-                setFormData({ ...formData, slug: e.target.value })
-              }
-              className="w-full px-4 py-2 border rounded-md"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Mô tả ngắn</label>
-            <textarea
-              value={formData.excerpt}
-              onChange={(e) =>
-                setFormData({ ...formData, excerpt: e.target.value })
-              }
-              className="w-full px-4 py-2 border rounded-md"
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Nội dung <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              value={formData.content}
-              onChange={(e) =>
-                setFormData({ ...formData, content: e.target.value })
-              }
-              className="w-full px-4 py-2 border rounded-md"
-              rows={15}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Ảnh đại diện (URL)
-            </label>
-            <input
-              type="text"
-              value={formData.featuredImage}
-              onChange={(e) =>
-                setFormData({ ...formData, featuredImage: e.target.value })
-              }
-              className="w-full px-4 py-2 border rounded-md"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Danh mục</label>
-            <select
-              value={formData.categoryId}
-              onChange={(e) =>
-                setFormData({ ...formData, categoryId: e.target.value })
-              }
-              className="w-full px-4 py-2 border rounded-md"
-            >
-              <option value="">-- Chọn danh mục --</option>
-              {categories.map((cat: any) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Trạng thái</label>
-            <select
-              value={formData.status}
-              onChange={(e) =>
-                setFormData({ ...formData, status: e.target.value })
-              }
-              className="w-full px-4 py-2 border rounded-md"
-            >
-              <option value="DRAFT">Bản nháp</option>
-              <option value="PUBLISHED">Đã xuất bản</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={formData.isFeatured}
-              onChange={(e) =>
-                setFormData({ ...formData, isFeatured: e.target.checked })
-              }
-              className="h-4 w-4"
-            />
-            <label className="text-sm font-medium">Bài viết nổi bật</label>
-          </div>
+    <div className="container mx-auto p-4 md:p-6 max-w-5xl space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Tạo Bài Viết Mới</h1>
+          <p className="text-muted-foreground mt-1">
+            Tạo bài viết blog với trình soạn thảo rich text
+          </p>
         </div>
+      </div>
 
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Main Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Thông Tin Cơ Bản</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">
+                Tiêu Đề <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    title: e.target.value,
+                    slug: generateSlug(e.target.value),
+                  });
+                }}
+                placeholder="VD: Hướng dẫn sử dụng Next.js..."
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="slug">
+                Slug (Đường dẫn URL) <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="slug"
+                value={formData.slug}
+                onChange={(e) =>
+                  setFormData({ ...formData, slug: e.target.value })
+                }
+                placeholder="VD: huong-dan-su-dung-nextjs"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="excerpt">Mô Tả Ngắn</Label>
+              <Textarea
+                id="excerpt"
+                value={formData.excerpt}
+                onChange={(e) =>
+                  setFormData({ ...formData, excerpt: e.target.value })
+                }
+                placeholder="Mô tả ngắn gọn về bài viết..."
+                rows={3}
+              />
+            </div>
+
+            <CategorySelect
+              value={formData.categoryId}
+              onChange={(value) => setFormData({ ...formData, categoryId: value })}
+              query={GET_BLOG_CATEGORIES}
+              queryName="blogCategories"
+              label="Danh Mục"
+              placeholder="Chọn danh mục bài viết"
+              allowEmpty
+            />
+
+            <div className="space-y-2">
+              <Label htmlFor="featuredImage">URL Ảnh Đại Diện</Label>
+              <Input
+                id="featuredImage"
+                value={formData.featuredImage}
+                onChange={(e) =>
+                  setFormData({ ...formData, featuredImage: e.target.value })
+                }
+                placeholder="https://example.com/image.jpg"
+              />
+              {formData.featuredImage && (
+                <img
+                  src={formData.featuredImage}
+                  alt="Preview"
+                  className="w-full max-w-md rounded-lg mt-2"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Content */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Nội Dung <span className="text-red-500">*</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RichTextEditor
+              value={formData.content}
+              onChange={(value) => setFormData({ ...formData, content: value })}
+              placeholder="Viết nội dung bài viết ở đây..."
+            />
+          </CardContent>
+        </Card>
+
+        {/* SEO */}
+        <Card>
+          <CardHeader>
+            <CardTitle>SEO & Meta</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="metaTitle">Meta Title</Label>
+              <Input
+                id="metaTitle"
+                value={formData.metaTitle}
+                onChange={(e) =>
+                  setFormData({ ...formData, metaTitle: e.target.value })
+                }
+                placeholder="Tiêu đề SEO (tối đa 60 ký tự)"
+                maxLength={60}
+              />
+              <p className="text-sm text-muted-foreground">
+                {formData.metaTitle.length}/60 ký tự
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="metaDescription">Meta Description</Label>
+              <Textarea
+                id="metaDescription"
+                value={formData.metaDescription}
+                onChange={(e) =>
+                  setFormData({ ...formData, metaDescription: e.target.value })
+                }
+                placeholder="Mô tả SEO (tối đa 160 ký tự)"
+                rows={3}
+                maxLength={160}
+              />
+              <p className="text-sm text-muted-foreground">
+                {formData.metaDescription.length}/160 ký tự
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Cài Đặt</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="status">Trạng Thái</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, status: value })
+                }
+              >
+                <SelectTrigger id="status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DRAFT">Bản Nháp</SelectItem>
+                  <SelectItem value="PUBLISHED">Đã Xuất Bản</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="isFeatured"
+                checked={formData.isFeatured}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, isFeatured: checked })
+                }
+              />
+              <Label htmlFor="isFeatured">Bài viết nổi bật</Label>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Actions */}
         <div className="flex gap-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400"
-          >
-            {loading ? 'Đang tạo...' : 'Tạo bài viết'}
-          </button>
-          <button
+          <Button type="submit" disabled={loading}>
+            {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Save className="h-4 w-4 mr-2" />
+            Tạo Bài Viết
+          </Button>
+          <Button
             type="button"
+            variant="outline"
             onClick={() => router.back()}
-            className="px-6 py-2 border rounded-md hover:bg-gray-50"
           >
             Hủy
-          </button>
+          </Button>
         </div>
       </form>
     </div>

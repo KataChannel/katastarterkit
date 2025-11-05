@@ -136,13 +136,16 @@ export class CreateBlogCategoryInput {
 
   @Field({ nullable: true })
   thumbnail?: string;
+
+  @Field(() => Int, { nullable: true, defaultValue: 0 })
+  order?: number;
+
+  @Field({ nullable: true, defaultValue: true })
+  isActive?: boolean;
 }
 
 @InputType()
 export class UpdateBlogCategoryInput {
-  @Field(() => ID)
-  id: string;
-
   @Field({ nullable: true })
   name?: string;
 
@@ -154,6 +157,12 @@ export class UpdateBlogCategoryInput {
 
   @Field({ nullable: true })
   thumbnail?: string;
+
+  @Field(() => Int, { nullable: true })
+  order?: number;
+
+  @Field({ nullable: true })
+  isActive?: boolean;
 }
 
 @InputType()

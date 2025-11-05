@@ -258,10 +258,83 @@ export const DELETE_BLOG = gql`
   }
 `;
 
+// ============================================================================
+// BLOG CATEGORY MUTATIONS (Admin)
+// ============================================================================
+
+export const CREATE_BLOG_CATEGORY = gql`
+  mutation CreateBlogCategory($input: CreateBlogCategoryInput!) {
+    createBlogCategory(input: $input) {
+      id
+      name
+      slug
+      description
+      thumbnail
+      order
+      isActive
+    }
+  }
+`;
+
+export const UPDATE_BLOG_CATEGORY = gql`
+  mutation UpdateBlogCategory($id: ID!, $input: UpdateBlogCategoryInput!) {
+    updateBlogCategory(id: $id, input: $input) {
+      id
+      name
+      slug
+      description
+      thumbnail
+      order
+      isActive
+    }
+  }
+`;
+
+export const DELETE_BLOG_CATEGORY = gql`
+  mutation DeleteBlogCategory($id: ID!) {
+    deleteBlogCategory(id: $id)
+  }
+`;
+
+export const GET_BLOG_CATEGORIES_WITH_COUNT = gql`
+  query GetBlogCategoriesWithCount {
+    blogCategories {
+      id
+      name
+      slug
+      description
+      thumbnail
+      order
+      isActive
+      postCount
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export interface RelatedBlogsResponse {
   relatedBlogs: Blog[];
 }
 
 export interface BlogCategoriesResponse {
   blogCategories: BlogCategory[];
+}
+
+export interface CreateBlogCategoryInput {
+  name: string;
+  slug: string;
+  description?: string;
+  thumbnail?: string;
+  order?: number;
+  isActive?: boolean;
+}
+
+export interface UpdateBlogCategoryInput {
+  name?: string;
+  slug?: string;
+  description?: string;
+  thumbnail?: string;
+  order?: number;
+  isActive?: boolean;
 }

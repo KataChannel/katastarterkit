@@ -124,9 +124,11 @@ export class BlogResolver {
 
   @Mutation(() => BlogCategoryType, { name: 'updateBlogCategory' })
   @UseGuards(JwtAuthGuard)
-  async updateCategory(@Args('input') input: UpdateBlogCategoryInput) {
-    const { id, ...updateData } = input;
-    return this.blogService.updateCategory(id, updateData);
+  async updateCategory(
+    @Args('id', { type: () => ID }) id: string,
+    @Args('input') input: UpdateBlogCategoryInput
+  ) {
+    return this.blogService.updateCategory(id, input);
   }
 
   @Mutation(() => Boolean, { name: 'deleteBlogCategory' })

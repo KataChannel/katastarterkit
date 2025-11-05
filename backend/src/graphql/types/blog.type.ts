@@ -62,6 +62,12 @@ export class BlogCategoryType {
   @Field({ nullable: true })
   thumbnail?: string;
 
+  @Field(() => Int, { defaultValue: 0 })
+  order: number;
+
+  @Field({ defaultValue: true })
+  isActive: boolean;
+
   @Field(() => Int)
   postCount: number;
 

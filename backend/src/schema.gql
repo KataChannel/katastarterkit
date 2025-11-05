@@ -512,7 +512,9 @@ type BlogCategoryType {
   createdAt: DateTime!
   description: String
   id: ID!
+  isActive: Boolean!
   name: String!
+  order: Int!
   postCount: Int!
   slug: String!
   thumbnail: String
@@ -1012,7 +1014,9 @@ input CreateAnswerInput {
 
 input CreateBlogCategoryInput {
   description: String
+  isActive: Boolean = true
   name: String!
+  order: Int = 0
   slug: String!
   thumbnail: String
 }
@@ -2601,7 +2605,7 @@ type Mutation {
   updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
   updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
   updateBlog(input: UpdateBlogInput!): BlogType!
-  updateBlogCategory(input: UpdateBlogCategoryInput!): BlogCategoryType!
+  updateBlogCategory(id: ID!, input: UpdateBlogCategoryInput!): BlogCategoryType!
   updateBlogTag(input: UpdateBlogTagInput!): BlogTagType!
   updateCallCenterConfig(id: String!, input: UpdateCallCenterConfigInput!): CallCenterConfig!
   updateCartItem(input: UpdateCartItemInput!, sessionId: String): UpdateCartResponse!
@@ -4596,8 +4600,9 @@ input UpdateAffUserInput {
 
 input UpdateBlogCategoryInput {
   description: String
-  id: ID!
+  isActive: Boolean
   name: String
+  order: Int
   slug: String
   thumbnail: String
 }
