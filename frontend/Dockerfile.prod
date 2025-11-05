@@ -1,0 +1,58 @@
+# Frontend Production Dockerfile - Optimized for low memory
+FROM oven/bun:1.1.42-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Copy dependency files
+COPY frontend/package.json frontend/bun.lock* ./
+RUN bun install --frozen-lockfile --production
+
+# Build stage
+FROM base AS builder
+WORKDIR /app
+
+# Build arguments
+ARG NEXT_PUBLIC_GRAPHQL_ENDPOINT
+ARG NEXT_PUBLIC_APP_URL
+
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
+COPY frontend/ ./
+
+# Set environment variables for build
+ENV NEXT_PUBLIC_GRAPHQL_ENDPOINT=${NEXT_PUBLIC_GRAPHQL_ENDPOINT}
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_OTEL_ENABLED=false
+
+# Build Next.js application
+RUN bun run build
+
+# Production stage
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Copy built application
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+USER nextjs
+
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => r.statusCode === 200 ? process.exit(0) : process.exit(1))"
+
+CMD ["node", "server.js"]
