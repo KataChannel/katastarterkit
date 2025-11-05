@@ -167,6 +167,32 @@ export function ProductCarouselSettingsDialog({
           {/* Filter Tab */}
           <TabsContent value="filter" className="space-y-6 mt-6">
             <div className="space-y-4">
+              {/* Data Source Table Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="dataSourceTable" className="text-sm font-medium">
+                  Data Source Table
+                </Label>
+                <Select
+                  value={localSettings.dataSourceTable || 'ext_sanphamhoadon'}
+                  onValueChange={(value: any) => updateSettings({ dataSourceTable: value })}
+                >
+                  <SelectTrigger id="dataSourceTable">
+                    <SelectValue placeholder="Select table" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ext_sanphamhoadon">ext_sanphamhoadon (Sản phẩm)</SelectItem>
+                    <SelectItem value="ext_listhoadon">ext_listhoadon (Danh sách hóa đơn)</SelectItem>
+                    <SelectItem value="ext_detailhoadon">ext_detailhoadon (Chi tiết hóa đơn)</SelectItem>
+                    <SelectItem value="Product">Product (Sản phẩm E-commerce)</SelectItem>
+                    <SelectItem value="Post">Post (Bài viết)</SelectItem>
+                    <SelectItem value="custom">Custom (Tùy chỉnh)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Chọn bảng dữ liệu nguồn để lấy sản phẩm
+                </p>
+              </div>
+
               {/* Filter Type */}
               <div className="space-y-2">
                 <Label htmlFor="filterType" className="text-sm font-medium">
@@ -184,7 +210,7 @@ export function ProductCarouselSettingsDialog({
                     <SelectItem value="featured">Featured Products</SelectItem>
                     <SelectItem value="bestseller">Best Sellers</SelectItem>
                     <SelectItem value="category">By Category</SelectItem>
-                    <SelectItem value="custom">Custom Query</SelectItem>
+                    <SelectItem value="custom">Custom GraphQL Query</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
@@ -219,24 +245,60 @@ export function ProductCarouselSettingsDialog({
                   </Label>
                   <textarea
                     id="customQuery"
-                    rows={6}
+                    rows={10}
                     placeholder="Enter GraphQL query..."
                     value={localSettings.customQuery || ''}
                     onChange={(e) => updateSettings({ customQuery: e.target.value })}
-                    className="w-full px-3 py-2 text-sm border rounded-md font-mono"
+                    className="w-full px-3 py-2 text-sm border rounded-md font-mono bg-white"
                   />
-                  <p className="text-xs text-purple-700">
+                  <p className="text-xs text-purple-700 mb-2">
                     Advanced: Define custom GraphQL query for products
                   </p>
+                  
+                  {/* Sample Query Button */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const sampleQuery = `query GetProducts($limit: Int) {
+  ext_sanphamhoadon(
+    limit: $limit
+    orderBy: { createdAt: desc }
+    where: {
+      ten: { contains: "" }
+      dgia: { gt: 0 }
+    }
+  ) {
+    id
+    ten
+    ten2
+    ma
+    dvt
+    dgia
+    createdAt
+  }
+}`;
+                      updateSettings({ customQuery: sampleQuery });
+                    }}
+                    className="w-full"
+                  >
+                    📝 Load Sample Query
+                  </Button>
                 </div>
               )}
 
               {/* Filter Info */}
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-800">
+                <p className="text-sm text-green-800 mb-2">
                   <strong>✅ Data Source:</strong> Products are loaded from table{' '}
-                  <code className="px-1.5 py-0.5 bg-green-100 rounded text-xs">ext_sanphamhoadon</code>{' '}
+                  <code className="px-1.5 py-0.5 bg-green-100 rounded text-xs font-mono">
+                    {localSettings.dataSourceTable || 'ext_sanphamhoadon'}
+                  </code>{' '}
                   using dynamic GraphQL queries.
+                </p>
+                <p className="text-xs text-green-700 mt-1">
+                  💡 Tip: Chọn "Custom GraphQL Query" để tùy chỉnh hoàn toàn query lấy dữ liệu
                 </p>
               </div>
             </div>

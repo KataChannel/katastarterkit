@@ -331,6 +331,7 @@ export interface ContactFormBlockContent {
 export interface ProductCarouselBlockContent {
   title?: string;
   category?: string; // Danh mục sản phẩm
+  dataSourceTable?: string; // 🆕 Bảng dữ liệu nguồn (ext_sanphamhoadon, Product, etc.)
   filterType?: 'all' | 'featured' | 'bestseller' | 'category' | 'custom'; // Loại lọc
   customQuery?: string; // GraphQL query tùy chỉnh
   itemsToShow?: number; // Số sản phẩm hiển thị
