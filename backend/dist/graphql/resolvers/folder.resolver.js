@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FolderResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -50,7 +51,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input', { type: () => file_input_1.CreateFolderInput })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [file_input_1.CreateFolderInput, Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof file_input_1.CreateFolderInput !== "undefined" && file_input_1.CreateFolderInput) === "function" ? _b : Object, Object]),
     __metadata("design:returntype", Promise)
 ], FolderResolver.prototype, "createFolder", null);
 __decorate([
@@ -73,7 +74,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input', { type: () => file_input_1.UpdateFolderInput })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [file_input_1.UpdateFolderInput, Object]),
+    __metadata("design:paramtypes", [typeof (_c = typeof file_input_1.UpdateFolderInput !== "undefined" && file_input_1.UpdateFolderInput) === "function" ? _c : Object, Object]),
     __metadata("design:returntype", Promise)
 ], FolderResolver.prototype, "updateFolder", null);
 __decorate([
@@ -87,6 +88,6 @@ __decorate([
 exports.FolderResolver = FolderResolver = __decorate([
     (0, graphql_1.Resolver)(() => file_model_1.FileFolder),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [file_service_1.FileService])
+    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _a : Object])
 ], FolderResolver);
 //# sourceMappingURL=folder.resolver.js.map

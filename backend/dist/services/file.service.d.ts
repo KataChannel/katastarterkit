@@ -13,8 +13,8 @@ export declare class FileService {
     getFiles(input: GetFilesInput, userId: string): Promise<{
         items: any;
         total: any;
-        page: number;
-        limit: number;
+        page: GetFilesInput;
+        limit: GetFilesInput;
         totalPages: number;
         hasNextPage: boolean;
         hasPreviousPage: boolean;

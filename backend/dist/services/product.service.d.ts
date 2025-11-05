@@ -6,8 +6,8 @@ export declare class ProductService {
     getProducts(input: GetProductsInput): Promise<{
         items: any;
         total: any;
-        page: number;
-        limit: number;
+        page: GetProductsInput;
+        limit: GetProductsInput;
         totalPages: number;
         hasMore: boolean;
     }>;
@@ -16,8 +16,8 @@ export declare class ProductService {
     getProductsByCategory(categoryId: string, input?: GetProductsInput): Promise<{
         items: any;
         total: any;
-        page: number;
-        limit: number;
+        page: GetProductsInput;
+        limit: GetProductsInput;
         totalPages: number;
         hasMore: boolean;
     }>;

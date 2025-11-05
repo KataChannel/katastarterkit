@@ -32,8 +32,8 @@ export declare class AffiliateCampaignService {
     searchCampaigns(input: CampaignSearchInput): Promise<{
         campaigns: any;
         total: any;
-        page: number;
-        size: number;
+        page: any;
+        size: any;
         totalPages: number;
     }>;
     joinCampaign(affiliateUserId: string, input: JoinCampaignInput): Promise<any>;

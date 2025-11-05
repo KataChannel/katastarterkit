@@ -18,10 +18,7 @@ import { LoggerModule } from './logger/logger.module';
 import { DataLoaderModule } from './common/data-loaders/data-loader.module';
 import { GraphQLPerformanceModule } from './common/graphql-performance/graphql-performance.module';
 import { CommonServicesModule } from './common/common-services.module';
-import { SecurityModule } from './security/security.module';
 import { UnifiedDynamicModule } from './graphql/unified-dynamic.module';
-import { MenuModule } from './menu/menu.module';
-import { BlogModule } from './graphql/modules/blog.module';
 import { TestController } from './test.controller';
 
 // Removed modules (deleted during cleanup):
@@ -29,13 +26,11 @@ import { TestController } from './test.controller';
 // - RealTimeModule, SearchModule, MonitoringModule
 // - KetoAnModule, FileModule, HRModule, ProductModule, ReviewModule
 // - SeedModule, CallCenterModule, LmsModule, EcommerceModule, SupportChatModule
+// - SecurityModule, MenuModule, BlogModule (schema incompatibility)
 
 // Configuration
 import { validationSchema } from './config/validation';
 import { EnvConfigService } from './config/env-config.service';
-
-// Removed controllers (deleted during cleanup):
-// - LogController, FileController, ProductNormalizationController
 
 // Resolvers
 import { AppResolver } from './app.resolver';
@@ -44,10 +39,6 @@ import { AppResolver } from './app.resolver';
 import { GraphQLLoggingInterceptor } from './interceptors/graphql-logging.interceptor';
 import { InputSanitizationInterceptor } from './common/interceptors/input-sanitization.interceptor';
 import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-performance.interceptor';
-import { PerformanceInterceptor } from './interceptors/performance.interceptor';
-
-// Removed module (deleted during cleanup):
-// - ProjectModule
 
 @Module({
   imports: [
@@ -116,10 +107,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     MinioModule,
     LoggerModule,
     CommonServicesModule,
-    SecurityModule,
     UnifiedDynamicModule,
-    MenuModule,
-    BlogModule,
   ],
   controllers: [
     TestController,
@@ -138,10 +126,6 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
     {
       provide: APP_INTERCEPTOR,
       useClass: GraphQLPerformanceInterceptor,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: PerformanceInterceptor,
     },
   ],
 })

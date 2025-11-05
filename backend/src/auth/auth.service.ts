@@ -225,8 +225,7 @@ export class AuthService {
             data: {
               userId: user.id,
               provider: 'GOOGLE',
-              providerId: userInfo.id,
-              isVerified: true
+              providerId: userInfo.id
             }
           });
           this.logger.log(`Google auth method linked to existing user: ${user.id}`);
@@ -246,8 +245,7 @@ export class AuthService {
             authMethods: {
               create: {
                 provider: 'GOOGLE',
-                providerId: userInfo.id,
-                isVerified: true
+                providerId: userInfo.id
               }
             }
           },
@@ -267,7 +265,7 @@ export class AuthService {
         data: {
           userId: user.id,
           action: 'LOGIN',
-          resourceType: 'user',
+          resource: 'users',
           resourceId: user.id,
           details: `Google login for ${user.email}`,
           ipAddress: null,
@@ -327,8 +325,7 @@ export class AuthService {
           data: {
             userId: user.id,
             provider: AuthProvider.FACEBOOK,
-            providerId: facebookId,
-            isVerified: true,
+            providerId: facebookId
           },
         });
       }
@@ -350,8 +347,7 @@ export class AuthService {
           authMethods: {
             create: {
               provider: AuthProvider.FACEBOOK,
-              providerId: facebookId,
-              isVerified: true,
+              providerId: facebookId
             },
           },
         },
@@ -380,7 +376,7 @@ export class AuthService {
       data: {
         userId: user.id,
         action: 'FACEBOOK_LOGIN',
-        resourceType: 'user',
+        resource: 'user',
         resourceId: user.id,
         details: {
           facebookId,
@@ -397,6 +393,9 @@ export class AuthService {
     };
   }
 
+  // DISABLED: PHONE provider removed from schema
+  // TODO: Re-implement phone authentication if needed with LOCAL provider
+  /*
   async loginWithPhone(phone: string, profile?: any): Promise<{ user: User; accessToken: string; refreshToken: string }> {
     // 1. Kiểm tra phone với hệ thống
     let user = await this.prisma.user.findUnique({
@@ -417,7 +416,6 @@ export class AuthService {
             userId: user.id,
             provider: AuthProvider.PHONE,
             providerId: phone,
-            isVerified: true,
           },
         });
       }
@@ -436,7 +434,6 @@ export class AuthService {
             create: {
               provider: AuthProvider.PHONE,
               providerId: phone,
-              isVerified: true,
             },
           },
         },
@@ -459,6 +456,7 @@ export class AuthService {
       ...tokens,
     };
   }
+  */
 
   /**
    * Cập nhật thông tin hồ sơ người dùng
@@ -509,7 +507,7 @@ export class AuthService {
       data: {
         userId,
         action: 'UPDATE_PROFILE',
-        resourceType: 'user',
+        resource: 'user',
         resourceId: userId,
         details: {
           updatedFields: Object.keys(updateData),
@@ -576,7 +574,7 @@ export class AuthService {
       data: {
         userId,
         action: 'CHANGE_PASSWORD',
-        resourceType: 'user',
+        resource: 'user',
         resourceId: userId,
         details: {
           timestamp: new Date(),
@@ -627,7 +625,7 @@ export class AuthService {
       data: {
         userId,
         action: 'SET_PASSWORD',
-        resourceType: 'user',
+        resource: 'user',
         resourceId: userId,
         details: {
           timestamp: new Date(),
@@ -729,7 +727,7 @@ export class AuthService {
       data: {
         userId: adminId,
         action: 'ADMIN_RESET_PASSWORD',
-        resourceType: 'user',
+        resource: 'user',
         resourceId: userId,
         details: {
           targetUserId: userId,
@@ -776,12 +774,12 @@ export class AuthService {
     // Tạo mã OTP 6 chữ số
     const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Xóa các token cũ chưa sử dụng
+    // Xóa các token cũ chưa sử dụng (usedAt = null)
     await this.prisma.verificationToken.deleteMany({
       where: {
         userId: user.id,
         type: 'PASSWORD_RESET',
-        isUsed: false,
+        usedAt: null,  // null = chưa sử dụng
       },
     });
 
@@ -834,7 +832,7 @@ export class AuthService {
         userId: user.id,
         token,
         type: 'PASSWORD_RESET',
-        isUsed: false,
+        usedAt: null,  // null = chưa sử dụng
       },
     });
 
@@ -893,7 +891,7 @@ export class AuthService {
         type: 'PASSWORD_RESET',
       },
       data: {
-        isUsed: true,
+        usedAt: new Date(),  // Mark as used with timestamp
       },
     });
 

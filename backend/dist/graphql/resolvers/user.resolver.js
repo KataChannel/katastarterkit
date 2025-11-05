@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -442,8 +443,6 @@ __decorate([
 exports.UserResolver = UserResolver = __decorate([
     (0, graphql_1.Resolver)(() => user_model_1.User),
     __metadata("design:paramtypes", [user_service_1.UserService,
-        auth_service_1.AuthService,
-        otp_service_1.OtpService,
-        pubsub_service_1.PubSubService])
+        auth_service_1.AuthService, typeof (_a = typeof otp_service_1.OtpService !== "undefined" && otp_service_1.OtpService) === "function" ? _a : Object, pubsub_service_1.PubSubService])
 ], UserResolver);
 //# sourceMappingURL=user.resolver.js.map

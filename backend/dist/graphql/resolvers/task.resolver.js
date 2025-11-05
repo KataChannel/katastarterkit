@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TaskResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -243,7 +243,7 @@ __decorate([
     __param(0, (0, graphql_1.Context)()),
     __param(1, (0, graphql_1.Args)('filters', { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, task_input_1.TaskFilterInput]),
+    __metadata("design:paramtypes", [Object, typeof (_f = typeof task_input_1.TaskFilterInput !== "undefined" && task_input_1.TaskFilterInput) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "getTasks", null);
 __decorate([
@@ -270,7 +270,7 @@ __decorate([
     __param(0, (0, graphql_1.Context)()),
     __param(1, (0, graphql_1.Args)('filters', { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, task_input_1.TaskFilterInput]),
+    __metadata("design:paramtypes", [Object, typeof (_g = typeof task_input_1.TaskFilterInput !== "undefined" && task_input_1.TaskFilterInput) === "function" ? _g : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "getSharedTasks", null);
 __decorate([
@@ -281,7 +281,7 @@ __decorate([
     __param(2, (0, graphql_1.Args)('limit', { type: () => graphql_1.Int, defaultValue: 10 })),
     __param(3, (0, graphql_1.Args)('filters', { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Number, Number, task_input_1.TaskFilterInput]),
+    __metadata("design:paramtypes", [Object, Number, Number, typeof (_h = typeof task_input_1.TaskFilterInput !== "undefined" && task_input_1.TaskFilterInput) === "function" ? _h : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "getTasksPaginated", null);
 __decorate([
@@ -290,7 +290,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_input_1.CreateTaskInput, Object]),
+    __metadata("design:paramtypes", [typeof (_j = typeof task_input_1.CreateTaskInput !== "undefined" && task_input_1.CreateTaskInput) === "function" ? _j : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "createTask", null);
 __decorate([
@@ -299,7 +299,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_input_1.UpdateTaskInput, Object]),
+    __metadata("design:paramtypes", [typeof (_k = typeof task_input_1.UpdateTaskInput !== "undefined" && task_input_1.UpdateTaskInput) === "function" ? _k : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "updateTask", null);
 __decorate([
@@ -317,7 +317,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_share_input_1.ShareTaskInput, Object]),
+    __metadata("design:paramtypes", [typeof (_l = typeof task_share_input_1.ShareTaskInput !== "undefined" && task_share_input_1.ShareTaskInput) === "function" ? _l : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "shareTask", null);
 __decorate([
@@ -326,7 +326,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_comment_input_1.CreateTaskCommentInput, Object]),
+    __metadata("design:paramtypes", [typeof (_m = typeof task_comment_input_1.CreateTaskCommentInput !== "undefined" && task_comment_input_1.CreateTaskCommentInput) === "function" ? _m : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "createTaskComment", null);
 __decorate([
@@ -336,7 +336,7 @@ __decorate([
     __param(1, (0, graphql_1.Args)('input')),
     __param(2, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, task_input_1.CreateTaskInput, Object]),
+    __metadata("design:paramtypes", [String, typeof (_o = typeof task_input_1.CreateTaskInput !== "undefined" && task_input_1.CreateTaskInput) === "function" ? _o : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "createSubtask", null);
 __decorate([
@@ -345,7 +345,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_media_input_1.UploadTaskMediaInput, Object]),
+    __metadata("design:paramtypes", [typeof (_p = typeof task_media_input_1.UploadTaskMediaInput !== "undefined" && task_media_input_1.UploadTaskMediaInput) === "function" ? _p : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "uploadTaskMedia", null);
 __decorate([
@@ -379,7 +379,7 @@ __decorate([
     (0, graphql_1.ResolveField)(() => user_model_1.User),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_model_1.Task]),
+    __metadata("design:paramtypes", [typeof (_q = typeof task_model_1.Task !== "undefined" && task_model_1.Task) === "function" ? _q : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "author", null);
 __decorate([
@@ -387,49 +387,49 @@ __decorate([
     __param(0, (0, graphql_1.Parent)()),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_model_1.Task, Object]),
+    __metadata("design:paramtypes", [typeof (_r = typeof task_model_1.Task !== "undefined" && task_model_1.Task) === "function" ? _r : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "progress", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => [task_media_model_1.TaskMedia]),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_model_1.Task]),
+    __metadata("design:paramtypes", [typeof (_s = typeof task_model_1.Task !== "undefined" && task_model_1.Task) === "function" ? _s : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "media", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => [task_share_model_1.TaskShare]),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_model_1.Task]),
+    __metadata("design:paramtypes", [typeof (_t = typeof task_model_1.Task !== "undefined" && task_model_1.Task) === "function" ? _t : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "shares", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => [task_comment_model_1.TaskComment]),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_model_1.Task]),
+    __metadata("design:paramtypes", [typeof (_u = typeof task_model_1.Task !== "undefined" && task_model_1.Task) === "function" ? _u : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "comments", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => Number),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_model_1.Task]),
+    __metadata("design:paramtypes", [typeof (_v = typeof task_model_1.Task !== "undefined" && task_model_1.Task) === "function" ? _v : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "commentCount", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => Number),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_model_1.Task]),
+    __metadata("design:paramtypes", [typeof (_w = typeof task_model_1.Task !== "undefined" && task_model_1.Task) === "function" ? _w : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "mediaCount", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => Number),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_model_1.Task]),
+    __metadata("design:paramtypes", [typeof (_x = typeof task_model_1.Task !== "undefined" && task_model_1.Task) === "function" ? _x : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "subtaskCount", null);
 __decorate([
@@ -437,7 +437,7 @@ __decorate([
     __param(0, (0, graphql_1.Parent)()),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_model_1.Task, Object]),
+    __metadata("design:paramtypes", [typeof (_y = typeof task_model_1.Task !== "undefined" && task_model_1.Task) === "function" ? _y : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "subtasks", null);
 __decorate([
@@ -445,28 +445,28 @@ __decorate([
     __param(0, (0, graphql_1.Parent)()),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_model_1.Task, Object]),
+    __metadata("design:paramtypes", [typeof (_z = typeof task_model_1.Task !== "undefined" && task_model_1.Task) === "function" ? _z : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "parent", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => user_model_1.User),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_comment_model_1.TaskComment]),
+    __metadata("design:paramtypes", [typeof (_0 = typeof task_comment_model_1.TaskComment !== "undefined" && task_comment_model_1.TaskComment) === "function" ? _0 : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "commentAuthor", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => task_comment_model_1.TaskComment, { nullable: true }),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_comment_model_1.TaskComment]),
+    __metadata("design:paramtypes", [typeof (_1 = typeof task_comment_model_1.TaskComment !== "undefined" && task_comment_model_1.TaskComment) === "function" ? _1 : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "commentParent", null);
 __decorate([
     (0, graphql_1.ResolveField)(() => [task_comment_model_1.TaskComment]),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [task_comment_model_1.TaskComment]),
+    __metadata("design:paramtypes", [typeof (_2 = typeof task_comment_model_1.TaskComment !== "undefined" && task_comment_model_1.TaskComment) === "function" ? _2 : Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "commentReplies", null);
 __decorate([
@@ -479,7 +479,7 @@ __decorate([
     __param(1, (0, graphql_1.Args)('filters', { nullable: true })),
     __param(2, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, task_input_1.TaskFilterInput, Object]),
+    __metadata("design:paramtypes", [String, typeof (_3 = typeof task_input_1.TaskFilterInput !== "undefined" && task_input_1.TaskFilterInput) === "function" ? _3 : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "getProjectTasks", null);
 __decorate([
@@ -492,7 +492,7 @@ __decorate([
     __param(1, (0, graphql_1.Args)('input')),
     __param(2, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, task_input_1.CreateTaskInput, Object]),
+    __metadata("design:paramtypes", [String, typeof (_4 = typeof task_input_1.CreateTaskInput !== "undefined" && task_input_1.CreateTaskInput) === "function" ? _4 : Object, Object]),
     __metadata("design:returntype", Promise)
 ], TaskResolver.prototype, "createProjectTask", null);
 __decorate([
@@ -523,12 +523,8 @@ __decorate([
 ], TaskResolver.prototype, "assignTask", null);
 exports.TaskResolver = TaskResolver = __decorate([
     (0, graphql_1.Resolver)(() => task_model_1.Task),
-    __metadata("design:paramtypes", [task_service_1.TaskService,
-        task_share_service_1.TaskShareService,
-        task_comment_service_1.TaskCommentService,
-        task_media_service_1.TaskMediaService,
-        notification_service_1.NotificationService,
+    __metadata("design:paramtypes", [typeof (_a = typeof task_service_1.TaskService !== "undefined" && task_service_1.TaskService) === "function" ? _a : Object, typeof (_b = typeof task_share_service_1.TaskShareService !== "undefined" && task_share_service_1.TaskShareService) === "function" ? _b : Object, typeof (_c = typeof task_comment_service_1.TaskCommentService !== "undefined" && task_comment_service_1.TaskCommentService) === "function" ? _c : Object, typeof (_d = typeof task_media_service_1.TaskMediaService !== "undefined" && task_media_service_1.TaskMediaService) === "function" ? _d : Object, notification_service_1.NotificationService,
         user_service_1.UserService,
-        pubsub_service_1.PubSubService, typeof (_a = typeof task_data_loader_service_1.TaskDataLoaderService !== "undefined" && task_data_loader_service_1.TaskDataLoaderService) === "function" ? _a : Object, cache_invalidation_service_1.CacheInvalidationService])
+        pubsub_service_1.PubSubService, typeof (_e = typeof task_data_loader_service_1.TaskDataLoaderService !== "undefined" && task_data_loader_service_1.TaskDataLoaderService) === "function" ? _e : Object, cache_invalidation_service_1.CacheInvalidationService])
 ], TaskResolver);
 //# sourceMappingURL=task.resolver.js.map

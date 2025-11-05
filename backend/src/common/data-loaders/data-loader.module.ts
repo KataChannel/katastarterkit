@@ -1,11 +1,11 @@
 import { Module, Global } from '@nestjs/common';
-import { TaskDataLoaderService } from './task-data-loader.service';
+// TaskDataLoaderService removed - Task model deleted during cleanup
 import { PrismaModule } from '../../prisma/prisma.module';
 
 @Global()
 @Module({
   imports: [PrismaModule],
-  providers: [TaskDataLoaderService],
-  exports: [TaskDataLoaderService],
+  providers: [],
+  exports: [],
 })
 export class DataLoaderModule {}

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AffiliateConversionResolver = exports.AffiliatePaymentResolver = exports.AffiliateTrackingResolver = exports.AffiliateCampaignResolver = exports.AffiliateUserResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -92,7 +93,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.CreateAffUserInput, Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof affiliate_input_1.CreateAffUserInput !== "undefined" && affiliate_input_1.CreateAffUserInput) === "function" ? _b : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliateUserResolver.prototype, "createAffiliateUser", null);
 __decorate([
@@ -109,12 +110,12 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.UpdateAffUserInput, Object]),
+    __metadata("design:paramtypes", [typeof (_c = typeof affiliate_input_1.UpdateAffUserInput !== "undefined" && affiliate_input_1.UpdateAffUserInput) === "function" ? _c : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliateUserResolver.prototype, "updateAffiliateUser", null);
 exports.AffiliateUserResolver = AffiliateUserResolver = __decorate([
     (0, graphql_1.Resolver)(() => affiliate_model_1.AffUser),
-    __metadata("design:paramtypes", [affiliate_service_1.AffiliateUserService])
+    __metadata("design:paramtypes", [typeof (_a = typeof affiliate_service_1.AffiliateUserService !== "undefined" && affiliate_service_1.AffiliateUserService) === "function" ? _a : Object])
 ], AffiliateUserResolver);
 let AffiliateCampaignResolver = class AffiliateCampaignResolver {
     constructor(campaignService) {
@@ -163,7 +164,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.CreateCampaignInput, Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof affiliate_input_1.CreateCampaignInput !== "undefined" && affiliate_input_1.CreateCampaignInput) === "function" ? _e : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliateCampaignResolver.prototype, "createCampaign", null);
 __decorate([
@@ -171,7 +172,7 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, graphql_1.Args)('search', { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.CampaignSearchInput]),
+    __metadata("design:paramtypes", [typeof (_f = typeof affiliate_input_1.CampaignSearchInput !== "undefined" && affiliate_input_1.CampaignSearchInput) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], AffiliateCampaignResolver.prototype, "getCampaigns", null);
 __decorate([
@@ -190,7 +191,7 @@ __decorate([
     __param(1, (0, graphql_1.Args)('input')),
     __param(2, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, affiliate_input_1.UpdateCampaignInput, Object]),
+    __metadata("design:paramtypes", [String, typeof (_g = typeof affiliate_input_1.UpdateCampaignInput !== "undefined" && affiliate_input_1.UpdateCampaignInput) === "function" ? _g : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliateCampaignResolver.prototype, "updateCampaign", null);
 __decorate([
@@ -209,7 +210,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.JoinCampaignInput, Object]),
+    __metadata("design:paramtypes", [typeof (_h = typeof affiliate_input_1.JoinCampaignInput !== "undefined" && affiliate_input_1.JoinCampaignInput) === "function" ? _h : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliateCampaignResolver.prototype, "joinCampaign", null);
 __decorate([
@@ -219,12 +220,12 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.ReviewCampaignApplicationInput, Object]),
+    __metadata("design:paramtypes", [typeof (_j = typeof affiliate_input_1.ReviewCampaignApplicationInput !== "undefined" && affiliate_input_1.ReviewCampaignApplicationInput) === "function" ? _j : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliateCampaignResolver.prototype, "reviewApplication", null);
 exports.AffiliateCampaignResolver = AffiliateCampaignResolver = __decorate([
     (0, graphql_1.Resolver)(() => affiliate_model_1.AffCampaign),
-    __metadata("design:paramtypes", [affiliate_service_1.AffiliateCampaignService])
+    __metadata("design:paramtypes", [typeof (_d = typeof affiliate_service_1.AffiliateCampaignService !== "undefined" && affiliate_service_1.AffiliateCampaignService) === "function" ? _d : Object])
 ], AffiliateCampaignResolver);
 let AffiliateTrackingResolver = class AffiliateTrackingResolver {
     constructor(trackingService) {
@@ -259,7 +260,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.CreateAffLinkInput, Object]),
+    __metadata("design:paramtypes", [typeof (_l = typeof affiliate_input_1.CreateAffLinkInput !== "undefined" && affiliate_input_1.CreateAffLinkInput) === "function" ? _l : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliateTrackingResolver.prototype, "createLink", null);
 __decorate([
@@ -268,7 +269,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('search', { nullable: true })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.AffLinkSearchInput, Object]),
+    __metadata("design:paramtypes", [typeof (_m = typeof affiliate_input_1.AffLinkSearchInput !== "undefined" && affiliate_input_1.AffLinkSearchInput) === "function" ? _m : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliateTrackingResolver.prototype, "getLinks", null);
 __decorate([
@@ -277,12 +278,12 @@ __decorate([
     __param(0, (0, graphql_1.Args)('search', { nullable: true })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.AffConversionSearchInput, Object]),
+    __metadata("design:paramtypes", [typeof (_o = typeof affiliate_input_1.AffConversionSearchInput !== "undefined" && affiliate_input_1.AffConversionSearchInput) === "function" ? _o : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliateTrackingResolver.prototype, "getConversions", null);
 exports.AffiliateTrackingResolver = AffiliateTrackingResolver = __decorate([
     (0, graphql_1.Resolver)(() => affiliate_model_1.AffLink),
-    __metadata("design:paramtypes", [affiliate_tracking_service_1.AffiliateTrackingService])
+    __metadata("design:paramtypes", [typeof (_k = typeof affiliate_tracking_service_1.AffiliateTrackingService !== "undefined" && affiliate_tracking_service_1.AffiliateTrackingService) === "function" ? _k : Object])
 ], AffiliateTrackingResolver);
 let AffiliatePaymentResolver = class AffiliatePaymentResolver {
     constructor(paymentService) {
@@ -317,7 +318,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.CreatePaymentRequestInput, Object]),
+    __metadata("design:paramtypes", [typeof (_q = typeof affiliate_input_1.CreatePaymentRequestInput !== "undefined" && affiliate_input_1.CreatePaymentRequestInput) === "function" ? _q : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliatePaymentResolver.prototype, "createPaymentRequest", null);
 __decorate([
@@ -326,7 +327,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('search', { nullable: true })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [affiliate_input_1.AffPaymentRequestSearchInput, Object]),
+    __metadata("design:paramtypes", [typeof (_r = typeof affiliate_input_1.AffPaymentRequestSearchInput !== "undefined" && affiliate_input_1.AffPaymentRequestSearchInput) === "function" ? _r : Object, Object]),
     __metadata("design:returntype", Promise)
 ], AffiliatePaymentResolver.prototype, "getPaymentRequests", null);
 __decorate([
@@ -353,7 +354,7 @@ __decorate([
 ], AffiliatePaymentResolver.prototype, "processPaymentRequest", null);
 exports.AffiliatePaymentResolver = AffiliatePaymentResolver = __decorate([
     (0, graphql_1.Resolver)(() => affiliate_model_1.AffPaymentRequest),
-    __metadata("design:paramtypes", [affiliate_payment_service_1.AffiliatePaymentService])
+    __metadata("design:paramtypes", [typeof (_p = typeof affiliate_payment_service_1.AffiliatePaymentService !== "undefined" && affiliate_payment_service_1.AffiliatePaymentService) === "function" ? _p : Object])
 ], AffiliatePaymentResolver);
 let AffiliateConversionResolver = class AffiliateConversionResolver {
     constructor(conversionService) {
@@ -394,6 +395,6 @@ __decorate([
 ], AffiliateConversionResolver.prototype, "rejectConversion", null);
 exports.AffiliateConversionResolver = AffiliateConversionResolver = __decorate([
     (0, graphql_1.Resolver)('AffConversion'),
-    __metadata("design:paramtypes", [affiliate_conversion_service_1.AffiliateConversionService])
+    __metadata("design:paramtypes", [typeof (_s = typeof affiliate_conversion_service_1.AffiliateConversionService !== "undefined" && affiliate_conversion_service_1.AffiliateConversionService) === "function" ? _s : Object])
 ], AffiliateConversionResolver);
 //# sourceMappingURL=affiliate.resolver.js.map

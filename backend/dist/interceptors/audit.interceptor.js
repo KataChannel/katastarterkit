@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var AuditInterceptor_1;
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuditInterceptor = void 0;
 const common_1 = require("@nestjs/common");
@@ -236,6 +237,6 @@ let AuditInterceptor = AuditInterceptor_1 = class AuditInterceptor {
 exports.AuditInterceptor = AuditInterceptor;
 exports.AuditInterceptor = AuditInterceptor = AuditInterceptor_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [enhanced_audit_service_1.EnhancedAuditService])
+    __metadata("design:paramtypes", [typeof (_a = typeof enhanced_audit_service_1.EnhancedAuditService !== "undefined" && enhanced_audit_service_1.EnhancedAuditService) === "function" ? _a : Object])
 ], AuditInterceptor);
 //# sourceMappingURL=audit.interceptor.js.map

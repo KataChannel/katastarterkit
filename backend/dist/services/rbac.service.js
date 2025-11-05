@@ -28,27 +28,21 @@ let RbacService = class RbacService {
     async createPermission(input) {
         const existing = await this.prisma.permission.findUnique({
             where: {
-                resource_action_scope: {
+                resource_action: {
                     resource: input.resource,
                     action: input.action,
-                    scope: input.scope || null,
                 },
             },
         });
         if (existing) {
-            throw new common_1.ConflictException(`Permission "${input.resource}:${input.action}${input.scope ? ':' + input.scope : ''}" already exists`);
+            throw new common_1.ConflictException(`Permission "${input.resource}:${input.action}" already exists`);
         }
         return this.prisma.permission.create({
             data: {
-                name: input.name,
-                displayName: input.displayName,
                 description: input.description,
                 resource: input.resource,
                 action: input.action,
-                scope: input.scope,
-                category: input.category || 'general',
-                conditions: input.conditions,
-                metadata: input.metadata,
+                createdById: 'system',
             },
         });
     }
@@ -56,9 +50,6 @@ let RbacService = class RbacService {
         const permission = await this.prisma.permission.findUnique({ where: { id } });
         if (!permission) {
             throw new common_1.NotFoundException('Permission not found');
-        }
-        if (permission.isSystemPerm && input.isActive === false) {
-            throw new common_1.ForbiddenException('Cannot deactivate system permission');
         }
         return this.prisma.permission.update({
             where: { id },
@@ -69,9 +60,6 @@ let RbacService = class RbacService {
         const permission = await this.prisma.permission.findUnique({ where: { id } });
         if (!permission) {
             throw new common_1.NotFoundException('Permission not found');
-        }
-        if (permission.isSystemPerm) {
-            throw new common_1.ForbiddenException('Cannot delete system permission');
         }
         await this.prisma.permission.delete({ where: { id } });
         return true;
@@ -116,12 +104,11 @@ let RbacService = class RbacService {
         const roleData = await this.prisma.role.findUnique({
             where: { id },
             include: {
-                permissions: {
+                rolePermissions: {
                     include: {
                         permission: true,
                     },
                 },
-                children: true,
             },
         });
         if (!roleData) {
@@ -129,7 +116,7 @@ let RbacService = class RbacService {
         }
         return {
             ...roleData,
-            permissions: roleData.permissions.map(rp => rp.permission).filter(p => p !== null)
+            permissions: roleData.rolePermissions?.map(rp => rp.permission).filter(p => p !== null) || []
         };
     }
     async createRole(input) {
@@ -139,31 +126,19 @@ let RbacService = class RbacService {
         if (existing) {
             throw new common_1.ConflictException(`Role "${input.name}" already exists`);
         }
-        if (input.parentId) {
-            const parent = await this.prisma.role.findUnique({
-                where: { id: input.parentId },
-            });
-            if (!parent) {
-                throw new common_1.NotFoundException('Parent role not found');
-            }
-        }
         return this.prisma.$transaction(async (tx) => {
             const role = await tx.role.create({
                 data: {
                     name: input.name,
-                    displayName: input.displayName,
                     description: input.description,
-                    parentId: input.parentId,
-                    priority: input.priority || 0,
-                    metadata: input.metadata,
+                    createdById: 'system',
                 },
                 include: {
-                    permissions: {
+                    rolePermissions: {
                         include: {
                             permission: true,
                         },
                     },
-                    children: true,
                 },
             });
             if (input.permissionIds && input.permissionIds.length > 0) {
@@ -171,24 +146,22 @@ let RbacService = class RbacService {
                     data: input.permissionIds.map((permId) => ({
                         roleId: role.id,
                         permissionId: permId,
-                        effect: 'allow',
                     })),
                 });
             }
             const updatedRole = await tx.role.findUnique({
                 where: { id: role.id },
                 include: {
-                    permissions: {
+                    rolePermissions: {
                         include: {
                             permission: true,
                         },
                     },
-                    children: true,
                 },
             });
             return {
                 ...updatedRole,
-                permissions: updatedRole.permissions.map(rp => rp.permission).filter(p => p !== null)
+                permissions: updatedRole?.rolePermissions?.map(rp => rp.permission).filter(p => p !== null) || []
             };
         });
     }
@@ -197,32 +170,23 @@ let RbacService = class RbacService {
         if (!role) {
             throw new common_1.NotFoundException('Role not found');
         }
-        if (role.isSystemRole && input.isActive === false) {
+        if (role.isSystem && input.isActive === false) {
             throw new common_1.ForbiddenException('Cannot deactivate system role');
-        }
-        if (input.parentId) {
-            const parent = await this.prisma.role.findUnique({
-                where: { id: input.parentId },
-            });
-            if (!parent) {
-                throw new common_1.NotFoundException('Parent role not found');
-            }
         }
         const roleData = await this.prisma.role.update({
             where: { id },
             data: input,
             include: {
-                permissions: {
+                rolePermissions: {
                     include: {
                         permission: true,
                     },
                 },
-                children: true,
             },
         });
         return {
             ...roleData,
-            permissions: roleData.permissions.map(rp => rp.permission).filter(p => p !== null)
+            permissions: roleData.rolePermissions?.map(rp => rp.permission).filter(p => p !== null) || []
         };
     }
     async deleteRole(id) {
@@ -230,7 +194,7 @@ let RbacService = class RbacService {
         if (!role) {
             throw new common_1.NotFoundException('Role not found');
         }
-        if (role.isSystemRole) {
+        if (role.isSystem) {
             throw new common_1.ForbiddenException('Cannot delete system role');
         }
         await this.prisma.role.delete({ where: { id } });
@@ -241,14 +205,11 @@ let RbacService = class RbacService {
         if (input.search) {
             where.OR = [
                 { name: { contains: input.search, mode: 'insensitive' } },
-                { displayName: { contains: input.search, mode: 'insensitive' } },
                 { description: { contains: input.search, mode: 'insensitive' } },
             ];
         }
         if (input.isActive !== undefined)
             where.isActive = input.isActive;
-        if (input.parentId)
-            where.parentId = input.parentId;
         const [rolesData, total] = await Promise.all([
             this.prisma.role.findMany({
                 where,
@@ -258,20 +219,18 @@ let RbacService = class RbacService {
                     [input.sortBy || 'name']: input.sortOrder || 'asc',
                 },
                 include: {
-                    permissions: {
+                    rolePermissions: {
                         include: {
                             permission: true,
                         },
                     },
-                    parent: true,
-                    children: true,
                 },
             }),
             this.prisma.role.count({ where }),
         ]);
         const roles = rolesData.map(role => ({
             ...role,
-            permissions: role.permissions.map(rp => rp.permission).filter(p => p !== null)
+            permissions: role.rolePermissions?.map(rp => rp.permission).filter(p => p !== null) || []
         }));
         return {
             roles,
@@ -348,7 +307,7 @@ let RbacService = class RbacService {
                 include: {
                     role: {
                         include: {
-                            permissions: {
+                            rolePermissions: {
                                 include: {
                                     permission: true,
                                 },
@@ -368,37 +327,19 @@ let RbacService = class RbacService {
             ...assignment,
             role: {
                 ...assignment.role,
-                permissions: assignment.role.permissions.map(rp => rp.permission).filter(p => p !== null)
+                permissions: assignment.role.rolePermissions?.map(rp => rp.permission).filter(p => p !== null) || []
             }
         }));
-        const allowedRoleAssignments = allRoleAssignments.filter(a => a.effect === 'allow');
-        const deniedPermissions = new Set();
-        allDirectPermissions
-            .filter(up => up.effect === 'deny')
-            .forEach(up => {
-            if (up.permission) {
-                deniedPermissions.add(up.permission.id);
-            }
-        });
-        allRoleAssignments
-            .filter(ra => ra.effect === 'deny')
-            .forEach(ra => {
-            ra.role.permissions.forEach(rp => {
-                if (rp.permission) {
-                    deniedPermissions.add(rp.permission.id);
-                }
-            });
-        });
-        const rolePermissions = allowedRoleAssignments
-            .flatMap((assignment) => assignment.role.permissions)
-            .filter(p => p && !deniedPermissions.has(p.id));
-        const directAllowedPermissions = allDirectPermissions
-            .filter(up => up.effect === 'allow' && up.permission)
+        const rolePermissions = allRoleAssignments
+            .flatMap((assignment) => assignment.role.rolePermissions || [])
+            .map(rp => rp.permission)
+            .filter(p => p !== null);
+        const directPermissionsOnly = allDirectPermissions
             .map(up => up.permission)
-            .filter(p => p && !deniedPermissions.has(p.id));
+            .filter(p => p !== null);
         const allPermissions = [
             ...rolePermissions,
-            ...directAllowedPermissions,
+            ...directPermissionsOnly,
         ];
         const uniquePermissions = allPermissions.filter((permission, index, self) => permission && index === self.findIndex((p) => p && p.id === permission.id));
         return {
@@ -406,11 +347,9 @@ let RbacService = class RbacService {
             roleAssignments,
             directPermissions: allDirectPermissions,
             effectivePermissions: uniquePermissions,
-            deniedPermissions: Array.from(deniedPermissions),
             summary: {
-                totalDirectPermissions: allDirectPermissions.filter(p => p.effect === 'allow').length,
-                totalDeniedPermissions: deniedPermissions.size,
-                totalRoleAssignments: allowedRoleAssignments.length,
+                totalDirectPermissions: allDirectPermissions.length,
+                totalRoleAssignments: allRoleAssignments.length,
                 totalEffectivePermissions: uniquePermissions.length,
                 lastUpdated: new Date(),
             },
@@ -419,61 +358,48 @@ let RbacService = class RbacService {
     async initializeSystemRolePermissions() {
         const systemPermissions = [
             {
-                name: 'users.create',
-                displayName: 'Create Users',
                 resource: 'user',
                 action: 'create',
-                category: 'user_management',
+                description: 'Create Users',
             },
             {
-                name: 'users.read',
-                displayName: 'Read Users',
                 resource: 'user',
                 action: 'read',
-                category: 'user_management',
+                description: 'Read Users',
             },
             {
-                name: 'users.update',
-                displayName: 'Update Users',
                 resource: 'user',
                 action: 'update',
-                category: 'user_management',
+                description: 'Update Users',
             },
             {
-                name: 'users.delete',
-                displayName: 'Delete Users',
                 resource: 'user',
                 action: 'delete',
-                category: 'user_management',
+                description: 'Delete Users',
             },
             {
-                name: 'roles.manage',
-                displayName: 'Manage Roles',
                 resource: 'role',
                 action: 'manage',
-                category: 'role_management',
+                description: 'Manage Roles',
             },
             {
-                name: 'permissions.manage',
-                displayName: 'Manage Permissions',
                 resource: 'permission',
                 action: 'manage',
-                category: 'permission_management',
+                description: 'Manage Permissions',
             },
         ];
         for (const perm of systemPermissions) {
             await this.prisma.permission.upsert({
                 where: {
-                    resource_action_scope: {
+                    resource_action: {
                         resource: perm.resource,
                         action: perm.action,
-                        scope: null,
                     },
                 },
                 update: {},
                 create: {
                     ...perm,
-                    isSystemPerm: true,
+                    createdById: 'system',
                 },
             });
         }
@@ -482,10 +408,9 @@ let RbacService = class RbacService {
             update: {},
             create: {
                 name: 'super_admin',
-                displayName: 'Super Administrator',
                 description: 'Full system access',
-                isSystemRole: true,
-                priority: 1000,
+                isSystem: true,
+                createdById: 'system',
             },
         });
         const adminRole = await this.prisma.role.upsert({
@@ -493,10 +418,9 @@ let RbacService = class RbacService {
             update: {},
             create: {
                 name: 'admin',
-                displayName: 'Administrator',
                 description: 'Administrative access',
-                isSystemRole: true,
-                priority: 500,
+                isSystem: true,
+                createdById: 'system',
             },
         });
         const allPermissions = await this.prisma.permission.findMany();
@@ -512,7 +436,6 @@ let RbacService = class RbacService {
                 create: {
                     roleId: superAdminRole.id,
                     permissionId: permission.id,
-                    effect: 'allow',
                 },
             });
         }

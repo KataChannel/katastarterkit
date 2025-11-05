@@ -8,8 +8,8 @@ export declare class AffiliatePaymentService {
     getPaymentRequests(input: AffPaymentRequestSearchInput, userRole?: $Enums.AffUserRole, userId?: string): Promise<{
         requests: any;
         total: any;
-        page: number;
-        size: number;
+        page: any;
+        size: any;
         totalPages: number;
     }>;
     processPaymentRequest(adminUserId: string, input: ProcessPaymentRequestInput): Promise<any>;

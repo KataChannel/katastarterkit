@@ -63,7 +63,7 @@ let UserService = class UserService {
                     include: {
                         role: {
                             include: {
-                                permissions: {
+                                rolePermissions: {
                                     include: {
                                         permission: true,
                                     },
@@ -145,8 +145,7 @@ let UserService = class UserService {
                 password: hashedPassword,
                 userRoles: {
                     create: {
-                        roleId: defaultRole.id,
-                        assignedBy: 'system',
+                        roleId: defaultRole.id
                     }
                 }
             },
@@ -155,7 +154,7 @@ let UserService = class UserService {
                     include: {
                         role: {
                             include: {
-                                permissions: {
+                                rolePermissions: {
                                     include: {
                                         permission: true,
                                     },

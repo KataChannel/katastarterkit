@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CallCenterResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -119,6 +120,6 @@ __decorate([
 ], CallCenterResolver.prototype, "getSyncLogs", null);
 exports.CallCenterResolver = CallCenterResolver = __decorate([
     (0, graphql_1.Resolver)(() => callcenter_model_1.CallCenterRecord),
-    __metadata("design:paramtypes", [callcenter_service_1.CallCenterService])
+    __metadata("design:paramtypes", [typeof (_a = typeof callcenter_service_1.CallCenterService !== "undefined" && callcenter_service_1.CallCenterService) === "function" ? _a : Object])
 ], CallCenterResolver);
 //# sourceMappingURL=callcenter.resolver.js.map

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommentResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -166,8 +167,6 @@ __decorate([
 exports.CommentResolver = CommentResolver = __decorate([
     (0, graphql_1.Resolver)(() => comment_model_1.Comment),
     __metadata("design:paramtypes", [comment_service_1.CommentService,
-        user_service_1.UserService,
-        post_service_1.PostService,
-        pubsub_service_1.PubSubService])
+        user_service_1.UserService, typeof (_a = typeof post_service_1.PostService !== "undefined" && post_service_1.PostService) === "function" ? _a : Object, pubsub_service_1.PubSubService])
 ], CommentResolver);
 //# sourceMappingURL=comment.resolver.js.map

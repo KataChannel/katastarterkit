@@ -90,8 +90,8 @@ export class HealthCheckProvider {
       
       const latency = Date.now() - startTime;
       
-      // Test a simple query to tasks table
-      const taskCount = await this.prismaService.task.count();
+      // Test a simple query to users table (core model)
+      const userCount = await this.prismaService.user.count();
       
       const totalLatency = Date.now() - startTime;
       
@@ -100,14 +100,14 @@ export class HealthCheckProvider {
           status: 'warn',
           latency: totalLatency,
           message: 'Database response time is slow',
-          details: { taskCount, queryLatency: totalLatency }
+          details: { userCount, queryLatency: totalLatency }
         };
       }
       
       return {
         status: 'pass',
         latency: totalLatency,
-        details: { taskCount, connected: true }
+        details: { userCount, connected: true }
       };
       
     } catch (error) {

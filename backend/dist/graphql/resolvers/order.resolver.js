@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -230,6 +231,6 @@ __decorate([
 ], OrderResolver.prototype, "getOrderStatistics", null);
 exports.OrderResolver = OrderResolver = __decorate([
     (0, graphql_1.Resolver)(() => order_schema_1.OrderType),
-    __metadata("design:paramtypes", [order_service_1.OrderService])
+    __metadata("design:paramtypes", [typeof (_a = typeof order_service_1.OrderService !== "undefined" && order_service_1.OrderService) === "function" ? _a : Object])
 ], OrderResolver);
 //# sourceMappingURL=order.resolver.js.map

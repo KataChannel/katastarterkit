@@ -8,9 +8,7 @@ const prisma = new PrismaClient();
 export async function getAuthRedirectSettings() {
   const settings = await prisma.websiteSetting.findMany({
     where: {
-      category: 'AUTH',
-      group: 'redirect',
-      isActive: true
+      group: 'redirect'
     }
   });
 
@@ -86,8 +84,8 @@ export async function updateAuthRedirectSetting(
   await prisma.websiteSetting.update({
     where: { key },
     data: { 
-      value,
-      updatedBy: userId
+      value
+      // updatedBy field doesn't exist in simplified schema
     }
   });
 }

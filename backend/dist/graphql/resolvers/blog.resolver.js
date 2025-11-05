@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BlogResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -232,6 +233,6 @@ __decorate([
 ], BlogResolver.prototype, "deleteTag", null);
 exports.BlogResolver = BlogResolver = __decorate([
     (0, graphql_1.Resolver)(() => blog_type_1.BlogType),
-    __metadata("design:paramtypes", [blog_service_1.BlogService])
+    __metadata("design:paramtypes", [typeof (_a = typeof blog_service_1.BlogService !== "undefined" && blog_service_1.BlogService) === "function" ? _a : Object])
 ], BlogResolver);
 //# sourceMappingURL=blog.resolver.js.map

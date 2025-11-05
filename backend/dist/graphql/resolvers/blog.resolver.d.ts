@@ -3,42 +3,22 @@ import { CreateBlogInput, UpdateBlogInput, CreateBlogCategoryInput, UpdateBlogCa
 export declare class BlogResolver {
     private blogService;
     constructor(blogService: BlogService);
-    getBlogs(page?: number, limit?: number, search?: string, categoryId?: string, sort?: string): Promise<{
-        items: any;
-        total: any;
-        page: any;
-        pageSize: any;
-        totalPages: number;
-        hasMore: boolean;
-    }>;
+    getBlogs(page?: number, limit?: number, search?: string, categoryId?: string, sort?: string): Promise<any>;
     getBlog(id: string): Promise<any>;
     getBlogBySlug(slug: string): Promise<any>;
     getFeaturedBlogs(limit?: number): Promise<any>;
-    getBlogsByCategory(categoryId: string, page?: number, limit?: number): Promise<{
-        items: any;
-        total: any;
-        page: any;
-        pageSize: any;
-        totalPages: number;
-        hasMore: boolean;
-    }>;
+    getBlogsByCategory(categoryId: string, page?: number, limit?: number): Promise<any>;
     getRelatedBlogs(blogId: string, limit?: number): Promise<any>;
     getCategories(): Promise<any>;
     getCategory(id: string): Promise<any>;
     getTags(): Promise<any>;
     createBlog(input: CreateBlogInput, context: any): Promise<any>;
     updateBlog(input: UpdateBlogInput): Promise<any>;
-    deleteBlog(id: string): Promise<{
-        success: boolean;
-    }>;
+    deleteBlog(id: string): Promise<any>;
     createCategory(input: CreateBlogCategoryInput): Promise<any>;
     updateCategory(input: UpdateBlogCategoryInput): Promise<any>;
-    deleteCategory(id: string): Promise<{
-        success: boolean;
-    }>;
+    deleteCategory(id: string): Promise<any>;
     createTag(input: CreateBlogTagInput): Promise<any>;
     updateTag(input: UpdateBlogTagInput): Promise<any>;
-    deleteTag(id: string): Promise<{
-        success: boolean;
-    }>;
+    deleteTag(id: string): Promise<any>;
 }

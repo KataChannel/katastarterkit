@@ -51,20 +51,20 @@ let HealthCheckProvider = class HealthCheckProvider {
         try {
             await this.prismaService.$queryRaw `SELECT 1`;
             const latency = Date.now() - startTime;
-            const taskCount = await this.prismaService.task.count();
+            const userCount = await this.prismaService.user.count();
             const totalLatency = Date.now() - startTime;
             if (totalLatency > 1000) {
                 return {
                     status: 'warn',
                     latency: totalLatency,
                     message: 'Database response time is slow',
-                    details: { taskCount, queryLatency: totalLatency }
+                    details: { userCount, queryLatency: totalLatency }
                 };
             }
             return {
                 status: 'pass',
                 latency: totalLatency,
-                details: { taskCount, connected: true }
+                details: { userCount, connected: true }
             };
         }
         catch (error) {

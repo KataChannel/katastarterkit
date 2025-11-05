@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -118,7 +119,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input', { type: () => file_input_1.GetFilesInput, nullable: true })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [file_input_1.GetFilesInput, Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof file_input_1.GetFilesInput !== "undefined" && file_input_1.GetFilesInput) === "function" ? _b : Object, Object]),
     __metadata("design:returntype", Promise)
 ], FileResolver.prototype, "getFiles", null);
 __decorate([
@@ -126,7 +127,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input', { type: () => file_input_1.UpdateFileInput })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [file_input_1.UpdateFileInput, Object]),
+    __metadata("design:paramtypes", [typeof (_c = typeof file_input_1.UpdateFileInput !== "undefined" && file_input_1.UpdateFileInput) === "function" ? _c : Object, Object]),
     __metadata("design:returntype", Promise)
 ], FileResolver.prototype, "updateFile", null);
 __decorate([
@@ -142,7 +143,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input', { type: () => file_input_1.MoveFilesInput })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [file_input_1.MoveFilesInput, Object]),
+    __metadata("design:paramtypes", [typeof (_d = typeof file_input_1.MoveFilesInput !== "undefined" && file_input_1.MoveFilesInput) === "function" ? _d : Object, Object]),
     __metadata("design:returntype", Promise)
 ], FileResolver.prototype, "moveFiles", null);
 __decorate([
@@ -150,7 +151,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input', { type: () => file_input_1.BulkDeleteFilesInput })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [file_input_1.BulkDeleteFilesInput, Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof file_input_1.BulkDeleteFilesInput !== "undefined" && file_input_1.BulkDeleteFilesInput) === "function" ? _e : Object, Object]),
     __metadata("design:returntype", Promise)
 ], FileResolver.prototype, "bulkDeleteFiles", null);
 __decorate([
@@ -158,7 +159,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input', { type: () => file_input_1.BulkUpdateFilesInput })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [file_input_1.BulkUpdateFilesInput, Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof file_input_1.BulkUpdateFilesInput !== "undefined" && file_input_1.BulkUpdateFilesInput) === "function" ? _f : Object, Object]),
     __metadata("design:returntype", Promise)
 ], FileResolver.prototype, "bulkUpdateFiles", null);
 __decorate([
@@ -173,12 +174,12 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input', { type: () => file_input_1.CreateFileShareInput })),
     __param(1, (0, graphql_1.Context)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [file_input_1.CreateFileShareInput, Object]),
+    __metadata("design:paramtypes", [typeof (_g = typeof file_input_1.CreateFileShareInput !== "undefined" && file_input_1.CreateFileShareInput) === "function" ? _g : Object, Object]),
     __metadata("design:returntype", Promise)
 ], FileResolver.prototype, "createFileShare", null);
 exports.FileResolver = FileResolver = __decorate([
     (0, graphql_1.Resolver)(() => file_model_1.File),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [file_service_1.FileService])
+    __metadata("design:paramtypes", [typeof (_a = typeof file_service_1.FileService !== "undefined" && file_service_1.FileService) === "function" ? _a : Object])
 ], FileResolver);
 //# sourceMappingURL=file.resolver.js.map

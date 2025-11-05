@@ -8,7 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DataLoaderModule = void 0;
 const common_1 = require("@nestjs/common");
-const task_data_loader_service_1 = require("./task-data-loader.service");
 const prisma_module_1 = require("../../prisma/prisma.module");
 let DataLoaderModule = class DataLoaderModule {
 };
@@ -17,8 +16,8 @@ exports.DataLoaderModule = DataLoaderModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule],
-        providers: [task_data_loader_service_1.TaskDataLoaderService],
-        exports: [task_data_loader_service_1.TaskDataLoaderService],
+        providers: [],
+        exports: [],
     })
 ], DataLoaderModule);
 //# sourceMappingURL=data-loader.module.js.map

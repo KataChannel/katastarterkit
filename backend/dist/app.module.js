@@ -24,10 +24,7 @@ const logger_module_1 = require("./logger/logger.module");
 const data_loader_module_1 = require("./common/data-loaders/data-loader.module");
 const graphql_performance_module_1 = require("./common/graphql-performance/graphql-performance.module");
 const common_services_module_1 = require("./common/common-services.module");
-const security_module_1 = require("./security/security.module");
 const unified_dynamic_module_1 = require("./graphql/unified-dynamic.module");
-const menu_module_1 = require("./menu/menu.module");
-const blog_module_1 = require("./graphql/modules/blog.module");
 const test_controller_1 = require("./test.controller");
 const validation_1 = require("./config/validation");
 const env_config_service_1 = require("./config/env-config.service");
@@ -35,7 +32,6 @@ const app_resolver_1 = require("./app.resolver");
 const graphql_logging_interceptor_1 = require("./interceptors/graphql-logging.interceptor");
 const input_sanitization_interceptor_1 = require("./common/interceptors/input-sanitization.interceptor");
 const graphql_performance_interceptor_1 = require("./common/interceptors/graphql-performance.interceptor");
-const performance_interceptor_1 = require("./interceptors/performance.interceptor");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -92,10 +88,7 @@ exports.AppModule = AppModule = __decorate([
             minio_module_1.MinioModule,
             logger_module_1.LoggerModule,
             common_services_module_1.CommonServicesModule,
-            security_module_1.SecurityModule,
             unified_dynamic_module_1.UnifiedDynamicModule,
-            menu_module_1.MenuModule,
-            blog_module_1.BlogModule,
         ],
         controllers: [
             test_controller_1.TestController,
@@ -114,10 +107,6 @@ exports.AppModule = AppModule = __decorate([
             {
                 provide: core_1.APP_INTERCEPTOR,
                 useClass: graphql_performance_interceptor_1.GraphQLPerformanceInterceptor,
-            },
-            {
-                provide: core_1.APP_INTERCEPTOR,
-                useClass: performance_interceptor_1.PerformanceInterceptor,
             },
         ],
     })

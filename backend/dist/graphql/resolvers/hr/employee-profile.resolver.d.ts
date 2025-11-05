@@ -7,14 +7,7 @@ export declare class EmployeeProfileResolver {
     employeeProfile(id: string): Promise<any>;
     employeeProfileByUserId(userId: string): Promise<any>;
     employeeProfileByCode(employeeCode: string): Promise<any>;
-    listEmployeeProfiles(department?: string, position?: string, isActive?: boolean, skip?: number, take?: number): Promise<{
-        employees: any;
-        total: any;
-        hasMore: boolean;
-    }>;
+    listEmployeeProfiles(department?: string, position?: string, isActive?: boolean, skip?: number, take?: number): Promise<any>;
     updateEmployeeProfile(id: string, input: UpdateEmployeeProfileInput, currentUser: any): Promise<any>;
-    deleteEmployeeProfile(id: string): Promise<{
-        success: boolean;
-        message: string;
-    }>;
+    deleteEmployeeProfile(id: string): Promise<any>;
 }

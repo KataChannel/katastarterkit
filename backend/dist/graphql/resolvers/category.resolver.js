@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -110,6 +111,6 @@ __decorate([
 ], CategoryResolver.prototype, "productCount", null);
 exports.CategoryResolver = CategoryResolver = __decorate([
     (0, graphql_1.Resolver)(() => category_type_1.CategoryType),
-    __metadata("design:paramtypes", [category_service_1.CategoryService])
+    __metadata("design:paramtypes", [typeof (_a = typeof category_service_1.CategoryService !== "undefined" && category_service_1.CategoryService) === "function" ? _a : Object])
 ], CategoryResolver);
 //# sourceMappingURL=category.resolver.js.map

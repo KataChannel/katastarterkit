@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmployeeProfileResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -61,7 +62,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, get_user_decorator_1.GetUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [employee_profile_input_1.CreateEmployeeProfileInput, Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof employee_profile_input_1.CreateEmployeeProfileInput !== "undefined" && employee_profile_input_1.CreateEmployeeProfileInput) === "function" ? _b : Object, Object]),
     __metadata("design:returntype", Promise)
 ], EmployeeProfileResolver.prototype, "createEmployeeProfile", null);
 __decorate([
@@ -107,7 +108,7 @@ __decorate([
     __param(1, (0, graphql_1.Args)('input')),
     __param(2, (0, get_user_decorator_1.GetUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, employee_profile_input_1.UpdateEmployeeProfileInput, Object]),
+    __metadata("design:paramtypes", [String, typeof (_c = typeof employee_profile_input_1.UpdateEmployeeProfileInput !== "undefined" && employee_profile_input_1.UpdateEmployeeProfileInput) === "function" ? _c : Object, Object]),
     __metadata("design:returntype", Promise)
 ], EmployeeProfileResolver.prototype, "updateEmployeeProfile", null);
 __decorate([
@@ -121,7 +122,7 @@ __decorate([
 exports.EmployeeProfileResolver = EmployeeProfileResolver = __decorate([
     (0, graphql_1.Resolver)(() => employee_profile_model_1.EmployeeProfile),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [hr_service_1.HRService])
+    __metadata("design:paramtypes", [typeof (_a = typeof hr_service_1.HRService !== "undefined" && hr_service_1.HRService) === "function" ? _a : Object])
 ], EmployeeProfileResolver);
 const graphql_2 = require("@nestjs/graphql");
 let EmployeeListResponse = class EmployeeListResponse {

@@ -9,23 +9,7 @@ export declare class ComplianceController {
     constructor(auditService: SecurityAuditService);
     generateGDPRReport(req: any, body: ComplianceReportRequest): Promise<{
         success: boolean;
-        data: {
-            complianceScore: number;
-            status: string;
-            reportId: string;
-            generatedAt: Date;
-            reportPeriod: {
-                startDate: Date;
-                endDate: Date;
-            };
-            summary: {
-                totalAuditLogs: any;
-                securityEventsBySeverity: any;
-                accessControlChanges: any;
-            };
-            userActivities: any;
-            accessChanges: any;
-        };
+        data: any;
         message: string;
         error?: undefined;
     } | {
@@ -36,30 +20,7 @@ export declare class ComplianceController {
     }>;
     generateSOC2Report(req: any, body: ComplianceReportRequest): Promise<{
         success: boolean;
-        data: {
-            framework: string;
-            reportId: string;
-            trustServicesCriteria: {
-                security: boolean;
-                availability: boolean;
-                processingIntegrity: boolean;
-                confidentiality: boolean;
-            };
-            complianceScore: number;
-            status: string;
-            generatedAt: Date;
-            reportPeriod: {
-                startDate: Date;
-                endDate: Date;
-            };
-            summary: {
-                totalAuditLogs: any;
-                securityEventsBySeverity: any;
-                accessControlChanges: any;
-            };
-            userActivities: any;
-            accessChanges: any;
-        };
+        data: any;
         message: string;
         error?: undefined;
     } | {
@@ -70,32 +31,7 @@ export declare class ComplianceController {
     }>;
     getComplianceDashboard(req: any, timeframe?: string): Promise<{
         success: boolean;
-        data: {
-            gdprCompliance: {
-                score: number;
-                status: string;
-                lastAssessment: Date;
-            };
-            soc2Compliance: {
-                score: number;
-                status: string;
-                lastAssessment: Date;
-            };
-            securityPosture: {
-                riskLevel: string;
-                improvementAreas: string[];
-            };
-            timeframe: "day" | "week" | "month";
-            summary: {
-                totalEvents: any;
-                criticalEvents: any;
-                highEvents: any;
-                riskScore: number;
-            };
-            eventsByType: any;
-            eventsByUser: any;
-            recentEvents: any;
-        };
+        data: any;
         message: string;
         error?: undefined;
     } | {
@@ -106,28 +42,7 @@ export declare class ComplianceController {
     }>;
     getComplianceAuditLogs(req: any, action?: string, resourceType?: string, limit?: string, offset?: string): Promise<{
         success: boolean;
-        data: {
-            logs: ({
-                user: {
-                    id: string;
-                    email: string;
-                    username: string;
-                };
-            } & {
-                id: string;
-                createdAt: Date;
-                ipAddress: string | null;
-                userAgent: string | null;
-                action: string;
-                details: import("@prisma/client/runtime/library").JsonValue | null;
-                userId: string | null;
-                resource: string;
-                resourceId: string | null;
-            })[];
-            total: number;
-            limit: number;
-            offset: number;
-        };
+        data: any;
         message: string;
         error?: undefined;
     } | {
@@ -138,12 +53,7 @@ export declare class ComplianceController {
     }>;
     getSecurityEvents(req: any, eventType?: string, severity?: string, limit?: string, offset?: string): Promise<{
         success: boolean;
-        data: {
-            events: any;
-            total: any;
-            limit: number;
-            offset: number;
-        };
+        data: any;
         message: string;
         error?: undefined;
     } | {
@@ -154,13 +64,7 @@ export declare class ComplianceController {
     }>;
     getUserAnomalies(req: any, timeframe?: string): Promise<{
         success: boolean;
-        data: {
-            userId: string;
-            timeframe: "day" | "hour";
-            anomaliesDetected: number;
-            anomalies: any[];
-            riskLevel: "low" | "medium" | "high" | "critical";
-        };
+        data: any;
         message: string;
         error?: undefined;
     } | {

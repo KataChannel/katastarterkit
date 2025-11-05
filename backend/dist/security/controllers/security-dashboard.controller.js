@@ -12,6 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var SecurityDashboardController_1;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SecurityDashboardController = void 0;
 const common_1 = require("@nestjs/common");
@@ -262,7 +263,6 @@ __decorate([
 ], SecurityDashboardController.prototype, "getSystemHealth", null);
 exports.SecurityDashboardController = SecurityDashboardController = SecurityDashboardController_1 = __decorate([
     (0, common_1.Controller)('security/dashboard'),
-    __metadata("design:paramtypes", [security_monitoring_service_1.SecurityMonitoringService,
-        security_audit_service_1.SecurityAuditService])
+    __metadata("design:paramtypes", [typeof (_a = typeof security_monitoring_service_1.SecurityMonitoringService !== "undefined" && security_monitoring_service_1.SecurityMonitoringService) === "function" ? _a : Object, typeof (_b = typeof security_audit_service_1.SecurityAuditService !== "undefined" && security_audit_service_1.SecurityAuditService) === "function" ? _b : Object])
 ], SecurityDashboardController);
 //# sourceMappingURL=security-dashboard.controller.js.map

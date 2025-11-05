@@ -11,9 +11,7 @@ const prisma = new client_1.PrismaClient();
 async function getAuthRedirectSettings() {
     const settings = await prisma.websiteSetting.findMany({
         where: {
-            category: 'AUTH',
-            group: 'redirect',
-            isActive: true
+            group: 'redirect'
         }
     });
     const settingsMap = {};
@@ -59,8 +57,7 @@ async function updateAuthRedirectSetting(key, value, userId) {
     await prisma.websiteSetting.update({
         where: { key },
         data: {
-            value,
-            updatedBy: userId
+            value
         }
     });
 }

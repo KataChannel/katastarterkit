@@ -22,7 +22,7 @@ export class UserService {
           include: {
             role: {
               include: {
-                permissions: {
+                rolePermissions: {
                   include: {
                     permission: true,
                   },
@@ -120,8 +120,7 @@ export class UserService {
         password: hashedPassword,
         userRoles: {
           create: {
-            roleId: defaultRole.id,
-            assignedBy: 'system',
+            roleId: defaultRole.id
           }
         }
       },
@@ -130,7 +129,7 @@ export class UserService {
           include: {
             role: {
               include: {
-                permissions: {
+                rolePermissions: {
                   include: {
                     permission: true,
                   },

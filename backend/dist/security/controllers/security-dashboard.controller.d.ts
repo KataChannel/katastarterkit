@@ -23,28 +23,12 @@ export declare class SecurityDashboardController {
     getSecuritySummary(): Promise<SecurityDashboardSummary>;
     runSecurityAssessment(): Promise<{
         success: boolean;
-        assessment: import("../services/security-monitoring.service").SecurityAssessment;
+        assessment: any;
         message: string;
     }>;
     generateComplianceReport(days?: string): Promise<{
         success: boolean;
-        report: {
-            complianceScore: number;
-            status: string;
-            reportId: string;
-            generatedAt: Date;
-            reportPeriod: {
-                startDate: Date;
-                endDate: Date;
-            };
-            summary: {
-                totalAuditLogs: any;
-                securityEventsBySeverity: any;
-                accessControlChanges: any;
-            };
-            userActivities: any;
-            accessChanges: any;
-        };
+        report: any;
         period: {
             startDate: Date;
             endDate: Date;
@@ -59,32 +43,32 @@ export declare class SecurityDashboardController {
     }>;
     getSecurityRecommendations(): Promise<{
         success: boolean;
-        recommendations: import("../services/security-monitoring.service").SecurityRecommendation[];
+        recommendations: any;
         summary: {
-            total: number;
-            critical: number;
-            high: number;
-            medium: number;
-            low: number;
+            total: any;
+            critical: any;
+            high: any;
+            medium: any;
+            low: any;
         };
-        topRecommendations: import("../services/security-monitoring.service").SecurityRecommendation[];
+        topRecommendations: any[];
     }>;
     runDailyAssessment(): Promise<{
         success: boolean;
         message: string;
         assessment: {
-            id: string;
-            score: number;
-            riskLevel: "low" | "medium" | "high" | "critical";
-            timestamp: Date;
+            id: any;
+            score: any;
+            riskLevel: any;
+            timestamp: any;
         };
     }>;
     runWeeklyComplianceCheck(): Promise<{
         success: boolean;
         message: string;
         report: {
-            complianceScore: number;
-            status: string;
+            complianceScore: any;
+            status: any;
             timestamp: Date;
         };
     }>;

@@ -9,11 +9,7 @@ export declare class OnboardingResolver {
     createOnboardingChecklist(input: CreateOnboardingChecklistInput, currentUser: any): Promise<any>;
     onboardingChecklist(id: string): Promise<any>;
     onboardingChecklistByEmployee(employeeProfileId: string): Promise<any>;
-    listOnboardingChecklists(status?: OnboardingStatus, skip?: number, take?: number): Promise<{
-        checklists: any;
-        total: any;
-        hasMore: boolean;
-    }>;
+    listOnboardingChecklists(status?: OnboardingStatus, skip?: number, take?: number): Promise<any>;
     updateOnboardingChecklist(id: string, input: UpdateOnboardingChecklistInput): Promise<any>;
     completeOnboardingTask(checklistId: string, taskId: string, currentUser: any): Promise<any>;
 }
@@ -22,11 +18,7 @@ export declare class OffboardingResolver {
     constructor(hrService: HRService);
     createOffboardingProcess(input: CreateOffboardingProcessInput): Promise<any>;
     offboardingProcess(id: string): Promise<any>;
-    listOffboardingProcesses(status?: OffboardingStatus, clearanceStatus?: ClearanceStatus, skip?: number, take?: number): Promise<{
-        processes: any;
-        total: any;
-        hasMore: boolean;
-    }>;
+    listOffboardingProcesses(status?: OffboardingStatus, clearanceStatus?: ClearanceStatus, skip?: number, take?: number): Promise<any>;
     updateOffboardingProcess(id: string, input: UpdateOffboardingProcessInput): Promise<any>;
     completeOffboarding(id: string, currentUser: any): Promise<any>;
 }
@@ -40,19 +32,5 @@ export declare class EmploymentHistoryResolver {
 export declare class HRStatisticsResolver {
     private hrService;
     constructor(hrService: HRService);
-    hrStatistics(): Promise<{
-        totalEmployees: any;
-        activeEmployees: any;
-        inactiveEmployees: number;
-        onboarding: {
-            pending: any;
-            inProgress: any;
-            total: any;
-        };
-        offboarding: {
-            pending: any;
-            inProgress: any;
-            total: any;
-        };
-    }>;
+    hrStatistics(): Promise<any>;
 }

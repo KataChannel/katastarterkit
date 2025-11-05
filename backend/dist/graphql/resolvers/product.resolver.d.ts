@@ -6,24 +6,10 @@ export declare class ProductResolver {
     private productService;
     private categoryService;
     constructor(productService: ProductService, categoryService: CategoryService);
-    getProducts(input?: GetProductsInput): Promise<{
-        items: any;
-        total: any;
-        page: number;
-        limit: number;
-        totalPages: number;
-        hasMore: boolean;
-    }>;
+    getProducts(input?: GetProductsInput): Promise<any>;
     getProduct(id: string): Promise<any>;
     getProductBySlug(slug: string): Promise<any>;
-    getProductsByCategory(categoryId: string, input?: GetProductsInput): Promise<{
-        items: any;
-        total: any;
-        page: number;
-        limit: number;
-        totalPages: number;
-        hasMore: boolean;
-    }>;
+    getProductsByCategory(categoryId: string, input?: GetProductsInput): Promise<any>;
     createProduct(input: CreateProductInput): Promise<any>;
     updateProduct(input: UpdateProductInput): Promise<any>;
     deleteProduct(id: string): Promise<any>;
@@ -36,14 +22,14 @@ export declare class ProductResolver {
     category(product: ProductType): Promise<{
         name: string;
         id: string;
-        isActive: boolean;
+        description: string | null;
         createdAt: Date;
         updatedAt: Date;
-        description: string | null;
         slug: string;
         parentId: string | null;
-        order: number;
         icon: string | null;
+        order: number;
+        isActive: boolean;
     }>;
     discountPercentage(product: ProductType): Promise<number>;
     profitMargin(product: ProductType): Promise<number>;

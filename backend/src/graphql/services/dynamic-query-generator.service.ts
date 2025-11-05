@@ -95,52 +95,33 @@ export class DynamicQueryGeneratorService {
     const normalizedModel = modelName.toLowerCase();
     
     // Map model names to Prisma client delegates
-    const modelMap: Record<string, any> = {
+    // Core Models (simplified schema - 20 models only)
+    const modelMapping: Record<string, any> = {
       user: this.prisma.user,
       authmethod: this.prisma.authMethod,
       verificationtoken: this.prisma.verificationToken,
       usersession: this.prisma.userSession,
-      auditlog: this.prisma.auditLog,
       role: this.prisma.role,
       permission: this.prisma.permission,
-      rolepermission: this.prisma.rolePermission,
       userroleassignment: this.prisma.userRoleAssignment,
+      rolepermission: this.prisma.rolePermission,
       userpermission: this.prisma.userPermission,
-      resourceaccess: this.prisma.resourceAccess,
+      menu: this.prisma.menu,
+      menuitem: this.prisma.menuItem,
+      page: this.prisma.page,
+      block: this.prisma.block,
+      category: this.prisma.category,
+      tag: this.prisma.tag,
       post: this.prisma.post,
       comment: this.prisma.comment,
-      tag: this.prisma.tag,
-      posttag: this.prisma.postTag,
       like: this.prisma.like,
-      task: this.prisma.task,
-      taskcomment: this.prisma.taskComment,
-      taskmedia: this.prisma.taskMedia,
-      taskshare: this.prisma.taskShare,
-      notification: this.prisma.notification,
-      menu: this.prisma.menu,
-      page: this.prisma.page,
-      pageblock: this.prisma.pageBlock,
-      chatbotmodel: this.prisma.chatbotModel,
-      trainingdata: this.prisma.trainingData,
-      chatconversation: this.prisma.chatConversation,
-      chatmessage: this.prisma.chatMessage,
-      affuser: this.prisma.affUser,
-      affcampaign: this.prisma.affCampaign,
-      affcampaignaffiliate: this.prisma.affCampaignAffiliate,
-      afflink: this.prisma.affLink,
-      affclick: this.prisma.affClick,
-      affconversion: this.prisma.affConversion,
-      affpaymentrequest: this.prisma.affPaymentRequest,
-      usermfasettings: this.prisma.userMfaSettings,
-      invoice: this.prisma.ext_listhoadon,
-      invoiceitem: this.prisma.ext_detailhoadon,
-      invoicepayment: this.prisma.ext_listhoadon, // Assuming same table
-      ext_listhoadon: this.prisma.ext_listhoadon,
-      ext_detailhoadon: this.prisma.ext_detailhoadon,
-      ext_sanphamhoadon: this.prisma.ext_sanphamhoadon,
+      auditlog: this.prisma.auditLog,
+      websitesetting: this.prisma.websiteSetting,
+      
+      // All other models removed during schema simplification
     };
 
-    const delegate = modelMap[normalizedModel];
+    const delegate = modelMapping[normalizedModel];
     if (!delegate) {
       throw new Error(`No Prisma delegate found for model: ${modelName}`);
     }

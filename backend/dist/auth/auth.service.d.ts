@@ -33,11 +33,6 @@ export declare class AuthService {
         accessToken: string;
         refreshToken: string;
     }>;
-    loginWithPhone(phone: string, profile?: any): Promise<{
-        user: User;
-        accessToken: string;
-        refreshToken: string;
-    }>;
     updateProfile(userId: string, updateData: {
         firstName?: string;
         lastName?: string;

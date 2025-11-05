@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomTemplateResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -108,8 +108,7 @@ __decorate([
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_model_1.User,
-        custom_template_input_1.CreateCustomTemplateInput]),
+    __metadata("design:paramtypes", [user_model_1.User, typeof (_c = typeof custom_template_input_1.CreateCustomTemplateInput !== "undefined" && custom_template_input_1.CreateCustomTemplateInput) === "function" ? _c : Object]),
     __metadata("design:returntype", Promise)
 ], CustomTemplateResolver.prototype, "createCustomTemplate", null);
 __decorate([
@@ -118,8 +117,7 @@ __decorate([
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_model_1.User,
-        custom_template_input_1.UpdateCustomTemplateInput]),
+    __metadata("design:paramtypes", [user_model_1.User, typeof (_d = typeof custom_template_input_1.UpdateCustomTemplateInput !== "undefined" && custom_template_input_1.UpdateCustomTemplateInput) === "function" ? _d : Object]),
     __metadata("design:returntype", Promise)
 ], CustomTemplateResolver.prototype, "updateCustomTemplate", null);
 __decorate([
@@ -147,8 +145,7 @@ __decorate([
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_model_1.User,
-        custom_template_input_1.ShareTemplateInput]),
+    __metadata("design:paramtypes", [user_model_1.User, typeof (_e = typeof custom_template_input_1.ShareTemplateInput !== "undefined" && custom_template_input_1.ShareTemplateInput) === "function" ? _e : Object]),
     __metadata("design:returntype", Promise)
 ], CustomTemplateResolver.prototype, "shareTemplate", null);
 __decorate([
@@ -167,8 +164,7 @@ __decorate([
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_model_1.User,
-        custom_template_input_1.UpdateTemplatePublicityInput]),
+    __metadata("design:paramtypes", [user_model_1.User, typeof (_f = typeof custom_template_input_1.UpdateTemplatePublicityInput !== "undefined" && custom_template_input_1.UpdateTemplatePublicityInput) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], CustomTemplateResolver.prototype, "updateTemplatePublicity", null);
 __decorate([

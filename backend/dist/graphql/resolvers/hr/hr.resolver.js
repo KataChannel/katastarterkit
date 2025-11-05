@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HRStatisticsResolver = exports.EmploymentHistoryResolver = exports.OffboardingResolver = exports.OnboardingResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -153,7 +154,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('input')),
     __param(1, (0, get_user_decorator_1.GetUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [onboarding_checklist_input_1.CreateOnboardingChecklistInput, Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof onboarding_checklist_input_1.CreateOnboardingChecklistInput !== "undefined" && onboarding_checklist_input_1.CreateOnboardingChecklistInput) === "function" ? _b : Object, Object]),
     __metadata("design:returntype", Promise)
 ], OnboardingResolver.prototype, "createOnboardingChecklist", null);
 __decorate([
@@ -179,7 +180,7 @@ __decorate([
     __param(1, (0, graphql_1.Args)('skip', { type: () => graphql_1.Int, nullable: true })),
     __param(2, (0, graphql_1.Args)('take', { type: () => graphql_1.Int, nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
+    __metadata("design:paramtypes", [typeof (_c = typeof enums_model_1.OnboardingStatus !== "undefined" && enums_model_1.OnboardingStatus) === "function" ? _c : Object, Number, Number]),
     __metadata("design:returntype", Promise)
 ], OnboardingResolver.prototype, "listOnboardingChecklists", null);
 __decorate([
@@ -188,7 +189,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, onboarding_checklist_input_1.UpdateOnboardingChecklistInput]),
+    __metadata("design:paramtypes", [String, typeof (_d = typeof onboarding_checklist_input_1.UpdateOnboardingChecklistInput !== "undefined" && onboarding_checklist_input_1.UpdateOnboardingChecklistInput) === "function" ? _d : Object]),
     __metadata("design:returntype", Promise)
 ], OnboardingResolver.prototype, "updateOnboardingChecklist", null);
 __decorate([
@@ -204,7 +205,7 @@ __decorate([
 exports.OnboardingResolver = OnboardingResolver = __decorate([
     (0, graphql_1.Resolver)(() => onboarding_checklist_model_1.OnboardingChecklist),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [hr_service_1.HRService])
+    __metadata("design:paramtypes", [typeof (_a = typeof hr_service_1.HRService !== "undefined" && hr_service_1.HRService) === "function" ? _a : Object])
 ], OnboardingResolver);
 let OffboardingResolver = class OffboardingResolver {
     constructor(hrService) {
@@ -232,7 +233,7 @@ __decorate([
     (0, roles_decorator_1.Roles)('ADMIN'),
     __param(0, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [offboarding_process_input_1.CreateOffboardingProcessInput]),
+    __metadata("design:paramtypes", [typeof (_f = typeof offboarding_process_input_1.CreateOffboardingProcessInput !== "undefined" && offboarding_process_input_1.CreateOffboardingProcessInput) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], OffboardingResolver.prototype, "createOffboardingProcess", null);
 __decorate([
@@ -251,7 +252,7 @@ __decorate([
     __param(2, (0, graphql_1.Args)('skip', { type: () => graphql_1.Int, nullable: true })),
     __param(3, (0, graphql_1.Args)('take', { type: () => graphql_1.Int, nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Number, Number]),
+    __metadata("design:paramtypes", [typeof (_g = typeof enums_model_1.OffboardingStatus !== "undefined" && enums_model_1.OffboardingStatus) === "function" ? _g : Object, typeof (_h = typeof enums_model_1.ClearanceStatus !== "undefined" && enums_model_1.ClearanceStatus) === "function" ? _h : Object, Number, Number]),
     __metadata("design:returntype", Promise)
 ], OffboardingResolver.prototype, "listOffboardingProcesses", null);
 __decorate([
@@ -260,7 +261,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, offboarding_process_input_1.UpdateOffboardingProcessInput]),
+    __metadata("design:paramtypes", [String, typeof (_j = typeof offboarding_process_input_1.UpdateOffboardingProcessInput !== "undefined" && offboarding_process_input_1.UpdateOffboardingProcessInput) === "function" ? _j : Object]),
     __metadata("design:returntype", Promise)
 ], OffboardingResolver.prototype, "updateOffboardingProcess", null);
 __decorate([
@@ -275,7 +276,7 @@ __decorate([
 exports.OffboardingResolver = OffboardingResolver = __decorate([
     (0, graphql_1.Resolver)(() => offboarding_process_model_1.OffboardingProcess),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [hr_service_1.HRService])
+    __metadata("design:paramtypes", [typeof (_e = typeof hr_service_1.HRService !== "undefined" && hr_service_1.HRService) === "function" ? _e : Object])
 ], OffboardingResolver);
 let EmploymentHistoryResolver = class EmploymentHistoryResolver {
     constructor(hrService) {
@@ -297,7 +298,7 @@ __decorate([
     (0, roles_decorator_1.Roles)('ADMIN'),
     __param(0, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [employment_history_input_1.CreateEmploymentHistoryInput]),
+    __metadata("design:paramtypes", [typeof (_l = typeof employment_history_input_1.CreateEmploymentHistoryInput !== "undefined" && employment_history_input_1.CreateEmploymentHistoryInput) === "function" ? _l : Object]),
     __metadata("design:returntype", Promise)
 ], EmploymentHistoryResolver.prototype, "createEmploymentHistory", null);
 __decorate([
@@ -314,13 +315,13 @@ __decorate([
     __param(0, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
     __param(1, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, employment_history_input_1.UpdateEmploymentHistoryInput]),
+    __metadata("design:paramtypes", [String, typeof (_m = typeof employment_history_input_1.UpdateEmploymentHistoryInput !== "undefined" && employment_history_input_1.UpdateEmploymentHistoryInput) === "function" ? _m : Object]),
     __metadata("design:returntype", Promise)
 ], EmploymentHistoryResolver.prototype, "updateEmploymentHistory", null);
 exports.EmploymentHistoryResolver = EmploymentHistoryResolver = __decorate([
     (0, graphql_1.Resolver)(() => employment_history_model_1.EmploymentHistory),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [hr_service_1.HRService])
+    __metadata("design:paramtypes", [typeof (_k = typeof hr_service_1.HRService !== "undefined" && hr_service_1.HRService) === "function" ? _k : Object])
 ], EmploymentHistoryResolver);
 let HRStatisticsResolver = class HRStatisticsResolver {
     constructor(hrService) {
@@ -341,6 +342,6 @@ __decorate([
 exports.HRStatisticsResolver = HRStatisticsResolver = __decorate([
     (0, graphql_1.Resolver)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [hr_service_1.HRService])
+    __metadata("design:paramtypes", [typeof (_o = typeof hr_service_1.HRService !== "undefined" && hr_service_1.HRService) === "function" ? _o : Object])
 ], HRStatisticsResolver);
 //# sourceMappingURL=hr.resolver.js.map

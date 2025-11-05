@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -91,7 +92,7 @@ __decorate([
     (0, graphql_1.Query)(() => product_type_1.PaginatedProducts, { name: 'products' }),
     __param(0, (0, graphql_1.Args)('input', { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [product_input_1.GetProductsInput]),
+    __metadata("design:paramtypes", [typeof (_b = typeof product_input_1.GetProductsInput !== "undefined" && product_input_1.GetProductsInput) === "function" ? _b : Object]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "getProducts", null);
 __decorate([
@@ -113,7 +114,7 @@ __decorate([
     __param(0, (0, graphql_1.Args)('categoryId', { type: () => graphql_1.ID })),
     __param(1, (0, graphql_1.Args)('input', { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, product_input_1.GetProductsInput]),
+    __metadata("design:paramtypes", [String, typeof (_c = typeof product_input_1.GetProductsInput !== "undefined" && product_input_1.GetProductsInput) === "function" ? _c : Object]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "getProductsByCategory", null);
 __decorate([
@@ -121,7 +122,7 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [product_input_1.CreateProductInput]),
+    __metadata("design:paramtypes", [typeof (_d = typeof product_input_1.CreateProductInput !== "undefined" && product_input_1.CreateProductInput) === "function" ? _d : Object]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "createProduct", null);
 __decorate([
@@ -129,7 +130,7 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [product_input_1.UpdateProductInput]),
+    __metadata("design:paramtypes", [typeof (_e = typeof product_input_1.UpdateProductInput !== "undefined" && product_input_1.UpdateProductInput) === "function" ? _e : Object]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "updateProduct", null);
 __decorate([
@@ -145,7 +146,7 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [product_input_1.CreateProductImageInput]),
+    __metadata("design:paramtypes", [typeof (_f = typeof product_input_1.CreateProductImageInput !== "undefined" && product_input_1.CreateProductImageInput) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "addProductImage", null);
 __decorate([
@@ -161,7 +162,7 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [product_input_1.CreateProductVariantInput]),
+    __metadata("design:paramtypes", [typeof (_g = typeof product_input_1.CreateProductVariantInput !== "undefined" && product_input_1.CreateProductVariantInput) === "function" ? _g : Object]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "addProductVariant", null);
 __decorate([
@@ -169,7 +170,7 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [product_input_1.UpdateProductVariantInput]),
+    __metadata("design:paramtypes", [typeof (_h = typeof product_input_1.UpdateProductVariantInput !== "undefined" && product_input_1.UpdateProductVariantInput) === "function" ? _h : Object]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "updateProductVariant", null);
 __decorate([
@@ -212,7 +213,6 @@ __decorate([
 ], ProductResolver.prototype, "profitMargin", null);
 exports.ProductResolver = ProductResolver = __decorate([
     (0, graphql_1.Resolver)(() => product_type_1.ProductType),
-    __metadata("design:paramtypes", [product_service_1.ProductService,
-        category_service_1.CategoryService])
+    __metadata("design:paramtypes", [typeof (_a = typeof product_service_1.ProductService !== "undefined" && product_service_1.ProductService) === "function" ? _a : Object, category_service_1.CategoryService])
 ], ProductResolver);
 //# sourceMappingURL=product.resolver.js.map

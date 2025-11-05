@@ -10,8 +10,8 @@ export declare class AffiliateTrackingService {
     getAffiliateLinks(affiliateUserId: string, input?: AffLinkSearchInput): Promise<{
         links: any;
         total: any;
-        page: number;
-        size: number;
+        page: any;
+        size: any;
         totalPages: number;
     }>;
     updateAffiliateLink(linkId: string, affiliateUserId: string, input: UpdateAffLinkInput): Promise<any>;
@@ -34,8 +34,8 @@ export declare class AffiliateTrackingService {
     getConversions(input: AffConversionSearchInput, userRole?: $Enums.AffUserRole, userId?: string): Promise<{
         conversions: any;
         total: any;
-        page: number;
-        size: number;
+        page: any;
+        size: any;
         totalPages: number;
     }>;
     generateTrackingUrl(trackingCode: string, baseUrl?: string): string;
