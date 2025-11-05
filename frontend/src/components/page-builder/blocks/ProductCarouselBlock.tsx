@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ShoppingCart, Eye, Settings, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingCart, Eye, Settings, Trash2, X } from 'lucide-react';
 import { PageBlock, ProductCarouselBlockContent } from '@/types/page-builder';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useQuery } from '@apollo/client';
 import { GET_PRODUCTS } from '@/graphql/product.queries';
 import { useDynamicQuery } from '@/lib/graphql/dynamic-hooks';
@@ -80,6 +81,11 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const [imagePreview, setImagePreview] = useState<{ open: boolean; src: string; alt: string }>({
+    open: false,
+    src: '',
+    alt: '',
+  });
 
   // Determine data source table
   const dataSourceTable = editContent.dataSourceTable || 'ext_sanphamhoadon';
@@ -249,6 +255,28 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
     return product.unit || product.dvt || product.donvitinh || '';
   };
 
+  const getProductSlug = (product: Product) => {
+    return product.slug || product.ma || product.id;
+  };
+
+  const handleImagePreview = (product: Product, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setImagePreview({
+      open: true,
+      src: getProductImage(product),
+      alt: getProductName(product),
+    });
+  };
+
+  const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Add to cart:', product.id, getProductName(product));
+    // TODO: Implement add to cart functionality
+    // You can integrate with your cart context/state here
+  };
+
   // Debug logging
   useEffect(() => {
     console.log('[ProductCarousel] Debug Info:', {
@@ -346,17 +374,29 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
                         </div>
                       )}
                       
-                      {/* Quick View Button */}
-                      <button className="absolute top-2 right-2 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                        <Eye className="w-4 h-4 text-gray-700" />
-                      </button>
+                      {/* Quick View Button - Eye Icon */}
+                      {getProductImage(product) && (
+                        <button 
+                          onClick={(e) => handleImagePreview(product, e)}
+                          className="absolute top-2 right-2 bg-white/90 hover:bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                          title="Xem ảnh lớn"
+                        >
+                          <Eye className="w-4 h-4 text-gray-700" />
+                        </button>
+                      )}
                     </div>
 
                     {/* Product Info */}
                     <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3rem]">
-                        {getProductName(product)}
-                      </h3>
+                      {/* Product Name - Clickable to detail page */}
+                      <Link 
+                        href={`/san-pham/${getProductSlug(product)}`}
+                        className="block hover:text-primary transition-colors"
+                      >
+                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3rem] hover:text-primary">
+                          {getProductName(product)}
+                        </h3>
+                      </Link>
                       
                       <div className="flex items-center justify-between mb-3">
                         <div>
@@ -370,7 +410,11 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
                       </div>
 
                       {/* Add to Cart Button */}
-                      <Button className="w-full" size="sm">
+                      <Button 
+                        className="w-full" 
+                        size="sm"
+                        onClick={(e) => handleAddToCart(product, e)}
+                      >
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         Mua ngay
                       </Button>
@@ -477,6 +521,30 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
           {loading && <p className="text-sm text-gray-500 mt-2">Đang tải...</p>}
         </div>
       </div>
+
+      {/* Image Preview Dialog */}
+      <Dialog open={imagePreview.open} onOpenChange={(open) => setImagePreview({ ...imagePreview, open })}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <button
+            onClick={() => setImagePreview({ open: false, src: '', alt: '' })}
+            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-10"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Đóng</span>
+          </button>
+          
+          <div className="relative w-full h-[70vh]">
+            {imagePreview.src && (
+              <Image
+                src={imagePreview.src}
+                alt={imagePreview.alt}
+                fill
+                className="object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
