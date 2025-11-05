@@ -8,6 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery, useMutation, ApolloError } from '@apollo/client';
 import { DYNAMIC_FIND_MANY, DYNAMIC_CREATE, DYNAMIC_UPDATE, DYNAMIC_DELETE } from '../graphql/universal-dynamic-queries';
+import { UPDATE_MENU_ADMIN, CREATE_MENU_ADMIN, DELETE_MENU_ADMIN } from '@/graphql/menu.queries';
 import {
   buildMenuFindManyInput,
   buildMenuFindUniqueInput,
@@ -341,15 +342,18 @@ export function useMenuCount(where?: any) {
  * Hook to create menu
  */
 export function useCreateMenu() {
-  const [mutate, { data, loading, error }] = useMutation(DYNAMIC_CREATE, {
+  const [mutate, { data, loading, error }] = useMutation(CREATE_MENU_ADMIN, {
     errorPolicy: 'all',
   });
 
   const createMenu = useCallback(
     async (menuData: Partial<Menu>) => {
       try {
-        const input = buildMenuCreateInput(menuData);
-        return await mutate({ variables: { input } });
+        return await mutate({ 
+          variables: { 
+            input: menuData 
+          } 
+        });
       } catch (err) {
         console.error('Error creating menu:', err);
         throw err;
@@ -360,7 +364,7 @@ export function useCreateMenu() {
 
   return {
     createMenu,
-    data: data?.dynamicCreate,
+    data: data?.createMenu,
     loading,
     error,
   };
@@ -370,15 +374,19 @@ export function useCreateMenu() {
  * Hook to update menu
  */
 export function useUpdateMenu() {
-  const [mutate, { data, loading, error }] = useMutation(DYNAMIC_UPDATE, {
+  const [mutate, { data, loading, error }] = useMutation(UPDATE_MENU_ADMIN, {
     errorPolicy: 'all',
   });
 
   const updateMenu = useCallback(
     async (id: string, menuData: Partial<Menu>) => {
       try {
-        const input = buildMenuUpdateInput({ id }, menuData);
-        return await mutate({ variables: { input } });
+        return await mutate({ 
+          variables: { 
+            id,
+            input: menuData 
+          } 
+        });
       } catch (err) {
         console.error('Error updating menu:', err);
         throw err;
@@ -389,7 +397,7 @@ export function useUpdateMenu() {
 
   return {
     updateMenu,
-    data: data?.dynamicUpdate,
+    data: data?.updateMenu,
     loading,
     error,
   };
@@ -399,15 +407,18 @@ export function useUpdateMenu() {
  * Hook to delete menu
  */
 export function useDeleteMenu() {
-  const [mutate, { data, loading, error }] = useMutation(DYNAMIC_DELETE, {
+  const [mutate, { data, loading, error }] = useMutation(DELETE_MENU_ADMIN, {
     errorPolicy: 'all',
   });
 
   const deleteMenu = useCallback(
     async (id: string) => {
       try {
-        const input = buildMenuDeleteInput({ id });
-        return await mutate({ variables: { input } });
+        return await mutate({ 
+          variables: { 
+            id 
+          } 
+        });
       } catch (err) {
         console.error('Error deleting menu:', err);
         throw err;
@@ -418,7 +429,7 @@ export function useDeleteMenu() {
 
   return {
     deleteMenu,
-    data: data?.dynamicDelete,
+    data: data?.deleteMenu,
     loading,
     error,
   };

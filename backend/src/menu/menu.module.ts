@@ -11,6 +11,6 @@ import { MenuRepository } from './repositories/menu.repository';
     MenuResolver,
     MenuRepository,
   ],
-  exports: [MenuService, MenuRepository],
+  exports: [MenuService, MenuResolver, MenuRepository],
 })
 export class MenuModule {}

@@ -57,6 +57,31 @@ export class MenuResponseDto {
   @Field({ nullable: true })
   image?: string | null;
 
+  @Field({ nullable: true })
+  cssClass?: string | null;
+
+  // Dynamic linking fields
+  @Field({ nullable: true })
+  linkType?: string | null;
+
+  @Field({ nullable: true })
+  productId?: string | null;
+
+  @Field({ nullable: true })
+  blogPostId?: string | null;
+
+  @Field({ nullable: true })
+  pageId?: string | null;
+
+  @Field({ nullable: true })
+  categoryId?: string | null;
+
+  @Field({ nullable: true })
+  blogCategoryId?: string | null;
+
+  @Field({ nullable: true })
+  queryConditions?: string | null;
+
   @Field(() => [String])
   requiredPermissions!: string[];
 

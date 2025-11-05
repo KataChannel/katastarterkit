@@ -36,6 +36,21 @@ export class MenuService {
 
   constructor(private readonly menuRepository: MenuRepository) {}
 
+  /**
+   * Clean empty strings from update data to avoid Prisma enum validation errors
+   */
+  private cleanEmptyStrings(data: any): any {
+    const cleaned: any = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value === '') {
+        cleaned[key] = null;
+      } else if (value !== undefined) {
+        cleaned[key] = value;
+      }
+    }
+    return cleaned;
+  }
+
   // =====================================================
   // CREATE
   // =====================================================
@@ -56,7 +71,7 @@ export class MenuService {
 
     // Prepare create data
     const createData = {
-      ...dto,
+      ...this.cleanEmptyStrings(dto),
       level,
       path,
       type: dto.type || MenuType.SIDEBAR,
@@ -195,7 +210,7 @@ export class MenuService {
     }
 
     // Recalculate hierarchy if parent changed
-    let updateData: any = { ...dto };
+    let updateData: any = { ...this.cleanEmptyStrings(dto) };
 
     if (dto.parentId !== undefined && dto.parentId !== existingMenu.parentId) {
       // Prevent circular reference

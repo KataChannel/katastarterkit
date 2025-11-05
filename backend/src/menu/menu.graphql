@@ -19,6 +19,15 @@ type Menu {
   externalUrl: String
   target: MenuTarget!
   
+  # Dynamic Linking
+  linkType: MenuLinkType
+  productId: String
+  blogPostId: String
+  pageId: String
+  categoryId: String
+  blogCategoryId: String
+  queryConditions: JSON
+  
   # Display
   icon: String
   iconType: String
@@ -66,6 +75,19 @@ enum MenuTarget {
   MODAL
 }
 
+enum MenuLinkType {
+  URL
+  ROUTE
+  EXTERNAL
+  PRODUCT_LIST
+  PRODUCT_DETAIL
+  BLOG_LIST
+  BLOG_DETAIL
+  CATEGORY
+  BLOG_CATEGORY
+  PAGE
+}
+
 input CreateMenuInput {
   title: String!
   slug: String!
@@ -81,6 +103,15 @@ input CreateMenuInput {
   route: String
   externalUrl: String
   target: MenuTarget
+  
+  # Dynamic Linking
+  linkType: MenuLinkType
+  productId: String
+  blogPostId: String
+  pageId: String
+  categoryId: String
+  blogCategoryId: String
+  queryConditions: JSON
   
   # Display
   icon: String
@@ -119,6 +150,15 @@ input UpdateMenuInput {
   route: String
   externalUrl: String
   target: MenuTarget
+  
+  # Dynamic Linking
+  linkType: MenuLinkType
+  productId: String
+  blogPostId: String
+  pageId: String
+  categoryId: String
+  blogCategoryId: String
+  queryConditions: JSON
   
   # Display
   icon: String

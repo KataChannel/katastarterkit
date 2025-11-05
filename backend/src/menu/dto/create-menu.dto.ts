@@ -3,7 +3,7 @@ import { MenuType, MenuTarget } from '@prisma/client';
 import { Field, InputType, Int } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
 
-@InputType()
+@InputType('CreateMenuInput')
 export class CreateMenuDto {
   @Field()
   @IsString()
@@ -117,6 +117,43 @@ export class CreateMenuDto {
   @IsOptional()
   @IsBoolean()
   isVisible?: boolean;
+
+  // Dynamic linking fields
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @Length(0, 50)
+  linkType?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  productId?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  blogPostId?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  pageId?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  blogCategoryId?: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
+  @IsObject()
+  queryConditions?: Record<string, any>;
 
   @Field(() => GraphQLJSON, { nullable: true })
   @IsOptional()

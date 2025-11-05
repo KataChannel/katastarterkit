@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { useRouter, useParams } from 'next/navigation';
 import {
@@ -61,44 +61,46 @@ export default function MenuFormPage() {
   });
 
   // Load menu data for editing
-  const { loading: loadingMenu } = useQuery(GET_MENU_BY_ID_ADMIN, {
+  const { data: menuData, loading: loadingMenu } = useQuery(GET_MENU_BY_ID_ADMIN, {
     variables: { id: menuId },
     skip: !isEdit,
-    onCompleted: (data) => {
-      if (data?.menu) {
-        setFormData({
-          title: data.menu.title || '',
-          slug: data.menu.slug || '',
-          description: data.menu.description || '',
-          type: data.menu.type || 'HEADER',
-          parentId: data.menu.parentId || '',
-          order: data.menu.order || 0,
-          url: data.menu.url || '',
-          route: data.menu.route || '',
-          externalUrl: data.menu.externalUrl || '',
-          target: data.menu.target || 'SELF',
-          linkType: data.menu.linkType || 'URL',
-          icon: data.menu.icon || '',
-          badge: data.menu.badge || '',
-          badgeColor: data.menu.badgeColor || '',
-          image: data.menu.image || '',
-          isActive: data.menu.isActive !== false,
-          isVisible: data.menu.isVisible !== false,
-          cssClass: data.menu.cssClass || '',
-          productId: data.menu.productId || '',
-          blogPostId: data.menu.blogPostId || '',
-          pageId: data.menu.pageId || '',
-          categoryId: data.menu.categoryId || '',
-          blogCategoryId: data.menu.blogCategoryId || '',
-          queryConditions: data.menu.queryConditions || null,
-        });
-      }
-    },
     onError: (error) => {
       toast.error('Lỗi: ' + error.message);
       router.push('/admin/menu');
     },
   });
+
+  // Update form data when menu data is loaded
+  useEffect(() => {
+    if (menuData?.menu) {
+      setFormData({
+        title: menuData.menu.title || '',
+        slug: menuData.menu.slug || '',
+        description: menuData.menu.description || '',
+        type: menuData.menu.type || 'HEADER',
+        parentId: menuData.menu.parentId || '',
+        order: menuData.menu.order || 0,
+        url: menuData.menu.url || '',
+        route: menuData.menu.route || '',
+        externalUrl: menuData.menu.externalUrl || '',
+        target: menuData.menu.target || 'SELF',
+        linkType: menuData.menu.linkType || 'URL',
+        icon: menuData.menu.icon || '',
+        badge: menuData.menu.badge || '',
+        badgeColor: menuData.menu.badgeColor || '',
+        image: menuData.menu.image || '',
+        isActive: menuData.menu.isActive !== false,
+        isVisible: menuData.menu.isVisible !== false,
+        cssClass: menuData.menu.cssClass || '',
+        productId: menuData.menu.productId || '',
+        blogPostId: menuData.menu.blogPostId || '',
+        pageId: menuData.menu.pageId || '',
+        categoryId: menuData.menu.categoryId || '',
+        blogCategoryId: menuData.menu.blogCategoryId || '',
+        queryConditions: menuData.menu.queryConditions || null,
+      });
+    }
+  }, [menuData]);
 
   // Load menu tree for parent selection
   const { data: menusData } = useQuery(GET_MENUS_TREE);
@@ -136,7 +138,7 @@ export default function MenuFormPage() {
       parentId: formData.parentId || undefined,
       order: parseInt(String(formData.order)) || 0,
       target: formData.target,
-      linkType: formData.linkType,
+      linkType: formData.linkType || undefined,
       icon: formData.icon || undefined,
       badge: formData.badge || undefined,
       badgeColor: formData.badgeColor || undefined,
@@ -157,6 +159,7 @@ export default function MenuFormPage() {
       }
     } else {
       // Dynamic link
+      input.linkType = formData.linkType || undefined;
       input.productId = formData.productId || undefined;
       input.blogPostId = formData.blogPostId || undefined;
       input.pageId = formData.pageId || undefined;
@@ -165,9 +168,12 @@ export default function MenuFormPage() {
       input.queryConditions = formData.queryConditions || undefined;
     }
 
+    console.log('isEdit:', isEdit, 'menuId:', menuId);
     if (isEdit) {
-      await updateMenu({ variables: { input: { id: menuId, ...input } } });
+      console.log('Updating menu with id:', menuId, 'input:', input);
+      await updateMenu({ variables: { id: menuId, input } });
     } else {
+      console.log('Creating menu with input:', input);
       await createMenu({ variables: { input } });
     }
   };
@@ -287,12 +293,12 @@ export default function MenuFormPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="parentId">Menu Cha</Label>
-                <Select value={formData.parentId} onValueChange={(parentId) => setFormData({ ...formData, parentId })}>
+                <Select value={formData.parentId || 'none'} onValueChange={(parentId) => setFormData({ ...formData, parentId: parentId === 'none' ? '' : parentId })}>
                   <SelectTrigger id="parentId">
                     <SelectValue placeholder="-- Không có --" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">-- Không có --</SelectItem>
+                    <SelectItem value="none">-- Không có --</SelectItem>
                     {menus.map((menu: any) => (
                       <SelectItem key={menu.id} value={menu.id}>
                         {menu.title}

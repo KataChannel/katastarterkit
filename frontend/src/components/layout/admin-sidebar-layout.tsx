@@ -108,6 +108,12 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
       requiredRoles: ['admin', 'super_admin'],
     },
     {
+      name: 'Menu Management',
+      href: '/admin/menu',
+      icon: LinkIcon,
+      requiredRoles: ['admin', 'super_admin'],
+    },
+    {
       name: 'Settings',
       href: '/admin/settings',
       icon: Settings,

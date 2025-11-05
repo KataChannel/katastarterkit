@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   useMenus,
-  useCreateMenu,
   useUpdateMenu,
   useDeleteMenu,
 } from '@/lib/hooks/useMenus';
@@ -45,8 +45,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { SortableMenuRow } from '@/components/menu/SortableMenuRow';
-import { MenuFormDialog } from '@/components/menu/MenuFormDialog';
+import { SortableMenuRow, MenuTreeItem } from '@/components/menu/SortableMenuRow';
 import {
   buildMenuTree,
   flattenMenuTree,
@@ -64,27 +63,11 @@ import {
  */
 
 export default function MenuManagementPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
-  const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    type: 'SIDEBAR',
-    route: '',
-    url: '',
-    icon: '',
-    order: 0,
-    parentId: '',
-    isActive: true,
-    isVisible: true,
-    isPublic: false,
-  });
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -126,9 +109,8 @@ export default function MenuManagementPage() {
   );
 
   // Flatten tree for drag and drop
-  const flatMenus = useMemo(() => flattenMenuTree(menuTree), [menuTree]);
+  const flatMenus = useMemo(() => flattenMenuTree(menuTree) as MenuTreeItem[], [menuTree]);
   
-  const { createMenu: createMenuMutation } = useCreateMenu();
   const { updateMenu: updateMenuMutation } = useUpdateMenu();
   const { deleteMenu: deleteMenuMutation } = useDeleteMenu();
 
@@ -183,40 +165,6 @@ export default function MenuManagementPage() {
     });
   };
 
-  const handleCreate = async () => {
-    try {
-      await createMenuMutation({
-        ...formData,
-        order: parseInt(formData.order.toString()),
-        parentId: formData.parentId && formData.parentId !== 'none' ? formData.parentId : undefined,
-      });
-      toast.success('Menu created successfully');
-      setIsCreateOpen(false);
-      resetForm();
-      refetch();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create menu');
-    }
-  };
-
-  const handleEdit = async () => {
-    if (!selectedMenu) return;
-    try {
-      await updateMenuMutation(selectedMenu.id, {
-        ...formData,
-        order: parseInt(formData.order.toString()),
-        parentId: formData.parentId && formData.parentId !== 'none' ? formData.parentId : undefined,
-      });
-      toast.success('Menu updated successfully');
-      setIsEditOpen(false);
-      setSelectedMenu(null);
-      resetForm();
-      refetch();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update menu');
-    }
-  };
-
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Are you sure you want to delete menu "${title}"?`)) return;
     try {
@@ -254,42 +202,6 @@ export default function MenuManagementPage() {
     }
   };
 
-  const openEditDialog = (menu: Menu) => {
-    setSelectedMenu(menu);
-    setFormData({
-      title: menu.title,
-      slug: menu.slug,
-      description: menu.description || '',
-      type: menu.type,
-      route: menu.route || '',
-      url: menu.url || '',
-      icon: menu.icon || '',
-      order: menu.order,
-      parentId: menu.parentId || 'none',
-      isActive: menu.isActive,
-      isVisible: menu.isVisible,
-      isPublic: menu.isPublic,
-    });
-    setIsEditOpen(true);
-  };
-
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      slug: '',
-      description: '',
-      type: 'SIDEBAR',
-      route: '',
-      url: '',
-      icon: '',
-      order: 0,
-      parentId: 'none',
-      isActive: true,
-      isVisible: true,
-      isPublic: false,
-    });
-  };
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -300,9 +212,9 @@ export default function MenuManagementPage() {
             Quản lý menu và điều hướng ứng dụng của bạn
           </p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
+        <Button onClick={() => router.push('/admin/menu/create')}>
           <Plus className="mr-2 h-4 w-4" />
-          Tạo Menu
+          Tạo Menu Mới
         </Button>
       </div>
 
@@ -351,26 +263,26 @@ export default function MenuManagementPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[30px]"></TableHead>
                   <TableHead>Tiêu đề</TableHead>
                   <TableHead>Loại</TableHead>
-                  <TableHead>Đường dẫn/URL</TableHead>
+                  <TableHead>Đường dẫn</TableHead>
                   <TableHead>Thứ tự</TableHead>
                   <TableHead>Trạng thái</TableHead>
-                  <TableHead>Hiển thị</TableHead>
-                  <TableHead className="text-right">Hành động</TableHead>
+                  <TableHead className="text-right">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      Đang tải menu...
+                    <TableCell colSpan={7} className="text-center">
+                      Đang tải...
                     </TableCell>
                   </TableRow>
-                ) : menuTree.length === 0 ? (
+                ) : flatMenus.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      Không tìm thấy menu
+                    <TableCell colSpan={7} className="text-center">
+                      Không có menu nào
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -378,13 +290,12 @@ export default function MenuManagementPage() {
                     items={flatMenus.map((m) => m.id)}
                     strategy={verticalListSortingStrategy}
                   >
-                    {menuTree.map((menu) => (
+                    {flatMenus.map((menu) => (
                       <SortableMenuRow
                         key={menu.id}
                         menu={menu}
-                        level={0}
+                        level={menu.level || 0}
                         allMenus={menus}
-                        onEdit={openEditDialog}
                         onDelete={handleDelete}
                         onToggleActive={handleToggleActive}
                         onToggleVisibility={handleToggleVisibility}
@@ -409,29 +320,6 @@ export default function MenuManagementPage() {
           </DndContext>
         </CardContent>
       </Card>
-
-      {/* Create Dialog */}
-      <MenuFormDialog
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        mode="create"
-        formData={formData}
-        onFormChange={setFormData}
-        onSubmit={handleCreate}
-        menus={menus}
-      />
-
-      {/* Edit Dialog */}
-      <MenuFormDialog
-        open={isEditOpen}
-        onOpenChange={setIsEditOpen}
-        mode="edit"
-        formData={formData}
-        onFormChange={setFormData}
-        onSubmit={handleEdit}
-        menus={menus}
-        selectedMenuId={selectedMenu?.id}
-      />
     </div>
   );
 }

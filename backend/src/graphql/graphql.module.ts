@@ -64,6 +64,7 @@ import { AuthModule } from '../auth/auth.module';
 import { GrokModule } from '../grok/grok.module';
 import { MinioModule } from '../minio/minio.module';
 import { SearchModule } from '../search/search.module';
+import { MenuModule } from '../menu/menu.module';
 import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingResolver, AffiliatePaymentResolver, AffiliateConversionResolver } from './resolvers/affiliate.resolver';
 // JSON scalar handled by graphql-type-json directly
 
@@ -74,6 +75,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     GrokModule,
     MinioModule,
     SearchModule,
+    MenuModule,
     MulterModule.register({
       limits: {
         fileSize: 10 * 1024 * 1024, // 10MB
@@ -134,7 +136,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     // Website settings resolver
     WebsiteSettingResolver,
     
-    // Menu public resolver
+    // Menu public resolver (MenuResolver được import từ MenuModule)
     MenuPublicResolver,
     
     // Services

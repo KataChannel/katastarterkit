@@ -39,7 +39,9 @@
     "db:restore-benchmark": "bash prisma/benchmark-restore.sh",
     "prisma:seed": "bun run prisma/seed.ts",
     "seed:comprehensive": "bun run src/scripts/run-comprehensive-seeder.ts",
-    "orama:reindex": "bun scripts/orama-reindex.ts"
+    "orama:reindex": "bun scripts/orama-reindex.ts",
+    "migrate:old-data": "bun run migrate-old-data.ts",
+    "verify:migration": "bun run verify-migration.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.2",

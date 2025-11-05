@@ -476,16 +476,74 @@ export const CREATE_MENU_ADMIN = gql`
       id
       title
       slug
+      description
+      type
+      parentId
+      order
+      url
+      route
+      externalUrl
+      target
+      linkType
+      icon
+      iconType
+      badge
+      badgeColor
+      image
+      cssClass
+      productId
+      blogPostId
+      pageId
+      categoryId
+      blogCategoryId
+      queryConditions
+      requiredPermissions
+      requiredRoles
+      isPublic
+      isActive
+      isVisible
+      isProtected
+      createdAt
+      updatedAt
     }
   }
 `;
 
 export const UPDATE_MENU_ADMIN = gql`
-  mutation UpdateMenuAdmin($input: UpdateMenuInput!) {
-    updateMenu(input: $input) {
+  mutation UpdateMenuAdmin($id: ID!, $input: UpdateMenuInput!) {
+    updateMenu(id: $id, input: $input) {
       id
       title
       slug
+      description
+      type
+      parentId
+      order
+      url
+      route
+      externalUrl
+      target
+      linkType
+      icon
+      iconType
+      badge
+      badgeColor
+      image
+      cssClass
+      productId
+      blogPostId
+      pageId
+      categoryId
+      blogCategoryId
+      queryConditions
+      requiredPermissions
+      requiredRoles
+      isPublic
+      isActive
+      isVisible
+      isProtected
+      createdAt
+      updatedAt
     }
   }
 `;

@@ -1,6 +1,7 @@
 'use client';
 
 import { Menu } from '@/lib/graphql/menu-dynamic-queries';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TableCell, TableRow } from '@/components/ui/table';
@@ -29,7 +30,6 @@ interface SortableMenuRowProps {
   menu: MenuTreeItem;
   level?: number;
   allMenus: Menu[];
-  onEdit: (menu: Menu) => void;
   onDelete: (id: string, title: string) => void;
   onToggleActive: (id: string) => void;
   onToggleVisibility: (id: string) => void;
@@ -42,7 +42,6 @@ export function SortableMenuRow({
   menu,
   level = 0,
   allMenus,
-  onEdit,
   onDelete,
   onToggleActive,
   onToggleVisibility,
@@ -50,6 +49,7 @@ export function SortableMenuRow({
   getTypeColor,
   expanded = false,
 }: SortableMenuRowProps) {
+  const router = useRouter();
   const {
     attributes,
     listeners,
@@ -134,7 +134,7 @@ export function SortableMenuRow({
             >
               {menu.isVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => onEdit(menu)} title="Chỉnh sửa">
+            <Button variant="ghost" size="icon" onClick={() => router.push(`/admin/menu/${menu.id}/edit`)} title="Chỉnh sửa">
               <Pencil className="h-4 w-4" />
             </Button>
             {!menu.isProtected && (
@@ -158,7 +158,6 @@ export function SortableMenuRow({
             menu={child}
             level={level + 1}
             allMenus={allMenus}
-            onEdit={onEdit}
             onDelete={onDelete}
             onToggleActive={onToggleActive}
             onToggleVisibility={onToggleVisibility}

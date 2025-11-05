@@ -1305,9 +1305,12 @@ input CreateManyInput {
   skipDuplicates: Boolean! = false
 }
 
-input CreateMenuDto {
+input CreateMenuInput {
   badge: String
   badgeColor: String
+  blogCategoryId: String
+  blogPostId: String
+  categoryId: String
   cssClass: String
   customData: JSON
   description: String
@@ -1318,9 +1321,13 @@ input CreateMenuDto {
   isActive: Boolean
   isPublic: Boolean
   isVisible: Boolean
+  linkType: String
   metadata: JSON
   order: Int
+  pageId: String
   parentId: String
+  productId: String
+  queryConditions: JSON
   requiredPermissions: [String!]
   requiredRoles: [String!]
   route: String
@@ -2315,8 +2322,12 @@ type MenuPaginationResponseDto {
 type MenuResponseDto {
   badge: String
   badgeColor: String
+  blogCategoryId: String
+  blogPostId: String
+  categoryId: String
   createdAt: DateTime!
   createdBy: String
+  cssClass: String
   description: String
   externalUrl: String
   icon: String
@@ -2328,9 +2339,13 @@ type MenuResponseDto {
   isPublic: Boolean!
   isVisible: Boolean!
   level: Int!
+  linkType: String
   order: Int!
+  pageId: String
   parentId: String
   path: String
+  productId: String
+  queryConditions: String
   requiredPermissions: [String!]!
   requiredRoles: [String!]!
   route: String
@@ -2423,7 +2438,7 @@ type Mutation {
 
   """Create multiple records in a single operation"""
   createMany(input: UnifiedBulkCreateInput!, modelName: String!): JSONObject!
-  createMenu(input: CreateMenuDto!): MenuResponseDto!
+  createMenu(input: CreateMenuInput!): MenuResponseDto!
   createModule(input: CreateModuleInput!): CourseModule!
   createOffboardingProcess(input: CreateOffboardingProcessInput!): OffboardingProcess!
   createOnboardingChecklist(input: CreateOnboardingChecklistInput!): OnboardingChecklist!
@@ -2632,7 +2647,7 @@ type Mutation {
 
   """Update multiple records matching criteria"""
   updateMany(input: UnifiedBulkUpdateInput!, modelName: String!): JSONObject!
-  updateMenu(id: ID!, input: UpdateMenuDto!): MenuResponseDto!
+  updateMenu(id: ID!, input: UpdateMenuInput!): MenuResponseDto!
   updateModule(input: UpdateModuleInput!): CourseModule!
   updateOffboardingProcess(id: ID!, input: UpdateOffboardingProcessInput!): OffboardingProcess!
   updateOnboardingChecklist(id: ID!, input: UpdateOnboardingChecklistInput!): OnboardingChecklist!
@@ -4872,9 +4887,12 @@ input UpdateMemberRoleInput {
   userId: ID!
 }
 
-input UpdateMenuDto {
+input UpdateMenuInput {
   badge: String
   badgeColor: String
+  blogCategoryId: String
+  blogPostId: String
+  categoryId: String
   cssClass: String
   customData: JSON
   description: String
@@ -4886,9 +4904,13 @@ input UpdateMenuDto {
   isProtected: Boolean
   isPublic: Boolean
   isVisible: Boolean
+  linkType: String
   metadata: JSON
   order: Int
+  pageId: String
   parentId: String
+  productId: String
+  queryConditions: JSON
   requiredPermissions: [String!]
   requiredRoles: [String!]
   route: String
