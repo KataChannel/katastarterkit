@@ -14,6 +14,7 @@ export interface BlockRendererProps {
   onDeleteChild?: (blockId: string) => void;
   onSelect?: (blockId: string | null) => void;
   depth?: number;
+  isGridChild?: boolean; // Flag to indicate if this block is a direct child of a Grid
 }
 
 export const BlockRenderer: React.FC<BlockRendererProps> = ({
@@ -26,6 +27,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
   onDeleteChild,
   onSelect,
   depth = 0,
+  isGridChild = false,
 }) => {
   // Get selected block ID from context for visual highlighting (optional - for editor only)
   // Use context directly instead of usePageState to make it optional
@@ -64,52 +66,39 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
       return [...block.children]
         .sort((a, b) => a.order - b.order)
         .map((childBlock) => (
-          <div key={childBlock.id} className="grid-item">
-            <BlockRenderer
-              block={childBlock}
-              isEditing={isEditing}
-              onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
-              onDelete={() => onDeleteChild?.(childBlock.id)}
-              onAddChild={onAddChild}
-              onUpdateChild={onUpdateChild}
-              onDeleteChild={onDeleteChild}
-              onSelect={onSelect}
-              depth={depth + 1}
-            />
-          </div>
+          <BlockRenderer
+            key={childBlock.id}
+            block={childBlock}
+            isEditing={isEditing}
+            onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
+            onDelete={() => onDeleteChild?.(childBlock.id)}
+            onAddChild={onAddChild}
+            onUpdateChild={onUpdateChild}
+            onDeleteChild={onDeleteChild}
+            onSelect={onSelect}
+            depth={depth + 1}
+            isGridChild={true}
+          />
         ));
     }
 
-    // For other container blocks: Keep visual indicators
-    return (
-      <div className="nested-blocks-container border-l-4 border-blue-200 ml-4 pl-4 mt-2 space-y-2">
-        <div className="text-xs text-blue-600 font-semibold mb-2 flex items-center gap-1">
-          📦 Nested Blocks ({block.children.length})
-        </div>
-        {[...block.children]
-          .sort((a, b) => a.order - b.order)
-          .map((childBlock) => {
-            return (
-              <div 
-                key={childBlock.id} 
-                className="nested-block-item bg-blue-50/30 rounded-lg p-2 border border-blue-100"
-              >
-                <BlockRenderer
-                  block={childBlock}
-                  isEditing={isEditing}
-                  onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
-                  onDelete={() => onDeleteChild?.(childBlock.id)}
-                  onAddChild={onAddChild}
-                  onUpdateChild={onUpdateChild}
-                  onDeleteChild={onDeleteChild}
-                  onSelect={onSelect}
-                  depth={depth + 1}
-                />
-              </div>
-            );
-          })}
-      </div>
-    );
+    // For other container blocks: Render children directly (for proper flex/layout)
+    return [...block.children]
+      .sort((a, b) => a.order - b.order)
+      .map((childBlock) => (
+        <BlockRenderer
+          key={childBlock.id}
+          block={childBlock}
+          isEditing={isEditing}
+          onUpdate={(content, style) => onUpdateChild?.(childBlock.id, content, style)}
+          onDelete={() => onDeleteChild?.(childBlock.id)}
+          onAddChild={onAddChild}
+          onUpdateChild={onUpdateChild}
+          onDeleteChild={onDeleteChild}
+          onSelect={onSelect}
+          depth={depth + 1}
+        />
+      ));
   };
 
   const containerProps = {
@@ -171,7 +160,13 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({
 
   let blockContent = renderBlockContent();
 
-  // Wrap in clickable div for selection (only in edit mode)
+  // Don't wrap grid children in selection div - it breaks grid layout
+  // Grid children should render directly as grid items
+  if (isGridChild) {
+    return blockContent;
+  }
+  
+  // Wrap in clickable div for selection (only in edit mode and NOT for grid children)
   if (isEditing && onSelect) {
     return (
       <div 

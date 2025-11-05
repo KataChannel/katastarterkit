@@ -237,17 +237,17 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
 
   return (
     <div className={`relative group ${isEditable ? 'hover:ring-2 hover:ring-blue-300' : ''}`}>
-      <div className="text-center">
+      <div className="w-full">
         <img
           src={content.src}
           alt={content.alt || ''}
           style={{
-            width: content.width ? `${content.width}px` : 'auto',
+            width: content.width ? `${content.width}px` : '100%',
             height: content.height ? `${content.height}px` : 'auto',
             objectFit: content.objectFit || 'cover',
             maxWidth: '100%',
           }}
-          className="mx-auto rounded-lg"
+          className="rounded-lg"
         />
         {content.caption && (
           <p className="mt-2 text-sm text-gray-600 italic">{content.caption}</p>
