@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,7 +10,6 @@ import {
   Calendar,
   User,
   Clock,
-  Tag,
   Eye,
   Share2,
   Facebook,
@@ -18,7 +17,15 @@ import {
   Linkedin,
   MessageCircle,
   Send,
+  ArrowLeft,
+  ChevronRight,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 export default function BlogDetailPage() {
   const params = useParams();
@@ -73,32 +80,37 @@ export default function BlogDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-16 h-16 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </Card>
       </div>
     );
   }
 
   if (error || !blog) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Không tìm thấy bài viết
-          </h1>
-          <button
-            onClick={() => router.push('/blog')}
-            className="text-blue-600 hover:underline"
-          >
-            ← Quay lại danh sách blog
-          </button>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-6 sm:p-8 text-center">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+              Không tìm thấy bài viết
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 mb-6">
+              Bài viết bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.
+            </p>
+            <Button onClick={() => router.push('/bai-viet')} className="w-full sm:w-auto">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Quay lại danh sách
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">{/* Continue with blog content */}
       {/* Hero Section */}
       {blog.featuredImage && (
         <div className="relative h-96 bg-gray-900">
@@ -163,14 +175,14 @@ export default function BlogDetailPage() {
               {/* Tags */}
               {blog.tags && blog.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6 pb-6 border-t pt-6">
-                  <Tag className="h-5 w-5 text-gray-400" />
                   {blog.tags.map((tag: any) => (
                     <Link
                       key={tag.id}
-                      href={`/blog?tag=${tag.slug}`}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition text-sm"
+                      href={`/bai-viet?tag=${tag.slug}`}
                     >
-                      #{tag.name}
+                      <Badge variant="secondary" className="hover:bg-gray-300 transition">
+                        #{tag.name}
+                      </Badge>
                     </Link>
                   ))}
                 </div>

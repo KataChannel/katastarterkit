@@ -30,10 +30,12 @@ export const GET_BLOGS = gql`
           username
           firstName
           lastName
+          email
         }
         thumbnailUrl
         viewCount
         publishedAt
+        createdAt
         category {
           id
           name
