@@ -78,6 +78,8 @@ export interface MenuItem {
   children?: MenuItem[];
   
   // Metadata
+  metadata?: any;
+  customData?: any;
   createdAt: string;
   updatedAt: string;
   createdBy?: string | null;

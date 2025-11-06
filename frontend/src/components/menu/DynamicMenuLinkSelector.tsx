@@ -132,7 +132,7 @@ function ProductSelector({
   onSearchChange 
 }: { 
   value?: string; 
-  onChange: (v: string) => void;
+  onChange: (v: any) => void;
   searchTerm: string;
   onSearchChange: (v: string) => void;
 }) {
@@ -141,6 +141,20 @@ function ProductSelector({
   });
 
   const products = data?.products?.items || [];
+
+  const handleProductChange = (productId: string) => {
+    const selectedProduct = products.find((p: any) => p.id === productId);
+    if (selectedProduct) {
+      // Lưu cả productId và slug vào customData
+      onChange({
+        productId: selectedProduct.id,
+        customData: {
+          productSlug: selectedProduct.slug,
+          productName: selectedProduct.name,
+        }
+      });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -153,7 +167,7 @@ function ProductSelector({
         ) : (
           <Combobox
             value={value || ''}
-            onChange={onChange}
+            onChange={handleProductChange}
             options={products.map((product: any) => ({
               value: product.id,
               label: product.name,
@@ -226,7 +240,7 @@ function BlogSelector({
   onSearchChange 
 }: { 
   value?: string; 
-  onChange: (v: string) => void;
+  onChange: (v: any) => void;
   searchTerm: string;
   onSearchChange: (v: string) => void;
 }) {
@@ -235,6 +249,20 @@ function BlogSelector({
   });
 
   const blogs = data?.blogs?.items || [];
+
+  const handleBlogChange = (blogPostId: string) => {
+    const selectedBlog = blogs.find((b: any) => b.id === blogPostId);
+    if (selectedBlog) {
+      // Lưu cả blogPostId và slug vào customData
+      onChange({
+        blogPostId: selectedBlog.id,
+        customData: {
+          blogPostSlug: selectedBlog.slug,
+          blogPostTitle: selectedBlog.title,
+        }
+      });
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -247,7 +275,7 @@ function BlogSelector({
         ) : (
           <Combobox
             value={value || ''}
-            onChange={onChange}
+            onChange={handleBlogChange}
             options={blogs.map((blog: any) => ({
               value: blog.id,
               label: blog.title,

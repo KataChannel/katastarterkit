@@ -387,10 +387,22 @@ function getMenuHref(item: MenuItem): string {
       return item.route || '#';
     case 'PAGE':
       return item.pageId ? `/page/${item.pageId}` : '#';
-    case 'PRODUCT_DETAIL':
-      return item.productId ? `/product/${item.productId}` : '#';
-    case 'BLOG_DETAIL':
-      return item.blogPostId ? `/blog/${item.blogPostId}` : '#';
+    case 'PRODUCT_DETAIL': {
+      // Ưu tiên slug từ customData, fallback về ID
+      const productSlug = item.customData?.productSlug;
+      if (productSlug) {
+        return `/san-pham/${productSlug}`;
+      }
+      return item.productId ? `/san-pham/${item.productId}` : '#';
+    }
+    case 'BLOG_DETAIL': {
+      // Ưu tiên slug từ customData, fallback về ID
+      const blogPostSlug = item.customData?.blogPostSlug;
+      if (blogPostSlug) {
+        return `/bai-viet/${blogPostSlug}`;
+      }
+      return item.blogPostId ? `/bai-viet/${item.blogPostId}` : '#';
+    }
     case 'CATEGORY':
       return item.categoryId ? `/category/${item.categoryId}` : '#';
     case 'BLOG_CATEGORY':

@@ -1,83 +1,170 @@
-# Cập Nhật Menu Link Selector - Đổi Select thành Combobox
+# Cập Nhật Menu Link Selector - Đổi Select thành Combobox & Fix 404 Chi Tiết
 
 ## Tổng Quan
-Cập nhật component `DynamicMenuLinkSelector` theo rule #11: "Tất cả Select đổi thành Combobox"
+1. Cập nhật component `DynamicMenuLinkSelector` theo rule #11: "Tất cả Select đổi thành Combobox"
+2. Fix bug menu chi tiết sản phẩm/bài viết trả về lỗi 404
+
+## Bug 404 - Nguyên Nhân & Giải Pháp
+
+### Vấn Đề:
+Menu lưu `productId` và `blogPostId` (UUID), nhưng frontend routes dùng **slug**:
+- Route thực tế: `/san-pham/[slug]` và `/bai-viet/[slug]`
+- MenuRenderer cũ: `/product/{productId}` và `/blog/{blogPostId}` → **404 Error**
+
+### Giải Pháp:
+Lưu **slug** vào `customData` khi chọn product/blog, MenuRenderer ưu tiên đọc slug
 
 ## Thay Đổi
 
-### File: `/frontend/src/components/menu/DynamicMenuLinkSelector.tsx`
+### 1. File: `/frontend/src/components/menu/DynamicMenuLinkSelector.tsx`
 
 **Import:**
 - ❌ Xóa: `Select`, `SelectContent`, `SelectItem`, `SelectTrigger`, `SelectValue`, `Search`
 - ✅ Thêm: `Combobox` từ `@/components/ui/combobox`
 
+**ProductSelector - Lưu slug:**
+```typescript
+const handleProductChange = (productId: string) => {
+  const selectedProduct = products.find((p: any) => p.id === productId);
+  if (selectedProduct) {
+    onChange({
+      productId: selectedProduct.id,
+      customData: {
+        productSlug: selectedProduct.slug,    // ← Lưu slug
+        productName: selectedProduct.name,
+      }
+    });
+  }
+};
+```
+
+**BlogSelector - Lưu slug:**
+```typescript
+const handleBlogChange = (blogPostId: string) => {
+  const selectedBlog = blogs.find((b: any) => b.id === blogPostId);
+  if (selectedBlog) {
+    onChange({
+      blogPostId: selectedBlog.id,
+      customData: {
+        blogPostSlug: selectedBlog.slug,      // ← Lưu slug
+        blogPostTitle: selectedBlog.title,
+      }
+    });
+  }
+};
+```
+
 **Components Đã Cập Nhật:**
+1. **ProductListConditions** - Sắp xếp → Combobox
+2. **ProductSelector** - Gộp tìm kiếm + chọn + lưu slug
+3. **BlogListConditions** - Sắp xếp → Combobox  
+4. **BlogSelector** - Gộp tìm kiếm + chọn + lưu slug
+5. **CategorySelector** - Combobox với loading
+6. **BlogCategorySelector** - Combobox với loading
 
-1. **ProductListConditions** - Sắp xếp sản phẩm
-   - Đổi từ Select → Combobox với tìm kiếm
-   - Options: Mới Nhất, Bán Chạy, Xem Nhiều, Giá Tăng/Giảm Dần
+### 2. File: `/frontend/src/features/menu/components/MenuRenderer.tsx`
 
-2. **ProductSelector** - Chọn sản phẩm chi tiết
-   - ❌ Xóa: Input tìm kiếm riêng + Select
-   - ✅ Dùng: Combobox với tìm kiếm tích hợp
-   - Loading state hiển thị Loader2 trong border
-   - Fix: Dùng `product.name` thay vì `product.name || product.nameEn`
+**getMenuHref - Đọc slug từ customData:**
+```typescript
+case 'PRODUCT_DETAIL': {
+  // Ưu tiên slug từ customData, fallback về ID
+  const productSlug = item.customData?.productSlug;
+  if (productSlug) {
+    return `/san-pham/${productSlug}`;     // ← Dùng slug
+  }
+  return item.productId ? `/san-pham/${item.productId}` : '#';
+}
 
-3. **BlogListConditions** - Sắp xếp bài viết
-   - Đổi từ Select → Combobox
-   - Options: Mới Nhất, Cũ Nhất, Xem Nhiều, Nổi Bật
+case 'BLOG_DETAIL': {
+  const blogPostSlug = item.customData?.blogPostSlug;
+  if (blogPostSlug) {
+    return `/bai-viet/${blogPostSlug}`;    // ← Dùng slug
+  }
+  return item.blogPostId ? `/bai-viet/${item.blogPostId}` : '#';
+}
+```
 
-4. **BlogSelector** - Chọn bài viết chi tiết
-   - ❌ Xóa: Input tìm kiếm riêng + Select
-   - ✅ Dùng: Combobox với tìm kiếm tích hợp
+### 3. File: `/frontend/src/features/menu/types/menu.types.ts`
 
-5. **CategorySelector** - Danh mục sản phẩm
-   - Đổi từ Select → Combobox
-   - Loading state với Loader2
+**Thêm fields:**
+```typescript
+export interface MenuItem {
+  // ... existing fields
+  
+  // Metadata
+  metadata?: any;
+  customData?: any;  // ← Thêm customData
+  createdAt: string;
+  updatedAt: string;
+}
+```
 
-6. **BlogCategorySelector** - Danh mục bài viết
-   - Đổi từ Select → Combobox
-   - Loading state với Loader2
-
-### File: `/frontend/src/graphql/menu.queries.ts`
+### 4. File: `/frontend/src/graphql/menu.queries.ts`
 
 **Fix GraphQL Query:**
-- ❌ Lỗi: `products(search: $search, limit: $limit)` - Unknown arguments
-- ✅ Fix: `products(input: { filters: { search: $search }, limit: $limit })`
-- ❌ Lỗi: Query field `nameEn` không tồn tại
-- ✅ Fix: Xóa field `nameEn`, chỉ dùng `name`
+```graphql
+# ❌ Lỗi: products(search: $search, limit: $limit)
+# ✅ Fix: products(input: { filters: { search: $search }, limit: $limit })
+
+query GetProductsForMenu($search: String, $limit: Int) {
+  products(input: { filters: { search: $search }, limit: $limit }) {
+    items {
+      id
+      name      # ← Xóa nameEn
+      slug      # ← Có slug để lưu vào customData
+    }
+  }
+}
+```
 
 ## Cải Tiến UX
 
 ### Trước:
 - Tìm kiếm và chọn là 2 bước riêng biệt
-- Phải gõ → Enter → Chọn từ dropdown
-- GraphQL error khi query products
+- Menu chi tiết sản phẩm/bài viết → 404 Error
+- Dùng ID trong URL thay vì slug
 
 ### Sau:
 - Tìm kiếm và chọn hợp nhất trong 1 Combobox
-- Gõ và chọn ngay lập tức
-- Mobile-friendly với touch support
-- Keyboard navigation tốt hơn
-- GraphQL query hoạt động đúng theo backend schema
+- Menu chi tiết hoạt động đúng với slug
+- URL thân thiện SEO: `/san-pham/ao-thun-nam` thay vì `/product/uuid`
+- Fallback về ID nếu không có slug (backward compatible)
 
 ## Bug Đã Fix
 
-### GraphQL Execution Errors:
+### 1. GraphQL Execution Errors:
 ```
 Unknown argument "search" on field "Query.products"
 Unknown argument "limit" on field "Query.products"
 Cannot query field "nameEn" on type "ProductType"
 ```
+**Fix:** Dùng `input: { filters: { search }, limit }` và xóa `nameEn`
 
-**Nguyên nhân:**
-- Backend schema dùng `input: GetProductsInput` với nested `filters.search`
-- ProductType không có field `nameEn`, chỉ có `name`
+### 2. Menu Chi Tiết 404 Error:
+```
+Menu link: /product/abc-123-uuid-456 → 404
+Frontend route: /san-pham/[slug]
+```
+**Fix:** Lưu slug vào customData, MenuRenderer đọc slug thay vì ID
 
-**Giải pháp:**
-- Cập nhật query dùng đúng structure: `input: { filters: { search }, limit }`
-- Xóa field `nameEn` khỏi query
-- Cập nhật component dùng `product.name` thay vì fallback `nameEn`
+## Luồng Hoạt Động
+
+### Tạo Menu Chi Tiết Sản Phẩm:
+1. User chọn Link Type = "Chi Tiết Sản Phẩm"
+2. DynamicMenuLinkSelector hiển thị ProductSelector (Combobox)
+3. User search và chọn sản phẩm "Áo Thun Nam"
+4. ProductSelector lưu:
+   - `productId`: "abc-123-uuid"
+   - `customData.productSlug`: "ao-thun-nam"
+   - `customData.productName`: "Áo Thun Nam"
+5. Menu được lưu vào database
+
+### Render Menu Trên Website:
+1. MenuRenderer nhận menu item
+2. `getMenuHref()` kiểm tra `linkType === 'PRODUCT_DETAIL'`
+3. Đọc `item.customData?.productSlug` → "ao-thun-nam"
+4. Return href: `/san-pham/ao-thun-nam` ✅
+5. User click → Navigate đúng route → Hiển thị sản phẩm
 
 ## Tuân Thủ Rules
 
@@ -91,8 +178,9 @@ Cannot query field "nameEn" on type "ProductType"
 ## Kết Quả
 - ✅ 6 components cập nhật thành công
 - ✅ GraphQL query fix đúng backend schema
+- ✅ Menu chi tiết sản phẩm/bài viết hoạt động đúng
+- ✅ URL thân thiện SEO với slug
 - ✅ Không có lỗi TypeScript
 - ✅ Không có lỗi GraphQL execution
 - ✅ UX tốt hơn với Combobox có tìm kiếm tích hợp
-- ✅ Loading states với Loader2 animation
-- ✅ Placeholder và empty message tiếng Việt
+- ✅ Backward compatible (fallback về ID nếu không có slug)
