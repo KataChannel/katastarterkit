@@ -4,8 +4,17 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { GET_PRODUCT_BY_SLUG, ADD_TO_CART, GET_CART } from '@/graphql/ecommerce.queries';
+import { 
+  GET_PRODUCT_BY_SLUG, 
+  ADD_TO_CART, 
+  GET_CART,
+  ADD_TO_WISHLIST,
+  REMOVE_FROM_WISHLIST,
+} from '@/graphql/ecommerce.queries';
 import { ProductImage } from '@/components/ui/product-image';
+import { ProductReviews } from '@/components/ecommerce/ProductReviews';
+import { QuantitySelector } from '@/components/ecommerce/QuantitySelector';
+import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 import {
   ShoppingCart,
   Heart,
@@ -19,17 +28,19 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params?.slug as string;
+  const { toast } = useToast();
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+  const [isInWishlist, setIsInWishlist] = useState(false);
 
   // Fetch product
   const { data, loading, error } = useQuery(GET_PRODUCT_BY_SLUG, {
@@ -42,13 +53,66 @@ export default function ProductDetailPage() {
     refetchQueries: [{ query: GET_CART }],
     onCompleted: (data) => {
       if (data.addToCart.success) {
-        toast.success('Đã thêm vào giỏ hàng!');
+        toast({
+          title: 'Thành công',
+          description: 'Đã thêm vào giỏ hàng!',
+          type: 'success',
+        });
       } else {
-        toast.error(data.addToCart.message || 'Có lỗi xảy ra');
+        toast({
+          title: 'Lỗi',
+          description: data.addToCart.message || 'Có lỗi xảy ra',
+          type: 'error',
+          variant: 'destructive',
+        });
       }
     },
     onError: (error) => {
-      toast.error('Không thể thêm vào giỏ hàng: ' + error.message);
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể thêm vào giỏ hàng: ' + error.message,
+        type: 'error',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Wishlist mutations
+  const [addToWishlist, { loading: addingToWishlist }] = useMutation(ADD_TO_WISHLIST, {
+    onCompleted: () => {
+      setIsInWishlist(true);
+      toast({
+        title: 'Đã thêm vào yêu thích',
+        description: 'Sản phẩm đã được lưu vào danh sách yêu thích',
+        type: 'success',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Lỗi',
+        description: error.message,
+        type: 'error',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const [removeFromWishlist, { loading: removingFromWishlist }] = useMutation(REMOVE_FROM_WISHLIST, {
+    onCompleted: () => {
+      setIsInWishlist(false);
+      toast({
+        title: 'Đã xóa khỏi yêu thích',
+        description: 'Sản phẩm đã được xóa khỏi danh sách yêu thích',
+        type: 'success',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Lỗi',
+        description: error.message,
+        type: 'error',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -109,12 +173,22 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = async () => {
     if (effectiveStock === 0) {
-      toast.error('Sản phẩm đã hết hàng');
+      toast({
+        title: 'Không thể thêm',
+        description: 'Sản phẩm đã hết hàng',
+        type: 'error',
+        variant: 'destructive',
+      });
       return;
     }
 
     if (quantity > effectiveStock) {
-      toast.error(`Chỉ còn ${effectiveStock} sản phẩm`);
+      toast({
+        title: 'Số lượng không hợp lệ',
+        description: `Chỉ còn ${effectiveStock} sản phẩm`,
+        type: 'error',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -128,6 +202,22 @@ export default function ProductDetailPage() {
           },
         },
       });
+    } catch (err) {
+      // Error handled by onError
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    try {
+      if (isInWishlist) {
+        await removeFromWishlist({
+          variables: { productId: product.id },
+        });
+      } else {
+        await addToWishlist({
+          variables: { productId: product.id },
+        });
+      }
     } catch (err) {
       // Error handled by onError
     }
@@ -399,11 +489,22 @@ export default function ProductDetailPage() {
                 <ShoppingCart className="h-5 w-5" />
                 {adding ? 'Đang thêm...' : 'Thêm vào giỏ'}
               </button>
-              <button className="px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition font-medium">
+              <button 
+                onClick={() => router.push('/thanh-toan')}
+                className="px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition font-medium"
+              >
                 Mua ngay
               </button>
-              <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                <Heart className="h-6 w-6 text-gray-600" />
+              <button 
+                onClick={handleToggleWishlist}
+                disabled={addingToWishlist || removingFromWishlist}
+                className={`p-3 border rounded-lg transition ${
+                  isInWishlist 
+                    ? 'border-red-500 bg-red-50' 
+                    : 'border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <Heart className={`h-6 w-6 ${isInWishlist ? 'text-red-500 fill-red-500' : 'text-gray-600'}`} />
               </button>
             </div>
 
@@ -525,17 +626,7 @@ export default function ProductDetailPage() {
             )}
             {activeTab === 'reviews' && (
               <div>
-                <p className="text-gray-500">Chức năng đánh giá đang được phát triển</p>
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-gray-700">
-                    <strong>Thống kê:</strong>
-                  </p>
-                  <ul className="mt-2 space-y-1 text-sm text-gray-600">
-                    <li>• Lượt xem: {product.viewCount || 0}</li>
-                    <li>• Đã bán: {product.soldCount || 0}</li>
-                    <li>• Còn lại: {product.stock}</li>
-                  </ul>
-                </div>
+                <ProductReviews productId={product.id} canReview={true} />
               </div>
             )}
           </div>

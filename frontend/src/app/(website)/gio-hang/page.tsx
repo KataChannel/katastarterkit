@@ -16,9 +16,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { QuantitySelector } from '@/components/ecommerce/QuantitySelector';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 import { useToast } from '@/hooks/use-toast';
+import { getRemainingForFreeShipping, isFreeShippingEligible } from '@/lib/ecommerce-utils';
 import { useState } from 'react';
 
 export default function CartPage() {
@@ -302,6 +305,36 @@ export default function CartPage() {
                 </h2>
 
                 <Separator />
+
+                {/* Free Shipping Progress */}
+                {!isFreeShippingEligible(cart?.total || 0) && (
+                  <Alert className="border-green-200 bg-green-50">
+                    <AlertDescription>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-medium text-green-700">
+                            Mua thêm để được miễn phí vận chuyển!
+                          </span>
+                        </div>
+                        <Progress 
+                          value={((cart?.total || 0) / 500000) * 100} 
+                          className="h-2"
+                        />
+                        <p className="text-xs text-green-600">
+                          Còn <PriceDisplay price={getRemainingForFreeShipping(cart?.total || 0)} size="sm" showCurrency={false} /> ₫ nữa để được miễn phí ship
+                        </p>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {isFreeShippingEligible(cart?.total || 0) && (
+                  <Alert className="border-green-200 bg-green-50">
+                    <AlertDescription className="text-sm text-green-700 font-medium">
+                      🎉 Bạn đã được miễn phí vận chuyển!
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">

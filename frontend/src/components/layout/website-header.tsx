@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 // ✅ MIGRATED: Import Dynamic GraphQL
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
 import { useQuery } from '@apollo/client';
@@ -28,7 +29,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Phone, Search, ShoppingCart, User, LogIn } from 'lucide-react';
+import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import React from 'react';
@@ -65,6 +66,7 @@ ListItem.displayName = "ListItem";
 
 export function WebsiteHeader() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { itemCount: cartItemCount } = useCart();
   const router = useRouter();
 
   // ✅ Load Header Settings
@@ -348,6 +350,48 @@ export function WebsiteHeader() {
           )}
         </div>                 
          <div className="flex items-center space-x-3 text-white">
+                  {/* Wishlist */}
+                  {isAuthenticated && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
+                            onClick={() => router.push('/yeu-thich')}
+                          >
+                            <Heart className="w-5 h-5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Sản phẩm yêu thích</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+
+                  {/* Orders */}
+                  {isAuthenticated && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
+                            onClick={() => router.push('/don-hang')}
+                          >
+                            <Package className="w-5 h-5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Đơn hàng của tôi</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+
                   {/* User Profile */}
                   {headerSettings['header.show_user_menu'] && (
                     <TooltipProvider>
@@ -387,19 +431,31 @@ export function WebsiteHeader() {
                   
                   {/* Shopping Cart */}
                   {headerSettings['header.show_cart'] && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                    >
-                      <ShoppingCart className="w-5 h-5" />
-                      <Badge 
-                        variant="destructive" 
-                        className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                      >
-                        0
-                      </Badge>
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
+                            onClick={() => router.push('/gio-hang')}
+                          >
+                            <ShoppingCart className="w-5 h-5" />
+                            {cartItemCount > 0 && (
+                              <Badge 
+                                variant="destructive" 
+                                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                              >
+                                {cartItemCount}
+                              </Badge>
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Giỏ hàng {cartItemCount > 0 && `(${cartItemCount})`}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
           </div>    
         </div>

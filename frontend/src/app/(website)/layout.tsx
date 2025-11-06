@@ -2,6 +2,7 @@
 
 import { WebsiteFooter } from '@/components/layout/website-footer';
 import { WebsiteHeader } from '@/components/layout/website-header';
+import { CartProvider } from '@/contexts/CartContext';
 import { useWebsiteSetting } from '@/hooks/useWebsiteSettings';
 import { ReactNode } from 'react';
 
@@ -19,12 +20,14 @@ export default function websiteLayout({ children }: websiteLayoutProps) {
   const showFooter = footerLoading ? true : (footerEnabled !== false);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {showHeader && <WebsiteHeader />}
-      <main className="flex-1">
-        {children}
-      </main>
-      {showFooter && <WebsiteFooter />}
-    </div>
+    <CartProvider>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        {showHeader && <WebsiteHeader />}
+        <main className="flex-1">
+          {children}
+        </main>
+        {showFooter && <WebsiteFooter />}
+      </div>
+    </CartProvider>
   );
 }

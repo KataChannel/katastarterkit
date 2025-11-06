@@ -6,10 +6,13 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { GET_CART, CREATE_ORDER } from '@/graphql/ecommerce.queries';
 import { CreditCard, Truck, MapPin, Phone, Mail, User, ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
+import { PaymentMethodBadge } from '@/components/ecommerce/PaymentMethodBadge';
+import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const { data: cartData, loading: cartLoading } = useQuery(GET_CART);
 
   const [formData, setFormData] = useState({
@@ -35,14 +38,32 @@ export default function CheckoutPage() {
   const [createOrder, { loading: creating }] = useMutation(CREATE_ORDER, {
     onCompleted: (data) => {
       if (data.createOrder.success) {
-        toast.success('Đặt hàng thành công!');
-        router.push(`/orders/${data.createOrder.order.id}`);
+        const order = data.createOrder.order;
+        toast({
+          title: 'Thành công',
+          description: 'Đặt hàng thành công!',
+          type: 'success',
+        });
+        // Redirect to success page with order info
+        router.push(
+          `/thanh-toan/thanh-cong?orderNumber=${order.orderNumber}&totalAmount=${order.total}&paymentMethod=${formData.paymentMethod}`
+        );
       } else {
-        toast.error(data.createOrder.message || 'Đặt hàng thất bại');
+        toast({
+          title: 'Lỗi',
+          description: data.createOrder.message || 'Đặt hàng thất bại',
+          type: 'error',
+          variant: 'destructive',
+        });
       }
     },
     onError: (error) => {
-      toast.error('Đặt hàng thất bại: ' + error.message);
+      toast({
+        title: 'Lỗi',
+        description: 'Đặt hàng thất bại: ' + error.message,
+        type: 'error',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -76,12 +97,22 @@ export default function CheckoutPage() {
 
     // Validation
     if (!formData.fullName || !formData.phone || !formData.address) {
-      toast.error('Vui lòng điền đầy đủ thông tin giao hàng');
+      toast({
+        title: 'Thiếu thông tin',
+        description: 'Vui lòng điền đầy đủ thông tin giao hàng',
+        type: 'error',
+        variant: 'destructive',
+      });
       return;
     }
 
     if (items.length === 0) {
-      toast.error('Giỏ hàng trống');
+      toast({
+        title: 'Giỏ hàng trống',
+        description: 'Vui lòng thêm sản phẩm vào giỏ hàng',
+        type: 'error',
+        variant: 'destructive',
+      });
       return;
     }
 

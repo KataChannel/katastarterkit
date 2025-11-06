@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Heart, ShoppingCart, Trash2, Package } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { EcommerceNavigation } from '@/components/ecommerce/EcommerceNavigation';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -142,19 +143,27 @@ function WishlistContent() {
   const items = data?.wishlist?.items || [];
 
   return (
-    <div className="container max-w-6xl mx-auto px-4 py-6 md:py-8">
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <Heart className="h-8 w-8 text-red-500 fill-red-500" />
-          Sản phẩm yêu thích
-        </h1>
-        <p className="text-sm text-gray-600 mt-1">
-          {items.length > 0
-            ? `Bạn có ${items.length} sản phẩm trong danh sách yêu thích`
-            : 'Danh sách yêu thích của bạn đang trống'}
-        </p>
-      </div>
+    <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8">
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Navigation Sidebar */}
+        <aside className="md:w-64 flex-shrink-0">
+          <EcommerceNavigation />
+        </aside>
+
+        {/* Main Content */}
+        <div className="flex-1">
+          {/* Page Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <Heart className="h-8 w-8 text-red-500 fill-red-500" />
+              Sản phẩm yêu thích
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
+              {items.length > 0
+                ? `Bạn có ${items.length} sản phẩm trong danh sách yêu thích`
+                : 'Danh sách yêu thích của bạn đang trống'}
+            </p>
+          </div>
 
       {/* Loading State */}
       {loading && !data ? (
@@ -289,6 +298,8 @@ function WishlistContent() {
           </Button>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }

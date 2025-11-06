@@ -10,6 +10,7 @@ import { Package, Search, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { EcommerceNavigation } from '@/components/ecommerce/EcommerceNavigation';
 import { OrderStatusBadge, type OrderStatus } from '@/components/ecommerce/OrderStatusBadge';
 import { PaymentMethodBadge, type PaymentMethod } from '@/components/ecommerce/PaymentMethodBadge';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
@@ -130,16 +131,24 @@ function OrderListContent() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-6 md:py-8">
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-          Đơn hàng của tôi
-        </h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Quản lý và theo dõi đơn hàng của bạn
-        </p>
-      </div>
+    <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8">
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Navigation Sidebar */}
+        <aside className="md:w-64 flex-shrink-0">
+          <EcommerceNavigation />
+        </aside>
+
+        {/* Main Content */}
+        <div className="flex-1">
+          {/* Page Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+              Đơn hàng của tôi
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Quản lý và theo dõi đơn hàng của bạn
+            </p>
+          </div>
 
       {/* Filters */}
       <Card className="mb-6">
@@ -315,6 +324,8 @@ function OrderListContent() {
           ))}
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }
