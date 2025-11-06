@@ -1,0 +1,343 @@
+'use client';
+
+import { Suspense } from 'react';
+import { useQuery } from '@apollo/client';
+import { gql } from '@apollo/client';
+import Link from 'next/link';
+import { formatDistanceToNow } from 'date-fns';
+import { vi } from 'date-fns/locale';
+import { Package, Search, Filter } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { OrderStatusBadge, type OrderStatus } from '@/components/ecommerce/OrderStatusBadge';
+import { PaymentMethodBadge, type PaymentMethod } from '@/components/ecommerce/PaymentMethodBadge';
+import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useState } from 'react';
+
+const GET_USER_ORDERS = gql`
+  query GetUserOrders($status: OrderStatus, $limit: Int, $offset: Int) {
+    orders(status: $status, limit: $limit, offset: $offset) {
+      id
+      orderNumber
+      status
+      totalAmount
+      paymentMethod
+      paymentStatus
+      createdAt
+      items {
+        id
+        quantity
+        price
+        product {
+          id
+          name
+          slug
+          thumbnailUrl
+        }
+      }
+      shippingAddress {
+        fullName
+        phone
+        address
+        ward
+        district
+        province
+      }
+    }
+  }
+`;
+
+interface Order {
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  totalAmount: number;
+  paymentMethod: PaymentMethod;
+  paymentStatus: string;
+  createdAt: string;
+  items: Array<{
+    id: string;
+    quantity: number;
+    price: number;
+    product: {
+      id: string;
+      name: string;
+      slug: string;
+      thumbnailUrl?: string;
+    };
+  }>;
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    address: string;
+    ward: string;
+    district: string;
+    province: string;
+  };
+}
+
+function OrderListContent() {
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { data, loading, error, fetchMore } = useQuery<{ orders: Order[] }>(
+    GET_USER_ORDERS,
+    {
+      variables: {
+        status: statusFilter === 'ALL' ? undefined : statusFilter,
+        limit: 10,
+        offset: 0,
+      },
+      fetchPolicy: 'cache-and-network',
+    }
+  );
+
+  const orders = data?.orders || [];
+
+  // Client-side search filter
+  const filteredOrders = orders.filter((order) => {
+    if (!searchQuery) return true;
+    const search = searchQuery.toLowerCase();
+    return (
+      order.orderNumber.toLowerCase().includes(search) ||
+      order.items.some((item) =>
+        item.product.name.toLowerCase().includes(search)
+      )
+    );
+  });
+
+  if (error) {
+    return (
+      <div className="container max-w-4xl mx-auto px-4 py-8">
+        <Card className="border-red-200">
+          <CardContent className="pt-6">
+            <p className="text-red-600 text-center">
+              Không thể tải danh sách đơn hàng. Vui lòng thử lại sau.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container max-w-4xl mx-auto px-4 py-6 md:py-8">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+          Đơn hàng của tôi
+        </h1>
+        <p className="text-sm text-gray-600 mt-1">
+          Quản lý và theo dõi đơn hàng của bạn
+        </p>
+      </div>
+
+      {/* Filters */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Tìm theo mã đơn hoặc tên sản phẩm..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Trạng thái" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Tất cả</SelectItem>
+                <SelectItem value="PENDING">Chờ xác nhận</SelectItem>
+                <SelectItem value="CONFIRMED">Đã xác nhận</SelectItem>
+                <SelectItem value="PROCESSING">Đang xử lý</SelectItem>
+                <SelectItem value="SHIPPING">Đang giao</SelectItem>
+                <SelectItem value="DELIVERED">Đã giao</SelectItem>
+                <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
+                <SelectItem value="CANCELLED">Đã hủy</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Orders List */}
+      {loading && !data ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="pt-6">
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : filteredOrders.length === 0 ? (
+        <Card>
+          <CardContent className="pt-12 pb-12 text-center">
+            <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Chưa có đơn hàng
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {searchQuery || statusFilter !== 'ALL'
+                ? 'Không tìm thấy đơn hàng phù hợp'
+                : 'Bạn chưa có đơn hàng nào'}
+            </p>
+            <Button asChild>
+              <Link href="/san-pham">Mua sắm ngay</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {filteredOrders.map((order) => (
+            <Card key={order.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <CardTitle className="text-base">
+                      #{order.orderNumber}
+                    </CardTitle>
+                    <OrderStatusBadge status={order.status} size="sm" />
+                  </div>
+                  <time className="text-sm text-gray-500">
+                    {formatDistanceToNow(new Date(order.createdAt), {
+                      addSuffix: true,
+                      locale: vi,
+                    })}
+                  </time>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                {/* Order Items */}
+                <div className="space-y-2">
+                  {order.items.slice(0, 2).map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex gap-3 p-2 rounded-lg hover:bg-gray-50"
+                    >
+                      {/* Product Image */}
+                      <div className="relative w-16 h-16 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
+                        {item.product.thumbnailUrl ? (
+                          <img
+                            src={item.product.thumbnailUrl}
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Package className="w-8 h-8 text-gray-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                        )}
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {item.product.name}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-gray-500">
+                            SL: {item.quantity}
+                          </span>
+                          <span className="text-xs text-gray-300">•</span>
+                          <PriceDisplay
+                            price={item.price}
+                            size="sm"
+                            showCurrency
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {order.items.length > 2 && (
+                    <p className="text-sm text-gray-500 pl-2">
+                      +{order.items.length - 2} sản phẩm khác
+                    </p>
+                  )}
+                </div>
+
+                {/* Order Summary */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <PaymentMethodBadge
+                      method={order.paymentMethod}
+                      size="sm"
+                    />
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        order.paymentStatus === 'PAID'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                      }`}
+                    >
+                      {order.paymentStatus === 'PAID'
+                        ? 'Đã thanh toán'
+                        : 'Chưa thanh toán'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between sm:justify-end gap-4">
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500">Tổng tiền</p>
+                      <PriceDisplay
+                        price={order.totalAmount}
+                        size="md"
+                        className="font-bold"
+                      />
+                    </div>
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={`/don-hang/${order.orderNumber}`}>
+                        Chi tiết
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function OrderListPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container max-w-4xl mx-auto px-4 py-8">
+          <Skeleton className="h-8 w-48 mb-6" />
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="pt-6">
+                  <Skeleton className="h-20 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <OrderListContent />
+    </Suspense>
+  );
+}

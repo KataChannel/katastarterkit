@@ -462,41 +462,242 @@ export const CREATE_REVIEW = gql`
 // ============================================================================
 // WISHLIST QUERIES & MUTATIONS
 // ============================================================================
-// TODO: Implement Wishlist resolver in backend
 
-// export const GET_WISHLIST = gql`
-//   query GetWishlist {
-//     wishlist {
-//       items {
-//         id
-//         product {
-//           id
-//           name
-//           slug
-//           finalPrice
-//           featuredImage
-//           stock
-//         }
-//         createdAt
-//       }
-//     }
-//   }
-// `;
+export const GET_WISHLIST = gql`
+  query GetWishlist {
+    wishlist {
+      id
+      items {
+        id
+        product {
+          id
+          name
+          slug
+          price
+          salePrice
+          thumbnailUrl
+          stock
+          inStock
+        }
+        addedAt
+      }
+    }
+  }
+`;
 
-// export const ADD_TO_WISHLIST = gql`
-//   mutation AddToWishlist($productId: ID!) {
-//     addToWishlist(productId: $productId) {
-//       success
-//       message
-//     }
-//   }
-// `;
+export const ADD_TO_WISHLIST = gql`
+  mutation AddToWishlist($productId: ID!) {
+    addToWishlist(productId: $productId) {
+      success
+      message
+    }
+  }
+`;
 
-// export const REMOVE_FROM_WISHLIST = gql`
-//   mutation RemoveFromWishlist($productId: ID!) {
-//     removeFromWishlist(productId: $productId) {
-//       success
-//       message
-//     }
-//   }
-// `;
+export const REMOVE_FROM_WISHLIST = gql`
+  mutation RemoveFromWishlist($productId: ID!) {
+    removeFromWishlist(productId: $productId) {
+      success
+      message
+    }
+  }
+`;
+
+// ============================================================================
+// ORDER TRACKING QUERIES
+// ============================================================================
+
+export const TRACK_ORDER = gql`
+  query TrackOrder($orderNumber: String!) {
+    trackOrder(orderNumber: $orderNumber) {
+      orderNumber
+      status
+      estimatedDelivery
+      currentLocation
+      trackingEvents {
+        id
+        type
+        status
+        description
+        location
+        timestamp
+      }
+      shippingProvider
+      trackingNumber
+    }
+  }
+`;
+
+export const GET_USER_ORDERS = gql`
+  query GetUserOrders($status: OrderStatus, $limit: Int, $offset: Int) {
+    orders(status: $status, limit: $limit, offset: $offset) {
+      id
+      orderNumber
+      status
+      totalAmount
+      paymentMethod
+      paymentStatus
+      createdAt
+      items {
+        id
+        quantity
+        price
+        product {
+          id
+          name
+          slug
+          thumbnailUrl
+        }
+      }
+      shippingAddress {
+        fullName
+        phone
+        address
+        ward
+        district
+        province
+      }
+    }
+  }
+`;
+
+export const GET_ORDER_DETAIL = gql`
+  query GetOrderDetail($orderNumber: String!) {
+    order(orderNumber: $orderNumber) {
+      id
+      orderNumber
+      status
+      totalAmount
+      subtotal
+      shippingFee
+      discount
+      paymentMethod
+      paymentStatus
+      notes
+      createdAt
+      updatedAt
+      items {
+        id
+        quantity
+        price
+        subtotal
+        product {
+          id
+          name
+          slug
+          thumbnailUrl
+          sku
+        }
+        variant {
+          id
+          name
+        }
+      }
+      shippingAddress {
+        fullName
+        phone
+        email
+        address
+        ward
+        district
+        province
+        postalCode
+      }
+      trackingEvents {
+        id
+        type
+        status
+        description
+        location
+        timestamp
+      }
+    }
+  }
+`;
+
+// ============================================================================
+// PAYMENT QUERIES & MUTATIONS
+// ============================================================================
+
+export const CREATE_PAYMENT = gql`
+  mutation CreatePayment($input: CreatePaymentInput!) {
+    createPayment(input: $input) {
+      success
+      message
+      payment {
+        id
+        orderId
+        method
+        status
+        amount
+        transactionId
+        gatewayResponse
+      }
+      paymentUrl
+    }
+  }
+`;
+
+export const VERIFY_PAYMENT = gql`
+  query VerifyPayment($orderId: ID!, $transactionId: String!) {
+    verifyPayment(orderId: $orderId, transactionId: $transactionId) {
+      success
+      message
+      payment {
+        id
+        status
+        paidAt
+      }
+    }
+  }
+`;
+
+// ============================================================================
+// CHECKOUT MUTATIONS
+// ============================================================================
+
+export const VALIDATE_CHECKOUT = gql`
+  mutation ValidateCheckout($input: ValidateCheckoutInput!) {
+    validateCheckout(input: $input) {
+      valid
+      errors {
+        field
+        message
+      }
+      warnings {
+        field
+        message
+      }
+      itemsAvailability {
+        productId
+        available
+        requestedQuantity
+        availableQuantity
+      }
+    }
+  }
+`;
+
+export const APPLY_COUPON = gql`
+  mutation ApplyCoupon($code: String!) {
+    applyCoupon(code: $code) {
+      success
+      message
+      discount {
+        code
+        type
+        value
+        discountAmount
+      }
+    }
+  }
+`;
+
+export const REMOVE_COUPON = gql`
+  mutation RemoveCoupon {
+    removeCoupon {
+      success
+      message
+    }
+  }
+`;
