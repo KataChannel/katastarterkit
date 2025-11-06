@@ -2,13 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@apollo/client';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,7 +12,7 @@ import {
   GET_BLOG_CATEGORIES,
   GET_CATEGORIES,
 } from '@/graphql/menu.queries';
-import { Loader2, Search } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface DynamicMenuLinkSelectorProps {
   linkType: string;
@@ -77,21 +71,20 @@ function ProductListConditions({ value, onChange }: { value?: any; onChange: (v:
       <CardContent className="pt-6 space-y-4">
         <div className="space-y-2">
           <Label>Sắp Xếp</Label>
-          <Select
+          <Combobox
             value={conditions.sort || 'latest'}
-            onValueChange={(sort) => onChange({ ...conditions, sort })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="latest">Mới Nhất</SelectItem>
-              <SelectItem value="bestseller">Bán Chạy</SelectItem>
-              <SelectItem value="popular">Xem Nhiều</SelectItem>
-              <SelectItem value="price_asc">Giá Tăng Dần</SelectItem>
-              <SelectItem value="price_desc">Giá Giảm Dần</SelectItem>
-            </SelectContent>
-          </Select>
+            onChange={(sort) => onChange({ ...conditions, sort })}
+            options={[
+              { value: 'latest', label: 'Mới Nhất' },
+              { value: 'bestseller', label: 'Bán Chạy' },
+              { value: 'popular', label: 'Xem Nhiều' },
+              { value: 'price_asc', label: 'Giá Tăng Dần' },
+              { value: 'price_desc', label: 'Giá Giảm Dần' },
+            ]}
+            placeholder="Chọn cách sắp xếp"
+            searchPlaceholder="Tìm..."
+            emptyMessage="Không tìm thấy."
+          />
         </div>
 
         <div className="space-y-2">
@@ -152,38 +145,24 @@ function ProductSelector({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Tìm Kiếm Sản Phẩm</Label>
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Nhập tên sản phẩm..."
-            className="pl-10"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
         <Label>Chọn Sản Phẩm</Label>
-        <Select value={value} onValueChange={onChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="-- Chọn sản phẩm --" />
-          </SelectTrigger>
-          <SelectContent>
-            {loading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-4 w-4 animate-spin" />
-              </div>
-            ) : (
-              products.map((product: any) => (
-                <SelectItem key={product.id} value={product.id}>
-                  {product.name || product.nameEn}
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
+        {loading ? (
+          <div className="flex items-center justify-center py-8 border rounded-md">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <Combobox
+            value={value || ''}
+            onChange={onChange}
+            options={products.map((product: any) => ({
+              value: product.id,
+              label: product.name,
+            }))}
+            placeholder="Chọn sản phẩm"
+            searchPlaceholder="Tìm sản phẩm..."
+            emptyMessage="Không tìm thấy sản phẩm."
+          />
+        )}
       </div>
     </div>
   );
@@ -198,20 +177,19 @@ function BlogListConditions({ value, onChange }: { value?: any; onChange: (v: an
       <CardContent className="pt-6 space-y-4">
         <div className="space-y-2">
           <Label>Sắp Xếp</Label>
-          <Select
+          <Combobox
             value={conditions.sort || 'latest'}
-            onValueChange={(sort) => onChange({ ...conditions, sort })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="latest">Mới Nhất</SelectItem>
-              <SelectItem value="oldest">Cũ Nhất</SelectItem>
-              <SelectItem value="popular">Xem Nhiều</SelectItem>
-              <SelectItem value="featured">Nổi Bật</SelectItem>
-            </SelectContent>
-          </Select>
+            onChange={(sort) => onChange({ ...conditions, sort })}
+            options={[
+              { value: 'latest', label: 'Mới Nhất' },
+              { value: 'oldest', label: 'Cũ Nhất' },
+              { value: 'popular', label: 'Xem Nhiều' },
+              { value: 'featured', label: 'Nổi Bật' },
+            ]}
+            placeholder="Chọn cách sắp xếp"
+            searchPlaceholder="Tìm..."
+            emptyMessage="Không tìm thấy."
+          />
         </div>
 
         <div className="space-y-2">
@@ -261,38 +239,24 @@ function BlogSelector({
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Tìm Kiếm Bài Viết</Label>
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Nhập tiêu đề bài viết..."
-            className="pl-10"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
         <Label>Chọn Bài Viết</Label>
-        <Select value={value} onValueChange={onChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="-- Chọn bài viết --" />
-          </SelectTrigger>
-          <SelectContent>
-            {loading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-4 w-4 animate-spin" />
-              </div>
-            ) : (
-              blogs.map((blog: any) => (
-                <SelectItem key={blog.id} value={blog.id}>
-                  {blog.title}
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
+        {loading ? (
+          <div className="flex items-center justify-center py-8 border rounded-md">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <Combobox
+            value={value || ''}
+            onChange={onChange}
+            options={blogs.map((blog: any) => ({
+              value: blog.id,
+              label: blog.title,
+            }))}
+            placeholder="Chọn bài viết"
+            searchPlaceholder="Tìm bài viết..."
+            emptyMessage="Không tìm thấy bài viết."
+          />
+        )}
       </div>
     </div>
   );
@@ -306,24 +270,23 @@ function CategorySelector({ value, onChange }: { value?: string; onChange: (v: s
   return (
     <div className="space-y-2">
       <Label>Chọn Danh Mục Sản Phẩm</Label>
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger>
-          <SelectValue placeholder="-- Chọn danh mục --" />
-        </SelectTrigger>
-        <SelectContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-4 w-4 animate-spin" />
-            </div>
-          ) : (
-            categories.map((cat: any) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.name}
-              </SelectItem>
-            ))
-          )}
-        </SelectContent>
-      </Select>
+      {loading ? (
+        <div className="flex items-center justify-center py-8 border rounded-md">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <Combobox
+          value={value || ''}
+          onChange={onChange}
+          options={categories.map((cat: any) => ({
+            value: cat.id,
+            label: cat.name,
+          }))}
+          placeholder="Chọn danh mục sản phẩm"
+          searchPlaceholder="Tìm danh mục..."
+          emptyMessage="Không tìm thấy danh mục."
+        />
+      )}
     </div>
   );
 }
@@ -336,24 +299,23 @@ function BlogCategorySelector({ value, onChange }: { value?: string; onChange: (
   return (
     <div className="space-y-2">
       <Label>Chọn Danh Mục Bài Viết</Label>
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger>
-          <SelectValue placeholder="-- Chọn danh mục --" />
-        </SelectTrigger>
-        <SelectContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-4 w-4 animate-spin" />
-            </div>
-          ) : (
-            categories.map((cat: any) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.name}
-              </SelectItem>
-            ))
-          )}
-        </SelectContent>
-      </Select>
+      {loading ? (
+        <div className="flex items-center justify-center py-8 border rounded-md">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <Combobox
+          value={value || ''}
+          onChange={onChange}
+          options={categories.map((cat: any) => ({
+            value: cat.id,
+            label: cat.name,
+          }))}
+          placeholder="Chọn danh mục bài viết"
+          searchPlaceholder="Tìm danh mục..."
+          emptyMessage="Không tìm thấy danh mục."
+        />
+      )}
     </div>
   );
 }

@@ -557,11 +557,10 @@ export const DELETE_MENU_ADMIN = gql`
 // Helper queries for dynamic selectors
 export const GET_PRODUCTS_FOR_MENU = gql`
   query GetProductsForMenu($search: String, $limit: Int) {
-    products(search: $search, limit: $limit) {
+    products(input: { filters: { search: $search }, limit: $limit }) {
       items {
         id
         name
-        nameEn
         slug
       }
     }
