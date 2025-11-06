@@ -65,12 +65,16 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     }
   );
 
-  // Query 2: Menu Fallback (only if Page not found)
+  // Query 2: Menu Fallback (only if Page not found OR page is not PUBLISHED)
   const { data: menuData, loading: menuLoading, error: menuError } = useQuery(
     GET_MENU_BY_SLUG,
     {
       variables: { slug: slug || '' },
-      skip: slug === null || !!pageData?.getPageBySlug, // Skip if slug not ready or Page exists
+      // Skip menu query if:
+      // 1. Slug not ready yet, OR
+      // 2. Page exists AND is PUBLISHED (page takes priority)
+      // If page exists but is DRAFT/ARCHIVED, still check menu
+      skip: slug === null || (!!pageData?.getPageBySlug && pageData.getPageBySlug.status === PageStatus.PUBLISHED),
       errorPolicy: 'all'
     }
   );
@@ -135,17 +139,15 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     );
   }
 
-  // Priority 1: Page Builder exists → Render blocks
+  // Priority 1: Page Builder exists AND is PUBLISHED → Render blocks
+  // If page exists but is DRAFT/ARCHIVED, skip to Menu fallback
   if (pageData?.getPageBySlug) {
     const page = pageData.getPageBySlug;
     console.log('Fetched page data:', page);
     
-    // ✅ FIX: Don't show draft or archived pages on public website
-    // Only PUBLISHED pages should be visible to public
-    if (page.status !== PageStatus.PUBLISHED) {
-      console.warn(`Page "${page.slug}" has status "${page.status}" - not showing on public website`);
-      // Treat as if page doesn't exist, fall through to Menu check below
-    } else {
+    // ✅ Only PUBLISHED pages should be visible on public website
+    // DRAFT/ARCHIVED pages will fall through to Menu logic
+    if (page.status === PageStatus.PUBLISHED) {
       // Page is PUBLISHED - render it
       const seoTitle = page.seoTitle || page.title;
       const seoDescription = page.seoDescription || page.content;
@@ -217,6 +219,10 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           </>
         </>
       );
+    } else {
+      // Page exists but is DRAFT/ARCHIVED
+      // Fall through to check Menu configuration
+      console.log(`Page "${page.slug}" has status "${page.status}" - checking Menu configuration instead`);
     }
   }
 
