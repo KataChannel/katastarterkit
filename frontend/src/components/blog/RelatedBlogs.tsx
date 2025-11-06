@@ -23,7 +23,12 @@ interface RelatedBlogsData {
     slug: string;
     shortDescription: string;
     thumbnailUrl: string;
-    author: string;
+    author: {
+      id: string;
+      username: string;
+      firstName: string;
+      lastName: string;
+    };
     publishedAt: string;
     viewCount: number;
     category: {

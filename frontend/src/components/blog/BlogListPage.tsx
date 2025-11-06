@@ -20,7 +20,12 @@ interface BlogsQueryData {
       slug: string;
       shortDescription: string;
       excerpt: string;
-      author: string;
+      author: {
+        id: string;
+        username: string;
+        firstName: string;
+        lastName: string;
+      };
       thumbnailUrl: string;
       viewCount: number;
       publishedAt: string;
