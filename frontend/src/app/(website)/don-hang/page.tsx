@@ -23,39 +23,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useState } from 'react';
+import { GET_USER_ORDERS } from '@/graphql/ecommerce.queries';
 
-const GET_USER_ORDERS = gql`
-  query GetUserOrders($status: OrderStatus, $limit: Int, $offset: Int) {
-    orders(status: $status, limit: $limit, offset: $offset) {
-      id
-      orderNumber
-      status
-      totalAmount
-      paymentMethod
-      paymentStatus
-      createdAt
-      items {
-        id
-        quantity
-        price
-        product {
-          id
-          name
-          slug
-          thumbnailUrl
-        }
-      }
-      shippingAddress {
-        fullName
-        phone
-        address
-        ward
-        district
-        province
-      }
-    }
-  }
-`;
+// Removed duplicate query - using centralized version from ecommerce.queries.ts
 
 interface Order {
   id: string;
@@ -87,33 +57,42 @@ interface Order {
 }
 
 function OrderListContent() {
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
-  const { data, loading, error, fetchMore } = useQuery<{ orders: Order[] }>(
+  const { data, loading, error } = useQuery(
     GET_USER_ORDERS,
     {
       variables: {
-        status: statusFilter === 'ALL' ? undefined : statusFilter,
-        limit: 10,
-        offset: 0,
+        skip: 0,
+        take: 50,
       },
       fetchPolicy: 'cache-and-network',
     }
   );
 
-  const orders = data?.orders || [];
+  const orders = data?.getMyOrders?.orders || [];
+  const total = data?.getMyOrders?.total || 0;
 
-  // Client-side search filter
-  const filteredOrders = orders.filter((order) => {
-    if (!searchQuery) return true;
-    const search = searchQuery.toLowerCase();
-    return (
-      order.orderNumber.toLowerCase().includes(search) ||
-      order.items.some((item) =>
-        item.product.name.toLowerCase().includes(search)
-      )
-    );
+  // Client-side filters
+  const filteredOrders = orders.filter((order: any) => {
+    // Search filter
+    if (searchQuery) {
+      const search = searchQuery.toLowerCase();
+      const matchesSearch = 
+        order.orderNumber.toLowerCase().includes(search) ||
+        order.items?.some((item: any) =>
+          item.productName?.toLowerCase().includes(search)
+        );
+      if (!matchesSearch) return false;
+    }
+
+    // Status filter
+    if (statusFilter !== 'ALL' && order.status !== statusFilter) {
+      return false;
+    }
+
+    return true;
   });
 
   if (error) {
@@ -217,7 +196,7 @@ function OrderListContent() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredOrders.map((order) => (
+          {filteredOrders.map((order: any) => (
             <Card key={order.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -239,17 +218,17 @@ function OrderListContent() {
               <CardContent className="space-y-4">
                 {/* Order Items */}
                 <div className="space-y-2">
-                  {order.items.slice(0, 2).map((item) => (
+                  {order.items?.slice(0, 2).map((item: any) => (
                     <div
                       key={item.id}
                       className="flex gap-3 p-2 rounded-lg hover:bg-gray-50"
                     >
                       {/* Product Image */}
                       <div className="relative w-16 h-16 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
-                        {item.product.thumbnailUrl ? (
+                        {item.thumbnail ? (
                           <img
-                            src={item.product.thumbnailUrl}
-                            alt={item.product.name}
+                            src={item.thumbnail}
+                            alt={item.productName}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -260,7 +239,7 @@ function OrderListContent() {
                       {/* Product Info */}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {item.product.name}
+                          {item.productName}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs text-gray-500">
@@ -276,7 +255,7 @@ function OrderListContent() {
                       </div>
                     </div>
                   ))}
-                  {order.items.length > 2 && (
+                  {order.items?.length > 2 && (
                     <p className="text-sm text-gray-500 pl-2">
                       +{order.items.length - 2} sản phẩm khác
                     </p>

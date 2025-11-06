@@ -18,12 +18,13 @@ const accountMenuItems = [
     href: '/don-hang',
     description: 'Theo dõi đơn hàng',
   },
-  {
-    icon: Heart,
-    label: 'Sản phẩm yêu thích',
-    href: '/yeu-thich',
-    description: 'Danh sách wishlist',
-  },
+  // Wishlist - disabled (backend not implemented)
+  // {
+  //   icon: Heart,
+  //   label: 'Sản phẩm yêu thích',
+  //   href: '/yeu-thich',
+  //   description: 'Danh sách wishlist',
+  // },
   {
     icon: MapPin,
     label: 'Địa chỉ giao hàng',

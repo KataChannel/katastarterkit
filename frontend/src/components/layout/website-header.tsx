@@ -350,8 +350,8 @@ export function WebsiteHeader() {
           )}
         </div>                 
          <div className="flex items-center space-x-3 text-white">
-                  {/* Wishlist */}
-                  {isAuthenticated && (
+                  {/* Wishlist - Disabled (backend not implemented) */}
+                  {/* {isAuthenticated && (
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -369,7 +369,7 @@ export function WebsiteHeader() {
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                  )}
+                  )} */}
 
                   {/* Orders */}
                   {isAuthenticated && (

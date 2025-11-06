@@ -426,7 +426,7 @@ export default function CheckoutPage() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
               <h2 className="text-lg font-bold text-gray-900 mb-4">
-                Đơn hàng ({cart.totalItems} sản phẩm)
+                Đơn hàng ({cart.itemCount} sản phẩm)
               </h2>
 
               {/* Items List */}
@@ -435,7 +435,7 @@ export default function CheckoutPage() {
                   <div key={item.id} className="flex gap-3">
                     <div className="relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden">
                       <Image
-                        src={item.product.featuredImage || '/placeholder-product.jpg'}
+                        src={item.product.thumbnail || '/placeholder-product.jpg'}
                         alt={item.product.name}
                         fill
                         className="object-cover"

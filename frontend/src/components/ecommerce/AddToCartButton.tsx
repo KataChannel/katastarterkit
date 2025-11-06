@@ -1,0 +1,168 @@
+'use client';
+
+import { useState } from 'react';
+import { useMutation } from '@apollo/client';
+import { ShoppingCart, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { ADD_TO_CART, GET_CART } from '@/graphql/ecommerce.queries';
+import { cn } from '@/lib/utils';
+
+interface AddToCartButtonProps {
+  productId: string;
+  productName?: string;
+  quantity?: number;
+  variantId?: string;
+  disabled?: boolean;
+  className?: string;
+  size?: 'sm' | 'md' | 'lg';
+  fullWidth?: boolean;
+  showIcon?: boolean;
+  children?: React.ReactNode;
+}
+
+export function AddToCartButton({
+  productId,
+  productName = 'Sản phẩm',
+  quantity = 1,
+  variantId,
+  disabled = false,
+  className,
+  size = 'md',
+  fullWidth = false,
+  showIcon = true,
+  children,
+}: AddToCartButtonProps) {
+  const { toast } = useToast();
+  const [isAdding, setIsAdding] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+
+  const [addToCart] = useMutation(ADD_TO_CART, {
+    refetchQueries: [{ query: GET_CART }],
+    onCompleted: (data) => {
+      if (data.addToCart.success) {
+        // Animation success
+        setJustAdded(true);
+        setTimeout(() => setJustAdded(false), 2000);
+
+        // Toast notification
+        toast({
+          title: '✅ Đã thêm vào giỏ hàng!',
+          description: `${productName} đã được thêm vào giỏ hàng của bạn`,
+          type: 'success',
+        });
+      } else {
+        toast({
+          title: 'Lỗi',
+          description: data.addToCart.message || 'Không thể thêm vào giỏ hàng',
+          type: 'error',
+          variant: 'destructive',
+        });
+      }
+      setIsAdding(false);
+    },
+    onError: (error) => {
+      toast({
+        title: 'Lỗi',
+        description: error.message || 'Không thể kết nối đến server',
+        type: 'error',
+        variant: 'destructive',
+      });
+      setIsAdding(false);
+    },
+  });
+
+  const handleAddToCart = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (disabled || isAdding || justAdded) return;
+
+    setIsAdding(true);
+
+    try {
+      await addToCart({
+        variables: {
+          input: {
+            productId,
+            variantId,
+            quantity,
+          },
+        },
+      });
+    } catch (err) {
+      setIsAdding(false);
+    }
+  };
+
+  const sizeClasses = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2',
+    lg: 'px-6 py-3 text-lg',
+  };
+
+  const iconSizes = {
+    sm: 'h-3.5 w-3.5',
+    md: 'h-4 w-4',
+    lg: 'h-5 w-5',
+  };
+
+  return (
+    <Button
+      onClick={handleAddToCart}
+      disabled={disabled || isAdding || justAdded}
+      className={cn(
+        'relative overflow-hidden transition-all duration-300',
+        fullWidth && 'w-full',
+        justAdded && 'bg-green-600 hover:bg-green-700',
+        isAdding && 'scale-95',
+        sizeClasses[size],
+        className
+      )}
+    >
+      {/* Success overlay animation */}
+      {justAdded && (
+        <span className="absolute inset-0 bg-green-500 animate-pulse" />
+      )}
+
+      {/* Content */}
+      <span className="relative flex items-center justify-center gap-2">
+        {showIcon && (
+          <>
+            {justAdded ? (
+              <Check className={cn(iconSizes[size], 'animate-bounce')} />
+            ) : (
+              <ShoppingCart
+                className={cn(
+                  iconSizes[size],
+                  isAdding && 'animate-bounce'
+                )}
+              />
+            )}
+          </>
+        )}
+        
+        {children ? (
+          children
+        ) : (
+          <span>
+            {justAdded
+              ? 'Đã thêm ✓'
+              : isAdding
+              ? 'Đang thêm...'
+              : 'Thêm vào giỏ'}
+          </span>
+        )}
+      </span>
+
+      {/* Loading ripple effect */}
+      {isAdding && (
+        <span className="absolute inset-0">
+          <span className="absolute inset-0 bg-white/20 rounded-full scale-0 animate-ping" />
+        </span>
+      )}
+    </Button>
+  );
+}

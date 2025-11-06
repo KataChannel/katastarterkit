@@ -202,11 +202,12 @@ export const GET_CART = gql`
           stock
         }
       }
+      itemCount
       subtotal
       discount
       tax
       total
-      couponCode
+      metadata
       createdAt
       updatedAt
     }
@@ -227,10 +228,10 @@ export const ADD_TO_CART = gql`
           product {
             id
             name
-            featuredImage
+            thumbnail
           }
         }
-        totalItems
+        itemCount
         total
       }
     }
@@ -249,7 +250,7 @@ export const UPDATE_CART_ITEM = gql`
           quantity
           price
         }
-        totalItems
+        itemCount
         total
       }
     }
@@ -263,7 +264,7 @@ export const REMOVE_FROM_CART = gql`
       message
       cart {
         id
-        totalItems
+        itemCount
         total
       }
     }
@@ -463,45 +464,54 @@ export const CREATE_REVIEW = gql`
 // WISHLIST QUERIES & MUTATIONS
 // ============================================================================
 
-export const GET_WISHLIST = gql`
-  query GetWishlist {
-    wishlist {
-      id
-      items {
-        id
-        product {
-          id
-          name
-          slug
-          price
-          salePrice
-          thumbnailUrl
-          stock
-          inStock
-        }
-        addedAt
-      }
-    }
-  }
-`;
+// ============================================================================
+// WISHLIST QUERIES (Backend not implemented yet - commented out)
+// ============================================================================
 
-export const ADD_TO_WISHLIST = gql`
-  mutation AddToWishlist($productId: ID!) {
-    addToWishlist(productId: $productId) {
-      success
-      message
-    }
-  }
-`;
+// export const GET_WISHLIST = gql`
+//   query GetWishlist {
+//     wishlist {
+//       id
+//       items {
+//         id
+//         product {
+//           id
+//           name
+//           slug
+//           price
+//           salePrice
+//           thumbnailUrl
+//           stock
+//           inStock
+//         }
+//         addedAt
+//       }
+//     }
+//   }
+// `;
 
-export const REMOVE_FROM_WISHLIST = gql`
-  mutation RemoveFromWishlist($productId: ID!) {
-    removeFromWishlist(productId: $productId) {
-      success
-      message
-    }
-  }
-`;
+// export const ADD_TO_WISHLIST = gql`
+//   mutation AddToWishlist($productId: ID!) {
+//     addToWishlist(productId: $productId) {
+//       success
+//       message
+//     }
+//   }
+// `;
+
+// export const REMOVE_FROM_WISHLIST = gql`
+//   mutation RemoveFromWishlist($productId: ID!) {
+//     removeFromWishlist(productId: $productId) {
+//       success
+//       message
+//     }
+//   }
+// `;
+
+// Temporary mock exports to prevent import errors
+export const GET_WISHLIST = null;
+export const ADD_TO_WISHLIST = null;
+export const REMOVE_FROM_WISHLIST = null;
 
 // ============================================================================
 // ORDER TRACKING QUERIES
@@ -529,34 +539,29 @@ export const TRACK_ORDER = gql`
 `;
 
 export const GET_USER_ORDERS = gql`
-  query GetUserOrders($status: OrderStatus, $limit: Int, $offset: Int) {
-    orders(status: $status, limit: $limit, offset: $offset) {
-      id
-      orderNumber
-      status
-      totalAmount
-      paymentMethod
-      paymentStatus
-      createdAt
-      items {
+  query GetMyOrders($skip: Float, $take: Float) {
+    getMyOrders(skip: $skip, take: $take) {
+      orders {
         id
-        quantity
-        price
-        product {
+        orderNumber
+        status
+        total
+        paymentMethod
+        paymentStatus
+        createdAt
+        items {
           id
-          name
-          slug
-          thumbnailUrl
+          productId
+          productName
+          thumbnail
+          quantity
+          price
+          subtotal
         }
+        shippingAddress
       }
-      shippingAddress {
-        fullName
-        phone
-        address
-        ward
-        district
-        province
-      }
+      total
+      hasMore
     }
   }
 `;

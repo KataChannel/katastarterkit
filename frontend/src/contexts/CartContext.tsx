@@ -25,7 +25,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   });
 
   const cart = data?.cart || data?.getCart;
-  const itemCount = cart?.items?.length || 0;
+  // Use backend's itemCount if available, fallback to items.length
+  const itemCount = cart?.itemCount ?? cart?.items?.length ?? 0;
   const total = cart?.total || 0;
 
   const value: CartContextType = {

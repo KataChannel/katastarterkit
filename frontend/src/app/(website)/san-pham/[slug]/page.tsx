@@ -8,13 +8,14 @@ import {
   GET_PRODUCT_BY_SLUG, 
   ADD_TO_CART, 
   GET_CART,
-  ADD_TO_WISHLIST,
-  REMOVE_FROM_WISHLIST,
+  // ADD_TO_WISHLIST, // Backend not implemented yet
+  // REMOVE_FROM_WISHLIST, // Backend not implemented yet
 } from '@/graphql/ecommerce.queries';
 import { ProductImage } from '@/components/ui/product-image';
 import { ProductReviews } from '@/components/ecommerce/ProductReviews';
 import { QuantitySelector } from '@/components/ecommerce/QuantitySelector';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
+import { AddToCartButton } from '@/components/ecommerce/AddToCartButton';
 import {
   ShoppingCart,
   Heart,
@@ -48,73 +49,73 @@ export default function ProductDetailPage() {
     skip: !slug,
   });
 
-  // Add to cart mutation
-  const [addToCart, { loading: adding }] = useMutation(ADD_TO_CART, {
-    refetchQueries: [{ query: GET_CART }],
-    onCompleted: (data) => {
-      if (data.addToCart.success) {
-        toast({
-          title: 'Thành công',
-          description: 'Đã thêm vào giỏ hàng!',
-          type: 'success',
-        });
-      } else {
-        toast({
-          title: 'Lỗi',
-          description: data.addToCart.message || 'Có lỗi xảy ra',
-          type: 'error',
-          variant: 'destructive',
-        });
-      }
-    },
-    onError: (error) => {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể thêm vào giỏ hàng: ' + error.message,
-        type: 'error',
-        variant: 'destructive',
-      });
-    },
-  });
+  // Add to cart mutation - now handled by AddToCartButton component
+  // const [addToCart, { loading: adding }] = useMutation(ADD_TO_CART, {
+  //   refetchQueries: [{ query: GET_CART }],
+  //   onCompleted: (data) => {
+  //     if (data.addToCart.success) {
+  //       toast({
+  //         title: 'Thành công',
+  //         description: 'Đã thêm vào giỏ hàng!',
+  //         type: 'success',
+  //       });
+  //     } else {
+  //       toast({
+  //         title: 'Lỗi',
+  //         description: data.addToCart.message || 'Có lỗi xảy ra',
+  //         type: 'error',
+  //         variant: 'destructive',
+  //       });
+  //     }
+  //   },
+  //   onError: (error) => {
+  //     toast({
+  //       title: 'Lỗi',
+  //       description: 'Không thể thêm vào giỏ hàng: ' + error.message,
+  //       type: 'error',
+  //       variant: 'destructive',
+  //     });
+  //   },
+  // });
 
-  // Wishlist mutations
-  const [addToWishlist, { loading: addingToWishlist }] = useMutation(ADD_TO_WISHLIST, {
-    onCompleted: () => {
-      setIsInWishlist(true);
-      toast({
-        title: 'Đã thêm vào yêu thích',
-        description: 'Sản phẩm đã được lưu vào danh sách yêu thích',
-        type: 'success',
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Lỗi',
-        description: error.message,
-        type: 'error',
-        variant: 'destructive',
-      });
-    },
-  });
+  // Wishlist mutations (disabled - backend not implemented)
+  // const [addToWishlist, { loading: addingToWishlist }] = useMutation(ADD_TO_WISHLIST, {
+  //   onCompleted: () => {
+  //     setIsInWishlist(true);
+  //     toast({
+  //       title: 'Đã thêm vào yêu thích',
+  //       description: 'Sản phẩm đã được lưu vào danh sách yêu thích',
+  //       type: 'success',
+  //     });
+  //   },
+  //   onError: (error) => {
+  //     toast({
+  //       title: 'Lỗi',
+  //       description: error.message,
+  //       type: 'error',
+  //       variant: 'destructive',
+  //     });
+  //   },
+  // });
 
-  const [removeFromWishlist, { loading: removingFromWishlist }] = useMutation(REMOVE_FROM_WISHLIST, {
-    onCompleted: () => {
-      setIsInWishlist(false);
-      toast({
-        title: 'Đã xóa khỏi yêu thích',
-        description: 'Sản phẩm đã được xóa khỏi danh sách yêu thích',
-        type: 'success',
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Lỗi',
-        description: error.message,
-        type: 'error',
-        variant: 'destructive',
-      });
-    },
-  });
+  // const [removeFromWishlist, { loading: removingFromWishlist }] = useMutation(REMOVE_FROM_WISHLIST, {
+  //   onCompleted: () => {
+  //     setIsInWishlist(false);
+  //     toast({
+  //       title: 'Đã xóa khỏi yêu thích',
+  //       description: 'Sản phẩm đã được xóa khỏi danh sách yêu thích',
+  //       type: 'success',
+  //     });
+  //   },
+  //   onError: (error) => {
+  //     toast({
+  //       title: 'Lỗi',
+  //       description: error.message,
+  //       type: 'error',
+  //       variant: 'destructive',
+  //     });
+  //   },
+  // });
 
   if (loading) {
     return (
@@ -171,57 +172,58 @@ export default function ProductDetailPage() {
     }).format(price);
   };
 
-  const handleAddToCart = async () => {
-    if (effectiveStock === 0) {
-      toast({
-        title: 'Không thể thêm',
-        description: 'Sản phẩm đã hết hàng',
-        type: 'error',
-        variant: 'destructive',
-      });
-      return;
-    }
+  // handleAddToCart - now handled by AddToCartButton component
+  // const handleAddToCart = async () => {
+  //   if (effectiveStock === 0) {
+  //     toast({
+  //       title: 'Không thể thêm',
+  //       description: 'Sản phẩm đã hết hàng',
+  //       type: 'error',
+  //       variant: 'destructive',
+  //     });
+  //     return;
+  //   }
 
-    if (quantity > effectiveStock) {
-      toast({
-        title: 'Số lượng không hợp lệ',
-        description: `Chỉ còn ${effectiveStock} sản phẩm`,
-        type: 'error',
-        variant: 'destructive',
-      });
-      return;
-    }
+  //   if (quantity > effectiveStock) {
+  //     toast({
+  //       title: 'Số lượng không hợp lệ',
+  //       description: `Chỉ còn ${effectiveStock} sản phẩm`,
+  //       type: 'error',
+  //       variant: 'destructive',
+  //     });
+  //     return;
+  //   }
 
-    try {
-      await addToCart({
-        variables: {
-          input: {
-            productId: product.id,
-            variantId: selectedVariant,
-            quantity,
-          },
-        },
-      });
-    } catch (err) {
-      // Error handled by onError
-    }
-  };
+  //   try {
+  //     await addToCart({
+  //       variables: {
+  //         input: {
+  //           productId: product.id,
+  //           variantId: selectedVariant,
+  //           quantity,
+  //         },
+  //       },
+  //     });
+  //   } catch (err) {
+  //     // Error handled by onError
+  //   }
+  // };
 
-  const handleToggleWishlist = async () => {
-    try {
-      if (isInWishlist) {
-        await removeFromWishlist({
-          variables: { productId: product.id },
-        });
-      } else {
-        await addToWishlist({
-          variables: { productId: product.id },
-        });
-      }
-    } catch (err) {
-      // Error handled by onError
-    }
-  };
+  // const handleToggleWishlist = async () => {
+  //   try {
+  //     if (isInWishlist) {
+  //       await removeFromWishlist({
+  //         variables: { productId: product.id },
+  //       });
+  //     } else {
+  //       await addToWishlist({
+  //         variables: { productId: product.id },
+  //       });
+  //     }
+  //   } catch (err) {
+  //     // Error handled by onError
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -481,30 +483,29 @@ export default function ProductDetailPage() {
 
             {/* Actions */}
             <div className="flex gap-3 mb-6">
-              <button
-                onClick={handleAddToCart}
-                disabled={effectiveStock === 0 || adding}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition font-medium"
-              >
-                <ShoppingCart className="h-5 w-5" />
-                {adding ? 'Đang thêm...' : 'Thêm vào giỏ'}
-              </button>
+              <AddToCartButton
+                productId={product.id}
+                productName={product.name}
+                quantity={quantity}
+                variantId={selectedVariant || undefined}
+                disabled={effectiveStock === 0}
+                size="lg"
+                fullWidth
+                className="flex-1"
+              />
               <button 
                 onClick={() => router.push('/thanh-toan')}
                 className="px-6 py-3 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition font-medium"
               >
                 Mua ngay
               </button>
+              {/* Wishlist button - disabled (backend not implemented yet) */}
               <button 
-                onClick={handleToggleWishlist}
-                disabled={addingToWishlist || removingFromWishlist}
-                className={`p-3 border rounded-lg transition ${
-                  isInWishlist 
-                    ? 'border-red-500 bg-red-50' 
-                    : 'border-gray-300 hover:bg-gray-50'
-                }`}
+                disabled
+                className="p-3 border border-gray-300 rounded-lg opacity-50 cursor-not-allowed"
+                title="Chức năng đang phát triển"
               >
-                <Heart className={`h-6 w-6 ${isInWishlist ? 'text-red-500 fill-red-500' : 'text-gray-600'}`} />
+                <Heart className="h-6 w-6 text-gray-400" />
               </button>
             </div>
 

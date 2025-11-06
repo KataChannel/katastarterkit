@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { GET_PRODUCTS, GET_PRODUCT_CATEGORIES } from '@/graphql/ecommerce.queries';
 import { ShoppingCart, Heart, Star, ChevronDown, Filter, Search } from 'lucide-react';
 import { ProductImage } from '@/components/ui/product-image';
+import { AddToCartButton } from '@/components/ecommerce/AddToCartButton';
 
 export default function ProductsPage() {
   const [page, setPage] = useState(1);
@@ -340,25 +341,29 @@ export default function ProductsPage() {
 
                         {/* Actions */}
                         <div className="flex gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              // Add to cart logic
-                            }}
+                          <AddToCartButton
+                            productId={product.id}
+                            productName={product.name}
+                            quantity={1}
                             disabled={product.stock === 0}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                            size="sm"
+                            fullWidth
                           >
-                            <ShoppingCart className="h-4 w-4" />
-                            Thêm
-                          </button>
+                            <span className="flex items-center gap-1.5">
+                              <ShoppingCart className="h-3.5 w-3.5" />
+                              Thêm
+                            </span>
+                          </AddToCartButton>
                           <button
                             onClick={(e) => {
                               e.preventDefault();
-                              // Add to wishlist logic
+                              // Wishlist disabled - backend not implemented
                             }}
-                            className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                            disabled
+                            className="p-2 border border-gray-300 rounded-md opacity-50 cursor-not-allowed"
+                            title="Chức năng đang phát triển"
                           >
-                            <Heart className="h-5 w-5 text-gray-600" />
+                            <Heart className="h-5 w-5 text-gray-400" />
                           </button>
                         </div>
                       </div>
