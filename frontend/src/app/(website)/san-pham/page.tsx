@@ -224,77 +224,119 @@ export default function ProductsPage() {
                       {/* Product Image */}
                       <div className="relative aspect-square overflow-hidden rounded-t-lg">
                         <ProductImage
-                          src={product.featuredImage}
+                          src={product.thumbnail}
                           alt={product.name}
                           fill
                           className="object-cover group-hover:scale-105 transition duration-300"
                         />
-                        {product.discount > 0 && (
+                        {/* Discount Badge */}
+                        {product.originalPrice && product.price < product.originalPrice && (
                           <span className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-bold z-10">
-                            -{product.discount}%
+                            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
                           </span>
                         )}
+                        {/* Featured Badge */}
                         {product.isFeatured && (
                           <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-bold z-10">
                             HOT
+                          </span>
+                        )}
+                        {/* New Arrival Badge */}
+                        {product.isNewArrival && (
+                          <span className="absolute top-12 left-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-bold z-10">
+                            MỚI
+                          </span>
+                        )}
+                        {/* Best Seller Badge */}
+                        {product.isBestSeller && (
+                          <span className="absolute top-22 left-2 bg-purple-500 text-white px-2 py-1 rounded-md text-xs font-bold z-10">
+                            BÁN CHẠY
                           </span>
                         )}
                       </div>
 
                       {/* Product Info */}
                       <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                        <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[3rem]">
                           {product.name}
                         </h3>
                         
-                        {/* Category */}
-                        <p className="text-xs text-gray-500 mb-2">
-                          {product.category?.name}
-                        </p>
-
-                        {/* Rating */}
-                        <div className="flex items-center gap-1 mb-2">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${
-                                  i < Math.floor(product?.rating)
-                                    ? 'fill-yellow-400 text-yellow-400'
-                                    : 'text-gray-300'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-gray-500">
-                            ({product.reviewCount})
-                          </span>
+                        {/* Category & SKU */}
+                        <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                          <span>{product.category?.name}</span>
+                          {product.sku && (
+                            <span className="font-mono">SKU: {product.sku}</span>
+                          )}
                         </div>
+
+                        {/* Origin */}
+                        {product.origin && (
+                          <p className="text-xs text-gray-600 mb-2">
+                            📍 Xuất xứ: {product.origin}
+                          </p>
+                        )}
+
+                        {/* Unit */}
+                        {product.unit && (
+                          <p className="text-xs text-gray-500 mb-2">
+                            Đơn vị: {product.unit}
+                          </p>
+                        )}
 
                         {/* Price */}
                         <div className="mb-3">
-                          <div className="flex items-baseline gap-2">
+                          <div className="flex items-baseline gap-2 flex-wrap">
                             <span className="text-lg font-bold text-blue-600">
-                              {formatPrice(product.finalPrice)}
+                              {formatPrice(product.price)}
                             </span>
-                            {product.compareAtPrice > product.finalPrice && (
+                            {product.originalPrice && product.price < product.originalPrice && (
                               <span className="text-sm text-gray-400 line-through">
-                                {formatPrice(product.compareAtPrice)}
+                                {formatPrice(product.originalPrice)}
                               </span>
                             )}
                           </div>
+                          {product.unit && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {formatPrice(product.price)}/{product.unit}
+                            </div>
+                          )}
                         </div>
 
                         {/* Stock Status */}
                         <div className="text-xs mb-3">
                           {product.stock > 0 ? (
-                            <span className="text-green-600">
-                              Còn hàng ({product.stock})
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-green-600 font-medium">
+                                ✓ Còn hàng
+                              </span>
+                              <span className="text-gray-500">
+                                ({product.stock} {product.unit || 'sản phẩm'})
+                              </span>
+                            </div>
                           ) : (
-                            <span className="text-red-600">Hết hàng</span>
+                            <span className="text-red-600 font-medium">✗ Hết hàng</span>
                           )}
                         </div>
+
+                        {/* Product Attributes (if any) */}
+                        {product.attributes && typeof product.attributes === 'object' && Object.keys(product.attributes).length > 0 && (
+                          <div className="mb-3 flex flex-wrap gap-1">
+                            {Object.entries(product.attributes).slice(0, 3).map(([key, value]: [string, any]) => (
+                              value && (
+                                <span
+                                  key={key}
+                                  className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full"
+                                  title={`${key}: ${value}`}
+                                >
+                                  {key === 'organic' && value ? '🌱 Hữu cơ' :
+                                   key === 'pesticide_free' && value ? '🚫 Không thuốc' :
+                                   key === 'fresh' && value ? '🍃 Tươi mới' :
+                                   `${key}`}
+                                </span>
+                              )
+                            ))}
+                          </div>
+                        )}
 
                         {/* Actions */}
                         <div className="flex gap-2">

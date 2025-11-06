@@ -128,15 +128,25 @@ export const GET_PRODUCT_CATEGORIES = gql`
         name
         slug
         description
-        thumbnail
+        image
+        icon
         parentId
+        displayOrder
+        isActive
+        isFeatured
+        productCount
         children {
           id
           name
           slug
+          productCount
         }
       }
       total
+      page
+      limit
+      totalPages
+      hasMore
     }
   }
 `;
