@@ -208,7 +208,7 @@ let PageService = class PageService {
             }
         });
         if (!page) {
-            throw new common_1.NotFoundException(`Page with slug "${slug}" not found`);
+            return null;
         }
         return page;
     }

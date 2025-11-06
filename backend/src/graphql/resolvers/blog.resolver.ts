@@ -31,6 +31,41 @@ export class BlogResolver {
     return blog.status === 'PUBLISHED';
   }
 
+  @ResolveField(() => [String], { nullable: true })
+  metaKeywords(@Parent() blog: any): string[] | null {
+    // Handle metaKeywords transformation from various formats
+    if (!blog.metaKeywords) {
+      return null;
+    }
+
+    // If already array, return as is
+    if (Array.isArray(blog.metaKeywords)) {
+      return blog.metaKeywords;
+    }
+
+    // If string, try to parse JSON or split by comma
+    if (typeof blog.metaKeywords === 'string') {
+      try {
+        const parsed = JSON.parse(blog.metaKeywords);
+        return Array.isArray(parsed) ? parsed : [blog.metaKeywords];
+      } catch {
+        return [blog.metaKeywords];
+      }
+    }
+
+    // If object (Prisma sometimes returns this), convert to array
+    if (typeof blog.metaKeywords === 'object') {
+      // Handle array-like objects with numeric keys
+      if ('length' in blog.metaKeywords) {
+        return Object.values(blog.metaKeywords).filter(v => typeof v === 'string') as string[];
+      }
+      // Handle generic objects
+      return Object.values(blog.metaKeywords).filter(v => typeof v === 'string') as string[];
+    }
+
+    return null;
+  }
+
   // ============================================================================
   // BLOG QUERIES
   // ============================================================================

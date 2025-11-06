@@ -9,6 +9,13 @@ export declare enum BlogSortBy {
     POPULAR = "POPULAR",
     FEATURED = "FEATURED"
 }
+export declare class BlogAuthorType {
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+}
 export declare class BlogTagType {
     id: string;
     name: string;
@@ -35,7 +42,7 @@ export declare class BlogType {
     content: string;
     shortDescription?: string;
     excerpt?: string;
-    author: string;
+    author: BlogAuthorType;
     thumbnailUrl?: string;
     bannerUrl?: string;
     viewCount: number;
@@ -47,7 +54,7 @@ export declare class BlogType {
     isPublished: boolean;
     metaTitle?: string;
     metaDescription?: string;
-    metaKeywords?: string;
+    metaKeywords?: string[];
     createdAt: Date;
 }
 export declare class PaginatedBlogs {

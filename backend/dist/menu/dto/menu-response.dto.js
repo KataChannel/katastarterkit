@@ -8,14 +8,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var MenuResponseDto_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MenuPaginationResponseDto = exports.MenuResponseDto = void 0;
 const graphql_1 = require("@nestjs/graphql");
+const graphql_type_json_1 = __importDefault(require("graphql-type-json"));
 let MenuResponseDto = MenuResponseDto_1 = class MenuResponseDto {
     static fromEntity(menu) {
         const dto = new MenuResponseDto_1();
         Object.assign(dto, menu);
+        if (menu.children && menu.children.length > 0) {
+            dto.children = menu.children.map(child => MenuResponseDto_1.fromEntity(child));
+        }
         return dto;
     }
     static fromEntities(menus) {
@@ -96,6 +103,46 @@ __decorate([
     __metadata("design:type", String)
 ], MenuResponseDto.prototype, "image", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], MenuResponseDto.prototype, "cssClass", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], MenuResponseDto.prototype, "linkType", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], MenuResponseDto.prototype, "productId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], MenuResponseDto.prototype, "blogPostId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], MenuResponseDto.prototype, "pageId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], MenuResponseDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], MenuResponseDto.prototype, "blogCategoryId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], MenuResponseDto.prototype, "queryConditions", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
+    __metadata("design:type", Object)
+], MenuResponseDto.prototype, "customData", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
+    __metadata("design:type", Object)
+], MenuResponseDto.prototype, "metadata", void 0);
+__decorate([
     (0, graphql_1.Field)(() => [String]),
     __metadata("design:type", Array)
 ], MenuResponseDto.prototype, "requiredPermissions", void 0);
@@ -135,6 +182,10 @@ __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], MenuResponseDto.prototype, "updatedBy", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [MenuResponseDto], { nullable: true }),
+    __metadata("design:type", Array)
+], MenuResponseDto.prototype, "children", void 0);
 exports.MenuResponseDto = MenuResponseDto = MenuResponseDto_1 = __decorate([
     (0, graphql_1.ObjectType)()
 ], MenuResponseDto);

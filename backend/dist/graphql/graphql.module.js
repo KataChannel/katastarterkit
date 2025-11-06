@@ -63,6 +63,7 @@ const auth_module_1 = require("../auth/auth.module");
 const grok_module_1 = require("../grok/grok.module");
 const minio_module_1 = require("../minio/minio.module");
 const search_module_1 = require("../search/search.module");
+const menu_module_1 = require("../menu/menu.module");
 const affiliate_resolver_1 = require("./resolvers/affiliate.resolver");
 let GraphQLResolversModule = class GraphQLResolversModule {
 };
@@ -75,6 +76,7 @@ exports.GraphQLResolversModule = GraphQLResolversModule = __decorate([
             grok_module_1.GrokModule,
             minio_module_1.MinioModule,
             search_module_1.SearchModule,
+            menu_module_1.MenuModule,
             platform_express_1.MulterModule.register({
                 limits: {
                     fileSize: 10 * 1024 * 1024,

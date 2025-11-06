@@ -15,6 +15,7 @@ export declare class MenuService {
     private readonly MAX_DEPTH;
     private readonly DEFAULT_PAGE_SIZE;
     constructor(menuRepository: MenuRepository);
+    private cleanEmptyStrings;
     createMenu(dto: CreateMenuDto, userId?: string): Promise<MenuResponseDto>;
     findById(id: string): Promise<MenuResponseDto>;
     findBySlug(slug: string): Promise<MenuResponseDto>;

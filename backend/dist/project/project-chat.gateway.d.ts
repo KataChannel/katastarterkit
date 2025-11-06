@@ -74,8 +74,8 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
                 senderId: string;
                 isEdited: boolean;
                 editedAt: Date | null;
-                reactions: import("@prisma/client/runtime/library").JsonValue | null;
                 replyToId: string | null;
+                reactions: import("@prisma/client/runtime/library").JsonValue | null;
             };
         } & {
             id: string;
@@ -87,8 +87,8 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
             senderId: string;
             isEdited: boolean;
             editedAt: Date | null;
-            reactions: import("@prisma/client/runtime/library").JsonValue | null;
             replyToId: string | null;
+            reactions: import("@prisma/client/runtime/library").JsonValue | null;
         };
         error?: undefined;
     } | {
@@ -151,8 +151,8 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
             senderId: string;
             isEdited: boolean;
             editedAt: Date | null;
-            reactions: import("@prisma/client/runtime/library").JsonValue | null;
             replyToId: string | null;
+            reactions: import("@prisma/client/runtime/library").JsonValue | null;
         };
         error?: undefined;
     } | {

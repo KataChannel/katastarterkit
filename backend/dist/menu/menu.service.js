@@ -23,6 +23,18 @@ let MenuService = MenuService_1 = class MenuService {
         this.MAX_DEPTH = 5;
         this.DEFAULT_PAGE_SIZE = 50;
     }
+    cleanEmptyStrings(data) {
+        const cleaned = {};
+        for (const [key, value] of Object.entries(data)) {
+            if (value === '') {
+                cleaned[key] = null;
+            }
+            else if (value !== undefined) {
+                cleaned[key] = value;
+            }
+        }
+        return cleaned;
+    }
     async createMenu(dto, userId) {
         this.logger.log(`Creating menu: ${dto.slug}`);
         await this.validateSlugUniqueness(dto.slug);
@@ -31,7 +43,7 @@ let MenuService = MenuService_1 = class MenuService {
             throw new menu_exceptions_1.MenuMaxDepthExceededException(this.MAX_DEPTH);
         }
         const createData = {
-            ...dto,
+            ...this.cleanEmptyStrings(dto),
             level,
             path,
             type: dto.type || client_1.MenuType.SIDEBAR,
@@ -46,6 +58,7 @@ let MenuService = MenuService_1 = class MenuService {
             createdBy: userId,
             parent: dto.parentId ? { connect: { id: dto.parentId } } : undefined,
         };
+        delete createData.parentId;
         const menu = await this.menuRepository.create(createData);
         this.logger.log(`Menu created successfully: ${menu.id}`);
         return dto_1.MenuResponseDto.fromEntity(menu);
@@ -130,7 +143,7 @@ let MenuService = MenuService_1 = class MenuService {
         if (dto.slug && dto.slug !== existingMenu.slug) {
             await this.validateSlugUniqueness(dto.slug);
         }
-        let updateData = { ...dto };
+        let updateData = { ...this.cleanEmptyStrings(dto) };
         if (dto.parentId !== undefined && dto.parentId !== existingMenu.parentId) {
             if (dto.parentId) {
                 await this.validateNoCircularReference(id, dto.parentId);
@@ -143,6 +156,7 @@ let MenuService = MenuService_1 = class MenuService {
             updateData.path = path;
             updateData.parent = dto.parentId ? { connect: { id: dto.parentId } } : { disconnect: true };
         }
+        delete updateData.parentId;
         updateData.updatedBy = userId;
         const menu = await this.menuRepository.update(id, updateData);
         this.logger.log(`Menu updated successfully: ${menu.id}`);

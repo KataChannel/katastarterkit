@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaginatedBlogs = exports.BlogType = exports.BlogCategoryType = exports.BlogTagType = exports.BlogSortBy = exports.BlogStatus = void 0;
+exports.PaginatedBlogs = exports.BlogType = exports.BlogCategoryType = exports.BlogTagType = exports.BlogAuthorType = exports.BlogSortBy = exports.BlogStatus = void 0;
 const graphql_1 = require("@nestjs/graphql");
 var BlogStatus;
 (function (BlogStatus) {
@@ -32,6 +32,32 @@ var BlogSortBy;
     name: 'BlogSortBy',
     description: 'Sắp xếp bài viết',
 });
+let BlogAuthorType = class BlogAuthorType {
+};
+exports.BlogAuthorType = BlogAuthorType;
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.ID),
+    __metadata("design:type", String)
+], BlogAuthorType.prototype, "id", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], BlogAuthorType.prototype, "username", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], BlogAuthorType.prototype, "firstName", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], BlogAuthorType.prototype, "lastName", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], BlogAuthorType.prototype, "email", void 0);
+exports.BlogAuthorType = BlogAuthorType = __decorate([
+    (0, graphql_1.ObjectType)()
+], BlogAuthorType);
 let BlogTagType = class BlogTagType {
 };
 exports.BlogTagType = BlogTagType;
@@ -132,8 +158,8 @@ __decorate([
     __metadata("design:type", String)
 ], BlogType.prototype, "excerpt", void 0);
 __decorate([
-    (0, graphql_1.Field)(),
-    __metadata("design:type", String)
+    (0, graphql_1.Field)(() => BlogAuthorType),
+    __metadata("design:type", BlogAuthorType)
 ], BlogType.prototype, "author", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -168,7 +194,7 @@ __decorate([
     __metadata("design:type", Boolean)
 ], BlogType.prototype, "isFeatured", void 0);
 __decorate([
-    (0, graphql_1.Field)(),
+    (0, graphql_1.Field)({ defaultValue: false }),
     __metadata("design:type", Boolean)
 ], BlogType.prototype, "isPublished", void 0);
 __decorate([
@@ -180,8 +206,8 @@ __decorate([
     __metadata("design:type", String)
 ], BlogType.prototype, "metaDescription", void 0);
 __decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    __metadata("design:type", String)
+    (0, graphql_1.Field)(() => [String], { nullable: true }),
+    __metadata("design:type", Array)
 ], BlogType.prototype, "metaKeywords", void 0);
 __decorate([
     (0, graphql_1.Field)(),

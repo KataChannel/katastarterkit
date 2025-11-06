@@ -60,10 +60,10 @@ export declare class AICourseGeneratorService {
                         id: string;
                         createdAt: Date;
                         updatedAt: Date;
-                        quizId: string;
                         points: number;
                         explanation: string | null;
                         mediaUrl: string | null;
+                        quizId: string;
                     })[];
                 } & {
                     id: string;
@@ -114,10 +114,10 @@ export declare class AICourseGeneratorService {
         status: import("@prisma/client").$Enums.CourseStatus;
         publishedAt: Date | null;
         thumbnail: string | null;
+        categoryId: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         price: import("@prisma/client/runtime/library").Decimal;
-        categoryId: string | null;
         viewCount: number;
         duration: number | null;
         trailer: string | null;

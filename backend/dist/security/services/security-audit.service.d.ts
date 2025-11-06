@@ -77,8 +77,8 @@ export declare class SecurityAuditService {
             resolvedBy: string | null;
             resolvedAt: Date | null;
             resolution: string | null;
-            parentEventId: string | null;
             detectedAt: Date;
+            parentEventId: string | null;
         })[];
         total: number;
         limit: number;
@@ -183,8 +183,8 @@ export declare class SecurityAuditService {
             resolvedBy: string | null;
             resolvedAt: Date | null;
             resolution: string | null;
-            parentEventId: string | null;
             detectedAt: Date;
+            parentEventId: string | null;
         })[];
     }>;
     private calculateRiskScore;

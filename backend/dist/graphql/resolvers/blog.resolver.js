@@ -23,6 +23,33 @@ let BlogResolver = class BlogResolver {
     constructor(blogService) {
         this.blogService = blogService;
     }
+    isPublished(blog) {
+        return blog.status === 'PUBLISHED';
+    }
+    metaKeywords(blog) {
+        if (!blog.metaKeywords) {
+            return null;
+        }
+        if (Array.isArray(blog.metaKeywords)) {
+            return blog.metaKeywords;
+        }
+        if (typeof blog.metaKeywords === 'string') {
+            try {
+                const parsed = JSON.parse(blog.metaKeywords);
+                return Array.isArray(parsed) ? parsed : [blog.metaKeywords];
+            }
+            catch {
+                return [blog.metaKeywords];
+            }
+        }
+        if (typeof blog.metaKeywords === 'object') {
+            if ('length' in blog.metaKeywords) {
+                return Object.values(blog.metaKeywords).filter(v => typeof v === 'string');
+            }
+            return Object.values(blog.metaKeywords).filter(v => typeof v === 'string');
+        }
+        return null;
+    }
     async getBlogs(page, limit, search, categoryId, sort) {
         return this.blogService.getBlogs({
             page,
@@ -88,6 +115,20 @@ let BlogResolver = class BlogResolver {
     }
 };
 exports.BlogResolver = BlogResolver;
+__decorate([
+    (0, graphql_1.ResolveField)(() => Boolean),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Boolean)
+], BlogResolver.prototype, "isPublished", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => [String], { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Array)
+], BlogResolver.prototype, "metaKeywords", null);
 __decorate([
     (0, graphql_1.Query)(() => blog_type_1.PaginatedBlogs, { name: 'blogs' }),
     __param(0, (0, graphql_1.Args)('page', { type: () => graphql_1.Int, nullable: true })),

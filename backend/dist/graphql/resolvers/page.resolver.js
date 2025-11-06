@@ -118,7 +118,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PageResolver.prototype, "getPageById", null);
 __decorate([
-    (0, graphql_1.Query)(() => page_model_1.Page, { name: 'getPageBySlug' }),
+    (0, graphql_1.Query)(() => page_model_1.Page, { name: 'getPageBySlug', nullable: true }),
     __param(0, (0, graphql_1.Args)('slug')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

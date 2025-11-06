@@ -34,6 +34,7 @@ export declare class OrderResolver {
                 publishedAt: Date | null;
                 updatedBy: string | null;
                 thumbnail: string | null;
+                categoryId: string;
                 displayOrder: number;
                 isFeatured: boolean;
                 metaTitle: string | null;
@@ -61,7 +62,6 @@ export declare class OrderResolver {
                 maxStock: number | null;
                 wastage: number;
                 loadpoint: number | null;
-                categoryId: string;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
                 viewCount: number;
                 soldCount: number;
@@ -74,12 +74,12 @@ export declare class OrderResolver {
                 isActive: boolean;
                 name: string;
                 updatedAt: Date;
+                productId: string;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
                 stock: number;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
-                productId: string;
             };
         } & {
             id: string;
@@ -88,13 +88,13 @@ export declare class OrderResolver {
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
             productName: string;
             thumbnail: string | null;
+            productId: string | null;
             displayOrder: number | null;
             price: number;
             sku: string | null;
             vat: number;
             notes: string | null;
             orderId: string;
-            productId: string | null;
             quantity: number;
             subtotal: number;
             variantId: string | null;
@@ -205,6 +205,7 @@ export declare class OrderResolver {
                 publishedAt: Date | null;
                 updatedBy: string | null;
                 thumbnail: string | null;
+                categoryId: string;
                 displayOrder: number;
                 isFeatured: boolean;
                 metaTitle: string | null;
@@ -232,7 +233,6 @@ export declare class OrderResolver {
                 maxStock: number | null;
                 wastage: number;
                 loadpoint: number | null;
-                categoryId: string;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
                 viewCount: number;
                 soldCount: number;
@@ -245,12 +245,12 @@ export declare class OrderResolver {
                 isActive: boolean;
                 name: string;
                 updatedAt: Date;
+                productId: string;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
                 stock: number;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
-                productId: string;
             };
         } & {
             id: string;
@@ -259,13 +259,13 @@ export declare class OrderResolver {
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
             productName: string;
             thumbnail: string | null;
+            productId: string | null;
             displayOrder: number | null;
             price: number;
             sku: string | null;
             vat: number;
             notes: string | null;
             orderId: string;
-            productId: string | null;
             quantity: number;
             subtotal: number;
             variantId: string | null;
@@ -380,6 +380,7 @@ export declare class OrderResolver {
                 publishedAt: Date | null;
                 updatedBy: string | null;
                 thumbnail: string | null;
+                categoryId: string;
                 displayOrder: number;
                 isFeatured: boolean;
                 metaTitle: string | null;
@@ -407,7 +408,6 @@ export declare class OrderResolver {
                 maxStock: number | null;
                 wastage: number;
                 loadpoint: number | null;
-                categoryId: string;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
                 viewCount: number;
                 soldCount: number;
@@ -420,12 +420,12 @@ export declare class OrderResolver {
                 isActive: boolean;
                 name: string;
                 updatedAt: Date;
+                productId: string;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
                 stock: number;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
-                productId: string;
             };
         } & {
             id: string;
@@ -434,13 +434,13 @@ export declare class OrderResolver {
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
             productName: string;
             thumbnail: string | null;
+            productId: string | null;
             displayOrder: number | null;
             price: number;
             sku: string | null;
             vat: number;
             notes: string | null;
             orderId: string;
-            productId: string | null;
             quantity: number;
             subtotal: number;
             variantId: string | null;

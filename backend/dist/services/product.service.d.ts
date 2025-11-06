@@ -43,12 +43,12 @@ export declare class ProductService {
                 isActive: boolean;
                 name: string;
                 updatedAt: Date;
+                productId: string;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
                 stock: number;
                 attributes: Prisma.JsonValue | null;
-                productId: string;
             }[];
         } & {
             id: string;
@@ -62,6 +62,7 @@ export declare class ProductService {
             publishedAt: Date | null;
             updatedBy: string | null;
             thumbnail: string | null;
+            categoryId: string;
             displayOrder: number;
             isFeatured: boolean;
             metaTitle: string | null;
@@ -89,7 +90,6 @@ export declare class ProductService {
             maxStock: number | null;
             wastage: number;
             loadpoint: number | null;
-            categoryId: string;
             attributes: Prisma.JsonValue | null;
             viewCount: number;
             soldCount: number;
@@ -139,12 +139,12 @@ export declare class ProductService {
             isActive: boolean;
             name: string;
             updatedAt: Date;
+            productId: string;
             price: number;
             sku: string | null;
             barcode: string | null;
             stock: number;
             attributes: Prisma.JsonValue | null;
-            productId: string;
         }[];
     } & {
         id: string;
@@ -158,6 +158,7 @@ export declare class ProductService {
         publishedAt: Date | null;
         updatedBy: string | null;
         thumbnail: string | null;
+        categoryId: string;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
@@ -185,7 +186,6 @@ export declare class ProductService {
         maxStock: number | null;
         wastage: number;
         loadpoint: number | null;
-        categoryId: string;
         attributes: Prisma.JsonValue | null;
         viewCount: number;
         soldCount: number;
@@ -229,12 +229,12 @@ export declare class ProductService {
             isActive: boolean;
             name: string;
             updatedAt: Date;
+            productId: string;
             price: number;
             sku: string | null;
             barcode: string | null;
             stock: number;
             attributes: Prisma.JsonValue | null;
-            productId: string;
         }[];
     } & {
         id: string;
@@ -248,6 +248,7 @@ export declare class ProductService {
         publishedAt: Date | null;
         updatedBy: string | null;
         thumbnail: string | null;
+        categoryId: string;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
@@ -275,7 +276,6 @@ export declare class ProductService {
         maxStock: number | null;
         wastage: number;
         loadpoint: number | null;
-        categoryId: string;
         attributes: Prisma.JsonValue | null;
         viewCount: number;
         soldCount: number;
@@ -320,12 +320,12 @@ export declare class ProductService {
                 isActive: boolean;
                 name: string;
                 updatedAt: Date;
+                productId: string;
                 price: number;
                 sku: string | null;
                 barcode: string | null;
                 stock: number;
                 attributes: Prisma.JsonValue | null;
-                productId: string;
             }[];
         } & {
             id: string;
@@ -339,6 +339,7 @@ export declare class ProductService {
             publishedAt: Date | null;
             updatedBy: string | null;
             thumbnail: string | null;
+            categoryId: string;
             displayOrder: number;
             isFeatured: boolean;
             metaTitle: string | null;
@@ -366,7 +367,6 @@ export declare class ProductService {
             maxStock: number | null;
             wastage: number;
             loadpoint: number | null;
-            categoryId: string;
             attributes: Prisma.JsonValue | null;
             viewCount: number;
             soldCount: number;
@@ -416,12 +416,12 @@ export declare class ProductService {
             isActive: boolean;
             name: string;
             updatedAt: Date;
+            productId: string;
             price: number;
             sku: string | null;
             barcode: string | null;
             stock: number;
             attributes: Prisma.JsonValue | null;
-            productId: string;
         }[];
     } & {
         id: string;
@@ -435,6 +435,7 @@ export declare class ProductService {
         publishedAt: Date | null;
         updatedBy: string | null;
         thumbnail: string | null;
+        categoryId: string;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
@@ -462,7 +463,6 @@ export declare class ProductService {
         maxStock: number | null;
         wastage: number;
         loadpoint: number | null;
-        categoryId: string;
         attributes: Prisma.JsonValue | null;
         viewCount: number;
         soldCount: number;
@@ -506,12 +506,12 @@ export declare class ProductService {
             isActive: boolean;
             name: string;
             updatedAt: Date;
+            productId: string;
             price: number;
             sku: string | null;
             barcode: string | null;
             stock: number;
             attributes: Prisma.JsonValue | null;
-            productId: string;
         }[];
     } & {
         id: string;
@@ -525,6 +525,7 @@ export declare class ProductService {
         publishedAt: Date | null;
         updatedBy: string | null;
         thumbnail: string | null;
+        categoryId: string;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
@@ -552,7 +553,6 @@ export declare class ProductService {
         maxStock: number | null;
         wastage: number;
         loadpoint: number | null;
-        categoryId: string;
         attributes: Prisma.JsonValue | null;
         viewCount: number;
         soldCount: number;
@@ -570,6 +570,7 @@ export declare class ProductService {
         publishedAt: Date | null;
         updatedBy: string | null;
         thumbnail: string | null;
+        categoryId: string;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
@@ -597,7 +598,6 @@ export declare class ProductService {
         maxStock: number | null;
         wastage: number;
         loadpoint: number | null;
-        categoryId: string;
         attributes: Prisma.JsonValue | null;
         viewCount: number;
         soldCount: number;
@@ -632,12 +632,12 @@ export declare class ProductService {
         isActive: boolean;
         name: string;
         updatedAt: Date;
+        productId: string;
         price: number;
         sku: string | null;
         barcode: string | null;
         stock: number;
         attributes: Prisma.JsonValue | null;
-        productId: string;
     }>;
     updateProductVariant(input: UpdateProductVariantInput): Promise<{
         order: number;
@@ -646,12 +646,12 @@ export declare class ProductService {
         isActive: boolean;
         name: string;
         updatedAt: Date;
+        productId: string;
         price: number;
         sku: string | null;
         barcode: string | null;
         stock: number;
         attributes: Prisma.JsonValue | null;
-        productId: string;
     }>;
     deleteProductVariant(id: string): Promise<{
         order: number;
@@ -660,12 +660,12 @@ export declare class ProductService {
         isActive: boolean;
         name: string;
         updatedAt: Date;
+        productId: string;
         price: number;
         sku: string | null;
         barcode: string | null;
         stock: number;
         attributes: Prisma.JsonValue | null;
-        productId: string;
     }>;
     updateStock(id: string, quantity: number): Promise<{
         id: string;
@@ -679,6 +679,7 @@ export declare class ProductService {
         publishedAt: Date | null;
         updatedBy: string | null;
         thumbnail: string | null;
+        categoryId: string;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
@@ -706,7 +707,6 @@ export declare class ProductService {
         maxStock: number | null;
         wastage: number;
         loadpoint: number | null;
-        categoryId: string;
         attributes: Prisma.JsonValue | null;
         viewCount: number;
         soldCount: number;

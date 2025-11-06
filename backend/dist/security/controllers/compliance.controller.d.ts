@@ -162,8 +162,8 @@ export declare class ComplianceController {
                 resolvedBy: string | null;
                 resolvedAt: Date | null;
                 resolution: string | null;
-                parentEventId: string | null;
                 detectedAt: Date;
+                parentEventId: string | null;
             })[];
         };
         message: string;
@@ -270,8 +270,8 @@ export declare class ComplianceController {
                 resolvedBy: string | null;
                 resolvedAt: Date | null;
                 resolution: string | null;
-                parentEventId: string | null;
                 detectedAt: Date;
+                parentEventId: string | null;
             })[];
             total: number;
             limit: number;

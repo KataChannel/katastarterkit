@@ -235,7 +235,7 @@ export interface Blog {
   isPublished: boolean;
   metaTitle?: string;
   metaDescription?: string;
-  metaKeywords?: string;
+  metaKeywords?: string[];
   createdAt: string;
 }
 

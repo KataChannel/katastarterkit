@@ -98,8 +98,8 @@ export declare class SecurityDashboardController {
             resolvedBy: string | null;
             resolvedAt: Date | null;
             resolution: string | null;
-            parentEventId: string | null;
             detectedAt: Date;
+            parentEventId: string | null;
         })[];
         totalCount: number;
         unresolved: number;

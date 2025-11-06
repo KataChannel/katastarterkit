@@ -316,13 +316,13 @@ export declare class AffiliatePaymentService {
             customerEmail: string | null;
             saleAmount: import("@prisma/client/runtime/library").Decimal;
             conversionType: string;
+            approvedAt: Date | null;
+            rejectedAt: Date | null;
             linkId: string;
             commission: import("@prisma/client/runtime/library").Decimal;
             clickId: string | null;
             currency: string;
             convertedAt: Date;
-            approvedAt: Date | null;
-            rejectedAt: Date | null;
             paidAt: Date | null;
             validatedBy: string | null;
         })[];

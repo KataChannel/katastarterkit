@@ -23,7 +23,7 @@ exports.MenuModule = MenuModule = __decorate([
             menu_resolver_1.MenuResolver,
             menu_repository_1.MenuRepository,
         ],
-        exports: [menu_service_1.MenuService, menu_repository_1.MenuRepository],
+        exports: [menu_service_1.MenuService, menu_resolver_1.MenuResolver, menu_repository_1.MenuRepository],
     })
 ], MenuModule);
 //# sourceMappingURL=menu.module.js.map

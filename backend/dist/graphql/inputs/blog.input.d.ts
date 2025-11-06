@@ -14,7 +14,7 @@ export declare class CreateBlogInput {
     publishedAt?: Date;
     metaTitle?: string;
     metaDescription?: string;
-    metaKeywords?: string;
+    metaKeywords?: string[];
 }
 export declare class UpdateBlogInput {
     id: string;
@@ -33,7 +33,7 @@ export declare class UpdateBlogInput {
     publishedAt?: Date;
     metaTitle?: string;
     metaDescription?: string;
-    metaKeywords?: string;
+    metaKeywords?: string[];
 }
 export declare class GetBlogsInput {
     page?: number;

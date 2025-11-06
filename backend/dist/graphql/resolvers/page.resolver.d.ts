@@ -7,7 +7,7 @@ export declare class PageResolver {
     constructor(pageService: PageService);
     getPages(pagination: PaginationInput, filters?: PageFiltersInput): Promise<PaginatedPages>;
     getPageById(id: string): Promise<Page>;
-    getPageBySlug(slug: string): Promise<Page>;
+    getPageBySlug(slug: string): Promise<Page | null>;
     getPublishedPages(pagination: PaginationInput): Promise<PaginatedPages>;
     getHomepage(): Promise<Page | null>;
     getReservedSlugs(): Promise<string[]>;

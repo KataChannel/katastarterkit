@@ -21,8 +21,8 @@ export declare class SupportTicketService {
         closedAt: Date | null;
         assignedAgentId: string | null;
         ticketNumber: string;
-        resolvedById: string | null;
         relatedOrderId: string | null;
+        resolvedById: string | null;
     }>;
     findAll(params?: any): Promise<{
         category: string | null;
@@ -43,8 +43,8 @@ export declare class SupportTicketService {
         closedAt: Date | null;
         assignedAgentId: string | null;
         ticketNumber: string;
-        resolvedById: string | null;
         relatedOrderId: string | null;
+        resolvedById: string | null;
     }[]>;
     findOne(id: string): Promise<{
         category: string | null;
@@ -65,8 +65,8 @@ export declare class SupportTicketService {
         closedAt: Date | null;
         assignedAgentId: string | null;
         ticketNumber: string;
-        resolvedById: string | null;
         relatedOrderId: string | null;
+        resolvedById: string | null;
     }>;
     update(id: string, data: any): Promise<{
         category: string | null;
@@ -87,7 +87,7 @@ export declare class SupportTicketService {
         closedAt: Date | null;
         assignedAgentId: string | null;
         ticketNumber: string;
-        resolvedById: string | null;
         relatedOrderId: string | null;
+        resolvedById: string | null;
     }>;
 }

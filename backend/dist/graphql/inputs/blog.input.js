@@ -75,8 +75,8 @@ __decorate([
     __metadata("design:type", String)
 ], CreateBlogInput.prototype, "metaDescription", void 0);
 __decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    __metadata("design:type", String)
+    (0, graphql_1.Field)(() => [String], { nullable: true }),
+    __metadata("design:type", Array)
 ], CreateBlogInput.prototype, "metaKeywords", void 0);
 exports.CreateBlogInput = CreateBlogInput = __decorate([
     (0, graphql_1.InputType)()
@@ -149,8 +149,8 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "metaDescription", void 0);
 __decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    __metadata("design:type", String)
+    (0, graphql_1.Field)(() => [String], { nullable: true }),
+    __metadata("design:type", Array)
 ], UpdateBlogInput.prototype, "metaKeywords", void 0);
 exports.UpdateBlogInput = UpdateBlogInput = __decorate([
     (0, graphql_1.InputType)()

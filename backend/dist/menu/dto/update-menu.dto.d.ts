@@ -21,6 +21,13 @@ export declare class UpdateMenuDto {
     isActive?: boolean;
     isVisible?: boolean;
     isProtected?: boolean;
+    linkType?: string;
+    productId?: string;
+    blogPostId?: string;
+    pageId?: string;
+    categoryId?: string;
+    blogCategoryId?: string;
+    queryConditions?: Record<string, any>;
     metadata?: Record<string, any>;
     cssClass?: string;
     customData?: Record<string, any>;

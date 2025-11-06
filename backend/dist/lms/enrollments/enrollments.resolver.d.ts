@@ -16,10 +16,10 @@ export declare class EnrollmentsResolver {
             status: import("@prisma/client").$Enums.CourseStatus;
             publishedAt: Date | null;
             thumbnail: string | null;
+            categoryId: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             price: import("@prisma/client/runtime/library").Decimal;
-            categoryId: string | null;
             viewCount: number;
             duration: number | null;
             trailer: string | null;
@@ -76,10 +76,10 @@ export declare class EnrollmentsResolver {
             status: import("@prisma/client").$Enums.CourseStatus;
             publishedAt: Date | null;
             thumbnail: string | null;
+            categoryId: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             price: import("@prisma/client/runtime/library").Decimal;
-            categoryId: string | null;
             viewCount: number;
             duration: number | null;
             trailer: string | null;
@@ -145,10 +145,10 @@ export declare class EnrollmentsResolver {
             status: import("@prisma/client").$Enums.CourseStatus;
             publishedAt: Date | null;
             thumbnail: string | null;
+            categoryId: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             price: import("@prisma/client/runtime/library").Decimal;
-            categoryId: string | null;
             viewCount: number;
             duration: number | null;
             trailer: string | null;

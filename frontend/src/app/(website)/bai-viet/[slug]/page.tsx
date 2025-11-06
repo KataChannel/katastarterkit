@@ -215,7 +215,7 @@ export default function BlogDetailPage() {
                         {blog.author.fullName || blog.author.email}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
-                        Biên tập viên tại Kata Shop
+                        Biên tập viên tại Rau Sạch Trần Gia
                       </p>
                     </div>
                   </div>

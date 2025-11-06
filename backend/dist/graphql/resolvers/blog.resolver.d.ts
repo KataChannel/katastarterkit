@@ -3,6 +3,8 @@ import { CreateBlogInput, UpdateBlogInput, CreateBlogCategoryInput, UpdateBlogCa
 export declare class BlogResolver {
     private blogService;
     constructor(blogService: BlogService);
+    isPublished(blog: any): boolean;
+    metaKeywords(blog: any): string[] | null;
     getBlogs(page?: number, limit?: number, search?: string, categoryId?: string, sort?: string): Promise<{
         items: {
             tags: {
@@ -47,12 +49,12 @@ export declare class BlogResolver {
             publishedAt: Date | null;
             authorId: string;
             images: string[];
+            categoryId: string | null;
             displayOrder: number;
             isFeatured: boolean;
             metaTitle: string | null;
             metaDescription: string | null;
             metaKeywords: string[];
-            categoryId: string | null;
             viewCount: number;
             visibility: import("@prisma/client").$Enums.PostVisibility;
             canonicalUrl: string | null;
@@ -110,12 +112,12 @@ export declare class BlogResolver {
         publishedAt: Date | null;
         authorId: string;
         images: string[];
+        categoryId: string | null;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
         metaKeywords: string[];
-        categoryId: string | null;
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
@@ -167,12 +169,12 @@ export declare class BlogResolver {
         publishedAt: Date | null;
         authorId: string;
         images: string[];
+        categoryId: string | null;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
         metaKeywords: string[];
-        categoryId: string | null;
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
@@ -217,12 +219,12 @@ export declare class BlogResolver {
         publishedAt: Date | null;
         authorId: string;
         images: string[];
+        categoryId: string | null;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
         metaKeywords: string[];
-        categoryId: string | null;
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
@@ -275,12 +277,12 @@ export declare class BlogResolver {
             publishedAt: Date | null;
             authorId: string;
             images: string[];
+            categoryId: string | null;
             displayOrder: number;
             isFeatured: boolean;
             metaTitle: string | null;
             metaDescription: string | null;
             metaKeywords: string[];
-            categoryId: string | null;
             viewCount: number;
             visibility: import("@prisma/client").$Enums.PostVisibility;
             canonicalUrl: string | null;
@@ -344,12 +346,12 @@ export declare class BlogResolver {
         publishedAt: Date | null;
         authorId: string;
         images: string[];
+        categoryId: string | null;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
         metaKeywords: string[];
-        categoryId: string | null;
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
@@ -455,12 +457,12 @@ export declare class BlogResolver {
         publishedAt: Date | null;
         authorId: string;
         images: string[];
+        categoryId: string | null;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
         metaKeywords: string[];
-        categoryId: string | null;
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;
@@ -518,12 +520,12 @@ export declare class BlogResolver {
         publishedAt: Date | null;
         authorId: string;
         images: string[];
+        categoryId: string | null;
         displayOrder: number;
         isFeatured: boolean;
         metaTitle: string | null;
         metaDescription: string | null;
         metaKeywords: string[];
-        categoryId: string | null;
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
         canonicalUrl: string | null;

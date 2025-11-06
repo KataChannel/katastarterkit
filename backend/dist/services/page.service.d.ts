@@ -10,7 +10,7 @@ export declare class PageService {
     create(input: CreatePageInput, userId: string): Promise<Page>;
     findMany(pagination?: PaginationInput, filters?: PageFiltersInput): Promise<PaginatedPages>;
     findById(id: string): Promise<Page>;
-    findBySlug(slug: string): Promise<Page>;
+    findBySlug(slug: string): Promise<Page | null>;
     update(id: string, input: UpdatePageInput, userId: string): Promise<Page>;
     delete(id: string): Promise<Page>;
     addBlock(pageId: string, input: CreatePageBlockInput): Promise<PageBlock>;

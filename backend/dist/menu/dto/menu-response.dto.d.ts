@@ -18,6 +18,16 @@ export declare class MenuResponseDto {
     badge?: string | null;
     badgeColor?: string | null;
     image?: string | null;
+    cssClass?: string | null;
+    linkType?: string | null;
+    productId?: string | null;
+    blogPostId?: string | null;
+    pageId?: string | null;
+    categoryId?: string | null;
+    blogCategoryId?: string | null;
+    queryConditions?: string | null;
+    customData?: Record<string, any> | null;
+    metadata?: Record<string, any> | null;
     requiredPermissions: string[];
     requiredRoles: string[];
     isPublic: boolean;
@@ -28,8 +38,13 @@ export declare class MenuResponseDto {
     updatedAt: Date;
     createdBy?: string | null;
     updatedBy?: string | null;
-    static fromEntity(menu: Menu): MenuResponseDto;
-    static fromEntities(menus: Menu[]): MenuResponseDto[];
+    children?: MenuResponseDto[];
+    static fromEntity(menu: Menu & {
+        children?: Menu[];
+    }): MenuResponseDto;
+    static fromEntities(menus: (Menu & {
+        children?: Menu[];
+    })[]): MenuResponseDto[];
 }
 export declare class MenuPaginationResponseDto {
     items: MenuResponseDto[];

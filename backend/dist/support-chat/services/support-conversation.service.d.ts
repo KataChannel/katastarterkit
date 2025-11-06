@@ -227,8 +227,8 @@ export declare class SupportConversationService {
             closedAt: Date | null;
             assignedAgentId: string | null;
             ticketNumber: string;
-            resolvedById: string | null;
             relatedOrderId: string | null;
+            resolvedById: string | null;
         }[];
     } & {
         id: string;

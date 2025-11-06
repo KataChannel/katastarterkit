@@ -259,9 +259,9 @@ export declare class AffiliateCampaignService {
             totalConversions: number;
             affiliateId: string;
             totalEarnings: import("@prisma/client/runtime/library").Decimal;
+            appliedAt: Date;
             approvedAt: Date | null;
             rejectedAt: Date | null;
-            appliedAt: Date;
         }[];
     } & {
         productImage: string | null;
@@ -361,13 +361,13 @@ export declare class AffiliateCampaignService {
             customerEmail: string | null;
             saleAmount: import("@prisma/client/runtime/library").Decimal;
             conversionType: string;
+            approvedAt: Date | null;
+            rejectedAt: Date | null;
             linkId: string;
             commission: import("@prisma/client/runtime/library").Decimal;
             clickId: string | null;
             currency: string;
             convertedAt: Date;
-            approvedAt: Date | null;
-            rejectedAt: Date | null;
             paidAt: Date | null;
             validatedBy: string | null;
         }[];
@@ -422,9 +422,9 @@ export declare class AffiliateCampaignService {
             totalConversions: number;
             affiliateId: string;
             totalEarnings: import("@prisma/client/runtime/library").Decimal;
+            appliedAt: Date;
             approvedAt: Date | null;
             rejectedAt: Date | null;
-            appliedAt: Date;
         })[];
         links: {
             id: string;
@@ -619,9 +619,9 @@ export declare class AffiliateCampaignService {
         totalConversions: number;
         affiliateId: string;
         totalEarnings: import("@prisma/client/runtime/library").Decimal;
+        appliedAt: Date;
         approvedAt: Date | null;
         rejectedAt: Date | null;
-        appliedAt: Date;
     }>;
     reviewCampaignApplication(merchantUserId: string, input: ReviewCampaignApplicationInput): Promise<{
         campaign: {
@@ -697,9 +697,9 @@ export declare class AffiliateCampaignService {
         totalConversions: number;
         affiliateId: string;
         totalEarnings: import("@prisma/client/runtime/library").Decimal;
+        appliedAt: Date;
         approvedAt: Date | null;
         rejectedAt: Date | null;
-        appliedAt: Date;
     }>;
     getMerchantStats(merchantUserId: string): Promise<{
         totalCampaigns: number;

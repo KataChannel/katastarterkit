@@ -17,6 +17,7 @@ const class_validator_1 = require("class-validator");
 const client_1 = require("@prisma/client");
 const graphql_1 = require("@nestjs/graphql");
 const graphql_type_json_1 = __importDefault(require("graphql-type-json"));
+const class_transformer_1 = require("class-transformer");
 let CreateMenuDto = class CreateMenuDto {
 };
 exports.CreateMenuDto = CreateMenuDto;
@@ -43,6 +44,7 @@ __decorate([
     (0, graphql_1.Field)(() => String, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.MenuType),
+    (0, class_transformer_1.Transform)(({ value }) => value === '' ? undefined : value),
     __metadata("design:type", String)
 ], CreateMenuDto.prototype, "type", void 0);
 __decorate([
@@ -84,6 +86,7 @@ __decorate([
     (0, graphql_1.Field)(() => String, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(client_1.MenuTarget),
+    (0, class_transformer_1.Transform)(({ value }) => value === '' ? undefined : value),
     __metadata("design:type", String)
 ], CreateMenuDto.prototype, "target", void 0);
 __decorate([
@@ -154,6 +157,49 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateMenuDto.prototype, "isVisible", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Length)(0, 50),
+    __metadata("design:type", String)
+], CreateMenuDto.prototype, "linkType", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateMenuDto.prototype, "productId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateMenuDto.prototype, "blogPostId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateMenuDto.prototype, "pageId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateMenuDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateMenuDto.prototype, "blogCategoryId", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], CreateMenuDto.prototype, "queryConditions", void 0);
+__decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsObject)(),
@@ -173,6 +219,6 @@ __decorate([
     __metadata("design:type", Object)
 ], CreateMenuDto.prototype, "customData", void 0);
 exports.CreateMenuDto = CreateMenuDto = __decorate([
-    (0, graphql_1.InputType)()
+    (0, graphql_1.InputType)('CreateMenuInput')
 ], CreateMenuDto);
 //# sourceMappingURL=create-menu.dto.js.map

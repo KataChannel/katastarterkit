@@ -548,7 +548,7 @@ type BlogType {
   isFeatured: Boolean!
   isPublished: Boolean!
   metaDescription: String
-  metaKeywords: String
+  metaKeywords: [String!]
   metaTitle: String
   publishedAt: DateTime
   shortDescription: String
@@ -1038,7 +1038,7 @@ input CreateBlogInput {
   isFeatured: Boolean = false
   isPublished: Boolean = true
   metaDescription: String
-  metaKeywords: String
+  metaKeywords: [String!]
   metaTitle: String
   publishedAt: DateTime
   shortDescription: String
@@ -4643,7 +4643,7 @@ input UpdateBlogInput {
   isFeatured: Boolean
   isPublished: Boolean
   metaDescription: String
-  metaKeywords: String
+  metaKeywords: [String!]
   metaTitle: String
   publishedAt: DateTime
   shortDescription: String

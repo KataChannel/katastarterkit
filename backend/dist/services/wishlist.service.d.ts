@@ -47,6 +47,7 @@ export declare class WishlistService {
                 publishedAt: Date | null;
                 updatedBy: string | null;
                 thumbnail: string | null;
+                categoryId: string;
                 displayOrder: number;
                 isFeatured: boolean;
                 metaTitle: string | null;
@@ -74,7 +75,6 @@ export declare class WishlistService {
                 maxStock: number | null;
                 wastage: number;
                 loadpoint: number | null;
-                categoryId: string;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
                 viewCount: number;
                 soldCount: number;
@@ -137,6 +137,7 @@ export declare class WishlistService {
                 publishedAt: Date | null;
                 updatedBy: string | null;
                 thumbnail: string | null;
+                categoryId: string;
                 displayOrder: number;
                 isFeatured: boolean;
                 metaTitle: string | null;
@@ -164,7 +165,6 @@ export declare class WishlistService {
                 maxStock: number | null;
                 wastage: number;
                 loadpoint: number | null;
-                categoryId: string;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
                 viewCount: number;
                 soldCount: number;
@@ -227,6 +227,7 @@ export declare class WishlistService {
                 publishedAt: Date | null;
                 updatedBy: string | null;
                 thumbnail: string | null;
+                categoryId: string;
                 displayOrder: number;
                 isFeatured: boolean;
                 metaTitle: string | null;
@@ -254,7 +255,6 @@ export declare class WishlistService {
                 maxStock: number | null;
                 wastage: number;
                 loadpoint: number | null;
-                categoryId: string;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
                 viewCount: number;
                 soldCount: number;
@@ -317,6 +317,7 @@ export declare class WishlistService {
                 publishedAt: Date | null;
                 updatedBy: string | null;
                 thumbnail: string | null;
+                categoryId: string;
                 displayOrder: number;
                 isFeatured: boolean;
                 metaTitle: string | null;
@@ -344,7 +345,6 @@ export declare class WishlistService {
                 maxStock: number | null;
                 wastage: number;
                 loadpoint: number | null;
-                categoryId: string;
                 attributes: import("@prisma/client/runtime/library").JsonValue | null;
                 viewCount: number;
                 soldCount: number;

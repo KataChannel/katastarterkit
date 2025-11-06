@@ -88,8 +88,8 @@ export declare class CallCenterService {
         items: {
             id: string;
             updatedAt: Date;
-            duration: string | null;
             direction: import("@prisma/client").$Enums.CallDirection;
+            duration: string | null;
             externalUuid: string;
             callerIdNumber: string | null;
             outboundCallerIdNumber: string | null;
@@ -116,8 +116,8 @@ export declare class CallCenterService {
     getRecordById(id: string): Promise<{
         id: string;
         updatedAt: Date;
-        duration: string | null;
         direction: import("@prisma/client").$Enums.CallDirection;
+        duration: string | null;
         externalUuid: string;
         callerIdNumber: string | null;
         outboundCallerIdNumber: string | null;

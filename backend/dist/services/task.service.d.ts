@@ -1418,8 +1418,8 @@ export declare class TaskService {
             name: string;
             updatedAt: Date;
             description: string | null;
-            isArchived: boolean;
             ownerId: string;
+            isArchived: boolean;
         };
         comments: ({
             user: {
@@ -1520,8 +1520,8 @@ export declare class TaskService {
             name: string;
             updatedAt: Date;
             description: string | null;
-            isArchived: boolean;
             ownerId: string;
+            isArchived: boolean;
         };
         comments: {
             id: string;
@@ -1611,8 +1611,8 @@ export declare class TaskService {
             name: string;
             updatedAt: Date;
             description: string | null;
-            isArchived: boolean;
             ownerId: string;
+            isArchived: boolean;
         };
     } & {
         category: import("@prisma/client").$Enums.TaskCategory;

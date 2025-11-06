@@ -154,8 +154,8 @@ export class BlogType {
   @Field({ nullable: true })
   metaDescription?: string;
 
-  @Field({ nullable: true })
-  metaKeywords?: string;
+  @Field(() => [String], { nullable: true })
+  metaKeywords?: string[];
 
   @Field()
   createdAt: Date;
