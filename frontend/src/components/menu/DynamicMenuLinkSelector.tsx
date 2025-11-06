@@ -40,13 +40,13 @@ export function DynamicMenuLinkSelector({
       return <ProductListConditions value={value.queryConditions} onChange={(v) => onChange({ queryConditions: v })} />;
 
     case 'PRODUCT_DETAIL':
-      return <ProductSelector value={value.productId} onChange={(v) => onChange({ productId: v })} searchTerm={searchTerm} onSearchChange={setSearchTerm} />;
+      return <ProductSelector value={value.productId} onChange={onChange} searchTerm={searchTerm} onSearchChange={setSearchTerm} />;
 
     case 'BLOG_LIST':
       return <BlogListConditions value={value.queryConditions} onChange={(v) => onChange({ queryConditions: v })} />;
 
     case 'BLOG_DETAIL':
-      return <BlogSelector value={value.blogPostId} onChange={(v) => onChange({ blogPostId: v })} searchTerm={searchTerm} onSearchChange={setSearchTerm} />;
+      return <BlogSelector value={value.blogPostId} onChange={onChange} searchTerm={searchTerm} onSearchChange={setSearchTerm} />;
 
     case 'CATEGORY':
       return <CategorySelector value={value.categoryId} onChange={(v) => onChange({ categoryId: v })} />;

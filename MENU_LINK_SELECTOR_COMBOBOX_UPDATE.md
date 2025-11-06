@@ -1,8 +1,9 @@
-# Cập Nhật Menu Link Selector - Đổi Select thành Combobox & Fix 404 Chi Tiết
+# Cập Nhật Menu Link Selector - Đổi Select thành Combobox & Fix 404
 
 ## Tổng Quan
 1. Cập nhật component `DynamicMenuLinkSelector` theo rule #11: "Tất cả Select đổi thành Combobox"
 2. Fix bug menu chi tiết sản phẩm/bài viết trả về lỗi 404
+3. Fix bug trang `/ve-chung-toi` trả về lỗi 404
 
 ## Bug 404 - Nguyên Nhân & Giải Pháp
 
@@ -184,3 +185,38 @@ Frontend route: /san-pham/[slug]
 - ✅ Không có lỗi GraphQL execution
 - ✅ UX tốt hơn với Combobox có tìm kiếm tích hợp
 - ✅ Backward compatible (fallback về ID nếu không có slug)
+- ✅ Fix trang `/ve-chung-toi` 404 (status DRAFT → PUBLISHED)
+
+## Fix Bug `/ve-chung-toi` 404
+
+### Vấn Đề:
+Trang "Về Chúng Tôi" với slug `ve-chung-toi` tồn tại trong database nhưng trả về 404.
+
+### Nguyên Nhân:
+- Trang có `status = DRAFT` thay vì `PUBLISHED`
+- `publishedAt = null`
+- Dynamic page handler check `status !== PUBLISHED` → notFound()
+
+### Giải Pháp:
+Tạo script `/backend/scripts/check-fix-about-page.ts` để:
+1. Kiểm tra status của trang
+2. Tự động fix:
+   - `status`: DRAFT → PUBLISHED
+   - `publishedAt`: null → Date hiện tại
+
+### Kết Quả:
+```bash
+$ bun backend/scripts/check-fix-about-page.ts
+
+📄 Thông tin trang:
+  - ID: 1f276224-bb24-4999-ae44-4feaa0600ab5
+  - Title: Về chúng tôi
+  - Slug: ve-chung-toi
+  - Status: DRAFT → PUBLISHED ✅
+  - Published At: null → 2025-11-06T03:26:42.400Z ✅
+  - Blocks: 0
+
+✅ Trang có thể truy cập tại: http://localhost:12000/ve-chung-toi
+```
+
+**Lưu ý:** Trang hiện có 0 blocks nên hiển thị "Page Content Coming Soon". Admin cần thêm blocks qua Page Builder.

@@ -236,6 +236,8 @@ export const GET_MENU_BY_SLUG = gql`
       badgeColor
       isActive
       isVisible
+      linkType
+      customData
       children {
         id
         title
@@ -251,6 +253,8 @@ export const GET_MENU_BY_SLUG = gql`
         badge
         isActive
         isVisible
+        linkType
+        customData
         children {
           id
           title
@@ -265,6 +269,8 @@ export const GET_MENU_BY_SLUG = gql`
           badge
           isActive
           isVisible
+          linkType
+          customData
         }
       }
     }
@@ -497,6 +503,8 @@ export const CREATE_MENU_ADMIN = gql`
       categoryId
       blogCategoryId
       queryConditions
+      customData
+      metadata
       requiredPermissions
       requiredRoles
       isPublic
@@ -536,6 +544,8 @@ export const UPDATE_MENU_ADMIN = gql`
       categoryId
       blogCategoryId
       queryConditions
+      customData
+      metadata
       requiredPermissions
       requiredRoles
       isPublic

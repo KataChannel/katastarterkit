@@ -75,6 +75,45 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     }
   );
 
+  // Handle ALL menu redirects with useEffect to avoid setState during render
+  // IMPORTANT: This must be before any early returns to follow Rules of Hooks
+  useEffect(() => {
+    if (menuData?.menuBySlug) {
+      const menu = menuData.menuBySlug;
+
+      // Case 1: Menu links to BLOG_DETAIL → Redirect to blog post
+      if (menu.linkType === 'BLOG_DETAIL' && menu.customData?.blogPostSlug) {
+        const blogUrl = `/bai-viet/${menu.customData.blogPostSlug}`;
+        router.push(blogUrl);
+        return;
+      }
+
+      // Case 2: Menu links to PRODUCT_DETAIL → Redirect to product
+      if (menu.linkType === 'PRODUCT_DETAIL' && menu.customData?.productSlug) {
+        const productUrl = `/san-pham/${menu.customData.productSlug}`;
+        router.push(productUrl);
+        return;
+      }
+
+      // Case 3: Menu has external URL → Redirect to external site
+      if (menu.externalUrl) {
+        if (menu.target === 'BLANK') {
+          window.open(menu.externalUrl, '_blank', 'noopener,noreferrer');
+          router.back(); // Go back after opening external link in new tab
+        } else {
+          window.location.href = menu.externalUrl;
+        }
+        return;
+      }
+
+      // Case 4: Menu has route → Redirect to internal route
+      if (menu.route && menu.route !== `/${slug}`) {
+        router.push(menu.route);
+        return;
+      }
+    }
+  }, [menuData, router, slug]);
+
   // Loading state
   if (slug === null || pageLoading) {
     return (
@@ -187,44 +226,29 @@ export default function DynamicPage({ params }: DynamicPageProps) {
       return notFound();
     }
 
-    // Case 2a: Menu has external URL → Redirect (use window.location directly)
-    if (menu.externalUrl) {
-      if (typeof window !== 'undefined') {
-        if (menu.target === 'BLANK') {
-          window.open(menu.externalUrl, '_blank', 'noopener,noreferrer');
-          router.back(); // Go back after opening external link
-        } else {
-          window.location.href = menu.externalUrl;
-        }
-      }
-
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <ExternalLink className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-pulse" />
-            <p className="text-gray-600">Đang chuyển hướng...</p>
-          </div>
-        </div>
-      );
-    }
-
-    // Case 2b: Menu has route → Redirect to route (use router.push directly)
-    if (menu.route && menu.route !== `/${slug}`) {
-      if (typeof window !== 'undefined') {
-        router.push(menu.route);
-      }
-
+    // Show loading state while redirecting for any redirect type
+    if (
+      (menu.linkType === 'BLOG_DETAIL' && menu.customData?.blogPostSlug) ||
+      (menu.linkType === 'PRODUCT_DETAIL' && menu.customData?.productSlug) ||
+      menu.externalUrl ||
+      (menu.route && menu.route !== `/${slug}`)
+    ) {
       return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Đang chuyển hướng...</p>
+            <p className="text-gray-600">
+              {menu.externalUrl ? 'Đang chuyển hướng...' :
+               menu.linkType === 'BLOG_DETAIL' ? 'Đang chuyển hướng tới bài viết...' : 
+               menu.linkType === 'PRODUCT_DETAIL' ? 'Đang chuyển hướng tới sản phẩm...' :
+               'Đang chuyển hướng...'}
+            </p>
           </div>
         </div>
       );
     }
 
-    // Case 2c: Menu exists but no content → Show fallback UI
+    // Case 2e: Menu exists but no content → Show fallback UI
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
         <div className="container mx-auto px-4 py-16 max-w-4xl">

@@ -378,6 +378,11 @@ function MenuIcon({ icon, className }: { icon: string; className?: string }) {
 
 /**
  * Get href from menu item based on link type
+ * Routes theo chuẩn:
+ * - List sản phẩm: /san-pham
+ * - Detail sản phẩm: /san-pham/[slug]
+ * - List bài viết: /bai-viet
+ * - Detail bài viết: /bai-viet/[slug]
  */
 function getMenuHref(item: MenuItem): string {
   switch (item.linkType) {
@@ -387,6 +392,8 @@ function getMenuHref(item: MenuItem): string {
       return item.route || '#';
     case 'PAGE':
       return item.pageId ? `/page/${item.pageId}` : '#';
+    case 'PRODUCT_LIST':
+      return '/san-pham';
     case 'PRODUCT_DETAIL': {
       // Ưu tiên slug từ customData, fallback về ID
       const productSlug = item.customData?.productSlug;
@@ -395,6 +402,8 @@ function getMenuHref(item: MenuItem): string {
       }
       return item.productId ? `/san-pham/${item.productId}` : '#';
     }
+    case 'BLOG_LIST':
+      return '/bai-viet';
     case 'BLOG_DETAIL': {
       // Ưu tiên slug từ customData, fallback về ID
       const blogPostSlug = item.customData?.blogPostSlug;
@@ -404,13 +413,9 @@ function getMenuHref(item: MenuItem): string {
       return item.blogPostId ? `/bai-viet/${item.blogPostId}` : '#';
     }
     case 'CATEGORY':
-      return item.categoryId ? `/category/${item.categoryId}` : '#';
+      return item.categoryId ? `/danh-muc/${item.categoryId}` : '#';
     case 'BLOG_CATEGORY':
-      return item.blogCategoryId ? `/blog/category/${item.blogCategoryId}` : '#';
-    case 'PRODUCT_LIST':
-      return '/products';
-    case 'BLOG_LIST':
-      return '/blog';
+      return item.blogCategoryId ? `/bai-viet/danh-muc/${item.blogCategoryId}` : '#';
     default:
       return item.url || '#';
   }

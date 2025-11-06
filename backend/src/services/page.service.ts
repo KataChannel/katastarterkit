@@ -221,7 +221,7 @@ export class PageService {
   }
 
   // Find page by slug
-  async findBySlug(slug: string): Promise<Page> {
+  async findBySlug(slug: string): Promise<Page | null> {
     const page = await this.prisma.page.findUnique({
       where: { slug },
       include: {
@@ -249,8 +249,10 @@ export class PageService {
       }
     });
 
+    // Return null instead of throwing error for non-existent pages
+    // This allows frontend to gracefully fallback to menu or 404
     if (!page) {
-      throw new NotFoundException(`Page with slug "${slug}" not found`);
+      return null;
     }
 
     return page as Page;

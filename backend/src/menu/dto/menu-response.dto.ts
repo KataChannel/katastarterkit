@@ -1,5 +1,6 @@
 import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Menu } from '@prisma/client';
+import GraphQLJSON from 'graphql-type-json';
 
 @ObjectType()
 export class MenuResponseDto {
@@ -81,6 +82,12 @@ export class MenuResponseDto {
 
   @Field({ nullable: true })
   queryConditions?: string | null;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  customData?: Record<string, any> | null;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  metadata?: Record<string, any> | null;
 
   @Field(() => [String])
   requiredPermissions!: string[];

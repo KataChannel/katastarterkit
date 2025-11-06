@@ -33,8 +33,8 @@ export class PageResolver {
     return this.pageService.findById(id);
   }
 
-  @Query(() => Page, { name: 'getPageBySlug' })
-  async getPageBySlug(@Args('slug') slug: string): Promise<Page> {
+  @Query(() => Page, { name: 'getPageBySlug', nullable: true })
+  async getPageBySlug(@Args('slug') slug: string): Promise<Page | null> {
     console.log(`Fetching page with slug: ${slug}`);
     
     return this.pageService.findBySlug(slug);

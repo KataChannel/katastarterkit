@@ -2329,6 +2329,7 @@ type MenuResponseDto {
   createdAt: DateTime!
   createdBy: String
   cssClass: String
+  customData: JSON
   description: String
   externalUrl: String
   icon: String
@@ -2341,6 +2342,7 @@ type MenuResponseDto {
   isVisible: Boolean!
   level: Int!
   linkType: String
+  metadata: JSON
   order: Int!
   pageId: String
   parentId: String
@@ -3680,7 +3682,7 @@ type Query {
   getOrderByNumber(email: String, orderNumber: String!): OrderType
   getOrderStatistics(endDate: DateTime, startDate: DateTime): OrderStatisticsResponse!
   getPageById(id: String!): Page!
-  getPageBySlug(slug: String!): Page!
+  getPageBySlug(slug: String!): Page
   getPageBySlugPattern(slugPattern: String!): Page
   getPages(filters: PageFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
   getPermissionById(id: String!): Permission!

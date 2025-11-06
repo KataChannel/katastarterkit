@@ -51,6 +51,7 @@ export default function MenuFormPage() {
     categoryId: '',
     blogCategoryId: '',
     queryConditions: null,
+    customData: null as Record<string, any> | null,
   });
 
   // Load menu data for editing
@@ -91,6 +92,7 @@ export default function MenuFormPage() {
         categoryId: menuData.menu.categoryId || '',
         blogCategoryId: menuData.menu.blogCategoryId || '',
         queryConditions: menuData.menu.queryConditions || null,
+        customData: menuData.menu.customData || null,
       });
     }
   }, [menuData]);
@@ -151,6 +153,7 @@ export default function MenuFormPage() {
       input.categoryId = formData.categoryId || undefined;
       input.blogCategoryId = formData.blogCategoryId || undefined;
       input.queryConditions = formData.queryConditions || undefined;
+      input.customData = formData.customData || undefined;
     }
 
     console.log('Updating menu with id:', menuId, 'input:', input);
@@ -170,9 +173,13 @@ export default function MenuFormPage() {
   };
 
   const handleDynamicLinkChange = (values: any) => {
+    // Tách customData ra khỏi các field khác
+    const { customData, ...otherFields } = values;
+    
     setFormData({
       ...formData,
-      ...values,
+      ...otherFields,
+      customData: customData || formData.customData,
     });
   };
 

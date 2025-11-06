@@ -34,7 +34,7 @@ export default function BlogDetailPage() {
     skip: !slug,
   });
 
-  const blog = data?.getBlogBySlug;
+  const blog = data?.blogBySlug;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('vi-VN', {
