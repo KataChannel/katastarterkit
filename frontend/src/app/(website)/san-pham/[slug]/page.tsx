@@ -68,7 +68,7 @@ export default function ProductDetailPage() {
             Không tìm thấy sản phẩm
           </h1>
           <button
-            onClick={() => router.push('/products')}
+            onClick={() => router.push('/san-pham')}
             className="text-blue-600 hover:underline"
           >
             ← Quay lại danh sách sản phẩm
@@ -79,12 +79,26 @@ export default function ProductDetailPage() {
   }
 
   const product = data.productBySlug;
-  const images = [product.featuredImage, ...(product.images || [])].filter(Boolean);
+  
+  // Sử dụng images từ database, với thumbnail làm ảnh đầu tiên
+  const productImages = product.images && product.images.length > 0 
+    ? [...product.images].sort((a: any, b: any) => a.order - b.order).map((img: any) => img.url)
+    : [];
+  const images = product.thumbnail 
+    ? [product.thumbnail, ...productImages.filter((img: string) => img !== product.thumbnail)]
+    : productImages;
+  
   const currentVariant = selectedVariant
     ? product.variants?.find((v: any) => v.id === selectedVariant)
     : null;
-  const effectivePrice = currentVariant?.price || product.finalPrice;
+  const effectivePrice = currentVariant?.price || product.price;
   const effectiveStock = currentVariant?.stock ?? product.stock;
+  
+  // Tính % giảm giá
+  const discountPercent = product.discountPercentage || 
+    (product.originalPrice && product.price < product.originalPrice
+      ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+      : 0);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -136,7 +150,7 @@ export default function ProductDetailPage() {
               <>
                 <span>/</span>
                 <Link
-                  href={`/products?category=${product.category.id}`}
+                  href={`/san-pham?category=${product.category.slug}`}
                   className="hover:text-blue-600"
                 >
                   {product.category.name}
@@ -156,16 +170,32 @@ export default function ProductDetailPage() {
           <div>
             {/* Main Image */}
             <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-gray-100">
-              <ProductImage
-                src={images[selectedImage]}
-                alt={product.name}
-                fill
-                className="object-contain"
-                priority
-              />
-              {product.discount > 0 && (
+              {images.length > 0 ? (
+                <ProductImage
+                  src={images[selectedImage]}
+                  alt={product.name}
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <span className="text-gray-400">Chưa có hình ảnh</span>
+                </div>
+              )}
+              {discountPercent > 0 && (
                 <span className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-md font-bold z-10">
-                  -{product.discount}%
+                  -{discountPercent}%
+                </span>
+              )}
+              {product.isBestSeller && (
+                <span className="absolute top-4 left-4 bg-yellow-500 text-white px-3 py-1 rounded-md font-bold z-10">
+                  Bán chạy
+                </span>
+              )}
+              {product.isNewArrival && (
+                <span className="absolute top-14 left-4 bg-green-500 text-white px-3 py-1 rounded-md font-bold z-10">
+                  Mới
                 </span>
               )}
             </div>
@@ -201,18 +231,44 @@ export default function ProductDetailPage() {
                   <Star
                     key={i}
                     className={`h-5 w-5 ${
-                      i < Math.floor(product.rating)
+                      i < 4 // Default 4 stars nếu chưa có review system
                         ? 'fill-yellow-400 text-yellow-400'
                         : 'text-gray-300'
                     }`}
                   />
                 ))}
                 <span className="ml-2 text-gray-600">
-                  {product?.rating?.toFixed(1)} ({product?.reviewCount} đánh giá)
+                  4.0 (Sắp có đánh giá)
                 </span>
               </div>
               <span className="text-gray-400">|</span>
-              <span className="text-gray-600">{product?.viewCount} lượt xem</span>
+              <span className="text-gray-600">{product.viewCount || 0} lượt xem</span>
+              <span className="text-gray-400">|</span>
+              <span className="text-gray-600">Đã bán: {product.soldCount || 0}</span>
+            </div>
+
+            {/* Product Info */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {product.sku && (
+                <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-md">
+                  SKU: <span className="font-medium">{product.sku}</span>
+                </span>
+              )}
+              {product.origin && (
+                <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-md">
+                  Xuất xứ: <span className="font-medium">{product.origin}</span>
+                </span>
+              )}
+              {product.unit && (
+                <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-md">
+                  Đơn vị: <span className="font-medium">{product.unit}</span>
+                </span>
+              )}
+              {product.weight && (
+                <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-md">
+                  Trọng lượng: <span className="font-medium">{product.weight}g</span>
+                </span>
+              )}
             </div>
 
             {/* Price */}
@@ -221,17 +277,46 @@ export default function ProductDetailPage() {
                 <span className="text-3xl font-bold text-blue-600">
                   {formatPrice(effectivePrice)}
                 </span>
-                {product.compareAtPrice > product.finalPrice && (
-                  <span className="text-lg text-gray-400 line-through">
-                    {formatPrice(product.compareAtPrice)}
-                  </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <>
+                    <span className="text-lg text-gray-400 line-through">
+                      {formatPrice(product.originalPrice)}
+                    </span>
+                    <span className="text-sm text-red-600 font-medium">
+                      Tiết kiệm {formatPrice(product.originalPrice - product.price)}
+                    </span>
+                  </>
                 )}
               </div>
+              {product.profitMargin && (
+                <p className="text-xs text-gray-500 mt-1">
+                  * Lợi nhuận ước tính: {product.profitMargin.toFixed(1)}%
+                </p>
+              )}
             </div>
 
             {/* Short Description */}
-            {product.shortDescription && (
-              <p className="text-gray-700 mb-6">{product.shortDescription}</p>
+            {product.shortDesc && (
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <p className="text-gray-700">{product.shortDesc}</p>
+              </div>
+            )}
+
+            {/* Attributes - Hiển thị thuộc tính sản phẩm từ JSON */}
+            {product.attributes && Object.keys(product.attributes).length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Đặc điểm nổi bật:</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.entries(product.attributes).map(([key, value]) => (
+                    <div key={key} className="flex items-center gap-2 text-sm">
+                      <span className="text-green-600">✓</span>
+                      <span className="text-gray-700">
+                        {key}: <span className="font-medium">{String(value)}</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
 
             {/* Variants */}
@@ -250,10 +335,18 @@ export default function ProductDetailPage() {
                           ? 'border-blue-600 bg-blue-50 text-blue-700 font-medium'
                           : 'border-gray-300 hover:border-gray-400'
                       } ${variant.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      disabled={variant.stock === 0}
+                      disabled={variant.stock === 0 || !variant.isActive}
                     >
-                      {variant.name}
-                      {variant.stock === 0 && ' (Hết hàng)'}
+                      <div className="flex flex-col items-start">
+                        <span>{variant.name}</span>
+                        {variant.sku && <span className="text-xs text-gray-500">SKU: {variant.sku}</span>}
+                        {variant.price !== product.price && (
+                          <span className="text-xs text-blue-600 font-medium">
+                            {formatPrice(variant.price)}
+                          </span>
+                        )}
+                      </div>
+                      {variant.stock === 0 && <span className="text-xs text-red-500 ml-2">(Hết hàng)</span>}
                     </button>
                   ))}
                 </div>
@@ -365,61 +458,98 @@ export default function ProductDetailPage() {
 
           <div className="p-6">
             {activeTab === 'description' && (
-              <div
-                className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: product.description || 'Chưa có mô tả' }}
-              />
+              <div className="prose max-w-none">
+                {product.description ? (
+                  <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                ) : (
+                  <p className="text-gray-500">Chưa có mô tả chi tiết</p>
+                )}
+              </div>
             )}
             {activeTab === 'specifications' && (
               <div>
-                {product.specifications ? (
-                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {Object.entries(product.specifications).map(([key, value]) => (
-                      <div key={key} className="border-b pb-2">
-                        <dt className="text-sm font-medium text-gray-900">{key}</dt>
-                        <dd className="mt-1 text-sm text-gray-600">{value as string}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : (
-                  <p className="text-gray-500">Chưa có thông số kỹ thuật</p>
-                )}
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin sản phẩm</h3>
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {product.sku && (
+                    <div className="border-b pb-2">
+                      <dt className="text-sm font-medium text-gray-900">Mã SKU</dt>
+                      <dd className="mt-1 text-sm text-gray-600">{product.sku}</dd>
+                    </div>
+                  )}
+                  {product.barcode && (
+                    <div className="border-b pb-2">
+                      <dt className="text-sm font-medium text-gray-900">Mã vạch</dt>
+                      <dd className="mt-1 text-sm text-gray-600">{product.barcode}</dd>
+                    </div>
+                  )}
+                  {product.origin && (
+                    <div className="border-b pb-2">
+                      <dt className="text-sm font-medium text-gray-900">Xuất xứ</dt>
+                      <dd className="mt-1 text-sm text-gray-600">{product.origin}</dd>
+                    </div>
+                  )}
+                  {product.unit && (
+                    <div className="border-b pb-2">
+                      <dt className="text-sm font-medium text-gray-900">Đơn vị tính</dt>
+                      <dd className="mt-1 text-sm text-gray-600">{product.unit}</dd>
+                    </div>
+                  )}
+                  {product.weight && (
+                    <div className="border-b pb-2">
+                      <dt className="text-sm font-medium text-gray-900">Trọng lượng</dt>
+                      <dd className="mt-1 text-sm text-gray-600">{product.weight} gram</dd>
+                    </div>
+                  )}
+                  <div className="border-b pb-2">
+                    <dt className="text-sm font-medium text-gray-900">Tồn kho</dt>
+                    <dd className="mt-1 text-sm text-gray-600">{product.stock} {product.unit || 'sản phẩm'}</dd>
+                  </div>
+                  {product.minStock && (
+                    <div className="border-b pb-2">
+                      <dt className="text-sm font-medium text-gray-900">Tồn kho tối thiểu</dt>
+                      <dd className="mt-1 text-sm text-gray-600">{product.minStock}</dd>
+                    </div>
+                  )}
+                  {product.attributes && Object.keys(product.attributes).length > 0 && (
+                    <>
+                      {Object.entries(product.attributes).map(([key, value]) => (
+                        <div key={key} className="border-b pb-2">
+                          <dt className="text-sm font-medium text-gray-900">{key}</dt>
+                          <dd className="mt-1 text-sm text-gray-600">{String(value)}</dd>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </dl>
               </div>
             )}
             {activeTab === 'reviews' && (
               <div>
                 <p className="text-gray-500">Chức năng đánh giá đang được phát triển</p>
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-gray-700">
+                    <strong>Thống kê:</strong>
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-gray-600">
+                    <li>• Lượt xem: {product.viewCount || 0}</li>
+                    <li>• Đã bán: {product.soldCount || 0}</li>
+                    <li>• Còn lại: {product.stock}</li>
+                  </ul>
+                </div>
               </div>
             )}
           </div>
         </div>
 
         {/* Related Products */}
-        {product.relatedProducts && product.relatedProducts.length > 0 && (
+        {product.category && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Sản phẩm liên quan</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {product.relatedProducts.map((related: any) => (
-                <Link
-                  key={related.id}
-                  href={`/products/${related.slug}`}
-                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-4"
-                >
-                  <div className="relative aspect-square rounded-md overflow-hidden mb-3">
-                    <ProductImage
-                      src={related.featuredImage}
-                      alt={related.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <h3 className="font-medium text-gray-900 text-sm mb-2 line-clamp-2">
-                    {related.name}
-                  </h3>
-                  <p className="text-blue-600 font-bold">{formatPrice(related.finalPrice)}</p>
-                </Link>
-              ))}
-            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              Sản phẩm cùng danh mục: {product.category.name}
+            </h2>
+            <p className="text-gray-500 text-sm mb-4">
+              Các sản phẩm liên quan sẽ được hiển thị ở đây (đang phát triển)
+            </p>
           </div>
         )}
       </div>

@@ -84,14 +84,39 @@ export const GET_PRODUCT_BY_SLUG = gql`
       isBestSeller
       isOnSale
       displayOrder
+      viewCount
+      soldCount
+      discountPercentage
+      profitMargin
       category {
         id
         name
         slug
         description
+        image
+      }
+      images {
+        id
+        url
+        alt
+        title
+        isPrimary
+        order
+      }
+      variants {
+        id
+        name
+        sku
+        barcode
+        price
+        stock
+        attributes
+        isActive
+        order
       }
       createdAt
       updatedAt
+      publishedAt
     }
   }
 `;
