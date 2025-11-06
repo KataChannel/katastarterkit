@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useMutation } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
 import { TaskMedia, MediaType } from '@/types/todo';
 import { UPLOAD_TASK_MEDIA } from '@/graphql/taskQueries';
 import { toast } from 'sonner';

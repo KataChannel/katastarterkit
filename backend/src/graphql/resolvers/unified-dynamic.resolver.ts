@@ -10,7 +10,7 @@ import {
 import { UseGuards, Injectable } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { DynamicCRUDService } from '../../services/dynamic-crud.service';
-import { GraphQLJSONObject } from 'graphql-type-json';
+import { GraphQLJSON } from 'graphql-type-json';
 import {
   UnifiedCreateInput,
   UnifiedUpdateInput,
@@ -81,7 +81,7 @@ export class UnifiedDynamicResolver {
    * @param modelName - The model name (e.g., 'task', 'user', 'post')
    * @param input - Query options (where, orderBy, select, include, etc.)
    */
-  @Query(() => [GraphQLJSONObject], { 
+  @Query(() => [GraphQLJSON], { 
     name: 'findMany',
     description: 'Find all records for a model with Prisma-like syntax' 
   })
@@ -105,7 +105,7 @@ export class UnifiedDynamicResolver {
    * @param modelName - The model name
    * @param input - Query options with pagination
    */
-  @Query(() => GraphQLJSONObject, { 
+  @Query(() => GraphQLJSON, { 
     name: 'findManyPaginated',
     description: 'Find records with pagination' 
   })
@@ -129,7 +129,7 @@ export class UnifiedDynamicResolver {
    * @param modelName - The model name
    * @param input - Query options with ID
    */
-  @Query(() => GraphQLJSONObject, { 
+  @Query(() => GraphQLJSON, { 
     name: 'findById',
     description: 'Find a unique record by ID' 
   })
@@ -163,7 +163,7 @@ export class UnifiedDynamicResolver {
   @UseGuards(JwtAuthGuard)
   async count(
     @Args('modelName', { type: () => String }) modelName: string,
-    @Args('where', { type: () => GraphQLJSONObject, nullable: true }) 
+    @Args('where', { type: () => GraphQLJSON, nullable: true }) 
     where?: any,
     @Context() context?: any
   ): Promise<number> {
@@ -183,7 +183,7 @@ export class UnifiedDynamicResolver {
    * @param modelName - The model name
    * @param input - Create input data
    */
-  @Mutation(() => GraphQLJSONObject, { 
+  @Mutation(() => GraphQLJSON, { 
     name: 'createOne',
     description: 'Create a single record with Prisma-like syntax' 
   })
@@ -214,7 +214,7 @@ export class UnifiedDynamicResolver {
    * @param modelName - The model name
    * @param input - Update input data
    */
-  @Mutation(() => GraphQLJSONObject, { 
+  @Mutation(() => GraphQLJSON, { 
     name: 'updateOne',
     description: 'Update a single record by ID' 
   })
@@ -240,7 +240,7 @@ export class UnifiedDynamicResolver {
    * @param modelName - The model name
    * @param input - Delete input data
    */
-  @Mutation(() => GraphQLJSONObject, { 
+  @Mutation(() => GraphQLJSON, { 
     name: 'deleteOne',
     description: 'Delete a single record by ID' 
   })
@@ -270,7 +270,7 @@ export class UnifiedDynamicResolver {
    * @param modelName - The model name
    * @param input - Bulk create input data
    */
-  @Mutation(() => GraphQLJSONObject, { 
+  @Mutation(() => GraphQLJSON, { 
     name: 'createMany',
     description: 'Create multiple records in a single operation' 
   })
@@ -305,7 +305,7 @@ export class UnifiedDynamicResolver {
    * @param modelName - The model name
    * @param input - Bulk update input data
    */
-  @Mutation(() => GraphQLJSONObject, { 
+  @Mutation(() => GraphQLJSON, { 
     name: 'updateMany',
     description: 'Update multiple records matching criteria' 
   })
@@ -331,7 +331,7 @@ export class UnifiedDynamicResolver {
    * @param modelName - The model name
    * @param input - Bulk delete input data
    */
-  @Mutation(() => GraphQLJSONObject, { 
+  @Mutation(() => GraphQLJSON, { 
     name: 'deleteMany',
     description: 'Delete multiple records matching criteria' 
   })
@@ -366,7 +366,7 @@ export class UnifiedDynamicResolver {
   @UseGuards(JwtAuthGuard)
   async exists(
     @Args('modelName', { type: () => String }) modelName: string,
-    @Args('where', { type: () => GraphQLJSONObject }) where: any,
+    @Args('where', { type: () => GraphQLJSON }) where: any,
     @Context() context?: any
   ): Promise<boolean> {
     try {
@@ -379,18 +379,18 @@ export class UnifiedDynamicResolver {
   /**
    * Upsert operation (equivalent to prisma.model.upsert())
    */
-  @Mutation(() => GraphQLJSONObject, { 
+  @Mutation(() => GraphQLJSON, { 
     name: 'upsert',
     description: 'Create or update a record based on criteria' 
   })
   @UseGuards(JwtAuthGuard)
   async upsert(
     @Args('modelName', { type: () => String }) modelName: string,
-    @Args('where', { type: () => GraphQLJSONObject }) where: any,
-    @Args('create', { type: () => GraphQLJSONObject }) create: any,
-    @Args('update', { type: () => GraphQLJSONObject }) update: any,
-    @Args('select', { type: () => GraphQLJSONObject, nullable: true }) select?: any,
-    @Args('include', { type: () => GraphQLJSONObject, nullable: true }) include?: any,
+    @Args('where', { type: () => GraphQLJSON }) where: any,
+    @Args('create', { type: () => GraphQLJSON }) create: any,
+    @Args('update', { type: () => GraphQLJSON }) update: any,
+    @Args('select', { type: () => GraphQLJSON, nullable: true }) select?: any,
+    @Args('include', { type: () => GraphQLJSON, nullable: true }) include?: any,
     @Context() context?: any
   ): Promise<any> {
     try {

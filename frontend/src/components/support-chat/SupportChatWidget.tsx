@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
-import { useMutation } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
 import { CREATE_SUPPORT_CONVERSATION, SEND_SUPPORT_MESSAGE } from '@/graphql/support-chat/support-chat.graphql';
 import {
   MessageCircle,

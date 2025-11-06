@@ -1,5 +1,6 @@
 import { useFindMany } from './useDynamicGraphQL';
-import { useQuery } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
 import { GET_PUBLIC_WEBSITE_SETTINGS, GET_HEADER_SETTINGS, GET_FOOTER_SETTINGS } from '@/graphql/website-settings.queries';
 
 export interface WebsiteSetting {

@@ -1,16 +1,32 @@
 'use client';
 
-import { useQuery } from '@apollo/client';
-import { GET_HOMEPAGE } from '@/graphql/queries/pages';
+import { getHomepage } from '@/actions/page.actions';
 import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
 import { Page, PageStatus } from '@/types/page-builder';
 import { notFound } from 'next/navigation';
 import Head from 'next/head';
+import { useEffect, useState } from 'react';
 
 export default function WebsitePage() {
-  const { data, loading, error } = useQuery<{ getHomepage: Page | null }>(GET_HOMEPAGE, {
-    errorPolicy: 'all'
-  });
+  const [page, setPage] = useState<Page | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchHomepage = async () => {
+      try {
+        setLoading(true);
+        const result = await getHomepage();
+        setPage(result as Page | null);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomepage();
+  }, []);
 
   if (loading) {
     return (
@@ -19,8 +35,6 @@ export default function WebsitePage() {
       </div>
     );
   }
-
-  const page = data?.getHomepage;
 
   if (error || !page) {
     return notFound();

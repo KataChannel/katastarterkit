@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

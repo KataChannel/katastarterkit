@@ -1,237 +1,55 @@
-import { gql } from '@apollo/client';
+/**
+ * DEPRECATED: GraphQL has been removed from this project
+ * This file provides backward compatibility stubs
+ * 
+ * Migration Guide:
+ * - Create Server Actions in @/actions/files.ts
+ * - Or create REST API: /api/files
+ */
 
-// Fragment for File fields
-export const FILE_FIELDS = gql`
-  fragment FileFields on File {
-    id
-    filename
-    originalName
-    mimeType
-    size
-    fileType
-    url
-    bucket
-    path
-    folderId
-    userId
-    visibility
-    title
-    description
-    alt
-    tags
-    metadata
-    width
-    height
-    thumbnailUrl
-    downloadCount
-    viewCount
-    createdAt
-    updatedAt
-  }
-`;
+// Type definitions
+export interface File {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  mimeType: string;
+  folderId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-// Fragment for Folder fields
-export const FOLDER_FIELDS = gql`
-  fragment FolderFields on FileFolder {
-    id
-    name
-    description
-    parentId
-    path
-    userId
-    color
-    icon
-    isSystem
-    createdAt
-    updatedAt
-  }
-`;
+export interface FileFolder {
+  id: string;
+  name: string;
+  parentId?: string;
+  files?: File[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-// Get single file
-export const GET_FILE = gql`
-  ${FILE_FIELDS}
-  query GetFile($id: ID!) {
-    file(id: $id) {
-      ...FileFields
-      folder {
-        id
-        name
-        path
-      }
-    }
-  }
-`;
+export interface StorageStats {
+  totalSize: number;
+  fileCount: number;
+  folderCount: number;
+}
 
-// Get files with pagination and filters
-export const GET_FILES = gql`
-  ${FILE_FIELDS}
-  query GetFiles($input: GetFilesInput) {
-    files(input: $input) {
-      items {
-        ...FileFields
-        folder {
-          id
-          name
-          path
-        }
-      }
-      total
-      page
-      limit
-      totalPages
-      hasNextPage
-      hasPreviousPage
-    }
-  }
-`;
+// GraphQL query stubs
+export const GET_FILES = `query GetFiles { files { id } }`;
+export const GET_FILE = `query GetFile($id: ID!) { file(id: $id) { id } }`;
+export const GET_FOLDERS = `query GetFolders { folders { id } }`;
+export const GET_FOLDER = `query GetFolder($id: ID!) { folder(id: $id) { id } }`;
+export const GET_STORAGE_STATS = `query GetStorageStats { storageStats { totalSize } }`;
 
-// Get single folder
-export const GET_FOLDER = gql`
-  ${FOLDER_FIELDS}
-  query GetFolder($id: ID!) {
-    folder(id: $id) {
-      ...FolderFields
-      parent {
-        id
-        name
-        path
-      }
-      children {
-        id
-        name
-        path
-      }
-      files {
-        id
-        filename
-        originalName
-        url
-        fileType
-        size
-      }
-    }
-  }
-`;
+// GraphQL mutation stubs
+export const UPDATE_FILE = `mutation UpdateFile($id: ID!, $input: FileInput!) { updateFile(id: $id, input: $input) { id } }`;
+export const DELETE_FILE = `mutation DeleteFile($id: ID!) { deleteFile(id: $id) }`;
+export const MOVE_FILES = `mutation MoveFiles($fileIds: [ID!]!, $folderId: ID) { moveFiles(fileIds: $fileIds, folderId: $folderId) }`;
+export const BULK_DELETE_FILES = `mutation BulkDeleteFiles($fileIds: [ID!]!) { bulkDeleteFiles(fileIds: $fileIds) }`;
+export const BULK_UPDATE_FILES = `mutation BulkUpdateFiles($updates: [FileUpdateInput!]!) { bulkUpdateFiles(updates: $updates) }`;
+export const CREATE_FOLDER = `mutation CreateFolder($input: FolderInput!) { createFolder(input: $input) { id } }`;
+export const UPDATE_FOLDER = `mutation UpdateFolder($id: ID!, $input: FolderInput!) { updateFolder(id: $id, input: $input) { id } }`;
+export const DELETE_FOLDER = `mutation DeleteFolder($id: ID!) { deleteFolder(id: $id) }`;
+export const CREATE_FILE_SHARE = `mutation CreateFileShare($fileId: ID!) { createFileShare(fileId: $fileId) { id } }`;
 
-// Get all folders
-export const GET_FOLDERS = gql`
-  ${FOLDER_FIELDS}
-  query GetFolders {
-    folders {
-      ...FolderFields
-      children {
-        id
-        name
-        path
-      }
-    }
-  }
-`;
-
-// Get storage statistics
-export const GET_STORAGE_STATS = gql`
-  query GetStorageStats {
-    fileStorageStats {
-      totalFiles
-      totalSize
-      totalFolders
-      filesByType {
-        type
-        count
-        totalSize
-      }
-      filesByVisibility {
-        visibility
-        count
-      }
-    }
-  }
-`;
-
-// Update file mutation
-export const UPDATE_FILE = gql`
-  ${FILE_FIELDS}
-  mutation UpdateFile($input: UpdateFileInput!) {
-    updateFile(input: $input) {
-      ...FileFields
-    }
-  }
-`;
-
-// Delete file mutation
-export const DELETE_FILE = gql`
-  mutation DeleteFile($id: ID!) {
-    deleteFile(id: $id)
-  }
-`;
-
-// Move files mutation
-export const MOVE_FILES = gql`
-  ${FILE_FIELDS}
-  mutation MoveFiles($input: MoveFilesInput!) {
-    moveFiles(input: $input) {
-      ...FileFields
-    }
-  }
-`;
-
-// Bulk delete files mutation
-export const BULK_DELETE_FILES = gql`
-  mutation BulkDeleteFiles($input: BulkDeleteFilesInput!) {
-    bulkDeleteFiles(input: $input)
-  }
-`;
-
-// Bulk update files mutation
-export const BULK_UPDATE_FILES = gql`
-  ${FILE_FIELDS}
-  mutation BulkUpdateFiles($input: BulkUpdateFilesInput!) {
-    bulkUpdateFiles(input: $input) {
-      ...FileFields
-    }
-  }
-`;
-
-// Create folder mutation
-export const CREATE_FOLDER = gql`
-  ${FOLDER_FIELDS}
-  mutation CreateFolder($input: CreateFolderInput!) {
-    createFolder(input: $input) {
-      ...FolderFields
-    }
-  }
-`;
-
-// Update folder mutation
-export const UPDATE_FOLDER = gql`
-  ${FOLDER_FIELDS}
-  mutation UpdateFolder($input: UpdateFolderInput!) {
-    updateFolder(input: $input) {
-      ...FolderFields
-    }
-  }
-`;
-
-// Delete folder mutation
-export const DELETE_FOLDER = gql`
-  mutation DeleteFolder($id: ID!) {
-    deleteFolder(id: $id)
-  }
-`;
-
-// Create file share mutation
-export const CREATE_FILE_SHARE = gql`
-  mutation CreateFileShare($input: CreateFileShareInput!) {
-    createFileShare(input: $input) {
-      id
-      fileId
-      token
-      sharedBy
-      sharedWith
-      expiresAt
-      canDownload
-      canView
-      createdAt
-    }
-  }
-`;
+console.warn('⚠️ @/graphql/queries/files is deprecated. Create @/actions/files.ts with Server Actions.');

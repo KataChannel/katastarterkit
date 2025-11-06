@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
-import { useQuery, useMutation } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   GET_SUPPORT_CONVERSATIONS, 

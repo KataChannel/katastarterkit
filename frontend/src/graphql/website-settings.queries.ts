@@ -1,98 +1,122 @@
 /**
- * ============================================================================
- * PUBLIC WEBSITE SETTINGS GRAPHQL QUERIES
- * ============================================================================
+ * DEPRECATED: GraphQL has been removed from this project
+ * This file provides backward compatibility stubs
  * 
- * Public website settings queries for frontend (no authentication required)
- * 
- * @author Senior Full-Stack Engineer
- * @version 1.0.0
+ * Migration Guide:
+ * - Create Server Actions in @/actions/website-settings.ts
+ * - Or create REST API: /api/website-settings
  */
 
-import { gql } from '@apollo/client';
+// Type definitions
+export interface WebsiteSetting {
+  id: string;
+  key: string;
+  value: any;
+  group?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-/**
- * Get Public Website Settings
- * No authentication required
- */
-export const GET_PUBLIC_WEBSITE_SETTINGS = gql`
-  query GetPublicWebsiteSettings(
-    $category: String
-    $group: String
-    $keys: [String!]
-  ) {
-    publicWebsiteSettings(
-      category: $category
-      group: $group
-      keys: $keys
-    ) {
+export interface HeaderSettings {
+  logo?: string;
+  navigation?: any[];
+  ctaButton?: {
+    text: string;
+    url: string;
+  };
+}
+
+export interface FooterSettings {
+  columns?: any[];
+  copyright?: string;
+  socialLinks?: {
+    platform: string;
+    url: string;
+  }[];
+}
+
+// GraphQL query stubs
+export const GET_PUBLIC_WEBSITE_SETTINGS = `
+  # DEPRECATED: Create Server Action getPublicWebsiteSettings()
+  query GetPublicWebsiteSettings {
+    publicWebsiteSettings {
       id
       key
-      label
       value
-      description
-      type
-      category
-      group
-      order
-      options
-      validation
-      isActive
-      isPublic
-      createdAt
-      updatedAt
     }
   }
 `;
 
-/**
- * Get Header Settings
- * No authentication required
- */
-export const GET_HEADER_SETTINGS = gql`
+export const GET_HEADER_SETTINGS = `
+  # DEPRECATED: Create Server Action getHeaderSettings()
   query GetHeaderSettings {
     headerSettings {
-      id
-      key
-      label
-      value
-      description
-      type
-      category
-      group
-      order
-      options
-      validation
-      isActive
-      isPublic
-      createdAt
-      updatedAt
+      logo
+      navigation
+      ctaButton {
+        text
+        url
+      }
     }
   }
 `;
 
-/**
- * Get Footer Settings
- * No authentication required
- */
-export const GET_FOOTER_SETTINGS = gql`
+export const GET_FOOTER_SETTINGS = `
+  # DEPRECATED: Create Server Action getFooterSettings()
   query GetFooterSettings {
     footerSettings {
-      id
-      key
-      label
-      value
-      description
-      type
-      category
-      group
-      order
-      options
-      validation
-      isActive
-      isPublic
-      createdAt
-      updatedAt
+      columns
+      copyright
+      socialLinks {
+        platform
+        url
+      }
     }
   }
 `;
+
+export const GET_ALL_WEBSITE_SETTINGS = `
+  # DEPRECATED: Create Server Action getAllWebsiteSettings()
+  query GetAllWebsiteSettings {
+    websiteSettings {
+      id
+      key
+      value
+      group
+    }
+  }
+`;
+
+// GraphQL mutation stubs
+export const UPDATE_WEBSITE_SETTING = `
+  # DEPRECATED: Create Server Action updateWebsiteSetting(key, value)
+  mutation UpdateWebsiteSetting($key: String!, $value: JSON!) {
+    updateWebsiteSetting(key: $key, value: $value) {
+      id
+      key
+      value
+    }
+  }
+`;
+
+export const UPDATE_HEADER_SETTINGS = `
+  # DEPRECATED: Create Server Action updateHeaderSettings(data)
+  mutation UpdateHeaderSettings($input: HeaderSettingsInput!) {
+    updateHeaderSettings(input: $input) {
+      logo
+      navigation
+    }
+  }
+`;
+
+export const UPDATE_FOOTER_SETTINGS = `
+  # DEPRECATED: Create Server Action updateFooterSettings(data)
+  mutation UpdateFooterSettings($input: FooterSettingsInput!) {
+    updateFooterSettings(input: $input) {
+      columns
+      copyright
+    }
+  }
+`;
+
+console.warn('⚠️ @/graphql/website-settings.queries is deprecated. Create @/actions/website-settings.ts with Server Actions.');

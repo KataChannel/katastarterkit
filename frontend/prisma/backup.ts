@@ -1,0 +1,363 @@
+import { PrismaClient } from '@prisma/client';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const prisma = new PrismaClient();
+const BACKUP_ROOT_DIR = './kata_json';
+
+function getFormattedDate(): string {
+  const now = new Date();
+  const pad = (num: number) => num.toString().padStart(2, '0');
+  return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+}
+
+const BACKUP_DIR = path.join(BACKUP_ROOT_DIR, getFormattedDate());
+
+/**
+ * Check if a table exists in the database
+ */
+async function tableExists(tableName: string): Promise<boolean> {
+  try {
+    await prisma.$queryRawUnsafe(`SELECT 1 FROM "${tableName}" LIMIT 1`);
+    return true;
+  } catch (error: any) {
+    // Check for table not exists error codes
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      return false;
+    }
+    // For other errors (like empty table), assume table exists
+    return true;
+  }
+}
+
+/**
+ * Get list of existing tables from database
+ */
+async function getExistingTables(): Promise<string[]> {
+  try {
+    const result: any[] = await prisma.$queryRaw`
+      SELECT tablename 
+      FROM pg_tables 
+      WHERE schemaname = 'public'
+      ORDER BY tablename
+    `;
+    return result.map(row => row.tablename);
+  } catch (error) {
+    console.error('❌ Error getting existing tables:', error);
+    return [];
+  }
+}
+
+/**
+ * Check if table is a system/metadata table that should always be backed up
+ */
+function isSystemTable(tableName: string): boolean {
+  const systemTables = [
+    'website_settings', // WebsiteSetting model - important config
+    '_prisma_migrations', // Prisma migrations tracking
+    'call_center_config', // Call center configuration
+    'call_center_sync_logs', // Call center sync history
+    'chat_integrations', // Chat platform integrations
+    'ai_providers', // AI provider configurations
+  ];
+  return systemTables.includes(tableName);
+}
+
+/**
+ * Parse schema.prisma file to extract all model names and their table mappings
+ */
+function parseSchemaModels(): { modelName: string; tableName: string }[] {
+  try {
+    const schemaPath = path.join(__dirname, 'schema.prisma');
+    const schemaContent = fs.readFileSync(schemaPath, 'utf8');
+    
+    // Extract model blocks using regex
+    const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*)\}/gm;
+    const models: { modelName: string; tableName: string }[] = [];
+    let match;
+    
+    while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
+      const modelName = match[1];
+      const modelBody = match[2];
+      
+      // Look for @@map directive in the model body
+      const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
+      const tableName = mapMatch ? mapMatch[1] : camelToSnakeCase(modelName);
+      
+      models.push({ modelName, tableName });
+    }
+    
+    console.log(`📋 Found ${models.length} models in schema.prisma`);
+    if (models.length > 0) {
+      console.log(`   Examples: ${models.slice(0, 5).map(m => `${m.modelName} → ${m.tableName}`).join(', ')}`);
+    }
+    return models;
+  } catch (error) {
+    console.error('❌ Error parsing schema.prisma:', error);
+    // Fallback to empty array if parsing fails
+    return [];
+  }
+}
+
+/**
+ * Convert Prisma model names to database table names
+ * Automatically builds mapping from schema.prisma by parsing @@map directives
+ * Falls back to snake_case conversion for models without explicit @@map
+ */
+function buildModelTableMapping(): { [modelName: string]: string } {
+  try {
+    const schemaPath = path.join(__dirname, 'schema.prisma');
+    const schemaContent = fs.readFileSync(schemaPath, 'utf8');
+    
+    const mapping: { [modelName: string]: string } = {};
+    
+    // Extract model blocks with their bodies
+    const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*?)\}/gm;
+    let match;
+    
+    while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
+      const modelName = match[1];
+      const modelBody = match[2];
+      
+      // Look for @@map directive in the model body
+      const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
+      
+      if (mapMatch) {
+        // Use @@map value if present
+        mapping[modelName] = mapMatch[1];
+      } else {
+        // Auto-convert to snake_case if no @@map
+        mapping[modelName] = camelToSnakeCase(modelName);
+      }
+    }
+    
+    return mapping;
+  } catch (error) {
+    console.error('❌ Error building model mapping from schema:', error);
+    // Return empty mapping to fall back to direct parsing
+    return {};
+  }
+}
+
+/**
+ * Convert camelCase to snake_case
+ * Examples: User → user, UserSession → user_session, TaskComment → task_comment
+ */
+function camelToSnakeCase(str: string): string {
+  return str
+    .replace(/([A-Z])/g, '_$1')  // Add underscore before uppercase letters
+    .toLowerCase()              // Convert to lowercase
+    .replace(/^_/, '');         // Remove leading underscore
+}
+
+/**
+ * Get or create the model-to-table name mapping (cached for performance)
+ */
+let modelTableMappingCache: { [modelName: string]: string } | null = null;
+
+function convertModelToTableName(modelName: string): string {
+  // Initialize cache on first call
+  if (!modelTableMappingCache) {
+    modelTableMappingCache = buildModelTableMapping();
+    
+    if (Object.keys(modelTableMappingCache).length === 0) {
+      console.warn('⚠️  Could not parse schema.prisma, using default snake_case conversion');
+    } else {
+      console.log(`✅ Built mapping for ${Object.keys(modelTableMappingCache).length} models from schema.prisma`);
+    }
+  }
+  
+  // Return mapped name or convert to snake_case
+  return modelTableMappingCache[modelName] || camelToSnakeCase(modelName);
+}
+
+async function getTables(): Promise<string[]> {
+  console.log('🔍 Parsing schema.prisma to get all models...');
+  const models = parseSchemaModels();
+  
+  if (models.length === 0) {
+    console.log('⚠️  No models found in schema.prisma, querying database for tables...');
+    // Query database directly if schema parsing fails
+    const existingTables = await getExistingTables();
+    console.log(`📋 Found ${existingTables.length} tables in database`);
+    return existingTables;
+  }
+  
+  const allTableNames = models.map(model => model.tableName);
+  console.log(`✅ Parsed ${allTableNames.length} table names from ${models.length} models`);
+  
+  // Get existing tables from database
+  console.log('🔍 Checking which tables actually exist in database...');
+  const existingTables = await getExistingTables();
+  console.log(`📋 Found ${existingTables.length} existing tables in database`);
+  
+  // Filter to only include tables that exist in database
+  const validTables = allTableNames.filter(tableName => {
+    const exists = existingTables.includes(tableName);
+    if (!exists) {
+      console.log(`   ⚠️  Table '${tableName}' from schema not found in database`);
+    }
+    return exists;
+  });
+  
+  // Add system tables that should always be included
+  for (const table of existingTables) {
+    if (isSystemTable(table) && !validTables.includes(table)) {
+      validTables.push(table);
+    }
+  }
+  
+  // Sort for consistency
+  validTables.sort();
+  
+  console.log(`✅ Final table list (${validTables.length} tables to backup):`);
+  console.log(`   ${validTables.slice(0, 10).join(', ')}${validTables.length > 10 ? ` ... and ${validTables.length - 10} more` : ''}`);
+  return validTables;
+}
+
+async function backupTableToJson(table: string): Promise<void> {
+  try {
+    console.log(`🔄 Backing up table: ${table}`);
+    
+    // Check if table exists first
+    const exists = await tableExists(table);
+    if (!exists) {
+      console.log(`⚠️  Table ${table} does not exist in database, skipping...`);
+      return;
+    }
+    
+    const data: any[] = await prisma.$queryRawUnsafe(`SELECT * FROM "${table}"`);
+    
+    if (data.length === 0) {
+      console.log(`⚠️  Table ${table} is empty, skipping...`);
+      return;
+    }
+    
+    const filePath: string = path.join(BACKUP_DIR, `${table}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    console.log(`✅ Backup JSON successful: ${filePath} (${data.length} records)`);
+  } catch (error: any) {
+    if (error.code === '42P01' || error.message?.includes('does not exist')) {
+      console.log(`⚠️  Table ${table} does not exist in database, skipping...`);
+    } else {
+      console.error(`❌ Error backing up table ${table}:`, error.message || error);
+    }
+  }
+}
+
+async function backupAllTablesToJson(): Promise<void> {
+  if (!fs.existsSync(BACKUP_DIR)) {
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+  }
+
+  console.log(`📂 Creating backup in directory: ${BACKUP_DIR}`);
+  console.log(`⏰ Backup started at: ${new Date().toLocaleString()}`);
+  
+  const tables: string[] = await getTables();
+  console.log(`📊 Found ${tables.length} tables to backup`);
+  
+  let totalRecords = 0;
+  const startTime = Date.now();
+  
+  for (const table of tables) {
+    const tableStartTime = Date.now();
+    await backupTableToJson(table);
+    
+    // Count records for statistics
+    try {
+      const recordCount: any[] = await prisma.$queryRawUnsafe(`SELECT COUNT(*) as count FROM "${table}"`);
+      const count = parseInt(recordCount[0].count);
+      totalRecords += count;
+      
+      const tableTime = Date.now() - tableStartTime;
+      if (count > 0) {
+        console.log(`   📈 ${count.toLocaleString()} records in ${tableTime}ms`);
+      }
+    } catch (e) {
+      console.log(`   ⚠️  Could not count records for ${table}`);
+    }
+  }
+  
+  const totalTime = Math.round((Date.now() - startTime) / 1000);
+  console.log(`\n🎉 Backup completed successfully!`);
+  console.log(`📊 Total records: ${totalRecords.toLocaleString()}`);
+  console.log(`⏱️  Total time: ${totalTime} seconds`);
+  console.log(`📁 Backup location: ${BACKUP_DIR}`);
+}
+
+async function restoreTableFromJson(table: string): Promise<void> {
+  try {
+    const latestBackupDir = fs.readdirSync(BACKUP_ROOT_DIR).sort().reverse()[0];
+    if (!latestBackupDir) {
+      console.error(`❌ No backup directory found.`);
+      return;
+    }
+    
+    const filePath: string = path.join(BACKUP_ROOT_DIR, latestBackupDir, `${table}.json`);
+    if (!fs.existsSync(filePath)) {
+      console.error(`❌ Backup file not found for table ${table}`);
+      return;
+    }
+
+    console.log(`📥 Restoring table: ${table}`);
+    const data: any[] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    
+    if (data.length === 0) {
+      console.log(`⚠️  No data to restore for table ${table}`);
+      return;
+    }
+    
+    // Use batch insert with ON CONFLICT handling
+    const columns = Object.keys(data[0]).map(col => `"${col}"`).join(', ');
+    const placeholders = Object.keys(data[0]).map((_, i) => `$${i + 1}`).join(', ');
+    
+    let successCount = 0;
+    for (const row of data) {
+      try {
+        await prisma.$queryRawUnsafe(
+          `INSERT INTO "${table}" (${columns}) VALUES (${placeholders}) ON CONFLICT DO NOTHING`,
+          ...Object.values(row)
+        );
+        successCount++;
+      } catch (error) {
+        console.log(`⚠️  Skipped duplicate/invalid record in ${table}`);
+      }
+    }
+    
+    console.log(`✅ Successfully restored ${successCount}/${data.length} records to table ${table}`);
+  } catch (error) {
+    console.error(`❌ Error restoring table ${table}:`, error);
+  }
+}
+
+async function restoreAllTablesFromJson(): Promise<void> {
+  console.log(`🔄 Starting restore process...`);
+  
+  const tables: string[] = await getTables();
+  console.log(`📊 Found ${tables.length} tables to restore`);
+  
+  const startTime = Date.now();
+  let totalRestored = 0;
+  
+  for (const table of tables) {
+    const tableStartTime = Date.now();
+    await restoreTableFromJson(table);
+    
+    const tableTime = Date.now() - tableStartTime;
+    console.log(`   ⏱️  ${table}: ${tableTime}ms`);
+  }
+  
+  const totalTime = Math.round((Date.now() - startTime) / 1000);
+  console.log(`\n🎉 Restore completed in ${totalTime} seconds!`);
+}
+
+backupAllTablesToJson()
+  .then(() => console.log('🎉 rausachcore backup completed successfully!'))
+  .catch((err) => console.error('❌ Backup error:', err))
+  .finally(() => prisma.$disconnect());
+
+// To restore data, uncomment and run restoreAllTablesFromJson()
+// restoreAllTablesFromJson()
+//   .then(() => console.log('🎉 rausachcore restore completed successfully!'))
+//   .catch((err) => console.error('❌ Restore error:', err))
+//   .finally(() => prisma.$disconnect());

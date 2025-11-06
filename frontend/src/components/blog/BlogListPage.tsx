@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_BLOGS, GET_BLOG_CATEGORIES } from '@/graphql/blog.queries';
+import { getBlogPosts, getBlogCategories } from '@/actions/blog.actions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -63,40 +62,77 @@ export function BlogListPage() {
   const [displayError, setDisplayError] = useState<{ message: string; details?: string } | null>(null);
   const { notify } = useErrorNotification();
 
-  const { data, loading, error, refetch } = useQuery<BlogsQueryData>(GET_BLOGS, {
-    variables: {
-      page,
-      limit: 12,
-      search: search || undefined,
-      categoryId: selectedCategory || undefined,
-      sort: sortBy,
-    },
-    errorPolicy: 'all',
-  });
+  // Data state
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [categoriesData, setCategoriesData] = useState<any[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState<Error | null>(null);
 
-  const { data: categoriesData, loading: categoriesLoading, error: categoriesError } = useQuery<CategoriesQueryData>(GET_BLOG_CATEGORIES, {
-    errorPolicy: 'all',
-  });
+  // Fetch blogs
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        const result = await getBlogPosts({
+          page,
+          limit: 12,
+          status: 'PUBLISHED',
+        });
+        setData({
+          blogs: {
+            items: result.posts,
+            total: result.total,
+            page,
+            pageSize: 12,
+            totalPages: Math.ceil(result.total / 12),
+            hasMore: page < Math.ceil(result.total / 12),
+          },
+        });
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, [page, search, selectedCategory, sortBy]);
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const cats = await getBlogCategories({ includeCount: true });
+        setCategoriesData(Array.isArray(cats) ? cats : []);
+      } catch (err) {
+        setCategoriesError(err as Error);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Handle errors and display notifications
   useEffect(() => {
     if (error) {
-      const errorInfo = parseGraphQLError(error);
       setDisplayError({
-        message: errorInfo.message,
-        details: errorInfo.details,
+        message: error.message,
+        details: error.stack,
       });
-      notify(errorInfo);
     } else {
       setDisplayError(null);
     }
-  }, [error, notify]);
+  }, [error]);
 
   // Log categories errors
   useEffect(() => {
     if (categoriesError) {
-      const errorInfo = parseGraphQLError(categoriesError);
-      console.warn('[Categories Error]', errorInfo);
+      console.warn('[Categories Error]', categoriesError.message);
     }
   }, [categoriesError]);
 
@@ -117,7 +153,7 @@ export function BlogListPage() {
 
   const blogs = data?.blogs?.items || [];
   const totalPages = data?.blogs?.totalPages || 0;
-  const categories = categoriesData?.blogCategories || [];
+  const categories = categoriesData || [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -218,7 +254,7 @@ export function BlogListPage() {
                   <Button
                     onClick={() => {
                       setDisplayError(null);
-                      refetch();
+                      setPage(1);
                     }}
                     className="bg-red-600 hover:bg-red-700 text-white"
                   >
@@ -247,7 +283,7 @@ export function BlogListPage() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {blogs.map((blog) => (
+              {blogs.map((blog: any) => (
                 <Link key={blog.id} href={`/website/baiviet/${blog.slug}`}>
                   <BlogCard blog={blog} />
                 </Link>

@@ -1,377 +1,131 @@
-import { gql } from '@apollo/client';
+/**
+ * DEPRECATED: GraphQL has been removed from this project
+ * This file provides backward compatibility stubs
+ * 
+ * Migration Guide:
+ * - Use Server Actions from @/actions/pages
+ * - Functions available: getPages, getPageBySlug, createPage, updatePage, deletePage
+ */
 
-// Fragment for page fields
-const PAGE_FRAGMENT = gql`
-  fragment PageFields on Page {
-    id
-    title
-    slug
-    content
-    status
-    isHomepage
-    isDynamic
-    dynamicConfig
-    seoTitle
-    seoDescription
-    seoKeywords
-    createdAt
-    updatedAt
+// Type definitions
+export interface Page {
+  id: string;
+  title: string;
+  slug: string;
+  content?: any;
+  blocks?: PageBlock[];
+  isPublished: boolean;
+  publishedAt?: string;
+  authorId?: string;
+  author?: {
+    id: string;
+    name: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PageBlock {
+  id: string;
+  type: string;
+  content: any;
+  order: number;
+  pageId: string;
+}
+
+export interface PaginatedPages {
+  pages: Page[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// GraphQL query stubs
+export const GET_PAGES = `
+  # DEPRECATED: Use Server Action getPages() from @/actions/pages
+  query GetPages {
+    pages {
+      id
+      title
+      slug
+      isPublished
+    }
   }
 `;
 
-// Fragment for page block fields (with nested children support)
-const PAGE_BLOCK_FRAGMENT = gql`
-  fragment PageBlockFields on PageBlock {
-    id
-    type
-    content
-    style
-    config
-    order
-    parentId
-    depth
-    isVisible
-    children {
+export const GET_PAGE_BY_ID = `
+  # DEPRECATED: Use Server Action getPageBySlug(slug)
+  query GetPageById($id: ID!) {
+    page(id: $id) {
       id
-      type
-      content
-      style
-      config
-      order
-      parentId
-      depth
-      isVisible
-      children {
+      title
+      slug
+      blocks {
         id
         type
         content
-        style
-        config
         order
-        parentId
-        depth
-        isVisible
-        children {
-          id
-          type
-          content
-          style
-          config
-          order
-          parentId
-          depth
-          isVisible
-        }
       }
     }
   }
 `;
 
-// Get paginated list of pages
-export const GET_PAGES = gql`
-  ${PAGE_FRAGMENT}
-  query GetPages($pagination: PaginationInput, $filters: PageFiltersInput) {
-    getPages(pagination: $pagination, filters: $filters) {
-      items {
-        ...PageFields
-        blocks {
-          id
-          type
-          order
-        }
-      }
-      pagination {
-        currentPage
-        totalPages
-        totalItems
-        hasNextPage
-        hasPreviousPage
-      }
-    }
-  }
-`;
-
-// Get a single page by ID with all blocks
-export const GET_PAGE_BY_ID = gql`
-  ${PAGE_FRAGMENT}
-  ${PAGE_BLOCK_FRAGMENT}
-  query GetPageById($id: String!) {
-    getPageById(id: $id) {
-      ...PageFields
-      blocks {
-        ...PageBlockFields
-      }
-    }
-  }
-`;
-
-// Get a single page by slug with all blocks (for public pages)
-export const GET_PAGE_BY_SLUG = gql`
-  ${PAGE_FRAGMENT}
-  ${PAGE_BLOCK_FRAGMENT}
-  query GetPageBySlug($slug: String!) {
-    getPageBySlug(slug: $slug) {
-      ...PageFields
-      blocks {
-        ...PageBlockFields
-      }
-    }
-  }
-`;
-
-// Get homepage
-export const GET_HOMEPAGE = gql`
-  ${PAGE_FRAGMENT}
-  ${PAGE_BLOCK_FRAGMENT}
-  query GetHomepage {
-    getHomepage {
-      ...PageFields
-      isHomepage
-      blocks {
-        ...PageBlockFields
-      }
-    }
-  }
-`;
-
-// Create a new page
-export const CREATE_PAGE = gql`
-  ${PAGE_FRAGMENT}
-  mutation CreatePage($input: CreatePageInput!) {
+// GraphQL mutation stubs
+export const CREATE_PAGE = `
+  # DEPRECATED: Use Server Action createPage(data)
+  mutation CreatePage($input: PageInput!) {
     createPage(input: $input) {
-      ...PageFields
+      id
     }
   }
 `;
 
-// Update an existing page
-export const UPDATE_PAGE = gql`
-  ${PAGE_FRAGMENT}
-  mutation UpdatePage($id: String!, $input: UpdatePageInput!) {
+export const UPDATE_PAGE = `
+  # DEPRECATED: Use Server Action updatePage(id, data)
+  mutation UpdatePage($id: ID!, $input: PageInput!) {
     updatePage(id: $id, input: $input) {
-      ...PageFields
-    }
-  }
-`;
-
-// Delete a page
-export const DELETE_PAGE = gql`
-  ${PAGE_FRAGMENT}
-  mutation DeletePage($id: String!) {
-    deletePage(id: $id) {
-      ...PageFields
-    }
-  }
-`;
-
-// Add a block to a page
-export const ADD_PAGE_BLOCK = gql`
-  fragment PageBlockFields on PageBlock {
-    id
-    type
-    content
-    style
-    config
-    order
-    parentId
-    depth
-    isVisible
-    children {
       id
-      type
-      content
-      style
-      config
-      order
-      parentId
-      depth
-      isVisible
-      children {
-        id
-        type
-        content
-        style
-        config
-        order
-        parentId
-        depth
-        isVisible
-        children {
-          id
-          type
-          content
-          style
-          config
-          order
-          parentId
-          depth
-          isVisible
-        }
-      }
-    }
-  }
-  mutation AddPageBlock($pageId: String!, $input: CreatePageBlockInput!) {
-    addPageBlock(pageId: $pageId, input: $input) {
-      ...PageBlockFields
     }
   }
 `;
 
-// Update a page block
-export const UPDATE_PAGE_BLOCK = gql`
-  fragment PageBlockFields on PageBlock {
-    id
-    type
-    content
-    style
-    config
-    order
-    parentId
-    depth
-    isVisible
-    children {
-      id
-      type
-      content
-      style
-      config
-      order
-      parentId
-      depth
-      isVisible
-      children {
-        id
-        type
-        content
-        style
-        config
-        order
-        parentId
-        depth
-        isVisible
-        children {
-          id
-          type
-          content
-          style
-          config
-          order
-          parentId
-          depth
-          isVisible
-        }
-      }
-    }
+export const DELETE_PAGE = `
+  # DEPRECATED: Use Server Action deletePage(id)
+  mutation DeletePage($id: ID!) {
+    deletePage(id: $id)
   }
-  mutation UpdatePageBlock($id: String!, $input: UpdatePageBlockInput!) {
-    updatePageBlock(id: $id, input: $input) {
-      ...PageBlockFields
+`;
+
+export const ADD_PAGE_BLOCK = `
+  # DEPRECATED: Update page blocks through updatePage Server Action
+  mutation AddPageBlock($pageId: ID!, $block: PageBlockInput!) {
+    addPageBlock(pageId: $pageId, block: $block) {
+      id
     }
   }
 `;
 
-// Delete a page block
-export const DELETE_PAGE_BLOCK = gql`
-  fragment PageBlockFields on PageBlock {
-    id
-    type
-    content
-    style
-    config
-    order
-    parentId
-    depth
-    isVisible
-    children {
+export const UPDATE_PAGE_BLOCK = `
+  # DEPRECATED: Update page blocks through updatePage Server Action
+  mutation UpdatePageBlock($id: ID!, $block: PageBlockInput!) {
+    updatePageBlock(id: $id, block: $block) {
       id
-      type
-      content
-      style
-      config
-      order
-      parentId
-      depth
-      isVisible
-      children {
-        id
-        type
-        content
-        style
-        config
-        order
-        parentId
-        depth
-        isVisible
-        children {
-          id
-          type
-          content
-          style
-          config
-          order
-          parentId
-          depth
-          isVisible
-        }
-      }
-    }
-  }
-  mutation DeletePageBlock($id: String!) {
-    deletePageBlock(id: $id) {
-      ...PageBlockFields
     }
   }
 `;
 
-// Update the order of multiple page blocks
-export const UPDATE_PAGE_BLOCKS_ORDER = gql`
-  fragment PageBlockFields on PageBlock {
-    id
-    type
-    content
-    style
-    config
-    order
-    parentId
-    depth
-    isVisible
-    children {
-      id
-      type
-      content
-      style
-      config
-      order
-      parentId
-      depth
-      isVisible
-      children {
-        id
-        type
-        content
-        style
-        config
-        order
-        parentId
-        depth
-        isVisible
-        children {
-          id
-          type
-          content
-          style
-          config
-          order
-          parentId
-          depth
-          isVisible
-        }
-      }
-    }
-  }
-  mutation UpdatePageBlocksOrder($pageId: String!, $updates: [BulkUpdateBlockOrderInput!]!) {
-    updatePageBlocksOrder(pageId: $pageId, updates: $updates) {
-      ...PageBlockFields
-    }
+export const DELETE_PAGE_BLOCK = `
+  # DEPRECATED: Update page blocks through updatePage Server Action
+  mutation DeletePageBlock($id: ID!) {
+    deletePageBlock(id: $id)
   }
 `;
+
+export const UPDATE_PAGE_BLOCKS_ORDER = `
+  # DEPRECATED: Update page blocks through updatePage Server Action
+  mutation UpdatePageBlocksOrder($pageId: ID!, $blockIds: [ID!]!) {
+    updatePageBlocksOrder(pageId: $pageId, blockIds: $blockIds)
+  }
+`;
+
+console.warn('⚠️ @/graphql/queries/pages is deprecated. Use @/actions/pages instead.');

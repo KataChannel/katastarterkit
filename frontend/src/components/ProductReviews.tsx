@@ -1,8 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
+// DEPRECATED: Apollo Client removed
+const gql = (strings: TemplateStringsArray, ...values: any[]) => strings.join('');
 import { Star, ThumbsUp, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

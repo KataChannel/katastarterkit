@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useQuery } from '@apollo/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -53,7 +52,7 @@ import { ImportTemplateDialog } from '@/components/page-builder/templates';
 import { PageTemplate, PageElement, ImportTemplateData } from '@/types/template';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useToast } from '@/hooks/use-toast';
-import { GET_PAGE_BY_ID } from '@/graphql/queries/pages';
+import { getPageById } from '@/actions/page.actions';
 import { usePageState, useUIState, usePageActions, useHistory } from './PageBuilderProvider';
 import { PageStatus } from '@/types/page-builder';
 import PageSettingsForm from './PageSettingsForm';
@@ -750,12 +749,23 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
     headCode: '',
   });
 
-  // GraphQL query
-  const { data: pageData } = useQuery(GET_PAGE_BY_ID, {
-    variables: { id: editingPage?.id },
-    skip: !editingPage?.id,
-    errorPolicy: 'all',
-  });
+  const [pageData, setPageData] = useState<any>(null);
+
+  // Fetch page data
+  useEffect(() => {
+    if (!editingPage?.id) return;
+
+    const fetchPage = async () => {
+      try {
+        const result = await getPageById(editingPage.id);
+        setPageData(result);
+      } catch (error) {
+        console.error('[PageBuilderTopBar] Failed to fetch page:', error);
+      }
+    };
+
+    fetchPage();
+  }, [editingPage?.id]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -776,13 +786,12 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
 
   // Sync page data
   useEffect(() => {
-    if (pageData?.getPageById) {
-      const page = pageData.getPageById;
+    if (pageData) {
       setPageSettings((prev) => ({
         ...prev,
-        seoTitle: page.seoTitle || '',
-        seoDescription: page.seoDescription || '',
-        seoKeywords: Array.isArray(page.seoKeywords) ? page.seoKeywords.join(', ') : '',
+        seoTitle: pageData.seoTitle || '',
+        seoDescription: pageData.seoDescription || '',
+        seoKeywords: Array.isArray(pageData.seoKeywords) ? pageData.seoKeywords.join(', ') : '',
       }));
     }
   }, [pageData]);

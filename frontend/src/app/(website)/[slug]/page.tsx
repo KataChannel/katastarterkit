@@ -1,7 +1,6 @@
 'use client';
 
-import { useQuery } from '@apollo/client';
-import { GET_PAGE_BY_SLUG } from '@/graphql/queries/pages';
+import { getPageBySlug } from '@/actions/page.actions';
 import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
 import { Page, PageStatus } from '@/types/page-builder';
 import { notFound } from 'next/navigation';
@@ -17,6 +16,9 @@ interface DynamicPageProps {
 
 export default function DynamicPage({ params }: DynamicPageProps) {
   const [slug, setSlug] = useState<string | null>(null);
+  const [page, setPage] = useState<Page | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const [routeError, setRouteError] = useState<string | null>(null);
   
   useEffect(() => {
@@ -40,23 +42,39 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           setSlug(resolvedParams.slug);
         } else {
           console.error('No slug found in params:', resolvedParams);
-          setSlug(''); // This will trigger notFound() in the query
+          setSlug(''); // This will trigger notFound()
         }
       } catch (err) {
         console.error('Error resolving params:', err);
         setRouteError('Lỗi khi xử lý tham số route');
-        setSlug(''); // This will trigger notFound() in the query
+        setSlug(''); // This will trigger notFound()
       }
     };
     
     resolveParams();
   }, [params]);
 
-  const { data, loading, error } = useQuery<{ getPageBySlug: Page }>(GET_PAGE_BY_SLUG, {
-    variables: { slug: slug || '' },
-    skip: slug === null, // Skip query until slug is resolved
-    errorPolicy: 'all'
-  });
+  useEffect(() => {
+    const fetchPage = async () => {
+      if (slug === null) return; // Wait for slug to be resolved
+      if (slug === '') {
+        setLoading(false);
+        return; // Will trigger notFound()
+      }
+
+      try {
+        setLoading(true);
+        const result = await getPageBySlug(slug);
+        setPage(result as Page | null);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPage();
+  }, [slug]);
 
   if (slug === null || loading) {
     return (
@@ -66,11 +84,9 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     );
   }
 
-  if (error || !data?.getPageBySlug || slug === '') {
+  if (error || !page || slug === '') {
     return notFound();
   }
-
-  const page = data.getPageBySlug;
   console.log('Fetched page data:', page);
   
   // Don't show draft or archived pages in production

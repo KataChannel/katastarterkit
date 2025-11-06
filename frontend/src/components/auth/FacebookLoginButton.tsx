@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useMutation } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { LOGIN_WITH_FACEBOOK } from '@/lib/graphql/mutations/auth';

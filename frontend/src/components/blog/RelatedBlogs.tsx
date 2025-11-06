@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_RELATED_BLOGS } from '@/graphql/blog.queries';
+import React, { useState, useEffect } from 'react';
+import { getRelatedBlogs } from '@/actions/blog.actions';
 import { BlogCard } from './BlogCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
@@ -16,25 +15,6 @@ interface RelatedBlogsProps {
   className?: string;
 }
 
-interface RelatedBlogsData {
-  relatedBlogs: Array<{
-    id: string;
-    title: string;
-    slug: string;
-    shortDescription: string;
-    thumbnailUrl: string;
-    author: string;
-    publishedAt: string;
-    viewCount: number;
-    category: {
-      id: string;
-      name: string;
-      slug: string;
-    };
-    isFeatured: boolean;
-  }>;
-}
-
 export function RelatedBlogs({
   categoryId,
   excludeBlogId,
@@ -42,16 +22,26 @@ export function RelatedBlogs({
   title = 'Bài viết liên quan',
   className,
 }: RelatedBlogsProps) {
-  const { data, loading, error } = useQuery<RelatedBlogsData>(GET_RELATED_BLOGS, {
-    variables: {
-      categoryId,
-      excludeBlogId,
-      limit,
-    },
-    errorPolicy: 'all',
-  });
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  const blogs = data?.relatedBlogs || [];
+  useEffect(() => {
+    const fetchRelatedBlogs = async () => {
+      try {
+        setLoading(true);
+        const result = await getRelatedBlogs(excludeBlogId, limit);
+        setBlogs(Array.isArray(result) ? result : []);
+      } catch (err) {
+        setError(err as Error);
+        setBlogs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRelatedBlogs();
+  }, [excludeBlogId, limit]);
 
   if (loading) {
     return (

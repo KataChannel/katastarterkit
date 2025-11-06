@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useQuery } from '@apollo/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -49,7 +48,7 @@ import { ImportTemplateDialog } from '@/components/page-builder/templates';
 import { PageTemplate, PageElement, ImportTemplateData } from '@/types/template';
 import { useTemplates } from '@/hooks/useTemplates';
 import { useToast } from '@/hooks/use-toast';
-import { GET_PAGE_BY_ID } from '@/graphql/queries/pages';
+import { getPageById } from '@/actions/page.actions';
 
 interface EditorToolbarProps {
   editorMode: 'visual' | 'code';
@@ -451,12 +450,23 @@ export function EditorToolbar(props: EditorToolbarProps) {
     headCode: '',
   });
 
-  // ===== GraphQL Query =====
-  const { data: pageData } = useQuery(GET_PAGE_BY_ID, {
-    variables: { id: pageId },
-    skip: !pageId,
-    errorPolicy: 'all',
-  });
+  const [pageData, setPageData] = useState<any>(null);
+
+  // ===== Fetch Page Data =====
+  useEffect(() => {
+    if (!pageId) return;
+
+    const fetchPage = async () => {
+      try {
+        const result = await getPageById(pageId);
+        setPageData(result);
+      } catch (error) {
+        console.error('[EditorToolbar] Failed to fetch page:', error);
+      }
+    };
+
+    fetchPage();
+  }, [pageId]);
 
   // ===== Keyboard Shortcuts =====
   useEffect(() => {
@@ -477,13 +487,12 @@ export function EditorToolbar(props: EditorToolbarProps) {
 
   // ===== Sync Page Data (Developer Settings Only) =====
   useEffect(() => {
-    if (pageData?.getPageById) {
-      const page = pageData.getPageById;
+    if (pageData) {
       setPageSettings((prev) => ({
         ...prev,
-        seoTitle: page.seoTitle || '',
-        seoDescription: page.seoDescription || '',
-        seoKeywords: Array.isArray(page.seoKeywords) ? page.seoKeywords.join(', ') : '',
+        seoTitle: pageData.seoTitle || '',
+        seoDescription: pageData.seoDescription || '',
+        seoKeywords: Array.isArray(pageData.seoKeywords) ? pageData.seoKeywords.join(', ') : '',
       }));
     }
   }, [pageData]);

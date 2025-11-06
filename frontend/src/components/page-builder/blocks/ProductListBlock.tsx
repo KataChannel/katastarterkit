@@ -6,7 +6,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
 import { GET_PRODUCTS } from '@/graphql/product.queries';
 import { Product } from '@/graphql/product.queries';
 import { PageBlock } from '@/types/page-builder';

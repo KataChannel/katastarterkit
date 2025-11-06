@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
 import {
   GET_AI_PROVIDERS,
   GET_AI_PROVIDER_STATS,

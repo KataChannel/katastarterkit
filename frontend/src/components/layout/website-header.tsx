@@ -3,10 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-// ✅ MIGRATED: Import Dynamic GraphQL
-import { useFindMany } from '@/hooks/useDynamicGraphQL';
-import { useQuery } from '@apollo/client';
-import { GET_PUBLIC_MENUS } from '@/graphql/menu.queries';
+import { getPublicMenus } from '@/actions/menu.actions';
 import { useHeaderSettings, useContactSettings, settingsToMap } from '@/hooks/useWebsiteSettings';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
@@ -75,28 +72,27 @@ export function WebsiteHeader() {
   const { data: contactSettingsRaw = [], loading: contactLoading } = useContactSettings();
   const contactSettings = useMemo(() => settingsToMap(contactSettingsRaw), [contactSettingsRaw]);
 
-  // ✅ MIGRATED: Fetch header menus with Dynamic GraphQL
-  // Note: If authentication fails, fallback to empty array (no menu items)
-  // ✅ USE PUBLIC MENU QUERY: No authentication required
-  const { data, loading: menuLoading, error: menuError } = useQuery(GET_PUBLIC_MENUS, {
-    variables: {
-      type: 'HEADER',
-      isActive: true,
-      isVisible: true,
-      orderBy: { order: 'asc' },
-      includeChildren: true,
-    },
-    fetchPolicy: 'network-only', // Always fetch fresh data
-  });
+  // ✅ MIGRATED: Fetch header menus with Server Actions
+  const [headerMenus, setHeaderMenus] = useState<any[]>([]);
+  const [menuLoading, setMenuLoading] = useState(true);
+  const [menuError, setMenuError] = useState<Error | null>(null);
 
-  const headerMenus = data?.publicMenus || [];
-
-  // Log any errors (shouldn't happen with public query)
   useEffect(() => {
-    if (menuError) {
-      console.error('[WebsiteHeader] Failed to load menu:', menuError.message);
-    }
-  }, [menuError]);
+    const fetchMenus = async () => {
+      try {
+        setMenuLoading(true);
+        const menus = await getPublicMenus({ isActive: true, includeChildren: true });
+        setHeaderMenus(Array.isArray(menus) ? menus : []);
+      } catch (err) {
+        setMenuError(err as Error);
+        console.error('[WebsiteHeader] Failed to load menu:', err);
+      } finally {
+        setMenuLoading(false);
+      }
+    };
+
+    fetchMenus();
+  }, []);
 
   console.log('headerSettings', headerSettings);
   console.log('contactSettings', contactSettings);

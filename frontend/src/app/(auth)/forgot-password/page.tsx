@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { gql } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -12,35 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, ArrowLeft, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-
-// GraphQL Mutations
-const REQUEST_FORGOT_PASSWORD = gql`
-  mutation RequestForgotPassword($email: String!) {
-    requestForgotPassword(email: $email) {
-      success
-      message
-      token
-    }
-  }
-`;
-
-const VERIFY_RESET_TOKEN = gql`
-  mutation VerifyResetToken($email: String!, $token: String!) {
-    verifyResetToken(email: $email, token: $token) {
-      success
-      message
-    }
-  }
-`;
-
-const RESET_PASSWORD_WITH_TOKEN = gql`
-  mutation ResetPasswordWithToken($email: String!, $token: String!, $newPassword: String!) {
-    resetPasswordWithToken(email: $email, token: $token, newPassword: $newPassword) {
-      success
-      message
-    }
-  }
-`;
+import { requestPasswordReset, verifyResetToken, resetPassword } from '@/actions/auth.actions';
 
 type Step = 'email' | 'verify' | 'password' | 'success';
 
@@ -52,10 +22,9 @@ export default function ForgotPasswordPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [devToken, setDevToken] = useState(''); // For development
-
-  const [requestReset, { loading: requestLoading }] = useMutation(REQUEST_FORGOT_PASSWORD);
-  const [verifyToken, { loading: verifyLoading }] = useMutation(VERIFY_RESET_TOKEN);
-  const [resetPassword, { loading: resetLoading }] = useMutation(RESET_PASSWORD_WITH_TOKEN);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   // Step 1: Request reset email
   const handleRequestReset = async (e: React.FormEvent) => {
@@ -67,17 +36,16 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const { data } = await requestReset({
-        variables: { email },
-      });
+      setRequestLoading(true);
+      const data = await requestPasswordReset(email);
 
-      if (data?.requestForgotPassword?.success) {
-        toast.success(data.requestForgotPassword.message);
+      if (data?.success) {
+        toast.success(data.message);
         
         // Store dev token if available
-        if (data.requestForgotPassword.token) {
-          setDevToken(data.requestForgotPassword.token);
-          toast.info(`Mã OTP (Dev): ${data.requestForgotPassword.token}`, {
+        if (data.resetToken) {
+          setDevToken(data.resetToken);
+          toast.info(`Mã OTP (Dev): ${data.resetToken}`, {
             duration: 10000,
           });
         }
@@ -86,6 +54,8 @@ export default function ForgotPasswordPage() {
       }
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra');
+    } finally {
+      setRequestLoading(false);
     }
   };
 
@@ -99,16 +69,17 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const { data } = await verifyToken({
-        variables: { email, token },
-      });
+      setVerifyLoading(true);
+      const data = await verifyResetToken(token);
 
-      if (data?.verifyResetToken?.success) {
+      if (data?.success) {
         toast.success('Mã xác thực hợp lệ');
         setStep('password');
       }
     } catch (error: any) {
       toast.error(error.message || 'Mã xác thực không hợp lệ');
+    } finally {
+      setVerifyLoading(false);
     }
   };
 
@@ -127,11 +98,10 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const { data } = await resetPassword({
-        variables: { email, token, newPassword },
-      });
+      setResetLoading(true);
+      const data = await resetPassword(token, newPassword);
 
-      if (data?.resetPasswordWithToken?.success) {
+      if (data?.success) {
         toast.success('Đặt lại mật khẩu thành công');
         setStep('success');
         
@@ -142,6 +112,8 @@ export default function ForgotPasswordPage() {
       }
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra');
+    } finally {
+      setResetLoading(false);
     }
   };
 

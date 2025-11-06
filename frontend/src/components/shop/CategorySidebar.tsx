@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { useQuery } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
 import { GET_CATEGORIES, GET_ACTIVE_CATEGORIES } from '@/graphql/category.queries';
 import { GET_CHEAP_PRODUCTS } from '@/graphql/product.queries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

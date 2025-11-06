@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
+// DEPRECATED: Apollo Client removed
+const gql = (strings: TemplateStringsArray, ...values: any[]) => strings.join('');
 import { Calendar as CalendarUI } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

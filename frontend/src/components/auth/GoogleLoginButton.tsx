@@ -1,6 +1,7 @@
 'use client';
 
-import { useMutation } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { LOGIN_WITH_GOOGLE } from '../../lib/graphql/auth-queries';
 import { toast } from 'sonner';

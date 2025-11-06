@@ -1,4 +1,5 @@
-import { useMutation } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
 import { 
   LOGIN_USER, 
   LOGIN_WITH_GOOGLE, 

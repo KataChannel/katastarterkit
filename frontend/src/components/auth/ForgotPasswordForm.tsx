@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -11,14 +10,7 @@ import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, ArrowLeft, Loader2, CheckCircle2, AlertCircle, Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  REQUEST_FORGOT_PASSWORD,
-  VERIFY_RESET_TOKEN,
-  RESET_PASSWORD_WITH_TOKEN,
-  type RequestForgotPasswordResponse,
-  type VerifyResetTokenResponse,
-  type ResetPasswordWithTokenResponse,
-} from '@/graphql/auth/forgot-password.graphql';
+import { requestPasswordReset, verifyResetToken, resetPassword } from '@/actions/auth.actions';
 
 type Step = 'email' | 'verify' | 'password' | 'success';
 
@@ -32,16 +24,9 @@ export default function ForgotPasswordForm() {
   const [devToken, setDevToken] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const [requestReset, { loading: requestLoading }] = useMutation<RequestForgotPasswordResponse>(
-    REQUEST_FORGOT_PASSWORD
-  );
-  const [verifyToken, { loading: verifyLoading }] = useMutation<VerifyResetTokenResponse>(
-    VERIFY_RESET_TOKEN
-  );
-  const [resetPassword, { loading: resetLoading }] = useMutation<ResetPasswordWithTokenResponse>(
-    RESET_PASSWORD_WITH_TOKEN
-  );
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,16 +37,15 @@ export default function ForgotPasswordForm() {
     }
 
     try {
-      const { data } = await requestReset({
-        variables: { email },
-      });
+      setRequestLoading(true);
+      const data = await requestPasswordReset(email);
 
-      if (data?.requestForgotPassword?.success) {
-        toast.success(data.requestForgotPassword.message);
+      if (data?.success) {
+        toast.success(data.message);
 
-        if (data.requestForgotPassword.token) {
-          setDevToken(data.requestForgotPassword.token);
-          toast.info(`Mã OTP: ${data.requestForgotPassword.token}`, {
+        if (data.resetToken) {
+          setDevToken(data.resetToken);
+          toast.info(`Mã OTP: ${data.resetToken}`, {
             duration: 15000,
           });
         }
@@ -70,6 +54,8 @@ export default function ForgotPasswordForm() {
       }
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra');
+    } finally {
+      setRequestLoading(false);
     }
   };
 
@@ -82,16 +68,17 @@ export default function ForgotPasswordForm() {
     }
 
     try {
-      const { data } = await verifyToken({
-        variables: { email, token },
-      });
+      setVerifyLoading(true);
+      const data = await verifyResetToken(token);
 
-      if (data?.verifyResetToken?.success) {
+      if (data?.success) {
         toast.success('Mã xác thực hợp lệ');
         setStep('password');
       }
     } catch (error: any) {
       toast.error(error.message || 'Mã xác thực không hợp lệ');
+    } finally {
+      setVerifyLoading(false);
     }
   };
 
@@ -109,11 +96,10 @@ export default function ForgotPasswordForm() {
     }
 
     try {
-      const { data } = await resetPassword({
-        variables: { email, token, newPassword },
-      });
+      setResetLoading(true);
+      const data = await resetPassword(token, newPassword);
 
-      if (data?.resetPasswordWithToken?.success) {
+      if (data?.success) {
         toast.success('Đặt lại mật khẩu thành công');
         setStep('success');
 
@@ -123,6 +109,8 @@ export default function ForgotPasswordForm() {
       }
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra');
+    } finally {
+      setResetLoading(false);
     }
   };
 

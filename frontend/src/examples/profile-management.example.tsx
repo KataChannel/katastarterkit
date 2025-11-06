@@ -2,7 +2,9 @@
 // Examples for using User Profile & Admin Reset Password features
 
 import React from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
 import {
   ADMIN_RESET_PASSWORD,
   UPDATE_PROFILE,

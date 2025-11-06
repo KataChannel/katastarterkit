@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({})/san-pham/[slug]/page.tsx)/san-pham/[slug]/page.tsx)/san-pham/[slug]/page.tsx) });
+const useMutation = () => [async () => ({})/san-pham/[slug]/page.tsx), { data: null, loading: false, error: null }];
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';

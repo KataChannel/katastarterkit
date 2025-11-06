@@ -130,13 +130,14 @@ import { AuthModule } from '../auth/auth.module';
     AuthModule, // Import AuthModule to provide AuthService for UserService
   ],
   providers: [
-    UnifiedDynamicResolver,
+    // TODO: Fix GraphQL scalar issue before enabling
+    // UnifiedDynamicResolver,
     DynamicCRUDService,
     PrismaService,
     UserService
   ],
   exports: [
-    UnifiedDynamicResolver,
+    // UnifiedDynamicResolver,
     DynamicCRUDService
   ]
 })

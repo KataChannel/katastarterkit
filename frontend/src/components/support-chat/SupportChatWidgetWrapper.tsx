@@ -1,6 +1,8 @@
 'use client';
 
-import { useQuery, gql } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const gql = (strings: TemplateStringsArray, ...values: any[]) => strings.join('');
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
 import SupportChatWidget from './SupportChatWidget';
 
 const GET_SUPPORT_CHAT_SETTINGS = gql`

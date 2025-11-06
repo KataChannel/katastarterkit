@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { gql, useQuery } from '@apollo/client';
-import { useMutation } from '@apollo/client'; // Keep for custom SYNC mutation
+// DEPRECATED: Apollo Client removed
+const gql = (strings: TemplateStringsArray, ...values: any[]) => strings.join('');
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
+// DEPRECATED: Apollo Client removed
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }]; // Keep for custom SYNC mutation
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

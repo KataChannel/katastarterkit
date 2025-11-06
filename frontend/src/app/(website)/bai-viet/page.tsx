@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery } from '@apollo/client';
+import { useState, useEffect } from 'react';
+import { getBlogPosts, getBlogCategories } from '@/actions/blog.actions';
 import Link from 'next/link';
 import Image from 'next/image';
-import { GET_BLOGS, GET_BLOG_CATEGORIES } from '@/graphql/blog.queries';
 import { Search, Calendar, User, Tag, Clock, TrendingUp } from 'lucide-react';
 
 export default function BlogPage() {
@@ -12,28 +11,51 @@ export default function BlogPage() {
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
+  
+  // Data state
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   // Fetch blogs
-  const { data, loading, error } = useQuery(GET_BLOGS, {
-    variables: {
-      input: {
-        page,
-        limit: 12,
-        categoryId,
-        search: searchQuery || undefined,
-        sort: sortBy,
-        isPublished: true,
-      },
-    },
-  });
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        const result = await getBlogPosts({
+          page,
+          limit: 12,
+          status: 'PUBLISHED',
+        });
+        setBlogs(result.posts || []);
+        setTotal(result.total || 0);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, [page, categoryId, searchQuery, sortBy]);
 
   // Fetch categories
-  const { data: categoriesData } = useQuery(GET_BLOG_CATEGORIES);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const cats = await getBlogCategories({ includeCount: true });
+        setCategories(Array.isArray(cats) ? cats : []);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+      }
+    };
 
-  const blogs = data?.getBlogs?.blogs || [];
-  const total = data?.getBlogs?.total || 0;
+    fetchCategories();
+  }, []);
+
   const hasMore = page * 12 < total;
-  const categories = categoriesData?.getBlogCategories || [];
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('vi-VN', {

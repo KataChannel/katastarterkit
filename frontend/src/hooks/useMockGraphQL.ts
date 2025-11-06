@@ -176,16 +176,16 @@ export const useTemplateData = () => {
 
 // Quick data helpers
 export const getProductsData = async () => {
-  const client = { query: async () => ({ data: { products: MOCK_PRODUCTS } }) };
+  const client = { query: async () => ({}) };
   return client.query();
 };
 
 export const getTasksData = async () => {
-  const client = { query: async () => ({ data: { tasks: MOCK_TASKS } }) };
+  const client = { query: async () => ({}) };
   return client.query();
 };
 
 export const getCategoriesData = async () => {
-  const client = { query: async () => ({ data: { categories: MOCK_CATEGORIES } }) };
+  const client = { query: async () => ({}) };
   return client.query();
 };

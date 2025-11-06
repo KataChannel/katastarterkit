@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
+import { useState, useEffect } from 'react';
+import { getBlogPostBySlug } from '@/actions/blog.actions';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { GET_BLOG_BY_SLUG } from '@/graphql/blog.queries';
 import {
   Calendar,
   User,
@@ -27,14 +26,28 @@ export default function BlogDetailPage() {
 
   const [commentContent, setCommentContent] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [blog, setBlog] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   // Fetch blog post
-  const { data, loading, error } = useQuery(GET_BLOG_BY_SLUG, {
-    variables: { slug },
-    skip: !slug,
-  });
+  useEffect(() => {
+    if (!slug) return;
 
-  const blog = data?.getBlogBySlug;
+    const fetchBlog = async () => {
+      try {
+        setLoading(true);
+        const result = await getBlogPostBySlug(slug);
+        setBlog(result);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlog();
+  }, [slug]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('vi-VN', {

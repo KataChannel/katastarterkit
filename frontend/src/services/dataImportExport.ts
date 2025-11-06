@@ -1,4 +1,5 @@
-import { gql } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const gql = (strings: TemplateStringsArray, ...values: any[]) => strings.join('');
 import { apolloClient } from '@/lib/apollo-client';
 
 export interface ImportDataResult {

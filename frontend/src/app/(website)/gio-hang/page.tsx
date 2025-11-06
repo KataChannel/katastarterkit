@@ -1,6 +1,8 @@
 'use client';
 
-import { useQuery, useMutation } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({})/gio-hang/page.tsx)/gio-hang/page.tsx)/gio-hang/page.tsx) });
+const useMutation = () => [async () => ({})/gio-hang/page.tsx), { data: null, loading: false, error: null }];
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';

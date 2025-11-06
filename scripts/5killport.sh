@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Find and kill all processes running on ports 12001 and 12000
-echo "Killing all processes on ports 12001 and 12000..."
+# Find and kill all processes running on ports 14001 and 14000
+echo "Killing all processes on ports 14001 and 14000..."
 
 # Function to kill all processes on a specific port
 kill_port() {
@@ -39,29 +39,29 @@ kill_port() {
     fi
 }
 
-# Kill all processes on port 12001
-kill_port 12001
+# Kill all processes on port 14001
+kill_port 14001
 
-# Kill all processes on port 12000
-kill_port 12000
+# Kill all processes on port 14000
+kill_port 14000
 
 # Verify ports are free
 echo ""
 echo "Verifying ports are free..."
-REMAINING_12001=$(sudo ss -tulpn | grep ":12001 " | grep -oP 'pid=\K[0-9]+' | sort -u)
-REMAINING_12000=$(sudo ss -tulpn | grep ":12000 " | grep -oP 'pid=\K[0-9]+' | sort -u)
+REMAINING_14001=$(sudo ss -tulpn | grep ":14001 " | grep -oP 'pid=\K[0-9]+' | sort -u)
+REMAINING_14000=$(sudo ss -tulpn | grep ":14000 " | grep -oP 'pid=\K[0-9]+' | sort -u)
 
-if [ -z "$REMAINING_12001" ] && [ -z "$REMAINING_12000" ]; then
-    echo "✓ All processes successfully killed. Ports 12001 and 12000 are now free."
+if [ -z "$REMAINING_14001" ] && [ -z "$REMAINING_14000" ]; then
+    echo "✓ All processes successfully killed. Ports 14001 and 14000 are now free."
 else
     echo "⚠ Warning: Some processes may still be running!"
-    if [ ! -z "$REMAINING_12001" ]; then
-        echo "  - Port 12001 still has PIDs: $REMAINING_12001"
-        sudo ss -tulpn | grep ":12001 "
+    if [ ! -z "$REMAINING_14001" ]; then
+        echo "  - Port 14001 still has PIDs: $REMAINING_14001"
+        sudo ss -tulpn | grep ":14001 "
     fi
-    if [ ! -z "$REMAINING_12000" ]; then
-        echo "  - Port 12000 still has PIDs: $REMAINING_12000"
-        sudo ss -tulpn | grep ":12000 "
+    if [ ! -z "$REMAINING_14000" ]; then
+        echo "  - Port 14000 still has PIDs: $REMAINING_14000"
+        sudo ss -tulpn | grep ":14000 "
     fi
 fi
 

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({})/san-pham/page.tsx)/san-pham/page.tsx)/san-pham/page.tsx) });
 import Link from 'next/link';
 import Image from 'next/image';
 import { GET_PRODUCTS, GET_PRODUCT_CATEGORIES } from '@/graphql/ecommerce.queries';

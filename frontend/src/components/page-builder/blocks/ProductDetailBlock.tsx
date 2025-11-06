@@ -7,8 +7,10 @@
 'use client';
 
 import React from 'react';
-import { useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
+// DEPRECATED: Apollo Client removed
+const gql = (strings: TemplateStringsArray, ...values: any[]) => strings.join('');
 import { Product } from '@/graphql/product.queries';
 import { PRODUCT_FULL_FRAGMENT } from '@/graphql/product.queries';
 import { PageBlock } from '@/types/page-builder';

@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 
+// GraphQL Scalars
+import { JSONScalar, JSONObjectScalar } from './scalars/json.scalar';
+
 // Removed resolvers (all deleted during cleanup):
 // - UserResolver, PermissionResolver, RoleResolver, UserRbacResolver (rbac.resolver.ts deleted)
 // - MenuPublicResolver, WebsiteSettingResolver (deleted)
@@ -53,13 +56,19 @@ import { MinioModule } from '../minio/minio.module';
     // All controllers removed during cleanup
   ],
   providers: [
+    // GraphQL Scalars
+    JSONScalar,
+    JSONObjectScalar,
+    
     // 🚀 Universal Dynamic GraphQL System
     DynamicGraphQLEngine,
-    UniversalDynamicResolver,
+    // TODO: Fix GraphQL scalar issue before enabling
+    // UniversalDynamicResolver,
     
     // 🚀 Data Import/Export and Image Upload
-    DataImportExportResolver,
-    ImageUploadResolver,
+    // TODO: Fix GraphQL scalar issues before enabling
+    // DataImportExportResolver,
+    // ImageUploadResolver,
     
     // Universal Dynamic Query resolver
     UniversalQueryResolver,

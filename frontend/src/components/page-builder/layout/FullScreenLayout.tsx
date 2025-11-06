@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { useMutation } from '@apollo/client';
 import { PageBuilderTopBar } from '../PageBuilderTopBar';
 import { EditorCanvas } from './EditorCanvas';
 import { EditorFooter } from './EditorFooter';
@@ -9,7 +8,7 @@ import { LeftPanel } from '../panels/LeftPanel/LeftPanel';
 import { RightPanel } from '../panels/RightPanel/RightPanel';
 import { usePageState, usePageActions, useUIState } from '../PageBuilderProvider';
 import { useToast } from '@/hooks/use-toast';
-import { UPDATE_PAGE } from '@/graphql/queries/pages';
+import { updatePage } from '@/actions/page.actions';
 import { UpdatePageInput, BlockType } from '@/types/page-builder';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -37,9 +36,6 @@ export function FullScreenLayout({
   const { handleSelectBlock, handleAddChildBlock, handleCloseAddChildDialog } = usePageActions();
   const { showAddChildDialog, addChildParentId } = useUIState();
   const { toast } = useToast();
-
-  // GraphQL mutation for updating page
-  const [updatePageMutation] = useMutation(UPDATE_PAGE);
 
   // Handle saving global page settings
   const handleSettingsSave = useCallback(async (settings: any) => {
@@ -86,13 +82,8 @@ export function FullScreenLayout({
         return;
       }
 
-      // For existing pages, update via GraphQL
-      await updatePageMutation({
-        variables: {
-          id: editingPage.id,
-          input: updateInput,
-        },
-      });
+      // For existing pages, update via Server Action
+      await updatePage(editingPage.id, updateInput);
 
       // Also update local state
       setEditingPage({
@@ -118,7 +109,7 @@ export function FullScreenLayout({
       });
       throw error;
     }
-  }, [editingPage, updatePageMutation, setEditingPage, toast]);
+  }, [editingPage, setEditingPage, toast]);
 
   return (
     <div className="h-screen w-screen bg-gray-50 flex flex-col overflow-hidden">

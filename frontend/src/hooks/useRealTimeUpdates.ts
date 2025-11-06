@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useSubscription } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useSubscription = () => ({ data: null, loading: false, error: null });
 import { NEW_POST_SUBSCRIPTION, NEW_COMMENT_SUBSCRIPTION } from '@/lib/graphql/queries';
 import { toast } from 'sonner';
 

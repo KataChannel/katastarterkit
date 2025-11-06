@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useLazyQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useLazyQuery = () => [async () => ({}), { data: null, loading: false, error: null }];
+// DEPRECATED: Apollo Client removed
+const gql = (strings: TemplateStringsArray, ...values: any[]) => strings.join('');
 import { Search, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';

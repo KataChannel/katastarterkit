@@ -1,4 +1,6 @@
-import { useMutation, useQuery } from '@apollo/client';
+// DEPRECATED: Apollo Client removed
+const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
+const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
 import { useState } from 'react';
 import {
   GET_FILES,

@@ -1,6 +1,17 @@
+/**
+ * AuthContext - Next.js Full-Stack Version
+ * 
+ * Updated to use Server Actions instead of Apollo Client + GraphQL
+ * No longer requires separate NestJS backend
+ */
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useLazyQuery, useMutation } from '@apollo/client';
-import { GET_CURRENT_USER, LOGIN_MUTATION, REGISTER_MUTATION } from '../lib/graphql/queries';
+import { 
+  login as loginAction, 
+  register as registerAction, 
+  checkAuth as checkAuthAction,
+  logout as logoutAction 
+} from '@/actions/auth.actions';
 
 interface Role {
   id: string;
@@ -47,8 +58,8 @@ export const useAuth = (): AuthContextType => {
       // Server-side: return a fallback context
       return {
         user: null,
-        login: async () => ({ success: false, error: 'Not available on server' }),
-        register: async () => ({ success: false, error: 'Not available on server' }),
+        login: async () => ({}),
+        register: async () => ({}),
         logout: () => {},
         loading: true,
         isAuthenticated: false,
@@ -69,185 +80,110 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [getCurrentUser, { data: currentUserData, error: currentUserError }] = useLazyQuery(GET_CURRENT_USER);
-  const [loginMutation] = useMutation(LOGIN_MUTATION);
-  const [registerMutation] = useMutation(REGISTER_MUTATION);
-
-  // Handle current user data updates
+  // Check for existing session on mount
   useEffect(() => {
-    if (currentUserData?.getMe) {
-      console.log('%c✅ AuthContext - User authenticated successfully', 'color: #2ecc71; font-weight: bold;', currentUserData.getMe);
-      setUser(currentUserData.getMe);
-      setLoading(false);
-    } else if (currentUserError) {
-      const networkError = currentUserError.networkError as any;
-      const graphQLErrors = currentUserError.graphQLErrors || [];
-      
-      // Log detailed error information
-      console.group('%c❌ AuthContext - Error Handling', 'color: #e74c3c; font-weight: bold;');
-      console.error('Full Error Object:', currentUserError);
-      console.error('Network Error:', networkError);
-      console.table(graphQLErrors.map(e => ({
-        message: e.message,
-        code: e.extensions?.code,
-        path: e.path,
-      })));
-      
-      // Check if it's a 401 Unauthorized error
-      const is401Error = networkError?.statusCode === 401 || networkError?.status === 401;
-      if (is401Error) {
-        console.log('%c🔐 401 HTTP Status Code detected - LOGOUT REQUIRED', 'color: #e74c3c; font-weight: bold;');
-      }
-      
-      // Check if it's an explicit auth-related GraphQL error
-      // ONLY check error codes, NOT message strings (messages are too unpredictable)
-      const isExplicitAuthError = graphQLErrors.some(err => {
-        const isUnauthenticated = err.extensions?.code === 'UNAUTHENTICATED';
-        const isForbidden = err.extensions?.code === 'FORBIDDEN';
+    const checkSession = async () => {
+      try {
+        console.log('%c🔍 AuthContext - Checking existing session', 'color: #3498db; font-weight: bold;');
         
-        if (isUnauthenticated) console.log('%c🔑 UNAUTHENTICATED error code detected', 'color: #f39c12;');
-        if (isForbidden) console.log('%c🚫 FORBIDDEN error code detected', 'color: #f39c12;');
+        const result = await checkAuthAction();
         
-        return isUnauthenticated || isForbidden;
-      });
-      
-      if (isExplicitAuthError) {
-        console.log('%c🚨 Explicit auth-related GraphQL error detected - LOGOUT REQUIRED', 'color: #e74c3c; font-weight: bold;');
-      }
-      
-      // Only logout on explicit auth errors, NOT on transient network issues
-      const isAuthError = is401Error || isExplicitAuthError;
-
-      if (isAuthError) {
-        console.log('%c🔓 LOGGING OUT - Clearing all auth data', 'color: #c0392b; font-weight: bold;');
-        console.table({
-          'Current Token': localStorage.getItem('accessToken') ? 'EXISTS' : 'NONE',
-          'Action': 'REMOVING',
-          'Timestamp': new Date().toISOString()
-        });
-        
-        // Clear ALL auth-related data at once to prevent confusion
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        console.log('%c✓ Auth data cleared from localStorage', 'color: #27ae60;');
-        
+        if (result.authenticated && result.user) {
+          console.log('%c✅ AuthContext - User authenticated successfully', 'color: #2ecc71; font-weight: bold;', result.user);
+          setUser({
+            ...result.user,
+            roleType: result.user.roleType || 'USER',
+            createdAt: new Date().toISOString(),
+          } as User);
+        } else {
+          console.log('%c⚠️  AuthContext - No active session', 'color: #f39c12;');
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('%c❌ AuthContext - Session check failed', 'color: #e74c3c; font-weight: bold;', error);
         setUser(null);
-      } else {
-        console.log('%c⚠️  Transient network error detected - KEEPING TOKEN for retry', 'color: #f39c12; font-weight: bold;');
-        console.log('Error details:', {
-          type: networkError?.name || 'Unknown',
-          message: networkError?.message,
-          statusCode: networkError?.statusCode,
-          willRetry: true
-        });
-        // For network errors, timeouts, or other transient issues, keep the token
-        // User will retry on next interaction
-        // Don't set user to null, just stop loading
+      } finally {
+        setLoading(false);
       }
-      console.groupEnd();
-      setLoading(false);
-    }
-  }, [currentUserData, currentUserError]);
+    };
 
-  // Check for existing token on mount
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      getCurrentUser();
-    } else {
-      setLoading(false);
-    }
-  }, [getCurrentUser]);
+    checkSession();
+  }, []);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      console.log('%c🔐 Login attempt started', 'color: #3498db; font-weight: bold;', { email, timestamp: new Date().toISOString() });
-      const { data } = await loginMutation({
-        variables: { 
-          input: {
-            emailOrUsername: email,
-            password: password
-          }
-        },
+      console.log('%c🔐 Login attempt started', 'color: #3498db; font-weight: bold;', { 
+        email, 
+        timestamp: new Date().toISOString() 
       });
 
-      if (data?.loginUser?.accessToken) {
-        const token = data.loginUser.accessToken;
-        localStorage.setItem('accessToken', token);
-        
-        // Also notify apollo client of the token change
-        // This ensures apollo-client can use the new token immediately
-        if (typeof window !== 'undefined') {
-          // Dispatch a storage event to notify other parts of the app
-          window.dispatchEvent(new StorageEvent('storage', {
-            key: 'accessToken',
-            newValue: token,
-            storageArea: localStorage,
-          }));
-        }
-        
-        // Refresh user data
-        getCurrentUser();
+      const result = await loginAction({ username: email, password });
+
+      if (result.success && result.user) {
+        console.log('%c✅ Login successful', 'color: #2ecc71; font-weight: bold;', result.user);
+        setUser({
+          ...result.user,
+          createdAt: new Date().toISOString(),
+        } as User);
         return { success: true };
       } else {
-        return { success: false, error: 'Login failed' };
+        console.error('%c❌ Login failed', 'color: #e74c3c;', result.message);
+        return { success: false, error: result.message || 'Login failed' };
       }
     } catch (error: any) {
+      console.error('%c❌ Login error', 'color: #e74c3c; font-weight: bold;', error);
       return { success: false, error: error.message || 'Login failed' };
     }
   };
 
-  const register = async (email: string, password: string, username: string): Promise<{ success: boolean; error?: string }> => {
+  const register = async (
+    email: string, 
+    password: string, 
+    username: string
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const { data } = await registerMutation({
-        variables: { 
-          input: {
-            email: email,
-            password: password,
-            username: username
-          }
-        },
+      console.log('%c📝 Registration attempt started', 'color: #3498db; font-weight: bold;', { 
+        email, 
+        username,
+        timestamp: new Date().toISOString() 
       });
 
-      if (data?.registerUser?.accessToken) {
-        const token = data.registerUser.accessToken;
-        localStorage.setItem('accessToken', token);
-        
-        // Also notify apollo client of the token change
-        if (typeof window !== 'undefined') {
-          // Dispatch a storage event to notify other parts of the app
-          window.dispatchEvent(new StorageEvent('storage', {
-            key: 'accessToken',
-            newValue: token,
-            storageArea: localStorage,
-          }));
-        }
-        
-        // Refresh user data
-        getCurrentUser();
+      const result = await registerAction({ username, email, password });
+
+      if (result.success && result.user) {
+        console.log('%c✅ Registration successful', 'color: #2ecc71; font-weight: bold;', result.user);
+        setUser({
+          ...result.user,
+          email: result.user.email || email,
+          createdAt: result.user.createdAt.toISOString(),
+        } as User);
         return { success: true };
       } else {
-        return { success: false, error: 'Registration failed' };
+        console.error('%c❌ Registration failed', 'color: #e74c3c;', result.message);
+        return { success: false, error: result.message || 'Registration failed' };
       }
     } catch (error: any) {
+      console.error('%c❌ Registration error', 'color: #e74c3c; font-weight: bold;', error);
       return { success: false, error: error.message || 'Registration failed' };
     }
   };
 
-  const logout = () => {
-    // Clear ALL auth-related data at once to ensure clean state
-    console.log('%c🚪 Manual logout triggered', 'color: #e74c3c; font-weight: bold;', { timestamp: new Date().toISOString() });
-    console.table({
-      'Token Before': localStorage.getItem('accessToken') ? 'EXISTS' : 'NONE',
-      'Action': 'REMOVING',
-      'User': user?.email || 'NONE'
-    });
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    console.log('%c✓ All auth data cleared', 'color: #27ae60;');
-    setUser(null);
+  const logout = async () => {
+    try {
+      console.log('%c🚪 Logout triggered', 'color: #e74c3c; font-weight: bold;', { 
+        user: user?.email,
+        timestamp: new Date().toISOString() 
+      });
+
+      await logoutAction();
+      
+      console.log('%c✅ Logout successful', 'color: #2ecc71;');
+      setUser(null);
+    } catch (error) {
+      console.error('%c❌ Logout error', 'color: #e74c3c;', error);
+      // Even if logout fails on server, clear local state
+      setUser(null);
+    }
   };
 
   const isAuthenticated = !!user;
