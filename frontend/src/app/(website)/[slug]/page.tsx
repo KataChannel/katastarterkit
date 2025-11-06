@@ -81,21 +81,33 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     if (menuData?.menuBySlug) {
       const menu = menuData.menuBySlug;
 
-      // Case 1: Menu links to BLOG_DETAIL → Redirect to blog post
+      // Case 1: Menu links to BLOG_LIST → Redirect to blog list page
+      if (menu.linkType === 'BLOG_LIST') {
+        router.push('/bai-viet');
+        return;
+      }
+
+      // Case 2: Menu links to BLOG_DETAIL → Redirect to blog post
       if (menu.linkType === 'BLOG_DETAIL' && menu.customData?.blogPostSlug) {
         const blogUrl = `/bai-viet/${menu.customData.blogPostSlug}`;
         router.push(blogUrl);
         return;
       }
 
-      // Case 2: Menu links to PRODUCT_DETAIL → Redirect to product
+      // Case 3: Menu links to PRODUCT_LIST → Redirect to product list page
+      if (menu.linkType === 'PRODUCT_LIST') {
+        router.push('/san-pham');
+        return;
+      }
+
+      // Case 4: Menu links to PRODUCT_DETAIL → Redirect to product
       if (menu.linkType === 'PRODUCT_DETAIL' && menu.customData?.productSlug) {
         const productUrl = `/san-pham/${menu.customData.productSlug}`;
         router.push(productUrl);
         return;
       }
 
-      // Case 3: Menu has external URL → Redirect to external site
+      // Case 5: Menu has external URL → Redirect to external site
       if (menu.externalUrl) {
         if (menu.target === 'BLANK') {
           window.open(menu.externalUrl, '_blank', 'noopener,noreferrer');
@@ -106,7 +118,7 @@ export default function DynamicPage({ params }: DynamicPageProps) {
         return;
       }
 
-      // Case 4: Menu has route → Redirect to internal route
+      // Case 6: Menu has route → Redirect to internal route
       if (menu.route && menu.route !== `/${slug}`) {
         router.push(menu.route);
         return;
@@ -228,6 +240,8 @@ export default function DynamicPage({ params }: DynamicPageProps) {
 
     // Show loading state while redirecting for any redirect type
     if (
+      menu.linkType === 'BLOG_LIST' ||
+      menu.linkType === 'PRODUCT_LIST' ||
       (menu.linkType === 'BLOG_DETAIL' && menu.customData?.blogPostSlug) ||
       (menu.linkType === 'PRODUCT_DETAIL' && menu.customData?.productSlug) ||
       menu.externalUrl ||
@@ -238,9 +252,11 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">
-              {menu.externalUrl ? 'Đang chuyển hướng...' :
+              {menu.linkType === 'BLOG_LIST' ? 'Đang chuyển hướng tới danh sách bài viết...' :
+               menu.linkType === 'PRODUCT_LIST' ? 'Đang chuyển hướng tới danh sách sản phẩm...' :
                menu.linkType === 'BLOG_DETAIL' ? 'Đang chuyển hướng tới bài viết...' : 
                menu.linkType === 'PRODUCT_DETAIL' ? 'Đang chuyển hướng tới sản phẩm...' :
+               menu.externalUrl ? 'Đang chuyển hướng...' :
                'Đang chuyển hướng...'}
             </p>
           </div>
