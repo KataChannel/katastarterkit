@@ -112,13 +112,23 @@ export class MenuResponseDto {
   @Field({ nullable: true })
   updatedBy?: string | null;
 
-  static fromEntity(menu: Menu): MenuResponseDto {
+  // ✅ ADD: Children field for hierarchical menu structure
+  @Field(() => [MenuResponseDto], { nullable: true })
+  children?: MenuResponseDto[];
+
+  static fromEntity(menu: Menu & { children?: Menu[] }): MenuResponseDto {
     const dto = new MenuResponseDto();
     Object.assign(dto, menu);
+    
+    // ✅ Map children recursively
+    if (menu.children && menu.children.length > 0) {
+      dto.children = menu.children.map(child => MenuResponseDto.fromEntity(child));
+    }
+    
     return dto;
   }
 
-  static fromEntities(menus: Menu[]): MenuResponseDto[] {
+  static fromEntities(menus: (Menu & { children?: Menu[] })[]): MenuResponseDto[] {
     return menus.map(menu => MenuResponseDto.fromEntity(menu));
   }
 }

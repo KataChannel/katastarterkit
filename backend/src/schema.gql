@@ -2325,6 +2325,7 @@ type MenuResponseDto {
   blogCategoryId: String
   blogPostId: String
   categoryId: String
+  children: [MenuResponseDto!]
   createdAt: DateTime!
   createdBy: String
   cssClass: String
