@@ -349,10 +349,6 @@ export default function ProductsPage() {
                             size="sm"
                             fullWidth
                           >
-                            <span className="flex items-center gap-1.5">
-                              <ShoppingCart className="h-3.5 w-3.5" />
-                              Thêm
-                            </span>
                           </AddToCartButton>
                           <button
                             onClick={(e) => {

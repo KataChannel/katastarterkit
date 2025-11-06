@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_CART } from '@/graphql/ecommerce.queries';
 import { useAuth } from '@/contexts/AuthContext';
+import { getSessionId } from '@/lib/session';
 
 interface CartContextType {
   cart: any;
@@ -18,10 +19,22 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+
+  // Get or create session ID on mount
+  useEffect(() => {
+    const id = getSessionId();
+    if (id) {
+      setSessionId(id);
+    }
+  }, []);
 
   const { data, loading, error, refetch } = useQuery(GET_CART, {
+    variables: {
+      sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+    },
     fetchPolicy: 'cache-and-network',
-    skip: !isAuthenticated,
+    skip: !isAuthenticated && !sessionId, // Only skip if not authenticated AND no sessionId
   });
 
   const cart = data?.cart || data?.getCart;

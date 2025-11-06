@@ -1,5 +1,6 @@
 import { Field, ObjectType, InputType, ID, Int, Float, registerEnumType } from '@nestjs/graphql';
 import GraphQLJSON from 'graphql-type-json';
+import { IsNotEmpty, IsString, IsInt, Min, IsOptional } from 'class-validator';
 
 /**
  * Cart GraphQL Schema
@@ -156,18 +157,27 @@ export class CartType {
 @InputType()
 export class AddToCartInput {
   @Field(() => ID)
+  @IsNotEmpty({ message: 'Product ID is required' })
+  @IsString()
   productId: string;
 
   @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsString()
   variantId?: string;
 
   @Field(() => Int, { defaultValue: 1 })
+  @IsInt()
+  @Min(1, { message: 'Quantity must be at least 1' })
   quantity: number;
 
   @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
   sessionId?: string; // For guest carts
 
   @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
   metadata?: any;
 }
 

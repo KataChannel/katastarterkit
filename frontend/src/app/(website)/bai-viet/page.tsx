@@ -250,7 +250,7 @@ function BlogPageContent() {
                 </div>
 
                 {/* Popular Tags */}
-                <div className="mt-6 sm:mt-8 hidden sm:block">
+                {/* <div className="mt-6 sm:mt-8 hidden sm:block">
                   <h3 className="font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
                     <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
                     Thẻ phổ biến
@@ -266,7 +266,7 @@ function BlogPageContent() {
                       </Badge>
                     ))}
                   </div>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
           </aside>

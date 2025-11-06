@@ -22,19 +22,41 @@ import { QuantitySelector } from '@/components/ecommerce/QuantitySelector';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 import { useToast } from '@/hooks/use-toast';
 import { getRemainingForFreeShipping, isFreeShippingEligible } from '@/lib/ecommerce-utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getSessionId } from '@/lib/session';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CartPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [couponCode, setCouponCode] = useState('');
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  const { isAuthenticated } = useAuth();
+
+  // Get or create session ID on mount
+  useEffect(() => {
+    const id = getSessionId();
+    if (id) {
+      setSessionId(id);
+    }
+  }, []);
 
   // Fetch cart
-  const { data, loading, error } = useQuery(GET_CART);
+  const { data, loading, error } = useQuery(GET_CART, {
+    variables: {
+      sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+    },
+    skip: !isAuthenticated && !sessionId,
+  });
 
   // Mutations
   const [updateCartItem, { loading: updating }] = useMutation(UPDATE_CART_ITEM, {
-    refetchQueries: [{ query: GET_CART }],
+    refetchQueries: [{ 
+      query: GET_CART,
+      variables: {
+        sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+      },
+    }],
     onError: (error) =>
       toast({
         title: 'Lỗi',
@@ -45,7 +67,12 @@ export default function CartPage() {
   });
 
   const [removeFromCart] = useMutation(REMOVE_FROM_CART, {
-    refetchQueries: [{ query: GET_CART }],
+    refetchQueries: [{ 
+      query: GET_CART,
+      variables: {
+        sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+      },
+    }],
     onCompleted: () =>
       toast({
         title: 'Đã xóa',
@@ -62,7 +89,12 @@ export default function CartPage() {
   });
 
   const [clearCart] = useMutation(CLEAR_CART, {
-    refetchQueries: [{ query: GET_CART }],
+    refetchQueries: [{ 
+      query: GET_CART,
+      variables: {
+        sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+      },
+    }],
     onCompleted: () =>
       toast({
         title: 'Đã xóa',

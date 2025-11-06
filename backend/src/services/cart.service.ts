@@ -23,12 +23,16 @@ export class CartService {
    * Get or create cart for user/session
    */
   async getOrCreateCart(userId?: string, sessionId?: string) {
-    if (!userId && !sessionId) {
+    // Normalize empty strings to undefined
+    const normalizedUserId = userId && userId.trim() !== '' ? userId : undefined;
+    const normalizedSessionId = sessionId && sessionId.trim() !== '' ? sessionId : undefined;
+
+    if (!normalizedUserId && !normalizedSessionId) {
       throw new BadRequestException('Either userId or sessionId is required');
     }
 
     // Try cache first
-    const cacheKey = this.getCartCacheKey(userId, sessionId);
+    const cacheKey = this.getCartCacheKey(normalizedUserId, normalizedSessionId);
     const cached = await this.redis.get(cacheKey);
     if (cached) {
       return JSON.parse(cached);
@@ -36,7 +40,7 @@ export class CartService {
 
     // Find existing cart
     let cart = await this.prisma.cart.findFirst({
-      where: userId ? { userId } : { sessionId },
+      where: normalizedUserId ? { userId: normalizedUserId } : { sessionId: normalizedSessionId },
       include: {
         items: {
           include: {
@@ -70,8 +74,8 @@ export class CartService {
     if (!cart) {
       cart = await this.prisma.cart.create({
         data: {
-          userId,
-          sessionId,
+          userId: normalizedUserId,
+          sessionId: normalizedSessionId,
           expiresAt: new Date(Date.now() + this.CART_TTL * 1000),
         },
         include: {
@@ -118,6 +122,15 @@ export class CartService {
    */
   async addItem(input: AddToCartInput, userId?: string) {
     const { productId, variantId, quantity, sessionId, metadata } = input;
+
+    // Validate input
+    if (!productId) {
+      throw new BadRequestException('Product ID is required');
+    }
+
+    if (!quantity || quantity < 1) {
+      throw new BadRequestException('Quantity must be at least 1');
+    }
 
     // Validate product and variant
     const product = await this.prisma.product.findUnique({

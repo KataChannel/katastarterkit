@@ -42,6 +42,15 @@ export class CartResolver {
     @Context() context?: any,
   ): Promise<AddToCartResponse> {
     try {
+      // Validate input
+      if (!input || !input.productId) {
+        return {
+          success: false,
+          message: 'Product ID is required',
+          errors: ['Product ID is required'],
+        };
+      }
+
       const userId = context?.req?.user?.id;
       const cart = await this.cartService.addItem(input, userId);
       

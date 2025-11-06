@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -9,11 +9,29 @@ import { CreditCard, Truck, MapPin, Phone, Mail, User, ArrowLeft } from 'lucide-
 import { useToast } from '@/hooks/use-toast';
 import { PaymentMethodBadge } from '@/components/ecommerce/PaymentMethodBadge';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
+import { getSessionId } from '@/lib/session';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { data: cartData, loading: cartLoading } = useQuery(GET_CART);
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  const { isAuthenticated } = useAuth();
+
+  // Get or create session ID on mount
+  useEffect(() => {
+    const id = getSessionId();
+    if (id) {
+      setSessionId(id);
+    }
+  }, []);
+
+  const { data: cartData, loading: cartLoading } = useQuery(GET_CART, {
+    variables: {
+      sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+    },
+    skip: !isAuthenticated && !sessionId,
+  });
 
   const [formData, setFormData] = useState({
     // Shipping Address

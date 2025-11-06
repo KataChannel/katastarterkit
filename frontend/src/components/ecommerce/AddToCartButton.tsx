@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
 import { ShoppingCart, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ADD_TO_CART, GET_CART } from '@/graphql/ecommerce.queries';
 import { cn } from '@/lib/utils';
+import { getSessionId } from '@/lib/session';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AddToCartButtonProps {
   productId: string;
@@ -36,9 +38,24 @@ export function AddToCartButton({
   const { toast } = useToast();
   const [isAdding, setIsAdding] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  const { isAuthenticated } = useAuth();
+
+  // Get or create session ID on mount
+  useEffect(() => {
+    const id = getSessionId();
+    if (id) {
+      setSessionId(id);
+    }
+  }, []);
 
   const [addToCart] = useMutation(ADD_TO_CART, {
-    refetchQueries: [{ query: GET_CART }],
+    refetchQueries: [{ 
+      query: GET_CART,
+      variables: {
+        sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+      },
+    }],
     onCompleted: (data) => {
       if (data.addToCart.success) {
         // Animation success
@@ -89,6 +106,7 @@ export function AddToCartButton({
             productId,
             variantId,
             quantity,
+            sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
           },
         },
       });

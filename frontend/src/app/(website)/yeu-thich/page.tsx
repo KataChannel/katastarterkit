@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
 import Link from 'next/link';
@@ -11,6 +11,9 @@ import { EcommerceNavigation } from '@/components/ecommerce/EcommerceNavigation'
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { ADD_TO_CART, GET_CART } from '@/graphql/ecommerce.queries';
+import { getSessionId } from '@/lib/session';
+import { useAuth } from '@/contexts/AuthContext';
 
 const GET_WISHLIST = gql`
   query GetWishlist {
@@ -43,17 +46,6 @@ const REMOVE_FROM_WISHLIST = gql`
   }
 `;
 
-const ADD_TO_CART = gql`
-  mutation AddToCart($productId: ID!, $quantity: Int!) {
-    addToCart(input: { productId: $productId, quantity: $quantity }) {
-      cart {
-        id
-        itemCount
-      }
-    }
-  }
-`;
-
 interface WishlistItem {
   id: string;
   product: {
@@ -71,6 +63,16 @@ interface WishlistItem {
 
 function WishlistContent() {
   const { toast } = useToast();
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  const { isAuthenticated } = useAuth();
+
+  // Get or create session ID on mount
+  useEffect(() => {
+    const id = getSessionId();
+    if (id) {
+      setSessionId(id);
+    }
+  }, []);
   
   const { data, loading, error, refetch } = useQuery<{
     wishlist: { id: string; items: WishlistItem[] };
@@ -101,6 +103,12 @@ function WishlistContent() {
   );
 
   const [addToCart, { loading: addingToCart }] = useMutation(ADD_TO_CART, {
+    refetchQueries: [{ 
+      query: GET_CART,
+      variables: {
+        sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+      },
+    }],
     onCompleted: () => {
       toast({
         title: 'Đã thêm vào giỏ hàng',
@@ -123,7 +131,15 @@ function WishlistContent() {
   };
 
   const handleAddToCart = async (productId: string) => {
-    await addToCart({ variables: { productId, quantity: 1 } });
+    await addToCart({ 
+      variables: { 
+        input: {
+          productId, 
+          quantity: 1,
+          sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+        }
+      } 
+    });
   };
 
   if (error) {
