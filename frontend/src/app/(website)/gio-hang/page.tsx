@@ -31,7 +31,7 @@ export default function CartPage() {
   const { toast } = useToast();
   const [couponCode, setCouponCode] = useState('');
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   // Get or create session ID on mount
   useEffect(() => {
@@ -41,11 +41,19 @@ export default function CartPage() {
     }
   }, []);
 
+  // Build query variables based on authentication state
+  const getQueryVariables = () => {
+    if (isAuthenticated && user?.id) {
+      return { userId: user.id };
+    } else if (sessionId) {
+      return { sessionId };
+    }
+    return undefined;
+  };
+
   // Fetch cart - always get fresh data
   const { data, loading, error, refetch } = useQuery(GET_CART, {
-    variables: {
-      sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
-    },
+    variables: getQueryVariables(),
     skip: !isAuthenticated && !sessionId,
     fetchPolicy: 'network-only', // Always fetch fresh cart data
   });
@@ -56,16 +64,14 @@ export default function CartPage() {
       if (data?.updateCartItem?.success && data?.updateCartItem?.cart) {
         cache.writeQuery({
           query: GET_CART,
-          variables: { sessionId: !isAuthenticated && sessionId ? sessionId : undefined },
+          variables: getQueryVariables(),
           data: { getCart: data.updateCartItem.cart },
         });
       }
     },
     refetchQueries: [{ 
       query: GET_CART,
-      variables: {
-        sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
-      },
+      variables: getQueryVariables(),
     }],
     awaitRefetchQueries: true,
     onError: (error) =>
@@ -82,16 +88,14 @@ export default function CartPage() {
       if (data?.removeFromCart?.success && data?.removeFromCart?.cart) {
         cache.writeQuery({
           query: GET_CART,
-          variables: { sessionId: !isAuthenticated && sessionId ? sessionId : undefined },
+          variables: getQueryVariables(),
           data: { getCart: data.removeFromCart.cart },
         });
       }
     },
     refetchQueries: [{ 
       query: GET_CART,
-      variables: {
-        sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
-      },
+      variables: getQueryVariables(),
     }],
     awaitRefetchQueries: true,
     onCompleted: () =>
@@ -114,16 +118,14 @@ export default function CartPage() {
       if (data?.clearCart?.success && data?.clearCart?.cart) {
         cache.writeQuery({
           query: GET_CART,
-          variables: { sessionId: !isAuthenticated && sessionId ? sessionId : undefined },
+          variables: getQueryVariables(),
           data: { getCart: data.clearCart.cart },
         });
       }
     },
     refetchQueries: [{ 
       query: GET_CART,
-      variables: {
-        sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
-      },
+      variables: getQueryVariables(),
     }],
     awaitRefetchQueries: true,
     onCompleted: () =>
@@ -152,7 +154,11 @@ export default function CartPage() {
         variables: { 
           itemId, 
           quantity: newQuantity,
-          sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+          // Send userId for authenticated users, sessionId for guests
+          ...(isAuthenticated && user?.id 
+            ? { userId: user.id }
+            : { sessionId }
+          ),
         },
       });
     } catch (err) {
@@ -165,7 +171,11 @@ export default function CartPage() {
       await removeFromCart({
         variables: { 
           itemId,
-          sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+          // Send userId for authenticated users, sessionId for guests
+          ...(isAuthenticated && user?.id 
+            ? { userId: user.id }
+            : { sessionId }
+          ),
         },
       });
     } catch (err) {
@@ -177,7 +187,11 @@ export default function CartPage() {
     try {
       await clearCart({
         variables: {
-          sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+          // Send userId for authenticated users, sessionId for guests
+          ...(isAuthenticated && user?.id 
+            ? { userId: user.id }
+            : { sessionId }
+          ),
         },
       });
     } catch (err) {

@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ADD_TO_CART, GET_CART } from '@/graphql/ecommerce.queries';
 import { cn } from '@/lib/utils';
 import { useCartSession } from '@/hooks/useCartSession';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AddToCartButtonProps {
   productId: string;
@@ -40,15 +41,27 @@ export function AddToCartButton({
   
   // Use optimized cart session hook
   const { sessionId } = useCartSession();
+  const { user, isAuthenticated } = useAuth();
+
+  // Build query variables based on authentication state
+  const getQueryVariables = () => {
+    if (isAuthenticated && user?.id) {
+      return { userId: user.id };
+    } else if (sessionId) {
+      return { sessionId };
+    }
+    return undefined;
+  };
 
   const [addToCart] = useMutation(ADD_TO_CART, {
     // Update Apollo cache directly for better performance
     update(cache, { data }) {
       if (data?.addToCart?.success && data?.addToCart?.cart) {
+        const variables = getQueryVariables();
         // Write the updated cart to cache
         cache.writeQuery({
           query: GET_CART,
-          variables: sessionId ? { sessionId } : undefined,
+          variables,
           data: { getCart: data.addToCart.cart },
         });
       }
@@ -56,7 +69,7 @@ export function AddToCartButton({
     // Fallback refetch if cache update fails
     refetchQueries: [{ 
       query: GET_CART,
-      variables: sessionId ? { sessionId } : undefined,
+      variables: getQueryVariables(),
     }],
     awaitRefetchQueries: true,
     onCompleted: (data) => {
@@ -110,8 +123,11 @@ export function AddToCartButton({
             productId,
             variantId,
             quantity,
-            // Always send sessionId for guest users (authenticated users don't need it)
-            sessionId,
+            // Send userId for authenticated users, sessionId for guests
+            ...(isAuthenticated && user?.id 
+              ? { userId: user.id }
+              : { sessionId }
+            ),
           },
         },
       });

@@ -4,6 +4,7 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_CART } from '@/graphql/ecommerce.queries';
 import { useCartSession } from '@/hooks/useCartSession';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CartContextType {
   cart: any;
@@ -18,11 +19,22 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { sessionId, isInitialized } = useCartSession();
+  const { user, isAuthenticated } = useAuth();
+
+  // Build variables based on authentication state
+  const variables = React.useMemo(() => {
+    if (isAuthenticated && user?.id) {
+      return { userId: user.id };
+    } else if (sessionId) {
+      return { sessionId };
+    }
+    return undefined;
+  }, [isAuthenticated, user?.id, sessionId]);
 
   const { data, loading, error, refetch } = useQuery(GET_CART, {
-    variables: sessionId ? { sessionId } : undefined,
+    variables,
     fetchPolicy: 'cache-and-network',
-    skip: !isInitialized, // Wait for session to initialize
+    skip: !isInitialized || !variables, // Wait for session to initialize and have valid variables
     notifyOnNetworkStatusChange: true, // Important for refetch updates
   });
 

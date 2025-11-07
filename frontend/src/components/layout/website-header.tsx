@@ -85,6 +85,7 @@ export function WebsiteHeader() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<any>();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   // Auto-slide functionality
   useEffect(() => {
@@ -97,18 +98,34 @@ export function WebsiteHeader() {
     return () => clearInterval(timer);
   }, [api]);
 
-  // Scroll detection - Hide carousel and shrink header after 100px
+  // Scroll detection with hysteresis to prevent jitter
   useEffect(() => {
+    let rafId: number | null = null;
+    
     const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const shouldScroll = scrollPosition > 350;
+      if (rafId) return; // Skip if already scheduled
       
-      // Use requestAnimationFrame for smooth state updates
-      if (shouldScroll !== isScrolled) {
-        requestAnimationFrame(() => {
-          setIsScrolled(shouldScroll);
-        });
-      }
+      rafId = requestAnimationFrame(() => {
+        const scrollPosition = window.scrollY;
+        const scrollThreshold = 350;
+        const hysteresis = 20; // Buffer zone to prevent jitter
+        
+        // Hysteresis logic: different thresholds for scrolling up vs down
+        if (isScrolled) {
+          // Currently scrolled - need to scroll up past threshold - hysteresis to unscroll
+          if (scrollPosition < scrollThreshold - hysteresis) {
+            setIsScrolled(false);
+          }
+        } else {
+          // Currently not scrolled - need to scroll down past threshold + hysteresis to scroll
+          if (scrollPosition > scrollThreshold + hysteresis) {
+            setIsScrolled(true);
+          }
+        }
+        
+        setLastScrollY(scrollPosition);
+        rafId = null;
+      });
     };
 
     // Initial check
@@ -118,7 +135,10 @@ export function WebsiteHeader() {
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     // Cleanup
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [isScrolled]);
 
   // Track current slide
@@ -326,7 +346,7 @@ export function WebsiteHeader() {
                     size="sm"
                     className="justify-start"
                     onClick={() => {
-                      router.push('/auth/login');
+                      router.push('/login?redirect=/');
                       setIsMobileMenuOpen(false);
                     }}
                   >
@@ -608,7 +628,7 @@ export function WebsiteHeader() {
                             size="sm"
                             variant="ghost"
                             className="flex items-center space-x-1 px-3 py-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                            onClick={() => router.push('/auth/login')}
+                            onClick={() => router.push('/login?redirect=/')}
                           >
                             <LogIn className="w-4 h-4" />
                             <span className="text-sm font-medium">Đăng nhập</span>

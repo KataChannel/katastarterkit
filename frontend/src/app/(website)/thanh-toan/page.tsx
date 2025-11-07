@@ -15,13 +15,21 @@ import { useCartSession } from '@/hooks/useCartSession';
 export default function CheckoutPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { sessionId, isInitialized } = useCartSession();
 
+  // Build query variables based on authentication state
+  const getQueryVariables = () => {
+    if (isAuthenticated && user?.id) {
+      return { userId: user.id };
+    } else if (sessionId) {
+      return { sessionId };
+    }
+    return undefined;
+  };
+
   const { data: cartData, loading: cartLoading, error: cartError } = useQuery(GET_CART, {
-    variables: {
-      sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
-    },
+    variables: getQueryVariables(),
     skip: !isInitialized || (!isAuthenticated && !sessionId),
     fetchPolicy: 'network-only', // Always fetch fresh data for checkout
   });
