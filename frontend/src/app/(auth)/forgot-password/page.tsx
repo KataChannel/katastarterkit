@@ -146,21 +146,28 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 py-6 px-4 sm:py-12">
       <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Link href="/login" className="text-muted-foreground hover:text-foreground">
+        <CardHeader className="space-y-2">
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <CardTitle className="text-2xl font-bold">Quên mật khẩu</CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Mail className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Quên mật khẩu</CardTitle>
+                <CardDescription className="text-sm">
+                  {step === 'email' && 'Nhập email để nhận mã xác thực'}
+                  {step === 'verify' && 'Nhập mã OTP đã được gửi đến email'}
+                  {step === 'password' && 'Tạo mật khẩu mới'}
+                  {step === 'success' && 'Hoàn tất đặt lại mật khẩu'}
+                </CardDescription>
+              </div>
+            </div>
           </div>
-          <CardDescription>
-            {step === 'email' && 'Nhập email để nhận mã xác thực'}
-            {step === 'verify' && 'Nhập mã OTP đã được gửi đến email'}
-            {step === 'password' && 'Tạo mật khẩu mới'}
-            {step === 'success' && 'Hoàn tất đặt lại mật khẩu'}
-          </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -174,7 +181,7 @@ export default function ForgotPasswordPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder="name@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -182,11 +189,15 @@ export default function ForgotPasswordPage() {
                     disabled={requestLoading}
                   />
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Chúng tôi sẽ gửi mã xác thực đến email của bạn
+                </p>
               </div>
 
               <Button
                 type="submit"
                 className="w-full"
+                size="lg"
                 disabled={requestLoading}
               >
                 {requestLoading ? (
@@ -209,7 +220,7 @@ export default function ForgotPasswordPage() {
                 <AlertDescription>
                   Mã OTP đã được gửi đến <strong>{email}</strong>
                   {devToken && (
-                    <div className="mt-2 p-2 bg-yellow-50 rounded text-sm">
+                    <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-950/20 rounded text-sm">
                       <strong>Dev:</strong> {devToken}
                     </div>
                   )}
@@ -224,11 +235,12 @@ export default function ForgotPasswordPage() {
                   placeholder="000000"
                   value={token}
                   onChange={(e) => setToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="text-center text-2xl tracking-widest"
+                  className="text-center text-2xl tracking-widest font-semibold"
                   maxLength={6}
                   required
                   disabled={verifyLoading}
                   autoComplete="off"
+                  autoFocus
                 />
               </div>
 
@@ -238,6 +250,7 @@ export default function ForgotPasswordPage() {
                   variant="outline"
                   className="flex-1"
                   onClick={() => setStep('email')}
+                  disabled={verifyLoading}
                 >
                   Quay lại
                 </Button>
@@ -296,6 +309,7 @@ export default function ForgotPasswordPage() {
               <Button
                 type="submit"
                 className="w-full"
+                size="lg"
                 disabled={resetLoading}
               >
                 {resetLoading ? (
@@ -314,13 +328,13 @@ export default function ForgotPasswordPage() {
           {step === 'success' && (
             <div className="text-center space-y-4 py-6">
               <div className="flex justify-center">
-                <div className="rounded-full bg-green-100 p-3">
-                  <CheckCircle2 className="h-12 w-12 text-green-600" />
+                <div className="rounded-full bg-green-100 dark:bg-green-950/20 p-3">
+                  <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-500" />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <h3 className="text-xl font-semibold text-green-600">
+                <h3 className="text-xl font-semibold text-green-600 dark:text-green-500">
                   Thành công!
                 </h3>
                 <p className="text-muted-foreground">
@@ -334,6 +348,7 @@ export default function ForgotPasswordPage() {
               <Button
                 onClick={() => router.push('/login')}
                 className="w-full"
+                size="lg"
               >
                 Đăng nhập ngay
               </Button>
@@ -341,7 +356,7 @@ export default function ForgotPasswordPage() {
           )}
         </CardContent>
 
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center border-t pt-6">
           <p className="text-sm text-muted-foreground">
             Đã nhớ mật khẩu?{' '}
             <Link href="/login" className="text-primary hover:underline font-medium">

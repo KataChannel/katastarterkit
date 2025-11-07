@@ -91,14 +91,17 @@ function RegisterPageContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 py-6 px-4 sm:py-12">
+      <Card className="w-full max-w-md shadow-xl">
+        <CardHeader className="space-y-2 text-center">
           <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-primary/10 mb-2">
             <UserPlus className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold">Tạo tài khoản</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight">Tạo tài khoản</CardTitle>
+          <CardDescription className="text-base">
+            Tham gia ngay để bắt đầu trải nghiệm
+          </CardDescription>
+          <p className="text-sm text-muted-foreground pt-2">
             Đã có tài khoản?{' '}
             <Link
               href="/login"
@@ -106,7 +109,7 @@ function RegisterPageContent() {
             >
               Đăng nhập tại đây
             </Link>
-          </CardDescription>
+          </p>
         </CardHeader>
 
         <CardContent>
@@ -120,7 +123,7 @@ function RegisterPageContent() {
                 type="text"
                 autoComplete="name"
                 data-testid="name-input"
-                placeholder="Nhập họ và tên của bạn"
+                placeholder="Nguyễn Văn A"
                 className={errors.name ? 'border-destructive' : ''}
               />
               {errors.name && (
@@ -137,7 +140,7 @@ function RegisterPageContent() {
                 type="email"
                 autoComplete="email"
                 data-testid="email-input"
-                placeholder="Nhập email của bạn"
+                placeholder="name@example.com"
                 className={errors.email ? 'border-destructive' : ''}
               />
               {errors.email && (
@@ -155,7 +158,7 @@ function RegisterPageContent() {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   data-testid="password-input"
-                  placeholder="Nhập mật khẩu của bạn"
+                  placeholder="••••••••"
                   className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
                 />
                 <Button
@@ -181,6 +184,9 @@ function RegisterPageContent() {
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
+              <p className="text-xs text-muted-foreground">
+                Tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường và số
+              </p>
             </div>
 
             {/* Confirm Password Field */}
@@ -193,7 +199,7 @@ function RegisterPageContent() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   data-testid="confirm-password-input"
-                  placeholder="Xác nhận mật khẩu của bạn"
+                  placeholder="••••••••"
                   className={errors.confirmPassword ? 'border-destructive pr-10' : 'pr-10'}
                 />
                 <Button
@@ -226,6 +232,7 @@ function RegisterPageContent() {
               disabled={!isValid || loading}
               data-testid="register-button"
               className="w-full"
+              size="lg"
             >
               {loading ? (
                 <>
