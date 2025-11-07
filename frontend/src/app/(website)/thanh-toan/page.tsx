@@ -6,13 +6,12 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { GET_CART, CREATE_ORDER } from '@/graphql/ecommerce.queries';
 import { CreditCard, Truck, MapPin, Phone, Mail, User, ArrowLeft } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCartSession } from '@/hooks/useCartSession';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
   const { sessionId, isInitialized } = useCartSession();
 
@@ -65,31 +64,17 @@ export default function CheckoutPage() {
     onCompleted: (data) => {
       if (data.createOrder.success) {
         const order = data.createOrder.order;
-        toast({
-          title: 'Thành công',
-          description: 'Đặt hàng thành công!',
-          type: 'success',
-        });
+        toast.success('Đặt hàng thành công!');
         // Redirect to success page with order info
         router.push(
           `/thanh-toan/thanh-cong?orderNumber=${order.orderNumber}&totalAmount=${order.total}&paymentMethod=${formData.paymentMethod}`
         );
       } else {
-        toast({
-          title: 'Lỗi',
-          description: data.createOrder.message || 'Đặt hàng thất bại',
-          type: 'error',
-          variant: 'destructive',
-        });
+        toast.error(data.createOrder.message || 'Đặt hàng thất bại');
       }
     },
     onError: (error) => {
-      toast({
-        title: 'Lỗi',
-        description: 'Đặt hàng thất bại: ' + error.message,
-        type: 'error',
-        variant: 'destructive',
-      });
+      toast.error('Đặt hàng thất bại: ' + error.message);
     },
   });
 
@@ -125,12 +110,7 @@ export default function CheckoutPage() {
           cartLoading,
           sessionId 
         });
-        toast({
-          title: 'Giỏ hàng trống',
-          description: 'Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán',
-          type: 'warning',
-          variant: 'default',
-        });
+        toast.warning('Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán');
         // router.push('/san-pham');
       }
       console.log("hasItems", isInitialized);
@@ -138,7 +118,7 @@ export default function CheckoutPage() {
       console.log("cartData", cartData);
       console.log("hasItems", hasItems);   
     }
-  }, [isInitialized, cartLoading, cartError, cartData, cart, items, sessionId, router, toast]);
+  }, [isInitialized, cartLoading, cartError, cartData, cart, items, sessionId, router]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -167,22 +147,12 @@ export default function CheckoutPage() {
 
     // Validation
     if (!formData.fullName || !formData.phone || !formData.address) {
-      toast({
-        title: 'Thiếu thông tin',
-        description: 'Vui lòng điền đầy đủ thông tin giao hàng',
-        type: 'error',
-        variant: 'destructive',
-      });
+      toast.error('Vui lòng điền đầy đủ thông tin giao hàng');
       return;
     }
 
     if (items.length === 0) {
-      toast({
-        title: 'Giỏ hàng trống',
-        description: 'Vui lòng thêm sản phẩm vào giỏ hàng',
-        type: 'error',
-        variant: 'destructive',
-      });
+      toast.error('Vui lòng thêm sản phẩm vào giỏ hàng');
       return;
     }
 

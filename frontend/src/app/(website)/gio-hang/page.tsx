@@ -20,7 +20,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { QuantitySelector } from '@/components/ecommerce/QuantitySelector';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { getRemainingForFreeShipping, isFreeShippingEligible } from '@/lib/ecommerce-utils';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,7 +28,6 @@ import { useCartSession } from '@/hooks/useCartSession';
 
 export default function CartPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [couponCode, setCouponCode] = useState('');
   const { isAuthenticated } = useAuth();
   const { sessionId, isInitialized } = useCartSession();
@@ -48,19 +47,13 @@ export default function CartPage() {
   });
 
   // Mutations
-  const [updateCartItem, { loading: updating }] = useMutation(UPDATE_CART_ITEM, {
+  const [updateCartItem] = useMutation(UPDATE_CART_ITEM, {
     refetchQueries: [{ 
       query: GET_CART,
       variables: getQueryVariables(),
     }],
     awaitRefetchQueries: true,
-    onError: (error) =>
-      toast({
-        title: 'Lỗi',
-        description: 'Cập nhật thất bại: ' + error.message,
-        type: 'error',
-        variant: 'destructive',
-      }),
+    onError: (error) => toast.error('Cập nhật thất bại: ' + error.message),
   });
 
   const [removeFromCart] = useMutation(REMOVE_FROM_CART, {
@@ -69,19 +62,8 @@ export default function CartPage() {
       variables: getQueryVariables(),
     }],
     awaitRefetchQueries: true,
-    onCompleted: () =>
-      toast({
-        title: 'Đã xóa',
-        description: 'Sản phẩm đã được xóa khỏi giỏ hàng',
-        type: 'success',
-      }),
-    onError: (error) =>
-      toast({
-        title: 'Lỗi',
-        description: 'Xóa thất bại: ' + error.message,
-        type: 'error',
-        variant: 'destructive',
-      }),
+    onCompleted: () => toast.success('Sản phẩm đã được xóa khỏi giỏ hàng'),
+    onError: (error) => toast.error('Xóa thất bại: ' + error.message),
   });
 
   const [clearCart] = useMutation(CLEAR_CART, {
@@ -90,19 +72,8 @@ export default function CartPage() {
       variables: getQueryVariables(),
     }],
     awaitRefetchQueries: true,
-    onCompleted: () =>
-      toast({
-        title: 'Đã xóa',
-        description: 'Đã xóa toàn bộ giỏ hàng',
-        type: 'success',
-      }),
-    onError: (error) =>
-      toast({
-        title: 'Lỗi',
-        description: 'Xóa thất bại: ' + error.message,
-        type: 'error',
-        variant: 'destructive',
-      }),
+    onCompleted: () => toast.success('Đã xóa toàn bộ giỏ hàng'),
+    onError: (error) => toast.error('Xóa thất bại: ' + error.message),
   });
 
   const cart = data?.cart || data?.getCart;
@@ -313,7 +284,6 @@ export default function CartPage() {
                               onChange={(newQty) => handleUpdateQuantity(item.id, newQty)}
                               max={productStock}
                               size="sm"
-                              loading={updating}
                             />
 
                             <Button

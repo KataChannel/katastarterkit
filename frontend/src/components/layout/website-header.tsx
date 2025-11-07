@@ -334,7 +334,7 @@ export function WebsiteHeader() {
           </Sheet>
 
           {/* Mobile Logo */}
-          <Link href="/" className="flex-1 flex justify-center">
+          <Link href="/" className="flex justify-center bg-white rounded-lg px-2 py-1">
             <img 
               src={headerSettings['header.logo'] || '/assets/images/logo.svg'} 
               alt="Logo" 

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { EcommerceNavigation } from '@/components/ecommerce/EcommerceNavigation';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ADD_TO_CART, GET_CART } from '@/graphql/ecommerce.queries';
 import { getSessionId } from '@/lib/session';
 import { useAuth } from '@/contexts/AuthContext';
@@ -62,7 +62,6 @@ interface WishlistItem {
 }
 
 function WishlistContent() {
-  const { toast } = useToast();
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const { isAuthenticated } = useAuth();
 
@@ -84,20 +83,11 @@ function WishlistContent() {
     REMOVE_FROM_WISHLIST,
     {
       onCompleted: () => {
-        toast({
-          title: 'Đã xóa',
-          description: 'Sản phẩm đã được xóa khỏi danh sách yêu thích',
-          type: 'success',
-        });
+        toast.success('Sản phẩm đã được xóa khỏi danh sách yêu thích');
         refetch();
       },
       onError: () => {
-        toast({
-          title: 'Lỗi',
-          description: 'Không thể xóa sản phẩm. Vui lòng thử lại.',
-          type: 'error',
-          variant: 'destructive',
-        });
+        toast.error('Không thể xóa sản phẩm. Vui lòng thử lại.');
       },
     }
   );
@@ -110,19 +100,10 @@ function WishlistContent() {
       },
     }],
     onCompleted: () => {
-      toast({
-        title: 'Đã thêm vào giỏ hàng',
-        description: 'Sản phẩm đã được thêm vào giỏ hàng',
-        type: 'success',
-      });
+      toast.success('Sản phẩm đã được thêm vào giỏ hàng');
     },
     onError: () => {
-      toast({
-        title: 'Lỗi',
-        description: 'Không thể thêm vào giỏ hàng. Vui lòng thử lại.',
-        type: 'error',
-        variant: 'destructive',
-      });
+      toast.error('Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
     },
   });
 
