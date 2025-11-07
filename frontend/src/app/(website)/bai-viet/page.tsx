@@ -6,18 +6,24 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { GET_BLOGS, GET_BLOG_CATEGORIES } from '@/graphql/blog.queries';
-import { Search, Calendar, User, Clock, TrendingUp, Filter, X, Home, ChevronRight } from 'lucide-react';
+import { Search, Calendar, User, Clock, TrendingUp, Filter, X, Home, ChevronRight, Check, ChevronsUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,6 +32,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { cn } from '@/lib/utils';
 
 function BlogPageContent() {
   const searchParams = useSearchParams();
@@ -37,7 +44,14 @@ function BlogPageContent() {
   );
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
+  const [openSortCombobox, setOpenSortCombobox] = useState(false);
   const [limit] = useState(Number(searchParams.get('limit')) || 12);
+
+  const sortOptions = [
+    { value: 'newest', label: 'Mới nhất' },
+    { value: 'oldest', label: 'Cũ nhất' },
+    { value: 'popular', label: 'Phổ biến nhất' },
+  ];
 
   // Update state khi URL params thay đổi
   useEffect(() => {
@@ -154,16 +168,49 @@ function BlogPageContent() {
                 className="pl-9 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base"
               />
             </div>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-[180px] h-10 sm:h-11">
-                <SelectValue placeholder="Sắp xếp" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Mới nhất</SelectItem>
-                <SelectItem value="oldest">Cũ nhất</SelectItem>
-                <SelectItem value="popular">Phổ biến nhất</SelectItem>
-              </SelectContent>
-            </Select>
+            
+            {/* Sort Combobox */}
+            <Popover open={openSortCombobox} onOpenChange={setOpenSortCombobox}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openSortCombobox}
+                  className="w-full sm:w-[180px] h-10 sm:h-11 justify-between"
+                >
+                  <span className="truncate">
+                    {sortOptions.find((option) => option.value === sortBy)?.label || 'Sắp xếp'}
+                  </span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[180px] p-0" align="end">
+                <Command>
+                  <CommandList>
+                    <CommandGroup>
+                      {sortOptions.map((option) => (
+                        <CommandItem
+                          key={option.value}
+                          value={option.value}
+                          onSelect={(currentValue) => {
+                            setSortBy(currentValue);
+                            setOpenSortCombobox(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              sortBy === option.value ? 'opacity-100' : 'opacity-0'
+                            )}
+                          />
+                          {option.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Active Filters Badge */}

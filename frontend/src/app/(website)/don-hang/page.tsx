@@ -6,7 +6,7 @@ import { gql } from '@apollo/client';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { Package, Search, Filter } from 'lucide-react';
+import { Package, Search, Filter, Check, ChevronsUpDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,12 +16,19 @@ import { PaymentMethodBadge, type PaymentMethod } from '@/components/ecommerce/P
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { GET_USER_ORDERS } from '@/graphql/ecommerce.queries';
 
@@ -59,6 +66,18 @@ interface Order {
 function OrderListContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [openStatusCombobox, setOpenStatusCombobox] = useState(false);
+
+  const statusOptions = [
+    { value: 'ALL', label: 'Tất cả' },
+    { value: 'PENDING', label: 'Chờ xác nhận' },
+    { value: 'CONFIRMED', label: 'Đã xác nhận' },
+    { value: 'PROCESSING', label: 'Đang xử lý' },
+    { value: 'SHIPPING', label: 'Đang giao' },
+    { value: 'DELIVERED', label: 'Đã giao' },
+    { value: 'COMPLETED', label: 'Hoàn thành' },
+    { value: 'CANCELLED', label: 'Đã hủy' },
+  ];
 
   const { data, loading, error } = useQuery(
     GET_USER_ORDERS,
@@ -145,23 +164,51 @@ function OrderListContent() {
               />
             </div>
 
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Trạng thái" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Tất cả</SelectItem>
-                <SelectItem value="PENDING">Chờ xác nhận</SelectItem>
-                <SelectItem value="CONFIRMED">Đã xác nhận</SelectItem>
-                <SelectItem value="PROCESSING">Đang xử lý</SelectItem>
-                <SelectItem value="SHIPPING">Đang giao</SelectItem>
-                <SelectItem value="DELIVERED">Đã giao</SelectItem>
-                <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
-                <SelectItem value="CANCELLED">Đã hủy</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Status Filter - Combobox */}
+            <Popover open={openStatusCombobox} onOpenChange={setOpenStatusCombobox}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openStatusCombobox}
+                  className="w-full sm:w-[200px] justify-between"
+                >
+                  <Filter className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">
+                    {statusOptions.find((option) => option.value === statusFilter)?.label || 'Trạng thái'}
+                  </span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Tìm trạng thái..." />
+                  <CommandList>
+                    <CommandEmpty>Không tìm thấy trạng thái</CommandEmpty>
+                    <CommandGroup>
+                      {statusOptions.map((option) => (
+                        <CommandItem
+                          key={option.value}
+                          value={option.value}
+                          onSelect={(currentValue) => {
+                            setStatusFilter(currentValue.toUpperCase());
+                            setOpenStatusCombobox(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              statusFilter === option.value ? 'opacity-100' : 'opacity-0'
+                            )}
+                          />
+                          {option.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardContent>
       </Card>
