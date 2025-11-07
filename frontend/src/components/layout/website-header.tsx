@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import { useScroll } from '@/contexts/ScrollContext';
 // ✅ MIGRATED: Import Dynamic GraphQL
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
 import { useQuery } from '@apollo/client';
@@ -38,6 +39,7 @@ import React from 'react';
 export function WebsiteHeader() {
   const { user, isAuthenticated, logout } = useAuth();
   const { itemCount: cartItemCount } = useCart();
+  const { isScrolled } = useScroll();
   const router = useRouter();
   const [showSearchPopup, setShowSearchPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -93,8 +95,6 @@ export function WebsiteHeader() {
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<any>();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
 
   // Auto-slide functionality
   useEffect(() => {
@@ -106,49 +106,6 @@ export function WebsiteHeader() {
 
     return () => clearInterval(timer);
   }, [api]);
-
-  // Scroll detection with hysteresis to prevent jitter
-  useEffect(() => {
-    let rafId: number | null = null;
-    
-    const handleScroll = () => {
-      if (rafId) return; // Skip if already scheduled
-      
-      rafId = requestAnimationFrame(() => {
-        const scrollPosition = window.scrollY;
-        const scrollThreshold = 50;
-        const hysteresis = 20; // Buffer zone to prevent jitter
-        
-        // Hysteresis logic: different thresholds for scrolling up vs down
-        if (isScrolled) {
-          // Currently scrolled - need to scroll up past threshold - hysteresis to unscroll
-          if (scrollPosition < scrollThreshold - hysteresis) {
-            setIsScrolled(false);
-          }
-        } else {
-          // Currently not scrolled - need to scroll down past threshold + hysteresis to scroll
-          if (scrollPosition > scrollThreshold + hysteresis) {
-            setIsScrolled(true);
-          }
-        }
-        
-        setLastScrollY(scrollPosition);
-        rafId = null;
-      });
-    };
-
-    // Initial check
-    handleScroll();
-
-    // Add event listener with passive flag for better performance
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, [isScrolled]);
 
   // Track current slide
   useEffect(() => {
@@ -523,7 +480,7 @@ export function WebsiteHeader() {
           >
             {/* Logo */}
             <div className={cn(
-              "bg-white col-span-3 flex justify-end rounded-e-full pe-8 transition-all duration-500 ease-in-out",
+              "bg-white col-span-4 flex justify-end rounded-e-full pe-8 transition-all duration-500 ease-in-out",
               isScrolled ? "p-2" : "p-4"
             )}>
               <Link href="/" className="text-2xl font-bold text-blue-600">
@@ -546,7 +503,7 @@ export function WebsiteHeader() {
 
             {/* Navigation & Search */}
             <div className={cn(
-              "col-span-7 flex flex-col transition-all duration-500 ease-in-out",
+              "col-span-5 flex flex-col transition-all duration-500 ease-in-out",
               isScrolled ? "space-y-1 py-2" : "space-y-2 py-4"
             )}>
               {/* Menu */}

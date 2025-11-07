@@ -52,7 +52,7 @@ export default function CheckoutPage() {
     ward: '',
     
     // Payment
-    paymentMethod: 'COD',
+    paymentMethod: 'CASH_ON_DELIVERY',
     
     // Shipping
     shippingMethod: 'STANDARD',
@@ -186,27 +186,41 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Build order input - only include sessionId if it's valid
+    const orderInput: any = {
+      shippingAddress: {
+        name: formData.fullName,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        district: formData.district,
+        ward: formData.ward,
+      },
+      paymentMethod: formData.paymentMethod,
+      shippingMethod: formData.shippingMethod,
+      customerNote: formData.notes,
+    };
+
+    // Only add sessionId if it has a value
+    if (sessionId) {
+      orderInput.sessionId = sessionId;
+    }
+
+    console.log('[Checkout] Submitting order with input:', {
+      orderInput,
+      sessionId,
+      isAuthenticated,
+      user: user?.id,
+    });
+
     try {
       await createOrder({
         variables: {
-          input: {
-            shippingAddress: {
-              fullName: formData.fullName,
-              phone: formData.phone,
-              email: formData.email,
-              address: formData.address,
-              city: formData.city,
-              district: formData.district,
-              ward: formData.ward,
-            },
-            paymentMethod: formData.paymentMethod,
-            shippingMethod: formData.shippingMethod,
-            notes: formData.notes,
-            sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
-          },
+          input: orderInput,
         },
       });
     } catch (err) {
+      console.error('[Checkout] Order creation error:', err);
       // Error handled by onError
     }
   };
@@ -465,8 +479,8 @@ export default function CheckoutPage() {
                   <input
                     type="radio"
                     name="paymentMethod"
-                    value="COD"
-                    checked={formData.paymentMethod === 'COD'}
+                    value="CASH_ON_DELIVERY"
+                    checked={formData.paymentMethod === 'CASH_ON_DELIVERY'}
                     onChange={handleInputChange}
                     className="mr-3"
                   />

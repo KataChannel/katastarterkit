@@ -2,7 +2,6 @@
 
 import { Suspense } from 'react';
 import { useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
@@ -24,102 +23,51 @@ import { PaymentMethodBadge, type PaymentMethod } from '@/components/ecommerce/P
 import { OrderTimeline, type OrderTrackingEvent } from '@/components/ecommerce/OrderTimeline';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const GET_ORDER_DETAIL = gql`
-  query GetOrderDetail($orderNumber: String!) {
-    order(orderNumber: $orderNumber) {
-      id
-      orderNumber
-      status
-      totalAmount
-      subtotal
-      shippingFee
-      discount
-      paymentMethod
-      paymentStatus
-      notes
-      createdAt
-      updatedAt
-      items {
-        id
-        quantity
-        price
-        subtotal
-        product {
-          id
-          name
-          slug
-          thumbnailUrl
-          sku
-        }
-        variant {
-          id
-          name
-        }
-      }
-      shippingAddress {
-        fullName
-        phone
-        email
-        address
-        ward
-        district
-        province
-        postalCode
-      }
-      trackingEvents {
-        id
-        type
-        status
-        description
-        location
-        timestamp
-      }
-    }
-  }
-`;
+import { GET_ORDER_DETAIL } from '@/graphql/ecommerce.queries';
 
 interface OrderDetail {
   id: string;
   orderNumber: string;
   status: OrderStatus;
-  totalAmount: number;
+  total: number;
   subtotal: number;
   shippingFee: number;
+  tax: number;
   discount: number;
   paymentMethod: PaymentMethod;
   paymentStatus: string;
-  notes?: string;
+  shippingMethod: string;
+  customerNote?: string;
+  internalNote?: string;
   createdAt: string;
   updatedAt: string;
+  confirmedAt?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
+  cancelledAt?: string;
   items: Array<{
     id: string;
+    productId?: string;
+    productName: string;
+    variantName?: string;
+    sku?: string;
+    thumbnail?: string;
     quantity: number;
     price: number;
     subtotal: number;
-    product: {
-      id: string;
-      name: string;
-      slug: string;
-      thumbnailUrl?: string;
-      sku?: string;
-    };
-    variant?: {
-      id: string;
-      name: string;
-    };
   }>;
-  shippingAddress: {
-    fullName: string;
-    phone: string;
-    email?: string;
-    address: string;
-    ward: string;
-    district: string;
-    province: string;
-    postalCode?: string;
+  shippingAddress: any;
+  billingAddress?: any;
+  tracking?: {
+    id: string;
+    status: string;
+    carrier?: string;
+    trackingNumber?: string;
+    trackingUrl?: string;
+    estimatedDelivery?: string;
+    actualDelivery?: string;
+    events: OrderTrackingEvent[];
   };
-  trackingEvents: OrderTrackingEvent[];
 }
 
 function OrderDetailContent() {
@@ -184,11 +132,17 @@ function OrderDetailContent() {
   }
 
   const order = data.order;
+  
+  // Parse shippingAddress from JSON
+  const shippingAddress = typeof order.shippingAddress === 'string' 
+    ? JSON.parse(order.shippingAddress) 
+    : order.shippingAddress;
+  
   const fullAddress = [
-    order.shippingAddress.address,
-    order.shippingAddress.ward,
-    order.shippingAddress.district,
-    order.shippingAddress.province,
+    shippingAddress?.address,
+    shippingAddress?.ward,
+    shippingAddress?.district,
+    shippingAddress?.city,
   ]
     .filter(Boolean)
     .join(', ');
@@ -224,7 +178,7 @@ function OrderDetailContent() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Tracking Timeline */}
-          {order.trackingEvents.length > 0 && (
+          {order.tracking?.events && order.tracking.events.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -233,7 +187,7 @@ function OrderDetailContent() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <OrderTimeline events={order.trackingEvents} />
+                <OrderTimeline events={order.tracking.events} />
               </CardContent>
             </Card>
           )}
@@ -254,37 +208,31 @@ function OrderDetailContent() {
                     className="flex gap-4 p-3 rounded-lg hover:bg-gray-50"
                   >
                     {/* Product Image */}
-                    <Link
-                      href={`/san-pham/${item.product.slug}`}
-                      className="relative w-20 h-20 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden group"
-                    >
-                      {item.product.thumbnailUrl ? (
+                    <div className="relative w-20 h-20 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden group">
+                      {item.thumbnail ? (
                         <img
-                          src={item.product.thumbnailUrl}
-                          alt={item.product.name}
+                          src={item.thumbnail}
+                          alt={item.productName}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         />
                       ) : (
                         <Package className="w-10 h-10 text-gray-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                       )}
-                    </Link>
+                    </div>
 
                     {/* Product Info */}
                     <div className="flex-1 min-w-0">
-                      <Link
-                        href={`/san-pham/${item.product.slug}`}
-                        className="text-sm font-medium text-gray-900 hover:text-primary line-clamp-2"
-                      >
-                        {item.product.name}
-                      </Link>
-                      {item.variant && (
+                      <div className="text-sm font-medium text-gray-900 line-clamp-2">
+                        {item.productName}
+                      </div>
+                      {item.variantName && (
                         <p className="text-xs text-gray-500 mt-1">
-                          Phân loại: {item.variant.name}
+                          Phân loại: {item.variantName}
                         </p>
                       )}
-                      {item.product.sku && (
+                      {item.sku && (
                         <p className="text-xs text-gray-500 mt-0.5">
-                          SKU: {item.product.sku}
+                          SKU: {item.sku}
                         </p>
                       )}
                       <div className="flex items-center gap-3 mt-2">
@@ -309,8 +257,8 @@ function OrderDetailContent() {
             </CardContent>
           </Card>
 
-          {/* Notes */}
-          {order.notes && (
+          {/* Customer Note */}
+          {order.customerNote && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -319,7 +267,7 @@ function OrderDetailContent() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-700">{order.notes}</p>
+                <p className="text-sm text-gray-700">{order.customerNote}</p>
               </CardContent>
             </Card>
           )}
@@ -353,7 +301,7 @@ function OrderDetailContent() {
               <div className="flex justify-between">
                 <span className="font-semibold">Tổng cộng</span>
                 <PriceDisplay
-                  price={order.totalAmount}
+                  price={order.total}
                   size="lg"
                   className="font-bold text-primary"
                 />
@@ -398,21 +346,21 @@ function OrderDetailContent() {
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               <p className="font-medium text-gray-900">
-                {order.shippingAddress.fullName}
+                {shippingAddress?.name || shippingAddress?.fullName || 'N/A'}
               </p>
               <div className="flex items-start gap-2 text-gray-600">
                 <Phone className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <span>{order.shippingAddress.phone}</span>
+                <span>{shippingAddress?.phone || 'N/A'}</span>
               </div>
-              {order.shippingAddress.email && (
+              {shippingAddress?.email && (
                 <div className="flex items-start gap-2 text-gray-600">
                   <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span>{order.shippingAddress.email}</span>
+                  <span>{shippingAddress.email}</span>
                 </div>
               )}
               <div className="flex items-start gap-2 text-gray-600">
                 <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <span>{fullAddress}</span>
+                <span>{fullAddress || 'N/A'}</span>
               </div>
             </CardContent>
           </Card>

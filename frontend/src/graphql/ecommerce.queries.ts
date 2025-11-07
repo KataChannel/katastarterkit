@@ -310,19 +310,17 @@ export const CREATE_ORDER = gql`
         status
         total
         paymentMethod
-        shippingAddress {
-          fullName
-          phone
-          address
-        }
+        shippingAddress
         items {
           id
+          productId
+          productName
+          variantName
+          sku
+          thumbnail
           quantity
           price
-          product {
-            name
-            featuredImage
-          }
+          subtotal
         }
         createdAt
       }
@@ -337,51 +335,48 @@ export const GET_ORDER = gql`
       orderNumber
       status
       paymentStatus
-      shippingStatus
       subtotal
       discount
       shippingFee
+      tax
       total
       paymentMethod
       shippingMethod
-      shippingAddress {
-        fullName
-        phone
-        email
-        address
-        city
-        district
-        ward
-      }
-      billingAddress {
-        fullName
-        phone
-        email
-        address
-      }
+      shippingAddress
+      billingAddress
       items {
         id
+        productId
+        productName
+        variantName
+        sku
+        thumbnail
         quantity
         price
-        product {
-          name
-          slug
-          featuredImage
-        }
-        variant {
-          name
-        }
+        subtotal
       }
       tracking {
-        trackingNumber
+        id
         status
+        carrier
+        trackingNumber
+        trackingUrl
+        estimatedDelivery
+        actualDelivery
         events {
+          id
           status
           description
           location
           eventTime
         }
       }
+      customerNote
+      internalNote
+      confirmedAt
+      shippedAt
+      deliveredAt
+      cancelledAt
       createdAt
       updatedAt
     }
@@ -587,49 +582,50 @@ export const GET_ORDER_DETAIL = gql`
       id
       orderNumber
       status
-      totalAmount
+      total
       subtotal
       shippingFee
+      tax
       discount
       paymentMethod
       paymentStatus
-      notes
+      shippingMethod
+      customerNote
+      internalNote
       createdAt
       updatedAt
+      confirmedAt
+      shippedAt
+      deliveredAt
+      cancelledAt
       items {
         id
+        productId
+        productName
+        variantName
+        sku
+        thumbnail
         quantity
         price
         subtotal
-        product {
-          id
-          name
-          slug
-          thumbnailUrl
-          sku
-        }
-        variant {
-          id
-          name
-        }
       }
-      shippingAddress {
-        fullName
-        phone
-        email
-        address
-        ward
-        district
-        province
-        postalCode
-      }
-      trackingEvents {
+      shippingAddress
+      billingAddress
+      tracking {
         id
-        type
         status
-        description
-        location
-        timestamp
+        carrier
+        trackingNumber
+        trackingUrl
+        estimatedDelivery
+        actualDelivery
+        events {
+          id
+          status
+          description
+          location
+          eventTime
+        }
       }
     }
   }

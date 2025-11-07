@@ -12,7 +12,8 @@ import { MERGE_CARTS } from '@/graphql/ecommerce.queries';
 
 export function useCartSession() {
   const { isAuthenticated, user } = useAuth();
-  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  // Initialize with getSessionId() immediately to avoid undefined
+  const [sessionId, setSessionId] = useState<string>(() => getSessionId());
   const [isInitialized, setIsInitialized] = useState(false);
 
   const [mergeCarts] = useMutation(MERGE_CARTS, {
@@ -20,7 +21,7 @@ export function useCartSession() {
       if (data.mergeCarts.success) {
         console.log('[CartSession] Carts merged successfully');
         clearSessionId();
-        setSessionId(undefined);
+        setSessionId(''); // Clear but don't set to undefined
       }
     },
     onError: (error) => {
@@ -31,6 +32,7 @@ export function useCartSession() {
   // Initialize session on mount
   useEffect(() => {
     if (!isInitialized) {
+      // Re-get session ID to ensure consistency
       const id = getSessionId();
       setSessionId(id);
       setIsInitialized(true);
@@ -56,14 +58,29 @@ export function useCartSession() {
     }
   }, [isAuthenticated, user, sessionId, isInitialized, mergeCarts]);
 
-  // Get current session ID - ALWAYS return sessionId (backend will use userId from context if authenticated)
-  const getCartSessionId = useCallback(() => {
-    // Return current sessionId or get/create a new one
-    return sessionId || getSessionId();
-  }, [sessionId]);
+  // Get effective sessionId for cart operations
+  // For authenticated users: don't send sessionId (backend will use userId from context)
+  // For guest users: always ensure we have a valid sessionId
+  let effectiveSessionId: string | undefined;
+  
+  if (isAuthenticated) {
+    // Authenticated user - no sessionId needed
+    effectiveSessionId = undefined;
+  } else {
+    // Guest user - MUST have a valid sessionId
+    // If sessionId state is empty/undefined, get it immediately from localStorage
+    effectiveSessionId = sessionId && sessionId.trim() !== '' ? sessionId : getSessionId();
+  }
+
+  console.log('[CartSession] Returning:', { 
+    effectiveSessionId, 
+    isAuthenticated, 
+    isInitialized,
+    rawSessionId: sessionId 
+  });
 
   return {
-    sessionId: getCartSessionId(),
+    sessionId: effectiveSessionId,
     isAuthenticated,
     isInitialized,
   };
