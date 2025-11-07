@@ -1,821 +1,414 @@
-# 🚀 rausachcore - Modern Fullstack Starter Kit
+# 🚀 InnerV2 - Next.js Fullstack Starter Kit
 
-![rausachcore](https://img.shields.io/badge/rausachcore-Starter%20Kit-blue)
+![InnerV2](https://img.shields.io/badge/InnerV2-Fullstack%20Next.js-blue)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black)](https://nextjs.org/)
-[![NestJS](https://img.shields.io/badge/NestJS-11.1.6-red)](https://nestjs.com/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.1.12-38B2AC)](https://tailwindcss.com/)
 
-A modern, production-ready fullstack starter kit built with the latest technologies. Get your project up and running in minutes with best practices, modern tooling, and comprehensive features out of the box.
+A modern, production-ready Next.js fullstack starter kit. Built entirely with Next.js 15 using Server Actions, API Routes, and Server Components - no separate backend needed!
 
 ## ✨ Features
 
-### 🎯 **Frontend (Next.js 15 + React 19)**
-- ⚡ **Next.js 15** with App Router
-- ⚛️ **React 19** with latest features
+### 🎯 **Fullstack Next.js 15**
+- ⚡ **Next.js 15** with App Router & Server Actions
+- ⚛️ **React 19** with latest features  
 - 🎨 **TailwindCSS v4** with latest improvements
 - 📱 **Responsive Design** with mobile-first approach
-- 🔒 **NextAuth.js** authentication
-- 📊 **Apollo Client** for GraphQL
-- 🧪 **Comprehensive Testing** (Jest + Cypress)
-
-### 🏗️ **Backend (NestJS + GraphQL)**
-- 🚀 **NestJS 11** with modern architecture
-- 🔗 **GraphQL API** with Apollo Server
+- 🔒 **Custom Authentication** with session management
 - 🗄️ **Prisma ORM** with PostgreSQL
-- 🔐 **JWT Authentication** & authorization
 - ⚡ **Redis** for caching and sessions
-- 📦 **File Upload** with MinIO
-- 🛡️ **Security** best practices
-- 📈 **Health Checks** and monitoring
+- 📦 **MinIO** for object storage
+- 🧪 **Testing** setup ready
 
 ### 🛠️ **Developer Experience**
 - 🏃‍♂️ **Bun.js** for ultra-fast package management
-- 🐳 **Docker** containerization
-- � **TypeScript** throughout the stack
+- 🐳 **Docker** for infrastructure (PostgreSQL, Redis, MinIO)
+- 💻 **TypeScript** throughout
 - 📝 **ESLint** and **Prettier** configured
-- 🧪 **Testing** setup for both frontend and backend
+- 🔥 **Hot Module Replacement**
 - 📚 **Comprehensive documentation**
 
-### Local Development Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/rausachcore/rausachcore.git
-   cd rausachcore
-   ```
-
-2. **Start development environment**
 ## 🏗️ Tech Stack
 
 | Category | Technology | Version | Purpose |
 |----------|------------|---------|---------|
-| **Frontend** | Next.js | 15.5.0 | React framework |
-| **Frontend** | React | 19.1.1 | UI library |
-| **Frontend** | TailwindCSS | 4.1.12 | CSS framework |
-| **Backend** | NestJS | 11.1.6 | Node.js framework |
+| **Framework** | Next.js | 15.5.0 | Fullstack React framework |
+| **UI** | React | 19.1.1 | UI library |
+| **Styling** | TailwindCSS | 4.1.12 | CSS framework |
 | **Database** | PostgreSQL | 16+ | Primary database |
 | **Cache** | Redis | 7+ | Caching and sessions |
 | **Storage** | MinIO | Latest | Object storage |
 | **ORM** | Prisma | 6+ | Database toolkit |
-| **API** | GraphQL | 16+ | Query language |
 | **Runtime** | Bun.js | 1.0+ | JavaScript runtime |
-| **Container** | Docker | 20+ | Containerization |
+| **Container** | Docker | 20+ | Infrastructure |
 
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/KataChannel/katastarterkit.git
-cd katastarterkit
+git clone https://github.com/KataChannel/katastarterkit.git innerv2
+cd innerv2
 ```
 
-### 2. Install Dependencies
+### 2. Start Infrastructure
+
+Start PostgreSQL, Redis, and MinIO with Docker:
 
 ```bash
-# Install root dependencies
+docker-compose up -d
+```
+
+**Services:**
+- PostgreSQL: `localhost:14003`
+- pgAdmin: `http://localhost:14002`
+- Redis: `localhost:14004`
+- MinIO: `http://localhost:14007` (Console: `http://localhost:14008`)
+
+### 3. Setup Frontend
+
+```bash
+cd frontend
+
+# Install dependencies
 bun install
 
-# Install backend dependencies
-cd backend && bun install
+# Copy environment file
+cp .env.example .env.local
 
-# Install frontend dependencies
-cd ../frontend && bun install && cd ..
-```
-
-### 3. Setup Environment
-
-```bash
-# Copy environment files
-cp .env.example .env
-cp backend/.env.example backend/.env.local
-cp frontend/.env.example frontend/.env.local
-
-# Edit environment variables as needed
-nano .env
-```
-
-### 4. Start Infrastructure
-
-```bash
-# Start PostgreSQL, Redis, and MinIO
-docker-compose up -d
-
-# Wait for services to be ready
-sleep 10
-```
-
-### 5. Setup Database
-
-```bash
-# Generate Prisma client
-cd backend && bunx prisma generate
+# Generate Prisma Client
+bunx prisma generate
 
 # Run database migrations
 bunx prisma migrate dev
 
-# Seed the database (optional)
+# Seed database with sample data
 bunx prisma db seed
 ```
 
-### 6. Start Development Servers
+### 4. Start Development Server
 
 ```bash
-# Start both frontend and backend
-bun run dev
+# Development mode with hot reload
+bun dev
 
-# Or start them separately:
-# bun run dev:backend  # http://localhost:14000
-# bun run dev:frontend # http://localhost:13000
+# Or with turbopack (faster)
+bun dev:turbo
 ```
 
-### 7. Access Your Application
+Frontend will be available at: **http://localhost:3000**
 
-- **Frontend**: http://localhost:13000
-- **Backend API**: http://localhost:14000
-- **GraphQL Playground**: http://localhost:14000/graphql
-- **MinIO Console**: http://localhost:9001
+### 5. Default Admin Account
+
+After seeding, you can login with:
+
+- **Email**: `katachanneloffical@gmail.com`
+- **Password**: `Kata@@2024`
+
+See [ADMIN_SETUP.md](ADMIN_SETUP.md) for more details.
 
 ## 📁 Project Structure
 
 ```
-rausachcore/
+innerv2/
 ├── frontend/                 # Next.js application
 │   ├── src/
-│   │   ├── app/             # App router pages
-│   │   ├── components/      # Reusable components
-│   │   ├── hooks/           # Custom React hooks
-│   │   ├── lib/             # Utility libraries
-│   │   └── pages/           # Pages router (optional)
-│   ├── public/              # Static assets
+│   │   ├── app/             # App Router pages
+│   │   ├── components/      # React components
+│   │   ├── actions/         # Server Actions
+│   │   ├── lib/             # Utilities & configs
+│   │   └── styles/          # Global styles
+│   ├── prisma/              # Database schema & migrations
+│   │   ├── schema.prisma    # Prisma schema
+│   │   ├── migrations/      # Database migrations
+│   │   └── seed.ts          # Database seeder
+│   ├── public/              # Static files
 │   └── package.json
-├── backend/                  # NestJS application
-│   ├── src/
-│   │   ├── auth/            # Authentication module
-│   │   ├── graphql/         # GraphQL resolvers
-│   │   ├── prisma/          # Database service
-│   │   └── main.ts          # Application entry
-│   ├── prisma/              # Database schema
-│   └── package.json
-├── docker/                   # Docker configurations
-├── docs/                     # Documentation
-├── scripts/                  # Utility scripts
-├── docker-compose.yml        # Development services
-└── package.json             # Root workspace
+├── docker-compose.yml       # Infrastructure services
+├── .env                     # Root environment
+└── README.md
 ```
 
-## 🛠️ Available Scripts
+## 🔧 Development
 
-### Root Commands
+### Available Scripts
+
 ```bash
-bun run dev          # Start both frontend and backend
-bun run build        # Build both applications
-bun run test         # Run all tests
-bun run lint         # Lint all code
-bun run format       # Format all code
-bun run clean        # Clean dependencies
+# Frontend development
+cd frontend
+bun dev              # Start dev server (port 3000)
+bun dev:turbo        # Start with Turbopack
+bun build            # Production build
+bun start            # Start production server
+
+# Database
+bunx prisma generate    # Generate Prisma Client
+bunx prisma migrate dev # Run migrations
+bunx prisma db seed     # Seed database
+bunx prisma studio      # Open Prisma Studio
+
+# Testing
+bun test            # Run tests
+bun test:watch      # Watch mode
+
+# Linting
+bun lint            # Check code
+bun lint:fix        # Auto-fix issues
 ```
 
-### Backend Commands
+### Database Management
+
 ```bash
-cd backend
-bun run dev          # Start development server
-bun run build        # Build for production
-bun run test         # Run tests
-bun run db:migrate   # Run database migrations
-bun run db:seed      # Seed database
-bun run db:studio    # Open Prisma Studio
+# Create new migration
+cd frontend
+bunx prisma migrate dev --name your_migration_name
+
+# Reset database (careful!)
+bunx prisma migrate reset
+
+# Open Prisma Studio (GUI)
+bunx prisma studio
 ```
 
-### Frontend Commands
+### Infrastructure Management
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Stop all services
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Restart specific service
+docker-compose restart postgres
+```
+
+## 🌐 API Structure
+
+### Server Actions (Recommended)
+
+Located in `frontend/src/actions/`:
+
+```typescript
+// Example: frontend/src/actions/posts.ts
+'use server'
+
+import { prisma } from '@/lib/prisma'
+import { revalidatePath } from 'next/cache'
+
+export async function createPost(formData: FormData) {
+  const title = formData.get('title') as string
+  
+  const post = await prisma.post.create({
+    data: { title, /* ... */ }
+  })
+  
+  revalidatePath('/posts')
+  return post
+}
+```
+
+### API Routes (Alternative)
+
+Located in `frontend/src/app/api/`:
+
+```typescript
+// Example: frontend/src/app/api/posts/route.ts
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+
+export async function GET() {
+  const posts = await prisma.post.findMany()
+  return NextResponse.json(posts)
+}
+```
+
+## 🔐 Authentication
+
+Custom authentication system using:
+
+- **Session-based** auth with Redis
+- **HTTP-only cookies** for security
+- **Server Actions** for login/register
+- **Middleware** for route protection
+
+**Key files:**
+- `frontend/src/actions/auth.ts` - Auth Server Actions
+- `frontend/src/contexts/AuthContext.tsx` - Auth state
+- `frontend/src/middleware.ts` - Route protection
+
+See [ADMIN_SETUP.md](ADMIN_SETUP.md) for admin setup.
+
+## 📦 Database Schema
+
+Key models in `frontend/prisma/schema.prisma`:
+
+- **User** - User accounts
+- **AuthMethod** - OAuth providers (Google, Facebook)
+- **Post** - Blog posts
+- **Product** - E-commerce products
+- **Order** - Shopping orders
+- **Menu** - Dynamic menus
+- **Page** - CMS pages
+- **Block** - Page builder blocks
+
+Run `bunx prisma studio` to explore your data visually.
+
+## 🎨 Styling
+
+### TailwindCSS v4
+
+Configuration in `frontend/tailwind.config.ts`:
+
+```typescript
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
+  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
+  theme: {
+    extend: {
+      colors: {
+        primary: {...},
+        // Custom colors
+      }
+    }
+  }
+}
+```
+
+### UI Components
+
+Using Shadcn/ui components in `frontend/src/components/ui/`:
+
+```bash
+# Add new component
+bunx shadcn-ui@latest add button
+bunx shadcn-ui@latest add dialog
+```
+
+## 🚀 Deployment
+
+### Build for Production
+
 ```bash
 cd frontend
-bun run dev          # Start development server
-bun run build        # Build for production
-bun run test         # Run tests
-bun run test:e2e     # Run E2E tests
-bun run storybook    # Start Storybook
+bun run build
 ```
 
-## 🔧 Configuration
-
-### Environment Variables
-
-The starter kit uses environment variables for configuration. Key variables include:
+### Deploy to Vercel (Recommended)
 
 ```bash
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+# Install Vercel CLI
+bun add -g vercel
 
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# JWT
-JWT_SECRET=your-secret-key
-
-# MinIO
-MINIO_ENDPOINT=localhost
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
-
-# Frontend
-NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://localhost:14000/graphql
-NEXTAUTH_SECRET=your-nextauth-secret
+# Deploy
+vercel
 ```
 
-### Database Schema
+**Environment Variables to set:**
+- `DATABASE_URL` - PostgreSQL connection
+- `REDIS_URL` - Redis connection  
+- `MINIO_ENDPOINT` - MinIO endpoint
+- `MINIO_ACCESS_KEY` - MinIO credentials
+- `MINIO_SECRET_KEY` - MinIO credentials
 
-The project includes a complete database schema with:
-- User management
-- Authentication tables
-- File upload tracking
-- Audit logs
+### Self-Hosted with Docker
 
-Customize the schema in `backend/prisma/schema.prisma`.
+```bash
+# Build production image
+cd frontend
+docker build -t innerv2-frontend .
+
+# Run container
+docker run -p 3000:3000 \
+  -e DATABASE_URL="..." \
+  -e REDIS_URL="..." \
+  innerv2-frontend
+```
+
+## 📊 Monitoring
+
+### Health Checks
+
+Built-in health check endpoints:
+
+- `/api/health` - Application health
+- `/api/health/db` - Database connection
+- `/api/health/redis` - Redis connection
+
+### Logging
+
+Using `console` methods:
+
+```typescript
+console.log('Info message')
+console.error('Error message')
+console.warn('Warning message')
+```
+
+For production, consider adding:
+- **Pino** for structured logging
+- **Sentry** for error tracking
+- **Datadog** for APM
 
 ## 🧪 Testing
 
-### Backend Testing
-```bash
-cd backend
-bun test              # Unit tests
-bun run test:e2e      # E2E tests
-bun run test:cov      # Coverage report
-```
-
-### Frontend Testing
 ```bash
 cd frontend
-bun test              # Unit tests with Jest
-bun run test:e2e      # E2E tests with Cypress
+
+# Run all tests
+bun test
+
+# Watch mode
+bun test:watch
+
+# Coverage
+bun test:coverage
 ```
 
-## 🚀 Production Deployment
-
-### Docker Production Build
-```bash
-# Build production images
-docker-compose -f docker-compose.prod.yml build
-
-# Start production services
-docker-compose -f docker-compose.prod.yml up -d
+Test structure:
 ```
-
-### Manual Deployment
-1. Build applications: `bun run build`
-2. Setup production database
-3. Configure environment variables
-4. Deploy to your hosting platform
+frontend/
+├── __tests__/
+│   ├── components/
+│   ├── actions/
+│   └── lib/
+```
 
 ## 📚 Documentation
 
-### Core Documentation
-- [**Getting Started**](docs/getting-started.md) - Detailed setup guide
-- [**Frontend Guide**](docs/frontend-setup.md) - Frontend development
-- [**Backend Guide**](docs/backend-setup.md) - Backend development
-- [**API Documentation**](docs/api.md) - GraphQL API reference
-- [**Deployment Guide**](docs/deployment.md) - Production deployment
-
-### 🚀 Universal Dynamic Query System (NEW)
-Modern, flexible query system that eliminates GraphQL schema conflicts and provides powerful Prisma-based queries.
-
-**Quick Start:**
-- [**📖 Documentation Index**](docs/DOCUMENTATION-INDEX.md) - Complete guide navigation
-- [**⚡ Quick Reference**](docs/QUICK-REFERENCE-USESEARCHUSERS.md) - Fast lookup & examples
-- [**🎨 Visual Architecture**](docs/ARCHITECTURE-VISUAL-DIAGRAM.md) - System diagrams
-
-**Detailed Guides:**
-- [**🔧 Migration Report**](docs/USERSEARCH-DYNAMIC-QUERY-MIGRATION.md) - useSearchUsers migration
-- [**🎉 Complete Report**](docs/DYNAMIC-QUERY-MIGRATION-COMPLETE.md) - Full implementation details
-- [**🐛 Bug Fix Guide**](docs/SEARCHUSERS-BUG-FIX-GUIDE.md) - Problem analysis & solutions
-
-**System Documentation:**
-- [**Backend System**](docs/DYNAMIC-QUERY-SYSTEM.md) - Server-side implementation
-- [**Frontend Integration**](docs/FRONTEND-DYNAMIC-QUERY-GUIDE.md) - Client-side hooks
-
-**Examples:**
-- [**💻 Code Examples**](frontend/src/components/examples/UserSearchExamples.tsx) - Production-ready samples
-
-### 🎨 Advanced Page Builder System (NEW)
-Modern, nested block-based page builder with dynamic content and advanced layouts.
-
-**Quick Start:**
-- [**🚀 Quick Start Guide**](PAGE_BUILDER_QUICK_START.md) - Get started in 5 minutes
-- [**📖 Complete Implementation**](PAGE_BUILDER_IMPLEMENTATION_COMPLETE.md) - Full system overview
-- [**🇻🇳 Vietnamese Guide**](PAGE_BUILDER_COMPLETE_VIETNAMESE_SUMMARY.md) - Hướng dẫn tiếng Việt
-
-**Core Documentation:**
-- [**🏗️ Implementation Guide**](PAGE_BUILDER_NESTED_BLOCKS_IMPLEMENTATION.md) - Architecture & components
-- [**🔧 Hook API Reference**](docs/NESTED_BLOCK_HOOK_GUIDE.md) - useNestedBlockOperations guide
-- [**✅ Task 9 Report**](TASK_9_COMPLETION_REPORT.md) - Hook implementation details
-
-**Features:**
-- ✨ **Nested Blocks**: Unlimited nesting depth (recommended max: 4 levels)
-- 📦 **5 Container Types**: Container, Section, Grid, FlexRow, FlexColumn
-- ⚡ **Dynamic Blocks**: Data fetching from API/GraphQL with templates
-- 🎯 **10 Hook Operations**: Complete nested block management
-- 🔄 **Recursive Rendering**: Automatic nested structure rendering
-- 📊 **GraphQL API**: Full nested queries and mutations
-
-**Example Component:**
-- [**💻 Example Implementation**](frontend/src/components/page-builder/NestedPageBuilder.example.tsx) - Full UI example
-
-### 🏗️ Nested Blocks Feature (LATEST)
-Complete implementation of hierarchical, nestable block structures in Page Builder.
-
-**Quick Start:**
-- [**⚡ Quick Reference**](QUICK-REFERENCE-NESTED-BLOCKS.md) - 2-minute overview
-- [**🧪 Testing Guide**](NESTED-BLOCKS-TESTING-GUIDE.md) - Test procedures & validation
-- [**📋 Implementation Details**](NESTED-BLOCKS-IMPLEMENTATION.md) - Technical architecture
-- [**✅ Complete Report**](NESTED-BLOCKS-COMPLETE-REPORT.md) - Full feature summary
-
-**What's New:**
-- ✅ Add child blocks to any container (right-click "Add Block")
-- ✅ Edit, delete, and reorder child blocks
-- ✅ Nest containers unlimited levels (max 5 recommended)
-- ✅ All container types fully supported
-- ✅ Proper spacing and layout for children
-- ✅ Full drag-and-drop support for reordering
-
-### 🎯 Dynamic Block System (NEW)
-Powerful dynamic content system that fetches and renders data from multiple sources with flexible templating.
-
-**Quick Start:**
-- [**⚡ Quick Start Guide**](DYNAMIC_BLOCK_QUICK_START.md) - Get started in 15 minutes
-- [**📖 Complete Guide**](DYNAMIC_BLOCK_GUIDE.md) - Full documentation with all features
-- [**📚 Documentation Index**](DYNAMIC_BLOCK_INDEX.md) - Navigation guide
-
-**Features:**
-- ✅ **Multiple Data Sources**: Static, REST API, GraphQL, Database
-- ✅ **Template System**: Flexible Handlebars-like templates
-- ✅ **Repeater Pattern**: Loop through arrays and render multiple items
-- ✅ **Conditional Rendering**: Display content based on conditions
-- ✅ **Real-time Updates**: Auto-refresh data at intervals
-- ✅ **Error Handling**: Graceful error display and fallbacks
-
-**Data Source Support:**
-- 📊 **Static Data**: Hard-coded JSON objects
-- 🔌 **REST API**: HTTP endpoints with custom headers
-- 🔗 **GraphQL**: GraphQL queries with variables
-- 🗄️ **Database**: Direct Prisma queries
-
-**Common Use Cases:**
-- Product listings and carousels
-- Blog post feeds
-- Testimonials and reviews
-- Category showcases
-- Team member directories
-- Live pricing tables
-- Recent news/updates
-
-**Features:**
-- ✅ No GraphQL schema conflicts
-- ✅ Multi-field search (email, username, name)
-- ✅ Advanced filtering (role, status, dates)
-- ✅ Parallel query execution
-- ✅ 100% backward compatible
-- ✅ Type-safe with TypeScript
+- [ADMIN_SETUP.md](ADMIN_SETUP.md) - Admin account setup
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Deployment guide
+- [frontend/README.md](frontend/README.md) - Frontend details
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## ⭐ Show Your Support
-
-If this project helped you, please give it a ⭐ on GitHub!
-
-## 🔗 Links
-
-- [GitHub Repository](https://github.com/KataChannel/katastarterkit)
-- [Issue Tracker](https://github.com/KataChannel/katastarterkit/issues)
-- [Discussions](https://github.com/KataChannel/katastarterkit/discussions)
-
----
-
-**Happy coding! 🎉**
-
-> **rausachcore** - Build faster, ship smarter.
-```
-
-## 🛠️ Technology Stack
-
-### Frontend
-- **Framework**: Next.js 14 with App Router
-- **Styling**: TailwindCSS 3.x
-- **Language**: TypeScript 5.x
-- **Runtime**: Bun.js for improved performance
-- **State Management**: React Query + Zustand
-- **Authentication**: NextAuth.js
-
-### Backend
-- **Framework**: NestJS 10.x
-- **API**: GraphQL with Apollo Server
-- **Language**: TypeScript 5.x
-- **Runtime**: Bun.js for improved performance
-- **Database ORM**: Prisma 5.x
-- **Authentication**: JWT with Passport.js
-- **Validation**: class-validator + class-transformer
-
-### Database & Storage
-- **Primary Database**: PostgreSQL 15
-- **Caching**: Redis 7.x Cluster
-- **Object Storage**: MinIO (S3-compatible)
-- **Search**: Elasticsearch 8.x (planned)
-
-### Infrastructure & DevOps
-- **Containerization**: Docker & Docker Compose
-- **Orchestration**: Kubernetes (k3s)
-- **Ingress**: NGINX Ingress Controller
-- **SSL/TLS**: cert-manager with Let's Encrypt
-- **Monitoring**: Prometheus + Grafana
-- **CI/CD**: GitHub Actions
-- **Service Mesh**: Istio (planned)
-
-## � Development Commands
-
-### Using Makefile (Recommended)
-
-```bash
-# Install all dependencies
-make install
-
-# Start development environment
-make dev
-
-# Run tests
-make test
-
-# Build for production
-make build
-
-# Deploy to staging
-make deploy-staging
-
-# Deploy to production
-make deploy-production
-
-# Database operations
-make db-reset      # Reset database
-make db-migrate    # Run migrations
-make db-seed       # Seed database
-
-# Monitoring
-make logs          # View application logs
-make monitor       # Open monitoring dashboard
-```
-
-### Manual Commands
-
-#### Backend Development
-```bash
-cd backend
-
-# Install dependencies
-bun install
-
-# Start development server
-bun run dev
-
-# Run tests
-bun run test
-bun run test:e2e
-
-# Database operations
-bun run prisma:migrate
-bun run prisma:generate
-bun run prisma:seed
-
-# Build for production
-bun run build
-```
-
-#### Frontend Development
-```bash
-cd frontend
-
-# Install dependencies
-bun install
-
-# Start development server
-bun run dev
-
-# Run tests
-bun run test
-
-# Build for production
-bun run build
-
-# Start production server
-bun run start
-```
-
-## 🔒 Security Features
-
-- **Authentication**: JWT-based authentication with refresh tokens
-- **Authorization**: Role-based access control (RBAC)
-- **Data Validation**: Input validation with class-validator
-- **SQL Injection Prevention**: Prisma ORM with parameterized queries
-- **XSS Protection**: Content Security Policy (CSP) headers
-- **CORS**: Configurable Cross-Origin Resource Sharing
-- **Rate Limiting**: API rate limiting with Redis
-- **SSL/TLS**: Automatic HTTPS with Let's Encrypt
-- **Secrets Management**: Kubernetes secrets for sensitive data
-- **Network Policies**: Kubernetes network isolation
-
-## 📊 Monitoring & Observability
-
-### Metrics & Monitoring
-- **Application Metrics**: Custom Prometheus metrics
-- **System Metrics**: Node Exporter for system monitoring
-- **Database Metrics**: PostgreSQL Exporter
-- **Cache Metrics**: Redis Exporter
-- **Custom Dashboards**: Grafana dashboards for visualization
-
-### Logging
-- **Structured Logging**: JSON-formatted logs with Winston
-- **Log Aggregation**: Centralized logging with Kubernetes
-- **Log Levels**: Configurable log levels per environment
-- **Request Tracking**: Correlation IDs for request tracing
-
-### Health Checks
-- **Application Health**: Custom health check endpoints
-- **Database Health**: Connection and query performance monitoring
-- **Cache Health**: Redis cluster status monitoring
-- **Infrastructure Health**: Kubernetes resource monitoring
-
-## � Deployment
-
-### Development Deployment
-```bash
-# Start local development environment
-docker-compose up -d
-
-# Initialize database
-make db-setup
-
-# Start development servers
-make dev
-```
-
-### Staging Deployment
-```bash
-# Deploy to staging Kubernetes cluster
-make deploy-staging
-
-# Check deployment status
-kubectl get pods -n rausachcore-staging
-
-# View logs
-kubectl logs -f deployment/backend -n rausachcore-staging
-```
-
-### Production Deployment
-```bash
-# Deploy to production Kubernetes cluster
-make deploy-production
-
-# Monitor deployment
-kubectl rollout status deployment/backend -n rausachcore
-kubectl rollout status deployment/frontend -n rausachcore
-
-# Verify deployment
-make verify-production
-```
-
-### Cloud Server Setup
-```bash
-# Setup cloud server (Ubuntu 20.04+)
-chmod +x k8s/scripts/setup-cloud-server.sh
-./k8s/scripts/setup-cloud-server.sh
-
-# Deploy application
-chmod +x k8s/scripts/deploy.sh
-./k8s/scripts/deploy.sh
-```
-
-## 📚 API Documentation
-
-### GraphQL API
-- **Endpoint**: `/graphql`
-- **Playground**: Available in development at `/graphql`
-- **Schema**: Auto-generated from TypeScript definitions
-- **Documentation**: Introspective schema with descriptions
-
-### REST Endpoints
-- **Health Check**: `GET /health`
-- **Metrics**: `GET /metrics` (Prometheus format)
-- **OpenAPI**: `GET /api/docs` (Swagger UI)
-
-### Authentication
-```graphql
-# Login mutation
-mutation Login($email: String!, $password: String!) {
-  login(email: $email, password: $password) {
-    accessToken
-    refreshToken
-    user {
-      id
-      email
-      role
-    }
-  }
-}
-
-# Protected query example
-query GetUserProfile {
-  me {
-    id
-    email
-    profile {
-      firstName
-      lastName
-      avatar
-    }
-  }
-}
-```
-
-## 🧪 Testing
-
-### Backend Testing
-- **Unit Tests**: Jest with comprehensive coverage
-- **Integration Tests**: Database and API integration testing
-- **E2E Tests**: GraphQL endpoint testing
-- **Load Testing**: Performance testing with Artillery
-
-### Frontend Testing
-- **Unit Tests**: Jest + React Testing Library
-- **Component Tests**: Isolated component testing
-- **E2E Tests**: Playwright for full application testing
-- **Visual Tests**: Screenshot comparison testing
-
-### Test Commands
-```bash
-# Run all tests
-make test
-
-# Backend tests only
-make test-backend
-
-# Frontend tests only
-make test-frontend
-
-# E2E tests
-make test-e2e
-
-# Test coverage
-make test-coverage
-```
-
-## � CI/CD Pipeline
-
-### GitHub Actions Workflows
-
-1. **Continuous Integration** (`.github/workflows/ci-cd.yml`)
-   - Code linting and formatting
-   - Unit and integration tests
-   - Security vulnerability scanning
-   - Docker image building and pushing
-
-2. **Monitoring** (`.github/workflows/monitoring.yml`)
-   - Infrastructure health checks
-   - Performance metrics collection
-   - SSL certificate monitoring
-   - Automated alerting
-
-3. **Dependency Updates** (`.github/workflows/dependency-updates.yml`)
-   - Automated dependency updates
-   - Security audit scanning
-   - Pull request creation for updates
-
-4. **Release Management** (`.github/workflows/release.yml`)
-   - Automated release creation
-   - Changelog generation
-   - Production deployment
-   - Release notifications
-
-### Deployment Pipeline
-```
-Code Push → Tests → Build → Security Scan → Deploy Staging → Tests → Deploy Production → Monitor
-```
-
-## 🛡️ Security & Best Practices
-
-### Code Quality
-- **ESLint**: Strict linting rules for code consistency
-- **Prettier**: Code formatting automation
-- **Husky**: Git hooks for pre-commit validation
-- **TypeScript**: Strict type checking
-- **SonarQube**: Code quality analysis
-
-### Security Scanning
-- **Trivy**: Container vulnerability scanning
-- **npm audit**: Dependency vulnerability scanning
-- **SAST**: Static Application Security Testing
-- **Dependabot**: Automated security updates
-
-### Performance Optimization
-- **Bun.js Runtime**: Improved JavaScript performance
-- **Code Splitting**: Optimized bundle loading
-- **Image Optimization**: Next.js image optimization
-- **Caching Strategy**: Multi-layer caching with Redis
-- **CDN Integration**: Static asset optimization
-
-## 📖 Documentation
-
-- [Backend Setup Guide](docs/backend-setup.md)
-- [Frontend Setup Guide](docs/frontend-setup.md)
-- [Deployment Guide](docs/deployment.md)
-- [API Documentation](docs/api.md)
-- [Contributing Guidelines](CONTRIBUTING.md)
-- [Security Policy](SECURITY.md)
-- [Changelog](CHANGELOG.md)
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Development Workflow
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Code of Conduct
-This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **NestJS Team** for the excellent backend framework
-- **Next.js Team** for the powerful React framework
-- **Prisma Team** for the outstanding database toolkit
-- **Bun Team** for the fast JavaScript runtime
-- **Kubernetes Community** for container orchestration
-- **Open Source Community** for inspiration and tools
-
-## 📞 Support
-
-- **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/rausachcore/rausachcore/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/rausachcore/rausachcore/discussions)
-- **Security**: [security@rausachcore.dev](mailto:security@rausachcore.dev)
-
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=rausachcore/rausachcore&type=Date)](https://star-history.com/#rausachcore/rausachcore&Date)
-
----
-
-<div align="center">
-  <strong>Built with ❤️ by the rausachcore Team</strong>
-  <br>
-  <sub>Making fullstack development accessible and scalable</sub>
-</div>
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
-
-## 📄 License
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- Built with ❤️ using modern web technologies
-- Inspired by best practices from the developer community
-- Optimized for developer experience and production performance
+- Next.js team for the amazing framework
+- Prisma team for the excellent ORM
+- TailwindCSS for beautiful styling
+- Shadcn for UI components
 
-## 📞 Support
+## 📧 Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/KataChannel/katastarterkit/issues)
-- 💡 **Feature Requests**: [GitHub Issues](https://github.com/KataChannel/katastarterkit/issues)
-- 💬 **Questions**: [GitHub Discussions](https://github.com/KataChannel/katastarterkit/discussions)
+- **Email**: katachanneloffical@gmail.com
+- **Issues**: [GitHub Issues](https://github.com/KataChannel/katastarterkit/issues)
 
 ---
 
-**Happy coding! 🎉**
-
-> **rausachcore** - Build faster, ship smarter.
-
-⭐ **If you find this project helpful, please give it a star on GitHub!**
+**Built with ❤️ using Next.js 15**

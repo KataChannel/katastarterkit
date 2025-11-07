@@ -1,57 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-// DEPRECATED: Apollo Client removed
-const useLazyQuery = () => [async () => ({}), { data: null, loading: false, error: null }];
-// DEPRECATED: Apollo Client removed
-const gql = (strings: TemplateStringsArray, ...values: any[]) => strings.join('');
 import { Search, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-const UNIVERSAL_SEARCH_QUERY = gql`
-  query UniversalSearch($input: OramaSearchInput!) {
-    universalSearch(input: $input) {
-      tasks {
-        hits {
-          id
-          score
-          document
-        }
-        count
-        elapsed {
-          formatted
-        }
-      }
-      users {
-        hits {
-          id
-          score
-          document
-        }
-        count
-      }
-      affiliateCampaigns {
-        hits {
-          id
-          score
-          document
-        }
-        count
-      }
-      affiliateLinks {
-        hits {
-          id
-          score
-          document
-        }
-        count
-      }
-    }
-  }
-`;
+// TODO: Implement actual search API when backend is ready
+// This component is ready to integrate with /api/search endpoint
 
 interface SearchResult {
   id: string;
@@ -65,83 +22,31 @@ export function UniversalSearch() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [search, { loading, data }] = useLazyQuery(UNIVERSAL_SEARCH_QUERY);
-
-  // Process search results
-  useEffect(() => {
-    if (data?.universalSearch) {
-      const allResults: SearchResult[] = [];
-
-      // Add tasks
-      data.universalSearch.tasks.hits.forEach((hit: any) => {
-        allResults.push({
-          id: hit.id,
-          score: hit.score,
-          document: hit.document,
-          type: 'task',
-        });
-      });
-
-      // Add users
-      data.universalSearch.users.hits.forEach((hit: any) => {
-        allResults.push({
-          id: hit.id,
-          score: hit.score,
-          document: hit.document,
-          type: 'user',
-        });
-      });
-
-      // Add affiliate campaigns
-      data.universalSearch.affiliateCampaigns.hits.forEach((hit: any) => {
-        allResults.push({
-          id: hit.id,
-          score: hit.score,
-          document: hit.document,
-          type: 'campaign',
-        });
-      });
-
-      // Add affiliate links
-      data.universalSearch.affiliateLinks.hits.forEach((hit: any) => {
-        allResults.push({
-          id: hit.id,
-          score: hit.score,
-          document: hit.document,
-          type: 'link',
-        });
-      });
-
-      // Sort by score (descending)
-      allResults.sort((a, b) => b.score - a.score);
-
-      setResults(allResults.slice(0, 10)); // Limit to top 10
-    }
-  }, [data]);
-
-  // Debounced search
+  // Debounced search effect
   useEffect(() => {
     if (query.length < 2) {
       setResults([]);
       return;
     }
 
+    setLoading(true);
     const timeoutId = setTimeout(() => {
-      search({
-        variables: {
-          input: {
-            term: query,
-            limit: 20,
-          },
-        },
-      });
+      // TODO: Replace with actual API call when backend is ready
+      // For now, just show empty results
+      console.warn('Universal search API not implemented yet. GraphQL has been removed.');
+      setResults([]);
+      setLoading(false);
     }, 300);
 
-    return () => clearTimeout(timeoutId);
-  }, [query, search]);
+    return () => {
+      clearTimeout(timeoutId);
+      setLoading(false);
+    };
+  }, [query]); // Only depend on query, not on any functions
 
   // Click outside to close
   useEffect(() => {
@@ -327,14 +232,6 @@ export function UniversalSearch() {
                   </div>
                 </button>
               ))}
-            </div>
-          )}
-
-          {data?.universalSearch && (
-            <div className="border-t px-4 py-2 text-xs text-muted-foreground">
-              Found {data.universalSearch.tasks.count} tasks, {data.universalSearch.users.count} users,{' '}
-              {data.universalSearch.affiliateCampaigns.count} campaigns in{' '}
-              {data.universalSearch.tasks.elapsed.formatted}
             </div>
           )}
         </Card>

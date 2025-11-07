@@ -1,77 +1,62 @@
 {
-  "name": "rausachcore-starter",
-  "version": "1.0.0",
-  "description": "Modern Fullstack Starter Kit with Next.js + NestJS + GraphQL + Prisma + Redis + TailwindCSS v4",
+  "name": "innerv2-nextjs-fullstack",
+  "version": "2.0.0",
+  "description": "Modern Next.js 15 Fullstack Starter Kit with Prisma + Redis + MinIO + TailwindCSS v4",
   "private": true,
   "workspaces": [
-    "frontend",
-    "backend"
+    "frontend"
   ],
   "scripts": {
-    "dev": "concurrently \"bun run dev:backend\" \"bun run dev:frontend\"",
-    "dev:backend": "cd backend && bun run dev",
-    "dev:frontend": "cd frontend && bun run dev",
-    "build": "bun run build:backend && bun run build:frontend",
-    "build:backend": "cd backend && bun run build",
-    "build:frontend": "cd frontend && bun run build",
-    "test": "bun run test:backend && bun run test:frontend",
-    "test:backend": "cd backend && bun test",
-    "test:frontend": "cd frontend && bun test",
-    "lint": "bun run lint:backend && bun run lint:frontend",
-    "lint:backend": "cd backend && bun run lint",
-    "lint:frontend": "cd frontend && bun run lint",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
-    "docker:devfull": "docker compose up -d",
-    "docker:dev": "docker compose -f 'docker-compose.yml' up -d --build 'postgres' 'redis' 'minio'",
-    "docker:prod": "docker compose -f docker-compose.prod.yml up -d",
+    "dev": "cd frontend && bun run dev",
+    "dev:turbo": "cd frontend && bun run dev:turbo",
+    "build": "cd frontend && bun run build",
+    "start": "cd frontend && bun run start",
+    "test": "cd frontend && bun test",
+    "lint": "cd frontend && bun run lint",
+    "lint:fix": "cd frontend && bun run lint --fix",
+    "format": "prettier --write \"frontend/**/*.{js,jsx,ts,tsx,json,md}\"",
+    "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "setup": "bun install && cd backend && bun install && cd ../frontend && bun install",
-    "clean": "rm -rf node_modules backend/node_modules frontend/node_modules bun.lockb backend/bun.lockb frontend/bun.lockb",
-    "db:migrate": "cd backend && npx prisma migrate dev",
-    "db:reset": "cd backend && npx prisma migrate reset",
-    "db:seed": "cd backend && npx prisma db seed",
-    "db:studio": "cd backend && npx prisma studio",
-    "db:pushforce": "cd backend && npx prisma db push --force-reset",
-    "db:push": "cd backend && npx prisma db push",
-    "db:restore": "cd backend && bun run prisma/restore.ts",
-    "db:backup": "cd backend && bun run prisma/backup.ts"
+    "docker:logs": "docker compose logs -f",
+    "setup": "bun install && cd frontend && bun install",
+    "clean": "rm -rf node_modules frontend/node_modules bun.lockb frontend/bun.lockb",
+    "db:generate": "cd frontend && bunx prisma generate",
+    "db:migrate": "cd frontend && bunx prisma migrate dev",
+    "db:reset": "cd frontend && bunx prisma migrate reset",
+    "db:seed": "cd frontend && bunx prisma db seed",
+    "db:studio": "cd frontend && bunx prisma studio",
+    "db:push": "cd frontend && bunx prisma db push"
   },
   "devDependencies": {
-    "@types/validator": "^13.15.3",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.40.0",
-    "concurrently": "^9.2.0",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.5",
-    "prettier": "^3.6.2",
-    "prisma": "^6.18.0"
+    "prettier": "^3.6.2"
   },
   "engines": {
-    "bun": ">=1.1.0"
+    "bun": ">=1.1.0",
+    "node": ">=20.0.0"
   },
   "keywords": [
-    "bun",
-    "bunjs",
+    "nextjs",
     "fullstack",
     "typescript",
     "starter-kit",
-    "nextjs",
-    "nestjs",
-    "graphql",
     "prisma",
     "postgresql",
     "redis",
     "minio",
     "docker",
     "tailwindcss",
-    "apollo",
-    "enterprise",
-    "modern",
-    "fast"
+    "server-actions",
+    "app-router",
+    "react-19",
+    "nextjs-15"
   ],
-  "author": "rausachcore Team",
+  "author": "KataChannel",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -87,22 +72,12 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "frontend/**/*.{js,jsx,ts,tsx}": [
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{json,md}": [
+    "frontend/**/*.{json,md}": [
       "prettier --write"
     ]
-  },
-  "dependencies": {
-    "@apollo/server": "^4.12.2",
-    "@heroicons/react": "^2.2.0",
-    "cross-fetch": "^4.1.0",
-    "graphql-request": "^7.2.0",
-    "graphql-type-json": "^0.3.2",
-    "install": "^0.13.0",
-    "recharts": "^3.3.0",
-    "validator": "^13.15.20"
   }
 }

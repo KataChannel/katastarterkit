@@ -6,19 +6,25 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting seed...');
 
-  // Create admin user
-  const adminPassword = await bcrypt.hash('admin123', 10);
-    const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@rausachcore.dev' },
-    update: {},
+  // Create admin user - katachanneloffical@gmail.com
+  const adminPassword = await bcrypt.hash('Kata@@2024', 10);
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'katachanneloffical@gmail.com' },
+    update: {
+      roleType: 'ADMIN',
+      isActive: true,
+      isVerified: true,
+    },
     create: {
-      email: 'admin@rausachcore.dev',
-      username: 'admin',
-      firstName: 'Admin',
-      lastName: 'User',
+      email: 'katachanneloffical@gmail.com',
+      username: 'admin_kataofficial',
+      firstName: 'Phạm',
+      lastName: 'Chí Kiệt',
+      phone: '0977272967',
       password: adminPassword,
       roleType: 'ADMIN',
       isActive: true,
+      isVerified: true,
     },
   });
 
@@ -296,7 +302,7 @@ export class PostModule {}
   ]);
 
   console.log('✅ Seed completed successfully!');
-  console.log(`👤 Admin user: admin@rausachcore.dev / admin123`);
+  console.log(`👤 Admin user: katachanneloffical@gmail.com / Kata@@2024`);
   console.log(`👤 Test user: user@rausachcore.dev / user123`);
   console.log(`📝 Created ${posts.length} posts`);
   console.log(`🏷️ Created ${tags.length} tags`);

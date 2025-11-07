@@ -1,13 +1,11 @@
 'use client';
 
-// DEPRECATED: Apollo Client removed
-const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
-import { LOGIN_WITH_GOOGLE } from '../../lib/graphql/auth-queries';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { loginWithGoogle } from '@/actions/auth';
 
 interface GoogleJwtPayload {
   sub: string;
@@ -22,7 +20,6 @@ interface GoogleJwtPayload {
 export default function GoogleLoginButton() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const [loginWithGoogle] = useMutation(LOGIN_WITH_GOOGLE);
 
   const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) {
@@ -38,59 +35,44 @@ export default function GoogleLoginButton() {
       const decoded = jwtDecode<GoogleJwtPayload>(credentialResponse.credential);
       console.log('Decoded Google token:', decoded);
 
-      // Send to backend for processing
-      const { data } = await loginWithGoogle({
-        variables: {
-          input: {
-            token: credentialResponse.credential,
-            provider: 'GOOGLE',
-            email: decoded.email,
-            providerId: decoded.sub,
-            firstName: decoded.given_name,
-            lastName: decoded.family_name,
-            avatar: decoded.picture,
-          }
-        }
+      // Call Server Action
+      const result = await loginWithGoogle({
+        token: credentialResponse.credential,
+        email: decoded.email,
+        providerId: decoded.sub,
+        firstName: decoded.given_name,
+        lastName: decoded.family_name,
+        avatar: decoded.picture,
       });
       
-      console.log('Login response:', data);
+      console.log('Login response:', result);
       
-      if (data?.loginWithGoogle) {
-        const { accessToken, refreshToken, user } = data.loginWithGoogle;
-        
-        // Store tokens in localStorage
-        localStorage.setItem('accessToken', accessToken);
-        if (refreshToken) {
-          localStorage.setItem('refreshToken', refreshToken);
-        }
-        
-        // Store user data
-        localStorage.setItem('user', JSON.stringify(user));
+      if (result.success && result.data) {
+        const { user, isNewUser } = result.data;
         
         // Show success message
-        const isNewUser = user.createdAt && new Date(user.createdAt) > new Date(Date.now() - 5000);
         if (isNewUser) {
-          toast.success(`Welcome to rausachcore, ${user.firstName || user.username}! Your account has been created.`);
+          toast.success(`Welcome to Innerbright, ${user.firstName || user.username}! Your account has been created.`);
         } else {
           toast.success(`Welcome back, ${user.firstName || user.username}!`);
         }
         
         // Small delay to ensure toast is shown, then redirect
         setTimeout(() => {
-          // Use window.location for hard navigation to ensure new auth state
+          // Use window.location for hard navigation to ensure session is refreshed
           window.location.href = '/admin';
         }, 500);
       } else {
-        toast.error('Google login failed. Please try again.');
+        toast.error(result.error || 'Google login failed. Please try again.');
       }
 
     } catch (error: any) {
       console.error('Error processing Google login:', error);
       
       // Handle specific error messages
-      if (error.message.includes('User not found')) {
+      if (error.message?.includes('User not found')) {
         toast.error('Account not found. Please register first.');
-      } else if (error.message.includes('Account is disabled')) {
+      } else if (error.message?.includes('Account is disabled')) {
         toast.error('Your account has been disabled. Please contact support.');
       } else {
         toast.error('Google login failed. Please try again.');
