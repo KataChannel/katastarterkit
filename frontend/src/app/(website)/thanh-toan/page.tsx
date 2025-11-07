@@ -9,28 +9,20 @@ import { CreditCard, Truck, MapPin, Phone, Mail, User, ArrowLeft } from 'lucide-
 import { useToast } from '@/hooks/use-toast';
 import { PaymentMethodBadge } from '@/components/ecommerce/PaymentMethodBadge';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
-import { getSessionId } from '@/lib/session';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCartSession } from '@/hooks/useCartSession';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const { isAuthenticated } = useAuth();
-
-  // Get or create session ID on mount
-  useEffect(() => {
-    const id = getSessionId();
-    if (id) {
-      setSessionId(id);
-    }
-  }, []);
+  const { sessionId, isInitialized } = useCartSession();
 
   const { data: cartData, loading: cartLoading, error: cartError } = useQuery(GET_CART, {
     variables: {
       sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
     },
-    skip: !isAuthenticated && !sessionId,
+    skip: !isInitialized || (!isAuthenticated && !sessionId),
     fetchPolicy: 'network-only', // Always fetch fresh data for checkout
   });
 
@@ -91,11 +83,15 @@ export default function CheckoutPage() {
 
   // Auto-redirect if cart is empty (better UX than showing empty state)
   useEffect(() => {
-    // Only check after loading is complete and cart data is available
-    if (!cartLoading && cartData) {
-      const hasItems = items && items.length > 0;
+    // Only check after:
+    // 1. Session is initialized
+    // 2. Loading is complete
+    // 3. We have received data from server
+    if (isInitialized && !cartLoading && cartData !== undefined) {
+      const hasItems = cart && items && items.length > 0;
       
       if (!hasItems) {
+        console.log('[Checkout] Redirecting - empty cart', { cart, items });
         toast({
           title: 'Giỏ hàng trống',
           description: 'Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán',
@@ -105,7 +101,7 @@ export default function CheckoutPage() {
         router.push('/san-pham');
       }
     }
-  }, [cartLoading, cartData, items, router, toast]);
+  }, [isInitialized, cartLoading, cartData, cart, items, router, toast]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -178,7 +174,8 @@ export default function CheckoutPage() {
     }
   };
 
-  if (cartLoading) {
+  // Show loading while session initializes or cart is loading
+  if (!isInitialized || cartLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
