@@ -8,6 +8,8 @@ const prisma = new PrismaClient();
 
 // Cache for schema-based model mappings
 let tableToModelMappingCache: { [tableName: string]: string } | null = null;
+// Cache for table -> field/column mapping parsed from schema.prisma
+let tableFieldInfoCache: { [tableName: string]: { fieldNames: string[]; columnToField: { [col: string]: string } } } | null = null;
 
 // Determine environment from DATABASE_URL
 function getEnvironmentName(): string {
@@ -354,6 +356,26 @@ function transformRecord(record: any, tableName?: string): any {
     }
   }
 
+  // Handle comments transformations (userId → authorId)
+  if (tableName === 'comments') {
+    if (transformed.userId && !transformed.authorId) {
+      transformed.authorId = transformed.userId;
+      delete transformed.userId;
+    }
+  }
+
+  // Handle tags transformations (createdBy → createdById)
+  if (tableName === 'tags') {
+    if (transformed.createdBy && !transformed.createdById) {
+      transformed.createdById = transformed.createdBy;
+      delete transformed.createdBy;
+    }
+    if (transformed.updatedBy && !transformed.updatedById) {
+      transformed.updatedById = transformed.updatedBy;
+      delete transformed.updatedBy;
+    }
+  }
+
   return transformed;
 }
 
@@ -380,6 +402,11 @@ async function batchInsert(
       const errors: any[] = [];
       
       for (const record of records) {
+        // Skip sanitized/empty records (no matching model fields)
+        if (!record || Object.keys(record).length === 0) {
+          skipped++;
+          continue;
+        }
         try {
           // Determine the unique field for each table
           let whereClause: any;
@@ -390,10 +417,20 @@ async function batchInsert(
             whereClause = { id: record.id };
           }
 
+          // Ensure we don't try to update immutable/PK fields (like id) or the unique key used in where
+          const createObj = { ...record };
+          const updateObj = { ...record };
+          // Remove primary key fields and the unique key from update payload
+          delete updateObj.id;
+          if (whereClause && Object.keys(whereClause).length === 1) {
+            const uniqueField = Object.keys(whereClause)[0];
+            delete updateObj[uniqueField];
+          }
+
           await model.upsert({
             where: whereClause,
-            update: record,
-            create: record,
+            update: updateObj,
+            create: createObj,
           });
           inserted++;
         } catch (error: any) {
@@ -420,11 +457,17 @@ async function batchInsert(
     }
 
     // For other tables, use createMany with skipDuplicates
+    const validRecords = Array.isArray(records) ? records.filter(r => r && Object.keys(r).length > 0) : [];
+    if (validRecords.length === 0) {
+      // All records were sanitized out (no matching model fields)
+      return { inserted: 0, skipped: records.length };
+    }
+
     const result = await model.createMany({
-      data: records,
+      data: validRecords,
       skipDuplicates: true,
     });
-    inserted = result.count || records.length;
+    inserted = result.count || validRecords.length;
     return { inserted, skipped: records.length - inserted };
   } catch (batchError: any) {
     // Log the error for debugging
@@ -547,13 +590,110 @@ async function restoreTableOptimized(
 
     console.log(`   📊 Total records: ${records.length.toLocaleString()}`);
 
-    // Get Prisma model
-    const modelName = toCamelCase(table);
-    const model = (prisma as any)[modelName];
+    // Special handling: detect legacy menu backup (has menu item fields) → restore to menu_items
+    let targetTable = table;
+    let targetModel = null;
+    let targetModelName = '';
+    
+    if (table === 'menus' && records.length > 0) {
+      // Check if this looks like menu items (has title, route/url fields)
+      const firstRecord = records[0];
+      const hasMenuItemFields = firstRecord.title && (firstRecord.route || firstRecord.url || firstRecord.path);
+      const lacksMenuFields = !firstRecord.name; // Menu model requires 'name'
+      
+      if (hasMenuItemFields && lacksMenuFields) {
+        console.log(`   🔍 Detected legacy menu item format in menus.json`);
+        
+        // Check if menu_items table exists
+        if (await tableExists('menu_items')) {
+          console.log(`   🔄 Will restore as menu_items instead of menus`);
+          targetTable = 'menu_items';
+          targetModelName = toCamelCase('menu_items');
+          targetModel = (prisma as any)[targetModelName];
+          
+          // Get default user ID for createdById (use first user)
+          let defaultUserId: string | null = null;
+          try {
+            const firstUser = await prisma.user.findFirst({ select: { id: true } });
+            defaultUserId = firstUser?.id || null;
+          } catch (err) {
+            console.log(`   ⚠️  Could not fetch default user for createdById`);
+          }
+          
+          if (!defaultUserId) {
+            console.log(`   ❌ Cannot restore menu items without a valid user ID for createdById`);
+            stats.recordsSkipped += records.length;
+            stats.tablesProcessed++;
+            stats.tableStats.set(table, { restored: 0, skipped: records.length, errors: 0 });
+            return;
+          }
+          
+          // Transform legacy menu records → MenuItem format
+          records = records.map(record => transformLegacyMenuToMenuItem(record, defaultUserId!));
+          
+          // Need to create at least one Menu first for menuId foreign key
+          let defaultMenuId: string | null = null;
+          try {
+            let defaultMenu = await prisma.menu.findFirst({ select: { id: true } });
+            if (!defaultMenu) {
+              // Create a default menu
+              defaultMenu = await prisma.menu.create({
+                data: {
+                  name: 'Default Menu',
+                  slug: 'default-menu',
+                  description: 'Auto-created menu for legacy menu items',
+                  createdById: defaultUserId,
+                },
+                select: { id: true },
+              });
+              console.log(`   ✅ Created default Menu for menu items`);
+            }
+            defaultMenuId = defaultMenu.id;
+          } catch (err) {
+            console.log(`   ❌ Failed to create/find default Menu: ${err}`);
+            stats.recordsSkipped += records.length;
+            stats.tablesProcessed++;
+            stats.tableStats.set(table, { restored: 0, skipped: records.length, errors: 0 });
+            return;
+          }
+          
+          // Add menuId to all menu items
+          records = records.map((record: any) => ({ ...record, menuId: defaultMenuId }));
+          
+        } else {
+          console.log(`   ⚠️  menu_items table does not exist, skipping`);
+          stats.recordsSkipped += records.length;
+          stats.tablesProcessed++;
+          stats.tableStats.set(table, { restored: 0, skipped: records.length, errors: 0 });
+          return;
+        }
+      }
+    }
 
-    if (!model || typeof model.createMany !== 'function') {
-      console.log(`   🔧 Using raw SQL for ${table}...`);
-      await restoreWithRawSQL(table, records);
+    // If the target table does not exist in the current DB, skip restoring it
+    if (!(await tableExists(targetTable))) {
+      console.log(`   ⚠️  Table ${targetTable} does not exist in the database, skipping ${records.length} records`);
+      stats.tablesProcessed++;
+      stats.recordsSkipped += records.length;
+      stats.tableStats.set(table, { restored: 0, skipped: records.length, errors: 0 });
+      return;
+    }
+
+    // Parse and transform records (skip if already transformed above for menu_items)
+    if (targetTable === table) {
+      // Normal transform
+      records = records.map(record => transformRecord(record, table));
+    }
+
+    // Get Prisma model
+    if (!targetModel) {
+      targetModelName = toCamelCase(targetTable);
+      targetModel = (prisma as any)[targetModelName];
+    }
+
+    if (!targetModel || typeof targetModel.createMany !== 'function') {
+      console.log(`   🔧 Using raw SQL for ${targetTable}...`);
+      await restoreWithRawSQL(targetTable, records);
       return;
     }
 
@@ -661,12 +801,21 @@ async function restoreTableOptimized(
 
     for (let i = 0; i < records.length; i += effectiveBatchSize) {
       const batch = records.slice(i, i + effectiveBatchSize);
-      const transformedBatch = batch.map(record => transformRecord(record, table));
+      // Sanitize and map columns to Prisma model fields (use targetTable, not original table)
+      const sanitizedBatch = batch.map(r => sanitizeRecordForTable(targetTable, r));
+
+      // If all records were sanitized out (no matching model fields), skip
+      if (sanitizedBatch.every(obj => !obj || Object.keys(obj).length === 0)) {
+        // No workable fields -> skip these records
+        console.log(`   ⚠️  No matching model fields found for table ${targetTable}, skipping this batch`);
+        totalSkipped += sanitizedBatch.length;
+        continue;
+      }
 
       const { inserted, skipped } = await batchInsert(
-        model,
-        table,
-        transformedBatch,
+        targetModel,
+        targetTable,
+        sanitizedBatch,
         effectiveBatchSize,
       );
 
@@ -1073,7 +1222,8 @@ function buildTableToModelMapping(): { [tableName: string]: string } {
     console.log(`📖 Reading schema from: ${path.basename(schemaPath)}`);
     const schemaContent = fs.readFileSync(schemaPath, 'utf8');
     
-    const mapping: { [tableName: string]: string } = {};
+  const mapping: { [tableName: string]: string } = {};
+  const fieldInfo: { [tableName: string]: { fieldNames: string[]; columnToField: { [col: string]: string } } } = {};
     
     // Extract model blocks with their bodies
     const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*?)\}/gm;
@@ -1082,19 +1232,201 @@ function buildTableToModelMapping(): { [tableName: string]: string } {
     while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
       const modelName = match[1];
       const modelBody = match[2];
-      
+
       // Look for @@map directive in the model body
       const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
       const tableName = mapMatch ? mapMatch[1] : camelToSnakeCase(modelName);
-      
+
+      // Parse fields inside model body to build a column -> field map
+      const lines = modelBody.split(/\r?\n/);
+      const fieldNames: string[] = [];
+      const columnToField: { [col: string]: string } = {};
+
+      for (const line of lines) {
+        // Skip attribute lines and indexes
+        if (!line || line.trim().startsWith('//') || line.includes('@@')) continue;
+
+        const fieldMatch = line.match(/^\s*(\w+)\s+[\w\[\]\?]+/);
+        if (fieldMatch) {
+          const fieldName = fieldMatch[1];
+          fieldNames.push(fieldName);
+
+          // Try to find @map("column_name") on the same line
+          const mapFieldMatch = line.match(/@map\s*\(\s*["']([^"']+)["']\s*\)/);
+          const columnName = mapFieldMatch ? mapFieldMatch[1] : camelToSnakeCase(fieldName);
+          columnToField[columnName] = fieldName;
+        }
+      }
+
       // Store mapping: table_name → modelName (for Prisma model access)
       mapping[tableName] = modelName;
+      fieldInfo[tableName] = { fieldNames, columnToField };
     }
     
+    // Cache field info as well
+    tableFieldInfoCache = fieldInfo;
     return mapping;
   } catch (error) {
     console.error('❌ Error building table-to-model mapping from schema:', error);
     return {};
+  }
+}
+
+/**
+ * Get parsed field/column info for a table from the schema
+ */
+function getTableFieldInfo(tableName: string) {
+  if (!tableFieldInfoCache) {
+    // Ensure mapping is built which also populates the field cache
+    tableToModelMappingCache = buildTableToModelMapping();
+  }
+
+  return tableFieldInfoCache && tableFieldInfoCache[tableName]
+    ? tableFieldInfoCache[tableName]
+    : { fieldNames: [], columnToField: {} };
+}
+
+/**
+ * Special transformation for old menu backup format → MenuItem model
+ */
+function transformLegacyMenuToMenuItem(record: any, defaultUserId: string): any {
+  const menuItem: any = {
+    id: record.id,
+    title: record.title || 'Untitled',
+    order: record.order || 0,
+    isActive: record.isActive !== undefined ? record.isActive : true,
+    parentId: record.parentId || null,
+    icon: record.icon || null,
+    pageId: null, // Will need to be mapped if pages exist
+  };
+
+  // Map URL fields: route or externalUrl → url
+  if (record.route) {
+    menuItem.url = record.route;
+  } else if (record.externalUrl) {
+    menuItem.url = record.externalUrl;
+  } else if (record.url) {
+    menuItem.url = record.url;
+  } else if (record.path) {
+    menuItem.url = record.path;
+  }
+
+  // Map target: SELF → _self, BLANK → _blank
+  if (record.target) {
+    const targetMap: any = {
+      'SELF': '_self',
+      '_SELF': '_self',
+      'BLANK': '_blank',
+      '_BLANK': '_blank',
+    };
+    menuItem.target = targetMap[record.target.toUpperCase()] || record.target.toLowerCase();
+  } else {
+    menuItem.target = '_self';
+  }
+
+  // Map createdBy/updatedBy → createdById
+  if (record.createdBy) {
+    menuItem.createdById = record.createdBy;
+  } else if (record.createdById) {
+    menuItem.createdById = record.createdById;
+  } else {
+    // Use default user ID (first admin user)
+    menuItem.createdById = defaultUserId;
+  }
+
+  // Preserve metadata with extra fields that don't fit the model
+  const extraFields: any = {};
+  if (record.type) extraFields.type = record.type;
+  if (record.description) extraFields.description = record.description;
+  if (record.level !== undefined) extraFields.level = record.level;
+  if (record.slug) extraFields.slug = record.slug;
+  if (record.iconType) extraFields.iconType = record.iconType;
+  if (record.badge) extraFields.badge = record.badge;
+  if (record.badgeColor) extraFields.badgeColor = record.badgeColor;
+  if (record.image) extraFields.image = record.image;
+  if (record.requiredPermissions) extraFields.requiredPermissions = record.requiredPermissions;
+  if (record.requiredRoles) extraFields.requiredRoles = record.requiredRoles;
+  if (record.isPublic !== undefined) extraFields.isPublic = record.isPublic;
+  if (record.isVisible !== undefined) extraFields.isVisible = record.isVisible;
+  if (record.isProtected !== undefined) extraFields.isProtected = record.isProtected;
+  if (record.cssClass) extraFields.cssClass = record.cssClass;
+  if (record.customData) extraFields.customData = record.customData;
+
+  if (Object.keys(extraFields).length > 0) {
+    menuItem.metadata = extraFields;
+  }
+
+  // Preserve timestamps
+  if (record.createdAt) menuItem.createdAt = record.createdAt;
+  if (record.updatedAt) menuItem.updatedAt = record.updatedAt;
+
+  return menuItem;
+}
+
+/**
+ * Sanitize and map a record's column keys (snake_case) to Prisma model field names (camelCase)
+ */
+function sanitizeRecordForTable(table: string, record: any): any {
+  const info = getTableFieldInfo(table);
+  const out: any = {};
+
+  for (const key of Object.keys(record)) {
+    // prefer explicit column -> field mapping
+    if (info.columnToField[key]) {
+      out[info.columnToField[key]] = record[key];
+      continue;
+    }
+
+    // fallback: convert snake_case to camelCase and check if present in fieldNames
+    const camel = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+    if (info.fieldNames.includes(camel)) {
+      out[camel] = record[key];
+      continue;
+    }
+
+    // sometimes backups already use camelCase keys; keep if present
+    if (info.fieldNames.includes(key)) {
+      out[key] = record[key];
+      continue;
+    }
+
+    // Otherwise ignore unknown keys (likely relational payloads)
+  }
+
+  // Common legacy fallback mappings
+  if (Object.keys(out).length === 0 && record) {
+    // createdBy -> createdById
+    if (record.createdBy && info.fieldNames.includes('createdById')) {
+      out['createdById'] = record.createdBy;
+    }
+    if (record.updatedBy && info.fieldNames.includes('updatedById')) {
+      out['updatedById'] = record.updatedBy;
+    }
+    // userId -> authorId (comments/posts legacy)
+    if ((record.userId || record.user_id) && info.fieldNames.includes('authorId')) {
+      out['authorId'] = record.userId || record.user_id;
+    }
+  }
+
+  return out;
+}
+
+/**
+ * Check whether a table exists in the current Postgres database
+ */
+async function tableExists(table: string): Promise<boolean> {
+  try {
+    const rows: any = await prisma.$queryRawUnsafe(
+      `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = $1) as exists`,
+      table,
+    );
+
+    if (Array.isArray(rows)) {
+      return !!rows[0]?.exists;
+    }
+    return !!rows?.exists;
+  } catch (error) {
+    return false;
   }
 }
 

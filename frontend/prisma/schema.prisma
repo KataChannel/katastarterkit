@@ -98,6 +98,9 @@ model User {
   blocksCreated  Block[]       @relation("BlockCreator")
 
   @@map("users")
+  tags Tag[] @relation("TagCreator")
+  permissions Permission[] @relation("PermissionCreator")
+  roles Role[] @relation("RoleCreator")
 }
 
 model AuthMethod {
