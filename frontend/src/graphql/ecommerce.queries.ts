@@ -204,8 +204,9 @@ export const GET_CART = gql`
       }
       itemCount
       subtotal
-      discount
+      shippingFee
       tax
+      discount
       total
       metadata
       createdAt
@@ -239,8 +240,8 @@ export const ADD_TO_CART = gql`
 `;
 
 export const UPDATE_CART_ITEM = gql`
-  mutation UpdateCartItem($itemId: ID!, $quantity: Int!) {
-    updateCartItem(itemId: $itemId, quantity: $quantity) {
+  mutation UpdateCartItem($itemId: ID!, $quantity: Int!, $sessionId: String) {
+    updateCartItem(itemId: $itemId, quantity: $quantity, sessionId: $sessionId) {
       success
       message
       cart {
@@ -258,8 +259,8 @@ export const UPDATE_CART_ITEM = gql`
 `;
 
 export const REMOVE_FROM_CART = gql`
-  mutation RemoveFromCart($itemId: ID!) {
-    removeFromCart(itemId: $itemId) {
+  mutation RemoveFromCart($itemId: ID!, $sessionId: String) {
+    removeFromCart(itemId: $itemId, sessionId: $sessionId) {
       success
       message
       cart {
@@ -272,10 +273,24 @@ export const REMOVE_FROM_CART = gql`
 `;
 
 export const CLEAR_CART = gql`
-  mutation ClearCart {
-    clearCart {
+  mutation ClearCart($sessionId: String) {
+    clearCart(sessionId: $sessionId) {
       success
       message
+    }
+  }
+`;
+
+export const MERGE_CARTS = gql`
+  mutation MergeCarts($input: MergeCartsInput!) {
+    mergeCarts(input: $input) {
+      success
+      message
+      cart {
+        id
+        itemCount
+        total
+      }
     }
   }
 `;

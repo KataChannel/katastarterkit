@@ -41,22 +41,33 @@ export default function CartPage() {
     }
   }, []);
 
-  // Fetch cart
-  const { data, loading, error } = useQuery(GET_CART, {
+  // Fetch cart - always get fresh data
+  const { data, loading, error, refetch } = useQuery(GET_CART, {
     variables: {
       sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
     },
     skip: !isAuthenticated && !sessionId,
+    fetchPolicy: 'network-only', // Always fetch fresh cart data
   });
 
   // Mutations
   const [updateCartItem, { loading: updating }] = useMutation(UPDATE_CART_ITEM, {
+    update(cache, { data }) {
+      if (data?.updateCartItem?.success && data?.updateCartItem?.cart) {
+        cache.writeQuery({
+          query: GET_CART,
+          variables: { sessionId: !isAuthenticated && sessionId ? sessionId : undefined },
+          data: { getCart: data.updateCartItem.cart },
+        });
+      }
+    },
     refetchQueries: [{ 
       query: GET_CART,
       variables: {
         sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
       },
     }],
+    awaitRefetchQueries: true,
     onError: (error) =>
       toast({
         title: 'Lỗi',
@@ -67,12 +78,22 @@ export default function CartPage() {
   });
 
   const [removeFromCart] = useMutation(REMOVE_FROM_CART, {
+    update(cache, { data }) {
+      if (data?.removeFromCart?.success && data?.removeFromCart?.cart) {
+        cache.writeQuery({
+          query: GET_CART,
+          variables: { sessionId: !isAuthenticated && sessionId ? sessionId : undefined },
+          data: { getCart: data.removeFromCart.cart },
+        });
+      }
+    },
     refetchQueries: [{ 
       query: GET_CART,
       variables: {
         sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
       },
     }],
+    awaitRefetchQueries: true,
     onCompleted: () =>
       toast({
         title: 'Đã xóa',
@@ -89,12 +110,22 @@ export default function CartPage() {
   });
 
   const [clearCart] = useMutation(CLEAR_CART, {
+    update(cache, { data }) {
+      if (data?.clearCart?.success && data?.clearCart?.cart) {
+        cache.writeQuery({
+          query: GET_CART,
+          variables: { sessionId: !isAuthenticated && sessionId ? sessionId : undefined },
+          data: { getCart: data.clearCart.cart },
+        });
+      }
+    },
     refetchQueries: [{ 
       query: GET_CART,
       variables: {
         sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
       },
     }],
+    awaitRefetchQueries: true,
     onCompleted: () =>
       toast({
         title: 'Đã xóa',
@@ -118,7 +149,11 @@ export default function CartPage() {
 
     try {
       await updateCartItem({
-        variables: { itemId, quantity: newQuantity },
+        variables: { 
+          itemId, 
+          quantity: newQuantity,
+          sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+        },
       });
     } catch (err) {
       // Error handled by onError
@@ -128,7 +163,10 @@ export default function CartPage() {
   const handleRemoveItem = async (itemId: string) => {
     try {
       await removeFromCart({
-        variables: { itemId },
+        variables: { 
+          itemId,
+          sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+        },
       });
     } catch (err) {
       // Error handled by onError
@@ -137,7 +175,11 @@ export default function CartPage() {
 
   const handleClearCart = async () => {
     try {
-      await clearCart();
+      await clearCart({
+        variables: {
+          sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+        },
+      });
     } catch (err) {
       // Error handled by onError
     }
@@ -288,9 +330,9 @@ export default function CartPage() {
                           {/* Price */}
                           <div className="space-y-1">
                             <PriceDisplay price={item.price} size="md" />
-                            <p className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-500">
                               Tổng: <PriceDisplay price={item.price * item.quantity} size="sm" showCurrency={false} /> ₫
-                            </p>
+                            </div>
                           </div>
 
                           {/* Quantity & Remove */}
@@ -352,9 +394,9 @@ export default function CartPage() {
                           value={((cart?.total || 0) / 500000) * 100} 
                           className="h-2"
                         />
-                        <p className="text-xs text-green-600">
+                        <div className="text-xs text-green-600">
                           Còn <PriceDisplay price={getRemainingForFreeShipping(cart?.total || 0)} size="sm" showCurrency={false} /> ₫ nữa để được miễn phí ship
-                        </p>
+                        </div>
                       </div>
                     </AlertDescription>
                   </Alert>

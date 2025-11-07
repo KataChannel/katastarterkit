@@ -1398,6 +1398,7 @@ input CreateOrderInput {
   items: [OrderItemInput!]
   metadata: JSON
   paymentMethod: PaymentMethod! = CASH_ON_DELIVERY
+  sessionId: String
   shippingAddress: ShippingAddressInput!
   shippingMethod: ShippingMethod! = STANDARD
 }

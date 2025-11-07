@@ -26,11 +26,12 @@ export default function CheckoutPage() {
     }
   }, []);
 
-  const { data: cartData, loading: cartLoading } = useQuery(GET_CART, {
+  const { data: cartData, loading: cartLoading, error: cartError } = useQuery(GET_CART, {
     variables: {
       sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
     },
     skip: !isAuthenticated && !sessionId,
+    fetchPolicy: 'network-only', // Always fetch fresh data for checkout
   });
 
   const [formData, setFormData] = useState({
@@ -85,8 +86,26 @@ export default function CheckoutPage() {
     },
   });
 
-  const cart = cartData?.cart;
+  const cart = cartData?.cart || cartData?.getCart;
   const items = cart?.items || [];
+
+  // Auto-redirect if cart is empty (better UX than showing empty state)
+  useEffect(() => {
+    // Only check after loading is complete and cart data is available
+    if (!cartLoading && cartData) {
+      const hasItems = items && items.length > 0;
+      
+      if (!hasItems) {
+        toast({
+          title: 'Giỏ hàng trống',
+          description: 'Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán',
+          type: 'warning',
+          variant: 'default',
+        });
+        router.push('/san-pham');
+      }
+    }
+  }, [cartLoading, cartData, items, router, toast]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -95,13 +114,13 @@ export default function CheckoutPage() {
     }).format(price);
   };
 
-  const calculateShippingFee = () => {
-    if (cart?.total >= 500000) return 0; // Free shipping
-    return formData.shippingMethod === 'EXPRESS' ? 50000 : 30000;
-  };
-
-  const shippingFee = calculateShippingFee();
-  const finalTotal = (cart?.total || 0) + shippingFee;
+  // Use shipping fee from cart (calculated by backend)
+  // Backend applies free shipping rules and dynamic calculations
+  const shippingFee = cart?.shippingFee || 0;
+  const tax = cart?.tax || 0;
+  
+  // Total already includes shipping and tax from backend
+  const finalTotal = cart?.total || 0;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -150,6 +169,7 @@ export default function CheckoutPage() {
             paymentMethod: formData.paymentMethod,
             shippingMethod: formData.shippingMethod,
             notes: formData.notes,
+            sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
           },
         },
       });
@@ -160,27 +180,54 @@ export default function CheckoutPage() {
 
   if (cartLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang tải thông tin giỏ hàng...</p>
+        </div>
       </div>
     );
   }
 
-  if (!cart || items.length === 0) {
+  // Error state
+  if (cartError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Giỏ hàng trống
-          </h1>
-          <p className="text-gray-600 mb-4">
-            Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán
-          </p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md">
+          <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
+            <h2 className="text-lg font-bold mb-2">Lỗi tải giỏ hàng</h2>
+            <p className="text-sm">{cartError.message}</p>
+          </div>
           <button
-            onClick={() => router.push('/products')}
+            onClick={() => router.push('/gio-hang')}
             className="text-blue-600 hover:underline"
           >
-            ← Tiếp tục mua sắm
+            ← Quay lại giỏ hàng
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // This fallback should rarely be reached due to useEffect redirect
+  // But kept for SSR and edge cases
+  if (!cart || items.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md">
+          <div className="bg-yellow-50 p-8 rounded-lg mb-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Giỏ hàng trống
+            </h1>
+            <p className="text-gray-600 mb-4">
+              Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán
+            </p>
+          </div>
+          <button
+            onClick={() => router.push('/san-pham')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+          >
+            Khám phá sản phẩm
           </button>
         </div>
       </div>
@@ -492,6 +539,13 @@ export default function CheckoutPage() {
                   <span>Phí vận chuyển</span>
                   <span>{shippingFee === 0 ? 'Miễn phí' : formatPrice(shippingFee)}</span>
                 </div>
+
+                {tax > 0 && (
+                  <div className="flex justify-between text-gray-600">
+                    <span>Thuế VAT</span>
+                    <span>{formatPrice(tax)}</span>
+                  </div>
+                )}
 
                 <div className="flex justify-between text-lg font-bold text-gray-900 border-t pt-2">
                   <span>Tổng cộng</span>

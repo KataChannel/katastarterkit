@@ -23,6 +23,7 @@ export class CartResolver {
 
   /**
    * Get current user's cart or session cart
+   * Returns null if cart doesn't exist or is empty (doesn't auto-create)
    */
   @Query(() => CartType, { nullable: true })
   async getCart(
@@ -30,7 +31,7 @@ export class CartResolver {
     @Context() context?: any,
   ) {
     const userId = context?.req?.user?.id;
-    return this.cartService.getOrCreateCart(userId, sessionId);
+    return this.cartService.getCart(userId, sessionId);
   }
 
   /**

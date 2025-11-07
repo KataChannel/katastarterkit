@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { ShoppingCart, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ADD_TO_CART, GET_CART } from '@/graphql/ecommerce.queries';
 import { cn } from '@/lib/utils';
-import { getSessionId } from '@/lib/session';
-import { useAuth } from '@/contexts/AuthContext';
+import { useCartSession } from '@/hooks/useCartSession';
 
 interface AddToCartButtonProps {
   productId: string;
@@ -38,24 +37,28 @@ export function AddToCartButton({
   const { toast } = useToast();
   const [isAdding, setIsAdding] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
-  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
-  const { isAuthenticated } = useAuth();
-
-  // Get or create session ID on mount
-  useEffect(() => {
-    const id = getSessionId();
-    if (id) {
-      setSessionId(id);
-    }
-  }, []);
+  
+  // Use optimized cart session hook
+  const { sessionId } = useCartSession();
 
   const [addToCart] = useMutation(ADD_TO_CART, {
+    // Update Apollo cache directly for better performance
+    update(cache, { data }) {
+      if (data?.addToCart?.success && data?.addToCart?.cart) {
+        // Write the updated cart to cache
+        cache.writeQuery({
+          query: GET_CART,
+          variables: sessionId ? { sessionId } : undefined,
+          data: { getCart: data.addToCart.cart },
+        });
+      }
+    },
+    // Fallback refetch if cache update fails
     refetchQueries: [{ 
       query: GET_CART,
-      variables: {
-        sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
-      },
+      variables: sessionId ? { sessionId } : undefined,
     }],
+    awaitRefetchQueries: true,
     onCompleted: (data) => {
       if (data.addToCart.success) {
         // Animation success
@@ -64,25 +67,26 @@ export function AddToCartButton({
 
         // Toast notification
         toast({
+          type: 'success',
           title: '✅ Đã thêm vào giỏ hàng!',
           description: `${productName} đã được thêm vào giỏ hàng của bạn`,
-          type: 'success',
         });
       } else {
         toast({
-          title: 'Lỗi',
-          description: data.addToCart.message || 'Không thể thêm vào giỏ hàng',
           type: 'error',
+          title: '❌ Lỗi',
+          description: data.addToCart.message || 'Không thể thêm vào giỏ hàng',
           variant: 'destructive',
         });
       }
       setIsAdding(false);
     },
     onError: (error) => {
+      console.error('[AddToCart] Error:', error);
       toast({
-        title: 'Lỗi',
-        description: error.message || 'Không thể kết nối đến server',
         type: 'error',
+        title: '❌ Lỗi',
+        description: error.message || 'Không thể kết nối đến server',
         variant: 'destructive',
       });
       setIsAdding(false);
@@ -106,11 +110,13 @@ export function AddToCartButton({
             productId,
             variantId,
             quantity,
-            sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+            // Always send sessionId for guest users (authenticated users don't need it)
+            sessionId,
           },
         },
       });
     } catch (err) {
+      console.error('[AddToCart] Mutation error:', err);
       setIsAdding(false);
     }
   };

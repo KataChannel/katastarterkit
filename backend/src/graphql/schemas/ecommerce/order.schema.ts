@@ -312,6 +312,10 @@ export class CreateOrderInput {
   @Field({ nullable: true })
   guestName?: string;
 
+  // Session ID for guest cart
+  @Field({ nullable: true })
+  sessionId?: string;
+
   // Order items (if not from cart)
   @Field(() => [OrderItemInput], { nullable: true })
   items?: OrderItemInput[];

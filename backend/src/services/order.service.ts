@@ -19,10 +19,10 @@ export class OrderService {
    * Create order from cart
    */
   async createFromCart(input: CreateOrderInput, userId?: string) {
-    const { shippingAddress, billingAddress, paymentMethod, shippingMethod } = input;
+    const { shippingAddress, billingAddress, paymentMethod, shippingMethod, sessionId } = input;
 
     // Get cart with validation
-    const cartValidation = await this.cartService.validateCart(userId, undefined);
+    const cartValidation = await this.cartService.validateCart(userId, sessionId);
     
     if (!cartValidation.isValid) {
       throw new BadRequestException(`Cart validation failed: ${cartValidation.errors.join(', ')}`);
