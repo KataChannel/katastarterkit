@@ -123,11 +123,8 @@ export function AddToCartButton({
             productId,
             variantId,
             quantity,
-            // Send userId for authenticated users, sessionId for guests
-            ...(isAuthenticated && user?.id 
-              ? { userId: user.id }
-              : { sessionId }
-            ),
+            // Only send sessionId for guest users (authenticated users are identified via context)
+            sessionId: !isAuthenticated ? sessionId : undefined,
           },
         },
       });

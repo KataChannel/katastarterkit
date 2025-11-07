@@ -152,13 +152,12 @@ export default function CartPage() {
     try {
       await updateCartItem({
         variables: { 
-          itemId, 
-          quantity: newQuantity,
-          // Send userId for authenticated users, sessionId for guests
-          ...(isAuthenticated && user?.id 
-            ? { userId: user.id }
-            : { sessionId }
-          ),
+          input: {
+            itemId, 
+            quantity: newQuantity,
+          },
+          // sessionId is a separate argument, not in input
+          sessionId: !isAuthenticated ? sessionId : undefined,
         },
       });
     } catch (err) {
@@ -170,12 +169,11 @@ export default function CartPage() {
     try {
       await removeFromCart({
         variables: { 
-          itemId,
-          // Send userId for authenticated users, sessionId for guests
-          ...(isAuthenticated && user?.id 
-            ? { userId: user.id }
-            : { sessionId }
-          ),
+          input: {
+            itemId,
+          },
+          // sessionId is a separate argument, not in input
+          sessionId: !isAuthenticated ? sessionId : undefined,
         },
       });
     } catch (err) {
@@ -187,11 +185,8 @@ export default function CartPage() {
     try {
       await clearCart({
         variables: {
-          // Send userId for authenticated users, sessionId for guests
-          ...(isAuthenticated && user?.id 
-            ? { userId: user.id }
-            : { sessionId }
-          ),
+          // sessionId is the only argument for clearCart
+          sessionId: !isAuthenticated ? sessionId : undefined,
         },
       });
     } catch (err) {

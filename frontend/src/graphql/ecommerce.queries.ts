@@ -240,8 +240,8 @@ export const ADD_TO_CART = gql`
 `;
 
 export const UPDATE_CART_ITEM = gql`
-  mutation UpdateCartItem($itemId: ID!, $quantity: Int!, $sessionId: String) {
-    updateCartItem(itemId: $itemId, quantity: $quantity, sessionId: $sessionId) {
+  mutation UpdateCartItem($input: UpdateCartItemInput!, $sessionId: String) {
+    updateCartItem(input: $input, sessionId: $sessionId) {
       success
       message
       cart {
@@ -259,8 +259,8 @@ export const UPDATE_CART_ITEM = gql`
 `;
 
 export const REMOVE_FROM_CART = gql`
-  mutation RemoveFromCart($itemId: ID!, $sessionId: String) {
-    removeFromCart(itemId: $itemId, sessionId: $sessionId) {
+  mutation RemoveFromCart($input: RemoveFromCartInput!, $sessionId: String) {
+    removeFromCart(input: $input, sessionId: $sessionId) {
       success
       message
       cart {
