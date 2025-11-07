@@ -81,7 +81,11 @@ export function WebsiteHeader() {
     const fetchMenus = async () => {
       try {
         setMenuLoading(true);
-        const menus = await getPublicMenus({ isActive: true, includeChildren: true });
+        const menus = await getPublicMenus({ 
+          type: 'HEADER', // Only get HEADER type menus
+          isActive: true, 
+          includeChildren: true 
+        });
         setHeaderMenus(Array.isArray(menus) ? menus : []);
       } catch (err) {
         setMenuError(err as Error);

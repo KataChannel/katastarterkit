@@ -20,14 +20,16 @@ import { requireAuth } from '../lib/auth'
  */
 export async function getPublicMenus({
   menuId,
+  type,
   isActive = true,
   includeChildren = true,
 }: {
   menuId?: string
+  type?: string // 'HEADER', 'FOOTER', 'SIDEBAR'
   isActive?: boolean
   includeChildren?: boolean
 } = {}) {
-  const cacheKey = `menus:public:${menuId || 'all'}:${isActive}:${includeChildren}`
+  const cacheKey = `menus:public:${menuId || 'all'}:${type || 'all'}:${isActive}:${includeChildren}`
 
   // Try cache first
   const cached = await cache.get(cacheKey)
@@ -37,7 +39,7 @@ export async function getPublicMenus({
   if (menuId) where.menuId = menuId
   if (isActive !== undefined) where.isActive = isActive
 
-  const menus = await prisma.menuItem.findMany({
+  let menus = await prisma.menuItem.findMany({
     where,
     orderBy: { order: 'asc' },
     include: includeChildren
@@ -55,6 +57,18 @@ export async function getPublicMenus({
         }
       : undefined,
   })
+
+  // Filter by type if specified (type is stored in metadata JSON)
+  if (type) {
+    menus = menus.filter((menu: any) => {
+      const metadata = menu.metadata as any
+      return metadata?.type === type
+    })
+  }
+
+  // Filter public menus (isPublic in metadata or no auth required)
+  // For now, we'll show all active menu items for header/footer
+  // You can add authentication check later if needed
 
   await cache.set(cacheKey, menus, 600) // Cache 10 minutes
   return menus
