@@ -76,91 +76,98 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Cài đặt hệ thống</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Quản lý cấu hình và tùy chọn LMS</p>
-        </div>
+      <div className="flex flex-col gap-2 sm:gap-1">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Cài đặt hệ thống</h1>
+        <p className="text-sm sm:text-base text-gray-600">Quản lý cấu hình và tùy chọn LMS</p>
       </div>
 
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-          <TabsTrigger value="general" className="gap-1">
-            <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">Chung</span>
-          </TabsTrigger>
-          <TabsTrigger value="enrollment" className="gap-1">
-            <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">Ghi danh</span>
-          </TabsTrigger>
-          <TabsTrigger value="certificate" className="gap-1">
-            <Award className="w-4 h-4" />
-            <span className="hidden sm:inline">Chứng chỉ</span>
-          </TabsTrigger>
-          <TabsTrigger value="notification" className="gap-1">
-            <Bell className="w-4 h-4" />
-            <span className="hidden sm:inline">Thông báo</span>
-          </TabsTrigger>
-          <TabsTrigger value="payment" className="gap-1">
-            <DollarSign className="w-4 h-4" />
-            <span className="hidden sm:inline">Thanh toán</span>
-          </TabsTrigger>
-          <TabsTrigger value="security" className="gap-1">
-            <Shield className="w-4 h-4" />
-            <span className="hidden sm:inline">Bảo mật</span>
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 gap-1">
+            <TabsTrigger value="general" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+              <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span>Chung</span>
+            </TabsTrigger>
+            <TabsTrigger value="enrollment" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+              <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span>Ghi danh</span>
+            </TabsTrigger>
+            <TabsTrigger value="certificate" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+              <Award className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Chứng chỉ</span>
+              <span className="xs:hidden">CC</span>
+            </TabsTrigger>
+            <TabsTrigger value="notification" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+              <Bell className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Thông báo</span>
+              <span className="xs:hidden">TB</span>
+            </TabsTrigger>
+            <TabsTrigger value="payment" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+              <DollarSign className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Thanh toán</span>
+              <span className="xs:hidden">TT</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+              <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">Bảo mật</span>
+              <span className="xs:hidden">BM</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* General Settings */}
         <TabsContent value="general" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="w-5 h-5" />
-                Thông tin chung
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Globe className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span>Thông tin chung</span>
               </CardTitle>
-              <CardDescription>Cấu hình thông tin cơ bản của hệ thống</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Cấu hình thông tin cơ bản của hệ thống</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
               <div className="space-y-2">
-                <Label htmlFor="siteName">Tên website</Label>
+                <Label htmlFor="siteName" className="text-sm">Tên website</Label>
                 <Input
                   id="siteName"
                   value={siteName}
                   onChange={(e) => setSiteName(e.target.value)}
                   placeholder="Nhập tên website"
+                  className="h-10 text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="siteDescription">Mô tả</Label>
+                <Label htmlFor="siteDescription" className="text-sm">Mô tả</Label>
                 <Textarea
                   id="siteDescription"
                   value={siteDescription}
                   onChange={(e) => setSiteDescription(e.target.value)}
                   placeholder="Nhập mô tả website"
                   rows={3}
+                  className="text-sm resize-none"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="adminEmail">Email quản trị</Label>
+                <Label htmlFor="adminEmail" className="text-sm">Email quản trị</Label>
                 <Input
                   id="adminEmail"
                   type="email"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   placeholder="admin@example.com"
+                  className="h-10 text-sm"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="language">Ngôn ngữ</Label>
+                  <Label htmlFor="language" className="text-sm">Ngôn ngữ</Label>
                   <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger id="language">
+                    <SelectTrigger id="language" className="h-10 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -172,9 +179,9 @@ export default function AdminSettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="timezone">Múi giờ</Label>
+                  <Label htmlFor="timezone" className="text-sm">Múi giờ</Label>
                   <Select value={timezone} onValueChange={setTimezone}>
-                    <SelectTrigger id="timezone">
+                    <SelectTrigger id="timezone" className="h-10 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -186,7 +193,7 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
 
-              <Button onClick={() => handleSave('chung')} className="gap-2">
+              <Button onClick={() => handleSave('chung')} className="gap-2 w-full sm:w-auto" size="sm">
                 <Save className="w-4 h-4" />
                 Lưu thay đổi
               </Button>
@@ -197,51 +204,52 @@ export default function AdminSettingsPage() {
         {/* Enrollment Settings */}
         <TabsContent value="enrollment" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Cài đặt ghi danh
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span>Cài đặt ghi danh</span>
               </CardTitle>
-              <CardDescription>Quản lý quy trình ghi danh khóa học</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Quản lý quy trình ghi danh khóa học</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="space-y-0.5">
-                  <Label>Tự động ghi danh</Label>
-                  <p className="text-sm text-gray-600">Cho phép học viên tự ghi danh khóa học</p>
+            <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3">
+                <div className="space-y-0.5 flex-1 min-w-0">
+                  <Label className="text-sm">Tự động ghi danh</Label>
+                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">Cho phép học viên tự ghi danh khóa học</p>
                 </div>
                 <Switch checked={autoEnrollment} onCheckedChange={setAutoEnrollment} />
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="space-y-0.5">
-                  <Label>Yêu cầu thanh toán</Label>
-                  <p className="text-sm text-gray-600">Bắt buộc thanh toán trước khi ghi danh</p>
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3">
+                <div className="space-y-0.5 flex-1 min-w-0">
+                  <Label className="text-sm">Yêu cầu thanh toán</Label>
+                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">Bắt buộc thanh toán trước khi ghi danh</p>
                 </div>
                 <Switch checked={requirePayment} onCheckedChange={setRequirePayment} />
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="space-y-0.5">
-                  <Label>Cho phép khách xem</Label>
-                  <p className="text-sm text-gray-600">Khách có thể xem nội dung miễn phí</p>
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3">
+                <div className="space-y-0.5 flex-1 min-w-0">
+                  <Label className="text-sm">Cho phép khách xem</Label>
+                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">Khách có thể xem nội dung miễn phí</p>
                 </div>
                 <Switch checked={allowGuestView} onCheckedChange={setAllowGuestView} />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="maxEnrollments">Số lượng ghi danh tối đa/khóa</Label>
+                <Label htmlFor="maxEnrollments" className="text-sm">Số lượng ghi danh tối đa/khóa</Label>
                 <Input
                   id="maxEnrollments"
                   type="number"
                   value={maxEnrollments}
                   onChange={(e) => setMaxEnrollments(e.target.value)}
                   placeholder="100"
+                  className="h-10 text-sm"
                 />
                 <p className="text-xs text-gray-600">Để trống = không giới hạn</p>
               </div>
 
-              <Button onClick={() => handleSave('ghi danh')} className="gap-2">
+              <Button onClick={() => handleSave('ghi danh')} className="gap-2 w-full sm:w-auto" size="sm">
                 <Save className="w-4 h-4" />
                 Lưu thay đổi
               </Button>
@@ -252,43 +260,44 @@ export default function AdminSettingsPage() {
         {/* Certificate Settings */}
         <TabsContent value="certificate" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="w-5 h-5" />
-                Cài đặt chứng chỉ
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Award className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span>Cài đặt chứng chỉ</span>
               </CardTitle>
-              <CardDescription>Quản lý chứng chỉ hoàn thành khóa học</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Quản lý chứng chỉ hoàn thành khóa học</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="space-y-0.5">
-                  <Label>Kích hoạt chứng chỉ</Label>
-                  <p className="text-sm text-gray-600">Cấp chứng chỉ khi hoàn thành khóa học</p>
+            <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3">
+                <div className="space-y-0.5 flex-1 min-w-0">
+                  <Label className="text-sm">Kích hoạt chứng chỉ</Label>
+                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">Cấp chứng chỉ khi hoàn thành khóa học</p>
                 </div>
                 <Switch checked={enableCertificates} onCheckedChange={setEnableCertificates} />
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="space-y-0.5">
-                  <Label>Yêu cầu hoàn thành 100%</Label>
-                  <p className="text-sm text-gray-600">Phải hoàn thành toàn bộ khóa học</p>
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3">
+                <div className="space-y-0.5 flex-1 min-w-0">
+                  <Label className="text-sm">Yêu cầu hoàn thành 100%</Label>
+                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">Phải hoàn thành toàn bộ khóa học</p>
                 </div>
                 <Switch checked={requireCompletion} onCheckedChange={setRequireCompletion} />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="certificatePrefix">Tiền tố mã chứng chỉ</Label>
+                <Label htmlFor="certificatePrefix" className="text-sm">Tiền tố mã chứng chỉ</Label>
                 <Input
                   id="certificatePrefix"
                   value={certificatePrefix}
                   onChange={(e) => setCertificatePrefix(e.target.value)}
                   placeholder="RSC"
                   maxLength={5}
+                  className="h-10 text-sm"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="minPassScore">Điểm tối thiểu để đạt (%)</Label>
+                <Label htmlFor="minPassScore" className="text-sm">Điểm tối thiểu để đạt (%)</Label>
                 <Input
                   id="minPassScore"
                   type="number"
@@ -296,10 +305,11 @@ export default function AdminSettingsPage() {
                   onChange={(e) => setMinPassScore(e.target.value)}
                   min="0"
                   max="100"
+                  className="h-10 text-sm"
                 />
               </div>
 
-              <Button onClick={() => handleSave('chứng chỉ')} className="gap-2">
+              <Button onClick={() => handleSave('chứng chỉ')} className="gap-2 w-full sm:w-auto" size="sm">
                 <Save className="w-4 h-4" />
                 Lưu thay đổi
               </Button>
@@ -310,27 +320,27 @@ export default function AdminSettingsPage() {
         {/* Notification Settings */}
         <TabsContent value="notification" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="w-5 h-5" />
-                Cài đặt thông báo
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Bell className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span>Cài đặt thông báo</span>
               </CardTitle>
-              <CardDescription>Quản lý thông báo email và hệ thống</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Quản lý thông báo email và hệ thống</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="space-y-0.5">
-                  <Label>Email thông báo</Label>
-                  <p className="text-sm text-gray-600">Kích hoạt gửi email tự động</p>
+            <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3">
+                <div className="space-y-0.5 flex-1 min-w-0">
+                  <Label className="text-sm">Email thông báo</Label>
+                  <p className="text-xs sm:text-sm text-gray-600">Kích hoạt gửi email tự động</p>
                 </div>
                 <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
               </div>
 
-              <div className="pl-4 space-y-3 border-l-2 border-gray-200">
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">Thông báo ghi danh mới</Label>
-                    <p className="text-xs text-gray-600">Email khi có ghi danh mới</p>
+              <div className="pl-3 sm:pl-4 space-y-2 sm:space-y-3 border-l-2 border-gray-200">
+                <div className="flex items-center justify-between p-2 sm:p-3 bg-white rounded-lg border gap-2">
+                  <div className="space-y-0.5 flex-1 min-w-0">
+                    <Label className="text-xs sm:text-sm">Thông báo ghi danh mới</Label>
+                    <p className="text-xs text-gray-600 line-clamp-1">Email khi có ghi danh mới</p>
                   </div>
                   <Switch 
                     checked={enrollmentNotify} 
@@ -339,10 +349,10 @@ export default function AdminSettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">Thông báo hoàn thành</Label>
-                    <p className="text-xs text-gray-600">Email khi hoàn thành khóa học</p>
+                <div className="flex items-center justify-between p-2 sm:p-3 bg-white rounded-lg border gap-2">
+                  <div className="space-y-0.5 flex-1 min-w-0">
+                    <Label className="text-xs sm:text-sm">Thông báo hoàn thành</Label>
+                    <p className="text-xs text-gray-600 line-clamp-1">Email khi hoàn thành khóa học</p>
                   </div>
                   <Switch 
                     checked={completionNotify} 
@@ -351,10 +361,10 @@ export default function AdminSettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">Thông báo kết quả quiz</Label>
-                    <p className="text-xs text-gray-600">Email kết quả bài kiểm tra</p>
+                <div className="flex items-center justify-between p-2 sm:p-3 bg-white rounded-lg border gap-2">
+                  <div className="space-y-0.5 flex-1 min-w-0">
+                    <Label className="text-xs sm:text-sm">Thông báo kết quả quiz</Label>
+                    <p className="text-xs text-gray-600 line-clamp-1">Email kết quả bài kiểm tra</p>
                   </div>
                   <Switch 
                     checked={quizNotify} 
@@ -364,7 +374,7 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
 
-              <Button onClick={() => handleSave('thông báo')} className="gap-2">
+              <Button onClick={() => handleSave('thông báo')} className="gap-2 w-full sm:w-auto" size="sm">
                 <Save className="w-4 h-4" />
                 Lưu thay đổi
               </Button>
@@ -375,18 +385,18 @@ export default function AdminSettingsPage() {
         {/* Payment Settings */}
         <TabsContent value="payment" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5" />
-                Cài đặt thanh toán
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span>Cài đặt thanh toán</span>
               </CardTitle>
-              <CardDescription>Quản lý cổng thanh toán và tiền tệ</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Quản lý cổng thanh toán và tiền tệ</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
               <div className="space-y-2">
-                <Label htmlFor="paymentGateway">Cổng thanh toán</Label>
+                <Label htmlFor="paymentGateway" className="text-sm">Cổng thanh toán</Label>
                 <Select value={paymentGateway} onValueChange={setPaymentGateway}>
-                  <SelectTrigger id="paymentGateway">
+                  <SelectTrigger id="paymentGateway" className="h-10 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -400,9 +410,9 @@ export default function AdminSettingsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="currency">Đơn vị tiền tệ</Label>
+                  <Label htmlFor="currency" className="text-sm">Đơn vị tiền tệ</Label>
                   <Select value={currency} onValueChange={setCurrency}>
-                    <SelectTrigger id="currency">
+                    <SelectTrigger id="currency" className="h-10 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -414,7 +424,7 @@ export default function AdminSettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="taxRate">Thuế (%)</Label>
+                  <Label htmlFor="taxRate" className="text-sm">Thuế (%)</Label>
                   <Input
                     id="taxRate"
                     type="number"
@@ -422,15 +432,16 @@ export default function AdminSettingsPage() {
                     onChange={(e) => setTaxRate(e.target.value)}
                     min="0"
                     max="100"
+                    className="h-10 text-sm"
                   />
                 </div>
               </div>
 
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">Lưu ý</p>
+                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-blue-900">Lưu ý</p>
                     <p className="text-xs text-blue-700 mt-1">
                       Cần cấu hình API key của cổng thanh toán trong file .env
                     </p>
@@ -438,7 +449,7 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
 
-              <Button onClick={() => handleSave('thanh toán')} className="gap-2">
+              <Button onClick={() => handleSave('thanh toán')} className="gap-2 w-full sm:w-auto" size="sm">
                 <Save className="w-4 h-4" />
                 Lưu thay đổi
               </Button>
@@ -449,48 +460,48 @@ export default function AdminSettingsPage() {
         {/* Security Settings */}
         <TabsContent value="security" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                Cài đặt bảo mật
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span>Cài đặt bảo mật</span>
               </CardTitle>
-              <CardDescription>Quản lý bảo mật và quyền truy cập</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Quản lý bảo mật và quyền truy cập</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <Label className="text-base">Đổi mật khẩu quản trị</Label>
-                  <p className="text-sm text-gray-600 mt-1 mb-3">Cập nhật mật khẩu tài khoản admin</p>
-                  <Button variant="outline" className="gap-2">
+            <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                  <Label className="text-sm sm:text-base">Đổi mật khẩu quản trị</Label>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1 mb-3">Cập nhật mật khẩu tài khoản admin</p>
+                  <Button variant="outline" className="gap-2 w-full sm:w-auto" size="sm">
                     <Lock className="w-4 h-4" />
                     Đổi mật khẩu
                   </Button>
                 </div>
 
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <Label className="text-base">Sao lưu dữ liệu</Label>
-                  <p className="text-sm text-gray-600 mt-1 mb-3">Tạo bản sao lưu toàn bộ hệ thống</p>
-                  <Button variant="outline" className="gap-2">
+                <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                  <Label className="text-sm sm:text-base">Sao lưu dữ liệu</Label>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1 mb-3">Tạo bản sao lưu toàn bộ hệ thống</p>
+                  <Button variant="outline" className="gap-2 w-full sm:w-auto" size="sm">
                     <Database className="w-4 h-4" />
                     Sao lưu ngay
                   </Button>
                 </div>
 
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <Label className="text-base">Nhật ký hoạt động</Label>
-                  <p className="text-sm text-gray-600 mt-1 mb-3">Xem lịch sử thay đổi hệ thống</p>
-                  <Button variant="outline" className="gap-2">
+                <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                  <Label className="text-sm sm:text-base">Nhật ký hoạt động</Label>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1 mb-3">Xem lịch sử thay đổi hệ thống</p>
+                  <Button variant="outline" className="gap-2 w-full sm:w-auto" size="sm">
                     <FileText className="w-4 h-4" />
                     Xem nhật ký
                   </Button>
                 </div>
               </div>
 
-              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+              <div className="p-3 sm:p-4 bg-red-50 rounded-lg border border-red-200">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-red-900">Cảnh báo bảo mật</p>
+                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm font-medium text-red-900">Cảnh báo bảo mật</p>
                     <p className="text-xs text-red-700 mt-1">
                       Thường xuyên cập nhật mật khẩu và sao lưu dữ liệu để đảm bảo an toàn
                     </p>
