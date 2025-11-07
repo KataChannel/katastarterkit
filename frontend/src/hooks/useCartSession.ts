@@ -56,13 +56,11 @@ export function useCartSession() {
     }
   }, [isAuthenticated, user, sessionId, isInitialized, mergeCarts]);
 
-  // Get current session ID or undefined for authenticated users
+  // Get current session ID - ALWAYS return sessionId (backend will use userId from context if authenticated)
   const getCartSessionId = useCallback(() => {
-    if (isAuthenticated) {
-      return undefined; // Authenticated users don't need sessionId
-    }
+    // Return current sessionId or get/create a new one
     return sessionId || getSessionId();
-  }, [isAuthenticated, sessionId]);
+  }, [sessionId]);
 
   return {
     sessionId: getCartSessionId(),

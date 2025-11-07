@@ -123,8 +123,9 @@ export function AddToCartButton({
             productId,
             variantId,
             quantity,
-            // Only send sessionId for guest users (authenticated users are identified via context)
-            sessionId: !isAuthenticated ? sessionId : undefined,
+            // ALWAYS send sessionId - backend will use userId from context if authenticated
+            // This ensures guest carts work and provides fallback for auth users
+            sessionId: sessionId,
           },
         },
       });

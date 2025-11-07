@@ -18,19 +18,15 @@ export default function CheckoutPage() {
   const { isAuthenticated, user } = useAuth();
   const { sessionId, isInitialized } = useCartSession();
 
-  // Build query variables based on authentication state
+  // Build query variables - always include sessionId for fallback
   const getQueryVariables = () => {
-    if (isAuthenticated && user?.id) {
-      return { userId: user.id };
-    } else if (sessionId) {
-      return { sessionId };
-    }
-    return undefined;
+    // Always send sessionId - backend will prioritize userId from context if authenticated
+    return { sessionId };
   };
 
   const { data: cartData, loading: cartLoading, error: cartError } = useQuery(GET_CART, {
     variables: getQueryVariables(),
-    skip: !isInitialized || (!isAuthenticated && !sessionId),
+    skip: !isInitialized || !sessionId,
     fetchPolicy: 'network-only', // Always fetch fresh data for checkout
   });
 

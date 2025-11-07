@@ -41,20 +41,16 @@ export default function CartPage() {
     }
   }, []);
 
-  // Build query variables based on authentication state
+  // Build query variables - always include sessionId for fallback
   const getQueryVariables = () => {
-    if (isAuthenticated && user?.id) {
-      return { userId: user.id };
-    } else if (sessionId) {
-      return { sessionId };
-    }
-    return undefined;
+    // Always send sessionId - backend will prioritize userId from context if authenticated
+    return { sessionId: sessionId || getSessionId() };
   };
 
   // Fetch cart - always get fresh data
   const { data, loading, error, refetch } = useQuery(GET_CART, {
     variables: getQueryVariables(),
-    skip: !isAuthenticated && !sessionId,
+    skip: !sessionId,
     fetchPolicy: 'network-only', // Always fetch fresh cart data
   });
 

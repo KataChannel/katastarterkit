@@ -106,7 +106,7 @@ function WishlistContent() {
     refetchQueries: [{ 
       query: GET_CART,
       variables: {
-        sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+        sessionId: sessionId,
       },
     }],
     onCompleted: () => {
@@ -136,7 +136,8 @@ function WishlistContent() {
         input: {
           productId, 
           quantity: 1,
-          sessionId: !isAuthenticated && sessionId ? sessionId : undefined,
+          // ALWAYS send sessionId - backend will use userId from context if authenticated
+          sessionId: sessionId,
         }
       } 
     });
