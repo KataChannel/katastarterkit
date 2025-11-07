@@ -116,7 +116,7 @@ export function WebsiteHeader() {
       
       rafId = requestAnimationFrame(() => {
         const scrollPosition = window.scrollY;
-        const scrollThreshold = 180;
+        const scrollThreshold = 50;
         const hysteresis = 20; // Buffer zone to prevent jitter
         
         // Hysteresis logic: different thresholds for scrolling up vs down
@@ -576,18 +576,28 @@ export function WebsiteHeader() {
               </nav>
 
               {/* Search Bar - Hidden when scrolled */}
-              {headerSettings['header.show_search'] && !isScrolled && (
+              {headerSettings['header.show_search'] && (
                 <div className={cn(
-                  "flex flex-row items-center max-w-lg mx-auto px-4 space-x-4 transition-all duration-500 ease-in-out"
+                  "flex flex-row items-center max-w-lg mx-auto px-4 space-x-4 transition-all duration-500 ease-in-out overflow-hidden",
+                  isScrolled ? "max-h-0 opacity-0 py-0" : "max-h-20 opacity-100 py-2"
                 )}>
-                  <Phone className="w-8 h-8 text-[#FAA61A] transition-all duration-500 ease-in-out transform scale-100" />
+                  <Phone className={cn(
+                    "w-8 h-8 text-[#FAA61A] transition-all duration-500 ease-in-out",
+                    isScrolled ? "scale-0" : "scale-100"
+                  )} />
                   <a 
                     href={`tel:${contactSettings['contact.phone'] || '0865770009'}`} 
-                    className="text-lg text-[#FAA61A] font-bold whitespace-nowrap transition-all duration-500 ease-in-out"
+                    className={cn(
+                      "text-lg text-[#FAA61A] font-bold whitespace-nowrap transition-all duration-500 ease-in-out",
+                      isScrolled ? "scale-0 w-0" : "scale-100"
+                    )}
                   >
                     {contactSettings['contact.phone_display'] || '0865.77.0009'}
                   </a>
-                  <form onSubmit={handleSearch} className="relative flex-1">
+                  <form onSubmit={handleSearch} className={cn(
+                    "relative flex-1 transition-all duration-500 ease-in-out",
+                    isScrolled ? "scale-0 w-0" : "scale-100"
+                  )}>
                     <Input
                       type="text"
                       placeholder="Tìm kiếm sản phẩm..."
@@ -601,7 +611,10 @@ export function WebsiteHeader() {
                       variant="ghost"
                       className="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:text-gray-600 transition-colors duration-300"
                     >
-                      <Search className="w-4 h-4 transition-all duration-500 ease-in-out transform scale-100" />
+                      <Search className={cn(
+                        "w-4 h-4 transition-all duration-500 ease-in-out",
+                        isScrolled ? "scale-0" : "scale-100"
+                      )} />
                     </Button>
                   </form>
                 </div>

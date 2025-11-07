@@ -7,8 +7,6 @@ import Image from 'next/image';
 import { GET_CART, CREATE_ORDER } from '@/graphql/ecommerce.queries';
 import { CreditCard, Truck, MapPin, Phone, Mail, User, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { PaymentMethodBadge } from '@/components/ecommerce/PaymentMethodBadge';
-import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCartSession } from '@/hooks/useCartSession';
 
@@ -26,8 +24,21 @@ export default function CheckoutPage() {
 
   const { data: cartData, loading: cartLoading, error: cartError } = useQuery(GET_CART, {
     variables: getQueryVariables(),
-    skip: !isInitialized || !sessionId,
+    skip: !isInitialized, // Only skip while initializing, not based on sessionId
     fetchPolicy: 'network-only', // Always fetch fresh data for checkout
+    // Ensure query runs after initialization
+    notifyOnNetworkStatusChange: true,
+    onCompleted: (data) => {
+      console.log('[Checkout] Cart query completed:', {
+        data,
+        sessionId,
+        isInitialized,
+        variables: getQueryVariables(),
+      });
+    },
+    onError: (error) => {
+      console.error('[Checkout] Cart query error:', error);
+    },
   });
 
   const [formData, setFormData] = useState({
@@ -85,27 +96,49 @@ export default function CheckoutPage() {
   const cart = cartData?.cart || cartData?.getCart;
   const items = cart?.items || [];
 
+  console.log('[Checkout] Render state:', { 
+    isInitialized, 
+    cartLoading, 
+    cartError, 
+    cartData,
+    cart,
+    itemsCount: items?.length,
+    sessionId 
+  });
+
   // Auto-redirect if cart is empty (better UX than showing empty state)
   useEffect(() => {
     // Only check after:
     // 1. Session is initialized
     // 2. Loading is complete
-    // 3. We have received data from server
-    if (isInitialized && !cartLoading && cartData !== undefined) {
+    // 3. We have received data from server (not undefined and not error)
+    // 4. No loading and no error
+    if (isInitialized && !cartLoading && !cartError && cartData) {
       const hasItems = cart && items && items.length > 0;
       
       if (!hasItems) {
-        console.log('[Checkout] Redirecting - empty cart', { cart, items });
+        console.log('[Checkout] Redirecting - empty cart', { 
+          cart, 
+          items, 
+          cartData,
+          isInitialized,
+          cartLoading,
+          sessionId 
+        });
         toast({
           title: 'Giỏ hàng trống',
           description: 'Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán',
           type: 'warning',
           variant: 'default',
         });
-        router.push('/san-pham');
+        // router.push('/san-pham');
       }
+      console.log("hasItems", isInitialized);
+      console.log("cartLoading", cartLoading);
+      console.log("cartData", cartData);
+      console.log("hasItems", hasItems);   
     }
-  }, [isInitialized, cartLoading, cartData, cart, items, router, toast]);
+  }, [isInitialized, cartLoading, cartError, cartData, cart, items, sessionId, router, toast]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -180,6 +213,7 @@ export default function CheckoutPage() {
 
   // Show loading while session initializes or cart is loading
   if (!isInitialized || cartLoading) {
+    console.log('[Checkout] Loading state:', { isInitialized, cartLoading, sessionId });
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

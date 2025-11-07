@@ -41,35 +41,14 @@ export function AddToCartButton({
   
   // Use optimized cart session hook
   const { sessionId } = useCartSession();
-  const { user, isAuthenticated } = useAuth();
-
-  // Build query variables based on authentication state
-  const getQueryVariables = () => {
-    if (isAuthenticated && user?.id) {
-      return { userId: user.id };
-    } else if (sessionId) {
-      return { sessionId };
-    }
-    return undefined;
-  };
+  const { isAuthenticated } = useAuth();
 
   const [addToCart] = useMutation(ADD_TO_CART, {
-    // Update Apollo cache directly for better performance
-    update(cache, { data }) {
-      if (data?.addToCart?.success && data?.addToCart?.cart) {
-        const variables = getQueryVariables();
-        // Write the updated cart to cache
-        cache.writeQuery({
-          query: GET_CART,
-          variables,
-          data: { getCart: data.addToCart.cart },
-        });
-      }
-    },
-    // Fallback refetch if cache update fails
+    // Use refetchQueries to get complete cart data from server
+    // This avoids cache write issues with missing fields
     refetchQueries: [{ 
       query: GET_CART,
-      variables: getQueryVariables(),
+      variables: { sessionId },
     }],
     awaitRefetchQueries: true,
     onCompleted: (data) => {

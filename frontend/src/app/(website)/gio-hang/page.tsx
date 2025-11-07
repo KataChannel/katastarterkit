@@ -22,49 +22,33 @@ import { QuantitySelector } from '@/components/ecommerce/QuantitySelector';
 import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
 import { useToast } from '@/hooks/use-toast';
 import { getRemainingForFreeShipping, isFreeShippingEligible } from '@/lib/ecommerce-utils';
-import { useState, useEffect } from 'react';
-import { getSessionId } from '@/lib/session';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCartSession } from '@/hooks/useCartSession';
 
 export default function CartPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [couponCode, setCouponCode] = useState('');
-  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
-  const { isAuthenticated, user } = useAuth();
-
-  // Get or create session ID on mount
-  useEffect(() => {
-    const id = getSessionId();
-    if (id) {
-      setSessionId(id);
-    }
-  }, []);
+  const { isAuthenticated } = useAuth();
+  const { sessionId, isInitialized } = useCartSession();
 
   // Build query variables - always include sessionId for fallback
   const getQueryVariables = () => {
     // Always send sessionId - backend will prioritize userId from context if authenticated
-    return { sessionId: sessionId || getSessionId() };
+    return { sessionId };
   };
 
   // Fetch cart - always get fresh data
   const { data, loading, error, refetch } = useQuery(GET_CART, {
     variables: getQueryVariables(),
-    skip: !sessionId,
+    skip: !isInitialized,
     fetchPolicy: 'network-only', // Always fetch fresh cart data
+    notifyOnNetworkStatusChange: true,
   });
 
   // Mutations
   const [updateCartItem, { loading: updating }] = useMutation(UPDATE_CART_ITEM, {
-    update(cache, { data }) {
-      if (data?.updateCartItem?.success && data?.updateCartItem?.cart) {
-        cache.writeQuery({
-          query: GET_CART,
-          variables: getQueryVariables(),
-          data: { getCart: data.updateCartItem.cart },
-        });
-      }
-    },
     refetchQueries: [{ 
       query: GET_CART,
       variables: getQueryVariables(),
@@ -80,15 +64,6 @@ export default function CartPage() {
   });
 
   const [removeFromCart] = useMutation(REMOVE_FROM_CART, {
-    update(cache, { data }) {
-      if (data?.removeFromCart?.success && data?.removeFromCart?.cart) {
-        cache.writeQuery({
-          query: GET_CART,
-          variables: getQueryVariables(),
-          data: { getCart: data.removeFromCart.cart },
-        });
-      }
-    },
     refetchQueries: [{ 
       query: GET_CART,
       variables: getQueryVariables(),
@@ -110,15 +85,6 @@ export default function CartPage() {
   });
 
   const [clearCart] = useMutation(CLEAR_CART, {
-    update(cache, { data }) {
-      if (data?.clearCart?.success && data?.clearCart?.cart) {
-        cache.writeQuery({
-          query: GET_CART,
-          variables: getQueryVariables(),
-          data: { getCart: data.clearCart.cart },
-        });
-      }
-    },
     refetchQueries: [{ 
       query: GET_CART,
       variables: getQueryVariables(),
