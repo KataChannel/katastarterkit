@@ -84,6 +84,7 @@ export function WebsiteHeader() {
 
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<any>();
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // Auto-slide functionality
   useEffect(() => {
@@ -95,6 +96,23 @@ export function WebsiteHeader() {
 
     return () => clearInterval(timer);
   }, [api]);
+
+  // Scroll detection - Hide carousel and shrink header after 100px
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 200);
+    };
+
+    // Initial check
+    handleScroll();
+
+    // Add event listener
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Cleanup
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Track current slide
   useEffect(() => {
@@ -379,8 +397,8 @@ export function WebsiteHeader() {
       {/* =============== DESKTOP LAYOUT (>= lg) =============== */}
       <div className="hidden lg:block">
         {/* Carousel Banner */}
-        {headerSettings['header.banner_enabled'] && (
-          <div className="relative overflow-hidden">
+        {headerSettings['header.banner_enabled'] && !isScrolled && (
+          <div className="relative overflow-hidden transition-all duration-300">
             <Carousel 
               className="w-full mx-auto"
               setApi={setApi}
@@ -439,28 +457,42 @@ export function WebsiteHeader() {
         )}
 
         {/* Desktop Main Header */}
-        <div className="w-full mx-auto">
+        <div className="w-full mx-auto transition-all duration-300">
           <div 
-            className="grid grid-cols-12 items-center"
+            className={cn(
+              "grid grid-cols-12 items-center transition-all duration-300",
+              isScrolled && "shadow-md"
+            )}
             style={{ backgroundColor: headerSettings['header.background_color'] || '#57A345' }}
           >
             {/* Logo */}
-            <div className="bg-white col-span-3 flex justify-end p-4 rounded-e-full pe-8">
+            <div className={cn(
+              "bg-white col-span-3 flex justify-end rounded-e-full pe-8 transition-all duration-300",
+              isScrolled ? "p-2" : "p-4"
+            )}>
               <Link href="/" className="text-2xl font-bold text-blue-600">
                 <img 
                   src={headerSettings['header.logo'] || '/assets/images/logo.svg'} 
                   alt="Logo" 
-                  className="max-h-20" 
+                  className={cn(
+                    "transition-all duration-300",
+                    isScrolled ? "max-h-12" : "max-h-20"
+                  )}
                   style={{ 
-                    height: `${headerSettings['header.logo_width'] || 80}px`,
-                    maxHeight: `${headerSettings['header.logo_width'] || 80}px` 
+                    height: isScrolled 
+                      ? `${Math.min(headerSettings['header.logo_width'] || 80, 48)}px`
+                      : `${headerSettings['header.logo_width'] || 80}px`,
+                    maxHeight: isScrolled ? '48px' : `${headerSettings['header.logo_width'] || 80}px`
                   }}
                 />
               </Link>
             </div>  
 
             {/* Navigation & Search */}
-            <div className="col-span-7 flex flex-col space-y-2 py-4">
+            <div className={cn(
+              "col-span-7 flex flex-col transition-all duration-300",
+              isScrolled ? "space-y-1 py-2" : "space-y-2 py-4"
+            )}>
               {/* Menu */}
               <nav className="flex items-center justify-center space-x-1">
                 {menuLoading ? (
@@ -477,11 +509,20 @@ export function WebsiteHeader() {
 
               {/* Search Bar */}
               {headerSettings['header.show_search'] && (
-                <div className="flex flex-row items-center max-w-lg mx-auto px-4 space-x-4">
-                  <Phone className="w-8 h-8 text-[#FAA61A]" />
+                <div className={cn(
+                  "flex flex-row items-center max-w-lg mx-auto px-4 space-x-4 transition-all duration-300",
+                  isScrolled && "max-w-md space-x-2"
+                )}>
+                  <Phone className={cn(
+                    "text-[#FAA61A] transition-all duration-300",
+                    isScrolled ? "w-6 h-6" : "w-8 h-8"
+                  )} />
                   <a 
                     href={`tel:${contactSettings['contact.phone'] || '0865770009'}`} 
-                    className="text-[#FAA61A] font-bold text-lg whitespace-nowrap"
+                    className={cn(
+                      "text-[#FAA61A] font-bold whitespace-nowrap transition-all duration-300",
+                      isScrolled ? "text-base" : "text-lg"
+                    )}
                   >
                     {contactSettings['contact.phone_display'] || '0865.77.0009'}
                   </a>
@@ -489,14 +530,20 @@ export function WebsiteHeader() {
                     <Input
                       type="text"
                       placeholder="Tìm kiếm sản phẩm..."
-                      className="w-full pl-4 pr-10 py-2 bg-white/90 backdrop-blur-sm border-white/20 focus:bg-white focus:border-blue-300 transition-all"
+                      className={cn(
+                        "w-full pl-4 pr-10 bg-white/90 backdrop-blur-sm border-white/20 focus:bg-white focus:border-blue-300 transition-all",
+                        isScrolled ? "py-1 text-sm" : "py-2"
+                      )}
                     />
                     <Button
                       size="sm"
                       variant="ghost"
                       className="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:text-gray-600"
                     >
-                      <Search className="w-4 h-4" />
+                      <Search className={cn(
+                        "transition-all duration-300",
+                        isScrolled ? "w-3 h-3" : "w-4 h-4"
+                      )} />
                     </Button>
                   </div>
                 </div>
