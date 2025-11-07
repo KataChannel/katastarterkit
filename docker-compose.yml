@@ -1,19 +1,19 @@
 services:
-  #PostgreSQL Database
+  # PostgreSQL Database
   postgres:
     image: ${POSTGRES_IMAGE:-postgres:16-alpine}
-    container_name: ${POSTGRES_CONTAINER_NAME:-rausachcore-postgres}
+    container_name: ${POSTGRES_CONTAINER_NAME:-innerv2core-postgres}
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-rausachcore}
+      POSTGRES_DB: ${POSTGRES_DB:-innerv2core}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
-      - "${POSTGRES_PORT:-12003}:5432"
+      - "${POSTGRES_PORT:-14003}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - rausachcore-network
+      - innerv2core-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 30s
@@ -22,33 +22,33 @@ services:
   # pgAdmin for PostgreSQL Management
   pgadmin:
     image: ${PGADMIN_IMAGE:-dpage/pgadmin4:latest}
-    container_name: ${PGADMIN_CONTAINER_NAME:-rausachcore-pgadmin}
+    container_name: ${PGADMIN_CONTAINER_NAME:-innerv2core-pgadmin}
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@rausachcore.com}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@innerv2core.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
-      - "${PGADMIN_PORT:-12002}:80"
+      - "${PGADMIN_PORT:-14002}:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - rausachcore-network
+      - innerv2core-network
   # Redis Cache & Pub/Sub
   redis:
     image: ${REDIS_IMAGE:-redis:7.4-alpine}
-    container_name: ${REDIS_CONTAINER_NAME:-rausachcore-redis}
+    container_name: ${REDIS_CONTAINER_NAME:-innerv2core-redis}
     restart: unless-stopped
-    command: redis-server --appendonly yes --timeout 300
+    command: redis-server --requirepass ${REDIS_PASSWORD:-123456} --appendonly yes --timeout 300
     ports:
-      - "${REDIS_PORT:-12004}:6379"
+      - "${REDIS_PORT:-14004}:6379"
     volumes:
       - redis_data:/data
     networks:
-      - rausachcore-network
+      - innerv2core-network
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
@@ -58,121 +58,28 @@ services:
     environment:
       - REDIS_REPLICATION_BACKLOG_TTL=3600
 
-  # Elasticsearch for Search
-  elasticsearch:
-    image: ${ELASTICSEARCH_IMAGE:-docker.elastic.co/elasticsearch/elasticsearch:8.15.0}
-    container_name: ${ELASTICSEARCH_CONTAINER_NAME:-rausachcore-elasticsearch}
-    restart: unless-stopped
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - xpack.security.enabled=false
-      - xpack.security.enrollment.enabled=false
-      - xpack.security.http.ssl.enabled=false
-      - xpack.security.transport.ssl.enabled=false
-    ports:
-      - "${ELASTICSEARCH_PORT:-12005}:9200"
-      - "${ELASTICSEARCH_TRANSPORT_PORT:-12006}:9300"
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    networks:
-      - rausachcore-network
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-
   # Minio Object Storage
   minio:
     image: ${MINIO_IMAGE:-minio/minio:RELEASE.2024-08-26T15-33-07Z}
-    container_name: ${MINIO_CONTAINER_NAME:-rausachcore-minio}
+    container_name: ${MINIO_CONTAINER_NAME:-innerv2core-minio}
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-rausachcore-admin}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-rausachcore-secret-2025}
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-innerv2core-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-innerv2core-secret-2025}
     ports:
-      - "${MINIO_PORT:-12007}:9000"
-      - "${MINIO_CONSOLE_PORT:-12008}:9001"
+      - "${MINIO_PORT:-14007}:9000"
+      - "${MINIO_CONSOLE_PORT:-14008}:9001"
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
     networks:
-      - rausachcore-network
+      - innerv2core-network
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
-
-  #Backend with Bun
-  backend:
-    build:
-      context: .
-      dockerfile: ./backend/Dockerfile
-    container_name: ${BACKEND_CONTAINER_NAME:-rausachcore-backend}
-    restart: unless-stopped
-    environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/rausachcore}
-      REDIS_HOST: ${DOCKER_REDIS_HOST:-redis}
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      MINIO_ENDPOINT: ${DOCKER_MINIO_ENDPOINT:-minio}
-      MINIO_PORT: 9000
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
-      MINIO_USE_SSL: false
-      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-uploads}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:12000}
-    ports:
-      - "${PORT:-12001}:4000"
-    # Note: Remove volumes for production deployment  
-    # volumes:
-    #   - ./backend:/app
-    #   - /app/node_modules
-    # depends_on:
-    #   postgres:
-    #     condition: service_healthy
-    #   redis:
-    #     condition: service_healthy
-    #   minio:
-    #     condition: service_healthy
-    networks:
-      - rausachcore-network
-
-  # Frontend with Bun
-  frontend:
-    build:
-      context: .
-      dockerfile: ./frontend/Dockerfile
-    container_name: ${FRONTEND_CONTAINER_NAME:-rausachcore-frontend}
-    restart: unless-stopped
-    environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      NEXT_PUBLIC_GRAPHQL_ENDPOINT: ${NEXT_PUBLIC_GRAPHQL_ENDPOINT:-http://localhost:12001/graphql}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:12000}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-nextauth-secret-change-in-production}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:12000}
-      # Disable Next.js instrumentation to avoid OpenTelemetry module loading issues
-      NEXT_OTEL_ENABLED: "false"
-      # Disable telemetry
-      NEXT_TELEMETRY_DISABLED: "1"
-    ports:
-      - "${FRONTEND_PORT:-12000}:3000"
-    # Note: Remove volumes for production deployment
-    # volumes:
-    #   - ./frontend:/app
-    #   - /app/node_modules
-    #   - /app/.next
-    depends_on:
-      - backend
-    networks:
-      - rausachcore-network
 
 volumes:
   postgres_data:
@@ -181,12 +88,10 @@ volumes:
     driver: local
   redis_data:
     driver: local
-  elasticsearch_data:
-    driver: local
   minio_data:
     driver: local
 
 networks:
-  rausachcore-network:
+  innerv2core-network:
     driver: bridge
-    name: ${DOCKER_NETWORK_NAME:-rausachcore-network}
+    name: ${DOCKER_NETWORK_NAME:-innerv2core-network}

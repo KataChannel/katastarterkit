@@ -1,34 +1,62 @@
 /**
- * Custom hooks for Menu operations using Universal Dynamic Query System
- * FIXED VERSION - Using direct Apollo imports to avoid circular dependencies
+ * Custom hooks for Menu operations
+ * STUB VERSION - GraphQL removed, awaiting Server Actions implementation
+ * 
+ * @deprecated These hooks are stubs. Implement with Server Actions or API Routes.
  */
 
 'use client';
 
-import { useCallback, useMemo } from 'react';
-import { useQuery, useMutation, ApolloError } from '@apollo/client';
-import { DYNAMIC_FIND_MANY, DYNAMIC_CREATE, DYNAMIC_UPDATE, DYNAMIC_DELETE } from '../graphql/universal-dynamic-queries';
-import {
-  buildMenuFindManyInput,
-  buildMenuFindUniqueInput,
-  buildMenuCreateInput,
-  buildMenuUpdateInput,
-  buildMenuDeleteInput,
-  buildMenuCountInput,
-  buildMenuTree,
-  getMenusByTypeWhere,
-  getActiveMenusWhere,
-  getPublicMenusWhere,
-  getRootMenusWhere,
-  DEFAULT_MENU_SELECT,
-  type Menu,
-  type MenuTreeNode,
-} from '../graphql/menu-dynamic-queries';
+import { useCallback } from 'react';
+
+// Stub types
+interface Menu {
+  id: string;
+  title: string;
+  slug: string;
+  url?: string;
+  path?: string;
+  route?: string;
+  externalUrl?: string;
+  icon?: string;
+  type?: string;
+  order?: number;
+  level?: number;
+  parentId?: string | null;
+  isActive?: boolean;
+  isVisible?: boolean;
+  isPublic?: boolean;
+  isProtected?: boolean;
+  requiredRoles?: string[];
+  requiredPermissions?: string[];
+  badge?: string;
+  badgeColor?: string;
+  target?: string;
+  description?: string;
+  iconType?: string;
+  cssClass?: string;
+  customData?: any;
+  metadata?: any;
+  children?: Menu[];
+}
+
+interface MenuTreeNode extends Menu {
+  children?: MenuTreeNode[];
+}
+
+// Stub error type
+class StubError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'StubError';
+  }
+}
 
 // ==================== QUERY HOOKS ====================
 
 /**
  * Hook to get all menus with filters
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function useMenus(params?: {
   where?: any;
@@ -36,302 +64,118 @@ export function useMenus(params?: {
   pagination?: { page: number; limit: number };
   select?: any;
 }) {
-  const input = buildMenuFindManyInput({
-    where: params?.where || getActiveMenusWhere(),
-    select: params?.select || DEFAULT_MENU_SELECT,
-    orderBy: params?.orderBy,
-    pagination: params?.pagination,
-  });
-
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input },
-    fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
-  });
-
-  const menus = useMemo(() => {
-    try {
-      const result = data?.dynamicFindMany?.data;
-      return Array.isArray(result) ? result : [];
-    } catch (err) {
-      console.warn('Error extracting menus data:', err);
-      return [];
-    }
-  }, [data]);
-
+  console.warn('useMenus is a stub. Implement with Server Actions or API Routes.');
+  
   return {
-    menus,
-    loading,
-    error,
-    refetch,
+    menus: [],
+    loading: false,
+    error: null,
+    refetch: async () => {},
   };
 }
 
 /**
  * Hook to get user's accessible menus based on roles/permissions
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function useMyMenus(type?: string) {
-  const where = type ? getMenusByTypeWhere(type) : getActiveMenusWhere();
+  console.warn('useMyMenus is a stub. Implement with Server Actions or API Routes.');
   
-  const input = buildMenuFindManyInput({
-    where,
-    select: DEFAULT_MENU_SELECT,
-    orderBy: { order: 'asc', level: 'asc' },
-  });
-
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input },
-    fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
-  });
-
-  const menus = useMemo(() => {
-    try {
-      const result = data?.dynamicFindMany?.data;
-      return Array.isArray(result) ? result : [];
-    } catch (err) {
-      console.warn('Error extracting menus data:', err);
-      return [];
-    }
-  }, [data]);
-
   return {
-    menus,
-    loading,
-    error,
-    refetch,
+    menus: [],
+    loading: false,
+    error: null,
+    refetch: async () => {},
   };
 }
 
 /**
  * Hook to get sidebar menus for authenticated users
- * Builds tree structure from flat array and transforms to NavigationItem format
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function useAdminMenus() {
-  const input = buildMenuFindManyInput({
-    where: getMenusByTypeWhere('SIDEBAR'),
-    select: DEFAULT_MENU_SELECT,
-    orderBy: { order: 'asc', level: 'asc' },
-  });
-  
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input },
-    fetchPolicy: 'cache-first',  // FIX: Prevent cache-and-network double fetches
-    errorPolicy: 'all',
-  });
-  
-  const transformMenu = useCallback((menu: MenuTreeNode): any => {
-    if (!menu) return null;
-
-    try {
-      // Determine href priority: externalUrl > route > url > path > /slug
-      const href = menu.externalUrl || menu.route || menu.url || menu.path || `/${menu.slug}`;
-      const isExternal = !!menu.externalUrl;
-      
-      // Ensure we have a name - fallback to slug if title is missing
-      const name = menu.title || menu.slug || 'Menu';
-      
-      return {
-        title: menu.title,
-        name: name,  // Always have a name for display
-        href: href,
-        icon: menu.icon || undefined,
-        requiredRoles: menu.requiredRoles || undefined,
-        requiredPermissions: menu.requiredPermissions || undefined,
-        isPublic: menu.isPublic,
-        children: menu.children?.map(transformMenu).filter(Boolean) || undefined,
-        badge: menu.badge || undefined,
-        badgeColor: menu.badgeColor || undefined,
-        target: menu.target || 'SELF',
-        metadata: {
-          id: menu.id,
-          type: menu.type,
-          order: menu.order,
-          level: menu.level,
-          isProtected: menu.isProtected,
-          isActive: menu.isActive,
-          isVisible: menu.isVisible,
-          isPublic: menu.isPublic,
-          slug: menu.slug,
-          description: menu.description,
-          iconType: menu.iconType,
-          cssClass: menu.cssClass,
-          customData: menu.customData,
-          externalUrl: menu.externalUrl,
-          isExternal: isExternal,
-          ...menu.metadata,
-        },
-      };
-    } catch (err) {
-      console.warn('Error transforming menu:', err, menu);
-      return null;
-    }
-  }, []);
-
-  const menus = useMemo(() => {
-    try {
-      const result = data?.dynamicFindMany?.data as Menu[] | undefined;
-      if (!result || !Array.isArray(result)) return [];
-      
-      // Build tree from flat array
-      const tree = buildMenuTree(result);
-      
-      // Transform to sidebar format
-      return tree.map(transformMenu).filter(Boolean);
-    } catch (err) {
-      console.error('Error transforming menus:', err);
-      return [];
-    }
-  }, [data, transformMenu]);
+  console.warn('useAdminMenus is a stub. Implement with Server Actions or API Routes.');
   
   return {
-    menus,
-    loading,
-    error,
-    refetch,
+    menus: [],
+    loading: false,
+    error: null,
+    refetch: async () => {},
   };
 }
 
 /**
  * Hook to get public sidebar menus (no authentication required)
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function usePublicSidebarMenus() {
-  const input = buildMenuFindManyInput({
-    where: {
-      ...getPublicMenusWhere(),
-      type: 'SIDEBAR',
-    },
-    select: DEFAULT_MENU_SELECT,
-    orderBy: { order: 'asc', level: 'asc' },
-  });
-
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input },
-    fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
-  });
-
-  const menus = useMemo(() => {
-    try {
-      const result = data?.dynamicFindMany?.data as Menu[] | undefined;
-      if (!result || !Array.isArray(result)) return [];
-      return buildMenuTree(result);
-    } catch (err) {
-      console.warn('Error building menu tree:', err);
-      return [];
-    }
-  }, [data]);
+  console.warn('usePublicSidebarMenus is a stub. Implement with Server Actions or API Routes.');
   
   return {
-    menus,
-    loading,
-    error,
-    refetch,
+    tree: [],
+    loading: false,
+    error: null,
+    refetch: async () => {},
   };
 }
 
 /**
  * Hook to get menu tree structure
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function useMenuTree(type?: string, parentId?: string) {
-  const where = parentId
-    ? { parentId, isActive: true, isVisible: true }
-    : getRootMenusWhere(type);
-
-  const input = buildMenuFindManyInput({
-    where,
-    select: DEFAULT_MENU_SELECT,
-    orderBy: { order: 'asc', level: 'asc' },
-  });
-
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input },
-    fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
-  });
-
-  const tree = useMemo(() => {
-    try {
-      const result = data?.dynamicFindMany?.data as Menu[] | undefined;
-      if (!result || !Array.isArray(result)) return [];
-      return buildMenuTree(result);
-    } catch (err) {
-      console.warn('Error building menu tree:', err);
-      return [];
-    }
-  }, [data]);
-
+  console.warn('useMenuTree is a stub. Implement with Server Actions or API Routes.');
+  
   return {
-    tree,
-    loading,
-    error,
-    refetch,
+    tree: [],
+    loading: false,
+    error: null,
+    refetch: async () => {},
   };
 }
 
 /**
  * Hook to get single menu by ID
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function useMenu(id: string) {
-  const input = buildMenuFindUniqueInput({
-    where: { id },
-    select: DEFAULT_MENU_SELECT,
-  });
-
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input: { ...input, pagination: { limit: 1 } } },
-    fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
-  });
-
+  console.warn('useMenu is a stub. Implement with Server Actions or API Routes.');
+  
   return {
-    menu: data?.dynamicFindMany?.data?.[0],
-    loading,
-    error,
-    refetch,
+    menu: null,
+    loading: false,
+    error: null,
+    refetch: async () => {},
   };
 }
 
 /**
  * Hook to get single menu by slug
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function useMenuBySlug(slug: string) {
-  const input = buildMenuFindUniqueInput({
-    where: { slug },
-    select: DEFAULT_MENU_SELECT,
-  });
-
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input: { ...input, pagination: { limit: 1 } } },
-    fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
-  });
-
+  console.warn('useMenuBySlug is a stub. Implement with Server Actions or API Routes.');
+  
   return {
-    menu: data?.dynamicFindMany?.data?.[0],
-    loading,
-    error,
-    refetch,
+    menu: null,
+    loading: false,
+    error: null,
+    refetch: async () => {},
   };
 }
 
 /**
  * Hook to count menus
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function useMenuCount(where?: any) {
-  const input = buildMenuCountInput(where);
-
-  const { data, loading, error, refetch } = useQuery(DYNAMIC_FIND_MANY, {
-    variables: { input: { model: 'menu', where } },
-    fetchPolicy: 'cache-and-network',
-    errorPolicy: 'all',
-  });
-
+  console.warn('useMenuCount is a stub. Implement with Server Actions or API Routes.');
+  
   return {
-    count: data?.dynamicFindMany?.data?.length || 0,
-    loading,
-    error,
-    refetch,
+    count: 0,
+    loading: false,
+    error: null,
+    refetch: async () => {},
   };
 }
 
@@ -339,87 +183,69 @@ export function useMenuCount(where?: any) {
 
 /**
  * Hook to create menu
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function useCreateMenu() {
-  const [mutate, { data, loading, error }] = useMutation(DYNAMIC_CREATE, {
-    errorPolicy: 'all',
-  });
-
+  console.warn('useCreateMenu is a stub. Implement with Server Actions.');
+  
   const createMenu = useCallback(
     async (menuData: Partial<Menu>) => {
-      try {
-        const input = buildMenuCreateInput(menuData);
-        return await mutate({ variables: { input } });
-      } catch (err) {
-        console.error('Error creating menu:', err);
-        throw err;
-      }
+      console.warn('createMenu called with:', menuData);
+      return { data: null };
     },
-    [mutate]
+    []
   );
 
   return {
     createMenu,
-    data: data?.dynamicCreate,
-    loading,
-    error,
+    data: null,
+    loading: false,
+    error: null,
   };
 }
 
 /**
  * Hook to update menu
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function useUpdateMenu() {
-  const [mutate, { data, loading, error }] = useMutation(DYNAMIC_UPDATE, {
-    errorPolicy: 'all',
-  });
-
+  console.warn('useUpdateMenu is a stub. Implement with Server Actions.');
+  
   const updateMenu = useCallback(
     async (id: string, menuData: Partial<Menu>) => {
-      try {
-        const input = buildMenuUpdateInput({ id }, menuData);
-        return await mutate({ variables: { input } });
-      } catch (err) {
-        console.error('Error updating menu:', err);
-        throw err;
-      }
+      console.warn('updateMenu called with:', id, menuData);
+      return { data: null };
     },
-    [mutate]
+    []
   );
 
   return {
     updateMenu,
-    data: data?.dynamicUpdate,
-    loading,
-    error,
+    data: null,
+    loading: false,
+    error: null,
   };
 }
 
 /**
  * Hook to delete menu
+ * @deprecated Stub implementation - replace with Server Actions
  */
 export function useDeleteMenu() {
-  const [mutate, { data, loading, error }] = useMutation(DYNAMIC_DELETE, {
-    errorPolicy: 'all',
-  });
-
+  console.warn('useDeleteMenu is a stub. Implement with Server Actions.');
+  
   const deleteMenu = useCallback(
     async (id: string) => {
-      try {
-        const input = buildMenuDeleteInput({ id });
-        return await mutate({ variables: { input } });
-      } catch (err) {
-        console.error('Error deleting menu:', err);
-        throw err;
-      }
+      console.warn('deleteMenu called with:', id);
+      return { data: null };
     },
-    [mutate]
+    []
   );
 
   return {
     deleteMenu,
-    data: data?.dynamicDelete,
-    loading,
-    error,
+    data: null,
+    loading: false,
+    error: null,
   };
 }
