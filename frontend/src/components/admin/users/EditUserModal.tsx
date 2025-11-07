@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 // DEPRECATED: Apollo Client removed
-const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
+const useMutation = (...args: any[]) => [async () => ({}), { data: null, loading: false, error: null }] as const;
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,7 +43,7 @@ interface FormErrors {
 
 export function EditUserModal({ user, isOpen, onClose, onSuccess }: EditUserModalProps) {
   const [adminUpdateUser, { loading }] = useAdminUpdateUser();
-  const [adminResetPassword, { loading: resettingPassword }] = useMutation<AdminResetPasswordResponse>(
+  const [adminResetPassword, { loading: resettingPassword }] = useMutation(
     ADMIN_RESET_PASSWORD
   );
   
@@ -126,7 +126,7 @@ export function EditUserModal({ user, isOpen, onClose, onSuccess }: EditUserModa
     }
 
     try {
-      const result = await adminUpdateUser({
+      const result = await (adminUpdateUser as any)({
         variables: {
           id: user.id,
           input: {
@@ -196,13 +196,13 @@ export function EditUserModal({ user, isOpen, onClose, onSuccess }: EditUserModa
     if (!confirmed) return;
 
     try {
-      const { data } = await adminResetPassword({
+      const { data } = await (adminResetPassword as any)({
         variables: {
           input: {
             userId: user.id,
           },
         },
-      });
+      }) as any;
 
       if (data?.adminResetPassword?.success) {
         setNewPassword(data.adminResetPassword.newPassword);

@@ -9,7 +9,20 @@ const prisma = new PrismaClient();
 // Cache for schema-based model mappings
 let tableToModelMappingCache: { [tableName: string]: string } | null = null;
 
-const BACKUP_ROOT_DIR = './kata_json';
+// Determine environment from DATABASE_URL
+function getEnvironmentName(): string {
+  const databaseUrl = process.env.DATABASE_URL || '';
+  if (databaseUrl.includes('rausachcore')) {
+    return 'rausach';
+  } else if (databaseUrl.includes('tazagroupcore')) {
+    return 'tazagroup';
+  }
+  return 'default';
+}
+
+const ENV_NAME = getEnvironmentName();
+// Fixed: backups folder is in frontend root, not parent directory
+const BACKUP_ROOT_DIR = path.join(__dirname, '..', 'backups');
 const BATCH_SIZE = 1000; // Process records in batches of 1000
 const STREAM_BUFFER_SIZE = 50; // Keep 50 batches in memory
 
@@ -896,7 +909,12 @@ async function cleanupBeforeRestore(): Promise<void> {
 /**
  * Create missing lessons that are referenced by quizzes
  * This fixes FK constraint violations during restore
+ * 
+ * NOTE: This function is disabled for schema.core.prisma
+ * The simplified schema does not include LMS models (Lesson, Course, etc.)
+ * Keeping for reference in case LMS is re-added
  */
+/*
 async function createMissingLessons(backupFolder: string): Promise<void> {
   try {
     console.log('🔍 Checking for missing lessons referenced by quizzes...');
@@ -1014,6 +1032,7 @@ async function createMissingLessons(backupFolder: string): Promise<void> {
     console.log('   ⏭️  Continuing with restore...\n');
   }
 }
+*/
 
 /**
  * Convert camelCase to snake_case
@@ -1032,7 +1051,26 @@ function camelToSnakeCase(str: string): string {
  */
 function buildTableToModelMapping(): { [tableName: string]: string } {
   try {
-    const schemaPath = path.join(__dirname, 'schema.prisma');
+    // Try schema.core.prisma first, then fall back to schema.prisma
+    const schemaPaths = [
+      path.join(__dirname, 'schema.core.prisma'),
+      path.join(__dirname, 'schema.prisma'),
+    ];
+    
+    let schemaPath = '';
+    for (const p of schemaPaths) {
+      if (fs.existsSync(p)) {
+        schemaPath = p;
+        break;
+      }
+    }
+    
+    if (!schemaPath) {
+      console.warn('⚠️  No schema file found');
+      return {};
+    }
+    
+    console.log(`📖 Reading schema from: ${path.basename(schemaPath)}`);
     const schemaContent = fs.readFileSync(schemaPath, 'utf8');
     
     const mapping: { [tableName: string]: string } = {};
@@ -1068,9 +1106,9 @@ function getTableToModelMapping(): { [tableName: string]: string } {
     tableToModelMappingCache = buildTableToModelMapping();
     
     if (Object.keys(tableToModelMappingCache).length === 0) {
-      console.warn('⚠️  Could not parse schema.prisma, restore may fail for some tables');
+      console.warn('⚠️  Could not parse schema file, restore may fail for some tables');
     } else {
-      console.log(`✅ Loaded model mapping for ${Object.keys(tableToModelMappingCache).length} tables from schema.prisma`);
+      console.log(`✅ Loaded model mapping for ${Object.keys(tableToModelMappingCache).length} tables from schema`);
     }
   }
   
@@ -1130,11 +1168,81 @@ function convertSnakeCaseToCamelCase(str: string): string {
 }
 
 /**
+ * Get default restoration order based on schema.core.prisma
+ * Order matters: tables without foreign keys first, then dependent tables
+ */
+function getDefaultRestorationOrder(): string[] {
+  return [
+    // ===== CORE SYSTEM (Level 1 - No dependencies) =====
+    '_prisma_migrations',
+    'website_settings',
+    
+    // ===== USERS & AUTH (Level 2 - No dependencies) =====
+    'users',
+    'auth_methods',
+    'user_sessions',
+    'verification_tokens',
+    
+    // ===== RBAC (Level 3 - Depends on users) =====
+    'roles',
+    'permissions',
+    'user_role_assignments',
+    'role_permissions',
+    'user_permissions',
+    
+    // ===== MENU (Level 4 - Depends on users) =====
+    'menus',
+    
+    // ===== PAGE BUILDER (Level 5 - Depends on users) =====
+    'pages',
+    
+    // ===== MENU ITEMS (Level 6 - Depends on menus and pages) =====
+    'menu_items',
+    
+    // ===== BLOCKS (Level 7 - Depends on pages) =====
+    'blocks',
+    
+    // ===== BLOG SYSTEM (Level 8 - Depends on users) =====
+    'categories',
+    'tags',
+    
+    // ===== POSTS (Level 9 - Depends on users, categories) =====
+    'posts',
+    
+    // ===== POST ENGAGEMENT (Level 10 - Depends on users and posts) =====
+    'comments',
+    'likes',
+    
+    // ===== AUDIT LOGS (Level 11 - Last, depends on users) =====
+    'audit_logs',
+  ];
+}
+
+/**
  * Build dependency-aware restoration order from schema
+```
  */
 function buildRestorationOrder(): string[] {
   try {
-    const schemaPath = path.join(__dirname, 'schema.prisma');
+    // Try schema.core.prisma first, then fall back to schema.prisma
+    const schemaPaths = [
+      path.join(__dirname, 'schema.core.prisma'),
+      path.join(__dirname, 'schema.prisma'),
+    ];
+    
+    let schemaPath = '';
+    for (const p of schemaPaths) {
+      if (fs.existsSync(p)) {
+        schemaPath = p;
+        break;
+      }
+    }
+    
+    if (!schemaPath) {
+      console.warn('⚠️  No schema file found, using default order');
+      return getDefaultRestorationOrder();
+    }
+    
     const schemaContent = fs.readFileSync(schemaPath, 'utf8');
     
     // Extract all model names
@@ -1468,7 +1576,7 @@ function printFinalStats(): void {
  * Main restore function
  */
 async function main(): Promise<void> {
-  console.log('🚀 STARTING OPTIMIZED rausachcore DATA RESTORE');
+  console.log(`🚀 STARTING OPTIMIZED ${ENV_NAME.toUpperCase()} DATA RESTORE`);
   console.log(`⏰ Start time: ${new Date().toLocaleString()}`);
   console.log(`⚙️  Batch size: ${BATCH_SIZE.toLocaleString()} records`);
   console.log(`💾 Backup root: ${BACKUP_ROOT_DIR}\n`);
@@ -1496,10 +1604,11 @@ async function main(): Promise<void> {
     for (let i = 0; i < tables.length; i++) {
       const table = tables[i];
       
+      // NOTE: createMissingLessons disabled for schema.core.prisma (no LMS models)
       // Before restoring quizzes, ensure lessons exist
-      if (table === 'quizzes') {
-        await createMissingLessons(backupFolder);
-      }
+      // if (table === 'quizzes') {
+      //   await createMissingLessons(backupFolder);
+      // }
       
       console.log(`[${i + 1}/${tables.length}] Restoring: ${table}`);
       await restoreTableOptimized(table, backupFolder);

@@ -95,7 +95,7 @@ function PageBuilderContent() {
             <h2 className="text-xl font-bold">Error Loading Pages</h2>
           </div>
           <p className="text-gray-600 mb-4">
-            {renderError || queryError?.message || 'An unexpected error occurred'}
+            {renderError || (queryError as any)?.message || 'An unexpected error occurred'}
           </p>
           <div className="flex gap-2">
             <Button onClick={() => window.location.reload()} className="flex-1">

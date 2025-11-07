@@ -3,7 +3,21 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const prisma = new PrismaClient();
-const BACKUP_ROOT_DIR = './kata_json';
+
+// Determine environment from DATABASE_URL
+function getEnvironmentName(): string {
+  const databaseUrl = process.env.DATABASE_URL || '';
+  if (databaseUrl.includes('rausachcore')) {
+    return 'rausach';
+  } else if (databaseUrl.includes('tazagroupcore')) {
+    return 'tazagroup';
+  }
+  return 'default';
+}
+
+const ENV_NAME = getEnvironmentName();
+// Fixed: use path.join for cross-platform compatibility
+const BACKUP_ROOT_DIR = path.join(__dirname, '..', 'backups');
 
 function getFormattedDate(): string {
   const now = new Date();
@@ -68,7 +82,26 @@ function isSystemTable(tableName: string): boolean {
  */
 function parseSchemaModels(): { modelName: string; tableName: string }[] {
   try {
-    const schemaPath = path.join(__dirname, 'schema.prisma');
+    // Try schema.core.prisma first, then fall back to schema.prisma
+    const schemaPaths = [
+      path.join(__dirname, 'schema.core.prisma'),
+      path.join(__dirname, 'schema.prisma'),
+    ];
+    
+    let schemaPath = '';
+    for (const p of schemaPaths) {
+      if (fs.existsSync(p)) {
+        schemaPath = p;
+        break;
+      }
+    }
+    
+    if (!schemaPath) {
+      console.warn('⚠️  No schema file found');
+      return [];
+    }
+    
+    console.log(`📖 Reading schema from: ${path.basename(schemaPath)}`);
     const schemaContent = fs.readFileSync(schemaPath, 'utf8');
     
     // Extract model blocks using regex
@@ -250,6 +283,7 @@ async function backupAllTablesToJson(): Promise<void> {
     fs.mkdirSync(BACKUP_DIR, { recursive: true });
   }
 
+  console.log(`🏷️  Environment: ${ENV_NAME.toUpperCase()}`);
   console.log(`📂 Creating backup in directory: ${BACKUP_DIR}`);
   console.log(`⏰ Backup started at: ${new Date().toLocaleString()}`);
   
@@ -352,12 +386,12 @@ async function restoreAllTablesFromJson(): Promise<void> {
 }
 
 backupAllTablesToJson()
-  .then(() => console.log('🎉 rausachcore backup completed successfully!'))
+  .then(() => console.log(`🎉 ${ENV_NAME.toUpperCase()} backup completed successfully!`))
   .catch((err) => console.error('❌ Backup error:', err))
   .finally(() => prisma.$disconnect());
 
 // To restore data, uncomment and run restoreAllTablesFromJson()
 // restoreAllTablesFromJson()
-//   .then(() => console.log('🎉 rausachcore restore completed successfully!'))
+//   .then(() => console.log(`🎉 ${ENV_NAME.toUpperCase()} restore completed successfully!`))
 //   .catch((err) => console.error('❌ Restore error:', err))
 //   .finally(() => prisma.$disconnect());

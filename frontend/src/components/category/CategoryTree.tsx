@@ -162,9 +162,9 @@ function CategoryTreeItem({
         </span>
 
         {/* Product Count */}
-        {showProductCount && category.productCount !== undefined && (
+        {showProductCount && (category as any)?.productCount !== undefined && (
           <Badge variant="secondary" className="text-xs">
-            {category.productCount}
+            {(category as any)?.productCount}
           </Badge>
         )}
 
@@ -274,9 +274,9 @@ export function CategoryList({
             )}
             <div>
               <p className="font-medium">{category.name}</p>
-              {category.productCount !== undefined && (
+              {(category as any)?.productCount !== undefined && (
                 <p className="text-xs text-muted-foreground">
-                  {category.productCount} sản phẩm
+                  {(category as any)?.productCount} sản phẩm
                 </p>
               )}
             </div>

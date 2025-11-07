@@ -41,7 +41,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     e.preventDefault();
     
     try {
-      await createRole({
+      await (createRole as any)({
         variables: {
           input: formData,
         },
@@ -55,7 +55,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     } catch (error: any) {
       toast({
         title: 'Create failed',
-        description: error.message || 'Failed to create role',
+        description: (error as any)?.message || 'Failed to create role',
         type: 'error',
       });
     }
@@ -70,7 +70,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     }));
   };
 
-  const permissions = permissionsData?.searchPermissions?.permissions || [];
+  const permissions = (permissionsData as any)?.searchPermissions?.permissions || [];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

@@ -1,4 +1,4 @@
-import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
+import { ApolloClient, NormalizedCacheObject } from '@/lib/apollo-client-stubs';
 import {
   GET_MY_CUSTOM_TEMPLATES,
   GET_CUSTOM_TEMPLATE,

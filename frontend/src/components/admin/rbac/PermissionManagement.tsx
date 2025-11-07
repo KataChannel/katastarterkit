@@ -55,7 +55,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
 
     if (window.confirm(`Are you sure you want to delete permission "${permission.displayName}"?`)) {
       try {
-        await deletePermission({ variables: { id: permission.id } });
+        await (deletePermission as any)({ variables: { id: permission.id } });
         toast({
           title: 'Permission deleted',
           description: `Permission "${permission.displayName}" has been deleted successfully.`,
@@ -65,7 +65,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
       } catch (error: any) {
         toast({
           title: 'Delete failed',
-          description: error.message || 'Failed to delete permission',
+          description: (error as any)?.message || 'Failed to delete permission',
           type: 'error',
         });
       }
@@ -108,15 +108,15 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
     return (
       <Alert className={`border-red-200 bg-red-50 text-red-800 ${className}`}>
         <AlertDescription>
-          Error loading permissions: {error.message}
+          Error loading permissions: {(error as any)?.message}
         </AlertDescription>
       </Alert>
     );
   }
 
-  const permissions = data?.searchPermissions?.permissions || [];
-  const total = data?.searchPermissions?.total || 0;
-  const totalPages = data?.searchPermissions?.totalPages || 0;
+  const permissions = (data as any)?.searchPermissions?.permissions || [];
+  const total = (data as any)?.searchPermissions?.total || 0;
+  const totalPages = (data as any)?.searchPermissions?.totalPages || 0;
 
   return (
     <Card className={className}>

@@ -58,7 +58,7 @@ const EditPermissionModal: React.FC<EditPermissionModalProps> = ({
     e.preventDefault();
     
     try {
-      await updatePermission({
+      await (updatePermission as any)({
         variables: {
           id: permission.id,
           input: {
@@ -76,7 +76,7 @@ const EditPermissionModal: React.FC<EditPermissionModalProps> = ({
     } catch (error: any) {
       toast({
         title: 'Update failed',
-        description: error.message || 'Failed to update permission',
+        description: (error as any)?.message || 'Failed to update permission',
         type: 'error',
       });
     }

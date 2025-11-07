@@ -23,7 +23,15 @@
     "build-storybook": "storybook build",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "analyze": "ANALYZE=true next build",
-    "bundle:analyze": "bash ./analyze-bundle.sh"
+    "bundle:analyze": "bash ./analyze-bundle.sh",
+    "db:migrate": "npx prisma migrate dev",
+    "db:reset": "npx prisma migrate reset",
+    "db:seed": "npx prisma db seed",
+    "db:studio": "npx prisma studio",
+    "db:pushforce": "npx prisma db push --force-reset",
+    "db:push": "npx prisma db push",
+    "db:restore": "bun run prisma/restore.ts",
+    "db:backup": "bun run prisma/backup.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 // DEPRECATED: Apollo Client removed
-const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
+const useMutation = (...args: any[]) => [async () => ({}), { data: null, loading: false, error: null }];
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { LOGIN_WITH_FACEBOOK } from '@/lib/graphql/mutations/auth';
@@ -28,7 +28,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
   const router = useRouter();
 
   const [loginWithFacebook] = useMutation(LOGIN_WITH_FACEBOOK, {
-    onCompleted: (data) => {
+    onCompleted: (data: any) => {
       const { token, user } = data.loginWithFacebook;
       
       // Store the token
@@ -43,7 +43,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
       // Redirect to dashboard or home
       router.push('/admin');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Facebook login error:', error);
       toast.error(error.message || 'Facebook login failed');
       
@@ -100,7 +100,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
           const { accessToken } = response.authResponse;
           
           // Call the GraphQL mutation with the access token
-          loginWithFacebook({
+          (loginWithFacebook as any)({
             variables: {
               input: {
                 token: accessToken,

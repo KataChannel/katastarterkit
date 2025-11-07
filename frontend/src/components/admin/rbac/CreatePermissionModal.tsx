@@ -37,7 +37,7 @@ const CreatePermissionModal: React.FC<CreatePermissionModalProps> = ({
     e.preventDefault();
     
     try {
-      await createPermission({
+      await (createPermission as any)({
         variables: {
           input: {
             ...formData,
@@ -54,7 +54,7 @@ const CreatePermissionModal: React.FC<CreatePermissionModalProps> = ({
     } catch (error: any) {
       toast({
         title: 'Create failed',
-        description: error.message || 'Failed to create permission',
+        description: (error as any)?.message || 'Failed to create permission',
         type: 'error',
       });
     }

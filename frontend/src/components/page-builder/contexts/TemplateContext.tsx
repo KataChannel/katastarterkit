@@ -1,8 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-// DEPRECATED: Apollo Client removed
-const useApolloClient = () => ({ cache: ./components/page-builder/contexts/TemplateContext.tsx, query: async () => ({}), mutate: async () => ({}) });
+import { useApolloClient } from '@/lib/apollo-client-stubs';
 import { BLOCK_TEMPLATES, BlockTemplate } from '@/data/blockTemplates';
 import { 
   CustomTemplatesService,

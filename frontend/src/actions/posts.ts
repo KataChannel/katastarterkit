@@ -19,7 +19,7 @@ export async function getPosts(options?: {
     const posts = await prisma.post.findMany({
       skip: options?.skip,
       take: options?.take ?? 10,
-      where: options?.where ?? { deletedAt: null },
+      where: options?.where,
       orderBy: options?.orderBy ?? { createdAt: 'desc' },
       include: options?.include ?? {
         author: {
@@ -31,16 +31,12 @@ export async function getPosts(options?: {
           },
         },
         category: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
+        tags: true,
       },
     })
 
     const total = await prisma.post.count({
-      where: options?.where ?? { deletedAt: null },
+      where: options?.where,
     })
 
     return {
@@ -62,7 +58,6 @@ export async function getPostBySlug(slug: string) {
     const post = await prisma.post.findFirst({
       where: {
         slug,
-        deletedAt: null,
       },
       include: {
         author: {
@@ -74,11 +69,7 @@ export async function getPostBySlug(slug: string) {
           },
         },
         category: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
+        tags: true,
       },
     })
 
@@ -93,7 +84,7 @@ export async function getPostBySlug(slug: string) {
     await prisma.post.update({
       where: { id: post.id },
       data: {
-        views: {
+        viewCount: {
           increment: 1,
         },
       },
@@ -126,11 +117,7 @@ export async function getPostById(id: string) {
           },
         },
         category: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
+        tags: true,
       },
     })
 
@@ -165,11 +152,7 @@ export async function createPost(data: Prisma.PostCreateInput) {
       include: {
         author: true,
         category: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
+        tags: true,
       },
     })
 
@@ -200,11 +183,7 @@ export async function updatePost(
       include: {
         author: true,
         category: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
+        tags: true,
       },
     })
 
@@ -227,12 +206,9 @@ export async function updatePost(
 
 export async function deletePost(id: string) {
   try {
-    // Soft delete
-    await prisma.post.update({
+    // Hard delete (schema không có deletedAt)
+    await prisma.post.delete({
       where: { id },
-      data: {
-        deletedAt: new Date(),
-      },
     })
 
     revalidatePath('/admin/blog')
@@ -272,14 +248,13 @@ export async function searchPosts(query: string, options?: {
             { excerpt: { contains: query, mode: 'insensitive' } },
           ],
         },
-        { deletedAt: null },
         options?.categoryId ? { categoryId: options.categoryId } : {},
         options?.authorId ? { authorId: options.authorId } : {},
         options?.status ? { status: options.status as any } : {},
         options?.tagIds ? {
           tags: {
             some: {
-              tagId: {
+              id: {
                 in: options.tagIds,
               },
             },
@@ -302,11 +277,7 @@ export async function searchPosts(query: string, options?: {
           },
         },
         category: true,
-        tags: {
-          include: {
-            tag: true,
-          },
-        },
+        tags: true,
       },
       orderBy: { createdAt: 'desc' },
     })

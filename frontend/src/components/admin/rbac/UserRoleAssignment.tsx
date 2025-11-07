@@ -26,7 +26,7 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ className = '' 
     size: 50,
   });
 
-  const users = usersData?.searchUsers?.users || [];
+  const users = (usersData as any)?.searchUsers?.users || [];
 
   const handleUserSelect = (user: any) => {
     setSelectedUser(user);
@@ -223,9 +223,9 @@ const UserRolePermissionPreview: React.FC<{ user: any }> = ({ user }) => {
     );
   }
 
-  const summary = rolePermissionsData?.getUserRolePermissions?.summary;
-  const roleAssignments = rolePermissionsData?.getUserRolePermissions?.roleAssignments || [];
-  const directPermissions = rolePermissionsData?.getUserRolePermissions?.directPermissions || [];
+  const summary = (rolePermissionsData as any)?.getUserRolePermissions?.summary;
+  const roleAssignments = (rolePermissionsData as any)?.getUserRolePermissions?.roleAssignments || [];
+  const directPermissions = (rolePermissionsData as any)?.getUserRolePermissions?.directPermissions || [];
 
   return (
     <div className="space-y-6">

@@ -79,16 +79,17 @@ export function UserManagementContent() {
   }, [filters]);
 
   // GraphQL hooks - Using new Dynamic Query System
+  const searchResult: any = useSearchUsers(searchInput);
   const { 
-    users,
-    total,
-    page,
-    size,
-    totalPages,
-    loading: usersLoading, 
-    error: usersError, 
-    refetch: refetchUsers 
-  } = useSearchUsers(searchInput);
+    users = [],
+    total = 0,
+    page = 0,
+    size = 20,
+    totalPages = 0,
+    loading: usersLoading = false, 
+    error: usersError = null, 
+    refetch: refetchUsers = async () => ({}) 
+  } = searchResult || {};
 
   const { data: statsData, loading: statsLoading } = useUserStats();
   const [bulkUserAction, { loading: bulkActionLoading }] = useBulkUserAction();
@@ -186,7 +187,7 @@ export function UserManagementContent() {
     }
 
     try {
-      const result = await bulkUserAction({
+      const result = await (bulkUserAction as any)({
         variables: {
           input: {
             userIds: selectedUsers,
@@ -196,7 +197,7 @@ export function UserManagementContent() {
         },
       });
 
-      if (result.data?.bulkUserAction?.success) {
+      if ((result.data as any)?.bulkUserAction?.success) {
         toast({
           title: 'Bulk action completed',
           description: result.data.bulkUserAction.message,
@@ -205,8 +206,8 @@ export function UserManagementContent() {
         setSelectedUsers([]);
         refetchUsers();
       } else {
-        const errorMessage = result.data?.bulkUserAction?.message || 'Unknown error occurred';
-        const errors = result.data?.bulkUserAction?.errors || [];
+        const errorMessage = (result.data as any)?.bulkUserAction?.message || 'Unknown error occurred';
+        const errors = (result.data as any)?.bulkUserAction?.errors || [];
         
         toast({
           title: 'Bulk action failed',
@@ -249,7 +250,7 @@ export function UserManagementContent() {
   // Handle delete user
   const handleDeleteUser = async (user: any) => {
     try {
-      await bulkUserAction({
+      await (bulkUserAction as any)({
         variables: {
           input: {
             userIds: [user.id],

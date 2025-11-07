@@ -45,19 +45,19 @@ export default function WebsiteSettingsPage() {
   const [hasChanges, setHasChanges] = useState(false);
 
   // Fetch settings
-  const { data: settings = [], loading, error, refetch } = useFindMany<WebsiteSetting>('WebsiteSetting', {
+  const { data: settings = [], loading, error, refetch } = useFindMany('WebsiteSetting', {
     orderBy: { order: 'asc' }, // Fix: orderBy must be object, not array
   });
 
   const [updateOne, { loading: updating }] = useUpdateOne('WebsiteSetting');
 
   // Filter settings by category and sort by order
-  const categorySettings = settings
-    .filter(s => s.category === selectedCategory)
-    .sort((a, b) => a.order - b.order);
+  const categorySettings = (settings as any[])
+    .filter((s: any) => s.category === selectedCategory)
+    .sort((a: any, b: any) => a.order - b.order);
 
-  // Group settings by group
-  const groupedSettings = categorySettings.reduce((acc, setting) => {
+  // Group settings by their group
+  const groupedSettings = categorySettings.reduce((acc: any, setting: any) => {
     const group = setting.group || 'other';
     if (!acc[group]) acc[group] = [];
     acc[group].push(setting);
@@ -121,16 +121,13 @@ export default function WebsiteSettingsPage() {
     try {
       const updatePromises = Object.entries(editedSettings).map(([key, value]) => {
         // Tìm setting để lấy id
-        const setting = settings.find(s => s.key === key);
+        const setting = (settings as any[])?.find((s: any) => s.key === key);
         if (!setting) {
           console.warn(`Setting not found for key: ${key}`);
           return Promise.resolve();
         }
 
-        return updateOne({
-          where: { id: setting.id },
-          data: { value },
-        });
+        return updateOne(setting.id, { value });
       });
 
       await Promise.all(updatePromises);
@@ -338,11 +335,11 @@ export default function WebsiteSettingsPage() {
                     {group === 'other' ? 'Khác' : group.replace(/_/g, ' ')}
                   </CardTitle>
                   <CardDescription>
-                    {groupSettings.length} cài đặt
+                    {(groupSettings as any[]).length} cài đặt
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {groupSettings.map((setting) => (
+                  {(groupSettings as any[]).map((setting: any) => (
                     <div key={setting.id} className="space-y-2 pb-4 border-b last:border-0 last:pb-0">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">

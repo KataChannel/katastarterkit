@@ -64,13 +64,13 @@ export async function GET() {
     // Check Redis connection
     try {
       const testKey = `health:check:${Date.now()}`;
-      await redis.set(testKey, 'ok');
-      const value = <any>await redis.get(testKey);
+      await redis?.set(testKey, 'ok');
+      const value = <any>await redis?.get(testKey);
       
       if (value === 'ok') {
         result.services.redis = 'ok';
         // Clean up test key
-        await redis.del(testKey);
+        await redis?.del(testKey);
       } else {
         result.services.redis = 'error';
         result.status = 'unhealthy';

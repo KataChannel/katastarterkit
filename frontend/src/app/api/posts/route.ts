@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
         where: {
-          deletedAt: null,
           ...(categoryId && { categoryId }),
           ...(authorId && { authorId }),
           ...(status && { status: status as any }),

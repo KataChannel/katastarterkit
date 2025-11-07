@@ -47,12 +47,12 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
   const [assignUserRoles, { loading: assigningRoles }] = useAssignUserRoles();
   const [assignUserPermissions, { loading: assigningPermissions }] = useAssignUserPermissions();
 
-  const roles = rolesData?.searchRoles?.roles || [];
-  const permissions = permissionsData?.searchPermissions?.permissions || [];
+  const roles = (rolesData as any)?.searchRoles?.roles || [];
+  const permissions = (permissionsData as any)?.searchPermissions?.permissions || [];
 
   useEffect(() => {
     if (userRolePermissions && roles.length > 0) {
-      const currentRoles = userRolePermissions.getUserRolePermissions?.roleAssignments || [];
+      const currentRoles = (userRolePermissions as any)?.getUserRolePermissions?.roleAssignments || [];
       const newRoleAssignments = roles.map((role: Role) => {
         const existing = currentRoles.find((ra: any) => ra.role.id === role.id);
         return {
@@ -66,7 +66,7 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
 
   useEffect(() => {
     if (userRolePermissions && permissions.length > 0) {
-      const currentPermissions = userRolePermissions.getUserRolePermissions?.directPermissions || [];
+      const currentPermissions = (userRolePermissions as any)?.getUserRolePermissions?.directPermissions || [];
       const newPermissionAssignments = permissions.map((permission: Permission) => {
         const existing = currentPermissions.find((dp: any) => dp.permission.id === permission.id);
         return {
@@ -112,7 +112,7 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
     };
 
     try {
-      await assignUserRoles({ variables: { input } });
+      await (assignUserRoles as any)({ variables: { input } });
       refetchUser();
     } catch (error) {
       console.error('Failed to assign user roles:', error);
@@ -133,7 +133,7 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
     };
 
     try {
-      await assignUserPermissions({ variables: { input } });
+      await (assignUserPermissions as any)({ variables: { input } });
       refetchUser();
     } catch (error) {
       console.error('Failed to assign user permissions:', error);
@@ -142,8 +142,8 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
 
   if (!isOpen) return null;
 
-  const summary = userRolePermissions?.getUserRolePermissions?.summary;
-  const effectivePermissions = userRolePermissions?.getUserRolePermissions?.effectivePermissions || [];
+  const summary = (userRolePermissions as any)?.getUserRolePermissions?.summary;
+  const effectivePermissions = (userRolePermissions as any)?.getUserRolePermissions?.effectivePermissions || [];
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">

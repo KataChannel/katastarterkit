@@ -34,3 +34,32 @@ export function useDynamicSubscription(model: string, options?: any) {
     error: null,
   }
 }
+
+// Additional exports for backward compatibility
+export function formatDynamicGraphQLError(error: any) {
+  console.warn('formatDynamicGraphQLError is deprecated')
+  return String(error)
+}
+
+export function isDynamicGraphQLError(error: any): boolean {
+  return false
+}
+
+export function useCRUD(model: string) {
+  console.warn('useCRUD is deprecated. Use Server Actions from @/actions instead')
+  
+  return {
+    create: async (data: any) => ({ data: null }),
+    update: async (id: string, data: any) => ({ data: null }),
+    delete: async (id: string) => ({ data: null }),
+    loading: false,
+    error: null,
+  }
+}
+
+export interface BulkOperationResult {
+  success: number
+  failed: number
+  total: number
+  errors?: any[]
+}

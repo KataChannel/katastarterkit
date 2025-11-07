@@ -56,7 +56,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
     e.preventDefault();
     
     try {
-      await updateRole({
+      await (updateRole as any)({
         variables: {
           id: role.id,
           input: formData,
@@ -71,7 +71,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
     } catch (error: any) {
       toast({
         title: 'Update failed',
-        description: error.message || 'Failed to update role',
+        description: (error as any)?.message || 'Failed to update role',
         type: 'error',
       });
     }

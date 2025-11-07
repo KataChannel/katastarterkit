@@ -1,5 +1,4 @@
-import { ApolloClient, InMemoryCache, gql, createHttpLink } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
+import { ApolloClient, InMemoryCache, gql, createHttpLink, setContext } from '@/lib/apollo-client-stubs';
 
 // Test file để debug GraphQL queries
 

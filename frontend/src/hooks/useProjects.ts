@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useApolloClient } from '@apollo/client';
+import { useQuery, useMutation, useApolloClient } from '@/lib/apollo-client-stubs';
 import { GET_MY_PROJECTS, GET_PROJECT, GET_PROJECT_MEMBERS } from '@/graphql/project/queries';
 import {
   CREATE_PROJECT,

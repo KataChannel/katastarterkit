@@ -1,6 +1,6 @@
 // DEPRECATED: Apollo Client removed
-const useMutation = () => [async () => ({}), { data: null, loading: false, error: null }];
-const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
+const useMutation = (...args: any[]) => [async () => ({}), { data: null, loading: false, error: null }] as const;
+const useQuery = (...args: any[]) => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
 import { 
   SEARCH_PERMISSIONS,
   GET_PERMISSION_BY_ID,

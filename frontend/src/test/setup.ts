@@ -21,8 +21,8 @@ vi.mock('next/navigation', () => ({
   useParams: () => ({}),
 }));
 
-// Mock Apollo Client
-vi.mock('@apollo/client', () => ({
+// Mock Apollo Client (now using stubs, so this mock may not be needed)
+vi.mock('@/lib/apollo-client-stubs', () => ({
   useQuery: vi.fn(),
   useMutation: vi.fn(),
   gql: (strings: TemplateStringsArray) => strings[0],

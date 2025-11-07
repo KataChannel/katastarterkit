@@ -8,10 +8,11 @@ import { getPageBySlug } from '@/actions/page.actions'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const page = await getPageBySlug(params.slug)
+    const { slug } = await params
+    const page = await getPageBySlug(slug)
 
     if (!page) {
       return NextResponse.json(

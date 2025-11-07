@@ -109,7 +109,7 @@ export function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUserModalP
     }
 
     try {
-      const result = await adminCreateUser({
+      const result = await (adminCreateUser as any)({
         variables: {
           input: {
             username: formData.username.trim(),

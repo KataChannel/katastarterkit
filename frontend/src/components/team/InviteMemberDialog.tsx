@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Mail, UserPlus, Loader2, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useApolloClient, gql } from '@apollo/client';
+import { useApolloClient, gql } from '@/lib/apollo-client-stubs';
 
 interface InviteMemberDialogProps {
   open: boolean;

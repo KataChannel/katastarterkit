@@ -57,7 +57,7 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
 
     if (window.confirm(`Are you sure you want to delete role "${role.displayName}"?`)) {
       try {
-        await deleteRole({ variables: { id: role.id } });
+        await (deleteRole as any)({ variables: { id: role.id } });
         toast({
           title: 'Role deleted',
           description: `Role "${role.displayName}" has been deleted successfully.`,
@@ -67,7 +67,7 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
       } catch (error: any) {
         toast({
           title: 'Delete failed',
-          description: error.message || 'Failed to delete role',
+          description: (error as any)?.message || 'Failed to delete role',
           type: 'error',
         });
       }
@@ -115,15 +115,15 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ className = '' }) => {
     return (
       <Alert className={`border-red-200 bg-red-50 text-red-800 ${className}`}>
         <AlertDescription>
-          Error loading roles: {error.message}
+          Error loading roles: {(error as any)?.message}
         </AlertDescription>
       </Alert>
     );
   }
 
-  const roles = data?.searchRoles?.roles || [];
-  const total = data?.searchRoles?.total || 0;
-  const totalPages = data?.searchRoles?.totalPages || 0;
+  const roles = (data as any)?.searchRoles?.roles || [];
+  const total = (data as any)?.searchRoles?.total || 0;
+  const totalPages = (data as any)?.searchRoles?.totalPages || 0;
 
   return (
     <Card className={className}>

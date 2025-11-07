@@ -18,9 +18,9 @@ export async function getPages(options?: {
     const pages = await prisma.page.findMany({
       skip: options?.skip,
       take: options?.take,
-      where: options?.where ?? { deletedAt: null },
+      where: options?.where,
       include: options?.include ?? {
-        author: {
+        createdBy: {
           select: {
             id: true,
             username: true,
@@ -32,7 +32,7 @@ export async function getPages(options?: {
     })
 
     const total = await prisma.page.count({
-      where: options?.where ?? { deletedAt: null },
+      where: options?.where,
     })
 
     return {
@@ -54,10 +54,9 @@ export async function getPageBySlug(slug: string) {
     const page = await prisma.page.findFirst({
       where: {
         slug,
-        deletedAt: null,
       },
       include: {
-        author: {
+        createdBy: {
           select: {
             id: true,
             username: true,
@@ -92,7 +91,7 @@ export async function getPageById(id: string) {
     const page = await prisma.page.findUnique({
       where: { id },
       include: {
-        author: {
+        createdBy: {
           select: {
             id: true,
             username: true,
@@ -131,7 +130,7 @@ export async function createPage(data: Prisma.PageCreateInput) {
     const page = await prisma.page.create({
       data,
       include: {
-        author: true,
+        createdBy: true,
       },
     })
 
@@ -160,7 +159,7 @@ export async function updatePage(
       where: { id },
       data,
       include: {
-        author: true,
+        createdBy: true,
       },
     })
 
@@ -182,12 +181,9 @@ export async function updatePage(
 
 export async function deletePage(id: string) {
   try {
-    // Soft delete
-    await prisma.page.update({
+    // Hard delete (schema không có deletedAt)
+    await prisma.page.delete({
       where: { id },
-      data: {
-        deletedAt: new Date(),
-      },
     })
 
     revalidatePath('/admin/pagebuilder')

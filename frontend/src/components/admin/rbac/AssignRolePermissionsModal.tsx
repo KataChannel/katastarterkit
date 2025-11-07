@@ -51,8 +51,8 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
   }, [isOpen]);
 
   useEffect(() => {
-    if (role && permissionsData?.searchPermissions?.permissions) {
-      const permissions = permissionsData.searchPermissions.permissions;
+    if (role && (permissionsData as any)?.searchPermissions?.permissions) {
+      const permissions = (permissionsData as any).searchPermissions.permissions;
       const rolePermissions = role.permissions || [];
       
       const newAssignments: PermissionAssignment[] = permissions.map((permission: Permission) => {
@@ -84,7 +84,7 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
       // we need to send ALL permissions (allow + deny) in correct order
       
       // First, assign "allow" permissions
-      await assignRolePermissions({
+      await (assignRolePermissions as any)({
         variables: { 
           input: {
             roleId: role.id,
@@ -115,7 +115,7 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
     } catch (error: any) {
       toast({
         title: 'Update failed',
-        description: error.message || 'Failed to update permissions',
+        description: (error as any)?.message || 'Failed to update permissions',
         type: 'error',
       });
     }
@@ -131,8 +131,8 @@ const AssignRolePermissionsModal: React.FC<AssignRolePermissionsModalProps> = ({
     );
   };
 
-  const permissions = permissionsData?.searchPermissions?.permissions || [];
-  const totalPermissions = permissionsData?.searchPermissions?.total || 0;
+  const permissions = (permissionsData as any)?.searchPermissions?.permissions || [];
+  const totalPermissions = (permissionsData as any)?.searchPermissions?.total || 0;
   const filteredPermissions = permissions.filter((permission: Permission) =>
     permission.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     permission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

@@ -1,4 +1,4 @@
-import { InMemoryCache, FieldPolicy, FieldReadFunction } from '@apollo/client';
+import { InMemoryCache, FieldPolicy, FieldReadFunction } from '@/lib/apollo-client-stubs';
 
 /**
  * Apollo Client Cache Configuration

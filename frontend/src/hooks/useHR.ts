@@ -1,4 +1,4 @@
-import { useQuery, useMutation, ApolloError } from '@apollo/client';
+import { useQuery, useMutation, ApolloError } from '@/lib/apollo-client-stubs';
 import { useCallback } from 'react';
 import {
   GET_EMPLOYEE_PROFILE,

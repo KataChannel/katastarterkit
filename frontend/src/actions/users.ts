@@ -19,7 +19,7 @@ export async function getUsers(options?: {
     const users = await prisma.user.findMany({
       skip: options?.skip,
       take: options?.take ?? 20,
-      where: options?.where ?? { deletedAt: null },
+      where: options?.where ?? {},
       orderBy: options?.orderBy ?? { createdAt: 'desc' },
       select: {
         id: true,
@@ -29,7 +29,7 @@ export async function getUsers(options?: {
         lastName: true,
         avatar: true,
         phone: true,
-        role: true,
+        roleType: true,
         isActive: true,
         createdAt: true,
         updatedAt: true,
@@ -37,7 +37,7 @@ export async function getUsers(options?: {
     })
 
     const total = await prisma.user.count({
-      where: options?.where ?? { deletedAt: null },
+      where: options?.where ?? {},
     })
 
     return {
@@ -66,9 +66,9 @@ export async function getUserById(id: string) {
         lastName: true,
         avatar: true,
         phone: true,
-        role: true,
+        roleType: true,
         isActive: true,
-        emailVerified: true,
+        isVerified: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -106,9 +106,9 @@ export async function getUserByEmail(email: string) {
         lastName: true,
         avatar: true,
         phone: true,
-        role: true,
+        roleType: true,
         isActive: true,
-        emailVerified: true,
+        isVerified: true,
       },
     })
 
@@ -156,7 +156,7 @@ export async function createUser(data: {
         firstName: data.firstName,
         lastName: data.lastName,
         phone: data.phone,
-        role: data.role as any ?? 'USER',
+        roleType: (data.role as any) ?? 'USER',
       },
       select: {
         id: true,
@@ -165,7 +165,7 @@ export async function createUser(data: {
         firstName: true,
         lastName: true,
         avatar: true,
-        role: true,
+        roleType: true,
       },
     })
 
@@ -217,7 +217,7 @@ export async function updateUser(
         lastName: true,
         avatar: true,
         phone: true,
-        role: true,
+        roleType: true,
         isActive: true,
       },
     })
@@ -252,7 +252,7 @@ export async function deleteUser(id: string) {
     await prisma.user.update({
       where: { id },
       data: {
-        deletedAt: new Date(),
+        // Hard delete - use prisma.user.delete instead,
         isActive: false,
       },
     })
@@ -281,10 +281,10 @@ export async function updateUserPassword(
       where: { id: userId },
     })
 
-    if (!user) {
+    if (!user || !user.password) {
       return {
         success: false,
-        error: 'User not found',
+        error: 'User not found or no password set',
       }
     }
 
