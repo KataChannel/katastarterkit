@@ -101,18 +101,25 @@ export function WebsiteHeader() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 200);
+      const shouldScroll = scrollPosition > 350;
+      
+      // Use requestAnimationFrame for smooth state updates
+      if (shouldScroll !== isScrolled) {
+        requestAnimationFrame(() => {
+          setIsScrolled(shouldScroll);
+        });
+      }
     };
 
     // Initial check
     handleScroll();
 
-    // Add event listener
+    // Add event listener with passive flag for better performance
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     // Cleanup
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isScrolled]);
 
   // Track current slide
   useEffect(() => {
@@ -397,8 +404,16 @@ export function WebsiteHeader() {
       {/* =============== DESKTOP LAYOUT (>= lg) =============== */}
       <div className="hidden lg:block">
         {/* Carousel Banner */}
-        {headerSettings['header.banner_enabled'] && !isScrolled && (
-          <div className="relative overflow-hidden transition-all duration-300">
+        {headerSettings['header.banner_enabled'] && (
+          <div 
+            className={cn(
+              "relative overflow-hidden transition-all duration-500 ease-in-out",
+              isScrolled && "max-h-0 opacity-0"
+            )}
+            style={{
+              maxHeight: isScrolled ? '0' : `${headerSettings['header.banner_height'] || 208}px`,
+            }}
+          >
             <Carousel 
               className="w-full mx-auto"
               setApi={setApi}
@@ -457,17 +472,17 @@ export function WebsiteHeader() {
         )}
 
         {/* Desktop Main Header */}
-        <div className="w-full mx-auto transition-all duration-300">
+        <div className="w-full mx-auto transition-shadow duration-300 ease-in-out">
           <div 
             className={cn(
-              "grid grid-cols-12 items-center transition-all duration-300",
-              isScrolled && "shadow-md"
+              "grid grid-cols-12 items-center transition-shadow duration-300 ease-in-out",
+              isScrolled && "shadow-lg"
             )}
             style={{ backgroundColor: headerSettings['header.background_color'] || '#57A345' }}
           >
             {/* Logo */}
             <div className={cn(
-              "bg-white col-span-3 flex justify-end rounded-e-full pe-8 transition-all duration-300",
+              "bg-white col-span-3 flex justify-end rounded-e-full pe-8 transition-all duration-500 ease-in-out",
               isScrolled ? "p-2" : "p-4"
             )}>
               <Link href="/" className="text-2xl font-bold text-blue-600">
@@ -475,8 +490,8 @@ export function WebsiteHeader() {
                   src={headerSettings['header.logo'] || '/assets/images/logo.svg'} 
                   alt="Logo" 
                   className={cn(
-                    "transition-all duration-300",
-                    isScrolled ? "max-h-12" : "max-h-20"
+                    "transition-all duration-500 ease-in-out transform",
+                    isScrolled ? "max-h-12 scale-95" : "max-h-20 scale-100"
                   )}
                   style={{ 
                     height: isScrolled 
@@ -490,7 +505,7 @@ export function WebsiteHeader() {
 
             {/* Navigation & Search */}
             <div className={cn(
-              "col-span-7 flex flex-col transition-all duration-300",
+              "col-span-7 flex flex-col transition-all duration-500 ease-in-out",
               isScrolled ? "space-y-1 py-2" : "space-y-2 py-4"
             )}>
               {/* Menu */}
@@ -510,17 +525,17 @@ export function WebsiteHeader() {
               {/* Search Bar */}
               {headerSettings['header.show_search'] && (
                 <div className={cn(
-                  "flex flex-row items-center max-w-lg mx-auto px-4 space-x-4 transition-all duration-300",
+                  "flex flex-row items-center max-w-lg mx-auto px-4 space-x-4 transition-all duration-500 ease-in-out",
                   isScrolled && "max-w-md space-x-2"
                 )}>
                   <Phone className={cn(
-                    "text-[#FAA61A] transition-all duration-300",
-                    isScrolled ? "w-6 h-6" : "w-8 h-8"
+                    "text-[#FAA61A] transition-all duration-500 ease-in-out transform",
+                    isScrolled ? "w-6 h-6 scale-90" : "w-8 h-8 scale-100"
                   )} />
                   <a 
                     href={`tel:${contactSettings['contact.phone'] || '0865770009'}`} 
                     className={cn(
-                      "text-[#FAA61A] font-bold whitespace-nowrap transition-all duration-300",
+                      "text-[#FAA61A] font-bold whitespace-nowrap transition-all duration-500 ease-in-out",
                       isScrolled ? "text-base" : "text-lg"
                     )}
                   >
@@ -531,18 +546,18 @@ export function WebsiteHeader() {
                       type="text"
                       placeholder="Tìm kiếm sản phẩm..."
                       className={cn(
-                        "w-full pl-4 pr-10 bg-white/90 backdrop-blur-sm border-white/20 focus:bg-white focus:border-blue-300 transition-all",
+                        "w-full pl-4 pr-10 bg-white/90 backdrop-blur-sm border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-500 ease-in-out",
                         isScrolled ? "py-1 text-sm" : "py-2"
                       )}
                     />
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:text-gray-600"
+                      className="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:text-gray-600 transition-colors duration-300"
                     >
                       <Search className={cn(
-                        "transition-all duration-300",
-                        isScrolled ? "w-3 h-3" : "w-4 h-4"
+                        "transition-all duration-500 ease-in-out transform",
+                        isScrolled ? "w-3 h-3 scale-90" : "w-4 h-4 scale-100"
                       )} />
                     </Button>
                   </div>
