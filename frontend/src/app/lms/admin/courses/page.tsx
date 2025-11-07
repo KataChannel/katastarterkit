@@ -195,55 +195,63 @@ export default function AdminCoursesPage() {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Quản lý khóa học</h1>
-          <p className="text-gray-600 mt-1">Tổng cộng {courses?.length || 0} khóa học</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Quản lý khóa học</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Tổng cộng {courses?.length || 0} khóa học</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleCreateCourse} variant="outline" className="gap-2">
+          <Button onClick={handleCreateCourse} variant="outline" className="gap-2 text-sm sm:text-base">
             <Plus className="w-4 h-4" />
-            Tạo thủ công
+            <span className="hidden sm:inline">Tạo thủ công</span>
+            <span className="sm:hidden">Thủ công</span>
           </Button>
           <Button 
             onClick={handleCreateWithAI} 
-            className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-sm sm:text-base"
           >
             <Sparkles className="w-4 h-4" />
-            Tạo với AI
+            <span className="hidden sm:inline">Tạo với AI</span>
+            <span className="sm:hidden">AI</span>
           </Button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
             placeholder="Tìm kiếm khóa học..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-10 sm:h-auto"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1">
           <Button
             variant={filterStatus === 'all' ? 'default' : 'outline'}
             onClick={() => setFilterStatus('all')}
+            size="sm"
+            className="whitespace-nowrap"
           >
             Tất cả
           </Button>
           <Button
             variant={filterStatus === 'published' ? 'default' : 'outline'}
             onClick={() => setFilterStatus('published')}
+            size="sm"
+            className="whitespace-nowrap"
           >
             Đã xuất bản
           </Button>
           <Button
             variant={filterStatus === 'draft' ? 'default' : 'outline'}
             onClick={() => setFilterStatus('draft')}
+            size="sm"
+            className="whitespace-nowrap"
           >
             Nháp
           </Button>
@@ -252,82 +260,82 @@ export default function AdminCoursesPage() {
 
       {/* Courses Grid */}
       {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Đang tải...</p>
+        <div className="text-center py-8 sm:py-12">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-sm sm:text-base text-gray-500 mt-4">Đang tải...</p>
         </div>
       ) : error ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <p className="text-red-600">Lỗi: {error.message}</p>
+          <CardContent className="py-8 sm:py-12 text-center">
+            <AlertCircle className="w-10 h-10 sm:w-12 sm:h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-sm sm:text-base text-red-600">Lỗi: {error.message}</p>
           </CardContent>
         </Card>
       ) : filteredCourses.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center">
-            <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">Không tìm thấy khóa học nào</p>
-            <Button onClick={handleCreateCourse} className="mt-4">
+          <CardContent className="py-8 sm:py-12 text-center">
+            <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-sm sm:text-base text-gray-500">Không tìm thấy khóa học nào</p>
+            <Button onClick={handleCreateCourse} className="mt-4" size="sm">
               Tạo khóa học đầu tiên
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {filteredCourses.map((course) => (
             <Card key={course.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between mb-2">
+              <CardHeader className="p-4 sm:p-6">
+                <div className="flex items-start justify-between mb-2 gap-2">
                   <Badge 
                     variant={course.status === 'PUBLISHED' ? 'default' : 'secondary'}
-                    className="cursor-pointer"
+                    className="cursor-pointer text-xs"
                     onClick={() => handleTogglePublish(course)}
                   >
                     {course.status === 'PUBLISHED' ? 'Đã xuất bản' : 'Nháp'}
                   </Badge>
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="text-xs">
                     {course.level || 'Beginner'}
                   </Badge>
                 </div>
-                <CardTitle className="line-clamp-2">{course.title}</CardTitle>
-                <CardDescription className="mt-2 line-clamp-2">
+                <CardTitle className="line-clamp-2 text-base sm:text-lg">{course.title}</CardTitle>
+                <CardDescription className="mt-2 line-clamp-2 text-xs sm:text-sm">
                   {course.description || 'Chưa có mô tả'}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6 pt-0">
                 {/* Instructor */}
                 {course.instructor && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Users className="w-4 h-4" />
-                    <span>Giảng viên: {course.instructor.firstName && course.instructor.lastName 
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <Users className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">Giảng viên: {course.instructor.firstName && course.instructor.lastName 
                       ? `${course.instructor.firstName} ${course.instructor.lastName}` 
                       : course.instructor.username}</span>
                   </div>
                 )}
 
                 {/* Stats */}
-                <div className="flex items-center gap-4 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
+                <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600 overflow-x-auto pb-1">
+                  <div className="flex items-center gap-1 whitespace-nowrap">
                     <Users className="w-4 h-4" />
                     <span>{course._count?.enrollments || 0}</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 whitespace-nowrap">
                     <BookOpen className="w-4 h-4" />
                     <span>{course._count?.modules || 0} modules</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 whitespace-nowrap">
                     <Clock className="w-4 h-4" />
                     <span>{course.duration || 0}p</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 whitespace-nowrap">
                     <Star className="w-4 h-4 text-yellow-500" />
                     <span>{course._count?.reviews || 0}</span>
                   </div>
                 </div>
 
                 {/* Price */}
-                <div className="text-lg font-bold text-blue-600">
+                <div className="text-base sm:text-lg font-bold text-blue-600">
                   {course.price ? formatPrice(course.price) : 'Miễn phí'}
                 </div>
 
@@ -336,25 +344,25 @@ export default function AdminCoursesPage() {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="flex-1 gap-2"
+                    className="flex-1 gap-1 sm:gap-2"
                     onClick={() => handleViewCourse(course.id)}
                   >
                     <Eye className="w-4 h-4" />
-                    Xem
+                    <span className="hidden sm:inline">Xem</span>
                   </Button>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="flex-1 gap-2"
+                    className="flex-1 gap-1 sm:gap-2"
                     onClick={() => handleEditCourse(course.id)}
                   >
                     <Edit className="w-4 h-4" />
-                    Sửa
+                    <span className="hidden sm:inline">Sửa</span>
                   </Button>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="gap-1 sm:gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                     onClick={() => handleDeleteClick(course)}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -368,10 +376,10 @@ export default function AdminCoursesPage() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa khóa học</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base sm:text-lg">Xác nhận xóa khóa học</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs sm:text-sm">
               Bạn có chắc chắn muốn xóa khóa học <strong>&quot;{courseToDelete?.title}&quot;</strong>?
               <br />
               <br />
@@ -380,12 +388,12 @@ export default function AdminCoursesPage() {
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="m-0">Hủy</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               disabled={deleteLoading}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 m-0"
             >
               {deleteLoading ? 'Đang xóa...' : 'Xóa khóa học'}
             </AlertDialogAction>

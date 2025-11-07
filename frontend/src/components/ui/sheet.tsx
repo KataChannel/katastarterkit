@@ -15,6 +15,31 @@ const SheetClose = SheetPrimitive.Close
 
 const SheetPortal = SheetPrimitive.Portal
 
+const VisuallyHidden = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ children, ...props }, ref) => (
+  <span
+    ref={ref}
+    style={{
+      position: 'absolute',
+      border: 0,
+      width: 1,
+      height: 1,
+      padding: 0,
+      margin: -1,
+      overflow: 'hidden',
+      clip: 'rect(0, 0, 0, 0)',
+      whiteSpace: 'nowrap',
+      wordWrap: 'normal',
+    }}
+    {...props}
+  >
+    {children}
+  </span>
+))
+VisuallyHidden.displayName = "VisuallyHidden"
+
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
@@ -51,12 +76,17 @@ const sheetVariants = cva(
 
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {}
+    VariantProps<typeof sheetVariants> {
+  /**
+   * Title for accessibility. Will be visually hidden if not provided as children.
+   */
+  title?: string
+}
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
+>(({ side = "right", className, children, title, ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content
@@ -64,6 +94,11 @@ const SheetContent = React.forwardRef<
       className={cn(sheetVariants({ side }), className)}
       {...props}
     >
+      {title && (
+        <VisuallyHidden>
+          <SheetPrimitive.Title>{title}</SheetPrimitive.Title>
+        </VisuallyHidden>
+      )}
       {children}
       <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
         <X className="h-4 w-4" />
@@ -137,4 +172,5 @@ export {
   SheetFooter,
   SheetTitle,
   SheetDescription,
+  VisuallyHidden,
 }

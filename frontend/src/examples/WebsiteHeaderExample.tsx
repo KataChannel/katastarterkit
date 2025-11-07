@@ -69,7 +69,7 @@ export function WebsiteHeaderExample() {
                 </Button>
               </SheetTrigger>
               
-              <SheetContent side="left" className="w-80 p-0">
+              <SheetContent side="left" className="w-80 p-0" title="Menu điều hướng">
                 <div className="flex flex-col h-full">
                   {/* Mobile Header */}
                   <div className="p-6 border-b">
