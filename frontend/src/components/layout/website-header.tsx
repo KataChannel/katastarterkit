@@ -18,12 +18,19 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/co
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package, Menu, ChevronRight } from 'lucide-react';
+import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package, Menu, ChevronRight, X } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import React from 'react';
@@ -32,6 +39,8 @@ export function WebsiteHeader() {
   const { user, isAuthenticated, logout } = useAuth();
   const { itemCount: cartItemCount } = useCart();
   const router = useRouter();
+  const [showSearchPopup, setShowSearchPopup] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // ✅ Load Header Settings
   const { data: headerSettingsRaw = [], loading: headerLoading } = useHeaderSettings();
@@ -107,7 +116,7 @@ export function WebsiteHeader() {
       
       rafId = requestAnimationFrame(() => {
         const scrollPosition = window.scrollY;
-        const scrollThreshold = 350;
+        const scrollThreshold = 180;
         const hysteresis = 20; // Buffer zone to prevent jitter
         
         // Hysteresis logic: different thresholds for scrolling up vs down
@@ -160,6 +169,15 @@ export function WebsiteHeader() {
   const handleLogout = async () => {
     await logout();
     router.push('/');
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/san-pham?search=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSearchPopup(false);
+      setSearchQuery('');
+    }
   };
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -403,20 +421,23 @@ export function WebsiteHeader() {
             </div>
             
             {/* Search */}
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative">
               <Input
                 type="text"
                 placeholder="Tìm kiếm sản phẩm..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pr-10"
               />
               <Button
+                type="submit"
                 size="sm"
                 variant="ghost"
                 className="absolute inset-y-0 right-0 h-full px-3"
               >
                 <Search className="w-4 h-4" />
               </Button>
-            </div>
+            </form>
           </div>
         )}
       </div>
@@ -540,47 +561,49 @@ export function WebsiteHeader() {
                     .sort((a: any, b: any) => a.order - b.order)
                     .map((item: any) => renderDesktopMenuItem(item))
                 )}
+                
+                {/* Search Icon - Show when scrolled */}
+                {headerSettings['header.show_search'] && isScrolled && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-white hover:text-blue-200 hover:bg-white/10 transition-all ml-2"
+                    onClick={() => setShowSearchPopup(true)}
+                  >
+                    <Search className="w-5 h-5" />
+                  </Button>
+                )}
               </nav>
 
-              {/* Search Bar */}
-              {headerSettings['header.show_search'] && (
+              {/* Search Bar - Hidden when scrolled */}
+              {headerSettings['header.show_search'] && !isScrolled && (
                 <div className={cn(
-                  "flex flex-row items-center max-w-lg mx-auto px-4 space-x-4 transition-all duration-500 ease-in-out",
-                  isScrolled && "max-w-md space-x-2"
+                  "flex flex-row items-center max-w-lg mx-auto px-4 space-x-4 transition-all duration-500 ease-in-out"
                 )}>
-                  <Phone className={cn(
-                    "text-[#FAA61A] transition-all duration-500 ease-in-out transform",
-                    isScrolled ? "w-6 h-6 scale-90" : "w-8 h-8 scale-100"
-                  )} />
+                  <Phone className="w-8 h-8 text-[#FAA61A] transition-all duration-500 ease-in-out transform scale-100" />
                   <a 
                     href={`tel:${contactSettings['contact.phone'] || '0865770009'}`} 
-                    className={cn(
-                      "text-[#FAA61A] font-bold whitespace-nowrap transition-all duration-500 ease-in-out",
-                      isScrolled ? "text-base" : "text-lg"
-                    )}
+                    className="text-lg text-[#FAA61A] font-bold whitespace-nowrap transition-all duration-500 ease-in-out"
                   >
                     {contactSettings['contact.phone_display'] || '0865.77.0009'}
                   </a>
-                  <div className="relative flex-1">
+                  <form onSubmit={handleSearch} className="relative flex-1">
                     <Input
                       type="text"
                       placeholder="Tìm kiếm sản phẩm..."
-                      className={cn(
-                        "w-full pl-4 pr-10 bg-white/90 backdrop-blur-sm border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-500 ease-in-out",
-                        isScrolled ? "py-1 text-sm" : "py-2"
-                      )}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-4 pr-10 py-2 bg-white/90 backdrop-blur-sm border-white/20 focus:bg-white focus:border-blue-300 transition-all duration-500 ease-in-out"
                     />
                     <Button
+                      type="submit"
                       size="sm"
                       variant="ghost"
                       className="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:text-gray-600 transition-colors duration-300"
                     >
-                      <Search className={cn(
-                        "transition-all duration-500 ease-in-out transform",
-                        isScrolled ? "w-3 h-3 scale-90" : "w-4 h-4 scale-100"
-                      )} />
+                      <Search className="w-4 h-4 transition-all duration-500 ease-in-out transform scale-100" />
                     </Button>
-                  </div>
+                  </form>
                 </div>
               )}
             </div>
@@ -675,6 +698,73 @@ export function WebsiteHeader() {
           </div>
         </div>
       </div>
+
+      {/* Search Popup Dialog - Mobile First */}
+      <Dialog open={showSearchPopup} onOpenChange={setShowSearchPopup}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5" />
+              Tìm kiếm sản phẩm
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-y-auto py-4">
+            <form onSubmit={handleSearch} className="space-y-4">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Nhập tên sản phẩm bạn muốn tìm..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-4 pr-12 py-3 text-base"
+                  autoFocus
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="absolute inset-y-0 right-1 my-1 px-4"
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  Tìm
+                </Button>
+              </div>
+              
+              {/* Quick search suggestions - Optional */}
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500">Từ khóa phổ biến:</p>
+                <div className="flex flex-wrap gap-2">
+                  {['Rau sạch', 'Rau hữu cơ', 'Củ quả', 'Trái cây', 'Thực phẩm organic'].map((keyword) => (
+                    <Button
+                      key={keyword}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSearchQuery(keyword);
+                        router.push(`/san-pham?search=${encodeURIComponent(keyword)}`);
+                        setShowSearchPopup(false);
+                      }}
+                    >
+                      {keyword}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowSearchPopup(false)}
+            >
+              Đóng
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }
