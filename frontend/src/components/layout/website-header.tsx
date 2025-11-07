@@ -14,55 +14,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Separator } from '@/components/ui/separator';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package } from 'lucide-react';
+import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package, Menu, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import React from 'react';
-
-// ListItem component for navigation menu
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a"> & { title: string; target?: string }
->(({ className, title, children, href, target, ...props }, ref) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <Link
-          ref={ref}
-          href={href || "#"}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
-          )}
-          target={target === 'BLANK' ? '_blank' : undefined}
-          rel={target === 'BLANK' ? 'noopener noreferrer' : undefined}
-          {...props}
-          >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </Link>
-      </NavigationMenuLink>
-    </li>
-  );
-});
-ListItem.displayName = "ListItem";
 
 export function WebsiteHeader() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -153,311 +117,480 @@ export function WebsiteHeader() {
     router.push('/');
   };
 
-  // Helper function to render menu items
-  const renderMenuItem = (item: any) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Helper: render mobile menu item
+  const renderMobileMenuItem = (item: any) => {
     if (!item.isVisible || !item.isActive) return null;
 
-    // Determine destination URL
     const href = item.route || item.url || '#';
-    const isExternalLink = item.target === 'BLANK' || item.externalUrl;
-
-    // Check if item has children with content
     const hasChildren = item.children && Array.isArray(item.children) && item.children.length > 0;
 
     if (hasChildren) {
-      // Has children - render as dropdown
       return (
-        <NavigationMenuItem key={item.id}>
-          <NavigationMenuTrigger className="text-white hover:text-blue-200 bg-transparent hover:bg-white/10 data-[state=open]:bg-white/20 text-sm lg:text-base px-2 lg:px-4">
+        <AccordionItem key={item.id} value={`item-${item.id}`}>
+          <AccordionTrigger className="text-sm font-medium hover:text-primary">
             {item.icon && <span className="mr-2">{item.icon}</span>}
             {item.title}
             {item.badge && <Badge className="ml-2 text-xs">{item.badge}</Badge>}
-          </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-col space-y-2 pl-4">
               {item.children.map((child: any) => {
                 const childHref = child.route || child.url || '#';
                 return (
-                  <ListItem
+                  <Link
                     key={child.id}
                     href={childHref}
-                    title={child.title}
+                    className="text-sm py-2 hover:text-primary transition-colors"
                     target={child.target === 'BLANK' ? '_blank' : undefined}
+                    rel={child.target === 'BLANK' ? 'noopener noreferrer' : undefined}
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    {child.description || child.title}
-                  </ListItem>
+                    <ChevronRight className="w-4 h-4 inline mr-2" />
+                    {child.title}
+                  </Link>
                 );
               })}
             </div>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
+          </AccordionContent>
+        </AccordionItem>
       );
     } else {
-      // No children - render as simple link
       return (
-        <NavigationMenuItem key={item.id}>
-          <NavigationMenuLink asChild>
-            <Link
-              href={href}
-              className={cn(
-                navigationMenuTriggerStyle(),
-                "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4"
-              )}
-              target={isExternalLink ? '_blank' : undefined}
-              rel={isExternalLink ? 'noopener noreferrer' : undefined}
-            >
-              {item.icon && <span className="mr-2">{item.icon}</span>}
-              {item.title}
-              {item.badge && <Badge className="ml-2 text-xs">{item.badge}</Badge>}
-            </Link>
-          </NavigationMenuLink>
-        </NavigationMenuItem>
+        <div key={item.id} className="border-b last:border-0">
+          <Link
+            href={href}
+            className="flex items-center py-3 text-sm font-medium hover:text-primary transition-colors"
+            target={item.target === 'BLANK' ? '_blank' : undefined}
+            rel={item.target === 'BLANK' ? 'noopener noreferrer' : undefined}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            {item.icon && <span className="mr-2">{item.icon}</span>}
+            {item.title}
+            {item.badge && <Badge className="ml-2 text-xs">{item.badge}</Badge>}
+          </Link>
+        </div>
+      );
+    }
+  };
+
+  // Helper: render desktop menu item
+  const renderDesktopMenuItem = (item: any) => {
+    if (!item.isVisible || !item.isActive) return null;
+
+    const href = item.route || item.url || '#';
+    const hasChildren = item.children && Array.isArray(item.children) && item.children.length > 0;
+
+    if (hasChildren) {
+      return (
+        <div key={item.id} className="relative group">
+          <button className="flex items-center px-3 py-2 text-sm font-medium text-white hover:text-blue-200 transition-colors">
+            {item.icon && <span className="mr-2">{item.icon}</span>}
+            {item.title}
+            {item.badge && <Badge className="ml-2 text-xs">{item.badge}</Badge>}
+            <ChevronRight className="w-4 h-4 ml-1 rotate-90" />
+          </button>
+          <div className="absolute left-0 mt-0 w-64 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <div className="py-2">
+              {item.children.map((child: any) => {
+                const childHref = child.route || child.url || '#';
+                return (
+                  <Link
+                    key={child.id}
+                    href={childHref}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors"
+                    target={child.target === 'BLANK' ? '_blank' : undefined}
+                    rel={child.target === 'BLANK' ? 'noopener noreferrer' : undefined}
+                  >
+                    {child.title}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <Link
+          key={item.id}
+          href={href}
+          className="flex items-center px-3 py-2 text-sm font-medium text-white hover:text-blue-200 transition-colors"
+          target={item.target === 'BLANK' ? '_blank' : undefined}
+          rel={item.target === 'BLANK' ? 'noopener noreferrer' : undefined}
+        >
+          {item.icon && <span className="mr-2">{item.icon}</span>}
+          {item.title}
+          {item.badge && <Badge className="ml-2 text-xs">{item.badge}</Badge>}
+        </Link>
       );
     }
   };
 
   return (
-    <header className="bg-white border-b border-gray-200">
-      {/* Carousel Banner */}
-      {headerSettings['header.banner_enabled'] && (
-        <div className="relative overflow-hidden">
-          <Carousel 
-            className="w-full mx-auto"
-            setApi={setApi}
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-          >
-            <CarouselContent>
-              {bannerItems.map((item, index) => (
-                <CarouselItem key={item.id}>
-                  <div className="relative">
-                    <Card className="border-0 rounded-none">
-                      <CardContent className={`relative p-0 ${item.bgColor} overflow-hidden`}>
-                        <div className="relative z-10 h-full flex items-center">
-                          <div className="mx-auto">
-                              <div 
-                                className="hidden lg:block w-full overflow-hidden shadow-2xl flex-shrink-0"
-                                style={{ height: `${headerSettings['header.banner_height'] || 208}px` }}
-                              >
-                                <img 
-                                  src={item.image} 
-                                  alt={item.title}
-                                  className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
-                                />
-                              </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-4 bg-white/20 border-white/30 text-white hover:bg-white/40 transition-all duration-300 backdrop-blur-sm" />
-            <CarouselNext className="right-4 bg-white/20 border-white/30 text-white hover:bg-white/40 transition-all duration-300 backdrop-blur-sm" />
-          </Carousel>
-          
-          {/* Slide Indicators */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            {bannerItems.map((_, index) => (
-              <button
-                key={index}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === currentSlide ? 'bg-white w-6' : 'bg-white/50'
-                }`}
-                onClick={() => {
-                  if (api) {
-                    api.scrollTo(index);
-                  }
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-      <div className="w-full mx-auto">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+      {/* =============== MOBILE LAYOUT (< lg) =============== */}
+      <div className="lg:hidden">
+        {/* Mobile Top Bar */}
         <div 
-          className="grid grid-cols-6 items-center"
+          className="flex items-center justify-between px-4 py-3"
           style={{ backgroundColor: headerSettings['header.background_color'] || '#57A345' }}
         >
-          <div className="bg-white col-span-2 flex justify-end p-4 rounded-e-full pe-8">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
-              <img 
-                src={headerSettings['header.logo'] || '/assets/images/logo.svg'} 
-                alt="Logo" 
-                className="max-h-20" 
-                style={{ 
-                  height: `${headerSettings['header.logo_width'] || 80}px`,
-                  maxHeight: `${headerSettings['header.logo_width'] || 80}px` 
-                }}
-              />
-            </Link>
-          </div>  
+          {/* Mobile Menu Button */}
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+                <Menu className="w-6 h-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+              </SheetHeader>
+              <Separator className="my-4" />
+              
+              {/* Mobile Menu Items */}
+              <Accordion type="single" collapsible className="w-full">
+                {menuLoading ? (
+                  <div className="text-sm py-4">Đang tải menu...</div>
+                ) : menuError ? (
+                  <div className="text-red-500 text-sm py-4">Lỗi tải menu</div>
+                ) : (
+                  headerMenus
+                    .filter((item: any) => (item.level === 0 || item.level === 1) && item.isActive && item.isVisible)
+                    .sort((a: any, b: any) => a.order - b.order)
+                    .map((item: any) => renderMobileMenuItem(item))
+                )}
+              </Accordion>
 
-        <div className="col-span-3 flex flex-col space-y-2">
-          <NavigationMenu className="w-full p-4">
-            <NavigationMenuList className="flex justify-evenly space-x-1 lg:space-x-2 w-full flex-wrap">
-              {/* Trang Chủ */}
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  {/* <Link href="/" className={cn(navigationMenuTriggerStyle(), "text-white hover:text-blue-200 bg-transparent hover:bg-white/10 text-sm lg:text-base px-2 lg:px-4")}>
-                    Trang Chủ
-                  </Link> */}
-                </NavigationMenuLink>
-              </NavigationMenuItem>
+              <Separator className="my-4" />
 
-              {/* Render menu items from database */}
-              {menuLoading ? (
-                <div className="text-white text-sm">Đang tải menu...</div>
-              ) : menuError ? (
-                <div className="text-red-200 text-sm">Lỗi tải menu</div>
-              ) : (
-                headerMenus
-                  .filter((item: any) => (item.level === 0 || item.level === 1) && item.isActive && item.isVisible)
-                  .sort((a: any, b: any) => a.order - b.order)
-                  .map((item: any) => renderMenuItem(item))
+              {/* Mobile User Actions */}
+              <div className="flex flex-col space-y-2">
+                {isAuthenticated && user ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="justify-start"
+                      onClick={() => {
+                        router.push('/don-hang');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Đơn hàng của tôi
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="justify-start"
+                      onClick={() => {
+                        router.push('/admin');
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      {user.email}
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="justify-start"
+                    onClick={() => {
+                      router.push('/auth/login');
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Đăng nhập
+                  </Button>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Mobile Logo */}
+          <Link href="/" className="flex-1 flex justify-center">
+            <img 
+              src={headerSettings['header.logo'] || '/assets/images/logo.svg'} 
+              alt="Logo" 
+              className="h-12"
+            />
+          </Link>
+
+          {/* Mobile Cart */}
+          {headerSettings['header.show_cart'] && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="relative text-white hover:bg-white/10"
+              onClick={() => router.push('/gio-hang')}
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {cartItemCount > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                >
+                  {cartItemCount}
+                </Badge>
               )}
-            </NavigationMenuList>
-          </NavigationMenu>
+            </Button>
+          )}
+        </div>
 
-          {/* Search Bar */}
-          {headerSettings['header.show_search'] && (
-            <div className="flex flex-row items-center max-w-lg mx-8 mb-2 space-x-4">
-              <Phone className="w-8 h-8 text-[#FAA61A]" />
+        {/* Mobile Search & Contact */}
+        {headerSettings['header.show_search'] && (
+          <div className="px-4 py-3 bg-gray-50 space-y-3">
+            {/* Phone */}
+            <div className="flex items-center space-x-2">
+              <Phone className="w-5 h-5 text-[#FAA61A]" />
               <a 
                 href={`tel:${contactSettings['contact.phone'] || '0865770009'}`} 
-                className="text-[#FAA61A] font-bold text-lg"
+                className="text-[#FAA61A] font-bold"
               >
                 {contactSettings['contact.phone_display'] || '0865.77.0009'}
               </a>
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Tìm kiếm sản phẩm..."
-                  className="w-full pl-4 pr-10 py-2 bg-white/90 backdrop-blur-sm border-white/20 focus:bg-white focus:border-blue-300 transition-all"
-                />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:text-gray-600"
-                >
-                  <Search className="w-4 h-4" />
-                </Button>
-              </div>
             </div>
-          )}
-        </div>                 
-         <div className="flex items-center space-x-3 text-white">
-                  {/* Wishlist - Disabled (backend not implemented) */}
-                  {/* {isAuthenticated && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                            onClick={() => router.push('/yeu-thich')}
-                          >
-                            <Heart className="w-5 h-5" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Sản phẩm yêu thích</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )} */}
+            
+            {/* Search */}
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm..."
+                className="w-full pr-10"
+              />
+              <Button
+                size="sm"
+                variant="ghost"
+                className="absolute inset-y-0 right-0 h-full px-3"
+              >
+                <Search className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
 
-                  {/* Orders */}
-                  {isAuthenticated && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                            onClick={() => router.push('/don-hang')}
-                          >
-                            <Package className="w-5 h-5" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Đơn hàng của tôi</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-
-                  {/* User Profile */}
-                  {headerSettings['header.show_user_menu'] && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center space-x-2">
-                            {isAuthenticated && user ? (
-                              // Đã đăng nhập: Hiện chữ cái đầu của email
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full p-0 text-white font-semibold"
-                                onClick={() => router.push('/admin')}
-                              >
-                                {user.email?.charAt(0).toUpperCase() || 'U'}
-                              </Button>
-                            ) : (
-                              // Chưa đăng nhập: Hiện icon Login
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="flex items-center space-x-1 px-3 py-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                                onClick={() => router.push('/auth/login')}
-                              >
-                                <LogIn className="w-4 h-4" />
-                                <span className="text-sm font-medium hidden md:inline">Đăng nhập</span>
-                              </Button>
-                            )}
+      {/* =============== DESKTOP LAYOUT (>= lg) =============== */}
+      <div className="hidden lg:block">
+        {/* Carousel Banner */}
+        {headerSettings['header.banner_enabled'] && (
+          <div className="relative overflow-hidden">
+            <Carousel 
+              className="w-full mx-auto"
+              setApi={setApi}
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+            >
+              <CarouselContent>
+                {bannerItems.map((item, index) => (
+                  <CarouselItem key={item.id}>
+                    <div className="relative">
+                      <Card className="border-0 rounded-none">
+                        <CardContent className={`relative p-0 ${item.bgColor} overflow-hidden`}>
+                          <div className="relative z-10 h-full flex items-center">
+                            <div className="mx-auto">
+                                <div 
+                                  className="w-full overflow-hidden shadow-2xl flex-shrink-0"
+                                  style={{ height: `${headerSettings['header.banner_height'] || 208}px` }}
+                                >
+                                  <img 
+                                    src={item.image} 
+                                    alt={item.title}
+                                    className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700"
+                                  />
+                                </div>
+                            </div>
                           </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{isAuthenticated && user ? user.email : 'Đăng nhập để tiếp tục'}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                  
-                  {/* Shopping Cart */}
-                  {headerSettings['header.show_cart'] && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-4 bg-white/20 border-white/30 text-white hover:bg-white/40 transition-all duration-300 backdrop-blur-sm" />
+              <CarouselNext className="right-4 bg-white/20 border-white/30 text-white hover:bg-white/40 transition-all duration-300 backdrop-blur-sm" />
+            </Carousel>
+            
+            {/* Slide Indicators */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              {bannerItems.map((_, index) => (
+                <button
+                  key={index}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === currentSlide ? 'bg-white w-6' : 'bg-white/50'
+                  }`}
+                  onClick={() => {
+                    if (api) {
+                      api.scrollTo(index);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Desktop Main Header */}
+        <div className="w-full mx-auto">
+          <div 
+            className="grid grid-cols-12 items-center"
+            style={{ backgroundColor: headerSettings['header.background_color'] || '#57A345' }}
+          >
+            {/* Logo */}
+            <div className="bg-white col-span-3 flex justify-end p-4 rounded-e-full pe-8">
+              <Link href="/" className="text-2xl font-bold text-blue-600">
+                <img 
+                  src={headerSettings['header.logo'] || '/assets/images/logo.svg'} 
+                  alt="Logo" 
+                  className="max-h-20" 
+                  style={{ 
+                    height: `${headerSettings['header.logo_width'] || 80}px`,
+                    maxHeight: `${headerSettings['header.logo_width'] || 80}px` 
+                  }}
+                />
+              </Link>
+            </div>  
+
+            {/* Navigation & Search */}
+            <div className="col-span-7 flex flex-col space-y-2 py-4">
+              {/* Menu */}
+              <nav className="flex items-center justify-center space-x-1">
+                {menuLoading ? (
+                  <div className="text-white text-sm">Đang tải menu...</div>
+                ) : menuError ? (
+                  <div className="text-red-200 text-sm">Lỗi tải menu</div>
+                ) : (
+                  headerMenus
+                    .filter((item: any) => (item.level === 0 || item.level === 1) && item.isActive && item.isVisible)
+                    .sort((a: any, b: any) => a.order - b.order)
+                    .map((item: any) => renderDesktopMenuItem(item))
+                )}
+              </nav>
+
+              {/* Search Bar */}
+              {headerSettings['header.show_search'] && (
+                <div className="flex flex-row items-center max-w-lg mx-auto px-4 space-x-4">
+                  <Phone className="w-8 h-8 text-[#FAA61A]" />
+                  <a 
+                    href={`tel:${contactSettings['contact.phone'] || '0865770009'}`} 
+                    className="text-[#FAA61A] font-bold text-lg whitespace-nowrap"
+                  >
+                    {contactSettings['contact.phone_display'] || '0865.77.0009'}
+                  </a>
+                  <div className="relative flex-1">
+                    <Input
+                      type="text"
+                      placeholder="Tìm kiếm sản phẩm..."
+                      className="w-full pl-4 pr-10 py-2 bg-white/90 backdrop-blur-sm border-white/20 focus:bg-white focus:border-blue-300 transition-all"
+                    />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="absolute inset-y-0 right-0 h-full px-3 text-gray-400 hover:text-gray-600"
+                    >
+                      <Search className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* User Actions */}
+            <div className="col-span-2 flex items-center justify-end space-x-3 text-white pr-4">
+              {/* Orders */}
+              {isAuthenticated && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
+                        onClick={() => router.push('/don-hang')}
+                      >
+                        <Package className="w-5 h-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Đơn hàng của tôi</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+
+              {/* User Profile */}
+              {headerSettings['header.show_user_menu'] && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center space-x-2">
+                        {isAuthenticated && user ? (
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                            onClick={() => router.push('/gio-hang')}
+                            className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full p-0 text-white font-semibold"
+                            onClick={() => router.push('/admin')}
                           >
-                            <ShoppingCart className="w-5 h-5" />
-                            {cartItemCount > 0 && (
-                              <Badge 
-                                variant="destructive" 
-                                className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                              >
-                                {cartItemCount}
-                              </Badge>
-                            )}
+                            {user.email?.charAt(0).toUpperCase() || 'U'}
                           </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Giỏ hàng {cartItemCount > 0 && `(${cartItemCount})`}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-          </div>    
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="flex items-center space-x-1 px-3 py-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
+                            onClick={() => router.push('/auth/login')}
+                          >
+                            <LogIn className="w-4 h-4" />
+                            <span className="text-sm font-medium">Đăng nhập</span>
+                          </Button>
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isAuthenticated && user ? user.email : 'Đăng nhập để tiếp tục'}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              
+              {/* Shopping Cart */}
+              {headerSettings['header.show_cart'] && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
+                        onClick={() => router.push('/gio-hang')}
+                      >
+                        <ShoppingCart className="w-5 h-5" />
+                        {cartItemCount > 0 && (
+                          <Badge 
+                            variant="destructive" 
+                            className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                          >
+                            {cartItemCount}
+                          </Badge>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Giỏ hàng {cartItemCount > 0 && `(${cartItemCount})`}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>    
+          </div>
         </div>
       </div>
     </header>
