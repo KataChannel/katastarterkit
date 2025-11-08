@@ -330,7 +330,7 @@ export const CREATE_ORDER = gql`
 
 export const GET_ORDER = gql`
   query GetOrder($orderId: ID!) {
-    order(orderId: $orderId) {
+    getOrder(orderId: $orderId) {
       id
       orderNumber
       status
@@ -529,21 +529,38 @@ export const REMOVE_FROM_WISHLIST = null;
 
 export const TRACK_ORDER = gql`
   query TrackOrder($orderNumber: String!) {
-    trackOrder(orderNumber: $orderNumber) {
+    getOrderByNumber(orderNumber: $orderNumber) {
+      id
       orderNumber
       status
-      estimatedDelivery
-      currentLocation
-      trackingEvents {
+      createdAt
+      confirmedAt
+      shippedAt
+      deliveredAt
+      tracking {
         id
-        type
         status
-        description
-        location
-        timestamp
+        carrier
+        trackingNumber
+        trackingUrl
+        estimatedDelivery
+        actualDelivery
+        events {
+          id
+          status
+          description
+          location
+          eventTime
+        }
       }
-      shippingProvider
-      trackingNumber
+      items {
+        id
+        productName
+        thumbnail
+        quantity
+        price
+      }
+      shippingAddress
     }
   }
 `;
@@ -578,7 +595,7 @@ export const GET_USER_ORDERS = gql`
 
 export const GET_ORDER_DETAIL = gql`
   query GetOrderDetail($orderNumber: String!) {
-    order(orderNumber: $orderNumber) {
+    getOrderByNumber(orderNumber: $orderNumber) {
       id
       orderNumber
       status

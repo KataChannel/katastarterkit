@@ -252,8 +252,8 @@ export default function ProductsPage() {
             {loading && (
               <div className={`grid gap-4 ${
                 viewMode === 'grid' 
-                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
-                  : 'grid-cols-1'
+                  ? 'grid-cols-2 lg:grid-cols-4' 
+                  : 'grid-cols-2'
               }`}>
                 {[...Array(6)].map((_, i) => (
                   <Card key={i}>
@@ -282,7 +282,7 @@ export default function ProductsPage() {
               <>
                 <div className={`grid gap-4 ${
                   viewMode === 'grid' 
-                    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
+                    ? 'grid-cols-2 lg:grid-cols-4' 
                     : 'grid-cols-1'
                 }`}>
                   {products.map((product: any) => (

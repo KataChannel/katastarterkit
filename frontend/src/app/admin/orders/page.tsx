@@ -88,8 +88,8 @@ const UPDATE_ORDER_STATUS = gql`
 `;
 
 const GET_ORDER_DETAIL = gql`
-  query GetOrderDetail($id: ID!) {
-    order(id: $id) {
+  query GetOrderDetail($orderId: ID!) {
+    getOrder(orderId: $orderId) {
       id
       orderNumber
       status
@@ -458,11 +458,11 @@ function OrderDetailDialog({
   onStatusUpdate: (orderId: string, status: string) => void;
 }) {
   const { data, loading } = useQuery(GET_ORDER_DETAIL, {
-    variables: { id: orderId },
+    variables: { orderId },
     skip: !orderId,
   });
 
-  const order = data?.order;
+  const order = data?.getOrder;
 
   if (loading) {
     return (

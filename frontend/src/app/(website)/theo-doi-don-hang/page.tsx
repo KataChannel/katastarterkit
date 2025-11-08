@@ -16,33 +16,68 @@ import Link from 'next/link';
 
 const TRACK_ORDER = gql`
   query TrackOrder($orderNumber: String!) {
-    trackOrder(orderNumber: $orderNumber) {
+    getOrderByNumber(orderNumber: $orderNumber) {
+      id
       orderNumber
       status
-      estimatedDelivery
-      currentLocation
-      trackingEvents {
+      createdAt
+      confirmedAt
+      shippedAt
+      deliveredAt
+      tracking {
         id
-        type
         status
-        description
-        location
-        timestamp
+        carrier
+        trackingNumber
+        trackingUrl
+        estimatedDelivery
+        actualDelivery
+        events {
+          id
+          status
+          description
+          location
+          eventTime
+        }
       }
-      shippingProvider
-      trackingNumber
+      items {
+        id
+        productName
+        thumbnail
+        quantity
+        price
+      }
+      shippingAddress
     }
   }
 `;
 
 interface TrackingInfo {
+  id: string;
   orderNumber: string;
   status: OrderStatus;
-  estimatedDelivery?: string;
-  currentLocation?: string;
-  trackingEvents: OrderTrackingEvent[];
-  shippingProvider?: string;
-  trackingNumber?: string;
+  createdAt: string;
+  confirmedAt?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
+  tracking?: {
+    id: string;
+    status: string;
+    carrier?: string;
+    trackingNumber?: string;
+    trackingUrl?: string;
+    estimatedDelivery?: string;
+    actualDelivery?: string;
+    events: OrderTrackingEvent[];
+  };
+  items: Array<{
+    id: string;
+    productName: string;
+    thumbnail?: string;
+    quantity: number;
+    price: number;
+  }>;
+  shippingAddress: any;
 }
 
 function TrackingContent() {
@@ -52,7 +87,7 @@ function TrackingContent() {
   const [orderNumber, setOrderNumber] = useState(orderParam || '');
   const [searchValue, setSearchValue] = useState(orderParam || '');
 
-  const { data, loading, error } = useQuery<{ trackOrder: TrackingInfo }>(
+  const { data, loading, error } = useQuery<{ getOrderByNumber: TrackingInfo }>(
     TRACK_ORDER,
     {
       variables: { orderNumber },
@@ -65,7 +100,8 @@ function TrackingContent() {
     setOrderNumber(searchValue);
   };
 
-  const trackingInfo = data?.trackOrder;
+  const orderInfo = data?.getOrderByNumber;
+  const trackingInfo = orderInfo?.tracking;
 
   return (
     <div className="container max-w-4xl mx-auto px-4 py-6 md:py-8">
@@ -142,30 +178,30 @@ function TrackingContent() {
       )}
 
       {/* Tracking Results */}
-      {trackingInfo && !loading && (
+      {orderInfo && !loading && (
         <div className="space-y-6">
           {/* Order Status Card */}
           <Card>
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <CardTitle className="text-lg">
-                  Đơn hàng #{trackingInfo.orderNumber}
+                  Đơn hàng #{orderInfo.orderNumber}
                 </CardTitle>
-                <OrderStatusBadge status={trackingInfo.status} size="lg" />
+                <OrderStatusBadge status={orderInfo.status as OrderStatus} size="lg" />
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Current Status Summary */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-                {trackingInfo.currentLocation && (
+                {trackingInfo?.events && trackingInfo.events.length > 0 && (
                   <div>
                     <p className="text-xs text-gray-500 mb-1">Vị trí hiện tại</p>
                     <p className="text-sm font-medium text-gray-900">
-                      📍 {trackingInfo.currentLocation}
+                      📍 {trackingInfo.events[0]?.location || 'Đang cập nhật'}
                     </p>
                   </div>
                 )}
-                {trackingInfo.estimatedDelivery && (
+                {trackingInfo?.estimatedDelivery && (
                   <div>
                     <p className="text-xs text-gray-500 mb-1">
                       Dự kiến giao hàng
@@ -178,15 +214,15 @@ function TrackingContent() {
               </div>
 
               {/* Shipping Provider Info */}
-              {(trackingInfo.shippingProvider || trackingInfo.trackingNumber) && (
+              {trackingInfo && (trackingInfo.carrier || trackingInfo.trackingNumber) && (
                 <div className="flex flex-col sm:flex-row gap-4 p-4 border rounded-lg">
-                  {trackingInfo.shippingProvider && (
+                  {trackingInfo.carrier && (
                     <div className="flex-1">
                       <p className="text-xs text-gray-500 mb-1">
                         Đơn vị vận chuyển
                       </p>
                       <p className="text-sm font-medium text-gray-900">
-                        {trackingInfo.shippingProvider}
+                        {trackingInfo.carrier}
                       </p>
                     </div>
                   )}
@@ -204,7 +240,7 @@ function TrackingContent() {
           </Card>
 
           {/* Timeline Card */}
-          {trackingInfo.trackingEvents.length > 0 && (
+          {trackingInfo?.events && trackingInfo.events.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Lịch sử vận chuyển</CardTitle>
@@ -213,14 +249,14 @@ function TrackingContent() {
                 {/* Desktop: Horizontal Timeline */}
                 <div className="hidden lg:block">
                   <OrderTimeline
-                    events={trackingInfo.trackingEvents}
+                    events={trackingInfo.events}
                     orientation="horizontal"
                   />
                 </div>
                 {/* Mobile: Vertical Timeline */}
                 <div className="lg:hidden">
                   <OrderTimeline
-                    events={trackingInfo.trackingEvents}
+                    events={trackingInfo.events}
                     orientation="vertical"
                   />
                 </div>
@@ -233,7 +269,7 @@ function TrackingContent() {
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button asChild variant="outline" className="flex-1">
-                  <Link href={`/don-hang/${trackingInfo.orderNumber}`}>
+                  <Link href={`/don-hang/${orderInfo.orderNumber}`}>
                     <Package className="h-4 w-4 mr-2" />
                     Xem chi tiết đơn hàng
                   </Link>

@@ -28,6 +28,43 @@ export class OrderResolver {
   ): Promise<CreateOrderResponse> {
     try {
       const userId = context?.req?.user?.id;
+      
+      console.log('[OrderResolver] ========================================');
+      console.log('[OrderResolver] createOrder FULL INPUT:', {
+        // User context
+        userId,
+        hasUserId: !!userId,
+        
+        // Session
+        sessionId: input.sessionId,
+        sessionIdType: typeof input.sessionId,
+        hasSessionId: !!input.sessionId,
+        
+        // Shipping address
+        shippingAddress: input.shippingAddress,
+        hasShippingAddress: !!input.shippingAddress,
+        shippingAddressKeys: input.shippingAddress ? Object.keys(input.shippingAddress) : [],
+        shippingAddressValues: input.shippingAddress ? {
+          name: input.shippingAddress.name,
+          phone: input.shippingAddress.phone,
+          address: input.shippingAddress.address,
+          city: input.shippingAddress.city,
+          district: input.shippingAddress.district,
+          ward: input.shippingAddress.ward,
+        } : null,
+        
+        // Methods
+        paymentMethod: input.paymentMethod,
+        shippingMethod: input.shippingMethod,
+        
+        // Notes
+        customerNote: input.customerNote,
+        
+        // Full input object
+        fullInput: JSON.stringify(input, null, 2),
+      });
+      console.log('[OrderResolver] ========================================');
+      
       const order = await this.orderService.createFromCart(input, userId);
       
       return {
@@ -36,6 +73,11 @@ export class OrderResolver {
         order: order as any,
       };
     } catch (error) {
+      console.error('[OrderResolver] createOrder ERROR:', {
+        error,
+        message: error.message,
+        stack: error.stack,
+      });
       return {
         success: false,
         message: error.message,

@@ -9,7 +9,7 @@ interface ScrollContextType {
 
 const ScrollContext = createContext<ScrollContextType>({
   isScrolled: false,
-  scrollThreshold: 50,
+  scrollThreshold: 20,
 });
 
 export function useScroll() {

@@ -61,16 +61,25 @@ export function useCartSession() {
   // Get effective sessionId for cart operations
   // For authenticated users: don't send sessionId (backend will use userId from context)
   // For guest users: always ensure we have a valid sessionId
-  let effectiveSessionId: string | undefined;
-  
-  if (isAuthenticated) {
-    // Authenticated user - no sessionId needed
-    effectiveSessionId = undefined;
-  } else {
-    // Guest user - MUST have a valid sessionId
-    // If sessionId state is empty/undefined, get it immediately from localStorage
-    effectiveSessionId = sessionId && sessionId.trim() !== '' ? sessionId : getSessionId();
-  }
+  const getEffectiveSessionId = useCallback(() => {
+    if (isAuthenticated) {
+      // Authenticated user - no sessionId needed
+      return undefined;
+    } else {
+      // Guest user - MUST have a valid sessionId
+      // If sessionId state is empty/undefined, get it immediately from localStorage
+      const sid = sessionId && sessionId.trim() !== '' ? sessionId : getSessionId();
+      console.log('[CartSession] Getting effective sessionId:', {
+        stateSessionId: sessionId,
+        freshSessionId: getSessionId(),
+        effectiveSessionId: sid,
+        isAuthenticated
+      });
+      return sid;
+    }
+  }, [isAuthenticated, sessionId]);
+
+  const effectiveSessionId = getEffectiveSessionId();
 
   console.log('[CartSession] Returning:', { 
     effectiveSessionId, 
@@ -83,5 +92,6 @@ export function useCartSession() {
     sessionId: effectiveSessionId,
     isAuthenticated,
     isInitialized,
+    getSessionId: getEffectiveSessionId, // Export function to get fresh sessionId
   };
 }

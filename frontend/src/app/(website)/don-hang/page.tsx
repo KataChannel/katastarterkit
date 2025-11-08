@@ -131,13 +131,14 @@ function OrderListContent() {
   return (
     <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8">
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Navigation Sidebar */}
-        <aside className="md:w-64 flex-shrink-0">
-          <EcommerceNavigation />
-        </aside>
 
         {/* Main Content */}
         <div className="flex-1">
+                  {/* Navigation Sidebar */}
+        <aside className="flex-shrink-0 py-4">
+          <EcommerceNavigation />
+        </aside>
+
           {/* Page Header */}
           <div className="mb-6">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">

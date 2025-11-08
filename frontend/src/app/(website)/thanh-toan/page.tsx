@@ -5,15 +5,16 @@ import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { GET_CART, CREATE_ORDER } from '@/graphql/ecommerce.queries';
-import { CreditCard, Truck, MapPin, Phone, Mail, User, ArrowLeft } from 'lucide-react';
+import { CreditCard, Truck, MapPin, Phone, Mail, User, ArrowLeft, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCartSession } from '@/hooks/useCartSession';
+import { getSessionId as getSessionIdFromLib } from '@/lib/session';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
-  const { sessionId, isInitialized } = useCartSession();
+  const { sessionId, isInitialized, getSessionId: getFreshSessionId } = useCartSession();
 
   // Build query variables - always include sessionId for fallback
   const getQueryVariables = () => {
@@ -61,7 +62,21 @@ export default function CheckoutPage() {
   });
 
   const [createOrder, { loading: creating }] = useMutation(CREATE_ORDER, {
+    refetchQueries: [
+      {
+        query: GET_CART,
+        variables: getQueryVariables(),
+      },
+    ],
+    awaitRefetchQueries: true,
     onCompleted: (data) => {
+      console.log('[Checkout] CREATE_ORDER mutation completed:', {
+        data,
+        success: data?.createOrder?.success,
+        message: data?.createOrder?.message,
+        order: data?.createOrder?.order,
+      });
+      
       if (data.createOrder.success) {
         const order = data.createOrder.order;
         toast.success('Đặt hàng thành công!');
@@ -74,6 +89,21 @@ export default function CheckoutPage() {
       }
     },
     onError: (error) => {
+      // Avoid circular reference errors by logging specific properties
+      console.error('[Checkout] CREATE_ORDER mutation error:', {
+        message: error.message,
+        name: error.name,
+        graphQLErrors: error.graphQLErrors?.map((e: any) => ({
+          message: e.message,
+          extensions: e.extensions,
+          path: e.path,
+        })),
+        networkError: error.networkError ? {
+          message: error.networkError.message,
+          name: error.networkError.name,
+        } : null,
+        extraInfo: error.extraInfo,
+      });
       toast.error('Đặt hàng thất bại: ' + error.message);
     },
   });
@@ -145,8 +175,29 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log('[Checkout] handleSubmit - Initial state:', {
+      sessionId,
+      isAuthenticated,
+      isInitialized,
+      sessionIdType: typeof sessionId,
+      sessionIdValue: sessionId,
+      sessionIdLength: sessionId?.length,
+      formData: {
+        fullName: formData.fullName,
+        phone: formData.phone,
+        address: formData.address,
+        paymentMethod: formData.paymentMethod,
+        shippingMethod: formData.shippingMethod,
+      }
+    });
+
     // Validation
     if (!formData.fullName || !formData.phone || !formData.address) {
+      console.error('[Checkout] Validation failed - missing required fields:', {
+        hasFullName: !!formData.fullName,
+        hasPhone: !!formData.phone,
+        hasAddress: !!formData.address,
+      });
       toast.error('Vui lòng điền đầy đủ thông tin giao hàng');
       return;
     }
@@ -156,41 +207,92 @@ export default function CheckoutPage() {
       return;
     }
 
+    // IMPORTANT: For guest checkout, always get fresh sessionId from localStorage
+    // Don't rely on state which might be undefined during SSR/hydration
+    let effectiveSessionId: string | undefined = undefined;
+    
+    if (!isAuthenticated) {
+      effectiveSessionId = getSessionIdFromLib();
+      console.log('[Checkout] Got fresh sessionId from lib:', {
+        effectiveSessionId,
+        type: typeof effectiveSessionId,
+        length: effectiveSessionId?.length
+      });
+    }
+    
+    console.log('[Checkout] Effective sessionId:', {
+      effectiveSessionId,
+      willIncludeInOrder: !!effectiveSessionId,
+      isAuthenticated
+    });
+
     // Build order input - only include sessionId if it's valid
     const orderInput: any = {
       shippingAddress: {
         name: formData.fullName,
         phone: formData.phone,
         address: formData.address,
-        city: formData.city,
-        district: formData.district,
-        ward: formData.ward,
+        city: formData.city || '-', // Default value to avoid empty string
+        district: formData.district || '-',
+        ward: formData.ward || '-',
       },
       paymentMethod: formData.paymentMethod,
       shippingMethod: formData.shippingMethod,
-      customerNote: formData.notes,
+      customerNote: formData.notes || '',
     };
 
-    // Only add sessionId if it has a value
-    if (sessionId) {
-      orderInput.sessionId = sessionId;
+    // Only add sessionId if not authenticated and has a valid session
+    if (effectiveSessionId) {
+      orderInput.sessionId = effectiveSessionId;
     }
 
-    console.log('[Checkout] Submitting order with input:', {
-      orderInput,
-      sessionId,
-      isAuthenticated,
-      user: user?.id,
+    console.log('[Checkout] orderInput BEFORE mutation:', {
+      orderInput: JSON.parse(JSON.stringify(orderInput)),
+      hasSessionId: !!orderInput.sessionId,
+      sessionIdValue: orderInput.sessionId,
+      shippingAddress: orderInput.shippingAddress,
+      paymentMethod: orderInput.paymentMethod,
+      shippingMethod: orderInput.shippingMethod,
+    });
+
+    const mutationVariables = {
+      input: orderInput,
+    };
+
+    console.log('[Checkout] Calling createOrder mutation with variables:', {
+      variables: mutationVariables,
+      input: mutationVariables.input,
+      inputKeys: Object.keys(mutationVariables.input),
+      inputJSON: JSON.stringify(mutationVariables.input, null, 2),
+      shippingAddressKeys: Object.keys(mutationVariables.input.shippingAddress),
     });
 
     try {
-      await createOrder({
-        variables: {
-          input: orderInput,
-        },
+      const result = await createOrder({
+        variables: mutationVariables,
       });
-    } catch (err) {
-      console.error('[Checkout] Order creation error:', err);
+      
+      console.log('[Checkout] createOrder result:', {
+        result,
+        data: result.data,
+        errors: result.errors,
+      });
+    } catch (err: any) {
+      // Avoid circular reference errors by logging specific properties
+      console.error('[Checkout] Order creation error:', {
+        message: err?.message,
+        name: err?.name,
+        graphQLErrors: err?.graphQLErrors?.map((e: any) => ({
+          message: e.message,
+          extensions: e.extensions,
+          path: e.path,
+        })),
+        networkError: err?.networkError ? {
+          message: err?.networkError.message,
+          name: err?.networkError.name,
+        } : null,
+        stack: err?.stack,
+      });
       // Error handled by onError
     }
   };
@@ -260,7 +362,7 @@ export default function CheckoutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push('/cart')}
+              onClick={() => router.push('/gio-hang')}
               className="text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="h-6 w-6" />
@@ -514,31 +616,58 @@ export default function CheckoutPage() {
               </h2>
 
               {/* Items List */}
-              <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
-                {items.map((item: any) => (
-                  <div key={item.id} className="flex gap-3">
-                    <div className="relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden">
+                <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
+                {items.map((item: any) => {
+                  const product = item.product;
+                  const itemTotal = item.price * item.quantity;
+                  
+                  return (
+                  <div 
+                    key={item.id} 
+                    className="flex gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 border border-gray-200">
+                    {product?.thumbnail ? (
                       <Image
-                        src={item.product.thumbnail || '/placeholder-product.jpg'}
-                        alt={item.product.name}
-                        fill
-                        className="object-cover"
+                      src={product.thumbnail}
+                      alt={product.name || 'Product'}
+                      fill
+                      className="object-cover"
+                      sizes="64px"
                       />
-                      <span className="absolute -top-1 -right-1 bg-gray-900 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {item.quantity}
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-gray-300" />
+                      </div>
+                    )}
+                    {item.quantity > 1 && (
+                      <span 
+                      className="absolute -top-1 -right-1 bg-gray-900 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium shadow-sm"
+                      aria-label={`Quantity: ${item.quantity}`}
+                      >
+                      {item.quantity}
                       </span>
+                    )}
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900 line-clamp-2">
-                        {item.product.name}
+                    <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
+                      {product?.name || 'Unknown Product'}
+                    </h3>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-sm font-semibold text-gray-900">
+                      {formatPrice(itemTotal)}
                       </p>
-                      <p className="text-sm text-gray-600">
-                        {formatPrice(item.price * item.quantity)}
+                      {item.quantity > 1 && (
+                      <p className="text-xs text-gray-500">
+                        {formatPrice(item.price)} × {item.quantity}
                       </p>
+                      )}
+                    </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                  );
+                })}
+                </div>
 
               {/* Price Breakdown */}
               <div className="border-t pt-4 space-y-2">

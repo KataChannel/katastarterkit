@@ -1,5 +1,6 @@
 import { Field, ObjectType, InputType, ID, Int, Float, registerEnumType } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
+import { IsOptional, IsString, IsNotEmpty, IsEnum } from 'class-validator';
 
 /**
  * Order GraphQL Schema
@@ -279,24 +280,38 @@ export class OrderType {
 @InputType()
 export class ShippingAddressInput {
   @Field()
+  @IsNotEmpty()
+  @IsString()
   name: string;
 
   @Field()
+  @IsNotEmpty()
+  @IsString()
   phone: string;
 
   @Field()
+  @IsNotEmpty()
+  @IsString()
   address: string;
 
   @Field()
+  @IsNotEmpty()
+  @IsString()
   city: string;
 
   @Field()
+  @IsNotEmpty()
+  @IsString()
   district: string;
 
   @Field()
+  @IsNotEmpty()
+  @IsString()
   ward: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   zipCode?: string;
 }
 
@@ -304,42 +319,60 @@ export class ShippingAddressInput {
 export class CreateOrderInput {
   // Customer info (for guest orders)
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   guestEmail?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   guestPhone?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   guestName?: string;
 
   // Session ID for guest cart
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   sessionId?: string;
 
   // Order items (if not from cart)
   @Field(() => [OrderItemInput], { nullable: true })
+  @IsOptional()
   items?: OrderItemInput[];
 
   // Or create from cart
   @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsString()
   cartId?: string;
 
   @Field(() => ShippingAddressInput)
+  @IsNotEmpty()
   shippingAddress: ShippingAddressInput;
 
   @Field(() => ShippingAddressInput, { nullable: true })
+  @IsOptional()
   billingAddress?: ShippingAddressInput;
 
   @Field(() => ShippingMethod, { defaultValue: ShippingMethod.STANDARD })
+  @IsEnum(ShippingMethod)
   shippingMethod: ShippingMethod;
 
   @Field(() => PaymentMethod, { defaultValue: PaymentMethod.CASH_ON_DELIVERY })
+  @IsEnum(PaymentMethod)
   paymentMethod: PaymentMethod;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   customerNote?: string;
 
   @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
   metadata?: any;
 }
 

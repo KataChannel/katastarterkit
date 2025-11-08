@@ -18,7 +18,6 @@ interface AddToCartButtonProps {
   disabled?: boolean;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
-  fullWidth?: boolean;
   showIcon?: boolean;
   children?: React.ReactNode;
 }
@@ -31,7 +30,6 @@ export function AddToCartButton({
   disabled = false,
   className,
   size = 'md',
-  fullWidth = false,
   showIcon = true,
   children,
 }: AddToCartButtonProps) {
@@ -132,7 +130,6 @@ export function AddToCartButton({
       disabled={disabled || isAdding || justAdded}
       className={cn(
         'relative overflow-hidden transition-all duration-300',
-        fullWidth && 'w-full',
         justAdded && 'bg-green-600 hover:bg-green-700',
         isAdding && 'scale-95',
         sizeClasses[size],

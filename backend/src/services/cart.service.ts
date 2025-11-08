@@ -499,13 +499,20 @@ export class CartService {
    * Validate cart before checkout
    */
   async validateCart(userId?: string, sessionId?: string) {
+    console.log('[CartService] validateCart called with:', {
+      userId,
+      sessionId,
+      userIdType: typeof userId,
+      sessionIdType: typeof sessionId
+    });
+    
     const cart = await this.getOrCreateCart(userId, sessionId);
     const errors: string[] = [];
 
     for (const item of cart.items) {
-      // Check product availability
-      if (item.product.status !== 'published') {
-        errors.push(`Product "${item.product.name}" is no longer available`);
+      // Check product availability - ACTIVE is the only valid status for checkout
+      if (item.product.status !== 'ACTIVE') {
+        errors.push(`Product "${item.product.name}" is no longer available (status: ${item.product.status})`);
         continue;
       }
 

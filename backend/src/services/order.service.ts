@@ -21,6 +21,14 @@ export class OrderService {
   async createFromCart(input: CreateOrderInput, userId?: string) {
     const { shippingAddress, billingAddress, paymentMethod, shippingMethod, sessionId } = input;
 
+    console.log('[OrderService] createFromCart input:', {
+      userId,
+      sessionId,
+      hasShippingAddress: !!shippingAddress,
+      paymentMethod,
+      shippingMethod
+    });
+
     // Get cart with validation
     const cartValidation = await this.cartService.validateCart(userId, sessionId);
     
@@ -45,14 +53,37 @@ export class OrderService {
 
       orderItems.push({
         productId: item.productId,
-        variantId: item.variantId,
+        variantId: item.variantId || null,
+        
+        // Required snapshot fields
+        productName: item.product.name,
+        variantName: item.variant?.name || null,
+        sku: item.variant?.sku || item.product.sku || null,
+        thumbnail: item.product.thumbnail || (item.product.images && item.product.images[0]) || null,
+        
+        // Quantities
         quantity: item.quantity,
-        price, // Snapshot price
-        productSnapshot: {
-          name: item.product.name,
-          slug: item.product.slug,
-          images: item.product.images,
-          attributes: item.variant?.attributes || {},
+        quantityOrdered: item.quantity,
+        quantityDelivered: 0,
+        quantityReceived: 0,
+        quantityCancelled: 0,
+        
+        // Pricing
+        price, // Unit price snapshot
+        subtotal: itemSubtotal,
+        totalDelivered: 0,
+        totalReceived: 0,
+        totalAfterVAT: itemSubtotal,
+        vat: 0,
+        
+        // Metadata - store full product snapshot
+        metadata: {
+          productSnapshot: {
+            name: item.product.name,
+            slug: item.product.slug,
+            images: item.product.images,
+            attributes: item.variant?.attributes || {},
+          },
         },
       });
     }
@@ -240,6 +271,8 @@ export class OrderService {
 
   /**
    * Get order by order number (for tracking)
+   * Note: This is a public endpoint for order tracking, so we allow viewing without strict auth
+   * For more sensitive operations, use getOrder() which requires userId verification
    */
   async getOrderByNumber(orderNumber: string, email?: string) {
     const order = await this.prisma.order.findUnique({
@@ -266,8 +299,10 @@ export class OrderService {
       throw new NotFoundException('Order not found');
     }
 
-    // For guest orders, verify email
-    if (!order.userId && order.guestEmail !== email) {
+    // Optional: For guest orders, verify email if provided (for additional security)
+    // But don't require it - allow viewing order details with just order number
+    // This matches common e-commerce UX where order number alone is sufficient
+    if (email && !order.userId && order.guestEmail && order.guestEmail !== email) {
       throw new BadRequestException('Invalid order number or email');
     }
 
