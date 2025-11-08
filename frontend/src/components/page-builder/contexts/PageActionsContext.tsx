@@ -3,14 +3,27 @@
 import React, { createContext, useContext, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { usePageOperations, useBlockOperations, useNestedBlockOperations } from '@/hooks/usePageBuilder';
-import { BlockType, PageBlock, CreatePageInput, UpdatePageInput } from '@/types/page-builder';
+import { BlockType, PageBlock, PageStatus } from '@/types/page-builder';
 import { pageBuilderLogger, LOG_OPERATIONS } from '../utils/pageBuilderLogger';
 import { usePageState } from './PageStateContext';
 import { useTemplate } from './TemplateContext';
 import { useUIState } from './UIStateContext';
 import { useHistory } from './HistoryContext';
 import { BlockTemplate } from '@/data/blockTemplates';
+
+// Server Actions
+import { 
+  createPage, 
+  updatePage, 
+  deletePage,
+  getPageById
+} from '@/actions/page.actions';
+import { 
+  addBlock, 
+  updateBlock, 
+  deleteBlock, 
+  updateBlocksOrder 
+} from '@/actions/block.actions';
 
 /**
  * Default content for each block type
@@ -185,16 +198,13 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   const uiState = useUIState();
   const history = useHistory();
   
-  const { createPage, updatePage, deletePage } = usePageOperations();
   // Initialize with pageId from props, but fall back to state's page ID
   const effectivePageId = pageId || pageState.page?.id || '';
-  const { addBlock, updateBlock, deleteBlock, updateBlocksOrder } = useBlockOperations(effectivePageId);
-  const nestedOps = useNestedBlockOperations(effectivePageId);
   
   // Page operations
   const handlePageSave = useCallback(async () => {
     try {
-      const { editingPage, isNewPageMode, blocks, refetch, setEditingPage } = pageState;
+      const { editingPage, isNewPageMode, refetch, setEditingPage } = pageState;
       
       if (!editingPage) {
         toast.error('No page to save');
@@ -202,45 +212,35 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       }
       
       if (isNewPageMode) {
-        const input: CreatePageInput = {
+        // Create new page
+        const newPage = await createPage({
           title: editingPage.title,
           slug: editingPage.slug,
-          content: editingPage.content || {},
-          status: editingPage.status,
-          seoTitle: editingPage.seoTitle,
-          seoDescription: editingPage.seoDescription,
-          seoKeywords: editingPage.seoKeywords || [],
-          isHomepage: editingPage.isHomepage || false,
-        };
+          description: (editingPage as any).description || (editingPage as any).seoDescription,
+          metaTitle: (editingPage as any).metaTitle || (editingPage as any).seoTitle,
+          metaDescription: (editingPage as any).metaDescription || (editingPage as any).seoDescription,
+          isPublished: (editingPage as any).isPublished || (editingPage.status === PageStatus.PUBLISHED),
+        });
         
-        const result = await createPage(input);
-        pageBuilderLogger.success(LOG_OPERATIONS.PAGE_CREATE, 'Page created successfully', result);
+        pageBuilderLogger.success(LOG_OPERATIONS.PAGE_CREATE, 'Page created successfully', newPage);
         toast.success('Page created successfully!');
         
-        if (result?.data?.createPage) {
-          const newPage = result.data.createPage;
-          setEditingPage(newPage);
-          // After creating a new page, redirect to the new page's editor
-          if (newPage?.id) {
-            router.push(`/admin/pagebuilder/${newPage.id}`);
-          }
-          // After creating a new page, we've exited "new page mode" since we now have an ID
-          // Do not call refetch here since it will try to query with the old empty pageId
-          // The page state will be automatically updated through the context
+        setEditingPage(newPage as any);
+        // After creating a new page, redirect to the new page's editor
+        if (newPage?.id) {
+          router.push(`/admin/pagebuilder/${newPage.id}`);
         }
       } else {
-        const input: UpdatePageInput = {
+        // Update existing page
+        await updatePage(editingPage.id, {
           title: editingPage.title,
           slug: editingPage.slug,
-          content: editingPage.content || {},
-          status: editingPage.status,
-          seoTitle: editingPage.seoTitle,
-          seoDescription: editingPage.seoDescription,
-          seoKeywords: editingPage.seoKeywords || [],
-          isHomepage: editingPage.isHomepage || false,
-        };
+          description: (editingPage as any).description || (editingPage as any).seoDescription,
+          metaTitle: (editingPage as any).metaTitle || (editingPage as any).seoTitle,
+          metaDescription: (editingPage as any).metaDescription || (editingPage as any).seoDescription,
+          isPublished: (editingPage as any).isPublished || (editingPage.status === PageStatus.PUBLISHED),
+        });
         
-        await updatePage(editingPage.id, input);
         pageBuilderLogger.success(LOG_OPERATIONS.PAGE_UPDATE, 'Page updated successfully', { pageId: editingPage.id });
         toast.success('Page saved successfully!');
         
@@ -251,7 +251,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       pageBuilderLogger.error(LOG_OPERATIONS.PAGE_UPDATE, 'Failed to save page', { error });
       toast.error(error?.message || 'Failed to save page');
     }
-  }, [pageState, createPage, updatePage, router]);
+  }, [pageState, router]);
   
   const handlePageDelete = useCallback(async () => {
     try {
@@ -265,7 +265,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       pageBuilderLogger.error(LOG_OPERATIONS.PAGE_DELETE, 'Failed to delete page', { error });
       toast.error(error?.message || 'Failed to delete page');
     }
-  }, [pageState, deletePage]);
+  }, [pageState]);
   
   // Block operations
   const handleAddBlock = useCallback(async (blockType: BlockType) => {
@@ -295,53 +295,58 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         console.log('[PageBuilder] Dynamic Block created - user will pick template');
       }
       
-      // Don't send order - let backend calculate it to avoid race conditions
-      const input = {
+      // Calculate order for new block
+      const nextOrder = blocks.length;
+      
+      console.log('[PageBuilder] Adding block:', { blockType, pageId: page.id, order: nextOrder });
+      
+      // Add block using Server Action
+      const newBlock = await addBlock({
+        pageId: page.id,
         type: blockType,
+        name: blockType,
         content: defaultContent,
-        // order is NOT sent, backend will auto-calculate based on block count
-      };
+        order: nextOrder,
+      });
       
-      console.log('[PageBuilder] Adding block:', { blockType, pageId: page.id });
-      
-      const result = await addBlock(input);
       pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_CREATE, 'Block added', { blockType });
       toast.success(blockType === BlockType.DYNAMIC ? '✨ Dynamic Block added - pick a template!' : 'Block added successfully!');
       
-      console.log('[PageBuilder] Block added successfully:', result);
+      console.log('[PageBuilder] Block added successfully:', newBlock);
       await refetch();
       
       // Push to history after successful add
-      const newBlocks = await refetch();
-      if (newBlocks?.data?.page?.blocks) {
-        history.pushHistory(newBlocks.data.page.blocks, `Added ${blockType} block`);
-      }
+      const updatedBlocks = pageState.blocks;
+      history.pushHistory(updatedBlocks, `Added ${blockType} block`);
     } catch (error: any) {
       console.error('[PageBuilder] Block add error:', error);
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_CREATE, 'Failed to add block', { error });
       toast.error(error?.message || 'Failed to add block');
     }
-  }, [pageState, addBlock, history]);
+  }, [pageState, history]);
   
   const handleAddTemplateBlock = useCallback(async (templateConfig: any) => {
     try {
-      const { page, refetch } = pageState;
+      const { page, refetch, blocks } = pageState;
       
       if (!page?.id) {
         toast.error('Please create a page first');
         return;
       }
       
-      const input = {
+      const nextOrder = blocks.length;
+      
+      await addBlock({
+        pageId: page.id,
         type: BlockType.DYNAMIC,
+        name: templateConfig.templateName || 'Dynamic Block',
         content: {
           ...DEFAULT_BLOCK_CONTENT[BlockType.DYNAMIC],
           ...templateConfig,
         },
-        // order is NOT sent, backend will auto-calculate
-      };
+        order: nextOrder,
+      });
       
-      await addBlock(input);
       pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_CREATE, 'Template block added', templateConfig);
       toast.success('Template block added!');
       await refetch();
@@ -349,50 +354,43 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_CREATE, 'Failed to add template block', { error });
       toast.error(error?.message || 'Failed to add template block');
     }
-  }, [pageState, addBlock]);
+  }, [pageState]);
   
   const handleBlockUpdate = useCallback(async (blockId: string, content: any, style?: any) => {
     try {
       const input: any = { content };
       if (style !== undefined) {
-        input.style = style;
-      }
-      
-      // If content has config property, extract and save it separately
-      if (content?.config !== undefined) {
-        input.config = content.config;
+        input.styles = style;
       }
       
       await updateBlock(blockId, input);
       pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_UPDATE, 'Block updated', { blockId, content, style });
-      const result = await pageState.refetch();
+      await pageState.refetch();
       
       // Push to history after successful update
-      if (result?.data?.page?.blocks) {
-        history.pushHistory(result.data.page.blocks, `Updated block`);
-      }
+      const updatedBlocks = pageState.blocks;
+      history.pushHistory(updatedBlocks, `Updated block`);
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_UPDATE, 'Failed to update block', { error });
       toast.error(error?.message || 'Failed to update block');
     }
-  }, [updateBlock, pageState, history]);
+  }, [pageState, history]);
   
   const handleBlockDelete = useCallback(async (blockId: string) => {
     try {
       await deleteBlock(blockId);
       pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_DELETE, 'Block deleted', { blockId });
       toast.success('Block deleted!');
-      const result = await pageState.refetch();
+      await pageState.refetch();
       
       // Push to history after successful delete
-      if (result?.data?.page?.blocks) {
-        history.pushHistory(result.data.page.blocks, `Deleted block`);
-      }
+      const updatedBlocks = pageState.blocks;
+      history.pushHistory(updatedBlocks, `Deleted block`);
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_DELETE, 'Failed to delete block', { error });
       toast.error(error?.message || 'Failed to delete block');
     }
-  }, [deleteBlock, pageState, history]);
+  }, [pageState, history]);
   
   const handleBlocksReorder = useCallback(async (newBlocks: PageBlock[]) => {
     try {
@@ -409,17 +407,16 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       await updateBlocksOrder(updates);
       
       pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_REORDER, 'Blocks reordered', { count: newBlocks.length });
-      const result = await refetch();
+      await refetch();
       
       // Push to history after successful reorder
-      if (result?.data?.page?.blocks) {
-        history.pushHistory(result.data.page.blocks, `Reordered blocks`);
-      }
+      const updatedBlocks = pageState.blocks;
+      history.pushHistory(updatedBlocks, `Reordered blocks`);
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_REORDER, 'Failed to reorder blocks', { error });
       toast.error('Failed to reorder blocks');
     }
-  }, [pageState, updateBlocksOrder]);
+  }, [pageState, history]);
   
   const handleSelectBlock = useCallback((blockId: string | null) => {
     pageState.setSelectedBlockId(blockId);
@@ -429,20 +426,18 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
     try {
       const { refetch } = pageState;
       
-      const input: any = { style };
-      await updateBlock(blockId, input);
+      await updateBlock(blockId, { styles: style });
       pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_STYLE_UPDATE, 'Block style updated', { blockId, style });
-      const result = await refetch();
+      await refetch();
       
       // Push to history after successful style update
-      if (result?.data?.page?.blocks) {
-        history.pushHistory(result.data.page.blocks, `Updated block style`);
-      }
+      const updatedBlocks = pageState.blocks;
+      history.pushHistory(updatedBlocks, `Updated block style`);
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_STYLE_UPDATE, 'Failed to update style', { error });
       toast.error('Failed to update style');
     }
-  }, [pageState, updateBlock, history]);
+  }, [pageState, history]);
   
   // History operations
   const handleUndo = useCallback(async () => {
@@ -472,7 +467,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       pageBuilderLogger.error('UNDO', 'Failed to undo', { error });
       toast.error('Failed to undo');
     }
-  }, [history, pageState, updateBlocksOrder]);
+  }, [history, pageState]);
   
   const handleRedo = useCallback(async () => {
     try {
@@ -501,7 +496,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
       pageBuilderLogger.error('REDO', 'Failed to redo', { error });
       toast.error('Failed to redo');
     }
-  }, [history, pageState, updateBlocksOrder]);
+  }, [history, pageState]);
   
   // Nested block operations
   const handleAddChild = useCallback((parentId: string) => {
@@ -513,29 +508,16 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   
   const handleAddChildBlock = useCallback(async (parentId: string, blockType: BlockType) => {
     try {
-      const { refetch } = pageState;
-      
-      const defaultContent = DEFAULT_BLOCK_CONTENT[blockType as keyof typeof DEFAULT_BLOCK_CONTENT] || {};
-      
-      await nestedOps.addChildBlock(
-        parentId,
-        blockType,
-        defaultContent,
-        {}
-      );
-      
-      pageBuilderLogger.success(LOG_OPERATIONS.BLOCK_CREATE, 'Child block added', { parentId, blockType });
-      toast.success('Child block added!');
-      
-      // Use atomic close operation
+      // TODO: Nested blocks not yet supported in current schema
+      // Need to add parentId field to Block model or implement via content JSON
+      toast.info('Nested blocks feature coming soon!');
+      pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_CREATE, 'Nested blocks not yet implemented', { parentId, blockType });
       uiState.closeAddChildDialog();
-      
-      await refetch();
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_CREATE, 'Failed to add child block', { error });
       toast.error('Failed to add child block');
     }
-  }, [pageState, uiState, nestedOps]);
+  }, [uiState]);
   
   const handleCloseAddChildDialog = useCallback(() => {
     uiState.closeAddChildDialog();
@@ -544,7 +526,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
   // Template operations
   const handleApplyTemplate = useCallback(async (template: BlockTemplate) => {
     try {
-      const { page, editingPage, isNewPageMode, refetch } = pageState;
+      const { page, editingPage, isNewPageMode, refetch, blocks } = pageState;
       const { setIsApplyingTemplate, setShowPreviewModal } = templateState;
       
       if (!editingPage?.id && !isNewPageMode) {
@@ -560,11 +542,15 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         return;
       }
       
-      for (const block of template.blocks) {
+      // Add each block from template
+      for (let i = 0; i < template.blocks.length; i++) {
+        const block = template.blocks[i];
         await addBlock({
+          pageId: currentPageId,
           type: block.type,
+          name: block.type, // Use type as name since TemplateBlockDefinition doesn't have name
           content: block.content,
-          order: block.order,
+          order: blocks.length + i,
         });
       }
       
@@ -579,7 +565,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
     } finally {
       templateState.setIsApplyingTemplate(false);
     }
-  }, [pageState, templateState, addBlock]);
+  }, [pageState, templateState]);
   
   // Drag and drop
   const handleDragStart = useCallback((event: any) => {
