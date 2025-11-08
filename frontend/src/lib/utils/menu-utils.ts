@@ -1,10 +1,10 @@
 import { MenuTreeItem } from '@/components/menu/SortableMenuRow';
-import { Menu } from '@/lib/graphql/menu-dynamic-queries';
+import type { MenuItem } from '@prisma/client';
 
 /**
  * Build hierarchical menu tree from flat array
  */
-export function buildMenuTree(items: Menu[], expandedMenus: Set<string>): MenuTreeItem[] {
+export function buildMenuTree(items: MenuItem[], expandedMenus: Set<string>): MenuTreeItem[] {
   const map = new Map<string, MenuTreeItem>();
   const roots: MenuTreeItem[] = [];
 
@@ -44,8 +44,8 @@ export function buildMenuTree(items: Menu[], expandedMenus: Set<string>): MenuTr
 /**
  * Flatten tree structure for drag and drop
  */
-export function flattenMenuTree(tree: MenuTreeItem[]): Menu[] {
-  const result: Menu[] = [];
+export function flattenMenuTree(tree: MenuTreeItem[]): MenuItem[] {
+  const result: MenuItem[] = [];
   const flatten = (items: MenuTreeItem[]) => {
     items.forEach((item) => {
       result.push(item);

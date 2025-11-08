@@ -9,7 +9,7 @@ export async function seedWebsiteSettings() {
     // ===== GENERAL SETTINGS =====
     {
       key: 'site.name',
-      value: 'Rau Sạch Trần Gia',
+      value: 'Inner Bright',
       type: 'TEXT',
       category: 'GENERAL',
       label: 'Tên Website',
@@ -407,7 +407,7 @@ export async function seedWebsiteSettings() {
     // ===== SEO SETTINGS =====
     {
       key: 'seo.meta_title',
-      value: 'Rau Sạch Trần Gia - Nông Sản Thực Phẩm Sạch',
+      value: 'Inner Bright - Nông Sản Thực Phẩm Sạch',
       type: 'TEXT',
       category: 'SEO',
       label: 'Meta Title',

@@ -19,7 +19,7 @@ Status: ✅ Intact & Accessible
 
 | Key | Value | Status |
 |-----|-------|--------|
-| site.name | Rau Sạch Trần Gia | ✅ |
+| site.name | Inner Bright | ✅ |
 | site.offline | false | ✅ |
 | site.homepage_url | /lms | ✅ |
 | site.offline_redirect_url | /maintenance | ✅ |

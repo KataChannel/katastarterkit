@@ -1,8 +1,9 @@
 'use client';
 
-import { Menu } from '@/lib/graphql/menu-dynamic-queries';
+import type { MenuItem } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { TableCell, TableRow } from '@/components/ui/table';
 import {
   Pencil,
@@ -20,7 +21,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 
-export interface MenuTreeItem extends Menu {
+export interface MenuTreeItem extends MenuItem {
   children?: MenuTreeItem[];
   expanded?: boolean;
 }
@@ -28,14 +29,16 @@ export interface MenuTreeItem extends Menu {
 interface SortableMenuRowProps {
   menu: MenuTreeItem;
   level?: number;
-  allMenus: Menu[];
-  onEdit: (menu: Menu) => void;
+  allMenus: MenuItem[];
+  onEdit: (menu: MenuItem) => void;
   onDelete: (id: string, title: string) => void;
   onToggleActive: (id: string) => void;
   onToggleVisibility: (id: string) => void;
   onToggleExpand: (id: string) => void;
   getTypeColor: (type: string) => string;
   expanded?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
 export function SortableMenuRow({
@@ -48,6 +51,8 @@ export function SortableMenuRow({
   onToggleVisibility,
   onToggleExpand,
   getTypeColor,
+  isSelected = false,
+  onToggleSelect,
   expanded = false,
 }: SortableMenuRowProps) {
   const {
@@ -70,6 +75,15 @@ export function SortableMenuRow({
   return (
     <>
       <TableRow ref={setNodeRef} style={style} className={cn(isDragging && 'bg-muted')}>
+        <TableCell className="w-12">
+          {onToggleSelect && (
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={() => onToggleSelect(menu.id)}
+              aria-label={`Chọn ${menu.title}`}
+            />
+          )}
+        </TableCell>
         <TableCell style={{ paddingLeft: `${level * 2 + 1}rem` }}>
           <div className="flex items-center gap-2">
             <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
@@ -92,16 +106,20 @@ export function SortableMenuRow({
             {menu.icon && <MenuIcon className="h-4 w-4 text-muted-foreground" />}
             <div>
               <div className="font-medium">{menu.title}</div>
-              <div className="text-sm text-muted-foreground">{menu.slug}</div>
+              <div className="text-sm text-muted-foreground">
+                {(menu.metadata as any)?.slug || menu.url || '-'}
+              </div>
             </div>
           </div>
         </TableCell>
         <TableCell>
-          <Badge className={getTypeColor(menu.type)}>{menu.type}</Badge>
+          <Badge className={getTypeColor((menu.metadata as any)?.type || 'SIDEBAR')}>
+            {(menu.metadata as any)?.type || 'SIDEBAR'}
+          </Badge>
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-1">
-            {menu.route || menu.url || '-'}
+            {menu.url || '-'}
             {menu.url && <ExternalLink className="h-3 w-3 text-muted-foreground" />}
           </div>
         </TableCell>
@@ -112,8 +130,8 @@ export function SortableMenuRow({
           </Badge>
         </TableCell>
         <TableCell>
-          <Badge variant={menu.isVisible ? 'default' : 'outline'}>
-            {menu.isVisible ? 'Hiển thị' : 'Ẩn'}
+          <Badge variant={(menu.metadata as any)?.isVisible !== false ? 'default' : 'outline'}>
+            {(menu.metadata as any)?.isVisible !== false ? 'Hiển thị' : 'Ẩn'}
           </Badge>
         </TableCell>
         <TableCell className="text-right">
@@ -130,14 +148,14 @@ export function SortableMenuRow({
               variant="ghost"
               size="icon"
               onClick={() => onToggleVisibility(menu.id)}
-              title={menu.isVisible ? 'Ẩn' : 'Hiển thị'}
+              title={(menu.metadata as any)?.isVisible !== false ? 'Ẩn' : 'Hiển thị'}
             >
-              {menu.isVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              {(menu.metadata as any)?.isVisible !== false ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
             </Button>
             <Button variant="ghost" size="icon" onClick={() => onEdit(menu)} title="Chỉnh sửa">
               <Pencil className="h-4 w-4" />
             </Button>
-            {!menu.isProtected && (
+            {!(menu.metadata as any)?.isProtected && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -165,6 +183,8 @@ export function SortableMenuRow({
             onToggleExpand={onToggleExpand}
             getTypeColor={getTypeColor}
             expanded={child.expanded}
+            isSelected={isSelected}
+            onToggleSelect={onToggleSelect}
           />
         ))}
     </>

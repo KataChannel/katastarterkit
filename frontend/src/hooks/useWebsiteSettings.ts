@@ -1,223 +1,233 @@
-import { useFindMany } from './useDynamicGraphQL';
-// DEPRECATED: Apollo Client removed
-const useQuery = () => ({ data: null, loading: false, error: null, refetch: async () => ({}) });
-import { GET_PUBLIC_WEBSITE_SETTINGS, GET_HEADER_SETTINGS, GET_FOOTER_SETTINGS } from '@/graphql/website-settings.queries';
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
+import { getSettings, getSettingsByGroup } from '@/actions/settings.actions';
 
 export interface WebsiteSetting {
   id: string;
   key: string;
   value: string | null;
-  type: 'TEXT' | 'TEXTAREA' | 'NUMBER' | 'BOOLEAN' | 'COLOR' | 'IMAGE' | 'URL' | 'JSON' | 'SELECT';
-  category: 'GENERAL' | 'HEADER' | 'FOOTER' | 'SEO' | 'SOCIAL' | 'CONTACT' | 'APPEARANCE' | 'ANALYTICS' | 'PAYMENT' | 'SHIPPING' | 'SUPPORT_CHAT' | 'AUTH';
-  label: string;
-  description?: string | null;
+  type?: string | null;
   group?: string | null;
-  order: number;
-  isActive: boolean;
-  isPublic: boolean;
-  options?: any;
-  validation?: any;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface WebsiteSettings {
-  // General
-  'site.name'?: string;
-  'site.tagline'?: string;
-  'site.description'?: string;
-
-  // Header
-  'header.enabled'?: boolean;
-  'header.logo'?: string;
-  'header.logo_width'?: number;
-  'header.background_color'?: string;
-  'header.text_color'?: string;
-  'header.show_search'?: boolean;
-  'header.show_cart'?: boolean;
-  'header.show_user_menu'?: boolean;
-  'header.banner_enabled'?: boolean;
-  'header.banner_height'?: number;
-  'header.banner_autoplay'?: boolean;
-  'header.banner_interval'?: number;
-
-  // Footer
-  'footer.enabled'?: boolean;
-  'footer.background_color'?: string;
-  'footer.text_color'?: string;
-  'footer.show_visitor_stats'?: boolean;
-  'footer.show_social_links'?: boolean;
-
-  // Contact
-  'contact.company_name'?: string;
-  'contact.address'?: string;
-  'contact.phone'?: string;
-  'contact.phone_display'?: string;
-  'contact.email'?: string;
-
-  // Social
-  'social.facebook'?: string;
-  'social.facebook_enabled'?: boolean;
-  'social.tiktok'?: string;
-  'social.tiktok_enabled'?: boolean;
-  'social.youtube'?: string;
-  'social.youtube_enabled'?: boolean;
-
-  // SEO
-  'seo.meta_title'?: string;
-  'seo.meta_description'?: string;
-  'seo.keywords'?: string;
-  'seo.og_image'?: string;
-
-  // Appearance
-  'appearance.primary_color'?: string;
-  'appearance.secondary_color'?: string;
-  'appearance.accent_color'?: string;
-
-  [key: string]: any;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**
- * Hook để lấy tất cả website settings
- * Uses public GraphQL query (no authentication required)
+ * Convert settings array to key-value map with parsed values
  */
-export function useWebsiteSettings(category?: string) {
-  const { data, loading, error } = useQuery(GET_PUBLIC_WEBSITE_SETTINGS, {
-    variables: {
-      category,
-    },
-    fetchPolicy: 'network-only',
+export function settingsToMap(settings: WebsiteSetting[]): Record<string, any> {
+  const map: Record<string, any> = {};
+  
+  settings.forEach(setting => {
+    if (setting.value !== null && setting.value !== undefined) {
+      // Parse value based on type
+      let parsedValue: any = setting.value;
+      
+      switch (setting.type?.toLowerCase()) {
+        case 'number':
+          parsedValue = Number(setting.value);
+          break;
+        case 'boolean':
+          parsedValue = setting.value === 'true';
+          break;
+        case 'json':
+          try {
+            parsedValue = JSON.parse(setting.value);
+          } catch {
+            parsedValue = setting.value;
+          }
+          break;
+        default:
+          parsedValue = setting.value;
+      }
+      
+      map[setting.key] = parsedValue;
+    }
   });
-
-  return {
-    data: data?.publicWebsiteSettings || [],
-    loading,
-    error,
-  };
+  
+  return map;
 }
 
 /**
- * Hook để lấy header settings
- * Uses public GraphQL query (no authentication required)
+ * Hook to fetch all website settings
+ */
+export function useWebsiteSettings() {
+  const [data, setData] = useState<WebsiteSetting[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchSettings = async () => {
+      try {
+        console.log('[useWebsiteSettings] Fetching settings...');
+        setLoading(true);
+        const settings = await getSettings();
+        console.log('[useWebsiteSettings] Got settings:', settings?.length || 0);
+        if (mounted) {
+          setData(settings as WebsiteSetting[]);
+          setError(null);
+        }
+      } catch (err) {
+        console.error('[useWebsiteSettings] Error:', err);
+        if (mounted) {
+          setError(err as Error);
+          setData([]);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchSettings();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return { data, loading, error };
+}
+
+/**
+ * Hook to fetch settings by group
+ */
+export function useSettingsByGroup(group: string) {
+  const [data, setData] = useState<WebsiteSetting[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchSettings = async () => {
+      try {
+        setLoading(true);
+        const settings = await getSettingsByGroup(group);
+        if (mounted) {
+          setData(settings as WebsiteSetting[]);
+          setError(null);
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err as Error);
+          setData([]);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchSettings();
+
+    return () => {
+      mounted = false;
+    };
+  }, [group]);
+
+  return { data, loading, error };
+}
+
+/**
+ * Hook to fetch header settings
  */
 export function useHeaderSettings() {
-  const { data, loading, error } = useQuery(GET_HEADER_SETTINGS, {
-    fetchPolicy: 'network-only',
-  });
+  const { data: allSettings, loading, error } = useWebsiteSettings();
+  
+  const headerSettings = useMemo(() => {
+    return allSettings.filter(s => s.key.startsWith('header.'));
+  }, [allSettings]);
 
-  return {
-    data: data?.headerSettings || [],
-    loading,
-    error,
-  };
+  return { data: headerSettings, loading, error };
 }
 
 /**
- * Hook để lấy footer settings
- * Uses public GraphQL query (no authentication required)
+ * Hook to fetch footer settings
  */
 export function useFooterSettings() {
-  const { data, loading, error } = useQuery(GET_FOOTER_SETTINGS, {
-    fetchPolicy: 'network-only',
-  });
+  const { data: allSettings, loading, error } = useWebsiteSettings();
+  
+  const footerSettings = useMemo(() => {
+    return allSettings.filter(s => s.key.startsWith('footer.'));
+  }, [allSettings]);
 
-  return {
-    data: data?.footerSettings || [],
-    loading,
-    error,
-  };
+  return { data: footerSettings, loading, error };
 }
 
 /**
- * Hook để lấy contact settings
- * Uses public GraphQL query (no authentication required)
+ * Hook to fetch contact settings
  */
 export function useContactSettings() {
-  const { data, loading, error } = useQuery(GET_PUBLIC_WEBSITE_SETTINGS, {
-    variables: {
-      category: 'CONTACT',
-    },
-    fetchPolicy: 'network-only',
-  });
+  const { data: allSettings, loading, error } = useWebsiteSettings();
+  
+  const contactSettings = useMemo(() => {
+    return allSettings.filter(s => s.key.startsWith('contact.'));
+  }, [allSettings]);
 
-  return {
-    data: data?.publicWebsiteSettings || [],
-    loading,
-    error,
-  };
+  return { data: contactSettings, loading, error };
 }
 
 /**
- * Hook để lấy social settings
- * Uses public GraphQL query (no authentication required)
+ * Hook to fetch social settings
  */
 export function useSocialSettings() {
-  const { data, loading, error } = useQuery(GET_PUBLIC_WEBSITE_SETTINGS, {
-    variables: {
-      category: 'SOCIAL',
-    },
-    fetchPolicy: 'network-only',
-  });
-
-  return {
-    data: data?.publicWebsiteSettings || [],
-    loading,
-    error,
-  };
-}
-
-/**
- * Helper function để parse giá trị setting theo type
- */
-export function parseSettingValue(setting: WebsiteSetting): any {
-  if (!setting.value) return null;
-
-  switch (setting.type) {
-    case 'BOOLEAN':
-      return setting.value === 'true';
-    case 'NUMBER':
-      return parseFloat(setting.value);
-    case 'JSON':
-      try {
-        return JSON.parse(setting.value);
-      } catch {
-        return null;
-      }
-    default:
-      return setting.value;
-  }
-}
-
-/**
- * Helper function để convert array of settings thành key-value object
- */
-export function settingsToMap(settings: WebsiteSetting[]): WebsiteSettings {
-  return settings.reduce((acc, setting) => {
-    acc[setting.key] = parseSettingValue(setting);
-    return acc;
-  }, {} as WebsiteSettings);
-}
-
-/**
- * Hook để lấy settings dạng key-value map
- */
-export function useWebsiteSettingsMap(category?: string) {
-  const { data: settings = [], loading, error } = useWebsiteSettings(category);
+  const { data: allSettings, loading, error } = useWebsiteSettings();
   
-  const settingsMap = settingsToMap(settings);
+  const socialSettings = useMemo(() => {
+    return allSettings.filter(s => s.key.startsWith('social.'));
+  }, [allSettings]);
 
-  return {
-    settings: settingsMap,
-    loading,
-    error,
-  };
+  return { data: socialSettings, loading, error };
 }
 
 /**
- * Hook để lấy 1 setting cụ thể theo key
+ * Hook to fetch SEO settings
+ */
+export function useSeoSettings() {
+  const { data: allSettings, loading, error } = useWebsiteSettings();
+  
+  const seoSettings = useMemo(() => {
+    return allSettings.filter(s => s.key.startsWith('seo.'));
+  }, [allSettings]);
+
+  return { data: seoSettings, loading, error };
+}
+
+/**
+ * Hook to fetch appearance settings
+ */
+export function useAppearanceSettings() {
+  const { data: allSettings, loading, error } = useWebsiteSettings();
+  
+  const appearanceSettings = useMemo(() => {
+    return allSettings.filter(s => s.key.startsWith('appearance.'));
+  }, [allSettings]);
+
+  return { data: appearanceSettings, loading, error };
+}
+
+/**
+ * Hook to get settings as a key-value map
+ */
+export function useWebsiteSettingsMap() {
+  const { data, loading, error } = useWebsiteSettings();
+  
+  const settingsMap = useMemo(() => settingsToMap(data), [data]);
+
+  return { data: settingsMap, loading, error };
+}
+
+/**
+ * Hook to get a single setting value by key
  */
 export function useWebsiteSetting(key: string) {
-  const { settings, loading, error } = useWebsiteSettingsMap();
+  const { data: settings, loading, error } = useWebsiteSettingsMap();
   
   return {
     value: settings[key],

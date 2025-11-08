@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu } from '@/lib/graphql/menu-dynamic-queries';
+import type { MenuItem } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,7 +43,7 @@ interface MenuFormDialogProps {
   formData: MenuFormData;
   onFormChange: (data: MenuFormData) => void;
   onSubmit: () => void;
-  menus: Menu[];
+  menus: MenuItem[];
   selectedMenuId?: string;
 }
 

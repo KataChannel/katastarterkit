@@ -8,7 +8,7 @@ import {
   useUpdateMenu,
   useDeleteMenu,
 } from '@/lib/hooks/useMenus';
-import { Menu } from '@/lib/graphql/menu-dynamic-queries';
+import type { MenuItem as Menu } from '@prisma/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +20,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus, Search } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Plus, Search, Trash2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -71,6 +80,9 @@ export default function MenuManagementPage() {
   const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
+  const [selectedMenuIds, setSelectedMenuIds] = useState<Set<string>>(new Set());
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [menuToDelete, setMenuToDelete] = useState<{ id: string; title: string } | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -95,23 +107,11 @@ export default function MenuManagementPage() {
   );
 
   // Use dynamic hooks
-  const where = useMemo(() => {
-    const filter: any = {};
-    if (selectedType !== 'all') {
-      filter.type = selectedType;
-    }
-    if (searchTerm) {
-      filter.OR = [
-        { title: { contains: searchTerm, mode: 'insensitive' } },
-        { slug: { contains: searchTerm, mode: 'insensitive' } },
-      ];
-    }
-    return filter;
-  }, [selectedType, searchTerm]);
-
   const { menus: menusData, loading, refetch } = useMenus({
-    where,
-    orderBy: { order: 'asc' },
+    isAdmin: true, // Use admin endpoint with authentication
+    type: selectedType !== 'all' ? selectedType : undefined,
+    searchTerm: searchTerm || undefined,
+    includeChildren: true,
   });
 
   // Ensure menus is always Menu[] type
@@ -217,14 +217,84 @@ export default function MenuManagementPage() {
     }
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Are you sure you want to delete menu "${title}"?`)) return;
+  const handleDelete = (id: string, title: string) => {
+    setMenuToDelete({ id, title });
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!menuToDelete) return;
     try {
-      await deleteMenuMutation(id);
-      toast.success('Menu deleted successfully');
+      await deleteMenuMutation(menuToDelete.id);
+      toast.success('Menu đã xóa thành công');
+      setIsDeleteDialogOpen(false);
+      setMenuToDelete(null);
       refetch();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete menu');
+      toast.error(error.message || 'Không thể xóa menu');
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedMenuIds.size === 0) {
+      toast.error('Vui lòng chọn ít nhất một menu để xóa');
+      return;
+    }
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmBulkDelete = async () => {
+    if (selectedMenuIds.size === 0) return;
+    
+    try {
+      let successCount = 0;
+      let failCount = 0;
+
+      // Convert Set to Array for iteration
+      const idsToDelete = Array.from(selectedMenuIds);
+      
+      for (const id of idsToDelete) {
+        try {
+          await deleteMenuMutation(id);
+          successCount++;
+        } catch (error) {
+          failCount++;
+          console.error(`Failed to delete menu ${id}:`, error);
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`Đã xóa thành công ${successCount} menu`);
+      }
+      if (failCount > 0) {
+        toast.error(`Không thể xóa ${failCount} menu`);
+      }
+
+      setIsDeleteDialogOpen(false);
+      setSelectedMenuIds(new Set());
+      refetch();
+    } catch (error: any) {
+      toast.error('Có lỗi xảy ra khi xóa menu');
+    }
+  };
+
+  const toggleSelectMenu = (id: string) => {
+    setSelectedMenuIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedMenuIds.size === menus.length) {
+      setSelectedMenuIds(new Set());
+    } else {
+      setSelectedMenuIds(new Set(menus.map((m) => m.id)));
     }
   };
 
@@ -243,10 +313,17 @@ export default function MenuManagementPage() {
 
   const handleToggleVisibility = async (id: string) => {
     try {
-      // Get current menu to toggle isVisible
+      // Get current menu to toggle isVisible (stored in metadata)
       const menu = menus.find((m) => m.id === id);
       if (!menu) return;
-      await updateMenuMutation(id, { isVisible: !(menu as any).isVisible });
+      
+      const currentMetadata = (menu as any).metadata || {};
+      const newMetadata = {
+        ...currentMetadata,
+        isVisible: currentMetadata.isVisible === false ? true : false,
+      };
+      
+      await updateMenuMutation(id, { metadata: newMetadata } as any);
       toast.success('Menu visibility updated');
       refetch();
     } catch (error: any) {
@@ -256,19 +333,20 @@ export default function MenuManagementPage() {
 
   const openEditDialog = (menu: Menu) => {
     setSelectedMenu(menu);
+    const metadata = (menu as any).metadata || {};
     setFormData({
-      title: (menu as any).title,
-      slug: menu.slug,
-      description: (menu as any).description || '',
-      type: (menu as any).type,
-      route: (menu as any).route || '',
-      url: (menu as any).url || '',
-      icon: (menu as any).icon || '',
-      order: (menu as any).order,
-      parentId: (menu as any).parentId || 'none',
-      isActive: (menu as any).isActive,
-      isVisible: (menu as any).isVisible,
-      isPublic: (menu as any).isPublic,
+      title: menu.title,
+      slug: metadata.slug || menu.url || '',
+      description: metadata.description || '',
+      type: metadata.type || 'SIDEBAR',
+      route: menu.url || '',
+      url: menu.url || '',
+      icon: menu.icon || '',
+      order: menu.order,
+      parentId: menu.parentId || 'none',
+      isActive: menu.isActive,
+      isVisible: metadata.isVisible !== false,
+      isPublic: metadata.isPublic || false,
     });
     setIsEditOpen(true);
   };
@@ -338,8 +416,18 @@ export default function MenuManagementPage() {
 
       {/* Table */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle>Menu ({menus.length})</CardTitle>
+          {selectedMenuIds.size > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleBulkDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Xóa {selectedMenuIds.size} menu
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           <DndContext
@@ -351,6 +439,13 @@ export default function MenuManagementPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={selectedMenuIds.size === menus.length && menus.length > 0}
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Chọn tất cả"
+                    />
+                  </TableHead>
                   <TableHead>Tiêu đề</TableHead>
                   <TableHead>Loại</TableHead>
                   <TableHead>Đường dẫn/URL</TableHead>
@@ -363,13 +458,13 @@ export default function MenuManagementPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={8} className="text-center py-8">
                       Đang tải menu...
                     </TableCell>
                   </TableRow>
                 ) : menuTree.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={8} className="text-center py-8">
                       Không tìm thấy menu
                     </TableCell>
                   </TableRow>
@@ -391,6 +486,8 @@ export default function MenuManagementPage() {
                         onToggleExpand={handleToggleExpand}
                         getTypeColor={getMenuTypeColor}
                         expanded={menu.expanded}
+                        isSelected={selectedMenuIds.has(menu.id)}
+                        onToggleSelect={toggleSelectMenu}
                       />
                     ))}
                   </SortableContext>
@@ -432,6 +529,48 @@ export default function MenuManagementPage() {
         menus={menus}
         selectedMenuId={selectedMenu?.id}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa</DialogTitle>
+            <DialogDescription>
+              {menuToDelete ? (
+                <>
+                  Bạn có chắc chắn muốn xóa menu <strong>"{menuToDelete.title}"</strong>?
+                  <br />
+                  <span className="text-destructive">Hành động này không thể hoàn tác.</span>
+                </>
+              ) : (
+                <>
+                  Bạn có chắc chắn muốn xóa <strong>{selectedMenuIds.size} menu</strong> đã chọn?
+                  <br />
+                  <span className="text-destructive">Hành động này không thể hoàn tác.</span>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setMenuToDelete(null);
+              }}
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={menuToDelete ? confirmDelete : confirmBulkDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

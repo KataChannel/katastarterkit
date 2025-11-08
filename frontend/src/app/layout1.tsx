@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    default: 'Rau Sạch Trần Gia',
+    default: 'Inner Bright',
     template: '%s | rausachcore',
   },
   description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data. Built with Next.js, NestJS, GraphQL, Prisma, Redis, and Minio.',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    title: 'Rau Sạch Trần Gia',
+    title: 'Inner Bright',
     description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data.',
     siteName: 'rausachcore',
     images: [
@@ -29,13 +29,13 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Rau Sạch Trần Gia',
+        alt: 'Inner Bright',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Rau Sạch Trần Gia',
+    title: 'Inner Bright',
     description: 'Enterprise Fullstack Starter Kit with AI-powered chatbots, training from your personal data.',
     images: ['/og-image.png'],
   },

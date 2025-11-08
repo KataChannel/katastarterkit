@@ -75,6 +75,67 @@ export async function getPublicMenus({
 }
 
 /**
+ * Get all menus for admin (requires authentication)
+ * Supports search and filtering
+ */
+export async function getAdminMenus({
+  searchTerm,
+  type,
+  menuId,
+  isActive,
+  includeChildren = true,
+}: {
+  searchTerm?: string
+  type?: string
+  menuId?: string
+  isActive?: boolean
+  includeChildren?: boolean
+} = {}) {
+  await requireAuth()
+
+  const where: any = { parentId: null } // Only get top-level items
+
+  // Apply filters
+  if (menuId) where.menuId = menuId
+  if (isActive !== undefined) where.isActive = isActive
+  
+  // Search filter
+  if (searchTerm) {
+    where.OR = [
+      { title: { contains: searchTerm, mode: 'insensitive' as any } },
+      { url: { contains: searchTerm, mode: 'insensitive' as any } },
+    ]
+  }
+
+  let menus = await prisma.menuItem.findMany({
+    where,
+    orderBy: { order: 'asc' },
+    include: includeChildren
+      ? {
+          children: {
+            orderBy: { order: 'asc' },
+            include: {
+              children: {
+                orderBy: { order: 'asc' },
+              },
+            },
+          },
+        }
+      : undefined,
+  })
+
+  // Filter by type if specified (type is stored in metadata JSON)
+  if (type && type !== 'all') {
+    menus = menus.filter((menu: any) => {
+      const metadata = menu.metadata as any
+      return metadata?.type === type
+    })
+  }
+
+  return menus
+}
+
+/**
  * Get menu by ID
  */
 export async function getMenuById(id: string, includeChildren = true) {

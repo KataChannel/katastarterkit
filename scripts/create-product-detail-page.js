@@ -83,7 +83,7 @@ async function createProductDetailPage() {
           },
         ],
       },
-      seoTitle: '{{name}} - Rau Sạch Trần Gia',
+      seoTitle: '{{name}} - Inner Bright',
       seoDescription: '{{shortDesc}}',
       seoKeywords: ['sản phẩm', 'rau sạch', '{{name}}'],
     };

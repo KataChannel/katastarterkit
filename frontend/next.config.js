@@ -5,6 +5,9 @@ const nextConfig = {
   // Enable standalone output for Docker deployment
   output: 'standalone',
   
+  // Use /tmp for .next directory to avoid NTFS filesystem I/O errors
+  distDir: '/tmp/innerv2-next',
+  
   /**
    * Turbopack Configuration for Next.js 16+
    * Turbopack is enabled by default in Next.js 16

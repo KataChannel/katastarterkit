@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useFindMany, useUpdateOne } from '@/hooks/useDynamicGraphQL';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -26,6 +25,7 @@ import {
   MessageCircle,
   Shield
 } from 'lucide-react';
+import { getSettings, upsertSetting } from '@/actions/settings.actions';
 import type { WebsiteSetting } from '@/hooks/useWebsiteSettings';
 
 const CATEGORIES = [
@@ -43,18 +43,118 @@ export default function WebsiteSettingsPage() {
   const [selectedCategory, setSelectedCategory] = useState('GENERAL');
   const [editedSettings, setEditedSettings] = useState<Record<string, any>>({});
   const [hasChanges, setHasChanges] = useState(false);
+  const [settings, setSettings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
-  // Fetch settings
-  const { data: settings = [], loading, error, refetch } = useFindMany('WebsiteSetting', {
-    orderBy: { order: 'asc' }, // Fix: orderBy must be object, not array
-  });
+  // Fetch settings from server
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+      const data = await getSettings();
+      
+      // Map database fields to expected format
+      const mappedData = (data || []).map((setting: any) => {
+        // Determine category based on key prefix
+        let category = 'GENERAL';
+        const key = setting.key;
+        
+        // Handle keys with underscore (auth_login_redirect)
+        if (key.startsWith('auth_')) {
+          category = 'AUTH';
+        }
+        // Handle keys with dot notation (header.logo)
+        else {
+          const keyPrefix = key.split('.')[0];
+          
+          switch (keyPrefix) {
+            case 'header':
+              category = 'HEADER';
+              break;
+            case 'footer':
+              category = 'FOOTER';
+              break;
+            case 'contact':
+              category = 'CONTACT';
+              break;
+            case 'social':
+              category = 'SOCIAL';
+              break;
+            case 'seo':
+              category = 'SEO';
+              break;
+            case 'support_chat':
+              category = 'SUPPORT_CHAT';
+              break;
+            case 'site':
+            case 'appearance':
+              category = 'GENERAL';
+              break;
+            default:
+              category = 'GENERAL';
+          }
+        }
+        
+        return {
+          ...setting,
+          category,
+          label: setting.key.split('.').pop()?.replace(/_/g, ' ') || setting.key,
+          description: null,
+          order: 0,
+          isActive: true,
+          isPublic: true,
+          type: (setting.type || 'string').toUpperCase(),
+        };
+      });
+      
+      setSettings(mappedData);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      setSettings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const [updateOne, { loading: updating }] = useUpdateOne('WebsiteSetting');
+  // Load settings on mount
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  // Initialize sample settings if database is empty
+  const initializeSampleSettings = async () => {
+    try {
+      setUpdating(true);
+      
+      const sampleSettings = [
+        { key: 'site_name', value: 'My Website', type: 'string', group: 'general' },
+        { key: 'site_tagline', value: 'Welcome to our website', type: 'string', group: 'general' },
+        { key: 'site_description', value: 'Website description', type: 'string', group: 'general' },
+        { key: 'contact_email', value: 'info@example.com', type: 'string', group: 'contact' },
+        { key: 'contact_phone', value: '+1234567890', type: 'string', group: 'contact' },
+        { key: 'facebook_url', value: '', type: 'string', group: 'social' },
+        { key: 'twitter_url', value: '', type: 'string', group: 'social' },
+        { key: 'instagram_url', value: '', type: 'string', group: 'social' },
+      ];
+
+      for (const setting of sampleSettings) {
+        await upsertSetting(setting);
+      }
+
+      alert('✅ Đã khởi tạo cài đặt mẫu thành công!');
+      await fetchSettings();
+    } catch (error) {
+      console.error('Error initializing settings:', error);
+      alert('❌ Có lỗi khi khởi tạo cài đặt. Vui lòng kiểm tra console.');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   // Filter settings by category and sort by order
-  const categorySettings = (settings as any[])
+  const categorySettings = (settings && Array.isArray(settings) ? settings as any[] : [])
     .filter((s: any) => s.category === selectedCategory)
-    .sort((a: any, b: any) => a.order - b.order);
+    .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
 
   // Group settings by their group
   const groupedSettings = categorySettings.reduce((acc: any, setting: any) => {
@@ -119,15 +219,23 @@ export default function WebsiteSettingsPage() {
   // Save all changes
   const handleSave = async () => {
     try {
-      const updatePromises = Object.entries(editedSettings).map(([key, value]) => {
-        // Tìm setting để lấy id
-        const setting = (settings as any[])?.find((s: any) => s.key === key);
+      setUpdating(true);
+      
+      const updatePromises = Object.entries(editedSettings).map(async ([key, value]) => {
+        // Find setting to get type and group
+        const setting = (settings && Array.isArray(settings) ? settings as any[] : [])?.find((s: any) => s.key === key);
         if (!setting) {
           console.warn(`Setting not found for key: ${key}`);
-          return Promise.resolve();
+          return;
         }
 
-        return updateOne(setting.id, { value });
+        // Use Server Action to update
+        await upsertSetting({
+          key,
+          value,
+          type: setting.type,
+          group: setting.group,
+        });
       });
 
       await Promise.all(updatePromises);
@@ -136,9 +244,14 @@ export default function WebsiteSettingsPage() {
 
       setEditedSettings({});
       setHasChanges(false);
-      refetch();
+      
+      // Reload settings
+      await fetchSettings();
     } catch (error: any) {
       console.error('❌ Lỗi:', error.message || 'Không thể lưu settings');
+      alert('Có lỗi xảy ra khi lưu cài đặt. Vui lòng thử lại.');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -280,6 +393,43 @@ export default function WebsiteSettingsPage() {
     return (
       <div className="flex items-center justify-center h-96">
         <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show initialization prompt if no settings
+  if (!settings || settings.length === 0) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="w-6 h-6" />
+              Chưa có cài đặt
+            </CardTitle>
+            <CardDescription>
+              Database chưa có dữ liệu cài đặt. Bạn có muốn khởi tạo các cài đặt mẫu không?
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button onClick={initializeSampleSettings} disabled={updating}>
+              {updating ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Đang khởi tạo...
+                </>
+              ) : (
+                <>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Khởi tạo cài đặt mẫu
+                </>
+              )}
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              Hoặc bạn có thể chạy lệnh: <code className="bg-muted px-2 py-1 rounded">npm run db:seed</code>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }

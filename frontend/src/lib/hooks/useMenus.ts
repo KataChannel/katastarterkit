@@ -32,12 +32,17 @@ interface MenuTreeNode extends Menu {
 
 /**
  * Hook to get all menus with filters
+ * Supports both admin and public queries
  */
 export function useMenus(params?: {
   type?: string;
   menuId?: string;
   isActive?: boolean;
   includeChildren?: boolean;
+  searchTerm?: string;
+  where?: any; // For backward compatibility with Prisma-style queries
+  orderBy?: any; // For backward compatibility
+  isAdmin?: boolean; // If true, uses admin endpoint with auth
 }) {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,12 +51,41 @@ export function useMenus(params?: {
   const fetchMenus = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getPublicMenus({
-        type: params?.type,
-        menuId: params?.menuId,
-        isActive: params?.isActive ?? true,
-        includeChildren: params?.includeChildren ?? true,
-      });
+      
+      // Extract search term from where clause if present
+      let searchTerm = params?.searchTerm;
+      let type = params?.type;
+      
+      if (params?.where) {
+        // Handle Prisma-style where clause
+        if (params.where.type) {
+          type = params.where.type;
+        }
+        if (params.where.OR) {
+          // Extract search term from OR clause
+          const titleSearch = params.where.OR.find((item: any) => item.title?.contains);
+          if (titleSearch) {
+            searchTerm = titleSearch.title.contains;
+          }
+        }
+      }
+      
+      // Use admin endpoint if specified (will be available after import)
+      const data = params?.isAdmin 
+        ? await (await import('@/actions/menu.actions')).getAdminMenus({
+            type,
+            menuId: params?.menuId,
+            isActive: params?.isActive,
+            includeChildren: params?.includeChildren ?? true,
+            searchTerm,
+          })
+        : await getPublicMenus({
+            type,
+            menuId: params?.menuId,
+            isActive: params?.isActive ?? true,
+            includeChildren: params?.includeChildren ?? true,
+          });
+          
       setMenus(Array.isArray(data) ? data : []);
       setError(null);
     } catch (err) {
@@ -60,7 +94,15 @@ export function useMenus(params?: {
     } finally {
       setLoading(false);
     }
-  }, [params?.type, params?.menuId, params?.isActive, params?.includeChildren]);
+  }, [
+    params?.type,
+    params?.menuId,
+    params?.isActive,
+    params?.includeChildren,
+    params?.searchTerm,
+    params?.where,
+    params?.isAdmin,
+  ]);
 
   useEffect(() => {
     fetchMenus();
@@ -165,67 +207,106 @@ export function useMenuCount(where?: any) {
 // ==================== MUTATION HOOKS ====================
 
 /**
- * Hook to create menu (stub - needs implementation)
+ * Hook to create menu
  */
 export function useCreateMenu() {
-  console.warn('useCreateMenu is a stub. Implement with Server Actions.');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   
   const createMenu = useCallback(
     async (menuData: Partial<Menu>) => {
-      console.warn('createMenu called with:', menuData);
-      return { data: null };
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const { createMenu: createMenuAction } = await import('@/actions/menu.actions');
+        const result = await createMenuAction(menuData as any);
+        
+        return { data: result };
+      } catch (err) {
+        setError(err as Error);
+        console.error('[useCreateMenu] Error:', err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
     },
     []
   );
 
   return {
     createMenu,
-    data: null,
-    loading: false,
-    error: null,
+    loading,
+    error,
   };
 }
 
 /**
- * Hook to update menu (stub - needs implementation)
+ * Hook to update menu
  */
 export function useUpdateMenu() {
-  console.warn('useUpdateMenu is a stub. Implement with Server Actions.');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   
   const updateMenu = useCallback(
     async (id: string, menuData: Partial<Menu>) => {
-      console.warn('updateMenu called with:', id, menuData);
-      return { data: null };
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const { updateMenu: updateMenuAction } = await import('@/actions/menu.actions');
+        const result = await updateMenuAction(id, menuData as any);
+        
+        return { data: result };
+      } catch (err) {
+        setError(err as Error);
+        console.error('[useUpdateMenu] Error:', err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
     },
     []
   );
 
   return {
     updateMenu,
-    data: null,
-    loading: false,
-    error: null,
+    loading,
+    error,
   };
 }
 
 /**
- * Hook to delete menu (stub - needs implementation)
+ * Hook to delete menu
  */
 export function useDeleteMenu() {
-  console.warn('useDeleteMenu is a stub. Implement with Server Actions.');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   
   const deleteMenu = useCallback(
     async (id: string) => {
-      console.warn('deleteMenu called with:', id);
-      return { data: null };
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const { deleteMenu: deleteMenuAction } = await import('@/actions/menu.actions');
+        const result = await deleteMenuAction(id);
+        
+        return { data: result };
+      } catch (err) {
+        setError(err as Error);
+        console.error('[useDeleteMenu] Error:', err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
     },
     []
   );
 
   return {
     deleteMenu,
-    data: null,
-    loading: false,
-    error: null,
+    loading,
+    error,
   };
 }

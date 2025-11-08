@@ -66,10 +66,12 @@ export function WebsiteHeader() {
 
   // ✅ Load Header Settings
   const { data: headerSettingsRaw = [], loading: headerLoading } = useHeaderSettings();
+  console.log('[WebsiteHeader] headerSettingsRaw:', headerSettingsRaw.length, 'items');
   const headerSettings = useMemo(() => settingsToMap(headerSettingsRaw), [headerSettingsRaw]);
 
   // ✅ Load Contact Settings
   const { data: contactSettingsRaw = [], loading: contactLoading } = useContactSettings();
+  console.log('[WebsiteHeader] contactSettingsRaw:', contactSettingsRaw.length, 'items');
   const contactSettings = useMemo(() => settingsToMap(contactSettingsRaw), [contactSettingsRaw]);
 
   // ✅ MIGRATED: Fetch header menus with Server Actions
@@ -98,9 +100,19 @@ export function WebsiteHeader() {
     fetchMenus();
   }, []);
 
-  console.log('headerSettings', headerSettings);
-  console.log('contactSettings', contactSettings);
-  console.log('headerMenus',headerMenus);
+  console.log('[WebsiteHeader] headerSettings:', Object.keys(headerSettings).length, 'keys');
+  console.log('[WebsiteHeader] contactSettings:', Object.keys(contactSettings).length, 'keys');
+  console.log('[WebsiteHeader] headerMenus:', headerMenus.length);
+  
+  // Debug: log actual settings when available
+  useEffect(() => {
+    if (Object.keys(headerSettings).length > 0) {
+      console.log('[WebsiteHeader] Header settings loaded:', headerSettings);
+    }
+    if (Object.keys(contactSettings).length > 0) {
+      console.log('[WebsiteHeader] Contact settings loaded:', contactSettings);
+    }
+  }, [headerSettings, contactSettings]);
   
   // Banner data
   const bannerItems = [

@@ -62,7 +62,7 @@ model WebsiteSetting {
 ### 🌐 GENERAL (3 settings)
 | Key | Type | Default | Mô tả |
 |-----|------|---------|-------|
-| `site.name` | TEXT | "Rau Sạch Trần Gia" | Tên website |
+| `site.name` | TEXT | "Inner Bright" | Tên website |
 | `site.tagline` | TEXT | "Nông Sản Thực Phẩm Sạch" | Slogan |
 | `site.description` | TEXTAREA | "Chuyên cung cấp..." | Mô tả website |
 
@@ -111,7 +111,7 @@ model WebsiteSetting {
 ### 🔍 SEO (4 settings)
 | Key | Type | Default | Mô tả |
 |-----|------|---------|-------|
-| `seo.meta_title` | TEXT | "Rau Sạch Trần Gia..." | Meta title |
+| `seo.meta_title` | TEXT | "Inner Bright..." | Meta title |
 | `seo.meta_description` | TEXTAREA | "Chuyên cung cấp..." | Meta description |
 | `seo.keywords` | TEXTAREA | "rau sạch, thực phẩm..." | Keywords |
 | `seo.og_image` | IMAGE | "/assets/images/logo.svg" | OG image |
