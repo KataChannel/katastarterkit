@@ -50,15 +50,17 @@ export const usePages = (pagination?: PaginationInput, filters?: PageFiltersInpu
 
 // Hook for managing a single page
 export const usePage = (id: string) => {
+  const shouldSkip = !id || id === '___SKIP___';
+  
   const { data, loading, error, refetch } = useQuery<{ getPageById: Page }>(GET_PAGE_BY_ID, {
     variables: { id },
-    skip: !id,
+    skip: shouldSkip,
     errorPolicy: 'all'
   });
 
   return {
     page: data?.getPageById,
-    loading,
+    loading: shouldSkip ? false : loading, // Don't show loading when query is skipped
     error,
     refetch
   };

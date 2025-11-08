@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
-import { usePage } from '@/hooks/usePageBuilder';
+import { getPageById } from '@/actions/page.actions';
 import { Page, PageBlock, PageStatus } from '@/types/page-builder';
 
 /**
@@ -69,10 +69,9 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
   const [selectedBlockId, setSelectedBlockIdState] = useState<string | null>(null);
   const [draggedBlock, setDraggedBlockState] = useState<PageBlock | null>(null);
   
-  // Hooks
-  // FIX: Only fetch page if we have a valid pageId (for existing pages)
-  // Pass pageId directly (not || '') so Apollo knows when it changes
-  const { page, loading, refetch } = usePage(pageId || '');
+  // Page loading state (for Server Actions)
+  const [page, setPage] = useState<Page | null>(null);
+  const [loading, setLoading] = useState(false);
   
   // Memoized setters for stable references
   const setEditingPage = useCallback((page: Page | null) => {
@@ -91,16 +90,52 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
     setDraggedBlockState(block);
   }, []);
   
-  // Track pageId changes and refetch when it changes
+  // Store current pageId in ref for stable refetch
+  const pageIdRef = React.useRef(pageId);
+  React.useEffect(() => {
+    pageIdRef.current = pageId;
+  }, [pageId]);
+  
+  // Fetch page when pageId changes
   useEffect(() => {
     if (pageId) {
       setIsNewPageMode(false);
-      // Refetch when pageId changes
-      refetch();
+      setLoading(true);
+      
+      // Fetch page using Server Action
+      getPageById(pageId)
+        .then((fetchedPage) => {
+          setPage(fetchedPage as Page | null);
+        })
+        .catch((error) => {
+          console.error('[PageStateContext] Error fetching page:', error);
+          setPage(null);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     } else {
       setIsNewPageMode(true);
+      setPage(null);
+      setLoading(false);
     }
-  }, [pageId, refetch]);
+  }, [pageId]); // ✅ Only depend on pageId!
+  
+  // Stable refetch function using ref
+  const stableRefetch = useCallback(async () => {
+    const currentPageId = pageIdRef.current;
+    if (!currentPageId) return;
+    
+    try {
+      setLoading(true);
+      const fetchedPage = await getPageById(currentPageId);
+      setPage(fetchedPage as Page | null);
+    } catch (error) {
+      console.error('[PageStateContext] Error refetching page:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []); // ✅ Empty deps - never changes!
   
   // Initialize editing page when page loads (for existing pages)
   useEffect(() => {
@@ -134,8 +169,23 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
     return findBlock(blocks);
   }, [selectedBlockId, blocks]);
   
-  const value: PageStateContextType = {
+  // Memoize context value to prevent unnecessary re-renders
+  const value: PageStateContextType = useMemo(() => ({
     page: page || null,
+    editingPage,
+    isNewPageMode,
+    loading: isNewPageMode ? false : loading, // Never show loading in new page mode
+    blocks,
+    selectedBlockId,
+    selectedBlock,
+    draggedBlock,
+    setEditingPage,
+    setBlocks,
+    setSelectedBlockId,
+    setDraggedBlock,
+    refetch: stableRefetch, // Use stable version
+  }), [
+    page,
     editingPage,
     isNewPageMode,
     loading,
@@ -147,8 +197,8 @@ export function PageStateProvider({ children, pageId }: PageStateProviderProps) 
     setBlocks,
     setSelectedBlockId,
     setDraggedBlock,
-    refetch,
-  };
+    stableRefetch, // This never changes!
+  ]);
   
   return (
     <PageStateContext.Provider value={value}>
