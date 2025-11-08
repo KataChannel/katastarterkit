@@ -33,7 +33,10 @@ export async function getPublicMenus({
 
   // Try cache first
   const cached = await cache.get(cacheKey)
-  if (cached) return cached
+  if (cached) {
+    console.log('[getPublicMenus] Returning from cache, count:', Array.isArray(cached) ? cached.length : 0);
+    return cached;
+  }
 
   const where: any = { parentId: null } // Only get top-level items
   if (menuId) where.menuId = menuId
@@ -58,12 +61,25 @@ export async function getPublicMenus({
       : undefined,
   })
 
+  console.log('[getPublicMenus] Before filter - Total menus:', menus.length);
+  console.log('[getPublicMenus] Filter params - type:', type, 'isActive:', isActive);
+  
+  // Debug: Log all menu types
+  if (menus.length > 0) {
+    console.log('[getPublicMenus] Menu types found:');
+    menus.forEach((menu: any) => {
+      const metadata = menu.metadata as any;
+      console.log(`  - ${menu.title}: type=${metadata?.type}, isVisible=${metadata?.isVisible}, isPublic=${metadata?.isPublic}`);
+    });
+  }
+
   // Filter by type if specified (type is stored in metadata JSON)
   if (type) {
     menus = menus.filter((menu: any) => {
       const metadata = menu.metadata as any
       return metadata?.type === type
     })
+    console.log('[getPublicMenus] After type filter:', menus.length, 'menus');
   }
 
   // Filter public menus (isPublic in metadata or no auth required)
@@ -71,6 +87,7 @@ export async function getPublicMenus({
   // You can add authentication check later if needed
 
   await cache.set(cacheKey, menus, 600) // Cache 10 minutes
+  console.log('[getPublicMenus] Final result:', menus.length, 'menus');
   return menus
 }
 

@@ -79,25 +79,46 @@ export function WebsiteHeader() {
   const [menuLoading, setMenuLoading] = useState(true);
   const [menuError, setMenuError] = useState<Error | null>(null);
 
+  console.log('[WebsiteHeader] Component rendering, current headerMenus length:', headerMenus.length);
+
   useEffect(() => {
+    console.log('[WebsiteHeader] 🔥 useEffect STARTED!');
+    
     const fetchMenus = async () => {
       try {
+        console.log('[WebsiteHeader] 🚀 fetchMenus function called');
+        console.log('[WebsiteHeader] Fetching HEADER menus...');
         setMenuLoading(true);
+        
+        console.log('[WebsiteHeader] About to call getPublicMenus...');
         const menus = await getPublicMenus({ 
           type: 'HEADER', // Only get HEADER type menus
           isActive: true, 
           includeChildren: true 
         });
+        console.log('[WebsiteHeader] ✅ getPublicMenus returned!');
+        console.log('[WebsiteHeader] Received menus from Server Action:', menus?.length || 0, 'items');
+        console.log('[WebsiteHeader] Menu details:', JSON.stringify(menus?.map((m: any) => ({
+          id: m.id,
+          title: m.title,
+          isActive: m.isActive,
+          metadata: m.metadata
+        })), null, 2));
         setHeaderMenus(Array.isArray(menus) ? menus : []);
       } catch (err) {
         setMenuError(err as Error);
-        console.error('[WebsiteHeader] Failed to load menu:', err);
+        console.error('[WebsiteHeader] ❌ Failed to load menu:', err);
       } finally {
         setMenuLoading(false);
+        console.log('[WebsiteHeader] fetchMenus completed');
       }
     };
 
-    fetchMenus();
+    console.log('[WebsiteHeader] About to call fetchMenus()...');
+    fetchMenus().catch(err => {
+      console.error('[WebsiteHeader] ❌ Unhandled error in fetchMenus:', err);
+    });
+    console.log('[WebsiteHeader] fetchMenus() called');
   }, []);
 
   console.log('[WebsiteHeader] headerSettings:', Object.keys(headerSettings).length, 'keys');
@@ -165,7 +186,12 @@ export function WebsiteHeader() {
 
   // Helper function to render menu items
   const renderMenuItem = (item: any) => {
-    if (!item.isVisible || !item.isActive) return null;
+    // Check metadata fields - isVisible and isPublic stored in metadata JSON field
+    const metadata = item.metadata as any || {};
+    const isVisible = metadata.isVisible !== false; // Default true if not set
+    const isPublic = metadata.isPublic !== false; // Default true if not set
+    
+    if (!isVisible || !isPublic || !item.isActive) return null;
 
     // Determine destination URL
     const href = item.route || item.url || '#';
@@ -325,7 +351,15 @@ export function WebsiteHeader() {
                 <div className="text-red-200 text-sm">Lỗi tải menu</div>
               ) : (
                 headerMenus
-                  .filter((item: any) => (item.level === 0 || item.level === 1) && item.isActive && item.isVisible)
+                  .filter((item: any) => {
+                    // Check metadata fields properly
+                    const metadata = item.metadata as any || {};
+                    const isVisible = metadata.isVisible !== false; // Default true
+                    const isPublic = metadata.isPublic !== false; // Default true
+                    const level = metadata.level || 0;
+                    
+                    return (level === 0 || level === 1) && item.isActive && isVisible && isPublic;
+                  })
                   .sort((a: any, b: any) => a.order - b.order)
                   .map((item: any) => renderMenuItem(item))
               )}
