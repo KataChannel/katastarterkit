@@ -233,6 +233,7 @@ export async function updatePage(
     description?: string
     metaTitle?: string
     metaDescription?: string
+    metaKeywords?: string
     isPublished?: boolean
     blocks?: Array<{
       type: string
@@ -258,12 +259,13 @@ export async function updatePage(
   }
 
   const updateData: any = {
-    title: data.title,
-    slug: data.slug,
-    description: data.description,
-    metaTitle: data.metaTitle,
-    metaDescription: data.metaDescription,
-    isPublished: data.isPublished,
+    ...(data.title !== undefined && { title: data.title }),
+    ...(data.slug !== undefined && { slug: data.slug }),
+    ...(data.description !== undefined && { description: data.description }),
+    ...(data.metaTitle !== undefined && { metaTitle: data.metaTitle }),
+    ...(data.metaDescription !== undefined && { metaDescription: data.metaDescription }),
+    ...(data.metaKeywords !== undefined && { metaKeywords: data.metaKeywords }),
+    ...(data.isPublished !== undefined && { isPublished: data.isPublished }),
   }
 
   // Update publishedAt when isPublished changes to true

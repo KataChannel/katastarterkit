@@ -3,13 +3,14 @@
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { FullScreenPageBuilder } from '@/components/page-builder/FullScreenPageBuilder';
-import { usePages, usePageOperations } from '@/hooks/usePageBuilder';
+import { getPages, deletePage } from '@/actions/page.actions';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Plus, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { DataTable } from './data-table';
+import { toast } from 'sonner';
 
 function PageBuilderContent() {
   const searchParams = useSearchParams();
@@ -18,14 +19,29 @@ function PageBuilderContent() {
   
   const [renderError, setRenderError] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  
-  const { pages, loading, refetch, error: queryError } = usePages(
-    { page: 1, limit: 100 },
-    undefined,
-    { skip: pageId ? true : false }
-  );
+  const [pages, setPages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
 
-  const { deletePage } = usePageOperations();
+  // Fetch pages
+  const fetchPages = async () => {
+    try {
+      setLoading(true);
+      const result = await getPages({ page: 1, limit: 100 }) as any;
+      setPages(result.pages || []);
+      setTotal(result.total || 0);
+    } catch (error: any) {
+      console.error('Error fetching pages:', error);
+      setRenderError(error?.message || 'Failed to load pages');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    fetchPages();
+  }, []);
 
   // Open editor dialog when pageId is present
   useEffect(() => {
@@ -37,9 +53,9 @@ function PageBuilderContent() {
   // Refetch when closing editor
   useEffect(() => {
     if (!isEditorOpen && pageId) {
-      refetch();
+      fetchPages();
     }
-  }, [isEditorOpen, pageId, refetch]);
+  }, [isEditorOpen, pageId]);
 
   const handleCreateNewPage = () => {
     try {
@@ -72,9 +88,11 @@ function PageBuilderContent() {
   const handleDeletePage = async (id: string) => {
     try {
       await deletePage(id);
-      refetch();
-    } catch (error) {
+      toast.success('Page deleted successfully!');
+      fetchPages();
+    } catch (error: any) {
       console.error('Error deleting page:', error);
+      toast.error(error?.message || 'Failed to delete page');
       throw error;
     }
   };
@@ -82,11 +100,11 @@ function PageBuilderContent() {
   const handleCloseEditor = () => {
     setIsEditorOpen(false);
     router.push('/admin/pagebuilder');
-    refetch();
+    fetchPages();
   };
 
   // Error display
-  if (renderError || queryError) {
+  if (renderError) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="max-w-md w-full p-6">
@@ -95,11 +113,11 @@ function PageBuilderContent() {
             <h2 className="text-xl font-bold">Error Loading Pages</h2>
           </div>
           <p className="text-gray-600 mb-4">
-            {renderError || (queryError as any)?.message || 'An unexpected error occurred'}
+            {renderError || 'An unexpected error occurred'}
           </p>
           <div className="flex gap-2">
-            <Button onClick={() => window.location.reload()} className="flex-1">
-              Reload Page
+            <Button onClick={() => fetchPages()} className="flex-1">
+              Retry
             </Button>
             <Button onClick={() => setRenderError(null)} variant="outline">
               Dismiss
@@ -139,12 +157,12 @@ function PageBuilderContent() {
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <DataTable
-            data={pages?.items || []}
+            data={pages || []}
             isLoading={loading}
             onEdit={handleEditPage}
             onView={handleViewPage}
             onDelete={handleDeletePage}
-            onRefresh={refetch}
+            onRefresh={fetchPages}
           />
         </div>
       </div>

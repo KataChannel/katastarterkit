@@ -873,7 +873,6 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
 
       setIsSettingsLoading(true);
       
-      // Update only the fields that exist in Page interface
       // Handle seoKeywords - can be string or array
       const seoKeywordsArray = Array.isArray(pageSettings.seoKeywords)
         ? pageSettings.seoKeywords
@@ -882,6 +881,7 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
             .map((k: string) => k.trim())
             .filter((k: string) => k.length > 0);
 
+      // Merge all changes from editingPage (from PageSettingsForm) with pageSettings
       const updatedPage: typeof editingPage = {
         ...editingPage,
         seoTitle: pageSettings.seoTitle || undefined,
@@ -892,7 +892,7 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
       // Update page state
       setEditingPage(updatedPage);
 
-      // Call parent handler if provided
+      // Call parent handler if provided - this should persist to database
       if (onSettingsSave) {
         await onSettingsSave({
           ...updatedPage,
@@ -906,8 +906,14 @@ export function PageBuilderTopBar(props: PageBuilderTopBarProps) {
         });
       }
 
-      // Save page via main handler
-      await onSave?.();
+      // CRITICAL: Call the main save handler to persist ALL changes
+      // This will trigger handlePageSave in PageActionsContext
+      if (onSave) {
+        await onSave();
+      } else {
+        // If no onSave handler, we need to manually trigger save via PageActions
+        console.warn('[PageBuilderTopBar] No onSave handler provided, changes may not be persisted');
+      }
 
       toast({
         title: 'Settings saved',

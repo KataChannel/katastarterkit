@@ -231,15 +231,28 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
           router.push(`/admin/pagebuilder/${newPage.id}`);
         }
       } else {
-        // Update existing page
-        await updatePage(editingPage.id, {
+        // Update existing page - only save fields that exist in Prisma schema
+        const updateData: any = {
           title: editingPage.title,
           slug: editingPage.slug,
-          description: (editingPage as any).description || (editingPage as any).seoDescription,
-          metaTitle: (editingPage as any).metaTitle || (editingPage as any).seoTitle,
-          metaDescription: (editingPage as any).metaDescription || (editingPage as any).seoDescription,
+          description: (editingPage as any).description || editingPage.seoDescription,
+          metaTitle: editingPage.seoTitle || (editingPage as any).metaTitle,
+          metaDescription: editingPage.seoDescription || (editingPage as any).metaDescription,
           isPublished: (editingPage as any).isPublished || (editingPage.status === PageStatus.PUBLISHED),
-        });
+        };
+
+        // Add metaKeywords if provided
+        if (editingPage.seoKeywords !== undefined) {
+          updateData.metaKeywords = Array.isArray(editingPage.seoKeywords) 
+            ? editingPage.seoKeywords.join(',')
+            : editingPage.seoKeywords;
+        }
+
+        // Note: Fields like isHomepage, isDynamic, dynamicConfig, layoutSettings are NOT in Prisma schema
+        // They are only in TypeScript types - would need migration to add to database
+        console.log('[PageActionsContext] Saving page with data:', updateData);
+
+        await updatePage(editingPage.id, updateData);
         
         pageBuilderLogger.success(LOG_OPERATIONS.PAGE_UPDATE, 'Page updated successfully', { pageId: editingPage.id });
         toast.success('Page saved successfully!');

@@ -319,7 +319,7 @@ export function DataTable({
                     <TableCell className="text-sm text-gray-600">/{page.slug || 'untitled'}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(page.status)} className={getStatusColor(page.status)}>
-                        {page.status.toLowerCase()}
+                        {page?.status?.toLowerCase()}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-gray-600">

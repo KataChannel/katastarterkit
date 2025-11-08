@@ -120,6 +120,13 @@ const getStatusDescription = (status: PageStatus) => {
         icon: <Lock className="w-5 h-5" />,
         color: 'text-gray-600',
       };
+    default:
+      return {
+        title: 'Draft (Bản Nháp)',
+        description: 'Trang này đang được soạn thảo. Không hiển thị công khai cho khách truy cập.',
+        icon: <AlertCircle className="w-5 h-5" />,
+        color: 'text-yellow-600',
+      };
   }
 };
 
