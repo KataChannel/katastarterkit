@@ -42,21 +42,37 @@ export function useCartSession() {
 
   // Merge carts when user logs in
   useEffect(() => {
-    if (isAuthenticated && user && sessionId && isInitialized) {
-      console.log('[CartSession] User logged in, merging carts...');
+    // Only merge if:
+    // 1. User is authenticated
+    // 2. User object exists with ID
+    // 3. Has a valid sessionId (guest cart exists)
+    // 4. Session is initialized
+    if (isAuthenticated && user?.id && sessionId && sessionId.trim() !== '' && isInitialized) {
+      console.log('[CartSession] User logged in, merging carts...', {
+        userId: user.id,
+        sessionId,
+        isAuthenticated,
+        isInitialized,
+      });
       
+      // Don't pass userId in input - backend will get it from context
+      // This avoids "User ID is required" error when context is not ready
       mergeCarts({
         variables: {
           input: {
-            userId: user.id,
             sessionId,
           },
         },
+      }).then((result) => {
+        if (result.data?.mergeCarts?.success) {
+          console.log('[CartSession] Merge successful, clearing session');
+        }
       }).catch((error) => {
         console.error('[CartSession] Merge failed:', error);
+        // Don't clear sessionId on error - keep guest cart
       });
     }
-  }, [isAuthenticated, user, sessionId, isInitialized, mergeCarts]);
+  }, [isAuthenticated, user?.id, sessionId, isInitialized, mergeCarts]);
 
   // Get effective sessionId for cart operations
   // For authenticated users: don't send sessionId (backend will use userId from context)

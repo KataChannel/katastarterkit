@@ -211,10 +211,14 @@ export class ApplyCouponInput {
 @InputType()
 export class MergeCartsInput {
   @Field()
+  @IsString()
+  @IsNotEmpty()
   sessionId: string; // Guest cart session
 
-  @Field(() => ID)
-  userId: string; // Target user ID after login
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsString()
+  userId?: string; // Target user ID after login (optional - will use context if not provided)
 }
 
 // ============================================================================

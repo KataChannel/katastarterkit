@@ -319,12 +319,20 @@ export class CartService {
       throw new NotFoundException('Cart item not found');
     }
 
-    // Verify cart ownership
-    if (userId && cartItem.cart.userId !== userId) {
-      throw new BadRequestException('Cart item does not belong to user');
-    }
-    if (sessionId && cartItem.cart.sessionId !== sessionId) {
-      throw new BadRequestException('Cart item does not belong to session');
+    // Verify cart ownership - prioritize userId over sessionId
+    if (userId) {
+      // Authenticated user - only check userId
+      if (cartItem.cart.userId !== userId) {
+        throw new BadRequestException('Cart item does not belong to user');
+      }
+    } else if (sessionId) {
+      // Guest user - check sessionId
+      if (cartItem.cart.sessionId !== sessionId) {
+        throw new BadRequestException('Cart item does not belong to session');
+      }
+    } else {
+      // No identifier provided
+      throw new BadRequestException('Either userId or sessionId is required');
     }
 
     // Check stock
@@ -361,12 +369,20 @@ export class CartService {
       throw new NotFoundException('Cart item not found');
     }
 
-    // Verify cart ownership
-    if (userId && cartItem.cart.userId !== userId) {
-      throw new BadRequestException('Cart item does not belong to user');
-    }
-    if (sessionId && cartItem.cart.sessionId !== sessionId) {
-      throw new BadRequestException('Cart item does not belong to session');
+    // Verify cart ownership - prioritize userId over sessionId
+    if (userId) {
+      // Authenticated user - only check userId
+      if (cartItem.cart.userId !== userId) {
+        throw new BadRequestException('Cart item does not belong to user');
+      }
+    } else if (sessionId) {
+      // Guest user - check sessionId
+      if (cartItem.cart.sessionId !== sessionId) {
+        throw new BadRequestException('Cart item does not belong to session');
+      }
+    } else {
+      // No identifier provided
+      throw new BadRequestException('Either userId or sessionId is required');
     }
 
     await this.prisma.cartItem.delete({

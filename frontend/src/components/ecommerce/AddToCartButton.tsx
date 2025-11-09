@@ -9,6 +9,7 @@ import { ADD_TO_CART, GET_CART } from '@/graphql/ecommerce.queries';
 import { cn } from '@/lib/utils';
 import { useCartSession } from '@/hooks/useCartSession';
 import { useAuth } from '@/contexts/AuthContext';
+import { getSessionId as getSessionIdFromLib } from '@/lib/session';
 
 interface AddToCartButtonProps {
   productId: string;
@@ -46,7 +47,7 @@ export function AddToCartButton({
     // This avoids cache write issues with missing fields
     refetchQueries: [{ 
       query: GET_CART,
-      variables: { sessionId },
+      variables: { sessionId: getSessionIdFromLib() }, // Always get fresh sessionId
     }],
     awaitRefetchQueries: true,
     onCompleted: (data) => {
@@ -94,6 +95,18 @@ export function AddToCartButton({
     setIsAdding(true);
 
     try {
+      // IMPORTANT: Always get fresh sessionId from localStorage
+      // Don't rely on state which might be stale or empty string
+      const effectiveSessionId = getSessionIdFromLib();
+      
+      console.log('[AddToCart] Mutation with:', {
+        productId,
+        variantId,
+        quantity,
+        sessionId: effectiveSessionId,
+        isAuthenticated,
+      });
+
       await addToCart({
         variables: {
           input: {
@@ -102,7 +115,7 @@ export function AddToCartButton({
             quantity,
             // ALWAYS send sessionId - backend will use userId from context if authenticated
             // This ensures guest carts work and provides fallback for auth users
-            sessionId: sessionId,
+            sessionId: effectiveSessionId,
           },
         },
       });

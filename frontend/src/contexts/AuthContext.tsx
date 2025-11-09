@@ -25,6 +25,14 @@ interface User {
   roles?: Role[];
   permissions?: Permission[];
   createdAt?: string;
+  // Profile information
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  ward?: string;
 }
 
 interface AuthContextType {

@@ -106,6 +106,12 @@ model User {
   isActive   Boolean      @default(true)
   isVerified Boolean      @default(false)
 
+  // Shipping/Address information
+  address  String?
+  city     String?
+  district String?
+  ward     String?
+
   // Security settings
   isTwoFactorEnabled  Boolean   @default(false)
   failedLoginAttempts Int       @default(0)

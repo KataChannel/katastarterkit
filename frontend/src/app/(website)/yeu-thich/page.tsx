@@ -96,7 +96,7 @@ function WishlistContent() {
     refetchQueries: [{ 
       query: GET_CART,
       variables: {
-        sessionId: sessionId,
+        sessionId: getSessionId(), // Always get fresh sessionId
       },
     }],
     onCompleted: () => {
@@ -112,13 +112,16 @@ function WishlistContent() {
   };
 
   const handleAddToCart = async (productId: string) => {
+    // IMPORTANT: Always get fresh sessionId from localStorage
+    const effectiveSessionId = getSessionId();
+    
     await addToCart({ 
       variables: { 
         input: {
           productId, 
           quantity: 1,
           // ALWAYS send sessionId - backend will use userId from context if authenticated
-          sessionId: sessionId,
+          sessionId: effectiveSessionId,
         }
       } 
     });

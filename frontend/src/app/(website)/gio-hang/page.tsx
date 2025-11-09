@@ -25,6 +25,7 @@ import { getRemainingForFreeShipping, isFreeShippingEligible } from '@/lib/ecomm
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCartSession } from '@/hooks/useCartSession';
+import { getSessionId as getSessionIdFromLib } from '@/lib/session';
 
 export default function CartPage() {
   const router = useRouter();
@@ -34,8 +35,9 @@ export default function CartPage() {
 
   // Build query variables - always include sessionId for fallback
   const getQueryVariables = () => {
-    // Always send sessionId - backend will prioritize userId from context if authenticated
-    return { sessionId };
+    // Always get fresh sessionId from localStorage to avoid stale state
+    const freshSessionId = getSessionIdFromLib();
+    return { sessionId: freshSessionId };
   };
 
   // Fetch cart - always get fresh data
@@ -83,14 +85,17 @@ export default function CartPage() {
     if (newQuantity < 1) return;
 
     try {
+      // IMPORTANT: Always get fresh sessionId from localStorage
+      const effectiveSessionId = getSessionIdFromLib();
+      
       await updateCartItem({
         variables: { 
           input: {
             itemId, 
             quantity: newQuantity,
           },
-          // sessionId is a separate argument, not in input
-          sessionId: !isAuthenticated ? sessionId : undefined,
+          // ALWAYS send sessionId - backend will use userId from context if authenticated
+          sessionId: effectiveSessionId,
         },
       });
     } catch (err) {
@@ -100,13 +105,16 @@ export default function CartPage() {
 
   const handleRemoveItem = async (itemId: string) => {
     try {
+      // IMPORTANT: Always get fresh sessionId from localStorage
+      const effectiveSessionId = getSessionIdFromLib();
+      
       await removeFromCart({
         variables: { 
           input: {
             itemId,
           },
-          // sessionId is a separate argument, not in input
-          sessionId: !isAuthenticated ? sessionId : undefined,
+          // ALWAYS send sessionId - backend will use userId from context if authenticated
+          sessionId: effectiveSessionId,
         },
       });
     } catch (err) {
@@ -116,10 +124,13 @@ export default function CartPage() {
 
   const handleClearCart = async () => {
     try {
+      // IMPORTANT: Always get fresh sessionId from localStorage
+      const effectiveSessionId = getSessionIdFromLib();
+      
       await clearCart({
         variables: {
-          // sessionId is the only argument for clearCart
-          sessionId: !isAuthenticated ? sessionId : undefined,
+          // ALWAYS send sessionId - backend will use userId from context if authenticated
+          sessionId: effectiveSessionId,
         },
       });
     } catch (err) {

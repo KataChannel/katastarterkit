@@ -45,6 +45,11 @@ export const GET_CURRENT_USER = gql`
       avatar
       firstName
       lastName
+      phone
+      address
+      city
+      district
+      ward
       createdAt
       updatedAt
       roles {

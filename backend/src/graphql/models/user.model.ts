@@ -45,6 +45,19 @@ export class User {
   @Field({ nullable: true })
   roleType?: string;
 
+  // Shipping/Address information
+  @Field({ nullable: true })
+  address?: string;
+
+  @Field({ nullable: true })
+  city?: string;
+
+  @Field({ nullable: true })
+  district?: string;
+
+  @Field({ nullable: true })
+  ward?: string;
+
   @Field()
   isActive: boolean;
 

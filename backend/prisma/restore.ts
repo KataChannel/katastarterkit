@@ -757,6 +757,18 @@ async function restoreWithRawSQL(table: string, records: any[]): Promise<void> {
               } else if (col === 'validation' || col === 'options') {
                 return `$${idx + 1}::jsonb`;
               }
+            } else if (table === 'menus') {
+              if (col === 'type') {
+                return `$${idx + 1}::"MenuType"`;
+              } else if (col === 'target') {
+                return `$${idx + 1}::"MenuTarget"`;
+              } else if (col === 'linkType') {
+                return `$${idx + 1}::"MenuLinkType"`;
+              } else if (col === 'queryConditions' || col === 'metadata' || col === 'customData') {
+                return `$${idx + 1}::jsonb`;
+              } else if (col === 'requiredPermissions' || col === 'requiredRoles') {
+                return `$${idx + 1}::text[]`;
+              }
             }
             
             return `$${idx + 1}`;
@@ -800,6 +812,24 @@ async function restoreWithRawSQL(table: string, records: any[]): Promise<void> {
               return val;
             }
             
+            // Handle array fields for menus table
+            if (table === 'menus' && (col === 'requiredPermissions' || col === 'requiredRoles')) {
+              // Ensure it's an array
+              if (Array.isArray(val)) {
+                return val; // PostgreSQL will handle array properly
+              }
+              // If it's a string representation of an array, parse it
+              if (typeof val === 'string') {
+                try {
+                  const parsed = JSON.parse(val);
+                  return Array.isArray(parsed) ? parsed : [];
+                } catch {
+                  return [];
+                }
+              }
+              return [];
+            }
+            
             // Handle JSONB fields for website_settings
             if (table === 'website_settings' && (col === 'options' || col === 'validation')) {
               if (val === null || val === undefined) {
@@ -821,6 +851,25 @@ async function restoreWithRawSQL(table: string, records: any[]): Promise<void> {
                 }
               }
               return val;
+            }
+            
+            // Handle JSONB/JSON fields for menus and other tables
+            if (table === 'menus' && (col === 'queryConditions' || col === 'metadata' || col === 'customData')) {
+              if (val === null || val === undefined) {
+                return null;
+              }
+              if (typeof val === 'object') {
+                return JSON.stringify(val);
+              }
+              if (typeof val === 'string') {
+                try {
+                  const parsed = JSON.parse(val);
+                  return JSON.stringify(parsed);
+                } catch {
+                  return null;
+                }
+              }
+              return null;
             }
             
             // Handle JSON/object fields for other tables
@@ -911,29 +960,40 @@ async function cleanupBeforeRestore(): Promise<void> {
  */
 async function createMissingLessons(backupFolder: string): Promise<void> {
   try {
-    console.log('🔍 Checking for missing lessons referenced by quizzes...');
+    console.log('🔍 Checking for missing lessons referenced by quizzes and lesson_progress...');
+    
+    const lessonIdsSet = new Set<string>();
     
     // Read quizzes backup file
     const quizzesFile = path.join(BACKUP_ROOT_DIR, backupFolder, 'quizzes.json');
-    if (!fs.existsSync(quizzesFile)) {
-      console.log('   ⏭️  No quizzes.json found - skipping\n');
-      return;
+    if (fs.existsSync(quizzesFile)) {
+      const quizzes = JSON.parse(fs.readFileSync(quizzesFile, 'utf8'));
+      if (Array.isArray(quizzes)) {
+        quizzes.forEach((q: any) => {
+          if (q.lessonId) lessonIdsSet.add(q.lessonId);
+        });
+      }
     }
-
-    const quizzes = JSON.parse(fs.readFileSync(quizzesFile, 'utf8'));
-    if (!Array.isArray(quizzes) || quizzes.length === 0) {
-      console.log('   ⏭️  No quizzes to restore - skipping\n');
-      return;
+    
+    // Read lesson_progress backup file
+    const lessonProgressFile = path.join(BACKUP_ROOT_DIR, backupFolder, 'lesson_progress.json');
+    if (fs.existsSync(lessonProgressFile)) {
+      const lessonProgress = JSON.parse(fs.readFileSync(lessonProgressFile, 'utf8'));
+      if (Array.isArray(lessonProgress)) {
+        lessonProgress.forEach((lp: any) => {
+          if (lp.lessonId) lessonIdsSet.add(lp.lessonId);
+        });
+      }
     }
 
     // Extract unique lesson IDs
-    const lessonIds = [...new Set(quizzes.map((q: any) => q.lessonId).filter(Boolean))];
+    const lessonIds = Array.from(lessonIdsSet);
     if (lessonIds.length === 0) {
       console.log('   ⏭️  No lesson references found - skipping\n');
       return;
     }
 
-    console.log(`   📋 Found ${lessonIds.length} unique lesson IDs in quizzes`);
+    console.log(`   📋 Found ${lessonIds.length} unique lesson IDs in quizzes and lesson_progress`);
 
     // Check which lessons already exist
     const existingLessons = await prisma.lesson.findMany({
@@ -1508,8 +1568,8 @@ async function main(): Promise<void> {
     for (let i = 0; i < tables.length; i++) {
       const table = tables[i];
       
-      // Before restoring quizzes, ensure lessons exist
-      if (table === 'quizzes') {
+      // Before restoring quizzes or lesson_progress, ensure lessons exist
+      if (table === 'quizzes' || table === 'lesson_progress') {
         await createMissingLessons(backupFolder);
       }
       

@@ -2364,7 +2364,7 @@ type MenuResponseDto {
 
 input MergeCartsInput {
   sessionId: String!
-  userId: ID!
+  userId: ID
 }
 
 type MergeCartsResponse {
@@ -5212,8 +5212,11 @@ input UpsertInput {
 }
 
 type User {
+  address: String
   avatar: String
+  city: String
   createdAt: DateTime!
+  district: String
   email: String
   failedLoginAttempts: Float!
   firstName: String
@@ -5231,6 +5234,7 @@ type User {
   roles: [Role!]
   updatedAt: DateTime!
   username: String!
+  ward: String
 }
 
 type UserPermission {

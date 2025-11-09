@@ -14,24 +14,25 @@ import { getSessionId as getSessionIdFromLib } from '@/lib/session';
 export default function CheckoutPage() {
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
-  const { sessionId, isInitialized, getSessionId: getFreshSessionId } = useCartSession();
+  const { isInitialized } = useCartSession();
 
-  // Build query variables - always include sessionId for fallback
+  // Build query variables - always get fresh sessionId for both guest and authenticated users
   const getQueryVariables = () => {
-    // Always send sessionId - backend will prioritize userId from context if authenticated
-    return { sessionId };
+    // IMPORTANT: Always get fresh sessionId from localStorage
+    // Backend will prioritize userId from context if authenticated
+    const freshSessionId = getSessionIdFromLib();
+    return { sessionId: freshSessionId };
   };
 
   const { data: cartData, loading: cartLoading, error: cartError } = useQuery(GET_CART, {
     variables: getQueryVariables(),
-    skip: !isInitialized, // Only skip while initializing, not based on sessionId
+    skip: !isInitialized, // Only skip while initializing
     fetchPolicy: 'network-only', // Always fetch fresh data for checkout
     // Ensure query runs after initialization
     notifyOnNetworkStatusChange: true,
     onCompleted: (data) => {
       console.log('[Checkout] Cart query completed:', {
         data,
-        sessionId,
         isInitialized,
         variables: getQueryVariables(),
       });
@@ -60,6 +61,30 @@ export default function CheckoutPage() {
     // Notes
     notes: '',
   });
+
+  // Auto-fill form with user data when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('[Checkout] Auto-filling form with user data:', user);
+      
+      // Build full name from firstName + lastName or fallback to username
+      const fullName = [user.firstName, user.lastName]
+        .filter(Boolean)
+        .join(' ')
+        .trim() || user.username || '';
+      
+      setFormData((prev) => ({
+        ...prev,
+        fullName,
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        city: user.city || '',
+        district: user.district || '',
+        ward: user.ward || '',
+      }));
+    }
+  }, [isAuthenticated, user]);
 
   const [createOrder, { loading: creating }] = useMutation(CREATE_ORDER, {
     refetchQueries: [
@@ -118,7 +143,6 @@ export default function CheckoutPage() {
     cartData,
     cart,
     itemsCount: items?.length,
-    sessionId 
   });
 
   // Auto-redirect if cart is empty (better UX than showing empty state)
@@ -138,7 +162,6 @@ export default function CheckoutPage() {
           cartData,
           isInitialized,
           cartLoading,
-          sessionId 
         });
         toast.warning('Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán');
         // router.push('/san-pham');
@@ -148,7 +171,7 @@ export default function CheckoutPage() {
       console.log("cartData", cartData);
       console.log("hasItems", hasItems);   
     }
-  }, [isInitialized, cartLoading, cartError, cartData, cart, items, sessionId, router]);
+  }, [isInitialized, cartLoading, cartError, cartData, cart, items, router]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -175,13 +198,16 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Get fresh sessionId at submission time
+    const currentSessionId = getSessionIdFromLib();
+
     console.log('[Checkout] handleSubmit - Initial state:', {
-      sessionId,
+      currentSessionId,
       isAuthenticated,
       isInitialized,
-      sessionIdType: typeof sessionId,
-      sessionIdValue: sessionId,
-      sessionIdLength: sessionId?.length,
+      sessionIdType: typeof currentSessionId,
+      sessionIdValue: currentSessionId,
+      sessionIdLength: currentSessionId?.length,
       formData: {
         fullName: formData.fullName,
         phone: formData.phone,
@@ -207,18 +233,20 @@ export default function CheckoutPage() {
       return;
     }
 
-    // IMPORTANT: For guest checkout, always get fresh sessionId from localStorage
+    // IMPORTANT: Always get fresh sessionId from localStorage
+    // This is needed for both guest and authenticated users because:
+    // 1. Guest users need it to identify their cart
+    // 2. Authenticated users may have items from before login (guest cart merge)
     // Don't rely on state which might be undefined during SSR/hydration
-    let effectiveSessionId: string | undefined = undefined;
+    const effectiveSessionId = getSessionIdFromLib();
     
-    if (!isAuthenticated) {
-      effectiveSessionId = getSessionIdFromLib();
-      console.log('[Checkout] Got fresh sessionId from lib:', {
-        effectiveSessionId,
-        type: typeof effectiveSessionId,
-        length: effectiveSessionId?.length
-      });
-    }
+    console.log('[Checkout] Got fresh sessionId from lib:', {
+      effectiveSessionId,
+      type: typeof effectiveSessionId,
+      length: effectiveSessionId?.length,
+      isAuthenticated,
+      userId: user?.id,
+    });
     
     console.log('[Checkout] Effective sessionId:', {
       effectiveSessionId,
@@ -226,8 +254,10 @@ export default function CheckoutPage() {
       isAuthenticated
     });
 
-    // Build order input - only include sessionId if it's valid
+    // Build order input - ALWAYS include sessionId
+    // Backend will prioritize userId if authenticated, but needs sessionId for cart lookup
     const orderInput: any = {
+      sessionId: effectiveSessionId, // Always include sessionId
       shippingAddress: {
         name: formData.fullName,
         phone: formData.phone,
@@ -240,10 +270,10 @@ export default function CheckoutPage() {
       shippingMethod: formData.shippingMethod,
       customerNote: formData.notes || '',
     };
-
-    // Only add sessionId if not authenticated and has a valid session
-    if (effectiveSessionId) {
-      orderInput.sessionId = effectiveSessionId;
+    
+    // Add guest email if not authenticated and email is provided
+    if (!isAuthenticated && formData.email) {
+      orderInput.guestEmail = formData.email;
     }
 
     console.log('[Checkout] orderInput BEFORE mutation:', {
@@ -299,7 +329,7 @@ export default function CheckoutPage() {
 
   // Show loading while session initializes or cart is loading
   if (!isInitialized || cartLoading) {
-    console.log('[Checkout] Loading state:', { isInitialized, cartLoading, sessionId });
+    console.log('[Checkout] Loading state:', { isInitialized, cartLoading });
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
