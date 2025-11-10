@@ -234,7 +234,9 @@ export const useProjectMembers = (projectId: string | null) => {
  * });
  */
 export const useCreateProject = () => {
-  const [createOne, { data, loading, error }] = useCreateOne<Project>('project');
+  const [createOne, { data, loading, error }] = useCreateOne<Project>('project', {
+    refetchQueries: ['FindManyProject'], // Auto refetch project list after create
+  });
 
   const createProject = async (options: { variables: { input: CreateProjectInput } }) => {
     const result = await createOne({
@@ -291,7 +293,9 @@ export const useCreateProject = () => {
  * });
  */
 export const useUpdateProject = () => {
-  const [updateOne, { data, loading, error }] = useUpdateOne<Project>('project');
+  const [updateOne, { data, loading, error }] = useUpdateOne<Project>('project', {
+    refetchQueries: ['FindManyProject'], // Auto refetch project list after update
+  });
 
   const updateProject = async (options: { 
     variables: { 
@@ -326,7 +330,9 @@ export const useUpdateProject = () => {
  * await deleteProject({ variables: { id: "uuid" } });
  */
 export const useDeleteProject = () => {
-  const [deleteOne, { data, loading, error }] = useDeleteOne<Project>('project');
+  const [deleteOne, { data, loading, error }] = useDeleteOne<Project>('project', {
+    refetchQueries: ['FindManyProject'], // Auto refetch project list after delete
+  });
 
   const deleteProject = async (options: { variables: { id: string } }) => {
     const result = await deleteOne({

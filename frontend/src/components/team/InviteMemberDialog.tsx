@@ -459,32 +459,6 @@ export function InviteMemberDialog({
 
           <form onSubmit={handleSubmit}>
           <div className="grid gap-4 p-4 max-h-[60vh] overflow-y-auto">
-            {/* Project selection - only show if projects prop is provided */}
-            {projects && projects.length > 0 && (
-              <div className="grid gap-2">
-                <Label htmlFor="project">Dự án</Label>
-                <Select
-                  value={localProjectId}
-                  onValueChange={(value) => {
-                    setLocalProjectId(value);
-                    onProjectChange?.(value);
-                  }}
-                  disabled={submitting || loading}
-                >
-                  <SelectTrigger id="project">
-                    <SelectValue placeholder="Chọn dự án" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
             <div className="grid gap-2">
               <Label htmlFor="email">
                 Email <span className="text-red-500">*</span>

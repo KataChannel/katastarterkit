@@ -93,7 +93,7 @@ export default function EditCoursePage() {
   const [updateCourse, { loading }] = useMutation(UPDATE_COURSE, {
     refetchQueries: [{ query: GET_MY_COURSES }],
     onCompleted: () => {
-      router.push('/lms/instructor/dashboard');
+      router.push('/lms/instructor');
     },
     onError: (error) => {
       console.error('Error updating course:', error);
@@ -193,7 +193,7 @@ export default function EditCoursePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
-                href="/lms/instructor/dashboard"
+                href="/lms/instructor"
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />

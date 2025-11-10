@@ -196,7 +196,7 @@ export default function LMSHomePage() {
                 Khám phá tất cả khóa học
               </Button>
               <Button
-                onClick={() => router.push('/lms/instructor/dashboard')}
+                onClick={() => router.push('/lms/instructor')}
                 size="lg"
                 variant="secondary"
                 className="text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8"

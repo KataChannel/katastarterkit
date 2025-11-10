@@ -27,7 +27,7 @@ interface NavItem {
 const instructorNavigation: NavItem[] = [
   {
     name: 'Dashboard',
-    href: '/lms/instructor/dashboard',
+    href: '/lms/instructor',
     icon: LayoutDashboard,
   },
   {
@@ -56,7 +56,7 @@ export function InstructorSidebar() {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
-    if (href === '/lms/instructor/dashboard') {
+    if (href === '/lms/instructor') {
       return pathname === href;
     }
     return pathname?.startsWith(href);

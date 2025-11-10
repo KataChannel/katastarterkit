@@ -7,6 +7,8 @@ import { AnalyticsDashboard } from '@/components/project-management/AnalyticsDas
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Combobox } from '@/components/ui/combobox';
 import { InviteMemberDialog } from '@/components/team/InviteMemberDialog';
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
 import { useAddMember } from '@/hooks/useProjects';
@@ -415,26 +417,26 @@ export default function DashboardPage() {
     );
   }
 
-  // Data loading
+  // Data loading - Mobile First skeleton
   if (projectsLoading || tasksLoading || membersLoading) {
     return (
       <div className="h-full overflow-auto">
-        <div className="container max-w-7xl mx-auto p-4 lg:p-6 space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="container max-w-7xl mx-auto p-3 space-y-4 sm:p-4 sm:space-y-6 lg:p-6">
+          <div className="flex flex-col gap-3">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Dashboard</h1>
-              <p className="text-muted-foreground mt-1">Đang tải dữ liệu...</p>
+              <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">Bảng điều khiển</h1>
+              <p className="text-sm text-muted-foreground mt-1">Đang tải dữ liệu...</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
               <Card key={i}>
-                <CardHeader className="animate-pulse">
-                  <div className="h-4 bg-muted rounded w-24"></div>
+                <CardHeader className="animate-pulse pb-2">
+                  <div className="h-3 bg-muted rounded w-20 sm:h-4 sm:w-24"></div>
                 </CardHeader>
                 <CardContent className="animate-pulse">
-                  <div className="h-8 bg-muted rounded w-16 mb-2"></div>
-                  <div className="h-3 bg-muted rounded w-32"></div>
+                  <div className="h-6 bg-muted rounded w-12 mb-2 sm:h-8 sm:w-16"></div>
+                  <div className="h-2.5 bg-muted rounded w-24 sm:h-3 sm:w-32"></div>
                 </CardContent>
               </Card>
             ))}
@@ -446,45 +448,76 @@ export default function DashboardPage() {
 
   return (
     <div className="h-full overflow-auto">
-      <div className="container max-w-7xl mx-auto p-4 lg:p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">
-              Dashboard
+      {/* Mobile First: Smaller padding, Desktop: Larger padding */}
+      <div className="container max-w-7xl mx-auto p-3 space-y-4 sm:p-4 sm:space-y-5 lg:p-6 lg:space-y-6">
+        {/* Header - Mobile First: Stack vertically */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
+              Bảng điều khiển
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground sm:text-base">
               Tổng quan dự án và hiệu suất làm việc
             </p>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button 
-              className="flex-1 sm:flex-initial"
-              onClick={() => setIsInviteDialogOpen(true)}
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Thêm thành viên
-            </Button>
-            <Button variant="outline" className="flex-1 sm:flex-initial">
-              <Calendar className="mr-2 h-4 w-4" />
-              Lọc thời gian
-            </Button>
+          <div className="flex flex-col gap-3 w-full sm:flex-row sm:w-auto">
+            {/* Project Selection - Mobile First */}
+            {projectsData && projectsData.length > 0 && (
+              <div className="w-full sm:w-auto sm:min-w-[240px]">
+                <Label htmlFor="dashboard-project" className="text-xs text-muted-foreground mb-2 block sm:hidden">
+                  Chọn dự án
+                </Label>
+                <Combobox
+                  options={projectsData.map((project: any) => ({
+                    value: project.id,
+                    label: project.name
+                  }))}
+                  value={selectedProjectId || ''}
+                  onChange={(value) => setSelectedProjectId(value)}
+                  placeholder="Chọn dự án..."
+                  searchPlaceholder="Tìm kiếm dự án..."
+                  emptyMessage="Không tìm thấy dự án."
+                  className="w-full"
+                />
+              </div>
+            )}
+            
+            {/* Action Buttons - Mobile First: Stack vertically, Desktop: Row */}
+            <div className="flex flex-col gap-2 w-full sm:flex-row sm:w-auto">
+              <Button 
+                className="w-full sm:w-auto"
+                onClick={() => setIsInviteDialogOpen(true)}
+                disabled={!selectedProjectId}
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                <span className="truncate">Thêm thành viên</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full sm:w-auto"
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                <span className="truncate">Lọc thời gian</span>
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Stats Grid - Mobile First: 1 column, Tablet: 2 cols, Desktop: 4 cols */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Card key={index}>
+              <Card key={index} className="hover:shadow-md transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-xs font-medium sm:text-sm">
                     {stat.title}
                   </CardTitle>
-                  <Icon className={`h-4 w-4 ${stat.color}`} />
+                  <Icon className={`h-4 w-4 shrink-0 ${stat.color}`} />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <div className="text-xl font-bold sm:text-2xl">{stat.value}</div>
+                  <p className="text-xs text-muted-foreground mt-1 truncate">
                     {stat.change}
                   </p>
                 </CardContent>
@@ -493,94 +526,106 @@ export default function DashboardPage() {
           })}
         </div>
 
-        <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
-            <TabsTrigger value="analytics">Phân tích</TabsTrigger>
-            <TabsTrigger value="activity">Hoạt động</TabsTrigger>
-            <TabsTrigger value="tasks">Công việc</TabsTrigger>
+        {/* Tabs - Mobile First: Full width tabs */}
+        <Tabs defaultValue="analytics" className="space-y-3 sm:space-y-4">
+          <TabsList className="grid w-full grid-cols-3 h-auto sm:w-auto sm:inline-flex">
+            <TabsTrigger value="analytics" className="text-xs sm:text-sm">
+              Phân tích
+            </TabsTrigger>
+            <TabsTrigger value="activity" className="text-xs sm:text-sm">
+              Hoạt động
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="text-xs sm:text-sm">
+              Công việc
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics" className="space-y-4">
             <AnalyticsDashboard projectId={selectedProjectId || ''} />
           </TabsContent>
 
-          <TabsContent value="activity" className="space-y-4">
+          <TabsContent value="activity" className="space-y-3 sm:space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Hoạt động gần đây</CardTitle>
-                <CardDescription>
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="text-base sm:text-lg">Hoạt động gần đây</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Cập nhật mới nhất từ nhóm của bạn
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {recentActivity.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {recentActivity.map((activity, index) => (
                       <div
                         key={index}
-                        className="flex items-start gap-4 pb-4 last:pb-0 border-b last:border-0"
+                        className="flex items-start gap-3 pb-3 last:pb-0 border-b last:border-0 sm:gap-4 sm:pb-4"
                       >
                         <div className={`
-                          mt-1 h-8 w-8 rounded-full flex items-center justify-center
-                          ${activity.type === 'complete' ? 'bg-green-100' : 
-                            activity.type === 'comment' ? 'bg-blue-100' : 'bg-purple-100'}
+                          mt-0.5 h-7 w-7 rounded-full flex items-center justify-center shrink-0 sm:h-8 sm:w-8
+                          ${activity.type === 'complete' ? 'bg-green-100 dark:bg-green-900/20' : 
+                            activity.type === 'comment' ? 'bg-blue-100 dark:bg-blue-900/20' : 'bg-purple-100 dark:bg-purple-900/20'}
                         `}>
                           {activity.type === 'complete' && (
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-green-600 sm:h-4 sm:w-4" />
                           )}
                           {activity.type === 'comment' && (
-                            <AlertCircle className="h-4 w-4 text-blue-600" />
+                            <AlertCircle className="h-3.5 w-3.5 text-blue-600 sm:h-4 sm:w-4" />
                           )}
                           {activity.type === 'create' && (
-                            <Activity className="h-4 w-4 text-purple-600" />
+                            <Activity className="h-3.5 w-3.5 text-purple-600 sm:h-4 sm:w-4" />
                           )}
                         </div>
-                        <div className="flex-1 space-y-1">
-                          <p className="text-sm">
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <p className="text-xs leading-relaxed sm:text-sm">
                             <span className="font-medium">{activity.user}</span>
                             {' '}{activity.action}{' '}
-                            <span className="font-medium">{activity.task}</span>
+                            <span className="font-medium break-words">{activity.task}</span>
                           </p>
                           <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {activity.time}
+                            <Clock className="h-3 w-3 shrink-0" />
+                            <span>{activity.time}</span>
                           </p>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    Chưa có hoạt động nào
-                  </p>
+                  <div className="flex flex-col items-center justify-center py-8 sm:py-12">
+                    <Activity className="h-10 w-10 text-muted-foreground/50 mb-3 sm:h-12 sm:w-12" />
+                    <p className="text-sm text-muted-foreground text-center">
+                      Chưa có hoạt động nào
+                    </p>
+                  </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="tasks" className="space-y-4">
+          <TabsContent value="tasks" className="space-y-3 sm:space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Tổng quan công việc</CardTitle>
-                <CardDescription>
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="text-base sm:text-lg">Tổng quan công việc</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Thống kê công việc theo trạng thái
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="p-4 border rounded-lg">
-                      <div className="text-sm text-muted-foreground">Chờ xử lý</div>
-                      <div className="text-2xl font-bold mt-1">{taskBreakdown.pending}</div>
-                    </div>
-                    <div className="p-4 border rounded-lg">
-                      <div className="text-sm text-muted-foreground">Đang làm</div>
-                      <div className="text-2xl font-bold mt-1">{taskBreakdown.inProgress}</div>
-                    </div>
-                    <div className="p-4 border rounded-lg">
-                      <div className="text-sm text-muted-foreground">Hoàn thành</div>
-                      <div className="text-2xl font-bold mt-1">{taskBreakdown.completed}</div>
-                    </div>
+                {/* Task Breakdown - Mobile First: 1 col, Tablet+: 3 cols */}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+                  <div className="p-3 border rounded-lg hover:border-primary/50 transition-colors sm:p-4">
+                    <div className="text-xs text-muted-foreground sm:text-sm">Chờ xử lý</div>
+                    <div className="text-xl font-bold mt-1 sm:text-2xl">{taskBreakdown.pending}</div>
+                    <div className="h-1 w-12 bg-amber-500 rounded-full mt-2"></div>
+                  </div>
+                  <div className="p-3 border rounded-lg hover:border-primary/50 transition-colors sm:p-4">
+                    <div className="text-xs text-muted-foreground sm:text-sm">Đang làm</div>
+                    <div className="text-xl font-bold mt-1 sm:text-2xl">{taskBreakdown.inProgress}</div>
+                    <div className="h-1 w-12 bg-blue-500 rounded-full mt-2"></div>
+                  </div>
+                  <div className="p-3 border rounded-lg hover:border-primary/50 transition-colors sm:p-4">
+                    <div className="text-xs text-muted-foreground sm:text-sm">Hoàn thành</div>
+                    <div className="text-xl font-bold mt-1 sm:text-2xl">{taskBreakdown.completed}</div>
+                    <div className="h-1 w-12 bg-green-500 rounded-full mt-2"></div>
                   </div>
                 </div>
               </CardContent>

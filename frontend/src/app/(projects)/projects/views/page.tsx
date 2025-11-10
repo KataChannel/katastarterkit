@@ -8,7 +8,17 @@ import TaskFeed from '@/components/project-management/TaskFeed';
 import ChatPanel from '@/components/project-management/ChatPanel';
 import { InviteMemberDialog } from '@/components/team/InviteMemberDialog';
 import { Button } from '@/components/ui/button';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  PanelLeftClose, 
+  PanelLeftOpen, 
+  PanelRightClose, 
+  PanelRightOpen,
+  FolderKanban,
+  ListTodo,
+  MessageSquare,
+  Loader2
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAddMember } from '@/hooks/useProjects';
 import { useToast } from '@/hooks/use-toast';
@@ -162,11 +172,14 @@ function ProjectsPage() {
     setIsInviteDialogOpen(true);
   };
 
-  // Show loading state
+  // Show loading state - Mobile First
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="h-full flex items-center justify-center bg-background p-4">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-10 w-10 animate-spin text-primary sm:h-12 sm:w-12" />
+          <p className="text-sm text-muted-foreground">Đang tải...</p>
+        </div>
       </div>
     );
   }
@@ -177,95 +190,135 @@ function ProjectsPage() {
   }
 
   return (
-    <div className="h-full flex overflow-hidden bg-background">
-      {/* Left Sidebar - Projects List */}
-      <div 
-        className={cn(
-          "transition-all duration-300 ease-in-out border-r",
-          showSidebar 
-            ? "w-full sm:w-80 lg:w-[350px]" 
-            : "w-0"
-        )}
-      >
-        <div className={cn(
-          "h-full overflow-hidden",
-          !showSidebar && "hidden"
-        )}>
-          <ProjectSidebar
-            selectedProjectId={selectedProjectId}
-            onSelectProject={setSelectedProjectId}
-            onInviteClick={handleOpenInviteDialog}
-          />
-        </div>
+    <div className="h-full flex flex-col overflow-hidden bg-background md:flex-row">
+      {/* Mobile: Tabs View, Desktop: 3-Panel Layout */}
+      <div className="flex-1 flex flex-col md:hidden">
+        {/* Mobile Tabs */}
+        <Tabs defaultValue="tasks" className="h-full flex flex-col">
+          <TabsList className="grid w-full grid-cols-3 rounded-none border-b h-auto">
+            <TabsTrigger value="projects" className="gap-2 text-xs py-3">
+              <FolderKanban className="h-4 w-4" />
+              <span>Dự án</span>
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="gap-2 text-xs py-3">
+              <ListTodo className="h-4 w-4" />
+              <span>Công việc</span>
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="gap-2 text-xs py-3">
+              <MessageSquare className="h-4 w-4" />
+              <span>Trò chuyện</span>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="projects" className="flex-1 overflow-hidden mt-0 data-[state=active]:flex">
+            <ProjectSidebar
+              selectedProjectId={selectedProjectId}
+              onSelectProject={setSelectedProjectId}
+              onInviteClick={handleOpenInviteDialog}
+            />
+          </TabsContent>
+          
+          <TabsContent value="tasks" className="flex-1 overflow-hidden mt-0 data-[state=active]:flex">
+            <TaskFeed projectId={selectedProjectId} />
+          </TabsContent>
+          
+          <TabsContent value="chat" className="flex-1 overflow-hidden mt-0 data-[state=active]:flex">
+            <ChatPanel projectId={selectedProjectId} />
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* Center - Task Feed */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Feed Header with Toggle Buttons */}
-        <div className="h-12 border-b flex items-center justify-between px-4 bg-muted/30">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowSidebar(!showSidebar)}
-            className="gap-2"
-          >
-            {showSidebar ? (
-              <>
-                <PanelLeftClose className="h-4 w-4" />
-                <span className="hidden sm:inline">Hide Projects</span>
-              </>
-            ) : (
-              <>
-                <PanelLeftOpen className="h-4 w-4" />
-                <span className="hidden sm:inline">Show Projects</span>
-              </>
-            )}
-          </Button>
+      {/* Desktop: 3-Panel Layout */}
+      <div className="hidden md:flex md:flex-1 md:overflow-hidden">
+        {/* Left Sidebar - Projects List */}
+        <div 
+          className={cn(
+            "transition-all duration-300 ease-in-out border-r",
+            showSidebar 
+              ? "w-80 lg:w-[320px]" 
+              : "w-0"
+          )}
+        >
+          <div className={cn(
+            "h-full overflow-hidden",
+            !showSidebar && "hidden"
+          )}>
+            <ProjectSidebar
+              selectedProjectId={selectedProjectId}
+              onSelectProject={setSelectedProjectId}
+              onInviteClick={handleOpenInviteDialog}
+            />
+          </div>
+        </div>
 
-          <div className="text-sm font-medium text-muted-foreground">
-            {selectedProjectId ? 'Project Tasks' : 'All Tasks'}
+        {/* Center - Task Feed */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Feed Header with Toggle Buttons */}
+          <div className="h-11 border-b flex items-center justify-between px-3 bg-muted/30 lg:h-12 lg:px-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="gap-2 h-8"
+            >
+              {showSidebar ? (
+                <>
+                  <PanelLeftClose className="h-4 w-4" />
+                  <span className="text-xs lg:text-sm">Ẩn dự án</span>
+                </>
+              ) : (
+                <>
+                  <PanelLeftOpen className="h-4 w-4" />
+                  <span className="text-xs lg:text-sm">Hiện dự án</span>
+                </>
+              )}
+            </Button>
+
+            <div className="text-xs font-medium text-muted-foreground lg:text-sm">
+              {selectedProjectId ? 'Công việc dự án' : 'Tất cả công việc'}
+            </div>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowChat(!showChat)}
+              className="gap-2 h-8"
+            >
+              {showChat ? (
+                <>
+                  <span className="text-xs lg:text-sm">Ẩn chat</span>
+                  <PanelRightClose className="h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  <span className="text-xs lg:text-sm">Hiện chat</span>
+                  <PanelRightOpen className="h-4 w-4" />
+                </>
+              )}
+            </Button>
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowChat(!showChat)}
-            className="gap-2"
-          >
-            {showChat ? (
-              <>
-                <span className="hidden sm:inline">Hide Chat</span>
-                <PanelRightClose className="h-4 w-4" />
-              </>
-            ) : (
-              <>
-                <span className="hidden sm:inline">Show Chat</span>
-                <PanelRightOpen className="h-4 w-4" />
-              </>
-            )}
-          </Button>
+          {/* Task Feed Content */}
+          <div className="flex-1 overflow-hidden">
+            <TaskFeed projectId={selectedProjectId} />
+          </div>
         </div>
 
-        {/* Task Feed Content */}
-        <div className="flex-1 overflow-hidden">
-          <TaskFeed projectId={selectedProjectId} />
-        </div>
-      </div>
-
-      {/* Right Panel - Chat */}
-      <div 
-        className={cn(
-          "transition-all duration-300 ease-in-out border-l",
-          showChat 
-            ? "w-full sm:w-80 lg:w-[350px]" 
-            : "w-0"
-        )}
-      >
-        <div className={cn(
-          "h-full overflow-hidden",
-          !showChat && "hidden"
-        )}>
-          <ChatPanel projectId={selectedProjectId} />
+        {/* Right Panel - Chat */}
+        <div 
+          className={cn(
+            "transition-all duration-300 ease-in-out border-l",
+            showChat 
+              ? "w-80 lg:w-[320px]" 
+              : "w-0"
+          )}
+        >
+          <div className={cn(
+            "h-full overflow-hidden",
+            !showChat && "hidden"
+          )}>
+            <ChatPanel projectId={selectedProjectId} />
+          </div>
         </div>
       </div>
 

@@ -60,7 +60,7 @@ const mainNavigation: NavigationItem[] = [
 
 const instructorNavigation: NavigationItem = {
   name: 'Dashboard Giảng viên',
-  href: '/lms/instructor/dashboard',
+  href: '/lms/instructor',
   icon: LayoutDashboard,
   requiredRole: 'instructor',
 };
@@ -169,7 +169,7 @@ export function LMSNavigation({ user, showInstructorLink = true }: LMSNavigation
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/lms/instructor/dashboard">
+                        <Link href="/lms/instructor">
                           <LayoutDashboard className="mr-2 h-4 w-4" />
                           Dashboard Giảng viên
                         </Link>
