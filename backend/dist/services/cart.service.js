@@ -20,17 +20,87 @@ let CartService = class CartService {
         this.CART_TTL = 86400 * 7;
         this.CACHE_TTL = 3600;
     }
-    async getOrCreateCart(userId, sessionId) {
-        if (!userId && !sessionId) {
-            throw new common_1.BadRequestException('Either userId or sessionId is required');
+    async getCart(userId, sessionId) {
+        const normalizedUserId = userId && userId.trim() !== '' ? userId : undefined;
+        const normalizedSessionId = sessionId && sessionId.trim() !== '' ? sessionId : undefined;
+        if (!normalizedUserId && !normalizedSessionId) {
+            return null;
         }
-        const cacheKey = this.getCartCacheKey(userId, sessionId);
+        const cacheKey = this.getCartCacheKey(normalizedUserId, normalizedSessionId);
         const cached = await this.redis.get(cacheKey);
         if (cached) {
-            return JSON.parse(cached);
+            try {
+                const parsedCart = this.deserializeCart(cached);
+                if (this.isValidCachedCart(parsedCart)) {
+                    return parsedCart;
+                }
+                await this.redis.del(cacheKey);
+            }
+            catch (error) {
+                await this.redis.del(cacheKey);
+            }
+        }
+        const cart = await this.prisma.cart.findFirst({
+            where: normalizedUserId ? { userId: normalizedUserId } : { sessionId: normalizedSessionId },
+            include: {
+                items: {
+                    include: {
+                        product: {
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                                price: true,
+                                originalPrice: true,
+                                images: true,
+                                stock: true,
+                                status: true,
+                            }
+                        },
+                        variant: {
+                            select: {
+                                id: true,
+                                sku: true,
+                                price: true,
+                                stock: true,
+                                attributes: true,
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        if (!cart) {
+            return null;
+        }
+        const cartWithTotals = await this.calculateTotals(cart);
+        await this.redis.setex(cacheKey, this.CACHE_TTL, this.serializeCart(cartWithTotals));
+        return cartWithTotals;
+    }
+    async getOrCreateCart(userId, sessionId) {
+        const normalizedUserId = userId && userId.trim() !== '' ? userId : undefined;
+        const normalizedSessionId = sessionId && sessionId.trim() !== '' ? sessionId : undefined;
+        if (!normalizedUserId && !normalizedSessionId) {
+            throw new common_1.BadRequestException('Either userId or sessionId is required');
+        }
+        const cacheKey = this.getCartCacheKey(normalizedUserId, normalizedSessionId);
+        const cached = await this.redis.get(cacheKey);
+        if (cached) {
+            try {
+                const parsedCart = this.deserializeCart(cached);
+                if (this.isValidCachedCart(parsedCart)) {
+                    return parsedCart;
+                }
+                await this.redis.del(cacheKey);
+                console.log('[CartCache] Deleted invalid cache for:', cacheKey);
+            }
+            catch (error) {
+                await this.redis.del(cacheKey);
+                console.error('[CartCache] Error parsing cache, deleted:', error.message);
+            }
         }
         let cart = await this.prisma.cart.findFirst({
-            where: userId ? { userId } : { sessionId },
+            where: normalizedUserId ? { userId: normalizedUserId } : { sessionId: normalizedSessionId },
             include: {
                 items: {
                     include: {
@@ -62,8 +132,8 @@ let CartService = class CartService {
         if (!cart) {
             cart = await this.prisma.cart.create({
                 data: {
-                    userId,
-                    sessionId,
+                    userId: normalizedUserId,
+                    sessionId: normalizedSessionId,
                     expiresAt: new Date(Date.now() + this.CART_TTL * 1000),
                 },
                 include: {
@@ -96,11 +166,22 @@ let CartService = class CartService {
             });
         }
         const cartWithTotals = await this.calculateTotals(cart);
-        await this.redis.setex(cacheKey, this.CACHE_TTL, JSON.stringify(cartWithTotals));
+        await this.redis.setex(cacheKey, this.CACHE_TTL, this.serializeCart(cartWithTotals));
         return cartWithTotals;
     }
     async addItem(input, userId) {
         const { productId, variantId, quantity, sessionId, metadata } = input;
+        const normalizedUserId = userId && userId.trim() !== '' ? userId : undefined;
+        const normalizedSessionId = sessionId && sessionId.trim() !== '' ? sessionId : undefined;
+        if (!normalizedUserId && !normalizedSessionId) {
+            throw new common_1.BadRequestException('Either userId or sessionId is required');
+        }
+        if (!productId) {
+            throw new common_1.BadRequestException('Product ID is required');
+        }
+        if (!quantity || quantity < 1) {
+            throw new common_1.BadRequestException('Quantity must be at least 1');
+        }
         const product = await this.prisma.product.findUnique({
             where: { id: productId },
             include: {
@@ -118,7 +199,7 @@ let CartService = class CartService {
         if (availableStock < quantity) {
             throw new common_1.BadRequestException(`Only ${availableStock} items available in stock`);
         }
-        const cart = await this.getOrCreateCart(userId, sessionId);
+        const cart = await this.getOrCreateCart(normalizedUserId, normalizedSessionId);
         const existingItem = cart.items.find(item => item.productId === productId && item.variantId === variantId);
         if (existingItem) {
             const newQuantity = existingItem.quantity + quantity;
@@ -146,8 +227,8 @@ let CartService = class CartService {
                 }
             });
         }
-        await this.invalidateCartCache(userId, sessionId);
-        return this.getOrCreateCart(userId, sessionId);
+        await this.invalidateCartCache(normalizedUserId, normalizedSessionId);
+        return this.getOrCreateCart(normalizedUserId, normalizedSessionId);
     }
     async updateItem(itemId, quantity, userId, sessionId) {
         const cartItem = await this.prisma.cartItem.findUnique({
@@ -161,11 +242,18 @@ let CartService = class CartService {
         if (!cartItem) {
             throw new common_1.NotFoundException('Cart item not found');
         }
-        if (userId && cartItem.cart.userId !== userId) {
-            throw new common_1.BadRequestException('Cart item does not belong to user');
+        if (userId) {
+            if (cartItem.cart.userId !== userId) {
+                throw new common_1.BadRequestException('Cart item does not belong to user');
+            }
         }
-        if (sessionId && cartItem.cart.sessionId !== sessionId) {
-            throw new common_1.BadRequestException('Cart item does not belong to session');
+        else if (sessionId) {
+            if (cartItem.cart.sessionId !== sessionId) {
+                throw new common_1.BadRequestException('Cart item does not belong to session');
+            }
+        }
+        else {
+            throw new common_1.BadRequestException('Either userId or sessionId is required');
         }
         const availableStock = cartItem.variant?.stock ?? cartItem.product.stock;
         if (quantity > availableStock) {
@@ -189,11 +277,18 @@ let CartService = class CartService {
         if (!cartItem) {
             throw new common_1.NotFoundException('Cart item not found');
         }
-        if (userId && cartItem.cart.userId !== userId) {
-            throw new common_1.BadRequestException('Cart item does not belong to user');
+        if (userId) {
+            if (cartItem.cart.userId !== userId) {
+                throw new common_1.BadRequestException('Cart item does not belong to user');
+            }
         }
-        if (sessionId && cartItem.cart.sessionId !== sessionId) {
-            throw new common_1.BadRequestException('Cart item does not belong to session');
+        else if (sessionId) {
+            if (cartItem.cart.sessionId !== sessionId) {
+                throw new common_1.BadRequestException('Cart item does not belong to session');
+            }
+        }
+        else {
+            throw new common_1.BadRequestException('Either userId or sessionId is required');
         }
         await this.prisma.cartItem.delete({
             where: { id: itemId }
@@ -280,11 +375,17 @@ let CartService = class CartService {
         return this.getOrCreateCart(userId);
     }
     async validateCart(userId, sessionId) {
+        console.log('[CartService] validateCart called with:', {
+            userId,
+            sessionId,
+            userIdType: typeof userId,
+            sessionIdType: typeof sessionId
+        });
         const cart = await this.getOrCreateCart(userId, sessionId);
         const errors = [];
         for (const item of cart.items) {
-            if (item.product.status !== 'published') {
-                errors.push(`Product "${item.product.name}" is no longer available`);
+            if (item.product.status !== 'ACTIVE') {
+                errors.push(`Product "${item.product.name}" is no longer available (status: ${item.product.status})`);
                 continue;
             }
             const availableStock = item.variant?.stock ?? item.product.stock;
@@ -306,8 +407,8 @@ let CartService = class CartService {
     async calculateTotals(cart) {
         let subtotal = 0;
         let itemCount = 0;
-        for (const item of cart.items) {
-            const price = item.salePrice ?? item.price;
+        for (const item of cart.items || []) {
+            const price = item.salePrice ?? item.price ?? 0;
             subtotal += price * item.quantity;
             itemCount += item.quantity;
         }
@@ -321,14 +422,35 @@ let CartService = class CartService {
                 discount = coupon.discount;
             }
         }
-        const total = subtotal - discount;
+        const shippingFee = this.calculateShippingFee(subtotal, itemCount);
+        const tax = this.calculateTax(subtotal);
+        const total = subtotal + shippingFee + tax - discount;
         return {
             ...cart,
             itemCount,
-            subtotal,
-            discount,
-            total,
+            subtotal: Math.max(0, subtotal),
+            shippingFee: Math.max(0, shippingFee),
+            tax: Math.max(0, tax),
+            discount: Math.max(0, discount),
+            total: Math.max(0, total),
+            createdAt: cart.createdAt instanceof Date ? cart.createdAt : new Date(cart.createdAt),
+            updatedAt: cart.updatedAt instanceof Date ? cart.updatedAt : new Date(cart.updatedAt),
+            expiresAt: cart.expiresAt ? (cart.expiresAt instanceof Date ? cart.expiresAt : new Date(cart.expiresAt)) : null,
         };
+    }
+    calculateShippingFee(subtotal, itemCount) {
+        const FREE_SHIPPING_THRESHOLD = 500000;
+        if (subtotal >= FREE_SHIPPING_THRESHOLD) {
+            return 0;
+        }
+        const BASE_SHIPPING_FEE = 30000;
+        const PER_ITEM_FEE = 5000;
+        const additionalFee = itemCount > 1 ? (itemCount - 1) * PER_ITEM_FEE : 0;
+        return BASE_SHIPPING_FEE + additionalFee;
+    }
+    calculateTax(subtotal) {
+        const VAT_RATE = 0;
+        return subtotal * VAT_RATE;
     }
     async validateCoupon(code) {
         return {
@@ -347,6 +469,72 @@ let CartService = class CartService {
     async invalidateCartCache(userId, sessionId) {
         const cacheKey = this.getCartCacheKey(userId, sessionId);
         await this.redis.del(cacheKey);
+    }
+    isValidCachedCart(cart) {
+        if (!cart || typeof cart !== 'object') {
+            return false;
+        }
+        const requiredFields = ['id', 'items', 'itemCount', 'subtotal', 'shippingFee', 'tax', 'discount', 'total', 'createdAt', 'updatedAt'];
+        for (const field of requiredFields) {
+            if (cart[field] === null || cart[field] === undefined) {
+                console.log(`[CartCache] Invalid cache - missing field: ${field}`);
+                return false;
+            }
+        }
+        const numericFields = ['itemCount', 'subtotal', 'shippingFee', 'tax', 'discount', 'total'];
+        for (const field of numericFields) {
+            if (typeof cart[field] !== 'number' || isNaN(cart[field])) {
+                console.log(`[CartCache] Invalid cache - ${field} is not a valid number`);
+                return false;
+            }
+        }
+        const dateFields = ['createdAt', 'updatedAt'];
+        for (const field of dateFields) {
+            try {
+                const date = new Date(cart[field]);
+                if (isNaN(date.getTime())) {
+                    console.log(`[CartCache] Invalid cache - ${field} is not a valid date`);
+                    return false;
+                }
+            }
+            catch (error) {
+                console.log(`[CartCache] Invalid cache - ${field} cannot be parsed as date`);
+                return false;
+            }
+        }
+        return true;
+    }
+    serializeCart(cart) {
+        return JSON.stringify(cart, (key, value) => {
+            if (value instanceof Date) {
+                return value.toISOString();
+            }
+            return value;
+        });
+    }
+    deserializeCart(cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.createdAt && typeof parsed.createdAt === 'string') {
+            parsed.createdAt = new Date(parsed.createdAt);
+        }
+        if (parsed.updatedAt && typeof parsed.updatedAt === 'string') {
+            parsed.updatedAt = new Date(parsed.updatedAt);
+        }
+        if (parsed.expiresAt && typeof parsed.expiresAt === 'string') {
+            parsed.expiresAt = new Date(parsed.expiresAt);
+        }
+        if (Array.isArray(parsed.items)) {
+            parsed.items = parsed.items.map((item) => {
+                if (item.createdAt && typeof item.createdAt === 'string') {
+                    item.createdAt = new Date(item.createdAt);
+                }
+                if (item.updatedAt && typeof item.updatedAt === 'string') {
+                    item.updatedAt = new Date(item.updatedAt);
+                }
+                return item;
+            });
+        }
+        return parsed;
     }
     async cleanupExpiredCarts() {
         const deleted = await this.prisma.cart.deleteMany({

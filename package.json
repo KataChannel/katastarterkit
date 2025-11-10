@@ -8,6 +8,7 @@
     "backend"
   ],
   "scripts": {
+    "menu": "./vscode-menu.sh",
     "dev": "concurrently \"bun run dev:backend\" \"bun run dev:frontend\"",
     "dev:backend": "cd backend && bun run dev",
     "dev:frontend": "cd frontend && bun run dev",
@@ -60,7 +61,12 @@
     "db:backup:rausach": "cp .env.rausach backend/.env && cd backend && bun run prisma/backup.ts",
     "db:backup:tazagroup": "cp .env.tazagroup backend/.env && cd backend && bun run prisma/backup.ts",
     "db:restore:rausach": "cp .env.rausach backend/.env && cd backend && bun run prisma/restore.ts",
-    "db:restore:tazagroup": "cp .env.tazagroup backend/.env && cd backend && bun run prisma/restore.ts"
+    "db:restore:tazagroup": "cp .env.tazagroup backend/.env && cd backend && bun run prisma/restore.ts",
+    "kill:12000": "./scripts/kill-ports.sh 12000",
+    "kill:12001": "./scripts/kill-ports.sh 12001",
+    "kill:13000": "./scripts/kill-ports.sh 13000",
+    "kill:13001": "./scripts/kill-ports.sh 13001",
+    "kill:all": "./scripts/kill-ports.sh"
   },
   "devDependencies": {
     "@types/validator": "^13.15.3",

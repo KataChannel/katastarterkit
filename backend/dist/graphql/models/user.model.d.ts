@@ -9,6 +9,10 @@ export declare class User {
     lastName?: string;
     avatar?: string;
     roleType?: string;
+    address?: string;
+    city?: string;
+    district?: string;
+    ward?: string;
     isActive: boolean;
     isVerified: boolean;
     isTwoFactorEnabled: boolean;

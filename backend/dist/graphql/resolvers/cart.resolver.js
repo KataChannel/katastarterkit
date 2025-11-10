@@ -22,10 +22,17 @@ let CartResolver = class CartResolver {
     }
     async getCart(sessionId, context) {
         const userId = context?.req?.user?.id;
-        return this.cartService.getOrCreateCart(userId, sessionId);
+        return this.cartService.getCart(userId, sessionId);
     }
     async addToCart(input, context) {
         try {
+            if (!input || !input.productId) {
+                return {
+                    success: false,
+                    message: 'Product ID is required',
+                    errors: ['Product ID is required'],
+                };
+            }
             const userId = context?.req?.user?.id;
             const cart = await this.cartService.addItem(input, userId);
             return {

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { decodeToken } from '@/lib/auth-utils';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,6 +11,8 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -23,11 +26,23 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     // If roles are specified, check user role
     if (allowedRoles && allowedRoles.length > 0) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = decodeToken(token);
         
-        if (!allowedRoles.includes(payload.roleType)) {
+        if (!payload) {
+          console.error('Failed to decode token');
+          router.push('/login');
+          return;
+        }
+        
+        const userRole = payload.roleType as 'ADMIN' | 'GIANGVIEN' | 'USER' | 'GUEST';
+        
+        // Check if user role is allowed
+        if (!allowedRoles.includes(userRole)) {
+          console.warn(`❌ Access denied. User role: ${userRole}, Allowed roles: ${allowedRoles.join(', ')}`);
+          
           // Redirect based on user's actual role
-          switch (payload.roleType) {
+          // This allows users who had their role changed to still access the new role's dashboard
+          switch (userRole) {
             case 'ADMIN':
               router.push('/lms/admin');
               break;
@@ -42,12 +57,31 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
           }
           return;
         }
+        
+        // User is authorized
+        setIsAuthorized(true);
+        setIsChecking(false);
       } catch (error) {
         console.error('Failed to parse token:', error);
         router.push('/login');
+        return;
       }
+    } else {
+      // No role check required, just check token exists
+      setIsAuthorized(true);
+      setIsChecking(false);
     }
   }, [router, allowedRoles]);
 
-  return <>{children}</>;
+  // Show loading state while checking authorization
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Only render children if authorized
+  return isAuthorized ? <>{children}</> : null;
 }

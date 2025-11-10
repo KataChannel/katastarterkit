@@ -192,6 +192,10 @@ export declare const websiteSettingResolvers: {
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
+            address: string | null;
+            city: string | null;
+            district: string | null;
+            ward: string | null;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
@@ -212,6 +216,10 @@ export declare const websiteSettingResolvers: {
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
             isTwoFactorEnabled: boolean;
+            address: string | null;
+            city: string | null;
+            district: string | null;
+            ward: string | null;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;

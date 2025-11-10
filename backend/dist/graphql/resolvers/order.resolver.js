@@ -23,6 +23,30 @@ let OrderResolver = class OrderResolver {
     async createOrder(input, context) {
         try {
             const userId = context?.req?.user?.id;
+            console.log('[OrderResolver] ========================================');
+            console.log('[OrderResolver] createOrder FULL INPUT:', {
+                userId,
+                hasUserId: !!userId,
+                sessionId: input.sessionId,
+                sessionIdType: typeof input.sessionId,
+                hasSessionId: !!input.sessionId,
+                shippingAddress: input.shippingAddress,
+                hasShippingAddress: !!input.shippingAddress,
+                shippingAddressKeys: input.shippingAddress ? Object.keys(input.shippingAddress) : [],
+                shippingAddressValues: input.shippingAddress ? {
+                    name: input.shippingAddress.name,
+                    phone: input.shippingAddress.phone,
+                    address: input.shippingAddress.address,
+                    city: input.shippingAddress.city,
+                    district: input.shippingAddress.district,
+                    ward: input.shippingAddress.ward,
+                } : null,
+                paymentMethod: input.paymentMethod,
+                shippingMethod: input.shippingMethod,
+                customerNote: input.customerNote,
+                fullInput: JSON.stringify(input, null, 2),
+            });
+            console.log('[OrderResolver] ========================================');
             const order = await this.orderService.createFromCart(input, userId);
             return {
                 success: true,
@@ -31,6 +55,11 @@ let OrderResolver = class OrderResolver {
             };
         }
         catch (error) {
+            console.error('[OrderResolver] createOrder ERROR:', {
+                error,
+                message: error.message,
+                stack: error.stack,
+            });
             return {
                 success: false,
                 message: error.message,

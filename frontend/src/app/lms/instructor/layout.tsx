@@ -16,6 +16,20 @@ const menuItems = [
   { title: 'Cài đặt', icon: Settings, href: '/lms/instructor/settings' },
 ];
 
+// Helper to check if user is admin (for navigation to admin dashboard)
+const getAdminLink = () => {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.roleType === 'ADMIN' ? '/lms/admin' : null;
+    }
+  } catch (error) {
+    // Ignore error
+  }
+  return null;
+};
+
 function InstructorSidebar() {
   const router = useRouter();
   const pathname = usePathname();
@@ -51,7 +65,24 @@ function InstructorSidebar() {
         </ul>
       </nav>
 
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-200 space-y-2">
+        {/* Check if user is admin - show link to admin dashboard */}
+        {(() => {
+          const adminLink = getAdminLink();
+          if (adminLink) {
+            return (
+              <button
+                onClick={() => router.push(adminLink)}
+                className="w-full px-4 py-2 text-sm text-purple-600 hover:text-purple-900 hover:bg-purple-50 rounded-lg transition-colors flex items-center gap-2 font-medium"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                Quay lại Admin
+              </button>
+            );
+          }
+          return null;
+        })()}
+        
         <button
           onClick={() => router.push('/lms')}
           className="w-full px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2"

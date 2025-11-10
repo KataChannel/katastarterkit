@@ -20,6 +20,10 @@ export declare class AffiliatePaymentService {
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -82,6 +86,10 @@ export declare class AffiliatePaymentService {
                     avatar: string | null;
                     roleType: $Enums.UserRoleType;
                     isTwoFactorEnabled: boolean;
+                    address: string | null;
+                    city: string | null;
+                    district: string | null;
+                    ward: string | null;
                     failedLoginAttempts: number;
                     lockedUntil: Date | null;
                     lastLoginAt: Date | null;
@@ -148,6 +156,10 @@ export declare class AffiliatePaymentService {
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -280,6 +292,10 @@ export declare class AffiliatePaymentService {
                     avatar: string | null;
                     roleType: $Enums.UserRoleType;
                     isTwoFactorEnabled: boolean;
+                    address: string | null;
+                    city: string | null;
+                    district: string | null;
+                    ward: string | null;
                     failedLoginAttempts: number;
                     lockedUntil: Date | null;
                     lastLoginAt: Date | null;

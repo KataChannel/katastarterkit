@@ -46,13 +46,14 @@ export default function LessonViewer({
   const [createLessonProgress] = useCreateOne('lessonProgress');
   const [updateLessonProgress] = useUpdateOne('lessonProgress');
 
-  // ✅ Migrated: Fetch quizzes by lesson (only if lesson type is QUIZ)
-  const { data: quizzes, loading: loadingQuizzes } = useFindMany('quiz', {
-    where: { 
-      lessonId: lesson.id,
-      ...(lesson.type === 'QUIZ' ? {} : { id: 'never-match' }) // Only fetch if QUIZ type
-    },
-  });
+  // ✅ Migrated: Fetch quizzes by lesson - Always fetch quizzes for any lesson
+  const { data: quizzes, loading: loadingQuizzes } = useFindMany('quiz', 
+    lesson.type === 'QUIZ' ? {
+      where: { 
+        lessonId: lesson.id,
+      },
+    } : undefined
+  );
 
   // Check if lesson progress already exists using findMany with composite filter
   const { data: progressRecords, refetch: refetchProgress } = useFindMany('lessonProgress', {

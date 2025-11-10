@@ -85,12 +85,6 @@ export function useCartSession() {
       // Guest user - MUST have a valid sessionId
       // If sessionId state is empty/undefined, get it immediately from localStorage
       const sid = sessionId && sessionId.trim() !== '' ? sessionId : getSessionId();
-      console.log('[CartSession] Getting effective sessionId:', {
-        stateSessionId: sessionId,
-        freshSessionId: getSessionId(),
-        effectiveSessionId: sid,
-        isAuthenticated
-      });
       return sid;
     }
   }, [isAuthenticated, sessionId]);

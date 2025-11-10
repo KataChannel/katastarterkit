@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ValidateCartResponse = exports.MergeCartsResponse = exports.ApplyCouponResponse = exports.ClearCartResponse = exports.RemoveFromCartResponse = exports.UpdateCartResponse = exports.AddToCartResponse = exports.MergeCartsInput = exports.ApplyCouponInput = exports.RemoveFromCartInput = exports.UpdateCartItemInput = exports.AddToCartInput = exports.CartType = exports.CartItemType = exports.ProductVariantSummaryType = exports.ProductSummaryType = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const graphql_type_json_1 = __importDefault(require("graphql-type-json"));
+const class_validator_1 = require("class-validator");
 let ProductSummaryType = class ProductSummaryType {
 };
 exports.ProductSummaryType = ProductSummaryType;
@@ -204,22 +205,31 @@ let AddToCartInput = class AddToCartInput {
 exports.AddToCartInput = AddToCartInput;
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Product ID is required' }),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], AddToCartInput.prototype, "productId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], AddToCartInput.prototype, "variantId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { defaultValue: 1 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1, { message: 'Quantity must be at least 1' }),
     __metadata("design:type", Number)
 ], AddToCartInput.prototype, "quantity", void 0);
 __decorate([
     (0, graphql_1.Field)(() => String, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], AddToCartInput.prototype, "sessionId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], AddToCartInput.prototype, "metadata", void 0);
 exports.AddToCartInput = AddToCartInput = __decorate([
@@ -272,10 +282,14 @@ let MergeCartsInput = class MergeCartsInput {
 exports.MergeCartsInput = MergeCartsInput;
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], MergeCartsInput.prototype, "sessionId", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => graphql_1.ID),
+    (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], MergeCartsInput.prototype, "userId", void 0);
 exports.MergeCartsInput = MergeCartsInput = __decorate([

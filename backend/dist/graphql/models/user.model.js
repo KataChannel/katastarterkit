@@ -59,6 +59,22 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "roleType", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "address", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "city", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "district", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "ward", void 0);
+__decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Boolean)
 ], User.prototype, "isActive", void 0);

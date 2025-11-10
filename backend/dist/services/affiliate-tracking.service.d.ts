@@ -44,6 +44,10 @@ export declare class AffiliateTrackingService {
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -129,6 +133,10 @@ export declare class AffiliateTrackingService {
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -290,9 +298,9 @@ export declare class AffiliateTrackingService {
         sessionId: string | null;
         ipAddress: string | null;
         userAgent: string | null;
+        city: string | null;
         referer: string | null;
         country: string | null;
-        city: string | null;
         device: string | null;
         browser: string | null;
         visitorId: string | null;
@@ -365,6 +373,10 @@ export declare class AffiliateTrackingService {
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -472,6 +484,10 @@ export declare class AffiliateTrackingService {
                 avatar: string | null;
                 roleType: $Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -580,6 +596,10 @@ export declare class AffiliateTrackingService {
                     avatar: string | null;
                     roleType: $Enums.UserRoleType;
                     isTwoFactorEnabled: boolean;
+                    address: string | null;
+                    city: string | null;
+                    district: string | null;
+                    ward: string | null;
                     failedLoginAttempts: number;
                     lockedUntil: Date | null;
                     lastLoginAt: Date | null;

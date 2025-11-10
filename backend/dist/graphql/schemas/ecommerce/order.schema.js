@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderStatisticsResponse = exports.OrderListResponse = exports.CancelOrderResponse = exports.UpdateOrderResponse = exports.CreateOrderResponse = exports.OrderFilterInput = exports.CancelOrderInput = exports.UpdateOrderStatusInput = exports.OrderItemInput = exports.CreateOrderInput = exports.ShippingAddressInput = exports.OrderType = exports.PaymentType = exports.OrderTrackingType = exports.OrderTrackingEventType = exports.OrderItemType = exports.ShippingMethod = exports.PaymentMethod = exports.PaymentStatus = exports.OrderStatus = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const graphql_type_json_1 = require("graphql-type-json");
+const class_validator_1 = require("class-validator");
 var OrderStatus;
 (function (OrderStatus) {
     OrderStatus["PENDING"] = "PENDING";
@@ -342,30 +343,44 @@ let ShippingAddressInput = class ShippingAddressInput {
 exports.ShippingAddressInput = ShippingAddressInput;
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ShippingAddressInput.prototype, "name", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ShippingAddressInput.prototype, "phone", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ShippingAddressInput.prototype, "address", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ShippingAddressInput.prototype, "city", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ShippingAddressInput.prototype, "district", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ShippingAddressInput.prototype, "ward", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ShippingAddressInput.prototype, "zipCode", void 0);
 exports.ShippingAddressInput = ShippingAddressInput = __decorate([
@@ -376,46 +391,68 @@ let CreateOrderInput = class CreateOrderInput {
 exports.CreateOrderInput = CreateOrderInput;
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateOrderInput.prototype, "guestEmail", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateOrderInput.prototype, "guestPhone", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateOrderInput.prototype, "guestName", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateOrderInput.prototype, "sessionId", void 0);
+__decorate([
     (0, graphql_1.Field)(() => [OrderItemInput], { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], CreateOrderInput.prototype, "items", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateOrderInput.prototype, "cartId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => ShippingAddressInput),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", ShippingAddressInput)
 ], CreateOrderInput.prototype, "shippingAddress", void 0);
 __decorate([
     (0, graphql_1.Field)(() => ShippingAddressInput, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", ShippingAddressInput)
 ], CreateOrderInput.prototype, "billingAddress", void 0);
 __decorate([
     (0, graphql_1.Field)(() => ShippingMethod, { defaultValue: ShippingMethod.STANDARD }),
+    (0, class_validator_1.IsEnum)(ShippingMethod),
     __metadata("design:type", String)
 ], CreateOrderInput.prototype, "shippingMethod", void 0);
 __decorate([
     (0, graphql_1.Field)(() => PaymentMethod, { defaultValue: PaymentMethod.CASH_ON_DELIVERY }),
+    (0, class_validator_1.IsEnum)(PaymentMethod),
     __metadata("design:type", String)
 ], CreateOrderInput.prototype, "paymentMethod", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateOrderInput.prototype, "customerNote", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], CreateOrderInput.prototype, "metadata", void 0);
 exports.CreateOrderInput = CreateOrderInput = __decorate([

@@ -19,8 +19,15 @@ let OrderService = class OrderService {
         this.cartService = cartService;
     }
     async createFromCart(input, userId) {
-        const { shippingAddress, billingAddress, paymentMethod, shippingMethod } = input;
-        const cartValidation = await this.cartService.validateCart(userId, undefined);
+        const { shippingAddress, billingAddress, paymentMethod, shippingMethod, sessionId } = input;
+        console.log('[OrderService] createFromCart input:', {
+            userId,
+            sessionId,
+            hasShippingAddress: !!shippingAddress,
+            paymentMethod,
+            shippingMethod
+        });
+        const cartValidation = await this.cartService.validateCart(userId, sessionId);
         if (!cartValidation.isValid) {
             throw new common_1.BadRequestException(`Cart validation failed: ${cartValidation.errors.join(', ')}`);
         }
@@ -36,14 +43,29 @@ let OrderService = class OrderService {
             subtotal += itemSubtotal;
             orderItems.push({
                 productId: item.productId,
-                variantId: item.variantId,
+                variantId: item.variantId || null,
+                productName: item.product.name,
+                variantName: item.variant?.name || null,
+                sku: item.variant?.sku || item.product.sku || null,
+                thumbnail: item.product.thumbnail || (item.product.images && item.product.images[0]) || null,
                 quantity: item.quantity,
+                quantityOrdered: item.quantity,
+                quantityDelivered: 0,
+                quantityReceived: 0,
+                quantityCancelled: 0,
                 price,
-                productSnapshot: {
-                    name: item.product.name,
-                    slug: item.product.slug,
-                    images: item.product.images,
-                    attributes: item.variant?.attributes || {},
+                subtotal: itemSubtotal,
+                totalDelivered: 0,
+                totalReceived: 0,
+                totalAfterVAT: itemSubtotal,
+                vat: 0,
+                metadata: {
+                    productSnapshot: {
+                        name: item.product.name,
+                        slug: item.product.slug,
+                        images: item.product.images,
+                        attributes: item.variant?.attributes || {},
+                    },
                 },
             });
         }
@@ -208,7 +230,7 @@ let OrderService = class OrderService {
         if (!order) {
             throw new common_1.NotFoundException('Order not found');
         }
-        if (!order.userId && order.guestEmail !== email) {
+        if (email && !order.userId && order.guestEmail && order.guestEmail !== email) {
             throw new common_1.BadRequestException('Invalid order number or email');
         }
         return order;

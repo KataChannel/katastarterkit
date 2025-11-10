@@ -119,6 +119,7 @@ export declare class CreateOrderInput {
     guestEmail?: string;
     guestPhone?: string;
     guestName?: string;
+    sessionId?: string;
     items?: OrderItemInput[];
     cartId?: string;
     shippingAddress: ShippingAddressInput;

@@ -7,6 +7,7 @@ export declare class CartService {
     private readonly CART_TTL;
     private readonly CACHE_TTL;
     constructor(prisma: PrismaService, redis: RedisService);
+    getCart(userId?: string, sessionId?: string): Promise<any>;
     getOrCreateCart(userId?: string, sessionId?: string): Promise<any>;
     addItem(input: AddToCartInput, userId?: string): Promise<any>;
     updateItem(itemId: string, quantity: number, userId?: string, sessionId?: string): Promise<any>;
@@ -20,9 +21,14 @@ export declare class CartService {
         cart: any;
     }>;
     private calculateTotals;
+    private calculateShippingFee;
+    private calculateTax;
     private validateCoupon;
     private getCartCacheKey;
     private invalidateCartCache;
+    private isValidCachedCart;
+    private serializeCart;
+    private deserializeCart;
     cleanupExpiredCarts(): Promise<{
         deletedCount: number;
     }>;

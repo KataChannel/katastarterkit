@@ -202,7 +202,7 @@ export default function CourseDetailPage() {
             <p className="text-sm text-gray-600 mt-1">Xem thông tin chi tiết</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant={course.status === 'PUBLISHED' ? 'outline' : 'default'}
             onClick={handleTogglePublish}
@@ -219,6 +219,15 @@ export default function CourseDetailPage() {
                 <span className="hidden sm:inline">Xuất bản</span>
               </>
             )}
+          </Button>
+          <Button 
+            variant="default" 
+            onClick={() => router.push(`/lms/instructor/courses/${courseId}/manage`)}
+            className="gap-2 bg-blue-600 hover:bg-blue-700"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span className="hidden sm:inline">Quản lý Nội dung</span>
+            <span className="sm:hidden">Nội dung</span>
           </Button>
           <Button variant="outline" onClick={handleEdit} className="gap-2">
             <Edit className="w-4 h-4" />
@@ -371,6 +380,44 @@ export default function CourseDetailPage() {
 
         {/* Right Column - Stats & Info */}
         <div className="space-y-6">
+          {/* Quick Actions - Quản lý nội dung */}
+          <Card className="border-2 border-blue-500 bg-gradient-to-br from-blue-50 to-white">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2 text-blue-900">
+                <BookOpen className="w-5 h-5" />
+                Quản lý Nội dung Khóa học
+              </CardTitle>
+              <CardDescription>
+                Thêm và chỉnh sửa modules, lessons, quizzes
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button 
+                onClick={() => router.push(`/lms/instructor/courses/${courseId}/manage`)}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                Quản lý Modules
+              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => router.push(`/lms/instructor/courses/${courseId}/lessons`)}
+                  className="text-sm"
+                >
+                  Lessons
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => router.push(`/lms/instructor/courses/${courseId}/quizzes`)}
+                  className="text-sm"
+                >
+                  Quizzes
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Stats */}
           <Card>
             <CardHeader>

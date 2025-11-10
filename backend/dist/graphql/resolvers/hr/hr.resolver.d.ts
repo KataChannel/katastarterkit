@@ -22,6 +22,10 @@ export declare class OnboardingResolver {
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -35,6 +39,9 @@ export declare class OnboardingResolver {
             createdAt: Date;
             isActive: boolean;
             userId: string;
+            city: string | null;
+            district: string | null;
+            ward: string | null;
             updatedAt: Date;
             displayName: string | null;
             createdBy: string | null;
@@ -42,7 +49,6 @@ export declare class OnboardingResolver {
             skills: string[];
             startDate: Date | null;
             notes: string | null;
-            city: string | null;
             employeeCode: string;
             fullName: string;
             citizenId: string | null;
@@ -60,8 +66,6 @@ export declare class OnboardingResolver {
             personalPhone: string | null;
             permanentAddress: string | null;
             currentAddress: string | null;
-            district: string | null;
-            ward: string | null;
             postalCode: string | null;
             emergencyContactName: string | null;
             emergencyContactRelationship: string | null;
@@ -125,6 +129,10 @@ export declare class OnboardingResolver {
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -138,6 +146,9 @@ export declare class OnboardingResolver {
             createdAt: Date;
             isActive: boolean;
             userId: string;
+            city: string | null;
+            district: string | null;
+            ward: string | null;
             updatedAt: Date;
             displayName: string | null;
             createdBy: string | null;
@@ -145,7 +156,6 @@ export declare class OnboardingResolver {
             skills: string[];
             startDate: Date | null;
             notes: string | null;
-            city: string | null;
             employeeCode: string;
             fullName: string;
             citizenId: string | null;
@@ -163,8 +173,6 @@ export declare class OnboardingResolver {
             personalPhone: string | null;
             permanentAddress: string | null;
             currentAddress: string | null;
-            district: string | null;
-            ward: string | null;
             postalCode: string | null;
             emergencyContactName: string | null;
             emergencyContactRelationship: string | null;
@@ -228,6 +236,10 @@ export declare class OnboardingResolver {
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -241,6 +253,9 @@ export declare class OnboardingResolver {
             createdAt: Date;
             isActive: boolean;
             userId: string;
+            city: string | null;
+            district: string | null;
+            ward: string | null;
             updatedAt: Date;
             displayName: string | null;
             createdBy: string | null;
@@ -248,7 +263,6 @@ export declare class OnboardingResolver {
             skills: string[];
             startDate: Date | null;
             notes: string | null;
-            city: string | null;
             employeeCode: string;
             fullName: string;
             citizenId: string | null;
@@ -266,8 +280,6 @@ export declare class OnboardingResolver {
             personalPhone: string | null;
             permanentAddress: string | null;
             currentAddress: string | null;
-            district: string | null;
-            ward: string | null;
             postalCode: string | null;
             emergencyContactName: string | null;
             emergencyContactRelationship: string | null;
@@ -332,6 +344,9 @@ export declare class OnboardingResolver {
                 createdAt: Date;
                 isActive: boolean;
                 userId: string;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 updatedAt: Date;
                 displayName: string | null;
                 createdBy: string | null;
@@ -339,7 +354,6 @@ export declare class OnboardingResolver {
                 skills: string[];
                 startDate: Date | null;
                 notes: string | null;
-                city: string | null;
                 employeeCode: string;
                 fullName: string;
                 citizenId: string | null;
@@ -357,8 +371,6 @@ export declare class OnboardingResolver {
                 personalPhone: string | null;
                 permanentAddress: string | null;
                 currentAddress: string | null;
-                district: string | null;
-                ward: string | null;
                 postalCode: string | null;
                 emergencyContactName: string | null;
                 emergencyContactRelationship: string | null;
@@ -425,6 +437,10 @@ export declare class OnboardingResolver {
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -438,6 +454,9 @@ export declare class OnboardingResolver {
             createdAt: Date;
             isActive: boolean;
             userId: string;
+            city: string | null;
+            district: string | null;
+            ward: string | null;
             updatedAt: Date;
             displayName: string | null;
             createdBy: string | null;
@@ -445,7 +464,6 @@ export declare class OnboardingResolver {
             skills: string[];
             startDate: Date | null;
             notes: string | null;
-            city: string | null;
             employeeCode: string;
             fullName: string;
             citizenId: string | null;
@@ -463,8 +481,6 @@ export declare class OnboardingResolver {
             personalPhone: string | null;
             permanentAddress: string | null;
             currentAddress: string | null;
-            district: string | null;
-            ward: string | null;
             postalCode: string | null;
             emergencyContactName: string | null;
             emergencyContactRelationship: string | null;
@@ -556,6 +572,10 @@ export declare class OffboardingResolver {
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -569,6 +589,9 @@ export declare class OffboardingResolver {
             createdAt: Date;
             isActive: boolean;
             userId: string;
+            city: string | null;
+            district: string | null;
+            ward: string | null;
             updatedAt: Date;
             displayName: string | null;
             createdBy: string | null;
@@ -576,7 +599,6 @@ export declare class OffboardingResolver {
             skills: string[];
             startDate: Date | null;
             notes: string | null;
-            city: string | null;
             employeeCode: string;
             fullName: string;
             citizenId: string | null;
@@ -594,8 +616,6 @@ export declare class OffboardingResolver {
             personalPhone: string | null;
             permanentAddress: string | null;
             currentAddress: string | null;
-            district: string | null;
-            ward: string | null;
             postalCode: string | null;
             emergencyContactName: string | null;
             emergencyContactRelationship: string | null;
@@ -685,6 +705,10 @@ export declare class OffboardingResolver {
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -698,6 +722,9 @@ export declare class OffboardingResolver {
             createdAt: Date;
             isActive: boolean;
             userId: string;
+            city: string | null;
+            district: string | null;
+            ward: string | null;
             updatedAt: Date;
             displayName: string | null;
             createdBy: string | null;
@@ -705,7 +732,6 @@ export declare class OffboardingResolver {
             skills: string[];
             startDate: Date | null;
             notes: string | null;
-            city: string | null;
             employeeCode: string;
             fullName: string;
             citizenId: string | null;
@@ -723,8 +749,6 @@ export declare class OffboardingResolver {
             personalPhone: string | null;
             permanentAddress: string | null;
             currentAddress: string | null;
-            district: string | null;
-            ward: string | null;
             postalCode: string | null;
             emergencyContactName: string | null;
             emergencyContactRelationship: string | null;
@@ -815,6 +839,9 @@ export declare class OffboardingResolver {
                 createdAt: Date;
                 isActive: boolean;
                 userId: string;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 updatedAt: Date;
                 displayName: string | null;
                 createdBy: string | null;
@@ -822,7 +849,6 @@ export declare class OffboardingResolver {
                 skills: string[];
                 startDate: Date | null;
                 notes: string | null;
-                city: string | null;
                 employeeCode: string;
                 fullName: string;
                 citizenId: string | null;
@@ -840,8 +866,6 @@ export declare class OffboardingResolver {
                 personalPhone: string | null;
                 permanentAddress: string | null;
                 currentAddress: string | null;
-                district: string | null;
-                ward: string | null;
                 postalCode: string | null;
                 emergencyContactName: string | null;
                 emergencyContactRelationship: string | null;
@@ -934,6 +958,10 @@ export declare class OffboardingResolver {
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
                 isTwoFactorEnabled: boolean;
+                address: string | null;
+                city: string | null;
+                district: string | null;
+                ward: string | null;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
@@ -947,6 +975,9 @@ export declare class OffboardingResolver {
             createdAt: Date;
             isActive: boolean;
             userId: string;
+            city: string | null;
+            district: string | null;
+            ward: string | null;
             updatedAt: Date;
             displayName: string | null;
             createdBy: string | null;
@@ -954,7 +985,6 @@ export declare class OffboardingResolver {
             skills: string[];
             startDate: Date | null;
             notes: string | null;
-            city: string | null;
             employeeCode: string;
             fullName: string;
             citizenId: string | null;
@@ -972,8 +1002,6 @@ export declare class OffboardingResolver {
             personalPhone: string | null;
             permanentAddress: string | null;
             currentAddress: string | null;
-            district: string | null;
-            ward: string | null;
             postalCode: string | null;
             emergencyContactName: string | null;
             emergencyContactRelationship: string | null;

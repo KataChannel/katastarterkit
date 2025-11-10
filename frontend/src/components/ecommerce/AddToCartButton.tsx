@@ -20,6 +20,7 @@ interface AddToCartButtonProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   showIcon?: boolean;
+  fullWidth?: boolean;
   children?: React.ReactNode;
 }
 
@@ -32,6 +33,7 @@ export function AddToCartButton({
   className,
   size = 'md',
   showIcon = true,
+  fullWidth = false,
   children,
 }: AddToCartButtonProps) {
   const { toast } = useToast();
@@ -99,14 +101,6 @@ export function AddToCartButton({
       // Don't rely on state which might be stale or empty string
       const effectiveSessionId = getSessionIdFromLib();
       
-      console.log('[AddToCart] Mutation with:', {
-        productId,
-        variantId,
-        quantity,
-        sessionId: effectiveSessionId,
-        isAuthenticated,
-      });
-
       await addToCart({
         variables: {
           input: {
@@ -143,6 +137,7 @@ export function AddToCartButton({
       disabled={disabled || isAdding || justAdded}
       className={cn(
         'relative overflow-hidden transition-all duration-300',
+        fullWidth && 'w-full',
         justAdded && 'bg-green-600 hover:bg-green-700',
         isAdding && 'scale-95',
         sizeClasses[size],

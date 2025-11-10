@@ -340,33 +340,47 @@ export default function AdminCoursesPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-2">
+                <div className="flex flex-col gap-2 pt-2">
+                  {/* Primary Action - Quản lý nội dung */}
                   <Button 
-                    variant="outline" 
+                    variant="default"
                     size="sm" 
-                    className="flex-1 gap-1 sm:gap-2"
-                    onClick={() => handleViewCourse(course.id)}
+                    className="w-full gap-2 bg-blue-600 hover:bg-blue-700"
+                    onClick={() => router.push(`/lms/instructor/courses/${course.id}/manage`)}
                   >
-                    <Eye className="w-4 h-4" />
-                    <span className="hidden sm:inline">Xem</span>
+                    <BookOpen className="w-4 h-4" />
+                    Quản lý Modules & Quiz
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1 gap-1 sm:gap-2"
-                    onClick={() => handleEditCourse(course.id)}
-                  >
-                    <Edit className="w-4 h-4" />
-                    <span className="hidden sm:inline">Sửa</span>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-1 sm:gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => handleDeleteClick(course)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  
+                  {/* Secondary Actions */}
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 gap-1 sm:gap-2"
+                      onClick={() => handleViewCourse(course.id)}
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span className="hidden sm:inline">Xem</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 gap-1 sm:gap-2"
+                      onClick={() => handleEditCourse(course.id)}
+                    >
+                      <Edit className="w-4 h-4" />
+                      <span className="hidden sm:inline">Sửa</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="gap-1 sm:gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDeleteClick(course)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

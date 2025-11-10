@@ -67,7 +67,7 @@ export declare class ApplyCouponInput {
 }
 export declare class MergeCartsInput {
     sessionId: string;
-    userId: string;
+    userId?: string;
 }
 export declare class AddToCartResponse {
     success: boolean;

@@ -29,7 +29,7 @@ export default function InstructorDashboardPage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login?redirect=/lms/instructor/dashboard');
+      router.push('/login?redirect=/lms/instructor');
     }
   }, [user, authLoading, router]);
 
