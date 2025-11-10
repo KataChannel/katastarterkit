@@ -44,6 +44,8 @@ export default function ChatPanel({ projectId, userToken }: ChatPanelProps) {
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -80,14 +82,50 @@ export default function ChatPanel({ projectId, userToken }: ChatPanelProps) {
     // Connection events
     newSocket.on('connect', () => {
       setIsConnected(true);
+      setHasError(false);
+      setErrorMessage('');
       console.log('✅ Connected to chat');
-      newSocket.emit('join_project', { projectId });
       
-      // Request to load messages after joining
-      newSocket.emit('load_messages', {
-        projectId,
-        take: 50,
-        skip: 0,
+      // Debug: Log user info
+      try {
+        const userStr = localStorage.getItem('user');
+        const user = userStr ? JSON.parse(userStr) : null;
+        console.log('[ChatPanel] 🔍 Debug:', {
+          userId: user?.id,
+          userEmail: user?.email,
+          projectId,
+        });
+      } catch (e) {
+        console.error('[ChatPanel] Error parsing user:', e);
+      }
+      
+      // Join project with callback to handle errors
+      newSocket.emit('join_project', { projectId }, (response: any) => {
+        console.log('[ChatPanel] 📩 Join response:', response);
+        
+        if (response?.success) {
+          setOnlineUsers(response.onlineUsers || []);
+          
+          // Request to load messages after successfully joining
+          newSocket.emit('load_messages', {
+            projectId,
+            take: 50,
+            skip: 0,
+          });
+        } else if (response?.error) {
+          console.error('[ChatPanel] ❌ Join failed:', response.error);
+          setHasError(true);
+          
+          // Parse error message for better UX
+          let displayMessage = response.error;
+          if (response.error?.toLowerCase().includes('not a project member')) {
+            displayMessage = 'Bạn không phải là thành viên của dự án này';
+          } else if (response.error?.toLowerCase().includes('not authenticated')) {
+            displayMessage = 'Phiên đăng nhập đã hết hạn';
+          }
+          
+          setErrorMessage(displayMessage);
+        }
       });
     });
 
@@ -172,11 +210,29 @@ export default function ChatPanel({ projectId, userToken }: ChatPanelProps) {
     });
 
     newSocket.on('error', (error: { message: string }) => {
-      toast({
-        title: 'Error',
-        description: `Chat error: ${error.message}`,
-        type: 'error',
-      });
+      console.error('[ChatPanel] Socket error:', error);
+      setHasError(true);
+      
+      // Parse error message for better UX
+      let displayMessage = error.message;
+      if (error.message?.toLowerCase().includes('not a project member')) {
+        displayMessage = 'Bạn không phải là thành viên của dự án này';
+      } else if (error.message?.toLowerCase().includes('permission')) {
+        displayMessage = 'Bạn không có quyền truy cập chat này';
+      } else if (error.message?.toLowerCase().includes('unauthorized')) {
+        displayMessage = 'Phiên đăng nhập đã hết hạn';
+      }
+      
+      setErrorMessage(displayMessage);
+      
+      // Only show toast for non-permission errors
+      if (!error.message?.toLowerCase().includes('not a project member')) {
+        toast({
+          title: '❌ Lỗi Chat',
+          description: displayMessage,
+          type: 'error',
+        });
+      }
     });
 
     setSocket(newSocket);
@@ -246,13 +302,37 @@ export default function ChatPanel({ projectId, userToken }: ChatPanelProps) {
     });
   };
 
+  // Show error state if user doesn't have permission
+  if (hasError && errorMessage) {
+    return (
+      <div className="h-full flex items-center justify-center bg-muted/30 p-3 sm:p-4">
+        <div className="text-center max-w-md mx-auto space-y-4">
+          <div className="rounded-full bg-destructive/10 w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mx-auto">
+            <MessageSquare className="h-8 w-8 sm:h-10 sm:w-10 text-destructive" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-semibold text-base sm:text-lg">
+              Không thể kết nối chat
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {errorMessage}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Bạn cần được thêm vào dự án để có thể trò chuyện với các thành viên khác.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!projectId) {
     return (
       <div className="h-full flex items-center justify-center bg-muted/30">
         <div className="text-center max-w-xs px-4">
           <MessageSquare className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
-            Select a project to view chat
+            Chọn một dự án để xem chat
           </p>
         </div>
       </div>

@@ -75,7 +75,7 @@ export class ProjectResolver {
   })
   async updateProject(
     @CurrentUser('id') userId: string,
-    @Args('id') projectId: string,
+    @Args('id', { type: () => ID }) projectId: string,
     @Args('input') input: UpdateProjectInput,
   ): Promise<ProjectType> {
     return this.projectService.updateProject(projectId, userId, input) as any;
@@ -83,13 +83,36 @@ export class ProjectResolver {
 
   @Mutation(() => ProjectType, {
     name: 'deleteProject',
-    description: 'Xóa project (soft delete = archive, owner only)',
+    description: 'Archive/Soft delete project (owner/admin only)',
   })
   async deleteProject(
     @CurrentUser('id') userId: string,
-    @Args('id') projectId: string,
+    @Args('id', { type: () => ID }) projectId: string,
   ): Promise<ProjectType> {
     return this.projectService.deleteProject(projectId, userId) as any;
+  }
+
+    @Mutation(() => Boolean, {
+    name: 'permanentlyDeleteProject',
+    description: 'Permanently delete project and all related data (owner only, cannot be undone)',
+  })
+  async permanentlyDeleteProject(
+    @CurrentUser('id') userId: string,
+    @Args('id', { type: () => ID }) projectId: string,
+  ): Promise<Boolean> {
+    await this.projectService.permanentlyDeleteProject(projectId, userId);
+    return true;
+  }
+
+  @Mutation(() => ProjectType, {
+    name: 'restoreProject',
+    description: 'Restore archived project (owner/admin only)',
+  })
+  async restoreProject(
+    @CurrentUser('id') userId: string,
+    @Args('id', { type: () => ID }) projectId: string,
+  ): Promise<ProjectType> {
+    return this.projectService.restoreProject(projectId, userId) as any;
   }
 
   // ==================== MEMBER MUTATIONS ====================

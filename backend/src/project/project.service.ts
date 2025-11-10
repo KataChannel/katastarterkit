@@ -194,6 +194,74 @@ export class ProjectService {
     });
   }
 
+  /**
+   * Xóa project vĩnh viễn (hard delete)
+   * Chỉ owner mới được xóa
+   * CẢNH BÁO: Xóa tất cả data liên quan (tasks, chat, members)
+   */
+  async permanentlyDeleteProject(projectId: string, userId: string): Promise<{ success: boolean; message: string }> {
+    // Check if user is owner
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        _count: {
+          select: {
+            tasks: true,
+            chatMessages: true,
+            members: true,
+          },
+        },
+      },
+    });
+
+    if (!project) {
+      throw new NotFoundException(`Project with ID ${projectId} not found`);
+    }
+
+    if (project.ownerId !== userId) {
+      throw new ForbiddenException('Only project owner can permanently delete the project');
+    }
+
+    // Delete project (cascade will handle related data)
+    await this.prisma.project.delete({
+      where: { id: projectId },
+    });
+
+    return {
+      success: true,
+      message: `Project "${project.name}" and all related data (${project._count.tasks} tasks, ${project._count.chatMessages} messages, ${project._count.members} members) permanently deleted`,
+    };
+  }
+
+  /**
+   * Restore archived project
+   * Chỉ owner mới được restore
+   */
+  async restoreProject(projectId: string, userId: string): Promise<Project> {
+    // Check if user is owner
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      throw new NotFoundException(`Project with ID ${projectId} not found`);
+    }
+
+    if (project.ownerId !== userId) {
+      throw new ForbiddenException('Only project owner can restore the project');
+    }
+
+    if (!project.isArchived) {
+      throw new BadRequestException('Project is not archived');
+    }
+
+    // Restore project
+    return this.prisma.project.update({
+      where: { id: projectId },
+      data: { isArchived: false },
+    });
+  }
+
   // ==================== MEMBER MANAGEMENT ====================
 
   /**
@@ -342,8 +410,23 @@ export class ProjectService {
 
   /**
    * Kiểm tra xem user có quyền admin (owner hoặc admin) không
+   * Allow if user is project owner OR is member with admin/owner role
    */
   private async checkAdminPermission(projectId: string, userId: string): Promise<void> {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    // Allow if user is the project owner
+    if (project.ownerId === userId) {
+      return;
+    }
+
+    // Check if user is member with admin/owner role
     const member = await this.prisma.projectMember.findUnique({
       where: {
         projectId_userId: {

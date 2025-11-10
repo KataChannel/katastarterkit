@@ -2510,8 +2510,8 @@ type Mutation {
   deleteProductImage(id: ID!): Boolean!
   deleteProductVariant(id: ID!): Boolean!
 
-  """Xóa project (soft delete = archive, owner only)"""
-  deleteProject(id: String!): Project!
+  """Archive/Soft delete project (owner/admin only)"""
+  deleteProject(id: ID!): Project!
   deleteQuiz(id: String!): Boolean!
   deleteReview(reviewId: ID!): Boolean!
   deleteRole(id: String!): Boolean!
@@ -2585,6 +2585,11 @@ type Mutation {
     productIds: [String!]
     threshold: Float! = 0.6
   ): NormalizationStats!
+
+  """
+  Permanently delete project and all related data (owner only, cannot be undone)
+  """
+  permanentlyDeleteProject(id: ID!): Boolean!
   processPaymentRequest(id: String!, status: String!): AffPaymentRequest!
   publishCourse(id: ID!): Course!
   publishPost(id: String!): Post!
@@ -2603,6 +2608,9 @@ type Mutation {
   requestForgotPassword(email: String!): OtpResponse!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   resetPasswordWithToken(email: String!, newPassword: String!, token: String!): OtpResponse!
+
+  """Restore archived project (owner/admin only)"""
+  restoreProject(id: ID!): Project!
   reviewCampaignApplication(input: ReviewCampaignApplicationInput!): String!
   sendSupportMessage(input: CreateSupportMessageInput!): SupportMessage!
 
@@ -2679,7 +2687,7 @@ type Mutation {
   updateProfile(input: UpdateProfileInput!): User!
 
   """Update project (owner/admin only)"""
-  updateProject(id: String!, input: UpdateProjectInput!): Project!
+  updateProject(id: ID!, input: UpdateProjectInput!): Project!
 
   """Update role của member (owner only)"""
   updateProjectMemberRole(input: UpdateMemberRoleInput!, projectId: ID!): ProjectMember!

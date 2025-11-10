@@ -11,6 +11,7 @@
  */
 
 import { useMemo } from 'react';
+import { gql, useMutation } from '@apollo/client';
 import {
   useFindMany,
   useFindUnique,
@@ -95,17 +96,40 @@ export interface UpdateMemberRoleInput {
 
 /**
  * Hook: Get all user's projects (for Sidebar)
+ * Only returns projects where user is owner OR member
  * 
  * @example
  * const { data: projects, loading, refetch } = useMyProjects(false);
  */
 export const useMyProjects = (includeArchived = false) => {
-  const where = useMemo(() => {
-    if (includeArchived) {
-      return undefined; // Get all projects
+  // Get current user ID from localStorage
+  const userId = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) return null;
+      const user = JSON.parse(userStr);
+      return user.id;
+    } catch {
+      return null;
     }
-    return { isArchived: { equals: false } }; // Only active projects
-  }, [includeArchived]);
+  }, []);
+
+  const where = useMemo(() => {
+    const conditions: any = {
+      isArchived: includeArchived ? undefined : { equals: false },
+    };
+
+    // Only show projects where user is owner OR member
+    if (userId) {
+      conditions.OR = [
+        { ownerId: { equals: userId } },
+        { members: { some: { userId: { equals: userId } } } }
+      ];
+    }
+
+    return conditions;
+  }, [includeArchived, userId]);
 
   const { data, loading, error, refetch } = useFindMany<Project>('project', {
     where,
@@ -128,9 +152,26 @@ export const useMyProjects = (includeArchived = false) => {
         select: {
           tasks: true,
           chatMessages: true,
+          members: true,
         },
       },
     },
+  }, {
+    skip: !userId, // Don't query if no userId
+  });
+
+  // Debug: Log query results
+  console.log('[useMyProjects] Debug:', {
+    userId,
+    where,
+    projectCount: data?.length || 0,
+    projects: data?.map(p => ({
+      id: p.id,
+      name: p.name,
+      ownerId: p.userId,
+      memberCount: p.members?.length || 0,
+      members: p.members?.map(m => ({ userId: m.user.id, role: m.role }))
+    }))
   });
 
   return {
@@ -224,6 +265,8 @@ export const useProjectMembers = (projectId: string | null) => {
 
 /**
  * Hook: Create new project
+ * IMPORTANT: Uses custom mutation (not Dynamic GraphQL) because backend
+ * has special logic to auto-add owner to members
  * 
  * @example
  * const [createProject, { loading }] = useCreateProject();
@@ -234,6 +277,59 @@ export const useProjectMembers = (projectId: string | null) => {
  * });
  */
 export const useCreateProject = () => {
+  const [mutate, { data, loading, error }] = useMutation(
+    gql`
+      mutation CreateProject($input: CreateProjectInput!) {
+        createProject(input: $input) {
+          id
+          name
+          description
+          avatar
+          isArchived
+          createdAt
+          updatedAt
+          userId
+          members {
+            id
+            role
+            user {
+              id
+              firstName
+              lastName
+              email
+              avatar
+            }
+          }
+          _count {
+            tasks
+            chatMessages
+            members
+          }
+        }
+      }
+    `,
+    {
+      refetchQueries: ['FindManyProject'],
+      awaitRefetchQueries: true,
+    }
+  );
+
+  const createProject = async (options: { variables: { input: CreateProjectInput } }) => {
+    const result = await mutate(options);
+    return result;
+  };
+
+  return [createProject, { loading, error }] as const;
+};
+
+/**
+ * Hook: Create new project (OLD - Dynamic GraphQL version)
+ * DO NOT USE - Does not add owner to members!
+ * Use useCreateProject() instead
+ * 
+ * @deprecated Use useCreateProject() which calls custom mutation
+ */
+export const useCreateProjectDynamic = () => {
   const [createOne, { data, loading, error }] = useCreateOne<Project>('project', {
     refetchQueries: ['FindManyProject'], // Auto refetch project list after create
   });
@@ -323,10 +419,10 @@ export const useUpdateProject = () => {
 };
 
 /**
- * Hook: Delete/Archive project
+ * Hook: Delete/Archive project (soft delete)
  * 
  * @example
- * const [deleteProject] = useDeleteProject();
+ * const [deleteProject, { loading }] = useDeleteProject();
  * await deleteProject({ variables: { id: "uuid" } });
  */
 export const useDeleteProject = () => {
@@ -340,6 +436,7 @@ export const useDeleteProject = () => {
       select: {
         id: true,
         name: true,
+        isArchived: true,
       },
     });
 
@@ -347,6 +444,66 @@ export const useDeleteProject = () => {
   };
 
   return [deleteProject, { loading, error }] as const;
+};
+
+/**
+ * Hook: Permanently delete project (hard delete)
+ * CẢNH BÁO: Xóa vĩnh viễn, không thể khôi phục!
+ * 
+ * @example
+ * const [permanentlyDelete, { loading }] = usePermanentlyDeleteProject();
+ * await permanentlyDelete({ variables: { id: "uuid" } });
+ */
+export const usePermanentlyDeleteProject = () => {
+  const [mutate, { loading, error }] = useMutation(
+    gql`
+      mutation PermanentlyDeleteProject($id: ID!) {
+        permanentlyDeleteProject(id: $id)
+      }
+    `,
+    {
+      refetchQueries: ['FindManyProject'],
+      awaitRefetchQueries: true,
+    }
+  );
+
+  const permanentlyDeleteProject = async (options: { variables: { id: string } }) => {
+    const result = await mutate(options);
+    return result;
+  };
+
+  return [permanentlyDeleteProject, { loading, error }] as const;
+};
+
+/**
+ * Hook: Restore archived project
+ * 
+ * @example
+ * const [restoreProject, { loading }] = useRestoreProject();
+ * await restoreProject({ variables: { id: "uuid" } });
+ */
+export const useRestoreProject = () => {
+  const [updateOne, { data, loading, error }] = useUpdateOne<Project>('project', {
+    refetchQueries: ['FindManyProject'],
+  });
+
+  const restoreProject = async (options: { variables: { id: string } }) => {
+    const result = await updateOne({
+      where: options.variables.id,
+      data: {
+        isArchived: false,
+      },
+      select: {
+        id: true,
+        name: true,
+        isArchived: true,
+      },
+    });
+
+    return { data: { restoreProject: result } };
+  };
+
+  return [restoreProject, { loading, error }] as const;
 };
 
 /**
@@ -399,6 +556,8 @@ export default {
   useCreateProject,
   useUpdateProject,
   useDeleteProject,
+  usePermanentlyDeleteProject,
+  useRestoreProject,
   useAddMember,
   useRemoveMember,
   useUpdateMemberRole,

@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useMyProjects } from '@/hooks/useProjects.dynamic';
-import { Plus, Archive, Users, MessageSquare, CheckSquare, UserPlus } from 'lucide-react';
+import { Plus, Archive, Users, MessageSquare, CheckSquare, UserPlus, FolderKanban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import CreateProjectModal from './CreateProjectModal';
+import { DeleteProjectMenu } from './DeleteProjectMenu';
 
 interface ProjectSidebarProps {
   selectedProjectId: string | null;
@@ -32,15 +33,16 @@ export default function ProjectSidebar({
   if (!mounted) {
     return (
       <div className="h-full flex flex-col bg-background border-r">
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Projects</h2>
+        <div className="p-3 border-b sm:p-4">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-base font-semibold sm:text-lg">Dự án của tôi</h2>
             <Button
               size="sm"
               onClick={() => setIsCreateModalOpen(true)}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 p-0 sm:h-8 sm:w-8"
+              title="Tạo dự án mới"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
@@ -51,8 +53,11 @@ export default function ProjectSidebar({
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      <div className="h-full flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-2">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          <p className="text-xs text-muted-foreground">Đang tải dự án...</p>
+        </div>
       </div>
     );
   }
@@ -60,7 +65,10 @@ export default function ProjectSidebar({
   if (error) {
     return (
       <div className="h-full flex items-center justify-center p-4">
-        <p className="text-sm text-destructive">Failed to load projects</p>
+        <div className="text-center">
+          <p className="text-sm text-destructive mb-2">Không thể tải dự án</p>
+          <p className="text-xs text-muted-foreground">Vui lòng thử lại sau</p>
+        </div>
       </div>
     );
   }
@@ -69,16 +77,17 @@ export default function ProjectSidebar({
 
   return (
     <div className="h-full flex flex-col bg-background border-r">
-      {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Projects</h2>
+      {/* Header - Mobile First */}
+      <div className="p-3 border-b sm:p-4">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <h2 className="text-base font-semibold sm:text-lg">Dự án của tôi</h2>
           <Button
             size="sm"
             onClick={() => setIsCreateModalOpen(true)}
-            className="h-8 w-8 p-0"
+            className="h-7 w-7 p-0 sm:h-8 sm:w-8"
+            title="Tạo dự án mới"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </Button>
         </div>
       </div>
@@ -88,16 +97,20 @@ export default function ProjectSidebar({
         <div className="p-2 space-y-1">
           {projects.length === 0 ? (
             <div className="text-center py-8 px-4">
-              <div className="text-muted-foreground text-sm mb-4">
-                No projects yet
+              <div className="mb-2">
+                <FolderKanban className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
               </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Chưa có dự án nào
+              </p>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsCreateModalOpen(true)}
+                className="w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Create First Project
+                Tạo dự án đầu tiên
               </Button>
             </div>
           ) : (
@@ -154,17 +167,18 @@ function ProjectItem({ project, isSelected, onClick, onInviteClick }: ProjectIte
         }
       }}
       className={`
-        w-full p-3 rounded-lg text-left transition-colors relative group cursor-pointer
+        w-full p-2.5 rounded-lg text-left transition-colors relative group cursor-pointer
+        sm:p-3
         ${
           isSelected
-            ? 'bg-primary/10 border border-primary'
+            ? 'bg-primary/10 border border-primary shadow-sm'
             : 'hover:bg-accent border border-transparent'
         }
       `}
     >
       {/* Project Header */}
-      <div className="flex items-start gap-3 mb-2">
-        <Avatar className="h-10 w-10 flex-shrink-0">
+      <div className="flex items-start gap-2.5 mb-2 sm:gap-3">
+        <Avatar className="h-9 w-9 flex-shrink-0 sm:h-10 sm:w-10">
           <AvatarImage src={project.avatar} />
           <AvatarFallback className="bg-primary/20 text-primary text-xs">
             {project.name.substring(0, 2).toUpperCase()}
@@ -172,48 +186,54 @@ function ProjectItem({ project, isSelected, onClick, onInviteClick }: ProjectIte
         </Avatar>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-sm truncate">{project.name}</h3>
+          <h3 className="font-medium text-xs truncate sm:text-sm">{project.name}</h3>
           {project.description && (
-            <p className="text-xs text-muted-foreground truncate">
+            <p className="text-xs text-muted-foreground truncate line-clamp-1">
               {project.description}
             </p>
           )}
         </div>
 
-        {/* Invite Button - Shows on hover */}
-        {onInviteClick && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={handleInviteClick}
-            title="Mời thành viên"
-          >
-            <UserPlus className="h-3.5 w-3.5" />
-          </Button>
-        )}
+        {/* Action Buttons - Shows on hover (desktop) or always visible (mobile) */}
+        <div className="flex items-center gap-1 shrink-0">
+          {onInviteClick && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 sm:h-7 sm:w-7 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+              onClick={handleInviteClick}
+              title="Mời thành viên"
+            >
+              <UserPlus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            </Button>
+          )}
+          <DeleteProjectMenu
+            project={project}
+            className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+          />
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+      {/* Stats - Mobile First: Compact */}
+      <div className="flex items-center gap-2.5 text-xs text-muted-foreground sm:gap-3">
         <div className="flex items-center gap-1">
-          <CheckSquare className="h-3 w-3" />
-          <span>{project._count?.tasks || 0}</span>
+          <CheckSquare className="h-3 w-3 shrink-0" />
+          <span className="tabular-nums">{project._count?.tasks || 0}</span>
         </div>
         <div className="flex items-center gap-1">
-          <MessageSquare className="h-3 w-3" />
-          <span>{project._count?.chatMessages || 0}</span>
+          <MessageSquare className="h-3 w-3 shrink-0" />
+          <span className="tabular-nums">{project._count?.chatMessages || 0}</span>
         </div>
         <div className="flex items-center gap-1">
-          <Users className="h-3 w-3" />
-          <span>{project.members?.length || 0}</span>
+          <Users className="h-3 w-3 shrink-0" />
+          <span className="tabular-nums">{project.members?.length || 0}</span>
         </div>
       </div>
 
       {/* Role Badge */}
       {project.members?.find((m: any) => m.role === 'owner') && (
         <Badge variant="secondary" className="mt-2 text-xs">
-          {project.members.find((m: any) => m.role === 'owner')?.role}
+          Chủ sở hữu
         </Badge>
       )}
 
@@ -221,7 +241,7 @@ function ProjectItem({ project, isSelected, onClick, onInviteClick }: ProjectIte
       {project.isArchived && (
         <Badge variant="outline" className="mt-2 text-xs">
           <Archive className="h-3 w-3 mr-1" />
-          Archived
+          Đã lưu trữ
         </Badge>
       )}
     </div>
