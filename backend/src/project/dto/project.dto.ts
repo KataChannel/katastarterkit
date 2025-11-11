@@ -134,10 +134,13 @@ export class UpdateProjectInput {
 
 @InputType('AddMemberInput')
 export class AddMemberInput {
-  @Field(() => String)
+  @Field(() => ID)
+  @IsString()
   userId: string;
 
   @Field({ nullable: true, defaultValue: 'member' })
+  @IsString()
+  @IsOptional()
   role?: 'owner' | 'admin' | 'member';
 }
 

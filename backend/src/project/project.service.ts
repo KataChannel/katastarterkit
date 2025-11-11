@@ -273,6 +273,13 @@ export class ProjectService {
     currentUserId: string,
     input: AddMemberInput,
   ): Promise<ProjectMember> {
+    console.log('📝 AddMember called with:', { projectId, currentUserId, input });
+
+    // Validate input
+    if (!input || !input.userId) {
+      throw new BadRequestException('userId is required in input');
+    }
+
     // Check permission
     await this.checkAdminPermission(projectId, currentUserId);
 

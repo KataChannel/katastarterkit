@@ -59,7 +59,12 @@ export class OrderService {
         productName: item.product.name,
         variantName: item.variant?.name || null,
         sku: item.variant?.sku || item.product.sku || null,
-        thumbnail: item.product.thumbnail || (item.product.images && item.product.images[0]) || null,
+        thumbnail: item.product.thumbnail || 
+          (item.product.images && item.product.images[0] 
+            ? (typeof item.product.images[0] === 'string' 
+                ? item.product.images[0] 
+                : item.product.images[0]?.url || item.product.images[0]?.src || null)
+            : null),
         
         // Quantities
         quantity: item.quantity,

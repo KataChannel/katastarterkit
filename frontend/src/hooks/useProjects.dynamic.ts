@@ -30,7 +30,14 @@ export interface Project {
   isArchived: boolean;
   createdAt: string;
   updatedAt: string;
-  userId: string;
+  ownerId: string;
+  owner?: {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    avatar?: string;
+  };
   members?: ProjectMember[];
   tasks?: Task[];
   chatMessages?: any[];
@@ -168,7 +175,7 @@ export const useMyProjects = (includeArchived = false) => {
     projects: data?.map(p => ({
       id: p.id,
       name: p.name,
-      ownerId: p.userId,
+      ownerId: p.ownerId,
       memberCount: p.members?.length || 0,
       members: p.members?.map(m => ({ userId: m.user.id, role: m.role }))
     }))
@@ -288,10 +295,20 @@ export const useCreateProject = () => {
           isArchived
           createdAt
           updatedAt
-          userId
+          ownerId
+          owner {
+            id
+            firstName
+            lastName
+            email
+            avatar
+          }
           members {
             id
+            userId
+            projectId
             role
+            joinedAt
             user {
               id
               firstName
@@ -345,9 +362,18 @@ export const useCreateProjectDynamic = () => {
         isArchived: true,
         createdAt: true,
         updatedAt: true,
-        userId: true,
+        ownerId: true,
       },
       include: {
+        owner: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          },
+        },
         members: {
           include: {
             user: {

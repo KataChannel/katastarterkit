@@ -124,8 +124,11 @@ export class ProjectResolver {
   async addMember(
     @CurrentUser('id') userId: string,
     @Args('projectId', { type: () => ID }) projectId: string,
-    @Args('input') input: AddMemberInput,
+    @Args('input', { type: () => AddMemberInput }) input: AddMemberInput,
   ): Promise<ProjectMemberType> {
+    console.log('🔍 [Resolver] Received input:', JSON.stringify(input, null, 2));
+    console.log('🔍 [Resolver] Input type:', typeof input);
+    console.log('🔍 [Resolver] Input keys:', Object.keys(input || {}));
     return this.projectService.addMember(projectId, userId, input) as any;
   }
 

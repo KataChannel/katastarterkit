@@ -347,22 +347,27 @@ export default function DashboardPage() {
         return;
       }
       
+      const mutationInput = {
+        userId: userIdValue,
+        role: role.toLowerCase() as 'owner' | 'admin' | 'member'
+      };
+      
       console.log('[Dashboard] Adding member:', {
         projectId: targetProjectId,
         userId: userIdValue,
-        role: role.toLowerCase()
+        role: role.toLowerCase(),
+        mutationInput: JSON.stringify(mutationInput),
       });
       
       // Add member using custom mutation
-      await addMember({
+      const result = await addMember({
         variables: {
           projectId: targetProjectId,
-          input: {
-            userId: userIdValue,
-            role: role.toLowerCase() as 'owner' | 'admin' | 'member'
-          }
+          input: mutationInput
         }
       });
+      
+      console.log('[Dashboard] Add member result:', result);
 
       // Success feedback
       const project = projectsData?.find((p: any) => p.id === targetProjectId);

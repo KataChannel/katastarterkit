@@ -64,7 +64,7 @@ interface ProjectAnalytics {
   pendingTasks: number;
   totalMembers: number;
   completionRate: number;
-  averageCompletionTime: string;
+  averageCompletionTime: string | { averageDays: number; averageHours: number; totalCompleted: number };
 }
 
 interface TaskStatistics {
@@ -79,7 +79,7 @@ interface MemberStats {
   tasksAssigned: number;
   tasksCompleted: number;
   completionRate: number;
-  averageCompletionTime: string;
+  averageCompletionTime: string | { averageDays: number; averageHours: number; totalCompleted: number };
 }
 
 interface VelocityData {
@@ -385,7 +385,11 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
                     </div>
                     <div className="text-right">
                       <div className="text-base md:text-lg font-bold">{member.completionRate.toFixed(0)}%</div>
-                      <p className="text-xs md:text-sm text-gray-500">{member.averageCompletionTime}</p>
+                      <p className="text-xs md:text-sm text-gray-500">
+                        {typeof member.averageCompletionTime === 'object' && member.averageCompletionTime
+                          ? `${member.averageCompletionTime.averageDays}d`
+                          : member.averageCompletionTime}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -440,7 +444,11 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
                 </div>
                 <div className="col-span-2 md:col-span-2">
                   <p className="text-xs md:text-sm text-gray-500">Thời gian hoàn thành trung bình</p>
-                  <p className="text-xl md:text-2xl font-bold">{parsedData.analytics.averageCompletionTime}</p>
+                  <p className="text-xl md:text-2xl font-bold">
+                    {typeof parsedData.analytics.averageCompletionTime === 'object' 
+                      ? `${parsedData.analytics.averageCompletionTime.averageDays} ngày (${parsedData.analytics.averageCompletionTime.averageHours}h)`
+                      : parsedData.analytics.averageCompletionTime}
+                  </p>
                 </div>
               </div>
             </CardContent>
