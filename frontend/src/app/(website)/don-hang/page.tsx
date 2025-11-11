@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { useQuery } from '@apollo/client';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { EcommerceNavigation } from '@/components/ecommerce/EcommerceNavigation';
 import { OrderFilters } from '@/components/ecommerce/OrderFilters';
 import { OrderCard } from '@/components/ecommerce/OrderCard';
@@ -11,6 +12,7 @@ import { OrderEmptyState } from '@/components/ecommerce/OrderEmptyState';
 import { useOrderFilters } from '@/hooks/useOrderFilters';
 import { type OrderListItem } from '@/types/order.types';
 import { GET_USER_ORDERS } from '@/graphql/ecommerce.queries';
+import { mockOrders, USE_MOCK_DATA } from '@/lib/mockOrderData';
 
 /**
  * OrderListContent Component
@@ -27,30 +29,36 @@ function OrderListContent() {
       take: 50,
     },
     fetchPolicy: 'cache-and-network',
+    skip: USE_MOCK_DATA, // Skip query if using mock data
   });
 
-  // Transform API data to OrderListItem format
-  const orders: OrderListItem[] = (data?.getMyOrders?.orders || []).map((order: any) => ({
-    id: order.id,
-    orderNumber: order.orderNumber,
-    status: order.status,
-    total: order.totalAmount || order.total || 0,
-    paymentMethod: order.paymentMethod,
-    createdAt: order.createdAt,
-    items: (order.items || []).map((item: any) => ({
-      id: item.id,
-      productId: item.product?.id,
-      productName: item.product?.name || item.productName || '',
-      variantName: item.variantName,
-      sku: item.sku,
-      thumbnail: item.product?.thumbnailUrl || item.thumbnail,
-      quantity: item.quantity,
-      price: item.price,
-      subtotal: item.price * item.quantity,
-    })),
-  }));
+  // Debug logging
+  console.log('Orders Query Result:', { data, loading, error, USE_MOCK_DATA });
 
-  const total = data?.getMyOrders?.total || 0;
+  // Transform API data to OrderListItem format or use mock data
+  const orders: OrderListItem[] = USE_MOCK_DATA 
+    ? mockOrders 
+    : (data?.getMyOrders?.orders || []).map((order: any) => ({
+        id: order.id,
+        orderNumber: order.orderNumber,
+        status: order.status,
+        total: order.total || 0,
+        paymentMethod: order.paymentMethod,
+        createdAt: order.createdAt,
+        items: (order.items || []).map((item: any) => ({
+          id: item.id,
+          productId: item.productId,
+          productName: item.productName || '',
+          variantName: item.variantName,
+          sku: item.sku,
+          thumbnail: item.thumbnail,
+          quantity: item.quantity,
+          price: item.price,
+          subtotal: item.subtotal || (item.price * item.quantity),
+        })),
+      }));
+
+  const total = USE_MOCK_DATA ? mockOrders.length : (data?.getMyOrders?.total || 0);
 
   // Custom hook for filtering logic
   const {
@@ -63,8 +71,8 @@ function OrderListContent() {
     filteredOrders,
   } = useOrderFilters({ orders });
 
-  // Loading state
-  if (loading) {
+  // Loading state (skip if using mock data)
+  if (!USE_MOCK_DATA && loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
@@ -82,14 +90,24 @@ function OrderListContent() {
     );
   }
 
-  // Error state
-  if (error) {
+  // Error state (skip if using mock data)
+  if (!USE_MOCK_DATA && error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="p-6 max-w-md">
-          <p className="text-sm text-red-600">
+          <p className="text-sm text-red-600 mb-4">
             Có lỗi xảy ra khi tải danh sách đơn hàng. Vui lòng thử lại sau.
           </p>
+          <p className="text-xs text-gray-500 mb-4">
+            Error: {error.message}
+          </p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            size="sm" 
+            className="w-full"
+          >
+            Thử lại
+          </Button>
         </Card>
       </div>
     );
@@ -100,12 +118,21 @@ function OrderListContent() {
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         {/* Page Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-            Đơn hàng của tôi
-          </h1>
-          <p className="text-sm sm:text-base text-gray-600">
-            Quản lý và theo dõi đơn hàng của bạn ({total} đơn)
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                Đơn hàng của tôi
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600">
+                Quản lý và theo dõi đơn hàng của bạn ({total} đơn)
+              </p>
+            </div>
+            {USE_MOCK_DATA && (
+              <span className="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">
+                Demo Mode
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Layout: Sidebar + Content */}
