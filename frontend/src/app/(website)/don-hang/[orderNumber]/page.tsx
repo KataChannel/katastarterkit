@@ -6,70 +6,27 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import {
-  ArrowLeft,
-  Package,
-  MapPin,
-  Phone,
-  Mail,
-  Truck,
-  FileText,
-} from 'lucide-react';
+import { ArrowLeft, Package, Truck, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { OrderStatusBadge, type OrderStatus } from '@/components/ecommerce/OrderStatusBadge';
-import { PaymentMethodBadge, type PaymentMethod } from '@/components/ecommerce/PaymentMethodBadge';
-import { OrderTimeline, type OrderTrackingEvent } from '@/components/ecommerce/OrderTimeline';
-import { PriceDisplay } from '@/components/ecommerce/PriceDisplay';
+import { OrderStatusBadge } from '@/components/ecommerce/OrderStatusBadge';
+import { PaymentMethodBadge } from '@/components/ecommerce/PaymentMethodBadge';
+import { OrderTimeline } from '@/components/ecommerce/OrderTimeline';
 import { Skeleton } from '@/components/ui/skeleton';
+import { OrderSummaryCard } from '@/components/ecommerce/OrderSummaryCard';
+import { OrderItemPreview } from '@/components/ecommerce/OrderItemPreview';
+import { ShippingAddressCard } from '@/components/ecommerce/ShippingAddressCard';
+import { type OrderDetail, type ShippingMethod } from '@/types/order.types';
 import { GET_ORDER_DETAIL } from '@/graphql/ecommerce.queries';
 
-interface OrderDetail {
-  id: string;
-  orderNumber: string;
-  status: OrderStatus;
-  total: number;
-  subtotal: number;
-  shippingFee: number;
-  tax: number;
-  discount: number;
-  paymentMethod: PaymentMethod;
-  paymentStatus: string;
-  shippingMethod: string;
-  customerNote?: string;
-  internalNote?: string;
-  createdAt: string;
-  updatedAt: string;
-  confirmedAt?: string;
-  shippedAt?: string;
-  deliveredAt?: string;
-  cancelledAt?: string;
-  items: Array<{
-    id: string;
-    productId?: string;
-    productName: string;
-    variantName?: string;
-    sku?: string;
-    thumbnail?: string;
-    quantity: number;
-    price: number;
-    subtotal: number;
-  }>;
-  shippingAddress: any;
-  billingAddress?: any;
-  tracking?: {
-    id: string;
-    status: string;
-    carrier?: string;
-    trackingNumber?: string;
-    trackingUrl?: string;
-    estimatedDelivery?: string;
-    actualDelivery?: string;
-    events: OrderTrackingEvent[];
-  };
-}
-
+/**
+ * OrderDetailContent Component
+ * 
+ * Refactored order detail page following Clean Architecture principles
+ * Mobile-First responsive design with extracted components
+ * Clean separation of concerns and reusable components
+ */
 function OrderDetailContent() {
   const params = useParams();
   const router = useRouter();
@@ -83,6 +40,7 @@ function OrderDetailContent() {
     }
   );
 
+  // Loading State
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -107,6 +65,7 @@ function OrderDetailContent() {
     );
   }
 
+  // Error State
   if (error || !data?.getOrderByNumber) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-3 sm:p-4">
@@ -132,20 +91,16 @@ function OrderDetailContent() {
   }
 
   const order = data.getOrderByNumber;
-  
-  // Parse shippingAddress from JSON
-  const shippingAddress = typeof order.shippingAddress === 'string' 
-    ? JSON.parse(order.shippingAddress) 
-    : order.shippingAddress;
-  
-  const fullAddress = [
-    shippingAddress?.address,
-    shippingAddress?.ward,
-    shippingAddress?.district,
-    shippingAddress?.city,
-  ]
-    .filter(Boolean)
-    .join(', ');
+
+  // Shipping method label mapping
+  const getShippingMethodLabel = (method: ShippingMethod): string => {
+    const labels: Record<ShippingMethod, string> = {
+      STANDARD: 'Giao hàng tiêu chuẩn',
+      EXPRESS: 'Giao hàng nhanh',
+      SAME_DAY: 'Giao trong ngày',
+    };
+    return labels[method] || method;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -181,39 +136,14 @@ function OrderDetailContent() {
 
         {/* Mobile-First Single Column Layout */}
         <div className="space-y-3 sm:space-y-4">
-          {/* Order Summary Card - Mobile First */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base sm:text-lg">Tổng đơn hàng</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2.5">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Tạm tính</span>
-                <PriceDisplay price={order.subtotal} size="sm" />
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Phí vận chuyển</span>
-                <PriceDisplay price={order.shippingFee} size="sm" />
-              </div>
-              {order.discount > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Giảm giá</span>
-                  <span className="text-red-600 font-medium">
-                    -<PriceDisplay price={order.discount} size="sm" />
-                  </span>
-                </div>
-              )}
-              <Separator className="my-2" />
-              <div className="flex justify-between items-center pt-1">
-                <span className="font-semibold text-base">Tổng cộng</span>
-                <PriceDisplay
-                  price={order.total}
-                  size="lg"
-                  className="font-bold text-primary"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {/* Order Summary Card - Using extracted component */}
+          <OrderSummaryCard
+            subtotal={order.subtotal}
+            shippingFee={order.shippingFee}
+            tax={order.tax}
+            discount={order.discount}
+            total={order.total}
+          />
 
           {/* Tracking Timeline - Mobile Optimized */}
           {order.tracking?.events && order.tracking.events.length > 0 && (
@@ -230,13 +160,15 @@ function OrderDetailContent() {
             </Card>
           )}
 
-          {/* Order Items - Mobile Optimized */}
+          {/* Order Items - Using extracted component */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                 <Package className="h-4 w-4 sm:h-5 sm:w-5" />
                 Sản phẩm
-                <span className="text-sm font-normal text-gray-500">({order.items.length})</span>
+                <span className="text-sm font-normal text-gray-500">
+                  ({order.items.length})
+                </span>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
@@ -244,51 +176,17 @@ function OrderDetailContent() {
                 {order.items.map((item, index) => (
                   <div key={item.id}>
                     {index > 0 && <Separator className="my-3" />}
-                    <div className="flex gap-3">
-                      {/* Product Image - Smaller on mobile */}
-                      <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
-                        {item.thumbnail ? (
-                          <img
-                            src={item.thumbnail}
-                            alt={item.productName}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <Package className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                        )}
-                      </div>
-
-                      {/* Product Info */}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm sm:text-base font-medium text-gray-900 line-clamp-2 mb-1">
-                          {item.productName}
-                        </h4>
-                        {item.variantName && (
-                          <p className="text-xs text-gray-500 mb-0.5">
-                            {item.variantName}
-                          </p>
-                        )}
-                        {item.sku && (
-                          <p className="text-xs text-gray-400 mb-1">
-                            SKU: {item.sku}
-                          </p>
-                        )}
-                        
-                        {/* Price & Quantity - Stacked on mobile */}
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 mt-2">
-                          <div className="flex items-center gap-2 text-xs sm:text-sm">
-                            <PriceDisplay price={item.price} size="sm" />
-                            <span className="text-gray-400">×</span>
-                            <span className="text-gray-600">{item.quantity}</span>
-                          </div>
-                          <PriceDisplay
-                            price={item.subtotal}
-                            size="sm"
-                            className="font-semibold text-primary"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                    <OrderItemPreview
+                      productName={item.productName}
+                      variantName={item.variantName}
+                      sku={item.sku}
+                      thumbnail={item.thumbnail}
+                      quantity={item.quantity}
+                      price={item.price}
+                      subtotal={item.subtotal}
+                      size="md"
+                      showPrice={true}
+                    />
                   </div>
                 ))}
               </div>
@@ -335,42 +233,14 @@ function OrderDetailContent() {
               <CardContent className="pt-0">
                 <p className="text-xs text-gray-500 mb-1.5">Phương thức</p>
                 <span className="inline-flex items-center px-2.5 py-1 rounded bg-blue-100 text-blue-700 text-xs sm:text-sm font-medium">
-                  {order.shippingMethod === 'STANDARD' && 'Giao hàng tiêu chuẩn'}
-                  {order.shippingMethod === 'EXPRESS' && 'Giao hàng nhanh'}
-                  {order.shippingMethod === 'SAME_DAY' && 'Giao trong ngày'}
+                  {getShippingMethodLabel(order.shippingMethod)}
                 </span>
               </CardContent>
             </Card>
           </div>
 
-          {/* Shipping Address - Mobile Optimized */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Địa chỉ giao hàng
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm pt-0">
-              <p className="font-medium text-gray-900">
-                {shippingAddress?.name || shippingAddress?.fullName || 'N/A'}
-              </p>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Phone className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">{shippingAddress?.phone || 'N/A'}</span>
-              </div>
-              {shippingAddress?.email && (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Mail className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm break-all">{shippingAddress.email}</span>
-                </div>
-              )}
-              <div className="flex items-start gap-2 text-gray-600 pt-1">
-                <MapPin className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm leading-relaxed">{fullAddress || 'N/A'}</span>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Shipping Address - Using extracted component */}
+          <ShippingAddressCard address={order.shippingAddress} />
 
           {/* Customer Note */}
           {order.customerNote && (
@@ -382,7 +252,9 @@ function OrderDetailContent() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{order.customerNote}</p>
+                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  {order.customerNote}
+                </p>
               </CardContent>
             </Card>
           )}
@@ -407,6 +279,12 @@ function OrderDetailContent() {
   );
 }
 
+/**
+ * OrderDetailPage Component
+ * 
+ * Main order detail page with Suspense wrapper
+ * Follows Mobile-First responsive design principles
+ */
 export default function OrderDetailPage() {
   return (
     <Suspense

@@ -7,14 +7,7 @@ import {
   Smartphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-export type PaymentMethod =
-  | 'CASH_ON_DELIVERY'
-  | 'BANK_TRANSFER'
-  | 'CREDIT_CARD'
-  | 'MOMO'
-  | 'ZALOPAY'
-  | 'VNPAY';
+import { type PaymentMethod } from '@/types/order.types';
 
 interface PaymentMethodBadgeProps {
   method: PaymentMethod;

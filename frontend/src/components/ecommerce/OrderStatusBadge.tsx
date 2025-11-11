@@ -12,19 +12,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-export type OrderStatus =
-  | 'PENDING'
-  | 'CONFIRMED'
-  | 'PROCESSING'
-  | 'PACKAGING'
-  | 'READY_TO_SHIP'
-  | 'SHIPPING'
-  | 'DELIVERED'
-  | 'COMPLETED'
-  | 'CANCELLED'
-  | 'RETURNED'
-  | 'REFUNDED';
+import { type OrderStatus } from '@/types/order.types';
 
 interface OrderStatusBadgeProps {
   status: OrderStatus;
