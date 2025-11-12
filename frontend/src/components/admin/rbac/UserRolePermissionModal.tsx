@@ -414,13 +414,13 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
           <TabsContent value="effective" className="space-y-4">
             <ScrollArea className="h-[450px] border rounded-lg">
               <div className="divide-y">
-                {effectivePermissions.map((ep: any) => (
+                {effectivePermissions.filter((ep: any) => ep.permission).map((ep: any) => (
                   <div key={ep.permission.id} className="p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 space-y-1">
-                        <div className="font-medium">{ep.permission.displayName}</div>
+                        <div className="font-medium">{ep.permission.displayName || 'Unknown Permission'}</div>
                         <div className="text-sm text-muted-foreground">
-                          {ep.permission.resource}:{ep.permission.action}
+                          {ep.permission.resource || 'N/A'}:{ep.permission.action || 'N/A'}
                           {ep.permission.scope && `:${ep.permission.scope}`}
                         </div>
                         <div className="flex items-center gap-2 mt-2">

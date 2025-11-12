@@ -38,6 +38,7 @@
     "assign:content-manager": "ts-node scripts/assign-content-manager-role.ts",
     "assign:role": "ts-node scripts/assign-role-to-user.ts",
     "user:roles": "ts-node scripts/view-user-roles.ts",
+    "fix:permissions": "ts-node scripts/fix-null-permission-names.ts",
     "db:backup": "bun run prisma/backup.ts",
     "db:restore": "bun run prisma/restore.ts",
     "db:restore-optimized": "bun run prisma/restore-optimized.ts",

@@ -300,7 +300,7 @@ const UserRolePermissionPreview: React.FC<{ user: any }> = ({ user }) => {
           <p className="text-sm text-muted-foreground">No direct permissions assigned</p>
         ) : (
           <div className="space-y-2">
-            {directPermissions.slice(0, 3).map((permission: any) => (
+            {directPermissions.filter((p: any) => p.permission).slice(0, 3).map((permission: any) => (
               <div 
                 key={permission.id} 
                 className="flex items-center justify-between p-2 rounded-lg bg-accent/50 hover:bg-accent transition-colors"
@@ -311,7 +311,7 @@ const UserRolePermissionPreview: React.FC<{ user: any }> = ({ user }) => {
                       <ShieldCheck className="h-3 w-3 text-green-600" />
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-sm font-medium">{permission.permission.displayName}</p>
+                  <p className="text-sm font-medium">{permission.permission?.displayName || 'Unknown Permission'}</p>
                 </div>
                 <Badge variant={permission.effect === 'allow' ? 'default' : 'destructive'}>
                   {permission.effect}

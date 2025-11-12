@@ -10,6 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { hasAdminAccess, getUserDisplayRole } from '@/lib/rbac-utils';
 
 // Import components
 import { UserManagementHeader } from '@/components/admin/users/UserManagementHeader';
@@ -42,9 +43,10 @@ export default function AdminUsersPage() {
     if (!loading && !isAuthenticated) {
       console.log('AdminUsersPage: Not authenticated, redirecting to login');
       router.push('/login');
-    } else if (!loading && isAuthenticated && user?.roleType !== 'ADMIN') {
-      console.log('AdminUsersPage: User is not admin', { 
-        roleType: user?.roleType 
+    } else if (!loading && isAuthenticated && !hasAdminAccess(user)) {
+      console.log('AdminUsersPage: User does not have admin access', { 
+        roleType: user?.roleType,
+        roles: user?.roles?.map(r => r.name)
       });
       // Don't redirect, show access denied instead
     }
@@ -55,9 +57,9 @@ export default function AdminUsersPage() {
     return <LoadingState message="Loading admin panel..." />;
   }
 
-  // Show access denied for non-admin users
-  if (isAuthenticated && user?.roleType !== 'ADMIN') {
-    return <AccessDenied userRole={user?.roleType} requiredRole="ADMIN" />;
+  // Show access denied for users without admin access
+  if (isAuthenticated && !hasAdminAccess(user)) {
+    return <AccessDenied userRole={getUserDisplayRole(user)} requiredRole="Admin or Content Manager" />;
   }
 
   // Redirect if not authenticated (will be handled by useEffect)

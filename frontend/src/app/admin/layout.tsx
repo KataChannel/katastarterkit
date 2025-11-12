@@ -4,6 +4,7 @@ import { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminSidebarLayout } from '@/components/layout/admin-sidebar-layout';
 import { useAuth } from '@/contexts/AuthContext';
+import { hasAdminAccess } from '@/lib/rbac-utils';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -16,8 +17,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push('/login?redirect=/admin');
-    } else if (!loading && isAuthenticated && user?.roleType && user.roleType !== 'ADMIN') {
-      // Redirect USER and other non-admin roles to request-access page
+    } else if (!loading && isAuthenticated && !hasAdminAccess(user)) {
+      // Redirect users without admin access to request-access page
       router.push('/request-access');
     }
   }, [isAuthenticated, loading, user, router]);

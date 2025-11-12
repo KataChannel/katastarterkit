@@ -435,11 +435,14 @@ export class RbacService {
     ]);
 
     // Transform role assignments to match GraphQL schema expectations
+    // Filter out null permissions and permissions with null name
     const roleAssignments = allRoleAssignments.map(assignment => ({
       ...assignment,
       role: {
         ...assignment.role,
-        permissions: assignment.role.permissions.map(rp => rp.permission).filter(p => p !== null)
+        permissions: assignment.role.permissions
+          .map(rp => rp.permission)
+          .filter(p => p !== null && p.name !== null)
       }
     }));
 
@@ -451,7 +454,7 @@ export class RbacService {
     allDirectPermissions
       .filter(up => up.effect === 'deny')
       .forEach(up => {
-        if (up.permission) {
+        if (up.permission && up.permission.name !== null) {
           deniedPermissions.add(up.permission.id);
         }
       });
@@ -461,22 +464,23 @@ export class RbacService {
       .filter(ra => ra.effect === 'deny')
       .forEach(ra => {
         ra.role.permissions.forEach(rp => {
-          if (rp.permission) {
+          if (rp.permission && rp.permission.name !== null) {
             deniedPermissions.add(rp.permission.id);
           }
         });
       });
 
-    // Collect allowed permissions from roles (excluding denied ones)
+    // Collect allowed permissions from roles (excluding denied ones and null names)
     const rolePermissions = allowedRoleAssignments
       .flatMap((assignment) => assignment.role.permissions)
-      .filter(p => p && !deniedPermissions.has(p.id));
+      .map(rp => rp.permission)
+      .filter(p => p && p.name !== null && !deniedPermissions.has(p.id));
 
-    // Collect allowed direct permissions (excluding denied ones)
+    // Collect allowed direct permissions (excluding denied ones and null names)
     const directAllowedPermissions = allDirectPermissions
-      .filter(up => up.effect === 'allow' && up.permission)
+      .filter(up => up.effect === 'allow' && up.permission && up.permission.name !== null)
       .map(up => up.permission)
-      .filter(p => p && !deniedPermissions.has(p.id));
+      .filter(p => p && p.name !== null && !deniedPermissions.has(p.id));
 
     // Combine all allowed permissions (after deny filtering)
     const allPermissions = [
@@ -484,20 +488,24 @@ export class RbacService {
       ...directAllowedPermissions,
     ];
 
-    // Remove duplicates
+    // Remove duplicates and filter out any remaining null names
     const uniquePermissions = allPermissions.filter(
       (permission, index, self) =>
-        permission && index === self.findIndex((p) => p && p.id === permission.id)
+        permission && permission.name !== null && index === self.findIndex((p) => p && p.id === permission.id)
     );
+
+    // Filter out direct permissions with null permission or null name
+    const validDirectPermissions = allDirectPermissions
+      .filter(up => up.permission && up.permission.name !== null);
 
     return {
       userId,
       roleAssignments,
-      directPermissions: allDirectPermissions,
+      directPermissions: validDirectPermissions,
       effectivePermissions: uniquePermissions,
       deniedPermissions: Array.from(deniedPermissions),
       summary: {
-        totalDirectPermissions: allDirectPermissions.filter(p => p.effect === 'allow').length,
+        totalDirectPermissions: validDirectPermissions.filter(p => p.effect === 'allow').length,
         totalDeniedPermissions: deniedPermissions.size,
         totalRoleAssignments: allowedRoleAssignments.length,
         totalEffectivePermissions: uniquePermissions.length,

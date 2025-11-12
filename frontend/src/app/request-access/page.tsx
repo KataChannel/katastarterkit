@@ -10,6 +10,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { hasAdminAccess, getUserDisplayRole } from '@/lib/rbac-utils';
 import { RequestAccessNotification } from '@/components/admin/request-access/RequestAccessNotification';
 
 export default function RequestAccessPage() {
@@ -21,8 +22,8 @@ export default function RequestAccessPage() {
     if (!loading && !isAuthenticated) {
       router.push('/login?redirect=/request-access');
     }
-    // Redirect to admin dashboard if user is already ADMIN
-    if (!loading && isAuthenticated && user?.roleType === 'ADMIN') {
+    // Redirect to admin dashboard if user has admin access
+    if (!loading && isAuthenticated && hasAdminAccess(user)) {
       router.push('/admin');
     }
   }, [loading, isAuthenticated, user, router]);
@@ -44,10 +45,10 @@ export default function RequestAccessPage() {
     return null;
   }
 
-  // Show access request notification for non-admin users
+  // Show access request notification for users without admin access
   return (
     <RequestAccessNotification 
-      userRole={user?.roleType || 'User'}
+      userRole={getUserDisplayRole(user)}
       userName={user?.email || 'User'}
     />
   );
