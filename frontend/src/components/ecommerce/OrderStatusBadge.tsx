@@ -14,6 +14,9 @@ import {
 import { cn } from '@/lib/utils';
 import { type OrderStatus } from '@/types/order.types';
 
+// Re-export OrderStatus for convenience
+export type { OrderStatus };
+
 interface OrderStatusBadgeProps {
   status: OrderStatus;
   size?: 'sm' | 'md' | 'lg';

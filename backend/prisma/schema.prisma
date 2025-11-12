@@ -196,6 +196,7 @@ model User {
   certificates      Certificate[]     @relation("UserCertificates")
   discussions       Discussion[]      @relation("UserDiscussions")
   discussionReplies DiscussionReply[] @relation("UserDiscussionReplies")
+  sourceDocuments   SourceDocument[]  @relation("UserSourceDocuments")
   department        Department?       @relation("DepartmentUsers", fields: [departmentId], references: [id])
   departmentId      String?
 
@@ -3163,6 +3164,22 @@ enum EnrollmentStatus {
   DROPPED
 }
 
+enum SourceDocumentType {
+  FILE // PDF, DOC, XLS, etc.
+  VIDEO // MP4, YouTube, Vimeo, etc.
+  TEXT // Markdown, plain text input
+  AUDIO // MP3, podcast, etc.
+  LINK // External URL
+  IMAGE // PNG, JPG, diagrams
+}
+
+enum SourceDocumentStatus {
+  DRAFT // Chưa hoàn thành
+  PROCESSING // Đang xử lý (upload, AI analysis)
+  PUBLISHED // Đã xuất bản
+  ARCHIVED // Đã lưu trữ
+}
+
 model CourseCategory {
   id          String  @id @default(uuid())
   name        String
@@ -3222,11 +3239,12 @@ model Course {
   tags            String[] @default([]) // For search & filtering
 
   // Modules & Enrollments
-  modules      CourseModule[]
-  enrollments  Enrollment[]
-  reviews      Review[]       @relation("CourseReviews")
-  certificates Certificate[]  @relation("CourseCertificates")
-  discussions  Discussion[]   @relation("CourseDiscussions")
+  modules         CourseModule[]
+  enrollments     Enrollment[]
+  reviews         Review[]               @relation("CourseReviews")
+  certificates    Certificate[]          @relation("CourseCertificates")
+  discussions     Discussion[]           @relation("CourseDiscussions")
+  sourceDocuments CourseSourceDocument[] // Link to source documents
 
   // Timestamps
   createdAt   DateTime  @default(now())
@@ -3501,6 +3519,112 @@ model Certificate {
   @@index([certificateNumber])
   @@index([issueDate])
   @@map("certificates")
+}
+
+// ==================== SOURCE DOCUMENTS (Tài liệu nguồn) ====================
+
+model SourceDocumentCategory {
+  id          String  @id @default(uuid())
+  name        String  @db.VarChar(255)
+  slug        String  @unique @db.VarChar(255)
+  description String? @db.Text
+  icon        String? @db.VarChar(100) // Lucide icon name
+  color       String? @db.VarChar(50) // Hex color for UI
+  parentId    String?
+
+  // Relations
+  parent          SourceDocumentCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children        SourceDocumentCategory[] @relation("CategoryHierarchy")
+  sourceDocuments SourceDocument[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([parentId])
+  @@map("source_document_categories")
+}
+
+model SourceDocument {
+  id          String               @id @default(uuid())
+  title       String               @db.VarChar(500)
+  description String?              @db.Text
+  type        SourceDocumentType
+  status      SourceDocumentStatus @default(DRAFT)
+
+  // File/Video/Content info
+  url          String? @db.VarChar(1000) // For FILE, VIDEO, LINK, AUDIO, IMAGE
+  content      String? @db.Text // For TEXT type (Markdown/HTML)
+  fileName     String? @db.VarChar(255)
+  fileSize     BigInt? // In bytes
+  mimeType     String? @db.VarChar(100)
+  duration     Int? // In seconds (for VIDEO/AUDIO)
+  thumbnailUrl String? @db.VarChar(1000)
+
+  // Organization
+  categoryId String?
+  tags       String[] @default([])
+
+  // AI Analysis (future)
+  aiSummary    String?   @db.Text // AI-generated summary
+  aiKeywords   String[]  @default([]) // AI-extracted keywords
+  aiTopics     String[]  @default([]) // AI-identified topics
+  aiAnalyzedAt DateTime? // When AI analysis completed
+  isAiAnalyzed Boolean   @default(false)
+
+  // Metadata (JSON for flexibility)
+  metadata Json? // Store additional metadata (author, source, etc.)
+
+  // Owner
+  userId String
+  user   User   @relation("UserSourceDocuments", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Category
+  category SourceDocumentCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Relations
+  courses CourseSourceDocument[]
+
+  // Stats
+  viewCount     Int @default(0)
+  downloadCount Int @default(0)
+  usageCount    Int @default(0) // How many courses use this
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([type])
+  @@index([status])
+  @@index([isAiAnalyzed])
+  @@index([createdAt])
+  @@index([publishedAt])
+  @@map("source_documents")
+}
+
+// Junction table for Many-to-Many relationship between Course and SourceDocument
+model CourseSourceDocument {
+  id         String @id @default(uuid())
+  courseId   String
+  documentId String
+
+  // Additional metadata about the relationship
+  order       Int?     @default(0) // Display order
+  isRequired  Boolean  @default(false) // Is this document required for the course?
+  description String?  @db.Text // Why this document is relevant to the course
+  addedBy     String? // userId who added this link
+  addedAt     DateTime @default(now())
+
+  course   Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  document SourceDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, documentId]) // Prevent duplicate links
+  @@index([courseId])
+  @@index([documentId])
+  @@index([order])
+  @@map("course_source_documents")
 }
 
 // ==================== COURSE DISCUSSIONS ====================

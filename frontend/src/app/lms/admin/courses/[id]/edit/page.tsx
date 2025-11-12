@@ -2,18 +2,31 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useFindUnique, useUpdateOne, useFindMany } from '@/hooks/useDynamicGraphQL';
+import { useQuery, useMutation } from '@apollo/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   ArrowLeft,
   Save,
   AlertCircle,
   Plus,
   X,
-  Upload
+  Upload,
+  BookOpen,
+  Search,
+  File,
+  Video,
+  FileText,
+  Music,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  GripVertical,
+  Trash2,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +37,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import {
+  GET_SOURCE_DOCUMENTS,
+  GET_COURSE_DOCUMENTS,
+  LINK_DOCUMENT_TO_COURSE,
+  UNLINK_DOCUMENT_FROM_COURSE,
+  UPDATE_COURSE_DOCUMENT_LINK,
+} from '@/graphql/lms/source-documents';
 
 export default function EditCoursePage() {
   const params = useParams();
@@ -107,6 +135,109 @@ export default function EditCoursePage() {
   const [newRequirement, setNewRequirement] = useState('');
   const [newAudience, setNewAudience] = useState('');
   const [newTag, setNewTag] = useState('');
+
+  // Source Documents state
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [documentSearch, setDocumentSearch] = useState('');
+  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
+
+  // Source Documents queries
+  const { data: availableDocsData } = useQuery(GET_SOURCE_DOCUMENTS, {
+    variables: {
+      filter: { title: documentSearch || undefined },
+      page: 1,
+      limit: 20,
+    },
+    skip: !linkDialogOpen,
+  });
+
+  const { data: linkedDocsData, refetch: refetchLinkedDocs } = useQuery(GET_COURSE_DOCUMENTS, {
+    variables: { courseId },
+    skip: !courseId,
+  });
+
+  const [linkDocument] = useMutation(LINK_DOCUMENT_TO_COURSE, {
+    onCompleted: () => {
+      toast({ type: 'success', title: 'Thành công', description: 'Đã liên kết tài liệu' });
+      refetchLinkedDocs();
+      setLinkDialogOpen(false);
+      setSelectedDocuments([]);
+    },
+    onError: (error) => {
+      toast({ type: 'error', title: 'Lỗi', description: error.message });
+    },
+  });
+
+  const [unlinkDocument] = useMutation(UNLINK_DOCUMENT_FROM_COURSE, {
+    onCompleted: () => {
+      toast({ type: 'success', title: 'Thành công', description: 'Đã gỡ liên kết tài liệu' });
+      refetchLinkedDocs();
+    },
+    onError: (error) => {
+      toast({ type: 'error', title: 'Lỗi', description: error.message });
+    },
+  });
+
+  const [updateDocumentLink] = useMutation(UPDATE_COURSE_DOCUMENT_LINK, {
+    onCompleted: () => {
+      toast({ type: 'success', title: 'Thành công', description: 'Đã cập nhật tài liệu' });
+      refetchLinkedDocs();
+    },
+    onError: (error) => {
+      toast({ type: 'error', title: 'Lỗi', description: error.message });
+    },
+  });
+
+  const availableDocuments = availableDocsData?.sourceDocuments?.data || [];
+  const linkedDocuments = linkedDocsData?.courseDocuments || [];
+
+  const TYPE_ICONS: Record<string, any> = {
+    FILE: File,
+    VIDEO: Video,
+    TEXT: FileText,
+    AUDIO: Music,
+    LINK: LinkIcon,
+    IMAGE: ImageIcon,
+  };
+
+  const handleLinkDocuments = () => {
+    if (selectedDocuments.length === 0) {
+      toast({ type: 'error', title: 'Lỗi', description: 'Vui lòng chọn ít nhất 1 tài liệu' });
+      return;
+    }
+
+    selectedDocuments.forEach((documentId) => {
+      linkDocument({
+        variables: {
+          userId: course?.instructor?.id || '',
+          input: {
+            courseId,
+            documentId,
+            isRequired: false,
+            order: linkedDocuments.length,
+          },
+        },
+      });
+    });
+  };
+
+  const handleUnlinkDocument = (documentId: string) => {
+    unlinkDocument({
+      variables: {
+        courseId,
+        documentId,
+      },
+    });
+  };
+
+  const handleToggleRequired = (linkId: string, isRequired: boolean) => {
+    updateDocumentLink({
+      variables: {
+        id: linkId,
+        input: { isRequired },
+      },
+    });
+  };
 
   // Load course data
   useEffect(() => {
@@ -587,6 +718,111 @@ export default function EditCoursePage() {
           </CardContent>
         </Card>
 
+        {/* Source Documents Section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-blue-600" />
+                  <CardTitle>Tài liệu nguồn</CardTitle>
+                </div>
+                <CardDescription className="mt-1">
+                  Quản lý tài liệu nguồn cho khóa học
+                </CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setLinkDialogOpen(true)}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Thêm tài liệu
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {linkedDocuments.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                <p>Chưa có tài liệu nào</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setLinkDialogOpen(true)}
+                  className="mt-3"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Thêm tài liệu đầu tiên
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {linkedDocuments.map((link: any) => {
+                  const TypeIcon = TYPE_ICONS[link.document.type] || File;
+                  return (
+                    <div
+                      key={link.id}
+                      className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      {/* Icon */}
+                      <div className="w-10 h-10 flex items-center justify-center bg-blue-50 rounded-lg">
+                        <TypeIcon className="w-5 h-5 text-blue-600" />
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm sm:text-base truncate">
+                          {link.document.title}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <Badge variant="outline" className="text-xs">
+                            {link.document.type}
+                          </Badge>
+                          {link.isRequired && (
+                            <Badge className="text-xs bg-orange-100 text-orange-700">
+                              Bắt buộc
+                            </Badge>
+                          )}
+                          {link.document.category && (
+                            <span className="text-xs text-gray-500">
+                              {link.document.category.icon} {link.document.category.name}
+                            </span>
+                          )}
+                        </div>
+                        {link.description && (
+                          <p className="text-xs text-gray-600 mt-1 line-clamp-1">
+                            {link.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          checked={link.isRequired}
+                          onCheckedChange={(checked) =>
+                            handleToggleRequired(link.id, checked as boolean)
+                          }
+                          title="Bắt buộc"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleUnlinkDocument(link.document.id)}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Actions */}
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="outline" onClick={handleBack}>
@@ -598,6 +834,126 @@ export default function EditCoursePage() {
           </Button>
         </div>
       </form>
+
+      {/* Link Documents Dialog */}
+      <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Thêm tài liệu nguồn</DialogTitle>
+            <DialogDescription>
+              Chọn tài liệu để thêm vào khóa học
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                value={documentSearch}
+                onChange={(e) => setDocumentSearch(e.target.value)}
+                placeholder="Tìm kiếm tài liệu..."
+                className="pl-10"
+              />
+            </div>
+
+            {/* Documents List */}
+            <div className="border rounded-lg max-h-96 overflow-y-auto">
+              {availableDocuments.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                  <p>Không tìm thấy tài liệu</p>
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {availableDocuments.map((doc: any) => {
+                    const TypeIcon = TYPE_ICONS[doc.type] || File;
+                    const isLinked = linkedDocuments.some(
+                      (link: any) => link.document.id === doc.id
+                    );
+                    const isSelected = selectedDocuments.includes(doc.id);
+
+                    return (
+                      <div
+                        key={doc.id}
+                        className={`flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer transition-colors ${
+                          isSelected ? 'bg-blue-50' : ''
+                        } ${isLinked ? 'opacity-50' : ''}`}
+                        onClick={() => {
+                          if (isLinked) return;
+                          setSelectedDocuments((prev) =>
+                            prev.includes(doc.id)
+                              ? prev.filter((id) => id !== doc.id)
+                              : [...prev, doc.id]
+                          );
+                        }}
+                      >
+                        {/* Checkbox */}
+                        <Checkbox
+                          checked={isSelected}
+                          disabled={isLinked}
+                          onCheckedChange={() => {
+                            // Handled by parent div onClick
+                          }}
+                        />
+
+                        {/* Icon */}
+                        <div className="w-10 h-10 flex items-center justify-center bg-blue-50 rounded-lg">
+                          <TypeIcon className="w-5 h-5 text-blue-600" />
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm truncate">
+                            {doc.title}
+                          </h4>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <Badge variant="outline" className="text-xs">
+                              {doc.type}
+                            </Badge>
+                            {isLinked && (
+                              <Badge className="text-xs bg-green-100 text-green-700">
+                                Đã thêm
+                              </Badge>
+                            )}
+                            {doc.category && (
+                              <span className="text-xs text-gray-500">
+                                {doc.category.icon} {doc.category.name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {selectedDocuments.length > 0 && (
+              <p className="text-sm text-gray-600">
+                Đã chọn {selectedDocuments.length} tài liệu
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setLinkDialogOpen(false);
+                setSelectedDocuments([]);
+                setDocumentSearch('');
+              }}
+            >
+              Hủy
+            </Button>
+            <Button onClick={handleLinkDocuments} disabled={selectedDocuments.length === 0}>
+              Thêm ({selectedDocuments.length})
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

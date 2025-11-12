@@ -8,6 +8,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { FilesModule } from './files/files.module';
 import { CertificatesModule } from './certificates/certificates.module';
 import { DiscussionsModule } from './discussions/discussions.module';
+import { SourceDocumentModule } from './source-document/source-document.module';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
@@ -22,6 +23,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     FilesModule,
     CertificatesModule,
     DiscussionsModule,
+    SourceDocumentModule,
   ],
   exports: [
     JwtModule, // Export so child modules can use
@@ -33,6 +35,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     FilesModule,
     CertificatesModule,
     DiscussionsModule,
+    SourceDocumentModule,
   ],
 })
 export class LmsModule {}

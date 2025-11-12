@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import GraphQLUpload from 'graphql-upload/GraphQLUpload.mjs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_INTERCEPTOR, HttpAdapterHost } from '@nestjs/core';
@@ -85,6 +86,13 @@ import { ProjectModule } from './project/project.module';
         context: ({ req, res }) => ({ req, res }),
         // Disable Apollo's body parser - let Express handle it (configured in main.ts)
         bodyParserConfig: false,
+        // Add Upload scalar type definition and resolver
+        typeDefs: `
+          scalar Upload
+        `,
+        resolvers: {
+          Upload: GraphQLUpload,
+        },
         subscriptions: {
           'graphql-ws': {
             path: '/graphql',

@@ -199,4 +199,52 @@ export class MinioService implements OnModuleInit {
 
     return mimeTypes[contentType] || 'jpg';
   }
+
+  // Source Documents Upload Methods
+  async uploadSourceDocument(
+    documentId: string,
+    buffer: Buffer,
+    fileName: string,
+    contentType: string,
+  ): Promise<string> {
+    const sanitizedFileName = this.sanitizeFileName(fileName);
+    const uniqueFileName = `${documentId}/${Date.now()}-${sanitizedFileName}`;
+    return this.uploadFile('source-documents', uniqueFileName, buffer, contentType);
+  }
+
+  async uploadDocumentThumbnail(
+    documentId: string,
+    buffer: Buffer,
+    contentType: string,
+  ): Promise<string> {
+    const ext = this.getFileExtension(contentType);
+    const fileName = `${documentId}/thumbnail-${Date.now()}.${ext}`;
+    return this.uploadFile('source-documents', fileName, buffer, contentType);
+  }
+
+  async deleteSourceDocument(fileName: string): Promise<void> {
+    return this.deleteFile('source-documents', fileName);
+  }
+
+  async getSourceDocumentUrl(fileName: string): Promise<string> {
+    return this.getPresignedUrl('source-documents', fileName);
+  }
+
+  private sanitizeFileName(fileName: string): string {
+    // Remove special characters, keep only alphanumeric, dash, underscore, and dot
+    return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+  }
+
+  async generateThumbnailFromVideo(videoBuffer: Buffer): Promise<Buffer> {
+    // TODO: Implement video thumbnail generation using ffmpeg
+    // For now, return placeholder
+    throw new Error('Video thumbnail generation not implemented yet');
+  }
+
+  async generateThumbnailFromPDF(pdfBuffer: Buffer): Promise<Buffer> {
+    // TODO: Implement PDF thumbnail generation
+    // For now, return placeholder
+    throw new Error('PDF thumbnail generation not implemented yet');
+  }
 }
+

@@ -967,6 +967,18 @@ type CourseModule {
   updatedAt: DateTime!
 }
 
+type CourseSourceDocument {
+  addedAt: DateTime!
+  addedBy: ID
+  courseId: ID!
+  description: String
+  document: SourceDocument!
+  documentId: ID!
+  id: ID!
+  isRequired: Boolean!
+  order: Int
+}
+
 """Course publication status"""
 enum CourseStatus {
   ARCHIVED
@@ -1564,6 +1576,32 @@ input CreateRoleInput {
   parentId: String
   permissionIds: [String!]
   priority: Int! = 0
+}
+
+input CreateSourceDocumentCategoryInput {
+  color: String
+  description: String
+  icon: String
+  name: String!
+  parentId: ID
+  slug: String!
+}
+
+input CreateSourceDocumentInput {
+  categoryId: ID
+  content: String
+  description: String
+  duration: Int
+  fileName: String
+  fileSize: Int
+  metadata: JSON
+  mimeType: String
+  status: SourceDocumentStatus! = DRAFT
+  tags: [String!]! = []
+  thumbnailUrl: String
+  title: String!
+  type: SourceDocumentType!
+  url: String
 }
 
 input CreateSupportConversationInput {
@@ -2233,6 +2271,14 @@ enum LessonType {
   VIDEO
 }
 
+input LinkDocumentToCourseInput {
+  courseId: ID!
+  description: String
+  documentId: ID!
+  isRequired: Boolean! = false
+  order: Int
+}
+
 input LoginUserInput {
   emailOrUsername: String!
   password: String!
@@ -2391,6 +2437,7 @@ type Mutation {
   adminCreateUser(input: AdminCreateUserInput!): User!
   adminResetPassword(input: AdminResetPasswordInput!): AdminResetPasswordResult!
   adminUpdateUser(id: String!, input: AdminUpdateUserInput!): User!
+  analyzeSourceDocument(id: ID!): SourceDocument!
   applyCoupon(input: ApplyCouponInput!): ApplyCouponResponse!
   approveConversion(id: String!): Boolean!
   archiveCourse(id: ID!): Course!
@@ -2402,6 +2449,7 @@ type Mutation {
   assignUserPermissions(input: AssignUserPermissionInput!): Boolean!
   assignUserRoles(input: AssignUserRoleInput!): Boolean!
   batchUploadAndMap(items: JSON!): JSON!
+  bulkAnalyzeDocuments(userId: ID): String!
   bulkCreateInvoices(input: BulkInvoiceInput!): DatabaseSyncResult!
   bulkDeleteFiles(input: BulkDeleteFilesInput!): Int!
   bulkImportData(data: JSON!, mappingConfig: JSON, modelName: String!): JSON!
@@ -2465,6 +2513,8 @@ type Mutation {
   createReply(input: CreateReplyInput!): DiscussionReply!
   createReview(input: CreateReviewInput!): Review!
   createRole(input: CreateRoleInput!): Role!
+  createSourceDocument(input: CreateSourceDocumentInput!, userId: ID!): SourceDocument!
+  createSourceDocumentCategory(input: CreateSourceDocumentCategoryInput!): SourceDocumentCategory!
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createSupportConversation(input: CreateSupportConversationInput!): SupportConversation!
   createTask(input: CreateTaskInput!): Task!
@@ -2515,6 +2565,8 @@ type Mutation {
   deleteQuiz(id: String!): Boolean!
   deleteReview(reviewId: ID!): Boolean!
   deleteRole(id: String!): Boolean!
+  deleteSourceDocument(id: ID!): SourceDocument!
+  deleteSourceDocumentCategory(id: ID!): SourceDocumentCategory!
   deleteTask(id: String!): Boolean!
   deleteTaskMedia(mediaId: String!): Boolean!
   deleteUser(id: String!): Boolean!
@@ -2557,8 +2609,10 @@ type Mutation {
   importJSONData(jsonString: String!, mappingConfig: JSON, modelName: String!): JSON!
   importTextData(delimiter: String = "\t", mappingConfig: JSON, modelName: String!, text: String!): JSON!
   improveContent(content: String!, instruction: String!): String!
+  incrementDocumentDownload(id: ID!): SourceDocument!
   incrementTemplateUsage(templateId: String!): CustomTemplate!
   joinCampaign(input: JoinCampaignInput!): String!
+  linkDocumentToCourse(input: LinkDocumentToCourseInput!, userId: ID!): CourseSourceDocument!
   loginUser(input: LoginUserInput!): AuthResponse!
   loginWithFacebook(input: SocialLoginInput!): AuthResponse!
   loginWithGoogle(input: SocialLoginInput!): AuthResponse!
@@ -2633,6 +2687,7 @@ type Mutation {
 
   """Execute any Prisma mutation operation dynamically"""
   universalMutation(input: UniversalQueryInput!): JSONObject!
+  unlinkDocumentFromCourse(courseId: ID!, documentId: ID!): Boolean!
   unshareTemplate(templateId: String!, userId: String!): Boolean!
 
   """Cập nhật AI provider"""
@@ -2648,6 +2703,7 @@ type Mutation {
   updateComment(id: String!, input: UpdateCommentInput!): Comment!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
   updateCourseCategory(updateCourseCategoryInput: UpdateCourseCategoryInput!): CourseCategory!
+  updateCourseDocumentLink(id: ID!, input: UpdateCourseDocumentLinkInput!): CourseSourceDocument!
   updateCustomTemplate(input: UpdateCustomTemplateInput!): CustomTemplate!
   updateDiscussion(input: UpdateDiscussionInput!): Discussion!
   updateEmployeeProfile(id: ID!, input: UpdateEmployeeProfileInput!): EmployeeProfile!
@@ -2694,6 +2750,8 @@ type Mutation {
   updateQuiz(id: String!, input: UpdateQuizInput!): Quiz!
   updateReview(input: UpdateReviewInput!): Review!
   updateRole(id: String!, input: UpdateRoleInput!): Role!
+  updateSourceDocument(id: ID!, input: UpdateSourceDocumentInput!): SourceDocument!
+  updateSourceDocumentCategory(id: ID!, input: UpdateSourceDocumentCategoryInput!): SourceDocumentCategory!
   updateTask(input: UpdateTaskInput!): Task!
 
   """Update task order for drag & drop"""
@@ -2710,6 +2768,7 @@ type Mutation {
   uploadChatFile(caption: String, filename: String!, messageId: ID!, mimetype: String!, size: Float!, url: String!): ChatMedia!
   uploadCourseMaterial(courseId: String!, file: Upload!): FileUploadResult!
   uploadCourseThumbnail(courseId: String, file: Upload!): FileUploadResult!
+  uploadDocumentThumbnail(documentId: ID!, file: Upload!): String!
   uploadFile(file: JSON!, folderId: ID, metadata: JSON): FileUploadResponse!
   uploadImage(bucket: String = "images", editOptions: JSON, file: Upload!): JSON!
   uploadLessonVideo(courseId: String!, file: Upload!): FileUploadResult!
@@ -2717,6 +2776,7 @@ type Mutation {
 
   """Upload file to project - Use Dynamic GraphQL createOne instead"""
   uploadProjectFile(caption: String, filename: String!, mimetype: String!, projectId: ID!, size: Float!, url: String!): ProjectMedia!
+  uploadSourceDocumentFile(documentId: ID!, file: Upload!): String!
 
   """Upload file to task - Use Dynamic GraphQL createOne instead"""
   uploadTaskFile(caption: String, filename: String!, mimetype: String!, size: Float!, taskId: ID!, url: String!): ProjectMedia!
@@ -3562,6 +3622,7 @@ type Query {
   courseCategory(id: ID!): CourseCategory!
   courseCategoryTree: [CourseCategory!]!
   courseDiscussions(courseId: ID!, lessonId: ID): [Discussion!]!
+  courseDocuments(courseId: ID!): [CourseSourceDocument!]!
   courseEnrollments(courseId: ID!): [Enrollment!]!
   coursePromptTemplates: JSON!
   courses(filters: CourseFiltersInput): PaginatedCourses!
@@ -3845,6 +3906,12 @@ type Query {
   """Search users using Orama full-text search engine"""
   searchUsers(input: OramaSearchInput!): OramaSearchResult!
   sidebarMenus: [MenuResponseDto!]!
+  sourceDocument(id: ID!): SourceDocument!
+  sourceDocumentCategories: [SourceDocumentCategory!]!
+  sourceDocumentCategory(id: ID!): SourceDocumentCategory!
+  sourceDocumentCategoryTree: [SourceDocumentCategory!]!
+  sourceDocumentStats(userId: ID): String!
+  sourceDocuments(filter: SourceDocumentFilterInput, limit: Int! = 20, page: Int! = 1): [SourceDocument!]!
   suggestMapping(modelName: String!, sourceFields: [String!]!): JSON!
   supportAnalytics: SupportAnalytics!
   supportConversation(id: String!): SupportConversation!
@@ -4169,6 +4236,80 @@ input SocialLoginInput {
   providerId: String
   rememberMe: Boolean
   token: String!
+}
+
+type SourceDocument {
+  aiAnalyzedAt: DateTime
+  aiKeywords: [String!]!
+  aiSummary: String
+  aiTopics: [String!]!
+  category: SourceDocumentCategory
+  categoryId: ID
+  content: String
+  createdAt: DateTime!
+  description: String
+  downloadCount: Int!
+  duration: Int
+  fileName: String
+  fileSize: Int
+  id: ID!
+  isAiAnalyzed: Boolean!
+  metadata: JSON
+  mimeType: String
+  publishedAt: DateTime
+  status: SourceDocumentStatus!
+  tags: [String!]!
+  thumbnailUrl: String
+  title: String!
+  type: SourceDocumentType!
+  updatedAt: DateTime!
+  url: String
+  usageCount: Int!
+  userId: ID!
+  viewCount: Int!
+}
+
+type SourceDocumentCategory {
+  children: [SourceDocumentCategory!]
+  color: String
+  createdAt: DateTime!
+  description: String
+  icon: String
+  id: ID!
+  name: String!
+  parent: SourceDocumentCategory
+  parentId: ID
+  slug: String!
+  sourceDocuments: [SourceDocument!]
+  updatedAt: DateTime!
+}
+
+input SourceDocumentFilterInput {
+  categoryId: ID
+  isAiAnalyzed: Boolean
+  search: String
+  statuses: [SourceDocumentStatus!]
+  tags: [String!]
+  types: [SourceDocumentType!]
+  userId: ID
+}
+
+"""Status of source document"""
+enum SourceDocumentStatus {
+  ARCHIVED
+  DRAFT
+  PROCESSING
+  PUBLISHED
+}
+
+"""Type of source document"""
+enum SourceDocumentType {
+  AUDIO
+  FILE
+  IMAGE
+  LINK
+  TEXT
+  VIDEO
 }
 
 input SubmitQuizInput {
@@ -4735,6 +4876,12 @@ input UpdateCourseCategoryInput {
   parentId: String
 }
 
+input UpdateCourseDocumentLinkInput {
+  description: String
+  isRequired: Boolean
+  order: Int
+}
+
 input UpdateCourseInput {
   categoryId: String
   description: String
@@ -5157,6 +5304,32 @@ input UpdateRoleInput {
   metadata: JSON
   parentId: String
   priority: Int
+}
+
+input UpdateSourceDocumentCategoryInput {
+  color: String
+  description: String
+  icon: String
+  name: String
+  parentId: ID
+  slug: String
+}
+
+input UpdateSourceDocumentInput {
+  categoryId: ID
+  content: String
+  description: String
+  duration: Int
+  fileName: String
+  fileSize: Int
+  metadata: JSON
+  mimeType: String
+  status: SourceDocumentStatus
+  tags: [String!]
+  thumbnailUrl: String
+  title: String
+  type: SourceDocumentType
+  url: String
 }
 
 input UpdateTaskInput {

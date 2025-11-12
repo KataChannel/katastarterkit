@@ -25,7 +25,7 @@ export interface OrderTrackingEvent {
   status: string;
   description?: string;
   location?: string;
-  timestamp: Date;
+  timestamp: string | Date;
 }
 
 interface OrderTimelineProps {
