@@ -4,12 +4,13 @@ import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Button } from '@/components/ui/button';
-import { Menu, BookOpen, Users, ClipboardList, BarChart3, Settings, Home, LayoutDashboard } from 'lucide-react';
+import { Menu, BookOpen, Users, ClipboardList, BarChart3, Settings, Home, LayoutDashboard, FileText } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const menuItems = [
   { title: 'Tổng quan', icon: LayoutDashboard, href: '/lms/instructor' },
   { title: 'Khóa học của tôi', icon: BookOpen, href: '/lms/instructor/courses' },
+  { title: 'Tài liệu nguồn', icon: FileText, href: '/lms/instructor/source-documents' },
   { title: 'Học viên', icon: Users, href: '/lms/instructor/students' },
   { title: 'Bài kiểm tra', icon: ClipboardList, href: '/lms/instructor/quizzes' },
   { title: 'Báo cáo', icon: BarChart3, href: '/lms/instructor/reports' },

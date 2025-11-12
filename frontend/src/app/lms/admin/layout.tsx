@@ -15,7 +15,9 @@ import {
   Home,
   Menu,
   X,
-  ShoppingBag
+  ShoppingBag,
+  FileText,
+  FolderTree
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -37,9 +39,14 @@ const menuItems = [
     href: '/lms/admin/courses',
   },
   {
-    title: 'Danh mục',
+    title: 'Danh mục khóa học',
     icon: Folder,
     href: '/lms/admin/categories',
+  },
+  {
+    title: 'Tài liệu nguồn',
+    icon: FileText,
+    href: '/lms/admin/source-documents',
   },
   {
     title: 'Giảng viên',
