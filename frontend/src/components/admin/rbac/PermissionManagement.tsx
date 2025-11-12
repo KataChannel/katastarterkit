@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Pencil, Trash2, Key } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Pencil, Trash2, Key, Search } from 'lucide-react';
 import { useSearchPermissions, useDeletePermission } from '../../../hooks/useRbac';
 import { Permission, PermissionSearchInput } from '../../../types/rbac.types';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
     sortOrder: 'asc'
   });
   
+  const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingPermission, setEditingPermission] = useState<Permission | null>(null);
 
@@ -35,9 +36,21 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
   const [deletePermission] = useDeletePermission();
   const { toast } = useToast();
 
-  const handleSearch = (search: string) => {
-    setSearchInput(prev => ({ ...prev, search, page: 0 }));
-  };
+  // Auto-filter with debounce for smooth UX
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchInput(prev => {
+        const newSearch = searchTerm || undefined;
+        // Only update if search value actually changed to prevent unnecessary re-renders
+        if (prev.search !== newSearch) {
+          return { ...prev, search: newSearch, page: 0 };
+        }
+        return prev;
+      });
+    }, 300); // 300ms debounce for instant feel
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const handlePageChange = (page: number) => {
     setSearchInput(prev => ({ ...prev, page }));
@@ -138,12 +151,14 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
       <CardContent className="space-y-4">
         {/* Search and Filters */}
         <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search permissions..."
-              value={searchInput.search || ''}
-              onChange={(e) => handleSearch(e.target.value)}
+              placeholder="Filter permissions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9"
             />
           </div>
           <div className="flex gap-2">
