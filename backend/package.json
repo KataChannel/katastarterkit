@@ -34,6 +34,7 @@
     "seed:rbac": "ts-node prisma/seeds/rbac-roles-permissions.seed.ts",
     "seed:assign-roles": "ts-node prisma/seeds/assign-user-roles.seed.ts",
     "migrate:assign-roles": "bun run scripts/assign-default-roles.ts",
+    "cleanup:users-seed-perms": "ts-node scripts/cleanup-users-and-seed-permissions.ts",
     "db:backup": "bun run prisma/backup.ts",
     "db:restore": "bun run prisma/restore.ts",
     "db:restore-optimized": "bun run prisma/restore-optimized.ts",
