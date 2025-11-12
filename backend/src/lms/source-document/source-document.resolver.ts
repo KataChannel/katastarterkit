@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, ID, Int, Context } from '@nestjs/graphql';
-// import { UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { SourceDocumentService } from './source-document.service';
 import { MinioService } from '../../minio/minio.service';
 import {
@@ -14,7 +14,8 @@ import {
   UpdateCourseDocumentLinkInput,
 } from './dto/source-document.dto';
 import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
-// import { GqlAuthGuard } from '../../auth/guards/gql-auth.guard';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { CurrentUser } from '../../auth/current-user.decorator';
 
 @Resolver(() => SourceDocument)
 export class SourceDocumentResolver {
@@ -24,12 +25,12 @@ export class SourceDocumentResolver {
   ) {}
 
   @Mutation(() => SourceDocument)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async createSourceDocument(
+    @CurrentUser() user: any,
     @Args('input') input: CreateSourceDocumentInput,
-    @Args('userId', { type: () => ID }) userId: string, // Temporary: pass userId as argument
   ) {
-    return this.sourceDocumentService.create(userId, input);
+    return this.sourceDocumentService.create(user.id, input);
   }
 
   @Query(() => [SourceDocument])
@@ -48,7 +49,7 @@ export class SourceDocumentResolver {
   }
 
   @Mutation(() => SourceDocument)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async updateSourceDocument(
     @Args('id', { type: () => ID }) id: string,
     @Args('input') input: UpdateSourceDocumentInput,
@@ -57,7 +58,7 @@ export class SourceDocumentResolver {
   }
 
   @Mutation(() => SourceDocument)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async deleteSourceDocument(@Args('id', { type: () => ID }) id: string) {
     return this.sourceDocumentService.delete(id);
   }
@@ -65,16 +66,16 @@ export class SourceDocumentResolver {
   // ============== Course Linking ==============
 
   @Mutation(() => CourseSourceDocument)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async linkDocumentToCourse(
+    @CurrentUser() user: any,
     @Args('input') input: LinkDocumentToCourseInput,
-    @Args('userId', { type: () => ID }) userId: string, // Temporary
   ) {
-    return this.sourceDocumentService.linkToCourse(userId, input);
+    return this.sourceDocumentService.linkToCourse(user.id, input);
   }
 
   @Mutation(() => Boolean)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async unlinkDocumentFromCourse(
     @Args('courseId', { type: () => ID }) courseId: string,
     @Args('documentId', { type: () => ID }) documentId: string,
@@ -87,7 +88,7 @@ export class SourceDocumentResolver {
   }
 
   @Mutation(() => CourseSourceDocument)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async updateCourseDocumentLink(
     @Args('id', { type: () => ID }) id: string,
     @Args('input') input: UpdateCourseDocumentLinkInput,
@@ -108,18 +109,18 @@ export class SourceDocumentResolver {
   }
 
   @Query(() => String)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async sourceDocumentStats(
-    @Args('userId', { type: () => ID, nullable: true }) userId?: string,
+    @CurrentUser() user: any,
   ) {
-    const stats = await this.sourceDocumentService.getStats(userId);
+    const stats = await this.sourceDocumentService.getStats(user.id);
     return JSON.stringify(stats);
   }
 
   // ============== File Upload ==============
 
   @Mutation(() => String)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async uploadSourceDocumentFile(
     @Args('documentId', { type: () => ID }) documentId: string,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: Promise<FileUpload>,
@@ -160,7 +161,7 @@ export class SourceDocumentResolver {
   }
 
   @Mutation(() => String)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async uploadDocumentThumbnail(
     @Args('documentId', { type: () => ID }) documentId: string,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: Promise<FileUpload>,
@@ -198,7 +199,7 @@ export class SourceDocumentResolver {
   // ============== AI Analysis ==============
 
   @Mutation(() => SourceDocument)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async analyzeSourceDocument(
     @Args('id', { type: () => ID }) id: string,
   ): Promise<any> {
@@ -206,11 +207,11 @@ export class SourceDocumentResolver {
   }
 
   @Mutation(() => String)
-  // @UseGuards(GqlAuthGuard) // TODO: Add auth guard
+  @UseGuards(JwtAuthGuard)
   async bulkAnalyzeDocuments(
-    @Args('userId', { type: () => ID, nullable: true }) userId?: string,
+    @CurrentUser() user: any,
   ): Promise<string> {
-    const result = await this.sourceDocumentService.bulkAnalyze(userId);
+    const result = await this.sourceDocumentService.bulkAnalyze(user.id);
     return JSON.stringify(result);
   }
 }

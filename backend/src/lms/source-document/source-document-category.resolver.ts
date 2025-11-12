@@ -1,10 +1,12 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { SourceDocumentCategoryService } from './source-document-category.service';
 import { SourceDocumentCategory } from './entities/source-document.entity';
 import {
   CreateSourceDocumentCategoryInput,
   UpdateSourceDocumentCategoryInput,
 } from './dto/source-document.dto';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 @Resolver(() => SourceDocumentCategory)
 export class SourceDocumentCategoryResolver {
@@ -13,6 +15,7 @@ export class SourceDocumentCategoryResolver {
   ) {}
 
   @Mutation(() => SourceDocumentCategory)
+  @UseGuards(JwtAuthGuard)
   async createSourceDocumentCategory(
     @Args('input') input: CreateSourceDocumentCategoryInput,
   ) {
@@ -30,6 +33,7 @@ export class SourceDocumentCategoryResolver {
   }
 
   @Mutation(() => SourceDocumentCategory)
+  @UseGuards(JwtAuthGuard)
   async updateSourceDocumentCategory(
     @Args('id', { type: () => ID }) id: string,
     @Args('input') input: UpdateSourceDocumentCategoryInput,
@@ -38,6 +42,7 @@ export class SourceDocumentCategoryResolver {
   }
 
   @Mutation(() => SourceDocumentCategory)
+  @UseGuards(JwtAuthGuard)
   async deleteSourceDocumentCategory(@Args('id', { type: () => ID }) id: string) {
     return this.categoryService.delete(id);
   }
