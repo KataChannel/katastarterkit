@@ -8,7 +8,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Import components
@@ -21,7 +21,21 @@ import RbacManagement from '@/components/admin/rbac/RbacManagement';
 export default function AdminUsersPage() {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'users' | 'rbac'>('users');
+  const searchParams = useSearchParams();
+  
+  // Initialize activeTab from URL parameter
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<'users' | 'rbac'>(
+    tabParam === 'rbac' ? 'rbac' : 'users'
+  );
+
+  // Update tab when URL parameter changes
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'rbac' || tabParam === 'users') {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   // Redirect if not authenticated
   useEffect(() => {

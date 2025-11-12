@@ -72,15 +72,9 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
       requiredRoles: ['admin', 'super_admin'],
     },
     {
-      name: 'Users',
+      name: 'Users & RBAC',
       href: '/admin/users',
       icon: Users,
-      requiredRoles: ['admin', 'super_admin'],
-    },
-    {
-      name: 'Roles & Permissions',
-      href: '/admin/roles',
-      icon: Settings,
       requiredRoles: ['admin', 'super_admin'],
     },
     {
