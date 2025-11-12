@@ -44,7 +44,7 @@ export class TableUtils {
         
         switch (filter.operator) {
           case 'equals':
-            return value === filterValue;
+            return value === filterValue || String(value) === String(filterValue);
           case 'contains':
             return String(value).toLowerCase().includes(String(filterValue).toLowerCase());
           case 'startsWith':
@@ -58,7 +58,19 @@ export class TableUtils {
           case 'between':
             return Number(value) >= Number(filterValue) && Number(value) <= Number(filter.value2);
           case 'in':
-            return Array.isArray(filterValue) && filterValue.includes(value);
+            if (Array.isArray(filterValue)) {
+              return filterValue.some(fv => String(value) === String(fv));
+            }
+            return filterValue.includes(value);
+          case 'notIn':
+            if (Array.isArray(filterValue)) {
+              return !filterValue.some(fv => String(value) === String(fv));
+            }
+            return !filterValue.includes(value);
+          case 'isEmpty':
+            return value === null || value === undefined || value === '';
+          case 'isNotEmpty':
+            return value !== null && value !== undefined && value !== '';
           default:
             return true;
         }

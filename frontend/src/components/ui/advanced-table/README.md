@@ -13,6 +13,7 @@ A comprehensive, dynamic data table component inspired by AG Grid Enterprise wit
 ### ✅ Sorting & Filtering
 - **Multi-column Sorting**: Sort by multiple columns with priority indicators
 - **Advanced Filtering**: Add multiple filter conditions with various operators
+- **Column Filters**: Google Sheets-style filters with checkbox selection for each column
 - **Global Search**: Search across all visible columns
 - **Data Type Filters**: Type-specific filters (text, number, date, boolean, select)
 
@@ -218,6 +219,76 @@ const config: TableConfig = {
   }}
 />
 ```
+
+## Google Sheets-Style Column Filters
+
+The advanced table now includes Google Sheets-style column filters that appear on each column header.
+
+### Features
+- **Checkbox Selection**: Select specific values to filter by
+- **Search in Filter**: Search within the filter values
+- **Select All/None**: Quick selection controls
+- **Sort Integration**: Sort A→Z or Z→A directly from filter popover
+- **Active Filter Badge**: Visual indicator showing count of active filters per column
+- **Multiple Selection**: Filter by multiple values at once
+
+### Usage
+
+Column filters are automatically enabled for all filterable columns. Simply hover over any column header to see the filter icon.
+
+```tsx
+const columns: ColumnDef<User>[] = [
+  {
+    field: 'status',
+    headerName: 'Status',
+    filterable: true,  // Enable column filter
+    sortable: true
+  },
+  {
+    field: 'role',
+    headerName: 'Role',
+    filterable: true,
+    type: 'select'
+  }
+];
+```
+
+### Filter Behavior
+
+1. **Hover State**: Filter icon appears when hovering over column header
+2. **Active State**: Filter icon becomes blue with badge showing active filter count
+3. **Single Value**: Selecting one value creates an 'equals' filter
+4. **Multiple Values**: Selecting multiple values creates an 'in' filter
+5. **Clear**: Click "Clear" in popover to remove all filters for that column
+6. **Sort**: Use A→Z / Z→A buttons to sort column while keeping filter open
+
+### Example
+
+```tsx
+// The component automatically handles column filters
+<AdvancedTable
+  columns={columns}
+  data={data}
+  onFilter={(filters) => {
+    // Filters include both global filters and column filters
+    console.log('Active filters:', filters);
+    // Example: [
+    //   { field: 'status', operator: 'in', value: ['active', 'pending'] },
+    //   { field: 'role', operator: 'equals', value: 'admin' }
+    // ]
+  }}
+/>
+```
+
+### Filter Operators
+
+Column filters support the following operators:
+
+- `equals`: Single value match (exact match)
+- `in`: Multiple value match (includes any of)
+- `notIn`: Exclude specific values (excludes all of)
+- `isEmpty`: Field is empty/null
+- `isNotEmpty`: Field has a value
 
 ## Data Types Support
 

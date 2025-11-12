@@ -237,6 +237,18 @@ export function AdvancedTable<T extends RowData>({
     setFilters(newFilters);
   }, []);
 
+  const handleAddFilter = useCallback((filter: FilterCondition) => {
+    setFilters(prev => [...prev, filter]);
+  }, []);
+
+  const handleRemoveFilter = useCallback((field: string) => {
+    setFilters(prev => prev.filter(f => f.field !== field));
+  }, []);
+
+  const handleClearColumnFilters = useCallback((field: string) => {
+    setFilters(prev => prev.filter(f => f.field !== field));
+  }, []);
+
   const getSortConfig = useCallback((field: keyof T) => {
     return sortConfigs.find(config => config.field === field);
   }, [sortConfigs]);
@@ -251,9 +263,14 @@ export function AdvancedTable<T extends RowData>({
           <div style={{ height: headerHeight }}>
             <ColumnHeader
               column={column}
+              data={processedData}
+              activeFilters={filters}
               sortDirection={sortConfig?.direction}
               sortPriority={sortConfig?.priority}
               onSort={(direction) => handleSort(column.field, direction)}
+              onAddFilter={handleAddFilter}
+              onRemoveFilter={handleRemoveFilter}
+              onClearColumnFilters={handleClearColumnFilters}
               onPin={(position) => handleColumnPin(column.field, position)}
               onHide={() => handleColumnHide(column.field)}
               onAutoSize={() => handleAutoSizeColumn(column.field)}
@@ -286,9 +303,9 @@ export function AdvancedTable<T extends RowData>({
         </div>
       );
     });
-  }, [processedData, sortConfigs, columnWidths, headerHeight, rowHeight, editingCell, selectedRows, 
+  }, [processedData, sortConfigs, columnWidths, headerHeight, rowHeight, editingCell, selectedRows, filters,
       getSortConfig, handleSort, handleColumnPin, handleColumnHide, handleAutoSizeColumn, 
-      handleColumnResize, handleCellEdit]);
+      handleColumnResize, handleCellEdit, handleAddFilter, handleRemoveFilter, handleClearColumnFilters]);
 
   if (loading) {
     return (

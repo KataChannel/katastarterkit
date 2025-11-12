@@ -3,32 +3,44 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ColumnDef, SortDirection, ColumnPinPosition } from './types';
-import { ChevronUp, ChevronDown, MoreHorizontal, Pin, PinOff, Eye, EyeOff, Maximize2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ColumnDef, SortDirection, ColumnPinPosition, FilterCondition, RowData } from './types';
+import { ColumnFilterPopover } from './ColumnFilterPopover';
+import { ChevronUp, ChevronDown, MoreHorizontal, Pin, PinOff, Eye, EyeOff, Maximize2, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface ColumnHeaderProps<T> {
+interface ColumnHeaderProps<T extends RowData> {
   column: ColumnDef<T>;
+  data: T[];
   sortDirection?: SortDirection;
   sortPriority?: number;
+  activeFilters: FilterCondition[];
   onSort?: (direction: SortDirection) => void;
   onPin?: (position: ColumnPinPosition) => void;
   onHide?: () => void;
   onAutoSize?: () => void;
   onResize?: (width: number) => void;
+  onAddFilter?: (filter: FilterCondition) => void;
+  onRemoveFilter?: (field: string) => void;
+  onClearColumnFilters?: (field: string) => void;
   width: number;
   isResizing?: boolean;
 }
 
-export function ColumnHeader<T>({
+export function ColumnHeader<T extends RowData>({
   column,
+  data,
   sortDirection,
   sortPriority,
+  activeFilters,
   onSort,
   onPin,
   onHide,
   onAutoSize,
   onResize,
+  onAddFilter,
+  onRemoveFilter,
+  onClearColumnFilters,
   width,
   isResizing
 }: ColumnHeaderProps<T>) {
@@ -109,31 +121,74 @@ export function ColumnHeader<T>({
     return <PinOff className="w-4 h-4" />;
   };
 
+  // Get filter count for this column
+  const columnFilterCount = activeFilters.filter(f => f.field === String(column.field)).length;
+
   return (
     <div
       className={cn(
         'group relative flex items-center h-full px-3 border-r border-gray-200 bg-gray-50 select-none',
         column.headerClass,
-        column.sortable && 'cursor-pointer hover:bg-gray-100',
         column.pinned === 'left' && 'border-r-2 border-blue-200 bg-blue-50',
         column.pinned === 'right' && 'border-l-2 border-blue-200 bg-blue-50'
       )}
       style={{ width }}
-      onClick={handleSortClick}
     >
       <div className="flex items-center justify-between w-full min-w-0">
-        <div className="flex items-center gap-2 min-w-0">
+        <div 
+          className={cn(
+            "flex items-center gap-2 min-w-0 flex-1",
+            column.sortable && 'cursor-pointer hover:text-blue-600'
+          )}
+          onClick={handleSortClick}
+        >
           <span className="font-medium text-sm truncate">{column.headerName}</span>
           {sortPriority !== undefined && sortPriority > 0 && (
             <span className="text-xs bg-blue-100 text-blue-800 px-1 rounded">
               {sortPriority + 1}
             </span>
           )}
+          {getSortIcon()}
         </div>
         
-        <div className="flex items-center gap-1 flex-shrink-0">
-          {getSortIcon()}
+        <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+          {/* Google Sheets-style Filter Icon */}
+          {column.filterable !== false && (
+            <ColumnFilterPopover
+              column={column}
+              data={data}
+              activeFilters={activeFilters}
+              onAddFilter={onAddFilter!}
+              onRemoveFilter={onRemoveFilter!}
+              onClearColumnFilters={onClearColumnFilters!}
+              sortDirection={sortDirection}
+              onSort={onSort}
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-6 w-6 p-0",
+                  columnFilterCount > 0 
+                    ? "opacity-100 text-blue-600 hover:text-blue-700" 
+                    : "opacity-0 group-hover:opacity-100 hover:text-blue-600"
+                )}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Filter className="w-4 h-4" />
+                {columnFilterCount > 0 && (
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[9px] bg-blue-600 text-white"
+                  >
+                    {columnFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            </ColumnFilterPopover>
+          )}
           
+          {/* More Options Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

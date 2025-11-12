@@ -5,7 +5,7 @@ export type ColumnPinPosition = 'left' | 'right' | null;
 
 export interface FilterCondition {
   field: string;
-  operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'greaterThan' | 'lessThan' | 'between' | 'in';
+  operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'greaterThan' | 'lessThan' | 'between' | 'in' | 'notIn' | 'isEmpty' | 'isNotEmpty';
   value: any;
   value2?: any; // For 'between' operator
 }
