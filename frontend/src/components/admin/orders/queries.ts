@@ -10,8 +10,8 @@ import { gql } from '@apollo/client';
 // ================================
 
 export const LIST_ORDERS = gql`
-  query ListOrders($filter: OrderFilterInput, $pagination: PaginationInput) {
-    listOrders(filter: $filter, pagination: $pagination) {
+  query ListOrders($filter: OrderFilterInput) {
+    listOrders(filter: $filter) {
       orders {
         id
         orderNumber
@@ -21,38 +21,24 @@ export const LIST_ORDERS = gql`
         shippingMethod
         createdAt
         updatedAt
-        user {
-          id
-          email
-          firstName
-          lastName
-        }
-        shippingAddress {
-          fullName
-          phone
-          city
-          district
-          ward
-          streetAddress
-        }
+        userId
+        guestName
+        guestEmail
+        guestPhone
+        shippingAddress
         items {
           id
           quantity
           price
-          product {
-            id
-            name
-            slug
-            images {
-              url
-            }
-          }
+          productId
+          productName
+          thumbnail
+          sku
+          variantName
         }
       }
       total
       hasMore
-      page
-      limit
     }
   }
 `;
@@ -60,13 +46,12 @@ export const LIST_ORDERS = gql`
 export const GET_ORDER_STATS = gql`
   query GetOrderStatistics {
     getOrderStatistics {
+      success
+      message
       totalOrders
       totalRevenue
-      pendingOrders
-      processingOrders
-      completedOrders
-      cancelledOrders
-      averageOrderValue
+      byStatus
+      byPaymentStatus
     }
   }
 `;
@@ -81,54 +66,28 @@ export const GET_ORDER_DETAIL = gql`
       paymentMethod
       total
       subtotal
-      shippingCost
-      taxAmount
-      discountAmount
+      shippingFee
+      tax
+      discount
       shippingMethod
       createdAt
       updatedAt
-      user {
-        id
-        email
-        firstName
-        lastName
-        phone
-      }
-      shippingAddress {
-        fullName
-        phone
-        email
-        city
-        district
-        ward
-        streetAddress
-        postalCode
-      }
-      billingAddress {
-        fullName
-        phone
-        email
-        city
-        district
-        ward
-        streetAddress
-        postalCode
-      }
+      userId
+      guestName
+      guestEmail
+      guestPhone
+      shippingAddress
+      billingAddress
       items {
         id
         quantity
         price
-        total
-        product {
-          id
-          name
-          slug
-          sku
-          images {
-            url
-            alt
-          }
-        }
+        subtotal
+        productId
+        productName
+        thumbnail
+        sku
+        variantName
       }
       tracking {
         id
@@ -136,28 +95,15 @@ export const GET_ORDER_DETAIL = gql`
         trackingNumber
         status
         estimatedDelivery
-        createdAt
+        trackingUrl
+        actualDelivery
         events {
           id
           status
           location
           description
-          timestamp
+          eventTime
         }
-      }
-      notes {
-        id
-        content
-        type
-        createdBy
-        createdAt
-      }
-      history {
-        id
-        action
-        description
-        createdBy
-        createdAt
       }
     }
   }

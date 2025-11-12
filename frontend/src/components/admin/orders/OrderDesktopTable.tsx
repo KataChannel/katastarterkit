@@ -65,7 +65,7 @@ export default function OrderDesktopTable({
             <TableBody>
               {orders.map((order) => {
                 const paymentConfig = getPaymentStatusConfig(order.paymentStatus);
-                const customerName = formatCustomerName(order.user, order.shippingAddress);
+                const customerName = formatCustomerName(order.guestName, order.shippingAddress);
 
                 return (
                   <TableRow key={order.id} className="hover:bg-muted/50">
@@ -77,7 +77,7 @@ export default function OrderDesktopTable({
                       <div>
                         <p className="font-medium">{customerName}</p>
                         <p className="text-sm text-muted-foreground">
-                          {order.user?.email || 'N/A'}
+                          {order.guestEmail || 'N/A'}
                         </p>
                       </div>
                     </TableCell>

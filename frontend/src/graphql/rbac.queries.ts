@@ -327,3 +327,52 @@ export const ASSIGN_USER_PERMISSIONS = gql`
     assignUserPermissions(input: $input)
   }
 `;
+
+// Current User Permissions & Roles
+export const GET_MY_PERMISSIONS = gql`
+  query GetMyPermissions {
+    myPermissions {
+      id
+      name
+      displayName
+      resource
+      action
+      scope
+      category
+      description
+    }
+  }
+`;
+
+export const GET_MY_ROLES = gql`
+  query GetMyRoles {
+    myRoles {
+      id
+      role {
+        id
+        name
+        displayName
+        description
+      }
+      assignedAt
+      expiresAt
+    }
+  }
+`;
+
+export const REMOVE_USER_ROLE = gql`
+  mutation RemoveUserRole($userId: ID!, $roleId: ID!) {
+    removeUserRole(userId: $userId, roleId: $roleId) {
+      success
+      message
+    }
+  }
+`;
+
+export const CHECK_USER_PERMISSION = gql`
+  query CheckUserPermission($userId: ID!, $resource: String!, $action: String!, $scope: String) {
+    checkUserPermission(userId: $userId, resource: $resource, action: $action, scope: $scope) {
+      hasPermission
+    }
+  }
+`;

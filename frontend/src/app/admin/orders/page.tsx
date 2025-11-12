@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { toast } from 'sonner';
 import { LIST_ORDERS, GET_ORDER_STATS, UPDATE_ORDER_STATUS } from '@/components/admin/orders/queries';
-import { OrderFilterInput, DEFAULT_PAGINATION } from '@/components/admin/orders/types';
+import { OrderFilterInput } from '@/components/admin/orders/types';
 import OrderStatsCards from '@/components/admin/orders/OrderStatsCards';
 import OrderSearchFiltersBar from '@/components/admin/orders/OrderSearchFiltersBar';
 import OrderMobileCards from '@/components/admin/orders/OrderMobileCards';
@@ -12,7 +12,7 @@ import OrderDesktopTable from '@/components/admin/orders/OrderDesktopTable';
 import OrderLoadingState from '@/components/admin/orders/OrderLoadingState';
 import OrderEmptyState from '@/components/admin/orders/OrderEmptyState';
 import OrderDetailDialog from '@/components/admin/orders/OrderDetailDialog';
-import OrderFilterDialog from '@/components/admin/orders/OrderFilterDialog';
+import { OrderFilterDialog } from '@/components/admin/orders/OrderFilterDialog';
 
 export default function AdminOrdersPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,7 +27,6 @@ export default function AdminOrdersPage() {
   const { data, loading, error, refetch } = useQuery(LIST_ORDERS, {
     variables: {
       filter: { ...filters, searchTerm: searchTerm || undefined },
-      pagination: DEFAULT_PAGINATION,
     },
     fetchPolicy: 'cache-and-network',
   });
@@ -52,8 +51,8 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const handleApplyFilters = (newFilters: OrderFilterInput) => {
-    setFilters(newFilters);
+  const handleApplyFilters = (newFilters: any) => {
+    setFilters(newFilters as OrderFilterInput);
     setFilterDialogOpen(false);
     refetch();
   };
@@ -97,7 +96,7 @@ export default function AdminOrdersPage() {
 
       {selectedOrderId && (
         <OrderDetailDialog
-          orderId={selectedOrderId}
+          order={selectedOrderId}
           open={!!selectedOrderId}
           onOpenChange={(open) => !open && setSelectedOrderId(null)}
         />

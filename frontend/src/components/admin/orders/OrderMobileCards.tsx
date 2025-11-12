@@ -50,7 +50,7 @@ export default function OrderMobileCards({
                 <div>
                   <p className="font-semibold text-base">{order.orderNumber}</p>
                   <p className="text-sm text-muted-foreground">
-                    {order.user?.email || 'Khách vãng lai'}
+                    {order.guestEmail || order.guestName || 'Khách vãng lai'}
                   </p>
                 </div>
                 <DropdownMenu>

@@ -2,6 +2,7 @@
 
 import { gql, useQuery } from '@apollo/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@/components/ui/visually-hidden';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,12 +39,7 @@ const GET_ORDER_DETAIL = gql`
       shippedAt
       deliveredAt
       cancelledAt
-      user {
-        id
-        email
-        firstName
-        lastName
-      }
+      userId
       guestEmail
       guestName
       guestPhone
@@ -129,6 +125,9 @@ export function OrderDetailDialog({ order: orderProp, open, onOpenChange, onStat
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="p-0 gap-0 flex flex-col max-h-[90vh] max-w-4xl">
+          <VisuallyHidden>
+            <DialogTitle>Đang tải đơn hàng</DialogTitle>
+          </VisuallyHidden>
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
           </div>
@@ -212,7 +211,7 @@ export function OrderDetailDialog({ order: orderProp, open, onOpenChange, onStat
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-gray-500">Tên</p>
                       <p className="font-medium truncate">
-                        {order.user?.firstName} {order.user?.lastName} {order.guestName}
+                        {order.guestName || 'N/A'}
                       </p>
                     </div>
                   </div>
@@ -221,7 +220,7 @@ export function OrderDetailDialog({ order: orderProp, open, onOpenChange, onStat
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-gray-500">Email</p>
                       <p className="font-medium text-sm truncate">
-                        {order.user?.email || order.guestEmail}
+                        {order.guestEmail || 'N/A'}
                       </p>
                     </div>
                   </div>
@@ -498,3 +497,5 @@ export function OrderDetailDialog({ order: orderProp, open, onOpenChange, onStat
     </Dialog>
   );
 }
+
+export default OrderDetailDialog;

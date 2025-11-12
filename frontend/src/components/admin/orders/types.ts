@@ -67,32 +67,15 @@ export const PAYMENT_STATUS_COLORS: Record<PaymentStatus, string> = {
 // TypeScript Interfaces
 // ================================
 
-export interface OrderUser {
-  id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-}
-
-export interface OrderAddress {
-  fullName?: string;
-  phone?: string;
-  city?: string;
-  district?: string;
-  ward?: string;
-  streetAddress?: string;
-}
-
 export interface OrderItem {
   id: string;
   quantity: number;
   price: number;
-  product?: {
-    id: string;
-    name: string;
-    slug: string;
-    images?: Array<{ url: string }>;
-  };
+  productId?: string;
+  productName: string;
+  thumbnail?: string;
+  sku?: string;
+  variantName?: string;
 }
 
 export interface Order {
@@ -104,19 +87,21 @@ export interface Order {
   shippingMethod?: string;
   createdAt: string;
   updatedAt: string;
-  user?: OrderUser;
-  shippingAddress?: OrderAddress;
+  userId?: string;
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
+  shippingAddress?: any; // JSON field
   items: OrderItem[];
 }
 
 export interface OrderStatistics {
+  success: boolean;
+  message: string;
   totalOrders: number;
   totalRevenue: number;
-  pendingOrders: number;
-  processingOrders: number;
-  completedOrders: number;
-  cancelledOrders: number;
-  averageOrderValue: number;
+  byStatus: Record<string, number>;
+  byPaymentStatus: Record<string, number>;
 }
 
 export interface OrderFilterInput {
@@ -130,11 +115,11 @@ export interface OrderFilterInput {
 }
 
 export interface OrderListResponse {
+  errors?: string[];
+  message?: string;
   orders: Order[];
   total: number;
   hasMore: boolean;
-  page: number;
-  limit: number;
 }
 
 export interface UpdateOrderStatusInput {

@@ -23,6 +23,11 @@ export default function OrderStatsCards({ stats, loading }: OrderStatsCardsProps
     return formatter ? formatter(value) : value.toString();
   };
 
+  // Parse byStatus JSON to get individual counts
+  const byStatus = stats?.byStatus || {};
+  const pendingCount = byStatus?.PENDING || 0;
+  const completedCount = byStatus?.COMPLETED || byStatus?.DELIVERED || 0;
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {/* Tổng đơn hàng */}
@@ -61,7 +66,7 @@ export default function OrderStatsCards({ stats, loading }: OrderStatsCardsProps
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {displayValue(stats?.pendingOrders)}
+            {displayValue(pendingCount)}
           </div>
           <p className="text-xs text-muted-foreground">Đơn hàng mới</p>
         </CardContent>
@@ -75,7 +80,7 @@ export default function OrderStatsCards({ stats, loading }: OrderStatsCardsProps
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {displayValue(stats?.completedOrders)}
+            {displayValue(completedCount)}
           </div>
           <p className="text-xs text-muted-foreground">Giao hàng thành công</p>
         </CardContent>

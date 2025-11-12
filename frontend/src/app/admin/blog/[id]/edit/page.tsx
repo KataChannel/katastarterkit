@@ -62,31 +62,37 @@ export default function EditBlogPage() {
     metaDescription: '',
   });
 
-  const { data, loading: loadingBlog } = useQuery(GET_BLOG_BY_ID, {
+  const { data, loading: loadingBlog, error } = useQuery(GET_BLOG_BY_ID, {
     variables: { id: blogId },
     skip: !blogId,
-    onCompleted: (data) => {
-      if (data?.blog) {
-        setFormData({
-          id: data.blog.id,
-          title: data.blog.title || '',
-          slug: data.blog.slug || '',
-          excerpt: data.blog.excerpt || '',
-          content: data.blog.content || '',
-          categoryId: data.blog.category?.id || '',
-          featuredImage: data.blog.thumbnailUrl || '',
-          status: 'DRAFT',
-          isFeatured: data.blog.isFeatured || false,
-          metaTitle: data.blog.metaTitle || '',
-          metaDescription: data.blog.metaDescription || '',
-        });
-      }
-    },
-    onError: (error) => {
+  });
+
+  // Update form data when blog data is loaded
+  useEffect(() => {
+    if (data?.blog) {
+      setFormData({
+        id: data.blog.id,
+        title: data.blog.title || '',
+        slug: data.blog.slug || '',
+        excerpt: data.blog.excerpt || '',
+        content: data.blog.content || '',
+        categoryId: data.blog.category?.id || '',
+        featuredImage: data.blog.thumbnailUrl || '',
+        status: 'DRAFT',
+        isFeatured: data.blog.isFeatured || false,
+        metaTitle: data.blog.metaTitle || '',
+        metaDescription: data.blog.metaDescription || '',
+      });
+    }
+  }, [data]);
+
+  // Handle error
+  useEffect(() => {
+    if (error) {
       toast.error('Lỗi: ' + error.message);
       router.push('/admin/blog');
-    },
-  });
+    }
+  }, [error, router]);
 
   const [updateBlog, { loading: updating }] = useMutation(UPDATE_BLOG, {
     onCompleted: () => {

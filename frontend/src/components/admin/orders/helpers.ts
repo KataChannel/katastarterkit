@@ -85,17 +85,18 @@ export const formatOrderNumber = (orderNumber: string): string => {
 // ================================
 
 /**
- * Format tên khách hàng từ user hoặc shipping address
+ * Format tên khách hàng từ guest info hoặc shipping address
  */
 export const formatCustomerName = (
-  user?: { firstName?: string; lastName?: string },
-  shippingAddress?: { fullName?: string }
+  guestName?: string,
+  shippingAddress?: any
 ): string => {
+  // Try to get fullName from shippingAddress JSON
   if (shippingAddress?.fullName) {
     return shippingAddress.fullName;
   }
-  if (user?.firstName || user?.lastName) {
-    return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+  if (guestName) {
+    return guestName;
   }
   return 'Khách vãng lai';
 };
@@ -198,8 +199,10 @@ export const normalizeSearchTerm = (term: string): string => {
 export const matchesSearchTerm = (
   order: {
     orderNumber: string;
-    user?: { email?: string };
-    shippingAddress?: { fullName?: string; phone?: string };
+    guestEmail?: string;
+    guestName?: string;
+    guestPhone?: string;
+    shippingAddress?: any;
   },
   searchTerm: string
 ): boolean => {
@@ -208,7 +211,9 @@ export const matchesSearchTerm = (
 
   const searchableFields = [
     order.orderNumber,
-    order.user?.email,
+    order.guestEmail,
+    order.guestName,
+    order.guestPhone,
     order.shippingAddress?.fullName,
     order.shippingAddress?.phone,
   ]
@@ -228,9 +233,9 @@ export const matchesSearchTerm = (
 export const prepareOrdersForExport = (orders: any[]) => {
   return orders.map((order) => ({
     'Mã đơn': order.orderNumber,
-    'Khách hàng': formatCustomerName(order.user, order.shippingAddress),
-    'Email': order.user?.email || 'N/A',
-    'Số điện thoại': order.shippingAddress?.phone || 'N/A',
+    'Khách hàng': formatCustomerName(order.guestName, order.shippingAddress),
+    'Email': order.guestEmail || 'N/A',
+    'Số điện thoại': order.guestPhone || order.shippingAddress?.phone || 'N/A',
     'Trạng thái': ORDER_STATUS_LABELS[order.status as OrderStatus],
     'Thanh toán': PAYMENT_STATUS_LABELS[order.paymentStatus as PaymentStatus],
     'Tổng tiền': order.total,
