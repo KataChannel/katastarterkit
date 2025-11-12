@@ -8,6 +8,13 @@ interface GenerateCourseFromPromptInput {
   instructorId: string;
 }
 
+interface GenerateCourseFromDocumentsInput {
+  documentIds: string[];
+  categoryId?: string;
+  additionalPrompt?: string;
+  instructorId: string;
+}
+
 @Injectable()
 export class AICourseGeneratorService {
   private genAI: GoogleGenerativeAI;
@@ -82,6 +89,334 @@ export class AICourseGeneratorService {
 
     return course;
   }
+
+  /**
+   * Generate course from source documents using AI analysis
+   */
+  async generateCourseFromDocuments(input: GenerateCourseFromDocumentsInput) {
+    if (!this.model) {
+      throw new BadRequestException('AI service is not configured. Please set GOOGLE_GEMINI_API_KEY');
+    }
+
+    const { documentIds, categoryId, additionalPrompt, instructorId } = input;
+
+    // Validate input
+    if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
+      throw new BadRequestException('documentIds is required and must be a non-empty array');
+    }
+
+    if (!instructorId) {
+      throw new BadRequestException('instructorId is required');
+    }
+
+    console.log('🤖 [AI Course Generator from Documents] Starting...');
+    console.log(`📚 Documents: ${documentIds.length} items`);
+    console.log(`👤 Instructor ID: ${instructorId}`);
+    console.log(`📁 Category ID: ${categoryId || 'None'}`);
+
+    // Step 1: Fetch source documents with AI data
+    console.log('\n⏳ Step 1/4: Fetching source documents...');
+    const documents = await this.prisma.sourceDocument.findMany({
+      where: {
+        id: { in: documentIds },
+        status: 'PUBLISHED',
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    if (documents.length === 0) {
+      throw new BadRequestException('No valid documents found');
+    }
+
+    console.log(`✅ Found ${documents.length} documents`);
+
+    // Step 2: Aggregate AI analysis from all documents
+    console.log('\n⏳ Step 2/4: Aggregating AI analysis...');
+    const aggregatedData = this.aggregateDocumentAnalysis(documents);
+    console.log(`✅ Aggregated data from ${documents.length} documents`);
+    console.log(`   - Keywords: ${aggregatedData.keywords.length}`);
+    console.log(`   - Topics: ${aggregatedData.topics.length}`);
+
+    // Step 3: Generate prompt from aggregated data
+    const generatedPrompt = this.buildPromptFromDocuments(
+      aggregatedData,
+      documents,
+      additionalPrompt
+    );
+    console.log(`✅ Generated prompt (${generatedPrompt.length} chars)`);
+
+    // Step 4: Generate course using standard flow
+    console.log('\n⏳ Step 3/4: Calling Gemini AI...');
+    const startAI = Date.now();
+    const courseStructure = await this.generateCourseStructure(generatedPrompt);
+    const aiDuration = ((Date.now() - startAI) / 1000).toFixed(2);
+    console.log(`✅ AI Response received in ${aiDuration}s`);
+
+    // Step 5: Create course in database
+    console.log('\n⏳ Step 4/4: Creating course in database...');
+    const startDB = Date.now();
+    const course = await this.createCourseFromStructure(
+      courseStructure,
+      instructorId,
+      categoryId
+    );
+    const dbDuration = ((Date.now() - startDB) / 1000).toFixed(2);
+    console.log(`✅ Course created in ${dbDuration}s`);
+
+    // Step 6: Link source documents to course
+    await this.prisma.courseSourceDocument.createMany({
+      data: documentIds.map((docId, index) => ({
+        courseId: course.id,
+        documentId: docId,
+        order: index,
+        isRequired: false,
+      })),
+    });
+    console.log(`✅ Linked ${documentIds.length} source documents to course`);
+
+    const totalDuration = ((Date.now() - startAI) / 1000).toFixed(2);
+    console.log('\n🎉 Course from documents completed!');
+    console.log(`⏱️  Total time: ${totalDuration}s`);
+    console.log(`📖 Course ID: ${course.id}`);
+    console.log(`📖 Course Title: ${course.title}\n`);
+
+    return course;
+  }
+
+  /**
+   * Aggregate AI analysis data from multiple source documents
+   */
+  private aggregateDocumentAnalysis(documents: any[]) {
+    const allKeywords: string[] = [];
+    const allTopics: string[] = [];
+    const summaries: string[] = [];
+    const difficulties: string[] = [];
+
+    documents.forEach((doc) => {
+      if (doc.aiKeywords) {
+        allKeywords.push(...doc.aiKeywords);
+      }
+      if (doc.aiTopics) {
+        allTopics.push(...doc.aiTopics);
+      }
+      if (doc.aiSummary) {
+        summaries.push(`${doc.title}: ${doc.aiSummary}`);
+      }
+      if (doc.aiDifficulty) {
+        difficulties.push(doc.aiDifficulty);
+      }
+    });
+
+    // Deduplicate and sort by frequency
+    const keywordFreq = this.getFrequency(allKeywords);
+    const topicFreq = this.getFrequency(allTopics);
+    const difficultyFreq = this.getFrequency(difficulties);
+
+    return {
+      keywords: Object.keys(keywordFreq).sort((a, b) => keywordFreq[b] - keywordFreq[a]),
+      topics: Object.keys(topicFreq).sort((a, b) => topicFreq[b] - topicFreq[a]),
+      summaries,
+      mostCommonDifficulty: Object.keys(difficultyFreq)[0] || 'BEGINNER',
+    };
+  }
+
+  /**
+   * Count frequency of items
+   */
+  private getFrequency(items: string[]): Record<string, number> {
+    return items.reduce((acc, item) => {
+      acc[item] = (acc[item] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+  }
+
+  /**
+   * Build AI prompt from aggregated document data
+   */
+  private buildPromptFromDocuments(
+    aggregatedData: any,
+    documents: any[],
+    additionalPrompt?: string
+  ): string {
+    const documentTitles = documents.map((d) => d.title).join(', ');
+    const topKeywords = aggregatedData.keywords.slice(0, 10).join(', ');
+    const topTopics = aggregatedData.topics.slice(0, 5).join(', ');
+
+    let prompt = `Tạo khóa học dựa trên ${documents.length} tài liệu nguồn sau:\n\n`;
+    prompt += `📚 Tài liệu: ${documentTitles}\n\n`;
+    prompt += `🔑 Từ khóa chính: ${topKeywords}\n\n`;
+    prompt += `📖 Chủ đề: ${topTopics}\n\n`;
+    prompt += `📊 Độ khó đề xuất: ${aggregatedData.mostCommonDifficulty}\n\n`;
+
+    // Add summaries
+    if (aggregatedData.summaries.length > 0) {
+      prompt += `📝 Tóm tắt nội dung:\n`;
+      aggregatedData.summaries.forEach((summary, idx) => {
+        prompt += `${idx + 1}. ${summary}\n`;
+      });
+      prompt += '\n';
+    }
+
+    // Add additional instructions
+    if (additionalPrompt) {
+      prompt += `\n💡 Yêu cầu bổ sung: ${additionalPrompt}\n`;
+    }
+
+    prompt += `\nDựa trên các tài liệu nguồn trên, hãy tạo một khóa học toàn diện, có cấu trúc rõ ràng với modules, lessons và quizzes phù hợp.`;
+
+    return prompt;
+  }
+
+  /**
+   * Analyze documents and generate course suggestions (WITHOUT creating course)
+   * Step 1 of 2-step process
+   */
+  async analyzeDocumentsForCourse(input: { documentIds: string[]; additionalContext?: string }) {
+    if (!this.model) {
+      throw new BadRequestException('AI service is not configured. Please set GOOGLE_GEMINI_API_KEY');
+    }
+
+    const { documentIds, additionalContext } = input;
+
+    // Validate input
+    if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
+      throw new BadRequestException('documentIds is required and must be a non-empty array');
+    }
+
+    console.log('🔍 [AI Course Analysis] Starting...');
+    console.log(`📚 Documents: ${documentIds.length} items`);
+
+    // Fetch source documents
+    const documents = await this.prisma.sourceDocument.findMany({
+      where: {
+        id: { in: documentIds },
+        status: 'PUBLISHED',
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    if (documents.length === 0) {
+      throw new BadRequestException('No valid published documents found');
+    }
+
+    console.log(`✅ Found ${documents.length} documents`);
+
+    // Aggregate AI analysis
+    const aggregatedData = this.aggregateDocumentAnalysis(documents);
+
+    // Build analysis prompt for AI
+    const analysisPrompt = this.buildAnalysisPrompt(aggregatedData, documents, additionalContext);
+
+    console.log('🤖 Calling Gemini AI for analysis...');
+    const startAI = Date.now();
+
+    try {
+      const result = await this.model.generateContent(analysisPrompt);
+      const response = await result.response;
+      let text = response.text();
+
+      // Clean response
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      
+      const jsonStart = text.indexOf('{');
+      const jsonEnd = text.lastIndexOf('}');
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        text = text.substring(jsonStart, jsonEnd + 1);
+      }
+
+      const analysisResult = JSON.parse(text);
+      const aiDuration = ((Date.now() - startAI) / 1000).toFixed(2);
+      
+      console.log(`✅ AI Analysis completed in ${aiDuration}s`);
+
+      // Return structured analysis result
+      return {
+        suggestedTitle: analysisResult.suggestedTitle || '',
+        suggestedDescription: analysisResult.suggestedDescription || '',
+        recommendedLevel: analysisResult.recommendedLevel || 'BEGINNER',
+        aggregatedKeywords: aggregatedData.keywords.slice(0, 20),
+        mainTopics: aggregatedData.topics.slice(0, 10),
+        learningObjectives: analysisResult.learningObjectives || [],
+        whatYouWillLearn: analysisResult.whatYouWillLearn || [],
+        requirements: analysisResult.requirements || [],
+        targetAudience: analysisResult.targetAudience || [],
+        suggestedStructure: analysisResult.suggestedStructure || {},
+        estimatedDuration: analysisResult.estimatedDuration || 120,
+        sourceDocumentIds: documentIds,
+        analysisSummary: analysisResult.analysisSummary || '',
+      };
+    } catch (error) {
+      console.error('❌ AI Analysis error:', error);
+      throw new BadRequestException('Failed to analyze documents with AI: ' + error.message);
+    }
+  }
+
+  /**
+   * Build analysis prompt (lighter than full course generation)
+   */
+  private buildAnalysisPrompt(
+    aggregatedData: any,
+    documents: any[],
+    additionalContext?: string
+  ): string {
+    const documentTitles = documents.map((d) => d.title).join(', ');
+    const topKeywords = aggregatedData.keywords.slice(0, 15).join(', ');
+    const topTopics = aggregatedData.topics.slice(0, 8).join(', ');
+
+    let prompt = `Bạn là chuyên gia phân tích giáo dục. Phân tích ${documents.length} tài liệu nguồn sau và đề xuất khóa học.
+
+📚 THÔNG TIN TÀI LIỆU:
+- Tài liệu: ${documentTitles}
+- Từ khóa: ${topKeywords}
+- Chủ đề: ${topTopics}
+
+`;
+
+    // Add summaries
+    if (aggregatedData.summaries.length > 0) {
+      prompt += `📝 TÓM TẮT NỘI DUNG:\n`;
+      aggregatedData.summaries.slice(0, 5).forEach((summary: string, idx: number) => {
+        prompt += `${idx + 1}. ${summary}\n`;
+      });
+      prompt += '\n';
+    }
+
+    if (additionalContext) {
+      prompt += `💡 YÊU CẦU BỔ SUNG: ${additionalContext}\n\n`;
+    }
+
+    prompt += `YÊU CẦU PHÂN TÍCH (trả về JSON):
+{
+  "suggestedTitle": "Tên khóa học gợi ý (60-100 ký tự)",
+  "suggestedDescription": "Mô tả khóa học (200-300 ký tự)",
+  "recommendedLevel": "BEGINNER|INTERMEDIATE|ADVANCED",
+  "learningObjectives": ["Mục tiêu 1", "Mục tiêu 2", "Mục tiêu 3"],
+  "whatYouWillLearn": ["Kỹ năng 1", "Kỹ năng 2", "Kỹ năng 3", "Kỹ năng 4"],
+  "requirements": ["Yêu cầu 1", "Yêu cầu 2"],
+  "targetAudience": ["Đối tượng 1", "Đối tượng 2"],
+  "suggestedStructure": {
+    "moduleCount": 3-5,
+    "modules": [
+      {
+        "title": "Tên module",
+        "description": "Mô tả ngắn",
+        "topics": ["Topic 1", "Topic 2"]
+      }
+    ]
+  },
+  "estimatedDuration": 120-240,
+  "analysisSummary": "Tóm tắt phân tích (100-200 ký tự)"
+}
+
+CHỈ TRẢ VỀ JSON, KHÔNG GIẢI THÍCH THÊM.`;
+
+    return prompt;
+  }
+
 
   /**
    * Attempt to repair incomplete JSON from AI response

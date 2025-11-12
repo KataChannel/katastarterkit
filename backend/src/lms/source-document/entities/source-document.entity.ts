@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, registerEnumType, Int } from '@nestjs/graphql';
+import { ObjectType, Field, ID, registerEnumType, Int, Float } from '@nestjs/graphql';
 import { SourceDocumentType, SourceDocumentStatus } from '@prisma/client';
 import GraphQLJSON from 'graphql-type-json';
 
@@ -79,7 +79,7 @@ export class SourceDocument {
   @Field({ nullable: true })
   fileName?: string;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Float, { nullable: true, description: 'File size in bytes (supports large files)' })
   fileSize?: number;
 
   @Field({ nullable: true })

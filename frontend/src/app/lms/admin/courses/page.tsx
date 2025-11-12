@@ -145,6 +145,10 @@ export default function AdminCoursesPage() {
     router.push('/lms/admin/courses/create-with-ai');
   };
 
+  const handleCreateFromDocuments = () => {
+    router.push('/lms/admin/courses/create-from-documents');
+  };
+
   const handleViewCourse = (courseId: string) => {
     router.push(`/lms/admin/courses/${courseId}`);
   };
@@ -226,11 +230,20 @@ export default function AdminCoursesPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Quản lý khóa học</h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">Tổng cộng {courses?.length || 0} khóa học</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col xs:flex-row gap-2 sm:gap-3">
           <Button onClick={handleCreateCourse} variant="outline" className="gap-2 text-sm sm:text-base">
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Tạo thủ công</span>
             <span className="sm:hidden">Thủ công</span>
+          </Button>
+          <Button 
+            onClick={handleCreateFromDocuments}
+            variant="outline"
+            className="gap-2 text-sm sm:text-base border-purple-300 text-purple-700 hover:bg-purple-50"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span className="hidden sm:inline">Từ tài liệu</span>
+            <span className="sm:hidden">Tài liệu</span>
           </Button>
           <Button 
             onClick={handleCreateWithAI} 

@@ -407,6 +407,14 @@ input AggregateInput {
   where: JSONObject
 }
 
+input AnalyzeDocumentsForCourseInput {
+  """Optional additional context for AI analysis"""
+  additionalContext: String
+
+  """Array of source document IDs to analyze"""
+  documentIds: [ID!]!
+}
+
 type Answer {
   createdAt: DateTime!
   id: ID!
@@ -919,6 +927,47 @@ type Course {
   title: String!
   trailer: String
   updatedAt: DateTime!
+  whatYouWillLearn: [String!]!
+}
+
+type CourseAnalysisResult {
+  """Aggregated keywords from documents"""
+  aggregatedKeywords: [String!]!
+
+  """Summary of the analysis"""
+  analysisSummary: String!
+
+  """Estimated duration in minutes"""
+  estimatedDuration: Int!
+
+  """Learning objectives based on content"""
+  learningObjectives: [String!]!
+
+  """Main topics identified"""
+  mainTopics: [String!]!
+
+  """Recommended difficulty level"""
+  recommendedLevel: String!
+
+  """Prerequisites and requirements"""
+  requirements: [String!]!
+
+  """Document IDs used for analysis"""
+  sourceDocumentIds: [String!]!
+
+  """AI-generated course description"""
+  suggestedDescription: String!
+
+  """Suggested course structure (modules outline)"""
+  suggestedStructure: JSON!
+
+  """AI-generated course title suggestion"""
+  suggestedTitle: String!
+
+  """Target audience"""
+  targetAudience: [String!]!
+
+  """What students will learn"""
   whatYouWillLearn: [String!]!
 }
 
@@ -2103,6 +2152,17 @@ enum Gender {
   OTHER
 }
 
+input GenerateCourseFromDocumentsInput {
+  """Optional additional instructions for AI"""
+  additionalPrompt: String
+
+  """Optional category for the generated course"""
+  categoryId: String
+
+  """Array of source document IDs to analyze"""
+  documentIds: [ID!]!
+}
+
 input GetCategoriesInput {
   filters: CategoryFiltersInput
   includeChildren: Boolean = false
@@ -2601,6 +2661,7 @@ type Mutation {
   enrollCourse(enrollCourseInput: EnrollCourseInput!): Enrollment!
   exportDataToExcel(modelName: String!, select: JSON, where: JSON): String!
   generateCertificate(enrollmentId: ID!): Certificate!
+  generateCourseFromDocuments(input: GenerateCourseFromDocumentsInput!): Course!
   generateCourseFromPrompt(categoryId: String, prompt: String!): Course!
   generatePostSummary(postId: String!): String!
   generateSummary(content: String!, maxLength: Float! = 200): String!
@@ -3587,6 +3648,7 @@ type Query {
 
   """Aggregate operations (count, sum, avg, min, max)"""
   aggregate(model: String!, options: JSON!): JSON!
+  analyzeDocumentsForCourse(input: AnalyzeDocumentsForCourseInput!): CourseAnalysisResult!
   blog(id: ID!): BlogType!
   blogBySlug(slug: String!): BlogType!
   blogCategories: [BlogCategoryType!]!
@@ -4251,7 +4313,9 @@ type SourceDocument {
   downloadCount: Int!
   duration: Int
   fileName: String
-  fileSize: Int
+
+  """File size in bytes (supports large files)"""
+  fileSize: Float
   id: ID!
   isAiAnalyzed: Boolean!
   metadata: JSON

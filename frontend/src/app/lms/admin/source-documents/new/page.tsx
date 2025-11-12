@@ -232,7 +232,6 @@ export default function NewSourceDocumentPage() {
                     <SelectValue placeholder="Chọn danh mục..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Không có danh mục</SelectItem>
                     {categories.map((cat: any) => (
                       <SelectItem key={cat.id} value={cat.id}>
                         {cat.icon} {cat.name}

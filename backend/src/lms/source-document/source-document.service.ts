@@ -17,10 +17,19 @@ export class SourceDocumentService {
     private geminiService: GeminiService,
   ) {}
 
+  // Helper method to convert BigInt to Number for GraphQL
+  private transformDocument(doc: any) {
+    if (!doc) return doc;
+    return {
+      ...doc,
+      fileSize: doc.fileSize ? Number(doc.fileSize) : null,
+    };
+  }
+
   // ============== CRUD Operations ==============
 
   async create(userId: string, input: CreateSourceDocumentInput) {
-    return this.prisma.sourceDocument.create({
+    const document = await this.prisma.sourceDocument.create({
       data: {
         ...input,
         userId,
@@ -39,6 +48,7 @@ export class SourceDocumentService {
         },
       },
     });
+    return this.transformDocument(document);
   }
 
   async findAll(filter?: SourceDocumentFilterInput, page = 1, limit = 20) {
@@ -95,7 +105,7 @@ export class SourceDocumentService {
     ]);
 
     return {
-      items,
+      items: items.map((item) => this.transformDocument(item)),
       total,
       page,
       limit,
@@ -142,13 +152,13 @@ export class SourceDocumentService {
       data: { viewCount: { increment: 1 } },
     });
 
-    return document;
+    return this.transformDocument(document);
   }
 
   async update(id: string, input: UpdateSourceDocumentInput) {
     await this.findOne(id); // Check exists
 
-    return this.prisma.sourceDocument.update({
+    const updated = await this.prisma.sourceDocument.update({
       where: { id },
       data: {
         ...input,
@@ -167,6 +177,7 @@ export class SourceDocumentService {
         },
       },
     });
+    return this.transformDocument(updated);
   }
 
   async delete(id: string) {
@@ -279,10 +290,11 @@ export class SourceDocumentService {
   // ============== Stats & Analytics ==============
 
   async incrementDownloadCount(id: string) {
-    return this.prisma.sourceDocument.update({
+    const updated = await this.prisma.sourceDocument.update({
       where: { id },
       data: { downloadCount: { increment: 1 } },
     });
+    return this.transformDocument(updated);
   }
 
   async getStats(userId?: string) {
@@ -373,7 +385,7 @@ export class SourceDocumentService {
       },
     });
 
-    return updated;
+    return this.transformDocument(updated);
   }
 
   async bulkAnalyze(userId?: string): Promise<{ analyzed: number; failed: number }> {

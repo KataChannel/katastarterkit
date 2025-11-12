@@ -3,10 +3,13 @@ import { UseGuards } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { AICourseGeneratorService } from './ai-course-generator.service';
 import { Course } from './entities/course.entity';
+import { CourseAnalysisResult } from './entities/course-analysis-result.entity';
 import { PaginatedCourses } from './entities/paginated-courses.entity';
 import { CreateCourseInput } from './dto/create-course.input';
 import { UpdateCourseInput } from './dto/update-course.input';
 import { CourseFiltersInput } from './dto/course-filters.input';
+import { GenerateCourseFromDocumentsInput } from './dto/generate-course-from-documents.input';
+import { AnalyzeDocumentsForCourseInput } from './dto/analyze-documents-for-course.input';
 import { CreateModuleInput, UpdateModuleInput, ReorderModulesInput } from './dto/module.input';
 import { CreateLessonInput, UpdateLessonInput, ReorderLessonsInput } from './dto/lesson.input';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -181,6 +184,21 @@ export class CoursesResolver {
 
   // ==================== AI COURSE GENERATOR ====================
 
+  @Query(() => CourseAnalysisResult, { name: 'analyzeDocumentsForCourse' })
+  @UseGuards(JwtAuthGuard)
+  async analyzeDocumentsForCourse(
+    @CurrentUser() user: any,
+    @Args('input') input: AnalyzeDocumentsForCourseInput,
+  ) {
+    console.log('📥 Analyze documents request from user:', user.id);
+    console.log('📚 Documents:', input.documentIds);
+    
+    return this.aiCourseGeneratorService.analyzeDocumentsForCourse({
+      documentIds: input.documentIds,
+      additionalContext: input.additionalContext,
+    });
+  }
+
   @Mutation(() => Course, { name: 'generateCourseFromPrompt' })
   @UseGuards(JwtAuthGuard)
   async generateCourseFromPrompt(
@@ -191,6 +209,23 @@ export class CoursesResolver {
     return this.aiCourseGeneratorService.generateCourseFromPrompt({
       prompt,
       categoryId,
+      instructorId: user.id,
+    });
+  }
+
+  @Mutation(() => Course, { name: 'generateCourseFromDocuments' })
+  @UseGuards(JwtAuthGuard)
+  async generateCourseFromDocuments(
+    @CurrentUser() user: any,
+    @Args('input') input: GenerateCourseFromDocumentsInput,
+  ) {
+    console.log('📥 Resolver received input:', JSON.stringify(input, null, 2));
+    console.log('👤 User ID:', user.id);
+    
+    return this.aiCourseGeneratorService.generateCourseFromDocuments({
+      documentIds: input.documentIds || [],
+      categoryId: input.categoryId,
+      additionalPrompt: input.additionalPrompt,
       instructorId: user.id,
     });
   }

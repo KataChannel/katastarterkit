@@ -1,5 +1,51 @@
 import { gql } from '@apollo/client';
 
+// ==================== MUTATIONS ====================
+
+export const ANALYZE_DOCUMENTS_FOR_COURSE = gql`
+  query AnalyzeDocumentsForCourse($input: AnalyzeDocumentsForCourseInput!) {
+    analyzeDocumentsForCourse(input: $input) {
+      suggestedTitle
+      suggestedDescription
+      recommendedLevel
+      aggregatedKeywords
+      mainTopics
+      learningObjectives
+      whatYouWillLearn
+      requirements
+      targetAudience
+      suggestedStructure
+      estimatedDuration
+      sourceDocumentIds
+      analysisSummary
+    }
+  }
+`;
+
+export const GENERATE_COURSE_FROM_DOCUMENTS = gql`
+  mutation GenerateCourseFromDocuments($input: GenerateCourseFromDocumentsInput!) {
+    generateCourseFromDocuments(input: $input) {
+      id
+      title
+      slug
+      description
+      status
+      modules {
+        id
+        title
+        lessons {
+          id
+          title
+          quizzes {
+            id
+            title
+          }
+        }
+      }
+    }
+  }
+`;
+
 // Course Fragments
 export const COURSE_BASIC_FRAGMENT = gql`
   fragment CourseBasic on Course {

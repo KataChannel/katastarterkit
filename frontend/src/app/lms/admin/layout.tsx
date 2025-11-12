@@ -37,9 +37,15 @@ const menuItems = [
     title: 'Khóa học',
     icon: BookOpen,
     href: '/lms/admin/courses',
+    children: [
+      { title: 'Danh sách', href: '/lms/admin/courses' },
+      { title: 'Tạo mới', href: '/lms/admin/courses/create' },
+      { title: 'Từ tài liệu', href: '/lms/admin/courses/create-from-documents' },
+      { title: 'Tạo với AI', href: '/lms/admin/courses/create-with-ai' },
+    ],
   },
   {
-    title: 'Danh mục khóa học',
+    title: 'Danh mục',
     icon: Folder,
     href: '/lms/admin/categories',
   },
@@ -47,6 +53,11 @@ const menuItems = [
     title: 'Tài liệu nguồn',
     icon: FileText,
     href: '/lms/admin/source-documents',
+    children: [
+      { title: 'Danh sách', href: '/lms/admin/source-documents' },
+      { title: 'Thêm mới', href: '/lms/admin/source-documents/new' },
+      { title: 'Danh mục', href: '/lms/admin/source-documents/categories' },
+    ],
   },
   {
     title: 'Giảng viên',
@@ -64,11 +75,6 @@ const menuItems = [
     href: '/lms/admin/enrollments',
   },
   {
-    title: 'Đơn hàng',
-    icon: ShoppingBag,
-    href: '/lms/admin/orders',
-  },
-  {
     title: 'Bài kiểm tra',
     icon: ClipboardList,
     href: '/lms/admin/quizzes',
@@ -79,7 +85,7 @@ const menuItems = [
     href: '/lms/admin/reports',
   },
   {
-    title: 'Cài đặt LMS',
+    title: 'Cài đặt',
     icon: Settings,
     href: '/lms/admin/settings',
   },
@@ -120,6 +126,29 @@ export default function AdminLMSLayout({ children }: AdminLMSLayoutProps) {
                   <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                   <span className="font-medium truncate">{item.title}</span>
                 </button>
+                
+                {/* Submenu */}
+                {item.children && isActive && (
+                  <ul className="mt-1 ml-7 sm:ml-9 space-y-0.5">
+                    {item.children.map((child) => (
+                      <li key={child.href}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleNavigation(child.href);
+                          }}
+                          className={`w-full text-left px-3 py-1.5 rounded text-xs sm:text-sm transition-colors ${
+                            pathname === child.href
+                              ? 'text-blue-700 font-medium bg-blue-50/50'
+                              : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50/30'
+                          }`}
+                        >
+                          {child.title}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             );
           })}
