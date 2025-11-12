@@ -9,6 +9,15 @@ import { SubscriptionOptimizationService } from './services/subscription-optimiz
 import { MobileOptimizationService } from './services/mobile-optimization.service';
 import { AnalyticsDashboardService } from './services/analytics-dashboard.service';
 
+// Import RBAC services
+import { RBACService } from './services/rbac.service';
+import { RBACCacheService } from './services/rbac-cache.service';
+import { AuditLogService } from './services/audit-log.service';
+
+// Import guards
+import { RBACGuard } from './guards/rbac.guard';
+import { OwnershipGuard } from './guards/ownership.guard';
+
 // Import controllers
 import { MonitoringController } from './controllers/monitoring.controller';
 import { AnalyticsController } from './controllers/analytics.controller';
@@ -30,6 +39,13 @@ import { PrismaService } from '../prisma/prisma.service';
     SubscriptionOptimizationService,
     MobileOptimizationService,
     AnalyticsDashboardService,
+    
+    // RBAC Services & Guards
+    RBACService,
+    RBACCacheService,
+    AuditLogService,
+    RBACGuard,
+    OwnershipGuard,
   ],
   controllers: [
     MonitoringController,
@@ -44,6 +60,13 @@ import { PrismaService } from '../prisma/prisma.service';
     MobileOptimizationService,
     AnalyticsDashboardService,
     PrismaService,
+    
+    // Export RBAC Services & Guards
+    RBACService,
+    RBACCacheService,
+    AuditLogService,
+    RBACGuard,
+    OwnershipGuard,
   ],
 })
 export class CommonServicesModule {}

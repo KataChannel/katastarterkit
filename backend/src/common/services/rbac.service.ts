@@ -5,10 +5,17 @@
 
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RBACCacheService } from './rbac-cache.service';
+import { AuditLogService } from './audit-log.service';
+import { scopeIncludes } from '../constants/rbac.constants';
 
 @Injectable()
 export class RBACService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cacheService: RBACCacheService,
+    private auditLogService: AuditLogService,
+  ) {}
 
   /**
    * Get all roles
@@ -89,10 +96,17 @@ export class RBACService {
   }
 
   /**
-   * Get user's roles
+   * Get user's roles (with cache)
    */
   async getUserRoles(userId: string) {
-    return this.prisma.userRoleAssignment.findMany({
+    // Check cache first
+    const cached = await this.cacheService.getUserRoles(userId);
+    if (cached) {
+      return cached;
+    }
+
+    // Query from database
+    const roles = await this.prisma.userRoleAssignment.findMany({
       where: {
         userId,
         effect: 'allow',
@@ -113,12 +127,24 @@ export class RBACService {
         },
       },
     });
+
+    // Cache the result
+    await this.cacheService.setUserRoles(userId, roles);
+
+    return roles;
   }
 
   /**
-   * Get user's all permissions (from roles + direct assignments)
+   * Get user's all permissions (from roles + direct assignments) with cache
    */
   async getUserPermissions(userId: string) {
+    // Check cache first
+    const cached = await this.cacheService.getUserPermissions(userId);
+    if (cached) {
+      return cached;
+    }
+
+    // Query from database
     // Get permissions from roles
     const rolePermissions = await this.prisma.userRoleAssignment.findMany({
       where: {
@@ -199,11 +225,16 @@ export class RBACService {
       }
     });
 
-    return Array.from(allPermissions.values());
+    const permissions = Array.from(allPermissions.values());
+
+    // Cache the result
+    await this.cacheService.setUserPermissions(userId, permissions);
+
+    return permissions;
   }
 
   /**
-   * Assign role to user
+   * Assign role to user (with cache invalidation)
    */
   async assignRoleToUser(
     userId: string,
@@ -242,7 +273,7 @@ export class RBACService {
     }
 
     // Assign role
-    return this.prisma.userRoleAssignment.create({
+    const result = await this.prisma.userRoleAssignment.create({
       data: {
         userId,
         roleId,
@@ -263,18 +294,35 @@ export class RBACService {
         },
       },
     });
+
+    // Invalidate user cache
+    await this.cacheService.invalidateUserCache(userId);
+
+    // Log audit event
+    await this.auditLogService.logRoleAssignment(
+      assignedBy || 'system',
+      userId,
+      roleId,
+      role.name,
+      expiresAt,
+    );
+
+    return result;
   }
 
   /**
-   * Remove role from user
+   * Remove role from user (with cache invalidation)
    */
-  async removeRoleFromUser(userId: string, roleId: string) {
+  async removeRoleFromUser(userId: string, roleId: string, currentUserId?: string) {
     const assignment = await this.prisma.userRoleAssignment.findUnique({
       where: {
         userId_roleId: {
           userId,
           roleId,
         },
+      },
+      include: {
+        role: true,
       },
     });
 
@@ -288,11 +336,22 @@ export class RBACService {
       },
     });
 
+    // Invalidate user cache
+    await this.cacheService.invalidateUserCache(userId);
+
+    // Log audit event
+    await this.auditLogService.logRoleRemoval(
+      currentUserId || 'system',
+      userId,
+      roleId,
+      assignment.role.name,
+    );
+
     return { success: true, message: 'Role removed from user' };
   }
 
   /**
-   * Check if user has permission
+   * Check if user has permission (with scope hierarchy)
    */
   async userHasPermission(
     userId: string,
@@ -300,15 +359,14 @@ export class RBACService {
     action: string,
     scope?: string,
   ): Promise<boolean> {
-    // Check direct permission
-    const directPermission = await this.prisma.userPermission.findFirst({
+    // Check direct permissions with scope hierarchy
+    const directPermissions = await this.prisma.userPermission.findMany({
       where: {
         userId,
         effect: 'allow',
         permission: {
           resource,
           action,
-          scope: scope || null,
           isActive: true,
         },
         OR: [
@@ -316,43 +374,66 @@ export class RBACService {
           { expiresAt: { gt: new Date() } },
         ],
       },
+      include: {
+        permission: true,
+      },
     });
 
-    if (directPermission) {
-      return true;
+    // Check if any direct permission scope includes required scope
+    for (const up of directPermissions) {
+      if (scopeIncludes(up.permission.scope, scope)) {
+        return true;
+      }
     }
 
-    // Check permission through roles
-    const rolePermission = await this.prisma.userRoleAssignment.findFirst({
+    // Check permissions through roles with scope hierarchy
+    const roleAssignments = await this.prisma.userRoleAssignment.findMany({
       where: {
         userId,
         effect: 'allow',
         role: {
           isActive: true,
-          permissions: {
-            some: {
-              effect: 'allow',
-              permission: {
-                resource,
-                action,
-                scope: scope || null,
-                isActive: true,
-              },
-              OR: [
-                { expiresAt: null },
-                { expiresAt: { gt: new Date() } },
-              ],
-            },
-          },
         },
         OR: [
           { expiresAt: null },
           { expiresAt: { gt: new Date() } },
         ],
       },
+      include: {
+        role: {
+          include: {
+            permissions: {
+              where: {
+                effect: 'allow',
+                permission: {
+                  resource,
+                  action,
+                  isActive: true,
+                },
+                OR: [
+                  { expiresAt: null },
+                  { expiresAt: { gt: new Date() } },
+                ],
+              },
+              include: {
+                permission: true,
+              },
+            },
+          },
+        },
+      },
     });
 
-    return !!rolePermission;
+    // Check if any role permission scope includes required scope
+    for (const ra of roleAssignments) {
+      for (const rp of ra.role.permissions) {
+        if (scopeIncludes(rp.permission.scope, scope)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**

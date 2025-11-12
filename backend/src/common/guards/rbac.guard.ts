@@ -11,18 +11,21 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AuditLogService } from '../services/audit-log.service';
 import {
   PERMISSIONS_KEY,
   ROLES_KEY,
   IS_PUBLIC_KEY,
   PermissionRequirement,
 } from '../decorators/rbac.decorator';
+import { scopeIncludes } from '../constants/rbac.constants';
 
 @Injectable()
 export class RBACGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private prisma: PrismaService,
+    private auditLogService: AuditLogService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -45,6 +48,15 @@ export class RBACGuard implements CanActivate {
 
     // Check if user is ADMIN (bypass all checks)
     if (user.roleType === 'ADMIN') {
+      // Log admin bypass
+      const route = request.route?.path || request.url;
+      await this.auditLogService.logAdminBypass(
+        user.id,
+        route,
+        request.method,
+        request.ip,
+        request.headers['user-agent'],
+      );
       return true;
     }
 
@@ -70,6 +82,15 @@ export class RBACGuard implements CanActivate {
     if (requiredRoles && requiredRoles.length > 0) {
       const hasRole = await this.checkUserHasRole(user.id, requiredRoles);
       if (hasRole) {
+        // Log access granted
+        await this.auditLogService.logAccessGranted(
+          user.id,
+          `role:${requiredRoles.join(',')}`,
+          'access',
+          'role',
+          request.ip,
+          request.headers['user-agent'],
+        );
         return true;
       }
     }
@@ -81,9 +102,35 @@ export class RBACGuard implements CanActivate {
         requiredPermissions,
       );
       if (hasPermission) {
+        // Log access granted
+        const permissionStr = requiredPermissions
+          .map((p) => `${p.resource}:${p.action}${p.scope ? ':' + p.scope : ''}`)
+          .join(',');
+        await this.auditLogService.logAccessGranted(
+          user.id,
+          permissionStr,
+          'access',
+          'permission',
+          request.ip,
+          request.headers['user-agent'],
+        );
         return true;
       }
     }
+
+    // Log access denied
+    const deniedResource = requiredPermissions
+      ? requiredPermissions.map((p) => `${p.resource}:${p.action}`).join(',')
+      : requiredRoles?.join(',') || 'unknown';
+    await this.auditLogService.logAccessDenied(
+      user.id,
+      deniedResource,
+      'access',
+      'required',
+      'Insufficient permissions',
+      request.ip,
+      request.headers['user-agent'],
+    );
 
     throw new ForbiddenException(
       'You do not have permission to access this resource',
@@ -135,17 +182,19 @@ export class RBACGuard implements CanActivate {
   }
 
   /**
-   * Check single permission
+   * Check single permission with deny > allow rule
+   * Deny permissions always take precedence over allow permissions
    */
   private async checkSinglePermission(
     userId: string,
     permission: PermissionRequirement,
   ): Promise<boolean> {
-    // Check direct user permissions
-    const directPermission = await this.prisma.userPermission.findFirst({
+    // STEP 1: Check for DENY permissions first (deny > allow rule)
+    // Check direct deny permissions
+    const directDeny = await this.prisma.userPermission.findFirst({
       where: {
         userId,
-        effect: 'allow',
+        effect: 'deny',
         permission: {
           resource: permission.resource,
           action: permission.action,
@@ -159,11 +208,72 @@ export class RBACGuard implements CanActivate {
       },
     });
 
-    if (directPermission) {
-      return true;
+    if (directDeny) {
+      return false; // Explicitly denied
     }
 
-    // Check permissions through roles
+    // Check deny through roles
+    const roleDeny = await this.prisma.userRoleAssignment.findFirst({
+      where: {
+        userId,
+        role: {
+          isActive: true,
+          permissions: {
+            some: {
+              effect: 'deny',
+              permission: {
+                resource: permission.resource,
+                action: permission.action,
+                scope: permission.scope || null,
+                isActive: true,
+              },
+              OR: [
+                { expiresAt: null },
+                { expiresAt: { gt: new Date() } },
+              ],
+            },
+          },
+        },
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } },
+        ],
+      },
+    });
+
+    if (roleDeny) {
+      return false; // Denied through role
+    }
+
+    // STEP 2: Check for ALLOW permissions (only if not denied)
+    // Check direct user permissions with scope hierarchy
+    const directAllowPermissions = await this.prisma.userPermission.findMany({
+      where: {
+        userId,
+        effect: 'allow',
+        permission: {
+          resource: permission.resource,
+          action: permission.action,
+          isActive: true,
+        },
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } },
+        ],
+      },
+      include: {
+        permission: true,
+      },
+    });
+
+    // Check if any direct permission scope includes required scope
+    for (const up of directAllowPermissions) {
+      if (scopeIncludes(up.permission.scope, permission.scope)) {
+        return true; // Allowed directly with scope hierarchy
+      }
+    }
+
+    // Check permissions through roles with scope hierarchy
     const rolePermissions = await this.prisma.userRoleAssignment.findMany({
       where: {
         userId,
@@ -185,7 +295,6 @@ export class RBACGuard implements CanActivate {
                 permission: {
                   resource: permission.resource,
                   action: permission.action,
-                  scope: permission.scope || null,
                   isActive: true,
                 },
                 OR: [
@@ -193,12 +302,24 @@ export class RBACGuard implements CanActivate {
                   { expiresAt: { gt: new Date() } },
                 ],
               },
+              include: {
+                permission: true,
+              },
             },
           },
         },
       },
     });
 
-    return rolePermissions.some((ra) => ra.role.permissions.length > 0);
+    // Check if any role permission scope includes required scope
+    for (const ra of rolePermissions) {
+      for (const rp of ra.role.permissions) {
+        if (scopeIncludes(rp.permission.scope, permission.scope)) {
+          return true; // Allowed through role with scope hierarchy
+        }
+      }
+    }
+
+    return false; // No matching permission found
   }
 }
