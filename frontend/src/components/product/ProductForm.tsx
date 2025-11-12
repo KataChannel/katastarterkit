@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -20,7 +20,9 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Image as ImageIcon, Folder } from 'lucide-react';
+import { FilePicker } from '@/components/file-manager/FilePicker';
+import { File, FileType } from '@/types/file';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Tên sản phẩm phải có ít nhất 3 ký tự'),
@@ -78,6 +80,7 @@ const STATUS_OPTIONS = [
 
 export function ProductForm({ product, onSubmit, onCancel, loading = false }: ProductFormProps) {
   const { categories, loading: categoriesLoading } = useActiveCategories();
+  const [filePickerOpen, setFilePickerOpen] = useState(false);
 
   const {
     register,
@@ -131,6 +134,16 @@ export function ProductForm({ product, onSubmit, onCancel, loading = false }: Pr
 
   const handleFormSubmit = async (data: ProductFormData) => {
     await onSubmit(data as any);
+  };
+
+  const handleFileSelect = (file: File | string) => {
+    if (typeof file === 'string') {
+      // URL string
+      setValue('imageUrl', file);
+    } else {
+      // File object from FileManager
+      setValue('imageUrl', file.url);
+    }
   };
 
   return (
@@ -205,14 +218,40 @@ export function ProductForm({ product, onSubmit, onCancel, loading = false }: Pr
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="imageUrl">URL ảnh sản phẩm</Label>
-                <Input
-                  id="imageUrl"
-                  {...register('imageUrl')}
-                  placeholder="https://example.com/image.jpg"
-                />
+                <Label htmlFor="imageUrl">Hình ảnh sản phẩm</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="imageUrl"
+                    {...register('imageUrl')}
+                    placeholder="https://example.com/image.jpg"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setFilePickerOpen(true)}
+                  >
+                    <Folder className="h-4 w-4 mr-2" />
+                    Chọn từ thư viện
+                  </Button>
+                </div>
                 {errors.imageUrl && (
                   <p className="text-sm text-red-500">{errors.imageUrl.message}</p>
+                )}
+                {watchedFields.imageUrl && (
+                  <div className="mt-2 border rounded-lg p-2 bg-muted/50">
+                    <p className="text-xs text-muted-foreground mb-1">Xem trước:</p>
+                    <div className="relative aspect-video bg-background rounded-md overflow-hidden flex items-center justify-center">
+                      <img
+                        src={watchedFields.imageUrl}
+                        alt="Preview"
+                        className="max-w-full max-h-full object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
             </CardContent>
@@ -475,6 +514,15 @@ export function ProductForm({ product, onSubmit, onCancel, loading = false }: Pr
           {product ? 'Cập nhật' : 'Tạo mới'}
         </Button>
       </div>
+
+      {/* File Picker Dialog */}
+      <FilePicker
+        open={filePickerOpen}
+        onOpenChange={setFilePickerOpen}
+        onSelect={handleFileSelect}
+        fileTypes={[FileType.IMAGE]}
+        allowUrl={true}
+      />
     </form>
   );
 }

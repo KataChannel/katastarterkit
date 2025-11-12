@@ -31,7 +31,7 @@ const GET_BLOG_BY_ID = gql`
       slug
       excerpt
       content
-      featuredImage
+      thumbnailUrl
       isFeatured
       metaTitle
       metaDescription
@@ -74,7 +74,7 @@ export default function EditBlogPage() {
           excerpt: data.blog.excerpt || '',
           content: data.blog.content || '',
           categoryId: data.blog.category?.id || '',
-          featuredImage: data.blog.featuredImage || '',
+          featuredImage: data.blog.thumbnailUrl || '',
           status: 'DRAFT',
           isFeatured: data.blog.isFeatured || false,
           metaTitle: data.blog.metaTitle || '',
@@ -113,8 +113,7 @@ export default function EditBlogPage() {
           excerpt: formData.excerpt || undefined,
           content: formData.content,
           categoryId: formData.categoryId || undefined,
-          featuredImage: formData.featuredImage || undefined,
-          status: formData.status,
+          thumbnailUrl: formData.featuredImage || undefined,
           isFeatured: formData.isFeatured,
           metaTitle: formData.metaTitle || undefined,
           metaDescription: formData.metaDescription || undefined,
@@ -213,15 +212,14 @@ export default function EditBlogPage() {
 
             <div className="space-y-2">
               <Label htmlFor="excerpt">Mô Tả Ngắn</Label>
-              <Textarea
-                id="excerpt"
-                value={formData.excerpt}
-                onChange={(e) =>
-                  setFormData({ ...formData, excerpt: e.target.value })
-                }
-                placeholder="Mô tả ngắn gọn về bài viết..."
-                rows={3}
-              />
+              <div className="border rounded-md">
+                <RichTextEditor
+                  value={formData.excerpt}
+                  onChange={(value) => setFormData({ ...formData, excerpt: value })}
+                  placeholder="Mô tả ngắn gọn về bài viết..."
+                  className="min-h-[120px]"
+                />
+              </div>
             </div>
 
             <CategorySelect

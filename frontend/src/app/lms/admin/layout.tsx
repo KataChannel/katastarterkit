@@ -14,7 +14,8 @@ import {
   UserCheck,
   Home,
   Menu,
-  X
+  X,
+  ShoppingBag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -54,6 +55,11 @@ const menuItems = [
     title: 'Ghi danh',
     icon: UserCheck,
     href: '/lms/admin/enrollments',
+  },
+  {
+    title: 'Đơn hàng',
+    icon: ShoppingBag,
+    href: '/lms/admin/orders',
   },
   {
     title: 'Bài kiểm tra',

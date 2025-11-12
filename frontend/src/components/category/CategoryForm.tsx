@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -19,7 +19,9 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Folder } from 'lucide-react';
+import { FilePicker } from '@/components/file-manager/FilePicker';
+import { File, FileType } from '@/types/file';
 
 const categorySchema = z.object({
   name: z.string().min(2, 'Tên danh mục phải có ít nhất 2 ký tự'),
@@ -48,6 +50,7 @@ export function CategoryForm({
   excludeId,
 }: CategoryFormProps) {
   const { categoryTree, loading: categoriesLoading } = useCategoryTree();
+  const [filePickerOpen, setFilePickerOpen] = useState(false);
 
   const {
     register,
@@ -110,6 +113,14 @@ export function CategoryForm({
     await onSubmit(submitData as any);
   };
 
+  const handleFileSelect = (file: File | string) => {
+    if (typeof file === 'string') {
+      setValue('imageUrl', file);
+    } else {
+      setValue('imageUrl', file.url);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <Card>
@@ -146,21 +157,33 @@ export function CategoryForm({
 
           {/* Image URL */}
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">URL ảnh</Label>
-            <Input
-              id="imageUrl"
-              {...register('imageUrl')}
-              placeholder="https://example.com/image.jpg"
-            />
+            <Label htmlFor="imageUrl">Hình ảnh danh mục</Label>
+            <div className="flex gap-2">
+              <Input
+                id="imageUrl"
+                {...register('imageUrl')}
+                placeholder="https://example.com/image.jpg"
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setFilePickerOpen(true)}
+              >
+                <Folder className="h-4 w-4 mr-2" />
+                Chọn từ thư viện
+              </Button>
+            </div>
             {errors.imageUrl && (
               <p className="text-sm text-red-500">{errors.imageUrl.message}</p>
             )}
             {watchedFields.imageUrl && (
-              <div className="mt-2">
+              <div className="mt-2 border rounded-lg p-2 bg-muted/50">
+                <p className="text-xs text-muted-foreground mb-1">Xem trước:</p>
                 <img
                   src={watchedFields.imageUrl}
                   alt="Preview"
-                  className="w-32 h-32 object-cover rounded border"
+                  className="w-32 h-32 object-cover rounded"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
@@ -288,6 +311,15 @@ export function CategoryForm({
           {category ? 'Cập nhật' : 'Tạo mới'}
         </Button>
       </div>
+
+      {/* File Picker Dialog */}
+      <FilePicker
+        open={filePickerOpen}
+        onOpenChange={setFilePickerOpen}
+        onSelect={handleFileSelect}
+        fileTypes={[FileType.IMAGE]}
+        allowUrl={true}
+      />
     </form>
   );
 }

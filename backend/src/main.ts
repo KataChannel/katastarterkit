@@ -88,6 +88,18 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true, // ✅ Auto-convert types
       },
+      exceptionFactory: (errors) => {
+        // Log validation errors for debugging
+        console.error('❌ Validation errors:', JSON.stringify(errors, null, 2));
+        const messages = errors.map(error => {
+          return {
+            field: error.property,
+            errors: Object.values(error.constraints || {}),
+          };
+        });
+        console.error('❌ Formatted errors:', JSON.stringify(messages, null, 2));
+        return new (require('@nestjs/common').BadRequestException)(errors);
+      },
     }),
   );
 

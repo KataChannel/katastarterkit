@@ -430,7 +430,7 @@ export class SetPasswordInput {
 @InputType()
 export class AdminResetPasswordInput {
   @Field()
-  @IsUUID('all', { message: 'User ID phải là UUID hợp lệ' })
   @IsNotEmpty({ message: 'User ID không được để trống' })
+  @IsUUID(undefined, { message: 'User ID phải là UUID hợp lệ' })
   userId: string;
 }
