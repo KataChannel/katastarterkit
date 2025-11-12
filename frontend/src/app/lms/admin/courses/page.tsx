@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFindMany, useDeleteOne, useUpdateOne } from '@/hooks/useDynamicGraphQL';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import Pagination, { usePagination } from '@/components/ui/pagination';
+import { extractPaginationInfo } from '@/lib/lms/pagination-utils';
 import { 
   Plus, 
   Search, 
@@ -19,6 +21,7 @@ import {
   AlertCircle,
   BookOpen,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -63,6 +66,15 @@ export default function AdminCoursesPage() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'published' | 'draft'>('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState<any>(null);
+  
+  // Pagination state
+  const { 
+    currentPage, 
+    pageSize, 
+    handlePageChange, 
+    handlePageSizeChange,
+    resetPagination,
+  } = usePagination(12); // 12 items per page for grid layout
 
   const { data: courses, loading, error, refetch } = useFindMany('Course', {
     select: {
@@ -111,6 +123,18 @@ export default function AdminCoursesPage() {
                          (filterStatus === 'draft' && course.status === 'DRAFT');
     return matchesSearch && matchesFilter;
   });
+
+  // Pagination calculations
+  const totalFilteredItems = filteredCourses.length;
+  const totalPages = Math.ceil(totalFilteredItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedCourses = filteredCourses.slice(startIndex, endIndex);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    resetPagination();
+  }, [searchQuery, filterStatus, resetPagination]);
 
   // Handlers
   const handleCreateCourse = () => {
@@ -261,8 +285,8 @@ export default function AdminCoursesPage() {
       {/* Courses Grid */}
       {loading ? (
         <div className="text-center py-8 sm:py-12">
-          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-sm sm:text-base text-gray-500 mt-4">Đang tải...</p>
+          <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600 mx-auto animate-spin" />
+          <p className="text-sm sm:text-base text-gray-500 mt-4">Đang tải khóa học...</p>
         </div>
       ) : error ? (
         <Card>
@@ -282,8 +306,9 @@ export default function AdminCoursesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          {filteredCourses.map((course) => (
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+            {paginatedCourses.map((course) => (
             <Card key={course.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="p-4 sm:p-6">
                 <div className="flex items-start justify-between mb-2 gap-2">
@@ -384,8 +409,24 @@ export default function AdminCoursesPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalFilteredItems > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalFilteredItems}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              loading={loading}
+              showPageSize={true}
+              pageSizeOptions={[12, 24, 48]}
+            />
+          )}
+        </>
       )}
 
       {/* Delete Confirmation Dialog */}

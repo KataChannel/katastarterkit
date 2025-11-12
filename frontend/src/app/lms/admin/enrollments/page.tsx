@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import Pagination, { usePagination } from '@/components/ui/pagination';
 import { 
   Search, 
   Users,
@@ -16,7 +17,8 @@ import {
   DollarSign,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  Loader2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -48,6 +50,15 @@ export default function AdminEnrollmentsPage() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'ACTIVE' | 'COMPLETED' | 'DROPPED'>('all');
+  
+  // Pagination state
+  const { 
+    currentPage, 
+    pageSize, 
+    handlePageChange, 
+    handlePageSizeChange,
+    resetPagination,
+  } = usePagination(20); // 20 items per page for table layout
 
   const { data: enrollments, loading, error, refetch } = useFindMany('Enrollment', {
     select: {
@@ -101,6 +112,18 @@ export default function AdminEnrollmentsPage() {
     
     return matchesSearch && matchesFilter;
   });
+
+  // Pagination calculations
+  const totalFilteredItems = filteredEnrollments.length;
+  const totalPages = Math.ceil(totalFilteredItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedEnrollments = filteredEnrollments.slice(startIndex, endIndex);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    resetPagination();
+  }, [searchQuery, filterStatus, resetPagination]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '-';
@@ -251,9 +274,9 @@ export default function AdminEnrollmentsPage() {
 
       {/* Enrollments List */}
       {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Đang tải...</p>
+        <div className="text-center py-8 sm:py-12">
+          <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600 mx-auto animate-spin" />
+          <p className="text-sm sm:text-base text-gray-500 mt-4">Đang tải ghi danh...</p>
         </div>
       ) : error ? (
         <Card>
@@ -262,7 +285,7 @@ export default function AdminEnrollmentsPage() {
             <p className="text-red-600">Lỗi: {error.message}</p>
           </CardContent>
         </Card>
-      ) : filteredEnrollments.length === 0 ? (
+      ) : paginatedEnrollments.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -270,8 +293,9 @@ export default function AdminEnrollmentsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {filteredEnrollments.map((enrollment: Enrollment) => (
+        <>
+          <div className="space-y-4">
+            {paginatedEnrollments.map((enrollment: Enrollment) => (
             <Card key={enrollment.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -370,8 +394,24 @@ export default function AdminEnrollmentsPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalFilteredItems > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalFilteredItems}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              loading={loading}
+              showPageSize={true}
+              pageSizeOptions={[20, 50, 100]}
+            />
+          )}
+        </>
       )}
     </div>
   );

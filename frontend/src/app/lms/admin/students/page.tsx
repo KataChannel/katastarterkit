@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import Pagination, { usePagination } from '@/components/ui/pagination';
 import { 
   Search, 
   Users,
@@ -17,7 +18,8 @@ import {
   Mail,
   Phone,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  Loader2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -45,6 +47,15 @@ export default function AdminStudentsPage() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'enrolled'>('all');
+  
+  // Pagination state
+  const { 
+    currentPage, 
+    pageSize, 
+    handlePageChange, 
+    handlePageSizeChange,
+    resetPagination,
+  } = usePagination(16); // 16 items per page for grid layout
 
   const { data: students, loading, error, refetch } = useFindMany('User', {
     where: {
@@ -96,6 +107,18 @@ export default function AdminStudentsPage() {
     
     return matchesSearch && matchesFilter;
   });
+
+  // Pagination calculations
+  const totalFilteredItems = filteredStudents.length;
+  const totalPages = Math.ceil(totalFilteredItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedStudents = filteredStudents.slice(startIndex, endIndex);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    resetPagination();
+  }, [searchQuery, filterStatus, resetPagination]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Chưa có';
@@ -169,9 +192,9 @@ export default function AdminStudentsPage() {
 
       {/* Students Grid */}
       {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Đang tải...</p>
+        <div className="text-center py-8 sm:py-12">
+          <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600 mx-auto animate-spin" />
+          <p className="text-sm sm:text-base text-gray-500 mt-4">Đang tải học viên...</p>
         </div>
       ) : error ? (
         <Card>
@@ -180,7 +203,7 @@ export default function AdminStudentsPage() {
             <p className="text-red-600">Lỗi: {error.message}</p>
           </CardContent>
         </Card>
-      ) : filteredStudents.length === 0 ? (
+      ) : paginatedStudents.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <UserCircle2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -188,8 +211,9 @@ export default function AdminStudentsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredStudents.map((student: Student) => (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {paginatedStudents.map((student: Student) => (
             <Card key={student.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between mb-3">
@@ -294,7 +318,23 @@ export default function AdminStudentsPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
+          </div>
+
+          {/* Pagination */}
+          {totalFilteredItems > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalFilteredItems}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              loading={loading}
+              showPageSize={true}
+              pageSizeOptions={[16, 32, 64]}
+            />
+          )}
+        </>
       )}
     </div>
   );
