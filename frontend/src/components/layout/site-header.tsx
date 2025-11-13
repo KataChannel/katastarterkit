@@ -11,8 +11,8 @@ export function SiteHeader() {
   const { siteName } = useSiteName();
 
   const handleLogout = async () => {
+    // Logout will handle redirect based on auth_logout_redirect setting
     await logout();
-    router.push('/');
   };
 
   return (

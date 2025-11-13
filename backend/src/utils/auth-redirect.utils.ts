@@ -25,7 +25,7 @@ export async function getAuthRedirectSettings() {
 /**
  * Get redirect URL after login based on user role
  */
-export async function getLoginRedirectUrl(userRole: string): Promise<string> {
+export async function getLoginRedirectUrl(userId: string): Promise<string> {
   const settings = await getAuthRedirectSettings();
   
   const roleBasedRedirect = settings['auth_role_based_redirect'] === 'true';
@@ -34,12 +34,32 @@ export async function getLoginRedirectUrl(userRole: string): Promise<string> {
     return settings['auth_login_redirect'] || '/dashboard';
   }
 
-  // Role-based redirect
-  switch (userRole.toUpperCase()) {
+  // Get user with their assigned roles
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      userRoles: {
+        include: {
+          role: true
+        }
+      }
+    }
+  });
+
+  if (!user) {
+    return settings['auth_login_redirect'] || '/dashboard';
+  }
+
+  // Check for giangvien role first (highest priority for LMS)
+  const hasGiangvienRole = user.userRoles.some(ur => ur.role.name === 'giangvien');
+  if (hasGiangvienRole) {
+    return settings['auth_redirect_giangvien'] || '/lms/instructor';
+  }
+
+  // Then check roleType for backward compatibility
+  switch (user.roleType.toUpperCase()) {
     case 'ADMIN':
       return settings['auth_redirect_admin'] || '/admin';
-    case 'GIANGVIEN':
-      return settings['auth_redirect_giangvien'] || '/giangvien/courses';
     case 'USER':
       return settings['auth_redirect_user'] || '/dashboard';
     case 'GUEST':

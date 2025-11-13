@@ -41,7 +41,13 @@ export default function CreateCoursePage() {
 
   const { data: instructors } = useFindMany('User', {
     where: {
-      roleType: 'GIANGVIEN',
+      userRoles: {
+        some: {
+          role: {
+            name: 'giangvien'
+          }
+        }
+      }
     },
     select: {
       id: true,

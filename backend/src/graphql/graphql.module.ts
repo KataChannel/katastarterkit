@@ -9,6 +9,7 @@ import { TaskResolver } from './resolvers/task.resolver';
 import { PageResolver } from './resolvers/page.resolver';
 import { InvoiceResolver } from './resolvers/invoice.resolver';
 import { PermissionResolver, RoleResolver, UserRbacResolver } from './resolvers/rbac.resolver';
+import { RBACResolver } from './rbac/rbac.resolver';
 import { OramaSearchResolver } from './resolvers/orama-search.resolver';
 import { UniversalQueryResolver } from './resolvers/universal-query.resolver';
 import { ExtModelsResolver } from './resolvers/ext-models.resolver';
@@ -47,6 +48,7 @@ import { CategoryImportExportService } from '../services/category-import-export.
 import { ProductImportExportService } from '../services/product-import-export.service';
 import { BackendConfigService } from '../services/backend-config.service';
 import { RbacService } from '../services/rbac.service';
+import { RBACService } from '../common/services/rbac.service';
 import { AffiliateUserService, AffiliateCampaignService } from '../services/affiliate.service';
 import { AffiliateTrackingService } from '../services/affiliate-tracking.service';
 import { AffiliatePaymentService } from '../services/affiliate-payment.service';
@@ -113,6 +115,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     PermissionResolver,
     RoleResolver,
     UserRbacResolver,
+    RBACResolver,
     
     // Affiliate resolvers
     AffiliateUserResolver,
@@ -157,6 +160,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     ProductImportExportService,
     BackendConfigService,
     RbacService,
+    RBACService,
     
     // Custom template service
     CustomTemplateService,

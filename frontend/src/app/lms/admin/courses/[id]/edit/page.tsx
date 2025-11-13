@@ -96,7 +96,13 @@ export default function EditCoursePage() {
 
   const { data: instructors } = useFindMany('User', {
     where: {
-      roleType: 'GIANGVIEN',
+      userRoles: {
+        some: {
+          role: {
+            name: 'giangvien'
+          }
+        }
+      }
     },
     select: {
       id: true,

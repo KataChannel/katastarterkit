@@ -7,6 +7,7 @@ import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { RBACService } from '../../common/services/rbac.service';
 import { RBACGuard } from '../../common/guards/rbac.guard';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RequireRole } from '../../common/decorators/rbac.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import {
@@ -26,6 +27,7 @@ export class RBACResolver {
    * Public query - any authenticated user can see their own permissions
    */
   @Query(() => [PermissionType])
+  @UseGuards(JwtAuthGuard)
   async myPermissions(@CurrentUser() user: any) {
     if (!user || !user.id) {
       return [];
@@ -38,6 +40,7 @@ export class RBACResolver {
    * Public query - any authenticated user can see their own roles
    */
   @Query(() => [UserRoleAssignmentType])
+  @UseGuards(JwtAuthGuard)
   async myRoles(@CurrentUser() user: any) {
     if (!user || !user.id) {
       return [];
@@ -49,6 +52,7 @@ export class RBACResolver {
    * Check if current user has specific permission
    */
   @Query(() => Boolean)
+  @UseGuards(JwtAuthGuard)
   async checkMyPermission(
     @CurrentUser() user: any,
     @Args('resource') resource: string,
@@ -65,7 +69,7 @@ export class RBACResolver {
    * Get all roles (ADMIN only)
    */
   @Query(() => [RoleType])
-  @UseGuards(RBACGuard)
+  @UseGuards(JwtAuthGuard, RBACGuard)
   @RequireRole('ADMIN')
   async roles() {
     return this.rbacService.getAllRoles();
@@ -75,7 +79,7 @@ export class RBACResolver {
    * Get role by ID (ADMIN only)
    */
   @Query(() => RoleType)
-  @UseGuards(RBACGuard)
+  @UseGuards(JwtAuthGuard, RBACGuard)
   @RequireRole('ADMIN')
   async role(@Args('id') id: string) {
     return this.rbacService.getRoleById(id);
@@ -85,7 +89,7 @@ export class RBACResolver {
    * Get all permissions grouped by category (ADMIN only)
    */
   @Query(() => PermissionsByCategoryType)
-  @UseGuards(RBACGuard)
+  @UseGuards(JwtAuthGuard, RBACGuard)
   @RequireRole('ADMIN')
   async permissions() {
     const data = await this.rbacService.getAllPermissions();
@@ -96,7 +100,7 @@ export class RBACResolver {
    * Assign role to user (ADMIN only)
    */
   @Mutation(() => UserRoleAssignmentType)
-  @UseGuards(RBACGuard)
+  @UseGuards(JwtAuthGuard, RBACGuard)
   @RequireRole('ADMIN')
   async assignRoleToUser(
     @CurrentUser() currentUser: any,
@@ -116,7 +120,7 @@ export class RBACResolver {
    * Remove role from user (ADMIN only)
    */
   @Mutation(() => RemoveRoleResultType)
-  @UseGuards(RBACGuard)
+  @UseGuards(JwtAuthGuard, RBACGuard)
   @RequireRole('ADMIN')
   async removeRoleFromUser(
     @Args('userId') userId: string,
@@ -130,7 +134,7 @@ export class RBACResolver {
    * Get users by role (ADMIN only)
    */
   @Query(() => [UserRoleAssignmentType])
-  @UseGuards(RBACGuard)
+  @UseGuards(JwtAuthGuard, RBACGuard)
   @RequireRole('ADMIN')
   async usersByRole(@Args('roleId') roleId: string) {
     return this.rbacService.getUsersByRole(roleId);
@@ -140,7 +144,7 @@ export class RBACResolver {
    * Check if user has specific permission (ADMIN only)
    */
   @Query(() => Boolean)
-  @UseGuards(RBACGuard)
+  @UseGuards(JwtAuthGuard, RBACGuard)
   @RequireRole('ADMIN')
   async checkUserPermission(
     @Args('userId') userId: string,

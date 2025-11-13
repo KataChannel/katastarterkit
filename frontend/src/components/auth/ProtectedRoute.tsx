@@ -6,7 +6,7 @@ import { decodeToken } from '@/lib/auth-utils';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: ('ADMIN' | 'GIANGVIEN' | 'USER' | 'GUEST')[];
+  allowedRoles?: ('ADMIN' | 'USER' | 'GUEST')[];
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
@@ -34,20 +34,16 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
           return;
         }
         
-        const userRole = payload.roleType as 'ADMIN' | 'GIANGVIEN' | 'USER' | 'GUEST';
+        const userRole = payload.roleType as 'ADMIN' | 'USER' | 'GUEST';
         
         // Check if user role is allowed
         if (!allowedRoles.includes(userRole)) {
           console.warn(`❌ Access denied. User role: ${userRole}, Allowed roles: ${allowedRoles.join(', ')}`);
           
           // Redirect based on user's actual role
-          // This allows users who had their role changed to still access the new role's dashboard
           switch (userRole) {
             case 'ADMIN':
               router.push('/lms/admin');
-              break;
-            case 'GIANGVIEN':
-              router.push('/lms/instructor');
               break;
             case 'USER':
               router.push('/lms/my-learning');

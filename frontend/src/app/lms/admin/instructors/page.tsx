@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFindMany, useUpdateOne, useDeleteOne } from '@/hooks/useDynamicGraphQL';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -84,11 +84,36 @@ export default function AdminInstructorsPage() {
   const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [giangvienRoleId, setGiangvienRoleId] = useState<string>('');
 
-  // Lấy danh sách giảng viên hiện tại
+  // Lấy roleId của giangvien role
+  const { data: rolesData } = useFindMany<{ id: string; name: string }>('Role', {
+    where: {
+      name: 'giangvien'
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  // Set giangvienRoleId khi data về
+  useEffect(() => {
+    if (rolesData && rolesData.length > 0) {
+      setGiangvienRoleId(rolesData[0].id);
+    }
+  }, [rolesData]);
+
+  // Lấy danh sách giảng viên hiện tại (users có role giangvien)
   const { data: instructors = [], loading, error, refetch } = useFindMany<User>('User', {
     where: {
-      roleType: 'GIANGVIEN'
+      userRoles: {
+        some: {
+          role: {
+            name: 'giangvien'
+          }
+        }
+      }
     },
     select: {
       id: true,
@@ -119,11 +144,15 @@ export default function AdminInstructorsPage() {
     orderBy: { createdAt: 'desc' },
   });
 
-  // Lấy danh sách tất cả user KHÔNG phải GIANGVIEN (để phân quyền)
+  // Lấy danh sách tất cả user KHÔNG có role giangvien (để phân quyền)
   const { data: availableUsers = [], loading: usersLoading, refetch: refetchUsers } = useFindMany<User>('User', {
     where: {
-      roleType: {
-        not: 'GIANGVIEN'
+      userRoles: {
+        none: {
+          role: {
+            name: 'giangvien'
+          }
+        }
       }
     },
     select: {
@@ -183,13 +212,46 @@ export default function AdminInstructorsPage() {
       return;
     }
 
-    try {
-      await updateUser({
-        where: { id: selectedUserId },
-        data: {
-          roleType: 'GIANGVIEN',
-        },
+    if (!giangvienRoleId) {
+      toast({
+        title: 'Lỗi',
+        description: 'Không tìm thấy role giảng viên',
+        type: 'error',
       });
+      return;
+    }
+
+    try {
+      // Gọi assignRoleToUser mutation
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:13001/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation AssignRoleToUser($userId: String!, $roleId: String!) {
+              assignRoleToUser(userId: $userId, roleId: $roleId) {
+                id
+                userId
+                roleId
+              }
+            }
+          `,
+          variables: {
+            userId: selectedUserId,
+            roleId: giangvienRoleId,
+          },
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (result.errors) {
+        throw new Error(result.errors[0]?.message || 'Lỗi khi phân quyền');
+      }
 
       toast({
         title: 'Thành công',
@@ -236,15 +298,48 @@ export default function AdminInstructorsPage() {
 
   // Thu hồi quyền giảng viên (chuyển về USER)
   const handleRevokeInstructor = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser || !giangvienRoleId) return;
 
     try {
-      await updateUser({
-        where: { id: selectedUser.id },
-        data: {
-          roleType: 'USER',
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('Không tìm thấy token xác thực');
+      }
+
+      // Gọi GraphQL mutation removeRoleFromUser
+      const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:13001/graphql';
+      
+      const response = await fetch(graphqlUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({
+          query: `
+            mutation RemoveRoleFromUser($userId: String!, $roleId: String!) {
+              removeRoleFromUser(userId: $userId, roleId: $roleId) {
+                success
+                message
+              }
+            }
+          `,
+          variables: {
+            userId: selectedUser.id,
+            roleId: giangvienRoleId,
+          },
+        }),
       });
+
+      const result = await response.json();
+
+      if (result.errors) {
+        throw new Error(result.errors[0]?.message || 'Lỗi khi thu hồi quyền');
+      }
+
+      if (!result.data?.removeRoleFromUser?.success) {
+        throw new Error(result.data?.removeRoleFromUser?.message || 'Không thể thu hồi quyền');
+      }
 
       toast({
         title: 'Thành công',
@@ -275,7 +370,6 @@ export default function AdminInstructorsPage() {
   const getRoleBadgeColor = (roleType: string) => {
     switch (roleType) {
       case 'ADMIN': return 'bg-red-100 text-red-800 border-red-300';
-      case 'GIANGVIEN': return 'bg-blue-100 text-blue-800 border-blue-300';
       case 'USER': return 'bg-green-100 text-green-800 border-green-300';
       case 'GUEST': return 'bg-gray-100 text-gray-800 border-gray-300';
       default: return 'bg-gray-100 text-gray-800 border-gray-300';
@@ -468,7 +562,7 @@ export default function AdminInstructorsPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-hidden flex flex-col py-2">
             {/* Search */}
             <div className="px-1 pb-3">
               <div className="relative">
@@ -568,24 +662,26 @@ export default function AdminInstructorsPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Thu hồi quyền giảng viên</AlertDialogTitle>
-            <AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 p-4">
+            <p className="text-sm text-gray-500">
               Bạn có chắc chắn muốn thu hồi quyền giảng viên của{' '}
               <span className="font-semibold">
                 {selectedUser ? getFullName(selectedUser) : ''}
               </span>
-              ? 
-              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-blue-800 text-sm">
+              ?
+            </p>
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded text-blue-800 text-sm">
+              <AlertCircle className="w-4 h-4 inline mr-2" />
+              User sẽ được chuyển về quyền <strong>USER</strong> thông thường.
+            </div>
+            {selectedUser && selectedUser._count?.coursesInstructed > 0 && (
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm">
                 <AlertCircle className="w-4 h-4 inline mr-2" />
-                User sẽ được chuyển về quyền <strong>USER</strong> thông thường.
+                Giảng viên này đang dạy <strong>{selectedUser._count.coursesInstructed} khóa học</strong>!
               </div>
-              {selectedUser && selectedUser._count?.coursesInstructed > 0 && (
-                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm">
-                  <AlertCircle className="w-4 h-4 inline mr-2" />
-                  Giảng viên này đang dạy <strong>{selectedUser._count.coursesInstructed} khóa học</strong>!
-                </div>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            )}
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel>
               Hủy

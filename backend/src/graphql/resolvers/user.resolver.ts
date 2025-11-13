@@ -67,7 +67,7 @@ export class UserResolver {
   async loginUser(@Args('input') input: LoginUserInput): Promise<AuthResponse> {
     const user = await this.authService.validateUser(input.emailOrUsername, input.password);
     const tokens = await this.authService.generateTokens(user);
-    const redirectUrl = await getLoginRedirectUrl(user.roleType);
+    const redirectUrl = await getLoginRedirectUrl(user.id);
     
     return {
       ...tokens,
@@ -82,7 +82,7 @@ export class UserResolver {
     
     const result = await this.authService.loginWithGoogle(input);
     console.log('Result from authService:', result);
-    const redirectUrl = await getLoginRedirectUrl(result.user.roleType);
+    const redirectUrl = await getLoginRedirectUrl(result.user.id);
     
     return {
       accessToken: result.accessToken,
@@ -98,7 +98,7 @@ export class UserResolver {
       input.token,
       input.providerId
     );
-    const redirectUrl = await getLoginRedirectUrl(result.user.roleType);
+    const redirectUrl = await getLoginRedirectUrl(result.user.id);
     
     return {
       accessToken: result.accessToken,
@@ -118,7 +118,7 @@ export class UserResolver {
     }
 
     const result = await this.authService.loginWithPhone(input.phone);
-    const redirectUrl = await getLoginRedirectUrl(result.user.roleType);
+    const redirectUrl = await getLoginRedirectUrl(result.user.id);
     
     return {
       accessToken: result.accessToken,

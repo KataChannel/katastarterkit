@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { GET_CURRENT_USER, LOGIN_MUTATION, REGISTER_MUTATION } from '../lib/graphql/queries';
+import { useRouter } from 'next/navigation';
 
 interface Role {
   id: string;
@@ -39,7 +40,7 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string; redirectUrl?: string }>;
   register: (email: string, password: string, username: string) => Promise<{ success: boolean; error?: string; redirectUrl?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
   isAuthenticated: boolean;
 }
@@ -57,7 +58,7 @@ export const useAuth = (): AuthContextType => {
         user: null,
         login: async () => ({ success: false, error: 'Not available on server' }),
         register: async () => ({ success: false, error: 'Not available on server' }),
-        logout: () => {},
+        logout: async () => {},
         loading: true,
         isAuthenticated: false,
       };
@@ -245,7 +246,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     // Clear ALL auth-related data at once to ensure clean state
     console.log('%c🚪 Manual logout triggered', 'color: #e74c3c; font-weight: bold;', { timestamp: new Date().toISOString() });
     console.table({
@@ -258,6 +259,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('user');
     console.log('%c✓ All auth data cleared', 'color: #27ae60;');
     setUser(null);
+
+    // Fetch logout redirect URL from settings
+    try {
+      const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:13001/graphql';
+      
+      const response = await fetch(graphqlUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `
+            query GetLogoutRedirect {
+              publicWebsiteSettings(keys: ["auth_logout_redirect"]) {
+                key
+                value
+              }
+            }
+          `,
+        }),
+        cache: 'no-store',
+      });
+
+      const { data } = await response.json();
+      const settings = data?.publicWebsiteSettings || [];
+      const logoutSetting = settings.find((s: any) => s.key === 'auth_logout_redirect');
+      const logoutUrl = logoutSetting?.value?.trim() || '/';
+
+      console.log(`%c🔀 Redirecting after logout to: ${logoutUrl}`, 'color: #3498db; font-weight: bold;');
+      
+      // Use window.location for hard navigation (clears all React state)
+      window.location.href = logoutUrl;
+    } catch (error) {
+      console.error('[Logout] Error fetching redirect setting:', error);
+      // Fallback to root if error
+      window.location.href = '/';
+    }
   };
 
   const isAuthenticated = !!user;

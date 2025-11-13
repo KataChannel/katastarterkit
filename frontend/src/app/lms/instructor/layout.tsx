@@ -257,7 +257,7 @@ export default function InstructorLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <ProtectedRoute allowedRoles={['GIANGVIEN']}>
+    <ProtectedRoute allowedRoles={['USER']}>
       <div className="flex h-screen bg-gray-50">
         {/* Desktop Sidebar */}
         <div className="hidden lg:block">

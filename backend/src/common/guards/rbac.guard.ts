@@ -10,6 +10,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLogService } from '../services/audit-log.service';
 import {
@@ -39,8 +40,20 @@ export class RBACGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    // Get user from context (supports both HTTP and GraphQL)
+    let request;
+    let user;
+    
+    if (context.getType() === 'http') {
+      request = context.switchToHttp().getRequest();
+      user = request.user;
+    } else {
+      // GraphQL context
+      const gqlContext = GqlExecutionContext.create(context);
+      const ctx = gqlContext.getContext();
+      request = ctx.req;
+      user = ctx.req?.user;
+    }
 
     if (!user) {
       throw new ForbiddenException('User not authenticated');

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   BookOpen,
   GraduationCap,
@@ -16,6 +17,7 @@ import {
   Users,
   Settings,
   ChevronDown,
+  LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -78,6 +80,11 @@ interface LMSNavigationProps {
 export function LMSNavigation({ user, showInstructorLink = true }: LMSNavigationProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   const isActive = (href: string) => {
     if (href === '/lms') {
@@ -183,10 +190,9 @@ export function LMSNavigation({ user, showInstructorLink = true }: LMSNavigation
                       Cài đặt
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/logout">
-                      Đăng xuất
-                    </Link>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Đăng xuất
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -2528,6 +2528,7 @@ type Mutation {
   archiveCourse(id: ID!): Course!
   assignConversationToAgent(agentId: String!, conversationId: String!): SupportConversation!
   assignRolePermissions(input: AssignRolePermissionInput!): Boolean!
+  assignRoleToUser(expiresAt: DateTime, roleId: String!, userId: String!): UserRoleAssignmentType!
 
   """Assign task to users"""
   assignTask(taskId: String!, userIds: [ID!]!): Task!
@@ -2742,6 +2743,7 @@ type Mutation {
 
   """Xóa thành viên khỏi project"""
   removeProjectMember(memberId: String!, projectId: ID!): Boolean!
+  removeRoleFromUser(roleId: String!, userId: String!): RemoveRoleResultType!
   reorderLessons(input: ReorderLessonsInput!): [Lesson!]!
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
   reorderModules(input: ReorderModulesInput!): [CourseModule!]!
@@ -3380,6 +3382,27 @@ type PermissionSearchResult {
   totalPages: Int!
 }
 
+type PermissionType {
+  action: String!
+  category: String
+  createdAt: DateTime!
+  description: String
+  displayName: String!
+  id: ID!
+  isActive: Boolean!
+  isSystemPerm: Boolean!
+  name: String!
+  resource: String!
+  roleName: String
+  scope: String
+  source: String
+  updatedAt: DateTime!
+}
+
+type PermissionsByCategoryType {
+  data: JSON!
+}
+
 input PhoneLoginInput {
   otp: String!
   phone: String!
@@ -3700,6 +3723,8 @@ type Query {
   categoryTree: [CategoryType!]!
   certificate(id: ID!): Certificate!
   certificateStats: CertificateStats!
+  checkMyPermission(action: String!, resource: String!, scope: String): Boolean!
+  checkUserPermission(action: String!, resource: String!, scope: String, userId: String!): Boolean!
 
   """Count records matching the criteria"""
   count(modelName: String!, where: JSONObject): Float!
@@ -3916,9 +3941,11 @@ type Query {
   myCourses: [Course!]!
   myEnrollments: [Enrollment!]!
   myMenus(type: String): [MenuResponseDto!]!
+  myPermissions: [PermissionType!]!
 
   """Lấy tất cả projects mà user là thành viên (dùng cho Sidebar)"""
   myProjects(includeArchived: Boolean! = false): [Project!]!
+  myRoles: [UserRoleAssignmentType!]!
 
   """Normalize a product name"""
   normalizeProductName(productName: String!, threshold: Float! = 0.6): String!
@@ -3934,6 +3961,7 @@ type Query {
 
   """Get overdue tasks"""
   overdueTasks(projectId: ID!): String!
+  permissions: PermissionsByCategoryType!
   product(id: ID!): ProductType!
   productBySlug(slug: String!): ProductType!
   productRatingSummary(productId: ID!): ProductRatingSummaryType!
@@ -3973,6 +4001,8 @@ type Query {
   review(id: ID!): ProductReviewType
   reviewStats(courseId: ID!): ReviewStats!
   reviews(input: GetReviewsInput!): ReviewsWithStats!
+  role(id: String!): RoleType!
+  roles: [RoleType!]!
   sampleCoursePrompts: [String!]!
 
   """Search affiliate campaigns using Orama full-text search engine"""
@@ -4037,6 +4067,7 @@ type Query {
   """Get upcoming tasks for reminders"""
   upcomingTasks(hours: Float! = 24): String!
   userReview(courseId: ID!): Review
+  usersByRole(roleId: String!): [UserRoleAssignmentType!]!
   validateCart(sessionId: String): ValidateCartResponse!
   validateImportData(data: JSON!, requiredFields: [String!]!): JSON!
   validateMapping(mapping: JSON!, modelName: String!): JSON!
@@ -4127,6 +4158,11 @@ type RemoveFromCartResponse {
   cart: CartType
   errors: [String!]
   message: String
+  success: Boolean!
+}
+
+type RemoveRoleResultType {
+  message: String!
   success: Boolean!
 }
 
@@ -4236,6 +4272,16 @@ type Role {
   updatedAt: DateTime!
 }
 
+type RolePermissionType {
+  createdAt: DateTime!
+  effect: String!
+  expiresAt: DateTime
+  id: ID!
+  permission: PermissionType!
+  permissionId: ID!
+  roleId: ID!
+}
+
 input RoleSearchInput {
   isActive: Boolean
   page: Int = 0
@@ -4252,6 +4298,22 @@ type RoleSearchResult {
   size: Int!
   total: Int!
   totalPages: Int!
+}
+
+type RoleType {
+  createdAt: DateTime!
+  description: String
+  displayName: String!
+  id: ID!
+  isActive: Boolean!
+  isSystemRole: Boolean!
+  name: String!
+  parentId: String
+  permissions: [RolePermissionType!]
+  priority: Int!
+  updatedAt: DateTime!
+  userCount: Int
+  userRoles: [UserRoleAssignmentType!]
 }
 
 input SetPasswordInput {
@@ -5507,6 +5569,16 @@ type User {
   ward: String
 }
 
+type UserBasicType {
+  avatar: String
+  email: String!
+  firstName: String
+  id: ID!
+  isActive: Boolean!
+  lastName: String
+  username: String
+}
+
 type UserPermission {
   assignedAt: DateTime!
   assignedBy: String
@@ -5540,6 +5612,18 @@ type UserRoleAssignment {
   userId: String!
 }
 
+type UserRoleAssignmentType {
+  assignedAt: DateTime!
+  assignedBy: String
+  effect: String!
+  expiresAt: DateTime
+  id: ID!
+  role: RoleType
+  roleId: ID!
+  user: UserBasicType
+  userId: ID!
+}
+
 type UserRolePermissionSummary {
   directPermissions: [UserPermission!]!
   effectivePermissions: [Permission!]!
@@ -5550,7 +5634,6 @@ type UserRolePermissionSummary {
 
 enum UserRoleType {
   ADMIN
-  GIANGVIEN
   GUEST
   USER
 }

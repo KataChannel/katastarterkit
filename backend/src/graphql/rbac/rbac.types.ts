@@ -118,6 +118,30 @@ export class RolePermissionType {
 }
 
 @ObjectType()
+export class UserBasicType {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  email: string;
+
+  @Field(() => String, { nullable: true })
+  username: string | null;
+
+  @Field(() => String, { nullable: true })
+  firstName: string | null;
+
+  @Field(() => String, { nullable: true })
+  lastName: string | null;
+
+  @Field(() => String, { nullable: true })
+  avatar: string | null;
+
+  @Field()
+  isActive: boolean;
+}
+
+@ObjectType()
 export class UserRoleAssignmentType {
   @Field(() => ID)
   id: string;
@@ -145,30 +169,6 @@ export class UserRoleAssignmentType {
 
   @Field(() => UserBasicType, { nullable: true })
   user?: UserBasicType;
-}
-
-@ObjectType()
-export class UserBasicType {
-  @Field(() => ID)
-  id: string;
-
-  @Field()
-  email: string;
-
-  @Field(() => String, { nullable: true })
-  username: string | null;
-
-  @Field(() => String, { nullable: true })
-  firstName: string | null;
-
-  @Field(() => String, { nullable: true })
-  lastName: string | null;
-
-  @Field(() => String, { nullable: true })
-  avatar: string | null;
-
-  @Field()
-  isActive: boolean;
 }
 
 @ObjectType()

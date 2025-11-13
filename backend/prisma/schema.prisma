@@ -13,7 +13,6 @@ datasource db {
 
 enum UserRoleType {
   ADMIN
-  GIANGVIEN
   USER
   GUEST
 }
