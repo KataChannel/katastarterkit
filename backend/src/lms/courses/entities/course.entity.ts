@@ -98,4 +98,8 @@ export class Course {
 
   @Field(() => [CourseModule], { nullable: true })
   modules?: CourseModule[];
+
+  // Count fields for related entities
+  @Field(() => Int, { nullable: true })
+  sourceDocumentsCount?: number;
 }

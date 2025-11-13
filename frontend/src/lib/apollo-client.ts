@@ -90,6 +90,10 @@ const getGraphQLUri = () => {
 
 const httpLink = createHttpLink({
   uri: getGraphQLUri(),
+  // Increase timeout for AI operations (analysis and generation can take 30-60s)
+  fetchOptions: {
+    timeout: 120000, // 120 seconds (2 minutes)
+  },
 });
 
 // WebSocket Link for subscriptions - completely disabled in development
@@ -372,9 +376,26 @@ export const apolloClient = new ApolloClient({
   defaultOptions: {
     watchQuery: {
       errorPolicy: 'all',
+      fetchPolicy: 'cache-and-network',
     },
     query: {
       errorPolicy: 'all',
+      fetchPolicy: 'network-only',
+      // Default timeout for queries (AI operations may override this)
+      context: {
+        fetchOptions: {
+          timeout: 120000, // 2 minutes for AI operations
+        },
+      },
+    },
+    mutate: {
+      errorPolicy: 'all',
+      fetchPolicy: 'no-cache',
+      context: {
+        fetchOptions: {
+          timeout: 120000, // 2 minutes for AI operations
+        },
+      },
     },
   },
 });

@@ -920,6 +920,7 @@ type Course {
   requirements: [String!]!
   reviewCount: Int!
   slug: String!
+  sourceDocumentsCount: Int
   status: CourseStatus!
   tags: [String!]!
   targetAudience: [String!]!
@@ -2153,14 +2154,38 @@ enum Gender {
 }
 
 input GenerateCourseFromDocumentsInput {
+  """Additional context for generation"""
+  additionalContext: String
+
   """Optional additional instructions for AI"""
   additionalPrompt: String
 
   """Optional category for the generated course"""
   categoryId: String
 
+  """Course description (user can edit AI suggestion)"""
+  description: String
+
   """Array of source document IDs to analyze"""
   documentIds: [ID!]!
+
+  """Learning objectives (user can edit AI suggestion)"""
+  learningObjectives: [String!]
+
+  """Course level (user can edit AI suggestion)"""
+  level: String
+
+  """Requirements (user can edit AI suggestion)"""
+  requirements: [String!]
+
+  """Target audience (user can edit AI suggestion)"""
+  targetAudience: [String!]
+
+  """Course title (user can edit AI suggestion)"""
+  title: String
+
+  """What you will learn (user can edit AI suggestion)"""
+  whatYouWillLearn: [String!]
 }
 
 input GetCategoriesInput {

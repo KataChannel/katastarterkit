@@ -123,13 +123,24 @@ export class CoursesService {
             },
           },
           category: true,
+          _count: {
+            select: {
+              sourceDocuments: true,
+            },
+          },
         },
       }),
       this.prisma.course.count({ where }),
     ]);
 
+    // Map courses to include sourceDocumentsCount
+    const coursesWithCount = courses.map(course => ({
+      ...course,
+      sourceDocumentsCount: course._count.sourceDocuments,
+    }));
+
     return {
-      data: courses,
+      data: coursesWithCount,
       total,
       page,
       limit,
@@ -159,6 +170,11 @@ export class CoursesService {
             },
           },
         },
+        _count: {
+          select: {
+            sourceDocuments: true,
+          },
+        },
       },
     });
 
@@ -166,7 +182,10 @@ export class CoursesService {
       throw new NotFoundException(`Course with ID ${id} not found`);
     }
 
-    return course;
+    return {
+      ...course,
+      sourceDocumentsCount: course._count.sourceDocuments,
+    };
   }
 
   async findBySlug(slug: string) {
@@ -191,6 +210,11 @@ export class CoursesService {
             },
           },
         },
+        _count: {
+          select: {
+            sourceDocuments: true,
+          },
+        },
       },
     });
 
@@ -198,7 +222,10 @@ export class CoursesService {
       throw new NotFoundException(`Course with slug ${slug} not found`);
     }
 
-    return course;
+    return {
+      ...course,
+      sourceDocumentsCount: course._count.sourceDocuments,
+    };
   }
 
   async update(id: string, userId: string, updateCourseInput: UpdateCourseInput) {
@@ -328,7 +355,7 @@ export class CoursesService {
   }
 
   async getMyCourses(userId: string) {
-    return this.prisma.course.findMany({
+    const courses = await this.prisma.course.findMany({
       where: { instructorId: userId },
       include: {
         category: true,
@@ -336,11 +363,17 @@ export class CoursesService {
           select: {
             enrollments: true,
             modules: true,
+            sourceDocuments: true,
           },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    return courses.map(course => ({
+      ...course,
+      sourceDocumentsCount: course._count.sourceDocuments,
+    }));
   }
 
   // ==================== MODULE OPERATIONS ====================

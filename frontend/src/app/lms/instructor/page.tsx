@@ -21,7 +21,8 @@ import {
   PlayCircle,
   HelpCircle,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -240,6 +241,7 @@ export default function InstructorDashboardPage() {
                       <th className="text-left py-3 px-4 sm:px-0 font-semibold">Khóa học</th>
                       <th className="text-left py-3 px-4 sm:px-0 font-semibold hidden sm:table-cell">Trạng thái</th>
                       <th className="text-left py-3 px-4 sm:px-0 font-semibold hidden md:table-cell">Học viên</th>
+                      <th className="text-left py-3 px-4 sm:px-0 font-semibold hidden lg:table-cell">Tài liệu</th>
                       <th className="text-left py-3 px-4 sm:px-0 font-semibold hidden lg:table-cell">Doanh thu</th>
                       <th className="text-right py-3 px-4 sm:px-0 font-semibold">Hành động</th>
                     </tr>
@@ -292,6 +294,12 @@ export default function InstructorDashboardPage() {
                         </td>
                         <td className="py-3 sm:py-4 px-4 sm:px-0 hidden md:table-cell">
                           <p className="text-sm">{course.enrollmentCount}</p>
+                        </td>
+                        <td className="py-3 sm:py-4 px-4 sm:px-0 hidden lg:table-cell">
+                          <div className="flex items-center gap-1 text-sm">
+                            <FileText className="w-4 h-4 text-green-600" />
+                            <span>{course.sourceDocumentsCount || 0}</span>
+                          </div>
                         </td>
                         <td className="py-3 sm:py-4 px-4 sm:px-0 hidden lg:table-cell">
                           <p className="text-sm font-medium">

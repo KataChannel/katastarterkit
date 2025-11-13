@@ -23,7 +23,14 @@ interface AnalysisResult {
   whatYouWillLearn: string[];
   requirements: string[];
   targetAudience: string[];
-  suggestedStructure: string;
+  suggestedStructure: {
+    moduleCount?: number;
+    modules?: Array<{
+      title: string;
+      description: string;
+      topics: string[];
+    }>;
+  };
   estimatedDuration: string;
   sourceDocumentIds: string[];
   analysisSummary: string;
@@ -252,6 +259,27 @@ export default function CreateCourseFromDocumentsPage() {
               />
             </div>
             
+            {/* Loading State */}
+            {analyzing && (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <div className="flex items-start gap-3">
+                  <Loader2 className="h-5 w-5 animate-spin text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 space-y-2">
+                    <p className="font-semibold text-blue-900">
+                      🤖 AI đang phân tích {selectedDocuments.length} tài liệu...
+                    </p>
+                    <p className="text-sm text-blue-700">
+                      ⏱️ Thời gian ước tính: 10-15 giây
+                    </p>
+                    <p className="text-xs text-blue-600">
+                      AI đang tổng hợp nội dung, trích xuất từ khóa, phân tích chủ đề và đề xuất cấu trúc khóa học.
+                      Vui lòng chờ trong giây lát...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="flex justify-end gap-3">
               <Button
                 variant="outline"
@@ -437,12 +465,67 @@ export default function CreateCourseFromDocumentsPage() {
                 {analysisResult.suggestedStructure && (
                   <div className="space-y-2">
                     <Label>Cấu trúc đề xuất</Label>
-                    <div className="p-4 rounded-lg bg-muted text-sm whitespace-pre-wrap">
-                      {analysisResult.suggestedStructure}
+                    <div className="p-4 rounded-lg bg-muted space-y-3">
+                      {analysisResult.suggestedStructure.moduleCount && (
+                        <div className="text-sm font-semibold text-primary">
+                          📚 Gồm {analysisResult.suggestedStructure.moduleCount} modules
+                        </div>
+                      )}
+                      
+                      {analysisResult.suggestedStructure.modules && 
+                       analysisResult.suggestedStructure.modules.length > 0 && (
+                        <div className="space-y-3">
+                          {analysisResult.suggestedStructure.modules.map((module, idx) => (
+                            <div key={idx} className="border-l-2 border-primary pl-3 space-y-1">
+                              <div className="font-medium text-sm">
+                                {idx + 1}. {module.title}
+                              </div>
+                              {module.description && (
+                                <div className="text-xs text-muted-foreground">
+                                  {module.description}
+                                </div>
+                              )}
+                              {module.topics && module.topics.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {module.topics.map((topic, topicIdx) => (
+                                    <span 
+                                      key={topicIdx}
+                                      className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded"
+                                    >
+                                      {topic}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
               </div>
+              
+              {/* Loading State for Course Generation */}
+              {generating && (
+                <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                  <div className="flex items-start gap-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-green-600 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 space-y-2">
+                      <p className="font-semibold text-green-900">
+                        🚀 Đang tạo khóa học...
+                      </p>
+                      <p className="text-sm text-green-700">
+                        ⏱️ Thời gian ước tính: 30-60 giây
+                      </p>
+                      <p className="text-xs text-green-600">
+                        AI đang tạo cấu trúc khóa học đầy đủ với modules, lessons và quizzes.
+                        Quá trình này có thể mất một chút thời gian...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               <div className="flex flex-col-reverse sm:flex-row justify-between gap-3 pt-4 border-t">
                 <Button

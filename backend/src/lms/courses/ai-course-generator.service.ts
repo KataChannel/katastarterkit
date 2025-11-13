@@ -13,6 +13,15 @@ interface GenerateCourseFromDocumentsInput {
   categoryId?: string;
   additionalPrompt?: string;
   instructorId: string;
+  // User-edited fields from analysis step
+  title?: string;
+  description?: string;
+  level?: string;
+  learningObjectives?: string[];
+  whatYouWillLearn?: string[];
+  requirements?: string[];
+  targetAudience?: string[];
+  additionalContext?: string;
 }
 
 @Injectable()
@@ -98,7 +107,21 @@ export class AICourseGeneratorService {
       throw new BadRequestException('AI service is not configured. Please set GOOGLE_GEMINI_API_KEY');
     }
 
-    const { documentIds, categoryId, additionalPrompt, instructorId } = input;
+    const { 
+      documentIds, 
+      categoryId, 
+      additionalPrompt, 
+      instructorId,
+      // User-edited fields from analysis step
+      title,
+      description,
+      level,
+      learningObjectives,
+      whatYouWillLearn,
+      requirements,
+      targetAudience,
+      additionalContext,
+    } = input;
 
     // Validate input
     if (!documentIds || !Array.isArray(documentIds) || documentIds.length === 0) {
@@ -113,6 +136,7 @@ export class AICourseGeneratorService {
     console.log(`📚 Documents: ${documentIds.length} items`);
     console.log(`👤 Instructor ID: ${instructorId}`);
     console.log(`📁 Category ID: ${categoryId || 'None'}`);
+    console.log(`✏️  User-edited fields: ${title ? 'Yes' : 'No'}`);
 
     // Step 1: Fetch source documents with AI data
     console.log('\n⏳ Step 1/4: Fetching source documents...');
@@ -139,11 +163,22 @@ export class AICourseGeneratorService {
     console.log(`   - Keywords: ${aggregatedData.keywords.length}`);
     console.log(`   - Topics: ${aggregatedData.topics.length}`);
 
-    // Step 3: Generate prompt from aggregated data
+    // Step 3: Build prompt (with user edits if provided)
+    const promptContext = additionalPrompt || additionalContext || '';
     const generatedPrompt = this.buildPromptFromDocuments(
       aggregatedData,
       documents,
-      additionalPrompt
+      promptContext,
+      // Include user-edited fields in prompt
+      {
+        title,
+        description,
+        level,
+        learningObjectives,
+        whatYouWillLearn,
+        requirements,
+        targetAudience,
+      }
     );
     console.log(`✅ Generated prompt (${generatedPrompt.length} chars)`);
 
@@ -238,7 +273,16 @@ export class AICourseGeneratorService {
   private buildPromptFromDocuments(
     aggregatedData: any,
     documents: any[],
-    additionalPrompt?: string
+    additionalPrompt?: string,
+    userEdits?: {
+      title?: string;
+      description?: string;
+      level?: string;
+      learningObjectives?: string[];
+      whatYouWillLearn?: string[];
+      requirements?: string[];
+      targetAudience?: string[];
+    }
   ): string {
     const documentTitles = documents.map((d) => d.title).join(', ');
     const topKeywords = aggregatedData.keywords.slice(0, 10).join(', ');
@@ -259,12 +303,52 @@ export class AICourseGeneratorService {
       prompt += '\n';
     }
 
+    // Add user-edited fields if provided
+    if (userEdits) {
+      prompt += '\n📝 THÔNG TIN ĐÃ XÁC NHẬN (sử dụng chính xác):\n';
+      
+      if (userEdits.title) {
+        prompt += `Tiêu đề: ${userEdits.title}\n`;
+      }
+      if (userEdits.description) {
+        prompt += `Mô tả: ${userEdits.description}\n`;
+      }
+      if (userEdits.level) {
+        prompt += `Cấp độ: ${userEdits.level}\n`;
+      }
+      if (userEdits.learningObjectives && userEdits.learningObjectives.length > 0) {
+        prompt += `Mục tiêu học tập:\n`;
+        userEdits.learningObjectives.forEach((obj, idx) => {
+          prompt += `${idx + 1}. ${obj}\n`;
+        });
+      }
+      if (userEdits.whatYouWillLearn && userEdits.whatYouWillLearn.length > 0) {
+        prompt += `Bạn sẽ học được:\n`;
+        userEdits.whatYouWillLearn.forEach((item, idx) => {
+          prompt += `${idx + 1}. ${item}\n`;
+        });
+      }
+      if (userEdits.requirements && userEdits.requirements.length > 0) {
+        prompt += `Yêu cầu:\n`;
+        userEdits.requirements.forEach((req, idx) => {
+          prompt += `${idx + 1}. ${req}\n`;
+        });
+      }
+      if (userEdits.targetAudience && userEdits.targetAudience.length > 0) {
+        prompt += `Đối tượng học viên:\n`;
+        userEdits.targetAudience.forEach((aud, idx) => {
+          prompt += `${idx + 1}. ${aud}\n`;
+        });
+      }
+      prompt += '\n';
+    }
+
     // Add additional instructions
     if (additionalPrompt) {
       prompt += `\n💡 Yêu cầu bổ sung: ${additionalPrompt}\n`;
     }
 
-    prompt += `\nDựa trên các tài liệu nguồn trên, hãy tạo một khóa học toàn diện, có cấu trúc rõ ràng với modules, lessons và quizzes phù hợp.`;
+    prompt += `\nDựa trên các tài liệu nguồn${userEdits ? ' và thông tin đã xác nhận' : ''} trên, hãy tạo một khóa học toàn diện, có cấu trúc rõ ràng với modules, lessons và quizzes phù hợp.`;
 
     return prompt;
   }

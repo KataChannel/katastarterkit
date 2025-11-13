@@ -288,7 +288,7 @@ export default function ProductsPage() {
                   {products.map((product: any) => (
                     <Link
                       key={product.id}
-                      href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/san-pham/${product.slug}`}
+                      href={`/san-pham/${product.slug}`}
                     >
                       <Card className="h-full hover:shadow-lg transition-shadow group overflow-hidden">
                         <CardContent className="p-0">

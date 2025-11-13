@@ -260,7 +260,7 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
   };
 
   const getProductUrl = (product: Product) => {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+    const baseUrl = '';
     const slug = getProductSlug(product);
     return `${baseUrl}/san-pham/${slug}`;
   };

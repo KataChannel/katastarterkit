@@ -61,6 +61,7 @@ export const COURSE_BASIC_FRAGMENT = gql`
     avgRating
     enrollmentCount
     reviewCount
+    sourceDocumentsCount
     createdAt
     publishedAt
   }

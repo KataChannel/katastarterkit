@@ -22,6 +22,7 @@ import {
   BookOpen,
   Sparkles,
   Loader2,
+  FileText,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -45,6 +46,7 @@ interface Course {
   duration: number;
   thumbnailUrl: string;
   status: string;
+  sourceDocumentsCount?: number;
   instructor: {
     id: string;
     firstName: string;
@@ -370,6 +372,12 @@ export default function AdminCoursesPage() {
                     <Star className="w-4 h-4 text-yellow-500" />
                     <span>{course._count?.reviews || 0}</span>
                   </div>
+                  {course.sourceDocumentsCount > 0 && (
+                    <div className="flex items-center gap-1 whitespace-nowrap">
+                      <FileText className="w-4 h-4 text-green-600" />
+                      <span>{course.sourceDocumentsCount} tài liệu</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Price */}
