@@ -19,7 +19,11 @@ export async function homepageMiddleware(request: NextRequest) {
 
   try {
     // Check custom homepage URL by calling GraphQL API
-    const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:12001/graphql';
+    // HARDCODED FOR TESTING: Force to use port 13001
+    const graphqlUrl = 'http://localhost:13001/graphql';
+    
+    console.log('[Homepage Middleware] GraphQL URL:', graphqlUrl);
+    console.log('[Homepage Middleware] Fetching settings from GraphQL...');
     
     const response = await fetch(graphqlUrl, {
       method: 'POST',

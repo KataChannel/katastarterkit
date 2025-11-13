@@ -6,6 +6,9 @@ import { homepageMiddleware } from './src/middleware/homepage';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
+  // ALWAYS LOG TO VERIFY MIDDLEWARE IS RUNNING
+  console.error(`🔴🔴🔴 MIDDLEWARE RUNNING FOR: ${pathname} 🔴🔴🔴`);
+  
   console.log('\n' + '='.repeat(80));
   console.log(`[Main Middleware] 🚀 MIDDLEWARE INVOKED for: ${pathname}`);
   console.log('='.repeat(80));
