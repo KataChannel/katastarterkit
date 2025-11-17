@@ -29,8 +29,7 @@ export class CoursesResolver {
   ) {}
 
   @Mutation(() => Course, { name: 'createCourse' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   createCourse(
     @CurrentUser() user: any,
     @Args('createCourseInput') createCourseInput: CreateCourseInput,
@@ -54,15 +53,13 @@ export class CoursesResolver {
   }
 
   @Query(() => [Course], { name: 'myCourses' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   getMyCourses(@CurrentUser() user: any) {
     return this.coursesService.getMyCourses(user.id);
   }
 
   @Mutation(() => Course, { name: 'updateCourse' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   updateCourse(
     @CurrentUser() user: any,
     @Args('updateCourseInput') updateCourseInput: UpdateCourseInput,
@@ -71,8 +68,7 @@ export class CoursesResolver {
   }
 
   @Mutation(() => Course, { name: 'publishCourse' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   publishCourse(
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
@@ -81,8 +77,7 @@ export class CoursesResolver {
   }
 
   @Mutation(() => Course, { name: 'archiveCourse' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   archiveCourse(
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,
@@ -91,8 +86,7 @@ export class CoursesResolver {
   }
 
   @Mutation(() => Boolean, { name: 'deleteCourse' })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoleType.ADMIN)
+  @UseGuards(JwtAuthGuard)
   async removeCourse(
     @CurrentUser() user: any,
     @Args('id', { type: () => ID }) id: string,

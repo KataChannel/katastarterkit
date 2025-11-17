@@ -4416,6 +4416,7 @@ type SourceDocument {
   updatedAt: DateTime!
   url: String
   usageCount: Int!
+  user: User
   userId: ID!
   viewCount: Int!
 }

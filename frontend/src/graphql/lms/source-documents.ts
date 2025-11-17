@@ -34,6 +34,13 @@ export const GET_SOURCE_DOCUMENTS = gql`
         icon
         color
       }
+      user {
+        id
+        email
+        username
+        firstName
+        lastName
+      }
     }
   }
 `;
@@ -166,8 +173,8 @@ export const GET_SOURCE_DOCUMENT_STATS = gql`
 // ============== MUTATIONS ==============
 
 export const CREATE_SOURCE_DOCUMENT = gql`
-  mutation CreateSourceDocument($input: CreateSourceDocumentInput!, $userId: ID!) {
-    createSourceDocument(input: $input, userId: $userId) {
+  mutation CreateSourceDocument($input: CreateSourceDocumentInput!) {
+    createSourceDocument(input: $input) {
       id
       title
       type

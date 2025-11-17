@@ -32,24 +32,24 @@ const RbacManagement: React.FC<RbacManagementProps> = ({ className = '' }) => {
   const tabs = [
     {
       value: 'roles',
-      label: 'Roles',
+      label: 'Vai trò',
       icon: Users,
       component: RoleManagement,
-      description: 'Manage system roles and their hierarchies',
+      description: 'Quản lý vai trò hệ thống và phân cấp',
     },
     {
       value: 'permissions',
-      label: 'Permissions',
+      label: 'Quyền hạn',
       icon: Key,
       component: PermissionManagement,
-      description: 'Define and manage system permissions',
+      description: 'Định nghĩa và quản lý quyền hạn hệ thống',
     },
     {
       value: 'assignments',
-      label: 'User Assignments',
+      label: 'Phân quyền User',
       icon: ShieldCheck,
       component: UserRoleAssignment,
-      description: 'Assign roles and permissions to users',
+      description: 'Gán vai trò và quyền hạn cho người dùng',
     },
   ];
 
@@ -57,9 +57,9 @@ const RbacManagement: React.FC<RbacManagementProps> = ({ className = '' }) => {
     <div className={className}>
       <Card>
         <CardHeader>
-          <CardTitle>Role & Permission Management</CardTitle>
+          <CardTitle>Quản lý Vai trò & Quyền hạn</CardTitle>
           <CardDescription>
-            Manage system access control, roles, and permissions
+            Quản lý kiểm soát truy cập, vai trò và quyền hạn hệ thống
           </CardDescription>
         </CardHeader>
         <CardContent>

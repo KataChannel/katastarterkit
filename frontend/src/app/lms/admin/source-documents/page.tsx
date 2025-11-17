@@ -150,6 +150,18 @@ export default function SourceDocumentsPage() {
     resetPagination();
   }, [searchQuery, filterType, filterStatus, filterCategory, resetPagination]);
 
+  // Refetch when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refetch();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [refetch]);
+
   const handleDelete = (document: any) => {
     setDocumentToDelete(document);
     setDeleteDialogOpen(true);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Plus, Pencil, Trash2, Key, Search } from 'lucide-react';
 import { useSearchPermissions, useDeletePermission } from '../../../hooks/useRbac';
 import { Permission, PermissionSearchInput } from '../../../types/rbac.types';
@@ -36,21 +36,14 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
   const [deletePermission] = useDeletePermission();
   const { toast } = useToast();
 
-  // Auto-filter with debounce for smooth UX
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchInput(prev => {
-        const newSearch = searchTerm || undefined;
-        // Only update if search value actually changed to prevent unnecessary re-renders
-        if (prev.search !== newSearch) {
-          return { ...prev, search: newSearch, page: 0 };
-        }
-        return prev;
-      });
-    }, 300); // 300ms debounce for instant feel
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+  // Manual search function
+  const handleSearch = () => {
+    setSearchInput(prev => ({ 
+      ...prev, 
+      search: searchTerm || undefined, 
+      page: 0 
+    }));
+  };
 
   const handlePageChange = (page: number) => {
     setSearchInput(prev => ({ ...prev, page }));
@@ -134,47 +127,65 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
   return (
     <Card className={className}>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div>
-            <CardTitle>Permission Management</CardTitle>
+            <CardTitle>Quản lý Quyền hạn</CardTitle>
             <CardDescription>
-              Define and manage system permissions
+              Định nghĩa và quản lý quyền hạn hệ thống
             </CardDescription>
           </div>
-          <Button onClick={() => setShowCreateModal(true)}>
+          <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
-            New Permission
+            Tạo Permission mới
           </Button>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Search and Filters */}
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Filter permissions..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+        {/* Search and Filters - Mobile First */}
+        <div className="flex flex-col gap-3">
+          {/* Search Input Row */}
           <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Tìm kiếm permissions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
+                className="pl-10"
+              />
+            </div>
+            <Button 
+              variant="secondary"
+              size="icon"
+              onClick={handleSearch}
+              className="flex-shrink-0"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Filters Row */}
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               type="text"
-              placeholder="Resource"
+              placeholder="Resource (vd: lms)"
               value={searchInput.resource || ''}
               onChange={(e) => setSearchInput(prev => ({ ...prev, resource: e.target.value || undefined, page: 0 }))}
-              className="w-32"
+              className="w-full sm:w-40"
             />
             <Input
               type="text"
-              placeholder="Action"
+              placeholder="Action (vd: read)"
               value={searchInput.action || ''}
               onChange={(e) => setSearchInput(prev => ({ ...prev, action: e.target.value || undefined, page: 0 }))}
-              className="w-32"
+              className="w-full sm:w-40"
             />
             <Select
               value={searchInput.isActive === undefined ? 'all' : searchInput.isActive.toString()}
@@ -184,13 +195,13 @@ const PermissionManagement: React.FC<PermissionManagementProps> = ({ className =
                 page: 0 
               }))}
             >
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="All Status" />
+              <SelectTrigger className="w-full sm:w-[140px]">
+                <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="true">Active</SelectItem>
-                <SelectItem value="false">Inactive</SelectItem>
+                <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="true">Hoạt động</SelectItem>
+                <SelectItem value="false">Tạm dừng</SelectItem>
               </SelectContent>
             </Select>
           </div>

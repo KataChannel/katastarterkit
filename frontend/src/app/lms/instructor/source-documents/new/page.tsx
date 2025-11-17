@@ -67,7 +67,7 @@ export default function NewSourceDocumentPage() {
         title: 'Thành công',
         description: 'Đã tạo tài liệu nguồn mới',
       });
-      router.push(`/lms/admin/source-documents/${data.createSourceDocument.id}`);
+      router.push(`/lms/instructor/source-documents/${data.createSourceDocument.id}`);
     },
     onError: (error) => {
       toast({

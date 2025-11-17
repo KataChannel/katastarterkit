@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery, useMutation } from '@apollo/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,9 +78,7 @@ const STATUS_CONFIG = {
 export default function InstructorSourceDocumentsPage() {
   const router = useRouter();
   const { toast } = useToast();
-  
-  // TODO: Get from auth context
-  const currentUserId = 'instructor-user-id';
+  const { user } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
@@ -96,11 +95,10 @@ export default function InstructorSourceDocumentsPage() {
     resetPagination,
   } = usePagination(12); // 12 items per page
 
-  // Queries
+  // Queries - Get all documents, will filter by current user on client side
   const { data, loading, error, refetch } = useQuery(GET_SOURCE_DOCUMENTS, {
     variables: {
       filter: {
-        userId: currentUserId, // Filter by current instructor
         title: searchQuery || undefined,
         type: typeFilter !== 'ALL' ? typeFilter : undefined,
         status: statusFilter !== 'ALL' ? statusFilter : undefined,
@@ -126,14 +124,29 @@ export default function InstructorSourceDocumentsPage() {
     },
   });
 
-  const documents = data?.sourceDocuments?.data || [];
-  const total = data?.sourceDocuments?.total || 0;
+  const allDocuments = data?.sourceDocuments || [];
   const categories = categoriesData?.sourceDocumentCategories || [];
+
+  // Filter documents by current user (instructor can only see their own documents)
+  const documents = allDocuments.filter((doc: any) => doc.userId === user?.id);
+  const total = documents.length;
 
   // Auto-reset pagination when filters change
   useEffect(() => {
     resetPagination();
   }, [searchQuery, typeFilter, statusFilter, categoryFilter, resetPagination]);
+
+  // Refetch when page becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refetch();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [refetch]);
 
   const handleDelete = (doc: any) => {
     setSelectedDocument(doc);

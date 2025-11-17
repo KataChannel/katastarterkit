@@ -29,12 +29,43 @@ export class SourceDocumentService {
   // ============== CRUD Operations ==============
 
   async create(userId: string, input: CreateSourceDocumentInput) {
+    // Log input for debugging
+    console.log('📄 Creating source document:', {
+      title: input.title,
+      type: input.type,
+      status: input.status,
+      userId,
+    });
+
+    // Prepare data object explicitly to avoid spread issues
+    const data: any = {
+      title: input.title,
+      type: input.type,
+      status: input.status,
+      userId,
+      fileSize: input.fileSize ? BigInt(input.fileSize) : null,
+    };
+
+    // Add optional fields only if they exist
+    if (input.description) data.description = input.description;
+    if (input.url) data.url = input.url;
+    if (input.content) data.content = input.content;
+    if (input.fileName) data.fileName = input.fileName;
+    if (input.mimeType) data.mimeType = input.mimeType;
+    if (input.duration) data.duration = input.duration;
+    if (input.thumbnailUrl) data.thumbnailUrl = input.thumbnailUrl;
+    if (input.categoryId) data.categoryId = input.categoryId;
+    if (input.tags?.length) data.tags = input.tags;
+
+    // Set publishedAt if status is PUBLISHED
+    if (input.status === 'PUBLISHED') {
+      data.publishedAt = new Date();
+    }
+
+    console.log('💾 Prisma create data:', JSON.stringify(data, null, 2));
+
     const document = await this.prisma.sourceDocument.create({
-      data: {
-        ...input,
-        userId,
-        fileSize: input.fileSize ? BigInt(input.fileSize) : null,
-      },
+      data,
       include: {
         category: true,
         user: {
@@ -156,14 +187,22 @@ export class SourceDocumentService {
   }
 
   async update(id: string, input: UpdateSourceDocumentInput) {
-    await this.findOne(id); // Check exists
+    const existing = await this.findOne(id); // Check exists
+
+    // Prepare update data
+    const data: any = {
+      ...input,
+      fileSize: input.fileSize ? BigInt(input.fileSize) : undefined,
+    };
+
+    // Set publishedAt if status changes to PUBLISHED and it wasn't published before
+    if (input.status === 'PUBLISHED' && !existing.publishedAt) {
+      data.publishedAt = new Date();
+    }
 
     const updated = await this.prisma.sourceDocument.update({
       where: { id },
-      data: {
-        ...input,
-        fileSize: input.fileSize ? BigInt(input.fileSize) : undefined,
-      },
+      data,
       include: {
         category: true,
         user: {

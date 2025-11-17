@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID, registerEnumType, Int, Float } from '@nestjs/graphql';
 import { SourceDocumentType, SourceDocumentStatus } from '@prisma/client';
 import GraphQLJSON from 'graphql-type-json';
+import { User } from '../../../graphql/models/user.model';
 
 // Register enums for GraphQL
 registerEnumType(SourceDocumentType, {
@@ -124,6 +125,9 @@ export class SourceDocument {
 
   @Field(() => SourceDocumentCategory, { nullable: true })
   category?: SourceDocumentCategory;
+
+  @Field(() => User, { nullable: true })
+  user?: User;
 
   // Stats
   @Field(() => Int)

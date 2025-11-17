@@ -18,15 +18,20 @@ interface UserRoleAssignmentProps {
 
 const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ className = '' }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
   const { data: usersData, loading: usersLoading } = useSearchUsers({
-    search: searchTerm,
+    search: searchQuery,
     page: 0,
     size: 50,
   });
 
   const users = usersData?.searchUsers?.users || [];
+
+  const handleSearch = () => {
+    setSearchQuery(searchTerm);
+  };
 
   const handleUserSelect = (user: any) => {
     setSelectedUser(user);
@@ -67,27 +72,42 @@ const UserRoleAssignment: React.FC<UserRoleAssignmentProps> = ({ className = '' 
 
   return (
     <div className={`${className}`}>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* User List */}
         <Card>
           <CardHeader>
-            <CardTitle>Select User</CardTitle>
+            <CardTitle>Chọn User</CardTitle>
             <CardDescription>
-              Choose a user to manage their roles and permissions
+              Chọn người dùng để quản lý vai trò và quyền hạn
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            {/* Search - Mobile First */}
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Tìm kiếm users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
+                  className="pl-10"
+                />
+              </div>
+              <Button 
+                variant="secondary"
+                size="icon"
+                onClick={handleSearch}
+                className="flex-shrink-0"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
             </div>
 
             {/* User List */}

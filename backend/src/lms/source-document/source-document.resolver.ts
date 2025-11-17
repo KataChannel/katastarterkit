@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ID, Int, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Int, Context, ResolveField, Parent } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { SourceDocumentService } from './source-document.service';
 import { MinioService } from '../../minio/minio.service';
@@ -16,13 +16,30 @@ import {
 import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Resolver(() => SourceDocument)
 export class SourceDocumentResolver {
   constructor(
     private readonly sourceDocumentService: SourceDocumentService,
     private readonly minioService: MinioService,
+    private readonly prisma: PrismaService,
   ) {}
+
+  @ResolveField('user')
+  async user(@Parent() sourceDocument: SourceDocument) {
+    if (!sourceDocument.userId) return null;
+    return this.prisma.user.findUnique({
+      where: { id: sourceDocument.userId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+  }
 
   @Mutation(() => SourceDocument)
   @UseGuards(JwtAuthGuard)
@@ -40,6 +57,13 @@ export class SourceDocumentResolver {
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit?: number,
   ) {
     const result = await this.sourceDocumentService.findAll(filter, page, limit);
+    console.log('📄 Source documents query:', {
+      filter,
+      page,
+      limit,
+      totalItems: result.items.length,
+      totalCount: result.total,
+    });
     return result.items;
   }
 

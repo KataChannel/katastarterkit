@@ -23,6 +23,7 @@ import {
   Sparkles,
   Loader2,
   FileText,
+  HelpCircle,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -363,6 +364,10 @@ export default function AdminCoursesPage() {
                   <div className="flex items-center gap-1 whitespace-nowrap">
                     <BookOpen className="w-4 h-4" />
                     <span>{course._count?.modules || 0} modules</span>
+                  </div>
+                  <div className="flex items-center gap-1 whitespace-nowrap" title="Mỗi module có 1 quiz">
+                    <HelpCircle className="w-4 h-4 text-purple-600" />
+                    <span>~{course._count?.modules || 0} quiz</span>
                   </div>
                   <div className="flex items-center gap-1 whitespace-nowrap">
                     <Clock className="w-4 h-4" />

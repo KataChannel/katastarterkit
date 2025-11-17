@@ -809,46 +809,94 @@ LƯU Ý QUAN TRỌNG:
     // Create quizzes for each module
     console.log('   🔄 Creating quizzes for modules...');
     let quizCount = 0;
+    let skippedModules = [];
+    
     for (let i = 0; i < modules.length; i++) {
       const moduleData = modules[i];
       const createdModule = course.modules[i];
 
-      if (moduleData.quiz && createdModule.lessons.length > 0) {
+      // Validate quiz data
+      if (!moduleData.quiz) {
+        console.warn(`   ⚠️  Module ${i + 1} "${moduleData.title}" has no quiz data`);
+        skippedModules.push(`${moduleData.title} (no quiz data)`);
+        continue;
+      }
+
+      if (createdModule.lessons.length === 0) {
+        console.warn(`   ⚠️  Module ${i + 1} "${moduleData.title}" has no lessons, skipping quiz`);
+        skippedModules.push(`${moduleData.title} (no lessons)`);
+        continue;
+      }
+
+      if (!moduleData.quiz.questions || moduleData.quiz.questions.length === 0) {
+        console.warn(`   ⚠️  Module ${i + 1} "${moduleData.title}" has no questions in quiz`);
+        skippedModules.push(`${moduleData.title} (no questions)`);
+        continue;
+      }
+
+      // Validate each question has answers
+      const validQuestions = moduleData.quiz.questions.filter((q: any) => 
+        q.answers && q.answers.length >= 2
+      );
+
+      if (validQuestions.length === 0) {
+        console.warn(`   ⚠️  Module ${i + 1} "${moduleData.title}" has no valid questions (need at least 2 answers each)`);
+        skippedModules.push(`${moduleData.title} (invalid questions)`);
+        continue;
+      }
+
+      try {
         // Get last lesson of module to attach quiz
         const lastLesson = createdModule.lessons[createdModule.lessons.length - 1];
 
-        await this.prisma.quiz.create({
+        const createdQuiz = await this.prisma.quiz.create({
           data: {
-            title: moduleData.quiz.title,
-            description: moduleData.quiz.description,
+            title: moduleData.quiz.title || `Quiz: ${moduleData.title}`,
+            description: moduleData.quiz.description || 'Kiểm tra kiến thức',
             lessonId: lastLesson.id,
             passingScore: moduleData.quiz.passingScore || 70,
             timeLimit: moduleData.quiz.timeLimit || 20,
             maxAttempts: moduleData.quiz.maxAttempts || 3,
             isRequired: moduleData.quiz.isRequired !== false,
             questions: {
-              create: moduleData.quiz.questions.map((question: any) => ({
+              create: validQuestions.map((question: any, qIdx: number) => ({
                 type: question.type || 'MULTIPLE_CHOICE',
                 question: question.question,
-                points: question.points || 10,
-                order: question.order,
+                points: question.points || 25,
+                order: question.order !== undefined ? question.order : qIdx,
                 explanation: question.explanation,
                 answers: {
-                  create: question.answers.map((answer: any) => ({
+                  create: question.answers.map((answer: any, aIdx: number) => ({
                     text: answer.text,
-                    isCorrect: answer.isCorrect,
-                    order: answer.order,
+                    isCorrect: answer.isCorrect || false,
+                    order: answer.order !== undefined ? answer.order : aIdx,
                   })),
                 },
               })),
             },
           },
+          include: {
+            questions: {
+              include: { answers: true }
+            }
+          }
         });
+        
         quizCount++;
+        const questionCount = createdQuiz.questions.length;
+        const totalAnswers = createdQuiz.questions.reduce((sum, q) => sum + q.answers.length, 0);
         console.log(`   ✓ Quiz ${quizCount}/${modules.length} created for module: ${moduleData.title}`);
+        console.log(`      📝 ${questionCount} questions, ${totalAnswers} answers total`);
+      } catch (error) {
+        console.error(`   ❌ Failed to create quiz for module ${i + 1} "${moduleData.title}":`, error.message);
+        skippedModules.push(`${moduleData.title} (creation error)`);
       }
     }
-    console.log(`   ✅ Created ${quizCount} quizzes`);
+    
+    console.log(`   ✅ Created ${quizCount}/${modules.length} quizzes`);
+    if (skippedModules.length > 0) {
+      console.warn(`   ⚠️  Skipped ${skippedModules.length} modules: ${skippedModules.join(', ')}`);
+    }
 
     console.log('   🔄 Fetching complete course data...');
     // Fetch complete course with quizzes
