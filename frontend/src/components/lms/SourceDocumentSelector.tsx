@@ -24,9 +24,38 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   GET_SOURCE_DOCUMENTS,
   GET_SOURCE_DOCUMENT_CATEGORIES,
-  type SourceDocument,
-  type SourceDocumentCategory,
-} from '@/graphql/lms/source-documents.graphql';
+} from '@/graphql/lms/source-documents';
+
+interface SourceDocument {
+  id: string;
+  title: string;
+  description?: string;
+  type: string;
+  status: string;
+  url?: string;
+  fileName?: string;
+  fileSize?: number;
+  thumbnailUrl?: string;
+  categoryId?: string;
+  tags?: string[];
+  aiKeywords?: string[];
+  createdAt: string;
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+    icon?: string;
+    color?: string;
+  };
+}
+
+interface SourceDocumentCategory {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+  color?: string;
+}
 
 interface SourceDocumentSelectorProps {
   value: string[];
