@@ -134,7 +134,7 @@ export default function CreateAIAnalyzePage() {
         title: 'Thành công',
         description: `Khóa học "${data.generateCourseFromDocuments.title}" đã được tạo`,
       });
-      router.push(`/lms/admin/courses/${data.generateCourseFromDocuments.id}`);
+      router.push(`/lms/instructor/courses/${data.generateCourseFromDocuments.id}`);
     },
     onError: (error) => {
       toast({
@@ -154,7 +154,7 @@ export default function CreateAIAnalyzePage() {
         title: 'Lỗi',
         description: 'Không tìm thấy tài liệu nguồn',
       });
-      router.push('/lms/admin/courses/create');
+      router.push('/lms/instructor/courses/create');
       return;
     }
     
@@ -351,7 +351,7 @@ export default function CreateAIAnalyzePage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/lms/admin/courses/create')}
+                onClick={() => router.push('/lms/instructor/courses/create')}
                 className="gap-2"
                 disabled={analyzing}
               >

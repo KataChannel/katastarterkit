@@ -32,9 +32,7 @@ const menuItems = [
     href: '/lms/instructor/courses',
     children: [
       { title: 'Danh sách', href: '/lms/instructor/courses' },
-      { title: 'Tạo mới', href: '/lms/instructor/courses/create' },
-      { title: 'Từ tài liệu', href: '/lms/instructor/courses/create-from-documents' },
-      { title: 'Tạo với AI', href: '/lms/instructor/courses/create-with-ai' },
+      { title: 'Tạo khóa học', href: '/lms/instructor/courses/create' },
     ],
   },
   { 

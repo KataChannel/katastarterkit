@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
-import { Loader2, Sparkles, ArrowRight, ArrowLeft, FileText } from 'lucide-react';
+import { Loader2, Sparkles, ArrowRight, ArrowLeft, FileText, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { ANALYZE_DOCUMENTS_FOR_COURSE, GENERATE_COURSE_FROM_DOCUMENTS } from '@/graphql/lms/courses.graphql';
 import { SourceDocumentSelector } from '@/components/lms/SourceDocumentSelector';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface AnalysisResult {
   suggestedTitle: string;
@@ -98,11 +99,28 @@ export default function CreateCourseFromDocumentsPage() {
       });
     },
     onError: (error) => {
-      toast({
-        type: 'error',
-        title: 'Lỗi',
-        description: error.message,
-      });
+      const errorMessage = error.message;
+      
+      // Handle specific error cases
+      if (errorMessage.includes('No valid published documents found')) {
+        toast({
+          type: 'error',
+          title: 'Tài liệu chưa được xuất bản',
+          description: 'Vui lòng xuất bản (publish) tài liệu nguồn trước khi sử dụng AI phân tích.',
+        });
+      } else if (errorMessage.includes('documentIds')) {
+        toast({
+          type: 'error',
+          title: 'Thiếu tài liệu',
+          description: 'Vui lòng chọn ít nhất 1 tài liệu nguồn.',
+        });
+      } else {
+        toast({
+          type: 'error',
+          title: 'Lỗi phân tích AI',
+          description: errorMessage || 'Không thể phân tích tài liệu. Vui lòng thử lại.',
+        });
+      }
     },
   });
   
@@ -225,27 +243,40 @@ export default function CreateCourseFromDocumentsPage() {
       
       {/* Step 1: Select & Analyze */}
       {currentStep === 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Bước 1: Chọn tài liệu nguồn
-            </CardTitle>
-            <CardDescription>
-              Chọn các tài liệu nguồn để AI phân tích và đề xuất nội dung khóa học
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label>Tài liệu nguồn *</Label>
-              <SourceDocumentSelector
-                value={selectedDocuments}
-                onChange={setSelectedDocuments}
-              />
-              <p className="text-xs text-muted-foreground">
-                Đã chọn {selectedDocuments.length} tài liệu
+        <div className="space-y-6">
+          {/* Important Notice */}
+          <Alert className="border-amber-200 bg-amber-50">
+            <AlertCircle className="h-5 w-5 text-amber-600" />
+            <AlertDescription className="text-amber-900 ml-2">
+              <p className="font-semibold mb-1">📌 Lưu ý quan trọng</p>
+              <p className="text-sm">
+                Tài liệu nguồn phải được <strong>xuất bản (PUBLISHED)</strong> trước khi sử dụng AI phân tích. 
+                Nếu gặp lỗi, vui lòng kiểm tra trạng thái tài liệu tại trang quản lý tài liệu nguồn.
               </p>
-            </div>
+            </AlertDescription>
+          </Alert>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Bước 1: Chọn tài liệu nguồn
+              </CardTitle>
+              <CardDescription>
+                Chọn các tài liệu nguồn để AI phân tích và đề xuất nội dung khóa học
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label>Tài liệu nguồn *</Label>
+                <SourceDocumentSelector
+                  value={selectedDocuments}
+                  onChange={setSelectedDocuments}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Đã chọn {selectedDocuments.length} tài liệu
+                </p>
+              </div>
             
             <div className="space-y-2">
               <Label htmlFor="additionalContext">Thông tin bổ sung (tùy chọn)</Label>
@@ -308,6 +339,7 @@ export default function CreateCourseFromDocumentsPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       )}
       
       {/* Step 2: Edit & Generate */}
