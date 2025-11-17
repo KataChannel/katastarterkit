@@ -2857,7 +2857,7 @@ type Mutation {
   uploadCourseMaterial(courseId: String!, file: Upload!): FileUploadResult!
   uploadCourseThumbnail(courseId: String, file: Upload!): FileUploadResult!
   uploadDocumentThumbnail(documentId: ID!, file: Upload!): String!
-  uploadFile(file: JSON!, folderId: ID, metadata: JSON): FileUploadResponse!
+  uploadFile(bucket: String!, file: Upload!): FileUploadResult!
   uploadImage(bucket: String = "images", editOptions: JSON, file: Upload!): JSON!
   uploadLessonVideo(courseId: String!, file: Upload!): FileUploadResult!
   uploadMultipleImages(bucket: String = "images", editOptions: JSON, files: [Upload!]!): JSON!

@@ -10,6 +10,8 @@ import { onError } from '@apollo/client/link/error';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
+// @ts-ignore - apollo-upload-client doesn't have proper TypeScript definitions
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 
 // Utility function to safely stringify objects for logging
 const safeStringify = (obj: any, maxDepth = 3): string => {
@@ -88,7 +90,7 @@ const getGraphQLUri = () => {
   return endpoint;
 };
 
-const httpLink = createHttpLink({
+const httpLink = createUploadLink({
   uri: getGraphQLUri(),
   // Increase timeout for AI operations (analysis and generation can take 30-60s)
   fetchOptions: {
@@ -125,6 +127,8 @@ const authLink = setContext((_, { headers }) => {
     headers: {
       ...headers,
       ...(token && { authorization: `Bearer ${token}` }),
+      // Add CSRF protection header required by Apollo Server
+      'apollo-require-preflight': 'true',
     },
   };
 });

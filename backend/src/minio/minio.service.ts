@@ -87,7 +87,7 @@ export class MinioService implements OnModuleInit {
   }
 
   private async initializeBuckets(): Promise<void> {
-    const buckets = ['avatars', 'posts', 'uploads'];
+    const buckets = ['avatars', 'posts', 'uploads', 'source-documents'];
     
     for (const bucket of buckets) {
       try {

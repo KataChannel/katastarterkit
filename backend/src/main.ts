@@ -16,6 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { PrismaService } from './prisma/prisma.service';
 import { EnvConfigService } from './config/env-config.service';
+import { GraphQLValidationPipe } from './common/pipes/graphql-validation.pipe';
 import * as dotenv from 'dotenv';
 import { join } from 'path';
 import * as express from 'express';
@@ -76,12 +77,18 @@ async function bootstrap() {
     origin: corsOrigins.length > 0 ? corsOrigins : true,
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: [
+      'Content-Type', 
+      'Authorization', 
+      'X-Requested-With',
+      'apollo-require-preflight', // Apollo CSRF protection
+      'x-apollo-operation-name', // Apollo operation name
+    ],
   });
 
-  // Global validation pipe
+  // Global validation pipe - custom pipe that skips file uploads
   app.useGlobalPipes(
-    new ValidationPipe({
+    new GraphQLValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: false, // ✅ Allow extra properties (GraphQL will validate)
       transform: true,

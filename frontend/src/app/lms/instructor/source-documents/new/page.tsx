@@ -21,6 +21,7 @@ import {
   CREATE_SOURCE_DOCUMENT,
   GET_SOURCE_DOCUMENT_CATEGORIES,
 } from '@/graphql/lms/source-documents';
+import SourceDocumentFileUpload from '@/components/lms/SourceDocumentFileUpload';
 
 const DOCUMENT_TYPES = [
   { value: 'FILE', label: 'File (PDF, DOC, XLS...)', icon: '📄' },
@@ -348,21 +349,23 @@ export default function NewSourceDocumentPage() {
               )}
             </div>
 
-            {/* File Upload Placeholder */}
+            {/* File Upload */}
             {(formData.type === 'FILE' || formData.type === 'AUDIO' || formData.type === 'IMAGE') && (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600 mb-2">
-                  Drag & drop file hoặc click để chọn
-                </p>
-                <p className="text-xs text-gray-500">
-                  Chức năng upload file sẽ được thêm sau
-                </p>
-                <Button type="button" variant="outline" className="mt-4" disabled>
-                  <Upload className="w-4 h-4 mr-2" />
-                  Chọn file (Coming soon)
-                </Button>
-              </div>
+              <SourceDocumentFileUpload
+                documentType={formData.type as 'FILE' | 'AUDIO' | 'IMAGE'}
+                onUploadComplete={(result: any) => {
+                  handleChange('url', result.url);
+                  handleChange('fileName', result.filename);
+                  toast({
+                    type: 'success',
+                    title: 'Upload thành công',
+                    description: `File "${result.filename}" đã được upload`,
+                  });
+                }}
+                onUploadError={(error: Error) => {
+                  console.error('Upload error:', error);
+                }}
+              />
             )}
           </CardContent>
         </Card>

@@ -1,11 +1,12 @@
 import { Resolver, Query, Mutation, Args, ID, Int, Context, ResolveField, Parent } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { SourceDocumentService } from './source-document.service';
 import { MinioService } from '../../minio/minio.service';
 import {
   SourceDocument,
   CourseSourceDocument,
 } from './entities/source-document.entity';
+import { FileUploadResult } from '../files/entities/file-upload.entity';
 import {
   CreateSourceDocumentInput,
   UpdateSourceDocumentInput,
@@ -17,6 +18,7 @@ import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 
 @Resolver(() => SourceDocument)
 export class SourceDocumentResolver {
@@ -24,6 +26,7 @@ export class SourceDocumentResolver {
     private readonly sourceDocumentService: SourceDocumentService,
     private readonly minioService: MinioService,
     private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
   ) {}
 
   @ResolveField('user')
@@ -142,6 +145,53 @@ export class SourceDocumentResolver {
   }
 
   // ============== File Upload ==============
+
+  @Mutation(() => FileUploadResult)
+  @UseGuards(JwtAuthGuard)
+  async uploadFile(
+    @Args({ name: 'file', type: () => GraphQLUpload }) file: Promise<FileUpload>,
+    @Args('bucket', { type: () => String }) bucket: string,
+  ): Promise<FileUploadResult> {
+    const { createReadStream, filename, mimetype } = await file;
+    
+    // Convert stream to buffer
+    const chunks: Buffer[] = [];
+    const stream = createReadStream();
+    
+    return new Promise((resolve, reject) => {
+      stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+      stream.on('error', reject);
+      stream.on('end', async () => {
+        try {
+          const buffer = Buffer.concat(chunks);
+          
+          // Generate unique file name
+          const timestamp = Date.now();
+          const safeName = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const uniqueFileName = `${timestamp}-${safeName}`;
+          
+          // Upload to MinIO using service method
+          const url = await this.minioService.uploadFile(
+            bucket,
+            uniqueFileName,
+            buffer,
+            mimetype,
+          );
+          
+          resolve({
+            id: `${bucket}-${uniqueFileName}`,
+            url,
+            filename,
+            mimetype,
+            size: buffer.length,
+            bucket,
+          });
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+  }
 
   @Mutation(() => String)
   @UseGuards(JwtAuthGuard)

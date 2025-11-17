@@ -198,10 +198,12 @@ export const DELETE_COMMENT = gql`
 export const UPLOAD_FILE = gql`
   mutation UploadFile($file: Upload!, $bucket: String!) {
     uploadFile(file: $file, bucket: $bucket) {
+      id
+      url
       filename
       mimetype
-      encoding
-      url
+      size
+      bucket
     }
   }
 `;

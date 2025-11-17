@@ -2,6 +2,7 @@ import { ObjectType, Field, ID, registerEnumType, Int, Float } from '@nestjs/gra
 import { SourceDocumentType, SourceDocumentStatus } from '@prisma/client';
 import GraphQLJSON from 'graphql-type-json';
 import { User } from '../../../graphql/models/user.model';
+import { FileUploadResult } from '../../files/entities/file-upload.entity';
 
 // Register enums for GraphQL
 registerEnumType(SourceDocumentType, {
