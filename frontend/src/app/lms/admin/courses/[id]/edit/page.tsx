@@ -662,67 +662,142 @@ export default function EditCoursePage() {
           </CardContent>
         </Card>
 
-        {/* SEO */}
-        <Card>
+        {/* SEO & Marketing - HIDDEN */}
+        {/* Uncomment this section to enable SEO & Marketing features */}
+        {/* <Card>
           <CardHeader>
             <CardTitle>SEO & Marketing</CardTitle>
+            <CardDescription>Tối ưu hóa công cụ tìm kiếm và marketing cho khóa học</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="metaTitle">Meta Title</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="metaTitle">Meta Title *</Label>
+                <span className={`text-xs font-medium ${formData.metaTitle.length > 60 ? 'text-red-500' : formData.metaTitle.length > 50 ? 'text-yellow-600' : 'text-gray-500'}`}>
+                  {formData.metaTitle.length}/60
+                </span>
+              </div>
               <Input
                 id="metaTitle"
                 value={formData.metaTitle}
                 onChange={(e) => handleChange('metaTitle', e.target.value)}
                 maxLength={60}
+                placeholder="Tiêu đề hiển thị trên kết quả tìm kiếm Google"
               />
-              <p className="text-xs text-gray-500">{formData.metaTitle.length}/60 ký tự</p>
+              <p className="text-xs text-gray-500">
+                💡 Nên chứa từ khóa chính và dưới 60 ký tự để hiển thị đầy đủ trên Google
+              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="metaDescription">Meta Description</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="metaDescription">Meta Description *</Label>
+                <span className={`text-xs font-medium ${formData.metaDescription.length > 160 ? 'text-red-500' : formData.metaDescription.length > 150 ? 'text-yellow-600' : 'text-gray-500'}`}>
+                  {formData.metaDescription.length}/160
+                </span>
+              </div>
               <Textarea
                 id="metaDescription"
                 value={formData.metaDescription}
                 onChange={(e) => handleChange('metaDescription', e.target.value)}
                 maxLength={160}
                 rows={3}
+                placeholder="Mô tả ngắn gọn về khóa học, hiển thị dưới tiêu đề trên kết quả tìm kiếm"
               />
-              <p className="text-xs text-gray-500">{formData.metaDescription.length}/160 ký tự</p>
+              <p className="text-xs text-gray-500">
+                💡 Mô tả hấp dẫn, chứa lợi ích chính và từ khóa. Tối đa 160 ký tự
+              </p>
             </div>
 
+            <Separator />
+
             <div className="space-y-3">
-              <Label>Tags</Label>
+              <div>
+                <Label>Keywords & Tags</Label>
+                <p className="text-xs text-gray-500 mt-1">
+                  Thêm từ khóa và thẻ để tăng khả năng tìm thấy khóa học
+                </p>
+              </div>
               <div className="flex gap-2">
                 <Input
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="Nhập tag..."
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddItem('tag'))}
+                  placeholder="VD: lập trình, python, AI, machine learning..."
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddItem('tag');
+                    }
+                  }}
                 />
-                <Button type="button" onClick={() => handleAddItem('tag')} size="icon">
+                <Button type="button" onClick={() => handleAddItem('tag')} size="icon" variant="outline">
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
               {tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
                   {tags.map((tag, index) => (
-                    <div key={index} className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                    <div key={index} className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-blue-200 text-blue-700 rounded-full text-sm font-medium shadow-sm hover:shadow transition-shadow">
                       <span>{tag}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveItem('tag', index)}
-                        className="hover:text-blue-900"
+                        className="hover:text-red-600 transition-colors"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ))}
                 </div>
               )}
+              {tags.length === 0 && (
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                  <p className="text-xs text-blue-700">
+                    <strong>Mẹo:</strong> Thêm 5-10 từ khóa liên quan để khóa học dễ tìm kiếm hơn
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label>Xem trước kết quả tìm kiếm</Label>
+              <div className="p-4 bg-white border border-gray-200 rounded-lg">
+                <div className="space-y-1">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-500">google.com › courses › ...</p>
+                      <h3 className="text-lg text-blue-600 hover:underline cursor-pointer font-medium line-clamp-1">
+                        {formData.metaTitle || formData.title || 'Tiêu đề khóa học của bạn'}
+                      </h3>
+                      <p className="text-sm text-gray-700 line-clamp-2 mt-1">
+                        {formData.metaDescription || formData.description || 'Mô tả khóa học sẽ hiển thị ở đây...'}
+                      </p>
+                      {tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {tags.slice(0, 5).map((tag, index) => (
+                            <span key={index} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                              {tag}
+                            </span>
+                          ))}
+                          {tags.length > 5 && (
+                            <span className="text-xs px-2 py-0.5 text-gray-500">
+                              +{tags.length - 5} từ khóa khác
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                Đây là cách khóa học sẽ hiển thị trên Google và các công cụ tìm kiếm khác
+              </p>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Source Documents Section */}
         <Card>
