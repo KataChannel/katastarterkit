@@ -49,6 +49,7 @@ import { EnvConfigService } from './config/env-config.service';
 // Controllers
 import { LogController } from './controllers/log.controller';
 import { FileController } from './controllers/file.controller';
+import { FilesController } from './controllers/files.controller';
 import { ProductNormalizationController } from './api/product-normalization.controller';
 
 // Resolvers
@@ -163,6 +164,7 @@ import { ProjectModule } from './project/project.module';
     LogController,
     TestController,
     FileController,
+    FilesController,
     ProductNormalizationController,
   ],
   providers: [

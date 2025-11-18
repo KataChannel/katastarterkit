@@ -8,8 +8,7 @@
     "backend"
   ],
   "scripts": {
-    "menu": "./vscode-menu.sh",
-    "dev": "concurrently \"bun run dev:backend\" \"bun run dev:frontend\"",
+    "dev": "./vscode-menu.sh",
     "dev:backend": "cd backend && bun run dev",
     "dev:frontend": "cd frontend && bun run dev",
     "dev:rausach": "cp .env.dev.rausach backend/.env && cp .env.dev.rausach frontend/.env.local && concurrently \"bun run dev:rausach:backend\" \"bun run dev:rausach:frontend\"",

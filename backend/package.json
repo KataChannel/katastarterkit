@@ -50,7 +50,8 @@
     "orama:reindex": "bun scripts/orama-reindex.ts",
     "migrate:old-data": "bun run migrate-old-data.ts",
     "verify:migration": "bun run verify-migration.ts",
-    "import:legacy": "bun run prisma/import-legacy-data.ts"
+    "import:legacy": "bun run prisma/import-legacy-data.ts",
+    "import:blog:rausachtrangia": "bun run import-blog-rausachtrangia.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.2",

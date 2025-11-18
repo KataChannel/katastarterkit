@@ -126,7 +126,9 @@ export const GET_COURSE_BY_SLUG = gql`
         lessons {
           id
           title
+          description
           type
+          content
           duration
           order
           isFree
