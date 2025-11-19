@@ -30,6 +30,6 @@ import { UserModule } from '../user/user.module';
     }),
   ],
   providers: [AuthService],
-  exports: [AuthService, JwtModule],
+  exports: [AuthService, JwtModule, UserModule], // Export UserModule for JwtAuthGuard
 })
 export class AuthModule {}

@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CartService } from './cart.service';
+import { NotificationService } from './notification.service';
 import { 
   CreateOrderInput,
   UpdateOrderStatusInput,
@@ -13,6 +14,8 @@ export class OrderService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cartService: CartService,
+    @Inject(forwardRef(() => NotificationService))
+    private readonly notificationService: NotificationService,
   ) {}
 
   /**
@@ -234,6 +237,20 @@ export class OrderService {
 
       return newOrder;
     });
+
+    // 🆕 Gửi notification sau khi tạo order thành công
+    try {
+      await this.notificationService.createOrderNotification(
+        userId,
+        input.guestEmail,
+        order.orderNumber,
+        order.total,
+        order,
+      );
+    } catch (error) {
+      // Log error nhưng không throw để không ảnh hưởng order creation
+      console.error('Failed to send order notification:', error);
+    }
 
     return order;
   }

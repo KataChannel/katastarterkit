@@ -35,6 +35,7 @@ import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package, Menu, Chevron
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import React from 'react';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 export function WebsiteHeader() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -342,25 +343,29 @@ export function WebsiteHeader() {
             />
           </Link>
 
-          {/* Mobile Cart */}
-          {headerSettings['header.show_cart'] && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="relative text-white hover:bg-white/10"
-              onClick={() => router.push('/gio-hang')}
-            >
-              <ShoppingCart className="w-6 h-6" />
-              {cartItemCount > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                >
-                  {cartItemCount}
-                </Badge>
-              )}
-            </Button>
-          )}
+          {/* Mobile Notifications & Cart */}
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            
+            {headerSettings['header.show_cart'] && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative text-white hover:bg-white/10"
+                onClick={() => router.push('/gio-hang')}
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {cartItemCount > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                  >
+                    {cartItemCount}
+                  </Badge>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Mobile Search & Contact */}
@@ -580,6 +585,11 @@ export function WebsiteHeader() {
 
             {/* User Actions */}
             <div className="col-span-2 flex items-center justify-end space-x-3 text-white pr-4">
+              {/* Notifications */}
+              <div className="[&_button]:text-white [&_button:hover]:text-blue-200 [&_button:hover]:bg-white/10">
+                <NotificationBell />
+              </div>
+
               {/* Orders */}
               {isAuthenticated && (
                 <TooltipProvider>

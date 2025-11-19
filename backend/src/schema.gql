@@ -1754,6 +1754,10 @@ input DeleteManyInput {
   where: JSONObject!
 }
 
+input DeleteNotificationInput {
+  notificationId: String!
+}
+
 type DeleteResponse {
   message: String!
   success: Boolean!
@@ -2379,6 +2383,10 @@ enum MaritalStatus {
   WIDOWED
 }
 
+input MarkNotificationAsReadInput {
+  notificationId: String!
+}
+
 """Type of uploaded media"""
 enum MediaType {
   DOCUMENT
@@ -2392,6 +2400,14 @@ type MediaUploader {
   firstName: String
   id: ID!
   lastName: String
+}
+
+type MentionerType {
+  avatar: String
+  firstName: String
+  id: String!
+  lastName: String
+  username: String!
 }
 
 input MenuFilterDto {
@@ -2614,6 +2630,7 @@ type Mutation {
   """Xóa AI provider"""
   deleteAIProvider(id: String!): Boolean!
   deleteAffiliateCampaign(id: String!): Boolean!
+  deleteAllReadNotifications: Boolean!
   deleteBlog(id: ID!): Boolean!
   deleteBlogCategory(id: ID!): Boolean!
   deleteBlogTag(id: ID!): Boolean!
@@ -2635,6 +2652,7 @@ type Mutation {
   deleteMany(input: UnifiedBulkDeleteInput!, modelName: String!): JSONObject!
   deleteMenu(id: ID!): Boolean!
   deleteModule(id: ID!): Boolean!
+  deleteNotification(input: DeleteNotificationInput!): Boolean!
 
   """Delete a single record by ID"""
   deleteOne(input: UnifiedDeleteInput!, modelName: String!): JSONObject!
@@ -2707,8 +2725,10 @@ type Mutation {
   loginWithFacebook(input: SocialLoginInput!): AuthResponse!
   loginWithGoogle(input: SocialLoginInput!): AuthResponse!
   loginWithPhone(input: PhoneLoginInput!): AuthResponse!
+  markAllNotificationsAsRead: Boolean!
   markLessonComplete(enrollmentId: ID!, lessonId: ID!): LessonProgress!
   markMessagesAsRead(conversationId: String!, userId: String!): Int!
+  markNotificationAsRead(input: MarkNotificationAsReadInput!): NotificationType!
   markReviewHelpful(reviewId: ID!): Review!
   mergeCarts(input: MergeCartsInput!): MergeCartsResponse!
 
@@ -2882,6 +2902,28 @@ type NormalizationStats {
   errors: Int!
   skipped: Int!
   updated: Int!
+}
+
+type NotificationListResponse {
+  hasMore: Boolean!
+  notifications: [NotificationType!]!
+  total: Int!
+  unreadCount: Int!
+}
+
+type NotificationType {
+  createdAt: DateTime!
+  data: JSON
+  id: String!
+  isRead: Boolean!
+  mentionedBy: String
+  mentioner: MentionerType
+  message: String!
+  taskId: String
+  title: String!
+  type: String!
+  updatedAt: DateTime!
+  userId: String!
 }
 
 type OffboardingListResponse {
@@ -3869,6 +3911,7 @@ type Query {
   getMyCustomTemplates(archived: Boolean, category: TemplateCategory): [CustomTemplate!]!
   getMyOrders(skip: Float = 0, take: Float = 20): OrderListResponse!
   getMyPosts: [Post!]!
+  getNotifications(isRead: Boolean, skip: Int, take: Int, type: String): NotificationListResponse!
   getOrder(orderId: ID!): OrderType
   getOrderByNumber(email: String, orderNumber: String!): OrderType
   getOrderStatistics(endDate: DateTime, startDate: DateTime): OrderStatisticsResponse!
@@ -3901,6 +3944,7 @@ type Query {
   getTaskById(id: ID!): Task!
   getTasks(filters: TaskFilterInput): [Task!]!
   getTasksPaginated(filters: TaskFilterInput, limit: Int! = 10, page: Int! = 1): TasksPaginatedResult!
+  getUnreadNotificationsCount: Float!
   getUserById(id: String!): User!
   getUserRolePermissions(userId: String!): UserRolePermissionSummary!
   getUserStats: UserStats!

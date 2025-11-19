@@ -38,7 +38,7 @@ import { TaskService } from '../services/task.service';
 import { TaskShareService } from '../services/task-share.service';
 import { TaskCommentService } from '../services/task-comment.service';
 import { TaskMediaService } from '../services/task-media.service';
-import { NotificationService } from '../services/notification.service';
+// NotificationService moved to EcommerceModule
 import { OtpService } from '../services/otp.service';
 import { PubSubService } from '../services/pubsub.service';
 import { PageService } from '../services/page.service';
@@ -150,7 +150,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     TaskShareService,
     TaskCommentService,
     TaskMediaService,
-    NotificationService,
+    // NotificationService moved to EcommerceModule
     OtpService,
     PubSubService,
     PageService,
@@ -188,7 +188,7 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     TaskShareService,
     TaskCommentService,
     TaskMediaService,
-    NotificationService,
+    // NotificationService exported from EcommerceModule
     PubSubService,
     PageService,
     InvoiceService,

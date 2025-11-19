@@ -127,14 +127,13 @@ export function ColumnHeader<T extends RowData>({
   return (
     <div
       className={cn(
-        'group relative flex items-center h-full px-2 select-none',
+        'group relative flex items-center h-full w-full px-2 select-none',
         'border-r border-gray-200 bg-gray-50',
         'hover:bg-gray-100 transition-colors',
         column.headerClass,
         column.pinned === 'left' && 'bg-white shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]',
         column.pinned === 'right' && 'bg-white shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]'
       )}
-      style={{ width }}
     >
       <div className="flex items-center justify-between w-full min-w-0 gap-1">
         <div 

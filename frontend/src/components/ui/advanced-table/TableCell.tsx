@@ -285,12 +285,12 @@ export function TableCell<T extends RowData>({
   if (isEditing) {
     return (
       <div className={cn(
-        'h-full px-2 py-1 bg-white relative flex items-center',
+        'h-full w-full px-2 py-1 bg-white relative flex items-center',
         'border-2 border-blue-500 shadow-[0_0_0_1px_rgba(59,130,246,0.5)]',
         cellClass,
         className
       )}>
-        <div className="flex items-center gap-1 w-full">
+        <div className="flex items-center gap-1 w-full min-w-0">
           <div className="flex-1 min-w-0">
             {renderEditor()}
           </div>
@@ -325,7 +325,7 @@ export function TableCell<T extends RowData>({
   return (
     <div
       className={cn(
-        'h-full px-2 py-1.5 cursor-default flex items-center overflow-hidden',
+        'h-full w-full px-2 py-1.5 cursor-default flex items-center overflow-hidden',
         'text-sm text-gray-800',
         'transition-colors',
         column.editable && 'cursor-cell',

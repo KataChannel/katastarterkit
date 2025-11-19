@@ -18,7 +18,7 @@ import { TaskService } from '../../services/task.service';
 import { TaskShareService } from '../../services/task-share.service';
 import { TaskCommentService } from '../../services/task-comment.service';
 import { TaskMediaService } from '../../services/task-media.service';
-import { NotificationService } from '../../services/notification.service';
+// import { NotificationService } from '../../services/notification.service'; // Moved to EcommerceModule
 import { UserService } from '../../services/user.service';
 import { PubSubService } from '../../services/pubsub.service';
 import { TaskDataLoaderService } from '../../common/data-loaders/task-data-loader.service';
@@ -31,7 +31,7 @@ export class TaskResolver {
     private readonly taskShareService: TaskShareService,
     private readonly taskCommentService: TaskCommentService,
     private readonly taskMediaService: TaskMediaService,
-    private readonly notificationService: NotificationService,
+    // private readonly notificationService: NotificationService, // Removed - moved to EcommerceModule
     private readonly userService: UserService,
     private readonly pubSubService: PubSubService,
     private readonly taskDataLoaderService: TaskDataLoaderService,
@@ -141,9 +141,10 @@ export class TaskResolver {
     }
     
     // Create notification if task is completed
-    if (input.status === 'COMPLETED') {
-      await this.notificationService.createTaskCompletedNotification(task.id, userId);
-    }
+    // TODO: Re-implement task notifications in a separate module if needed
+    // if (input.status === 'COMPLETED') {
+    //   await this.notificationService.createTaskCompletedNotification(task.id, userId);
+    // }
     
     // Smart cache invalidation
     await this.cacheInvalidationService.invalidateTaskCache(task.id, userId);
@@ -179,10 +180,11 @@ export class TaskResolver {
     const share = await this.taskShareService.create(input, userId);
     
     // Create notification for shared user
-    await this.notificationService.createTaskAssignedNotification(
-      input.taskId,
-      input.sharedWithId,
-    );
+    // TODO: Re-implement task notifications in a separate module if needed
+    // await this.notificationService.createTaskAssignedNotification(
+    //   input.taskId,
+    //   input.sharedWithId,
+    // );
     
     // Publish task shared event
     await this.pubSubService.publish('taskShared', { taskShared: share });
@@ -200,10 +202,11 @@ export class TaskResolver {
     const comment = await this.taskCommentService.create(input, userId);
     
     // Create notification for task owner and collaborators
-    await this.notificationService.createTaskCommentNotification(
-      input.taskId,
-      userId,
-    );
+    // TODO: Re-implement task notifications in a separate module if needed
+    // await this.notificationService.createTaskCommentNotification(
+    //   input.taskId,
+    //   userId,
+    // );
     
     // Publish comment created event
     console.log('Publishing taskCommentCreated with comment:', comment);

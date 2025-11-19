@@ -396,18 +396,18 @@ export function AdvancedTable<T extends RowData>({
         />
       )}
 
-      {/* Google Sheets Style Table - Fixed Header + Frozen Columns */}
+      {/* Google Sheets Style Table - Full Width with Fixed Header + Frozen Columns */}
       <div 
         className="relative overflow-auto"
         style={{ height: height - (showToolbar ? 60 : 0) - (enableFiltering ? 80 : 0) }}
       >
-        {/* Sticky Header Container */}
-        <div className="w-full sticky top-0 z-20 flex bg-white">
+        {/* Sticky Header Container - Full Width */}
+        <div className="w-full min-w-full sticky top-0 z-20 flex bg-white">
           {/* Selection Column Header - Frozen */}
           {enableRowSelection && (
             <div 
               className={cn(
-                "sticky left-0 z-30 flex items-center justify-center",
+                "sticky left-0 z-30 flex items-center justify-center flex-shrink-0",
                 GOOGLE_SHEETS_STYLES.headerBg,
                 GOOGLE_SHEETS_STYLES.headerBorder,
                 GOOGLE_SHEETS_STYLES.cellBorder,
@@ -424,12 +424,13 @@ export function AdvancedTable<T extends RowData>({
             </div>
           )}
 
-          {/* Column Headers */}
+          {/* Column Headers - Dynamic Width Distribution */}
           {visibleColumns.map((column, index) => {
             const sortConfig = getSortConfig(column.field);
-            const width = columnWidths[String(column.field)] || column.width || 150;
+            const baseWidth = columnWidths[String(column.field)] || column.width || 150;
             const isFirstColumn = index === 0 && !enableRowSelection;
             const isPinnedLeft = column.pinned === 'left' || isFirstColumn;
+            const isLastColumn = index === visibleColumns.length - 1;
             
             return (
               <div
@@ -438,13 +439,14 @@ export function AdvancedTable<T extends RowData>({
                   GOOGLE_SHEETS_STYLES.headerBg,
                   GOOGLE_SHEETS_STYLES.headerBorder,
                   GOOGLE_SHEETS_STYLES.cellBorder,
-                  "relative",
+                  "relative flex-shrink-0",
                   isPinnedLeft && "sticky z-30 bg-white",
-                  isPinnedLeft && GOOGLE_SHEETS_STYLES.frozenColumn
+                  isPinnedLeft && GOOGLE_SHEETS_STYLES.frozenColumn,
+                  isLastColumn && "flex-grow" // Last column grows to fill remaining space
                 )}
                 style={{ 
-                  width,
-                  minWidth: width,
+                  width: isLastColumn ? 'auto' : baseWidth,
+                  minWidth: baseWidth,
                   height: headerHeight,
                   left: isPinnedLeft ? (enableRowSelection ? 48 : 0) : 'auto'
                 }}
@@ -463,22 +465,22 @@ export function AdvancedTable<T extends RowData>({
                   onHide={() => handleColumnHide(column.field)}
                   onAutoSize={() => handleAutoSizeColumn(column.field)}
                   onResize={(newWidth) => handleColumnResize(column.field, newWidth)}
-                  width={width}
+                  width={baseWidth}
                 />
               </div>
             );
           })}
         </div>
 
-        {/* Table Body */}
-        <div className="relative">
+        {/* Table Body - Full Width Rows */}
+        <div className="relative w-full">
           {processedData.map((row, rowIndex) => (
-            <div key={row.id} className="flex hover:bg-gray-50/50">
+            <div key={row.id} className="w-full min-w-full flex hover:bg-gray-50/50">
               {/* Selection Cell - Frozen */}
               {enableRowSelection && (
                 <div
                   className={cn(
-                    "sticky left-0 z-10 flex items-center justify-center bg-white",
+                    "sticky left-0 z-10 flex items-center justify-center bg-white flex-shrink-0",
                     GOOGLE_SHEETS_STYLES.cellBorder,
                     GOOGLE_SHEETS_STYLES.compactPadding,
                     GOOGLE_SHEETS_STYLES.cellHover,
@@ -494,14 +496,15 @@ export function AdvancedTable<T extends RowData>({
                 </div>
               )}
 
-              {/* Data Cells */}
+              {/* Data Cells - Dynamic Width Distribution */}
               {visibleColumns.map((column, colIndex) => {
                 const value = column.valueGetter ? column.valueGetter(row) : row[column.field];
                 const isEditing = editingCell?.rowId === row.id && editingCell?.field === column.field;
                 const isSelected = selectedRows.has(row.id);
-                const width = columnWidths[String(column.field)] || column.width || 150;
+                const baseWidth = columnWidths[String(column.field)] || column.width || 150;
                 const isFirstColumn = colIndex === 0 && !enableRowSelection;
                 const isPinnedLeft = column.pinned === 'left' || isFirstColumn;
+                const isLastColumn = colIndex === visibleColumns.length - 1;
 
                 return (
                   <div
@@ -511,14 +514,15 @@ export function AdvancedTable<T extends RowData>({
                       GOOGLE_SHEETS_STYLES.compactPadding,
                       GOOGLE_SHEETS_STYLES.fontSize,
                       GOOGLE_SHEETS_STYLES.cellHover,
-                      "bg-white",
+                      "bg-white flex-shrink-0",
                       isPinnedLeft && "sticky z-10",
                       isPinnedLeft && GOOGLE_SHEETS_STYLES.frozenColumn,
-                      isSelected && GOOGLE_SHEETS_STYLES.selectedCell
+                      isSelected && GOOGLE_SHEETS_STYLES.selectedCell,
+                      isLastColumn && "flex-grow" // Last column grows to fill space
                     )}
                     style={{ 
-                      width,
-                      minWidth: width,
+                      width: isLastColumn ? 'auto' : baseWidth,
+                      minWidth: baseWidth,
                       height: rowHeight,
                       left: isPinnedLeft ? (enableRowSelection ? 48 : 0) : 'auto'
                     }}
