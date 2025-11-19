@@ -1,518 +1,588 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useProducts, useDeleteProduct } from '@/hooks/useProducts';
 import { Product, GetProductsInput } from '@/graphql/product.queries';
 import { DataImportComponent } from '@/components/DataImport';
 import { ImportExportDialog } from '@/components/admin/ImportExportDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AdvancedTable, ColumnDef, TableConfig, FilterCondition, SortConfig } from '@/components/ui/advanced-table';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
   Plus,
-  Search,
   Edit,
   Trash2,
   Eye,
-  ChevronLeft,
-  ChevronRight,
   Loader2,
   Download,
   Upload,
   FileSpreadsheet,
   Info,
+  Package,
+  DollarSign,
+  AlertCircle,
+  FileText,
 } from 'lucide-react';
 import { useActiveCategories } from '@/hooks/useCategories';
 import { toast } from 'sonner';
-
-const STATUS_LABELS: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  DRAFT: { label: 'Nháp', variant: 'secondary' },
-  ACTIVE: { label: 'Đang bán', variant: 'default' },
-  INACTIVE: { label: 'Ngừng bán', variant: 'outline' },
-  OUT_OF_STOCK: { label: 'Hết hàng', variant: 'destructive' },
-  DISCONTINUED: { label: 'Ngừng kinh doanh', variant: 'destructive' },
+// Helper to get full image URL
+const getImageUrl = (url?: string) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:13001';
+  return `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-const UNIT_LABELS: Record<string, string> = {
-  KG: 'kg',
-  G: 'g',
-  BUNDLE: 'bó',
-  PIECE: 'củ',
-  BAG: 'túi',
-  BOX: 'hộp',
-};
+// Extend Product - keep string id for uniqueness
+interface ProductRow extends Product {
+  // id is already string | number compatible with RowData
+}
 
 export default function ProductsPage() {
   const router = useRouter();
-  const [filters, setFilters] = React.useState<GetProductsInput>({
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showExcelImportDialog, setShowExcelImportDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<ProductRow[]>([]);
+
+  // State for GraphQL filters
+  const [filters, setFilters] = useState<GetProductsInput>({
     page: 1,
-    limit: 20,
+    limit: 50,
     sortBy: 'createdAt',
     sortOrder: 'desc',
-    filters: {},
+    filters: {}
   });
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [importDialogOpen, setImportDialogOpen] = React.useState(false);
-  const [importExcelDialogOpen, setImportExcelDialogOpen] = React.useState(false);
 
   const { products, pagination, loading, error, refetch } = useProducts(filters);
   const { categories } = useActiveCategories();
-  const { deleteProduct, loading: deleting } = useDeleteProduct();
+  const deleteProduct = useDeleteProduct();
 
-  // Debounced search
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setFilters((prev) => ({
-        ...prev,
-        page: 1,
-        filters: {
-          ...prev.filters,
-          search: searchTerm || undefined,
-        },
-      }));
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+  // Convert products to ProductRow format (keep string id for uniqueness)
+  const productRows = useMemo<ProductRow[]>(() => 
+    products.map(p => ({ ...p })),
+    [products]
+  );
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(price);
-  };
+  // Stats calculation
+  const stats = useMemo(() => {
+    return {
+      total: pagination?.total || 0,
+      active: products.filter(p => p.status === 'active').length,
+      outOfStock: products.filter(p => p.status === 'out_of_stock').length,
+      draft: products.filter(p => p.status === 'draft').length,
+    };
+  }, [products, pagination]);
 
-  const handleFilterChange = (key: string, value: any) => {
-    setFilters((prev) => ({
-      ...prev,
-      page: 1,
-      filters: {
-        ...prev.filters,
-        [key]: value || undefined,
-      },
-    }));
-  };
-
-  const handlePageChange = (newPage: number) => {
-    setFilters((prev) => ({ ...prev, page: newPage }));
-  };
-
-  const handleDeleteClick = async (product: Product) => {
-    try {
-      await deleteProduct(product.id);
-      toast.success(`Đã xóa sản phẩm "${product.name}"`);
-      refetch();
-    } catch (error) {
-      toast.error('Lỗi khi xóa sản phẩm');
-      console.error(error);
-    }
-  };
-
-  const handleExport = async () => {
-    try {
-      const token = localStorage.getItem('accessToken');
-      const queryParams = new URLSearchParams();
-      if (filters.filters?.categoryId) {
-        queryParams.append('categoryId', filters.filters.categoryId as string);
-      }
-      if (filters.filters?.status) {
-        queryParams.append('status', filters.filters.status as string);
-      }
-
-      const backendUrl = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT?.replace('/graphql', '') || 'http://localhost:12001';
-      const url = `${backendUrl}/api/product-import-export/export${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Export failed');
-
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = `SanPham_${Date.now()}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(downloadUrl);
-      document.body.removeChild(a);
-
-      toast.success('Đã export sản phẩm thành công');
-    } catch (error) {
-      toast.error('Không thể export sản phẩm');
-    }
-  };
-
-  return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Quản lý sản phẩm</h1>
-          <p className="text-muted-foreground mt-1">
-            Quản lý danh sách sản phẩm, giá cả và tồn kho
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setImportExcelDialogOpen(true)}>
-            <Upload className="h-4 w-4 mr-2" />
-            Import Excel
-          </Button>
-          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
-            <FileSpreadsheet className="h-4 w-4 mr-2" />
-            Import (Drag-Drop)
-          </Button>
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Export Excel
-          </Button>
-          <Button onClick={() => router.push('/admin/products/create')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Tạo sản phẩm mới
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Tổng sản phẩm
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pagination.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Đang bán
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {products.filter((p) => p.status === 'ACTIVE').length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Hết hàng
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {products.filter((p) => p.status === 'OUT_OF_STOCK').length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Nháp
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-600">
-              {products.filter((p) => p.status === 'DRAFT').length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Tìm kiếm sản phẩm..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <Select
-              value={filters.filters?.categoryId || 'all'}
-              onValueChange={(value) =>
-                handleFilterChange('categoryId', value === 'all' ? undefined : value)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Tất cả danh mục" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả danh mục</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={filters.filters?.status || 'all'}
-              onValueChange={(value) =>
-                handleFilterChange('status', value === 'all' ? undefined : value)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Tất cả trạng thái" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                {Object.entries(STATUS_LABELS).map(([key, { label }]) => (
-                  <SelectItem key={key} value={key}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : error ? (
-            <div className="text-center py-12 text-red-500">
-              Lỗi: {error.message}
-            </div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              Không tìm thấy sản phẩm nào
+  // Column definitions with Mobile First responsive design
+  const columns: ColumnDef<ProductRow>[] = [
+    {
+      field: 'thumbnail',
+      headerName: 'Hình ảnh',
+      width: 100,
+      pinned: 'left',
+      sortable: false,
+      filterable: false,
+      cellRenderer: ({ value, data }) => (
+        <div className="flex items-center justify-center p-1">
+          {value ? (
+            <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-md overflow-hidden border">
+              <Image
+                src={getImageUrl(value)}
+                alt={data.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 48px, 64px"
+              />
             </div>
           ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[80px]">Ảnh</TableHead>
-                    <TableHead>Tên sản phẩm</TableHead>
-                    <TableHead>Danh mục</TableHead>
-                    <TableHead>Giá</TableHead>
-                    <TableHead>Tồn kho</TableHead>
-                    <TableHead>Trạng thái</TableHead>
-                    <TableHead className="text-right">Thao tác</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {products.map((product) => (
-                    <TableRow key={product.id}>
-                      <TableCell>
-                        <img
-                          src={product.thumbnail || product.images?.[0]?.url || '/placeholder-product.png'}
-                          alt={product.name}
-                          className="w-12 h-12 object-cover rounded"
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <div>
-                          {product.name}
-                          {product.isFeatured && (
-                            <Badge variant="outline" className="ml-2 text-xs">
-                              Nổi bật
-                            </Badge>
-                          )}
-                        </div>
-                        {product.sku && (
-                          <div className="text-xs text-muted-foreground">
-                            SKU: {product.sku}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>{product.category?.name}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {formatPrice(product.price)}
-                          </div>
-                          {product.originalPrice &&
-                            product.originalPrice > product.price && (
-                              <div className="text-xs text-muted-foreground line-through">
-                                {formatPrice(product.originalPrice)}
-                              </div>
-                            )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div
-                          className={
-                            product.stock === 0
-                              ? 'text-red-600 font-medium'
-                              : product.stock <= product.minStock
-                              ? 'text-yellow-600 font-medium'
-                              : ''
-                          }
-                        >
-                          {product.stock} {UNIT_LABELS[product.unit]}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={STATUS_LABELS[product.status].variant}>
-                          {STATUS_LABELS[product.status].label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => router.push(`/sanpham/${product.slug}`)}
-                            title="Xem"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() =>
-                              router.push(`/admin/products/${product.id}`)
-                            }
-                            title="Chỉnh sửa"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => handleDeleteClick(product)}
-                            title="Xóa"
-                            className="text-red-500 hover:text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-md bg-gray-100 flex items-center justify-center">
+              <Package className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      field: 'name',
+      headerName: 'Tên sản phẩm',
+      width: 250,
+      minWidth: 200,
+      sortable: true,
+      filterable: true,
+      resizable: true,
+      cellRenderer: ({ value }) => (
+        <div className="font-medium text-sm sm:text-base line-clamp-2">
+          {value}
+        </div>
+      ),
+    },
+    {
+      field: 'category',
+      headerName: 'Danh mục',
+      width: 150,
+      type: 'select',
+      sortable: true,
+      filterable: true,
+      filterOptions: categories.map(c => c.name),
+      cellRenderer: ({ value }) => value?.name || '-',
+    },
+    {
+      field: 'price',
+      headerName: 'Giá',
+      width: 120,
+      type: 'number',
+      sortable: true,
+      filterable: true,
+      cellRenderer: ({ value }) => (
+        <div className="font-semibold text-sm sm:text-base text-green-600">
+          {new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+          }).format(value || 0)}
+        </div>
+      ),
+    },
+    {
+      field: 'stock',
+      headerName: 'Tồn kho',
+      width: 100,
+      type: 'number',
+      sortable: true,
+      filterable: true,
+      cellRenderer: ({ value }) => (
+        <div className={`text-center font-medium text-sm sm:text-base ${
+          value === 0 ? 'text-red-600' : value < 10 ? 'text-yellow-600' : 'text-green-600'
+        }`}>
+          {value || 0}
+        </div>
+      ),
+    },
+    {
+      field: 'status',
+      headerName: 'Trạng thái',
+      width: 130,
+      type: 'select',
+      sortable: true,
+      filterable: true,
+      filterOptions: ['active', 'draft', 'out_of_stock', 'archived'],
+      pinned: 'right',
+      cellRenderer: ({ value }) => {
+        const statusConfig = {
+          active: { label: 'Hoạt động', variant: 'default' as const, icon: Package },
+          draft: { label: 'Nháp', variant: 'secondary' as const, icon: FileText },
+          out_of_stock: { label: 'Hết hàng', variant: 'destructive' as const, icon: AlertCircle },
+          archived: { label: 'Lưu trữ', variant: 'outline' as const, icon: Package },
+        };
+        
+        const config = statusConfig[value as keyof typeof statusConfig] || statusConfig.draft;
+        const Icon = config.icon;
+        
+        return (
+          <Badge variant={config.variant} className="text-xs sm:text-sm">
+            <Icon className="w-3 h-3 mr-1 hidden sm:inline" />
+            {config.label}
+          </Badge>
+        );
+      },
+    },
+    {
+      field: 'id',
+      headerName: 'Thao tác',
+      width: 150,
+      pinned: 'right',
+      sortable: false,
+      filterable: false,
+      cellRenderer: ({ data }) => (
+        <div className="flex items-center gap-1 sm:gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push(`/sanpham/${data.slug}`)}
+            className="text-xs sm:text-sm p-1 sm:p-2"
+          >
+            <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden lg:inline ml-1">Xem</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push(`/admin/products/${data.id}`)}
+            className="text-xs sm:text-sm p-1 sm:p-2"
+          >
+            <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden lg:inline ml-1">Sửa</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDeleteSingle(data)}
+            className="text-xs sm:text-sm p-1 sm:p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden lg:inline ml-1">Xóa</span>
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
-              {/* Pagination */}
-              <div className="flex items-center justify-between px-6 py-4 border-t">
-                <div className="text-sm text-muted-foreground">
-                  Hiển thị {(pagination.page - 1) * pagination.limit + 1} -{' '}
-                  {Math.min(pagination.page * pagination.limit, pagination.total)} của{' '}
-                  {pagination.total} sản phẩm
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Trước
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={pagination.page >= pagination.totalPages}
-                  >
-                    Sau
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
-              </div>
-            </>
+  // Advanced table configuration - Mobile First
+  const tableConfig: TableConfig = {
+    enableSorting: true,
+    enableFiltering: true,
+    enableColumnPinning: true,
+    enableColumnResizing: true,
+    enableColumnHiding: true,
+    enableRowSelection: true,
+    enableInlineEditing: false,
+    enableRowDeletion: true,
+    rowHeight: 80, // Taller for mobile friendly
+    headerHeight: 48,
+    showToolbar: true,
+  };
+
+  // Handle advanced table filters and convert to GraphQL format
+  const handleTableFilter = useCallback((tableFilters: FilterCondition[]) => {
+    const graphqlFilters: GetProductsInput['filters'] = {};
+
+    tableFilters.forEach(filter => {
+      const field = filter.field as keyof Product;
+      
+      switch (filter.operator) {
+        case 'contains':
+          if (field === 'name') {
+            graphqlFilters.search = filter.value;
+          }
+          break;
+        case 'equals':
+          if (field === 'status') {
+            graphqlFilters.status = filter.value;
+          } else if (field === 'category') {
+            const category = categories.find(c => c.name === filter.value);
+            if (category) {
+              graphqlFilters.categoryId = category.id;
+            }
+          }
+          break;
+        case 'in':
+          if (field === 'status' && Array.isArray(filter.value) && filter.value.length > 0) {
+            graphqlFilters.status = filter.value[0]; // Take first for now
+          }
+          break;
+      }
+    });
+
+    setFilters(prev => ({ ...prev, filters: graphqlFilters, page: 1 }));
+  }, [categories]);
+
+  // Handle advanced table sorting
+  const handleTableSort = useCallback((sortConfigs: SortConfig[]) => {
+    if (sortConfigs.length > 0) {
+      const primarySort = sortConfigs[0];
+      setFilters(prev => ({
+        ...prev,
+        sortBy: primarySort.field,
+        sortOrder: primarySort.direction === 'asc' ? 'asc' : 'desc',
+      }));
+    }
+  }, []);
+
+  // Handle row selection
+  const handleRowSelect = useCallback((selectedRows: ProductRow[]) => {
+    setSelectedProducts(selectedRows);
+  }, []);
+
+  // Handle bulk delete
+  const handleBulkDelete = useCallback(async (rows: ProductRow[]): Promise<boolean> => {
+    setSelectedProducts(rows);
+    setShowDeleteDialog(true);
+    return false; // Don't auto-delete, show dialog first
+  }, []);
+
+  // Confirm delete
+  const confirmDelete = async () => {
+    try {
+      const deletePromises = selectedProducts.map(product =>
+        deleteProduct.deleteProduct(String(product.id))
+      );
+      
+      await Promise.all(deletePromises);
+      
+      toast.success(`Đã xóa ${selectedProducts.length} sản phẩm thành công`);
+      setShowDeleteDialog(false);
+      setSelectedProducts([]);
+      refetch();
+      return true;
+    } catch (error: any) {
+      toast.error(`Lỗi khi xóa sản phẩm: ${error.message}`);
+      return false;
+    }
+  };
+
+  // Handle delete single product
+  const handleDeleteSingle = (product: ProductRow) => {
+    setSelectedProducts([product]);
+    setShowDeleteDialog(true);
+  };
+
+  // Export to CSV
+  const handleExport = () => {
+    toast.info('Đang xuất dữ liệu...');
+    // Will be handled by AdvancedTable's built-in export
+  };
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-4 sm:py-6 lg:py-8 px-4">
+        <Alert className="border-red-200 bg-red-50">
+          <AlertCircle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            Lỗi khi tải danh sách sản phẩm: {error.message}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto py-4 sm:py-6 lg:py-8 px-4">
+      {/* Header - Mobile First */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">Quản lý sản phẩm</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+            Quản lý thông tin sản phẩm của cửa hàng
+          </p>
+        </div>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Button
+            onClick={() => setShowExcelImportDialog(true)}
+            variant="outline"
+            size="sm"
+            className="flex-1 sm:flex-none text-xs sm:text-sm"
+          >
+            <Upload className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Import Excel</span>
+            <span className="sm:hidden">Import</span>
+          </Button>
+          <Button
+            onClick={() => setShowImportDialog(true)}
+            variant="outline"
+            size="sm"
+            className="flex-1 sm:flex-none text-xs sm:text-sm"
+          >
+            <FileSpreadsheet className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Import JSON</span>
+            <span className="sm:hidden">JSON</span>
+          </Button>
+          <Button
+            onClick={() => router.push('/admin/products/new')}
+            className="flex-1 sm:flex-none text-xs sm:text-sm"
+          >
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            Thêm mới
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Cards - Mobile First Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Tổng sản phẩm
+            </CardTitle>
+            <Package className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold">{stats.total}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Đang hoạt động
+            </CardTitle>
+            <Package className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+          </CardHeader>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.active}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Hết hàng
+            </CardTitle>
+            <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
+          </CardHeader>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold text-red-600">{stats.outOfStock}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Nháp
+            </CardTitle>
+            <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-xl sm:text-2xl font-bold">{stats.draft}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Advanced Table - Mobile First with horizontal scroll */}
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <AdvancedTable
+              columns={columns}
+              data={productRows}
+              config={tableConfig}
+              onRowSelect={handleRowSelect}
+              onRowDelete={handleBulkDelete}
+              onFilter={handleTableFilter}
+              onSort={handleTableSort}
+              height={600}
+              className="w-full"
+            />
           )}
         </CardContent>
       </Card>
 
-      {/* Import/Export Dialog cũ (Template-based) */}
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md w-[95vw] sm:w-full">
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn xóa {selectedProducts.length} sản phẩm? 
+              Hành động này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {selectedProducts.slice(0, 3).map(product => (
+              <div key={product.id} className="flex items-center gap-2 py-2 border-b last:border-0">
+                {product.thumbnail && (
+                  <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0">
+                    <Image
+                      src={getImageUrl(product.thumbnail)}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                      sizes="40px"
+                    />
+                  </div>
+                )}
+                <span className="text-sm truncate flex-1">{product.name}</span>
+              </div>
+            ))}
+            {selectedProducts.length > 3 && (
+              <div className="text-sm text-muted-foreground text-center py-2">
+                và {selectedProducts.length - 3} sản phẩm khác...
+              </div>
+            )}
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+              className="w-full sm:w-auto"
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deleteProduct.loading}
+              className="w-full sm:w-auto"
+            >
+              {deleteProduct.loading && (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              )}
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Excel Import Dialog */}
       <ImportExportDialog
-        open={importExcelDialogOpen}
-        onOpenChange={setImportExcelDialogOpen}
-        title="Import Sản Phẩm (Template)"
-        description="Tải template Excel, điền dữ liệu và upload lại để import hàng loạt"
-        templateUrl="/api/product-import-export/template"
-        importUrl="/api/product-import-export/import"
+        open={showExcelImportDialog}
+        onOpenChange={setShowExcelImportDialog}
+        title="Import Sản Phẩm từ Excel"
+        description="Tải xuống template Excel, điền thông tin và upload để import sản phẩm hàng loạt"
+        templateUrl="/api/products/export-template"
+        importUrl="/api/products/import"
         onImportSuccess={() => {
+          toast.success('Import sản phẩm thành công!');
           refetch();
-          toast.success('Import sản phẩm thành công');
-          setImportExcelDialogOpen(false);
         }}
       />
 
-      {/* Import/Export Dialog mới với Drag-Drop Mapping - Mobile First + Scrollable */}
-      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-[85vw] h-[95vh] flex flex-col p-0">
-          {/* Header - Fixed */}
-          <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b">
-            <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <FileSpreadsheet className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              Import Sản Phẩm (Drag-Drop)
-            </DialogTitle>
-            <DialogDescription className="text-xs sm:text-sm mt-1">
-              Wizard 4 bước: Nhập → Preview → Mapping → Import
+      {/* JSON Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-4xl w-[95vw] sm:w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Import sản phẩm từ JSON</DialogTitle>
+            <DialogDescription>
+              Kéo thả hoặc chọn file JSON để import dữ liệu sản phẩm
             </DialogDescription>
           </DialogHeader>
-          
-          {/* Content - Scrollable */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+          <div className="flex-1 overflow-auto">
             <DataImportComponent
               modelName="Product"
-              onImportComplete={(result) => {
-                console.log('Import result:', result);
+              onImportComplete={(result: any) => {
                 if (result.success) {
+                  toast.success('Import sản phẩm thành công!');
+                  setShowImportDialog(false);
                   refetch();
-                  toast.success(`✅ Import thành công ${result.successRows || 0} sản phẩm`);
-                  setImportDialogOpen(false);
                 } else {
-                  toast.error(`❌ Import thất bại: ${result.errors?.[0] || 'Unknown error'}`);
+                  toast.error('Import thất bại: ' + (result.message || 'Lỗi không xác định'));
                 }
               }}
             />
           </div>
-          
-          {/* Footer - Fixed (Optional help text) */}
-          <div className="px-4 sm:px-6 py-3 border-t bg-muted/50">
-            <p className="text-xs text-muted-foreground text-center">
-              💡 Mẹo: Sử dụng Ctrl+C để copy từ Excel, Ctrl+V để paste. Mobile: Long press → Copy/Paste
-            </p>
-          </div>
         </DialogContent>
       </Dialog>
+
+      {/* Info Alert - Mobile First */}
+      <Alert className="mt-4">
+        <Info className="h-4 w-4" />
+        <AlertDescription className="text-xs sm:text-sm">
+          <strong>Hướng dẫn:</strong> 
+          <ul className="list-disc list-inside mt-2 space-y-1">
+            <li>Click vào header cột để sắp xếp</li>
+            <li>Sử dụng icon filter trên header để lọc theo cột</li>
+            <li>Chọn nhiều sản phẩm và click Delete để xóa hàng loạt</li>
+            <li>Click nút "Columns" để ẩn/hiện cột, ghim cột trái/phải</li>
+            <li>Kéo viền cột để thay đổi kích thước</li>
+            <li>Sử dụng thanh tìm kiếm toàn cục để tìm nhanh</li>
+          </ul>
+        </AlertDescription>
+      </Alert>
     </div>
   );
 }
