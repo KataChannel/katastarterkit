@@ -88,6 +88,7 @@ export interface GetFilesInput {
   filters?: FileFiltersInput;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  allUsers?: boolean;
 }
 
 export interface UpdateFileInput {

@@ -104,7 +104,7 @@ export default function FileManagerPage() {
     });
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:14000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
       const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
       
       const headers: HeadersInit = {};
@@ -126,7 +126,10 @@ export default function FileManagerPage() {
         throw new Error(errorData.message || `Upload thất bại với status ${response.status}`);
       }
 
-      const results = await response.json();
+      const responseData = await response.json();
+      console.log('Upload response:', responseData, 'Type:', typeof responseData, 'IsArray:', Array.isArray(responseData));
+      // Handle cả object wrapper và array trực tiếp
+      const results = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
       setUploadingFiles(prev => prev.map((f, index) => ({
         ...f,
@@ -373,7 +376,7 @@ export default function FileManagerPage() {
           </div>
 
           <TabsContent value="all" className="flex-1 mt-0 p-4 md:p-6 overflow-auto">
-            <FileManager viewMode={viewMode} sortBy={{ field: 'name', order: 'asc' }} searchQuery={searchQuery} />
+            <FileManager viewMode={viewMode} sortBy={{ field: 'name', order: 'asc' }} searchQuery={searchQuery} allowMultiple={true} />
           </TabsContent>
 
           <TabsContent value="recent" className="flex-1 mt-0 p-4 md:p-6 overflow-auto">
@@ -382,6 +385,7 @@ export default function FileManagerPage() {
               sortBy={{ field: 'date', order: 'desc' }} 
               searchQuery={searchQuery}
               limit={50}
+              allowMultiple={true}
             />
           </TabsContent>
 
@@ -391,6 +395,7 @@ export default function FileManagerPage() {
               sortBy={{ field: 'name', order: 'asc' }} 
               searchQuery={searchQuery}
               filter={{ type: FileType.IMAGE }}
+              allowMultiple={true}
             />
           </TabsContent>
 
@@ -400,6 +405,7 @@ export default function FileManagerPage() {
               sortBy={{ field: 'name', order: 'asc' }} 
               searchQuery={searchQuery}
               filter={{ type: FileType.VIDEO }}
+              allowMultiple={true}
             />
           </TabsContent>
 

@@ -150,13 +150,15 @@ export class FileService {
       filters = {},
       sortBy = 'createdAt',
       sortOrder = 'desc',
+      allUsers = false,
     } = input;
 
     const skip = (page - 1) * limit;
 
     // Build where clause
     const where: Prisma.FileWhereInput = {
-      userId, // Only show user's files
+      // Nếu allUsers = true, không filter theo userId (hiển thị tất cả file)
+      ...(allUsers ? {} : { userId }),
       ...(filters.fileType && { fileType: filters.fileType }),
       ...(filters.folderId && { folderId: filters.folderId }),
       ...(filters.visibility && { visibility: filters.visibility }),

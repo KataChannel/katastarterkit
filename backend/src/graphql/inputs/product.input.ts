@@ -1,5 +1,6 @@
 import { InputType, Field, Float, Int, ID } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
+import { IsNotEmpty, IsOptional, IsString, IsNumber, IsBoolean, IsEnum } from 'class-validator';
 import { ProductStatus, ProductUnit } from '../types/product.type';
 
 // Create Product Input
@@ -91,87 +92,172 @@ export class CreateProductInput {
 @InputType()
 export class UpdateProductInput {
   @Field(() => ID)
+  @IsNotEmpty({ message: 'Product ID is required' })
+  @IsString()
   id: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   name?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   slug?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   description?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   shortDesc?: string;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  shortDescription?: string; // Alias for shortDesc
+
   @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
   price?: number;
 
   @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
   originalPrice?: number;
 
   @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
   costPrice?: number;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   sku?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   barcode?: string;
 
   @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsNumber()
   stock?: number;
 
   @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsNumber()
   minStock?: number;
 
   @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsNumber()
   maxStock?: number;
 
   @Field(() => ProductUnit, { nullable: true })
+  @IsOptional()
+  @IsEnum(ProductUnit)
   unit?: ProductUnit;
 
   @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
   weight?: number;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   origin?: string;
 
   @Field(() => ProductStatus, { nullable: true })
+  @IsOptional()
+  @IsEnum(ProductStatus)
   status?: ProductStatus;
 
   @Field(() => ID, { nullable: true })
+  @IsOptional()
+  @IsString()
   categoryId?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   thumbnail?: string;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string; // Alias for thumbnail
+
   @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
   attributes?: any;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   metaTitle?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   metaDescription?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   metaKeywords?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
   isFeatured?: boolean;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
   isNewArrival?: boolean;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isNew?: boolean; // Alias for isNewArrival
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
   isBestSeller?: boolean;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
   isOnSale?: boolean;
 
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isOrganic?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  dimensions?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  manufacturer?: string;
+
   @Field(() => Int, { nullable: true })
+  @IsOptional()
+  @IsNumber()
   displayOrder?: number;
 }
 

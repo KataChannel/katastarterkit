@@ -40,9 +40,9 @@ export class FilesResolver {
     return this.filesService.uploadCourseMaterial(file, user.id, courseId);
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, { name: 'deleteLMSFile' })
   @UseGuards(JwtAuthGuard)
-  async deleteFile(
+  async deleteLMSFile(
     @CurrentUser() user: any,
     @Args('fileId', { type: () => String }) fileId: string,
     @Args('bucket', { type: () => String }) bucket: string,

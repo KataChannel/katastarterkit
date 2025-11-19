@@ -50,7 +50,17 @@ export function FilePicker({
   };
 
   const handleFileSelection = (file: File) => {
-    setSelectedFile(file);
+    console.log('FilePicker: File selected', file);
+    if (!allowMultiple) {
+      // Single select mode: auto-select and close
+      console.log('FilePicker: Auto-selecting in single mode');
+      onSelect(file);
+      onOpenChange(false);
+      setSelectedFile(null);
+    } else {
+      // Multiple select mode: store selection (to be implemented)
+      setSelectedFile(file);
+    }
   };
 
   const handleCancel = () => {

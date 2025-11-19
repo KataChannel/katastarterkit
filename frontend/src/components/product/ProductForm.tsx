@@ -133,7 +133,39 @@ export function ProductForm({ product, onSubmit, onCancel, loading = false }: Pr
   const watchedFields = watch();
 
   const handleFormSubmit = async (data: ProductFormData) => {
-    await onSubmit(data as any);
+    console.log('ProductForm - raw form data:', data);
+    // Map form fields to backend fields
+    const mappedData = {
+      name: data.name,
+      categoryId: data.categoryId,
+      description: data.description,
+      shortDesc: data.shortDescription, // Form field → Backend field
+      sku: data.sku,
+      barcode: data.barcode,
+      price: data.price,
+      originalPrice: data.compareAtPrice, // compareAtPrice → originalPrice
+      costPrice: data.costPrice,
+      unit: data.unit,
+      stock: data.stock,
+      minStock: data.minStock,
+      status: data.status,
+      thumbnail: data.imageUrl, // imageUrl → thumbnail
+      origin: data.origin,
+      isFeatured: data.isFeatured,
+      isNewArrival: data.isNew, // isNew → isNewArrival
+      isBestSeller: data.isBestSeller,
+      weight: data.weight,
+      attributes: {
+        dimensions: data.dimensions,
+        manufacturer: data.manufacturer,
+      },
+      metaTitle: data.metaTitle,
+      metaDescription: data.metaDescription,
+      metaKeywords: data.metaKeywords,
+    };
+
+    console.log('ProductForm - mappedData:', mappedData);
+    await onSubmit(mappedData as any);
   };
 
   const handleFileSelect = (file: File | string) => {

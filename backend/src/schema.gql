@@ -2198,6 +2198,7 @@ input GetCategoriesInput {
 }
 
 input GetFilesInput {
+  allUsers: Boolean = false
   filters: FileFiltersInput
   limit: Int! = 20
   page: Int! = 1
@@ -2624,11 +2625,10 @@ type Mutation {
   deleteCustomTemplate(id: String!): Boolean!
   deleteDiscussion(id: ID!): Boolean!
   deleteEmployeeProfile(id: ID!): DeleteResponse!
-
-  """Delete a file"""
-  deleteFile(fileId: ID!, type: String!): Boolean!
+  deleteFile(id: ID!): Boolean!
   deleteFolder(id: ID!): Boolean!
   deleteInvoice(id: ID!): Boolean!
+  deleteLMSFile(bucket: String!, fileId: String!): Boolean!
   deleteLesson(id: ID!): Boolean!
 
   """Delete multiple records matching criteria"""
@@ -2648,6 +2648,9 @@ type Mutation {
 
   """Archive/Soft delete project (owner/admin only)"""
   deleteProject(id: ID!): Project!
+
+  """Delete a project/task/chat file"""
+  deleteProjectFile(fileId: ID!, type: String!): Boolean!
   deleteQuiz(id: String!): Boolean!
   deleteReview(reviewId: ID!): Boolean!
   deleteRole(id: String!): Boolean!
@@ -3566,14 +3569,19 @@ type ProductType {
   createdAt: DateTime!
   createdBy: String
   description: String
+  dimensions: String
   discountPercentage: Float
   displayOrder: Int!
   id: ID!
+  imageUrl: String
   images: [ProductImageType!]
   isBestSeller: Boolean!
   isFeatured: Boolean!
+  isNew: Boolean
   isNewArrival: Boolean!
   isOnSale: Boolean!
+  isOrganic: Boolean
+  manufacturer: String
   maxStock: Int
   metaDescription: String
   metaKeywords: String
@@ -3586,6 +3594,7 @@ type ProductType {
   profitMargin: Float
   publishedAt: DateTime
   shortDesc: String
+  shortDescription: String
   sku: String
   slug: String!
   soldCount: Int!
@@ -5369,12 +5378,17 @@ input UpdateProductInput {
   categoryId: ID
   costPrice: Float
   description: String
+  dimensions: String
   displayOrder: Int
   id: ID!
+  imageUrl: String
   isBestSeller: Boolean
   isFeatured: Boolean
+  isNew: Boolean
   isNewArrival: Boolean
   isOnSale: Boolean
+  isOrganic: Boolean
+  manufacturer: String
   maxStock: Int
   metaDescription: String
   metaKeywords: String
@@ -5385,6 +5399,7 @@ input UpdateProductInput {
   originalPrice: Float
   price: Float
   shortDesc: String
+  shortDescription: String
   sku: String
   slug: String
   status: ProductStatus

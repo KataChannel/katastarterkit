@@ -10,6 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { UploadDialog } from '@/components/file-manager/UploadDialog';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Upload,
   Grid3x3,
   List,
@@ -77,6 +85,8 @@ export function FileManager({
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
   // Use external props if provided, otherwise use internal state
@@ -85,17 +95,21 @@ export function FileManager({
   const sortBy = externalSortBy || { field: 'date' as const, order: 'desc' as const };
 
   // Build query input
-  const queryInput: GetFilesInput = {
-    page,
-    limit,
+  const queryInput = {
+    page: page,
+    limit: limit,
     filters: {
+      search: searchQuery || undefined,
+      // Ưu tiên fileTypes prop (từ FilePicker), sau đó mới đến filter
+      ...(fileTypes && fileTypes.length > 0 
+        ? { fileType: fileTypes[0] } 
+        : filter?.type && { fileType: filter.type }
+      ),
       ...(folderId && { folderId }),
-      ...(searchQuery && { search: searchQuery }),
-      ...(filter?.type && { fileType: filter.type }),
-      ...(fileTypes && fileTypes.length > 0 && !filter?.type && { fileType: fileTypes[0] }),
     },
     sortBy: sortBy.field === 'name' ? 'filename' : sortBy.field === 'date' ? 'createdAt' : 'size',
     sortOrder: sortBy.order,
+    allUsers: true, // Hiển thị tất cả file không phân biệt user
   };
 
   const { files, loading, refetch } = useFiles(queryInput);
@@ -165,6 +179,18 @@ export function FileManager({
     setSelectedFiles(newSelection);
   };
 
+  // Handle file click - for FilePicker mode
+  const handleFileClick = (file: File) => {
+    if (onSelect) {
+      // FilePicker mode: call onSelect immediately
+      console.log('FileManager: Calling onSelect with file', file);
+      onSelect(file);
+    } else {
+      // Normal mode: toggle selection for bulk operations
+      toggleFileSelection(file.id);
+    }
+  };
+
   // Delete file
   const handleDeleteFile = async (fileId: string) => {
     if (confirm('Are you sure you want to delete this file?')) {
@@ -187,28 +213,36 @@ export function FileManager({
     }
   };
 
-  // Bulk delete
-  const handleBulkDelete = async () => {
+  // Open delete confirmation dialog
+  const openDeleteDialog = () => {
+    if (selectedFiles.size === 0) return;
+    setDeleteDialogOpen(true);
+  };
+
+  // Confirm and execute bulk delete
+  const confirmBulkDelete = async () => {
     if (selectedFiles.size === 0) return;
     
-    if (confirm(`Delete ${selectedFiles.size} selected file(s)?`)) {
-      try {
-        await bulkDeleteFiles({ fileIds: Array.from(selectedFiles) });
-        toast({
-          type: 'success',
-          title: 'Success',
-          description: `${selectedFiles.size} file(s) deleted successfully`,
-        });
-        setSelectedFiles(new Set());
-        refetch();
-      } catch (error: any) {
-        toast({
-          type: 'error',
-          title: 'Error',
-          description: error.message || 'Failed to delete files',
-          variant: 'destructive',
-        });
-      }
+    setIsDeleting(true);
+    try {
+      await bulkDeleteFiles({ fileIds: Array.from(selectedFiles) });
+      toast({
+        type: 'success',
+        title: 'Xóa thành công',
+        description: `Đã xóa ${selectedFiles.size} file`,
+      });
+      setSelectedFiles(new Set());
+      setDeleteDialogOpen(false);
+      refetch();
+    } catch (error: any) {
+      toast({
+        type: 'error',
+        title: 'Lỗi xóa file',
+        description: error.message || 'Không thể xóa file',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -241,6 +275,20 @@ export function FileManager({
 
   return (
     <div className="w-full h-full flex flex-col">
+      {/* Bulk Delete Button - Always show when files selected and not in picker mode */}
+      {!onSelect && selectedFiles.size > 0 && (
+        <div className="mb-3 flex justify-end">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={openDeleteDialog}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Xóa ({selectedFiles.size})
+          </Button>
+        </div>
+      )}
+      
       {/* Toolbar - only show if not controlled externally */}
       {externalViewMode === undefined && externalSearchQuery === undefined && (
         <Card className="mb-4">
@@ -266,17 +314,6 @@ export function FileManager({
                   <Upload className="w-4 h-4 mr-2" />
                   Upload
                 </Button>
-                {/* Bulk Delete */}
-                {selectedFiles.size > 0 && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleBulkDelete}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete ({selectedFiles.size})
-                  </Button>
-                )}
                 {/* Refresh */}
                 <Button variant="outline" size="sm" onClick={() => refetch()}>
                   <RefreshCw className="w-4 h-4" />
@@ -335,7 +372,7 @@ export function FileManager({
                     className={`cursor-pointer hover:shadow-lg transition-shadow ${
                       selectedFiles.has(file.id) ? 'ring-2 ring-blue-500' : ''
                     }`}
-                    onClick={() => toggleFileSelection(file.id)}
+                    onClick={() => handleFileClick(file)}
                   >
                     <CardContent className="p-4">
                       {/* Thumbnail */}
@@ -418,7 +455,7 @@ export function FileManager({
                     className={`cursor-pointer hover:shadow-md transition-shadow ${
                       selectedFiles.has(file.id) ? 'ring-2 ring-blue-500' : ''
                     }`}
-                    onClick={() => toggleFileSelection(file.id)}
+                    onClick={() => handleFileClick(file)}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -514,6 +551,95 @@ export function FileManager({
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-full bg-red-100 dark:bg-red-900">
+                <Trash2 className="h-5 w-5 text-red-600 dark:text-red-300" />
+              </div>
+              <div>
+                <DialogTitle>Xác nhận xóa file</DialogTitle>
+                <DialogDescription>
+                  Hành động này không thể hoàn tác
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">
+                    Cảnh báo
+                  </h4>
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    Bạn đang xóa <strong>{selectedFiles.size} file</strong>. 
+                    Dữ liệu sẽ bị xóa vĩnh viễn khỏi hệ thống.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-sm">
+              <p className="font-medium mb-2">File sẽ bị xóa:</p>
+              <div className="max-h-[200px] overflow-y-auto bg-muted/30 rounded-md p-3">
+                <ul className="space-y-1.5">
+                  {Array.from(selectedFiles).slice(0, 5).map((id) => {
+                    const file = files?.items?.find(f => f.id === id);
+                    return file ? (
+                      <li key={id} className="flex items-center gap-2 text-sm">
+                        <FileIcon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                        <span className="truncate">{file.originalName}</span>
+                      </li>
+                    ) : null;
+                  })}
+                  {selectedFiles.size > 5 && (
+                    <li className="text-muted-foreground italic text-sm pl-6">
+                      ... và {selectedFiles.size - 5} file khác
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmBulkDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Đang xóa...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Xóa
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -174,8 +174,11 @@ export function useUpdateProduct() {
   >(UPDATE_PRODUCT);
 
   return {
-    updateProduct: (input: UpdateProductInput) =>
-      updateProduct({ variables: { input } }),
+    updateProduct: (input: UpdateProductInput) => {
+      console.log('useUpdateProduct hook - input:', input);
+      console.log('useUpdateProduct hook - variables:', { input });
+      return updateProduct({ variables: { input } });
+    },
     product: data?.updateProduct,
     loading,
     error,

@@ -55,6 +55,12 @@ export class ProductResolver {
   @Mutation(() => ProductType, { name: 'updateProduct' })
   @UseGuards(JwtAuthGuard)
   async updateProduct(@Args('input') input: UpdateProductInput) {
+    console.log('UpdateProduct resolver - input received:', input);
+    console.log('UpdateProduct resolver - input.id:', input?.id);
+    console.log('UpdateProduct resolver - input type:', typeof input);
+    console.log('UpdateProduct resolver - input constructor:', input?.constructor?.name);
+    console.log('UpdateProduct resolver - input keys:', Object.keys(input || {}));
+    console.log('UpdateProduct resolver - JSON:', JSON.stringify(input, null, 2));
     return this.productService.updateProduct(input);
   }
 
@@ -128,5 +134,37 @@ export class ProductResolver {
       return null;
     }
     return ((product.price - product.costPrice) / product.price) * 100;
+  }
+
+  // Alias field resolvers
+  @ResolveField(() => String, { nullable: true })
+  async shortDescription(@Parent() product: any) {
+    return product.shortDesc || null;
+  }
+
+  @ResolveField(() => String, { nullable: true })
+  async imageUrl(@Parent() product: any) {
+    return product.thumbnail || null;
+  }
+
+  @ResolveField(() => Boolean, { nullable: true })
+  async isNew(@Parent() product: any) {
+    return product.isNewArrival || false;
+  }
+
+  // Attributes field resolvers
+  @ResolveField(() => Boolean, { nullable: true })
+  async isOrganic(@Parent() product: any) {
+    return product.attributes?.isOrganic || null;
+  }
+
+  @ResolveField(() => String, { nullable: true })
+  async dimensions(@Parent() product: any) {
+    return product.attributes?.dimensions || null;
+  }
+
+  @ResolveField(() => String, { nullable: true })
+  async manufacturer(@Parent() product: any) {
+    return product.attributes?.manufacturer || null;
   }
 }

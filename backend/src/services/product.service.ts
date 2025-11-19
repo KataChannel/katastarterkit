@@ -123,12 +123,62 @@ export class ProductService {
 
   // Update product
   async updateProduct(input: UpdateProductInput) {
-    const { id, ...data } = input;
+    console.log('ProductService.updateProduct - raw input:', input);
+    console.log('ProductService.updateProduct - input.id:', input.id);
+    console.log('ProductService.updateProduct - input type:', typeof input);
+    console.log('ProductService.updateProduct - input keys:', Object.keys(input));
+    
+    // Validate ID first before destructuring
+    if (!input?.id) {
+      console.error('ProductService.updateProduct - MISSING ID!', { input });
+      throw new BadRequestException('Product ID is required for update');
+    }
+
+    const id = input.id;
+    const { 
+      id: _id, 
+      shortDescription, 
+      imageUrl, 
+      isNew,
+      isOrganic,
+      dimensions,
+      manufacturer,
+      ...data 
+    } = input;
+
+    console.log('ProductService.updateProduct - extracted id:', id);
+    console.log('ProductService.updateProduct - data to update:', data);
 
     // Check if product exists
     const product = await this.prisma.product.findUnique({ where: { id } });
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    // Map aliases to correct field names
+    if (shortDescription !== undefined) {
+      data.shortDesc = shortDescription;
+    }
+    if (imageUrl !== undefined) {
+      data.thumbnail = imageUrl;
+    }
+    if (isNew !== undefined) {
+      data.isNewArrival = isNew;
+    }
+
+    // Handle extra fields in attributes
+    const extraAttributes: any = {};
+    if (isOrganic !== undefined) extraAttributes.isOrganic = isOrganic;
+    if (dimensions !== undefined) extraAttributes.dimensions = dimensions;
+    if (manufacturer !== undefined) extraAttributes.manufacturer = manufacturer;
+
+    // Merge with existing attributes
+    if (Object.keys(extraAttributes).length > 0) {
+      const currentAttributes = product.attributes || {};
+      data.attributes = {
+        ...(typeof currentAttributes === 'object' ? currentAttributes : {}),
+        ...extraAttributes,
+      };
     }
 
     // Check if slug is being updated and if it's unique

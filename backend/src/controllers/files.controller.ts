@@ -6,11 +6,13 @@ import {
   UseGuards,
   Logger,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { MinioService } from '../minio/minio.service';
 import { ImageOptimizationService } from '../services/image-optimization.service';
+import { FileService } from '../services/file.service';
 
 interface UploadedFileResult {
   originalName: string;
@@ -33,6 +35,7 @@ export class FilesController {
   constructor(
     private readonly minioService: MinioService,
     private readonly imageOptimizationService: ImageOptimizationService,
+    private readonly fileService: FileService,
   ) {}
 
   @Post('upload/bulk')
@@ -40,18 +43,24 @@ export class FilesController {
   @UseInterceptors(FilesInterceptor('files', 20)) // Tối đa 20 files
   async uploadFiles(
     @UploadedFiles() files: Array<Express.Multer.File>,
+    @Req() request: any,
   ): Promise<UploadedFileResult[]> {
     if (!files || files.length === 0) {
       throw new BadRequestException('Không có file nào được upload');
     }
 
-    this.logger.log(`Uploading ${files.length} files`);
+    const userId = request.user?.id;
+    if (!userId) {
+      throw new BadRequestException('User ID not found in request');
+    }
+
+    this.logger.log(`Uploading ${files.length} files for user ${userId}`);
 
     const results: UploadedFileResult[] = [];
 
     for (const file of files) {
       try {
-        const result = await this.uploadSingleFile(file);
+        const result = await this.uploadSingleFile(file, userId);
         results.push(result);
       } catch (error) {
         this.logger.error(`Failed to upload file ${file.originalname}:`, error);
@@ -73,6 +82,7 @@ export class FilesController {
 
   private async uploadSingleFile(
     file: Express.Multer.File,
+    userId: string,
   ): Promise<UploadedFileResult> {
     const isImage = this.imageOptimizationService.isImage(file.mimetype);
     const originalSize = file.size;
@@ -127,6 +137,22 @@ export class FilesController {
       buffer,
       format,
     );
+
+    // Lưu metadata vào database qua FileService
+    const multerFile: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: file.originalname,
+      encoding: file.encoding || '7bit',
+      mimetype: format,
+      size: buffer.length,
+      buffer: buffer,
+      stream: null,
+      destination: '',
+      filename: filename,
+      path: `uploads/${filename}`,
+    };
+
+    await this.fileService.uploadFile(multerFile, userId);
 
     return {
       originalName: file.originalname,

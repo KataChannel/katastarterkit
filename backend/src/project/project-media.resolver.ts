@@ -127,10 +127,10 @@ export class ProjectMediaResolver {
   }
 
   @Mutation(() => Boolean, {
-    name: 'deleteFile',
-    description: 'Delete a file',
+    name: 'deleteProjectFile',
+    description: 'Delete a project/task/chat file',
   })
-  async deleteFile(
+  async deleteProjectFile(
     @Args('fileId', { type: () => ID }) fileId: string,
     @Args('type') type: 'task' | 'project' | 'chat',
     @CurrentUser('id') userId: string,

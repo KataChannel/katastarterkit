@@ -141,7 +141,7 @@ export function useFileUpload() {
       const response = await fetch(`${apiUrl}/api/files/upload`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: formData,
       });
@@ -176,7 +176,7 @@ export function useFileUpload() {
       const response = await fetch(`${apiUrl}/api/files/upload/bulk`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: formData,
       });

@@ -119,6 +119,9 @@ export class ProductType {
   @Field({ nullable: true })
   shortDesc?: string;
 
+  @Field({ nullable: true })
+  shortDescription?: string; // Alias for shortDesc
+
   // Pricing
   @Field(() => Float)
   price: number;
@@ -172,6 +175,9 @@ export class ProductType {
   @Field({ nullable: true })
   thumbnail?: string;
 
+  @Field({ nullable: true })
+  imageUrl?: string; // Alias for thumbnail
+
   // Variants
   @Field(() => [ProductVariantType], { nullable: true })
   variants?: ProductVariantType[];
@@ -197,11 +203,23 @@ export class ProductType {
   @Field()
   isNewArrival: boolean;
 
+  @Field({ nullable: true })
+  isNew?: boolean; // Alias for isNewArrival
+
   @Field()
   isBestSeller: boolean;
 
   @Field()
   isOnSale: boolean;
+
+  @Field({ nullable: true })
+  isOrganic?: boolean; // From attributes
+
+  @Field({ nullable: true })
+  dimensions?: string; // From attributes
+
+  @Field({ nullable: true })
+  manufacturer?: string; // From attributes
 
   @Field(() => Int)
   displayOrder: number;

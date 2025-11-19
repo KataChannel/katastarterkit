@@ -15,12 +15,17 @@ export default function EditProductPage() {
   const params = useParams();
   const productId = params.id as string;
 
+  console.log('EditProductPage - params:', params, 'productId:', productId);
+
   const { product, loading: loadingProduct } = useProduct(productId);
   const { updateProduct, loading: updating } = useUpdateProduct();
 
   const handleSubmit = async (data: UpdateProductInput | any) => {
     try {
-      await updateProduct({ id: productId, ...data } as UpdateProductInput);
+      console.log('handleSubmit - productId:', productId, 'data:', data);
+      const updateData = { ...data, id: productId };
+      console.log('handleSubmit - updateData with id:', updateData);
+      await updateProduct(updateData as UpdateProductInput);
       toast.success('Cập nhật sản phẩm thành công!');
       router.push('/admin/products');
     } catch (error: any) {

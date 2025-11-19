@@ -233,4 +233,8 @@ export class GetFilesInput {
   @IsOptional()
   @IsString()
   sortOrder?: 'asc' | 'desc';
+
+  @Field({ nullable: true, defaultValue: false })
+  @IsOptional()
+  allUsers?: boolean;
 }

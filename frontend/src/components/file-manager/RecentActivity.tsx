@@ -1,9 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useFiles } from '@/hooks/useFiles';
+import { formatDistanceToNow } from 'date-fns';
+import { vi } from 'date-fns/locale';
 import {
   Clock,
   File,
@@ -12,63 +16,22 @@ import {
   FileText,
   Music,
   Archive,
-  Download,
-  Eye,
-  Trash2
+  AlertCircle,
 } from 'lucide-react';
-
-interface RecentFile {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  uploadedAt: string;
-  thumbnail?: string;
-}
 
 interface RecentActivityProps {
   limit?: number;
 }
 
 export function RecentActivity({ limit = 10 }: RecentActivityProps) {
-  // Mock data - in production, fetch from API
-  const recentFiles: RecentFile[] = [
-    {
-      id: '1',
-      name: 'project-design.png',
-      type: 'IMAGE',
-      size: 2048576,
-      uploadedAt: '2 minutes ago',
-    },
-    {
-      id: '2',
-      name: 'presentation.pdf',
-      type: 'DOCUMENT',
-      size: 5242880,
-      uploadedAt: '15 minutes ago',
-    },
-    {
-      id: '3',
-      name: 'demo-video.mp4',
-      type: 'VIDEO',
-      size: 15728640,
-      uploadedAt: '1 hour ago',
-    },
-    {
-      id: '4',
-      name: 'audio-track.mp3',
-      type: 'AUDIO',
-      size: 4194304,
-      uploadedAt: '2 hours ago',
-    },
-    {
-      id: '5',
-      name: 'backup.zip',
-      type: 'ARCHIVE',
-      size: 10485760,
-      uploadedAt: '1 day ago',
-    },
-  ];
+  // Lấy data thật từ database
+  const { files, loading, error } = useFiles({
+    page: 1,
+    limit: limit,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+    allUsers: true,
+  });
 
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -113,66 +76,91 @@ export function RecentActivity({ limit = 10 }: RecentActivityProps) {
     }
   };
 
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Clock className="h-5 w-5 text-muted-foreground" />
-          <h3 className="font-semibold text-lg">Recent Activity</h3>
-          <Badge variant="outline" className="ml-auto">{recentFiles.length} files</Badge>
-        </div>
-
-        <div className="space-y-3">
-          {recentFiles.slice(0, limit).map((file) => (
-            <div
-              key={file.id}
-              className="flex items-center gap-4 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors group"
-            >
-              {/* File Icon */}
-              <div className="flex-shrink-0">
-                {getFileIcon(file.type)}
-              </div>
-
-              {/* File Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="font-medium text-sm truncate">{file.name}</p>
-                  <Badge className={`text-xs ${getTypeBadgeColor(file.type)}`}>
-                    {file.type}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span>{formatBytes(file.size)}</span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {file.uploadedAt}
-                  </span>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Download className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-lg">Hoạt động gần đây</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4 p-3">
+              <Skeleton className="h-10 w-10 rounded" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
               </div>
             </div>
           ))}
-        </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-        {recentFiles.length > limit && (
-          <div className="mt-4 text-center">
-            <Button variant="ghost" size="sm" className="text-xs">
-              View all {recentFiles.length} files
-            </Button>
+  if (error || !files?.items) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-8">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-sm text-muted-foreground">
+              Không thể tải hoạt động gần đây
+            </p>
           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const recentFiles = files.items;
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-lg">Hoạt động gần đây</CardTitle>
+          </div>
+          <Badge variant="outline">{recentFiles.length} file</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {recentFiles.length === 0 ? (
+          <div className="text-center py-8">
+            <File className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+            <p className="text-sm text-muted-foreground">
+              Chưa có file nào được upload
+            </p>
+          </div>
+        ) : (
+          recentFiles.map((file) => (
+            <div
+              key={file.id}
+              className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+            >
+              <div className="flex-shrink-0">
+                {getFileIcon(file.fileType)}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-medium text-sm truncate">{file.originalName}</p>
+                  <Badge className={`text-xs ${getTypeBadgeColor(file.fileType)}`}>
+                    {file.fileType}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>{formatBytes(file.size)}</span>
+                  <span>•</span>
+                  <span>{formatDistanceToNow(new Date(file.createdAt), { addSuffix: true, locale: vi })}</span>
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </CardContent>
     </Card>
