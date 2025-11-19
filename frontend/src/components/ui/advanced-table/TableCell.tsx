@@ -285,8 +285,8 @@ export function TableCell<T extends RowData>({
   if (isEditing) {
     return (
       <div className={cn(
-        'h-full px-3 py-2 border-r border-gray-200 bg-white relative flex items-center',
-        isSelected && 'bg-blue-50',
+        'h-full px-2 py-1 bg-white relative flex items-center',
+        'border-2 border-blue-500 shadow-[0_0_0_1px_rgba(59,130,246,0.5)]',
         cellClass,
         className
       )}>
@@ -294,11 +294,11 @@ export function TableCell<T extends RowData>({
           <div className="flex-1 min-w-0">
             {renderEditor()}
           </div>
-          <div className="flex gap-1 ml-2 flex-shrink-0">
+          <div className="flex gap-0.5 ml-1 flex-shrink-0">
             <Button
               size="sm"
               variant="ghost"
-              className="h-6 w-6 p-0 text-green-600 hover:bg-green-100"
+              className="h-5 w-5 p-0 text-green-600 hover:bg-green-100"
               onClick={handleSave}
             >
               <Check className="w-3 h-3" />
@@ -306,7 +306,7 @@ export function TableCell<T extends RowData>({
             <Button
               size="sm"
               variant="ghost"
-              className="h-6 w-6 p-0 text-red-600 hover:bg-red-100"
+              className="h-5 w-5 p-0 text-red-600 hover:bg-red-100"
               onClick={handleCancel}
             >
               <X className="w-3 h-3" />
@@ -314,7 +314,7 @@ export function TableCell<T extends RowData>({
           </div>
         </div>
         {validationError && (
-          <div className="absolute top-full left-0 z-10 mt-1 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1">
+          <div className="absolute top-full left-0 z-10 mt-1 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1 shadow-md">
             {validationError}
           </div>
         )}
@@ -325,9 +325,11 @@ export function TableCell<T extends RowData>({
   return (
     <div
       className={cn(
-        'h-full px-3 py-2 border-r border-gray-200 bg-white cursor-default flex items-center overflow-hidden',
-        column.editable && 'hover:bg-gray-50 cursor-pointer',
-        isSelected && 'bg-blue-50',
+        'h-full px-2 py-1.5 cursor-default flex items-center overflow-hidden',
+        'text-sm text-gray-800',
+        'transition-colors',
+        column.editable && 'cursor-cell',
+        isSelected && 'bg-blue-50/70',
         cellClass,
         className
       )}

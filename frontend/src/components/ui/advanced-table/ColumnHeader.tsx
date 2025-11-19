@@ -127,31 +127,39 @@ export function ColumnHeader<T extends RowData>({
   return (
     <div
       className={cn(
-        'group relative flex items-center h-full px-3 border-r border-gray-200 bg-gray-50 select-none',
+        'group relative flex items-center h-full px-2 select-none',
+        'border-r border-gray-200 bg-gray-50',
+        'hover:bg-gray-100 transition-colors',
         column.headerClass,
-        column.pinned === 'left' && 'border-r-2 border-blue-200 bg-blue-50',
-        column.pinned === 'right' && 'border-l-2 border-blue-200 bg-blue-50'
+        column.pinned === 'left' && 'bg-white shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]',
+        column.pinned === 'right' && 'bg-white shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]'
       )}
       style={{ width }}
     >
-      <div className="flex items-center justify-between w-full min-w-0">
+      <div className="flex items-center justify-between w-full min-w-0 gap-1">
         <div 
           className={cn(
-            "flex items-center gap-2 min-w-0 flex-1",
-            column.sortable && 'cursor-pointer hover:text-blue-600'
+            "flex items-center gap-1 min-w-0 flex-1",
+            column.sortable && 'cursor-pointer'
           )}
           onClick={handleSortClick}
         >
-          <span className="font-medium text-sm truncate">{column.headerName}</span>
+          <span className="font-semibold text-xs text-gray-700 truncate">
+            {column.headerName}
+          </span>
           {sortPriority !== undefined && sortPriority > 0 && (
-            <span className="text-xs bg-blue-100 text-blue-800 px-1 rounded">
+            <span className="text-[10px] bg-blue-500 text-white px-1 rounded min-w-[16px] text-center">
               {sortPriority + 1}
             </span>
           )}
-          {getSortIcon()}
+          {column.sortable && (
+            <span className="text-gray-400 transition-colors group-hover:text-gray-600">
+              {getSortIcon()}
+            </span>
+          )}
         </div>
         
-        <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+        <div className="flex items-center gap-0.5 flex-shrink-0">
           {/* Google Sheets-style Filter Icon */}
           {column.filterable !== false && (
             <ColumnFilterPopover
@@ -168,18 +176,18 @@ export function ColumnHeader<T extends RowData>({
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "h-6 w-6 p-0",
+                  "h-5 w-5 p-0 rounded",
                   columnFilterCount > 0 
-                    ? "opacity-100 text-blue-600 hover:text-blue-700" 
-                    : "opacity-0 group-hover:opacity-100 hover:text-blue-600"
+                    ? "opacity-100 text-green-600 hover:text-green-700 hover:bg-green-50" 
+                    : "opacity-0 group-hover:opacity-100 hover:text-gray-700 hover:bg-gray-200"
                 )}
                 onClick={(e) => e.stopPropagation()}
               >
-                <Filter className="w-4 h-4" />
+                <Filter className="w-3.5 h-3.5" />
                 {columnFilterCount > 0 && (
                   <Badge 
                     variant="secondary" 
-                    className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[9px] bg-blue-600 text-white"
+                    className="absolute -top-0.5 -right-0.5 h-3 w-3 p-0 flex items-center justify-center text-[8px] bg-green-600 text-white border border-white"
                   >
                     {columnFilterCount}
                   </Badge>

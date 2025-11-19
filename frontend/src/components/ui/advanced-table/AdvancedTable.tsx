@@ -22,6 +22,19 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Google Sheets inspired styles
+const GOOGLE_SHEETS_STYLES = {
+  headerBg: 'bg-gray-50',
+  headerBorder: 'border-b-2 border-gray-300',
+  cellBorder: 'border-r border-b border-gray-200',
+  cellHover: 'hover:bg-blue-50/30',
+  selectedCell: 'bg-blue-50 border-blue-400',
+  frozenColumn: 'shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]',
+  gridLine: 'border-gray-200',
+  compactPadding: 'px-2 py-1.5',
+  fontSize: 'text-sm',
+};
+
 export function AdvancedTable<T extends RowData>({
   columns: initialColumns,
   data,
@@ -383,29 +396,95 @@ export function AdvancedTable<T extends RowData>({
         />
       )}
 
-      {/* Table - Responsive with horizontal scroll */}
+      {/* Google Sheets Style Table - Fixed Header + Frozen Columns */}
       <div 
-        className="overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+        className="relative overflow-auto"
         style={{ height: height - (showToolbar ? 60 : 0) - (enableFiltering ? 80 : 0) }}
       >
-        <div className="flex min-w-full">{/* Ensure min-width for mobile scroll */}
-          {/* Selection Column */}
+        {/* Sticky Header Container */}
+        <div className="w-full sticky top-0 z-20 flex bg-white">
+          {/* Selection Column Header - Frozen */}
           {enableRowSelection && (
-            <div className="flex flex-col flex-shrink-0">
-              <div 
-                className="flex items-center justify-center px-3 border-r border-gray-200 bg-gray-50"
-                style={{ height: headerHeight }}
+            <div 
+              className={cn(
+                "sticky left-0 z-30 flex items-center justify-center",
+                GOOGLE_SHEETS_STYLES.headerBg,
+                GOOGLE_SHEETS_STYLES.headerBorder,
+                GOOGLE_SHEETS_STYLES.cellBorder,
+                GOOGLE_SHEETS_STYLES.compactPadding,
+                "w-12"
+              )}
+              style={{ height: headerHeight }}
+            >
+              <Checkbox
+                checked={selectedRows.size === processedData.length && processedData.length > 0}
+                indeterminate={selectedRows.size > 0 && selectedRows.size < processedData.length}
+                onCheckedChange={handleSelectAll}
+              />
+            </div>
+          )}
+
+          {/* Column Headers */}
+          {visibleColumns.map((column, index) => {
+            const sortConfig = getSortConfig(column.field);
+            const width = columnWidths[String(column.field)] || column.width || 150;
+            const isFirstColumn = index === 0 && !enableRowSelection;
+            const isPinnedLeft = column.pinned === 'left' || isFirstColumn;
+            
+            return (
+              <div
+                key={String(column.field)}
+                className={cn(
+                  GOOGLE_SHEETS_STYLES.headerBg,
+                  GOOGLE_SHEETS_STYLES.headerBorder,
+                  GOOGLE_SHEETS_STYLES.cellBorder,
+                  "relative",
+                  isPinnedLeft && "sticky z-30 bg-white",
+                  isPinnedLeft && GOOGLE_SHEETS_STYLES.frozenColumn
+                )}
+                style={{ 
+                  width,
+                  minWidth: width,
+                  height: headerHeight,
+                  left: isPinnedLeft ? (enableRowSelection ? 48 : 0) : 'auto'
+                }}
               >
-                <Checkbox
-                  checked={selectedRows.size === processedData.length && processedData.length > 0}
-                  indeterminate={selectedRows.size > 0 && selectedRows.size < processedData.length}
-                  onCheckedChange={handleSelectAll}
+                <ColumnHeader
+                  column={column}
+                  data={processedData}
+                  activeFilters={filters}
+                  sortDirection={sortConfig?.direction}
+                  sortPriority={sortConfig?.priority}
+                  onSort={(direction) => handleSort(column.field, direction)}
+                  onAddFilter={handleAddFilter}
+                  onRemoveFilter={handleRemoveFilter}
+                  onClearColumnFilters={handleClearColumnFilters}
+                  onPin={(position) => handleColumnPin(column.field, position)}
+                  onHide={() => handleColumnHide(column.field)}
+                  onAutoSize={() => handleAutoSizeColumn(column.field)}
+                  onResize={(newWidth) => handleColumnResize(column.field, newWidth)}
+                  width={width}
                 />
               </div>
-              {processedData.map((row) => (
-                <div 
-                  key={row.id} 
-                  className="flex items-center justify-center px-3 border-r border-b border-gray-200 bg-white"
+            );
+          })}
+        </div>
+
+        {/* Table Body */}
+        <div className="relative">
+          {processedData.map((row, rowIndex) => (
+            <div key={row.id} className="flex hover:bg-gray-50/50">
+              {/* Selection Cell - Frozen */}
+              {enableRowSelection && (
+                <div
+                  className={cn(
+                    "sticky left-0 z-10 flex items-center justify-center bg-white",
+                    GOOGLE_SHEETS_STYLES.cellBorder,
+                    GOOGLE_SHEETS_STYLES.compactPadding,
+                    GOOGLE_SHEETS_STYLES.cellHover,
+                    "w-12",
+                    selectedRows.has(row.id) && GOOGLE_SHEETS_STYLES.selectedCell
+                  )}
                   style={{ height: rowHeight }}
                 >
                   <Checkbox
@@ -413,28 +492,53 @@ export function AdvancedTable<T extends RowData>({
                     onCheckedChange={(checked) => handleRowSelect(row.id, checked as boolean)}
                   />
                 </div>
-              ))}
-            </div>
-          )}
+              )}
 
-          {/* Pinned Left Columns */}
-          {pinnedLeftColumns.length > 0 && (
-            <div className="flex flex-shrink-0 border-r-2 border-blue-200">
-              {renderColumnGroup(pinnedLeftColumns, true)}
-            </div>
-          )}
+              {/* Data Cells */}
+              {visibleColumns.map((column, colIndex) => {
+                const value = column.valueGetter ? column.valueGetter(row) : row[column.field];
+                const isEditing = editingCell?.rowId === row.id && editingCell?.field === column.field;
+                const isSelected = selectedRows.has(row.id);
+                const width = columnWidths[String(column.field)] || column.width || 150;
+                const isFirstColumn = colIndex === 0 && !enableRowSelection;
+                const isPinnedLeft = column.pinned === 'left' || isFirstColumn;
 
-          {/* Center Columns */}
-          <div className="flex flex-1 min-w-0">
-            {renderColumnGroup(centerColumns)}
-          </div>
-
-          {/* Pinned Right Columns */}
-          {pinnedRightColumns.length > 0 && (
-            <div className="flex flex-shrink-0 border-l-2 border-blue-200">
-              {renderColumnGroup(pinnedRightColumns, true)}
+                return (
+                  <div
+                    key={String(column.field)}
+                    className={cn(
+                      GOOGLE_SHEETS_STYLES.cellBorder,
+                      GOOGLE_SHEETS_STYLES.compactPadding,
+                      GOOGLE_SHEETS_STYLES.fontSize,
+                      GOOGLE_SHEETS_STYLES.cellHover,
+                      "bg-white",
+                      isPinnedLeft && "sticky z-10",
+                      isPinnedLeft && GOOGLE_SHEETS_STYLES.frozenColumn,
+                      isSelected && GOOGLE_SHEETS_STYLES.selectedCell
+                    )}
+                    style={{ 
+                      width,
+                      minWidth: width,
+                      height: rowHeight,
+                      left: isPinnedLeft ? (enableRowSelection ? 48 : 0) : 'auto'
+                    }}
+                  >
+                    <TableCell
+                      column={column}
+                      data={row}
+                      value={value}
+                      rowIndex={rowIndex}
+                      isEditing={isEditing}
+                      isSelected={isSelected}
+                      onStartEdit={() => setEditingCell({ rowId: row.id, field: column.field })}
+                      onSave={(newValue) => handleCellEdit(row.id, column.field, newValue)}
+                      onCancel={() => setEditingCell(null)}
+                    />
+                  </div>
+                );
+              })}
             </div>
-          )}
+          ))}
         </div>
       </div>
 

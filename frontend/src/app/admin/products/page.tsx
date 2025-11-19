@@ -239,7 +239,7 @@ export default function ProductsPage() {
     },
   ];
 
-  // Advanced table configuration - Mobile First
+  // Advanced table configuration - Google Sheets Style
   const tableConfig: TableConfig = {
     enableSorting: true,
     enableFiltering: true,
@@ -249,8 +249,8 @@ export default function ProductsPage() {
     enableRowSelection: true,
     enableInlineEditing: false,
     enableRowDeletion: true,
-    rowHeight: 80, // Taller for mobile friendly
-    headerHeight: 48,
+    rowHeight: 36, // Compact Google Sheets style
+    headerHeight: 36, // Compact header
     showToolbar: true,
   };
 
