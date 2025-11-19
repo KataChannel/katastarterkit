@@ -8,6 +8,7 @@ import { RecentActivity } from '@/components/file-manager/RecentActivity';
 import { useStorageStats } from '@/hooks/useFiles';
 import { FileType } from '@/types/file';
 import { useToast } from '@/hooks/use-toast';
+import { getBulkFileUploadUrl } from '@/lib/api-config';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -104,7 +105,7 @@ export default function FileManagerPage() {
     });
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
+      const uploadUrl = getBulkFileUploadUrl();
       const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
       
       const headers: HeadersInit = {};
@@ -112,9 +113,11 @@ export default function FileManagerPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
+      console.log('📤 Uploading to:', uploadUrl); // Debug log
+
       setUploadingFiles(prev => prev.map(f => ({ ...f, status: 'uploading' as const, progress: 50 })));
       
-      const response = await fetch(`${apiUrl}/api/files/upload/bulk`, {
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         headers,
         body: formData,

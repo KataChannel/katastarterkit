@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as Minio from 'minio';
 import { ConfigService } from '@nestjs/config';
 import { Readable } from 'stream';
+import sharp from 'sharp';
 
 export interface UploadResult {
   filename: string;
@@ -98,43 +99,87 @@ export class MinioService implements OnModuleInit {
   }
 
   /**
-   * Upload a file from buffer
+   * Upload a file from buffer với optimize cho ảnh
    */
   async uploadFile(
     file: Express.Multer.File,
     folder: string = 'general',
   ): Promise<UploadResult> {
     try {
+      let processedBuffer = file.buffer;
+      let processedSize = file.size;
+      let processedMimeType = file.mimetype;
+      let ext = file.originalname.split('.').pop();
+      const originalSize = file.size;
+
+      // Optimize images to WebP
+      if (file.mimetype.startsWith('image/') && !file.mimetype.includes('svg')) {
+        try {
+          this.logger.log(`Optimizing image: ${file.originalname} (${file.size} bytes)`);
+          
+          // Convert to WebP with high quality settings
+          processedBuffer = await sharp(file.buffer)
+            .webp({
+              quality: 90, // High quality (90%)
+              effort: 6,   // Maximum compression effort (0-6, higher = better compression but slower)
+              lossless: false, // Use lossy compression for smaller size
+              nearLossless: false,
+              smartSubsample: true, // Better quality for specific images
+            })
+            .toBuffer();
+          
+          processedSize = processedBuffer.length;
+          processedMimeType = 'image/webp';
+          ext = 'webp';
+
+          const savedBytes = originalSize - processedSize;
+          const savedPercent = ((savedBytes / originalSize) * 100).toFixed(1);
+          this.logger.log(
+            `Image optimized: ${file.originalname} | ` +
+            `Original: ${this.formatBytes(originalSize)} → ` +
+            `WebP: ${this.formatBytes(processedSize)} | ` +
+            `Saved: ${this.formatBytes(savedBytes)} (${savedPercent}%)`,
+          );
+        } catch (error) {
+          this.logger.warn(`Failed to optimize image, using original: ${error.message}`);
+          // Fallback to original if optimization fails
+          processedBuffer = file.buffer;
+          processedSize = file.size;
+          processedMimeType = file.mimetype;
+        }
+      }
+
       // Generate unique filename
       const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 15);
-      const ext = file.originalname.split('.').pop();
       const filename = `${timestamp}-${randomStr}.${ext}`;
       const objectPath = `${folder}/${filename}`;
 
       // Upload to MinIO
       const metaData = {
-        'Content-Type': file.mimetype,
+        'Content-Type': processedMimeType,
         'X-Original-Name': file.originalname,
+        'X-Original-Size': originalSize.toString(),
+        'X-Optimized': file.mimetype.startsWith('image/') ? 'true' : 'false',
       };
 
       const result = await this.minioClient.putObject(
         this.bucketName,
         objectPath,
-        file.buffer,
-        file.size,
+        processedBuffer,
+        processedSize,
         metaData,
       );
 
       const url = `${this.publicUrl}/${this.bucketName}/${objectPath}`;
 
-      this.logger.log(`File uploaded: ${objectPath} (${file.size} bytes)`);
+      this.logger.log(`File uploaded: ${objectPath} (${processedSize} bytes)`);
 
       return {
         filename,
         url,
-        size: file.size,
-        mimeType: file.mimetype,
+        size: processedSize,
+        mimeType: processedMimeType,
         bucket: this.bucketName,
         path: objectPath,
         etag: result.etag,
@@ -143,6 +188,17 @@ export class MinioService implements OnModuleInit {
       this.logger.error(`Error uploading file: ${error.message}`, error.stack);
       throw error;
     }
+  }
+
+  /**
+   * Format bytes to human readable
+   */
+  private formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   }
 
   /**

@@ -16,6 +16,7 @@ import {
   DELETE_FOLDER,
   CREATE_FILE_SHARE,
 } from '@/graphql/queries/files';
+import { getFileUploadUrl, getBulkFileUploadUrl } from '@/lib/api-config';
 import {
   File,
   FileFolder,
@@ -137,8 +138,9 @@ export function useFileUpload() {
       if (folderId) formData.append('folderId', folderId);
       if (metadata) formData.append('metadata', JSON.stringify(metadata));
 
-      const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
-      const response = await fetch(`${apiUrl}/api/files/upload`, {
+      const uploadUrl = getFileUploadUrl();
+      console.log('📤 Single file upload to:', uploadUrl); // Debug log
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -172,8 +174,9 @@ export function useFileUpload() {
       files.forEach((file) => formData.append('files', file as any));
       if (folderId) formData.append('folderId', folderId);
 
-      const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:12001';
-      const response = await fetch(`${apiUrl}/api/files/upload/bulk`, {
+      const uploadUrl = getBulkFileUploadUrl();
+      console.log('📤 Bulk file upload to:', uploadUrl); // Debug log
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,

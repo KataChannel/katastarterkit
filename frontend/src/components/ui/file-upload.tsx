@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import Image from 'next/image';
+import { getApiBaseUrl } from '@/lib/api-config';
 import {
   CloudArrowUpIcon,
   PhotoIcon,
@@ -62,8 +63,11 @@ export function FileUpload({
     formData.append('bucket', bucket);
 
     try {
+      const uploadUrl = `${getApiBaseUrl()}/upload`;
+      console.log('📤 File upload to:', uploadUrl); // Debug log
+      
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:14000'}/upload`,
+        uploadUrl,
         formData,
         {
           headers: {

@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEmployeeDocuments, useCreateEmployeeDocument, useUpdateEmployeeDocument, useDeleteEmployeeDocument, useEmployeeProfile } from '@/hooks/useHR';
 import { DocumentType } from '@/types/hr';
+import { getBulkFileUploadUrl } from '@/lib/api-config';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -121,10 +122,12 @@ export default function EmployeeDocumentsPage() {
       const formData = new FormData();
       formData.append('files', selectedFile);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:14000';
+      const uploadUrl = getBulkFileUploadUrl();
       const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
-      const uploadResponse = await fetch(`${apiUrl}/api/files/upload/bulk`, {
+      console.log('📤 Uploading HR document to:', uploadUrl); // Debug log
+
+      const uploadResponse = await fetch(uploadUrl, {
         method: 'POST',
         headers: {
           ...(token && { Authorization: `Bearer ${token}` }),

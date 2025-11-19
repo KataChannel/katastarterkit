@@ -92,12 +92,37 @@ export class ProductService {
   // Create product
   async createProduct(input: CreateProductInput) {
     // Check if slug exists
-    const existingProduct = await this.prisma.product.findUnique({
+    const existingBySlug = await this.prisma.product.findUnique({
       where: { slug: input.slug },
     });
 
-    if (existingProduct) {
+    if (existingBySlug) {
       throw new BadRequestException(`Product with slug ${input.slug} already exists`);
+    }
+
+    // Check if SKU exists (if provided)
+    if (input.sku) {
+      const existingBySku = await this.prisma.product.findUnique({
+        where: { sku: input.sku },
+      });
+
+      if (existingBySku) {
+        throw new BadRequestException(`Product with SKU ${input.sku} already exists`);
+      }
+    }
+
+    // Check if barcode exists (if provided and not empty)
+    if (input.barcode && input.barcode.trim() !== '') {
+      const existingByBarcode = await this.prisma.product.findUnique({
+        where: { barcode: input.barcode },
+      });
+
+      if (existingByBarcode) {
+        throw new BadRequestException(`Product with barcode ${input.barcode} already exists`);
+      }
+    } else if (input.barcode === '') {
+      // Convert empty string to null to avoid unique constraint issues
+      input.barcode = null;
     }
 
     // Check if category exists
@@ -189,6 +214,35 @@ export class ProductService {
 
       if (existingProduct) {
         throw new BadRequestException(`Product with slug ${data.slug} already exists`);
+      }
+    }
+
+    // Check if SKU is being updated and if it's unique
+    if (data.sku && data.sku !== product.sku) {
+      const existingProduct = await this.prisma.product.findUnique({
+        where: { sku: data.sku },
+      });
+
+      if (existingProduct) {
+        throw new BadRequestException(`Product with SKU ${data.sku} already exists`);
+      }
+    }
+
+    // Check if barcode is being updated and if it's unique
+    // Only validate if barcode is not empty string
+    if (data.barcode !== undefined && data.barcode !== product.barcode) {
+      if (data.barcode && data.barcode.trim() !== '') {
+        // Only check uniqueness if barcode has a value
+        const existingProduct = await this.prisma.product.findUnique({
+          where: { barcode: data.barcode },
+        });
+
+        if (existingProduct) {
+          throw new BadRequestException(`Product with barcode ${data.barcode} already exists`);
+        }
+      } else {
+        // If barcode is empty string, set to null to avoid unique constraint
+        data.barcode = null;
       }
     }
 

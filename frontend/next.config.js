@@ -43,6 +43,17 @@ const nextConfig = {
         pathname: '/uploads/**',
       },
       {
+        protocol: 'http',
+        hostname: '116.118.49.243',
+        port: '12007',
+        pathname: '/rausach-uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '116.118.49.243',
+        pathname: '/rausach-uploads/**',
+      },
+      {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
