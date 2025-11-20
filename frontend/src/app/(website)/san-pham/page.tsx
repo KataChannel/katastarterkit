@@ -139,7 +139,7 @@ export default function ProductsPage() {
           {/* Sidebar Filters - Desktop */}
           <aside className="hidden lg:block lg:w-64 flex-shrink-0">
             <Card className="sticky top-24">
-              <CardContent className="p-6">
+              <CardContent className="p-0">
                 <FilterSidebar />
               </CardContent>
             </Card>

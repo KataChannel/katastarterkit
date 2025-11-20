@@ -135,11 +135,16 @@ function OrderListContent() {
           </div>
         </div>
 
+        {/* Mobile Navigation Tabs */}
+        <div className="lg:hidden mb-4">
+          <EcommerceNavigation />
+        </div>
+
         {/* Layout: Sidebar + Content */}
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Sidebar Navigation - Desktop */}
           <aside className="hidden lg:block lg:w-64 flex-shrink-0">
-            <div className="sticky top-6">
+            <div className="sticky top-4">
               <EcommerceNavigation />
             </div>
           </aside>
@@ -184,11 +189,6 @@ function OrderListContent() {
               />
             )}
           </div>
-        </div>
-
-        {/* Mobile Navigation - Bottom */}
-        <div className="lg:hidden mt-6 pt-6 border-t">
-          <EcommerceNavigation />
         </div>
       </div>
     </div>
