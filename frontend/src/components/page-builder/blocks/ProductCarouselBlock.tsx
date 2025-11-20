@@ -1,16 +1,21 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ShoppingCart, Eye, Settings, Trash2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingCart, Eye, Settings, Trash2, X, Check } from 'lucide-react';
 import { PageBlock, ProductCarouselBlockContent } from '@/types/page-builder';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { GET_PRODUCTS } from '@/graphql/product.queries';
+import { ADD_TO_CART } from '@/graphql/ecommerce.queries';
 import { useDynamicQuery } from '@/lib/graphql/dynamic-hooks';
 import { ProductCarouselSettingsDialog } from './ProductCarouselSettingsDialog';
 import { ProductImage } from '@/components/ui/product-image';
+import { useCart } from '@/contexts/CartContext';
+import { useCartSession } from '@/hooks/useCartSession';
+import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 interface ProductCarouselBlockProps {
   block: PageBlock;
@@ -85,6 +90,22 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
     open: false,
     src: '',
     alt: '',
+  });
+  const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const [addedToCart, setAddedToCart] = useState<Set<string>>(new Set());
+
+  // Cart and Auth hooks
+  const { refetch: refetchCart } = useCart();
+  const { sessionId } = useCartSession();
+  const { user, isAuthenticated } = useAuth();
+
+  // Add to cart mutation
+  const [addToCartMutation] = useMutation(ADD_TO_CART, {
+    onCompleted: (data) => {
+      if (data.addToCart.success) {
+        refetchCart();
+      }
+    },
   });
 
   // Determine data source table
@@ -275,12 +296,60 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
     });
   };
 
-  const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+  const handleAddToCart = async (product: Product, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Add to cart:', product.id, getProductName(product));
-    // TODO: Implement add to cart functionality
-    // You can integrate with your cart context/state here
+
+    try {
+      setAddingToCart(product.id);
+
+      const input: any = {
+        productId: product.id,
+        quantity: 1,
+      };
+
+      // Add userId or sessionId
+      if (isAuthenticated && user?.id) {
+        input.userId = user.id;
+      } else if (sessionId) {
+        input.sessionId = sessionId;
+      }
+
+      const result = await addToCartMutation({
+        variables: { input },
+      });
+
+      if (result.data?.addToCart?.success) {
+        // Show success animation
+        setAddedToCart(prev => new Set(prev).add(product.id));
+        
+        // Show toast notification
+        toast.success('Đã thêm vào giỏ hàng', {
+          description: `${getProductName(product)} - ${formatPrice(getProductPrice(product))}`,
+          duration: 2000,
+        });
+
+        // Remove success animation after 2s
+        setTimeout(() => {
+          setAddedToCart(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(product.id);
+            return newSet;
+          });
+        }, 2000);
+      } else {
+        toast.error('Không thể thêm vào giỏ hàng', {
+          description: result.data?.addToCart?.message || 'Vui lòng thử lại',
+        });
+      }
+    } catch (error: any) {
+      console.error('Error adding to cart:', error);
+      toast.error('Lỗi khi thêm vào giỏ hàng', {
+        description: error.message || 'Vui lòng thử lại sau',
+      });
+    } finally {
+      setAddingToCart(null);
+    }
   };
 
   // Debug logging
@@ -385,10 +454,24 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
                           
                           {/* Icon giỏ hàng màu vàng/cam ở góc trên phải */}
                           <div className="absolute top-2 right-2">
-                            <div className="bg-orange-400 hover:bg-orange-500 rounded-full p-2 shadow-lg cursor-pointer transition-colors"
-                                 onClick={(e) => handleAddToCart(product, e)}>
-                              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                            </div>
+                            <button
+                              className={`rounded-full p-2 shadow-lg cursor-pointer transition-all transform ${
+                                addedToCart.has(product.id)
+                                  ? 'bg-green-500 scale-110'
+                                  : 'bg-orange-400 hover:bg-orange-500 hover:scale-105'
+                              } ${addingToCart === product.id ? 'animate-pulse' : ''}`}
+                              onClick={(e) => handleAddToCart(product, e)}
+                              disabled={addingToCart === product.id}
+                              title={addedToCart.has(product.id) ? 'Đã thêm vào giỏ' : 'Thêm vào giỏ hàng'}
+                            >
+                              {addingToCart === product.id ? (
+                                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : addedToCart.has(product.id) ? (
+                                <Check className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                              ) : (
+                                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                              )}
+                            </button>
                           </div>
                         </div>
 
@@ -411,10 +494,27 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
 
                           {/* Button Mua Ngay màu đỏ */}
                           <button 
-                            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md transition-colors text-sm sm:text-base"
+                            className={`w-full font-semibold py-2 px-4 rounded-md transition-all text-sm sm:text-base flex items-center justify-center gap-2 ${
+                              addedToCart.has(product.id)
+                                ? 'bg-green-500 hover:bg-green-600 text-white'
+                                : 'bg-red-600 hover:bg-red-700 text-white'
+                            }`}
                             onClick={(e) => handleAddToCart(product, e)}
+                            disabled={addingToCart === product.id}
                           >
-                            Mua Ngay
+                            {addingToCart === product.id ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <span>Đang thêm...</span>
+                              </>
+                            ) : addedToCart.has(product.id) ? (
+                              <>
+                                <Check className="w-4 h-4" />
+                                <span>Đã thêm</span>
+                              </>
+                            ) : (
+                              'Mua Ngay'
+                            )}
                           </button>
                         </div>
                       </div>
