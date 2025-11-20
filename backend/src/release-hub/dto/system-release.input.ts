@@ -6,8 +6,8 @@ export class CreateSystemReleaseInput {
   @Field()
   version: string;
 
-  @Field()
-  versionNumber: string;
+  @Field({ nullable: true })
+  versionNumber?: string;
 
   @Field(() => ReleaseType)
   releaseType: ReleaseType;
@@ -57,8 +57,8 @@ export class CreateSystemReleaseInput {
   @Field(() => [String], { nullable: true })
   screenshotUrls?: string[];
 
-  @Field()
-  slug: string;
+  @Field({ nullable: true })
+  slug?: string;
 
   @Field({ nullable: true })
   metaTitle?: string;

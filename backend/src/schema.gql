@@ -1702,13 +1702,13 @@ input CreateSystemReleaseInput {
   releaseNotes: String
   releaseType: ReleaseType!
   screenshotUrls: [String!]
-  slug: String!
+  slug: String
   summary: String
   thumbnailUrl: String
   title: String!
   upgradeGuide: String
   version: String!
-  versionNumber: String!
+  versionNumber: String
   videoUrl: String
 }
 

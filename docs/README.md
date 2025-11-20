@@ -15,6 +15,7 @@
 | [🚢 Deployment](./05-DEPLOYMENT.md) | Production deployment | 15 min |
 | [📘 API Reference](./06-API-REFERENCE.md) | GraphQL API docs | 30 min |
 | [🐛 Troubleshooting](./07-TROUBLESHOOTING.md) | Common issues & fixes | - |
+| [🚀 Release Hub Guide](./08-RELEASE-HUB-GUIDE.md) | Release & Support Center system | 20 min |
 
 ---
 

@@ -16,10 +16,14 @@ export class SystemReleaseService {
     try {
       // Auto-generate slug if not provided
       const slug = input.slug || this.generateSlug(input.title);
+      
+      // Auto-generate versionNumber from version (remove 'v' prefix if exists)
+      const versionNumber = input.versionNumber || input.version.replace(/^v/, '');
 
       const release = await this.prisma.systemRelease.create({
         data: {
           ...input,
+          versionNumber,
           slug,
           features: input.features || [],
           improvements: input.improvements || [],
