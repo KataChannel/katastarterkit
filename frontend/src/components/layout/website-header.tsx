@@ -7,8 +7,9 @@ import { useCart } from '@/contexts/CartContext';
 import { useScroll } from '@/contexts/ScrollContext';
 // ✅ MIGRATED: Import Dynamic GraphQL
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
-import { useQuery } from '@apollo/client';
+import { useQuery, useLazyQuery } from '@apollo/client';
 import { GET_PUBLIC_MENUS } from '@/graphql/menu.queries';
+import { GET_PRODUCTS } from '@/graphql/product.queries';
 import { useHeaderSettings, useContactSettings, settingsToMap } from '@/hooks/useWebsiteSettings';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,10 +32,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package, Menu, ChevronRight, X } from 'lucide-react';
+import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package, Menu, ChevronRight, X, TrendingUp, ArrowRight } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import React from 'react';
+import Image from 'next/image';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 export function WebsiteHeader() {
@@ -44,6 +46,73 @@ export function WebsiteHeader() {
   const router = useRouter();
   const [showSearchPopup, setShowSearchPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  // ✅ Search Products Query
+  const [searchProducts, { loading: searchLoading, data: searchData }] = useLazyQuery(GET_PRODUCTS, {
+    fetchPolicy: 'network-only',
+  });
+
+  // Reset search when dialog is closed
+  useEffect(() => {
+    if (!showSearchPopup) {
+      setSearchQuery('');
+      setSearchResults([]);
+    }
+  }, [showSearchPopup]);
+
+  // ✅ Handle search input change with debounce
+  useEffect(() => {
+    const trimmedQuery = searchQuery.trim();
+    
+    // Only search if query has at least 2 characters
+    if (!trimmedQuery || trimmedQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      console.log('Searching for:', trimmedQuery);
+      
+      searchProducts({
+        variables: {
+          input: {
+            page: 1,
+            limit: 10,
+            sortBy: 'createdAt',
+            sortOrder: 'desc',
+            filters: {
+              search: trimmedQuery,
+              status: 'ACTIVE', // Only show active products
+            },
+          },
+        },
+      }).catch((error) => {
+        console.error('Search error:', error);
+        setSearchResults([]);
+      });
+    }, 300); // Debounce 300ms
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchProducts]);
+
+  // ✅ Update search results when data changes
+  useEffect(() => {
+    // Only update results if we have a valid search query
+    if (!searchQuery.trim() || searchQuery.length < 2) {
+      return; // Don't update if query is empty
+    }
+    
+    if (searchData?.products?.items) {
+      console.log('Search results for "' + searchQuery + '":', searchData.products.items.length, 'products found');
+      console.log('First result:', searchData.products.items[0]?.name);
+      setSearchResults(searchData.products.items);
+    } else if (searchData?.products && !searchData.products.items) {
+      // Handle case where query succeeded but no items
+      console.log('Search completed but no items found');
+      setSearchResults([]);
+    }
+  }, [searchData, searchQuery]);
 
   // ✅ Load Header Settings
   const { data: headerSettingsRaw = [], loading: headerLoading } = useHeaderSettings();
@@ -680,68 +749,198 @@ export function WebsiteHeader() {
       </div>
 
       {/* Search Popup Dialog - Mobile First */}
-      <Dialog open={showSearchPopup} onOpenChange={setShowSearchPopup}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
-          <DialogHeader>
+      <Dialog open={showSearchPopup} onOpenChange={(open) => {
+        setShowSearchPopup(open);
+        if (!open) {
+          setSearchQuery('');
+          setSearchResults([]);
+        }
+      }}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b">
             <DialogTitle className="flex items-center gap-2">
-              <Search className="w-5 h-5" />
+              <Search className="w-5 h-5 text-green-600" />
               Tìm kiếm sản phẩm
             </DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto p-4">
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Nhập tên sản phẩm bạn muốn tìm..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-12 py-3 text-base"
-                  autoFocus
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="absolute inset-y-0 right-1 my-1 px-4"
-                >
-                  <Search className="w-4 h-4 mr-2" />
-                  Tìm
-                </Button>
-              </div>
-              
-              {/* Quick search suggestions - Optional */}
-              <div className="space-y-2">
-                <p className="text-sm text-gray-500">Từ khóa phổ biến:</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Rau sạch', 'Rau hữu cơ', 'Củ quả', 'Trái cây', 'Thực phẩm organic'].map((keyword) => (
-                    <Button
-                      key={keyword}
+          <div className="flex-1 overflow-y-auto">
+            {/* Search Input */}
+            <div className="px-6 py-4 border-b bg-gray-50">
+              <form onSubmit={handleSearch}>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Tìm kiếm sản phẩm (ví dụ: rau cải, củ cải...)"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 text-base"
+                    autoFocus
+                  />
+                  {searchQuery && (
+                    <button
                       type="button"
-                      variant="outline"
-                      size="sm"
                       onClick={() => {
-                        setSearchQuery(keyword);
-                        router.push(`/san-pham?search=${encodeURIComponent(keyword)}`);
-                        setShowSearchPopup(false);
+                        setSearchQuery('');
+                        setSearchResults([]);
                       }}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {keyword}
-                    </Button>
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Search Results */}
+            <div className="px-6 py-4">
+              {searchLoading && (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                  <span className="ml-3 text-gray-600">Đang tìm kiếm...</span>
+                </div>
+              )}
+
+              {!searchLoading && searchQuery.length > 0 && searchQuery.length < 2 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Search className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                  <p>Nhập ít nhất 2 ký tự để tìm kiếm</p>
+                </div>
+              )}
+
+              {!searchLoading && searchQuery.length >= 2 && searchResults.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Search className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                  <p>Không tìm thấy sản phẩm nào</p>
+                  <p className="text-sm mt-2">Thử tìm kiếm với từ khóa khác</p>
+                </div>
+              )}
+
+              {!searchLoading && searchResults.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm text-gray-600">
+                      Tìm thấy <span className="font-semibold text-green-600">{searchResults.length}</span> sản phẩm
+                    </p>
+                    {searchResults.length === 10 && (
+                      <button
+                        onClick={() => {
+                          router.push(`/san-pham?search=${encodeURIComponent(searchQuery)}`);
+                          setShowSearchPopup(false);
+                        }}
+                        className="text-sm text-green-600 hover:text-green-700 font-medium flex items-center gap-1"
+                      >
+                        Xem tất cả <ArrowRight className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {searchResults.map((product: any) => (
+                    <Link
+                      key={product.id}
+                      href={`/san-pham/${product.slug}`}
+                      onClick={() => setShowSearchPopup(false)}
+                      className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-200"
+                    >
+                      {/* Product Image */}
+                      <div className="relative w-16 h-16 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
+                        {product.thumbnail ? (
+                          <Image
+                            src={product.thumbnail}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                            <Package className="w-8 h-8" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-900 text-sm line-clamp-1">
+                          {product.name}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-red-600 font-semibold text-base">
+                            {product.price?.toLocaleString('vi-VN')}đ
+                          </span>
+                          {product.originalPrice && product.originalPrice > product.price && (
+                            <span className="text-gray-400 line-through text-sm">
+                              {product.originalPrice.toLocaleString('vi-VN')}đ
+                            </span>
+                          )}
+                        </div>
+                        {product.category && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {product.category.name}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Stock Status */}
+                      <div className="flex-shrink-0">
+                        {product.stock > 0 ? (
+                          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                            Còn hàng
+                          </span>
+                        ) : (
+                          <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                            Hết hàng
+                          </span>
+                        )}
+                      </div>
+                    </Link>
                   ))}
                 </div>
-              </div>
-            </form>
+              )}
+
+              {/* Quick search suggestions */}
+              {searchQuery.length === 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-gray-700 mb-3">
+                    <TrendingUp className="w-4 h-4" />
+                    <p className="text-sm font-medium">Từ khóa phổ biến:</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {['Rau sạch', 'Rau hữu cơ', 'Củ quả', 'Trái cây', 'Rau ăn lá', 'Cà chua', 'Rau muống'].map((keyword) => (
+                      <Button
+                        key={keyword}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSearchQuery(keyword);
+                        }}
+                        className="hover:bg-green-50 hover:text-green-600 hover:border-green-600"
+                      >
+                        {keyword}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowSearchPopup(false)}
-            >
-              Đóng
-            </Button>
+          <DialogFooter className="px-6 py-4 border-t bg-gray-50">
+            <div className="flex items-center justify-between w-full">
+              <p className="text-xs text-gray-500">
+                Nhấn Enter hoặc nút Tìm để xem kết quả đầy đủ
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowSearchPopup(false)}
+                size="sm"
+              >
+                Đóng
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

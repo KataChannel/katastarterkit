@@ -20,7 +20,9 @@ export class ProductService {
     const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', filters } = input;
     const skip = (page - 1) * limit;
 
+    console.log('[ProductService] getProducts input:', JSON.stringify(input, null, 2));
     const where = this.buildWhereClause(filters);
+    console.log('[ProductService] where clause:', JSON.stringify(where, null, 2));
 
     const [items, total] = await Promise.all([
       this.prisma.product.findMany({
@@ -374,15 +376,21 @@ export class ProductService {
 
   // Helper method to build where clause from filters
   private buildWhereClause(filters?: ProductFiltersInput): Prisma.ProductWhereInput {
-    if (!filters) return {};
+    if (!filters) {
+      console.log('[ProductService] No filters provided');
+      return {};
+    }
 
     const where: Prisma.ProductWhereInput = {};
 
-    if (filters.search) {
+    // Only apply search filter if search string is not empty
+    if (filters.search && filters.search.trim().length > 0) {
+      const searchTerm = filters.search.trim();
+      console.log('[ProductService] Search query:', searchTerm);
       where.OR = [
-        { name: { contains: filters.search, mode: 'insensitive' } },
-        { description: { contains: filters.search, mode: 'insensitive' } },
-        { sku: { contains: filters.search, mode: 'insensitive' } },
+        { name: { contains: searchTerm, mode: 'insensitive' } },
+        { description: { contains: searchTerm, mode: 'insensitive' } },
+        { sku: { contains: searchTerm, mode: 'insensitive' } },
       ];
     }
 
