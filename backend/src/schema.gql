@@ -1676,6 +1676,42 @@ input CreateSupportMessageInput {
   senderType: String!
 }
 
+input CreateSystemGuideInput {
+  content: String
+  description: String
+  icon: String
+  isPublished: Boolean
+  order: Float
+  parentId: String
+  title: String!
+  type: String!
+}
+
+input CreateSystemReleaseInput {
+  breakingChanges: [String!]
+  bugfixes: [String!]
+  deploymentDate: DateTime
+  deprecations: [String!]
+  description: String
+  features: [String!]
+  improvements: [String!]
+  keywords: [String!]
+  metaDescription: String
+  metaTitle: String
+  releaseDate: DateTime
+  releaseNotes: String
+  releaseType: ReleaseType!
+  screenshotUrls: [String!]
+  slug: String!
+  summary: String
+  thumbnailUrl: String
+  title: String!
+  upgradeGuide: String
+  version: String!
+  versionNumber: String!
+  videoUrl: String
+}
+
 input CreateTaskCommentInput {
   content: String!
   parentId: String
@@ -1694,6 +1730,37 @@ input CreateTaskInput {
   status: TaskStatus
   tags: [String!]
   title: String!
+}
+
+input CreateTechnicalSupportMessageInput {
+  attachmentUrls: [String!]
+  authorEmail: String
+  authorId: String
+  authorName: String
+  content: String!
+  isInternal: Boolean! = false
+  ticketId: String!
+}
+
+input CreateTechnicalSupportTicketInput {
+  attachmentUrls: [String!]
+  browserInfo: String
+  category: SupportTicketCategory!
+  customerEmail: String
+  customerId: String
+  customerName: String
+  customerPhone: String
+  description: String!
+  deviceInfo: String
+  environment: String
+  errorLogs: String
+  osInfo: String
+  priority: SupportTicketPriority! = MEDIUM
+  relatedOrderId: String
+  relatedUrl: String
+  screenshotUrls: [String!]
+  subject: String!
+  tags: [String!]
 }
 
 input CreateWebsiteSettingInput {
@@ -2241,6 +2308,13 @@ input GroupByInput {
   where: JSONObject
 }
 
+enum GuideType {
+  DEVELOPER_GUIDE
+  FAQ
+  USER_GUIDE
+  VIDEO_TUTORIAL
+}
+
 type HRStatistics {
   activeEmployees: Int!
   inactiveEmployees: Int!
@@ -2549,6 +2623,7 @@ type Mutation {
 
   """Assign task to users"""
   assignTask(taskId: String!, userIds: [ID!]!): Task!
+  assignTechnicalSupportTicket(assignedToId: String!, ticketId: String!): TechnicalSupportTicket!
   assignUserPermissions(input: AssignUserPermissionInput!): Boolean!
   assignUserRoles(input: AssignUserRoleInput!): Boolean!
   batchUploadAndMap(items: JSON!): JSON!
@@ -2620,8 +2695,12 @@ type Mutation {
   createSourceDocumentCategory(input: CreateSourceDocumentCategoryInput!): SourceDocumentCategory!
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createSupportConversation(input: CreateSupportConversationInput!): SupportConversation!
+  createSystemGuide(input: CreateSystemGuideInput!): SystemGuide!
+  createSystemRelease(input: CreateSystemReleaseInput!): SystemRelease!
   createTask(input: CreateTaskInput!): Task!
   createTaskComment(input: CreateTaskCommentInput!): TaskComment!
+  createTechnicalSupportMessage(input: CreateTechnicalSupportMessageInput!): TechnicalSupportMessage!
+  createTechnicalSupportTicket(input: CreateTechnicalSupportTicketInput!): TechnicalSupportTicket!
   createWebsiteSetting(input: CreateWebsiteSettingInput!): WebsiteSetting!
 
   """Create new ext_sanphamhoadon"""
@@ -2674,6 +2753,8 @@ type Mutation {
   deleteRole(id: String!): Boolean!
   deleteSourceDocument(id: ID!): SourceDocument!
   deleteSourceDocumentCategory(id: ID!): SourceDocumentCategory!
+  deleteSystemGuide(id: String!): Boolean!
+  deleteSystemRelease(id: String!): Boolean!
   deleteTask(id: String!): Boolean!
   deleteTaskMedia(mediaId: String!): Boolean!
   deleteUser(id: String!): Boolean!
@@ -2718,6 +2799,8 @@ type Mutation {
   importTextData(delimiter: String = "\t", mappingConfig: JSON, modelName: String!, text: String!): JSON!
   improveContent(content: String!, instruction: String!): String!
   incrementDocumentDownload(id: ID!): SourceDocument!
+  incrementGuideView(id: String!): SystemGuide!
+  incrementSystemReleaseDownloadCount(id: String!): Boolean!
   incrementTemplateUsage(templateId: String!): CustomTemplate!
   joinCampaign(input: JoinCampaignInput!): String!
   linkDocumentToCourse(input: LinkDocumentToCourseInput!): CourseSourceDocument!
@@ -2757,6 +2840,8 @@ type Mutation {
   processPaymentRequest(id: String!, status: String!): AffPaymentRequest!
   publishCourse(id: ID!): Course!
   publishPost(id: String!): Post!
+  publishSystemRelease(id: String!): SystemRelease!
+  rateTechnicalSupportTicket(input: RateTicketInput!): TechnicalSupportTicket!
   registerUser(input: RegisterUserInput!): AuthResponse!
 
   """Reindex all data from database into Orama search indexes"""
@@ -2773,6 +2858,7 @@ type Mutation {
   requestForgotPassword(email: String!): OtpResponse!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   resetPasswordWithToken(email: String!, newPassword: String!, token: String!): OtpResponse!
+  resolveTechnicalSupportTicket(resolution: String!, ticketId: String!): TechnicalSupportTicket!
 
   """Restore archived project (owner/admin only)"""
   restoreProject(id: ID!): Project!
@@ -2866,10 +2952,13 @@ type Mutation {
   updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateSourceDocument(id: ID!, input: UpdateSourceDocumentInput!): SourceDocument!
   updateSourceDocumentCategory(id: ID!, input: UpdateSourceDocumentCategoryInput!): SourceDocumentCategory!
+  updateSystemGuide(input: UpdateSystemGuideInput!): SystemGuide!
+  updateSystemRelease(id: String!, input: UpdateSystemReleaseInput!): SystemRelease!
   updateTask(input: UpdateTaskInput!): Task!
 
   """Update task order for drag & drop"""
   updateTaskOrder(newOrder: Int!, taskId: String!): Task!
+  updateTechnicalSupportTicket(id: String!, input: UpdateTechnicalSupportTicketInput!): TechnicalSupportTicket!
   updateTemplatePublicity(input: UpdateTemplatePublicityInput!): CustomTemplate!
   updateUser(id: String!, input: UpdateUserInput!): User!
   updateWebsiteSetting(input: UpdateWebsiteSettingInput!, key: String!): WebsiteSetting!
@@ -2899,6 +2988,7 @@ type Mutation {
   """Create or update a record based on criteria"""
   upsert(create: JSONObject!, include: JSONObject, modelName: String!, select: JSONObject, update: JSONObject!, where: JSONObject!): JSONObject!
   verifyResetToken(email: String!, token: String!): OtpResponse!
+  voteGuideHelpful(id: String!, isHelpful: Boolean!): SystemGuide!
 }
 
 type NormalizationStats {
@@ -3979,6 +4069,7 @@ type Query {
   hello: String!
   hrStatistics: HRStatistics!
   invoiceExists(idServer: String!, khmshdon: String!, nbmst: String!, shdon: String!): Boolean!
+  latestSystemRelease: SystemRelease
 
   """Get list of all available Prisma models"""
   listAvailableModels: [String!]!
@@ -4003,6 +4094,7 @@ type Query {
   """Lấy tất cả projects mà user là thành viên (dùng cho Sidebar)"""
   myProjects(includeArchived: Boolean! = false): [Project!]!
   myRoles: [UserRoleAssignmentType!]!
+  myTechnicalSupportTickets(status: String): [TechnicalSupportTicket!]!
 
   """Normalize a product name"""
   normalizeProductName(productName: String!, threshold: Float! = 0.6): String!
@@ -4091,6 +4183,13 @@ type Query {
   supportConversation(id: String!): SupportConversation!
   supportConversations(take: Int, where: SupportConversationWhereInput): [SupportConversation!]!
   supportMessages(conversationId: String!): [SupportMessage!]!
+  systemGuide(id: String!): SystemGuide!
+  systemGuideBySlug(slug: String!): SystemGuide!
+  systemGuides(parentId: String, search: String, type: String): [SystemGuide!]!
+  systemRelease(id: String!): SystemRelease
+  systemReleaseBySlug(slug: String!): SystemRelease
+  systemReleaseByVersion(version: String!): SystemRelease
+  systemReleases(skip: Int = 0, take: Int = 20, where: SystemReleaseWhereInput): [SystemRelease!]!
 
   """Get tag usage statistics"""
   tagStatistics(projectId: ID!): String!
@@ -4103,6 +4202,9 @@ type Query {
 
   """Get task completion velocity"""
   taskVelocity(days: Float! = 30, projectId: ID!): String!
+  technicalSupportTicket(id: String!): TechnicalSupportTicket
+  technicalSupportTicketByNumber(ticketNumber: String!): TechnicalSupportTicket
+  technicalSupportTickets(skip: Int = 0, take: Int = 20, where: TechnicalSupportTicketWhereInput): [TechnicalSupportTicket!]!
 
   """Test similarity between two products"""
   testProductSimilarity(productId1: String!, productId2: String!): ProductSimilarityTest
@@ -4183,6 +4285,12 @@ type QuizAttempt {
   userId: String!
 }
 
+input RateTicketInput {
+  feedback: String
+  rating: Int!
+  ticketId: String!
+}
+
 type RatingDistributionType {
   rating1: Int!
   rating2: Int!
@@ -4205,6 +4313,20 @@ type ReindexResult {
   message: String!
   success: Boolean!
   totalIndexed: Int
+}
+
+enum ReleaseStatus {
+  DEPRECATED
+  DRAFT
+  RELEASED
+  SCHEDULED
+}
+
+enum ReleaseType {
+  HOTFIX
+  MAJOR
+  MINOR
+  PATCH
 }
 
 input RemoveFromCartInput {
@@ -4613,6 +4735,31 @@ type SupportMessage {
   sentAt: DateTime!
 }
 
+enum SupportTicketCategory {
+  ACCOUNT
+  BILLING
+  BUG_REPORT
+  FEATURE_REQUEST
+  GENERAL_INQUIRY
+  OTHER
+  TECHNICAL
+}
+
+enum SupportTicketPriority {
+  CRITICAL
+  HIGH
+  LOW
+  MEDIUM
+}
+
+enum SupportTicketStatus {
+  CLOSED
+  IN_PROGRESS
+  OPEN
+  RESOLVED
+  WAITING_CUSTOMER
+}
+
 input SyncCallCenterInput {
   configId: String
   fromDate: DateTime
@@ -4628,6 +4775,77 @@ type SyncCallCenterResponse {
   recordsUpdated: Int!
   success: Boolean!
   syncLogId: String
+}
+
+type SystemGuide {
+  attachmentUrls: [String!]!
+  authorId: String
+  category: String
+  content: String!
+  createdAt: DateTime!
+  description: String
+  difficulty: String
+  helpfulCount: Int!
+  id: ID!
+  isPublished: Boolean!
+  keywords: [String!]!
+  metaDescription: String
+  metaTitle: String
+  notHelpfulCount: Int!
+  orderIndex: Int!
+  parentId: String
+  publishedAt: DateTime
+  readingTime: Int
+  relatedGuideIds: [String!]!
+  slug: String!
+  tags: [String!]!
+  thumbnailUrl: String
+  title: String!
+  type: GuideType!
+  updatedAt: DateTime!
+  updatedById: String
+  videoUrl: String
+  viewCount: Int!
+}
+
+type SystemRelease {
+  breakingChanges: [String!]!
+  bugfixes: [String!]!
+  createdAt: DateTime!
+  createdById: String
+  deploymentDate: DateTime
+  deprecations: [String!]!
+  description: String
+  downloadCount: Int!
+  features: [String!]!
+  id: ID!
+  improvements: [String!]!
+  keywords: [String!]!
+  metaDescription: String
+  metaTitle: String
+  publishedAt: DateTime
+  releaseDate: DateTime
+  releaseNotes: String
+  releaseType: ReleaseType!
+  screenshotUrls: [String!]!
+  slug: String!
+  status: ReleaseStatus!
+  summary: String
+  thumbnailUrl: String
+  title: String!
+  updatedAt: DateTime!
+  updatedById: String
+  upgradeGuide: String
+  version: String!
+  versionNumber: String!
+  videoUrl: String
+  viewCount: Int!
+}
+
+input SystemReleaseWhereInput {
+  releaseType: ReleaseType
+  search: String
+  status: ReleaseStatus
 }
 
 type Tag {
@@ -4762,6 +4980,66 @@ enum TaskStatus {
 type TasksPaginatedResult {
   data: [Task!]!
   meta: PaginationInfo!
+}
+
+type TechnicalSupportMessage {
+  attachmentUrls: [String!]!
+  authorEmail: String
+  authorId: String
+  authorName: String
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  isInternal: Boolean!
+  isRead: Boolean!
+  readAt: DateTime
+  ticketId: String!
+  updatedAt: DateTime!
+}
+
+type TechnicalSupportTicket {
+  assignedAt: DateTime
+  assignedToId: String
+  attachmentUrls: [String!]!
+  browserInfo: String
+  category: SupportTicketCategory!
+  closedAt: DateTime
+  createdAt: DateTime!
+  customerEmail: String
+  customerFeedback: String
+  customerId: String
+  customerName: String
+  customerPhone: String
+  customerRating: Int
+  description: String!
+  deviceInfo: String
+  environment: String
+  errorLogs: String
+  firstResponseAt: DateTime
+  id: ID!
+  lastResponseAt: DateTime
+  osInfo: String
+  priority: SupportTicketPriority!
+  relatedOrderId: String
+  relatedUrl: String
+  resolution: String
+  resolvedAt: DateTime
+  resolvedById: String
+  screenshotUrls: [String!]!
+  status: SupportTicketStatus!
+  subject: String!
+  tags: [String!]!
+  ticketNumber: String!
+  updatedAt: DateTime!
+}
+
+input TechnicalSupportTicketWhereInput {
+  assignedToId: String
+  category: SupportTicketCategory
+  customerId: String
+  priority: SupportTicketPriority
+  search: String
+  status: SupportTicketStatus
 }
 
 """Template category for organization"""
@@ -5547,6 +5825,44 @@ input UpdateSourceDocumentInput {
   url: String
 }
 
+input UpdateSystemGuideInput {
+  content: String
+  description: String
+  icon: String
+  id: String!
+  isPublished: Boolean
+  order: Float
+  parentId: String
+  title: String
+  type: String
+}
+
+input UpdateSystemReleaseInput {
+  breakingChanges: [String!]
+  bugfixes: [String!]
+  deploymentDate: DateTime
+  deprecations: [String!]
+  description: String
+  features: [String!]
+  improvements: [String!]
+  keywords: [String!]
+  metaDescription: String
+  metaTitle: String
+  releaseDate: DateTime
+  releaseNotes: String
+  releaseType: ReleaseType
+  screenshotUrls: [String!]
+  slug: String
+  status: ReleaseStatus
+  summary: String
+  thumbnailUrl: String
+  title: String
+  upgradeGuide: String
+  version: String
+  versionNumber: String
+  videoUrl: String
+}
+
 input UpdateTaskInput {
   category: TaskCategory
   description: String
@@ -5555,6 +5871,17 @@ input UpdateTaskInput {
   priority: TaskPriority
   status: TaskStatus
   title: String
+}
+
+input UpdateTechnicalSupportTicketInput {
+  assignedToId: String
+  category: SupportTicketCategory
+  description: String
+  priority: SupportTicketPriority
+  resolution: String
+  status: SupportTicketStatus
+  subject: String
+  tags: [String!]
 }
 
 input UpdateTemplatePublicityInput {

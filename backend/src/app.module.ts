@@ -41,6 +41,7 @@ import { CallCenterModule } from './callcenter/callcenter.module';
 import { LmsModule } from './lms/lms.module';
 import { EcommerceModule } from './ecommerce/ecommerce.module';
 import { SupportChatModule } from './support-chat/support-chat.module';
+import { ReleaseHubModule } from './release-hub/release-hub.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -159,6 +160,7 @@ import { ProjectModule } from './project/project.module';
     ProjectModule,
     EcommerceModule,
     SupportChatModule,
+    ReleaseHubModule,
   ],
   controllers: [
     LogController,

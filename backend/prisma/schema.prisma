@@ -236,6 +236,17 @@ model User {
   // AI Provider Relations
   aiProvidersCreated AIProvider[] @relation("AIProviderCreator")
 
+  // Release Hub & Support Center Relations
+  releasesCreated              SystemRelease[]            @relation("ReleaseCreatedBy")
+  releasesUpdated              SystemRelease[]            @relation("ReleaseUpdatedBy")
+  changelogsAuthored           Changelog[]                @relation("ChangelogAuthor")
+  guidesAuthored               SystemGuide[]              @relation("GuideAuthor")
+  guidesUpdated                SystemGuide[]              @relation("GuideUpdatedBy")
+  technicalSupportTickets      TechnicalSupportTicket[]   @relation("SupportCustomer")
+  technicalSupportAssigned     TechnicalSupportTicket[]   @relation("SupportAssignedTo")
+  technicalSupportResolved     TechnicalSupportTicket[]   @relation("SupportResolvedBy")
+  technicalSupportMessages     TechnicalSupportMessage[]  @relation("SupportMessageAuthor")
+
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
   @@index([roleType])
@@ -4059,6 +4070,9 @@ model Order {
   createdBy String?
   updatedBy String?
 
+  // Support tickets
+  supportTickets TechnicalSupportTicket[]
+
   @@index([userId])
   @@index([customerId])
   @@index([orderNumber])
@@ -5006,4 +5020,355 @@ model SupportAnalytics {
   @@index([date])
   @@index([agentId, date])
   @@map("support_analytics")
+}
+
+// ============================================
+// RELEASE HUB & SUPPORT CENTER MODELS
+// ============================================
+
+enum ReleaseType {
+  MAJOR
+  MINOR
+  PATCH
+  HOTFIX
+}
+
+enum ReleaseStatus {
+  DRAFT
+  SCHEDULED
+  RELEASED
+  DEPRECATED
+}
+
+enum ChangelogType {
+  FEATURE
+  IMPROVEMENT
+  BUGFIX
+  SECURITY
+  BREAKING_CHANGE
+  DEPRECATION
+  DOCUMENTATION
+  PERFORMANCE
+}
+
+enum GuideType {
+  QUICK_START
+  TUTORIAL
+  USER_GUIDE
+  API_REFERENCE
+  TROUBLESHOOTING
+  FAQ
+  VIDEO_GUIDE
+  BEST_PRACTICES
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SupportTicketCategory {
+  TECHNICAL
+  BILLING
+  FEATURE_REQUEST
+  BUG_REPORT
+  GENERAL_INQUIRY
+  ACCOUNT
+  OTHER
+}
+
+// System Release - Phát hành phiên bản mới
+model SystemRelease {
+  id            String        @id @default(uuid())
+  version       String        @unique // v1.0.0
+  versionNumber String // 1.0.0 (without 'v')
+  releaseType   ReleaseType
+  status        ReleaseStatus @default(DRAFT)
+  
+  title         String
+  description   String?       @db.Text
+  summary       String?       @db.Text
+  
+  // Release details
+  features      String[]      @default([]) // Danh sách tính năng mới
+  improvements  String[]      @default([]) // Cải tiến
+  bugfixes      String[]      @default([]) // Sửa lỗi
+  breakingChanges String[]    @default([]) // Thay đổi phá vỡ tương thích
+  
+  // Release notes
+  releaseNotes  String?       @db.Text
+  upgradeGuide  String?       @db.Text
+  deprecations  String[]      @default([])
+  
+  // Technical info
+  deploymentDate DateTime?
+  releaseDate    DateTime?
+  
+  // Media
+  thumbnailUrl   String?
+  videoUrl       String?
+  screenshotUrls String[]      @default([])
+  
+  // SEO
+  slug           String        @unique
+  metaTitle      String?
+  metaDescription String?
+  keywords       String[]      @default([])
+  
+  // Relations
+  changelogs     Changelog[]
+  
+  // Stats
+  viewCount      Int           @default(0)
+  downloadCount  Int           @default(0)
+  
+  // Timestamps
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  publishedAt    DateTime?
+  
+  // Audit
+  createdById    String?
+  createdBy      User?         @relation("ReleaseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById    String?
+  updatedBy      User?         @relation("ReleaseUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  
+  @@index([version])
+  @@index([status])
+  @@index([releaseType])
+  @@index([releaseDate])
+  @@index([publishedAt])
+  @@map("system_releases")
+}
+
+// Changelog - Chi tiết thay đổi
+model Changelog {
+  id          String         @id @default(uuid())
+  
+  // Basic info
+  title       String
+  description String         @db.Text
+  type        ChangelogType
+  
+  // Categorization
+  component   String?        // Backend, Frontend, Database, etc.
+  module      String?        // Auth, E-commerce, LMS, etc.
+  
+  // Links
+  prUrl       String?        // Pull request URL
+  issueUrl    String?        // Issue URL
+  commitHash  String?
+  
+  // Technical details
+  affectedFiles String[]      @default([])
+  apiChanges    Json?         // API changes details
+  
+  // Impact
+  impact      String?        // User impact description
+  migration   String?        @db.Text // Migration guide if needed
+  
+  // Release relation
+  releaseId   String?
+  release     SystemRelease? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+  
+  // Timestamps
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  // Audit
+  authorId    String?
+  author      User?          @relation("ChangelogAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  
+  @@index([releaseId])
+  @@index([type])
+  @@index([component])
+  @@index([createdAt])
+  @@map("changelogs")
+}
+
+// System Guide - Hướng dẫn sử dụng
+model SystemGuide {
+  id              String        @id @default(uuid())
+  
+  // Basic info
+  title           String
+  description     String?       @db.Text
+  content         String        @db.Text // Markdown content
+  type            GuideType
+  
+  // Categorization
+  category        String?       // E-commerce, LMS, CMS, etc.
+  tags            String[]      @default([])
+  difficulty      String?       // Beginner, Intermediate, Advanced
+  
+  // Media
+  thumbnailUrl    String?
+  videoUrl        String?
+  attachmentUrls  String[]      @default([])
+  
+  // Structure
+  orderIndex      Int           @default(0)
+  parentId        String?
+  parent          SystemGuide?  @relation("GuideHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children        SystemGuide[] @relation("GuideHierarchy")
+  
+  // Related guides
+  relatedGuideIds String[]      @default([])
+  
+  // SEO
+  slug            String        @unique
+  metaTitle       String?
+  metaDescription String?
+  keywords        String[]      @default([])
+  
+  // Publishing
+  isPublished     Boolean       @default(false)
+  publishedAt     DateTime?
+  
+  // Stats
+  viewCount       Int           @default(0)
+  helpfulCount    Int           @default(0)
+  notHelpfulCount Int           @default(0)
+  
+  // Estimated reading time (minutes)
+  readingTime     Int?
+  
+  // Timestamps
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Audit
+  authorId        String?
+  author          User?         @relation("GuideAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  updatedById     String?
+  updatedBy       User?         @relation("GuideUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  
+  @@index([type])
+  @@index([category])
+  @@index([isPublished])
+  @@index([publishedAt])
+  @@index([orderIndex])
+  @@index([parentId])
+  @@map("system_guides")
+}
+
+// Technical Support Ticket - Ticket hỗ trợ kỹ thuật
+model TechnicalSupportTicket {
+  id              String                    @id @default(uuid())
+  ticketNumber    String                    @unique // AUTO-GENERATED: SUP-2024-001
+  
+  // Basic info
+  subject         String
+  description     String                    @db.Text
+  category        SupportTicketCategory
+  priority        SupportTicketPriority     @default(MEDIUM)
+  status          SupportTicketStatus       @default(OPEN)
+  
+  // Customer info
+  customerId      String?
+  customer        User?                     @relation("SupportCustomer", fields: [customerId], references: [id], onDelete: SetNull)
+  customerEmail   String?
+  customerName    String?
+  customerPhone   String?
+  
+  // Assignment
+  assignedToId    String?
+  assignedTo      User?                     @relation("SupportAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  assignedAt      DateTime?
+  
+  // Technical details
+  environment     String?                   // Production, Staging, Development
+  browserInfo     String?
+  osInfo          String?
+  deviceInfo      String?
+  errorLogs       String?                   @db.Text
+  
+  // Attachments
+  attachmentUrls  String[]                  @default([])
+  screenshotUrls  String[]                  @default([])
+  
+  // Related information
+  relatedUrl      String?                   // URL where issue occurred
+  relatedOrderId  String?
+  relatedOrder    Order?                    @relation(fields: [relatedOrderId], references: [id], onDelete: SetNull)
+  
+  // Resolution
+  resolution      String?                   @db.Text
+  resolvedAt      DateTime?
+  resolvedById    String?
+  resolvedBy      User?                     @relation("SupportResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+  
+  // Feedback
+  customerRating  Int?                      // 1-5 stars
+  customerFeedback String?                  @db.Text
+  
+  // Messages
+  messages        TechnicalSupportMessage[]
+  
+  // Tags for better organization
+  tags            String[]                  @default([])
+  
+  // Timestamps
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  closedAt        DateTime?
+  
+  // Response time tracking
+  firstResponseAt DateTime?
+  lastResponseAt  DateTime?
+  
+  @@index([ticketNumber])
+  @@index([customerId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([createdAt])
+  @@map("technical_support_tickets")
+}
+
+// Technical Support Message - Tin nhắn trong ticket
+model TechnicalSupportMessage {
+  id          String                   @id @default(uuid())
+  
+  // Content
+  content     String                   @db.Text
+  isInternal  Boolean                  @default(false) // Internal note for staff only
+  
+  // Attachments
+  attachmentUrls String[]              @default([])
+  
+  // Ticket relation
+  ticketId    String
+  ticket      TechnicalSupportTicket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  
+  // Author
+  authorId    String?
+  author      User?                    @relation("SupportMessageAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  authorName  String?                  // For guest messages
+  authorEmail String?                  // For guest messages
+  
+  // Status tracking
+  isRead      Boolean                  @default(false)
+  readAt      DateTime?
+  
+  // Timestamps
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  
+  @@index([ticketId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([isInternal])
+  @@map("technical_support_messages")
 }
