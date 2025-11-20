@@ -34,6 +34,7 @@ export declare class UpdateProductInput {
     slug?: string;
     description?: string;
     shortDesc?: string;
+    shortDescription?: string;
     price?: number;
     originalPrice?: number;
     costPrice?: number;
@@ -48,14 +49,19 @@ export declare class UpdateProductInput {
     status?: ProductStatus;
     categoryId?: string;
     thumbnail?: string;
+    imageUrl?: string;
     attributes?: any;
     metaTitle?: string;
     metaDescription?: string;
     metaKeywords?: string;
     isFeatured?: boolean;
     isNewArrival?: boolean;
+    isNew?: boolean;
     isBestSeller?: boolean;
     isOnSale?: boolean;
+    isOrganic?: boolean;
+    dimensions?: string;
+    manufacturer?: string;
     displayOrder?: number;
 }
 export declare class ProductFiltersInput {

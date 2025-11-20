@@ -6,6 +6,6 @@ export declare class FilesResolver {
     uploadCourseThumbnail(user: any, file: FileUpload, courseId?: string): Promise<UploadResult>;
     uploadLessonVideo(user: any, file: FileUpload, courseId: string): Promise<UploadResult>;
     uploadCourseMaterial(user: any, file: FileUpload, courseId: string): Promise<UploadResult>;
-    deleteFile(user: any, fileId: string, bucket: string): Promise<boolean>;
+    deleteLMSFile(user: any, fileId: string, bucket: string): Promise<boolean>;
     getPresignedUrl(fileId: string, bucket: string, expiresIn?: number): Promise<string>;
 }

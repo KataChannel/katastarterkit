@@ -27,12 +27,43 @@ let SourceDocumentService = class SourceDocumentService {
         };
     }
     async create(userId, input) {
+        console.log('📄 Creating source document:', {
+            title: input.title,
+            type: input.type,
+            status: input.status,
+            userId,
+        });
+        const data = {
+            title: input.title,
+            type: input.type,
+            status: input.status,
+            userId,
+            fileSize: input.fileSize ? BigInt(input.fileSize) : null,
+        };
+        if (input.description)
+            data.description = input.description;
+        if (input.url)
+            data.url = input.url;
+        if (input.content)
+            data.content = input.content;
+        if (input.fileName)
+            data.fileName = input.fileName;
+        if (input.mimeType)
+            data.mimeType = input.mimeType;
+        if (input.duration)
+            data.duration = input.duration;
+        if (input.thumbnailUrl)
+            data.thumbnailUrl = input.thumbnailUrl;
+        if (input.categoryId)
+            data.categoryId = input.categoryId;
+        if (input.tags?.length)
+            data.tags = input.tags;
+        if (input.status === 'PUBLISHED') {
+            data.publishedAt = new Date();
+        }
+        console.log('💾 Prisma create data:', JSON.stringify(data, null, 2));
         const document = await this.prisma.sourceDocument.create({
-            data: {
-                ...input,
-                userId,
-                fileSize: input.fileSize ? BigInt(input.fileSize) : null,
-            },
+            data,
             include: {
                 category: true,
                 user: {
@@ -144,13 +175,17 @@ let SourceDocumentService = class SourceDocumentService {
         return this.transformDocument(document);
     }
     async update(id, input) {
-        await this.findOne(id);
+        const existing = await this.findOne(id);
+        const data = {
+            ...input,
+            fileSize: input.fileSize ? BigInt(input.fileSize) : undefined,
+        };
+        if (input.status === 'PUBLISHED' && !existing.publishedAt) {
+            data.publishedAt = new Date();
+        }
         const updated = await this.prisma.sourceDocument.update({
             where: { id },
-            data: {
-                ...input,
-                fileSize: input.fileSize ? BigInt(input.fileSize) : undefined,
-            },
+            data,
             include: {
                 category: true,
                 user: {

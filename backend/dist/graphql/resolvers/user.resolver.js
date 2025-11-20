@@ -59,7 +59,7 @@ let UserResolver = class UserResolver {
     async loginUser(input) {
         const user = await this.authService.validateUser(input.emailOrUsername, input.password);
         const tokens = await this.authService.generateTokens(user);
-        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(user.roleType);
+        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(user.id);
         return {
             ...tokens,
             user,
@@ -70,7 +70,7 @@ let UserResolver = class UserResolver {
         console.log('Input to loginWithGoogle:', input);
         const result = await this.authService.loginWithGoogle(input);
         console.log('Result from authService:', result);
-        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(result.user.roleType);
+        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(result.user.id);
         return {
             accessToken: result.accessToken,
             refreshToken: result.refreshToken,
@@ -80,7 +80,7 @@ let UserResolver = class UserResolver {
     }
     async loginWithFacebook(input) {
         const result = await this.authService.loginWithFacebook(input.token, input.providerId);
-        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(result.user.roleType);
+        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(result.user.id);
         return {
             accessToken: result.accessToken,
             refreshToken: result.refreshToken,
@@ -94,7 +94,7 @@ let UserResolver = class UserResolver {
             throw new Error('Invalid or expired OTP');
         }
         const result = await this.authService.loginWithPhone(input.phone);
-        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(result.user.roleType);
+        const redirectUrl = await (0, auth_redirect_utils_1.getLoginRedirectUrl)(result.user.id);
         return {
             accessToken: result.accessToken,
             refreshToken: result.refreshToken,

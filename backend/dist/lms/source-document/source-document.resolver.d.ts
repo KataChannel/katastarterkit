@@ -1,11 +1,24 @@
 import { SourceDocumentService } from './source-document.service';
 import { MinioService } from '../../minio/minio.service';
+import { SourceDocument } from './entities/source-document.entity';
+import { FileUploadResult } from '../files/entities/file-upload.entity';
 import { CreateSourceDocumentInput, UpdateSourceDocumentInput, SourceDocumentFilterInput, LinkDocumentToCourseInput, UpdateCourseDocumentLinkInput } from './dto/source-document.dto';
 import { FileUpload } from 'graphql-upload-ts';
+import { PrismaService } from '../../prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 export declare class SourceDocumentResolver {
     private readonly sourceDocumentService;
     private readonly minioService;
-    constructor(sourceDocumentService: SourceDocumentService, minioService: MinioService);
+    private readonly prisma;
+    private readonly configService;
+    constructor(sourceDocumentService: SourceDocumentService, minioService: MinioService, prisma: PrismaService, configService: ConfigService);
+    user(sourceDocument: SourceDocument): Promise<{
+        id: string;
+        email: string;
+        username: string;
+        firstName: string;
+        lastName: string;
+    }>;
     createSourceDocument(user: any, input: CreateSourceDocumentInput): Promise<any>;
     sourceDocuments(filter?: SourceDocumentFilterInput, page?: number, limit?: number): Promise<any[]>;
     sourceDocument(id: string): Promise<any>;
@@ -198,6 +211,7 @@ export declare class SourceDocumentResolver {
     })[]>;
     incrementDocumentDownload(id: string): Promise<any>;
     sourceDocumentStats(user: any): Promise<string>;
+    uploadFile(file: Promise<FileUpload>, bucket: string): Promise<FileUploadResult>;
     uploadSourceDocumentFile(documentId: string, file: Promise<FileUpload>): Promise<string>;
     uploadDocumentThumbnail(documentId: string, file: Promise<FileUpload>): Promise<string>;
     analyzeSourceDocument(id: string): Promise<any>;

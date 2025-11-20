@@ -16,31 +16,44 @@ exports.UpdateCourseDocumentLinkInput = exports.LinkDocumentToCourseInput = expo
 const graphql_1 = require("@nestjs/graphql");
 const client_1 = require("@prisma/client");
 const graphql_type_json_1 = __importDefault(require("graphql-type-json"));
+const class_validator_1 = require("class-validator");
 let CreateSourceDocumentCategoryInput = class CreateSourceDocumentCategoryInput {
 };
 exports.CreateSourceDocumentCategoryInput = CreateSourceDocumentCategoryInput;
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentCategoryInput.prototype, "name", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentCategoryInput.prototype, "slug", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentCategoryInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentCategoryInput.prototype, "icon", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentCategoryInput.prototype, "color", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentCategoryInput.prototype, "parentId", void 0);
 exports.CreateSourceDocumentCategoryInput = CreateSourceDocumentCategoryInput = __decorate([
@@ -51,26 +64,40 @@ let UpdateSourceDocumentCategoryInput = class UpdateSourceDocumentCategoryInput 
 exports.UpdateSourceDocumentCategoryInput = UpdateSourceDocumentCategoryInput;
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentCategoryInput.prototype, "name", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentCategoryInput.prototype, "slug", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentCategoryInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentCategoryInput.prototype, "icon", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentCategoryInput.prototype, "color", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentCategoryInput.prototype, "parentId", void 0);
 exports.UpdateSourceDocumentCategoryInput = UpdateSourceDocumentCategoryInput = __decorate([
@@ -81,58 +108,83 @@ let CreateSourceDocumentInput = class CreateSourceDocumentInput {
 exports.CreateSourceDocumentInput = CreateSourceDocumentInput;
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentInput.prototype, "title", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.SourceDocumentType),
+    (0, class_validator_1.IsEnum)(client_1.SourceDocumentType),
     __metadata("design:type", String)
 ], CreateSourceDocumentInput.prototype, "type", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.SourceDocumentStatus, { defaultValue: client_1.SourceDocumentStatus.DRAFT }),
+    (0, class_validator_1.IsEnum)(client_1.SourceDocumentStatus),
     __metadata("design:type", String)
 ], CreateSourceDocumentInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentInput.prototype, "url", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentInput.prototype, "content", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentInput.prototype, "fileName", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], CreateSourceDocumentInput.prototype, "fileSize", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentInput.prototype, "mimeType", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], CreateSourceDocumentInput.prototype, "duration", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentInput.prototype, "thumbnailUrl", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSourceDocumentInput.prototype, "categoryId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [String], { defaultValue: [] }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], CreateSourceDocumentInput.prototype, "tags", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], CreateSourceDocumentInput.prototype, "metadata", void 0);
 exports.CreateSourceDocumentInput = CreateSourceDocumentInput = __decorate([
@@ -143,58 +195,87 @@ let UpdateSourceDocumentInput = class UpdateSourceDocumentInput {
 exports.UpdateSourceDocumentInput = UpdateSourceDocumentInput;
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentInput.prototype, "title", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.SourceDocumentType, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.SourceDocumentType),
     __metadata("design:type", String)
 ], UpdateSourceDocumentInput.prototype, "type", void 0);
 __decorate([
     (0, graphql_1.Field)(() => client_1.SourceDocumentStatus, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.SourceDocumentStatus),
     __metadata("design:type", String)
 ], UpdateSourceDocumentInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentInput.prototype, "url", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentInput.prototype, "content", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentInput.prototype, "fileName", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], UpdateSourceDocumentInput.prototype, "fileSize", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentInput.prototype, "mimeType", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], UpdateSourceDocumentInput.prototype, "duration", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentInput.prototype, "thumbnailUrl", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSourceDocumentInput.prototype, "categoryId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", Array)
 ], UpdateSourceDocumentInput.prototype, "tags", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.default, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], UpdateSourceDocumentInput.prototype, "metadata", void 0);
 exports.UpdateSourceDocumentInput = UpdateSourceDocumentInput = __decorate([

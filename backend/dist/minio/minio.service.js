@@ -111,7 +111,7 @@ let MinioService = MinioService_1 = class MinioService {
         }
     }
     async initializeBuckets() {
-        const buckets = ['avatars', 'posts', 'uploads'];
+        const buckets = ['avatars', 'posts', 'uploads', 'source-documents'];
         for (const bucket of buckets) {
             try {
                 const bucketExists = await this.minioClient.bucketExists(bucket);

@@ -17,6 +17,7 @@ const task_resolver_1 = require("./resolvers/task.resolver");
 const page_resolver_1 = require("./resolvers/page.resolver");
 const invoice_resolver_1 = require("./resolvers/invoice.resolver");
 const rbac_resolver_1 = require("./resolvers/rbac.resolver");
+const rbac_resolver_2 = require("./rbac/rbac.resolver");
 const orama_search_resolver_1 = require("./resolvers/orama-search.resolver");
 const universal_query_resolver_1 = require("./resolvers/universal-query.resolver");
 const ext_models_resolver_1 = require("./resolvers/ext-models.resolver");
@@ -39,7 +40,6 @@ const task_service_1 = require("../services/task.service");
 const task_share_service_1 = require("../services/task-share.service");
 const task_comment_service_1 = require("../services/task-comment.service");
 const task_media_service_1 = require("../services/task-media.service");
-const notification_service_1 = require("../services/notification.service");
 const otp_service_1 = require("../services/otp.service");
 const pubsub_service_1 = require("../services/pubsub.service");
 const page_service_1 = require("../services/page.service");
@@ -49,6 +49,7 @@ const category_import_export_service_1 = require("../services/category-import-ex
 const product_import_export_service_1 = require("../services/product-import-export.service");
 const backend_config_service_1 = require("../services/backend-config.service");
 const rbac_service_1 = require("../services/rbac.service");
+const rbac_service_2 = require("../common/services/rbac.service");
 const affiliate_service_1 = require("../services/affiliate.service");
 const affiliate_tracking_service_1 = require("../services/affiliate-tracking.service");
 const affiliate_payment_service_1 = require("../services/affiliate-payment.service");
@@ -106,6 +107,7 @@ exports.GraphQLResolversModule = GraphQLResolversModule = __decorate([
             rbac_resolver_1.PermissionResolver,
             rbac_resolver_1.RoleResolver,
             rbac_resolver_1.UserRbacResolver,
+            rbac_resolver_2.RBACResolver,
             affiliate_resolver_1.AffiliateUserResolver,
             affiliate_resolver_1.AffiliateCampaignResolver,
             affiliate_resolver_1.AffiliateTrackingResolver,
@@ -124,7 +126,6 @@ exports.GraphQLResolversModule = GraphQLResolversModule = __decorate([
             task_share_service_1.TaskShareService,
             task_comment_service_1.TaskCommentService,
             task_media_service_1.TaskMediaService,
-            notification_service_1.NotificationService,
             otp_service_1.OtpService,
             pubsub_service_1.PubSubService,
             page_service_1.PageService,
@@ -134,6 +135,7 @@ exports.GraphQLResolversModule = GraphQLResolversModule = __decorate([
             product_import_export_service_1.ProductImportExportService,
             backend_config_service_1.BackendConfigService,
             rbac_service_1.RbacService,
+            rbac_service_2.RBACService,
             custom_template_service_1.CustomTemplateService,
             affiliate_service_1.AffiliateUserService,
             affiliate_service_1.AffiliateCampaignService,
@@ -153,7 +155,6 @@ exports.GraphQLResolversModule = GraphQLResolversModule = __decorate([
             task_share_service_1.TaskShareService,
             task_comment_service_1.TaskCommentService,
             task_media_service_1.TaskMediaService,
-            notification_service_1.NotificationService,
             pubsub_service_1.PubSubService,
             page_service_1.PageService,
             invoice_service_1.InvoiceService,

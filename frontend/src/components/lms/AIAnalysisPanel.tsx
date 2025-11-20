@@ -15,7 +15,26 @@ import {
   Target,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { SourceDocument } from '@/graphql/lms/source-documents.graphql';
+
+// Type definition for SourceDocument
+interface SourceDocument {
+  id: string;
+  title: string;
+  description?: string;
+  type: string;
+  status: string;
+  aiSummary?: string;
+  aiKeywords?: string[];
+  aiTopics?: string[];
+  isAiAnalyzed?: boolean;
+  categoryId?: string;
+  tags?: string[];
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+}
 
 interface AIAnalysisPanelProps {
   documents: SourceDocument[];
@@ -43,7 +62,7 @@ export function AIAnalysisPanel({ documents, className }: AIAnalysisPanelProps) 
     // Aggregate keywords
     const keywordMap = new Map<string, number>();
     documents.forEach((doc) => {
-      doc.aiKeywords?.forEach((kw) => {
+      doc.aiKeywords?.forEach((kw: string) => {
         keywordMap.set(kw, (keywordMap.get(kw) || 0) + 1);
       });
     });
@@ -51,7 +70,7 @@ export function AIAnalysisPanel({ documents, className }: AIAnalysisPanelProps) 
     // Aggregate topics
     const topicMap = new Map<string, number>();
     documents.forEach((doc) => {
-      doc.aiTopics?.forEach((topic) => {
+      doc.aiTopics?.forEach((topic: string) => {
         topicMap.set(topic, (topicMap.get(topic) || 0) + 1);
       });
     });

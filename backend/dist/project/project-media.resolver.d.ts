@@ -7,6 +7,6 @@ export declare class ProjectMediaResolver {
     uploadChatFile(messageId: string, filename: string, mimetype: string, size: number, url: string, caption: string, userId: string): Promise<any>;
     getTaskFiles(taskId: string): Promise<any[]>;
     getProjectFiles(projectId: string): Promise<any[]>;
-    deleteFile(fileId: string, type: 'task' | 'project' | 'chat', userId: string): Promise<boolean>;
+    deleteProjectFile(fileId: string, type: 'task' | 'project' | 'chat', userId: string): Promise<boolean>;
     private streamToBuffer;
 }

@@ -32,9 +32,6 @@ const module_input_1 = require("./dto/module.input");
 const lesson_input_1 = require("./dto/lesson.input");
 const jwt_auth_guard_1 = require("../../auth/jwt-auth.guard");
 const current_user_decorator_1 = require("../../auth/current-user.decorator");
-const roles_decorator_1 = require("../../common/decorators/roles.decorator");
-const roles_guard_1 = require("../../common/guards/roles.guard");
-const client_1 = require("@prisma/client");
 const course_module_entity_1 = require("./entities/course-module.entity");
 const lesson_entity_1 = require("./entities/lesson.entity");
 const graphql_type_json_1 = __importDefault(require("graphql-type-json"));
@@ -132,8 +129,7 @@ let CoursesResolver = class CoursesResolver {
 exports.CoursesResolver = CoursesResolver;
 __decorate([
     (0, graphql_1.Mutation)(() => course_entity_1.Course, { name: 'createCourse' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('createCourseInput')),
     __metadata("design:type", Function),
@@ -163,8 +159,7 @@ __decorate([
 ], CoursesResolver.prototype, "findBySlug", null);
 __decorate([
     (0, graphql_1.Query)(() => [course_entity_1.Course], { name: 'myCourses' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -172,8 +167,7 @@ __decorate([
 ], CoursesResolver.prototype, "getMyCourses", null);
 __decorate([
     (0, graphql_1.Mutation)(() => course_entity_1.Course, { name: 'updateCourse' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('updateCourseInput')),
     __metadata("design:type", Function),
@@ -182,8 +176,7 @@ __decorate([
 ], CoursesResolver.prototype, "updateCourse", null);
 __decorate([
     (0, graphql_1.Mutation)(() => course_entity_1.Course, { name: 'publishCourse' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
     __metadata("design:type", Function),
@@ -192,8 +185,7 @@ __decorate([
 ], CoursesResolver.prototype, "publishCourse", null);
 __decorate([
     (0, graphql_1.Mutation)(() => course_entity_1.Course, { name: 'archiveCourse' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
     __metadata("design:type", Function),
@@ -202,8 +194,7 @@ __decorate([
 ], CoursesResolver.prototype, "archiveCourse", null);
 __decorate([
     (0, graphql_1.Mutation)(() => Boolean, { name: 'deleteCourse' }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)(client_1.UserRoleType.ADMIN),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('id', { type: () => graphql_1.ID })),
     __metadata("design:type", Function),

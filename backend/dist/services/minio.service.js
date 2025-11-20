@@ -41,12 +41,16 @@ var __importStar = (this && this.__importStar) || (function () {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var MinioService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MinioService = void 0;
 const common_1 = require("@nestjs/common");
 const Minio = __importStar(require("minio"));
 const config_1 = require("@nestjs/config");
+const sharp_1 = __importDefault(require("sharp"));
 let MinioService = MinioService_1 = class MinioService {
     constructor(configService) {
         this.configService = configService;
@@ -108,23 +112,58 @@ let MinioService = MinioService_1 = class MinioService {
     }
     async uploadFile(file, folder = 'general') {
         try {
+            let processedBuffer = file.buffer;
+            let processedSize = file.size;
+            let processedMimeType = file.mimetype;
+            let ext = file.originalname.split('.').pop();
+            const originalSize = file.size;
+            if (file.mimetype.startsWith('image/') && !file.mimetype.includes('svg')) {
+                try {
+                    this.logger.log(`Optimizing image: ${file.originalname} (${file.size} bytes)`);
+                    processedBuffer = await (0, sharp_1.default)(file.buffer)
+                        .webp({
+                        quality: 90,
+                        effort: 6,
+                        lossless: false,
+                        nearLossless: false,
+                        smartSubsample: true,
+                    })
+                        .toBuffer();
+                    processedSize = processedBuffer.length;
+                    processedMimeType = 'image/webp';
+                    ext = 'webp';
+                    const savedBytes = originalSize - processedSize;
+                    const savedPercent = ((savedBytes / originalSize) * 100).toFixed(1);
+                    this.logger.log(`Image optimized: ${file.originalname} | ` +
+                        `Original: ${this.formatBytes(originalSize)} → ` +
+                        `WebP: ${this.formatBytes(processedSize)} | ` +
+                        `Saved: ${this.formatBytes(savedBytes)} (${savedPercent}%)`);
+                }
+                catch (error) {
+                    this.logger.warn(`Failed to optimize image, using original: ${error.message}`);
+                    processedBuffer = file.buffer;
+                    processedSize = file.size;
+                    processedMimeType = file.mimetype;
+                }
+            }
             const timestamp = Date.now();
             const randomStr = Math.random().toString(36).substring(2, 15);
-            const ext = file.originalname.split('.').pop();
             const filename = `${timestamp}-${randomStr}.${ext}`;
             const objectPath = `${folder}/${filename}`;
             const metaData = {
-                'Content-Type': file.mimetype,
+                'Content-Type': processedMimeType,
                 'X-Original-Name': file.originalname,
+                'X-Original-Size': originalSize.toString(),
+                'X-Optimized': file.mimetype.startsWith('image/') ? 'true' : 'false',
             };
-            const result = await this.minioClient.putObject(this.bucketName, objectPath, file.buffer, file.size, metaData);
+            const result = await this.minioClient.putObject(this.bucketName, objectPath, processedBuffer, processedSize, metaData);
             const url = `${this.publicUrl}/${this.bucketName}/${objectPath}`;
-            this.logger.log(`File uploaded: ${objectPath} (${file.size} bytes)`);
+            this.logger.log(`File uploaded: ${objectPath} (${processedSize} bytes)`);
             return {
                 filename,
                 url,
-                size: file.size,
-                mimeType: file.mimetype,
+                size: processedSize,
+                mimeType: processedMimeType,
                 bucket: this.bucketName,
                 path: objectPath,
                 etag: result.etag,
@@ -134,6 +173,14 @@ let MinioService = MinioService_1 = class MinioService {
             this.logger.error(`Error uploading file: ${error.message}`, error.stack);
             throw error;
         }
+    }
+    formatBytes(bytes) {
+        if (bytes === 0)
+            return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     }
     async uploadStream(stream, filename, mimeType, size, folder = 'general') {
         try {

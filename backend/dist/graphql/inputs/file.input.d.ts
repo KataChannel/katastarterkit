@@ -59,4 +59,5 @@ export declare class GetFilesInput {
     filters?: FileFiltersInput;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
+    allUsers?: boolean;
 }

@@ -42,6 +42,12 @@ let ProductResolver = class ProductResolver {
         return this.productService.createProduct(input);
     }
     async updateProduct(input) {
+        console.log('UpdateProduct resolver - input received:', input);
+        console.log('UpdateProduct resolver - input.id:', input?.id);
+        console.log('UpdateProduct resolver - input type:', typeof input);
+        console.log('UpdateProduct resolver - input constructor:', input?.constructor?.name);
+        console.log('UpdateProduct resolver - input keys:', Object.keys(input || {}));
+        console.log('UpdateProduct resolver - JSON:', JSON.stringify(input, null, 2));
         return this.productService.updateProduct(input);
     }
     async deleteProduct(id) {
@@ -84,6 +90,24 @@ let ProductResolver = class ProductResolver {
             return null;
         }
         return ((product.price - product.costPrice) / product.price) * 100;
+    }
+    async shortDescription(product) {
+        return product.shortDesc || null;
+    }
+    async imageUrl(product) {
+        return product.thumbnail || null;
+    }
+    async isNew(product) {
+        return product.isNewArrival || false;
+    }
+    async isOrganic(product) {
+        return product.attributes?.isOrganic || null;
+    }
+    async dimensions(product) {
+        return product.attributes?.dimensions || null;
+    }
+    async manufacturer(product) {
+        return product.attributes?.manufacturer || null;
     }
 };
 exports.ProductResolver = ProductResolver;
@@ -210,6 +234,48 @@ __decorate([
     __metadata("design:paramtypes", [product_type_1.ProductType]),
     __metadata("design:returntype", Promise)
 ], ProductResolver.prototype, "profitMargin", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => String, { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductResolver.prototype, "shortDescription", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => String, { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductResolver.prototype, "imageUrl", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => Boolean, { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductResolver.prototype, "isNew", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => Boolean, { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductResolver.prototype, "isOrganic", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => String, { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductResolver.prototype, "dimensions", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => String, { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProductResolver.prototype, "manufacturer", null);
 exports.ProductResolver = ProductResolver = __decorate([
     (0, graphql_1.Resolver)(() => product_type_1.ProductType),
     __metadata("design:paramtypes", [product_service_1.ProductService,

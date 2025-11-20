@@ -122,7 +122,7 @@ export declare class SecurityDashboardController {
         assessment: {
             id: string;
             score: number;
-            riskLevel: "medium" | "low" | "high" | "critical";
+            riskLevel: "medium" | "critical" | "low" | "high";
             timestamp: Date;
         };
     }>;

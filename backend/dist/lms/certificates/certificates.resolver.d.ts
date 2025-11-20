@@ -7,6 +7,7 @@ export declare class CertificatesResolver {
         createdAt: Date;
         userId: string;
         updatedAt: Date;
+        grade: string | null;
         issueDate: Date;
         courseId: string;
         enrollmentId: string;
@@ -14,7 +15,6 @@ export declare class CertificatesResolver {
         courseName: string;
         instructorName: string;
         completionDate: Date;
-        grade: string | null;
         verificationUrl: string | null;
     }>;
     getMyCertificates(user: any): Promise<({
@@ -28,6 +28,7 @@ export declare class CertificatesResolver {
         createdAt: Date;
         userId: string;
         updatedAt: Date;
+        grade: string | null;
         issueDate: Date;
         courseId: string;
         enrollmentId: string;
@@ -35,7 +36,6 @@ export declare class CertificatesResolver {
         courseName: string;
         instructorName: string;
         completionDate: Date;
-        grade: string | null;
         verificationUrl: string | null;
     })[]>;
     getCertificate(user: any, id: string): Promise<{
@@ -55,6 +55,7 @@ export declare class CertificatesResolver {
         createdAt: Date;
         userId: string;
         updatedAt: Date;
+        grade: string | null;
         issueDate: Date;
         courseId: string;
         enrollmentId: string;
@@ -62,7 +63,6 @@ export declare class CertificatesResolver {
         courseName: string;
         instructorName: string;
         completionDate: Date;
-        grade: string | null;
         verificationUrl: string | null;
     }>;
     verifyCertificate(certificateNumber: string): Promise<{
@@ -82,6 +82,7 @@ export declare class CertificatesResolver {
             createdAt: Date;
             userId: string;
             updatedAt: Date;
+            grade: string | null;
             issueDate: Date;
             courseId: string;
             enrollmentId: string;
@@ -89,7 +90,6 @@ export declare class CertificatesResolver {
             courseName: string;
             instructorName: string;
             completionDate: Date;
-            grade: string | null;
             verificationUrl: string | null;
         };
     }>;

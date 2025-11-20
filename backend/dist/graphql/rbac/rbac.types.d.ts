@@ -38,6 +38,15 @@ export declare class RolePermissionType {
     permission: PermissionType;
     createdAt: Date;
 }
+export declare class UserBasicType {
+    id: string;
+    email: string;
+    username: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    avatar: string | null;
+    isActive: boolean;
+}
 export declare class UserRoleAssignmentType {
     id: string;
     userId: string;
@@ -48,15 +57,6 @@ export declare class UserRoleAssignmentType {
     expiresAt: Date | null;
     role?: RoleType;
     user?: UserBasicType;
-}
-export declare class UserBasicType {
-    id: string;
-    email: string;
-    username: string | null;
-    firstName: string | null;
-    lastName: string | null;
-    avatar: string | null;
-    isActive: boolean;
 }
 export declare class RemoveRoleResultType {
     success: boolean;

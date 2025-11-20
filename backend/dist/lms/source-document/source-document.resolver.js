@@ -18,20 +18,46 @@ const common_1 = require("@nestjs/common");
 const source_document_service_1 = require("./source-document.service");
 const minio_service_1 = require("../../minio/minio.service");
 const source_document_entity_1 = require("./entities/source-document.entity");
+const file_upload_entity_1 = require("../files/entities/file-upload.entity");
 const source_document_dto_1 = require("./dto/source-document.dto");
 const graphql_upload_ts_1 = require("graphql-upload-ts");
 const jwt_auth_guard_1 = require("../../auth/jwt-auth.guard");
 const current_user_decorator_1 = require("../../auth/current-user.decorator");
+const prisma_service_1 = require("../../prisma/prisma.service");
+const config_1 = require("@nestjs/config");
 let SourceDocumentResolver = class SourceDocumentResolver {
-    constructor(sourceDocumentService, minioService) {
+    constructor(sourceDocumentService, minioService, prisma, configService) {
         this.sourceDocumentService = sourceDocumentService;
         this.minioService = minioService;
+        this.prisma = prisma;
+        this.configService = configService;
+    }
+    async user(sourceDocument) {
+        if (!sourceDocument.userId)
+            return null;
+        return this.prisma.user.findUnique({
+            where: { id: sourceDocument.userId },
+            select: {
+                id: true,
+                email: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+            },
+        });
     }
     async createSourceDocument(user, input) {
         return this.sourceDocumentService.create(user.id, input);
     }
     async sourceDocuments(filter, page, limit) {
         const result = await this.sourceDocumentService.findAll(filter, page, limit);
+        console.log('📄 Source documents query:', {
+            filter,
+            page,
+            limit,
+            totalItems: result.items.length,
+            totalCount: result.total,
+        });
         return result.items;
     }
     async sourceDocument(id) {
@@ -62,6 +88,35 @@ let SourceDocumentResolver = class SourceDocumentResolver {
     async sourceDocumentStats(user) {
         const stats = await this.sourceDocumentService.getStats(user.id);
         return JSON.stringify(stats);
+    }
+    async uploadFile(file, bucket) {
+        const { createReadStream, filename, mimetype } = await file;
+        const chunks = [];
+        const stream = createReadStream();
+        return new Promise((resolve, reject) => {
+            stream.on('data', (chunk) => chunks.push(chunk));
+            stream.on('error', reject);
+            stream.on('end', async () => {
+                try {
+                    const buffer = Buffer.concat(chunks);
+                    const timestamp = Date.now();
+                    const safeName = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+                    const uniqueFileName = `${timestamp}-${safeName}`;
+                    const url = await this.minioService.uploadFile(bucket, uniqueFileName, buffer, mimetype);
+                    resolve({
+                        id: `${bucket}-${uniqueFileName}`,
+                        url,
+                        filename,
+                        mimetype,
+                        size: buffer.length,
+                        bucket,
+                    });
+                }
+                catch (error) {
+                    reject(error);
+                }
+            });
+        });
     }
     async uploadSourceDocumentFile(documentId, file) {
         const { createReadStream, filename, mimetype } = await file;
@@ -119,6 +174,13 @@ let SourceDocumentResolver = class SourceDocumentResolver {
     }
 };
 exports.SourceDocumentResolver = SourceDocumentResolver;
+__decorate([
+    (0, graphql_1.ResolveField)('user'),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [source_document_entity_1.SourceDocument]),
+    __metadata("design:returntype", Promise)
+], SourceDocumentResolver.prototype, "user", null);
 __decorate([
     (0, graphql_1.Mutation)(() => source_document_entity_1.SourceDocument),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
@@ -211,6 +273,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SourceDocumentResolver.prototype, "sourceDocumentStats", null);
 __decorate([
+    (0, graphql_1.Mutation)(() => file_upload_entity_1.FileUploadResult),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, graphql_1.Args)({ name: 'file', type: () => graphql_upload_ts_1.GraphQLUpload })),
+    __param(1, (0, graphql_1.Args)('bucket', { type: () => String })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Promise, String]),
+    __metadata("design:returntype", Promise)
+], SourceDocumentResolver.prototype, "uploadFile", null);
+__decorate([
     (0, graphql_1.Mutation)(() => String),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, graphql_1.Args)('documentId', { type: () => graphql_1.ID })),
@@ -247,6 +318,8 @@ __decorate([
 exports.SourceDocumentResolver = SourceDocumentResolver = __decorate([
     (0, graphql_1.Resolver)(() => source_document_entity_1.SourceDocument),
     __metadata("design:paramtypes", [source_document_service_1.SourceDocumentService,
-        minio_service_1.MinioService])
+        minio_service_1.MinioService,
+        prisma_service_1.PrismaService,
+        config_1.ConfigService])
 ], SourceDocumentResolver);
 //# sourceMappingURL=source-document.resolver.js.map

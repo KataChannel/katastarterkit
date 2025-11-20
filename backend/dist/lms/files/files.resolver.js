@@ -33,7 +33,7 @@ let FilesResolver = class FilesResolver {
     async uploadCourseMaterial(user, file, courseId) {
         return this.filesService.uploadCourseMaterial(file, user.id, courseId);
     }
-    async deleteFile(user, fileId, bucket) {
+    async deleteLMSFile(user, fileId, bucket) {
         return this.filesService.deleteFile(fileId, bucket, user.id);
     }
     async getPresignedUrl(fileId, bucket, expiresIn) {
@@ -72,7 +72,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FilesResolver.prototype, "uploadCourseMaterial", null);
 __decorate([
-    (0, graphql_1.Mutation)(() => Boolean),
+    (0, graphql_1.Mutation)(() => Boolean, { name: 'deleteLMSFile' }),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('fileId', { type: () => String })),
@@ -80,7 +80,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
-], FilesResolver.prototype, "deleteFile", null);
+], FilesResolver.prototype, "deleteLMSFile", null);
 __decorate([
     (0, graphql_1.Query)(() => String),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

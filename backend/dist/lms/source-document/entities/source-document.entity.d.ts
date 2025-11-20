@@ -1,4 +1,5 @@
 import { SourceDocumentType, SourceDocumentStatus } from '@prisma/client';
+import { User } from '../../../graphql/models/user.model';
 export declare class SourceDocumentCategory {
     id: string;
     name: string;
@@ -36,6 +37,7 @@ export declare class SourceDocument {
     metadata?: any;
     userId: string;
     category?: SourceDocumentCategory;
+    user?: User;
     viewCount: number;
     downloadCount: number;
     usageCount: number;

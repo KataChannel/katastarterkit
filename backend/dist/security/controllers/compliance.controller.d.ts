@@ -292,7 +292,7 @@ export declare class ComplianceController {
             timeframe: "day" | "hour";
             anomaliesDetected: number;
             anomalies: any[];
-            riskLevel: "medium" | "low" | "high" | "critical";
+            riskLevel: "medium" | "critical" | "low" | "high";
         };
         message: string;
         error?: undefined;

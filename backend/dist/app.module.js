@@ -53,6 +53,7 @@ const validation_1 = require("./config/validation");
 const env_config_service_1 = require("./config/env-config.service");
 const log_controller_1 = require("./controllers/log.controller");
 const file_controller_1 = require("./controllers/file.controller");
+const files_controller_1 = require("./controllers/files.controller");
 const product_normalization_controller_1 = require("./api/product-normalization.controller");
 const app_resolver_1 = require("./app.resolver");
 const graphql_logging_interceptor_1 = require("./interceptors/graphql-logging.interceptor");
@@ -148,6 +149,7 @@ exports.AppModule = AppModule = __decorate([
             log_controller_1.LogController,
             test_controller_1.TestController,
             file_controller_1.FileController,
+            files_controller_1.FilesController,
             product_normalization_controller_1.ProductNormalizationController,
         ],
         providers: [

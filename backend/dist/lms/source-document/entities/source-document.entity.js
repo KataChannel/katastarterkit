@@ -16,6 +16,7 @@ exports.CourseSourceDocument = exports.SourceDocument = exports.SourceDocumentCa
 const graphql_1 = require("@nestjs/graphql");
 const client_1 = require("@prisma/client");
 const graphql_type_json_1 = __importDefault(require("graphql-type-json"));
+const user_model_1 = require("../../../graphql/models/user.model");
 (0, graphql_1.registerEnumType)(client_1.SourceDocumentType, {
     name: 'SourceDocumentType',
     description: 'Type of source document',
@@ -169,6 +170,10 @@ __decorate([
     (0, graphql_1.Field)(() => SourceDocumentCategory, { nullable: true }),
     __metadata("design:type", SourceDocumentCategory)
 ], SourceDocument.prototype, "category", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => user_model_1.User, { nullable: true }),
+    __metadata("design:type", user_model_1.User)
+], SourceDocument.prototype, "user", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int),
     __metadata("design:type", Number)

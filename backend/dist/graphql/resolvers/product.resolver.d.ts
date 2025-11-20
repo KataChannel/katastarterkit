@@ -985,4 +985,10 @@ export declare class ProductResolver {
     }>;
     discountPercentage(product: ProductType): Promise<number>;
     profitMargin(product: ProductType): Promise<number>;
+    shortDescription(product: any): Promise<any>;
+    imageUrl(product: any): Promise<any>;
+    isNew(product: any): Promise<any>;
+    isOrganic(product: any): Promise<any>;
+    dimensions(product: any): Promise<any>;
+    manufacturer(product: any): Promise<any>;
 }

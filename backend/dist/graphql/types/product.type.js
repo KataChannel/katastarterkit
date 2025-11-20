@@ -158,6 +158,10 @@ __decorate([
     __metadata("design:type", String)
 ], ProductType.prototype, "shortDesc", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], ProductType.prototype, "shortDescription", void 0);
+__decorate([
     (0, graphql_1.Field)(() => graphql_1.Float),
     __metadata("design:type", Number)
 ], ProductType.prototype, "price", void 0);
@@ -222,6 +226,10 @@ __decorate([
     __metadata("design:type", String)
 ], ProductType.prototype, "thumbnail", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], ProductType.prototype, "imageUrl", void 0);
+__decorate([
     (0, graphql_1.Field)(() => [ProductVariantType], { nullable: true }),
     __metadata("design:type", Array)
 ], ProductType.prototype, "variants", void 0);
@@ -250,6 +258,10 @@ __decorate([
     __metadata("design:type", Boolean)
 ], ProductType.prototype, "isNewArrival", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", Boolean)
+], ProductType.prototype, "isNew", void 0);
+__decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Boolean)
 ], ProductType.prototype, "isBestSeller", void 0);
@@ -257,6 +269,18 @@ __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Boolean)
 ], ProductType.prototype, "isOnSale", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", Boolean)
+], ProductType.prototype, "isOrganic", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], ProductType.prototype, "dimensions", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], ProductType.prototype, "manufacturer", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int),
     __metadata("design:type", Number)

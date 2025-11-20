@@ -77,13 +77,8 @@ async function bootstrap() {
     origin: corsOrigins.length > 0 ? corsOrigins : true,
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type', 
-      'Authorization', 
-      'X-Requested-With',
-      'apollo-require-preflight', // Apollo CSRF protection
-      'x-apollo-operation-name', // Apollo operation name
-    ],
+    allowedHeaders: '*', // Allow all headers
+    exposedHeaders: ['Content-Length', 'Content-Type'],
   });
 
   // Global validation pipe - custom pipe that skips file uploads

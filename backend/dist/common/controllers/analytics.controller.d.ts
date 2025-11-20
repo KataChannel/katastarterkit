@@ -80,7 +80,7 @@ export declare class AnalyticsController {
     }>;
     getHistoricalMetrics(timeRange?: '1h' | '6h' | '24h' | '7d', metrics?: string): Promise<any[]>;
     getSystemHealth(): Promise<{
-        status: "healthy" | "critical" | "warning";
+        status: "critical" | "healthy" | "warning";
         score: number;
         timestamp: number;
         components: {

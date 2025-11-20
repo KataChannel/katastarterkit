@@ -193,7 +193,7 @@ export declare class SecurityAuditService {
         timeframe: "day" | "hour";
         anomaliesDetected: number;
         anomalies: any[];
-        riskLevel: "medium" | "low" | "high" | "critical";
+        riskLevel: "medium" | "critical" | "low" | "high";
     }>;
     private calculateAnomalyRiskLevel;
     generateComplianceReport(startDate: Date, endDate: Date): Promise<{

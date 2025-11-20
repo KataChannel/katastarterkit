@@ -50,9 +50,9 @@ export declare class AffiliateConversionService {
                 updatedAt: Date;
                 description: string | null;
                 status: import("@prisma/client").$Enums.AffCampaignStatus;
-                commissionType: string;
                 startDate: Date | null;
                 endDate: Date | null;
+                commissionType: string;
                 productName: string;
                 productUrl: string;
                 commissionRate: import("@prisma/client/runtime/library").Decimal;

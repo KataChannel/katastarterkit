@@ -19,7 +19,9 @@ let ProductService = class ProductService {
     async getProducts(input) {
         const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', filters } = input;
         const skip = (page - 1) * limit;
+        console.log('[ProductService] getProducts input:', JSON.stringify(input, null, 2));
         const where = this.buildWhereClause(filters);
+        console.log('[ProductService] where clause:', JSON.stringify(where, null, 2));
         const [items, total] = await Promise.all([
             this.prisma.product.findMany({
                 where,
@@ -76,11 +78,30 @@ let ProductService = class ProductService {
         return this.getProducts({ ...input, filters });
     }
     async createProduct(input) {
-        const existingProduct = await this.prisma.product.findUnique({
+        const existingBySlug = await this.prisma.product.findUnique({
             where: { slug: input.slug },
         });
-        if (existingProduct) {
+        if (existingBySlug) {
             throw new common_1.BadRequestException(`Product with slug ${input.slug} already exists`);
+        }
+        if (input.sku) {
+            const existingBySku = await this.prisma.product.findUnique({
+                where: { sku: input.sku },
+            });
+            if (existingBySku) {
+                throw new common_1.BadRequestException(`Product with SKU ${input.sku} already exists`);
+            }
+        }
+        if (input.barcode && input.barcode.trim() !== '') {
+            const existingByBarcode = await this.prisma.product.findUnique({
+                where: { barcode: input.barcode },
+            });
+            if (existingByBarcode) {
+                throw new common_1.BadRequestException(`Product with barcode ${input.barcode} already exists`);
+            }
+        }
+        else if (input.barcode === '') {
+            input.barcode = null;
         }
         const category = await this.prisma.category.findUnique({
             where: { id: input.categoryId },
@@ -100,10 +121,44 @@ let ProductService = class ProductService {
         });
     }
     async updateProduct(input) {
-        const { id, ...data } = input;
+        console.log('ProductService.updateProduct - raw input:', input);
+        console.log('ProductService.updateProduct - input.id:', input.id);
+        console.log('ProductService.updateProduct - input type:', typeof input);
+        console.log('ProductService.updateProduct - input keys:', Object.keys(input));
+        if (!input?.id) {
+            console.error('ProductService.updateProduct - MISSING ID!', { input });
+            throw new common_1.BadRequestException('Product ID is required for update');
+        }
+        const id = input.id;
+        const { id: _id, shortDescription, imageUrl, isNew, isOrganic, dimensions, manufacturer, ...data } = input;
+        console.log('ProductService.updateProduct - extracted id:', id);
+        console.log('ProductService.updateProduct - data to update:', data);
         const product = await this.prisma.product.findUnique({ where: { id } });
         if (!product) {
             throw new common_1.NotFoundException(`Product with ID ${id} not found`);
+        }
+        if (shortDescription !== undefined) {
+            data.shortDesc = shortDescription;
+        }
+        if (imageUrl !== undefined) {
+            data.thumbnail = imageUrl;
+        }
+        if (isNew !== undefined) {
+            data.isNewArrival = isNew;
+        }
+        const extraAttributes = {};
+        if (isOrganic !== undefined)
+            extraAttributes.isOrganic = isOrganic;
+        if (dimensions !== undefined)
+            extraAttributes.dimensions = dimensions;
+        if (manufacturer !== undefined)
+            extraAttributes.manufacturer = manufacturer;
+        if (Object.keys(extraAttributes).length > 0) {
+            const currentAttributes = product.attributes || {};
+            data.attributes = {
+                ...(typeof currentAttributes === 'object' ? currentAttributes : {}),
+                ...extraAttributes,
+            };
         }
         if (data.slug && data.slug !== product.slug) {
             const existingProduct = await this.prisma.product.findUnique({
@@ -111,6 +166,27 @@ let ProductService = class ProductService {
             });
             if (existingProduct) {
                 throw new common_1.BadRequestException(`Product with slug ${data.slug} already exists`);
+            }
+        }
+        if (data.sku && data.sku !== product.sku) {
+            const existingProduct = await this.prisma.product.findUnique({
+                where: { sku: data.sku },
+            });
+            if (existingProduct) {
+                throw new common_1.BadRequestException(`Product with SKU ${data.sku} already exists`);
+            }
+        }
+        if (data.barcode !== undefined && data.barcode !== product.barcode) {
+            if (data.barcode && data.barcode.trim() !== '') {
+                const existingProduct = await this.prisma.product.findUnique({
+                    where: { barcode: data.barcode },
+                });
+                if (existingProduct) {
+                    throw new common_1.BadRequestException(`Product with barcode ${data.barcode} already exists`);
+                }
+            }
+            else {
+                data.barcode = null;
             }
         }
         if (data.categoryId) {
@@ -210,14 +286,18 @@ let ProductService = class ProductService {
         });
     }
     buildWhereClause(filters) {
-        if (!filters)
+        if (!filters) {
+            console.log('[ProductService] No filters provided');
             return {};
+        }
         const where = {};
-        if (filters.search) {
+        if (filters.search && filters.search.trim().length > 0) {
+            const searchTerm = filters.search.trim();
+            console.log('[ProductService] Search query:', searchTerm);
             where.OR = [
-                { name: { contains: filters.search, mode: 'insensitive' } },
-                { description: { contains: filters.search, mode: 'insensitive' } },
-                { sku: { contains: filters.search, mode: 'insensitive' } },
+                { name: { contains: searchTerm, mode: 'insensitive' } },
+                { description: { contains: searchTerm, mode: 'insensitive' } },
+                { sku: { contains: searchTerm, mode: 'insensitive' } },
             ];
         }
         if (filters.categoryId) {

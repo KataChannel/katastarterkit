@@ -141,10 +141,10 @@ let FileService = FileService_1 = class FileService {
         return file;
     }
     async getFiles(input, userId) {
-        const { page = 1, limit = 20, filters = {}, sortBy = 'createdAt', sortOrder = 'desc', } = input;
+        const { page = 1, limit = 20, filters = {}, sortBy = 'createdAt', sortOrder = 'desc', allUsers = false, } = input;
         const skip = (page - 1) * limit;
         const where = {
-            userId,
+            ...(allUsers ? {} : { userId }),
             ...(filters.fileType && { fileType: filters.fileType }),
             ...(filters.folderId && { folderId: filters.folderId }),
             ...(filters.visibility && { visibility: filters.visibility }),

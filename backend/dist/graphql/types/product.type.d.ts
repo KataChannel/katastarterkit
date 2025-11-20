@@ -45,6 +45,7 @@ export declare class ProductType {
     slug: string;
     description?: string;
     shortDesc?: string;
+    shortDescription?: string;
     price: number;
     originalPrice?: number;
     costPrice?: number;
@@ -61,6 +62,7 @@ export declare class ProductType {
     category?: CategoryType;
     images?: ProductImageType[];
     thumbnail?: string;
+    imageUrl?: string;
     variants?: ProductVariantType[];
     attributes?: any;
     metaTitle?: string;
@@ -68,8 +70,12 @@ export declare class ProductType {
     metaKeywords?: string;
     isFeatured: boolean;
     isNewArrival: boolean;
+    isNew?: boolean;
     isBestSeller: boolean;
     isOnSale: boolean;
+    isOrganic?: boolean;
+    dimensions?: string;
+    manufacturer?: string;
     displayOrder: number;
     viewCount: number;
     soldCount: number;

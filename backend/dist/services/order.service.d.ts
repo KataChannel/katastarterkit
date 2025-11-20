@@ -1,10 +1,12 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { CartService } from './cart.service';
+import { NotificationService } from './notification.service';
 import { CreateOrderInput, UpdateOrderStatusInput, CancelOrderInput, OrderFilterInput } from '../graphql/schemas/ecommerce/order.schema';
 export declare class OrderService {
     private readonly prisma;
     private readonly cartService;
-    constructor(prisma: PrismaService, cartService: CartService);
+    private readonly notificationService;
+    constructor(prisma: PrismaService, cartService: CartService, notificationService: NotificationService);
     createFromCart(input: CreateOrderInput, userId?: string): Promise<{
         payment: {
             id: string;

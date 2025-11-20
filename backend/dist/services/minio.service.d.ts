@@ -24,6 +24,7 @@ export declare class MinioService implements OnModuleInit {
     onModuleInit(): Promise<void>;
     private ensureBucketExists;
     uploadFile(file: Express.Multer.File, folder?: string): Promise<UploadResult>;
+    private formatBytes;
     uploadStream(stream: Readable, filename: string, mimeType: string, size: number, folder?: string): Promise<UploadResult>;
     deleteFile(objectPath: string): Promise<void>;
     getFile(objectPath: string): Promise<Buffer>;

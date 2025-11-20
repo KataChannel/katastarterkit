@@ -43,10 +43,10 @@ if (typeof global.File === 'undefined') {
     };
 }
 const core_1 = require("@nestjs/core");
-const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const app_module_1 = require("./app.module");
 const prisma_service_1 = require("./prisma/prisma.service");
+const graphql_validation_pipe_1 = require("./common/pipes/graphql-validation.pipe");
 const dotenv = __importStar(require("dotenv"));
 const path_1 = require("path");
 const express = __importStar(require("express"));
@@ -91,9 +91,10 @@ async function bootstrap() {
         origin: corsOrigins.length > 0 ? corsOrigins : true,
         credentials: true,
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+        allowedHeaders: '*',
+        exposedHeaders: ['Content-Length', 'Content-Type'],
     });
-    app.useGlobalPipes(new common_1.ValidationPipe({
+    app.useGlobalPipes(new graphql_validation_pipe_1.GraphQLValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: false,
         transform: true,

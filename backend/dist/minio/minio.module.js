@@ -10,6 +10,7 @@ exports.MinioModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const minio_service_1 = require("./minio.service");
+const image_optimization_service_1 = require("../services/image-optimization.service");
 let MinioModule = class MinioModule {
 };
 exports.MinioModule = MinioModule;
@@ -17,8 +18,8 @@ exports.MinioModule = MinioModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
         imports: [config_1.ConfigModule],
-        providers: [minio_service_1.MinioService],
-        exports: [minio_service_1.MinioService],
+        providers: [minio_service_1.MinioService, image_optimization_service_1.ImageOptimizationService],
+        exports: [minio_service_1.MinioService, image_optimization_service_1.ImageOptimizationService],
     })
 ], MinioModule);
 //# sourceMappingURL=minio.module.js.map

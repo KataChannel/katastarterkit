@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PermissionSearchResultType = exports.RoleSearchResultType = exports.PermissionsByCategoryType = exports.RemoveRoleResultType = exports.UserBasicType = exports.UserRoleAssignmentType = exports.RolePermissionType = exports.RoleType = exports.PermissionType = void 0;
+exports.PermissionSearchResultType = exports.RoleSearchResultType = exports.PermissionsByCategoryType = exports.RemoveRoleResultType = exports.UserRoleAssignmentType = exports.UserBasicType = exports.RolePermissionType = exports.RoleType = exports.PermissionType = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const graphql_type_json_1 = require("graphql-type-json");
 let PermissionType = class PermissionType {
@@ -166,6 +166,40 @@ __decorate([
 exports.RolePermissionType = RolePermissionType = __decorate([
     (0, graphql_1.ObjectType)()
 ], RolePermissionType);
+let UserBasicType = class UserBasicType {
+};
+exports.UserBasicType = UserBasicType;
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.ID),
+    __metadata("design:type", String)
+], UserBasicType.prototype, "id", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], UserBasicType.prototype, "email", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", String)
+], UserBasicType.prototype, "username", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", String)
+], UserBasicType.prototype, "firstName", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", String)
+], UserBasicType.prototype, "lastName", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    __metadata("design:type", String)
+], UserBasicType.prototype, "avatar", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", Boolean)
+], UserBasicType.prototype, "isActive", void 0);
+exports.UserBasicType = UserBasicType = __decorate([
+    (0, graphql_1.ObjectType)()
+], UserBasicType);
 let UserRoleAssignmentType = class UserRoleAssignmentType {
 };
 exports.UserRoleAssignmentType = UserRoleAssignmentType;
@@ -208,40 +242,6 @@ __decorate([
 exports.UserRoleAssignmentType = UserRoleAssignmentType = __decorate([
     (0, graphql_1.ObjectType)()
 ], UserRoleAssignmentType);
-let UserBasicType = class UserBasicType {
-};
-exports.UserBasicType = UserBasicType;
-__decorate([
-    (0, graphql_1.Field)(() => graphql_1.ID),
-    __metadata("design:type", String)
-], UserBasicType.prototype, "id", void 0);
-__decorate([
-    (0, graphql_1.Field)(),
-    __metadata("design:type", String)
-], UserBasicType.prototype, "email", void 0);
-__decorate([
-    (0, graphql_1.Field)(() => String, { nullable: true }),
-    __metadata("design:type", String)
-], UserBasicType.prototype, "username", void 0);
-__decorate([
-    (0, graphql_1.Field)(() => String, { nullable: true }),
-    __metadata("design:type", String)
-], UserBasicType.prototype, "firstName", void 0);
-__decorate([
-    (0, graphql_1.Field)(() => String, { nullable: true }),
-    __metadata("design:type", String)
-], UserBasicType.prototype, "lastName", void 0);
-__decorate([
-    (0, graphql_1.Field)(() => String, { nullable: true }),
-    __metadata("design:type", String)
-], UserBasicType.prototype, "avatar", void 0);
-__decorate([
-    (0, graphql_1.Field)(),
-    __metadata("design:type", Boolean)
-], UserBasicType.prototype, "isActive", void 0);
-exports.UserBasicType = UserBasicType = __decorate([
-    (0, graphql_1.ObjectType)()
-], UserBasicType);
 let RemoveRoleResultType = class RemoveRoleResultType {
 };
 exports.RemoveRoleResultType = RemoveRoleResultType;

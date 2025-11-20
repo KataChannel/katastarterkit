@@ -31,18 +31,16 @@ const task_service_1 = require("../../services/task.service");
 const task_share_service_1 = require("../../services/task-share.service");
 const task_comment_service_1 = require("../../services/task-comment.service");
 const task_media_service_1 = require("../../services/task-media.service");
-const notification_service_1 = require("../../services/notification.service");
 const user_service_1 = require("../../services/user.service");
 const pubsub_service_1 = require("../../services/pubsub.service");
 const task_data_loader_service_1 = require("../../common/data-loaders/task-data-loader.service");
 const cache_invalidation_service_1 = require("../../common/services/cache-invalidation.service");
 let TaskResolver = class TaskResolver {
-    constructor(taskService, taskShareService, taskCommentService, taskMediaService, notificationService, userService, pubSubService, taskDataLoaderService, cacheInvalidationService) {
+    constructor(taskService, taskShareService, taskCommentService, taskMediaService, userService, pubSubService, taskDataLoaderService, cacheInvalidationService) {
         this.taskService = taskService;
         this.taskShareService = taskShareService;
         this.taskCommentService = taskCommentService;
         this.taskMediaService = taskMediaService;
-        this.notificationService = notificationService;
         this.userService = userService;
         this.pubSubService = pubSubService;
         this.taskDataLoaderService = taskDataLoaderService;
@@ -98,9 +96,6 @@ let TaskResolver = class TaskResolver {
         catch (error) {
             console.error('Failed to publish taskUpdated event:', error);
         }
-        if (input.status === 'COMPLETED') {
-            await this.notificationService.createTaskCompletedNotification(task.id, userId);
-        }
         await this.cacheInvalidationService.invalidateTaskCache(task.id, userId);
         return task;
     }
@@ -114,14 +109,12 @@ let TaskResolver = class TaskResolver {
     async shareTask(input, context) {
         const userId = context.req.user.id;
         const share = await this.taskShareService.create(input, userId);
-        await this.notificationService.createTaskAssignedNotification(input.taskId, input.sharedWithId);
         await this.pubSubService.publish('taskShared', { taskShared: share });
         return share;
     }
     async createTaskComment(input, context) {
         const userId = context.req.user.id;
         const comment = await this.taskCommentService.create(input, userId);
-        await this.notificationService.createTaskCommentNotification(input.taskId, userId);
         console.log('Publishing taskCommentCreated with comment:', comment);
         try {
             this.pubSubService.publishTaskCommentCreated(comment);
@@ -526,7 +519,6 @@ exports.TaskResolver = TaskResolver = __decorate([
         task_share_service_1.TaskShareService,
         task_comment_service_1.TaskCommentService,
         task_media_service_1.TaskMediaService,
-        notification_service_1.NotificationService,
         user_service_1.UserService,
         pubsub_service_1.PubSubService,
         task_data_loader_service_1.TaskDataLoaderService,

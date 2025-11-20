@@ -74,7 +74,7 @@ let ProjectMediaResolver = class ProjectMediaResolver {
     async getProjectFiles(projectId) {
         return await this.projectMediaService.getProjectFiles(projectId);
     }
-    async deleteFile(fileId, type, userId) {
+    async deleteProjectFile(fileId, type, userId) {
         return await this.projectMediaService.deleteFile(fileId, userId, type);
     }
     async streamToBuffer(stream) {
@@ -157,8 +157,8 @@ __decorate([
 ], ProjectMediaResolver.prototype, "getProjectFiles", null);
 __decorate([
     (0, graphql_1.Mutation)(() => Boolean, {
-        name: 'deleteFile',
-        description: 'Delete a file',
+        name: 'deleteProjectFile',
+        description: 'Delete a project/task/chat file',
     }),
     __param(0, (0, graphql_1.Args)('fileId', { type: () => graphql_1.ID })),
     __param(1, (0, graphql_1.Args)('type')),
@@ -166,7 +166,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
-], ProjectMediaResolver.prototype, "deleteFile", null);
+], ProjectMediaResolver.prototype, "deleteProjectFile", null);
 exports.ProjectMediaResolver = ProjectMediaResolver = __decorate([
     (0, graphql_1.Resolver)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

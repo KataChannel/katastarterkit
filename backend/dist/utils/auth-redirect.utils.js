@@ -22,17 +22,32 @@ async function getAuthRedirectSettings() {
     });
     return settingsMap;
 }
-async function getLoginRedirectUrl(userRole) {
+async function getLoginRedirectUrl(userId) {
     const settings = await getAuthRedirectSettings();
     const roleBasedRedirect = settings['auth_role_based_redirect'] === 'true';
     if (!roleBasedRedirect) {
         return settings['auth_login_redirect'] || '/dashboard';
     }
-    switch (userRole.toUpperCase()) {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+            userRoles: {
+                include: {
+                    role: true
+                }
+            }
+        }
+    });
+    if (!user) {
+        return settings['auth_login_redirect'] || '/dashboard';
+    }
+    const hasGiangvienRole = user.userRoles.some(ur => ur.role.name === 'giangvien');
+    if (hasGiangvienRole) {
+        return settings['auth_redirect_giangvien'] || '/lms/instructor';
+    }
+    switch (user.roleType.toUpperCase()) {
         case 'ADMIN':
             return settings['auth_redirect_admin'] || '/admin';
-        case 'GIANGVIEN':
-            return settings['auth_redirect_giangvien'] || '/giangvien/courses';
         case 'USER':
             return settings['auth_redirect_user'] || '/dashboard';
         case 'GUEST':

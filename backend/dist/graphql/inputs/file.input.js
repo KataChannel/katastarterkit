@@ -316,6 +316,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], GetFilesInput.prototype, "sortOrder", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true, defaultValue: false }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], GetFilesInput.prototype, "allUsers", void 0);
 exports.GetFilesInput = GetFilesInput = __decorate([
     (0, graphql_1.InputType)()
 ], GetFilesInput);

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateProductVariantInput = exports.CreateProductVariantInput = exports.CreateProductImageInput = exports.GetProductsInput = exports.ProductFiltersInput = exports.UpdateProductInput = exports.CreateProductInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const graphql_type_json_1 = require("graphql-type-json");
+const class_validator_1 = require("class-validator");
 const product_type_1 = require("../types/product.type");
 let CreateProductInput = class CreateProductInput {
 };
@@ -132,114 +133,205 @@ let UpdateProductInput = class UpdateProductInput {
 exports.UpdateProductInput = UpdateProductInput;
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Product ID is required' }),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "id", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "name", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "slug", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "shortDesc", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateProductInput.prototype, "shortDescription", void 0);
+__decorate([
     (0, graphql_1.Field)(() => graphql_1.Float, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UpdateProductInput.prototype, "price", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Float, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UpdateProductInput.prototype, "originalPrice", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Float, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UpdateProductInput.prototype, "costPrice", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "sku", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "barcode", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UpdateProductInput.prototype, "stock", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UpdateProductInput.prototype, "minStock", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UpdateProductInput.prototype, "maxStock", void 0);
 __decorate([
     (0, graphql_1.Field)(() => product_type_1.ProductUnit, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(product_type_1.ProductUnit),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "unit", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Float, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UpdateProductInput.prototype, "weight", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "origin", void 0);
 __decorate([
     (0, graphql_1.Field)(() => product_type_1.ProductStatus, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(product_type_1.ProductStatus),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "status", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "categoryId", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "thumbnail", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateProductInput.prototype, "imageUrl", void 0);
+__decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], UpdateProductInput.prototype, "attributes", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "metaTitle", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "metaDescription", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductInput.prototype, "metaKeywords", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateProductInput.prototype, "isFeatured", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateProductInput.prototype, "isNewArrival", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateProductInput.prototype, "isNew", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateProductInput.prototype, "isBestSeller", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateProductInput.prototype, "isOnSale", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateProductInput.prototype, "isOrganic", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateProductInput.prototype, "dimensions", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateProductInput.prototype, "manufacturer", void 0);
+__decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], UpdateProductInput.prototype, "displayOrder", void 0);
 exports.UpdateProductInput = UpdateProductInput = __decorate([

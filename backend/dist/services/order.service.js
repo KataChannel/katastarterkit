@@ -8,15 +8,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const cart_service_1 = require("./cart.service");
+const notification_service_1 = require("./notification.service");
 let OrderService = class OrderService {
-    constructor(prisma, cartService) {
+    constructor(prisma, cartService, notificationService) {
         this.prisma = prisma;
         this.cartService = cartService;
+        this.notificationService = notificationService;
     }
     async createFromCart(input, userId) {
         const { shippingAddress, billingAddress, paymentMethod, shippingMethod, sessionId } = input;
@@ -182,6 +187,12 @@ let OrderService = class OrderService {
             });
             return newOrder;
         });
+        try {
+            await this.notificationService.createOrderNotification(userId, input.guestEmail, order.orderNumber, order.total, order);
+        }
+        catch (error) {
+            console.error('Failed to send order notification:', error);
+        }
         return order;
     }
     async getOrder(orderId, userId) {
@@ -568,7 +579,9 @@ let OrderService = class OrderService {
 exports.OrderService = OrderService;
 exports.OrderService = OrderService = __decorate([
     (0, common_1.Injectable)(),
+    __param(2, (0, common_1.Inject)((0, common_1.forwardRef)(() => notification_service_1.NotificationService))),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        cart_service_1.CartService])
+        cart_service_1.CartService,
+        notification_service_1.NotificationService])
 ], OrderService);
 //# sourceMappingURL=order.service.js.map

@@ -17,6 +17,7 @@ const graphql_1 = require("@nestjs/graphql");
 const common_1 = require("@nestjs/common");
 const rbac_service_1 = require("../../common/services/rbac.service");
 const rbac_guard_1 = require("../../common/guards/rbac.guard");
+const jwt_auth_guard_1 = require("../../auth/jwt-auth.guard");
 const rbac_decorator_1 = require("../../common/decorators/rbac.decorator");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 const rbac_types_1 = require("./rbac.types");
@@ -68,6 +69,7 @@ let RBACResolver = class RBACResolver {
 exports.RBACResolver = RBACResolver;
 __decorate([
     (0, graphql_1.Query)(() => [rbac_types_1.PermissionType]),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -75,6 +77,7 @@ __decorate([
 ], RBACResolver.prototype, "myPermissions", null);
 __decorate([
     (0, graphql_1.Query)(() => [rbac_types_1.UserRoleAssignmentType]),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -82,6 +85,7 @@ __decorate([
 ], RBACResolver.prototype, "myRoles", null);
 __decorate([
     (0, graphql_1.Query)(() => Boolean),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('resource')),
     __param(2, (0, graphql_1.Args)('action')),
@@ -92,7 +96,7 @@ __decorate([
 ], RBACResolver.prototype, "checkMyPermission", null);
 __decorate([
     (0, graphql_1.Query)(() => [rbac_types_1.RoleType]),
-    (0, common_1.UseGuards)(rbac_guard_1.RBACGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, rbac_guard_1.RBACGuard),
     (0, rbac_decorator_1.RequireRole)('ADMIN'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -100,7 +104,7 @@ __decorate([
 ], RBACResolver.prototype, "roles", null);
 __decorate([
     (0, graphql_1.Query)(() => rbac_types_1.RoleType),
-    (0, common_1.UseGuards)(rbac_guard_1.RBACGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, rbac_guard_1.RBACGuard),
     (0, rbac_decorator_1.RequireRole)('ADMIN'),
     __param(0, (0, graphql_1.Args)('id')),
     __metadata("design:type", Function),
@@ -109,7 +113,7 @@ __decorate([
 ], RBACResolver.prototype, "role", null);
 __decorate([
     (0, graphql_1.Query)(() => rbac_types_1.PermissionsByCategoryType),
-    (0, common_1.UseGuards)(rbac_guard_1.RBACGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, rbac_guard_1.RBACGuard),
     (0, rbac_decorator_1.RequireRole)('ADMIN'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -117,7 +121,7 @@ __decorate([
 ], RBACResolver.prototype, "permissions", null);
 __decorate([
     (0, graphql_1.Mutation)(() => rbac_types_1.UserRoleAssignmentType),
-    (0, common_1.UseGuards)(rbac_guard_1.RBACGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, rbac_guard_1.RBACGuard),
     (0, rbac_decorator_1.RequireRole)('ADMIN'),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, graphql_1.Args)('userId')),
@@ -129,7 +133,7 @@ __decorate([
 ], RBACResolver.prototype, "assignRoleToUser", null);
 __decorate([
     (0, graphql_1.Mutation)(() => rbac_types_1.RemoveRoleResultType),
-    (0, common_1.UseGuards)(rbac_guard_1.RBACGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, rbac_guard_1.RBACGuard),
     (0, rbac_decorator_1.RequireRole)('ADMIN'),
     __param(0, (0, graphql_1.Args)('userId')),
     __param(1, (0, graphql_1.Args)('roleId')),
@@ -140,7 +144,7 @@ __decorate([
 ], RBACResolver.prototype, "removeRoleFromUser", null);
 __decorate([
     (0, graphql_1.Query)(() => [rbac_types_1.UserRoleAssignmentType]),
-    (0, common_1.UseGuards)(rbac_guard_1.RBACGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, rbac_guard_1.RBACGuard),
     (0, rbac_decorator_1.RequireRole)('ADMIN'),
     __param(0, (0, graphql_1.Args)('roleId')),
     __metadata("design:type", Function),
@@ -149,7 +153,7 @@ __decorate([
 ], RBACResolver.prototype, "usersByRole", null);
 __decorate([
     (0, graphql_1.Query)(() => Boolean),
-    (0, common_1.UseGuards)(rbac_guard_1.RBACGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, rbac_guard_1.RBACGuard),
     (0, rbac_decorator_1.RequireRole)('ADMIN'),
     __param(0, (0, graphql_1.Args)('userId')),
     __param(1, (0, graphql_1.Args)('resource')),

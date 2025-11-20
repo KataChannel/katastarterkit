@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RBACGuard = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
+const graphql_1 = require("@nestjs/graphql");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const audit_log_service_1 = require("../services/audit-log.service");
 const rbac_decorator_1 = require("../decorators/rbac.decorator");
@@ -30,8 +31,18 @@ let RBACGuard = class RBACGuard {
         if (isPublic) {
             return true;
         }
-        const request = context.switchToHttp().getRequest();
-        const user = request.user;
+        let request;
+        let user;
+        if (context.getType() === 'http') {
+            request = context.switchToHttp().getRequest();
+            user = request.user;
+        }
+        else {
+            const gqlContext = graphql_1.GqlExecutionContext.create(context);
+            const ctx = gqlContext.getContext();
+            request = ctx.req;
+            user = ctx.req?.user;
+        }
         if (!user) {
             throw new common_1.ForbiddenException('User not authenticated');
         }
