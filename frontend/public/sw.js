@@ -131,31 +131,52 @@ self.addEventListener('sync', event => {
 self.addEventListener('push', event => {
   console.log('[ServiceWorker] Push received');
   
+  let notificationData = {
+    title: 'Thông báo mới',
+    body: 'Bạn có thông báo mới',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/badge-72x72.png',
+    data: {}
+  };
+  
+  // Parse push data if available
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      notificationData = {
+        title: data.title || notificationData.title,
+        body: data.message || data.body || notificationData.body,
+        icon: data.icon || notificationData.icon,
+        badge: notificationData.badge,
+        data: data.data || {}
+      };
+    } catch (e) {
+      notificationData.body = event.data.text();
+    }
+  }
+  
   const options = {
-    body: event.data ? event.data.text() : 'New notification',
-    icon: '/icon-192x192.png',
-    badge: '/badge-72x72.png',
+    body: notificationData.body,
+    icon: notificationData.icon,
+    badge: notificationData.badge,
     vibrate: [200, 100, 200],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    },
+    data: notificationData.data,
+    tag: notificationData.data.notificationId || 'default',
+    requireInteraction: false,
     actions: [
       {
         action: 'view',
-        title: 'View',
-        icon: '/icon-view.png'
+        title: 'Xem',
       },
       {
         action: 'close',
-        title: 'Close',
-        icon: '/icon-close.png'
+        title: 'Đóng',
       }
     ]
   };
   
   event.waitUntil(
-    self.registration.showNotification('rausachcore', options)
+    self.registration.showNotification(notificationData.title, options)
   );
 });
 
@@ -165,9 +186,25 @@ self.addEventListener('notificationclick', event => {
   
   event.notification.close();
   
-  if (event.action === 'view') {
+  const notificationData = event.notification.data || {};
+  const urlToOpen = notificationData.url || '/';
+  
+  if (event.action === 'view' || event.action === '') {
     event.waitUntil(
-      clients.openWindow('/tasks')
+      clients.matchAll({ type: 'window', includeUncontrolled: true })
+        .then(clientList => {
+          // Check if there's already a window open
+          for (let i = 0; i < clientList.length; i++) {
+            const client = clientList[i];
+            if (client.url === new URL(urlToOpen, self.location.origin).href && 'focus' in client) {
+              return client.focus();
+            }
+          }
+          // Open new window if no matching window found
+          if (clients.openWindow) {
+            return clients.openWindow(urlToOpen);
+          }
+        })
     );
   }
 });

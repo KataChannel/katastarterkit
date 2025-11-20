@@ -23,6 +23,9 @@ export interface PWAHookReturn {
   install: () => Promise<void>;
   requestNotificationPermission: () => Promise<NotificationPermission>;
   showNotification: (title: string, options?: NotificationOptions) => Promise<void>;
+  subscribeToPush: (vapidPublicKey: string) => Promise<PushSubscription | null>;
+  unsubscribeFromPush: () => Promise<boolean>;
+  getPushSubscription: () => Promise<PushSubscription | null>;
   registerBackgroundSync: (tag: string) => Promise<void>;
   clearCache: () => Promise<void>;
   updateAvailable: boolean;
@@ -192,6 +195,82 @@ export function usePWA(): PWAHookReturn {
     }
   }, [serviceWorkerRegistration]);
 
+  // Subscribe to push notifications
+  const subscribeToPush = useCallback(async (vapidPublicKey: string): Promise<PushSubscription | null> => {
+    if (!serviceWorkerRegistration) {
+      throw new Error('Service worker not registered');
+    }
+
+    if (!capabilities.hasPushSupport) {
+      throw new Error('Push notifications not supported');
+    }
+
+    try {
+      // Request notification permission first
+      const permission = await requestNotificationPermission();
+      if (permission !== 'granted') {
+        throw new Error('Notification permission denied');
+      }
+
+      // Check if already subscribed
+      let subscription = await serviceWorkerRegistration.pushManager.getSubscription();
+      
+      if (subscription) {
+        console.log('Already subscribed to push notifications');
+        return subscription;
+      }
+
+      // Subscribe to push service
+      const convertedKey = urlBase64ToUint8Array(vapidPublicKey);
+      subscription = await serviceWorkerRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedKey as BufferSource,
+      });
+
+      console.log('Subscribed to push notifications:', subscription);
+      return subscription;
+    } catch (error) {
+      console.error('Failed to subscribe to push notifications:', error);
+      throw error;
+    }
+  }, [serviceWorkerRegistration, capabilities.hasPushSupport, requestNotificationPermission]);
+
+  // Unsubscribe from push notifications
+  const unsubscribeFromPush = useCallback(async (): Promise<boolean> => {
+    if (!serviceWorkerRegistration) {
+      return false;
+    }
+
+    try {
+      const subscription = await serviceWorkerRegistration.pushManager.getSubscription();
+      
+      if (subscription) {
+        const result = await subscription.unsubscribe();
+        console.log('Unsubscribed from push notifications');
+        return result;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Failed to unsubscribe from push notifications:', error);
+      return false;
+    }
+  }, [serviceWorkerRegistration]);
+
+  // Get current push subscription
+  const getPushSubscription = useCallback(async (): Promise<PushSubscription | null> => {
+    if (!serviceWorkerRegistration) {
+      return null;
+    }
+
+    try {
+      return await serviceWorkerRegistration.pushManager.getSubscription();
+    } catch (error) {
+      console.error('Failed to get push subscription:', error);
+      return null;
+    }
+  }, [serviceWorkerRegistration]);
+
   // Register background sync
   const registerBackgroundSync = useCallback(async (tag: string) => {
     if (!serviceWorkerRegistration || !capabilities.hasBackgroundSync) {
@@ -254,11 +333,30 @@ export function usePWA(): PWAHookReturn {
     install,
     requestNotificationPermission,
     showNotification,
+    subscribeToPush,
+    unsubscribeFromPush,
+    getPushSubscription,
     registerBackgroundSync,
     clearCache,
     updateAvailable,
     updateApp,
   };
+}
+
+// Helper function to convert VAPID key
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
 }
 
 // Utility functions for PWA features

@@ -2785,10 +2785,12 @@ type Mutation {
   shareTask(input: ShareTaskInput!): TaskShare!
   shareTemplate(input: ShareTemplateInput!): [TemplateShare!]!
   submitQuiz(input: SubmitQuizInput!): QuizAttempt!
+  subscribeToPush(auth: String!, endpoint: String!, p256dh: String!): Boolean!
   syncCallCenterData(input: SyncCallCenterInput): SyncCallCenterResponse!
 
   """Test kết nối AI provider"""
   testAIProvider(input: TestAIProviderInput!): AIProviderTestResult!
+  testPushNotification: Boolean!
 
   """Bật/tắt AI provider"""
   toggleAIProviderStatus(id: String!, isActive: Boolean!): AIProvider!
@@ -2800,6 +2802,7 @@ type Mutation {
   universalMutation(input: UniversalQueryInput!): JSONObject!
   unlinkDocumentFromCourse(courseId: ID!, documentId: ID!): Boolean!
   unshareTemplate(templateId: String!, userId: String!): Boolean!
+  unsubscribeFromPush(endpoint: String!): Boolean!
 
   """Cập nhật AI provider"""
   updateAIProvider(id: String!, input: UpdateAIProviderInput!): AIProvider!
@@ -3949,6 +3952,7 @@ type Query {
   getUserRolePermissions(userId: String!): UserRolePermissionSummary!
   getUserStats: UserStats!
   getUsers: [User!]!
+  getVapidPublicKey: String!
 
   """Get all ext_detailhoadon records"""
   getext_detailhoadons(filters: JSON): [JSON!]!

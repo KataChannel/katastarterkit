@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, forwardRef, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RealTimeNotificationService } from '../realtime/real-time-notification.service';
+import { PushNotificationService } from './push-notification.service';
 
 export interface CreateNotificationInput {
   userId: string;
@@ -27,6 +28,8 @@ export class NotificationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly realTimeService: RealTimeNotificationService,
+    @Inject(forwardRef(() => PushNotificationService))
+    private readonly pushNotificationService: PushNotificationService,
   ) {}
 
   async createTaskAssignedNotification(taskId: string, assignedUserId: string) {
@@ -173,7 +176,7 @@ export class NotificationService {
         },
       });
 
-      // Gửi real-time notification qua websocket + push
+      // Gửi real-time notification qua websocket
       await this.realTimeService.notify({
         id: notification.id,
         type: `notification.${input.type.toLowerCase()}`,
@@ -197,6 +200,24 @@ export class NotificationService {
           { type: 'email', enabled: input.type === 'ORDER' }, // Email chỉ cho ORDER
         ],
       });
+
+      // Gửi push notification
+      try {
+        await this.pushNotificationService.sendToUser(input.userId, {
+          title: input.title,
+          message: input.message,
+          icon: this.getIconForNotificationType(input.type),
+          data: {
+            notificationId: notification.id,
+            type: input.type,
+            ...input.data,
+          },
+          url: this.getUrlForNotificationType(input.type, input.data),
+        });
+      } catch (pushError) {
+        // Don't fail notification creation if push fails
+        this.logger.warn(`Failed to send push notification: ${pushError.message}`);
+      }
 
       this.logger.log(`Notification created for user ${input.userId}: ${input.title}`);
 
@@ -372,5 +393,39 @@ export class NotificationService {
         isRead: true,
       },
     });
+  }
+
+  /**
+   * Helper: Get icon for notification type
+   */
+  private getIconForNotificationType(type: string): string {
+    const iconMap: Record<string, string> = {
+      ORDER: '/icons/icon-192x192.png',
+      PROMOTION: '/icons/icon-192x192.png',
+      SYSTEM: '/icons/icon-192x192.png',
+      TASK: '/icons/icon-192x192.png',
+      MENTION: '/icons/icon-192x192.png',
+    };
+    return iconMap[type] || '/icons/icon-192x192.png';
+  }
+
+  /**
+   * Helper: Get URL for notification type
+   */
+  private getUrlForNotificationType(type: string, data: any): string {
+    switch (type) {
+      case 'ORDER':
+        return data?.orderId ? `/orders/${data.orderId}` : '/orders';
+      case 'TASK':
+        return data?.taskId ? `/tasks/${data.taskId}` : '/tasks';
+      case 'PROMOTION':
+        return '/promotions';
+      case 'SYSTEM':
+        return '/';
+      case 'MENTION':
+        return data?.taskId ? `/tasks/${data.taskId}` : '/';
+      default:
+        return '/';
+    }
   }
 }

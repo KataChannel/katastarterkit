@@ -6,7 +6,7 @@ import { Bell, Check, Trash2, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { usePWA } from '@/hooks/usePWA';
 import {
   GET_NOTIFICATIONS,
   GET_UNREAD_NOTIFICATIONS_COUNT,
@@ -14,6 +14,10 @@ import {
   MARK_ALL_NOTIFICATIONS_AS_READ,
   DELETE_NOTIFICATION,
 } from '@/graphql/notification.queries';
+import {
+  GET_VAPID_PUBLIC_KEY,
+  SUBSCRIBE_TO_PUSH,
+} from '@/graphql/push-notification.queries';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,18 +41,61 @@ interface Notification {
 export function NotificationBell() {
   const { user, isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const { requestPermission, sendNotification, permission } = usePushNotifications();
+  const { subscribeToPush, requestNotificationPermission, capabilities } = usePWA();
+  const [pushSubscribed, setPushSubscribed] = useState(false);
 
-  // Auto-request push notification permission when user authenticated
+  // Query VAPID public key
+  const { data: vapidData } = useQuery(GET_VAPID_PUBLIC_KEY, {
+    skip: !isAuthenticated,
+  });
+
+  // Mutation to save push subscription
+  const [savePushSubscription] = useMutation(SUBSCRIBE_TO_PUSH);
+
+  // Auto-setup push notifications when user authenticated
   useEffect(() => {
-    if (isAuthenticated && permission === 'default') {
-      // Request permission sau 2 giây để không làm phiền user ngay
-      const timer = setTimeout(() => {
-        requestPermission();
-      }, 2000);
-      return () => clearTimeout(timer);
+    if (!isAuthenticated || !vapidData?.getVapidPublicKey || pushSubscribed) {
+      return;
     }
-  }, [isAuthenticated, permission, requestPermission]);
+
+    const setupPushNotifications = async () => {
+      try {
+        // Request permission sau 2 giây để không làm phiền user ngay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Request notification permission
+        const permission = await requestNotificationPermission();
+        if (permission !== 'granted') {
+          console.log('Push notification permission denied');
+          return;
+        }
+
+        // Subscribe to push service
+        const subscription = await subscribeToPush(vapidData.getVapidPublicKey);
+        if (!subscription) {
+          console.log('Failed to subscribe to push notifications');
+          return;
+        }
+
+        // Save subscription to backend
+        const subscriptionJson = subscription.toJSON();
+        await savePushSubscription({
+          variables: {
+            endpoint: subscription.endpoint,
+            p256dh: subscriptionJson.keys?.p256dh || '',
+            auth: subscriptionJson.keys?.auth || '',
+          },
+        });
+
+        setPushSubscribed(true);
+        console.log('Push notifications enabled successfully');
+      } catch (error) {
+        console.error('Failed to setup push notifications:', error);
+      }
+    };
+
+    setupPushNotifications();
+  }, [isAuthenticated, vapidData, pushSubscribed, subscribeToPush, requestNotificationPermission, savePushSubscription]);
 
   // Query unread count
   const { data: countData } = useQuery(GET_UNREAD_NOTIFICATIONS_COUNT, {
