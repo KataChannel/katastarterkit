@@ -69,105 +69,66 @@ export default function ProductsPage() {
 
   // Filter sidebar component
   const FilterSidebar = () => (
-    <div className="space-y-6">
-      {/* Search */}
-      <div className="space-y-2">
-        <Label htmlFor="search" className="text-sm font-medium">
-          Tìm kiếm
-        </Label>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            id="search"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Tìm sản phẩm..."
-            className="pl-9"
-          />
-        </div>
+    <div className="space-y-0">
+      {/* Green Header */}
+      <div className="bg-green-600 text-white px-4 py-3 rounded-t-lg">
+        <h2 className="font-bold text-base uppercase">DANH MỤC SẢN PHẨM</h2>
       </div>
 
-      <Separator />
-
-      {/* Categories */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Danh mục</Label>
-        <div className="space-y-1">
-          <Button
-            variant={categoryId === null ? "default" : "ghost"}
-            size="sm"
+      {/* Categories List */}
+      <div className="border border-t-0 rounded-b-lg overflow-hidden">
+        <div className="divide-y">
+          <button
             onClick={() => setCategoryId(null)}
-            className="w-full justify-start"
+            className={`w-full px-4 py-3 text-left flex items-center gap-2 hover:bg-gray-50 transition-colors ${
+              categoryId === null ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-700'
+            }`}
           >
-            Tất cả
-          </Button>
+            <span className="text-lg">📦</span>
+            <span className="text-sm">Tất cả</span>
+          </button>
           {categories.map((category: any) => (
-            <Button
+            <button
               key={category.id}
-              variant={categoryId === category.id ? "default" : "ghost"}
-              size="sm"
               onClick={() => setCategoryId(category.id)}
-              className="w-full justify-between"
+              className={`w-full px-4 py-3 text-left flex items-center gap-2 hover:bg-gray-50 transition-colors ${
+                categoryId === category.id ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-700'
+              }`}
             >
-              <span>{category.name}</span>
-              <Badge variant="secondary" className="ml-2">
-                {category._count?.products || 0}
-              </Badge>
-            </Button>
+              <span className="text-lg">
+                {category.icon || '📂'}
+              </span>
+              <span className="text-sm">{category.name}</span>
+            </button>
           ))}
         </div>
       </div>
 
-      <Separator />
-
-      {/* Price Range */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium">Khoảng giá</Label>
-        <div className="space-y-4">
-          <input
-            type="range"
-            min="0"
-            max="10000000"
-            step="100000"
-            value={priceRange[1]}
-            onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-          />
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>{formatPrice(0)}</span>
-            <span className="font-medium text-foreground">{formatPrice(priceRange[1])}</span>
-          </div>
+      {/* Additional Filters Section */}
+      <div className="mt-6 bg-green-600 text-white px-4 py-3 rounded-t-lg">
+        <h2 className="font-bold text-sm uppercase">Sản Phẩm Giá Rẻ</h2>
+      </div>
+      <div className="border border-t-0 rounded-b-lg p-4">
+        <div className="space-y-2">
+          <button
+            onClick={() => setCategoryId(null)}
+            className="w-full flex items-center gap-2 text-left hover:text-green-600 transition-colors"
+          >
+            <img src="/placeholder-product.png" alt="" className="w-12 h-12 object-cover bg-gray-100 rounded" onError={(e) => e.currentTarget.style.display = 'none'} />
+            <span className="text-sm text-gray-700">Khổ qua rừng</span>
+          </button>
         </div>
       </div>
-
-      <Separator />
-
-      {/* Clear Filters */}
-      <Button
-        variant="outline"
-        onClick={() => {
-          setCategoryId(null);
-          setSearchQuery('');
-          setPriceRange([0, 10000000]);
-          setSortBy('newest');
-        }}
-        className="w-full"
-      >
-        <X className="mr-2 h-4 w-4" />
-        Xóa bộ lọc
-      </Button>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       {/* Header - Mobile First */}
-      <div className="bg-card border-b sticky top-0 z-10 shadow-sm">
+      <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4 sm:py-6">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Sản phẩm</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Tìm thấy <span className="font-semibold text-foreground">{total}</span> sản phẩm
+          <p className="text-sm sm:text-base text-gray-600">
+            Hiện có <span className="font-semibold text-red-600">{total}</span> Sản Phẩm
           </p>
         </div>
       </div>
@@ -252,8 +213,8 @@ export default function ProductsPage() {
             {loading && (
               <div className={`grid gap-4 ${
                 viewMode === 'grid' 
-                  ? 'grid-cols-2 lg:grid-cols-4' 
-                  : 'grid-cols-2'
+                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
+                  : 'grid-cols-1'
               }`}>
                 {[...Array(6)].map((_, i) => (
                   <Card key={i}>
@@ -282,163 +243,69 @@ export default function ProductsPage() {
               <>
                 <div className={`grid gap-4 ${
                   viewMode === 'grid' 
-                    ? 'grid-cols-2 lg:grid-cols-4' 
+                    ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
                     : 'grid-cols-1'
                 }`}>
                   {products.map((product: any) => (
-                    <Link
-                      key={product.id}
-                      href={`/san-pham/${product.slug}`}
-                    >
-                      <Card className="h-full hover:shadow-lg transition-shadow group overflow-hidden">
-                        <CardContent className="p-0">
-                          <div className={viewMode === 'grid' ? '' : 'sm:flex sm:gap-4'}>
-                            {/* Product Image */}
-                            <div className={`relative overflow-hidden ${
-                              viewMode === 'grid' 
-                                ? 'aspect-square' 
-                                : 'aspect-square sm:w-48 sm:flex-shrink-0'
-                            }`}>
-                              <ProductImage
-                                src={product.thumbnail}
-                                alt={product.name}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
-                              {/* Badges */}
-                              <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
-                                {product.originalPrice && product.price < product.originalPrice && (
-                                  <Badge variant="destructive" className="font-bold">
-                                    -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                                  </Badge>
-                                )}
-                                {product.isFeatured && (
-                                  <Badge className="bg-yellow-500 hover:bg-yellow-600">HOT</Badge>
-                                )}
-                              </div>
-                              <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                                {product.isNewArrival && (
-                                  <Badge className="bg-green-500 hover:bg-green-600">MỚI</Badge>
-                                )}
-                                {product.isBestSeller && (
-                                  <Badge className="bg-purple-500 hover:bg-purple-600">BÁN CHẠY</Badge>
-                                )}
-                              </div>
-                            </div>
+                    <Card key={product.id} className="h-full hover:shadow-lg transition-shadow group overflow-hidden bg-white">
+                      <CardContent className="p-0">
+                        {/* Product Image */}
+                        <div className="relative aspect-square bg-gray-100 overflow-hidden">
+                          <ProductImage
+                            src={product.thumbnail}
+                            alt={product.name}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          {/* Cart Icon - Orange Circle */}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              // Add to cart logic here
+                            }}
+                            disabled={product.stock === 0}
+                            className="absolute bottom-3 right-3 bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg z-10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <ShoppingCart className="h-5 w-5" />
+                          </button>
+                        </div>
 
-                            {/* Product Info */}
-                            <div className="p-4 flex-1 flex flex-col">
-                              <h3 className="font-semibold text-sm sm:text-base line-clamp-2 mb-2 min-h-[2.5rem] group-hover:text-primary transition-colors">
-                                {product.name}
-                              </h3>
-                              
-                              {/* Category & SKU */}
-                              <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                                <span>{product.category?.name}</span>
-                                {product.sku && (
-                                  <span className="font-mono">SKU: {product.sku}</span>
-                                )}
-                              </div>
-
-                              {/* Origin & Unit */}
-                              {(product.origin || product.unit) && (
-                                <div className="flex flex-wrap gap-1 text-xs text-muted-foreground mb-2">
-                                  {product.origin && (
-                                    <Badge variant="outline" className="text-xs">
-                                      📍 {product.origin}
-                                    </Badge>
-                                  )}
-                                  {product.unit && (
-                                    <Badge variant="outline" className="text-xs">
-                                      {product.unit}
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* Price */}
-                              <div className="mb-3">
-                                <div className="flex items-baseline gap-2 flex-wrap">
-                                  <span className="text-lg sm:text-xl font-bold text-primary">
-                                    {formatPrice(product.price)}
-                                  </span>
-                                  {product.originalPrice && product.price < product.originalPrice && (
-                                    <span className="text-xs sm:text-sm text-muted-foreground line-through">
-                                      {formatPrice(product.originalPrice)}
-                                    </span>
-                                  )}
-                                </div>
-                                {product.unit && (
-                                  <div className="text-xs text-muted-foreground mt-0.5">
-                                    {formatPrice(product.price)}/{product.unit}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Stock Status */}
-                              <div className="text-xs mb-3">
-                                {product.stock > 0 ? (
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="outline" className="text-green-600 border-green-600">
-                                      ✓ Còn hàng
-                                    </Badge>
-                                    <span className="text-muted-foreground">
-                                      ({product.stock} {product.unit || 'sp'})
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <Badge variant="outline" className="text-destructive border-destructive">
-                                    ✗ Hết hàng
-                                  </Badge>
-                                )}
-                              </div>
-
-                              {/* Product Attributes */}
-                              {product.attributes && typeof product.attributes === 'object' && Object.keys(product.attributes).length > 0 && (
-                                <div className="mb-3 flex flex-wrap gap-1">
-                                  {Object.entries(product.attributes).slice(0, 3).map(([key, value]: [string, any]) => (
-                                    value && (
-                                      <Badge
-                                        key={key}
-                                        variant="secondary"
-                                        className="text-xs"
-                                      >
-                                        {key === 'organic' && value ? '🌱 Hữu cơ' :
-                                         key === 'pesticide_free' && value ? '🚫 Không thuốc' :
-                                         key === 'fresh' && value ? '🍃 Tươi mới' :
-                                         `${key}`}
-                                      </Badge>
-                                    )
-                                  ))}
-                                </div>
-                              )}
-
-                              {/* Actions */}
-                              <div className="flex gap-2 mt-auto">
-                                <AddToCartButton
-                                  productId={product.id}
-                                  productName={product.name}
-                                  quantity={1}
-                                  disabled={product.stock === 0}
-                                  size="sm"
-                                  fullWidth
-                                  className="flex-1"
-                                />
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  disabled
-                                  className="opacity-50"
-                                  title="Chức năng đang phát triển"
-                                >
-                                  <Heart className="h-4 w-4" />
-                                </Button>
-                              </div>
+                        {/* Product Info */}
+                        <div className="p-4 flex flex-col">
+                          <Link
+                            href={`/san-pham/${product.slug}`}
+                            className="block"
+                          >
+                            <h3 className="font-medium text-sm sm:text-base line-clamp-2 mb-3 text-gray-800 hover:text-green-600 transition-colors min-h-[2.5rem]">
+                              {product.name}
+                            </h3>
+                          </Link>
+                          
+                          {/* Price - Red Color */}
+                          <div className="mb-3">
+                            <div className="flex items-baseline gap-2 flex-wrap">
+                              <span className="text-lg sm:text-xl font-bold text-red-600">
+                                {product.price > 0 ? formatPrice(product.price) : '0₫'}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                /{product.unit || 'Kg'}
+                              </span>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
+
+                          {/* Buy Now Button - Red */}
+                          <Button
+                            asChild
+                            className="w-full bg-red-600 hover:bg-red-700 text-white font-medium"
+                            disabled={product.stock === 0}
+                          >
+                            <Link href={`/san-pham/${product.slug}`}>
+                              Mua Ngay
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
 
