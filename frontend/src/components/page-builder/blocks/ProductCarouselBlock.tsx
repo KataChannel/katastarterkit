@@ -65,7 +65,7 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
   const [editContent, setEditContent] = useState<ProductCarouselBlockContent>(content || {
     title: 'Sản phẩm nổi bật',
     filterType: 'all',
-    itemsToShow: 8,
+    itemsToShow: 10,
     showViewAllButton: true,
     viewAllLink: '/san-pham',
     autoplay: false,
@@ -75,7 +75,7 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
     responsive: {
       mobile: 2,
       tablet: 3,
-      desktop: 4,
+      desktop: 5,
     },
   });
 
@@ -174,14 +174,14 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
     return products.slice(0, editContent.itemsToShow || 8);
   }, [rawProducts, editContent.filterType, editContent.category, editContent.itemsToShow]);
 
-  // Responsive items per view
+  // Responsive items per view - 5 items trên desktop theo hình
   const getItemsPerView = () => {
-    if (typeof window === 'undefined') return editContent.responsive?.desktop || 4;
+    if (typeof window === 'undefined') return editContent.responsive?.desktop || 5;
     
     const width = window.innerWidth;
     if (width < 640) return editContent.responsive?.mobile || 2;
     if (width < 1024) return editContent.responsive?.tablet || 3;
-    return editContent.responsive?.desktop || 4;
+    return editContent.responsive?.desktop || 5;
   };
 
   const [itemsPerView, setItemsPerView] = useState(getItemsPerView());
@@ -297,35 +297,43 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
   if (!isEditable) {
     // Frontend display mode
     return (
-      <div className="product-carousel-block py-8 px-4 bg-gray-50">
+      <div className="product-carousel-block py-4 sm:py-6 md:py-8 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-              {editContent.title || 'Sản phẩm'}
-            </h2>
-            
+          {/* Header với Navigation */}
+          <div className="relative flex items-center mb-4 sm:mb-6">
+            {/* Left Arrow */}
             {editContent.showNavigation && (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handlePrev}
-                  disabled={currentIndex === 0 && !editContent.loop}
-                  className="rounded-full"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleNext}
-                  disabled={currentIndex >= maxIndex && !editContent.loop}
-                  className="rounded-full"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handlePrev}
+                disabled={currentIndex === 0 && !editContent.loop}
+                className="absolute left-0 z-10 -translate-x-2 sm:-translate-x-4 bg-white hover:bg-gray-100 rounded-full shadow-md border w-8 h-8 sm:w-10 sm:h-10"
+              >
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+            )}
+
+            {/* Title với background xanh lá */}
+            <div className="flex-1 flex justify-center">
+              <div className="inline-flex items-center bg-green-600 text-white px-6 sm:px-10 md:px-12 py-2 sm:py-3 rounded-l-full shadow-md">
+                <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold uppercase tracking-wide">
+                  {editContent.title || 'SẢN PHẨM'}
+                </h2>
               </div>
+            </div>
+
+            {/* Right Arrow */}
+            {editContent.showNavigation && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleNext}
+                disabled={currentIndex >= maxIndex && !editContent.loop}
+                className="absolute right-0 z-10 translate-x-2 sm:translate-x-4 bg-white hover:bg-gray-100 rounded-full shadow-md border w-8 h-8 sm:w-10 sm:h-10"
+              >
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
             )}
           </div>
 
@@ -351,89 +359,80 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
           {/* Carousel */}
           {!loading && filteredProducts.length > 0 && (
             <div className="relative overflow-hidden">
-            <div
-              ref={carouselRef}
-              className="flex transition-transform duration-300 ease-in-out"
-              style={{
-                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-              }}
-            >
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex-shrink-0 px-2"
-                  style={{ width: `${100 / itemsPerView}%` }}
-                >
-                  <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
-                    {/* Product Image */}
-                    <div className="relative aspect-square bg-gray-200">
-                      <ProductImage
-                        src={getProductImage(product)}
-                        alt={getProductName(product)}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      
-                      {/* Quick View Button - Eye Icon */}
-                      {getProductImage(product) && (
-                        <button 
-                          onClick={(e) => handleImagePreview(product, e)}
-                          className="absolute top-2 right-2 bg-white/90 hover:bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                          title="Xem ảnh lớn"
-                        >
-                          <Eye className="w-4 h-4 text-gray-700" />
-                        </button>
-                      )}
-                    </div>
+              <div
+                ref={carouselRef}
+                className="flex transition-transform duration-300 ease-in-out gap-2 sm:gap-3 md:gap-4"
+                style={{
+                  transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+                }}
+              >
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="flex-shrink-0"
+                    style={{ width: `calc(${100 / itemsPerView}% - ${(itemsPerView - 1) * (16 / itemsPerView)}px)` }}
+                  >
+                    <Link href={getProductUrl(product)}>
+                      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer">
+                        {/* Product Image với icon giỏ hàng */}
+                        <div className="relative aspect-square bg-gray-100">
+                          <ProductImage
+                            src={getProductImage(product)}
+                            alt={getProductName(product)}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          
+                          {/* Icon giỏ hàng màu vàng/cam ở góc trên phải */}
+                          <div className="absolute top-2 right-2">
+                            <div className="bg-orange-400 hover:bg-orange-500 rounded-full p-2 shadow-lg cursor-pointer transition-colors"
+                                 onClick={(e) => handleAddToCart(product, e)}>
+                              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                            </div>
+                          </div>
+                        </div>
 
-                    {/* Product Info */}
-                    <div className="p-4">
-                      {/* Product Name - Clickable to detail page */}
-                      <Link 
-                        href={getProductUrl(product)}
-                        className="block hover:text-primary transition-colors"
-                      >
-                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3rem] hover:text-primary">
-                          {getProductName(product)}
-                        </h3>
-                      </Link>
-                      
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="text-lg font-bold text-primary">
-                            {formatPrice(getProductPrice(product))}
-                          </p>
-                          {getProductUnit(product) && (
-                            <p className="text-xs text-gray-500">/{getProductUnit(product)}</p>
-                          )}
+                        {/* Product Info */}
+                        <div className="p-3 sm:p-4">
+                          {/* Product Name */}
+                          <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 min-h-[2.5rem] sm:min-h-[3rem] text-sm sm:text-base hover:text-green-600 transition-colors">
+                            {getProductName(product)}
+                          </h3>
+                          
+                          {/* Price và Unit */}
+                          <div className="flex items-baseline gap-1 mb-3">
+                            <p className="text-lg sm:text-xl font-bold text-red-600">
+                              {getProductPrice(product) ? `${Math.round(getProductPrice(product))}đ` : '0đ'}
+                            </p>
+                            {getProductUnit(product) && (
+                              <p className="text-xs sm:text-sm text-gray-500">/{getProductUnit(product)}</p>
+                            )}
+                          </div>
+
+                          {/* Button Mua Ngay màu đỏ */}
+                          <button 
+                            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md transition-colors text-sm sm:text-base"
+                            onClick={(e) => handleAddToCart(product, e)}
+                          >
+                            Mua Ngay
+                          </button>
                         </div>
                       </div>
-
-                      {/* Add to Cart Button */}
-                      <Button 
-                        className="w-full" 
-                        size="sm"
-                        onClick={(e) => handleAddToCart(product, e)}
-                      >
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        Mua ngay
-                      </Button>
-                    </div>
+                    </Link>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
           )}
 
-          {/* View All Button */}
+          {/* View All Button - Màu vàng/cam viền */}
           {!loading && filteredProducts.length > 0 && editContent.showViewAllButton && editContent.viewAllLink && (
-            <div className="text-center mt-6">
+            <div className="text-center mt-6 sm:mt-8">
               <Link href={editContent.viewAllLink}>
-                <Button variant="outline" size="lg">
-                  Xem tất cả
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
+                <button className="inline-flex items-center gap-2 px-6 sm:px-8 py-2 sm:py-3 border-2 border-orange-400 text-orange-500 hover:bg-orange-50 rounded-md font-semibold transition-colors text-sm sm:text-base">
+                  Xem Tất Cả
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
               </Link>
             </div>
           )}
