@@ -689,7 +689,7 @@ export function WebsiteHeader() {
             </DialogTitle>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto py-4">
+          <div className="flex-1 overflow-y-auto p-4">
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="relative">
                 <Input
