@@ -1,27 +1,36 @@
-# Hybrid Multi-Domain E-commerce Platform# 🚀 rausachcore - Modern Fullstack Starter Kit
+# 🚀 rausachcore - Modern Fullstack Starter Kit
 
-
-
-Full-stack e-commerce platform với kiến trúc Hybrid Multi-Domain cho 2 domains độc lập.![rausachcore](https://img.shields.io/badge/rausachcore-Starter%20Kit-blue)
-
+![rausachcore](https://img.shields.io/badge/rausachcore-Starter%20Kit-blue)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-
-## 🚀 Quick Start[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black)](https://nextjs.org/)
-
-```bash[![NestJS](https://img.shields.io/badge/NestJS-11.1.6-red)](https://nestjs.com/)
-
-# Deploy to production server[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.1.12-38B2AC)](https://tailwindcss.com/)
-
-./deploy.sh
+[![NestJS](https://img.shields.io/badge/NestJS-11.1.6-red)](https://nestjs.com/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.1.12-38B2AC)](https://tailwindcss.com/)
 
 A modern, production-ready fullstack starter kit built with the latest technologies. Get your project up and running in minutes with best practices, modern tooling, and comprehensive features out of the box.
 
+## 📚 Documentation
+
+**Complete documentation is available in the [`docs/`](docs/) folder**:
+
+- 📖 [Getting Started](docs/01-GETTING-STARTED.md) - 5-minute setup guide
+- 🏗️ [Architecture](docs/02-ARCHITECTURE.md) - System design and tech stack
+- ✨ [Features](docs/03-FEATURES.md) - 100+ features overview
+- 💻 [Development](docs/04-DEVELOPMENT.md) - Workflow and best practices
+- 🚀 [Deployment](docs/05-DEPLOYMENT.md) - Production deployment guide
+- 📡 [API Reference](docs/06-API-REFERENCE.md) - GraphQL API documentation
+- 🐛 [Troubleshooting](docs/07-TROUBLESHOOTING.md) - Common issues and solutions
+
+👉 **Start here**: [docs/README.md](docs/README.md)
+
+## 🚀 Quick Start
+
+```bash
+# Deploy to production server
+./deploy.sh
+
 # Or use interactive menu
-
-./menu.sh## ✨ Features
-
+./menu.sh
 ```
 
 ### 🎯 **Frontend (Next.js 15 + React 19)**
