@@ -1,3 +1,0 @@
-# GOOGLE_OAUTH_IMPLEMENTATION_COMPLETE.md
-
-*(File này ban đầu trống hoặc không có nội dung)*
