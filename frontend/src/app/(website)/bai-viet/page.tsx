@@ -111,149 +111,78 @@ function BlogPageContent() {
   const activeFiltersCount = [categoryId, searchQuery !== ''].filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Breadcrumb - Mobile First */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/" className="flex items-center gap-1 text-sm sm:text-base">
-                  <Home className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Trang chủ</span>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>
-                <ChevronRight className="h-4 w-4" />
-              </BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbPage className="font-semibold text-sm sm:text-base">
-                  Bài viết
-                  {total > 0 && (
-                    <Badge variant="secondary" className="ml-2 text-xs">
-                      {total}
-                    </Badge>
-                  )}
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-              {categoryId && categories.find((c: any) => c.id === categoryId) && (
-                <>
-                  <BreadcrumbSeparator>
-                    <ChevronRight className="h-4 w-4" />
-                  </BreadcrumbSeparator>
-                  <BreadcrumbItem>
-                    <BreadcrumbPage className="text-sm sm:text-base text-blue-600">
-                      {categories.find((c: any) => c.id === categoryId)?.name}
-                    </BreadcrumbPage>
-                  </BreadcrumbItem>
-                </>
-              )}
-            </BreadcrumbList>
-          </Breadcrumb>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
+        <div className="container mx-auto px-4 py-4 sm:py-6">
+          <p className="text-sm sm:text-base text-gray-600">
+            Hiện có <span className="font-semibold text-red-600">{total}</span> Bài Viết
+          </p>
         </div>
       </div>
 
-      {/* Filters & Search - Mobile Optimized */}
-      <div className="bg-white border-b sticky top-0 z-20 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          {/* Search Bar */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm bài viết..."
-                className="pl-9 sm:pl-10 h-10 sm:h-11 text-sm sm:text-base"
-              />
-            </div>
-            
-            {/* Sort Combobox */}
-            <Popover open={openSortCombobox} onOpenChange={setOpenSortCombobox}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={openSortCombobox}
-                  className="w-full sm:w-[180px] h-10 sm:h-11 justify-between"
-                >
-                  <span className="truncate">
-                    {sortOptions.find((option) => option.value === sortBy)?.label || 'Sắp xếp'}
-                  </span>
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[180px] p-0" align="end">
-                <Command>
-                  <CommandList>
-                    <CommandGroup>
-                      {sortOptions.map((option) => (
-                        <CommandItem
-                          key={option.value}
-                          value={option.value}
-                          onSelect={(currentValue) => {
-                            setSortBy(currentValue);
-                            setOpenSortCombobox(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              'mr-2 h-4 w-4',
-                              sortBy === option.value ? 'opacity-100' : 'opacity-0'
-                            )}
-                          />
-                          {option.label}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Active Filters Badge */}
-          {activeFiltersCount > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="outline" className="text-xs sm:text-sm">
-                <Filter className="h-3 w-3 mr-1" />
-                {activeFiltersCount} bộ lọc
-              </Badge>
-              {categoryId && (
-                <Badge variant="secondary" className="text-xs sm:text-sm">
-                  {categories.find((c: any) => c.id === categoryId)?.name}
-                </Badge>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearFilters}
-                className="h-7 text-xs"
-              >
-                <X className="h-3 w-3 mr-1" />
-                Xóa bộ lọc
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Main Content - Mobile First Layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-6">
           
-          {/* Sidebar - Mobile: Horizontal scroll, Desktop: Fixed sidebar */}
-          <aside className="lg:w-64 flex-shrink-0">
-            <Card className="sticky top-[180px] sm:top-[160px] lg:top-[140px]">
-              <CardContent className="p-4 sm:p-6">
-                <h3 className="font-bold text-gray-900 mb-4 text-base sm:text-lg flex items-center gap-2">
-                  <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Danh mục
-                </h3>
-                
-                {/* Mobile: Horizontal scrollable categories */}
-                <div className="lg:hidden flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+          {/* Sidebar - Categories */}
+          <aside className="hidden lg:block lg:w-64 flex-shrink-0">
+            <div className="sticky top-24">
+              {/* Green Header */}
+              <div className="bg-green-600 text-white px-4 py-3 rounded-t-lg">
+                <h2 className="font-bold text-base uppercase">Món Ngon Mỗi Ngày</h2>
+              </div>
+
+              {/* Categories List */}
+              <div className="border border-t-0 rounded-b-lg overflow-hidden bg-white">
+                <div className="divide-y">
+                  <button
+                    onClick={() => setCategoryId(null)}
+                    className={`w-full px-4 py-3 text-left flex items-center gap-2 hover:bg-gray-50 transition-colors ${
+                      categoryId === null ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-700'
+                    }`}
+                  >
+                    <span className="text-lg">📰</span>
+                    <span className="text-sm">Tất cả</span>
+                  </button>
+                  {categories.map((category: any) => (
+                    <button
+                      key={category.id}
+                      onClick={() => setCategoryId(category.id)}
+                      className={`w-full px-4 py-3 text-left flex items-center gap-2 hover:bg-gray-50 transition-colors ${
+                        categoryId === category.id ? 'bg-green-50 text-green-700 font-medium' : 'text-gray-700'
+                      }`}
+                    >
+                      <span className="text-lg">{category.icon || '📂'}</span>
+                      <span className="text-sm">{category.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Date Label Section */}
+              <div className="mt-6 bg-green-600 text-white px-4 py-3 rounded-t-lg">
+                <h2 className="font-bold text-sm uppercase">Thông Tin</h2>
+              </div>
+              <div className="border border-t-0 rounded-b-lg p-4 bg-white">
+                <div className="text-center text-sm text-gray-500">
+                  {new Date().toLocaleDateString('vi-VN', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <main className="flex-1 min-w-0">
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden mb-4 bg-white border-b sticky top-[73px] z-20 shadow-sm">
+              <div className="px-4 py-4">
+                {/* Mobile Categories Dropdown */}
+                <div className="flex gap-2 overflow-x-auto">
                   <Button
                     variant={categoryId === null ? "default" : "outline"}
                     size="sm"
@@ -274,52 +203,8 @@ function BlogPageContent() {
                     </Button>
                   ))}
                 </div>
-
-                {/* Desktop: Vertical list */}
-                <div className="hidden lg:block space-y-2">
-                  <Button
-                    variant={categoryId === null ? "default" : "ghost"}
-                    className="w-full justify-start"
-                    onClick={() => setCategoryId(null)}
-                  >
-                    Tất cả
-                  </Button>
-                  {categories.map((category: any) => (
-                    <Button
-                      key={category.id}
-                      variant={categoryId === category.id ? "default" : "ghost"}
-                      className="w-full justify-start"
-                      onClick={() => setCategoryId(category.id)}
-                    >
-                      {category.name}
-                    </Button>
-                  ))}
-                </div>
-
-                {/* Popular Tags */}
-                {/* <div className="mt-6 sm:mt-8 hidden sm:block">
-                  <h3 className="font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
-                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
-                    Thẻ phổ biến
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {['Công nghệ', 'Kinh doanh', 'Marketing', 'Thiết kế', 'Đời sống'].map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant="secondary"
-                        className="cursor-pointer hover:bg-gray-300 transition text-xs sm:text-sm"
-                      >
-                        #{tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div> */}
-              </CardContent>
-            </Card>
-          </aside>
-
-          {/* Blog Grid - Responsive: 1 col mobile, 2 col tablet, 3 col desktop */}
-          <main className="flex-1 min-w-0">
+              </div>
+            </div>
             
             {/* Loading State */}
             {loading && (
@@ -353,94 +238,57 @@ function BlogPageContent() {
             {/* Blog List */}
             {!loading && blogs.length > 0 && (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {blogs.map((blog: any) => (
-                    <Link
-                      key={blog.id}
-                      href={`/bai-viet/${blog.slug}`}
-                      className="group"
-                    >
-                      <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <Card key={blog.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white">
+                      <CardContent className="p-0">
                         {/* Featured Image */}
-                        {blog.thumbnailUrl && (
-                          <div className="relative aspect-video overflow-hidden bg-gray-100">
-                            <Image
-                              src={blog.thumbnailUrl}
-                              alt={blog.title}
-                              fill
-                              className="object-cover group-hover:scale-110 transition-transform duration-300"
-                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                            />
+                        <Link href={`/bai-viet/${blog.slug}`} className="block">
+                          <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                            {blog.thumbnailUrl ? (
+                              <Image
+                                src={blog.thumbnailUrl}
+                                alt={blog.title}
+                                fill
+                                className="object-cover hover:scale-105 transition-transform duration-300"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <span className="text-4xl">📰</span>
+                              </div>
+                            )}
                             {blog.category && (
-                              <Badge className="absolute top-2 left-2 sm:top-3 sm:left-3 text-xs">
+                              <Badge className="absolute top-2 left-2 bg-orange-500 text-white text-xs">
                                 {blog.category.name}
                               </Badge>
                             )}
                           </div>
-                        )}
+                        </Link>
 
                         {/* Content */}
-                        <CardContent className="p-3 sm:p-4">
-                          {/* Meta */}
-                          <div className="flex items-center gap-2 sm:gap-3 text-xs text-gray-500 mb-2">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {formatDate(blog.publishedAt || blog.createdAt)}
-                            </span>
-                            {blog.viewCount > 0 && (
-                              <span className="hidden sm:inline">{blog.viewCount} lượt xem</span>
-                            )}
-                          </div>
+                        <div className="p-4">
+                          {/* Date */}
+                          <p className="text-xs text-gray-500 mb-2">
+                            Món Ngon Mỗi Ngày | {formatDate(blog.publishedAt || blog.createdAt)}
+                          </p>
 
                           {/* Title */}
-                          <h2 className="font-bold text-gray-900 text-base sm:text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition">
-                            {blog.title}
-                          </h2>
+                          <Link href={`/bai-viet/${blog.slug}`}>
+                            <h2 className="font-bold text-gray-900 text-base mb-2 line-clamp-2 hover:text-green-600 transition-colors uppercase">
+                              {blog.title}
+                            </h2>
+                          </Link>
 
                           {/* Excerpt */}
                           {blog.shortDescription && (
-                            <p className="text-gray-600 text-xs sm:text-sm mb-3 line-clamp-2 sm:line-clamp-3">
+                            <p className="text-gray-600 text-sm line-clamp-3 uppercase">
                               {blog.shortDescription}
                             </p>
                           )}
-
-                          {/* Author & Reading Time */}
-                          <div className="flex items-center justify-between pt-3 border-t text-xs sm:text-sm">
-                            <div className="flex items-center gap-1 sm:gap-2 text-gray-600 truncate">
-                              <User className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                              <span className="truncate">
-                                {blog.author?.firstName && blog.author?.lastName
-                                  ? `${blog.author.firstName} ${blog.author.lastName}`
-                                  : blog.author?.username || 'Admin'}
-                              </span>
-                            </div>
-                            {(blog.shortDescription || blog.excerpt) && (
-                              <div className="flex items-center gap-1 text-gray-500 flex-shrink-0 ml-2">
-                                <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                                <span>
-                                  {calculateReadingTime(blog.shortDescription || blog.excerpt || '')} phút
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Tags - Only show on desktop */}
-                          {blog.tags && blog.tags.length > 0 && (
-                            <div className="hidden sm:flex flex-wrap gap-2 mt-3">
-                              {blog.tags.slice(0, 3).map((tag: any) => (
-                                <Badge
-                                  key={tag.id}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  #{tag.name}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
 

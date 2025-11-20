@@ -24,29 +24,37 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const GET_PRODUCT_REVIEWS = gql`
-  query GetProductReviews($productId: ID!, $rating: Int, $limit: Int, $offset: Int) {
-    productReviews(productId: $productId, rating: $rating, limit: $limit, offset: $offset) {
-      reviews {
+  query GetProductReviews($productId: ID!, $rating: Int, $limit: Int, $page: Int) {
+    productReviews(productId: $productId, rating: $rating, limit: $limit, page: $page) {
+      items {
         id
+        productId
         rating
+        title
         comment
+        images
+        isVerifiedPurchase
+        isApproved
+        helpfulCount
         createdAt
-        helpful
+        updatedAt
         user {
           id
-          name
+          email
+          fullName
           avatar
         }
-      }
-      stats {
-        averageRating
-        totalReviews
-        ratingDistribution {
-          rating
-          count
-          percentage
+        product {
+          id
+          name
+          slug
         }
       }
+      total
+      page
+      pageSize
+      totalPages
+      hasMore
     }
   }
 `;
@@ -54,34 +62,52 @@ const GET_PRODUCT_REVIEWS = gql`
 const CREATE_REVIEW = gql`
   mutation CreateReview($input: CreateReviewInput!) {
     createReview(input: $input) {
-      review {
-        id
-        rating
-        comment
-        createdAt
-      }
+      id
+      productId
+      rating
+      title
+      comment
+      images
+      isVerifiedPurchase
+      isApproved
+      helpfulCount
+      createdAt
+      updatedAt
     }
   }
 `;
 
 const MARK_HELPFUL = gql`
-  mutation MarkReviewHelpful($reviewId: ID!) {
-    markReviewHelpful(reviewId: $reviewId) {
+  mutation MarkReviewHelpful($input: ReviewHelpfulInput!) {
+    markReviewHelpful(input: $input) {
       success
+      message
     }
   }
 `;
 
 interface Review {
   id: string;
+  productId: string;
   rating: number;
-  comment: string;
+  title?: string;
+  comment?: string;
+  images?: string[];
+  isVerifiedPurchase: boolean;
+  isApproved: boolean;
+  helpfulCount: number;
   createdAt: string;
-  helpful: number;
-  user: {
+  updatedAt: string;
+  user?: {
+    id: string;
+    email?: string;
+    fullName?: string;
+    avatar?: string;
+  };
+  product?: {
     id: string;
     name: string;
-    avatar?: string;
+    slug: string;
   };
 }
 
@@ -106,18 +132,23 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data, loading, refetch } = useQuery<{
     productReviews: {
-      reviews: Review[];
-      stats: RatingStats;
+      items: Review[];
+      total: number;
+      page: number;
+      pageSize: number;
+      totalPages: number;
+      hasMore: boolean;
     };
   }>(GET_PRODUCT_REVIEWS, {
     variables: {
       productId,
       rating: ratingFilter === 'ALL' ? undefined : parseInt(ratingFilter),
       limit: 10,
-      offset: 0,
+      page: currentPage,
     },
   });
 
@@ -163,16 +194,30 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
   };
 
   const handleMarkHelpful = async (reviewId: string) => {
-    await markHelpful({ variables: { reviewId } });
+    await markHelpful({ 
+      variables: { 
+        input: {
+          reviewId,
+          helpful: true
+        }
+      } 
+    });
   };
 
-  const reviews = data?.productReviews?.reviews || [];
-  const stats = data?.productReviews?.stats;
+  const reviews = data?.productReviews?.items || [];
+  const totalReviews = data?.productReviews?.total || 0;
+  const totalPages = data?.productReviews?.totalPages || 1;
+  const hasMore = data?.productReviews?.hasMore || false;
+
+  // Calculate average rating from reviews
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : 0;
 
   return (
     <div className="space-y-6">
       {/* Rating Overview */}
-      {stats && (
+      {totalReviews > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Đánh giá sản phẩm</CardTitle>
@@ -184,7 +229,7 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   <div>
                     <div className="text-5xl font-bold text-gray-900">
-                      {stats.averageRating.toFixed(1)}
+                      {averageRating.toFixed(1)}
                     </div>
                     <div className="flex items-center justify-center md:justify-start gap-1 mt-2">
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -192,7 +237,7 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
                           key={star}
                           className={cn(
                             'h-5 w-5',
-                            star <= Math.round(stats.averageRating)
+                            star <= Math.round(averageRating)
                               ? 'fill-yellow-400 text-yellow-400'
                               : 'fill-gray-200 text-gray-200'
                           )}
@@ -200,7 +245,7 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
                       ))}
                     </div>
                     <p className="text-sm text-gray-600 mt-1">
-                      {stats.totalReviews} đánh giá
+                      {totalReviews} đánh giá
                     </p>
                   </div>
                 </div>
@@ -209,11 +254,8 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
               {/* Rating Distribution */}
               <div className="space-y-2">
                 {[5, 4, 3, 2, 1].map((rating) => {
-                  const dist = stats.ratingDistribution.find(
-                    (d) => d.rating === rating
-                  );
-                  const percentage = dist?.percentage || 0;
-                  const count = dist?.count || 0;
+                  const count = reviews.filter((r) => r.rating === rating).length;
+                  const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
 
                   return (
                     <div key={rating} className="flex items-center gap-2">
@@ -353,15 +395,15 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
             </CardContent>
           </Card>
         ) : (
-          reviews.map((review) => (
+          reviews.map((review: Review) => (
             <Card key={review.id}>
               <CardContent className="pt-6">
                 <div className="flex gap-4">
                   {/* Avatar */}
                   <Avatar className="flex-shrink-0">
-                    <AvatarImage src={review.user.avatar} />
+                    {review.user?.avatar && <AvatarImage src={review.user.avatar} />}
                     <AvatarFallback>
-                      {review.user.name.charAt(0).toUpperCase()}
+                      {review.user?.fullName?.charAt(0).toUpperCase() || review.user?.email?.charAt(0).toUpperCase() || '?'}
                     </AvatarFallback>
                   </Avatar>
 
@@ -371,7 +413,7 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                       <div>
                         <p className="font-medium text-gray-900">
-                          {review.user.name}
+                          {review.user?.fullName || review.user?.email || 'Khách hàng'}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
                           <div className="flex gap-0.5">
@@ -393,15 +435,41 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
                               locale: vi,
                             })}
                           </span>
+                          {review.isVerifiedPurchase && (
+                            <span className="text-xs text-green-600 font-medium">
+                              ✓ Đã mua hàng
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
+
+                    {/* Title */}
+                    {review.title && (
+                      <h4 className="text-base font-semibold text-gray-900 mt-3">
+                        {review.title}
+                      </h4>
+                    )}
 
                     {/* Comment */}
                     {review.comment && (
                       <p className="text-sm text-gray-700 mt-2 whitespace-pre-wrap">
                         {review.comment}
                       </p>
+                    )}
+
+                    {/* Review Images */}
+                    {review.images && review.images.length > 0 && (
+                      <div className="flex gap-2 mt-3 overflow-x-auto">
+                        {review.images.map((image, idx) => (
+                          <img
+                            key={idx}
+                            src={image}
+                            alt={`Review ${idx + 1}`}
+                            className="h-20 w-20 object-cover rounded border"
+                          />
+                        ))}
+                      </div>
                     )}
 
                     {/* Actions */}
@@ -414,7 +482,7 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
                       >
                         <ThumbsUp className="h-4 w-4 mr-1.5" />
                         <span className="text-xs">
-                          Hữu ích ({review.helpful})
+                          Hữu ích ({review.helpfulCount})
                         </span>
                       </Button>
                     </div>
@@ -425,6 +493,29 @@ export function ProductReviews({ productId, canReview = false }: ProductReviewsP
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+          >
+            Trước
+          </Button>
+          <div className="px-4 py-2 text-sm font-medium">
+            Trang {currentPage} / {totalPages}
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            disabled={!hasMore}
+          >
+            Sau
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
