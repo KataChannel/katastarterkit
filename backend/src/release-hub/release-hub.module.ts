@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from '../auth/auth.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { EcommerceModule } from '../ecommerce/ecommerce.module';
 import { UserModule } from '../user/user.module';
@@ -12,10 +13,11 @@ import { SystemGuideResolver } from './resolvers/system-guide.resolver';
 
 @Module({
   imports: [
+    ConfigModule,
     PrismaModule,
     EcommerceModule,
     UserModule,
-    JwtModule.register({}),
+    AuthModule,
   ],
   providers: [
     SystemReleaseService,

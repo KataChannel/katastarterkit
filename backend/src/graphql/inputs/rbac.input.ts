@@ -1,5 +1,6 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { IsOptional, IsString, IsBoolean, IsUUID, IsEnum, IsInt, Min, Max, IsJSON, IsArray, ArrayMinSize } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsUUID, IsEnum, IsInt, Min, Max, IsJSON, IsArray, ArrayMinSize, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { GraphQLJSON } from 'graphql-type-json';
 
 // Permission Inputs
@@ -268,36 +269,56 @@ export class AssignRolePermissionInput {
 
 // User Role/Permission Assignment Inputs
 @InputType()
-export class AssignUserRoleInput {
+export class RoleAssignmentInput {
   @Field()
-  @IsUUID()
-  userId: string;
-
-  @Field(() => [String])
-  roleIds: string[];
+  @IsString()
+  roleId: string;
 
   @Field({ defaultValue: 'allow' })
-  @IsOptional()
-  @IsEnum(['allow', 'deny'])
-  effect?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
   @IsString()
-  scope?: string;
+  @IsEnum(['allow', 'deny'])
+  effect: string;
 
   @Field(() => GraphQLJSON, { nullable: true })
   @IsOptional()
   conditions?: any;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   @IsOptional()
-  expiresAt?: Date;
+  metadata?: any;
+}
 
-  @Field({ nullable: true })
-  @IsOptional()
+@InputType()
+export class AssignUserRoleInput {
+  @Field()
+  @IsUUID()
+  userId: string;
+
+  @Field(() => [RoleAssignmentInput])
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RoleAssignmentInput)
+  assignments: RoleAssignmentInput[];
+}
+
+@InputType()
+export class PermissionAssignmentInput {
+  @Field()
   @IsString()
-  reason?: string;
+  permissionId: string;
+
+  @Field({ defaultValue: 'allow' })
+  @IsString()
+  @IsEnum(['allow', 'deny'])
+  effect: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
+  conditions?: any;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
+  metadata?: any;
 }
 
 @InputType()
@@ -306,29 +327,9 @@ export class AssignUserPermissionInput {
   @IsUUID()
   userId: string;
 
-  @Field(() => [String])
-  permissionIds: string[];
-
-  @Field({ defaultValue: 'allow' })
-  @IsOptional()
-  @IsEnum(['allow', 'deny'])
-  effect?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  scope?: string;
-
-  @Field(() => GraphQLJSON, { nullable: true })
-  @IsOptional()
-  conditions?: any;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  expiresAt?: Date;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  reason?: string;
+  @Field(() => [PermissionAssignmentInput])
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PermissionAssignmentInput)
+  assignments: PermissionAssignmentInput[];
 }

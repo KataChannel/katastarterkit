@@ -57,15 +57,25 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
   const permissions = permissionsData?.searchPermissions?.permissions || [];
 
   useEffect(() => {
+    console.log('=== useEffect roleAssignments DEBUG ===');
+    console.log('userRolePermissions:', userRolePermissions);
+    console.log('roles length:', roles.length);
+    
     if (userRolePermissions && roles.length > 0) {
       const currentRoles = userRolePermissions.getUserRolePermissions?.roleAssignments || [];
+      console.log('currentRoles from server:', currentRoles);
+      console.log('currentRoles count:', currentRoles.length);
+      
       const newRoleAssignments = roles.map((role: Role) => {
         const existing = currentRoles.find((ra: any) => ra.role.id === role.id);
+        console.log(`Role ${role.name}: existing =`, existing ? `${existing.effect}` : 'not found');
         return {
           roleId: role.id,
           effect: existing ? existing.effect : null,
         };
       });
+      
+      console.log('newRoleAssignments:', newRoleAssignments);
       setRoleAssignments(newRoleAssignments);
     }
   }, [userRolePermissions, roles]);
@@ -105,6 +115,9 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
   };
 
   const handleSaveRoles = async () => {
+    console.log('=== handleSaveRoles DEBUG ===');
+    console.log('All roleAssignments:', roleAssignments);
+    
     const activeAssignments = roleAssignments
       .filter(ra => ra.effect !== null)
       .map(ra => ({
@@ -112,20 +125,31 @@ const UserRolePermissionModal: React.FC<UserRolePermissionModalProps> = ({
         effect: ra.effect!,
       }));
 
+    console.log('Active assignments (after filter):', activeAssignments);
+    console.log('Active assignments count:', activeAssignments.length);
+
     const input: AssignUserRoleInput = {
       userId: user.id,
       assignments: activeAssignments,
     };
 
+    console.log('Final input to mutation:', JSON.stringify(input, null, 2));
+
     try {
-      await assignUserRoles({ variables: { input } });
+      const result = await assignUserRoles({ variables: { input } });
+      console.log('Mutation result:', result);
+      
       toast({
         title: 'Roles updated',
         description: `Role assignments for ${user.displayName || user.username} have been updated successfully.`,
         type: 'success',
       });
-      refetchUser();
+      
+      console.log('Calling refetchUser...');
+      await refetchUser();
+      console.log('refetchUser complete');
     } catch (error: any) {
+      console.error('Error in handleSaveRoles:', error);
       toast({
         title: 'Update failed',
         description: error.message || 'Failed to update role assignments',

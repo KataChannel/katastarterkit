@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PostStatus } from '@prisma/client';
+import slugify from 'slugify';
+import { CreateBlogCategoryInput, CreateBlogTagInput } from '../graphql/inputs/blog.input';
 
 @Injectable()
 export class BlogService {
@@ -114,10 +116,24 @@ export class BlogService {
     return { ...category, postCount: category._count.posts };
   }
 
-  async createCategory(input: any) {
-    const existing = await this.prisma.blogCategory.findUnique({ where: { slug: input.slug } });
-    if (existing) throw new BadRequestException(`Category slug "${input.slug}" already exists`);
-    return this.prisma.blogCategory.create({ data: input });
+  async createCategory(input: CreateBlogCategoryInput) {
+    // Generate slug from name if not provided
+    const baseSlug = input.slug || slugify(input.name, { lower: true, strict: true });
+    let slug = baseSlug;
+    let counter = 1;
+    
+    // Ensure unique slug
+    while (await this.prisma.blogCategory.findUnique({ where: { slug } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    
+    return this.prisma.blogCategory.create({
+      data: {
+        ...input,
+        slug,
+      },
+    });
   }
 
   async updateCategory(id: string, input: any) {
@@ -144,10 +160,23 @@ export class BlogService {
     return tag;
   }
 
-  async createTag(input: any) {
-    const existing = await this.prisma.blogTag.findFirst({ where: { OR: [{ slug: input.slug }, { name: input.name }] } });
-    if (existing) throw new BadRequestException(`Tag "${input.slug}" or "${input.name}" already exists`);
-    return this.prisma.blogTag.create({ data: input });
+  async createTag(input: CreateBlogTagInput) {
+    // Generate slug from name if not provided
+    const baseSlug = input.slug || slugify(input.name, { lower: true, strict: true });
+    let slug = baseSlug;
+    let counter = 1;
+    
+    // Ensure unique slug
+    while (await this.prisma.blogTag.findUnique({ where: { slug } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    
+    // Check if name already exists
+    const existingName = await this.prisma.blogTag.findFirst({ where: { name: input.name } });
+    if (existingName) throw new BadRequestException(`Tag name "${input.name}" already exists`);
+    
+    return this.prisma.blogTag.create({ data: { ...input, slug } });
   }
 
   async updateTag(id: string, input: any) {

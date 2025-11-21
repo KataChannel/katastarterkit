@@ -1,4 +1,5 @@
 import { InputType, Field, ID, Int } from '@nestjs/graphql';
+import { IsString, IsOptional, IsNotEmpty, IsInt, IsBoolean } from 'class-validator';
 
 @InputType()
 export class CreateBlogInput {
@@ -126,62 +127,95 @@ export class GetBlogsInput {
 @InputType()
 export class CreateBlogCategoryInput {
   @Field()
+  @IsString()
+  @IsNotEmpty({ message: 'Category name is required' })
   name: string;
 
-  @Field()
-  slug: string;
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  slug?: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   description?: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   thumbnail?: string;
 
   @Field(() => Int, { nullable: true, defaultValue: 0 })
+  @IsInt()
+  @IsOptional()
   order?: number;
 
   @Field({ nullable: true, defaultValue: true })
+  @IsBoolean()
+  @IsOptional()
   isActive?: boolean;
 }
 
 @InputType()
 export class UpdateBlogCategoryInput {
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   name?: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   slug?: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   description?: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   thumbnail?: string;
 
   @Field(() => Int, { nullable: true })
+  @IsInt()
+  @IsOptional()
   order?: number;
 
   @Field({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
   isActive?: boolean;
 }
 
 @InputType()
 export class CreateBlogTagInput {
   @Field()
+  @IsString()
+  @IsNotEmpty({ message: 'Tag name is required' })
   name: string;
 
-  @Field()
-  slug: string;
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  slug?: string;
 }
 
 @InputType()
 export class UpdateBlogTagInput {
   @Field(() => ID)
+  @IsString()
   id: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   name?: string;
 
   @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
   slug?: string;
 }

@@ -357,28 +357,62 @@ export class RbacService {
 
   // User Role Assignment
   async assignUserRoles(input: AssignUserRoleInput): Promise<boolean> {
-    await this.prisma.$transaction(async (tx) => {
-      // Remove existing role assignments for this user
-      await tx.userRoleAssignment.deleteMany({
-        where: { userId: input.userId },
+    console.log('=== assignUserRoles DEBUG ===');
+    console.log('Input:', JSON.stringify(input, null, 2));
+    console.log('UserId:', input.userId);
+    console.log('Assignments:', input.assignments);
+    console.log('Assignments length:', input.assignments?.length);
+
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        // Remove existing role assignments for this user
+        const deletedCount = await tx.userRoleAssignment.deleteMany({
+          where: { userId: input.userId },
+        });
+        console.log('Deleted existing assignments:', deletedCount);
+
+        // Assign new roles
+        if (input.assignments && input.assignments.length > 0) {
+          const dataToCreate = input.assignments.map((assignment) => ({
+            userId: input.userId,
+            roleId: assignment.roleId,
+            effect: assignment.effect || 'allow',
+            conditions: assignment.conditions,
+          }));
+          
+          console.log('Data to create:', JSON.stringify(dataToCreate, null, 2));
+          
+          const result = await tx.userRoleAssignment.createMany({
+            data: dataToCreate,
+          });
+          
+          console.log('Created assignments result:', result);
+        } else {
+          console.log('No assignments to create');
+        }
       });
 
-      // Assign new roles
-      if (input.roleIds.length > 0) {
-        await tx.userRoleAssignment.createMany({
-          data: input.roleIds.map((roleId) => ({
-            userId: input.userId,
-            roleId: roleId,
-            effect: input.effect || 'allow',
-            scope: input.scope,
-            conditions: input.conditions,
-            expiresAt: input.expiresAt,
-          })),
-        });
-      }
-    });
-
-    return true;
+      // Verify the assignments were created
+      const verifyAssignments = await this.prisma.userRoleAssignment.findMany({
+        where: { userId: input.userId },
+        include: { role: true },
+      });
+      
+      console.log('Verification - Found assignments after creation:', verifyAssignments.length);
+      console.log('Verification assignments:', JSON.stringify(verifyAssignments.map(ra => ({
+        id: ra.id,
+        roleId: ra.roleId,
+        roleName: ra.role.name,
+        effect: ra.effect
+      })), null, 2));
+      console.log('=== assignUserRoles COMPLETE ===');
+      
+      return true;
+    } catch (error) {
+      console.error('=== assignUserRoles ERROR ===');
+      console.error('Error details:', error);
+      throw error;
+    }
   }
 
   // User Permission Assignment
@@ -390,16 +424,13 @@ export class RbacService {
       });
 
       // Assign new permissions
-      if (input.permissionIds.length > 0) {
+      if (input.assignments && input.assignments.length > 0) {
         await tx.userPermission.createMany({
-          data: input.permissionIds.map((permId) => ({
+          data: input.assignments.map((assignment) => ({
             userId: input.userId,
-            permissionId: permId,
-            effect: input.effect || 'allow',
-            scope: input.scope,
-            conditions: input.conditions,
-            expiresAt: input.expiresAt,
-            reason: input.reason,
+            permissionId: assignment.permissionId,
+            effect: assignment.effect || 'allow',
+            conditions: assignment.conditions,
           })),
         });
       }
@@ -410,6 +441,9 @@ export class RbacService {
 
   // Get User's Effective Permissions
   async getUserEffectivePermissions(userId: string): Promise<any> {
+    console.log('=== getUserEffectivePermissions DEBUG ===');
+    console.log('UserId:', userId);
+    
     // Fetch ALL role assignments and permissions (both allow and deny)
     const [allRoleAssignments, allDirectPermissions] = await Promise.all([
       this.prisma.userRoleAssignment.findMany({
@@ -433,6 +467,14 @@ export class RbacService {
         },
       }),
     ]);
+
+    console.log('Found role assignments:', allRoleAssignments.length);
+    console.log('Role assignments:', JSON.stringify(allRoleAssignments.map(ra => ({
+      id: ra.id,
+      roleId: ra.roleId,
+      roleName: ra.role.name,
+      effect: ra.effect
+    })), null, 2));
 
     // Transform role assignments to match GraphQL schema expectations
     // Filter out null permissions and permissions with null name

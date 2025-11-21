@@ -404,4 +404,34 @@ export const apolloClient = new ApolloClient({
   },
 });
 
+// Schema version tracking to auto-clear cache on breaking changes
+const SCHEMA_VERSION = '2.0.1'; // Increment this when GraphQL schema has breaking changes
+const SCHEMA_VERSION_KEY = 'apollo_schema_version';
+
+if (typeof window !== 'undefined') {
+  const storedVersion = localStorage.getItem(SCHEMA_VERSION_KEY);
+  if (storedVersion !== SCHEMA_VERSION) {
+    console.log(`[Apollo] Schema version changed: ${storedVersion} → ${SCHEMA_VERSION}`);
+    console.log('[Apollo] Clearing cache...');
+    apolloClient.clearStore().then(() => {
+      localStorage.setItem(SCHEMA_VERSION_KEY, SCHEMA_VERSION);
+      console.log('[Apollo] Cache cleared successfully');
+    }).catch(err => {
+      console.error('[Apollo] Failed to clear cache:', err);
+    });
+  }
+}
+
+// Helper function to manually clear Apollo cache
+export const clearApolloCache = async () => {
+  try {
+    await apolloClient.clearStore();
+    console.log('[Apollo] Cache cleared manually');
+    return true;
+  } catch (error) {
+    console.error('[Apollo] Failed to clear cache:', error);
+    return false;
+  }
+};
+
 export default apolloClient;

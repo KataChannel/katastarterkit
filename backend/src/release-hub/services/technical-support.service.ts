@@ -20,17 +20,49 @@ export class TechnicalSupportService {
 
   async createTicket(input: CreateTechnicalSupportTicketInput) {
     try {
+      // Debug: Log received input
+      console.log('📝 [TechnicalSupportService] Received input:', JSON.stringify(input, null, 2));
+      console.log('📝 [TechnicalSupportService] Input keys:', Object.keys(input));
+      console.log('📝 [TechnicalSupportService] subject:', input.subject, 'type:', typeof input.subject);
+      console.log('📝 [TechnicalSupportService] description:', input.description, 'type:', typeof input.description);
+      console.log('📝 [TechnicalSupportService] category:', input.category, 'type:', typeof input.category);
+      
+      // Validate required fields
+      if (!input.subject || !input.description || !input.category) {
+        throw new Error('Missing required fields: subject, description, and category are required');
+      }
+
       // Generate ticket number
       const ticketNumber = await this.generateTicketNumber();
 
+      // Build data object, only include defined values
+      const data: any = {
+        ticketNumber,
+        subject: input.subject,
+        description: input.description,
+        category: input.category,
+        priority: input.priority || 'MEDIUM',
+        status: 'OPEN',
+        attachmentUrls: input.attachmentUrls || [],
+        screenshotUrls: input.screenshotUrls || [],
+        tags: input.tags || [],
+      };
+
+      // Only add optional fields if they have values
+      if (input.customerId) data.customerId = input.customerId;
+      if (input.customerEmail) data.customerEmail = input.customerEmail;
+      if (input.customerName) data.customerName = input.customerName;
+      if (input.customerPhone) data.customerPhone = input.customerPhone;
+      if (input.environment) data.environment = input.environment;
+      if (input.browserInfo) data.browserInfo = input.browserInfo;
+      if (input.osInfo) data.osInfo = input.osInfo;
+      if (input.deviceInfo) data.deviceInfo = input.deviceInfo;
+      if (input.errorLogs) data.errorLogs = input.errorLogs;
+      if (input.relatedUrl) data.relatedUrl = input.relatedUrl;
+      if (input.relatedOrderId) data.relatedOrderId = input.relatedOrderId;
+
       const ticket = await this.prisma.technicalSupportTicket.create({
-        data: {
-          ...input,
-          ticketNumber,
-          attachmentUrls: input.attachmentUrls || [],
-          screenshotUrls: input.screenshotUrls || [],
-          tags: input.tags || [],
-        },
+        data,
         include: {
           customer: {
             select: {

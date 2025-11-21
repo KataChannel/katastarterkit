@@ -448,22 +448,12 @@ input AssignRolePermissionInput {
 }
 
 input AssignUserPermissionInput {
-  conditions: JSON
-  effect: String! = "allow"
-  expiresAt: DateTime
-  permissionIds: [String!]!
-  reason: String
-  scope: String
+  assignments: [PermissionAssignmentInput!]!
   userId: String!
 }
 
 input AssignUserRoleInput {
-  conditions: JSON
-  effect: String! = "allow"
-  expiresAt: DateTime
-  reason: String
-  roleIds: [String!]!
-  scope: String
+  assignments: [RoleAssignmentInput!]!
   userId: String!
 }
 
@@ -1087,7 +1077,7 @@ input CreateBlogCategoryInput {
   isActive: Boolean = true
   name: String!
   order: Int = 0
-  slug: String!
+  slug: String
   thumbnail: String
 }
 
@@ -1112,7 +1102,7 @@ input CreateBlogInput {
 
 input CreateBlogTagInput {
   name: String!
-  slug: String!
+  slug: String
 }
 
 input CreateCallCenterConfigInput {
@@ -3500,6 +3490,13 @@ type Permission {
   updatedAt: DateTime!
 }
 
+input PermissionAssignmentInput {
+  conditions: JSON
+  effect: String! = "allow"
+  metadata: JSON
+  permissionId: String!
+}
+
 input PermissionSearchInput {
   action: String
   category: String
@@ -4449,6 +4446,13 @@ type Role {
   permissions: [Permission!]!
   priority: Int!
   updatedAt: DateTime!
+}
+
+input RoleAssignmentInput {
+  conditions: JSON
+  effect: String! = "allow"
+  metadata: JSON
+  roleId: String!
 }
 
 type RolePermissionType {

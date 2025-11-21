@@ -63,7 +63,18 @@ export default function BlogCategoriesPage() {
   });
 
   const { data, loading, refetch } = useQuery(GET_BLOG_CATEGORIES_WITH_COUNT);
-  const [createCategory, { loading: creating }] = useMutation(CREATE_BLOG_CATEGORY);
+  const [createCategory, { loading: creating }] = useMutation(CREATE_BLOG_CATEGORY, {
+    onError: (error) => {
+      // eslint-disable-next-line no-console
+      console.error('=== useMutation onError ===');
+      // eslint-disable-next-line no-console
+      console.error('Error:', error);
+      // eslint-disable-next-line no-console
+      console.error('GraphQL errors:', error.graphQLErrors);
+      // eslint-disable-next-line no-console
+      console.error('Network error:', error.networkError);
+    },
+  });
   const [updateCategory, { loading: updating }] = useMutation(UPDATE_BLOG_CATEGORY);
   const [deleteCategory, { loading: deleting }] = useMutation(DELETE_BLOG_CATEGORY);
 
@@ -99,14 +110,55 @@ export default function BlogCategoriesPage() {
 
   const handleCreate = async () => {
     try {
+      // eslint-disable-next-line no-console
+      console.log('=== FRONTEND handleCreate ===');
+      // eslint-disable-next-line no-console
+      console.log('formData:', formData);
+      // eslint-disable-next-line no-console
+      console.log('formData.name:', formData.name);
+      // eslint-disable-next-line no-console
+      console.log('formData.slug:', formData.slug);
+      
+      // Clean up empty optional fields
+      const cleanInput: any = {
+        name: formData.name,
+        slug: formData.slug,
+      };
+      
+      if (formData.description && formData.description.trim()) {
+        cleanInput.description = formData.description;
+      }
+      if (formData.thumbnail && formData.thumbnail.trim()) {
+        cleanInput.thumbnail = formData.thumbnail;
+      }
+      if (formData.order !== undefined && formData.order !== null) {
+        cleanInput.order = formData.order;
+      }
+      if (formData.isActive !== undefined && formData.isActive !== null) {
+        cleanInput.isActive = formData.isActive;
+      }
+      
+      // eslint-disable-next-line no-console
+      console.log('cleanInput:', cleanInput);
+      // eslint-disable-next-line no-console
+      console.log('Variables to send:', JSON.stringify({ input: cleanInput }, null, 2));
+      
       await createCategory({
-        variables: { input: formData },
+        variables: { input: cleanInput },
       });
       toast.success('Tạo danh mục thành công');
       setCreateDialogOpen(false);
       resetForm();
       refetch();
     } catch (error: any) {
+      // eslint-disable-next-line no-console
+      console.error('=== CREATE CATEGORY ERROR ===');
+      // eslint-disable-next-line no-console
+      console.error('Error:', error);
+      // eslint-disable-next-line no-console
+      console.error('Error message:', error.message);
+      // eslint-disable-next-line no-console
+      console.error('GraphQL errors:', error.graphQLErrors);
       toast.error(error.message || 'Có lỗi xảy ra');
     }
   };
