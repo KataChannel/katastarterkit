@@ -47,6 +47,24 @@ export class Permission {
 }
 
 @ObjectType()
+export class RolePermission {
+  @Field(() => ID)
+  id: string;
+
+  @Field()
+  effect: string; // 'allow' | 'deny'
+
+  @Field(() => Permission)
+  permission: Permission;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  conditions?: any;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  metadata?: any;
+}
+
+@ObjectType()
 export class Role {
   @Field(() => ID)
   id: string;
@@ -81,8 +99,8 @@ export class Role {
   @Field(() => GraphQLJSON, { nullable: true })
   metadata?: any;
 
-  @Field(() => [Permission])
-  permissions: Permission[];
+  @Field(() => [RolePermission])
+  permissions: RolePermission[];
 
   @Field()
   createdAt: Date;

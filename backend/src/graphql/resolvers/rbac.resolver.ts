@@ -75,19 +75,6 @@ export class PermissionResolver {
 export class RoleResolver {
   constructor(private readonly rbacService: RbacService) {}
 
-  @ResolveField('permissions', () => [Object], { nullable: true })
-  async permissions(@Parent() role: any): Promise<any[]> {
-    // Extract Permission objects from RolePermission array
-    // and filter out any with null name fields
-    if (!role.permissions || !Array.isArray(role.permissions)) {
-      return [];
-    }
-
-    return role.permissions
-      .map((rp: any) => rp.permission)
-      .filter((permission: any) => permission && permission.id && permission.name);
-  }
-
   @Query(() => RoleSearchResult, { name: 'searchRoles' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles($Enums.UserRoleType.ADMIN)

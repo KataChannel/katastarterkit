@@ -62,21 +62,23 @@ export declare class AssignRolePermissionInput {
     conditions?: any;
     expiresAt?: Date;
 }
+export declare class RoleAssignmentInput {
+    roleId: string;
+    effect: string;
+    conditions?: any;
+    metadata?: any;
+}
 export declare class AssignUserRoleInput {
     userId: string;
-    roleIds: string[];
-    effect?: string;
-    scope?: string;
+    assignments: RoleAssignmentInput[];
+}
+export declare class PermissionAssignmentInput {
+    permissionId: string;
+    effect: string;
     conditions?: any;
-    expiresAt?: Date;
-    reason?: string;
+    metadata?: any;
 }
 export declare class AssignUserPermissionInput {
     userId: string;
-    permissionIds: string[];
-    effect?: string;
-    scope?: string;
-    conditions?: any;
-    expiresAt?: Date;
-    reason?: string;
+    assignments: PermissionAssignmentInput[];
 }

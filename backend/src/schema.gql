@@ -2299,10 +2299,14 @@ input GroupByInput {
 }
 
 enum GuideType {
-  DEVELOPER_GUIDE
+  API_REFERENCE
+  BEST_PRACTICES
   FAQ
+  QUICK_START
+  TROUBLESHOOTING
+  TUTORIAL
   USER_GUIDE
-  VIDEO_TUTORIAL
+  VIDEO_GUIDE
 }
 
 type HRStatistics {
@@ -4443,7 +4447,7 @@ type Role {
   name: String!
   parent: Role
   parentId: String
-  permissions: [Permission!]!
+  permissions: [RolePermission!]!
   priority: Int!
   updatedAt: DateTime!
 }
@@ -4453,6 +4457,14 @@ input RoleAssignmentInput {
   effect: String! = "allow"
   metadata: JSON
   roleId: String!
+}
+
+type RolePermission {
+  conditions: JSON
+  effect: String!
+  id: ID!
+  metadata: JSON
+  permission: Permission!
 }
 
 type RolePermissionType {

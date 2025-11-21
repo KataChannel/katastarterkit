@@ -7,7 +7,6 @@ export interface CreateSystemGuideDto {
   type: GuideType;
   description?: string;
   content?: string;
-  icon?: string;
   order?: number;
   parentId?: string;
   isPublished?: boolean;
@@ -20,7 +19,6 @@ export interface UpdateSystemGuideDto {
   type?: GuideType;
   description?: string;
   content?: string;
-  icon?: string;
   order?: number;
   parentId?: string;
   isPublished?: boolean;
@@ -40,8 +38,7 @@ export class SystemGuideService {
         type: data.type,
         description: data.description,
         content: data.content,
-        icon: data.icon,
-        order: data.order || 0,
+        orderIndex: data.order || 0,
         parentId: data.parentId,
         isPublished: data.isPublished || false,
         authorId: data.authorId,
@@ -89,10 +86,10 @@ export class SystemGuideService {
         parent: true,
         children: {
           where: { isPublished: true },
-          orderBy: { order: 'asc' },
+          orderBy: { orderIndex: 'asc' },
         },
       },
-      orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
+      orderBy: [{ orderIndex: 'asc' }, { createdAt: 'desc' }],
     });
   }
 
@@ -103,7 +100,7 @@ export class SystemGuideService {
         author: true,
         parent: true,
         children: {
-          orderBy: { order: 'asc' },
+          orderBy: { orderIndex: 'asc' },
         },
       },
     });
@@ -123,7 +120,7 @@ export class SystemGuideService {
         parent: true,
         children: {
           where: { isPublished: true },
-          orderBy: { order: 'asc' },
+          orderBy: { orderIndex: 'asc' },
         },
       },
     });
@@ -151,8 +148,7 @@ export class SystemGuideService {
     if (data.type) updateData.type = data.type;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.content !== undefined) updateData.content = data.content;
-    if (data.icon !== undefined) updateData.icon = data.icon;
-    if (data.order !== undefined) updateData.order = data.order;
+    if (data.order !== undefined) updateData.orderIndex = data.order;
     if (data.parentId !== undefined) updateData.parentId = data.parentId;
     if (data.isPublished !== undefined) updateData.isPublished = data.isPublished;
 

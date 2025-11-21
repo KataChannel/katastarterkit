@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserRolePermissionSummary = exports.UserSummary = exports.PermissionSearchResult = exports.RoleSearchResult = exports.UserPermission = exports.UserRoleAssignment = exports.Role = exports.Permission = void 0;
+exports.UserRolePermissionSummary = exports.UserSummary = exports.PermissionSearchResult = exports.RoleSearchResult = exports.UserPermission = exports.UserRoleAssignment = exports.Role = exports.RolePermission = exports.Permission = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const graphql_type_json_1 = require("graphql-type-json");
 let Permission = class Permission {
@@ -74,6 +74,32 @@ __decorate([
 exports.Permission = Permission = __decorate([
     (0, graphql_1.ObjectType)()
 ], Permission);
+let RolePermission = class RolePermission {
+};
+exports.RolePermission = RolePermission;
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.ID),
+    __metadata("design:type", String)
+], RolePermission.prototype, "id", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], RolePermission.prototype, "effect", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => Permission),
+    __metadata("design:type", Permission)
+], RolePermission.prototype, "permission", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
+    __metadata("design:type", Object)
+], RolePermission.prototype, "conditions", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
+    __metadata("design:type", Object)
+], RolePermission.prototype, "metadata", void 0);
+exports.RolePermission = RolePermission = __decorate([
+    (0, graphql_1.ObjectType)()
+], RolePermission);
 let Role = class Role {
 };
 exports.Role = Role;
@@ -122,7 +148,7 @@ __decorate([
     __metadata("design:type", Object)
 ], Role.prototype, "metadata", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => [Permission]),
+    (0, graphql_1.Field)(() => [RolePermission]),
     __metadata("design:type", Array)
 ], Role.prototype, "permissions", void 0);
 __decorate([

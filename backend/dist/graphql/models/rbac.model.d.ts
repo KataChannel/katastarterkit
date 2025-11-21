@@ -14,6 +14,13 @@ export declare class Permission {
     createdAt: Date;
     updatedAt: Date;
 }
+export declare class RolePermission {
+    id: string;
+    effect: string;
+    permission: Permission;
+    conditions?: any;
+    metadata?: any;
+}
 export declare class Role {
     id: string;
     name: string;
@@ -26,7 +33,7 @@ export declare class Role {
     isActive: boolean;
     priority: number;
     metadata?: any;
-    permissions: Permission[];
+    permissions: RolePermission[];
     createdAt: Date;
     updatedAt: Date;
 }

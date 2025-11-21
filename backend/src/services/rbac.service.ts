@@ -131,7 +131,7 @@ export class RbacService {
 
   // Role Management
   async getRoleById(id: string): Promise<any> {
-    const roleData = await this.prisma.role.findUnique({
+    const role = await this.prisma.role.findUnique({
       where: { id },
       include: {
         permissions: {
@@ -142,15 +142,13 @@ export class RbacService {
         children: true,
       },
     });
-    if (!roleData) {
+    if (!role) {
       throw new NotFoundException(`Role not found with id: ${id}`);
     }
     
-    // Transform the data to match GraphQL schema expectations
-    return {
-      ...roleData,
-      permissions: roleData.permissions.map(rp => rp.permission).filter(p => p !== null)
-    };
+    // Return full RolePermission objects with nested permission
+    // GraphQL schema expects: permissions: [{ id, effect, permission: {...} }]
+    return role;
   }
 
   async createRole(input: CreateRoleInput): Promise<any> {
@@ -218,21 +216,19 @@ export class RbacService {
         },
       });
 
-      // Transform the data to match GraphQL schema expectations
-      return {
-        ...updatedRole,
-        permissions: updatedRole.permissions.map(rp => rp.permission).filter(p => p !== null)
-      };
+      // Return full RolePermission objects with nested permission
+      // GraphQL schema expects: permissions: [{ id, effect, permission: {...} }]
+      return updatedRole;
     });
   }
 
   async updateRole(id: string, input: UpdateRoleInput): Promise<any> {
-    const role = await this.prisma.role.findUnique({ where: { id } });
-    if (!role) {
+    const existingRole = await this.prisma.role.findUnique({ where: { id } });
+    if (!existingRole) {
       throw new NotFoundException('Role not found');
     }
 
-    if (role.isSystemRole && input.isActive === false) {
+    if (existingRole.isSystemRole && input.isActive === false) {
       throw new ForbiddenException('Cannot deactivate system role');
     }
 
@@ -246,7 +242,7 @@ export class RbacService {
       }
     }
 
-    const roleData = await this.prisma.role.update({
+    const updatedRole = await this.prisma.role.update({
       where: { id },
       data: input,
       include: {
@@ -259,11 +255,9 @@ export class RbacService {
       },
     });
     
-    // Transform the data to match GraphQL schema expectations
-    return {
-      ...roleData,
-      permissions: roleData.permissions.map(rp => rp.permission).filter(p => p !== null)
-    };
+    // Return full RolePermission objects with nested permission
+    // GraphQL schema expects: permissions: [{ id, effect, permission: {...} }]
+    return updatedRole;
   }
 
   async deleteRole(id: string): Promise<boolean> {
@@ -294,7 +288,7 @@ export class RbacService {
     if (input.isActive !== undefined) where.isActive = input.isActive;
     if (input.parentId) where.parentId = input.parentId;
 
-    const [rolesData, total] = await Promise.all([
+    const [roles, total] = await Promise.all([
       this.prisma.role.findMany({
         where,
         skip: (input.page || 0) * (input.size || 20),
@@ -315,11 +309,8 @@ export class RbacService {
       this.prisma.role.count({ where }),
     ]);
 
-    // Transform the data to match GraphQL schema expectations
-    const roles = rolesData.map(role => ({
-      ...role,
-      permissions: role.permissions.map(rp => rp.permission).filter(p => p !== null)
-    }));
+    // Return full RolePermission objects (no flattening needed)
+    // GraphQL schema now expects: permissions: [{ id, effect, permission: {...} }]
 
     return {
       roles,

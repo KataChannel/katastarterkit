@@ -1,10 +1,14 @@
 import { ObjectType, Field, ID, registerEnumType, Int } from '@nestjs/graphql';
 
 export enum GuideType {
+  QUICK_START = 'QUICK_START',
+  TUTORIAL = 'TUTORIAL',
   USER_GUIDE = 'USER_GUIDE',
-  DEVELOPER_GUIDE = 'DEVELOPER_GUIDE',
-  VIDEO_TUTORIAL = 'VIDEO_TUTORIAL',
+  API_REFERENCE = 'API_REFERENCE',
+  TROUBLESHOOTING = 'TROUBLESHOOTING',
   FAQ = 'FAQ',
+  VIDEO_GUIDE = 'VIDEO_GUIDE',
+  BEST_PRACTICES = 'BEST_PRACTICES',
 }
 
 registerEnumType(GuideType, { name: 'GuideType' });

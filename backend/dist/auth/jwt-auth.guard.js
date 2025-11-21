@@ -12,13 +12,15 @@ var JwtAuthGuard_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JwtAuthGuard = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const graphql_1 = require("@nestjs/graphql");
 const jwt_1 = require("@nestjs/jwt");
 const user_service_1 = require("../services/user.service");
 let JwtAuthGuard = JwtAuthGuard_1 = class JwtAuthGuard {
-    constructor(jwtService, userService) {
+    constructor(jwtService, userService, configService) {
         this.jwtService = jwtService;
         this.userService = userService;
+        this.configService = configService;
         this.logger = new common_1.Logger(JwtAuthGuard_1.name);
     }
     async canActivate(context) {
@@ -39,7 +41,8 @@ let JwtAuthGuard = JwtAuthGuard_1 = class JwtAuthGuard {
             throw new common_1.UnauthorizedException('Authentication token is required');
         }
         try {
-            const payload = this.jwtService.verify(token);
+            const secret = this.configService.get('JWT_SECRET') || 'fallback-secret-key';
+            const payload = this.jwtService.verify(token, { secret });
             const user = await this.userService.findById(payload.sub);
             if (!user) {
                 this.logger.warn(`User not found for token payload sub: ${payload.sub}`);
@@ -81,6 +84,7 @@ exports.JwtAuthGuard = JwtAuthGuard;
 exports.JwtAuthGuard = JwtAuthGuard = JwtAuthGuard_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [jwt_1.JwtService,
-        user_service_1.UserService])
+        user_service_1.UserService,
+        config_1.ConfigService])
 ], JwtAuthGuard);
 //# sourceMappingURL=jwt-auth.guard.js.map

@@ -44,7 +44,7 @@ export declare class GetBlogsInput {
 }
 export declare class CreateBlogCategoryInput {
     name: string;
-    slug: string;
+    slug?: string;
     description?: string;
     thumbnail?: string;
     order?: number;
@@ -60,7 +60,7 @@ export declare class UpdateBlogCategoryInput {
 }
 export declare class CreateBlogTagInput {
     name: string;
-    slug: string;
+    slug?: string;
 }
 export declare class UpdateBlogTagInput {
     id: string;

@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateBlogTagInput = exports.CreateBlogTagInput = exports.UpdateBlogCategoryInput = exports.CreateBlogCategoryInput = exports.GetBlogsInput = exports.UpdateBlogInput = exports.CreateBlogInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
+const class_validator_1 = require("class-validator");
 let CreateBlogInput = class CreateBlogInput {
 };
 exports.CreateBlogInput = CreateBlogInput;
@@ -186,26 +187,38 @@ let CreateBlogCategoryInput = class CreateBlogCategoryInput {
 exports.CreateBlogCategoryInput = CreateBlogCategoryInput;
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Category name is required' }),
     __metadata("design:type", String)
 ], CreateBlogCategoryInput.prototype, "name", void 0);
 __decorate([
-    (0, graphql_1.Field)(),
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateBlogCategoryInput.prototype, "slug", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateBlogCategoryInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateBlogCategoryInput.prototype, "thumbnail", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true, defaultValue: 0 }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], CreateBlogCategoryInput.prototype, "order", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true, defaultValue: true }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], CreateBlogCategoryInput.prototype, "isActive", void 0);
 exports.CreateBlogCategoryInput = CreateBlogCategoryInput = __decorate([
@@ -216,26 +229,38 @@ let UpdateBlogCategoryInput = class UpdateBlogCategoryInput {
 exports.UpdateBlogCategoryInput = UpdateBlogCategoryInput;
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateBlogCategoryInput.prototype, "name", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateBlogCategoryInput.prototype, "slug", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateBlogCategoryInput.prototype, "description", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateBlogCategoryInput.prototype, "thumbnail", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateBlogCategoryInput.prototype, "order", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdateBlogCategoryInput.prototype, "isActive", void 0);
 exports.UpdateBlogCategoryInput = UpdateBlogCategoryInput = __decorate([
@@ -246,10 +271,14 @@ let CreateBlogTagInput = class CreateBlogTagInput {
 exports.CreateBlogTagInput = CreateBlogTagInput;
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Tag name is required' }),
     __metadata("design:type", String)
 ], CreateBlogTagInput.prototype, "name", void 0);
 __decorate([
-    (0, graphql_1.Field)(),
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateBlogTagInput.prototype, "slug", void 0);
 exports.CreateBlogTagInput = CreateBlogTagInput = __decorate([
@@ -260,14 +289,19 @@ let UpdateBlogTagInput = class UpdateBlogTagInput {
 exports.UpdateBlogTagInput = UpdateBlogTagInput;
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogTagInput.prototype, "id", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateBlogTagInput.prototype, "name", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateBlogTagInput.prototype, "slug", void 0);
 exports.UpdateBlogTagInput = UpdateBlogTagInput = __decorate([

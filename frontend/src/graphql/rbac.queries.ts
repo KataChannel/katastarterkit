@@ -116,13 +116,17 @@ export const SEARCH_ROLES = gql`
         updatedAt
         permissions {
           id
-          name
-          displayName
-          resource
-          action
-          scope
-          description
-          isActive
+          effect
+          permission {
+            id
+            name
+            displayName
+            resource
+            action
+            scope
+            description
+            isActive
+          }
         }
         children {
           id

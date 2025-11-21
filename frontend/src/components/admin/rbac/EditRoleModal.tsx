@@ -100,14 +100,14 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
       });
       
       const newAssignments: PermissionAssignment[] = permissions.map((permission: Permission) => {
-        // SEARCH_ROLES returns permissions as array of Permission objects directly
-        // So rolePermissions is [{id, name, displayName, ...}, ...]
-        // We just need to check if permission.id exists in rolePermissions array
-        const existing = rolePermissions.find((rp: any) => rp?.id === permission?.id);
+        // SEARCH_ROLES now returns permissions with nested structure:
+        // permissions: [{ id, effect, permission: { id, name, displayName, ... } }]
+        // So we need to check permission.permission.id against rolePermissions
+        const existing = rolePermissions.find((rp: any) => rp?.permission?.id === permission?.id);
         
         return {
           permissionId: permission?.id,
-          effect: existing ? 'allow' : null, // If exists, it's always 'allow'
+          effect: existing?.effect || null, // Use the actual effect from the relationship
         };
       });
       

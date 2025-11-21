@@ -13,7 +13,6 @@ export declare class PermissionResolver {
 export declare class RoleResolver {
     private readonly rbacService;
     constructor(rbacService: RbacService);
-    permissions(role: any): Promise<any[]>;
     searchRoles(input: RoleSearchInput): Promise<RoleSearchResult>;
     getRoleById(id: string): Promise<Role>;
     createRole(input: CreateRoleInput): Promise<Role>;

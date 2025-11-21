@@ -58,10 +58,14 @@ export const GET_CURRENT_USER = gql`
         displayName
         permissions {
           id
-          name
-          displayName
-          resource
-          action
+          effect
+          permission {
+            id
+            name
+            displayName
+            resource
+            action
+          }
         }
       }
       permissions {

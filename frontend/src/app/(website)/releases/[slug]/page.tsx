@@ -114,7 +114,7 @@ export default function ReleaseDetailPage() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3">
-              <Badge className={getReleaseTypeColor(release.releaseType)} className="text-lg px-3 py-1">
+              <Badge className={`${getReleaseTypeColor(release.releaseType)} text-lg px-3 py-1`}>
                 {release.version}
               </Badge>
               <Badge variant="outline" className="text-sm">

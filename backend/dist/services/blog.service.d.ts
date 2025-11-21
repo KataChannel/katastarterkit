@@ -1,4 +1,5 @@
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateBlogCategoryInput, CreateBlogTagInput } from '../graphql/inputs/blog.input';
 export declare class BlogService {
     private prisma;
     constructor(prisma: PrismaService);
@@ -445,7 +446,7 @@ export declare class BlogService {
         metaTitle: string | null;
         metaDescription: string | null;
     }>;
-    createCategory(input: any): Promise<{
+    createCategory(input: CreateBlogCategoryInput): Promise<{
         order: number;
         id: string;
         createdAt: Date;
@@ -500,7 +501,7 @@ export declare class BlogService {
         slug: string;
         color: string | null;
     }>;
-    createTag(input: any): Promise<{
+    createTag(input: CreateBlogTagInput): Promise<{
         id: string;
         createdAt: Date;
         name: string;

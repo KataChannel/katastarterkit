@@ -9,9 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AssignUserPermissionInput = exports.AssignUserRoleInput = exports.AssignRolePermissionInput = exports.RoleSearchInput = exports.UpdateRoleInput = exports.CreateRoleInput = exports.PermissionSearchInput = exports.UpdatePermissionInput = exports.CreatePermissionInput = void 0;
+exports.AssignUserPermissionInput = exports.PermissionAssignmentInput = exports.AssignUserRoleInput = exports.RoleAssignmentInput = exports.AssignRolePermissionInput = exports.RoleSearchInput = exports.UpdateRoleInput = exports.CreateRoleInput = exports.PermissionSearchInput = exports.UpdatePermissionInput = exports.CreatePermissionInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const graphql_type_json_1 = require("graphql-type-json");
 let CreatePermissionInput = class CreatePermissionInput {
 };
@@ -345,6 +346,33 @@ __decorate([
 exports.AssignRolePermissionInput = AssignRolePermissionInput = __decorate([
     (0, graphql_1.InputType)()
 ], AssignRolePermissionInput);
+let RoleAssignmentInput = class RoleAssignmentInput {
+};
+exports.RoleAssignmentInput = RoleAssignmentInput;
+__decorate([
+    (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RoleAssignmentInput.prototype, "roleId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ defaultValue: 'allow' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEnum)(['allow', 'deny']),
+    __metadata("design:type", String)
+], RoleAssignmentInput.prototype, "effect", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], RoleAssignmentInput.prototype, "conditions", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], RoleAssignmentInput.prototype, "metadata", void 0);
+exports.RoleAssignmentInput = RoleAssignmentInput = __decorate([
+    (0, graphql_1.InputType)()
+], RoleAssignmentInput);
 let AssignUserRoleInput = class AssignUserRoleInput {
 };
 exports.AssignUserRoleInput = AssignUserRoleInput;
@@ -354,40 +382,42 @@ __decorate([
     __metadata("design:type", String)
 ], AssignUserRoleInput.prototype, "userId", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => [String]),
+    (0, graphql_1.Field)(() => [RoleAssignmentInput]),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => RoleAssignmentInput),
     __metadata("design:type", Array)
-], AssignUserRoleInput.prototype, "roleIds", void 0);
+], AssignUserRoleInput.prototype, "assignments", void 0);
+exports.AssignUserRoleInput = AssignUserRoleInput = __decorate([
+    (0, graphql_1.InputType)()
+], AssignUserRoleInput);
+let PermissionAssignmentInput = class PermissionAssignmentInput {
+};
+exports.PermissionAssignmentInput = PermissionAssignmentInput;
 __decorate([
-    (0, graphql_1.Field)({ defaultValue: 'allow' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(['allow', 'deny']),
-    __metadata("design:type", String)
-], AssignUserRoleInput.prototype, "effect", void 0);
-__decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.IsOptional)(),
+    (0, graphql_1.Field)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], AssignUserRoleInput.prototype, "scope", void 0);
+], PermissionAssignmentInput.prototype, "permissionId", void 0);
+__decorate([
+    (0, graphql_1.Field)({ defaultValue: 'allow' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEnum)(['allow', 'deny']),
+    __metadata("design:type", String)
+], PermissionAssignmentInput.prototype, "effect", void 0);
 __decorate([
     (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
-], AssignUserRoleInput.prototype, "conditions", void 0);
+], PermissionAssignmentInput.prototype, "conditions", void 0);
 __decorate([
-    (0, graphql_1.Field)({ nullable: true }),
+    (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Date)
-], AssignUserRoleInput.prototype, "expiresAt", void 0);
-__decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], AssignUserRoleInput.prototype, "reason", void 0);
-exports.AssignUserRoleInput = AssignUserRoleInput = __decorate([
+    __metadata("design:type", Object)
+], PermissionAssignmentInput.prototype, "metadata", void 0);
+exports.PermissionAssignmentInput = PermissionAssignmentInput = __decorate([
     (0, graphql_1.InputType)()
-], AssignUserRoleInput);
+], PermissionAssignmentInput);
 let AssignUserPermissionInput = class AssignUserPermissionInput {
 };
 exports.AssignUserPermissionInput = AssignUserPermissionInput;
@@ -397,37 +427,12 @@ __decorate([
     __metadata("design:type", String)
 ], AssignUserPermissionInput.prototype, "userId", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => [String]),
+    (0, graphql_1.Field)(() => [PermissionAssignmentInput]),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => PermissionAssignmentInput),
     __metadata("design:type", Array)
-], AssignUserPermissionInput.prototype, "permissionIds", void 0);
-__decorate([
-    (0, graphql_1.Field)({ defaultValue: 'allow' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(['allow', 'deny']),
-    __metadata("design:type", String)
-], AssignUserPermissionInput.prototype, "effect", void 0);
-__decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], AssignUserPermissionInput.prototype, "scope", void 0);
-__decorate([
-    (0, graphql_1.Field)(() => graphql_type_json_1.GraphQLJSON, { nullable: true }),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Object)
-], AssignUserPermissionInput.prototype, "conditions", void 0);
-__decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Date)
-], AssignUserPermissionInput.prototype, "expiresAt", void 0);
-__decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], AssignUserPermissionInput.prototype, "reason", void 0);
+], AssignUserPermissionInput.prototype, "assignments", void 0);
 exports.AssignUserPermissionInput = AssignUserPermissionInput = __decorate([
     (0, graphql_1.InputType)()
 ], AssignUserPermissionInput);

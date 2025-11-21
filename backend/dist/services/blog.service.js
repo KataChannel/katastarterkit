@@ -8,11 +8,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BlogService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const client_1 = require("@prisma/client");
+const slugify_1 = __importDefault(require("slugify"));
 let BlogService = class BlogService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -138,10 +142,19 @@ let BlogService = class BlogService {
         return { ...category, postCount: category._count.posts };
     }
     async createCategory(input) {
-        const existing = await this.prisma.blogCategory.findUnique({ where: { slug: input.slug } });
-        if (existing)
-            throw new common_1.BadRequestException(`Category slug "${input.slug}" already exists`);
-        return this.prisma.blogCategory.create({ data: input });
+        const baseSlug = input.slug || (0, slugify_1.default)(input.name, { lower: true, strict: true });
+        let slug = baseSlug;
+        let counter = 1;
+        while (await this.prisma.blogCategory.findUnique({ where: { slug } })) {
+            slug = `${baseSlug}-${counter}`;
+            counter++;
+        }
+        return this.prisma.blogCategory.create({
+            data: {
+                ...input,
+                slug,
+            },
+        });
     }
     async updateCategory(id, input) {
         const category = await this.prisma.blogCategory.findUnique({ where: { id } });
@@ -168,10 +181,17 @@ let BlogService = class BlogService {
         return tag;
     }
     async createTag(input) {
-        const existing = await this.prisma.blogTag.findFirst({ where: { OR: [{ slug: input.slug }, { name: input.name }] } });
-        if (existing)
-            throw new common_1.BadRequestException(`Tag "${input.slug}" or "${input.name}" already exists`);
-        return this.prisma.blogTag.create({ data: input });
+        const baseSlug = input.slug || (0, slugify_1.default)(input.name, { lower: true, strict: true });
+        let slug = baseSlug;
+        let counter = 1;
+        while (await this.prisma.blogTag.findUnique({ where: { slug } })) {
+            slug = `${baseSlug}-${counter}`;
+            counter++;
+        }
+        const existingName = await this.prisma.blogTag.findFirst({ where: { name: input.name } });
+        if (existingName)
+            throw new common_1.BadRequestException(`Tag name "${input.name}" already exists`);
+        return this.prisma.blogTag.create({ data: { ...input, slug } });
     }
     async updateTag(id, input) {
         const tag = await this.prisma.blogTag.findUnique({ where: { id } });
