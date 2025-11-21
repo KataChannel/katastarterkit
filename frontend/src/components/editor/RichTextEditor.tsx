@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -23,6 +23,9 @@ import {
   Redo,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { FilePicker } from '@/components/file-manager/FilePicker';
+import { FileType } from '@/types/file';
+import type { File } from '@/types/file';
 
 interface RichTextEditorProps {
   value?: string;
@@ -39,6 +42,8 @@ export function RichTextEditor({
   placeholder = 'Nhập nội dung...',
   className,
 }: RichTextEditorProps) {
+  const [imagePickerOpen, setImagePickerOpen] = useState(false);
+  
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -96,11 +101,15 @@ export function RichTextEditor({
     );
   }
 
+  const handleImageSelect = (fileOrUrl: File | string) => {
+    if (!editor) return;
+    
+    const imageUrl = typeof fileOrUrl === 'string' ? fileOrUrl : fileOrUrl.url;
+    editor.chain().focus().setImage({ src: imageUrl }).run();
+  };
+
   const addImage = () => {
-    const url = window.prompt('URL hình ảnh:');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
+    setImagePickerOpen(true);
   };
 
   const addLink = () => {
@@ -111,10 +120,11 @@ export function RichTextEditor({
   };
 
   return (
-    <div className={cn('border rounded-md overflow-hidden bg-background', className)}>
-      {/* Toolbar */}
-      {editable && (
-        <div className="border-b bg-muted/20 p-2 flex flex-wrap items-center gap-1">
+    <>
+      <div className={cn('border rounded-md overflow-hidden bg-background', className)}>
+        {/* Toolbar */}
+        {editable && (
+          <div className="border-b bg-muted/20 p-2 flex flex-wrap items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
@@ -243,9 +253,19 @@ export function RichTextEditor({
         </div>
       )}
 
-      {/* Editor Content */}
-      <EditorContent editor={editor} />
-    </div>
+        {/* Editor Content */}
+        <EditorContent editor={editor} />
+      </div>
+
+      {/* Image Picker Dialog */}
+      <FilePicker
+        open={imagePickerOpen}
+        onOpenChange={setImagePickerOpen}
+        onSelect={handleImageSelect}
+        fileTypes={[FileType.IMAGE]}
+        allowUrl={true}
+      />
+    </>
   );
 }
 
