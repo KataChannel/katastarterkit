@@ -72,6 +72,9 @@ export class BlogService {
   }
 
   async updateBlog(id: string, input: any) {
+    if (!id || id.trim() === '') {
+      throw new BadRequestException('Blog post ID is required and cannot be empty');
+    }
     const blog = await this.prisma.blogPost.findUnique({ where: { id } });
     if (!blog) throw new NotFoundException(`Blog post with id ${id} not found`);
     if (input.slug && input.slug !== blog.slug) {

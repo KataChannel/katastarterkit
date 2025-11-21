@@ -88,7 +88,22 @@ let BlogResolver = class BlogResolver {
         return this.blogService.createBlog(input, userId);
     }
     async updateBlog(input) {
+        console.log('=== UpdateBlog Resolver Debug ===');
+        console.log('Full input object:', JSON.stringify(input, null, 2));
+        console.log('Input keys:', Object.keys(input));
+        console.log('id value:', input.id);
+        console.log('id type:', typeof input.id);
+        console.log('================================');
         const { id, ...updateData } = input;
+        if (!id || id.trim() === '') {
+            console.error('ID validation failed:', {
+                id,
+                isEmpty: !id,
+                isTrimEmpty: id?.trim() === '',
+                inputReceived: input
+            });
+            throw new Error('Blog post ID is required and cannot be empty');
+        }
         return this.blogService.updateBlog(id, updateData);
     }
     async deleteBlog(id) {
@@ -209,6 +224,12 @@ __decorate([
 __decorate([
     (0, graphql_1.Mutation)(() => blog_type_1.BlogType, { name: 'updateBlog' }),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UsePipes)(new common_1.ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: false,
+        skipMissingProperties: false
+    })),
     __param(0, (0, graphql_1.Args)('input')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [blog_input_1.UpdateBlogInput]),
@@ -273,6 +294,11 @@ __decorate([
 ], BlogResolver.prototype, "deleteTag", null);
 exports.BlogResolver = BlogResolver = __decorate([
     (0, graphql_1.Resolver)(() => blog_type_1.BlogType),
+    (0, common_1.UsePipes)(new common_1.ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: false
+    })),
     __metadata("design:paramtypes", [blog_service_1.BlogService])
 ], BlogResolver);
 //# sourceMappingURL=blog.resolver.js.map

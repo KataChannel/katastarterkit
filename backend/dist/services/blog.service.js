@@ -84,6 +84,9 @@ let BlogService = class BlogService {
         return this.prisma.blogPost.create({ data, include: { category: true, author: { select: { id: true, username: true, firstName: true, lastName: true, email: true } }, tags: { include: { tag: true } } } });
     }
     async updateBlog(id, input) {
+        if (!id || id.trim() === '') {
+            throw new common_1.BadRequestException('Blog post ID is required and cannot be empty');
+        }
         const blog = await this.prisma.blogPost.findUnique({ where: { id } });
         if (!blog)
             throw new common_1.NotFoundException(`Blog post with id ${id} not found`);

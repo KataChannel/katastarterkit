@@ -590,29 +590,30 @@ export function RichTextEditor({
                 title="Trích dẫn"
               >
                 <Quote className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-              className={cn('h-8 w-8 p-0', editor.isActive('codeBlock') && 'bg-muted')}
-              title="Code block"
-            >
-              <Code2 className="h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().setHorizontalRule().run()}
-              className="h-8 w-8 p-0"
-              title="Đường kẻ ngang"
-            >
-              <Minus className="h-4 w-4" />
-            </Button>
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+                className={cn('h-7 w-7 p-0', editor.isActive('codeBlock') && 'bg-background')}
+                title="Code block"
+              >
+                <Code2 className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().setHorizontalRule().run()}
+                className="h-7 w-7 p-0"
+                title="Đường kẻ ngang"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
 
-            <div className="w-px h-6 bg-border mx-1" />
+            <div className="w-px h-6 bg-border" />
 
             <Button
               type="button"

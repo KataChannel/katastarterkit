@@ -387,12 +387,21 @@ let RbacService = class RbacService {
             effect: ra.effect
         })), null, 2));
         const roleAssignments = allRoleAssignments.map(assignment => ({
-            ...assignment,
+            id: assignment.id,
+            effect: assignment.effect || 'allow',
+            conditions: assignment.conditions,
+            metadata: assignment.metadata,
             role: {
                 ...assignment.role,
                 permissions: assignment.role.permissions
-                    .map(rp => rp.permission)
-                    .filter(p => p !== null && p.name !== null)
+                    .filter(rp => rp.permission !== null && rp.permission.name !== null)
+                    .map(rp => ({
+                    id: rp.id,
+                    effect: rp.effect || 'allow',
+                    permission: rp.permission,
+                    conditions: rp.conditions,
+                    metadata: rp.grantedBy ? { grantedBy: rp.grantedBy } : null
+                }))
             }
         }));
         const allowedRoleAssignments = allRoleAssignments.filter(a => a.effect === 'allow');
@@ -427,7 +436,14 @@ let RbacService = class RbacService {
         ];
         const uniquePermissions = allPermissions.filter((permission, index, self) => permission && permission.name !== null && index === self.findIndex((p) => p && p.id === permission.id));
         const validDirectPermissions = allDirectPermissions
-            .filter(up => up.permission && up.permission.name !== null);
+            .filter(up => up.permission && up.permission.name !== null)
+            .map(up => ({
+            id: up.id,
+            effect: up.effect || 'allow',
+            permission: up.permission,
+            conditions: up.conditions,
+            metadata: up.metadata || null
+        }));
         return {
             userId,
             roleAssignments,

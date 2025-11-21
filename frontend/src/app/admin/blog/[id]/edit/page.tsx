@@ -49,7 +49,7 @@ export default function EditBlogPage() {
   const blogId = params?.id as string;
 
   const [formData, setFormData] = useState({
-    id: '',
+    id: blogId || '',
     title: '',
     slug: '',
     excerpt: '',
@@ -71,7 +71,7 @@ export default function EditBlogPage() {
   useEffect(() => {
     if (data?.blog) {
       setFormData({
-        id: data.blog.id,
+        id: data.blog.id || blogId,
         title: data.blog.title || '',
         slug: data.blog.slug || '',
         excerpt: data.blog.excerpt || '',
@@ -84,7 +84,7 @@ export default function EditBlogPage() {
         metaDescription: data.blog.metaDescription || '',
       });
     }
-  }, [data]);
+  }, [data, blogId]);
 
   // Handle error
   useEffect(() => {
@@ -110,20 +110,34 @@ export default function EditBlogPage() {
       return;
     }
 
+    // Ensure we have a valid ID
+    const blogIdToUpdate = formData.id || blogId;
+    if (!blogIdToUpdate) {
+      console.error('Missing blog ID:', { formDataId: formData.id, blogId, params });
+      toast.error('Không tìm thấy ID bài viết');
+      return;
+    }
+
+    console.log('Updating blog with ID:', blogIdToUpdate);
+
+    const inputVariables = {
+      id: blogIdToUpdate,
+      title: formData.title,
+      slug: formData.slug,
+      excerpt: formData.excerpt || undefined,
+      content: formData.content,
+      categoryId: formData.categoryId || undefined,
+      thumbnailUrl: formData.featuredImage || undefined,
+      isFeatured: formData.isFeatured,
+      metaTitle: formData.metaTitle || undefined,
+      metaDescription: formData.metaDescription || undefined,
+    };
+
+    console.log('GraphQL variables being sent:', JSON.stringify({ input: inputVariables }, null, 2));
+
     await updateBlog({ 
       variables: { 
-        input: {
-          id: formData.id,
-          title: formData.title,
-          slug: formData.slug,
-          excerpt: formData.excerpt || undefined,
-          content: formData.content,
-          categoryId: formData.categoryId || undefined,
-          thumbnailUrl: formData.featuredImage || undefined,
-          isFeatured: formData.isFeatured,
-          metaTitle: formData.metaTitle || undefined,
-          metaDescription: formData.metaDescription || undefined,
-        }
+        input: inputVariables
       } 
     });
   };

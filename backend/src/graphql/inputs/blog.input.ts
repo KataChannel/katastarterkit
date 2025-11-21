@@ -55,54 +55,85 @@ export class CreateBlogInput {
 @InputType()
 export class UpdateBlogInput {
   @Field(() => ID)
+  @IsString()
+  @IsNotEmpty({ message: 'Blog post ID is required' })
   id: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   title?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   slug?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   content?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   shortDescription?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   excerpt?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   author?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   thumbnailUrl?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   bannerUrl?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   categoryId?: string;
 
   @Field(() => [String], { nullable: true })
+  @IsOptional()
   tagIds?: string[];
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
   isFeatured?: boolean;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
   isPublished?: boolean;
 
   @Field({ nullable: true })
+  @IsOptional()
   publishedAt?: Date;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   metaTitle?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   metaDescription?: string;
 
   @Field(() => [String], { nullable: true })
+  @IsOptional()
   metaKeywords?: string[];
 }
 

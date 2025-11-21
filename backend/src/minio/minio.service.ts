@@ -172,7 +172,11 @@ export class MinioService implements OnModuleInit {
     const endpoint = this.configService.get('MINIO_ENDPOINT', 'localhost');
     const port = this.configService.get('MINIO_PORT', '9000');
     const useSSL = this.configService.get('MINIO_USE_SSL', 'false') === 'true';
-    const protocol = useSSL ? 'https' : 'http';
+    
+    // In production, always use HTTPS for public URLs to avoid mixed content issues
+    const isProduction = this.configService.get('NODE_ENV') === 'production';
+    const forceHttps = this.configService.get('MINIO_FORCE_HTTPS', 'false') === 'true';
+    const protocol = (useSSL || isProduction || forceHttps) ? 'https' : 'http';
     
     return `${protocol}://${endpoint}:${port}/${bucket}/${fileName}`;
   }

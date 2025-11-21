@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, ID, Int, Context, ResolveField, Parent } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { BlogService } from '../../services/blog.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import {
@@ -19,6 +19,11 @@ import {
 } from '../inputs/blog.input';
 
 @Resolver(() => BlogType)
+@UsePipes(new ValidationPipe({ 
+  whitelist: true, 
+  transform: true,
+  forbidNonWhitelisted: false 
+}))
 export class BlogResolver {
   constructor(private blogService: BlogService) {}
 
@@ -145,8 +150,31 @@ export class BlogResolver {
 
   @Mutation(() => BlogType, { name: 'updateBlog' })
   @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe({ 
+    whitelist: true, 
+    transform: true,
+    forbidNonWhitelisted: false,
+    skipMissingProperties: false 
+  }))
   async updateBlog(@Args('input') input: UpdateBlogInput) {
+    // Debug log to see what we receive
+    console.log('=== UpdateBlog Resolver Debug ===');
+    console.log('Full input object:', JSON.stringify(input, null, 2));
+    console.log('Input keys:', Object.keys(input));
+    console.log('id value:', input.id);
+    console.log('id type:', typeof input.id);
+    console.log('================================');
+    
     const { id, ...updateData } = input;
+    if (!id || id.trim() === '') {
+      console.error('ID validation failed:', { 
+        id, 
+        isEmpty: !id, 
+        isTrimEmpty: id?.trim() === '',
+        inputReceived: input 
+      });
+      throw new Error('Blog post ID is required and cannot be empty');
+    }
     return this.blogService.updateBlog(id, updateData);
   }
 

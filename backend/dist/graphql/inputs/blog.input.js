@@ -87,70 +87,101 @@ let UpdateBlogInput = class UpdateBlogInput {
 exports.UpdateBlogInput = UpdateBlogInput;
 __decorate([
     (0, graphql_1.Field)(() => graphql_1.ID),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Blog post ID is required' }),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "id", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "title", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "slug", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "content", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "shortDescription", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "excerpt", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "author", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "thumbnailUrl", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "bannerUrl", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "categoryId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateBlogInput.prototype, "tagIds", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateBlogInput.prototype, "isFeatured", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateBlogInput.prototype, "isPublished", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Date)
 ], UpdateBlogInput.prototype, "publishedAt", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "metaTitle", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "metaDescription", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateBlogInput.prototype, "metaKeywords", void 0);
 exports.UpdateBlogInput = UpdateBlogInput = __decorate([

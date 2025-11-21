@@ -42,10 +42,15 @@ export class MinioService implements OnModuleInit {
     this.bucketName = this.configService.get<string>('MINIO_BUCKET_NAME', 'uploads');
 
     // Public URL for file access
-    const protocol = this.useSSL ? 'https' : 'http';
+    // In production, always use HTTPS for public URLs to avoid mixed content issues
+    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+    const forceHttps = this.configService.get<string>('MINIO_FORCE_HTTPS', 'false') === 'true';
+    const protocol = (this.useSSL || isProduction || forceHttps) ? 'https' : 'http';
     const publicEndpoint = this.configService.get<string>('MINIO_PUBLIC_ENDPOINT', this.endpoint);
     const publicPort = this.configService.get<string>('MINIO_PUBLIC_PORT', String(this.port));
     this.publicUrl = `${protocol}://${publicEndpoint}:${publicPort}`;
+    
+    this.logger.log(`MinIO Public URL protocol: ${protocol} (production: ${isProduction}, forceHttps: ${forceHttps})`);
 
     this.minioClient = new Minio.Client({
       endPoint: this.endpoint,
