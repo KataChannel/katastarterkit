@@ -468,14 +468,23 @@ export class RbacService {
     })), null, 2));
 
     // Transform role assignments to match GraphQL schema expectations
-    // Filter out null permissions and permissions with null name
+    // Keep RolePermission structure with id, effect, and permission
     const roleAssignments = allRoleAssignments.map(assignment => ({
-      ...assignment,
+      id: assignment.id,
+      effect: assignment.effect || 'allow', // Default to 'allow' if null
+      conditions: assignment.conditions,
+      metadata: assignment.metadata,
       role: {
         ...assignment.role,
         permissions: assignment.role.permissions
-          .map(rp => rp.permission)
-          .filter(p => p !== null && p.name !== null)
+          .filter(rp => rp.permission !== null && rp.permission.name !== null)
+          .map(rp => ({
+            id: rp.id,
+            effect: rp.effect || 'allow', // Default to 'allow' if null
+            permission: rp.permission,
+            conditions: rp.conditions,
+            metadata: rp.grantedBy ? { grantedBy: rp.grantedBy } : null
+          }))
       }
     }));
 
@@ -528,8 +537,16 @@ export class RbacService {
     );
 
     // Filter out direct permissions with null permission or null name
+    // Format to match GraphQL UserPermission structure
     const validDirectPermissions = allDirectPermissions
-      .filter(up => up.permission && up.permission.name !== null);
+      .filter(up => up.permission && up.permission.name !== null)
+      .map(up => ({
+        id: up.id,
+        effect: up.effect || 'allow', // Default to 'allow' if null
+        permission: up.permission,
+        conditions: up.conditions,
+        metadata: up.metadata || null
+      }));
 
     return {
       userId,

@@ -290,13 +290,17 @@ export const GET_USER_ROLE_PERMISSIONS = gql`
           displayName
           permissions {
             id
-            name
-            displayName
-            resource
-            action
-            scope
-            description
-            isActive
+            effect
+            permission {
+              id
+              name
+              displayName
+              resource
+              action
+              scope
+              description
+              isActive
+            }
           }
         }
       }
