@@ -19,21 +19,24 @@ export class MinioService implements OnModuleInit {
       try {
         // Use Docker-specific endpoints if available
         const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
+        
+        // IMPORTANT: Use internal endpoint for direct MinIO connection
         const endpoint = isDockerEnv 
           ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
-          : this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
+          : this.configService.get('MINIO_INTERNAL_ENDPOINT') || this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
         
         // Always use configured port from .env
         const portConfig = isDockerEnv
           ? this.configService.get('DOCKER_MINIO_PORT', '9000')
-          : this.configService.get('MINIO_PORT', '12007');
+          : this.configService.get('MINIO_INTERNAL_PORT') || this.configService.get('MINIO_PORT', '12007');
         const port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
         
-        const useSSL = this.configService.get('MINIO_USE_SSL') === 'true';
+        // Use internal SSL setting (usually false for internal connections)
+        const useSSL = this.configService.get('MINIO_INTERNAL_SSL', 'false') === 'true';
         const accessKey = this.configService.get('MINIO_ACCESS_KEY', 'minioadmin');
         const secretKey = this.configService.get('MINIO_SECRET_KEY', 'minioadmin');
 
-        this.logger.log(`[Minio] Connection attempt ${attempt}/${retries}: endpoint=${endpoint}, port=${port}, dockerEnv=${isDockerEnv}`);
+        this.logger.log(`[Minio] Connection attempt ${attempt}/${retries}: endpoint=${endpoint}, port=${port}, SSL=${useSSL}, dockerEnv=${isDockerEnv}`);
 
         this.minioClient = new Minio.Client({
           endPoint: endpoint,
@@ -169,18 +172,33 @@ export class MinioService implements OnModuleInit {
   }
 
   getPublicUrl(bucket: string, fileName: string): string {
-    const endpoint = this.configService.get('MINIO_ENDPOINT', 'localhost');
-    const port = this.configService.get('MINIO_PORT', '9000');
-    const useSSL = this.configService.get('MINIO_USE_SSL', 'false') === 'true';
+    // ALWAYS use public endpoint for URLs returned to the frontend
+    // Priority: MINIO_PUBLIC_ENDPOINT > MINIO_ENDPOINT > fallback to localhost
+    const publicEndpoint = this.configService.get('MINIO_PUBLIC_ENDPOINT') || 
+                          this.configService.get('MINIO_ENDPOINT', 'localhost');
     
-    // In production, always use HTTPS for public URLs to avoid mixed content issues
+    // Get public port, with proper fallback chain
+    const publicPortStr = this.configService.get('MINIO_PUBLIC_PORT') || 
+                          this.configService.get('MINIO_PORT', '9000');
+    const publicPort = typeof publicPortStr === 'string' ? publicPortStr : String(publicPortStr);
+    
+    // Determine SSL based on explicit configuration
+    const publicSSL = this.configService.get('MINIO_PUBLIC_SSL') === 'true' || 
+                      this.configService.get('MINIO_USE_SSL', 'false') === 'true';
+    
+    // In production or when FORCE_HTTPS is set, always use HTTPS for public URLs
     const isProduction = this.configService.get('NODE_ENV') === 'production';
     const forceHttps = this.configService.get('MINIO_FORCE_HTTPS', 'false') === 'true';
-    const protocol = (useSSL || isProduction || forceHttps) ? 'https' : 'http';
+    const protocol = (publicSSL || isProduction || forceHttps) ? 'https' : 'http';
     
     // Don't include port in URL if using default ports (80 for HTTP, 443 for HTTPS)
-    const isDefaultPort = (protocol === 'https' && port === '443') || (protocol === 'http' && port === '80');
-    const urlBase = isDefaultPort ? `${protocol}://${endpoint}` : `${protocol}://${endpoint}:${port}`;
+    const isDefaultPort = (protocol === 'https' && publicPort === '443') || 
+                          (protocol === 'http' && publicPort === '80');
+    const urlBase = isDefaultPort 
+      ? `${protocol}://${publicEndpoint}` 
+      : `${protocol}://${publicEndpoint}:${publicPort}`;
+    
+    this.logger.debug(`[getPublicUrl] Generated URL: ${urlBase}/${bucket}/${fileName} (protocol=${protocol}, endpoint=${publicEndpoint}, port=${publicPort}, isDefault=${isDefaultPort})`);
     
     return `${urlBase}/${bucket}/${fileName}`;
   }

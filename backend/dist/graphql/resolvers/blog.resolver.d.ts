@@ -4,8 +4,10 @@ export declare class BlogResolver {
     private blogService;
     constructor(blogService: BlogService);
     isPublished(blog: any): boolean;
+    thumbnailUrl(blog: any): string | null;
+    bannerUrl(blog: any): string | null;
     metaKeywords(blog: any): string[] | null;
-    getBlogs(page?: number, limit?: number, search?: string, categoryId?: string, sort?: string): Promise<{
+    getBlogs(page?: number, limit?: number, search?: string, categoryId?: string, sort?: string, statusFilter?: string): Promise<{
         items: {
             tags: {
                 id: string;
@@ -57,10 +59,10 @@ export declare class BlogResolver {
             metaKeywords: string[];
             viewCount: number;
             visibility: import("@prisma/client").$Enums.PostVisibility;
-            canonicalUrl: string | null;
             isPinned: boolean;
-            readingTime: number | null;
+            canonicalUrl: string | null;
             commentsEnabled: boolean;
+            readingTime: number | null;
             scheduledAt: Date | null;
         }[];
         total: number;
@@ -120,10 +122,10 @@ export declare class BlogResolver {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     }>;
     getBlogBySlug(slug: string): Promise<{
@@ -177,10 +179,10 @@ export declare class BlogResolver {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     }>;
     getFeaturedBlogs(limit?: number): Promise<({
@@ -227,10 +229,10 @@ export declare class BlogResolver {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     })[]>;
     getBlogsByCategory(categoryId: string, page?: number, limit?: number): Promise<{
@@ -285,10 +287,10 @@ export declare class BlogResolver {
             metaKeywords: string[];
             viewCount: number;
             visibility: import("@prisma/client").$Enums.PostVisibility;
-            canonicalUrl: string | null;
             isPinned: boolean;
-            readingTime: number | null;
+            canonicalUrl: string | null;
             commentsEnabled: boolean;
+            readingTime: number | null;
             scheduledAt: Date | null;
         }[];
         total: number;
@@ -354,10 +356,10 @@ export declare class BlogResolver {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     })[]>;
     getCategories(): Promise<{
@@ -465,10 +467,10 @@ export declare class BlogResolver {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     }>;
     updateBlog(input: UpdateBlogInput): Promise<{
@@ -528,10 +530,10 @@ export declare class BlogResolver {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     }>;
     deleteBlog(id: string): Promise<{

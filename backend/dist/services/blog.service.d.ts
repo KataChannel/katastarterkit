@@ -55,10 +55,10 @@ export declare class BlogService {
             metaKeywords: string[];
             viewCount: number;
             visibility: import("@prisma/client").$Enums.PostVisibility;
-            canonicalUrl: string | null;
             isPinned: boolean;
-            readingTime: number | null;
+            canonicalUrl: string | null;
             commentsEnabled: boolean;
+            readingTime: number | null;
             scheduledAt: Date | null;
         }[];
         total: number;
@@ -118,10 +118,10 @@ export declare class BlogService {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     }>;
     getBlogBySlug(slug: string): Promise<{
@@ -175,10 +175,10 @@ export declare class BlogService {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     }>;
     getFeaturedBlogs(limit?: number): Promise<({
@@ -225,10 +225,10 @@ export declare class BlogService {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     })[]>;
     getRecentBlogs(limit?: number): Promise<({
@@ -275,10 +275,10 @@ export declare class BlogService {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     })[]>;
     createBlog(input: any, userId: string): Promise<{
@@ -338,10 +338,10 @@ export declare class BlogService {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     }>;
     updateBlog(id: string, input: any): Promise<{
@@ -401,10 +401,10 @@ export declare class BlogService {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     }>;
     deleteBlog(id: string): Promise<{
@@ -572,10 +572,10 @@ export declare class BlogService {
             metaKeywords: string[];
             viewCount: number;
             visibility: import("@prisma/client").$Enums.PostVisibility;
-            canonicalUrl: string | null;
             isPinned: boolean;
-            readingTime: number | null;
+            canonicalUrl: string | null;
             commentsEnabled: boolean;
+            readingTime: number | null;
             scheduledAt: Date | null;
         }[];
         total: number;
@@ -641,10 +641,10 @@ export declare class BlogService {
         metaKeywords: string[];
         viewCount: number;
         visibility: import("@prisma/client").$Enums.PostVisibility;
-        canonicalUrl: string | null;
         isPinned: boolean;
-        readingTime: number | null;
+        canonicalUrl: string | null;
         commentsEnabled: boolean;
+        readingTime: number | null;
         scheduledAt: Date | null;
     })[]>;
 }

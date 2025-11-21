@@ -36,6 +36,18 @@ export class BlogResolver {
     return blog.status === 'PUBLISHED';
   }
 
+  @ResolveField(() => String, { nullable: true })
+  thumbnailUrl(@Parent() blog: any): string | null {
+    // Map featuredImage to thumbnailUrl for backward compatibility
+    return blog.featuredImage || blog.thumbnailUrl || null;
+  }
+
+  @ResolveField(() => String, { nullable: true })
+  bannerUrl(@Parent() blog: any): string | null {
+    // Use featuredImage as bannerUrl if not set
+    return blog.bannerUrl || blog.featuredImage || null;
+  }
+
   @ResolveField(() => [String], { nullable: true })
   metaKeywords(@Parent() blog: any): string[] | null {
     // Handle metaKeywords transformation from various formats
@@ -80,13 +92,15 @@ export class BlogResolver {
                   @Args('limit', { type: () => Int, nullable: true }) limit?: number,
                   @Args('search', { nullable: true }) search?: string,
                   @Args('categoryId', { type: () => ID, nullable: true }) categoryId?: string,
-                  @Args('sort', { nullable: true }) sort?: string) {
+                  @Args('sort', { nullable: true }) sort?: string,
+                  @Args('statusFilter', { nullable: true }) statusFilter?: string) {
     return this.blogService.getBlogs({
       page,
       limit,
       search,
       categoryId,
       sort,
+      statusFilter,
     });
   }
 

@@ -26,6 +26,12 @@ let BlogResolver = class BlogResolver {
     isPublished(blog) {
         return blog.status === 'PUBLISHED';
     }
+    thumbnailUrl(blog) {
+        return blog.featuredImage || blog.thumbnailUrl || null;
+    }
+    bannerUrl(blog) {
+        return blog.bannerUrl || blog.featuredImage || null;
+    }
     metaKeywords(blog) {
         if (!blog.metaKeywords) {
             return null;
@@ -50,13 +56,14 @@ let BlogResolver = class BlogResolver {
         }
         return null;
     }
-    async getBlogs(page, limit, search, categoryId, sort) {
+    async getBlogs(page, limit, search, categoryId, sort, statusFilter) {
         return this.blogService.getBlogs({
             page,
             limit,
             search,
             categoryId,
             sort,
+            statusFilter,
         });
     }
     async getBlog(id) {
@@ -138,6 +145,20 @@ __decorate([
     __metadata("design:returntype", Boolean)
 ], BlogResolver.prototype, "isPublished", null);
 __decorate([
+    (0, graphql_1.ResolveField)(() => String, { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", String)
+], BlogResolver.prototype, "thumbnailUrl", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => String, { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", String)
+], BlogResolver.prototype, "bannerUrl", null);
+__decorate([
     (0, graphql_1.ResolveField)(() => [String], { nullable: true }),
     __param(0, (0, graphql_1.Parent)()),
     __metadata("design:type", Function),
@@ -151,8 +172,9 @@ __decorate([
     __param(2, (0, graphql_1.Args)('search', { nullable: true })),
     __param(3, (0, graphql_1.Args)('categoryId', { type: () => graphql_1.ID, nullable: true })),
     __param(4, (0, graphql_1.Args)('sort', { nullable: true })),
+    __param(5, (0, graphql_1.Args)('statusFilter', { nullable: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Number, String, String, String]),
+    __metadata("design:paramtypes", [Number, Number, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], BlogResolver.prototype, "getBlogs", null);
 __decorate([

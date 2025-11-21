@@ -11,6 +11,7 @@ export const GET_BLOGS = gql`
     $search: String
     $categoryId: ID
     $sort: String
+    $statusFilter: String
   ) {
     blogs(
       page: $page
@@ -18,6 +19,7 @@ export const GET_BLOGS = gql`
       search: $search
       categoryId: $categoryId
       sort: $sort
+      statusFilter: $statusFilter
     ) {
       items {
         id
@@ -32,7 +34,9 @@ export const GET_BLOGS = gql`
           lastName
           email
         }
+        featuredImage
         thumbnailUrl
+        status
         viewCount
         publishedAt
         createdAt

@@ -121,13 +121,27 @@ export class BlogType {
   @Field(() => BlogAuthorType)
   author: BlogAuthorType;
 
+  // Image fields - mapped from featuredImage in database
+  @Field({ nullable: true })
+  featuredImage?: string;
+
   @Field({ nullable: true })
   thumbnailUrl?: string;
 
   @Field({ nullable: true })
   bannerUrl?: string;
 
-  @Field(() => Int)
+  @Field(() => [String], { nullable: true })
+  images?: string[];
+
+  // Status fields
+  @Field({ defaultValue: 'DRAFT' })
+  status: string;
+
+  @Field({ defaultValue: 'PUBLIC' })
+  visibility: string;
+
+  @Field(() => Int, { defaultValue: 0 })
   viewCount: number;
 
   @Field({ nullable: true })
@@ -142,8 +156,11 @@ export class BlogType {
   @Field(() => [BlogTagType], { nullable: true })
   tags?: BlogTagType[];
 
-  @Field()
+  @Field({ defaultValue: false })
   isFeatured: boolean;
+
+  @Field({ defaultValue: false })
+  isPinned: boolean;
 
   @Field({ defaultValue: false })
   isPublished: boolean;
@@ -156,6 +173,15 @@ export class BlogType {
 
   @Field(() => [String], { nullable: true })
   metaKeywords?: string[];
+
+  @Field({ nullable: true })
+  canonicalUrl?: string;
+
+  @Field({ defaultValue: true })
+  commentsEnabled: boolean;
+
+  @Field(() => Int, { nullable: true })
+  readingTime?: number;
 
   @Field()
   createdAt: Date;

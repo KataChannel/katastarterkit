@@ -56,19 +56,30 @@ let MinioService = MinioService_1 = class MinioService {
         this.configService = configService;
         this.logger = new common_1.Logger(MinioService_1.name);
         const isDocker = process.env.DOCKER_NETWORK_NAME !== undefined;
-        this.endpoint = isDocker
+        const internalEndpoint = isDocker
             ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
-            : this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
-        const portConfig = isDocker
+            : this.configService.get('MINIO_INTERNAL_ENDPOINT') || this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
+        const internalPort = isDocker
             ? this.configService.get('DOCKER_MINIO_PORT', '9000')
-            : this.configService.get('MINIO_PORT', '12007');
-        this.port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
-        this.useSSL = this.configService.get('MINIO_USE_SSL', 'false') === 'true';
+            : this.configService.get('MINIO_INTERNAL_PORT') || this.configService.get('MINIO_PORT', '12007');
+        const internalSSL = this.configService.get('MINIO_INTERNAL_SSL', 'false') === 'true';
+        this.endpoint = internalEndpoint;
+        this.port = typeof internalPort === 'string' ? parseInt(internalPort, 10) : internalPort;
+        this.useSSL = internalSSL;
         this.bucketName = this.configService.get('MINIO_BUCKET_NAME', 'uploads');
-        const protocol = this.useSSL ? 'https' : 'http';
+        const isProduction = this.configService.get('NODE_ENV') === 'production';
+        const forceHttps = this.configService.get('MINIO_FORCE_HTTPS', 'false') === 'true';
         const publicEndpoint = this.configService.get('MINIO_PUBLIC_ENDPOINT', this.endpoint);
         const publicPort = this.configService.get('MINIO_PUBLIC_PORT', String(this.port));
-        this.publicUrl = `${protocol}://${publicEndpoint}:${publicPort}`;
+        const publicSSL = this.configService.get('MINIO_PUBLIC_SSL') === 'true' ||
+            this.configService.get('MINIO_USE_SSL', 'false') === 'true';
+        const protocol = (publicSSL || isProduction || forceHttps) ? 'https' : 'http';
+        const isDefaultPort = (protocol === 'https' && publicPort === '443') || (protocol === 'http' && publicPort === '80');
+        this.publicUrl = isDefaultPort
+            ? `${protocol}://${publicEndpoint}`
+            : `${protocol}://${publicEndpoint}:${publicPort}`;
+        this.logger.log(`MinIO Internal Connection: ${this.endpoint}:${this.port} (SSL: ${this.useSSL})`);
+        this.logger.log(`MinIO Public URL: ${this.publicUrl}`);
         this.minioClient = new Minio.Client({
             endPoint: this.endpoint,
             port: this.port,
@@ -76,7 +87,6 @@ let MinioService = MinioService_1 = class MinioService {
             accessKey: this.configService.get('MINIO_ACCESS_KEY', 'minioadmin'),
             secretKey: this.configService.get('MINIO_SECRET_KEY', 'minioadmin'),
         });
-        this.logger.log(`MinIO configured: ${this.endpoint}:${this.port} (SSL: ${this.useSSL})`);
     }
     async onModuleInit() {
         await this.ensureBucketExists();

@@ -12,73 +12,126 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateBlogTagInput = exports.CreateBlogTagInput = exports.UpdateBlogCategoryInput = exports.CreateBlogCategoryInput = exports.GetBlogsInput = exports.UpdateBlogInput = exports.CreateBlogInput = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 let CreateBlogInput = class CreateBlogInput {
 };
 exports.CreateBlogInput = CreateBlogInput;
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Title is required' }),
     __metadata("design:type", String)
 ], CreateBlogInput.prototype, "title", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Slug is required' }),
     __metadata("design:type", String)
 ], CreateBlogInput.prototype, "slug", void 0);
 __decorate([
     (0, graphql_1.Field)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Content is required' }),
     __metadata("design:type", String)
 ], CreateBlogInput.prototype, "content", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
-    __metadata("design:type", String)
-], CreateBlogInput.prototype, "shortDescription", void 0);
-__decorate([
-    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateBlogInput.prototype, "excerpt", void 0);
 __decorate([
-    (0, graphql_1.Field)(),
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateBlogInput.prototype, "author", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateBlogInput.prototype, "thumbnailUrl", void 0);
+], CreateBlogInput.prototype, "featuredImage", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [String], { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateBlogInput.prototype, "images", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
-    __metadata("design:type", String)
-], CreateBlogInput.prototype, "bannerUrl", void 0);
-__decorate([
-    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateBlogInput.prototype, "categoryId", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], CreateBlogInput.prototype, "tagIds", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true, defaultValue: client_1.PostStatus.DRAFT }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.PostStatus),
+    __metadata("design:type", String)
+], CreateBlogInput.prototype, "status", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true, defaultValue: client_1.PostVisibility.PUBLIC }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.PostVisibility),
+    __metadata("design:type", String)
+], CreateBlogInput.prototype, "visibility", void 0);
+__decorate([
     (0, graphql_1.Field)({ nullable: true, defaultValue: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreateBlogInput.prototype, "isFeatured", void 0);
 __decorate([
-    (0, graphql_1.Field)({ nullable: true, defaultValue: true }),
+    (0, graphql_1.Field)({ nullable: true, defaultValue: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
-], CreateBlogInput.prototype, "isPublished", void 0);
+], CreateBlogInput.prototype, "isPinned", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Date)
 ], CreateBlogInput.prototype, "publishedAt", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateBlogInput.prototype, "metaTitle", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateBlogInput.prototype, "metaDescription", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], CreateBlogInput.prototype, "metaKeywords", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateBlogInput.prototype, "canonicalUrl", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true, defaultValue: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateBlogInput.prototype, "commentsEnabled", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], CreateBlogInput.prototype, "readingTime", void 0);
 exports.CreateBlogInput = CreateBlogInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateBlogInput);
@@ -114,12 +167,6 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UpdateBlogInput.prototype, "shortDescription", void 0);
-__decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
 ], UpdateBlogInput.prototype, "excerpt", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
@@ -132,13 +179,12 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UpdateBlogInput.prototype, "thumbnailUrl", void 0);
+], UpdateBlogInput.prototype, "featuredImage", void 0);
 __decorate([
-    (0, graphql_1.Field)({ nullable: true }),
+    (0, graphql_1.Field)(() => [String], { nullable: true }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UpdateBlogInput.prototype, "bannerUrl", void 0);
+    __metadata("design:type", Array)
+], UpdateBlogInput.prototype, "images", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
@@ -151,6 +197,18 @@ __decorate([
     __metadata("design:type", Array)
 ], UpdateBlogInput.prototype, "tagIds", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.PostStatus),
+    __metadata("design:type", String)
+], UpdateBlogInput.prototype, "status", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => String, { nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.PostVisibility),
+    __metadata("design:type", String)
+], UpdateBlogInput.prototype, "visibility", void 0);
+__decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
@@ -161,7 +219,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
-], UpdateBlogInput.prototype, "isPublished", void 0);
+], UpdateBlogInput.prototype, "isPinned", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     (0, class_validator_1.IsOptional)(),
@@ -184,6 +242,24 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], UpdateBlogInput.prototype, "metaKeywords", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateBlogInput.prototype, "canonicalUrl", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateBlogInput.prototype, "commentsEnabled", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], UpdateBlogInput.prototype, "readingTime", void 0);
 exports.UpdateBlogInput = UpdateBlogInput = __decorate([
     (0, graphql_1.InputType)()
 ], UpdateBlogInput);

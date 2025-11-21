@@ -28,26 +28,39 @@ export class MinioService implements OnModuleInit {
     // Determine if running in Docker
     const isDocker = process.env.DOCKER_NETWORK_NAME !== undefined;
     
-    this.endpoint = isDocker 
+    // IMPORTANT: Separate internal connection from public URL
+    // Internal connection: Direct to MinIO server (may use IP:port)
+    // Public URL: For file access (may use domain with proxy)
+    
+    // Internal connection settings
+    const internalEndpoint = isDocker 
       ? this.configService.get<string>('DOCKER_MINIO_ENDPOINT', 'minio')
-      : this.configService.get<string>('MINIO_ENDPOINT', '116.118.49.243');
+      : this.configService.get<string>('MINIO_INTERNAL_ENDPOINT') || this.configService.get<string>('MINIO_ENDPOINT', '116.118.49.243');
     
-    // Always use configured port from .env
-    const portConfig = isDocker
+    const internalPort = isDocker
       ? this.configService.get<string>('DOCKER_MINIO_PORT', '9000')
-      : this.configService.get<string>('MINIO_PORT', '12007');
-    this.port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
+      : this.configService.get<string>('MINIO_INTERNAL_PORT') || this.configService.get<string>('MINIO_PORT', '12007');
     
-    this.useSSL = this.configService.get<string>('MINIO_USE_SSL', 'false') === 'true';
+    const internalSSL = this.configService.get<string>('MINIO_INTERNAL_SSL', 'false') === 'true';
+    
+    this.endpoint = internalEndpoint;
+    this.port = typeof internalPort === 'string' ? parseInt(internalPort, 10) : internalPort;
+    this.useSSL = internalSSL;
     this.bucketName = this.configService.get<string>('MINIO_BUCKET_NAME', 'uploads');
 
-    // Public URL for file access
-    // In production, always use HTTPS for public URLs to avoid mixed content issues
+    // Public URL for file access (used in browser, may be proxied through Nginx/Caddy)
+    // This is separate from internal connection
     const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
     const forceHttps = this.configService.get<string>('MINIO_FORCE_HTTPS', 'false') === 'true';
-    const protocol = (this.useSSL || isProduction || forceHttps) ? 'https' : 'http';
+    
+    // Public endpoint and port (for external access via proxy/domain)
     const publicEndpoint = this.configService.get<string>('MINIO_PUBLIC_ENDPOINT', this.endpoint);
     const publicPort = this.configService.get<string>('MINIO_PUBLIC_PORT', String(this.port));
+    const publicSSL = this.configService.get<string>('MINIO_PUBLIC_SSL') === 'true' || 
+                      this.configService.get<string>('MINIO_USE_SSL', 'false') === 'true';
+    
+    // Determine protocol for public URL
+    const protocol = (publicSSL || isProduction || forceHttps) ? 'https' : 'http';
     
     // Don't include port in URL if using default ports (80 for HTTP, 443 for HTTPS)
     const isDefaultPort = (protocol === 'https' && publicPort === '443') || (protocol === 'http' && publicPort === '80');
@@ -55,7 +68,8 @@ export class MinioService implements OnModuleInit {
       ? `${protocol}://${publicEndpoint}` 
       : `${protocol}://${publicEndpoint}:${publicPort}`;
     
-    this.logger.log(`MinIO Public URL: ${this.publicUrl} (protocol: ${protocol}, production: ${isProduction}, forceHttps: ${forceHttps})`);
+    this.logger.log(`MinIO Internal Connection: ${this.endpoint}:${this.port} (SSL: ${this.useSSL})`);
+    this.logger.log(`MinIO Public URL: ${this.publicUrl}`);
 
     this.minioClient = new Minio.Client({
       endPoint: this.endpoint,
@@ -64,8 +78,6 @@ export class MinioService implements OnModuleInit {
       accessKey: this.configService.get<string>('MINIO_ACCESS_KEY', 'minioadmin'),
       secretKey: this.configService.get<string>('MINIO_SECRET_KEY', 'minioadmin'),
     });
-
-    this.logger.log(`MinIO configured: ${this.endpoint}:${this.port} (SSL: ${this.useSSL})`);
   }
 
   async onModuleInit() {

@@ -538,24 +538,32 @@ type BlogTagType {
 type BlogType {
   author: BlogAuthorType!
   bannerUrl: String
+  canonicalUrl: String
   category: BlogCategoryType
+  commentsEnabled: Boolean!
   content: String!
   createdAt: DateTime!
   excerpt: String
+  featuredImage: String
   id: ID!
+  images: [String!]
   isFeatured: Boolean!
+  isPinned: Boolean!
   isPublished: Boolean!
   metaDescription: String
   metaKeywords: [String!]
   metaTitle: String
   publishedAt: DateTime
+  readingTime: Int
   shortDescription: String
   slug: String!
+  status: String!
   tags: [BlogTagType!]
   thumbnailUrl: String
   title: String!
   updatedAt: DateTime!
   viewCount: Int!
+  visibility: String!
 }
 
 input BulkDeleteFilesInput {
@@ -1082,22 +1090,26 @@ input CreateBlogCategoryInput {
 }
 
 input CreateBlogInput {
-  author: String!
-  bannerUrl: String
+  author: String
+  canonicalUrl: String
   categoryId: String
+  commentsEnabled: Boolean = true
   content: String!
   excerpt: String
+  featuredImage: String
+  images: [String!]
   isFeatured: Boolean = false
-  isPublished: Boolean = true
+  isPinned: Boolean = false
   metaDescription: String
   metaKeywords: [String!]
   metaTitle: String
   publishedAt: DateTime
-  shortDescription: String
+  readingTime: Float
   slug: String!
+  status: String = "DRAFT"
   tagIds: [String!]
-  thumbnailUrl: String
   title: String!
+  visibility: String = "PUBLIC"
 }
 
 input CreateBlogTagInput {
@@ -3847,7 +3859,7 @@ type Query {
   blogCategories: [BlogCategoryType!]!
   blogCategory(id: ID!): BlogCategoryType!
   blogTags: [BlogTagType!]!
-  blogs(categoryId: ID, limit: Int, page: Int, search: String, sort: String): PaginatedBlogs!
+  blogs(categoryId: ID, limit: Int, page: Int, search: String, sort: String, statusFilter: String): PaginatedBlogs!
   blogsByCategory(categoryId: ID!, limit: Int, page: Int): PaginatedBlogs!
 
   """Get month view for calendar"""
@@ -5288,22 +5300,26 @@ input UpdateBlogCategoryInput {
 
 input UpdateBlogInput {
   author: String
-  bannerUrl: String
+  canonicalUrl: String
   categoryId: String
+  commentsEnabled: Boolean
   content: String
   excerpt: String
+  featuredImage: String
   id: ID!
+  images: [String!]
   isFeatured: Boolean
-  isPublished: Boolean
+  isPinned: Boolean
   metaDescription: String
   metaKeywords: [String!]
   metaTitle: String
   publishedAt: DateTime
-  shortDescription: String
+  readingTime: Float
   slug: String
+  status: String
   tagIds: [String!]
-  thumbnailUrl: String
   title: String
+  visibility: String
 }
 
 input UpdateBlogTagInput {

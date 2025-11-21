@@ -430,6 +430,7 @@ export function AdvancedTable<T extends RowData>({
             const baseWidth = columnWidths[String(column.field)] || column.width || 150;
             const isFirstColumn = index === 0 && !enableRowSelection;
             const isPinnedLeft = column.pinned === 'left' || isFirstColumn;
+            const isPinnedRight = column.pinned === 'right';
             const isLastColumn = index === visibleColumns.length - 1;
             
             return (
@@ -441,14 +442,16 @@ export function AdvancedTable<T extends RowData>({
                   GOOGLE_SHEETS_STYLES.cellBorder,
                   "relative flex-shrink-0",
                   isPinnedLeft && "sticky z-30 bg-white",
-                  isPinnedLeft && GOOGLE_SHEETS_STYLES.frozenColumn,
-                  isLastColumn && "flex-grow" // Last column grows to fill remaining space
+                  isPinnedRight && "sticky right-0 z-30 bg-white shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]",
+                  isPinnedLeft && !isPinnedRight && GOOGLE_SHEETS_STYLES.frozenColumn,
+                  isLastColumn && !isPinnedRight && "flex-grow" // Last column grows to fill remaining space (unless pinned right)
                 )}
                 style={{ 
-                  width: isLastColumn ? 'auto' : baseWidth,
+                  width: (isLastColumn && !isPinnedRight) ? 'auto' : baseWidth,
                   minWidth: baseWidth,
                   height: headerHeight,
-                  left: isPinnedLeft ? (enableRowSelection ? 48 : 0) : 'auto'
+                  left: isPinnedLeft ? (enableRowSelection ? 48 : 0) : 'auto',
+                  right: isPinnedRight ? 0 : 'auto'
                 }}
               >
                 <ColumnHeader
@@ -504,6 +507,7 @@ export function AdvancedTable<T extends RowData>({
                 const baseWidth = columnWidths[String(column.field)] || column.width || 150;
                 const isFirstColumn = colIndex === 0 && !enableRowSelection;
                 const isPinnedLeft = column.pinned === 'left' || isFirstColumn;
+                const isPinnedRight = column.pinned === 'right';
                 const isLastColumn = colIndex === visibleColumns.length - 1;
 
                 return (
@@ -516,15 +520,17 @@ export function AdvancedTable<T extends RowData>({
                       GOOGLE_SHEETS_STYLES.cellHover,
                       "bg-white flex-shrink-0",
                       isPinnedLeft && "sticky z-10",
-                      isPinnedLeft && GOOGLE_SHEETS_STYLES.frozenColumn,
+                      isPinnedRight && "sticky right-0 z-10 bg-white shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]",
+                      isPinnedLeft && !isPinnedRight && GOOGLE_SHEETS_STYLES.frozenColumn,
                       isSelected && GOOGLE_SHEETS_STYLES.selectedCell,
-                      isLastColumn && "flex-grow" // Last column grows to fill space
+                      isLastColumn && !isPinnedRight && "flex-grow" // Last column grows to fill space (unless pinned right)
                     )}
                     style={{ 
-                      width: isLastColumn ? 'auto' : baseWidth,
+                      width: (isLastColumn && !isPinnedRight) ? 'auto' : baseWidth,
                       minWidth: baseWidth,
                       height: rowHeight,
-                      left: isPinnedLeft ? (enableRowSelection ? 48 : 0) : 'auto'
+                      left: isPinnedLeft ? (enableRowSelection ? 48 : 0) : 'auto',
+                      right: isPinnedRight ? 0 : 'auto'
                     }}
                   >
                     <TableCell

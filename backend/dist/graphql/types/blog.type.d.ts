@@ -43,18 +43,26 @@ export declare class BlogType {
     shortDescription?: string;
     excerpt?: string;
     author: BlogAuthorType;
+    featuredImage?: string;
     thumbnailUrl?: string;
     bannerUrl?: string;
+    images?: string[];
+    status: string;
+    visibility: string;
     viewCount: number;
     publishedAt?: Date;
     updatedAt: Date;
     category?: BlogCategoryType;
     tags?: BlogTagType[];
     isFeatured: boolean;
+    isPinned: boolean;
     isPublished: boolean;
     metaTitle?: string;
     metaDescription?: string;
     metaKeywords?: string[];
+    canonicalUrl?: string;
+    commentsEnabled: boolean;
+    readingTime?: number;
     createdAt: Date;
 }
 export declare class PaginatedBlogs {

@@ -55,6 +55,26 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'storage.rausachtrangia.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'storage.rausachtrangia.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'rausachtrangia.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'rausachtrangia.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.rausachtrangia.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'images.unsplash.com',
       },
       {

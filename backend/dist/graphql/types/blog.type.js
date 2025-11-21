@@ -164,13 +164,29 @@ __decorate([
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
+], BlogType.prototype, "featuredImage", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
 ], BlogType.prototype, "thumbnailUrl", void 0);
 __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], BlogType.prototype, "bannerUrl", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => graphql_1.Int),
+    (0, graphql_1.Field)(() => [String], { nullable: true }),
+    __metadata("design:type", Array)
+], BlogType.prototype, "images", void 0);
+__decorate([
+    (0, graphql_1.Field)({ defaultValue: 'DRAFT' }),
+    __metadata("design:type", String)
+], BlogType.prototype, "status", void 0);
+__decorate([
+    (0, graphql_1.Field)({ defaultValue: 'PUBLIC' }),
+    __metadata("design:type", String)
+], BlogType.prototype, "visibility", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int, { defaultValue: 0 }),
     __metadata("design:type", Number)
 ], BlogType.prototype, "viewCount", void 0);
 __decorate([
@@ -190,9 +206,13 @@ __decorate([
     __metadata("design:type", Array)
 ], BlogType.prototype, "tags", void 0);
 __decorate([
-    (0, graphql_1.Field)(),
+    (0, graphql_1.Field)({ defaultValue: false }),
     __metadata("design:type", Boolean)
 ], BlogType.prototype, "isFeatured", void 0);
+__decorate([
+    (0, graphql_1.Field)({ defaultValue: false }),
+    __metadata("design:type", Boolean)
+], BlogType.prototype, "isPinned", void 0);
 __decorate([
     (0, graphql_1.Field)({ defaultValue: false }),
     __metadata("design:type", Boolean)
@@ -209,6 +229,18 @@ __decorate([
     (0, graphql_1.Field)(() => [String], { nullable: true }),
     __metadata("design:type", Array)
 ], BlogType.prototype, "metaKeywords", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], BlogType.prototype, "canonicalUrl", void 0);
+__decorate([
+    (0, graphql_1.Field)({ defaultValue: true }),
+    __metadata("design:type", Boolean)
+], BlogType.prototype, "commentsEnabled", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int, { nullable: true }),
+    __metadata("design:type", Number)
+], BlogType.prototype, "readingTime", void 0);
 __decorate([
     (0, graphql_1.Field)(),
     __metadata("design:type", Date)

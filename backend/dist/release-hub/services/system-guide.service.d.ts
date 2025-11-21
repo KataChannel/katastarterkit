@@ -43,8 +43,8 @@ export declare class SystemGuideService {
             viewCount: number;
             keywords: string[];
             thumbnailUrl: string | null;
-            isPublished: boolean;
             readingTime: number | null;
+            isPublished: boolean;
             helpfulCount: number;
             videoUrl: string | null;
             updatedById: string | null;
@@ -73,8 +73,8 @@ export declare class SystemGuideService {
             viewCount: number;
             keywords: string[];
             thumbnailUrl: string | null;
-            isPublished: boolean;
             readingTime: number | null;
+            isPublished: boolean;
             helpfulCount: number;
             videoUrl: string | null;
             updatedById: string | null;
@@ -127,8 +127,8 @@ export declare class SystemGuideService {
         viewCount: number;
         keywords: string[];
         thumbnailUrl: string | null;
-        isPublished: boolean;
         readingTime: number | null;
+        isPublished: boolean;
         helpfulCount: number;
         videoUrl: string | null;
         updatedById: string | null;
@@ -163,8 +163,8 @@ export declare class SystemGuideService {
             viewCount: number;
             keywords: string[];
             thumbnailUrl: string | null;
-            isPublished: boolean;
             readingTime: number | null;
+            isPublished: boolean;
             helpfulCount: number;
             videoUrl: string | null;
             updatedById: string | null;
@@ -193,8 +193,8 @@ export declare class SystemGuideService {
             viewCount: number;
             keywords: string[];
             thumbnailUrl: string | null;
-            isPublished: boolean;
             readingTime: number | null;
+            isPublished: boolean;
             helpfulCount: number;
             videoUrl: string | null;
             updatedById: string | null;
@@ -247,8 +247,8 @@ export declare class SystemGuideService {
         viewCount: number;
         keywords: string[];
         thumbnailUrl: string | null;
-        isPublished: boolean;
         readingTime: number | null;
+        isPublished: boolean;
         helpfulCount: number;
         videoUrl: string | null;
         updatedById: string | null;
@@ -278,8 +278,8 @@ export declare class SystemGuideService {
             viewCount: number;
             keywords: string[];
             thumbnailUrl: string | null;
-            isPublished: boolean;
             readingTime: number | null;
+            isPublished: boolean;
             helpfulCount: number;
             videoUrl: string | null;
             updatedById: string | null;
@@ -308,8 +308,8 @@ export declare class SystemGuideService {
             viewCount: number;
             keywords: string[];
             thumbnailUrl: string | null;
-            isPublished: boolean;
             readingTime: number | null;
+            isPublished: boolean;
             helpfulCount: number;
             videoUrl: string | null;
             updatedById: string | null;
@@ -362,8 +362,8 @@ export declare class SystemGuideService {
         viewCount: number;
         keywords: string[];
         thumbnailUrl: string | null;
-        isPublished: boolean;
         readingTime: number | null;
+        isPublished: boolean;
         helpfulCount: number;
         videoUrl: string | null;
         updatedById: string | null;
@@ -393,8 +393,8 @@ export declare class SystemGuideService {
             viewCount: number;
             keywords: string[];
             thumbnailUrl: string | null;
-            isPublished: boolean;
             readingTime: number | null;
+            isPublished: boolean;
             helpfulCount: number;
             videoUrl: string | null;
             updatedById: string | null;
@@ -423,8 +423,8 @@ export declare class SystemGuideService {
             viewCount: number;
             keywords: string[];
             thumbnailUrl: string | null;
-            isPublished: boolean;
             readingTime: number | null;
+            isPublished: boolean;
             helpfulCount: number;
             videoUrl: string | null;
             updatedById: string | null;
@@ -477,8 +477,8 @@ export declare class SystemGuideService {
         viewCount: number;
         keywords: string[];
         thumbnailUrl: string | null;
-        isPublished: boolean;
         readingTime: number | null;
+        isPublished: boolean;
         helpfulCount: number;
         videoUrl: string | null;
         updatedById: string | null;
@@ -508,8 +508,8 @@ export declare class SystemGuideService {
             viewCount: number;
             keywords: string[];
             thumbnailUrl: string | null;
-            isPublished: boolean;
             readingTime: number | null;
+            isPublished: boolean;
             helpfulCount: number;
             videoUrl: string | null;
             updatedById: string | null;
@@ -538,8 +538,8 @@ export declare class SystemGuideService {
             viewCount: number;
             keywords: string[];
             thumbnailUrl: string | null;
-            isPublished: boolean;
             readingTime: number | null;
+            isPublished: boolean;
             helpfulCount: number;
             videoUrl: string | null;
             updatedById: string | null;
@@ -592,8 +592,8 @@ export declare class SystemGuideService {
         viewCount: number;
         keywords: string[];
         thumbnailUrl: string | null;
-        isPublished: boolean;
         readingTime: number | null;
+        isPublished: boolean;
         helpfulCount: number;
         videoUrl: string | null;
         updatedById: string | null;
@@ -623,8 +623,8 @@ export declare class SystemGuideService {
         viewCount: number;
         keywords: string[];
         thumbnailUrl: string | null;
-        isPublished: boolean;
         readingTime: number | null;
+        isPublished: boolean;
         helpfulCount: number;
         videoUrl: string | null;
         updatedById: string | null;
@@ -653,8 +653,8 @@ export declare class SystemGuideService {
         viewCount: number;
         keywords: string[];
         thumbnailUrl: string | null;
-        isPublished: boolean;
         readingTime: number | null;
+        isPublished: boolean;
         helpfulCount: number;
         videoUrl: string | null;
         updatedById: string | null;

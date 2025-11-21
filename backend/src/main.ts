@@ -77,8 +77,29 @@ async function bootstrap() {
     origin: corsOrigins.length > 0 ? corsOrigins : true,
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: '*', // Allow all headers
-    exposedHeaders: ['Content-Length', 'Content-Type'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
+      // Apollo Client headers
+      'apollo-require-preflight',
+      'x-apollo-operation-name',
+      'x-apollo-tracing',
+      // GraphQL Upload headers
+      'graphql-upload',
+      // Common custom headers
+      'x-request-id',
+      'x-correlation-id',
+    ],
+    exposedHeaders: ['Content-Length', 'Content-Type', 'Authorization'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    maxAge: 86400, // Cache preflight requests for 24 hours
   });
 
   // Global validation pipe - custom pipe that skips file uploads

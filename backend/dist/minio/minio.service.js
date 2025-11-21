@@ -62,15 +62,15 @@ let MinioService = MinioService_1 = class MinioService {
                 const isDockerEnv = process.env.DOCKER_NETWORK_NAME !== undefined;
                 const endpoint = isDockerEnv
                     ? this.configService.get('DOCKER_MINIO_ENDPOINT', 'minio')
-                    : this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
+                    : this.configService.get('MINIO_INTERNAL_ENDPOINT') || this.configService.get('MINIO_ENDPOINT', '116.118.49.243');
                 const portConfig = isDockerEnv
                     ? this.configService.get('DOCKER_MINIO_PORT', '9000')
-                    : this.configService.get('MINIO_PORT', '12007');
+                    : this.configService.get('MINIO_INTERNAL_PORT') || this.configService.get('MINIO_PORT', '12007');
                 const port = typeof portConfig === 'string' ? parseInt(portConfig, 10) : portConfig;
-                const useSSL = this.configService.get('MINIO_USE_SSL') === 'true';
+                const useSSL = this.configService.get('MINIO_INTERNAL_SSL', 'false') === 'true';
                 const accessKey = this.configService.get('MINIO_ACCESS_KEY', 'minioadmin');
                 const secretKey = this.configService.get('MINIO_SECRET_KEY', 'minioadmin');
-                this.logger.log(`[Minio] Connection attempt ${attempt}/${retries}: endpoint=${endpoint}, port=${port}, dockerEnv=${isDockerEnv}`);
+                this.logger.log(`[Minio] Connection attempt ${attempt}/${retries}: endpoint=${endpoint}, port=${port}, SSL=${useSSL}, dockerEnv=${isDockerEnv}`);
                 this.minioClient = new Minio.Client({
                     endPoint: endpoint,
                     port: port,
@@ -171,11 +171,23 @@ let MinioService = MinioService_1 = class MinioService {
         }
     }
     getPublicUrl(bucket, fileName) {
-        const endpoint = this.configService.get('MINIO_ENDPOINT', 'localhost');
-        const port = this.configService.get('MINIO_PORT', '9000');
-        const useSSL = this.configService.get('MINIO_USE_SSL', 'false') === 'true';
-        const protocol = useSSL ? 'https' : 'http';
-        return `${protocol}://${endpoint}:${port}/${bucket}/${fileName}`;
+        const publicEndpoint = this.configService.get('MINIO_PUBLIC_ENDPOINT') ||
+            this.configService.get('MINIO_ENDPOINT', 'localhost');
+        const publicPortStr = this.configService.get('MINIO_PUBLIC_PORT') ||
+            this.configService.get('MINIO_PORT', '9000');
+        const publicPort = typeof publicPortStr === 'string' ? publicPortStr : String(publicPortStr);
+        const publicSSL = this.configService.get('MINIO_PUBLIC_SSL') === 'true' ||
+            this.configService.get('MINIO_USE_SSL', 'false') === 'true';
+        const isProduction = this.configService.get('NODE_ENV') === 'production';
+        const forceHttps = this.configService.get('MINIO_FORCE_HTTPS', 'false') === 'true';
+        const protocol = (publicSSL || isProduction || forceHttps) ? 'https' : 'http';
+        const isDefaultPort = (protocol === 'https' && publicPort === '443') ||
+            (protocol === 'http' && publicPort === '80');
+        const urlBase = isDefaultPort
+            ? `${protocol}://${publicEndpoint}`
+            : `${protocol}://${publicEndpoint}:${publicPort}`;
+        this.logger.debug(`[getPublicUrl] Generated URL: ${urlBase}/${bucket}/${fileName} (protocol=${protocol}, endpoint=${publicEndpoint}, port=${publicPort}, isDefault=${isDefaultPort})`);
+        return `${urlBase}/${bucket}/${fileName}`;
     }
     async uploadAvatar(userId, buffer, contentType) {
         const fileName = `${userId}-${Date.now()}.${this.getFileExtension(contentType)}`;

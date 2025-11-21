@@ -1,55 +1,109 @@
 import { InputType, Field, ID, Int } from '@nestjs/graphql';
-import { IsString, IsOptional, IsNotEmpty, IsInt, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty, IsInt, IsBoolean, IsEnum } from 'class-validator';
+import { PostStatus, PostVisibility } from '@prisma/client';
 
 @InputType()
 export class CreateBlogInput {
   @Field()
+  @IsString()
+  @IsNotEmpty({ message: 'Title is required' })
   title: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty({ message: 'Slug is required' })
   slug: string;
 
   @Field()
+  @IsString()
+  @IsNotEmpty({ message: 'Content is required' })
   content: string;
 
   @Field({ nullable: true })
-  shortDescription?: string;
-
-  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   excerpt?: string;
 
-  @Field()
-  author: string;
+  // Author is optional - will be set from context if not provided
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  author?: string;
+
+  // Featured image (aligns with Prisma schema)
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  featuredImage?: string;
+
+  // Additional images
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  images?: string[];
 
   @Field({ nullable: true })
-  thumbnailUrl?: string;
-
-  @Field({ nullable: true })
-  bannerUrl?: string;
-
-  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   categoryId?: string;
 
   @Field(() => [String], { nullable: true })
+  @IsOptional()
   tagIds?: string[];
 
+  // Status field (DRAFT, PUBLISHED, etc.)
+  @Field(() => String, { nullable: true, defaultValue: PostStatus.DRAFT })
+  @IsOptional()
+  @IsEnum(PostStatus)
+  status?: PostStatus;
+
+  // Visibility field
+  @Field(() => String, { nullable: true, defaultValue: PostVisibility.PUBLIC })
+  @IsOptional()
+  @IsEnum(PostVisibility)
+  visibility?: PostVisibility;
+
   @Field({ nullable: true, defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
   isFeatured?: boolean;
 
-  @Field({ nullable: true, defaultValue: true })
-  isPublished?: boolean;
+  @Field({ nullable: true, defaultValue: false })
+  @IsOptional()
+  @IsBoolean()
+  isPinned?: boolean;
 
   @Field({ nullable: true })
+  @IsOptional()
   publishedAt?: Date;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   metaTitle?: string;
 
   @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
   metaDescription?: string;
 
   @Field(() => [String], { nullable: true })
+  @IsOptional()
   metaKeywords?: string[];
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  canonicalUrl?: string;
+
+  @Field({ nullable: true, defaultValue: true })
+  @IsOptional()
+  @IsBoolean()
+  commentsEnabled?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsInt()
+  readingTime?: number;
 }
 
 @InputType()
@@ -77,11 +131,6 @@ export class UpdateBlogInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  shortDescription?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
   excerpt?: string;
 
   @Field({ nullable: true })
@@ -92,12 +141,11 @@ export class UpdateBlogInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
-  thumbnailUrl?: string;
+  featuredImage?: string;
 
-  @Field({ nullable: true })
+  @Field(() => [String], { nullable: true })
   @IsOptional()
-  @IsString()
-  bannerUrl?: string;
+  images?: string[];
 
   @Field({ nullable: true })
   @IsOptional()
@@ -108,6 +156,16 @@ export class UpdateBlogInput {
   @IsOptional()
   tagIds?: string[];
 
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsEnum(PostStatus)
+  status?: PostStatus;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsEnum(PostVisibility)
+  visibility?: PostVisibility;
+
   @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
@@ -116,7 +174,7 @@ export class UpdateBlogInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
-  isPublished?: boolean;
+  isPinned?: boolean;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -135,6 +193,21 @@ export class UpdateBlogInput {
   @Field(() => [String], { nullable: true })
   @IsOptional()
   metaKeywords?: string[];
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  canonicalUrl?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  commentsEnabled?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsInt()
+  readingTime?: number;
 }
 
 @InputType()
