@@ -48,9 +48,14 @@ export class MinioService implements OnModuleInit {
     const protocol = (this.useSSL || isProduction || forceHttps) ? 'https' : 'http';
     const publicEndpoint = this.configService.get<string>('MINIO_PUBLIC_ENDPOINT', this.endpoint);
     const publicPort = this.configService.get<string>('MINIO_PUBLIC_PORT', String(this.port));
-    this.publicUrl = `${protocol}://${publicEndpoint}:${publicPort}`;
     
-    this.logger.log(`MinIO Public URL protocol: ${protocol} (production: ${isProduction}, forceHttps: ${forceHttps})`);
+    // Don't include port in URL if using default ports (80 for HTTP, 443 for HTTPS)
+    const isDefaultPort = (protocol === 'https' && publicPort === '443') || (protocol === 'http' && publicPort === '80');
+    this.publicUrl = isDefaultPort 
+      ? `${protocol}://${publicEndpoint}` 
+      : `${protocol}://${publicEndpoint}:${publicPort}`;
+    
+    this.logger.log(`MinIO Public URL: ${this.publicUrl} (protocol: ${protocol}, production: ${isProduction}, forceHttps: ${forceHttps})`);
 
     this.minioClient = new Minio.Client({
       endPoint: this.endpoint,

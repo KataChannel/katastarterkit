@@ -178,7 +178,11 @@ export class MinioService implements OnModuleInit {
     const forceHttps = this.configService.get('MINIO_FORCE_HTTPS', 'false') === 'true';
     const protocol = (useSSL || isProduction || forceHttps) ? 'https' : 'http';
     
-    return `${protocol}://${endpoint}:${port}/${bucket}/${fileName}`;
+    // Don't include port in URL if using default ports (80 for HTTP, 443 for HTTPS)
+    const isDefaultPort = (protocol === 'https' && port === '443') || (protocol === 'http' && port === '80');
+    const urlBase = isDefaultPort ? `${protocol}://${endpoint}` : `${protocol}://${endpoint}:${port}`;
+    
+    return `${urlBase}/${bucket}/${fileName}`;
   }
 
   async uploadAvatar(userId: string, buffer: Buffer, contentType: string): Promise<string> {
