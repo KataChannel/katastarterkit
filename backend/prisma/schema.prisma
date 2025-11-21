@@ -5215,6 +5215,7 @@ model SystemGuide {
   thumbnailUrl    String?
   videoUrl        String?
   attachmentUrls  String[]      @default([])
+  icon            String?       // Icon name or emoji
   
   // Structure
   orderIndex      Int           @default(0)

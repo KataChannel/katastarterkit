@@ -33,10 +33,14 @@ import {
 import Link from 'next/link';
 
 const GUIDE_TYPE_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
-  USER_GUIDE: { label: 'Hướng dẫn sử dụng', icon: FileText, color: 'bg-blue-100 text-blue-800' },
-  DEVELOPER_GUIDE: { label: 'Tài liệu kỹ thuật', icon: Code, color: 'bg-purple-100 text-purple-800' },
-  VIDEO_TUTORIAL: { label: 'Video hướng dẫn', icon: Video, color: 'bg-pink-100 text-pink-800' },
+  QUICK_START: { label: 'Bắt đầu nhanh', icon: FileText, color: 'bg-yellow-100 text-yellow-800' },
+  TUTORIAL: { label: 'Hướng dẫn', icon: Book, color: 'bg-blue-100 text-blue-800' },
+  USER_GUIDE: { label: 'Hướng dẫn sử dụng', icon: FileText, color: 'bg-cyan-100 text-cyan-800' },
+  API_REFERENCE: { label: 'Tài liệu API', icon: Code, color: 'bg-purple-100 text-purple-800' },
+  VIDEO_GUIDE: { label: 'Video hướng dẫn', icon: Video, color: 'bg-pink-100 text-pink-800' },
   FAQ: { label: 'Câu hỏi thường gặp', icon: HelpCircle, color: 'bg-green-100 text-green-800' },
+  TROUBLESHOOTING: { label: 'Khắc phục sự cố', icon: HelpCircle, color: 'bg-red-100 text-red-800' },
+  BEST_PRACTICES: { label: 'Best Practices', icon: Book, color: 'bg-indigo-100 text-indigo-800' },
 };
 
 export default function GuideDetailPage() {

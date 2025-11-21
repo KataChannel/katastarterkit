@@ -2310,6 +2310,13 @@ input GroupByInput {
   where: JSONObject
 }
 
+type GuideAuthor {
+  avatar: String
+  email: String!
+  id: ID!
+  name: String
+}
+
 enum GuideType {
   API_REFERENCE
   BEST_PRACTICES
@@ -4198,7 +4205,7 @@ type Query {
   supportMessages(conversationId: String!): [SupportMessage!]!
   systemGuide(id: String!): SystemGuide!
   systemGuideBySlug(slug: String!): SystemGuide!
-  systemGuides(parentId: String, search: String, type: String): [SystemGuide!]!
+  systemGuides(parentId: String, search: String, type: GuideType): [SystemGuide!]!
   systemRelease(id: String!): SystemRelease
   systemReleaseBySlug(slug: String!): SystemRelease
   systemReleaseByVersion(version: String!): SystemRelease
@@ -4807,20 +4814,25 @@ type SyncCallCenterResponse {
 
 type SystemGuide {
   attachmentUrls: [String!]!
+  author: GuideAuthor
   authorId: String
   category: String
+  children: [SystemGuide!]!
   content: String!
   createdAt: DateTime!
   description: String
   difficulty: String
   helpfulCount: Int!
+  icon: String
   id: ID!
   isPublished: Boolean!
   keywords: [String!]!
   metaDescription: String
   metaTitle: String
   notHelpfulCount: Int!
+  order: Int!
   orderIndex: Int!
+  parent: SystemGuide
   parentId: String
   publishedAt: DateTime
   readingTime: Int
@@ -4831,6 +4843,7 @@ type SystemGuide {
   title: String!
   type: GuideType!
   updatedAt: DateTime!
+  updatedBy: GuideAuthor
   updatedById: String
   videoUrl: String
   viewCount: Int!

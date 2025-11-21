@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { SystemGuideEntity, GuideType } from '../entities/system-guide.entity';
 import { SystemGuideService } from '../services/system-guide.service';
@@ -10,9 +10,20 @@ import { CurrentUser } from '../../auth/current-user.decorator';
 export class SystemGuideResolver {
   constructor(private readonly systemGuideService: SystemGuideService) {}
 
+  // Field resolvers
+  @ResolveField(() => Number)
+  order(@Parent() guide: any) {
+    return guide.orderIndex;
+  }
+
+  @ResolveField(() => String, { nullable: true })
+  icon(@Parent() guide: any) {
+    return guide.icon || null;
+  }
+
   @Query(() => [SystemGuideEntity], { name: 'systemGuides' })
   async getSystemGuides(
-    @Args('type', { type: () => String, nullable: true }) type?: GuideType,
+    @Args('type', { type: () => GuideType, nullable: true }) type?: GuideType,
     @Args('parentId', { type: () => String, nullable: true }) parentId?: string | null,
     @Args('search', { type: () => String, nullable: true }) search?: string,
   ) {

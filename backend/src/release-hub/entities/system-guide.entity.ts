@@ -13,6 +13,22 @@ export enum GuideType {
 
 registerEnumType(GuideType, { name: 'GuideType' });
 
+// Guide Author type for relations
+@ObjectType('GuideAuthor')
+class GuideAuthor {
+  @Field(() => ID)
+  id: string;
+
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field()
+  email: string;
+
+  @Field({ nullable: true })
+  avatar?: string;
+}
+
 @ObjectType()
 export class SystemGuide {
   @Field(() => ID)
@@ -48,11 +64,23 @@ export class SystemGuide {
   @Field(() => [String])
   attachmentUrls: string[];
 
+  @Field({ nullable: true })
+  icon?: string;
+
   @Field(() => Int)
   orderIndex: number;
 
+  @Field(() => Int)
+  order: number; // Alias for orderIndex
+
   @Field({ nullable: true })
   parentId?: string;
+
+  @Field(() => SystemGuide, { nullable: true })
+  parent?: SystemGuide;
+
+  @Field(() => [SystemGuide])
+  children: SystemGuide[];
 
   @Field(() => [String])
   relatedGuideIds: string[];
@@ -98,6 +126,13 @@ export class SystemGuide {
 
   @Field({ nullable: true })
   updatedById?: string;
+
+  // Relations
+  @Field(() => GuideAuthor, { nullable: true })
+  author?: GuideAuthor;
+
+  @Field(() => GuideAuthor, { nullable: true })
+  updatedBy?: GuideAuthor;
 }
 
 // Alias for consistency with other entities

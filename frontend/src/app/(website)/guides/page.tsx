@@ -22,10 +22,14 @@ import {
 
 const GUIDE_TYPES = [
   { value: '', label: 'Tất cả', icon: Book },
+  { value: 'QUICK_START', label: 'Bắt đầu nhanh', icon: FileText },
+  { value: 'TUTORIAL', label: 'Hướng dẫn', icon: Book },
   { value: 'USER_GUIDE', label: 'Hướng dẫn sử dụng', icon: FileText },
-  { value: 'DEVELOPER_GUIDE', label: 'Tài liệu kỹ thuật', icon: Code },
-  { value: 'VIDEO_TUTORIAL', label: 'Video hướng dẫn', icon: Video },
+  { value: 'API_REFERENCE', label: 'Tài liệu API', icon: Code },
+  { value: 'VIDEO_GUIDE', label: 'Video hướng dẫn', icon: Video },
   { value: 'FAQ', label: 'Câu hỏi thường gặp', icon: HelpCircle },
+  { value: 'TROUBLESHOOTING', label: 'Khắc phục sự cố', icon: HelpCircle },
+  { value: 'BEST_PRACTICES', label: 'Best Practices', icon: Book },
 ];
 
 export default function GuidesPage() {
@@ -52,10 +56,14 @@ export default function GuidesPage() {
 
   const getTypeBadgeColor = (type: string) => {
     const colors: Record<string, string> = {
-      USER_GUIDE: 'bg-blue-100 text-blue-800',
-      DEVELOPER_GUIDE: 'bg-purple-100 text-purple-800',
-      VIDEO_TUTORIAL: 'bg-pink-100 text-pink-800',
+      QUICK_START: 'bg-yellow-100 text-yellow-800',
+      TUTORIAL: 'bg-blue-100 text-blue-800',
+      USER_GUIDE: 'bg-cyan-100 text-cyan-800',
+      API_REFERENCE: 'bg-purple-100 text-purple-800',
+      VIDEO_GUIDE: 'bg-pink-100 text-pink-800',
       FAQ: 'bg-green-100 text-green-800',
+      TROUBLESHOOTING: 'bg-red-100 text-red-800',
+      BEST_PRACTICES: 'bg-indigo-100 text-indigo-800',
     };
     return colors[type] || 'bg-gray-100 text-gray-800';
   };
