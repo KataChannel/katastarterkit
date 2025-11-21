@@ -48,7 +48,11 @@ export function hasAdminAccess(user: User | null): boolean {
       'content_editor',
       'product_manager',
       'order_manager',
-      'user_manager'
+      'user_manager',
+      'blog_manager',           // Quản lý Blog
+      'blog_editor',            // Biên tập viên Blog
+      'ecommerce_manager',      // Quản lý E-commerce
+      'page_builder_manager'    // Quản lý Page Builder
     ];
     
     const hasAdminRole = user.roles.some(role => 
