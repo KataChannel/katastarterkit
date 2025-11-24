@@ -11,7 +11,7 @@ import { ADD_TO_CART } from '@/graphql/ecommerce.queries';
 import { useDynamicQuery } from '@/lib/graphql/dynamic-hooks';
 import { ProductCarouselSettingsDialog } from './ProductCarouselSettingsDialog';
 import { ProductImage } from '@/components/ui/product-image';
-import { useCart } from '@/contexts/CartContext';
+import { useCartOptional } from '@/contexts/CartContext';
 import { useCartSession } from '@/hooks/useCartSession';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
@@ -94,10 +94,13 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [addedToCart, setAddedToCart] = useState<Set<string>>(new Set());
 
-  // Cart and Auth hooks
-  const { refetch: refetchCart } = useCart();
+  // Cart and Auth hooks - use optional hook to avoid errors when CartProvider is not available
+  const cartContext = useCartOptional();
   const { sessionId } = useCartSession();
   const { user, isAuthenticated } = useAuth();
+  
+  // If cart is not available, we'll skip cart functionality
+  const refetchCart = cartContext?.refetch || (() => {});
 
   // Add to cart mutation
   const [addToCartMutation] = useMutation(ADD_TO_CART, {
@@ -299,6 +302,14 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
   const handleAddToCart = async (product: Product, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // If cart context is not available, show a message
+    if (!cartContext) {
+      toast.error('Giỏ hàng không khả dụng', {
+        description: 'Vui lòng vào trang sản phẩm để thêm vào giỏ hàng',
+      });
+      return;
+    }
 
     try {
       setAddingToCart(product.id);

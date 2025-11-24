@@ -63,3 +63,9 @@ export function useCart() {
   }
   return context;
 }
+
+// Optional hook that returns null if provider is not available
+export function useCartOptional() {
+  const context = useContext(CartContext);
+  return context;
+}

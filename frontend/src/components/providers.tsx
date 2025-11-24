@@ -5,6 +5,7 @@ import { ApolloProvider } from '@apollo/client';
 import { Toaster } from '@/components/ui/toaster';
 import { apolloClient } from '@/lib/apollo-client';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { CartProvider } from '@/contexts/CartContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 interface ProvidersProps {
@@ -16,8 +17,10 @@ export function Providers({ children }: ProvidersProps) {
     <ErrorBoundary>
       <ApolloProvider client={apolloClient}>
         <AuthProvider>
-          <Toaster />
-          {children}
+          <CartProvider>
+            <Toaster />
+            {children}
+          </CartProvider>
         </AuthProvider>
       </ApolloProvider>
     </ErrorBoundary>
