@@ -78,26 +78,50 @@ function isSystemTable(tableName: string): boolean {
 
 /**
  * Parse schema.prisma file to extract all model names and their table mappings
+ * Uses proper brace matching to handle nested structures
  */
 function parseSchemaModels(): { modelName: string; tableName: string }[] {
   try {
     const schemaPath = path.join(__dirname, 'schema.prisma');
     const schemaContent = fs.readFileSync(schemaPath, 'utf8');
     
-    // Extract model blocks using regex
-    const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*)\}/gm;
     const models: { modelName: string; tableName: string }[] = [];
-    let match;
+    const lines = schemaContent.split('\n');
     
-    while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
-      const modelName = match[1];
-      const modelBody = match[2];
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i].trim();
       
-      // Look for @@map directive in the model body
-      const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
-      const tableName = mapMatch ? mapMatch[1] : camelToSnakeCase(modelName);
-      
-      models.push({ modelName, tableName });
+      // Check if line starts a model definition
+      const modelMatch = line.match(/^model\s+(\w+)\s*\{/);
+      if (modelMatch) {
+        const modelName = modelMatch[1];
+        let braceCount = 1;
+        let modelBody = '';
+        i++;
+        
+        // Read until closing brace, handling nested braces
+        while (i < lines.length && braceCount > 0) {
+          const bodyLine = lines[i];
+          modelBody += bodyLine + '\n';
+          
+          // Count braces
+          for (const char of bodyLine) {
+            if (char === '{') braceCount++;
+            if (char === '}') braceCount--;
+          }
+          
+          i++;
+        }
+        
+        // Look for @@map directive in the complete model body
+        const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
+        const tableName = mapMatch ? mapMatch[1] : camelToSnakeCase(modelName);
+        
+        models.push({ modelName, tableName });
+      } else {
+        i++;
+      }
     }
     
     console.log(`📋 Found ${models.length} models in schema.prisma`);
@@ -116,6 +140,7 @@ function parseSchemaModels(): { modelName: string; tableName: string }[] {
  * Convert Prisma model names to database table names
  * Automatically builds mapping from schema.prisma by parsing @@map directives
  * Falls back to snake_case conversion for models without explicit @@map
+ * Uses proper brace matching to handle nested structures
  */
 function buildModelTableMapping(): { [modelName: string]: string } {
   try {
@@ -123,24 +148,46 @@ function buildModelTableMapping(): { [modelName: string]: string } {
     const schemaContent = fs.readFileSync(schemaPath, 'utf8');
     
     const mapping: { [modelName: string]: string } = {};
+    const lines = schemaContent.split('\n');
     
-    // Extract model blocks with their bodies
-    const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*?)\}/gm;
-    let match;
-    
-    while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
-      const modelName = match[1];
-      const modelBody = match[2];
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i].trim();
       
-      // Look for @@map directive in the model body
-      const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
-      
-      if (mapMatch) {
-        // Use @@map value if present
-        mapping[modelName] = mapMatch[1];
+      // Check if line starts a model definition
+      const modelMatch = line.match(/^model\s+(\w+)\s*\{/);
+      if (modelMatch) {
+        const modelName = modelMatch[1];
+        let braceCount = 1;
+        let modelBody = '';
+        i++;
+        
+        // Read until closing brace, handling nested braces
+        while (i < lines.length && braceCount > 0) {
+          const bodyLine = lines[i];
+          modelBody += bodyLine + '\n';
+          
+          // Count braces
+          for (const char of bodyLine) {
+            if (char === '{') braceCount++;
+            if (char === '}') braceCount--;
+          }
+          
+          i++;
+        }
+        
+        // Look for @@map directive in the complete model body
+        const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
+        
+        if (mapMatch) {
+          // Use @@map value if present
+          mapping[modelName] = mapMatch[1];
+        } else {
+          // Auto-convert to snake_case if no @@map
+          mapping[modelName] = camelToSnakeCase(modelName);
+        }
       } else {
-        // Auto-convert to snake_case if no @@map
-        mapping[modelName] = camelToSnakeCase(modelName);
+        i++;
       }
     }
     
@@ -155,12 +202,19 @@ function buildModelTableMapping(): { [modelName: string]: string } {
 /**
  * Convert camelCase to snake_case
  * Examples: User → user, UserSession → user_session, TaskComment → task_comment
+ * IMPORTANT: Keeps existing underscores (e.g., ext_listhoadon stays as-is)
  */
 function camelToSnakeCase(str: string): string {
+  // If model name already has underscores, keep it as-is (already snake_case)
+  if (str.includes('_')) {
+    return str.toLowerCase();
+  }
+  
+  // Convert PascalCase/camelCase to snake_case
   return str
     .replace(/([A-Z])/g, '_$1')  // Add underscore before uppercase letters
     .toLowerCase()              // Convert to lowercase
-    .replace(/^_/, '');         // Remove leading underscore
+    .replace(/^_/, '');         // Remove leading underscore from PascalCase
 }
 
 /**
@@ -271,21 +325,49 @@ async function backupAllTablesToJson(): Promise<void> {
   console.log(`📊 Found ${tables.length} tables to backup`);
   
   let totalRecords = 0;
+  let totalFiles = 0;
   const startTime = Date.now();
+  
+  // Store statistics for each table
+  interface TableStats {
+    table: string;
+    records: number;
+    size: number;
+    time: number;
+  }
+  const tableStats: TableStats[] = [];
   
   for (const table of tables) {
     const tableStartTime = Date.now();
+    const beforeBackup = fs.existsSync(path.join(BACKUP_DIR, `${table}.json`));
+    
     await backupTableToJson(table);
+    
+    // Check if file was created (means table had data)
+    const filePath = path.join(BACKUP_DIR, `${table}.json`);
+    const fileCreated = fs.existsSync(filePath);
     
     // Count records for statistics
     try {
-      const recordCount: any[] = await prisma.$queryRawUnsafe(`SELECT COUNT(*) as count FROM "${table}"`);
-      const count = parseInt(recordCount[0].count);
-      totalRecords += count;
-      
-      const tableTime = Date.now() - tableStartTime;
-      if (count > 0) {
-        console.log(`   📈 ${count.toLocaleString()} records in ${tableTime}ms`);
+      if (fileCreated) {
+        const recordCount: any[] = await prisma.$queryRawUnsafe(`SELECT COUNT(*) as count FROM "${table}"`);
+        const count = parseInt(recordCount[0].count);
+        totalRecords += count;
+        totalFiles++;
+        
+        const tableTime = Date.now() - tableStartTime;
+        const fileSize = fs.statSync(filePath).size;
+        
+        tableStats.push({
+          table,
+          records: count,
+          size: fileSize,
+          time: tableTime
+        });
+        
+        if (count > 0) {
+          console.log(`   📈 ${count.toLocaleString()} records in ${tableTime}ms`);
+        }
       }
     } catch (e) {
       console.log(`   ⚠️  Could not count records for ${table}`);
@@ -293,10 +375,68 @@ async function backupAllTablesToJson(): Promise<void> {
   }
   
   const totalTime = Math.round((Date.now() - startTime) / 1000);
+  const totalSize = tableStats.reduce((sum, stat) => sum + stat.size, 0);
+  
+  // Print summary
   console.log(`\n🎉 Backup completed successfully!`);
   console.log(`📊 Total records: ${totalRecords.toLocaleString()}`);
   console.log(`⏱️  Total time: ${totalTime} seconds`);
   console.log(`📁 Backup location: ${BACKUP_DIR}`);
+  
+  // Print detailed statistics table
+  console.log(`\n╔════════════════════════════════════════════════════════════════════════════╗`);
+  console.log(`║                      📊 BACKUP STATISTICS REPORT                           ║`);
+  console.log(`╚════════════════════════════════════════════════════════════════════════════╝\n`);
+  
+  console.log(`📈 Overview:`);
+  console.log(`   Total Files: ${totalFiles}`);
+  console.log(`   Total Records: ${totalRecords.toLocaleString()}`);
+  console.log(`   Total Size: ${formatBytes(totalSize)}`);
+  console.log(`   Duration: ${totalTime} seconds`);
+  console.log(`   Average Speed: ${Math.round(totalRecords / totalTime).toLocaleString()} records/sec\n`);
+  
+  // Sort by record count (descending) and show top 15 tables
+  const topTables = tableStats.sort((a, b) => b.records - a.records).slice(0, 15);
+  
+  console.log(`🏆 Top 15 Tables by Record Count:\n`);
+  console.log(`${'No.'.padEnd(4)} ${'Table Name'.padEnd(30)} ${'Records'.padStart(12)} ${'Size'.padStart(10)} ${'Time'.padStart(8)}`);
+  console.log(`${'─'.repeat(4)} ${'─'.repeat(30)} ${'─'.repeat(12)} ${'─'.repeat(10)} ${'─'.repeat(8)}`);
+  
+  topTables.forEach((stat, index) => {
+    const num = `${index + 1}.`.padEnd(4);
+    const table = stat.table.padEnd(30);
+    const records = stat.records.toLocaleString().padStart(12);
+    const size = formatBytes(stat.size).padStart(10);
+    const time = `${stat.time}ms`.padStart(8);
+    console.log(`${num} ${table} ${records} ${size} ${time}`);
+  });
+  
+  // Show tables by size
+  const topBySize = [...tableStats].sort((a, b) => b.size - a.size).slice(0, 10);
+  console.log(`\n💾 Top 10 Tables by File Size:\n`);
+  console.log(`${'No.'.padEnd(4)} ${'Table Name'.padEnd(30)} ${'Size'.padStart(10)} ${'Records'.padStart(12)}`);
+  console.log(`${'─'.repeat(4)} ${'─'.repeat(30)} ${'─'.repeat(10)} ${'─'.repeat(12)}`);
+  
+  topBySize.forEach((stat, index) => {
+    const num = `${index + 1}.`.padEnd(4);
+    const table = stat.table.padEnd(30);
+    const size = formatBytes(stat.size).padStart(10);
+    const records = stat.records.toLocaleString().padStart(12);
+    console.log(`${num} ${table} ${size} ${records}`);
+  });
+  
+  console.log(`\n${'═'.repeat(80)}\n`);
+}
+
+/**
+ * Format bytes to human readable string
+ */
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
 async function restoreTableFromJson(table: string): Promise<void> {

@@ -49,6 +49,9 @@ export enum BlockType {
   PRODUCT_LIST = 'PRODUCT_LIST',
   PRODUCT_DETAIL = 'PRODUCT_DETAIL',
   PRODUCT_CAROUSEL = 'PRODUCT_CAROUSEL',
+  
+  // Blog Blocks
+  BLOG_CAROUSEL = 'BLOG_CAROUSEL',
 }
 
 // Register enums for GraphQL

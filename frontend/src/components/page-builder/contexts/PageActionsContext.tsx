@@ -129,6 +129,27 @@ export const DEFAULT_BLOCK_CONTENT = {
     allowEdit: true,
     style: {}
   },
+  [BlockType.BLOG_CAROUSEL]: {
+    title: 'Tin tức nổi bật',
+    filterType: 'all',
+    itemsToShow: 6,
+    showViewAllButton: true,
+    viewAllLink: '/tin-tuc',
+    autoplay: false,
+    autoplayDelay: 5000,
+    loop: true,
+    showNavigation: true,
+    showExcerpt: true,
+    showAuthor: true,
+    showDate: true,
+    showCategory: true,
+    responsive: {
+      mobile: 1,
+      tablet: 2,
+      desktop: 3,
+    },
+    style: {}
+  },
 } as const;
 
 /**

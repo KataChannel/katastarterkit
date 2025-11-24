@@ -956,6 +956,8 @@ model Hoadon {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   HoadonChitiet HoadonChitiet[]
+
+  @@map("Hoadon")
 }
 
 model HoadonChitiet {
@@ -989,6 +991,7 @@ model HoadonChitiet {
   updatedAt DateTime @default(now())
 
   @@index([idhdon])
+  @@map("HoadonChitiet")
 }
 
 // Page Builder Models
@@ -1018,6 +1021,8 @@ enum BlockType {
   FAQ
   CONTACT_FORM
   COMPLETED_TASKS
+  SEARCH
+  BOOKMARK
 
   // Container/Layout Blocks (for nested children)
   CONTAINER
@@ -1035,6 +1040,9 @@ enum BlockType {
   PRODUCT_LIST
   PRODUCT_DETAIL
   PRODUCT_CAROUSEL
+  
+  // Blog Blocks
+  BLOG_CAROUSEL
 }
 
 model Page {
@@ -1071,6 +1079,7 @@ model Page {
   @@index([status])
   @@index([isHomepage])
   @@index([createdAt])
+  @@map("Page")
 }
 
 model PageBlock {
@@ -1105,6 +1114,7 @@ model PageBlock {
   @@index([pageId, order])
   @@index([type])
   @@index([parentId])
+  @@map("PageBlock")
 }
 
 // File Management Models
@@ -1150,6 +1160,7 @@ model FileFolder {
   @@index([userId])
   @@index([parentId])
   @@index([path])
+  @@map("FileFolder")
 }
 
 model File {
@@ -1205,6 +1216,7 @@ model File {
   @@index([mimeType])
   @@index([createdAt])
   @@index([path])
+  @@map("File")
 }
 
 model FileShare {
@@ -1233,6 +1245,7 @@ model FileShare {
   @@index([fileId])
   @@index([token])
   @@index([sharedBy])
+  @@map("FileShare")
 }
 
 // MFA and Security Models
@@ -1275,6 +1288,7 @@ model UserMfaSettings {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@map("UserMfaSettings")
 }
 
 model UserDevice {
@@ -1304,6 +1318,7 @@ model UserDevice {
   @@index([userId])
   @@index([deviceId])
   @@index([lastUsed])
+  @@map("UserDevice")
 }
 
 model SecurityEvent {
@@ -1357,6 +1372,7 @@ model SecurityEvent {
   @@index([isResolved])
   @@index([correlationId])
   @@index([parentEventId])
+  @@map("SecurityEvent")
 }
 
 // RBAC (Role-Based Access Control) Models
@@ -1396,6 +1412,7 @@ model Role {
   @@index([parentId])
   @@index([isActive])
   @@index([priority])
+  @@map("Role")
 }
 
 model Permission {
@@ -1438,6 +1455,7 @@ model Permission {
   @@index([category])
   @@index([isActive])
   @@index([createdBy])
+  @@map("Permission")
 }
 
 model RolePermission {
@@ -1467,6 +1485,7 @@ model RolePermission {
   @@index([permissionId])
   @@index([effect])
   @@index([expiresAt])
+  @@map("RolePermission")
 }
 
 model UserRoleAssignment {
@@ -1502,6 +1521,7 @@ model UserRoleAssignment {
   @@index([roleId])
   @@index([effect])
   @@index([expiresAt])
+  @@map("UserRoleAssignment")
 }
 
 model UserPermission {
@@ -1538,6 +1558,7 @@ model UserPermission {
   @@index([permissionId])
   @@index([effect])
   @@index([expiresAt])
+  @@map("UserPermission")
 }
 
 model ResourceAccess {
@@ -1580,6 +1601,7 @@ model ResourceAccess {
   @@index([accessType])
   @@index([isActive])
   @@index([expiresAt])
+  @@map("ResourceAccess")
 }
 
 // External Invoice System Models

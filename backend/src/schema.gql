@@ -473,6 +473,7 @@ type AuthResponse {
 
 """The type of a page block"""
 enum BlockType {
+  BLOG_CAROUSEL
   BOOKMARK
   BUTTON
   CARD
