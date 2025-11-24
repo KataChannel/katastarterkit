@@ -8,6 +8,12 @@ export declare enum GuideType {
     VIDEO_GUIDE = "VIDEO_GUIDE",
     BEST_PRACTICES = "BEST_PRACTICES"
 }
+declare class GuideAuthor {
+    id: string;
+    name?: string;
+    email: string;
+    avatar?: string;
+}
 export declare class SystemGuide {
     id: string;
     title: string;
@@ -20,8 +26,12 @@ export declare class SystemGuide {
     thumbnailUrl?: string;
     videoUrl?: string;
     attachmentUrls: string[];
+    icon?: string;
     orderIndex: number;
+    order: number;
     parentId?: string;
+    parent?: SystemGuide;
+    children: SystemGuide[];
     relatedGuideIds: string[];
     slug: string;
     metaTitle?: string;
@@ -37,5 +47,7 @@ export declare class SystemGuide {
     updatedAt: Date;
     authorId?: string;
     updatedById?: string;
+    author?: GuideAuthor;
+    updatedBy?: GuideAuthor;
 }
 export { SystemGuide as SystemGuideEntity };

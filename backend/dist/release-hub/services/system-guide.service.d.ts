@@ -38,6 +38,7 @@ export declare class SystemGuideService {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -68,6 +69,7 @@ export declare class SystemGuideService {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -122,6 +124,7 @@ export declare class SystemGuideService {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -158,6 +161,7 @@ export declare class SystemGuideService {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -188,6 +192,7 @@ export declare class SystemGuideService {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -242,6 +247,7 @@ export declare class SystemGuideService {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -273,6 +279,7 @@ export declare class SystemGuideService {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -303,6 +310,7 @@ export declare class SystemGuideService {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -357,6 +365,7 @@ export declare class SystemGuideService {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -388,6 +397,7 @@ export declare class SystemGuideService {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -418,6 +428,7 @@ export declare class SystemGuideService {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -472,6 +483,7 @@ export declare class SystemGuideService {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -503,6 +515,7 @@ export declare class SystemGuideService {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -533,6 +546,7 @@ export declare class SystemGuideService {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -587,6 +601,7 @@ export declare class SystemGuideService {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -618,6 +633,7 @@ export declare class SystemGuideService {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -648,6 +664,7 @@ export declare class SystemGuideService {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;

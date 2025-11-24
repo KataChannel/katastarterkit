@@ -4,6 +4,8 @@ import { CreateSystemGuideInput, UpdateSystemGuideInput } from '../dto/system-gu
 export declare class SystemGuideResolver {
     private readonly systemGuideService;
     constructor(systemGuideService: SystemGuideService);
+    order(guide: any): any;
+    icon(guide: any): any;
     getSystemGuides(type?: GuideType, parentId?: string | null, search?: string): Promise<({
         parent: {
             category: string | null;
@@ -19,6 +21,7 @@ export declare class SystemGuideResolver {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -49,6 +52,7 @@ export declare class SystemGuideResolver {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -103,6 +107,7 @@ export declare class SystemGuideResolver {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -134,6 +139,7 @@ export declare class SystemGuideResolver {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -164,6 +170,7 @@ export declare class SystemGuideResolver {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -218,6 +225,7 @@ export declare class SystemGuideResolver {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -249,6 +257,7 @@ export declare class SystemGuideResolver {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -279,6 +288,7 @@ export declare class SystemGuideResolver {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -333,6 +343,7 @@ export declare class SystemGuideResolver {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -364,6 +375,7 @@ export declare class SystemGuideResolver {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -394,6 +406,7 @@ export declare class SystemGuideResolver {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -448,6 +461,7 @@ export declare class SystemGuideResolver {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -479,6 +493,7 @@ export declare class SystemGuideResolver {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -509,6 +524,7 @@ export declare class SystemGuideResolver {
             slug: string;
             publishedAt: Date | null;
             authorId: string | null;
+            icon: string | null;
             metaTitle: string | null;
             metaDescription: string | null;
             viewCount: number;
@@ -563,6 +579,7 @@ export declare class SystemGuideResolver {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -594,6 +611,7 @@ export declare class SystemGuideResolver {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;
@@ -624,6 +642,7 @@ export declare class SystemGuideResolver {
         slug: string;
         publishedAt: Date | null;
         authorId: string | null;
+        icon: string | null;
         metaTitle: string | null;
         metaDescription: string | null;
         viewCount: number;

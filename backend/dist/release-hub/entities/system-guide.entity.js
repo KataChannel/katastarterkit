@@ -23,6 +23,27 @@ var GuideType;
     GuideType["BEST_PRACTICES"] = "BEST_PRACTICES";
 })(GuideType || (exports.GuideType = GuideType = {}));
 (0, graphql_1.registerEnumType)(GuideType, { name: 'GuideType' });
+let GuideAuthor = class GuideAuthor {
+};
+__decorate([
+    (0, graphql_1.Field)(() => graphql_1.ID),
+    __metadata("design:type", String)
+], GuideAuthor.prototype, "id", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], GuideAuthor.prototype, "name", void 0);
+__decorate([
+    (0, graphql_1.Field)(),
+    __metadata("design:type", String)
+], GuideAuthor.prototype, "email", void 0);
+__decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], GuideAuthor.prototype, "avatar", void 0);
+GuideAuthor = __decorate([
+    (0, graphql_1.ObjectType)('GuideAuthor')
+], GuideAuthor);
 let SystemGuide = class SystemGuide {
 };
 exports.SystemGuide = SystemGuide;
@@ -72,13 +93,29 @@ __decorate([
     __metadata("design:type", Array)
 ], SystemGuide.prototype, "attachmentUrls", void 0);
 __decorate([
+    (0, graphql_1.Field)({ nullable: true }),
+    __metadata("design:type", String)
+], SystemGuide.prototype, "icon", void 0);
+__decorate([
     (0, graphql_1.Field)(() => graphql_1.Int),
     __metadata("design:type", Number)
 ], SystemGuide.prototype, "orderIndex", void 0);
 __decorate([
+    (0, graphql_1.Field)(() => graphql_1.Int),
+    __metadata("design:type", Number)
+], SystemGuide.prototype, "order", void 0);
+__decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], SystemGuide.prototype, "parentId", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => SystemGuide, { nullable: true }),
+    __metadata("design:type", SystemGuide)
+], SystemGuide.prototype, "parent", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [SystemGuide]),
+    __metadata("design:type", Array)
+], SystemGuide.prototype, "children", void 0);
 __decorate([
     (0, graphql_1.Field)(() => [String]),
     __metadata("design:type", Array)
@@ -139,6 +176,14 @@ __decorate([
     (0, graphql_1.Field)({ nullable: true }),
     __metadata("design:type", String)
 ], SystemGuide.prototype, "updatedById", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => GuideAuthor, { nullable: true }),
+    __metadata("design:type", GuideAuthor)
+], SystemGuide.prototype, "author", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => GuideAuthor, { nullable: true }),
+    __metadata("design:type", GuideAuthor)
+], SystemGuide.prototype, "updatedBy", void 0);
 exports.SystemGuideEntity = exports.SystemGuide = SystemGuide = __decorate([
     (0, graphql_1.ObjectType)()
 ], SystemGuide);

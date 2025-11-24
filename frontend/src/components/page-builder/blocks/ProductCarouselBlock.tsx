@@ -380,40 +380,36 @@ export const ProductCarouselBlock: React.FC<ProductCarouselBlockProps> = ({
       <div className="product-carousel-block py-4 sm:py-6 md:py-8 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           {/* Header với Navigation */}
-          <div className="relative flex items-center mb-4 sm:mb-6">
-            {/* Left Arrow */}
-            {editContent.showNavigation && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handlePrev}
-                disabled={currentIndex === 0 && !editContent.loop}
-                className="absolute left-0 z-10 -translate-x-2 sm:-translate-x-4 bg-white hover:bg-gray-100 rounded-full shadow-md border w-8 h-8 sm:w-10 sm:h-10"
-              >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
-            )}
-
-            {/* Title với background xanh lá */}
-            <div className="flex-1 flex justify-center">
-              <div className="inline-flex items-center bg-green-600 text-white px-6 sm:px-10 md:px-12 py-2 sm:py-3 rounded-l-full shadow-md">
-                <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold uppercase tracking-wide">
-                  {editContent.title || 'SẢN PHẨM'}
-                </h2>
-              </div>
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            {/* Title - Left */}
+            <div className="inline-flex items-center bg-green-600 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 rounded-tr-full rounded-br-full shadow-lg">
+              <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold uppercase tracking-wide whitespace-nowrap">
+                {editContent.title || 'SẢN PHẨM'}
+              </h2>
             </div>
 
-            {/* Right Arrow */}
-            {editContent.showNavigation && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleNext}
-                disabled={currentIndex >= maxIndex && !editContent.loop}
-                className="absolute right-0 z-10 translate-x-2 sm:translate-x-4 bg-white hover:bg-gray-100 rounded-full shadow-md border w-8 h-8 sm:w-10 sm:h-10"
-              >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </Button>
+            {/* Navigation Arrows - Right */}
+            {editContent.showNavigation && filteredProducts.length > itemsPerView && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handlePrev}
+                  disabled={currentIndex === 0 && !editContent.loop}
+                  className="bg-white hover:bg-gray-100 rounded-full shadow-md border w-8 h-8 sm:w-10 sm:h-10 disabled:opacity-50"
+                >
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleNext}
+                  disabled={currentIndex >= maxIndex && !editContent.loop}
+                  className="bg-white hover:bg-gray-100 rounded-full shadow-md border w-8 h-8 sm:w-10 sm:h-10 disabled:opacity-50"
+                >
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Button>
+              </div>
             )}
           </div>
 

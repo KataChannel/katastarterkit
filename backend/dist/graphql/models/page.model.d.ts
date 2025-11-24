@@ -34,7 +34,8 @@ export declare enum BlockType {
     DYNAMIC = "DYNAMIC",
     PRODUCT_LIST = "PRODUCT_LIST",
     PRODUCT_DETAIL = "PRODUCT_DETAIL",
-    PRODUCT_CAROUSEL = "PRODUCT_CAROUSEL"
+    PRODUCT_CAROUSEL = "PRODUCT_CAROUSEL",
+    BLOG_CAROUSEL = "BLOG_CAROUSEL"
 }
 export declare class PageBlock {
     id: string;

@@ -51,6 +51,7 @@ var BlockType;
     BlockType["PRODUCT_LIST"] = "PRODUCT_LIST";
     BlockType["PRODUCT_DETAIL"] = "PRODUCT_DETAIL";
     BlockType["PRODUCT_CAROUSEL"] = "PRODUCT_CAROUSEL";
+    BlockType["BLOG_CAROUSEL"] = "BLOG_CAROUSEL";
 })(BlockType || (exports.BlockType = BlockType = {}));
 (0, graphql_1.registerEnumType)(PageStatus, {
     name: 'PageStatus',

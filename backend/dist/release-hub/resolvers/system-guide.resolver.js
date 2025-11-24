@@ -24,6 +24,12 @@ let SystemGuideResolver = class SystemGuideResolver {
     constructor(systemGuideService) {
         this.systemGuideService = systemGuideService;
     }
+    order(guide) {
+        return guide.orderIndex;
+    }
+    icon(guide) {
+        return guide.icon || null;
+    }
     async getSystemGuides(type, parentId, search) {
         return this.systemGuideService.findAll({
             type,
@@ -59,8 +65,22 @@ let SystemGuideResolver = class SystemGuideResolver {
 };
 exports.SystemGuideResolver = SystemGuideResolver;
 __decorate([
+    (0, graphql_1.ResolveField)(() => Number),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], SystemGuideResolver.prototype, "order", null);
+__decorate([
+    (0, graphql_1.ResolveField)(() => String, { nullable: true }),
+    __param(0, (0, graphql_1.Parent)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], SystemGuideResolver.prototype, "icon", null);
+__decorate([
     (0, graphql_1.Query)(() => [system_guide_entity_1.SystemGuideEntity], { name: 'systemGuides' }),
-    __param(0, (0, graphql_1.Args)('type', { type: () => String, nullable: true })),
+    __param(0, (0, graphql_1.Args)('type', { type: () => system_guide_entity_1.GuideType, nullable: true })),
     __param(1, (0, graphql_1.Args)('parentId', { type: () => String, nullable: true })),
     __param(2, (0, graphql_1.Args)('search', { type: () => String, nullable: true })),
     __metadata("design:type", Function),
