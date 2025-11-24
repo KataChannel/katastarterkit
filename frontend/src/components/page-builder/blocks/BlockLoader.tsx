@@ -27,6 +27,7 @@ const CarouselBlock = lazy(() => import('./CarouselBlock').then(m => ({ default:
 const ProductListBlock = lazy(() => import('./ProductListBlock').then(m => ({ default: m.ProductListBlock })));
 const ProductDetailBlock = lazy(() => import('./ProductDetailBlock').then(m => ({ default: m.ProductDetailBlock })));
 const ProductCarouselBlock = lazy(() => import('./ProductCarouselBlock').then(m => ({ default: m.ProductCarouselBlock })));
+const BlogCarouselBlock = lazy(() => import('./BlogCarouselBlock').then(m => ({ default: m.BlogCarouselBlock })));
 const VideoBlock = lazy(() => import('./VideoBlock').then(m => ({ default: m.VideoBlock })));
 const SearchBlock = lazy(() => import('./SearchBlock').then(m => ({ default: m.SearchBlock })));
 const BookmarkBlock = lazy(() => import('./BookmarkBlock').then(m => ({ default: m.BookmarkBlock })));
@@ -74,6 +75,9 @@ export const LAZY_BLOCK_COMPONENTS: Record<BlockType | string, React.ComponentTy
   [BlockType.PRODUCT_LIST]: ProductListBlock,
   [BlockType.PRODUCT_DETAIL]: ProductDetailBlock,
   [BlockType.PRODUCT_CAROUSEL]: ProductCarouselBlock,
+  
+  // Blog Blocks
+  [BlockType.BLOG_CAROUSEL]: BlogCarouselBlock,
 };
 
 /**

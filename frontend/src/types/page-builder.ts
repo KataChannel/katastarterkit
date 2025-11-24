@@ -40,6 +40,9 @@ export enum BlockType {
   PRODUCT_LIST = 'PRODUCT_LIST',
   PRODUCT_DETAIL = 'PRODUCT_DETAIL',
   PRODUCT_CAROUSEL = 'PRODUCT_CAROUSEL',
+  
+  // Blog Blocks
+  BLOG_CAROUSEL = 'BLOG_CAROUSEL',
 }
 
 export enum PageStatus {
@@ -341,6 +344,29 @@ export interface ProductCarouselBlockContent {
   autoplayDelay?: number; // ms
   loop?: boolean;
   showNavigation?: boolean; // Hiện nút Next/Prev
+  responsive?: {
+    mobile?: number; // Số items hiển thị trên mobile
+    tablet?: number; // Số items hiển thị trên tablet
+    desktop?: number; // Số items hiển thị trên desktop
+  };
+}
+
+export interface BlogCarouselBlockContent {
+  title?: string;
+  categoryId?: string; // ID danh mục bài viết
+  filterType?: 'all' | 'featured' | 'category' | 'recent' | 'custom'; // Loại lọc
+  customQuery?: string; // GraphQL query tùy chỉnh
+  itemsToShow?: number; // Số bài viết hiển thị
+  showViewAllButton?: boolean; // Ẩn/hiện nút "Xem tất cả"
+  viewAllLink?: string; // Link khi click "Xem tất cả"
+  autoplay?: boolean;
+  autoplayDelay?: number; // ms
+  loop?: boolean;
+  showNavigation?: boolean; // Hiện nút Next/Prev
+  showExcerpt?: boolean; // Hiện/ẩn excerpt
+  showAuthor?: boolean; // Hiện/ẩn tác giả
+  showDate?: boolean; // Hiện/ẩn ngày đăng
+  showCategory?: boolean; // Hiện/ẩn danh mục
   responsive?: {
     mobile?: number; // Số items hiển thị trên mobile
     tablet?: number; // Số items hiển thị trên tablet

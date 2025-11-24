@@ -27,6 +27,7 @@ import {
   Mail,
   Zap,
   ShoppingCart,
+  Newspaper,
 } from 'lucide-react';
 
 /**
@@ -67,6 +68,9 @@ export const BLOCK_TYPES = [
   { type: BlockType.DYNAMIC, label: 'Dynamic Block', icon: Code, color: 'bg-purple-100 text-purple-600' },
   { type: BlockType.PRODUCT_LIST, label: 'Product List', icon: ShoppingCart, color: 'bg-green-100 text-green-600' },
   { type: BlockType.PRODUCT_CAROUSEL, label: 'Product Carousel', icon: Zap, color: 'bg-blue-100 text-blue-600' },
+  
+  // Blog Blocks
+  { type: BlockType.BLOG_CAROUSEL, label: 'Blog Carousel', icon: Newspaper, color: 'bg-indigo-100 text-indigo-600' },
 ];
 
 /**
@@ -114,6 +118,12 @@ export const BLOCK_TYPE_GROUPS = [
     category: 'Dynamic & E-commerce',
     blocks: BLOCK_TYPES.filter(b => 
       [BlockType.DYNAMIC, BlockType.PRODUCT_LIST, BlockType.PRODUCT_CAROUSEL].includes(b.type)
+    )
+  },
+  {
+    category: 'Blog Blocks',
+    blocks: BLOCK_TYPES.filter(b => 
+      [BlockType.BLOG_CAROUSEL].includes(b.type)
     )
   },
 ];

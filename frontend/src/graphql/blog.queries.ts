@@ -231,6 +231,7 @@ export interface Blog {
   excerpt?: string;
   author: BlogAuthor;
   thumbnailUrl: string;
+  featuredImage?: string;
   bannerUrl?: string;
   viewCount: number;
   publishedAt: string;
