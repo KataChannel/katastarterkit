@@ -207,7 +207,7 @@ export default function LessonViewer({
             <div className="bg-white rounded-lg p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">
-                  Video Progress
+                  Tiến độ video
                 </span>
                 <span className="text-sm font-bold text-blue-600">
                   {Math.round(progress)}%
@@ -237,7 +237,7 @@ export default function LessonViewer({
                 disabled={markingComplete}
                 className="mt-8 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 px-6 rounded-lg font-medium transition-colors"
               >
-                {markingComplete ? 'Marking Complete...' : 'Mark as Complete'}
+                {markingComplete ? 'Đang đánh dấu hoàn thành...' : 'Đánh dấu hoàn thành'}
               </button>
             )}
           </div>
@@ -252,9 +252,9 @@ export default function LessonViewer({
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No Quiz Available</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Chưa có bài kiểm tra</h3>
               <p className="text-gray-600 mb-6">
-                This lesson does not have a quiz yet
+                Bài học này chưa có bài kiểm tra
               </p>
             </div>
           );
@@ -275,7 +275,7 @@ export default function LessonViewer({
         if (!enrollmentId) {
           return (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-              <p className="text-yellow-800">You must be enrolled to take this quiz</p>
+              <p className="text-yellow-800">Bạn phải đăng ký khóa học để làm bài kiểm tra này</p>
             </div>
           );
         }
@@ -299,9 +299,9 @@ export default function LessonViewer({
             <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FileText className="w-8 h-8 text-orange-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Assignment Coming Soon</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Bài tập sắp ra mắt</h3>
             <p className="text-gray-600">
-              Assignment submission will be available in the next update
+              Tính năng nộp bài tập sẽ có trong bản cập nhật tiếp theo
             </p>
           </div>
         );
@@ -334,24 +334,24 @@ export default function LessonViewer({
                 {lesson.duration && (
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    <span>{lesson.duration} minutes</span>
+                    <span>{lesson.duration} phút</span>
                   </div>
                 )}
                 
                 {existingProgress?.timeSpent && existingProgress.timeSpent > 0 && (
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    <span>Time spent: {Math.floor(existingProgress.timeSpent / 60)}m {existingProgress.timeSpent % 60}s</span>
+                    <span>Thời gian học: {Math.floor(existingProgress.timeSpent / 60)}p {existingProgress.timeSpent % 60}s</span>
                   </div>
                 )}
                 
                 {completed && (
                   <div className="flex items-center gap-1 text-green-600">
                     <CheckCircle className="w-4 h-4" />
-                    <span className="font-medium">Completed</span>
+                    <span className="font-medium">Đã hoàn thành</span>
                     {existingProgress?.completedAt && (
                       <span className="text-xs text-gray-500 ml-2">
-                        on {new Date(existingProgress.completedAt).toLocaleDateString()}
+                        vào {new Date(existingProgress.completedAt).toLocaleDateString('vi-VN')}
                       </span>
                     )}
                   </div>
@@ -364,10 +364,10 @@ export default function LessonViewer({
                   onClick={handleUnmarkComplete}
                   disabled={markingComplete}
                   className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-                  title="Unmark as complete"
+                  title="Bỏ đánh dấu hoàn thành"
                 >
                   <RotateCcw className="w-4 h-4" />
-                  <span>Unmark</span>
+                  <span>Bỏ đánh dấu</span>
                 </button>
               )}
             </div>
@@ -383,14 +383,14 @@ export default function LessonViewer({
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-100">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-1">Ready for the next lesson?</h3>
+              <h3 className="font-semibold text-gray-900 mb-1">Sẵn sàng cho bài học tiếp theo?</h3>
               <p className="text-sm text-gray-600">{nextLesson.title}</p>
             </div>
             <button
               onClick={onNextLesson}
               className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-medium transition-colors flex items-center gap-2"
             >
-              Next Lesson
+              Bài học tiếp theo
               <PlayCircle className="w-4 h-4" />
             </button>
           </div>
