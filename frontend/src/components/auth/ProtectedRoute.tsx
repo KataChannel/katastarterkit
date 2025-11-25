@@ -36,9 +36,33 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         
         const userRole = payload.roleType as 'ADMIN' | 'SUPERADMIN' | 'INSTRUCTOR' | 'USER' | 'GUEST';
         
-        // Check if user role is allowed
-        if (!allowedRoles.includes(userRole)) {
-          console.warn(`❌ Access denied. User role: ${userRole}, Allowed roles: ${allowedRoles.join(', ')}`);
+        // Check legacy roleType field first
+        let hasAccess = allowedRoles.includes(userRole);
+        
+        // If not allowed by roleType, check RBAC roles array
+        if (!hasAccess && payload.roles && Array.isArray(payload.roles)) {
+          // Map RBAC role names to legacy roleType equivalents
+          const roleMapping: Record<string, ('ADMIN' | 'SUPERADMIN' | 'INSTRUCTOR' | 'USER' | 'GUEST')[]> = {
+            'admin': ['ADMIN'],
+            'super_admin': ['SUPERADMIN'],
+            'administrator': ['ADMIN', 'SUPERADMIN'],
+            'giangvien': ['INSTRUCTOR'],
+            'instructor': ['INSTRUCTOR'],
+          };
+          
+          hasAccess = payload.roles.some(role => {
+            const mappedRoles = roleMapping[role.name] || [];
+            return mappedRoles.some(mapped => allowedRoles.includes(mapped));
+          });
+          
+          if (hasAccess) {
+            console.log(`✅ Access granted via RBAC role: ${payload.roles.map(r => r.name).join(', ')}`);
+          }
+        }
+        
+        // Check if user has access
+        if (!hasAccess) {
+          console.warn(`❌ Access denied. User roleType: ${userRole}, RBAC roles: ${payload.roles?.map(r => r.name).join(', ') || 'none'}, Allowed roles: ${allowedRoles.join(', ')}`);
           
           // Redirect based on user's actual role
           switch (userRole) {
@@ -50,7 +74,12 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
               router.push('/lms/instructor');
               break;
             case 'USER':
-              router.push('/lms/my-learning');
+              // Check if user has instructor role in RBAC
+              if (payload.roles?.some(r => r.name === 'giangvien' || r.name === 'instructor')) {
+                router.push('/lms/instructor');
+              } else {
+                router.push('/lms/my-learning');
+              }
               break;
             default:
               router.push('/lms/courses');

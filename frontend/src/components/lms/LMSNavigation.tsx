@@ -93,14 +93,42 @@ export function LMSNavigation({ user: propUser }: LMSNavigationProps) {
   // Helper functions to check user roles
   const isAdmin = () => {
     if (!user) return false;
+    
+    // Check roleType first (legacy support)
     const roleType = 'roleType' in user ? user.roleType : ('role' in user ? user.role : undefined);
-    return roleType === 'ADMIN' || roleType === 'SUPERADMIN';
+    if (roleType === 'ADMIN' || roleType === 'SUPERADMIN') return true;
+    
+    // Check roles array for admin/super_admin roles
+    if ('roles' in user && Array.isArray(user.roles)) {
+      return user.roles.some((role: any) => 
+        role.name === 'admin' || 
+        role.name === 'super_admin' ||
+        role.name === 'administrator'
+      );
+    }
+    
+    return false;
   };
 
   const isInstructor = () => {
     if (!user) return false;
+    
+    // Admin has all permissions including instructor
+    if (isAdmin()) return true;
+    
+    // Check roleType first (legacy support)
     const roleType = 'roleType' in user ? user.roleType : ('role' in user ? user.role : undefined);
-    return roleType === 'INSTRUCTOR' || isAdmin();
+    if (roleType === 'INSTRUCTOR') return true;
+    
+    // Check roles array for giangvien role (NEW RBAC SYSTEM)
+    if ('roles' in user && Array.isArray(user.roles)) {
+      return user.roles.some((role: any) => 
+        role.name === 'giangvien' || 
+        role.name === 'instructor'
+      );
+    }
+    
+    return false;
   };
 
   // Get user display name

@@ -63,11 +63,34 @@ export class AuthService {
   }
 
   async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
+    // Fetch user's RBAC roles with ALLOW effect
+    const userRoles = await this.prisma.userRoleAssignment.findMany({
+      where: {
+        userId: user.id,
+        effect: 'allow',
+      },
+      include: {
+        role: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+          },
+        },
+      },
+    });
+
     const payload = { 
       sub: user.id, 
       email: user.email, 
       username: user.username,
-      roleType: user.roleType 
+      roleType: user.roleType,
+      // Include RBAC roles array in JWT payload
+      roles: userRoles.map(assignment => ({
+        id: assignment.role.id,
+        name: assignment.role.name,
+        displayName: assignment.role.displayName,
+      })),
     };
 
     const accessToken = this.jwtService.sign(payload, {
