@@ -3,12 +3,14 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import { useFindMany, useFindUnique, useCreateOne, useUpdateOne, useDeleteOne } from '@/hooks/useDynamicGraphQL';
+import React, { useState, useEffect, useRef } from 'react';
+import { useMutation } from '@apollo/client';
+import { useFindMany } from '@/hooks/useDynamicGraphQL';
+import { MARK_LESSON_COMPLETE, UNMARK_LESSON_COMPLETE, UPDATE_VIDEO_PROGRESS } from '@/graphql/lms/courses.graphql';
 import VideoPlayer from './VideoPlayer';
 import QuizTaker from './QuizTaker';
 import QuizResults from './QuizResults';
-import { PlayCircle, FileText, CheckCircle, Clock } from 'lucide-react';
+import { PlayCircle, FileText, CheckCircle, Clock, RotateCcw } from 'lucide-react';
 
 interface Lesson {
   id: string;
@@ -41,10 +43,13 @@ export default function LessonViewer({
   const [completed, setCompleted] = useState(isCompleted);
   const [quizAttemptId, setQuizAttemptId] = useState<string | null>(null);
   const [markingComplete, setMarkingComplete] = useState(false);
+  const [watchStartTime, setWatchStartTime] = useState<number | null>(null);
+  const progressUpdateTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ✅ Migrated: Create or update lesson progress
-  const [createLessonProgress] = useCreateOne('lessonProgress');
-  const [updateLessonProgress] = useUpdateOne('lessonProgress');
+  // GraphQL mutations
+  const [markLessonComplete] = useMutation(MARK_LESSON_COMPLETE);
+  const [unmarkLessonComplete] = useMutation(UNMARK_LESSON_COMPLETE);
+  const [updateVideoProgress] = useMutation(UPDATE_VIDEO_PROGRESS);
 
   // ✅ Migrated: Fetch quizzes by lesson - Always fetch quizzes for any lesson
   const { data: quizzes, loading: loadingQuizzes } = useFindMany('quiz', 
@@ -66,8 +71,62 @@ export default function LessonViewer({
 
   const existingProgress = progressRecords?.[0];
 
-  const handleVideoProgress = (progressPercent: number) => {
+  // Initialize progress from existing record
+  useEffect(() => {
+    if (existingProgress) {
+      setCompleted(existingProgress.completed);
+      if (existingProgress.videoProgress) {
+        setProgress(existingProgress.videoProgress);
+      }
+    }
+  }, [existingProgress]);
+
+  // Track time spent
+  useEffect(() => {
+    if (lesson.type === 'VIDEO' || lesson.type === 'TEXT') {
+      setWatchStartTime(Date.now());
+      
+      return () => {
+        setWatchStartTime(null);
+        if (progressUpdateTimerRef.current) {
+          clearTimeout(progressUpdateTimerRef.current);
+        }
+      };
+    }
+  }, [lesson.id, lesson.type]);
+
+  const calculateTimeSpent = () => {
+    if (!watchStartTime) return 0;
+    return Math.floor((Date.now() - watchStartTime) / 1000);
+  };
+
+  const handleVideoProgress = async (progressPercent: number, watchTimeSeconds: number) => {
     setProgress(progressPercent);
+    
+    // Debounce video progress updates
+    if (progressUpdateTimerRef.current) {
+      clearTimeout(progressUpdateTimerRef.current);
+    }
+
+    progressUpdateTimerRef.current = setTimeout(async () => {
+      if (enrollmentId) {
+        const timeSpent = calculateTimeSpent();
+        
+        try {
+          await updateVideoProgress({
+            variables: {
+              enrollmentId,
+              lessonId: lesson.id,
+              videoProgress: progressPercent,
+              watchTime: Math.floor(watchTimeSeconds),
+              timeSpent: Math.floor(timeSpent),
+            },
+          });
+        } catch (error) {
+          console.error('Failed to update video progress:', error);
+        }
+      }
+    }, 2000); // Update every 2 seconds
     
     // Auto-mark as complete when 90% watched
     if (progressPercent >= 90 && !completed && enrollmentId) {
@@ -86,50 +145,12 @@ export default function LessonViewer({
 
     setMarkingComplete(true);
     try {
-      // Refetch to ensure we have the latest progress data
-      await refetchProgress();
-      
-      // Create or update lesson progress
-      if (existingProgress?.id) {
-        // Update existing progress
-        await updateLessonProgress({
-          where: { id: existingProgress.id },
-          data: {
-            completed: true,
-            completedAt: new Date().toISOString(),
-          },
-        });
-      } else {
-        // Try to create new progress record, handle duplicate error
-        try {
-          await createLessonProgress({
-            data: {
-              enrollmentId,
-              lessonId: lesson.id,
-              completed: true,
-              completedAt: new Date().toISOString(),
-            },
-          });
-        } catch (createError: any) {
-          // If record already exists (race condition), refetch and update instead
-          if (createError?.message?.includes('unique constraint') || 
-              createError?.message?.includes('already exists')) {
-            await refetchProgress();
-            const latestProgress = progressRecords?.[0];
-            if (latestProgress?.id) {
-              await updateLessonProgress({
-                where: { id: latestProgress.id },
-                data: {
-                  completed: true,
-                  completedAt: new Date().toISOString(),
-                },
-              });
-            }
-          } else {
-            throw createError;
-          }
-        }
-      }
+      await markLessonComplete({
+        variables: {
+          enrollmentId,
+          lessonId: lesson.id,
+        },
+      });
       
       setCompleted(true);
       
@@ -140,6 +161,32 @@ export default function LessonViewer({
       onComplete?.();
     } catch (error) {
       console.error('Failed to mark lesson complete:', error);
+    } finally {
+      setMarkingComplete(false);
+    }
+  };
+
+  const handleUnmarkComplete = async () => {
+    if (!enrollmentId || markingComplete) return;
+
+    setMarkingComplete(true);
+    try {
+      await unmarkLessonComplete({
+        variables: {
+          enrollmentId,
+          lessonId: lesson.id,
+        },
+      });
+      
+      setCompleted(false);
+      
+      // Refetch enrollment progress
+      await refetchProgress();
+      
+      // Call parent onComplete callback to refresh enrollment
+      onComplete?.();
+    } catch (error) {
+      console.error('Failed to unmark lesson complete:', error);
     } finally {
       setMarkingComplete(false);
     }
@@ -282,19 +329,46 @@ export default function LessonViewer({
               <p className="text-gray-600 mb-4">{lesson.description}</p>
             )}
             
-            <div className="flex items-center gap-4 text-sm text-gray-500">
-              {lesson.duration && (
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{lesson.duration} minutes</span>
-                </div>
-              )}
-              
-              {completed && (
-                <div className="flex items-center gap-1 text-green-600">
-                  <CheckCircle className="w-4 h-4" />
-                  <span className="font-medium">Completed</span>
-                </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                {lesson.duration && (
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    <span>{lesson.duration} minutes</span>
+                  </div>
+                )}
+                
+                {existingProgress?.timeSpent && existingProgress.timeSpent > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    <span>Time spent: {Math.floor(existingProgress.timeSpent / 60)}m {existingProgress.timeSpent % 60}s</span>
+                  </div>
+                )}
+                
+                {completed && (
+                  <div className="flex items-center gap-1 text-green-600">
+                    <CheckCircle className="w-4 h-4" />
+                    <span className="font-medium">Completed</span>
+                    {existingProgress?.completedAt && (
+                      <span className="text-xs text-gray-500 ml-2">
+                        on {new Date(existingProgress.completedAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Unmark Complete Button */}
+              {completed && enrollmentId && (
+                <button
+                  onClick={handleUnmarkComplete}
+                  disabled={markingComplete}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                  title="Unmark as complete"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Unmark</span>
+                </button>
               )}
             </div>
           </div>

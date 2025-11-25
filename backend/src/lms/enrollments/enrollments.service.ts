@@ -28,11 +28,15 @@ export class EnrollmentsService {
           courseId,
         },
       },
+      include: {
+        course: true,
+      },
     });
 
     if (existingEnrollment) {
       if (existingEnrollment.status === EnrollmentStatus.ACTIVE) {
-        throw new BadRequestException('Already enrolled in this course');
+        // Return existing enrollment instead of throwing error
+        return existingEnrollment;
       }
       // Reactivate if previously dropped
       return this.prisma.enrollment.update({
@@ -297,13 +301,18 @@ export class EnrollmentsService {
       }
 
       // Update to completed
-      return this.prisma.lessonProgress.update({
+      const updated = await this.prisma.lessonProgress.update({
         where: { id: existingProgress.id },
         data: {
           completed: true,
           completedAt: new Date(),
         },
       });
+
+      // Recalculate enrollment progress
+      await this.updateEnrollmentProgress(enrollmentId);
+
+      return updated;
     }
 
     // Create new progress record
@@ -320,6 +329,114 @@ export class EnrollmentsService {
     await this.updateEnrollmentProgress(enrollmentId);
 
     return lessonProgress;
+  }
+
+  async unmarkLessonComplete(userId: string, enrollmentId: string, lessonId: string) {
+    // Verify enrollment belongs to user
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: { id: enrollmentId },
+    });
+
+    if (!enrollment) {
+      throw new NotFoundException('Enrollment not found');
+    }
+
+    if (enrollment.userId !== userId) {
+      throw new ForbiddenException('Not authorized to update this enrollment');
+    }
+
+    // Find existing progress
+    const existingProgress = await this.prisma.lessonProgress.findUnique({
+      where: {
+        enrollmentId_lessonId: {
+          enrollmentId,
+          lessonId,
+        },
+      },
+    });
+
+    if (!existingProgress) {
+      throw new NotFoundException('Lesson progress not found');
+    }
+
+    // Update to not completed
+    const updated = await this.prisma.lessonProgress.update({
+      where: { id: existingProgress.id },
+      data: {
+        completed: false,
+        completedAt: null,
+      },
+    });
+
+    // Recalculate enrollment progress
+    await this.updateEnrollmentProgress(enrollmentId);
+
+    return updated;
+  }
+
+  async updateVideoProgress(
+    userId: string,
+    enrollmentId: string,
+    lessonId: string,
+    videoProgress: number,
+    watchTime: number,
+    timeSpent: number
+  ) {
+    // Verify enrollment belongs to user
+    const enrollment = await this.prisma.enrollment.findUnique({
+      where: { id: enrollmentId },
+    });
+
+    if (!enrollment) {
+      throw new NotFoundException('Enrollment not found');
+    }
+
+    if (enrollment.userId !== userId) {
+      throw new ForbiddenException('Not authorized to update this enrollment');
+    }
+
+    // Validate progress
+    if (videoProgress < 0 || videoProgress > 100) {
+      throw new BadRequestException('Video progress must be between 0 and 100');
+    }
+
+    // Find or create progress record
+    const existingProgress = await this.prisma.lessonProgress.findUnique({
+      where: {
+        enrollmentId_lessonId: {
+          enrollmentId,
+          lessonId,
+        },
+      },
+    });
+
+    const now = new Date();
+
+    if (existingProgress) {
+      // Update existing progress
+      return this.prisma.lessonProgress.update({
+        where: { id: existingProgress.id },
+        data: {
+          videoProgress,
+          watchTime,
+          timeSpent,
+          lastWatchedAt: now,
+        },
+      });
+    }
+
+    // Create new progress record
+    return this.prisma.lessonProgress.create({
+      data: {
+        enrollmentId,
+        lessonId,
+        videoProgress,
+        watchTime,
+        timeSpent,
+        lastWatchedAt: now,
+        completed: false,
+      },
+    });
   }
 
   private async updateEnrollmentProgress(enrollmentId: string) {
