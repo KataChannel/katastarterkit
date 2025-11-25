@@ -6,7 +6,7 @@ import { decodeToken } from '@/lib/auth-utils';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: ('ADMIN' | 'USER' | 'GUEST')[];
+  allowedRoles?: ('ADMIN' | 'SUPERADMIN' | 'INSTRUCTOR' | 'USER' | 'GUEST')[];
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
@@ -34,7 +34,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
           return;
         }
         
-        const userRole = payload.roleType as 'ADMIN' | 'USER' | 'GUEST';
+        const userRole = payload.roleType as 'ADMIN' | 'SUPERADMIN' | 'INSTRUCTOR' | 'USER' | 'GUEST';
         
         // Check if user role is allowed
         if (!allowedRoles.includes(userRole)) {
@@ -43,7 +43,11 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
           // Redirect based on user's actual role
           switch (userRole) {
             case 'ADMIN':
+            case 'SUPERADMIN':
               router.push('/lms/admin');
+              break;
+            case 'INSTRUCTOR':
+              router.push('/lms/instructor');
               break;
             case 'USER':
               router.push('/lms/my-learning');

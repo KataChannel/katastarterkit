@@ -80,6 +80,21 @@ export class Course {
   @Field(() => String)
   instructorId: string;
 
+  @Field(() => Boolean, { defaultValue: false })
+  approvalRequested: boolean;
+
+  @Field(() => Date, { nullable: true })
+  approvalRequestedAt?: Date;
+
+  @Field({ nullable: true })
+  approvedBy?: string;
+
+  @Field(() => Date, { nullable: true })
+  approvedAt?: Date;
+
+  @Field({ nullable: true })
+  rejectionReason?: string;
+
   @Field()
   createdAt: Date;
 

@@ -95,6 +95,36 @@ export class CoursesResolver {
     return result.success;
   }
 
+  // ==================== APPROVAL WORKFLOW ====================
+
+  @Mutation(() => Course, { name: 'requestCourseApproval' })
+  @UseGuards(JwtAuthGuard)
+  requestCourseApproval(
+    @CurrentUser() user: any,
+    @Args('courseId', { type: () => ID }) courseId: string,
+  ) {
+    return this.coursesService.requestApproval(courseId, user.id);
+  }
+
+  @Mutation(() => Course, { name: 'approveCourse' })
+  @UseGuards(JwtAuthGuard)
+  approveCourse(
+    @CurrentUser() user: any,
+    @Args('courseId', { type: () => ID }) courseId: string,
+  ) {
+    return this.coursesService.approveCourse(courseId, user.id);
+  }
+
+  @Mutation(() => Course, { name: 'rejectCourse' })
+  @UseGuards(JwtAuthGuard)
+  rejectCourse(
+    @CurrentUser() user: any,
+    @Args('courseId', { type: () => ID }) courseId: string,
+    @Args('reason', { type: () => String }) reason: string,
+  ) {
+    return this.coursesService.rejectCourse(courseId, user.id, reason);
+  }
+
   // ==================== MODULE MUTATIONS ====================
   // ✅ FIXED: Chuyển từ @Roles(ADMIN) sang JwtAuthGuard để instructor có thể tạo module
   // Service layer sẽ kiểm tra ownership của course

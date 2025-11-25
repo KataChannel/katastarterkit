@@ -67,6 +67,12 @@ const instructorNavigation: NavigationItem = {
   requiredRole: 'instructor',
 };
 
+const adminNavigation: NavigationItem = {
+  name: 'Quản trị LMS',
+  href: '/lms/admin',
+  icon: Settings,
+};
+
 interface LMSNavigationProps {
   user?: {
     name?: string;
@@ -74,13 +80,46 @@ interface LMSNavigationProps {
     avatar?: string;
     role?: string;
   } | null;
-  showInstructorLink?: boolean;
 }
 
-export function LMSNavigation({ user, showInstructorLink = true }: LMSNavigationProps) {
+export function LMSNavigation({ user: propUser }: LMSNavigationProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { logout } = useAuth();
+  const { user: authUser, logout } = useAuth();
+  
+  // Use authUser from context if available, otherwise fallback to propUser
+  const user = authUser || propUser;
+
+  // Helper functions to check user roles
+  const isAdmin = () => {
+    if (!user) return false;
+    const roleType = 'roleType' in user ? user.roleType : ('role' in user ? user.role : undefined);
+    return roleType === 'ADMIN' || roleType === 'SUPERADMIN';
+  };
+
+  const isInstructor = () => {
+    if (!user) return false;
+    const roleType = 'roleType' in user ? user.roleType : ('role' in user ? user.role : undefined);
+    return roleType === 'INSTRUCTOR' || isAdmin();
+  };
+
+  // Get user display name
+  const getUserName = () => {
+    if (!user) return '';
+    if ('name' in user && user.name) return user.name;
+    if ('firstName' in user && 'lastName' in user) {
+      return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    }
+    if ('username' in user) return user.username;
+    return user.email;
+  };
+
+  // Get user avatar
+  const getUserAvatar = () => {
+    if (!user) return undefined;
+    if ('avatar' in user) return user.avatar;
+    return undefined;
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -131,7 +170,10 @@ export function LMSNavigation({ user, showInstructorLink = true }: LMSNavigation
             {mainNavigation.map((item) => (
               <NavLink key={item.href} item={item} />
             ))}
-            {showInstructorLink && (
+            {isAdmin() && (
+              <NavLink item={adminNavigation} />
+            )}
+            {isInstructor() && !isAdmin() && (
               <NavLink item={instructorNavigation} />
             )}
           </nav>
@@ -143,9 +185,9 @@ export function LMSNavigation({ user, showInstructorLink = true }: LMSNavigation
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                     <Avatar className="h-9 w-9">
-                      <AvatarImage src={user.avatar} alt={user.name || user.email} />
+                      <AvatarImage src={getUserAvatar()} alt={getUserName() || user.email} />
                       <AvatarFallback>
-                        {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
+                        {getUserName()?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -153,8 +195,8 @@ export function LMSNavigation({ user, showInstructorLink = true }: LMSNavigation
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="flex items-center justify-start gap-2 p-2">
                     <div className="flex flex-col space-y-1">
-                      {user.name && (
-                        <p className="text-sm font-medium">{user.name}</p>
+                      {getUserName() && (
+                        <p className="text-sm font-medium">{getUserName()}</p>
                       )}
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
@@ -172,15 +214,25 @@ export function LMSNavigation({ user, showInstructorLink = true }: LMSNavigation
                       Chứng chỉ của tôi
                     </Link>
                   </DropdownMenuItem>
-                  {showInstructorLink && (
+                  {(isAdmin() || isInstructor()) && (
                     <>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/lms/instructor">
-                          <LayoutDashboard className="mr-2 h-4 w-4" />
-                          Dashboard Giảng viên
-                        </Link>
-                      </DropdownMenuItem>
+                      {isAdmin() && (
+                        <DropdownMenuItem asChild>
+                          <Link href="/lms/admin">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Quản trị LMS
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                      {isInstructor() && !isAdmin() && (
+                        <DropdownMenuItem asChild>
+                          <Link href="/lms/instructor">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Dashboard Giảng viên
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
                     </>
                   )}
                   <DropdownMenuSeparator />
@@ -219,7 +271,10 @@ export function LMSNavigation({ user, showInstructorLink = true }: LMSNavigation
                     {mainNavigation.map((item) => (
                       <NavLink key={item.href} item={item} />
                     ))}
-                    {showInstructorLink && (
+                    {isAdmin() && (
+                      <NavLink item={adminNavigation} />
+                    )}
+                    {isInstructor() && !isAdmin() && (
                       <NavLink item={instructorNavigation} />
                     )}
                   </nav>

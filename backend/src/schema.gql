@@ -900,6 +900,10 @@ input CountInput {
 }
 
 type Course {
+  approvalRequested: Boolean!
+  approvalRequestedAt: DateTime
+  approvedAt: DateTime
+  approvedBy: String
   avgRating: Float!
   category: CourseCategory
   categoryId: String
@@ -916,6 +920,7 @@ type Course {
   modules: [CourseModule!]
   price: Float!
   publishedAt: DateTime
+  rejectionReason: String
   requirements: [String!]!
   reviewCount: Int!
   slug: String!
@@ -2630,6 +2635,8 @@ type Mutation {
   analyzeSourceDocument(id: ID!): SourceDocument!
   applyCoupon(input: ApplyCouponInput!): ApplyCouponResponse!
   approveConversion(id: String!): Boolean!
+  approveCourse(courseId: ID!): Course!
+  approveDocument(documentId: ID!): SourceDocument!
   archiveCourse(id: ID!): Course!
   assignConversationToAgent(agentId: String!, conversationId: String!): SupportConversation!
   assignRolePermissions(input: AssignRolePermissionInput!): Boolean!
@@ -2861,6 +2868,8 @@ type Mutation {
   """Reindex all data from database into Orama search indexes"""
   reindexAllData: ReindexResult!
   rejectConversion(id: String!, reason: String): Boolean!
+  rejectCourse(courseId: ID!, reason: String!): Course!
+  rejectDocument(documentId: ID!, reason: String!): SourceDocument!
   removeFromCart(input: RemoveFromCartInput!, sessionId: String): RemoveFromCartResponse!
 
   """Xóa thành viên khỏi project"""
@@ -2869,6 +2878,8 @@ type Mutation {
   reorderLessons(input: ReorderLessonsInput!): [Lesson!]!
   reorderMenus(menuOrders: [MenuOrderDto!]!): [MenuResponseDto!]!
   reorderModules(input: ReorderModulesInput!): [CourseModule!]!
+  requestCourseApproval(courseId: ID!): Course!
+  requestDocumentApproval(documentId: ID!): SourceDocument!
   requestForgotPassword(email: String!): OtpResponse!
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   resetPasswordWithToken(email: String!, newPassword: String!, token: String!): OtpResponse!
@@ -4607,6 +4618,11 @@ type SourceDocument {
   aiKeywords: [String!]!
   aiSummary: String
   aiTopics: [String!]!
+  approvalRequested: Boolean!
+  approvalRequestedAt: DateTime
+  approvalRequestedBy: String
+  approvedAt: DateTime
+  approvedBy: String
   category: SourceDocumentCategory
   categoryId: ID
   content: String
@@ -4623,6 +4639,7 @@ type SourceDocument {
   metadata: JSON
   mimeType: String
   publishedAt: DateTime
+  rejectionReason: String
   status: SourceDocumentStatus!
   tags: [String!]!
   thumbnailUrl: String

@@ -200,7 +200,7 @@ export default function InstructorLayout({
   };
 
   return (
-    <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>
+    <ProtectedRoute allowedRoles={['INSTRUCTOR', 'ADMIN', 'SUPERADMIN']}>
       <div className="flex h-screen bg-gray-50">
         {/* Mobile Header with Menu Button */}
         <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">

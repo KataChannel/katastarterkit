@@ -311,3 +311,42 @@ export const DELETE_SOURCE_DOCUMENT_CATEGORY = gql`
     }
   }
 `;
+
+// ============== Approval Workflow ==============
+
+export const REQUEST_DOCUMENT_APPROVAL = gql`
+  mutation RequestDocumentApproval($documentId: ID!) {
+    requestDocumentApproval(documentId: $documentId) {
+      id
+      title
+      status
+      approvalRequested
+      approvalRequestedAt
+    }
+  }
+`;
+
+export const APPROVE_DOCUMENT = gql`
+  mutation ApproveDocument($documentId: ID!) {
+    approveDocument(documentId: $documentId) {
+      id
+      title
+      status
+      publishedAt
+      approvedBy
+      approvedAt
+    }
+  }
+`;
+
+export const REJECT_DOCUMENT = gql`
+  mutation RejectDocument($documentId: ID!, $reason: String!) {
+    rejectDocument(documentId: $documentId, reason: $reason) {
+      id
+      title
+      status
+      approvalRequested
+      rejectionReason
+    }
+  }
+`;

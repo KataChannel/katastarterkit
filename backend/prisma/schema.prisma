@@ -3284,6 +3284,13 @@ model Course {
   enrollmentCount Int   @default(0)
   viewCount       Int   @default(0) // Track popularity
 
+  // Approval workflow for instructor-created courses
+  approvalRequested   Boolean   @default(false) // Instructor requested approval
+  approvalRequestedAt DateTime? // When approval was requested
+  approvedBy          String? // userId of admin who approved
+  approvedAt          DateTime? // When it was approved
+  rejectionReason     String?   @db.Text // Reason if rejected
+
   // SEO & Marketing
   metaTitle       String?  @db.VarChar(255)
   metaDescription String?  @db.VarChar(500)
@@ -3615,6 +3622,14 @@ model SourceDocument {
   // Organization
   categoryId String?
   tags       String[] @default([])
+
+  // Approval workflow
+  approvalRequested   Boolean   @default(false) // Instructor requested approval
+  approvalRequestedAt DateTime? // When approval was requested
+  approvalRequestedBy String? // userId of who requested
+  approvedBy          String? // userId of admin who approved
+  approvedAt          DateTime? // When it was approved
+  rejectionReason     String?   @db.Text // Reason if rejected
 
   // AI Analysis (future)
   aiSummary    String?   @db.Text // AI-generated summary

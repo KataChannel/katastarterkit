@@ -234,6 +234,45 @@ export const DELETE_COURSE = gql`
   }
 `;
 
+// ============== Approval Workflow ==============
+
+export const REQUEST_COURSE_APPROVAL = gql`
+  mutation RequestCourseApproval($courseId: ID!) {
+    requestCourseApproval(courseId: $courseId) {
+      id
+      title
+      status
+      approvalRequested
+      approvalRequestedAt
+    }
+  }
+`;
+
+export const APPROVE_COURSE = gql`
+  mutation ApproveCourse($courseId: ID!) {
+    approveCourse(courseId: $courseId) {
+      id
+      title
+      status
+      publishedAt
+      approvedBy
+      approvedAt
+    }
+  }
+`;
+
+export const REJECT_COURSE = gql`
+  mutation RejectCourse($courseId: ID!, $reason: String!) {
+    rejectCourse(courseId: $courseId, reason: $reason) {
+      id
+      title
+      status
+      approvalRequested
+      rejectionReason
+    }
+  }
+`;
+
 export const MARK_LESSON_COMPLETE = gql`
   mutation MarkLessonComplete($enrollmentId: ID!, $lessonId: ID!) {
     markLessonComplete(enrollmentId: $enrollmentId, lessonId: $lessonId) {

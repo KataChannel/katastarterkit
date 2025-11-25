@@ -17,7 +17,8 @@ import {
   X,
   ShoppingBag,
   FileText,
-  FolderTree
+  FolderTree,
+  CheckSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -71,6 +72,11 @@ const menuItems = [
     title: 'Ghi danh',
     icon: UserCheck,
     href: '/lms/admin/enrollments',
+  },
+  {
+    title: 'Phê duyệt',
+    icon: CheckSquare,
+    href: '/lms/admin/approvals',
   },
   {
     title: 'Bài kiểm tra',
@@ -172,7 +178,7 @@ export default function AdminLMSLayout({ children }: AdminLMSLayoutProps) {
   );
 
   return (
-    <ProtectedRoute allowedRoles={['ADMIN']}>
+    <ProtectedRoute allowedRoles={['ADMIN', 'SUPERADMIN']}>
       <div className="flex h-screen bg-gray-50">
         {/* Mobile Header with Menu Button */}
         <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">

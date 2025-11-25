@@ -6,11 +6,17 @@ import { CourseFiltersInput } from './dto/course-filters.input';
 import { CreateModuleInput, UpdateModuleInput, ReorderModulesInput } from './dto/module.input';
 import { CreateLessonInput, UpdateLessonInput, ReorderLessonsInput } from './dto/lesson.input';
 import { Prisma, CourseStatus } from '@prisma/client';
+import { NotificationService } from '../../services/notification.service';
+import { PushNotificationService } from '../../services/push-notification.service';
 import slugify from 'slugify';
 
 @Injectable()
 export class CoursesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService,
+    private pushNotificationService: PushNotificationService,
+  ) {}
 
   async create(userId: string, createCourseInput: CreateCourseInput) {
     const { title, categoryId, ...rest } = createCourseInput;
@@ -322,6 +328,177 @@ export class CoursesService {
       where: { id },
       data: {
         status: CourseStatus.ARCHIVED,
+      },
+    });
+  }
+
+  // ============== Approval Workflow ==============
+
+  /**
+   * Request approval for a course (Instructor -> Admin)
+   */
+  async requestApproval(courseId: string, userId: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        modules: {
+          include: {
+            lessons: true,
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${courseId} not found`);
+    }
+
+    if (course.instructorId !== userId) {
+      throw new ForbiddenException('You do not have permission to request approval for this course');
+    }
+
+    if (course.status !== CourseStatus.DRAFT) {
+      throw new BadRequestException('Only draft courses can be submitted for approval');
+    }
+
+    if (course.approvalRequested) {
+      throw new BadRequestException('Approval already requested for this course');
+    }
+
+    // Validation: Course must have at least one module with lessons
+    if (course.modules.length === 0) {
+      throw new BadRequestException('Course must have at least one module before requesting approval');
+    }
+
+    const hasLessons = course.modules.some(module => module.lessons.length > 0);
+    if (!hasLessons) {
+      throw new BadRequestException('Course must have at least one lesson before requesting approval');
+    }
+
+    // Update course
+    const updated = await this.prisma.course.update({
+      where: { id: courseId },
+      data: {
+        approvalRequested: true,
+        approvalRequestedAt: new Date(),
+      },
+    });
+
+    // Get instructor info
+    const instructor = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true, firstName: true, lastName: true },
+    });
+
+    const instructorName = instructor?.firstName && instructor?.lastName
+      ? `${instructor.firstName} ${instructor.lastName}`
+      : instructor?.username || 'Giảng viên';
+
+    // Send notification to all admins
+    const admins = await this.prisma.user.findMany({
+      where: {
+        roles: {
+          some: {
+            role: {
+              name: 'ADMIN',
+            },
+          },
+        },
+      },
+      select: { id: true },
+    });
+
+    // Send notification and push to each admin
+    for (const admin of admins) {
+      try {
+        await this.notificationService.create({
+          userId: admin.id,
+          title: 'Yêu cầu phê duyệt khóa học',
+          message: `${instructorName} đã gửi yêu cầu phê duyệt khóa học "${updated.title}"`,
+          type: 'SYSTEM',
+          data: {
+            courseId: updated.id,
+            courseTitle: updated.title,
+            courseSlug: updated.slug,
+            instructorId: userId,
+            instructorName,
+            type: 'course_approval_request',
+          },
+        });
+
+        // Send push notification
+        await this.pushNotificationService.sendToUser(admin.id, {
+          title: 'Yêu cầu phê duyệt khóa học',
+          message: `${instructorName} đã gửi yêu cầu phê duyệt khóa học "${updated.title}"`,
+          url: `/admin/lms/courses/approvals`,
+          data: {
+            courseId: updated.id,
+            type: 'course_approval_request',
+          },
+        });
+      } catch (error) {
+        console.error(`Failed to notify admin ${admin.id}:`, error);
+      }
+    }
+
+    return updated;
+  }
+
+  /**
+   * Approve a course (Admin only)
+   */
+  async approveCourse(courseId: string, adminUserId: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${courseId} not found`);
+    }
+
+    if (!course.approvalRequested) {
+      throw new BadRequestException('No approval request found for this course');
+    }
+
+    if (course.status === CourseStatus.PUBLISHED) {
+      throw new BadRequestException('Course is already published');
+    }
+
+    // Update course to PUBLISHED
+    return this.prisma.course.update({
+      where: { id: courseId },
+      data: {
+        status: CourseStatus.PUBLISHED,
+        publishedAt: new Date(),
+        approvedBy: adminUserId,
+        approvedAt: new Date(),
+      },
+    });
+  }
+
+  /**
+   * Reject a course approval request (Admin only)
+   */
+  async rejectCourse(courseId: string, adminUserId: string, reason: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${courseId} not found`);
+    }
+
+    if (!course.approvalRequested) {
+      throw new BadRequestException('No approval request found for this course');
+    }
+
+    // Reset approval request
+    return this.prisma.course.update({
+      where: { id: courseId },
+      data: {
+        approvalRequested: false,
+        approvalRequestedAt: null,
+        rejectionReason: reason,
       },
     });
   }

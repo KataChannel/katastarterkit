@@ -8,6 +8,9 @@ import { MinioModule } from '../../minio/minio.module';
 import { AiModule } from '../../ai/ai.module';
 import { AuthModule } from '../../auth/auth.module';
 import { UserService } from '../../services/user.service';
+import { NotificationService } from '../../services/notification.service';
+import { PushNotificationService } from '../../services/push-notification.service';
+import { RealTimeNotificationService } from '../../realtime/real-time-notification.service';
 
 @Module({
   imports: [MinioModule, AiModule, AuthModule],
@@ -18,6 +21,9 @@ import { UserService } from '../../services/user.service';
     SourceDocumentCategoryResolver,
     SourceDocumentCategoryService,
     UserService,
+    NotificationService,
+    PushNotificationService,
+    RealTimeNotificationService,
   ],
   exports: [SourceDocumentService, SourceDocumentCategoryService],
 })

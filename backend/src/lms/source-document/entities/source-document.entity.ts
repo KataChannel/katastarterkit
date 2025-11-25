@@ -71,6 +71,24 @@ export class SourceDocument {
   @Field(() => SourceDocumentStatus)
   status: SourceDocumentStatus;
 
+  @Field(() => Boolean, { defaultValue: false })
+  approvalRequested: boolean;
+
+  @Field(() => Date, { nullable: true })
+  approvalRequestedAt?: Date;
+
+  @Field({ nullable: true })
+  approvalRequestedBy?: string;
+
+  @Field({ nullable: true })
+  approvedBy?: string;
+
+  @Field(() => Date, { nullable: true })
+  approvedAt?: Date;
+
+  @Field({ nullable: true })
+  rejectionReason?: string;
+
   // File/Video/Content info
   @Field({ nullable: true })
   url?: string;

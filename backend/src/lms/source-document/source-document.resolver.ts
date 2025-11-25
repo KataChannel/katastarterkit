@@ -144,6 +144,36 @@ export class SourceDocumentResolver {
     return JSON.stringify(stats);
   }
 
+  // ============== Approval Workflow ==============
+
+  @Mutation(() => SourceDocument)
+  @UseGuards(JwtAuthGuard)
+  async requestDocumentApproval(
+    @CurrentUser() user: any,
+    @Args('documentId', { type: () => ID }) documentId: string,
+  ) {
+    return this.sourceDocumentService.requestApproval(documentId, user.id);
+  }
+
+  @Mutation(() => SourceDocument)
+  @UseGuards(JwtAuthGuard)
+  async approveDocument(
+    @CurrentUser() user: any,
+    @Args('documentId', { type: () => ID }) documentId: string,
+  ) {
+    return this.sourceDocumentService.approveDocument(documentId, user.id);
+  }
+
+  @Mutation(() => SourceDocument)
+  @UseGuards(JwtAuthGuard)
+  async rejectDocument(
+    @CurrentUser() user: any,
+    @Args('documentId', { type: () => ID }) documentId: string,
+    @Args('reason', { type: () => String }) reason: string,
+  ) {
+    return this.sourceDocumentService.rejectDocument(documentId, user.id, reason);
+  }
+
   // ============== File Upload ==============
 
   @Mutation(() => FileUploadResult)

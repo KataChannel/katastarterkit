@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { GeminiService } from '../../ai/gemini.service';
+import { NotificationService } from '../../services/notification.service';
+import { PushNotificationService } from '../../services/push-notification.service';
 import {
   CreateSourceDocumentInput,
   UpdateSourceDocumentInput,
@@ -15,6 +17,8 @@ export class SourceDocumentService {
   constructor(
     private prisma: PrismaService,
     private geminiService: GeminiService,
+    private notificationService: NotificationService,
+    private pushNotificationService: PushNotificationService,
   ) {}
 
   // Helper method to convert BigInt to Number for GraphQL
@@ -453,5 +457,175 @@ export class SourceDocumentService {
     }
 
     return { analyzed, failed };
+  }
+
+  // ============== Approval Workflow ==============
+
+  /**
+   * Request approval for a source document (Instructor -> Admin)
+   */
+  async requestApproval(documentId: string, userId: string) {
+    const document = await this.findOne(documentId);
+
+    if (document.userId !== userId) {
+      throw new Error('You do not have permission to request approval for this document');
+    }
+
+    if (document.status !== 'DRAFT') {
+      throw new Error('Only draft documents can be submitted for approval');
+    }
+
+    if (document.approvalRequested) {
+      throw new Error('Approval already requested for this document');
+    }
+
+    // Update document
+    const updated = await this.prisma.sourceDocument.update({
+      where: { id: documentId },
+      data: {
+        approvalRequested: true,
+        approvalRequestedAt: new Date(),
+        approvalRequestedBy: userId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    // Get instructor info
+    const instructor = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true, firstName: true, lastName: true },
+    });
+
+    const instructorName = instructor?.firstName && instructor?.lastName
+      ? `${instructor.firstName} ${instructor.lastName}`
+      : instructor?.username || 'Giảng viên';
+
+    // Send notification to all admins
+    const admins = await this.prisma.user.findMany({
+      where: {
+        roles: {
+          some: {
+            role: {
+              name: 'ADMIN',
+            },
+          },
+        },
+      },
+      select: { id: true },
+    });
+
+    // Send notification and push to each admin
+    for (const admin of admins) {
+      try {
+        await this.notificationService.create({
+          userId: admin.id,
+          title: 'Yêu cầu phê duyệt tài liệu',
+          message: `${instructorName} đã gửi yêu cầu phê duyệt tài liệu "${updated.title}"`,
+          type: 'SYSTEM',
+          data: {
+            documentId: updated.id,
+            documentTitle: updated.title,
+            instructorId: userId,
+            instructorName,
+            type: 'document_approval_request',
+          },
+        });
+
+        // Send push notification
+        await this.pushNotificationService.sendToUser(admin.id, {
+          title: 'Yêu cầu phê duyệt tài liệu',
+          message: `${instructorName} đã gửi yêu cầu phê duyệt tài liệu "${updated.title}"`,
+          url: `/admin/lms/documents/approvals`,
+          data: {
+            documentId: updated.id,
+            type: 'document_approval_request',
+          },
+        });
+      } catch (error) {
+        console.error(`Failed to notify admin ${admin.id}:`, error);
+      }
+    }
+
+    return this.transformDocument(updated);
+  }
+
+  /**
+   * Approve a source document (Admin only)
+   */
+  async approveDocument(documentId: string, adminUserId: string) {
+    const document = await this.findOne(documentId);
+
+    if (!document.approvalRequested) {
+      throw new Error('No approval request found for this document');
+    }
+
+    if (document.status === 'PUBLISHED') {
+      throw new Error('Document is already published');
+    }
+
+    // Update document to PUBLISHED
+    const updated = await this.prisma.sourceDocument.update({
+      where: { id: documentId },
+      data: {
+        status: 'PUBLISHED',
+        publishedAt: new Date(),
+        approvedBy: adminUserId,
+        approvedAt: new Date(),
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return this.transformDocument(updated);
+  }
+
+  /**
+   * Reject a source document approval request (Admin only)
+   */
+  async rejectDocument(documentId: string, adminUserId: string, reason: string) {
+    const document = await this.findOne(documentId);
+
+    if (!document.approvalRequested) {
+      throw new Error('No approval request found for this document');
+    }
+
+    // Reset approval request
+    const updated = await this.prisma.sourceDocument.update({
+      where: { id: documentId },
+      data: {
+        approvalRequested: false,
+        approvalRequestedAt: null,
+        rejectionReason: reason,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return this.transformDocument(updated);
   }
 }
