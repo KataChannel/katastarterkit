@@ -4052,6 +4052,7 @@ type Query {
   getPageBySlug(slug: String!): Page
   getPageBySlugPattern(slugPattern: String!): Page
   getPages(filters: PageFiltersInput, pagination: PaginationInput! = {limit: 10, page: 1}): PaginatedPages!
+  getPendingApprovalsCount: Int!
   getPermissionById(id: String!): Permission!
   getPostById(id: String!): Post!
   getPostBySlug(slug: String!): Post!

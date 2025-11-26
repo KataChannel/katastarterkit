@@ -462,6 +462,18 @@ export class SourceDocumentService {
   // ============== Approval Workflow ==============
 
   /**
+   * Count pending approval requests
+   */
+  async countPendingApprovals(): Promise<number> {
+    return this.prisma.sourceDocument.count({
+      where: {
+        approvalRequested: true,
+        status: 'DRAFT',
+      },
+    });
+  }
+
+  /**
    * Request approval for a source document (Instructor -> Admin)
    */
   async requestApproval(documentId: string, userId: string) {

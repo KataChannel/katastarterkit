@@ -181,6 +181,12 @@ export const GET_SOURCE_DOCUMENT_STATS = gql`
   }
 `;
 
+export const GET_PENDING_APPROVALS_COUNT = gql`
+  query GetPendingApprovalsCount {
+    getPendingApprovalsCount
+  }
+`;
+
 // ============== MUTATIONS ==============
 
 export const CREATE_SOURCE_DOCUMENT = gql`

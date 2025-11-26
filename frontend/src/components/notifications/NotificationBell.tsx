@@ -19,6 +19,7 @@ import {
   GET_VAPID_PUBLIC_KEY,
   SUBSCRIBE_TO_PUSH,
 } from '@/graphql/push-notification.queries';
+import { GET_PENDING_APPROVALS_COUNT } from '@/graphql/lms/source-documents';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -105,6 +106,12 @@ export function NotificationBell() {
     pollInterval: 30000, // Poll every 30 seconds
   });
 
+  // Query pending approvals count for admin
+  const { data: approvalsData } = useQuery(GET_PENDING_APPROVALS_COUNT, {
+    skip: !isAuthenticated,
+    pollInterval: 30000, // Poll every 30 seconds
+  });
+
   // Query notifications when dropdown opens
   const { data, loading, refetch } = useQuery(GET_NOTIFICATIONS, {
     variables: { skip: 0, take: 20 },
@@ -130,7 +137,11 @@ export function NotificationBell() {
   }
 
   const unreadCount = countData?.getUnreadNotificationsCount || 0;
+  const pendingApprovalsCount = approvalsData?.getPendingApprovalsCount || 0;
   const notifications = data?.getNotifications?.notifications || [];
+  
+  // Total badge count = unread notifications + pending approvals
+  const totalBadgeCount = unreadCount + pendingApprovalsCount;
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -214,13 +225,13 @@ export function NotificationBell() {
           className="relative"
           aria-label="Thông báo"
         >
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
+          <Bell className="h-5 w-5 " />
+          {totalBadgeCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              className="absolute text-white -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
             >
-              {unreadCount > 99 ? '99+' : unreadCount}
+              {totalBadgeCount > 99 ? '99+' : totalBadgeCount}
             </Badge>
           )}
         </Button>
@@ -229,7 +240,14 @@ export function NotificationBell() {
       <DropdownMenuContent align="end" className="w-[380px] sm:w-[420px] p-0">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold text-base">Thông báo</h3>
+          <div>
+            <h3 className="font-semibold text-base">Thông báo</h3>
+            {pendingApprovalsCount > 0 && (
+              <p className="text-xs text-orange-600 mt-0.5">
+                {pendingApprovalsCount} tài liệu chờ phê duyệt
+              </p>
+            )}
+          </div>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
@@ -249,16 +267,48 @@ export function NotificationBell() {
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          ) : notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <Bell className="h-12 w-12 text-muted-foreground mb-3" />
-              <p className="text-sm text-muted-foreground">
-                Chưa có thông báo nào
-              </p>
-            </div>
           ) : (
             <div className="divide-y">
-              {notifications.map((notification: Notification) => (
+              {/* Pending Approvals Section */}
+              {pendingApprovalsCount > 0 && (
+                <div
+                  className="p-4 bg-orange-50 hover:bg-orange-100 transition-colors cursor-pointer"
+                  onClick={() => {
+                    router.push('/lms/admin/approvals');
+                    setIsOpen(false);
+                  }}
+                >
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0 text-2xl">📝</div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-sm leading-tight text-orange-900">
+                        Tài liệu chờ phê duyệt
+                      </h4>
+                      <p className="text-sm text-orange-700 mt-1">
+                        Có {pendingApprovalsCount} tài liệu đang chờ phê duyệt
+                      </p>
+                      <p className="text-xs text-orange-600 mt-2">
+                        Nhấn để xem danh sách →
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <Badge variant="destructive" className="h-6 min-w-6 flex items-center justify-center">
+                        {pendingApprovalsCount}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Regular Notifications */}
+              {notifications.length === 0 && pendingApprovalsCount === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                  <Bell className="h-12 w-12 text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground">
+                    Chưa có thông báo nào
+                  </p>
+                </div>
+              ) : notifications.map((notification: Notification) => (
                 <div
                   key={notification.id}
                   className={cn(
