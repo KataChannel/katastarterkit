@@ -18,9 +18,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Copy pre-built application from .next-rausach
-COPY --chown=nextjs:nodejs frontend/.next-rausach/standalone/ ./
-COPY --chown=nextjs:nodejs frontend/.next-rausach/static/ ./frontend/.next/static/
+# Copy pre-built application from .next
+COPY --chown=nextjs:nodejs frontend/.next/standalone/ ./
+COPY --chown=nextjs:nodejs frontend/.next/static/ ./frontend/.next/static/
 COPY --chown=nextjs:nodejs frontend/public/ ./frontend/public/
 
 # Switch to non-root user

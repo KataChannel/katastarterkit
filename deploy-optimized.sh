@@ -22,7 +22,8 @@ PROJECT_NAME="rausach"
 IMAGE_BACKEND="${PROJECT_NAME}-backend:latest"
 IMAGE_FRONTEND="${PROJECT_NAME}-frontend:latest"
 IMAGE_TAR_DIR="./docker-images"
-COMPOSE_FILE="docker-compose.hybrid.yml"
+COMPOSE_APP="docker-compose.app.yml"
+COMPOSE_INFRA="docker-compose.infra.yml"
 
 # Auto-detect project path
 if [ -d "/chikiet/kataoffical/shoprausach" ]; then
@@ -38,17 +39,47 @@ cd "$PROJECT_PATH"
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║     🚀 OPTIMIZED RAUSACH DEPLOYMENT                   ║${NC}"
-echo -e "${BLUE}║     Build Local → Transfer → Deploy                   ║${NC}"
+echo -e "${BLUE}║     Build Local → Transfer → Deploy (App Only)        ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${GREEN}📍 Server:${NC} $SERVER"
-echo -e "${GREEN}📦 Project:${NC} Rausach (Single Domain)"
+echo -e "${GREEN}📦 Project:${NC} Rausach (App Services Only)"
 echo -e "${GREEN}🏗️  Strategy:${NC} Local Build + Image Transfer"
+echo -e "${YELLOW}ℹ️  Note:${NC} Infrastructure (Postgres, Redis, Minio) runs separately"
+echo ""
+
+# ============================================================================
+# Step 0: Check Infrastructure Services
+# ============================================================================
+echo -e "${YELLOW}⏳ Step 0: Checking infrastructure services...${NC}"
+echo ""
+
+INFRA_CHECK=$(ssh $SERVER 'docker ps | grep -q "shoppostgres" && docker ps | grep -q "shared-redis" && docker ps | grep -q "shared-minio" && echo "READY" || echo "NOT_READY"' | tr -d '\r\n')
+
+if [ "$INFRA_CHECK" != "READY" ]; then
+    echo -e "${RED}╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${RED}║     ❌ INFRASTRUCTURE NOT READY!                      ║${NC}"
+    echo -e "${RED}╚════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${YELLOW}⚠️  Required infrastructure services are missing:${NC}"
+    echo "   • PostgreSQL (shoppostgres:12003)"
+    echo "   • Redis (shared-redis:12004)"
+    echo "   • Minio (shared-minio:12007)"
+    echo ""
+    echo -e "${BLUE}Please deploy infrastructure first:${NC}"
+    echo -e "   ${GREEN}./deploy-infrastructure.sh${NC}"
+    echo ""
+    echo -e "${YELLOW}Or use menu: ${GREEN}bun run dev${NC} → Choose ${GREEN}4${NC}"
+    echo ""
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Infrastructure services are running${NC}"
 echo ""
 
 # Check prerequisites
-if [ ! -f "$COMPOSE_FILE" ]; then
-    echo -e "${RED}❌ Error: $COMPOSE_FILE not found!${NC}"
+if [ ! -f "$COMPOSE_APP" ]; then
+    echo -e "${RED}❌ Error: $COMPOSE_APP not found!${NC}"
     exit 1
 fi
 
@@ -96,11 +127,11 @@ fi
 # Copy environment file
 cp ../.env.prod.rausach .env.local
 
-echo -e "${BLUE}  → Building Next.js application...${NC}"
+echo -e "${BLUE}  → Building Next.js application for production...${NC}"
 bun run build
 
 if [ ! -d ".next" ]; then
-    echo -e "${RED}❌ Frontend build failed!${NC}"
+    echo -e "${RED}❌ Frontend build failed! .next not found${NC}"
     exit 1
 fi
 
@@ -173,7 +204,13 @@ echo -e "${BLUE}  → Uploading frontend image...${NC}"
 rsync -avz --progress $IMAGE_TAR_DIR/frontend.tar.gz $SERVER:$REMOTE_DIR/docker-images/
 
 echo -e "${BLUE}  → Uploading configuration files...${NC}"
-rsync -avz $COMPOSE_FILE .env.rausach .env.prod.rausach $SERVER:$REMOTE_DIR/
+rsync -avz $COMPOSE_APP $COMPOSE_INFRA .env.rausach .env.prod.rausach $SERVER:$REMOTE_DIR/
+
+# Check and warn about GOOGLE_GEMINI_API_KEY
+if ! grep -q "GOOGLE_GEMINI_API_KEY=" .env.rausach 2>/dev/null || grep -q "GOOGLE_GEMINI_API_KEY=$" .env.rausach 2>/dev/null; then
+    echo -e "${YELLOW}  ⚠️  Warning: GOOGLE_GEMINI_API_KEY not set in .env.rausach${NC}"
+    echo -e "${YELLOW}     Support Chat AI will not work without this key${NC}"
+fi
 
 # Upload .env.production if exists
 if [ -f ".env.production" ]; then
@@ -194,32 +231,45 @@ ssh $SERVER << 'ENDSSH'
     set -e
     cd /root/shoprausach
     
-    echo "  → Tagging old images for rollback..."
-    docker tag rausach-backend:latest rausach-backend:previous 2>/dev/null || true
-    docker tag rausach-frontend:latest rausach-frontend:previous 2>/dev/null || true
+    echo "  → Backing up current images for rollback..."
+    # Only tag if images exist
+    if docker images | grep -q "rausach-backend.*latest"; then
+        docker tag rausach-backend:latest rausach-backend:previous 2>/dev/null || true
+    fi
+    if docker images | grep -q "rausach-frontend.*latest"; then
+        docker tag rausach-frontend:latest rausach-frontend:previous 2>/dev/null || true
+    fi
     
-    echo "  → Loading Docker images..."
+    echo "  → Removing old 'latest' tags to avoid conflicts..."
+    docker rmi rausach-backend:latest rausach-frontend:latest 2>/dev/null || true
+    
+    echo "  → Loading new Docker images..."
     docker load < docker-images/backend.tar.gz
     docker load < docker-images/frontend.tar.gz
     
     echo "  → Verifying loaded images..."
     docker images | grep -E "rausach-(backend|frontend).*latest" || echo "⚠️  Warning: Images may not be loaded properly"
     
-    echo "  → Stopping old containers..."
-    docker compose -f docker-compose.hybrid.yml down 2>/dev/null || true
+    echo "  → Checking infrastructure services..."
+    if ! docker ps | grep -q "shoppostgres"; then
+        echo "  ⚠️  Warning: Infrastructure not running. Start with: docker compose -f docker-compose.infra.yml up -d"
+    fi
+    
+    echo "  → Stopping old app containers..."
+    docker compose -f docker-compose.app.yml down 2>/dev/null || true
     
     echo "  → Removing old containers to force recreate..."
     docker rm -f shopbackend shopfrontend 2>/dev/null || true
     
-    echo "  → Starting services with new images..."
-    docker compose -f docker-compose.hybrid.yml up -d --force-recreate --no-build
+    echo "  → Starting app services with new images..."
+    docker compose -f docker-compose.app.yml up -d --force-recreate --remove-orphans
     
     echo "  → Waiting for services to be ready..."
     sleep 20
     
     echo ""
     echo "📊 Container Status:"
-    docker compose -f docker-compose.hybrid.yml ps
+    docker compose -f docker-compose.app.yml ps
     
     echo ""
     echo "🔍 Verifying new deployment:"

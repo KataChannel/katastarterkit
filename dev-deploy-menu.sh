@@ -20,23 +20,27 @@ show_menu() {
     echo "  3. Dev - Frontend Only"
     echo ""
     echo "🐳 DEPLOYMENT:"
-    echo "  4. Deploy Optimized (Local Build → Server)"
-    echo "  5. Show Docker Images"
-    echo "  6. Cleanup Docker (Remove old images)"
-    echo "  7. Rollback to Previous Version"
+    echo "  4. Deploy Infrastructure to Server (Postgres, Redis, Minio)"
+    echo "  5. Deploy App to Server (Backend + Frontend)"
+    echo "  6. Stop Services (App/Infrastructure/All)"
+    echo "  7. Show Docker Images"
+    echo "  8. Cleanup Docker (Remove old images)"
+    echo "  9. Rollback to Previous Version"
     echo ""
     echo "🗄️  DATABASE:"
-    echo "  8. Prisma Studio"
-    echo "  9. Database Migrate"
+    echo "  10. Prisma Studio"
+    echo "  11. Database Migrate"
     echo ""
     echo "🛠️  UTILITIES:"
-    echo "  10. Docker - Start Dev Services"
-    echo "  11. Docker - Stop All Services"
-    echo "  12. Kill Ports (12000-12001)"
+    echo "  12. Test Build Frontend (Production)"
+    echo "  13. Check Deployment Status"
+    echo "  14. Docker - Start Dev Services (Local)"
+    echo "  15. Docker - Stop Dev Services (Local)"
+    echo "  16. Kill Ports (12000-12001)"
     echo ""
     echo "  0. Exit"
     echo ""
-    echo -n "Select option [0-12]: "
+    echo -n "Select option [0-16]: "
 }
 
 run_dev_full() {
@@ -60,9 +64,37 @@ run_dev_frontend() {
     bun run dev:frontend
 }
 
-run_deploy() {
+run_deploy_infrastructure() {
     echo ""
-    echo "🚀 Running Optimized Deployment..."
+    echo "🗄️  Deploying Infrastructure to Server..."
+    echo "─────────────────────────────────────────────────────"
+    if [ ! -f "./deploy-infrastructure.sh" ]; then
+        echo "❌ Error: deploy-infrastructure.sh not found!"
+        read -p "Press Enter to continue..."
+        return
+    fi
+    ./deploy-infrastructure.sh
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+run_stop_services() {
+    echo ""
+    echo "🛑 Stop Services..."
+    echo "─────────────────────────────────────────────────────"
+    if [ ! -f "./stop-services.sh" ]; then
+        echo "❌ Error: stop-services.sh not found!"
+        read -p "Press Enter to continue..."
+        return
+    fi
+    ./stop-services.sh
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+run_deploy_app() {
+    echo ""
+    echo "🚀 Deploying Application (Backend + Frontend)..."
     echo "─────────────────────────────────────────────────────"
     if [ ! -f "./deploy-optimized.sh" ]; then
         echo "❌ Error: deploy-optimized.sh not found!"
@@ -76,42 +108,51 @@ run_deploy() {
 
 run_show_images() {
     echo ""
-    echo "📦 Docker Images..."
+    echo "📦 Docker Images on Server..."
     echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./show-images.sh" ]; then
-        echo "❌ Error: show-images.sh not found!"
-        read -p "Press Enter to continue..."
-        return
-    fi
-    ./show-images.sh
+    ssh root@116.118.49.243 "docker images | grep -E 'REPOSITORY|rausach|postgres|redis|minio'"
     echo ""
     read -p "Press Enter to continue..."
 }
 
 run_cleanup() {
     echo ""
-    echo "🧹 Cleaning up Docker..."
+    echo "🧹 Cleaning up Docker on Server..."
     echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./cleanup-docker.sh" ]; then
-        echo "❌ Error: cleanup-docker.sh not found!"
-        read -p "Press Enter to continue..."
-        return
+    echo "This will remove dangling images and unused containers"
+    read -p "Continue? (yes/no): " confirm
+    if [ "$confirm" = "yes" ]; then
+        ssh root@116.118.49.243 "docker system prune -f"
+        echo "✅ Cleanup completed"
     fi
-    ./cleanup-docker.sh
     echo ""
     read -p "Press Enter to continue..."
 }
 
 run_rollback() {
     echo ""
-    echo "🔄 Rolling back deployment..."
+    echo "🔄 Rolling back to previous version..."
     echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./rollback.sh" ]; then
-        echo "❌ Error: rollback.sh not found!"
-        read -p "Press Enter to continue..."
-        return
-    fi
-    ./rollback.sh
+    ssh root@116.118.49.243 << 'ENDSSH'
+        cd /root/shoprausach
+        
+        echo "Checking for previous images..."
+        if docker images | grep -q "rausach-backend:previous"; then
+            echo "→ Tagging previous backend as latest..."
+            docker tag rausach-backend:previous rausach-backend:latest
+        fi
+        
+        if docker images | grep -q "rausach-frontend:previous"; then
+            echo "→ Tagging previous frontend as latest..."
+            docker tag rausach-frontend:previous rausach-frontend:latest
+        fi
+        
+        echo "→ Restarting app services..."
+        docker compose -f docker-compose.app.yml down
+        docker compose -f docker-compose.app.yml up -d --force-recreate
+        
+        echo "✅ Rollback completed"
+ENDSSH
     echo ""
     read -p "Press Enter to continue..."
 }
@@ -134,16 +175,44 @@ run_db_migrate() {
     read -p "Press Enter to continue..."
 }
 
+run_test_build() {
+    echo ""
+    echo "🏗️  Testing Production Build..."
+    echo "─────────────────────────────────────────────────────"
+    if [ ! -f "./build-frontend-prod.sh" ]; then
+        echo "❌ Error: build-frontend-prod.sh not found!"
+        read -p "Press Enter to continue..."
+        return
+    fi
+    ./build-frontend-prod.sh
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+run_check_status() {
+    echo ""
+    echo "📊 Checking Deployment Status..."
+    echo "─────────────────────────────────────────────────────"
+    if [ ! -f "./check-deployment-status.sh" ]; then
+        echo "❌ Error: check-deployment-status.sh not found!"
+        read -p "Press Enter to continue..."
+        return
+    fi
+    ./check-deployment-status.sh
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
 run_docker_start() {
     echo ""
-    echo "🐳 Starting Docker Services..."
+    echo "🐳 Starting Docker Services (Local)..."
     echo "─────────────────────────────────────────────────────"
     bun run docker:dev
 }
 
 run_docker_stop() {
     echo ""
-    echo "🛑 Stopping Docker Services..."
+    echo "🛑 Stopping Docker Services (Local)..."
     echo "─────────────────────────────────────────────────────"
     bun run docker:down
     echo ""
@@ -178,15 +247,19 @@ while true; do
         1) run_dev_full ;;
         2) run_dev_backend ;;
         3) run_dev_frontend ;;
-        4) run_deploy ;;
-        5) run_show_images ;;
-        6) run_cleanup ;;
-        7) run_rollback ;;
-        8) run_prisma_studio ;;
-        9) run_db_migrate ;;
-        10) run_docker_start ;;
-        11) run_docker_stop ;;
-        12) run_kill_ports ;;
+        4) run_deploy_infrastructure ;;
+        5) run_deploy_app ;;
+        6) run_stop_services ;;
+        7) run_show_images ;;
+        8) run_cleanup ;;
+        9) run_rollback ;;
+        10) run_prisma_studio ;;
+        11) run_db_migrate ;;
+        12) run_test_build ;;
+        13) run_check_status ;;
+        14) run_docker_start ;;
+        15) run_docker_stop ;;
+        16) run_kill_ports ;;
         0) 
             echo ""
             echo "👋 Goodbye!"
