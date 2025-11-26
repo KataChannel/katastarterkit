@@ -1,7 +1,6 @@
 version: '3.8'
 
-# Hybrid Multi-Domain Deployment - Optimized for 1-2 Core, 1.5GB RAM, 7GB Storage
-# Database riêng biệt cho mỗi domain, Redis và Minio shared
+# Rausach Domain Deployment - Optimized for 1-2 Core, 1.5GB RAM, 7GB Storage
 
 services:
   # ========================================
@@ -156,104 +155,8 @@ services:
         reservations:
           memory: 128M
 
-  # ========================================
-  # TAZAGROUP DOMAIN (Port 13xxx) - Dedicated Stack
-  # ========================================
-  
-  # PostgreSQL for Tazagroup - Dedicated
-  tazagroup-postgres:
-    image: postgres:16-alpine
-    container_name: tazagroup-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: tazagroupcore
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "13003:5432"
-    volumes:
-      - tazagroup_postgres_data:/var/lib/postgresql/data
-    networks:
-      - hybrid-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-        reservations:
-          memory: 128M
-
-  tazagroup-backend:
-    build:
-      context: .
-      dockerfile: ./backend/Dockerfile
-    container_name: tazagroup-backend
-    restart: unless-stopped
-    env_file:
-      - .env.tazagroup
-    environment:
-      NODE_ENV: production
-      PORT: 4000
-      DATABASE_URL: postgresql://postgres:postgres@tazagroup-postgres:5432/tazagroupcore
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_KEY_PREFIX: "tazagroup:"
-      MINIO_ENDPOINT: minio
-      MINIO_PORT: 9000
-      MINIO_USE_SSL: "false"
-      MINIO_ACCESS_KEY: minio-admin
-      MINIO_SECRET_KEY: minio-secret-2025
-      MINIO_BUCKET_NAME: tazagroup-uploads
-    ports:
-      - "13001:4000"
-    depends_on:
-      tazagroup-postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    networks:
-      - hybrid-network
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
-
-  tazagroup-frontend:
-    build:
-      context: .
-      dockerfile: ./frontend/Dockerfile.tazagroup
-    container_name: tazagroup-frontend
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      PORT: 3000
-      NEXT_OTEL_ENABLED: "false"
-      NEXT_TELEMETRY_DISABLED: "1"
-    ports:
-      - "13000:3000"
-    depends_on:
-      - tazagroup-backend
-    networks:
-      - hybrid-network
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-        reservations:
-          memory: 128M
-
 volumes:
   rausach_postgres_data:
-    driver: local
-  tazagroup_postgres_data:
     driver: local
   redis_data:
     driver: local
@@ -263,4 +166,4 @@ volumes:
 networks:
   hybrid-network:
     driver: bridge
-    name: hybrid-multi-domain-network
+    name: rausach-network

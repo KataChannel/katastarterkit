@@ -1,13 +1,12 @@
-# 🚀 rausachcore - Modern Fullstack Starter Kit
+# 🚀 Rausach - Modern Fullstack Application
 
 ![rausachcore](https://img.shields.io/badge/rausachcore-Starter%20Kit-blue)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.0-black)](https://nextjs.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-11.1.6-red)](https://nestjs.com/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.1.12-38B2AC)](https://tailwindcss.com/)
 
-A modern, production-ready fullstack starter kit built with the latest technologies. Get your project up and running in minutes with best practices, modern tooling, and comprehensive features out of the box.
+A modern, production-ready fullstack application built with the latest technologies. E-commerce and LMS platform with comprehensive features.
 
 ## 📚 Documentation
 
