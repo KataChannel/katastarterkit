@@ -255,6 +255,7 @@ export declare class SourceDocumentService {
         analyzed: number;
         failed: number;
     }>;
+    countPendingApprovals(): Promise<number>;
     requestApproval(documentId: string, userId: string): Promise<any>;
     approveDocument(documentId: string, adminUserId: string): Promise<any>;
     rejectDocument(documentId: string, adminUserId: string, reason: string): Promise<any>;

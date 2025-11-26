@@ -235,6 +235,7 @@ export declare class SourceDocumentResolver {
     })[]>;
     incrementDocumentDownload(id: string): Promise<any>;
     sourceDocumentStats(user: any): Promise<string>;
+    getPendingApprovalsCount(): Promise<number>;
     requestDocumentApproval(user: any, documentId: string): Promise<any>;
     approveDocument(user: any, documentId: string): Promise<any>;
     rejectDocument(user: any, documentId: string, reason: string): Promise<any>;

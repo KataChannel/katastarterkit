@@ -394,6 +394,14 @@ let SourceDocumentService = class SourceDocumentService {
         }
         return { analyzed, failed };
     }
+    async countPendingApprovals() {
+        return this.prisma.sourceDocument.count({
+            where: {
+                approvalRequested: true,
+                status: 'DRAFT',
+            },
+        });
+    }
     async requestApproval(documentId, userId) {
         const document = await this.findOne(documentId);
         if (document.userId !== userId) {

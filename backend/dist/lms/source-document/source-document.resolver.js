@@ -89,6 +89,9 @@ let SourceDocumentResolver = class SourceDocumentResolver {
         const stats = await this.sourceDocumentService.getStats(user.id);
         return JSON.stringify(stats);
     }
+    async getPendingApprovalsCount() {
+        return this.sourceDocumentService.countPendingApprovals();
+    }
     async requestDocumentApproval(user, documentId) {
         return this.sourceDocumentService.requestApproval(documentId, user.id);
     }
@@ -281,6 +284,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], SourceDocumentResolver.prototype, "sourceDocumentStats", null);
+__decorate([
+    (0, graphql_1.Query)(() => graphql_1.Int),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SourceDocumentResolver.prototype, "getPendingApprovalsCount", null);
 __decorate([
     (0, graphql_1.Mutation)(() => source_document_entity_1.SourceDocument),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
