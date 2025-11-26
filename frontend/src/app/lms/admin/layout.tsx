@@ -23,6 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 interface AdminLMSLayoutProps {
   children: ReactNode;
@@ -108,8 +109,15 @@ export default function AdminLMSLayout({ children }: AdminLMSLayoutProps) {
   const SidebarContent = () => (
     <>
       <div className="p-4 sm:p-6 border-b border-gray-200">
-        <h2 className="text-lg sm:text-xl font-bold text-gray-900">LMS Admin</h2>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">Quản lý hệ thống học tập</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900">LMS Admin</h2>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">Quản lý hệ thống học tập</p>
+          </div>
+          <div className="hidden lg:block">
+            <NotificationBell />
+          </div>
+        </div>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3 sm:p-4">
@@ -186,20 +194,23 @@ export default function AdminLMSLayout({ children }: AdminLMSLayoutProps) {
             <h2 className="text-lg font-bold text-gray-900">LMS Admin</h2>
             <p className="text-xs text-gray-500">Quản lý hệ thống</p>
           </div>
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden">
-                <Menu className="w-5 h-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent 
-              side="left" 
-              className="w-[280px] sm:w-[320px] p-0 flex flex-col"
-              title="Menu quản lý LMS"
-            >
-              <SidebarContent />
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent 
+                side="left" 
+                className="w-[280px] sm:w-[320px] p-0 flex flex-col"
+                title="Menu quản lý LMS"
+              >
+                <SidebarContent />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
         {/* Desktop Sidebar */}

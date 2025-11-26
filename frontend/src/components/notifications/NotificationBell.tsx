@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
+import { useRouter } from 'next/navigation';
 import { Bell, Check, Trash2, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -39,6 +40,7 @@ interface Notification {
 }
 
 export function NotificationBell() {
+  const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const { subscribeToPush, requestNotificationPermission, capabilities } = usePWA();
@@ -162,7 +164,31 @@ export function NotificationBell() {
     }
   };
 
-  const getNotificationIcon = (type: string) => {
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read if not already read
+    if (!notification.isRead) {
+      await handleMarkAsRead(notification.id);
+    }
+
+    // Navigate based on notification type
+    if (notification.data?.type === 'document_approval_request') {
+      router.push('/lms/admin/approvals');
+    } else if (notification.data?.orderId) {
+      router.push(`/orders/${notification.data.orderId}`);
+    } else if (notification.data?.taskId) {
+      router.push(`/tasks/${notification.data.taskId}`);
+    }
+
+    // Close dropdown
+    setIsOpen(false);
+  };
+
+  const getNotificationIcon = (type: string, data?: any) => {
+    // Check if it's a document approval notification
+    if (data?.type === 'document_approval_request') {
+      return '📝';
+    }
+    
     switch (type) {
       case 'ORDER':
         return '🛍️';
@@ -170,6 +196,10 @@ export function NotificationBell() {
         return '🎁';
       case 'SYSTEM':
         return '⚙️';
+      case 'TASK':
+        return '✅';
+      case 'MENTION':
+        return '💬';
       default:
         return '📢';
     }
@@ -232,14 +262,15 @@ export function NotificationBell() {
                 <div
                   key={notification.id}
                   className={cn(
-                    'p-4 hover:bg-muted/50 transition-colors relative group',
+                    'p-4 hover:bg-muted/50 transition-colors relative group cursor-pointer',
                     !notification.isRead && 'bg-blue-50/50'
                   )}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex gap-3">
                     {/* Icon */}
                     <div className="flex-shrink-0 text-2xl">
-                      {getNotificationIcon(notification.type)}
+                      {getNotificationIcon(notification.type, notification.data)}
                     </div>
 
                     {/* Content */}
@@ -270,7 +301,10 @@ export function NotificationBell() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => handleMarkAsRead(notification.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMarkAsRead(notification.id);
+                          }}
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -279,7 +313,10 @@ export function NotificationBell() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(notification.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(notification.id);
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

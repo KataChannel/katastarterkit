@@ -52,9 +52,9 @@ export declare class ProjectChatGateway implements OnGatewayConnection, OnGatewa
         message: {
             sender: {
                 id: string;
+                email: string;
                 firstName: string;
                 lastName: string;
-                email: string;
                 avatar: string;
             };
             replyTo: {

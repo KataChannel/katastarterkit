@@ -34,8 +34,8 @@ export declare class ComplianceController {
                 userId: string;
                 user: {
                     id: string;
-                    username: string;
                     email: string;
+                    username: string;
                 };
                 resourceType: string;
                 resourceId: string;
@@ -85,8 +85,8 @@ export declare class ComplianceController {
                 userId: string;
                 user: {
                     id: string;
-                    username: string;
                     email: string;
+                    username: string;
                 };
                 resourceType: string;
                 resourceId: string;
@@ -137,20 +137,20 @@ export declare class ComplianceController {
             recentEvents: ({
                 user: {
                     id: string;
-                    username: string;
                     email: string;
+                    username: string;
                 };
             } & {
+                category: string;
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
-                description: string;
-                category: string;
-                userId: string | null;
                 sessionId: string | null;
                 ipAddress: string;
                 userAgent: string | null;
                 details: import("@prisma/client/runtime/library").JsonValue | null;
+                userId: string | null;
+                updatedAt: Date;
+                description: string;
                 severity: string;
                 correlationId: string | null;
                 eventType: string;
@@ -180,20 +180,18 @@ export declare class ComplianceController {
             logs: ({
                 user: {
                     id: string;
-                    username: string;
                     email: string;
+                    username: string;
                 };
             } & {
                 id: string;
                 createdAt: Date;
-                tags: string[];
-                userId: string | null;
-                success: boolean;
                 sessionId: string | null;
                 ipAddress: string | null;
                 userAgent: string | null;
                 action: string;
                 details: import("@prisma/client/runtime/library").JsonValue | null;
+                userId: string | null;
                 resourceType: string;
                 resourceId: string | null;
                 method: string | null;
@@ -205,9 +203,11 @@ export declare class ComplianceController {
                 parentResourceId: string | null;
                 operationType: string | null;
                 severity: string;
+                tags: string[];
                 batchId: string | null;
                 batchSize: number | null;
                 batchIndex: number | null;
+                success: boolean;
                 errorMessage: string | null;
                 errorCode: string | null;
                 responseTime: number | null;
@@ -245,20 +245,20 @@ export declare class ComplianceController {
             events: ({
                 user: {
                     id: string;
-                    username: string;
                     email: string;
+                    username: string;
                 };
             } & {
+                category: string;
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
-                description: string;
-                category: string;
-                userId: string | null;
                 sessionId: string | null;
                 ipAddress: string;
                 userAgent: string | null;
                 details: import("@prisma/client/runtime/library").JsonValue | null;
+                userId: string | null;
+                updatedAt: Date;
+                description: string;
                 severity: string;
                 correlationId: string | null;
                 eventType: string;

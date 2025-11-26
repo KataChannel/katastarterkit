@@ -35,16 +35,16 @@ export declare class ProjectMediaService {
             avatar: string;
         };
     } & {
+        type: import("@prisma/client").$Enums.MediaType;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
-        type: import("@prisma/client").$Enums.MediaType;
-        taskId: string;
-        url: string;
-        mimeType: string;
-        filename: string;
         size: number;
+        updatedAt: Date;
+        url: string;
+        filename: string;
+        mimeType: string;
         caption: string | null;
+        taskId: string;
         uploadedBy: string;
     })[]>;
     deleteFile(fileId: string, userId: string, type: 'task' | 'project' | 'chat'): Promise<boolean>;

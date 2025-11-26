@@ -10,8 +10,8 @@ export declare class ChatIntegrationService {
         accessToken: string | null;
         refreshToken: string | null;
         config: import("@prisma/client/runtime/library").JsonValue | null;
-        lastSyncAt: Date | null;
         platform: import("@prisma/client").$Enums.IntegrationPlatform;
+        lastSyncAt: Date | null;
         isEnabled: boolean;
         appId: string | null;
         appSecret: string | null;
@@ -28,8 +28,8 @@ export declare class ChatIntegrationService {
         accessToken: string | null;
         refreshToken: string | null;
         config: import("@prisma/client/runtime/library").JsonValue | null;
-        lastSyncAt: Date | null;
         platform: import("@prisma/client").$Enums.IntegrationPlatform;
+        lastSyncAt: Date | null;
         isEnabled: boolean;
         appId: string | null;
         appSecret: string | null;
@@ -55,8 +55,8 @@ export declare class ChatIntegrationService {
         accessToken: string | null;
         refreshToken: string | null;
         config: import("@prisma/client/runtime/library").JsonValue | null;
-        lastSyncAt: Date | null;
         platform: import("@prisma/client").$Enums.IntegrationPlatform;
+        lastSyncAt: Date | null;
         isEnabled: boolean;
         appId: string | null;
         appSecret: string | null;
@@ -73,8 +73,8 @@ export declare class ChatIntegrationService {
         accessToken: string | null;
         refreshToken: string | null;
         config: import("@prisma/client/runtime/library").JsonValue | null;
-        lastSyncAt: Date | null;
         platform: import("@prisma/client").$Enums.IntegrationPlatform;
+        lastSyncAt: Date | null;
         isEnabled: boolean;
         appId: string | null;
         appSecret: string | null;
@@ -91,8 +91,8 @@ export declare class ChatIntegrationService {
         accessToken: string | null;
         refreshToken: string | null;
         config: import("@prisma/client/runtime/library").JsonValue | null;
-        lastSyncAt: Date | null;
         platform: import("@prisma/client").$Enums.IntegrationPlatform;
+        lastSyncAt: Date | null;
         isEnabled: boolean;
         appId: string | null;
         appSecret: string | null;

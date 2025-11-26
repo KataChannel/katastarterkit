@@ -8,11 +8,11 @@ export declare class CallCenterService {
     getConfig(): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         isActive: boolean;
+        updatedAt: Date;
         batchSize: number;
-        apiUrl: string;
         domain: string;
+        apiUrl: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -25,11 +25,11 @@ export declare class CallCenterService {
     createConfig(input: CreateCallCenterConfigInput): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         isActive: boolean;
+        updatedAt: Date;
         batchSize: number;
-        apiUrl: string;
         domain: string;
+        apiUrl: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -42,11 +42,11 @@ export declare class CallCenterService {
     updateConfig(id: string, input: UpdateCallCenterConfigInput): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         isActive: boolean;
+        updatedAt: Date;
         batchSize: number;
-        apiUrl: string;
         domain: string;
+        apiUrl: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -59,11 +59,11 @@ export declare class CallCenterService {
     deleteConfig(id: string): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         isActive: boolean;
+        updatedAt: Date;
         batchSize: number;
-        apiUrl: string;
         domain: string;
+        apiUrl: string;
         apiKey: string | null;
         syncMode: import("@prisma/client").$Enums.CallCenterSyncMode;
         cronExpression: string | null;
@@ -88,9 +88,8 @@ export declare class CallCenterService {
         items: {
             id: string;
             updatedAt: Date;
-            duration: string | null;
             direction: import("@prisma/client").$Enums.CallDirection;
-            domain: string | null;
+            duration: string | null;
             externalUuid: string;
             callerIdNumber: string | null;
             outboundCallerIdNumber: string | null;
@@ -102,6 +101,7 @@ export declare class CallCenterService {
             sipHangupDisposition: string | null;
             callStatus: import("@prisma/client").$Enums.CallStatus;
             recordPath: string | null;
+            domain: string | null;
             rawData: import("@prisma/client/runtime/library").JsonValue | null;
             syncedAt: Date;
         }[];
@@ -116,9 +116,8 @@ export declare class CallCenterService {
     getRecordById(id: string): Promise<{
         id: string;
         updatedAt: Date;
-        duration: string | null;
         direction: import("@prisma/client").$Enums.CallDirection;
-        domain: string | null;
+        duration: string | null;
         externalUuid: string;
         callerIdNumber: string | null;
         outboundCallerIdNumber: string | null;
@@ -130,19 +129,20 @@ export declare class CallCenterService {
         sipHangupDisposition: string | null;
         callStatus: import("@prisma/client").$Enums.CallStatus;
         recordPath: string | null;
+        domain: string | null;
         rawData: import("@prisma/client/runtime/library").JsonValue | null;
         syncedAt: Date;
     }>;
     getSyncLogs(pagination: PaginationInput): Promise<{
         items: {
             id: string;
-            status: string;
-            duration: number | null;
-            completedAt: Date | null;
             errorMessage: string | null;
+            status: string;
+            completedAt: Date | null;
             fromDate: Date;
             toDate: Date;
             offset: number;
+            duration: number | null;
             configId: string | null;
             syncType: import("@prisma/client").$Enums.CallCenterSyncMode;
             recordsFetched: number;

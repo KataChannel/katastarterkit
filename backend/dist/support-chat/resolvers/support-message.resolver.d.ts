@@ -7,11 +7,11 @@ export declare class SupportMessageResolver {
         attachments: {
             id: string;
             createdAt: Date;
-            thumbnailUrl: string | null;
             fileName: string;
             fileSize: number;
             conversationId: string | null;
             fileType: string;
+            thumbnailUrl: string | null;
             fileUrl: string;
             messageId: string | null;
             uploadedById: string | null;
@@ -27,10 +27,11 @@ export declare class SupportMessageResolver {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        content: string;
         isRead: boolean;
         conversationId: string;
+        readAt: Date | null;
         sentAt: Date;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         senderType: import("@prisma/client").$Enums.SupportSender;
@@ -39,7 +40,6 @@ export declare class SupportMessageResolver {
         isAIGenerated: boolean;
         aiConfidence: number | null;
         aiSuggestions: import("@prisma/client/runtime/library").JsonValue | null;
-        readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
     })[]>;
@@ -47,11 +47,11 @@ export declare class SupportMessageResolver {
         attachments: {
             id: string;
             createdAt: Date;
-            thumbnailUrl: string | null;
             fileName: string;
             fileSize: number;
             conversationId: string | null;
             fileType: string;
+            thumbnailUrl: string | null;
             fileUrl: string;
             messageId: string | null;
             uploadedById: string | null;
@@ -67,10 +67,11 @@ export declare class SupportMessageResolver {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        content: string;
         isRead: boolean;
         conversationId: string;
+        readAt: Date | null;
         sentAt: Date;
         messageType: import("@prisma/client").$Enums.SupportMessageType;
         senderType: import("@prisma/client").$Enums.SupportSender;
@@ -79,7 +80,6 @@ export declare class SupportMessageResolver {
         isAIGenerated: boolean;
         aiConfidence: number | null;
         aiSuggestions: import("@prisma/client/runtime/library").JsonValue | null;
-        readAt: Date | null;
         isEdited: boolean;
         editedAt: Date | null;
     }>;

@@ -13,12 +13,12 @@ export declare class EnrollmentsResolver {
         createdAt: Date;
         updatedAt: Date;
         completedAt: Date | null;
-        enrollmentId: string;
-        lessonId: string;
         completed: boolean;
+        lessonId: string;
+        enrollmentId: string;
+        timeSpent: number | null;
         watchTime: number | null;
         videoProgress: number | null;
-        timeSpent: number | null;
         lastWatchedAt: Date | null;
     }>;
     unmarkLessonComplete(user: any, enrollmentId: string, lessonId: string): Promise<{
@@ -26,12 +26,12 @@ export declare class EnrollmentsResolver {
         createdAt: Date;
         updatedAt: Date;
         completedAt: Date | null;
-        enrollmentId: string;
-        lessonId: string;
         completed: boolean;
+        lessonId: string;
+        enrollmentId: string;
+        timeSpent: number | null;
         watchTime: number | null;
         videoProgress: number | null;
-        timeSpent: number | null;
         lastWatchedAt: Date | null;
     }>;
     updateVideoProgress(user: any, enrollmentId: string, lessonId: string, videoProgress: number, watchTime: number, timeSpent: number): Promise<{
@@ -39,12 +39,12 @@ export declare class EnrollmentsResolver {
         createdAt: Date;
         updatedAt: Date;
         completedAt: Date | null;
-        enrollmentId: string;
-        lessonId: string;
         completed: boolean;
+        lessonId: string;
+        enrollmentId: string;
+        timeSpent: number | null;
         watchTime: number | null;
         videoProgress: number | null;
-        timeSpent: number | null;
         lastWatchedAt: Date | null;
     }>;
 }

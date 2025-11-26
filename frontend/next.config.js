@@ -75,6 +75,14 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'images.rausachtrangia.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'images.rausachtrangia.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'images.unsplash.com',
       },
       {

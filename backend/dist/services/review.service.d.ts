@@ -33,9 +33,9 @@ export declare class ReviewService {
     createReview(userId: string, input: CreateReviewInput): Promise<{
         user: {
             id: string;
+            email: string;
             firstName: string;
             lastName: string;
-            email: string;
             avatar: string;
         };
         product: {
@@ -44,13 +44,13 @@ export declare class ReviewService {
             slug: string;
         };
     } & {
+        comment: string | null;
         id: string;
         createdAt: Date;
+        userId: string | null;
         updatedAt: Date;
         title: string | null;
         images: string[];
-        userId: string | null;
-        comment: string | null;
         productId: string;
         orderId: string | null;
         rating: number;
@@ -66,19 +66,19 @@ export declare class ReviewService {
         items: ({
             user: {
                 id: string;
+                email: string;
                 firstName: string;
                 lastName: string;
-                email: string;
                 avatar: string;
             };
         } & {
+            comment: string | null;
             id: string;
             createdAt: Date;
+            userId: string | null;
             updatedAt: Date;
             title: string | null;
             images: string[];
-            userId: string | null;
-            comment: string | null;
             productId: string;
             orderId: string | null;
             rating: number;
@@ -99,9 +99,9 @@ export declare class ReviewService {
     getReviewById(id: string): Promise<{
         user: {
             id: string;
+            email: string;
             firstName: string;
             lastName: string;
-            email: string;
             avatar: string;
         };
         product: {
@@ -110,13 +110,13 @@ export declare class ReviewService {
             slug: string;
         };
     } & {
+        comment: string | null;
         id: string;
         createdAt: Date;
+        userId: string | null;
         updatedAt: Date;
         title: string | null;
         images: string[];
-        userId: string | null;
-        comment: string | null;
         productId: string;
         orderId: string | null;
         rating: number;
@@ -131,19 +131,19 @@ export declare class ReviewService {
     updateReview(reviewId: string, userId: string, input: UpdateReviewInput): Promise<{
         user: {
             id: string;
+            email: string;
             firstName: string;
             lastName: string;
-            email: string;
             avatar: string;
         };
     } & {
+        comment: string | null;
         id: string;
         createdAt: Date;
+        userId: string | null;
         updatedAt: Date;
         title: string | null;
         images: string[];
-        userId: string | null;
-        comment: string | null;
         productId: string;
         orderId: string | null;
         rating: number;
