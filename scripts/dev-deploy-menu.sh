@@ -68,12 +68,12 @@ run_deploy_infrastructure() {
     echo ""
     echo "🗄️  Deploying Infrastructure to Server..."
     echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./deploy-infrastructure.sh" ]; then
+    if [ ! -f "./scripts/deployment/deploy-infrastructure.sh" ]; then
         echo "❌ Error: deploy-infrastructure.sh not found!"
         read -p "Press Enter to continue..."
         return
     fi
-    ./deploy-infrastructure.sh
+    ./scripts/deployment/deploy-infrastructure.sh
     echo ""
     read -p "Press Enter to continue..."
 }
@@ -82,12 +82,12 @@ run_stop_services() {
     echo ""
     echo "🛑 Stop Services..."
     echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./stop-services.sh" ]; then
+    if [ ! -f "./scripts/deployment/stop-services.sh" ]; then
         echo "❌ Error: stop-services.sh not found!"
         read -p "Press Enter to continue..."
         return
     fi
-    ./stop-services.sh
+    ./scripts/deployment/stop-services.sh
     echo ""
     read -p "Press Enter to continue..."
 }
@@ -96,12 +96,12 @@ run_deploy_app() {
     echo ""
     echo "🚀 Deploying Application (Backend + Frontend)..."
     echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./deploy-optimized.sh" ]; then
+    if [ ! -f "./scripts/deployment/deploy-optimized.sh" ]; then
         echo "❌ Error: deploy-optimized.sh not found!"
         read -p "Press Enter to continue..."
         return
     fi
-    ./deploy-optimized.sh
+    ./scripts/deployment/deploy-optimized.sh
     echo ""
     read -p "Press Enter to continue..."
 }
@@ -179,12 +179,12 @@ run_test_build() {
     echo ""
     echo "🏗️  Testing Production Build..."
     echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./build-frontend-prod.sh" ]; then
+    if [ ! -f "./scripts/setup/build-frontend-prod.sh" ]; then
         echo "❌ Error: build-frontend-prod.sh not found!"
         read -p "Press Enter to continue..."
         return
     fi
-    ./build-frontend-prod.sh
+    ./scripts/setup/build-frontend-prod.sh
     echo ""
     read -p "Press Enter to continue..."
 }
@@ -193,12 +193,12 @@ run_check_status() {
     echo ""
     echo "📊 Checking Deployment Status..."
     echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./check-deployment-status.sh" ]; then
+    if [ ! -f "./scripts/infrastructure/check-deployment-status.sh" ]; then
         echo "❌ Error: check-deployment-status.sh not found!"
         read -p "Press Enter to continue..."
         return
     fi
-    ./check-deployment-status.sh
+    ./scripts/infrastructure/check-deployment-status.sh
     echo ""
     read -p "Press Enter to continue..."
 }

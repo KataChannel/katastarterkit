@@ -84,11 +84,11 @@ if [ $? -ne 0 ]; then
     echo ""
     echo -e "${BLUE}To fix this, deploy infrastructure first:${NC}"
     echo -e "   1. Using menu: ${GREEN}bun run dev${NC} → Choose ${GREEN}4${NC}"
-    echo -e "   2. Direct run:  ${GREEN}./deploy-infrastructure.sh${NC}"
+    echo -e "   2. Direct run:  ${GREEN}./scripts/deployment/deploy-infrastructure.sh${NC}"
     echo ""
     echo -e "${YELLOW}After infrastructure is running, you can deploy the app:${NC}"
     echo -e "   1. Using menu: ${GREEN}bun run dev${NC} → Choose ${GREEN}5${NC}"
-    echo -e "   2. Direct run:  ${GREEN}./deploy-optimized.sh${NC}"
+    echo -e "   2. Direct run:  ${GREEN}./scripts/deployment/deploy-optimized.sh${NC}"
     echo ""
     exit 1
 fi

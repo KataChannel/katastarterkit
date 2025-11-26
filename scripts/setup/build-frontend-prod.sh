@@ -88,5 +88,5 @@ fi
 echo ""
 echo -e "${YELLOW}💡 Next Steps:${NC}"
 echo -e "   1. Test locally: ${BLUE}cd .next-rausach/standalone && node frontend/server.js${NC}"
-echo -e "   2. Deploy to server: ${BLUE}cd ../.. && ./deploy-optimized.sh${NC}"
+echo -e "   2. Deploy to server: ${BLUE}cd ../.. && ./scripts/deployment/deploy-optimized.sh${NC}"
 echo ""

@@ -16,7 +16,7 @@ bun run dev
 # Chọn: 4. Deploy Infrastructure to Server
 
 # Option 2: Chạy trực tiếp
-./deploy-infrastructure.sh
+./scripts/deployment/deploy-infrastructure.sh
 ```
 
 **Khi nào cần chạy:**
@@ -32,7 +32,7 @@ bun run dev
 # Chọn: 5. Deploy App to Server
 
 # Option 2: Chạy trực tiếp
-./deploy-optimized.sh
+./scripts/deployment/deploy-optimized.sh
 ```
 
 **Khi nào cần chạy:**
@@ -139,7 +139,7 @@ ssh root@116.118.49.243 "cd /root/shoprausach && docker compose -f docker-compos
 
 ```json
 {
-  "dev": "./dev-deploy-menu.sh",              // Mở menu
+  "dev": "./scripts/dev-deploy-menu.sh",              // Mở menu
   "docker:infra": "docker compose -f docker-compose.infra.yml up -d",
   "docker:app": "docker compose -f docker-compose.app.yml up -d",
   "docker:down:app": "docker compose -f docker-compose.app.yml down",

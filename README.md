@@ -25,11 +25,17 @@ A modern, production-ready fullstack application built with the latest technolog
 ## 🚀 Quick Start
 
 ```bash
-# Deploy to production server
-./deploy.sh
+# Development
+bun install
+bun run dev
 
-# Or use interactive menu
-./menu.sh
+# Deployment (interactive menu)
+bun run dev
+# Or: ./scripts/dev-deploy-menu.sh
+
+# Direct deployment
+./scripts/deployment/deploy-infrastructure.sh  # First time
+./scripts/deployment/deploy-optimized.sh       # Updates
 ```
 
 ### 🎯 **Frontend (Next.js 15 + React 19)**
