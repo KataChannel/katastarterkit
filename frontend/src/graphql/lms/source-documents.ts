@@ -62,6 +62,12 @@ export const GET_SOURCE_DOCUMENT = gql`
       thumbnailUrl
       categoryId
       tags
+      approvalRequested
+      approvalRequestedAt
+      approvalRequestedBy
+      approvedBy
+      approvedAt
+      rejectionReason
       aiSummary
       aiKeywords
       aiTopics
@@ -82,6 +88,11 @@ export const GET_SOURCE_DOCUMENT = gql`
         description
         icon
         color
+      }
+      user {
+        id
+        email
+        username
       }
     }
   }

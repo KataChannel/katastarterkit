@@ -11,17 +11,17 @@ export declare class RBACResolver {
         };
         permissions: ({
             permission: {
-                category: string;
                 id: string;
-                createdAt: Date;
-                isActive: boolean;
-                action: string;
                 name: string;
+                createdAt: Date;
                 updatedAt: Date;
-                displayName: string;
                 description: string | null;
+                isActive: boolean;
+                category: string;
+                displayName: string;
                 metadata: import("@prisma/client/runtime/library").JsonValue | null;
                 createdBy: string | null;
+                action: string;
                 scope: string | null;
                 conditions: import("@prisma/client/runtime/library").JsonValue | null;
                 resource: string;
@@ -30,24 +30,24 @@ export declare class RBACResolver {
         } & {
             id: string;
             createdAt: Date;
-            expiresAt: Date | null;
             updatedAt: Date;
+            expiresAt: Date | null;
+            roleId: string;
             effect: string;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
-            roleId: string;
             permissionId: string;
             grantedBy: string | null;
             grantedAt: Date;
         })[];
     } & {
         id: string;
-        createdAt: Date;
-        isActive: boolean;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
-        displayName: string;
         description: string | null;
+        isActive: boolean;
         parentId: string | null;
+        displayName: string;
         isSystemRole: boolean;
         priority: number;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
@@ -57,37 +57,37 @@ export declare class RBACResolver {
         userRoles: ({
             user: {
                 id: string;
-                email: string;
                 firstName: string;
                 lastName: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            expiresAt: Date | null;
-            userId: string;
             updatedAt: Date;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            userId: string;
+            expiresAt: Date | null;
+            roleId: string;
             effect: string;
             scope: string | null;
             assignedBy: string | null;
             assignedAt: Date;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
-            roleId: string;
         })[];
         permissions: ({
             permission: {
-                category: string;
                 id: string;
-                createdAt: Date;
-                isActive: boolean;
-                action: string;
                 name: string;
+                createdAt: Date;
                 updatedAt: Date;
-                displayName: string;
                 description: string | null;
+                isActive: boolean;
+                category: string;
+                displayName: string;
                 metadata: import("@prisma/client/runtime/library").JsonValue | null;
                 createdBy: string | null;
+                action: string;
                 scope: string | null;
                 conditions: import("@prisma/client/runtime/library").JsonValue | null;
                 resource: string;
@@ -96,24 +96,24 @@ export declare class RBACResolver {
         } & {
             id: string;
             createdAt: Date;
-            expiresAt: Date | null;
             updatedAt: Date;
+            expiresAt: Date | null;
+            roleId: string;
             effect: string;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
-            roleId: string;
             permissionId: string;
             grantedBy: string | null;
             grantedAt: Date;
         })[];
     } & {
         id: string;
-        createdAt: Date;
-        isActive: boolean;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
-        displayName: string;
         description: string | null;
+        isActive: boolean;
         parentId: string | null;
+        displayName: string;
         isSystemRole: boolean;
         priority: number;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
@@ -121,17 +121,17 @@ export declare class RBACResolver {
     }>;
     permissions(): Promise<{
         data: Record<string, {
-            category: string;
             id: string;
-            createdAt: Date;
-            isActive: boolean;
-            action: string;
             name: string;
+            createdAt: Date;
             updatedAt: Date;
-            displayName: string;
             description: string | null;
+            isActive: boolean;
+            category: string;
+            displayName: string;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdBy: string | null;
+            action: string;
             scope: string | null;
             conditions: import("@prisma/client/runtime/library").JsonValue | null;
             resource: string;
@@ -141,19 +141,19 @@ export declare class RBACResolver {
     assignRoleToUser(currentUser: any, userId: string, roleId: string, expiresAt?: Date): Promise<{
         user: {
             id: string;
-            email: string;
             firstName: string;
             lastName: string;
+            email: string;
         };
         role: {
             id: string;
-            createdAt: Date;
-            isActive: boolean;
             name: string;
+            createdAt: Date;
             updatedAt: Date;
-            displayName: string;
             description: string | null;
+            isActive: boolean;
             parentId: string | null;
+            displayName: string;
             isSystemRole: boolean;
             priority: number;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
@@ -162,16 +162,16 @@ export declare class RBACResolver {
     } & {
         id: string;
         createdAt: Date;
-        expiresAt: Date | null;
-        userId: string;
         updatedAt: Date;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        userId: string;
+        expiresAt: Date | null;
+        roleId: string;
         effect: string;
         scope: string | null;
         assignedBy: string | null;
         assignedAt: Date;
         conditions: import("@prisma/client/runtime/library").JsonValue | null;
-        roleId: string;
     }>;
     removeRoleFromUser(userId: string, roleId: string, currentUser: any): Promise<{
         success: boolean;
@@ -180,27 +180,27 @@ export declare class RBACResolver {
     usersByRole(roleId: string): Promise<({
         user: {
             id: string;
-            createdAt: Date;
-            isActive: boolean;
-            email: string;
             username: string;
             firstName: string;
             lastName: string;
+            email: string;
+            createdAt: Date;
+            isActive: boolean;
             avatar: string;
         };
     } & {
         id: string;
         createdAt: Date;
-        expiresAt: Date | null;
-        userId: string;
         updatedAt: Date;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        userId: string;
+        expiresAt: Date | null;
+        roleId: string;
         effect: string;
         scope: string | null;
         assignedBy: string | null;
         assignedAt: Date;
         conditions: import("@prisma/client/runtime/library").JsonValue | null;
-        roleId: string;
     })[]>;
     checkUserPermission(userId: string, resource: string, action: string, scope?: string): Promise<boolean>;
 }

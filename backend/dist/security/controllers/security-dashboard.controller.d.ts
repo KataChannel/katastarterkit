@@ -53,8 +53,8 @@ export declare class SecurityDashboardController {
                 userId: string;
                 user: {
                     id: string;
-                    email: string;
                     username: string;
+                    email: string;
                 };
                 resourceType: string;
                 resourceId: string;
@@ -73,22 +73,22 @@ export declare class SecurityDashboardController {
         alerts: ({
             user: {
                 id: string;
-                email: string;
                 username: string;
+                email: string;
             };
         } & {
-            category: string;
             id: string;
             createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            category: string;
+            userId: string | null;
             sessionId: string | null;
             ipAddress: string;
             userAgent: string | null;
             details: import("@prisma/client/runtime/library").JsonValue | null;
-            userId: string | null;
-            updatedAt: Date;
             severity: string;
             correlationId: string | null;
-            description: string;
             eventType: string;
             location: string | null;
             riskScore: number | null;

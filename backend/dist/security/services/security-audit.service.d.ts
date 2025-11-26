@@ -52,22 +52,22 @@ export declare class SecurityAuditService {
         events: ({
             user: {
                 id: string;
-                email: string;
                 username: string;
+                email: string;
             };
         } & {
-            category: string;
             id: string;
             createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            category: string;
+            userId: string | null;
             sessionId: string | null;
             ipAddress: string;
             userAgent: string | null;
             details: import("@prisma/client/runtime/library").JsonValue | null;
-            userId: string | null;
-            updatedAt: Date;
             severity: string;
             correlationId: string | null;
-            description: string;
             eventType: string;
             location: string | null;
             riskScore: number | null;
@@ -88,18 +88,20 @@ export declare class SecurityAuditService {
         logs: ({
             user: {
                 id: string;
-                email: string;
                 username: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
+            tags: string[];
+            userId: string | null;
+            success: boolean;
             sessionId: string | null;
             ipAddress: string | null;
             userAgent: string | null;
             action: string;
             details: import("@prisma/client/runtime/library").JsonValue | null;
-            userId: string | null;
             resourceType: string;
             resourceId: string | null;
             method: string | null;
@@ -111,11 +113,9 @@ export declare class SecurityAuditService {
             parentResourceId: string | null;
             operationType: string | null;
             severity: string;
-            tags: string[];
             batchId: string | null;
             batchSize: number | null;
             batchIndex: number | null;
-            success: boolean;
             errorMessage: string | null;
             errorCode: string | null;
             responseTime: number | null;
@@ -158,22 +158,22 @@ export declare class SecurityAuditService {
         recentEvents: ({
             user: {
                 id: string;
-                email: string;
                 username: string;
+                email: string;
             };
         } & {
-            category: string;
             id: string;
             createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            category: string;
+            userId: string | null;
             sessionId: string | null;
             ipAddress: string;
             userAgent: string | null;
             details: import("@prisma/client/runtime/library").JsonValue | null;
-            userId: string | null;
-            updatedAt: Date;
             severity: string;
             correlationId: string | null;
-            description: string;
             eventType: string;
             location: string | null;
             riskScore: number | null;
@@ -221,8 +221,8 @@ export declare class SecurityAuditService {
             userId: string;
             user: {
                 id: string;
-                email: string;
                 username: string;
+                email: string;
             };
             resourceType: string;
             resourceId: string;

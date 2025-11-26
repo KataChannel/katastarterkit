@@ -510,9 +510,9 @@ enum BlockType {
 
 type BlogAuthorType {
   email: String!
-  firstName: String!
+  firstName: String
   id: ID!
-  lastName: String!
+  lastName: String
   username: String!
 }
 

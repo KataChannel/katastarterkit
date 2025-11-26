@@ -80,8 +80,8 @@ export declare class SecurityMonitoringService {
             userId: string;
             user: {
                 id: string;
-                email: string;
                 username: string;
+                email: string;
             };
             resourceType: string;
             resourceId: string;

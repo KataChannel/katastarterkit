@@ -4,50 +4,50 @@ export declare class CalendarService {
     constructor(prisma: PrismaService);
     getCalendarTasks(userId: string, startDate: Date, endDate: Date, projectId?: string): Promise<{
         tasks: ({
+            _count: {
+                comments: number;
+                subtasks: number;
+            };
             user: {
                 id: string;
                 firstName: string;
                 lastName: string;
                 avatar: string;
             };
-            _count: {
-                comments: number;
-                subtasks: number;
-            };
         } & {
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
             id: string;
             createdAt: Date;
-            userId: string;
             updatedAt: Date;
-            tags: string[];
             description: string | null;
-            parentId: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            order: number;
             title: string;
             status: import("@prisma/client").$Enums.TaskStatus;
-            dueDate: Date | null;
+            category: import("@prisma/client").$Enums.TaskCategory;
+            tags: string[];
+            parentId: string | null;
+            priority: import("@prisma/client").$Enums.TaskPriority;
+            userId: string;
             completedAt: Date | null;
+            dueDate: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
         })[];
         tasksByDate: Record<string, {
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
             id: string;
             createdAt: Date;
-            userId: string;
             updatedAt: Date;
-            tags: string[];
             description: string | null;
-            parentId: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            order: number;
             title: string;
             status: import("@prisma/client").$Enums.TaskStatus;
-            dueDate: Date | null;
+            category: import("@prisma/client").$Enums.TaskCategory;
+            tags: string[];
+            parentId: string | null;
+            priority: import("@prisma/client").$Enums.TaskPriority;
+            userId: string;
             completedAt: Date | null;
+            dueDate: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
@@ -60,50 +60,50 @@ export declare class CalendarService {
     }>;
     getMonthView(userId: string, year: number, month: number, projectId?: string): Promise<{
         tasks: ({
+            _count: {
+                comments: number;
+                subtasks: number;
+            };
             user: {
                 id: string;
                 firstName: string;
                 lastName: string;
                 avatar: string;
             };
-            _count: {
-                comments: number;
-                subtasks: number;
-            };
         } & {
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
             id: string;
             createdAt: Date;
-            userId: string;
             updatedAt: Date;
-            tags: string[];
             description: string | null;
-            parentId: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            order: number;
             title: string;
             status: import("@prisma/client").$Enums.TaskStatus;
-            dueDate: Date | null;
+            category: import("@prisma/client").$Enums.TaskCategory;
+            tags: string[];
+            parentId: string | null;
+            priority: import("@prisma/client").$Enums.TaskPriority;
+            userId: string;
             completedAt: Date | null;
+            dueDate: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
         })[];
         tasksByDate: Record<string, {
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
             id: string;
             createdAt: Date;
-            userId: string;
             updatedAt: Date;
-            tags: string[];
             description: string | null;
-            parentId: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            order: number;
             title: string;
             status: import("@prisma/client").$Enums.TaskStatus;
-            dueDate: Date | null;
+            category: import("@prisma/client").$Enums.TaskCategory;
+            tags: string[];
+            parentId: string | null;
+            priority: import("@prisma/client").$Enums.TaskPriority;
+            userId: string;
             completedAt: Date | null;
+            dueDate: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
@@ -116,50 +116,50 @@ export declare class CalendarService {
     }>;
     getWeekView(userId: string, startDate: Date, projectId?: string): Promise<{
         tasks: ({
+            _count: {
+                comments: number;
+                subtasks: number;
+            };
             user: {
                 id: string;
                 firstName: string;
                 lastName: string;
                 avatar: string;
             };
-            _count: {
-                comments: number;
-                subtasks: number;
-            };
         } & {
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
             id: string;
             createdAt: Date;
-            userId: string;
             updatedAt: Date;
-            tags: string[];
             description: string | null;
-            parentId: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            order: number;
             title: string;
             status: import("@prisma/client").$Enums.TaskStatus;
-            dueDate: Date | null;
+            category: import("@prisma/client").$Enums.TaskCategory;
+            tags: string[];
+            parentId: string | null;
+            priority: import("@prisma/client").$Enums.TaskPriority;
+            userId: string;
             completedAt: Date | null;
+            dueDate: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
         })[];
         tasksByDate: Record<string, {
-            category: import("@prisma/client").$Enums.TaskCategory;
-            order: number;
             id: string;
             createdAt: Date;
-            userId: string;
             updatedAt: Date;
-            tags: string[];
             description: string | null;
-            parentId: string | null;
-            priority: import("@prisma/client").$Enums.TaskPriority;
+            order: number;
             title: string;
             status: import("@prisma/client").$Enums.TaskStatus;
-            dueDate: Date | null;
+            category: import("@prisma/client").$Enums.TaskCategory;
+            tags: string[];
+            parentId: string | null;
+            priority: import("@prisma/client").$Enums.TaskPriority;
+            userId: string;
             completedAt: Date | null;
+            dueDate: Date | null;
             projectId: string | null;
             assignedTo: string[];
             mentions: string[];
@@ -174,25 +174,25 @@ export declare class CalendarService {
     getUpcomingTasks(userId: string, hours?: number): Promise<({
         user: {
             id: string;
-            email: string;
             firstName: string;
             lastName: string;
+            email: string;
         };
     } & {
-        category: import("@prisma/client").$Enums.TaskCategory;
-        order: number;
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
-        tags: string[];
         description: string | null;
-        parentId: string | null;
-        priority: import("@prisma/client").$Enums.TaskPriority;
+        order: number;
         title: string;
         status: import("@prisma/client").$Enums.TaskStatus;
-        dueDate: Date | null;
+        category: import("@prisma/client").$Enums.TaskCategory;
+        tags: string[];
+        parentId: string | null;
+        priority: import("@prisma/client").$Enums.TaskPriority;
+        userId: string;
         completedAt: Date | null;
+        dueDate: Date | null;
         projectId: string | null;
         assignedTo: string[];
         mentions: string[];

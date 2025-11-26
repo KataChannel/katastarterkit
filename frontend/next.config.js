@@ -87,6 +87,10 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: '1drv.ms',
+      },
+      {
+        protocol: 'https',
         hostname: 'minio',
         pathname: '/uploads/**',
       },

@@ -5,12 +5,12 @@ export declare class CertificatesService {
     generateCertificate(enrollmentId: string, userId: string): Promise<{
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
+        courseId: string;
+        userId: string;
+        enrollmentId: string;
         grade: string | null;
         issueDate: Date;
-        courseId: string;
-        enrollmentId: string;
         certificateNumber: string;
         courseName: string;
         instructorName: string;
@@ -19,19 +19,19 @@ export declare class CertificatesService {
     }>;
     getMyCertificates(userId: string): Promise<({
         course: {
-            title: string;
             slug: string;
             thumbnail: string;
+            title: string;
         };
     } & {
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
+        courseId: string;
+        userId: string;
+        enrollmentId: string;
         grade: string | null;
         issueDate: Date;
-        courseId: string;
-        enrollmentId: string;
         certificateNumber: string;
         courseName: string;
         instructorName: string;
@@ -45,20 +45,20 @@ export declare class CertificatesService {
             lastName: string;
         };
         course: {
-            title: string;
             slug: string;
             thumbnail: string;
+            title: string;
             duration: number;
         };
     } & {
         id: string;
         createdAt: Date;
-        userId: string;
         updatedAt: Date;
+        courseId: string;
+        userId: string;
+        enrollmentId: string;
         grade: string | null;
         issueDate: Date;
-        courseId: string;
-        enrollmentId: string;
         certificateNumber: string;
         courseName: string;
         instructorName: string;
@@ -74,18 +74,18 @@ export declare class CertificatesService {
                 lastName: string;
             };
             course: {
-                title: string;
                 thumbnail: string;
+                title: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            userId: string;
             updatedAt: Date;
+            courseId: string;
+            userId: string;
+            enrollmentId: string;
             grade: string | null;
             issueDate: Date;
-            courseId: string;
-            enrollmentId: string;
             certificateNumber: string;
             courseName: string;
             instructorName: string;

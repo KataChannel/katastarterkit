@@ -13,11 +13,11 @@ export declare class FileService {
     getFiles(input: GetFilesInput, userId: string): Promise<{
         items: ({
             shares: {
-                password: string | null;
                 id: string;
                 createdAt: Date;
-                token: string;
+                password: string | null;
                 expiresAt: Date | null;
+                token: string;
                 sharedBy: string;
                 sharedWith: string | null;
                 fileId: string;
@@ -27,44 +27,44 @@ export declare class FileService {
                 lastAccess: Date | null;
             }[];
             folder: {
-                path: string;
                 id: string;
-                createdAt: Date;
-                userId: string;
                 name: string;
+                createdAt: Date;
                 updatedAt: Date;
                 description: string | null;
                 parentId: string | null;
                 color: string | null;
                 icon: string | null;
+                path: string;
+                userId: string;
                 isSystem: boolean;
             };
         } & {
-            path: string;
             id: string;
             createdAt: Date;
-            size: number;
-            userId: string;
             updatedAt: Date;
-            tags: string[];
             description: string | null;
-            metadata: Prisma.JsonValue | null;
             title: string | null;
+            thumbnailUrl: string | null;
+            visibility: import("@prisma/client").$Enums.FileVisibility;
+            viewCount: number;
+            tags: string[];
+            metadata: Prisma.JsonValue | null;
+            path: string;
+            userId: string;
             url: string;
-            filename: string;
             mimeType: string;
+            downloadCount: number;
+            bucket: string;
+            filename: string;
+            size: number;
             width: number | null;
             height: number | null;
-            bucket: string;
-            viewCount: number;
-            etag: string | null;
             alt: string | null;
             folderId: string | null;
-            visibility: import("@prisma/client").$Enums.FileVisibility;
             fileType: import("@prisma/client").$Enums.FileType;
             originalName: string;
-            thumbnailUrl: string | null;
-            downloadCount: number;
+            etag: string | null;
         })[];
         total: number;
         page: number;
@@ -89,7 +89,7 @@ export declare class FileService {
         totalSize: number;
         totalFolders: number;
         filesByType: {
-            type: "IMAGE" | "VIDEO" | "DOCUMENT" | "OTHER" | "AUDIO" | "ARCHIVE";
+            type: "VIDEO" | "AUDIO" | "IMAGE" | "DOCUMENT" | "OTHER" | "ARCHIVE";
             count: number;
             totalSize: number;
         }[];
@@ -100,38 +100,38 @@ export declare class FileService {
     }>;
     createFileShare(input: CreateFileShareInput, userId: string): Promise<{
         file: {
-            path: string;
             id: string;
             createdAt: Date;
-            size: number;
-            userId: string;
             updatedAt: Date;
-            tags: string[];
             description: string | null;
-            metadata: Prisma.JsonValue | null;
             title: string | null;
+            thumbnailUrl: string | null;
+            visibility: import("@prisma/client").$Enums.FileVisibility;
+            viewCount: number;
+            tags: string[];
+            metadata: Prisma.JsonValue | null;
+            path: string;
+            userId: string;
             url: string;
-            filename: string;
             mimeType: string;
+            downloadCount: number;
+            bucket: string;
+            filename: string;
+            size: number;
             width: number | null;
             height: number | null;
-            bucket: string;
-            viewCount: number;
-            etag: string | null;
             alt: string | null;
             folderId: string | null;
-            visibility: import("@prisma/client").$Enums.FileVisibility;
             fileType: import("@prisma/client").$Enums.FileType;
             originalName: string;
-            thumbnailUrl: string | null;
-            downloadCount: number;
+            etag: string | null;
         };
     } & {
-        password: string | null;
         id: string;
         createdAt: Date;
-        token: string;
+        password: string | null;
         expiresAt: Date | null;
+        token: string;
         sharedBy: string;
         sharedWith: string | null;
         fileId: string;

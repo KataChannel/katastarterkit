@@ -6,7 +6,12 @@ export declare class TechnicalSupportResolver {
     getTechnicalSupportTickets(where?: TechnicalSupportTicketWhereInput, take?: number, skip?: number): Promise<({
         customer: {
             id: string;
+            username: string;
             email: string;
+            avatar: string;
+        };
+        assignedTo: {
+            id: string;
             username: string;
             avatar: string;
         };
@@ -24,21 +29,16 @@ export declare class TechnicalSupportResolver {
             authorName: string | null;
             authorEmail: string | null;
         }[];
-        assignedTo: {
-            id: string;
-            username: string;
-            avatar: string;
-        };
     } & {
-        category: import("@prisma/client").$Enums.SupportTicketCategory;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        tags: string[];
         description: string;
+        status: import("@prisma/client").$Enums.SupportTicketStatus;
+        category: import("@prisma/client").$Enums.SupportTicketCategory;
+        tags: string[];
         priority: import("@prisma/client").$Enums.SupportTicketPriority;
         assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportTicketStatus;
         environment: string | null;
         customerEmail: string | null;
         resolvedAt: Date | null;
@@ -67,7 +67,12 @@ export declare class TechnicalSupportResolver {
     getTechnicalSupportTicket(id: string): Promise<{
         customer: {
             id: string;
+            username: string;
             email: string;
+            avatar: string;
+        };
+        assignedTo: {
+            id: string;
             username: string;
             avatar: string;
         };
@@ -91,31 +96,26 @@ export declare class TechnicalSupportResolver {
             authorName: string | null;
             authorEmail: string | null;
         })[];
-        assignedTo: {
-            id: string;
-            username: string;
-            avatar: string;
-        };
         resolvedBy: {
             id: string;
             username: string;
             avatar: string;
         };
         relatedOrder: {
-            type: string | null;
             id: string;
             createdAt: Date;
-            userId: string | null;
             updatedAt: Date;
-            metadata: import("@prisma/client/runtime/library").JsonValue | null;
-            createdBy: string | null;
             title: string | null;
             status: import("@prisma/client").$Enums.OrderStatus;
             total: number;
-            updatedBy: string | null;
+            type: string | null;
             displayOrder: number | null;
-            vat: number;
+            metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            createdBy: string | null;
+            userId: string | null;
             paymentMethod: import("@prisma/client").$Enums.PaymentMethod;
+            updatedBy: string | null;
+            vat: number;
             paymentStatus: import("@prisma/client").$Enums.PaymentStatus;
             guestName: string | null;
             guestEmail: string | null;
@@ -147,15 +147,15 @@ export declare class TechnicalSupportResolver {
             cancelledAt: Date | null;
         };
     } & {
-        category: import("@prisma/client").$Enums.SupportTicketCategory;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        tags: string[];
         description: string;
+        status: import("@prisma/client").$Enums.SupportTicketStatus;
+        category: import("@prisma/client").$Enums.SupportTicketCategory;
+        tags: string[];
         priority: import("@prisma/client").$Enums.SupportTicketPriority;
         assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportTicketStatus;
         environment: string | null;
         customerEmail: string | null;
         resolvedAt: Date | null;
@@ -183,27 +183,51 @@ export declare class TechnicalSupportResolver {
     }>;
     getTechnicalSupportTicketByNumber(ticketNumber: string): Promise<{
         customer: {
-            password: string | null;
             id: string;
-            isVerified: boolean;
-            createdAt: Date;
-            isActive: boolean;
-            email: string | null;
             username: string;
-            phone: string | null;
             firstName: string | null;
             lastName: string | null;
+            email: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            password: string | null;
+            phone: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isTwoFactorEnabled: boolean;
+            isVerified: boolean;
             address: string | null;
             city: string | null;
             district: string | null;
             ward: string | null;
+            isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
+            departmentId: string | null;
+        };
+        assignedTo: {
+            id: string;
+            username: string;
+            firstName: string | null;
+            lastName: string | null;
+            email: string | null;
+            createdAt: Date;
             updatedAt: Date;
+            isActive: boolean;
+            password: string | null;
+            phone: string | null;
+            avatar: string | null;
+            roleType: import("@prisma/client").$Enums.UserRoleType;
+            isVerified: boolean;
+            address: string | null;
+            city: string | null;
+            district: string | null;
+            ward: string | null;
+            isTwoFactorEnabled: boolean;
+            failedLoginAttempts: number;
+            lockedUntil: Date | null;
+            lastLoginAt: Date | null;
             departmentId: string | null;
         };
         messages: {
@@ -220,40 +244,16 @@ export declare class TechnicalSupportResolver {
             authorName: string | null;
             authorEmail: string | null;
         }[];
-        assignedTo: {
-            password: string | null;
-            id: string;
-            isVerified: boolean;
-            createdAt: Date;
-            isActive: boolean;
-            email: string | null;
-            username: string;
-            phone: string | null;
-            firstName: string | null;
-            lastName: string | null;
-            avatar: string | null;
-            roleType: import("@prisma/client").$Enums.UserRoleType;
-            isTwoFactorEnabled: boolean;
-            address: string | null;
-            city: string | null;
-            district: string | null;
-            ward: string | null;
-            failedLoginAttempts: number;
-            lockedUntil: Date | null;
-            lastLoginAt: Date | null;
-            updatedAt: Date;
-            departmentId: string | null;
-        };
     } & {
-        category: import("@prisma/client").$Enums.SupportTicketCategory;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        tags: string[];
         description: string;
+        status: import("@prisma/client").$Enums.SupportTicketStatus;
+        category: import("@prisma/client").$Enums.SupportTicketCategory;
+        tags: string[];
         priority: import("@prisma/client").$Enums.SupportTicketPriority;
         assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportTicketStatus;
         environment: string | null;
         customerEmail: string | null;
         resolvedAt: Date | null;
@@ -280,6 +280,11 @@ export declare class TechnicalSupportResolver {
         lastResponseAt: Date | null;
     }>;
     getMyTechnicalSupportTickets(user: any, status?: string): Promise<({
+        assignedTo: {
+            id: string;
+            username: string;
+            avatar: string;
+        };
         messages: {
             id: string;
             createdAt: Date;
@@ -294,21 +299,16 @@ export declare class TechnicalSupportResolver {
             authorName: string | null;
             authorEmail: string | null;
         }[];
-        assignedTo: {
-            id: string;
-            username: string;
-            avatar: string;
-        };
     } & {
-        category: import("@prisma/client").$Enums.SupportTicketCategory;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        tags: string[];
         description: string;
+        status: import("@prisma/client").$Enums.SupportTicketStatus;
+        category: import("@prisma/client").$Enums.SupportTicketCategory;
+        tags: string[];
         priority: import("@prisma/client").$Enums.SupportTicketPriority;
         assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportTicketStatus;
         environment: string | null;
         customerEmail: string | null;
         resolvedAt: Date | null;
@@ -337,20 +337,20 @@ export declare class TechnicalSupportResolver {
     createTechnicalSupportTicket(input: CreateTechnicalSupportTicketInput): Promise<{
         customer: {
             id: string;
-            email: string;
             username: string;
+            email: string;
             avatar: string;
         };
     } & {
-        category: import("@prisma/client").$Enums.SupportTicketCategory;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        tags: string[];
         description: string;
+        status: import("@prisma/client").$Enums.SupportTicketStatus;
+        category: import("@prisma/client").$Enums.SupportTicketCategory;
+        tags: string[];
         priority: import("@prisma/client").$Enums.SupportTicketPriority;
         assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportTicketStatus;
         environment: string | null;
         customerEmail: string | null;
         resolvedAt: Date | null;
@@ -377,15 +377,15 @@ export declare class TechnicalSupportResolver {
         lastResponseAt: Date | null;
     }>;
     updateTechnicalSupportTicket(id: string, input: UpdateTechnicalSupportTicketInput): Promise<{
-        category: import("@prisma/client").$Enums.SupportTicketCategory;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        tags: string[];
         description: string;
+        status: import("@prisma/client").$Enums.SupportTicketStatus;
+        category: import("@prisma/client").$Enums.SupportTicketCategory;
+        tags: string[];
         priority: import("@prisma/client").$Enums.SupportTicketPriority;
         assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportTicketStatus;
         environment: string | null;
         customerEmail: string | null;
         resolvedAt: Date | null;
@@ -413,63 +413,63 @@ export declare class TechnicalSupportResolver {
     }>;
     assignTechnicalSupportTicket(ticketId: string, assignedToId: string): Promise<{
         customer: {
-            password: string | null;
             id: string;
-            isVerified: boolean;
-            createdAt: Date;
-            isActive: boolean;
-            email: string | null;
             username: string;
-            phone: string | null;
             firstName: string | null;
             lastName: string | null;
+            email: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            password: string | null;
+            phone: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isTwoFactorEnabled: boolean;
+            isVerified: boolean;
             address: string | null;
             city: string | null;
             district: string | null;
             ward: string | null;
+            isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            updatedAt: Date;
             departmentId: string | null;
         };
         assignedTo: {
-            password: string | null;
             id: string;
-            isVerified: boolean;
-            createdAt: Date;
-            isActive: boolean;
-            email: string | null;
             username: string;
-            phone: string | null;
             firstName: string | null;
             lastName: string | null;
+            email: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            password: string | null;
+            phone: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isTwoFactorEnabled: boolean;
+            isVerified: boolean;
             address: string | null;
             city: string | null;
             district: string | null;
             ward: string | null;
+            isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
-        category: import("@prisma/client").$Enums.SupportTicketCategory;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        tags: string[];
         description: string;
+        status: import("@prisma/client").$Enums.SupportTicketStatus;
+        category: import("@prisma/client").$Enums.SupportTicketCategory;
+        tags: string[];
         priority: import("@prisma/client").$Enums.SupportTicketPriority;
         assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportTicketStatus;
         environment: string | null;
         customerEmail: string | null;
         resolvedAt: Date | null;
@@ -497,39 +497,39 @@ export declare class TechnicalSupportResolver {
     }>;
     resolveTechnicalSupportTicket(ticketId: string, resolution: string, user: any): Promise<{
         customer: {
-            password: string | null;
             id: string;
-            isVerified: boolean;
-            createdAt: Date;
-            isActive: boolean;
-            email: string | null;
             username: string;
-            phone: string | null;
             firstName: string | null;
             lastName: string | null;
+            email: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            isActive: boolean;
+            password: string | null;
+            phone: string | null;
             avatar: string | null;
             roleType: import("@prisma/client").$Enums.UserRoleType;
-            isTwoFactorEnabled: boolean;
+            isVerified: boolean;
             address: string | null;
             city: string | null;
             district: string | null;
             ward: string | null;
+            isTwoFactorEnabled: boolean;
             failedLoginAttempts: number;
             lockedUntil: Date | null;
             lastLoginAt: Date | null;
-            updatedAt: Date;
             departmentId: string | null;
         };
     } & {
-        category: import("@prisma/client").$Enums.SupportTicketCategory;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        tags: string[];
         description: string;
+        status: import("@prisma/client").$Enums.SupportTicketStatus;
+        category: import("@prisma/client").$Enums.SupportTicketCategory;
+        tags: string[];
         priority: import("@prisma/client").$Enums.SupportTicketPriority;
         assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportTicketStatus;
         environment: string | null;
         customerEmail: string | null;
         resolvedAt: Date | null;
@@ -563,63 +563,63 @@ export declare class TechnicalSupportResolver {
         };
         ticket: {
             customer: {
-                password: string | null;
                 id: string;
-                isVerified: boolean;
-                createdAt: Date;
-                isActive: boolean;
-                email: string | null;
                 username: string;
-                phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
+                email: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                isActive: boolean;
+                password: string | null;
+                phone: string | null;
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
-                isTwoFactorEnabled: boolean;
+                isVerified: boolean;
                 address: string | null;
                 city: string | null;
                 district: string | null;
                 ward: string | null;
+                isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                updatedAt: Date;
                 departmentId: string | null;
             };
             assignedTo: {
-                password: string | null;
                 id: string;
-                isVerified: boolean;
-                createdAt: Date;
-                isActive: boolean;
-                email: string | null;
                 username: string;
-                phone: string | null;
                 firstName: string | null;
                 lastName: string | null;
+                email: string | null;
+                createdAt: Date;
+                updatedAt: Date;
+                isActive: boolean;
+                password: string | null;
+                phone: string | null;
                 avatar: string | null;
                 roleType: import("@prisma/client").$Enums.UserRoleType;
-                isTwoFactorEnabled: boolean;
+                isVerified: boolean;
                 address: string | null;
                 city: string | null;
                 district: string | null;
                 ward: string | null;
+                isTwoFactorEnabled: boolean;
                 failedLoginAttempts: number;
                 lockedUntil: Date | null;
                 lastLoginAt: Date | null;
-                updatedAt: Date;
                 departmentId: string | null;
             };
         } & {
-            category: import("@prisma/client").$Enums.SupportTicketCategory;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            tags: string[];
             description: string;
+            status: import("@prisma/client").$Enums.SupportTicketStatus;
+            category: import("@prisma/client").$Enums.SupportTicketCategory;
+            tags: string[];
             priority: import("@prisma/client").$Enums.SupportTicketPriority;
             assignedAt: Date | null;
-            status: import("@prisma/client").$Enums.SupportTicketStatus;
             environment: string | null;
             customerEmail: string | null;
             resolvedAt: Date | null;
@@ -660,15 +660,15 @@ export declare class TechnicalSupportResolver {
         authorEmail: string | null;
     }>;
     rateTechnicalSupportTicket(input: RateTicketInput): Promise<{
-        category: import("@prisma/client").$Enums.SupportTicketCategory;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        tags: string[];
         description: string;
+        status: import("@prisma/client").$Enums.SupportTicketStatus;
+        category: import("@prisma/client").$Enums.SupportTicketCategory;
+        tags: string[];
         priority: import("@prisma/client").$Enums.SupportTicketPriority;
         assignedAt: Date | null;
-        status: import("@prisma/client").$Enums.SupportTicketStatus;
         environment: string | null;
         customerEmail: string | null;
         resolvedAt: Date | null;

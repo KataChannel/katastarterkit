@@ -13,16 +13,16 @@ export declare class NotificationResolver {
                 avatar: string;
             };
         } & {
-            type: string;
-            message: string;
             id: string;
             createdAt: Date;
-            userId: string;
             updatedAt: Date;
-            data: import("@prisma/client/runtime/library").JsonValue | null;
             title: string;
-            taskId: string | null;
+            type: string;
+            data: import("@prisma/client/runtime/library").JsonValue | null;
+            message: string;
             isRead: boolean;
+            userId: string;
+            taskId: string | null;
             mentionedBy: string | null;
         })[];
         total: number;
