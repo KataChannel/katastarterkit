@@ -110,7 +110,7 @@ export class BlogService {
     const blog = await this.prisma.blogPost.findUnique({ where: { id } });
     if (!blog) throw new NotFoundException(`Blog post with id ${id} not found`);
     await this.prisma.blogPost.delete({ where: { id } });
-    return { success: true };
+    return true;
   }
 
   async getCategories() {
@@ -151,11 +151,10 @@ export class BlogService {
   }
 
   async deleteCategory(id: string) {
-    const category = await this.prisma.blogCategory.findUnique({ where: { id }, include: { _count: { select: { posts: true } } } });
+    const category = await this.prisma.blogCategory.findUnique({ where: { id } });
     if (!category) throw new NotFoundException(`Category with id ${id} not found`);
-    if (category._count.posts > 0) throw new BadRequestException(`Cannot delete category with ${category._count.posts} posts`);
     await this.prisma.blogCategory.delete({ where: { id } });
-    return { success: true };
+    return true;
   }
 
   async getTags() {
@@ -198,7 +197,7 @@ export class BlogService {
     if (!tag) throw new NotFoundException(`Tag with id ${id} not found`);
     if (tag._count.posts > 0) throw new BadRequestException(`Cannot delete tag with ${tag._count.posts} posts`);
     await this.prisma.blogTag.delete({ where: { id } });
-    return { success: true };
+    return true;
   }
 
   async getBlogsByCategory(categoryId: string, input: any = {}) {
