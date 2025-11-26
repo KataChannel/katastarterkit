@@ -113,18 +113,24 @@ echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━�
 echo -e "${YELLOW}🐳 Step 3/6: Building Docker Images Locally${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
+# Remove old images to force fresh build
+echo -e "${BLUE}  → Removing old local images...${NC}"
+docker rmi -f $IMAGE_BACKEND $IMAGE_FRONTEND 2>/dev/null || true
+
 # Build backend image (context is project root, not backend/)
-echo -e "${BLUE}  → Building backend Docker image...${NC}"
+echo -e "${BLUE}  → Building backend Docker image (no cache)...${NC}"
 docker build -t $IMAGE_BACKEND \
     -f backend/Dockerfile \
     --build-arg NODE_ENV=production \
+    --no-cache \
     .
 
 # Build frontend image (context is project root, not frontend/)
-echo -e "${BLUE}  → Building frontend Docker image...${NC}"
+echo -e "${BLUE}  → Building frontend Docker image (no cache)...${NC}"
 docker build -t $IMAGE_FRONTEND \
     -f frontend/Dockerfile.rausach \
     --build-arg NODE_ENV=production \
+    --no-cache \
     .
 
 echo -e "${GREEN}  ✅ Docker images built${NC}"
@@ -188,15 +194,25 @@ ssh $SERVER << 'ENDSSH'
     set -e
     cd /root/shoprausach
     
+    echo "  → Tagging old images for rollback..."
+    docker tag rausach-backend:latest rausach-backend:previous 2>/dev/null || true
+    docker tag rausach-frontend:latest rausach-frontend:previous 2>/dev/null || true
+    
     echo "  → Loading Docker images..."
     docker load < docker-images/backend.tar.gz
     docker load < docker-images/frontend.tar.gz
     
+    echo "  → Verifying loaded images..."
+    docker images | grep -E "rausach-(backend|frontend).*latest" || echo "⚠️  Warning: Images may not be loaded properly"
+    
     echo "  → Stopping old containers..."
     docker compose -f docker-compose.hybrid.yml down 2>/dev/null || true
     
-    echo "  → Starting services..."
-    docker compose -f docker-compose.hybrid.yml up -d
+    echo "  → Removing old containers to force recreate..."
+    docker rm -f shopbackend shopfrontend 2>/dev/null || true
+    
+    echo "  → Starting services with new images..."
+    docker compose -f docker-compose.hybrid.yml up -d --force-recreate --no-build
     
     echo "  → Waiting for services to be ready..."
     sleep 20
@@ -204,6 +220,15 @@ ssh $SERVER << 'ENDSSH'
     echo ""
     echo "📊 Container Status:"
     docker compose -f docker-compose.hybrid.yml ps
+    
+    echo ""
+    echo "🔍 Verifying new deployment:"
+    echo "Backend container created:"
+    docker inspect shopbackend --format='{{.Created}}' | head -c 19
+    echo ""
+    echo "Frontend container created:"
+    docker inspect shopfrontend --format='{{.Created}}' | head -c 19
+    echo ""
     
     echo ""
     echo "💾 Resource Usage:"
@@ -215,10 +240,6 @@ ssh $SERVER << 'ENDSSH'
     
     echo ""
     echo "🧹 Cleaning up old project images..."
-    # Tag current images as previous for rollback
-    docker tag rausach-backend:latest rausach-backend:previous 2>/dev/null || true
-    docker tag rausach-frontend:latest rausach-frontend:previous 2>/dev/null || true
-    
     # Remove old project images (keep latest and previous)
     for image_type in backend frontend; do
         OLD_IMAGES=$(docker images "rausach-${image_type}" --format "{{.ID}}" | tail -n +3)

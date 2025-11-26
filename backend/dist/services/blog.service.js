@@ -135,7 +135,7 @@ let BlogService = class BlogService {
         if (!blog)
             throw new common_1.NotFoundException(`Blog post with id ${id} not found`);
         await this.prisma.blogPost.delete({ where: { id } });
-        return { success: true };
+        return true;
     }
     async getCategories() {
         const categories = await this.prisma.blogCategory.findMany({ include: { _count: { select: { posts: true } } }, orderBy: { order: 'asc' } });
@@ -169,13 +169,11 @@ let BlogService = class BlogService {
         return this.prisma.blogCategory.update({ where: { id }, data: input });
     }
     async deleteCategory(id) {
-        const category = await this.prisma.blogCategory.findUnique({ where: { id }, include: { _count: { select: { posts: true } } } });
+        const category = await this.prisma.blogCategory.findUnique({ where: { id } });
         if (!category)
             throw new common_1.NotFoundException(`Category with id ${id} not found`);
-        if (category._count.posts > 0)
-            throw new common_1.BadRequestException(`Cannot delete category with ${category._count.posts} posts`);
         await this.prisma.blogCategory.delete({ where: { id } });
-        return { success: true };
+        return true;
     }
     async getTags() {
         return this.prisma.blogTag.findMany({ include: { _count: { select: { posts: true } } }, orderBy: { name: 'asc' } });
@@ -212,7 +210,7 @@ let BlogService = class BlogService {
         if (tag._count.posts > 0)
             throw new common_1.BadRequestException(`Cannot delete tag with ${tag._count.posts} posts`);
         await this.prisma.blogTag.delete({ where: { id } });
-        return { success: true };
+        return true;
     }
     async getBlogsByCategory(categoryId, input = {}) {
         return this.getBlogs({ ...input, categoryId });
