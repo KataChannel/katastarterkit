@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "dev": "./scripts/dev-deploy-menu.sh",
+    "menu": "./scripts/menu.sh",
     "dev:full": "cp .env.dev.rausach backend/.env && cp .env.dev.rausach frontend/.env.local && concurrently \"bun run dev:backend\" \"bun run dev:frontend\"",
     "dev:backend": "cd backend && PORT=12001 bun run dev",
     "dev:frontend": "cd frontend && bun run dev -- -p 12000",
