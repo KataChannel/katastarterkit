@@ -42,14 +42,14 @@ ENV HOSTNAME="0.0.0.0"
 # Copy entire .next/standalone as /app root (already contains everything)
 # .next/standalone includes: frontend/ + node_modules/ + package.json + server.js
 # No need to copy node_modules separately - standalone build has optimized production deps
-COPY --chown=nextjs:nodejs frontend/.next/standalone/ ./
+COPY --chown=nextjs:nodejs .next/standalone/ ./
 
 # Copy static files to the correct location (frontend/.next/static/)
 # Server runs from /app/frontend/, so it looks for static files at /app/frontend/.next/static/
-COPY --chown=nextjs:nodejs frontend/.next/static/ ./frontend/.next/static/
+COPY --chown=nextjs:nodejs .next/static/ ./frontend/.next/static/
 
 # Copy public assets (frontend/public)
-COPY --chown=nextjs:nodejs frontend/public/ ./frontend/public/
+COPY --chown=nextjs:nodejs public/ ./frontend/public/
 
 # Switch to non-root user for security
 USER nextjs
