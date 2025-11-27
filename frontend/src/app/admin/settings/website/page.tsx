@@ -35,6 +35,7 @@ const CATEGORIES = [
   { value: 'CONTACT', label: 'Liên hệ', icon: Mail },
   { value: 'SOCIAL', label: 'Mạng xã hội', icon: MessageSquare },
   { value: 'SEO', label: 'SEO', icon: BarChart },
+  { value: 'ANALYTICS', label: 'Analytics', icon: BarChart },
   { value: 'SUPPORT_CHAT', label: 'Support Chat', icon: MessageCircle },
   { value: 'AUTH', label: 'Xác thực', icon: Shield },
 ];
@@ -81,6 +82,9 @@ export default function WebsiteSettingsPage() {
       'robots': 'Robots & Indexing',
       'additional': 'Bổ sung',
       'icons': 'Icons',
+      'google': 'Google Analytics & Tag Manager',
+      'facebook': 'Facebook Pixel',
+      'tiktok': 'TikTok Pixel',
     };
     return labels[group] || group.replace(/_/g, ' ');
   };
@@ -309,106 +313,135 @@ export default function WebsiteSettingsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Settings className="w-8 h-8" />
-            Cài đặt Website
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Quản lý tất cả các cài đặt của website
-          </p>
-        </div>
-
-        {hasChanges && (
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleReset}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Hủy
-            </Button>
-            <Button onClick={handleSave} disabled={updating}>
-              <Save className="w-4 h-4 mr-2" />
-              {updating ? 'Đang lưu...' : 'Lưu thay đổi'}
-            </Button>
+    <div className="flex flex-col h-screen">
+      {/* Header - Fixed */}
+      <div className="sticky top-0 z-10 bg-background border-b p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+              <Settings className="w-6 h-6 md:w-8 md:h-8" />
+              Cài đặt Website
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Quản lý tất cả các cài đặt của website
+            </p>
           </div>
-        )}
+
+          {hasChanges && (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={handleReset} size="sm">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Hủy
+              </Button>
+              <Button onClick={handleSave} disabled={updating} size="sm">
+                <Save className="w-4 h-4 mr-2" />
+                {updating ? 'Đang lưu...' : 'Lưu'}
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Categories Tabs */}
-      <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-        <TabsList className="grid grid-cols-4 lg:grid-cols-8 w-full">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <TabsTrigger key={cat.value} value={cat.value} className="flex items-center gap-2">
-                <Icon className="w-4 h-4" />
-                {cat.label}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
+      {/* Content - Scrollable with Vertical Tabs */}
+      <div className="flex-1 overflow-hidden">
+        <Tabs 
+          value={selectedCategory} 
+          onValueChange={setSelectedCategory} 
+          className="h-full flex flex-col md:flex-row"
+        >
+          {/* Vertical Tabs List - Sidebar on desktop, horizontal scroll on mobile */}
+          <div className="md:w-64 border-b md:border-b-0 md:border-r bg-muted/30 overflow-x-auto md:overflow-y-auto">
+            <TabsList className="flex flex-row md:flex-col w-max md:w-full h-auto gap-1 p-2 bg-transparent">
+              {CATEGORIES.map((cat) => {
+                const Icon = cat.icon;
+                const isActive = selectedCategory === cat.value;
+                return (
+                  <TabsTrigger 
+                    key={cat.value} 
+                    value={cat.value} 
+                    className={`
+                      flex items-center justify-start gap-3 w-full md:w-full
+                      px-4 py-3 rounded-md transition-all
+                      data-[state=active]:bg-background data-[state=active]:shadow-sm
+                      hover:bg-background/50
+                      whitespace-nowrap md:whitespace-normal
+                    `}
+                  >
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
+                    <span className="text-sm font-medium">{cat.label}</span>
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </div>
 
-        {CATEGORIES.map((cat) => (
-          <TabsContent key={cat.value} value={cat.value} className="space-y-6 mt-6">
-            {Object.entries(groupedSettings).map(([group, groupSettings]) => (
-              <Card key={group}>
-                <CardHeader>
-                  <CardTitle className="capitalize">
-                    {getGroupLabel(group)}
-                  </CardTitle>
-                  <CardDescription>
-                    {groupSettings.length} cài đặt
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {groupSettings.map((setting) => (
-                    <div key={setting.id} className="space-y-2 pb-4 border-b last:border-0 last:pb-0">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <Label htmlFor={setting.key} className="text-base font-semibold">
-                            {setting.label}
-                          </Label>
-                          {setting.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {setting.description}
-                            </p>
-                          )}
+          {/* Content Area - Scrollable */}
+          <div className="flex-1 overflow-y-auto">
+            {CATEGORIES.map((cat) => (
+              <TabsContent 
+                key={cat.value} 
+                value={cat.value} 
+                className="m-0 p-4 md:p-6 space-y-4 md:space-y-6 data-[state=inactive]:hidden"
+              >
+                {Object.entries(groupedSettings).map(([group, groupSettings]) => (
+                  <Card key={group}>
+                    <CardHeader>
+                      <CardTitle className="text-lg md:text-xl capitalize">
+                        {getGroupLabel(group)}
+                      </CardTitle>
+                      <CardDescription className="text-sm">
+                        {groupSettings.length} cài đặt
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {groupSettings.map((setting) => (
+                        <div key={setting.id} className="space-y-3 pb-4 border-b last:border-0 last:pb-0">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <Label htmlFor={setting.key} className="text-sm md:text-base font-semibold">
+                                {setting.label}
+                              </Label>
+                              {setting.description && (
+                                <p className="text-xs md:text-sm text-muted-foreground mt-1 break-words">
+                                  {setting.description}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Badge variant="outline" className="text-xs">
+                                {setting.type}
+                              </Badge>
+                              {setting.isPublic ? (
+                                <span title="Public"><Eye className="w-4 h-4 text-green-500" /></span>
+                              ) : (
+                                <span title="Private"><EyeOff className="w-4 h-4 text-gray-400" /></span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="mt-2">
+                            {renderInput(setting)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Key: <code className="bg-muted px-1 py-0.5 rounded break-all">{setting.key}</code>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            {setting.type}
-                          </Badge>
-                          {setting.isPublic ? (
-                            <span title="Public"><Eye className="w-4 h-4 text-green-500" /></span>
-                          ) : (
-                            <span title="Private"><EyeOff className="w-4 h-4 text-gray-400" /></span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="mt-2">
-                        {renderInput(setting)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Key: <code className="bg-muted px-1 py-0.5 rounded">{setting.key}</code>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                      ))}
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {Object.keys(groupedSettings).length === 0 && (
+                  <Card>
+                    <CardContent className="py-12 text-center text-muted-foreground">
+                      <p className="text-sm md:text-base">Chưa có cài đặt nào trong danh mục này</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
             ))}
-
-            {Object.keys(groupedSettings).length === 0 && (
-              <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
-                  Chưa có cài đặt nào trong danh mục này
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+          </div>
+        </Tabs>
+      </div>
     </div>
   );
 }
