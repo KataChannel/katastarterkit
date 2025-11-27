@@ -96,7 +96,7 @@ run_dev_full() {
     echo ""
     echo "🚀 Starting Full Development for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bun run dev:$CURRENT_DOMAIN
 }
 
@@ -108,7 +108,7 @@ run_dev_backend() {
     echo ""
     echo "🔧 Starting Backend Development for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bun run dev:${CURRENT_DOMAIN}:backend
 }
 
@@ -120,7 +120,7 @@ run_dev_frontend() {
     echo ""
     echo "🎨 Starting Frontend Development for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bun run dev:${CURRENT_DOMAIN}:frontend
 }
 
@@ -132,7 +132,7 @@ run_deploy_full() {
     echo ""
     echo "🚀 Building & Deploying $DOMAIN_NAME to Server..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bun run deploy:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
@@ -146,7 +146,7 @@ run_build_images() {
     echo ""
     echo "🏗️  Building Docker Images for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bun run build:${CURRENT_DOMAIN}:image
     echo ""
     read -p "Press Enter to continue..."
@@ -211,7 +211,7 @@ run_prisma_studio() {
     echo ""
     echo "🗄️  Opening Prisma Studio for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bun run db:studio:$CURRENT_DOMAIN
 }
 
@@ -223,7 +223,7 @@ run_db_migrate() {
     echo ""
     echo "🗄️  Running Database Migration for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bun run db:migrate:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
@@ -237,7 +237,7 @@ run_db_push() {
     echo ""
     echo "🗄️  Pushing Database Schema for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bun run db:push:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
@@ -251,7 +251,7 @@ run_db_seed() {
     echo ""
     echo "🗄️  Seeding Database for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bun run db:seed:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
@@ -261,7 +261,7 @@ run_clean() {
     echo ""
     echo "🧹 Cleaning node_modules..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bun run clean
     echo ""
     read -p "Press Enter to continue..."
@@ -306,7 +306,7 @@ run_git_auto() {
     echo ""
     echo "📦 Git Auto Commit & Push..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bash scripts/utils/autogit.sh
     echo ""
     read -p "Press Enter to continue..."
@@ -316,7 +316,7 @@ run_ssh_setup() {
     echo ""
     echo "🔑 SSH Key Setup (Auto Deploy)..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bash scripts/utils/ssh-setup.sh
     echo ""
     read -p "Press Enter to continue..."
@@ -326,7 +326,7 @@ run_git_auto() {
     echo ""
     echo "📦 Git Auto Commit & Push..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bash scripts/utils/autogit.sh
     echo ""
     read -p "Press Enter to continue..."
@@ -336,7 +336,7 @@ run_ssh_setup() {
     echo ""
     echo "🔑 SSH Key Setup (Auto Deploy)..."
     echo "─────────────────────────────────────────────────────"
-    cd ..
+    cd ../..
     bash scripts/utils/ssh-setup.sh
     echo ""
     read -p "Press Enter to continue..."
