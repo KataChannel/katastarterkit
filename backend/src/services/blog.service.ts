@@ -124,6 +124,12 @@ export class BlogService {
     return { ...category, postCount: category._count.posts };
   }
 
+  async getCategoryBySlug(slug: string) {
+    const category = await this.prisma.blogCategory.findUnique({ where: { slug }, include: { _count: { select: { posts: true } } } });
+    if (!category) return null;
+    return { ...category, postCount: category._count.posts };
+  }
+
   async createCategory(input: CreateBlogCategoryInput) {
     // Generate slug from name if not provided
     const baseSlug = input.slug || slugify(input.name, { lower: true, strict: true });

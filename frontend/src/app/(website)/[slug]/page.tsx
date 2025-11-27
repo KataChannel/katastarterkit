@@ -3,6 +3,7 @@
 import { useQuery } from '@apollo/client';
 import { GET_PAGE_BY_SLUG } from '@/graphql/queries/pages';
 import { GET_MENU_BY_SLUG } from '@/graphql/menu.queries';
+import { GET_BLOG_CATEGORY_BY_SLUG } from '@/graphql/blog.queries';
 import { BlockRenderer } from '@/components/page-builder/blocks/BlockRenderer';
 import { Page, PageStatus } from '@/types/page-builder';
 import { notFound, useRouter } from 'next/navigation';
@@ -65,19 +66,42 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     }
   );
 
-  // Query 2: Menu Fallback (only if Page not found OR page is not PUBLISHED)
+  // Query 2: Blog Category by Slug (check if slug is a blog category)
+  const { data: categoryData, loading: categoryLoading } = useQuery(
+    GET_BLOG_CATEGORY_BY_SLUG,
+    {
+      variables: { slug: slug || '' },
+      skip: slug === null || (!!pageData?.getPageBySlug && pageData.getPageBySlug.status === PageStatus.PUBLISHED),
+      errorPolicy: 'all'
+    }
+  );
+
+  // Query 3: Menu Fallback (only if Page and Category not found OR page is not PUBLISHED)
   const { data: menuData, loading: menuLoading, error: menuError } = useQuery(
     GET_MENU_BY_SLUG,
     {
       variables: { slug: slug || '' },
       // Skip menu query if:
       // 1. Slug not ready yet, OR
-      // 2. Page exists AND is PUBLISHED (page takes priority)
-      // If page exists but is DRAFT/ARCHIVED, still check menu
-      skip: slug === null || (!!pageData?.getPageBySlug && pageData.getPageBySlug.status === PageStatus.PUBLISHED),
+      // 2. Page exists AND is PUBLISHED (page takes priority), OR
+      // 3. Category exists (category takes priority)
+      // If page exists but is DRAFT/ARCHIVED, still check menu and category
+      skip: slug === null || 
+            (!!pageData?.getPageBySlug && pageData.getPageBySlug.status === PageStatus.PUBLISHED) ||
+            !!categoryData?.blogCategoryBySlug,
       errorPolicy: 'all'
     }
   );
+
+  // Handle blog category redirects (Priority 1.5: After Page, Before Menu)
+  useEffect(() => {
+    if (categoryData?.blogCategoryBySlug) {
+      const category = categoryData.blogCategoryBySlug;
+      // Redirect to blog list page with category filter
+      router.push(`/bai-viet?categoryId=${category.id}`);
+      return;
+    }
+  }, [categoryData, router]);
 
   // Handle ALL menu redirects with useEffect to avoid setState during render
   // IMPORTANT: This must be before any early returns to follow Rules of Hooks
@@ -87,7 +111,12 @@ export default function DynamicPage({ params }: DynamicPageProps) {
 
       // Case 1: Menu links to BLOG_LIST → Redirect to blog list page
       if (menu.linkType === 'BLOG_LIST') {
-        router.push('/bai-viet');
+        // Check if menu has blogCategoryId in customData
+        if (menu.customData?.blogCategoryId) {
+          router.push(`/bai-viet?categoryId=${menu.customData.blogCategoryId}`);
+        } else {
+          router.push('/bai-viet');
+        }
         return;
       }
 
@@ -131,10 +160,22 @@ export default function DynamicPage({ params }: DynamicPageProps) {
   }, [menuData, router, slug]);
 
   // Loading state
-  if (slug === null || pageLoading) {
+  if (slug === null || pageLoading || categoryLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Priority 1.5: Blog Category exists → Show loading and redirect
+  if (categoryData?.blogCategoryBySlug) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang chuyển tới danh mục bài viết...</p>
+        </div>
       </div>
     );
   }

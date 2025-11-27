@@ -3885,6 +3885,7 @@ type Query {
   blogBySlug(slug: String!): BlogType!
   blogCategories: [BlogCategoryType!]!
   blogCategory(id: ID!): BlogCategoryType!
+  blogCategoryBySlug(slug: String!): BlogCategoryType
   blogTags: [BlogTagType!]!
   blogs(categoryId: ID, limit: Int, page: Int, search: String, sort: String, statusFilter: String): PaginatedBlogs!
   blogsByCategory(categoryId: ID!, limit: Int, page: Int): PaginatedBlogs!

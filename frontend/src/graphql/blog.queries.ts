@@ -197,6 +197,18 @@ export const GET_BLOG_CATEGORIES = gql`
   }
 `;
 
+export const GET_BLOG_CATEGORY_BY_SLUG = gql`
+  query GetBlogCategoryBySlug($slug: String!) {
+    blogCategoryBySlug(slug: $slug) {
+      id
+      name
+      slug
+      description
+      thumbnail
+    }
+  }
+`;
+
 // ============================================================================
 // TYPES
 // ============================================================================

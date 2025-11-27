@@ -146,6 +146,11 @@ export class BlogResolver {
     return this.blogService.getCategoryById(id);
   }
 
+  @Query(() => BlogCategoryType, { name: 'blogCategoryBySlug', nullable: true })
+  async getCategoryBySlug(@Args('slug') slug: string) {
+    return this.blogService.getCategoryBySlug(slug);
+  }
+
   @Query(() => [BlogTagType], { name: 'blogTags' })
   async getTags() {
     return this.blogService.getTags();
