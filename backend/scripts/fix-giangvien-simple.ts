@@ -95,7 +95,7 @@ async function main() {
     const execAsync = promisify(exec);
     
     try {
-      await execAsync('bunx prisma generate');
+      await execAsync('bunx prisma generate --schema=./prisma/schema.prisma');
       console.log('   ✅ Prisma Client regenerated\n');
     } catch (error: any) {
       console.log(`   ⚠️  Warning: ${error.message}\n`);

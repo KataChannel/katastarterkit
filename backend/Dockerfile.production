@@ -24,7 +24,7 @@ RUN bun install --frozen-lockfile
 COPY backend/ ./
 
 # Generate Prisma client
-RUN bun prisma generate
+RUN bun prisma generate --schema=./prisma/schema.prisma
 
 # Build TypeScript
 RUN bun run build

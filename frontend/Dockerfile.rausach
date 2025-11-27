@@ -1,14 +1,15 @@
 # ============================================================================
-# RAUSACH Frontend Dockerfile - Uses .next-rausach build
+# RAUSACH Frontend Dockerfile - Production Build
 # ============================================================================
 
-FROM node:22-alpine AS runtime
+FROM node:22-alpine AS base
 
-# Install minimal runtime dependencies
-RUN apk add --no-cache curl dumb-init && \
-    rm -rf /var/cache/apk/* && \
-    addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs --ingroup nodejs
+# Install runtime dependencies
+RUN apk add --no-cache curl dumb-init libc6-compat && \
+    rm -rf /var/cache/apk/*
+
+# Production stage
+FROM base AS runtime
 
 WORKDIR /app
 
@@ -18,10 +19,21 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Copy pre-built application from .next
-COPY --chown=nextjs:nodejs frontend/.next/standalone/ ./
-COPY --chown=nextjs:nodejs frontend/.next/static/ ./frontend/.next/static/
-COPY --chown=nextjs:nodejs frontend/public/ ./frontend/public/
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs --ingroup nodejs
+
+# Copy package file and install only production runtime dependencies
+COPY --chown=nextjs:nodejs frontend/package.json ./package.json
+
+# Install dependencies using npm for better compatibility
+RUN npm install --production --legacy-peer-deps && \
+    npm cache clean --force
+
+# Copy the built application
+COPY --chown=nextjs:nodejs frontend/.next ./.next
+COPY --chown=nextjs:nodejs frontend/public ./public
+COPY --chown=nextjs:nodejs frontend/next.config.js ./next.config.js
 
 # Switch to non-root user
 USER nextjs
@@ -35,4 +47,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 
 # Start the application
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "frontend/server.js"]
+CMD ["node_modules/.bin/next", "start"]

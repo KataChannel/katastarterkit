@@ -122,7 +122,7 @@ fi
 
 # Generate Prisma Client
 echo -e "${BLUE}  → Generating Prisma Client...${NC}"
-bunx prisma generate
+bunx prisma generate --schema=./prisma/schema.prisma
 
 echo -e "${BLUE}  → Building TypeScript...${NC}"
 if ! bun run build; then

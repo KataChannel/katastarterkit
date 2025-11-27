@@ -1,0 +1,23 @@
+Dữ Liệu Dùng Chung Server : 116.118.49.243
+
+Postgres : 116.118.49.243:12003
+Redis : 116.118.49.243:12004
+Minio : 116.118.49.243:12007- 116.118.49.243:12008
+
+Domain : shop.rausachtrangia.com
+Frontend (Next.js :12000)
+Backend GraphQL (NestJS :12001)
+storage.rausachtrangia.com : MINIO_BUCKET_NAME: shopuploads - Object Storage (MinIO :12007-12008)
+env : .env.dev.rausach,.env.prod.rausach
+
+Domain : app.tazagroup.vn
+Frontend (Next.js :13000)
+Backend GraphQL (NestJS :13001)
+storage.tazagroup.vn : MINIO_BUCKET_NAME: tazagroup-uploads - Object Storage (MinIO :12007-12008)
+env : .env.dev.tazagroup,.env.prod.tazagroup
+
+Domain : app.timona.edu.vn
+Frontend (Next.js :15000)
+Backend GraphQL (NestJS :13001)
+storage.timona.edu.vn : MINIO_BUCKET_NAME: timona-uploads - Object Storage (MinIO :12007-12008)
+env : .env.dev.timona,.env.prod.timona

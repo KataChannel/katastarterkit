@@ -28,7 +28,7 @@ COPY backend/prisma ./prisma
 
 # Generate Prisma client
 # This layer cached if prisma schema hasn't changed
-RUN bun prisma generate
+RUN bun prisma generate --schema=./prisma/schema.prisma
 
 # Copy built application code LAST
 # This changes most frequently, so we do it last to maximize cache reuse
