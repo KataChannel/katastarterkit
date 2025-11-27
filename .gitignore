@@ -164,6 +164,11 @@ $RECYCLE.BIN/
 docker-compose.override.yml
 .docker/
 
+# Docker images (tar.gz files are too large for GitHub)
+docker-images/*.tar
+docker-images/*.tar.gz
+docker-images/*.tar.bz2
+
 # SSL certificates (development)
 docker/nginx/ssl/
 docker/minio/certs/
