@@ -470,13 +470,13 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
         const updatedBlocks = result.data.page.blocks;
         
         // Find the newly created block (should be at the end)
-        const newBlock = updatedBlocks[updatedBlocks.length - 1];
-        
-        // Reorder: move new block right after the original
-        const reorderedBlocks = [...updatedBlocks];
-        const newBlockAtEnd = reorderedBlocks.pop(); // Remove from end
+        const newBlockAtEnd = updatedBlocks[updatedBlocks.length - 1];
         
         if (newBlockAtEnd) {
+          // Create reordered array: move new block right after the original
+          const reorderedBlocks = [...updatedBlocks];
+          reorderedBlocks.pop(); // Remove from end
+          
           // Insert right after the original block (originalIndex + 1)
           reorderedBlocks.splice(originalIndex + 1, 0, newBlockAtEnd);
           
@@ -486,7 +486,7 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
             order: index,
           }));
           
-          // Update local state first
+          // Update local state first for immediate UI feedback
           setBlocks(finalBlocks);
           
           // Update order on server
@@ -496,14 +496,16 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
           }));
           await updateBlocksOrder(updates);
           
-          pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_REORDER, 'Blocks reordered after copy', { 
-            count: finalBlocks.length 
+          pageBuilderLogger.debug(LOG_OPERATIONS.BLOCK_REORDER, 'Copied block positioned after original', { 
+            originalIndex,
+            newIndex: originalIndex + 1,
+            totalBlocks: finalBlocks.length 
           });
           
-          // Final refetch to ensure consistency
-          await refetch();
+          // Push to history with correct blocks
+          history.pushHistory(finalBlocks, `Copied ${block.type} block`);
           
-          // Scroll to the newly copied block
+          // Scroll to the newly copied block with highlight effect
           setTimeout(() => {
             const blockElement = document.querySelector(`[data-block-id="${newBlockAtEnd.id}"]`);
             if (blockElement) {
@@ -514,16 +516,17 @@ export function PageActionsProvider({ children, pageId }: PageActionsProviderPro
               });
               
               // Add highlight effect
-              blockElement.classList.add('ring-4', 'ring-green-400');
+              blockElement.classList.add('ring-4', 'ring-green-400', 'transition-all');
               setTimeout(() => {
                 blockElement.classList.remove('ring-4', 'ring-green-400');
               }, 2000);
             }
           }, 300);
+          
+          toast.success(`Block copied successfully`);
+        } else {
+          toast.error('Failed to find new block');
         }
-        
-        // Push to history
-        history.pushHistory(updatedBlocks, `Copied ${block.type} block`);
       }
     } catch (error: any) {
       pageBuilderLogger.error(LOG_OPERATIONS.BLOCK_ADD, 'Failed to copy block', { error });
