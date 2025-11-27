@@ -10,8 +10,9 @@ import { notFound, useRouter } from 'next/navigation';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { ExternalLink, Info } from 'lucide-react';
+import { ExternalLink, Info, Home, FileText } from 'lucide-react';
 import BlogListByCategory from '@/components/blog/BlogListByCategory';
+import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 
 interface DynamicPageProps {
   params: Promise<{
@@ -233,6 +234,14 @@ export default function DynamicPage({ params }: DynamicPageProps) {
           </Head>
 
           <>
+            {/* Breadcrumb for Page Builder */}
+            <PageBreadcrumb 
+              items={[
+                { label: 'Trang chủ', href: '/', icon: <Home className="h-4 w-4" /> },
+                { label: page.title, icon: <FileText className="h-4 w-4" /> },
+              ]} 
+            />
+
             {/* Page Content - Full width for blocks to handle their own layouts */}
             <main className="w-full">
               {page.blocks && page.blocks.length > 0 ? (

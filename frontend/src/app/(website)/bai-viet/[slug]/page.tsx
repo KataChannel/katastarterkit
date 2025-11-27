@@ -19,6 +19,8 @@ import {
   Send,
   ArrowLeft,
   ChevronRight,
+  Home,
+  BookOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +28,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 
 export default function BlogDetailPage() {
   const params = useParams();
@@ -152,8 +155,18 @@ export default function BlogDetailPage() {
     </div>
   );
 
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { label: 'Trang chủ', href: '/', icon: <Home className="h-4 w-4" /> },
+    { label: 'Bài viết', href: '/bai-viet', icon: <BookOpen className="h-4 w-4" /> },
+    { label: blog.title },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumb */}
+      <PageBreadcrumb items={breadcrumbItems} />
+
       {/* Main Content */}
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="flex flex-col lg:flex-row gap-6">

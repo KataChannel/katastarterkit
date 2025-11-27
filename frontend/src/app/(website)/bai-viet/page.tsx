@@ -6,11 +6,12 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { GET_BLOGS, GET_BLOG_CATEGORIES } from '@/graphql/blog.queries';
-import { Search, Calendar, User, Clock, TrendingUp, Filter, X, Home, ChevronRight, Check, ChevronsUpDown } from 'lucide-react';
+import { Search, Calendar, User, Clock, TrendingUp, Filter, X, Home, ChevronRight, Check, ChevronsUpDown, BookOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 import {
   Command,
   CommandEmpty,
@@ -110,8 +111,27 @@ function BlogPageContent() {
 
   const activeFiltersCount = [categoryId, searchQuery !== ''].filter(Boolean).length;
 
+  // Breadcrumb items
+  const selectedCategory = categories.find((cat: any) => cat.id === categoryId);
+  const breadcrumbItems = [
+    { label: 'Trang chủ', href: '/', icon: <Home className="h-4 w-4" /> },
+    selectedCategory
+      ? { label: 'Bài viết', href: '/bai-viet' }
+      : { label: 'Bài viết', icon: <BookOpen className="h-4 w-4" /> },
+  ];
+  
+  if (selectedCategory) {
+    breadcrumbItems.push({
+      label: selectedCategory.name,
+      icon: <BookOpen className="h-4 w-4" />,
+    });
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumb */}
+      <PageBreadcrumb items={breadcrumbItems} />
+
       {/* Header */}
       <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4 sm:py-6">

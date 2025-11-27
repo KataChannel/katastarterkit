@@ -37,14 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -290,8 +283,18 @@ export default function ProductDetailPage() {
   //   }
   // };
 
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { label: 'Trang chủ', href: '/', icon: <Home className="h-4 w-4" /> },
+    { label: 'Sản phẩm', href: '/san-pham', icon: <Package className="h-4 w-4" /> },
+    { label: product.name },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumb */}
+      <PageBreadcrumb items={breadcrumbItems} />
+
       {/* Product Detail */}
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="flex flex-col lg:flex-row gap-6">

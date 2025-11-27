@@ -5,19 +5,12 @@ import { useQuery } from '@apollo/client';
 import Link from 'next/link';
 import Image from 'next/image';
 import { GET_BLOGS, GET_BLOG_CATEGORIES } from '@/graphql/blog.queries';
-import { Search, Calendar, User, Clock, TrendingUp, Filter, X, Home, ChevronRight, Check, ChevronsUpDown } from 'lucide-react';
+import { Search, Calendar, User, Clock, TrendingUp, Filter, X, Home, ChevronRight, Check, ChevronsUpDown, BookOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 
 interface BlogListByCategoryProps {
   category: {
@@ -63,8 +56,18 @@ export default function BlogListByCategory({ category }: BlogListByCategoryProps
     });
   };
 
+  // Breadcrumb items
+  const breadcrumbItems = [
+    { label: 'Trang chủ', href: '/', icon: <Home className="h-4 w-4" /> },
+    { label: 'Bài viết', href: '/bai-viet', icon: <BookOpen className="h-4 w-4" /> },
+    { label: category.name },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumb */}
+      <PageBreadcrumb items={breadcrumbItems} />
+
       {/* Header with Search and Sort */}
       <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4 sm:py-6">

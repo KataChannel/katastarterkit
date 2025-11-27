@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@apollo/client';
 import Link from 'next/link';
 import { GET_PRODUCTS, GET_PRODUCT_CATEGORIES } from '@/graphql/ecommerce.queries';
-import { ShoppingCart, Heart, Star, ChevronDown, Filter, Search, X, SlidersHorizontal, Grid3x3, List } from 'lucide-react';
+import { ShoppingCart, Heart, Star, ChevronDown, Filter, Search, X, SlidersHorizontal, Grid3x3, List, Home, Package } from 'lucide-react';
 import { ProductImage } from '@/components/ui/product-image';
 import { AddToCartButton } from '@/components/ecommerce/AddToCartButton';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import PageBreadcrumb from '@/components/common/PageBreadcrumb';
 
 export default function ProductsPage() {
   const [page, setPage] = useState(1);
@@ -122,8 +123,27 @@ export default function ProductsPage() {
     </div>
   );
 
+  // Breadcrumb items
+  const selectedCategory = categories.find((cat: any) => cat.id === categoryId);
+  const breadcrumbItems = [
+    { label: 'Trang chủ', href: '/', icon: <Home className="h-4 w-4" /> },
+    selectedCategory
+      ? { label: 'Sản phẩm', href: '/san-pham' }
+      : { label: 'Sản phẩm', icon: <Package className="h-4 w-4" /> },
+  ];
+  
+  if (selectedCategory) {
+    breadcrumbItems.push({
+      label: selectedCategory.name,
+      icon: <Package className="h-4 w-4" />,
+    });
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumb */}
+      <PageBreadcrumb items={breadcrumbItems} />
+
       {/* Header - Mobile First */}
       <div className="bg-white border-b sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4 sm:py-6">
