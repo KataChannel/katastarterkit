@@ -95,16 +95,33 @@ echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━�
 
 cd "$PROJECT_PATH/backend"
 
+# Clean previous build
+if [ -d "dist" ]; then
+    echo -e "${BLUE}  → Cleaning previous build...${NC}"
+    rm -rf dist
+fi
+
 if [ ! -d "node_modules" ]; then
     echo -e "${BLUE}  → Installing backend dependencies...${NC}"
     bun install
+else
+    echo -e "${BLUE}  → node_modules exists, checking for updates...${NC}"
+    bun install --frozen-lockfile 2>/dev/null || bun install
 fi
 
-echo -e "${BLUE}  → Building TypeScript...${NC}"
-bun run build
+# Generate Prisma Client
+echo -e "${BLUE}  → Generating Prisma Client...${NC}"
+bunx prisma generate
 
-if [ ! -d "dist" ]; then
+echo -e "${BLUE}  → Building TypeScript...${NC}"
+if ! bun run build; then
     echo -e "${RED}❌ Backend build failed!${NC}"
+    echo -e "${YELLOW}Trying with tsc directly...${NC}"
+    bunx tsc
+fi
+
+if [ ! -d "dist" ] || [ ! -f "dist/main.js" ]; then
+    echo -e "${RED}❌ Backend build failed! dist/main.js not found${NC}"
     exit 1
 fi
 
@@ -119,23 +136,52 @@ echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━�
 
 cd "$PROJECT_PATH/frontend"
 
+# Clean previous build
+if [ -d ".next" ]; then
+    echo -e "${BLUE}  → Cleaning previous build...${NC}"
+    rm -rf .next
+fi
+
 if [ ! -d "node_modules" ]; then
     echo -e "${BLUE}  → Installing frontend dependencies...${NC}"
     bun install
+else
+    echo -e "${BLUE}  → node_modules exists, checking for updates...${NC}"
+    bun install --frozen-lockfile 2>/dev/null || bun install
 fi
 
 # Copy environment file
-cp ../.env.prod.rausach .env.local
+if [ -f "../.env.prod.rausach" ]; then
+    echo -e "${BLUE}  → Copying production environment...${NC}"
+    cp ../.env.prod.rausach .env.local
+elif [ -f "../.env.rausach" ]; then
+    echo -e "${YELLOW}  ⚠️  .env.prod.rausach not found, using .env.rausach${NC}"
+    cp ../.env.rausach .env.local
+else
+    echo -e "${RED}❌ No environment file found!${NC}"
+    exit 1
+fi
 
 echo -e "${BLUE}  → Building Next.js application for production...${NC}"
-bun run build
+if ! bun run build; then
+    echo -e "${RED}❌ Frontend build failed!${NC}"
+    echo -e "${YELLOW}Checking for common issues...${NC}"
+    
+    # Check if GraphQL endpoint is set
+    if ! grep -q "NEXT_PUBLIC_GRAPHQL_ENDPOINT" .env.local; then
+        echo -e "${RED}  ✗ NEXT_PUBLIC_GRAPHQL_ENDPOINT not set in .env.local${NC}"
+    fi
+    
+    exit 1
+fi
 
-if [ ! -d ".next" ]; then
-    echo -e "${RED}❌ Frontend build failed! .next not found${NC}"
+if [ ! -d ".next" ] || [ ! -f ".next/BUILD_ID" ]; then
+    echo -e "${RED}❌ Frontend build failed! .next directory incomplete${NC}"
     exit 1
 fi
 
 echo -e "${GREEN}  ✅ Frontend built successfully${NC}"
+echo -e "${BLUE}     Build ID: $(cat .next/BUILD_ID)${NC}"
 cd "$PROJECT_PATH"
 
 # Step 3: Build Docker Images Locally
@@ -250,22 +296,25 @@ ssh $SERVER << 'ENDSSH'
     echo "  → Verifying loaded images..."
     docker images | grep -E "rausach-(backend|frontend).*latest" || echo "⚠️  Warning: Images may not be loaded properly"
     
-    echo "  → Checking infrastructure services..."
+    echo "  → Ensuring infrastructure is running..."
     if ! docker ps | grep -q "shoppostgres"; then
-        echo "  ⚠️  Warning: Infrastructure not running. Start with: docker compose -f docker-compose.infra.yml up -d"
+        echo "  → Starting infrastructure services..."
+        docker compose -f docker-compose.infra.yml up -d
+        echo "  → Waiting for infrastructure to be ready..."
+        sleep 10
+    else
+        echo "  ✓ Infrastructure already running"
     fi
     
     echo "  → Stopping old app containers..."
-    docker compose -f docker-compose.app.yml down 2>/dev/null || true
-    
-    echo "  → Removing old containers to force recreate..."
     docker rm -f shopbackend shopfrontend 2>/dev/null || true
     
     echo "  → Starting app services with new images..."
-    docker compose -f docker-compose.app.yml up -d --force-recreate --remove-orphans
+    docker compose -f docker-compose.app.yml up -d --force-recreate
     
     echo "  → Waiting for services to be ready..."
-    sleep 20
+    echo "     (Backend needs time to connect to DB, Redis, Minio...)"
+    sleep 45
     
     echo ""
     echo "📊 Container Status:"
@@ -310,20 +359,31 @@ echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━�
 echo -e "${YELLOW}🏥 Health Checks${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-sleep 5
-
 echo -e "${BLUE}  → Testing Frontend (12000)...${NC}"
-if curl -sf -o /dev/null http://116.118.49.243:12000; then
-    echo -e "${GREEN}    ✅ Frontend OK${NC}"
-else
-    echo -e "${RED}    ❌ Frontend FAIL${NC}"
-fi
+FRONTEND_STATUS=0
+for i in {1..3}; do
+    if curl -sf -o /dev/null http://116.118.49.243:12000; then
+        echo -e "${GREEN}    ✅ Frontend OK${NC}"
+        FRONTEND_STATUS=1
+        break
+    fi
+    [ $i -lt 3 ] && sleep 3
+done
+[ $FRONTEND_STATUS -eq 0 ] && echo -e "${RED}    ❌ Frontend FAIL${NC}"
 
 echo -e "${BLUE}  → Testing Backend (12001)...${NC}"
-if curl -sf http://116.118.49.243:12001/graphql -H "Content-Type: application/json" -d '{"query":"{__typename}"}' | grep -q "Query"; then
-    echo -e "${GREEN}    ✅ Backend OK${NC}"
-else
-    echo -e "${RED}    ❌ Backend FAIL${NC}"
+BACKEND_STATUS=0
+for i in {1..5}; do
+    if curl -sf http://116.118.49.243:12001/graphql -H "Content-Type: application/json" -d '{"query":"{__typename}"}' 2>/dev/null | grep -q "Query"; then
+        echo -e "${GREEN}    ✅ Backend OK${NC}"
+        BACKEND_STATUS=1
+        break
+    fi
+    [ $i -lt 5 ] && echo -e "     Attempt $i/5... (waiting for backend startup)" && sleep 10
+done
+
+if [ $BACKEND_STATUS -eq 0 ]; then
+    echo -e "${RED}    ❌ Backend FAIL - Check logs: ssh root@116.118.49.243 'docker logs shopbackend --tail 50'${NC}"
 fi
 
 # Cleanup local images
@@ -347,8 +407,9 @@ echo -e "   Frontend:  ${GREEN}http://116.118.49.243:12000${NC}"
 echo -e "   Backend:   ${GREEN}http://116.118.49.243:12001/graphql${NC}"
 echo ""
 echo -e "${BLUE}📊 Monitoring:${NC}"
-echo -e "   Logs:      ${YELLOW}ssh root@116.118.49.243 'docker compose -f docker-compose.hybrid.yml logs -f'${NC}"
-echo -e "   Status:    ${YELLOW}ssh root@116.118.49.243 'docker compose -f docker-compose.hybrid.yml ps'${NC}"
+echo -e "   App Logs:     ${YELLOW}ssh root@116.118.49.243 'docker logs shopbackend -f'${NC}"
+echo -e "   App Status:   ${YELLOW}ssh root@116.118.49.243 'docker ps | grep -E \"shop(backend|frontend)\"'${NC}"
+echo -e "   Infra Status: ${YELLOW}ssh root@116.118.49.243 'docker ps | grep -E \"postgres|redis|minio\"'${NC}"
 echo ""
 echo -e "${BLUE}💡 Performance Benefits:${NC}"
 echo -e "   ✓ Server CPU/RAM saved (no build on server)"

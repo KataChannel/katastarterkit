@@ -87,6 +87,9 @@ let BlogResolver = class BlogResolver {
     async getCategory(id) {
         return this.blogService.getCategoryById(id);
     }
+    async getCategoryBySlug(slug) {
+        return this.blogService.getCategoryBySlug(slug);
+    }
     async getTags() {
         return this.blogService.getTags();
     }
@@ -228,6 +231,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BlogResolver.prototype, "getCategory", null);
+__decorate([
+    (0, graphql_1.Query)(() => blog_type_1.BlogCategoryType, { name: 'blogCategoryBySlug', nullable: true }),
+    __param(0, (0, graphql_1.Args)('slug')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], BlogResolver.prototype, "getCategoryBySlug", null);
 __decorate([
     (0, graphql_1.Query)(() => [blog_type_1.BlogTagType], { name: 'blogTags' }),
     __metadata("design:type", Function),

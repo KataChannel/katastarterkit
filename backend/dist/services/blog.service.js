@@ -147,6 +147,12 @@ let BlogService = class BlogService {
             throw new common_1.NotFoundException(`Category with id ${id} not found`);
         return { ...category, postCount: category._count.posts };
     }
+    async getCategoryBySlug(slug) {
+        const category = await this.prisma.blogCategory.findUnique({ where: { slug }, include: { _count: { select: { posts: true } } } });
+        if (!category)
+            return null;
+        return { ...category, postCount: category._count.posts };
+    }
     async createCategory(input) {
         const baseSlug = input.slug || (0, slugify_1.default)(input.name, { lower: true, strict: true });
         let slug = baseSlug;
