@@ -29,6 +29,7 @@ export const BlogCarouselBlock: React.FC<BlogCarouselBlockProps> = ({
     title: 'Tin tức nổi bật',
     filterType: 'all',
     itemsToShow: 6,
+    sortBy: 'newest',
     showViewAllButton: true,
     viewAllLink: '/tin-tuc',
     autoplay: false,
@@ -54,11 +55,31 @@ export const BlogCarouselBlock: React.FC<BlogCarouselBlockProps> = ({
   const shouldFetchFeatured = editContent.filterType === 'featured';
   const shouldFetchByCategory = editContent.filterType === 'category' && editContent.categoryId;
 
+  // Map sortBy to GraphQL sort format
+  const getSortParameter = () => {
+    switch (editContent.sortBy) {
+      case 'newest':
+        return 'newest';
+      case 'oldest':
+        return 'oldest';
+      case 'author_asc':
+        return 'author_asc';
+      case 'author_desc':
+        return 'author_desc';
+      case 'title_asc':
+        return 'title_asc';
+      case 'title_desc':
+        return 'title_desc';
+      default:
+        return 'newest';
+    }
+  };
+
   const { data: allBlogsData, loading: allBlogsLoading } = useQuery(GET_BLOGS, {
     variables: {
       limit: editContent.itemsToShow || 6,
       page: 1,
-      sort: editContent.filterType === 'recent' ? 'publishedAt_DESC' : undefined,
+      sort: getSortParameter(),
     },
     skip: !shouldFetchAll,
     fetchPolicy: 'cache-first',
@@ -77,6 +98,7 @@ export const BlogCarouselBlock: React.FC<BlogCarouselBlockProps> = ({
       categoryId: editContent.categoryId,
       limit: editContent.itemsToShow || 6,
       page: 1,
+      sort: getSortParameter(),
     },
     skip: !shouldFetchByCategory,
     fetchPolicy: 'cache-first',

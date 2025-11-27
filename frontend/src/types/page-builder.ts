@@ -357,6 +357,7 @@ export interface BlogCarouselBlockContent {
   filterType?: 'all' | 'featured' | 'category' | 'recent' | 'custom'; // Loại lọc
   customQuery?: string; // GraphQL query tùy chỉnh
   itemsToShow?: number; // Số bài viết hiển thị
+  sortBy?: 'newest' | 'oldest' | 'author_asc' | 'author_desc' | 'title_asc' | 'title_desc'; // Sắp xếp theo
   showViewAllButton?: boolean; // Ẩn/hiện nút "Xem tất cả"
   viewAllLink?: string; // Link khi click "Xem tất cả"
   autoplay?: boolean;

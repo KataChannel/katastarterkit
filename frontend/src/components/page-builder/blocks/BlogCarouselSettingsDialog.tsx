@@ -74,6 +74,15 @@ export const BlogCarouselSettingsDialog: React.FC<BlogCarouselSettingsDialogProp
     { value: 'category', label: 'Theo danh mục' },
   ];
 
+  const sortOptions = [
+    { value: 'newest', label: 'Mới nhất (theo ngày)' },
+    { value: 'oldest', label: 'Cũ nhất (theo ngày)' },
+    { value: 'author_asc', label: 'Tác giả (A-Z)' },
+    { value: 'author_desc', label: 'Tác giả (Z-A)' },
+    { value: 'title_asc', label: 'Tiêu đề (A-Z)' },
+    { value: 'title_desc', label: 'Tiêu đề (Z-A)' },
+  ];
+
   const selectedCategory = categories.find((cat: any) => cat.id === localSettings.categoryId);
 
   return (
@@ -196,6 +205,47 @@ export const BlogCarouselSettingsDialog: React.FC<BlogCarouselSettingsDialogProp
                 value={localSettings.itemsToShow || 6}
                 onChange={(e) => updateSettings({ itemsToShow: parseInt(e.target.value) || 6 })}
               />
+            </div>
+
+            {/* Sort By */}
+            <div className="space-y-2">
+              <Label htmlFor="sortBy">Sắp xếp theo</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between"
+                  >
+                    {sortOptions.find((s) => s.value === localSettings.sortBy)?.label || 'Mới nhất'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Tìm kiếm..." />
+                    <CommandEmpty>Không tìm thấy.</CommandEmpty>
+                    <CommandGroup>
+                      {sortOptions.map((sort) => (
+                        <CommandItem
+                          key={sort.value}
+                          onSelect={() => {
+                            updateSettings({ sortBy: sort.value as any });
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              localSettings.sortBy === sort.value ? 'opacity-100' : 'opacity-0'
+                            )}
+                          />
+                          {sort.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Responsive Settings */}
