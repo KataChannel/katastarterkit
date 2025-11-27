@@ -15,17 +15,24 @@ FROM oven/bun:1.3-alpine AS builder
 WORKDIR /app
 
 # Copy package files first (better layer caching)
+# This layer will be cached unless package.json or lockfile changes
 COPY backend/package.json backend/package-lock.json* backend/bun.lockb* ./
 
 # Install ALL dependencies (including devDependencies for Prisma generation)
+# This is the slowest step, so we do it BEFORE copying code
+# Cache will be reused if package files haven't changed
 RUN bun install --frozen-lockfile
 
-# Copy source code
+# Copy Prisma schema separately (changes less frequently than dist)
 COPY backend/prisma ./prisma
-COPY backend/dist ./dist
 
 # Generate Prisma client
+# This layer cached if prisma schema hasn't changed
 RUN bun prisma generate
+
+# Copy built application code LAST
+# This changes most frequently, so we do it last to maximize cache reuse
+COPY backend/dist ./dist
 
 # ===== STAGE 2: PRODUCTION =====
 FROM oven/bun:1.3-alpine AS production

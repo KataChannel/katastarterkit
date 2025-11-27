@@ -4,6 +4,10 @@
 # Optimized Production Deployment Script for Rausach
 # Build locally → Save images → Transfer → Deploy on server
 # This approach reduces server load significantly
+#
+# Usage:
+#   ./deploy-optimized.sh           # Normal build (with cache)
+#   ./deploy-optimized.sh --no-cache # Force rebuild (slower, fresh build)
 # ============================================================================
 
 set -e
@@ -14,6 +18,13 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Parse arguments
+USE_CACHE=true
+if [ "$1" = "--no-cache" ]; then
+    USE_CACHE=false
+    echo -e "${YELLOW}⚠️  Force rebuild mode (--no-cache)${NC}"
+fi
 
 # Configuration
 SERVER="root@116.118.49.243"
@@ -190,27 +201,80 @@ echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━�
 echo -e "${YELLOW}🐳 Step 3/6: Building Docker Images Locally${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-# Remove old images to force fresh build
-echo -e "${BLUE}  → Removing old local images...${NC}"
-docker rmi -f $IMAGE_BACKEND $IMAGE_FRONTEND 2>/dev/null || true
+# Note: We keep old images for comparison, only remove if needed
+echo -e "${BLUE}  → Checking for old images...${NC}"
+OLD_BACKEND=$(docker images -q $IMAGE_BACKEND 2>/dev/null)
+OLD_FRONTEND=$(docker images -q $IMAGE_FRONTEND 2>/dev/null)
 
-# Build backend image (context is project root, not backend/)
-echo -e "${BLUE}  → Building backend Docker image (no cache)...${NC}"
-docker build -t $IMAGE_BACKEND \
-    -f backend/Dockerfile \
-    --build-arg NODE_ENV=production \
-    --no-cache \
-    .
+if [ ! -z "$OLD_BACKEND" ]; then
+    echo -e "${YELLOW}     Found existing backend image${NC}"
+fi
+if [ ! -z "$OLD_FRONTEND" ]; then
+    echo -e "${YELLOW}     Found existing frontend image${NC}"
+fi
 
-# Build frontend image (context is project root, not frontend/)
-echo -e "${BLUE}  → Building frontend Docker image (no cache)...${NC}"
-docker build -t $IMAGE_FRONTEND \
-    -f frontend/Dockerfile.rausach \
-    --build-arg NODE_ENV=production \
-    --no-cache \
-    .
+# Build backend image
+BACKEND_BUILD_START=$(date +%s)
+if [ "$USE_CACHE" = true ]; then
+    echo -e "${BLUE}  → Building backend Docker image (with cache optimization)...${NC}"
+    echo -e "${GREEN}     ✓ Using cached layers for faster build${NC}"
+    echo -e "${BLUE}     ℹ Only changed layers will be rebuilt${NC}"
+    docker build -t $IMAGE_BACKEND \
+        -f backend/Dockerfile \
+        --build-arg NODE_ENV=production \
+        .
+else
+    echo -e "${BLUE}  → Building backend Docker image (no cache - fresh build)...${NC}"
+    echo -e "${YELLOW}     ⚠ This will take longer but ensures clean build${NC}"
+    docker build -t $IMAGE_BACKEND \
+        -f backend/Dockerfile \
+        --build-arg NODE_ENV=production \
+        --no-cache \
+        .
+fi
 
-echo -e "${GREEN}  ✅ Docker images built${NC}"
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Backend Docker build failed!${NC}"
+    exit 1
+fi
+
+BACKEND_BUILD_END=$(date +%s)
+BACKEND_BUILD_TIME=$((BACKEND_BUILD_END - BACKEND_BUILD_START))
+echo -e "${GREEN}  ✅ Backend built in ${BACKEND_BUILD_TIME}s${NC}"
+
+# Build frontend image
+FRONTEND_BUILD_START=$(date +%s)
+if [ "$USE_CACHE" = true ]; then
+    echo -e "${BLUE}  → Building frontend Docker image (with cache optimization)...${NC}"
+    echo -e "${GREEN}     ✓ Using cached layers for faster build${NC}"
+    docker build -t $IMAGE_FRONTEND \
+        -f frontend/Dockerfile.rausach \
+        --build-arg NODE_ENV=production \
+        .
+else
+    echo -e "${BLUE}  → Building frontend Docker image (no cache - fresh build)...${NC}"
+    echo -e "${YELLOW}     ⚠ This will take longer but ensures clean build${NC}"
+    docker build -t $IMAGE_FRONTEND \
+        -f frontend/Dockerfile.rausach \
+        --build-arg NODE_ENV=production \
+        --no-cache \
+        .
+fi
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Frontend Docker build failed!${NC}"
+    exit 1
+fi
+
+FRONTEND_BUILD_END=$(date +%s)
+FRONTEND_BUILD_TIME=$((FRONTEND_BUILD_END - FRONTEND_BUILD_START))
+echo -e "${GREEN}  ✅ Frontend built in ${FRONTEND_BUILD_TIME}s${NC}"
+
+TOTAL_BUILD_TIME=$((BACKEND_BUILD_TIME + FRONTEND_BUILD_TIME))
+echo -e "${GREEN}  ✅ Total Docker build time: ${TOTAL_BUILD_TIME}s${NC}"
+if [ "$USE_CACHE" = true ]; then
+    echo -e "${BLUE}     ℹ First build: ~400-500s | Incremental builds: ~10-60s${NC}"
+fi
 
 # Step 4: Save Docker Images
 echo ""

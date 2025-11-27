@@ -1,4 +1,4 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, registerEnumType } from '@nestjs/graphql';
 import { IsString, IsOptional, IsBoolean, IsInt, IsEnum } from 'class-validator';
 import GraphQLJSON from 'graphql-type-json';
 
@@ -28,6 +28,17 @@ export enum SettingType {
   IMAGE = 'IMAGE',
   URL = 'URL',
 }
+
+// Register enums for GraphQL
+registerEnumType(SettingCategory, {
+  name: 'SettingCategory',
+  description: 'Website setting categories',
+});
+
+registerEnumType(SettingType, {
+  name: 'SettingType',
+  description: 'Website setting data types',
+});
 
 @InputType()
 export class CreateWebsiteSettingInput {
