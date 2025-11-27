@@ -78,7 +78,9 @@
     "db:pushforce": "cp .env.prod.rausach backend/.env && cd backend && npx prisma db push --force-reset",
     "db:push": "bun run db:push:rausach",
     "db:backup": "cp .env.prod.rausach backend/.env && cd backend && bun run prisma/backup.ts",
-    "db:restore": "cp .env.prod.rausach backend/.env && cd backend && bun run prisma/restore.ts"
+    "db:restore": "cp .env.prod.rausach backend/.env && cd backend && bun run prisma/restore.ts",
+    "git:auto": "bash scripts/utils/autogit.sh",
+    "ssh:setup": "bash scripts/utils/ssh-setup.sh"
   },
   "devDependencies": {
     "@types/validator": "^13.15.3",

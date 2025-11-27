@@ -41,6 +41,8 @@ show_menu() {
     echo "  13. Docker - Start Dev Services (Local)"
     echo "  14. Docker - Stop Dev Services (Local)"
     echo "  15. Clean node_modules"
+    echo "  16. Git Auto Commit & Push"
+    echo "  17. SSH Key Setup (Auto Deploy)"
     echo ""
     echo "  0. Exit"
     echo ""
@@ -300,6 +302,46 @@ run_kill_ports() {
     read -p "Press Enter to continue..."
 }
 
+run_git_auto() {
+    echo ""
+    echo "📦 Git Auto Commit & Push..."
+    echo "─────────────────────────────────────────────────────"
+    cd ..
+    bash scripts/utils/autogit.sh
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+run_ssh_setup() {
+    echo ""
+    echo "🔑 SSH Key Setup (Auto Deploy)..."
+    echo "─────────────────────────────────────────────────────"
+    cd ..
+    bash scripts/utils/ssh-setup.sh
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+run_git_auto() {
+    echo ""
+    echo "📦 Git Auto Commit & Push..."
+    echo "─────────────────────────────────────────────────────"
+    cd ..
+    bash scripts/utils/autogit.sh
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+run_ssh_setup() {
+    echo ""
+    echo "🔑 SSH Key Setup (Auto Deploy)..."
+    echo "─────────────────────────────────────────────────────"
+    cd ..
+    bash scripts/utils/ssh-setup.sh
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
 # Main loop
 CURRENT_DOMAIN=""
 DOMAIN_NAME=""
@@ -327,6 +369,8 @@ while true; do
         13) run_docker_start ;;
         14) run_docker_stop ;;
         15) run_clean ;;
+        16) run_git_auto ;;
+        17) run_ssh_setup ;;
         0) 
             echo ""
             echo "👋 Goodbye!"
