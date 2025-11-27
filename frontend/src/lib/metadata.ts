@@ -88,6 +88,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const iconShortcut = seo.icon_shortcut || '/favicon-16x16.png';
   const iconApple = seo.icon_apple || '/apple-touch-icon.png';
 
+  // Verification codes
+  const googleSiteVerification = seo.google_site_verification;
+  
   const metadata: Metadata = {
     title: {
       default: siteName,
@@ -98,6 +101,9 @@ export async function generateMetadata(): Promise<Metadata> {
     authors: [{ name: author }],
     creator: author,
     metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:13000'),
+    verification: googleSiteVerification ? {
+      google: googleSiteVerification,
+    } : undefined,
     openGraph: {
       type: ogType as any,
       locale: ogLocale,

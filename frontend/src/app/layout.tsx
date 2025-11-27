@@ -7,6 +7,7 @@ import SupportChatWidgetWrapper from '@/components/support-chat/SupportChatWidge
 import { Toaster } from '@/components/ui/sonner';
 import { generateMetadata as getMetadata } from '@/lib/metadata';
 import { ApiConfigDebug } from '@/components/ApiConfigDebug';
+import { AnalyticsWrapper } from '@/components/analytics';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -29,6 +30,7 @@ export default function RootLayout({
       <body className={`${inter.variable} h-full font-sans`}>
         <ApiConfigDebug />
         <Providers>
+          <AnalyticsWrapper />
           <PWAProvider
             enableAutoPrompt={true}
             enableOfflineStatus={true}
