@@ -11,6 +11,7 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ExternalLink, Info } from 'lucide-react';
+import BlogListByCategory from '@/components/blog/BlogListByCategory';
 
 interface DynamicPageProps {
   params: Promise<{
@@ -93,15 +94,8 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     }
   );
 
-  // Handle blog category redirects (Priority 1.5: After Page, Before Menu)
-  useEffect(() => {
-    if (categoryData?.blogCategoryBySlug) {
-      const category = categoryData.blogCategoryBySlug;
-      // Redirect to blog list page with category filter
-      router.push(`/bai-viet?categoryId=${category.id}`);
-      return;
-    }
-  }, [categoryData, router]);
+  // Blog category will be handled by rendering the blog list with category filter
+  // No redirect needed - better for SEO
 
   // Handle ALL menu redirects with useEffect to avoid setState during render
   // IMPORTANT: This must be before any early returns to follow Rules of Hooks
@@ -109,14 +103,10 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     if (menuData?.menuBySlug) {
       const menu = menuData.menuBySlug;
 
-      // Case 1: Menu links to BLOG_LIST → Redirect to blog list page
+      // Case 1: Menu links to BLOG_LIST → Redirect to blog list page  
+      // Note: If menu is configured for a specific category, use direct category slug URL instead
       if (menu.linkType === 'BLOG_LIST') {
-        // Check if menu has blogCategoryId in customData
-        if (menu.customData?.blogCategoryId) {
-          router.push(`/bai-viet?categoryId=${menu.customData.blogCategoryId}`);
-        } else {
-          router.push('/bai-viet');
-        }
+        router.push('/bai-viet');
         return;
       }
 
@@ -168,19 +158,36 @@ export default function DynamicPage({ params }: DynamicPageProps) {
     );
   }
 
-  // Priority 1.5: Blog Category exists → Show loading and redirect
+  // Priority 1.5: Blog Category exists → Render blog list filtered by category
   if (categoryData?.blogCategoryBySlug) {
+    const category = categoryData.blogCategoryBySlug;
+    
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Đang chuyển tới danh mục bài viết...</p>
-        </div>
-      </div>
+      <>
+        <Head>
+          <title>{category.name} - Bài Viết</title>
+          {category.description && <meta name="description" content={category.description} />}
+          <meta property="og:title" content={`${category.name} - Bài Viết`} />
+          {category.description && <meta property="og:description" content={category.description} />}
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content={`${process.env.NEXT_PUBLIC_APP_URL}/${category.slug}`} />
+          <meta name="robots" content="index, follow" />
+          <link rel="canonical" href={`${process.env.NEXT_PUBLIC_APP_URL}/${category.slug}`} />
+        </Head>
+        <BlogListByCategory 
+          category={{
+            id: category.id,
+            name: category.name,
+            slug: category.slug,
+            description: category.description,
+            thumbnail: category.thumbnail,
+          }} 
+        />
+      </>
     );
   }
 
-  // Priority 1: Page Builder exists AND is PUBLISHED → Render blocks
+  // Priority 2: Page Builder exists AND is PUBLISHED → Render blocks
   // If page exists but is DRAFT/ARCHIVED, skip to Menu fallback
   if (pageData?.getPageBySlug) {
     const page = pageData.getPageBySlug;
