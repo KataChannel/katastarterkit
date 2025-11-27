@@ -10,195 +10,257 @@ cd "$SCRIPT_DIR"
 
 show_menu() {
     clear
-    echo "╔════════════════════════════════════════════════════════╗"
-    echo "║        🚀 Rausach - Dev & Deploy Menu                 ║"
-    echo "╚════════════════════════════════════════════════════════╝"
+    echo "╔════════════════════════════════════════════════════════════╗"
+    echo "║       🚀 Multi-Domain Dev & Deploy Menu                   ║"
+    echo "╚════════════════════════════════════════════════════════════╝"
     echo ""
-    echo "📦 DEVELOPMENT:"
+    echo "🏢 SELECT DOMAIN:"
+    echo "  R. RAUSACH (shop.rausachtrangia.com - Ports 12000-12001)"
+    echo "  T. TAZAGROUP (app.tazagroup.vn - Ports 13000-13001)"
+    echo "  M. TIMONA (app.timona.edu.vn - Ports 15000-15001)"
+    echo ""
+    echo "📦 DEVELOPMENT (cho domain đã chọn):"
     echo "  1. Dev - Full (Backend + Frontend)"
     echo "  2. Dev - Backend Only"
     echo "  3. Dev - Frontend Only"
     echo ""
-    echo "🐳 DEPLOYMENT:"
-    echo "  4. Deploy Infrastructure to Server (Postgres, Redis, Minio)"
-    echo "  5. Deploy App to Server (Backend + Frontend)"
-    echo "  6. Stop Services (App/Infrastructure/All)"
-    echo "  7. Show Docker Images"
-    echo "  8. Cleanup Docker (Remove old images)"
-    echo "  9. Rollback to Previous Version"
+    echo "🐳 DEPLOYMENT (cho domain đã chọn):"
+    echo "  4. Build & Deploy App to Server"
+    echo "  5. Build Docker Images Only"
+    echo "  6. Deploy to Server (use existing images)"
     echo ""
-    echo "🗄️  DATABASE:"
-    echo "  10. Prisma Studio"
-    echo "  11. Database Migrate"
+    echo "🗄️  DATABASE (cho domain đã chọn):"
+    echo "  7. Prisma Studio"
+    echo "  8. Database Migrate"
+    echo "  9. Database Push"
+    echo "  10. Database Seed"
     echo ""
     echo "🛠️  UTILITIES:"
-    echo "  12. Test Build Frontend (Production)"
-    echo "  13. Check Deployment Status"
-    echo "  14. Docker - Start Dev Services (Local)"
-    echo "  15. Docker - Stop Dev Services (Local)"
-    echo "  16. Kill Ports (12000-12001)"
+    echo "  11. Show Current Domain"
+    echo "  12. Kill All Ports (12000-15001)"
+    echo "  13. Docker - Start Dev Services (Local)"
+    echo "  14. Docker - Stop Dev Services (Local)"
+    echo "  15. Clean node_modules"
     echo ""
     echo "  0. Exit"
     echo ""
-    echo -n "Select option [0-16]: "
+    if [ ! -z "$CURRENT_DOMAIN" ]; then
+        echo "📍 Current Domain: $CURRENT_DOMAIN"
+        echo ""
+    fi
+    echo -n "Select option: "
+}
+
+select_domain() {
+    echo ""
+    echo "🏢 Select Domain:"
+    echo "  1. RAUSACH (shop.rausachtrangia.com)"
+    echo "  2. TAZAGROUP (app.tazagroup.vn)"
+    echo "  3. TIMONA (app.timona.edu.vn)"
+    echo ""
+    echo -n "Select [1-3]: "
+    read domain_choice
+    
+    case $domain_choice in
+        1)
+            CURRENT_DOMAIN="rausach"
+            DOMAIN_NAME="RAUSACH"
+            ;;
+        2)
+            CURRENT_DOMAIN="tazagroup"
+            DOMAIN_NAME="TAZAGROUP"
+            ;;
+        3)
+            CURRENT_DOMAIN="timona"
+            DOMAIN_NAME="TIMONA"
+            ;;
+        *)
+            echo "❌ Invalid choice"
+            sleep 2
+            return 1
+            ;;
+    esac
+    
+    echo "✅ Domain set to: $DOMAIN_NAME"
+    sleep 1
+    return 0
 }
 
 run_dev_full() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
+    fi
+    
     echo ""
-    echo "🚀 Starting Full Development (Backend + Frontend)..."
+    echo "🚀 Starting Full Development for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    bun run dev:full
+    cd ..
+    bun run dev:$CURRENT_DOMAIN
 }
 
 run_dev_backend() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
+    fi
+    
     echo ""
-    echo "🔧 Starting Backend Development..."
+    echo "🔧 Starting Backend Development for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    bun run dev:backend
+    cd ..
+    bun run dev:${CURRENT_DOMAIN}:backend
 }
 
 run_dev_frontend() {
-    echo ""
-    echo "🎨 Starting Frontend Development..."
-    echo "─────────────────────────────────────────────────────"
-    bun run dev:frontend
-}
-
-run_deploy_infrastructure() {
-    echo ""
-    echo "🗄️  Deploying Infrastructure to Server..."
-    echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./deployment/deploy-infrastructure.sh" ]; then
-        echo "❌ Error: deploy-infrastructure.sh not found!"
-        read -p "Press Enter to continue..."
-        return
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
     fi
-    ./deployment/deploy-infrastructure.sh
+    
     echo ""
-    read -p "Press Enter to continue..."
+    echo "🎨 Starting Frontend Development for $DOMAIN_NAME..."
+    echo "─────────────────────────────────────────────────────"
+    cd ..
+    bun run dev:${CURRENT_DOMAIN}:frontend
 }
 
-run_stop_services() {
-    echo ""
-    echo "🛑 Stop Services..."
-    echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./deployment/stop-services.sh" ]; then
-        echo "❌ Error: stop-services.sh not found!"
-        read -p "Press Enter to continue..."
-        return
+run_deploy_full() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
     fi
-    ./deployment/stop-services.sh
+    
+    echo ""
+    echo "🚀 Building & Deploying $DOMAIN_NAME to Server..."
+    echo "─────────────────────────────────────────────────────"
+    cd ..
+    bun run deploy:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
 }
 
-run_deploy_app() {
-    echo ""
-    echo "🚀 Deploying Application (Backend + Frontend)..."
-    echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./deployment/deploy-optimized.sh" ]; then
-        echo "❌ Error: deploy-optimized.sh not found!"
-        read -p "Press Enter to continue..."
-        return
+run_build_images() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
     fi
-    ./deployment/deploy-optimized.sh
+    
+    echo ""
+    echo "🏗️  Building Docker Images for $DOMAIN_NAME..."
+    echo "─────────────────────────────────────────────────────"
+    cd ..
+    bun run build:${CURRENT_DOMAIN}:image
     echo ""
     read -p "Press Enter to continue..."
 }
 
-run_show_images() {
-    echo ""
-    echo "📦 Docker Images on Server..."
-    echo "─────────────────────────────────────────────────────"
-    ssh root@116.118.49.243 "docker images | grep -E 'REPOSITORY|rausach|postgres|redis|minio'"
-    echo ""
-    read -p "Press Enter to continue..."
-}
-
-run_cleanup() {
-    echo ""
-    echo "🧹 Cleaning up Docker on Server..."
-    echo "─────────────────────────────────────────────────────"
-    echo "This will remove dangling images and unused containers"
-    read -p "Continue? (yes/no): " confirm
-    if [ "$confirm" = "yes" ]; then
-        ssh root@116.118.49.243 "docker system prune -f"
-        echo "✅ Cleanup completed"
+run_deploy_only() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
     fi
+    
+    echo ""
+    echo "🚀 Deploying $DOMAIN_NAME to Server (using existing images)..."
+    echo "─────────────────────────────────────────────────────"
+    ./deploy-${CURRENT_DOMAIN}.sh
     echo ""
     read -p "Press Enter to continue..."
 }
 
-run_rollback() {
+show_current_domain() {
     echo ""
-    echo "🔄 Rolling back to previous version..."
+    echo "📍 Current Domain Configuration:"
     echo "─────────────────────────────────────────────────────"
-    ssh root@116.118.49.243 << 'ENDSSH'
-        cd /root/shoprausach
-        
-        echo "Checking for previous images..."
-        if docker images | grep -q "rausach-backend:previous"; then
-            echo "→ Tagging previous backend as latest..."
-            docker tag rausach-backend:previous rausach-backend:latest
-        fi
-        
-        if docker images | grep -q "rausach-frontend:previous"; then
-            echo "→ Tagging previous frontend as latest..."
-            docker tag rausach-frontend:previous rausach-frontend:latest
-        fi
-        
-        echo "→ Restarting app services..."
-        docker compose -f docker-compose.app.yml down
-        docker compose -f docker-compose.app.yml up -d --force-recreate
-        
-        echo "✅ Rollback completed"
-ENDSSH
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        echo "❌ No domain selected"
+        echo ""
+        echo "Available domains:"
+        echo "  • RAUSACH (shop.rausachtrangia.com - Ports 12000-12001)"
+        echo "  • TAZAGROUP (app.tazagroup.vn - Ports 13000-13001)"
+        echo "  • TIMONA (app.timona.edu.vn - Ports 15000-15001)"
+    else
+        echo "✅ Domain: $DOMAIN_NAME ($CURRENT_DOMAIN)"
+        case $CURRENT_DOMAIN in
+            "rausach")
+                echo "   URL: shop.rausachtrangia.com"
+                echo "   Frontend: Port 12000"
+                echo "   Backend: Port 12001"
+                echo "   Bucket: shopuploads"
+                ;;
+            "tazagroup")
+                echo "   URL: app.tazagroup.vn"
+                echo "   Frontend: Port 13000"
+                echo "   Backend: Port 13001"
+                echo "   Bucket: tazagroup-uploads"
+                ;;
+            "timona")
+                echo "   URL: app.timona.edu.vn"
+                echo "   Frontend: Port 15000"
+                echo "   Backend: Port 15001"
+                echo "   Bucket: timona-uploads"
+                ;;
+        esac
+    fi
     echo ""
     read -p "Press Enter to continue..."
 }
 
 run_prisma_studio() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
+    fi
+    
     echo ""
-    echo "🗄️  Opening Prisma Studio..."
+    echo "🗄️  Opening Prisma Studio for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    bun run db:studio
+    cd ..
+    bun run db:studio:$CURRENT_DOMAIN
 }
 
 run_db_migrate() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
+    fi
+    
     echo ""
-    echo "🗄️  Running Database Migration..."
+    echo "🗄️  Running Database Migration for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd backend
-    bunx prisma migrate dev
     cd ..
+    bun run db:migrate:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
 }
 
-run_test_build() {
-    echo ""
-    echo "🏗️  Testing Production Build..."
-    echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./setup/build-frontend-prod.sh" ]; then
-        echo "❌ Error: build-frontend-prod.sh not found!"
-        read -p "Press Enter to continue..."
-        return
+run_db_push() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
     fi
-    ./setup/build-frontend-prod.sh
+    
+    echo ""
+    echo "🗄️  Pushing Database Schema for $DOMAIN_NAME..."
+    echo "─────────────────────────────────────────────────────"
+    cd ..
+    bun run db:push:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
 }
 
-run_check_status() {
-    echo ""
-    echo "📊 Checking Deployment Status..."
-    echo "─────────────────────────────────────────────────────"
-    if [ ! -f "./infrastructure/check-deployment-status.sh" ]; then
-        echo "❌ Error: check-deployment-status.sh not found!"
-        read -p "Press Enter to continue..."
-        return
+run_db_seed() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
     fi
-    ./infrastructure/check-deployment-status.sh
+    
+    echo ""
+    echo "🗄️  Seeding Database for $DOMAIN_NAME..."
+    echo "─────────────────────────────────────────────────────"
+    cd ..
+    bun run db:seed:$CURRENT_DOMAIN
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+run_clean() {
+    echo ""
+    echo "🧹 Cleaning node_modules..."
+    echo "─────────────────────────────────────────────────────"
+    cd ..
+    bun run clean
     echo ""
     read -p "Press Enter to continue..."
 }
@@ -221,10 +283,10 @@ run_docker_stop() {
 
 run_kill_ports() {
     echo ""
-    echo "🔪 Killing ports 12000-12001..."
+    echo "🔪 Killing all application ports..."
     echo "─────────────────────────────────────────────────────"
     
-    for port in 12000 12001; do
+    for port in 12000 12001 13000 13001 15000 15001; do
         PID=$(lsof -ti:$port 2>/dev/null)
         if [ ! -z "$PID" ]; then
             kill -9 $PID 2>/dev/null
@@ -239,27 +301,32 @@ run_kill_ports() {
 }
 
 # Main loop
+CURRENT_DOMAIN=""
+DOMAIN_NAME=""
+
 while true; do
     show_menu
     read choice
     
     case $choice in
+        [Rr]) select_domain ;;
+        [Tt]) CURRENT_DOMAIN="tazagroup"; DOMAIN_NAME="TAZAGROUP"; echo "✅ Domain set to: $DOMAIN_NAME"; sleep 1 ;;
+        [Mm]) CURRENT_DOMAIN="timona"; DOMAIN_NAME="TIMONA"; echo "✅ Domain set to: $DOMAIN_NAME"; sleep 1 ;;
         1) run_dev_full ;;
         2) run_dev_backend ;;
         3) run_dev_frontend ;;
-        4) run_deploy_infrastructure ;;
-        5) run_deploy_app ;;
-        6) run_stop_services ;;
-        7) run_show_images ;;
-        8) run_cleanup ;;
-        9) run_rollback ;;
-        10) run_prisma_studio ;;
-        11) run_db_migrate ;;
-        12) run_test_build ;;
-        13) run_check_status ;;
-        14) run_docker_start ;;
-        15) run_docker_stop ;;
-        16) run_kill_ports ;;
+        4) run_deploy_full ;;
+        5) run_build_images ;;
+        6) run_deploy_only ;;
+        7) run_prisma_studio ;;
+        8) run_db_migrate ;;
+        9) run_db_push ;;
+        10) run_db_seed ;;
+        11) show_current_domain ;;
+        12) run_kill_ports ;;
+        13) run_docker_start ;;
+        14) run_docker_stop ;;
+        15) run_clean ;;
         0) 
             echo ""
             echo "👋 Goodbye!"

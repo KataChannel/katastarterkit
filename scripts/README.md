@@ -1,43 +1,54 @@
 # Scripts Directory
 
-Thư mục chứa tất cả các scripts quản lý, deployment và utilities của dự án.
+Thư mục chứa tất cả các scripts quản lý, deployment và utilities của dự án multi-domain.
+
+## 🚀 Quick Start
+
+```bash
+# Cách 1: Qua package.json (khuyến nghị)
+bun run dev
+
+# Cách 2: Qua menu script
+bun run menu
+
+# Cách 3: Chạy trực tiếp
+./scripts/dev-deploy-menu.sh
+```
 
 ## 📁 Cấu trúc
 
 ```
 scripts/
-├── deployment/           # Scripts triển khai lên server
-│   ├── deploy-infrastructure.sh    # Deploy PostgreSQL, Redis, Minio
-│   ├── deploy-optimized.sh         # Deploy Backend + Frontend
-│   ├── rollback.sh                 # Rollback về version trước
-│   └── stop-services.sh            # Dừng các services
+├── dev-deploy-menu.sh   # ⭐ Menu chính - Multi-domain interactive menu
+├── menu.sh              # Quick launcher
 │
-├── docker/              # Scripts quản lý Docker
-│   ├── cleanup-docker.sh           # Dọn dẹp Docker images/containers
-│   ├── show-images.sh              # Hiển thị Docker images
-│   └── start-infrastructure.sh     # Khởi động infrastructure locally
+├── deploy-rausach.sh    # Deploy RAUSACH (shop.rausachtrangia.com)
+├── deploy-tazagroup.sh  # Deploy TAZAGROUP (app.tazagroup.vn)
+├── deploy-timona.sh     # Deploy TIMONA (app.timona.edu.vn)
 │
-├── infrastructure/      # Scripts kiểm tra hạ tầng
-│   ├── check-deployment-status.sh  # Kiểm tra trạng thái deployment
-│   └── check-infrastructure.sh     # Kiểm tra infrastructure services
+├── kill-ports.sh        # Kill processes on ports
 │
-├── setup/              # Scripts cài đặt và cấu hình
-│   ├── build-frontend-prod.sh      # Build frontend cho production
-│   ├── create-env-production.sh    # Tạo file .env production
-│   └── setup-storage-domain.sh     # Cấu hình storage domain
-│
-├── dev-deploy-menu.sh   # Menu deployment chính ⭐
-├── dev-menu.sh          # Menu development
-└── vscode-menu.sh       # Menu cho VS Code
+├── deployment/          # Scripts triển khai lên server (legacy)
+├── docker/              # Scripts quản lý Docker (legacy)
+├── infrastructure/      # Scripts kiểm tra hạ tầng (legacy)
+└── setup/               # Scripts cài đặt và cấu hình (legacy)
 ```
 
-## 🚀 Quick Start
+## 🏢 Multi-Domain Support
 
-```bash
-# Mở menu deployment (khuyên dùng)
-bun run dev
+Hệ thống hỗ trợ 3 domains chạy song song:
 
-# Deployment nhanh
-./scripts/deployment/deploy-infrastructure.sh  # Lần đầu
-./scripts/deployment/deploy-optimized.sh       # Mỗi lần update code
-```
+### RAUSACH - shop.rausachtrangia.com
+- Frontend: Port 12000
+- Backend: Port 12001
+- Bucket: shopuploads
+
+### TAZAGROUP - app.tazagroup.vn
+- Frontend: Port 13000
+- Backend: Port 13001
+- Bucket: tazagroup-uploads
+
+### TIMONA - app.timona.edu.vn
+- Frontend: Port 15000
+- Backend: Port 15001
+- Bucket: timona-uploads
