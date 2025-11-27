@@ -158,7 +158,7 @@ run_deploy_only() {
     echo ""
     echo "🚀 Deploying $DOMAIN_NAME to Server (using existing images)..."
     echo "─────────────────────────────────────────────────────"
-    ./deploy-${CURRENT_DOMAIN}.sh
+    ../deploy/deploy-${CURRENT_DOMAIN}.sh
     echo ""
     read -p "Press Enter to continue..."
 }

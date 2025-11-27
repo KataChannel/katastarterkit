@@ -4,51 +4,101 @@ Thư mục chứa tất cả các scripts quản lý, deployment và utilities c
 
 ## 🚀 Quick Start
 
+### Interactive Menu (Recommended)
 ```bash
-# Cách 1: Qua package.json (khuyến nghị)
-bun run dev
-
-# Cách 2: Qua menu script
-bun run menu
-
-# Cách 3: Chạy trực tiếp
-./scripts/dev-deploy-menu.sh
+bun run dev              # Open interactive menu
+bun run menu             # Alternative launcher
 ```
 
-## 📁 Cấu trúc
+### Quick Commands
+```bash
+# Quick development
+bun run quick:dev [rausach|tazagroup|timona]
+# Example: bun run quick:dev rausach
+
+# Quick deploy
+bun run quick:deploy [rausach|tazagroup|timona]
+# Example: bun run quick:deploy tazagroup
+
+# Quick database studio
+bun run quick:db [rausach|tazagroup|timona]
+# Example: bun run quick:db timona
+```
+
+### Direct Domain Commands
+```bash
+# Development
+bun run dev:rausach
+bun run dev:tazagroup
+bun run dev:timona
+
+# Deploy
+bun run deploy:rausach
+bun run deploy:tazagroup
+bun run deploy:timona
+
+# Database
+bun run db:studio:rausach
+bun run db:studio:tazagroup
+bun run db:studio:timona
+```
+
+## 📁 Organized Structure
 
 ```
 scripts/
-├── dev-deploy-menu.sh   # ⭐ Menu chính - Multi-domain interactive menu
-├── menu.sh              # Quick launcher
+├── 📌 Main Entry Points
+│   ├── dev.sh                    # Main interactive menu launcher
+│   ├── quick-dev.sh              # Quick dev start with arg
+│   ├── quick-deploy.sh           # Quick deploy with arg
+│   └── db-studio.sh              # Quick database studio with arg
 │
-├── deploy-rausach.sh    # Deploy RAUSACH (shop.rausachtrangia.com)
-├── deploy-tazagroup.sh  # Deploy TAZAGROUP (app.tazagroup.vn)
-├── deploy-timona.sh     # Deploy TIMONA (app.timona.edu.vn)
+├── 📂 core/                      # Core menu scripts
+│   ├── dev-deploy-menu.sh        # Main interactive menu
+│   └── menu.sh                   # Menu launcher
 │
-├── kill-ports.sh        # Kill processes on ports
+├── 📂 deploy/                    # Deployment scripts per domain
+│   ├── deploy-rausach.sh         # RAUSACH deployment
+│   ├── deploy-tazagroup.sh       # TAZAGROUP deployment
+│   └── deploy-timona.sh          # TIMONA deployment
 │
-├── deployment/          # Scripts triển khai lên server (legacy)
-├── docker/              # Scripts quản lý Docker (legacy)
-├── infrastructure/      # Scripts kiểm tra hạ tầng (legacy)
-└── setup/               # Scripts cài đặt và cấu hình (legacy)
+├── 📂 dev/                       # Development utilities
+│   ├── dev-menu.sh               # Dev-specific menu
+│   ├── fix-file-watchers.sh     # Fix file watching issues
+│   └── kill-dev-servers.sh      # Kill dev servers
+│
+├── 📂 db/                        # Database scripts
+│   ├── migrate-*.ts              # Migration scripts
+│   └── seed-*.sh                # Seed scripts
+│
+├── 📂 utils/                     # Utility scripts
+│   ├── kill-ports.sh            # Kill processes on ports
+│   ├── test-*.ts                # Test scripts
+│   ├── debug-*.ts               # Debug scripts
+│   └── audit-*.ts               # Audit scripts
+│
+└── 📂 legacy/                    # Legacy scripts (deprecated)
+    ├── 1sshauto.sh              # Old SSH automation
+    ├── 2autogit.sh              # Old Git automation
+    └── vscode-menu.sh           # Old VS Code menu
 ```
 
 ## 🏢 Multi-Domain Support
 
-Hệ thống hỗ trợ 3 domains chạy song song:
-
 ### RAUSACH - shop.rausachtrangia.com
-- Frontend: Port 12000
-- Backend: Port 12001
-- Bucket: shopuploads
+- **Frontend**: Port 12000
+- **Backend**: Port 12001
+- **MinIO Bucket**: shopuploads
+- **Env Files**: `.env.dev.rausach`, `.env.prod.rausach`
 
 ### TAZAGROUP - app.tazagroup.vn
-- Frontend: Port 13000
-- Backend: Port 13001
-- Bucket: tazagroup-uploads
+- **Frontend**: Port 13000
+- **Backend**: Port 13001
+- **MinIO Bucket**: tazagroup-uploads
+- **Env Files**: `.env.dev.tazagroup`, `.env.prod.tazagroup`
 
 ### TIMONA - app.timona.edu.vn
-- Frontend: Port 15000
-- Backend: Port 15001
-- Bucket: timona-uploads
+- **Frontend**: Port 15000
+- **Backend**: Port 15001
+- **MinIO Bucket**: timona-uploads
+- **Env Files**: `.env.dev.timona`, `.env.prod.timona`
