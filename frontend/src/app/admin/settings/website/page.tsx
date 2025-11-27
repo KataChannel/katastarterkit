@@ -348,31 +348,61 @@ export default function WebsiteSettingsPage() {
           value={selectedCategory} 
           onValueChange={setSelectedCategory} 
           className="h-full flex flex-col md:flex-row"
+          orientation="vertical"
         >
           {/* Vertical Tabs List - Sidebar on desktop, horizontal scroll on mobile */}
-          <div className="md:w-64 border-b md:border-b-0 md:border-r bg-muted/30 overflow-x-auto md:overflow-y-auto">
-            <TabsList className="flex flex-row md:flex-col w-max md:w-full h-auto gap-1 p-2 bg-transparent">
-              {CATEGORIES.map((cat) => {
-                const Icon = cat.icon;
-                const isActive = selectedCategory === cat.value;
-                return (
-                  <TabsTrigger 
-                    key={cat.value} 
-                    value={cat.value} 
-                    className={`
-                      flex items-center justify-start gap-3 w-full md:w-full
-                      px-4 py-3 rounded-md transition-all
-                      data-[state=active]:bg-background data-[state=active]:shadow-sm
-                      hover:bg-background/50
-                      whitespace-nowrap md:whitespace-normal
-                    `}
-                  >
-                    <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <span className="text-sm font-medium">{cat.label}</span>
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
+          <div className="md:w-64 shrink-0 border-b md:border-b-0 md:border-r bg-muted/30">
+            {/* Mobile: Horizontal Scroll */}
+            <div className="md:hidden overflow-x-auto">
+              <div className="flex flex-row gap-1 p-2 min-w-max">
+                {CATEGORIES.map((cat) => {
+                  const Icon = cat.icon;
+                  const isActive = selectedCategory === cat.value;
+                  return (
+                    <button
+                      key={cat.value}
+                      onClick={() => setSelectedCategory(cat.value)}
+                      className={`
+                        flex items-center gap-2 px-4 py-2 rounded-md transition-all whitespace-nowrap
+                        ${isActive 
+                          ? 'bg-background shadow-sm text-primary font-medium' 
+                          : 'hover:bg-background/50 text-muted-foreground'
+                        }
+                      `}
+                    >
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-sm">{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Desktop: Vertical List */}
+            <div className="hidden md:block overflow-y-auto h-full">
+              <div className="flex flex-col gap-1 p-2">
+                {CATEGORIES.map((cat) => {
+                  const Icon = cat.icon;
+                  const isActive = selectedCategory === cat.value;
+                  return (
+                    <button
+                      key={cat.value}
+                      onClick={() => setSelectedCategory(cat.value)}
+                      className={`
+                        flex items-center justify-start gap-3 w-full px-4 py-3 rounded-md transition-all text-left
+                        ${isActive 
+                          ? 'bg-background shadow-sm text-primary font-medium' 
+                          : 'hover:bg-background/50 text-muted-foreground'
+                        }
+                      `}
+                    >
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="text-sm font-medium">{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Content Area - Scrollable */}
