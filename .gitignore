@@ -160,7 +160,7 @@ $RECYCLE.BIN/
 # ==========================================
 # Docker & Containers
 # ==========================================
-.dockerignore
+# .dockerignore - KEEP THIS! We need it for Docker builds
 docker-compose.override.yml
 .docker/
 

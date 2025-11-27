@@ -1,0 +1,103 @@
+# ============================================================================
+# Backend .dockerignore - Exclude unnecessary files from Docker build context
+# ============================================================================
+
+# Dependencies (will be installed in container)
+node_modules/
+bun.lockb
+
+# Build output (will be built in container)
+dist/
+build/
+*.tsbuildinfo
+
+# Development files
+.env*
+!.env.example
+*.log
+logs/
+*.log.*
+
+# Database files (huge! 6.2GB in backups/)
+backups/
+database-export/
+data/
+migrations/
+*.sql
+*.sqlite
+*.db
+*.dump
+*.backup
+
+# Test files
+test/
+tests/
+coverage/
+*.test.ts
+*.spec.ts
+test-*.ts
+test-*.sh
+test-*.graphql
+jest.config.ts
+
+# Documentation & temp files
+*.md
+!README.md
+*.tmp
+*.temp
+.cache/
+tmp/
+
+# Scripts & utilities (not needed in production)
+scripts/
+*-old-data.ts
+check-*.ts
+debug-*.ts
+verify-*.ts
+validate-*.ts
+fix-*.ts
+simulate-*.ts
+update-*.ts
+migrate-*.ts
+import-*.ts
+restore-*.ts
+seed-*.ts
+assign-*.ts
+compare-*.ts
+generate-*.ts
+list-*.ts
+add-*.ts
+create-*.ts
+find-*.ts
+*.sh
+!entrypoint.sh
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker files (not needed inside container)
+Dockerfile
+Dockerfile.*
+.dockerignore
+
+# Public uploads (should be served by MinIO/S3)
+public/
+uploads/
+
+# Prisma migrations (only schema needed, migrations done separately)
+prisma/migrations/
+
+# GraphQL test queries
+*.graphql
+!prisma/schema.prisma
