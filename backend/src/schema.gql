@@ -4183,7 +4183,7 @@ type Query {
 
   """Get public menu items (no authentication required)"""
   publicMenus(includeChildren: Boolean = true, isActive: Boolean, isVisible: Boolean, orderBy: JSON, skip: Int, take: Int, type: String): [JSON!]!
-  publicWebsiteSettings(category: String, group: String, keys: [String!]): [WebsiteSetting!]!
+  publicWebsiteSettings(category: SettingCategory, group: String, keys: [String!]): [WebsiteSetting!]!
   quiz(id: String!): Quiz!
   quizAttempt(id: String!): QuizAttempt!
   quizAttempts(quizId: String!): [QuizAttempt!]!
@@ -4277,7 +4277,7 @@ type Query {
   """Get API version"""
   version: String!
   websiteSetting(key: String!): WebsiteSetting
-  websiteSettings(category: String, group: String, isActive: Boolean, isPublic: Boolean): [WebsiteSetting!]!
+  websiteSettings(category: SettingCategory, group: String, isActive: Boolean, isPublic: Boolean): [WebsiteSetting!]!
   websiteSettingsByCategory(category: String!): [WebsiteSetting!]!
 }
 
@@ -4555,6 +4555,22 @@ type RoleType {
 input SetPasswordInput {
   confirmPassword: String!
   password: String!
+}
+
+"""Website setting categories"""
+enum SettingCategory {
+  ANALYTICS
+  APPEARANCE
+  AUTH
+  CONTACT
+  FOOTER
+  GENERAL
+  HEADER
+  PAYMENT
+  SEO
+  SHIPPING
+  SOCIAL
+  SUPPORT_CHAT
 }
 
 """The permission level for shared tasks"""

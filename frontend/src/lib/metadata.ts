@@ -16,7 +16,7 @@ async function fetchSEOSettings(): Promise<Record<string, string>> {
           query: `
             query GetSEOSettings {
               websiteSettings(
-                category: "SEO"
+                category: SEO
                 isActive: true
               ) {
                 key

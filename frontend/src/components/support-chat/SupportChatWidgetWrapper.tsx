@@ -6,7 +6,7 @@ import SupportChatWidget from './SupportChatWidget';
 const GET_SUPPORT_CHAT_SETTINGS = gql`
   query GetSupportChatSettings {
     websiteSettings(
-      category: "SUPPORT_CHAT"
+      category: SUPPORT_CHAT
       isActive: true
     ) {
       key

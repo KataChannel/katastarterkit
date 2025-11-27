@@ -17,7 +17,7 @@ import { gql } from '@apollo/client';
  */
 export const GET_PUBLIC_WEBSITE_SETTINGS = gql`
   query GetPublicWebsiteSettings(
-    $category: String
+    $category: SettingCategory
     $group: String
     $keys: [String!]
   ) {

@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRoleType } from '@prisma/client';
-import { CreateWebsiteSettingInput, UpdateWebsiteSettingInput } from '../dto/website-setting.input';
+import { CreateWebsiteSettingInput, UpdateWebsiteSettingInput, SettingCategory } from '../dto/website-setting.input';
 import GraphQLJSON from 'graphql-type-json';
 
 @ObjectType()
@@ -68,7 +68,7 @@ export class WebsiteSettingResolver {
 
   @Query(() => [WebsiteSetting], { name: 'websiteSettings' })
   async getWebsiteSettings(
-    @Args('category', { nullable: true }) category?: string,
+    @Args('category', { type: () => SettingCategory, nullable: true }) category?: SettingCategory,
     @Args('group', { nullable: true }) group?: string,
     @Args('isActive', { nullable: true }) isActive?: boolean,
     @Args('isPublic', { nullable: true }) isPublic?: boolean,
@@ -87,7 +87,7 @@ export class WebsiteSettingResolver {
 
   @Query(() => [WebsiteSetting], { name: 'publicWebsiteSettings' })
   async getPublicWebsiteSettings(
-    @Args('category', { nullable: true }) category?: string,
+    @Args('category', { type: () => SettingCategory, nullable: true }) category?: SettingCategory,
     @Args('group', { nullable: true }) group?: string,
     @Args('keys', { type: () => [String], nullable: true }) keys?: string[],
   ): Promise<WebsiteSetting[]> {

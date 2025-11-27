@@ -194,7 +194,7 @@ let WebsiteSettingResolver = class WebsiteSettingResolver {
 exports.WebsiteSettingResolver = WebsiteSettingResolver;
 __decorate([
     (0, graphql_1.Query)(() => [WebsiteSetting], { name: 'websiteSettings' }),
-    __param(0, (0, graphql_1.Args)('category', { nullable: true })),
+    __param(0, (0, graphql_1.Args)('category', { type: () => website_setting_input_1.SettingCategory, nullable: true })),
     __param(1, (0, graphql_1.Args)('group', { nullable: true })),
     __param(2, (0, graphql_1.Args)('isActive', { nullable: true })),
     __param(3, (0, graphql_1.Args)('isPublic', { nullable: true })),
@@ -204,7 +204,7 @@ __decorate([
 ], WebsiteSettingResolver.prototype, "getWebsiteSettings", null);
 __decorate([
     (0, graphql_1.Query)(() => [WebsiteSetting], { name: 'publicWebsiteSettings' }),
-    __param(0, (0, graphql_1.Args)('category', { nullable: true })),
+    __param(0, (0, graphql_1.Args)('category', { type: () => website_setting_input_1.SettingCategory, nullable: true })),
     __param(1, (0, graphql_1.Args)('group', { nullable: true })),
     __param(2, (0, graphql_1.Args)('keys', { type: () => [String], nullable: true })),
     __metadata("design:type", Function),

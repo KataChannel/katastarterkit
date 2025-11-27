@@ -1,5 +1,5 @@
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateWebsiteSettingInput, UpdateWebsiteSettingInput } from '../dto/website-setting.input';
+import { CreateWebsiteSettingInput, UpdateWebsiteSettingInput, SettingCategory } from '../dto/website-setting.input';
 export declare class WebsiteSetting {
     id: string;
     key: string;
@@ -22,8 +22,8 @@ export declare class WebsiteSetting {
 export declare class WebsiteSettingResolver {
     private prisma;
     constructor(prisma: PrismaService);
-    getWebsiteSettings(category?: string, group?: string, isActive?: boolean, isPublic?: boolean): Promise<WebsiteSetting[]>;
-    getPublicWebsiteSettings(category?: string, group?: string, keys?: string[]): Promise<WebsiteSetting[]>;
+    getWebsiteSettings(category?: SettingCategory, group?: string, isActive?: boolean, isPublic?: boolean): Promise<WebsiteSetting[]>;
+    getPublicWebsiteSettings(category?: SettingCategory, group?: string, keys?: string[]): Promise<WebsiteSetting[]>;
     getWebsiteSetting(key: string): Promise<WebsiteSetting | null>;
     getWebsiteSettingsByCategory(category: string): Promise<WebsiteSetting[]>;
     getHeaderSettings(): Promise<WebsiteSetting[]>;
