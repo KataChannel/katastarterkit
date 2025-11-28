@@ -1,6 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, IsEnum, IsOptional, IsBoolean } from 'class-validator';
-import { SupportSender, SupportMessageType } from '@prisma/client';
+import { SupportSender, SupportMessageType, CustomerAuthType } from '@prisma/client';
 import GraphQLJSON from 'graphql-type-json';
 
 @InputType()
@@ -28,6 +28,11 @@ export class CreateSupportMessageInput {
   @IsOptional()
   @IsString()
   senderId?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsEnum(CustomerAuthType)
+  customerAuthType?: CustomerAuthType;
 
   @Field(() => String, { nullable: true })
   @IsOptional()

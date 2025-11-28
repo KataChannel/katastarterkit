@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
-import { useMutation } from '@apollo/client';
-import { gql } from '@apollo/client';
+import { useMutation, useLazyQuery } from '@apollo/client';
+import { CREATE_CONVERSATION_WITH_AUTH, SEND_SUPPORT_MESSAGE, GET_SUPPORT_CONVERSATION } from '@/graphql/support-chat/support-chat.graphql';
 import {
   MessageCircle,
   X,
@@ -15,9 +15,8 @@ import {
   Bot,
   User,
   Phone,
-  Mail,
-  Facebook,
-  Chrome,
+  RotateCcw,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,68 +24,32 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-
-// GraphQL Mutations
-const CREATE_CONVERSATION_WITH_AUTH = gql`
-  mutation CreateSupportConversationWithAuth($input: CreateConversationWithAuthInput!) {
-    createSupportConversationWithAuth(input: $input) {
-      id
-      conversationCode
-      customerName
-      authType
-      platform
-    }
-  }
-`;
-
-const SEND_SUPPORT_MESSAGE = gql`
-  mutation SendSupportMessage($input: SendSupportMessageInput!) {
-    sendSupportMessage(input: $input) {
-      id
-      content
-      senderType
-      senderName
-      customerAuthType
-      customerAuthIcon
-      sentAt
-      isRead
-    }
-  }
-`;
 
 interface Message {
   id: string;
   content: string;
   senderType: 'CUSTOMER' | 'AGENT' | 'BOT';
   senderName?: string;
-  customerAuthType?: string;
   customerAuthIcon?: string;
   sentAt: string;
   isRead: boolean;
   isAIGenerated?: boolean;
 }
 
-interface SupportChatWidgetEnhancedProps {
+interface SupportChatWidgetSimpleProps {
   apiUrl?: string;
   websocketUrl?: string;
   primaryColor?: string;
   position?: 'bottom-right' | 'bottom-left';
-  enableZaloLogin?: boolean;
-  enableFacebookLogin?: boolean;
-  enableGoogleLogin?: boolean;
 }
 
-export default function SupportChatWidgetEnhanced({
-  apiUrl = 'http://localhost:3001',
-  websocketUrl = 'http://localhost:3001/support-chat',
+export default function SupportChatWidgetSimple({
+  apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:12001',
+  websocketUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:12001/support-chat',
   primaryColor = '#2563eb',
   position = 'bottom-right',
-  enableZaloLogin = true,
-  enableFacebookLogin = true,
-  enableGoogleLogin = true,
-}: SupportChatWidgetEnhancedProps) {
+}: SupportChatWidgetSimpleProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -95,9 +58,9 @@ export default function SupportChatWidgetEnhanced({
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Authentication state
-  const [authType, setAuthType] = useState<'GUEST' | 'PHONE' | 'ZALO' | 'FACEBOOK' | 'GOOGLE'>('GUEST');
+  // Phone auth state
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [showAuthInput, setShowAuthInput] = useState(true);
@@ -106,9 +69,104 @@ export default function SupportChatWidgetEnhanced({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Apollo mutations
+  // Storage key for persistence
+  const STORAGE_KEY = 'support_chat_session';
+
+  // Clear session and start new conversation
+  const clearSession = useCallback(() => {
+    // Clear localStorage
+    localStorage.removeItem(STORAGE_KEY);
+    
+    // Reset state
+    setCustomerName('');
+    setCustomerPhone('');
+    setConversationId(null);
+    setMessages([]);
+    setShowAuthInput(true);
+    
+    // Disconnect socket
+    if (socket) {
+      socket.disconnect();
+      setSocket(null);
+    }
+  }, [socket]);
+
+  // Apollo mutations and queries
   const [createConversationMutation] = useMutation(CREATE_CONVERSATION_WITH_AUTH);
   const [sendMessageMutation] = useMutation(SEND_SUPPORT_MESSAGE);
+  const [fetchConversation] = useLazyQuery(GET_SUPPORT_CONVERSATION, {
+    fetchPolicy: 'network-only',
+    onCompleted: (data) => {
+      if (data?.supportConversation?.messages) {
+        const serverMessages = data.supportConversation.messages.map((msg: any) => ({
+          id: msg.id,
+          content: msg.content,
+          senderType: msg.senderType,
+          senderName: msg.senderName,
+          customerAuthIcon: msg.customerAuthIcon || '📱',
+          sentAt: msg.sentAt || msg.createdAt,
+          isRead: msg.isRead,
+        }));
+        setMessages(serverMessages);
+      }
+    },
+    onError: (error) => {
+      console.error('Error fetching conversation:', error);
+      // If conversation not found, clear local storage and reset
+      if (error.message.includes('not found') || error.message.includes('Not found')) {
+        clearSession();
+      }
+    },
+  });
+
+  // Load saved session from localStorage on mount
+  useEffect(() => {
+    let savedConvId: string | null = null;
+    try {
+      const savedSession = localStorage.getItem(STORAGE_KEY);
+      if (savedSession) {
+        const session = JSON.parse(savedSession);
+        if (session.customerName) setCustomerName(session.customerName);
+        if (session.customerPhone) setCustomerPhone(session.customerPhone);
+        if (session.conversationId) {
+          savedConvId = session.conversationId;
+          setConversationId(session.conversationId);
+          setShowAuthInput(false);
+        }
+        // Load cached messages initially (they'll be updated by server fetch)
+        if (session.messages?.length > 0) {
+          setMessages(session.messages);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading saved session:', error);
+    }
+    setIsLoading(false);
+    
+    // Fetch fresh messages from server if we have a saved conversation
+    if (savedConvId) {
+      fetchConversation({ variables: { id: savedConvId } });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Save session to localStorage when data changes
+  useEffect(() => {
+    if (!isLoading && (customerName || customerPhone || conversationId)) {
+      try {
+        const session = {
+          customerName,
+          customerPhone,
+          conversationId,
+          messages: messages.slice(-50), // Save last 50 messages only
+          savedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+      } catch (error) {
+        console.error('Error saving session:', error);
+      }
+    }
+  }, [customerName, customerPhone, conversationId, messages, isLoading]);
 
   // Initialize Socket.IO connection
   useEffect(() => {
@@ -118,11 +176,24 @@ export default function SupportChatWidgetEnhanced({
       });
 
       newSocket.on('connect', () => {
-        console.log('Connected to support chat');
+        console.log('✅ Connected to support chat');
+        // Rejoin conversation if we have one from saved session
+        if (conversationId) {
+          newSocket.emit('join_conversation', { conversationId });
+        }
       });
 
       newSocket.on('new_message', (message: Message) => {
-        setMessages(prev => [...prev, message]);
+        console.log('📩 New message received:', message);
+        // Check for duplicates to avoid double-adding
+        setMessages(prev => {
+          const exists = prev.some(m => m.id === message.id);
+          if (exists) {
+            console.log('⚠️ Message already exists, skipping:', message.id);
+            return prev;
+          }
+          return [...prev, message];
+        });
         if (message.senderType !== 'CUSTOMER') {
           setUnreadCount(prev => prev + 1);
         }
@@ -130,7 +201,7 @@ export default function SupportChatWidgetEnhanced({
       });
 
       newSocket.on('ai_suggestion', (data: any) => {
-        console.log('AI Suggestion:', data);
+        console.log('🤖 AI Suggestion:', data);
       });
 
       newSocket.on('user_typing', () => {
@@ -142,11 +213,12 @@ export default function SupportChatWidgetEnhanced({
       });
 
       newSocket.on('agent_assigned', (data: any) => {
+        console.log('👤 Agent assigned:', data);
         setAgentInfo(data.agent);
       });
 
       newSocket.on('customer_auth_updated', (data: any) => {
-        console.log('Customer auth updated:', data);
+        console.log('🔐 Customer auth updated:', data);
       });
 
       setSocket(newSocket);
@@ -155,7 +227,7 @@ export default function SupportChatWidgetEnhanced({
         newSocket.disconnect();
       };
     }
-  }, [isOpen, websocketUrl]);
+  }, [isOpen, websocketUrl, conversationId]);
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -166,9 +238,11 @@ export default function SupportChatWidgetEnhanced({
     scrollToBottom();
   }, [messages]);
 
-  // Start conversation với guest (phone + name)
-  const startGuestConversation = async () => {
-    if (!customerName.trim() || !customerPhone.trim()) return;
+  // Start conversation với phone auth
+  const startConversation = async () => {
+    if (!customerName.trim() || !customerPhone.trim()) {
+      return;
+    }
 
     try {
       const { data } = await createConversationMutation({
@@ -189,7 +263,6 @@ export default function SupportChatWidgetEnhanced({
       const conversation = data.createSupportConversationWithAuth;
       
       setConversationId(conversation.id);
-      setAuthType('PHONE');
       setShowAuthInput(false);
 
       // Join conversation via WebSocket
@@ -203,7 +276,7 @@ export default function SupportChatWidgetEnhanced({
       setMessages([
         {
           id: '1',
-          content: `Xin chào ${customerName}! Tôi có thể giúp gì cho bạn?`,
+          content: `Xin chào ${customerName}! Cảm ơn bạn đã liên hệ. Tôi có thể giúp gì cho bạn?`,
           senderType: 'BOT',
           senderName: 'Trợ lý ảo',
           sentAt: new Date().toISOString(),
@@ -211,97 +284,15 @@ export default function SupportChatWidgetEnhanced({
           isAIGenerated: true,
         },
       ]);
+
+      // Focus input after successful connection
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500);
+
     } catch (error) {
-      console.error('Error starting conversation:', error);
-    }
-  };
-
-  // Social login handlers
-  const handleZaloLogin = async () => {
-    try {
-      const { initZaloAuth } = await import('@/lib/social-auth');
-      const result = await initZaloAuth();
-      
-      if (result.success && result.accessToken) {
-        await startSocialConversation('ZALO', result.accessToken);
-      }
-    } catch (error: any) {
-      console.error('Zalo login error:', error);
-      alert('Đăng nhập Zalo thất bại. Vui lòng thử lại.');
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    try {
-      const { initFacebookAuth } = await import('@/lib/social-auth');
-      const result = await initFacebookAuth();
-      
-      if (result.success && result.accessToken) {
-        await startSocialConversation('FACEBOOK', result.accessToken);
-      }
-    } catch (error: any) {
-      console.error('Facebook login error:', error);
-      alert('Đăng nhập Facebook thất bại. Vui lòng thử lại.');
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      const { initGoogleAuth } = await import('@/lib/social-auth');
-      const result = await initGoogleAuth();
-      
-      if (result.success && result.accessToken) {
-        await startSocialConversation('GOOGLE', result.accessToken);
-      }
-    } catch (error: any) {
-      console.error('Google login error:', error);
-      alert('Đăng nhập Google thất bại. Vui lòng thử lại.');
-    }
-  };
-
-  // Start conversation with social auth
-  const startSocialConversation = async (provider: 'ZALO' | 'FACEBOOK' | 'GOOGLE', accessToken: string) => {
-    try {
-      const { data } = await createConversationMutation({
-        variables: {
-          input: {
-            authType: provider,
-            socialAccessToken: accessToken,
-            platform: 'WEBSITE',
-          },
-        },
-      });
-
-      if (!data?.createSupportConversationWithAuth) {
-        throw new Error('Failed to create conversation');
-      }
-      
-      const conversation = data.createSupportConversationWithAuth;
-      
-      setConversationId(conversation.id);
-      setAuthType(provider);
-      setCustomerName(conversation.customerName);
-      setShowAuthInput(false);
-
-      if (socket) {
-        socket.emit('join_conversation', {
-          conversationId: conversation.id,
-        });
-      }
-
-      setMessages([
-        {
-          id: '1',
-          content: `Xin chào ${conversation.customerName}! Cảm ơn bạn đã đăng nhập qua ${provider}. Tôi có thể giúp gì cho bạn?`,
-          senderType: 'BOT',
-          senderName: 'Trợ lý ảo',
-          sentAt: new Date().toISOString(),
-          isRead: true,
-          isAIGenerated: true,
-        },
-      ]);
-    } catch (error) {
-      console.error('Error starting social conversation:', error);
+      console.error('❌ Error starting conversation:', error);
+      alert('Không thể kết nối. Vui lòng thử lại.');
     }
   };
 
@@ -320,35 +311,27 @@ export default function SupportChatWidgetEnhanced({
             content: messageContent,
             senderType: 'CUSTOMER',
             senderName: customerName,
-            customerAuthType: authType,
+            customerAuthType: 'PHONE',
           },
         },
       });
 
-      if (socket && data?.sendSupportMessage) {
-        socket.emit('send_message', {
-          conversationId,
-          messageId: data.sendSupportMessage.id,
-          content: messageContent,
-          senderType: 'CUSTOMER',
-          senderName: customerName,
-          customerAuthType: authType,
-        });
-      }
-
+      // Optimistic update - add message immediately
+      // Backend will broadcast via WebSocket, so we just add locally
+      // Check for duplicates when receiving WebSocket message
       setMessages(prev => [...prev, {
-        id: data?.sendSupportMessage?.id || Date.now().toString(),
+        id: data?.sendSupportMessage?.id || `temp-${Date.now()}`,
         content: messageContent,
         senderType: 'CUSTOMER',
         senderName: customerName,
-        customerAuthType: authType,
-        customerAuthIcon: data?.sendSupportMessage?.customerAuthIcon,
+        customerAuthIcon: '📱',
         sentAt: new Date().toISOString(),
         isRead: false,
       }]);
+
     } catch (error) {
-      console.error('Error sending message:', error);
-      setInputMessage(messageContent);
+      console.error('❌ Error sending message:', error);
+      setInputMessage(messageContent); // Restore message on error
     }
   };
 
@@ -368,13 +351,14 @@ export default function SupportChatWidgetEnhanced({
     }
   };
 
-  const positionClasses = position === 'bottom-right' 
+  // Position classes for chat button (floating button, not fullscreen)
+  const buttonPositionClasses = position === 'bottom-right' 
     ? 'right-4 sm:right-6' 
     : 'left-4 sm:left-6';
 
   return (
     <>
-      {/* Chat Button */}
+      {/* Chat Button - Mobile First */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -383,7 +367,7 @@ export default function SupportChatWidgetEnhanced({
             exit={{ scale: 0, opacity: 0 }}
             className={cn(
               "fixed bottom-4 sm:bottom-6 z-50",
-              positionClasses
+              buttonPositionClasses
             )}
           >
             <Button
@@ -410,7 +394,7 @@ export default function SupportChatWidgetEnhanced({
         )}
       </AnimatePresence>
 
-      {/* Chat Window */}
+      {/* Chat Window - Mobile Full Screen + Desktop Floating */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -419,22 +403,33 @@ export default function SupportChatWidgetEnhanced({
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              "fixed bottom-4 sm:bottom-6 z-50",
-              "w-[calc(100vw-2rem)] sm:w-96",
-              positionClasses
+              // Mobile: Full screen
+              "fixed inset-0 z-50",
+              // Desktop: Floating window
+              "sm:inset-auto sm:bottom-6 sm:w-96",
+              // Position for desktop
+              position === 'bottom-right' ? 'sm:right-6' : 'sm:left-6'
             )}
             style={{
-              maxHeight: isMinimized ? '64px' : 'calc(100vh - 8rem)',
-              height: isMinimized ? 'auto' : '600px',
+              // Mobile: always full height, Desktop: limited height
+              maxHeight: isMinimized ? '64px' : undefined,
+              height: isMinimized ? 'auto' : undefined,
             }}
           >
-            <Card className="h-full flex flex-col shadow-2xl border-0">
-              {/* Header */}
+            <Card className={cn(
+              "h-full flex flex-col shadow-2xl border-0",
+              // Mobile: no rounded corners, Desktop: rounded
+              "rounded-none sm:rounded-xl",
+              // Desktop: limit height
+              "sm:max-h-[600px]"
+            )}>
+              {/* Header - Fixed at top */}
               <CardHeader
-                className="p-4 text-white relative overflow-hidden cursor-pointer"
+                className="p-4 text-white relative overflow-hidden cursor-pointer flex-shrink-0 safe-area-inset-top"
                 style={{ backgroundColor: primaryColor }}
                 onClick={() => setIsMinimized(!isMinimized)}
               >
+                {/* Animated background */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none">
                   <div className="absolute w-32 h-32 bg-white rounded-full -top-10 -left-10 animate-pulse" />
                   <div className="absolute w-24 h-24 bg-white rounded-full -bottom-5 -right-5 animate-pulse" 
@@ -460,6 +455,21 @@ export default function SupportChatWidgetEnhanced({
                   </div>
 
                   <div className="flex items-center space-x-1">
+                    {/* New conversation button - only show when already authenticated */}
+                    {!showAuthInput && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                        title="Cuộc hội thoại mới"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          clearSession();
+                        }}
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       size="icon"
                       variant="ghost"
@@ -494,8 +504,8 @@ export default function SupportChatWidgetEnhanced({
 
               {!isMinimized && (
                 <>
-                  {/* Messages/Auth Area */}
-                  <CardContent className="flex-1 p-0">
+                  {/* Messages Area - Scrollable content */}
+                  <CardContent className="flex-1 p-0 overflow-hidden">
                     <ScrollArea className="h-full px-4 py-4">
                       {showAuthInput ? (
                         <motion.div
@@ -507,81 +517,38 @@ export default function SupportChatWidgetEnhanced({
                               Chào mừng bạn! 👋
                             </h4>
                             <p className="text-sm text-muted-foreground mb-4">
-                              Chọn cách bắt đầu cuộc trò chuyện:
+                              Vui lòng cho chúng tôi biết thông tin để bắt đầu hội thoại.
                             </p>
 
-                            <Tabs defaultValue="phone" className="w-full">
-                              <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="phone">
-                                  <Phone className="h-4 w-4 mr-2" />
-                                  Số điện thoại
-                                </TabsTrigger>
-                                <TabsTrigger value="social">
-                                  <User className="h-4 w-4 mr-2" />
-                                  Đăng nhập
-                                </TabsTrigger>
-                              </TabsList>
-
-                              <TabsContent value="phone" className="space-y-3 mt-4">
-                                <Input
-                                  type="text"
-                                  value={customerName}
-                                  onChange={(e) => setCustomerName(e.target.value)}
-                                  placeholder="Tên của bạn..."
-                                />
-                                <Input
-                                  type="tel"
-                                  value={customerPhone}
-                                  onChange={(e) => setCustomerPhone(e.target.value)}
-                                  onKeyPress={(e) => e.key === 'Enter' && startGuestConversation()}
-                                  placeholder="Số điện thoại..."
-                                />
-                                <Button
-                                  onClick={startGuestConversation}
-                                  disabled={!customerName.trim() || !customerPhone.trim()}
-                                  className={cn(
-                                    "w-full text-white border-0",
-                                    "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90"
-                                  )}
-                                  style={{ '--chat-primary': primaryColor } as React.CSSProperties}
-                                >
-                                  Bắt đầu chat
-                                </Button>
-                              </TabsContent>
-
-                              <TabsContent value="social" className="space-y-3 mt-4">
-                                {enableZaloLogin && (
-                                  <Button
-                                    onClick={handleZaloLogin}
-                                    variant="outline"
-                                    className="w-full"
-                                  >
-                                    <MessageCircle className="h-4 w-4 mr-2 text-blue-600" />
-                                    Đăng nhập với Zalo
-                                  </Button>
+                            <div className="space-y-3">
+                              <Input
+                                type="text"
+                                value={customerName}
+                                onChange={(e) => setCustomerName(e.target.value)}
+                                placeholder="Tên của bạn..."
+                                className="h-11"
+                              />
+                              <Input
+                                type="tel"
+                                value={customerPhone}
+                                onChange={(e) => setCustomerPhone(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && startConversation()}
+                                placeholder="Số điện thoại..."
+                                className="h-11"
+                              />
+                              <Button
+                                onClick={startConversation}
+                                disabled={!customerName.trim() || !customerPhone.trim()}
+                                className={cn(
+                                  "w-full h-11 text-white border-0",
+                                  "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90"
                                 )}
-                                {enableFacebookLogin && (
-                                  <Button
-                                    onClick={handleFacebookLogin}
-                                    variant="outline"
-                                    className="w-full"
-                                  >
-                                    <Facebook className="h-4 w-4 mr-2 text-blue-600" />
-                                    Đăng nhập với Facebook
-                                  </Button>
-                                )}
-                                {enableGoogleLogin && (
-                                  <Button
-                                    onClick={handleGoogleLogin}
-                                    variant="outline"
-                                    className="w-full"
-                                  >
-                                    <Chrome className="h-4 w-4 mr-2 text-red-600" />
-                                    Đăng nhập với Google
-                                  </Button>
-                                )}
-                              </TabsContent>
-                            </Tabs>
+                                style={{ '--chat-primary': primaryColor } as React.CSSProperties}
+                              >
+                                <Phone className="h-4 w-4 mr-2" />
+                                Bắt đầu chat
+                              </Button>
+                            </div>
                           </Card>
                         </motion.div>
                       ) : (
@@ -671,14 +638,14 @@ export default function SupportChatWidgetEnhanced({
                     </ScrollArea>
                   </CardContent>
 
-                  {/* Input Area */}
+                  {/* Input Area - Footer with safe area for mobile */}
                   {!showAuthInput && (
-                    <div className="p-4 border-t bg-background">
+                    <div className="p-4 border-t bg-background flex-shrink-0 pb-safe">
                       <div className="flex items-end space-x-2">
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="flex-shrink-0"
+                          className="flex-shrink-0 h-11 w-11"
                           title="Đính kèm file"
                         >
                           <Paperclip className="h-5 w-5" />
@@ -695,7 +662,7 @@ export default function SupportChatWidgetEnhanced({
                             }}
                             onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                             placeholder="Nhập tin nhắn..."
-                            className="rounded-xl"
+                            className="rounded-xl h-11"
                           />
                         </div>
 
@@ -704,7 +671,7 @@ export default function SupportChatWidgetEnhanced({
                           onClick={sendMessage}
                           disabled={!inputMessage.trim()}
                           className={cn(
-                            "flex-shrink-0 rounded-xl text-white border-0",
+                            "flex-shrink-0 rounded-xl text-white border-0 h-11 w-11",
                             "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90"
                           )}
                           style={{ '--chat-primary': primaryColor } as React.CSSProperties}
@@ -712,6 +679,31 @@ export default function SupportChatWidgetEnhanced({
                           <Send className="h-5 w-5" />
                         </Button>
                       </div>
+
+                      {/* Quick Replies */}
+                      {messages.length === 1 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {[
+                            { icon: '💰', text: 'Giá sản phẩm' },
+                            { icon: '📦', text: 'Theo dõi đơn hàng' },
+                            { icon: '🚚', text: 'Vận chuyển' },
+                          ].map((reply, idx) => (
+                            <Button
+                              key={idx}
+                              variant="secondary"
+                              size="sm"
+                              className="h-auto py-1.5 px-3 text-xs rounded-full"
+                              onClick={() => {
+                                setInputMessage(reply.text);
+                                inputRef.current?.focus();
+                              }}
+                            >
+                              <span className="mr-1">{reply.icon}</span>
+                              {reply.text}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </>

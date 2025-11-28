@@ -18,6 +18,7 @@ export const GET_SUPPORT_CONVERSATIONS = gql`
       platformUserName
       subject
       tags
+      authType
       lastMessageAt
       lastMessagePreview
       rating
@@ -79,6 +80,7 @@ export const GET_SUPPORT_CONVERSATION = gql`
       platformUserName
       subject
       tags
+      authType
       notes
       lastMessageAt
       lastMessagePreview
@@ -110,6 +112,8 @@ export const GET_SUPPORT_CONVERSATION = gql`
         content
         senderType
         senderName
+        customerAuthType
+        customerAuthIcon
         isAIGenerated
         aiConfidence
         isRead
@@ -145,6 +149,21 @@ export const CREATE_SUPPORT_CONVERSATION = gql`
   }
 `;
 
+export const CREATE_CONVERSATION_WITH_AUTH = gql`
+  mutation CreateSupportConversationWithAuth($input: CreateConversationWithAuthInput!) {
+    createSupportConversationWithAuth(input: $input) {
+      id
+      conversationCode
+      customerName
+      customerEmail
+      customerPhone
+      authType
+      platform
+      createdAt
+    }
+  }
+`;
+
 export const ASSIGN_CONVERSATION_TO_AGENT = gql`
   mutation AssignConversationToAgent($conversationId: String!, $agentId: String!) {
     assignConversationToAgent(conversationId: $conversationId, agentId: $agentId) {
@@ -170,6 +189,8 @@ export const SEND_SUPPORT_MESSAGE = gql`
       content
       senderType
       senderName
+      customerAuthType
+      customerAuthIcon
       isAIGenerated
       sentAt
       createdAt
@@ -325,12 +346,22 @@ export interface CreateSupportConversationInput {
   customerId?: string;
 }
 
+export interface CreateConversationWithAuthInput {
+  customerName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  authType: 'GUEST' | 'PHONE' | 'ZALO' | 'FACEBOOK' | 'GOOGLE' | 'USER_ACCOUNT';
+  socialAccessToken?: string;
+  platform?: string;
+}
+
 export interface CreateSupportMessageInput {
   conversationId: string;
   content: string;
   senderType: SupportSender;
   senderName?: string;
   senderId?: string;
+  customerAuthType?: string;
   messageType?: SupportMessageType;
   metadata?: any;
 }

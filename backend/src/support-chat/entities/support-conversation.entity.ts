@@ -4,7 +4,8 @@ import {
   IntegrationPlatform, 
   TicketPriority,
   SupportSender,
-  SupportMessageType 
+  SupportMessageType,
+  CustomerAuthType
 } from '@prisma/client';
 import { User } from '../../graphql/models/user.model';
 
@@ -29,6 +30,10 @@ registerEnumType(SupportMessageType, {
   name: 'SupportMessageType',
 });
 
+registerEnumType(CustomerAuthType, {
+  name: 'CustomerAuthType',
+});
+
 @ObjectType()
 export class SupportMessage {
   @Field(() => ID)
@@ -45,6 +50,12 @@ export class SupportMessage {
 
   @Field({ nullable: true })
   senderName?: string;
+
+  @Field(() => CustomerAuthType, { nullable: true })
+  customerAuthType?: CustomerAuthType;
+
+  @Field({ nullable: true })
+  customerAuthIcon?: string;
 
   @Field()
   isAIGenerated: boolean;
@@ -111,6 +122,15 @@ export class SupportConversation {
 
   @Field({ nullable: true })
   platformUserName?: string;
+
+  @Field(() => CustomerAuthType)
+  authType: CustomerAuthType;
+
+  @Field({ nullable: true })
+  socialAuthId?: string;
+
+  @Field({ nullable: true })
+  customerIdentifier?: string;
 
   @Field({ nullable: true })
   subject?: string;

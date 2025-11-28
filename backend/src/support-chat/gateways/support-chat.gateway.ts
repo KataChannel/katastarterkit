@@ -80,6 +80,7 @@ export class SupportChatGateway implements OnGatewayConnection, OnGatewayDisconn
     @MessageBody()
     data: {
       conversationId: string;
+      messageId?: string; // Client may send this but we don't use it
       content: string;
       senderId?: string;
       senderType: SupportSender;
@@ -88,36 +89,52 @@ export class SupportChatGateway implements OnGatewayConnection, OnGatewayDisconn
     },
     @ConnectedSocket() client: Socket,
   ) {
-    const message = await this.supportMessageService.createMessage(data);
+    // Destructure to exclude messageId (we generate our own ID)
+    const { messageId, ...messageData } = data;
+    const message = await this.supportMessageService.createMessage(messageData);
 
     // Broadcast to all clients in the conversation
     this.server
       .to(`conversation_${data.conversationId}`)
       .emit('new_message', message);
 
-    // If customer message, generate AI suggestion for agent
+    // If customer message, generate AI suggestion for agent (optional feature)
     if (data.senderType === 'CUSTOMER') {
-      try {
-        const aiResponse = await this.aiAssistantService.generateResponse(
-          data.content,
-          { conversationHistory: [] }, // Load from DB if needed
-        );
-
-        // Send AI suggestion to agents only
-        this.server
-          .to(`conversation_${data.conversationId}`)
-          .emit('ai_suggestion', {
-            conversationId: data.conversationId,
-            suggestion: aiResponse.response,
-            confidence: aiResponse.confidence,
-            suggestions: aiResponse.suggestions,
-          });
-      } catch (error) {
-        console.error('AI suggestion error:', error);
-      }
+      // Run AI suggestion in background - don't block the message flow
+      this.generateAISuggestion(data.conversationId, data.content).catch(() => {
+        // Silently ignore AI errors - feature is optional
+      });
     }
 
     return { success: true, message };
+  }
+
+  /**
+   * Generate AI suggestion for agents (optional feature)
+   * This runs in background and doesn't block the main message flow
+   */
+  private async generateAISuggestion(conversationId: string, content: string) {
+    try {
+      const aiResponse = await this.aiAssistantService.generateResponse(
+        content,
+        { conversationHistory: [] },
+      );
+
+      // Send AI suggestion to agents only
+      this.server
+        .to(`conversation_${conversationId}`)
+        .emit('ai_suggestion', {
+          conversationId,
+          suggestion: aiResponse.response,
+          confidence: aiResponse.confidence,
+          suggestions: aiResponse.suggestions,
+        });
+    } catch (error) {
+      // AI is optional - log only in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log('⚠️ AI suggestion skipped (not configured or API error)');
+      }
+    }
   }
 
   @SubscribeMessage('update_customer_auth')

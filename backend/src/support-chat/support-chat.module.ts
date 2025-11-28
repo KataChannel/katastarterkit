@@ -63,6 +63,7 @@ import { SupportChatGateway } from './gateways/support-chat.gateway';
     AIProviderService,
     AIResponseService,
     SocialAuthService,
+    SupportChatGateway,
   ],
 })
 export class SupportChatModule {}

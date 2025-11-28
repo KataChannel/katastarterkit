@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, gql } from '@apollo/client';
-import SupportChatWidget from './SupportChatWidget';
+import SupportChatWidgetSimple from './SupportChatWidgetSimple';
 
 const GET_SUPPORT_CHAT_SETTINGS = gql`
   query GetSupportChatSettings {
@@ -85,7 +85,7 @@ export default function SupportChatWidgetWrapper() {
                        "http://116.118.49.243:12001/support-chat";
 
   return (
-    <SupportChatWidget
+    <SupportChatWidgetSimple
       apiUrl={apiUrl}
       websocketUrl={websocketUrl}
       primaryColor={config.primary_color || '#16a34a'}

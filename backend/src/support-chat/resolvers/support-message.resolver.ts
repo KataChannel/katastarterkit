@@ -2,10 +2,14 @@ import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { SupportMessageService } from '../services/support-message.service';
 import { SupportMessage } from '../entities/support-conversation.entity';
 import { CreateSupportMessageInput, MarkMessagesAsReadInput } from '../dto/support-message.input';
+import { SupportChatGateway } from '../gateways/support-chat.gateway';
 
 @Resolver(() => SupportMessage)
 export class SupportMessageResolver {
-  constructor(private messageService: SupportMessageService) {}
+  constructor(
+    private messageService: SupportMessageService,
+    private chatGateway: SupportChatGateway,
+  ) {}
 
   @Query(() => [SupportMessage], { name: 'supportMessages' })
   async supportMessages(
@@ -18,7 +22,14 @@ export class SupportMessageResolver {
   async sendSupportMessage(
     @Args('input', { type: () => CreateSupportMessageInput }) input: CreateSupportMessageInput,
   ) {
-    return this.messageService.createMessage(input);
+    const message = await this.messageService.createMessage(input);
+    
+    // Broadcast via WebSocket to all clients in the conversation
+    this.chatGateway.server
+      .to(`conversation_${input.conversationId}`)
+      .emit('new_message', message);
+    
+    return message;
   }
 
   @Mutation(() => Int)

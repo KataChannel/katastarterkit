@@ -1688,6 +1688,7 @@ input CreateSupportConversationInput {
 input CreateSupportMessageInput {
   content: String!
   conversationId: String!
+  customerAuthType: String
   messageType: String
   metadata: JSON
   senderId: String
@@ -1813,6 +1814,15 @@ type CustomTemplate {
   usageCount: Float!
   user: User!
   userId: String!
+}
+
+enum CustomerAuthType {
+  FACEBOOK
+  GOOGLE
+  GUEST
+  PHONE
+  USER_ACCOUNT
+  ZALO
 }
 
 type DatabaseSyncResult {
@@ -4779,12 +4789,14 @@ type SupportConversation {
   assignedAgent: User
   assignedAgentId: String
   assignedAt: DateTime
+  authType: CustomerAuthType!
   closedAt: DateTime
   conversationCode: String!
   createdAt: DateTime!
   customer: User
   customerEmail: String
   customerId: String
+  customerIdentifier: String
   customerIp: String
   customerLocation: String
   customerName: String
@@ -4800,6 +4812,7 @@ type SupportConversation {
   platformUserName: String
   priority: TicketPriority!
   rating: Float
+  socialAuthId: String
   startedAt: DateTime!
   status: SupportConversationStatus!
   subject: String
@@ -4827,6 +4840,8 @@ type SupportMessage {
   content: String!
   conversationId: String!
   createdAt: DateTime!
+  customerAuthIcon: String
+  customerAuthType: CustomerAuthType
   id: ID!
   isAIGenerated: Boolean!
   isRead: Boolean!

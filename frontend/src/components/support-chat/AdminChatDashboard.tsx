@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
 import { useQuery, useMutation } from '@apollo/client';
@@ -33,6 +33,7 @@ import {
   Facebook,
   MessageCircle as ZaloIcon,
 } from 'lucide-react';
+import { CustomerAuthBadge, type CustomerAuthType } from './CustomerAuthBadge';
 
 interface Conversation {
   id: string;
@@ -43,6 +44,7 @@ interface Conversation {
   platform: string;
   status: string;
   priority: string;
+  authType?: CustomerAuthType;
   lastMessagePreview?: string;
   lastMessageAt?: string;
   unreadCount?: number;
@@ -50,19 +52,46 @@ interface Conversation {
   assignedAgent?: any;
 }
 
+interface Message {
+  id: string;
+  content: string;
+  senderType: 'CUSTOMER' | 'AGENT' | 'BOT';
+  senderName?: string;
+  customerAuthType?: CustomerAuthType;
+  customerAuthIcon?: string;
+  isAIGenerated?: boolean;
+  isRead: boolean;
+  sentAt: string;
+  createdAt: string;
+  sender?: any;
+}
+
 export default function AdminChatDashboard() {
   const { user } = useAuth(); // Get current user
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'waiting' | 'closed'>('all');
+  const [authTypeFilter, setAuthTypeFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Use ref to track selected conversation in socket handlers (avoid stale closure)
+  const selectedConversationRef = useRef<Conversation | null>(null);
+  
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
     waiting: 0,
     avgResponseTime: 0,
+    byAuthType: {
+      GUEST: 0,
+      PHONE: 0,
+      ZALO: 0,
+      FACEBOOK: 0,
+      GOOGLE: 0,
+      USER_ACCOUNT: 0,
+    },
   });
 
   // Apollo queries and mutations
@@ -90,11 +119,27 @@ export default function AdminChatDashboard() {
     const active = conversations.filter((c: Conversation) => c.status === 'ACTIVE').length;
     const waiting = conversations.filter((c: Conversation) => c.status === 'WAITING').length;
     
+    const authTypeStats = {
+      GUEST: 0,
+      PHONE: 0,
+      ZALO: 0,
+      FACEBOOK: 0,
+      GOOGLE: 0,
+      USER_ACCOUNT: 0,
+    };
+    
+    conversations.forEach((c: Conversation) => {
+      if (c.authType && authTypeStats.hasOwnProperty(c.authType)) {
+        authTypeStats[c.authType as keyof typeof authTypeStats]++;
+      }
+    });
+    
     setStats({
       total,
       active,
       waiting,
       avgResponseTime: 45, // Mock data
+      byAuthType: authTypeStats,
     });
   }, [conversations]);
 
@@ -105,21 +150,57 @@ export default function AdminChatDashboard() {
     }
   }, [conversationData]);
 
-  // Initialize Socket.IO
+  // Keep ref in sync with state
   useEffect(() => {
-    const newSocket = io('http://localhost:3001/support-chat');
+    selectedConversationRef.current = selectedConversation;
+  }, [selectedConversation]);
+
+  // Initialize Socket.IO - only once on mount
+  useEffect(() => {
+    // Use NEXT_PUBLIC_WS_URL or fall back to localhost:12001
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:12001/support-chat';
+    
+    console.log('🔌 Admin connecting to WebSocket:', wsUrl);
+    
+    const newSocket = io(wsUrl, {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+      transports: ['websocket', 'polling'],
+      autoConnect: true,
+    });
 
     newSocket.on('connect', () => {
-      console.log('Admin connected to support chat');
+      console.log('✅ Admin connected to support chat');
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('❌ WebSocket connection error:', error.message);
+      console.error('Make sure backend is running on port 12001');
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      console.log('⚠️ Disconnected from support chat:', reason);
     });
 
     newSocket.on('new_conversation', () => {
       refetchConversations();
     });
 
+    // Listen for new messages - use ref to avoid stale closure
     newSocket.on('new_message', (message: any) => {
-      if (selectedConversation && message.conversationId === selectedConversation.id) {
-        setMessages(prev => [...prev, message]);
+      console.log('📨 Admin received new_message:', message);
+      const currentConv = selectedConversationRef.current;
+      if (currentConv && message.conversationId === currentConv.id) {
+        // Check if message already exists to avoid duplication
+        setMessages(prev => {
+          const exists = prev.some(m => m.id === message.id);
+          if (exists) {
+            console.log('⚠️ Message already exists, skipping:', message.id);
+            return prev;
+          }
+          return [...prev, message];
+        });
       }
       refetchConversations();
     });
@@ -129,7 +210,8 @@ export default function AdminChatDashboard() {
     return () => {
       newSocket.disconnect();
     };
-  }, [selectedConversation, refetchConversations]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Refetch when filter changes
   useEffect(() => {
@@ -154,8 +236,20 @@ export default function AdminChatDashboard() {
     const messageContent = inputMessage;
     setInputMessage(''); // Clear immediately
 
+    // Optimistic update - add message immediately to UI
+    const optimisticMessage: Message = {
+      id: `temp-${Date.now()}`,
+      content: messageContent,
+      senderType: 'AGENT',
+      senderName: user.username || 'Agent',
+      sentAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      isRead: false,
+    };
+    setMessages(prev => [...prev, optimisticMessage]);
+
     try {
-      await sendMessageMutation({
+      const result = await sendMessageMutation({
         variables: {
           input: {
             conversationId: selectedConversation.id,
@@ -167,19 +261,20 @@ export default function AdminChatDashboard() {
         },
       });
 
-      // Also send via WebSocket
-      if (socket) {
-        socket.emit('send_message', {
-          conversationId: selectedConversation.id,
-          content: messageContent,
-          senderType: 'AGENT',
-          senderId: user.id,
-          senderName: user.username || 'Agent',
-        });
+      // Replace optimistic message with real one
+      if (result.data?.sendSupportMessage) {
+        setMessages(prev => prev.map(m => 
+          m.id === optimisticMessage.id ? result.data.sendSupportMessage : m
+        ));
       }
+
+      // Backend will broadcast via WebSocket, no need to emit here
+      // This prevents duplication
     } catch (error) {
       console.error('Error sending message:', error);
-      setInputMessage(messageContent); // Restore on error
+      // Remove optimistic message and restore input on error
+      setMessages(prev => prev.filter(m => m.id !== optimisticMessage.id));
+      setInputMessage(messageContent);
     }
   };
 
@@ -299,6 +394,21 @@ export default function AdminChatDashboard() {
             >
               Đang xử lý
             </button>
+            
+            {/* Auth Type Filter */}
+            <select
+              value={authTypeFilter}
+              onChange={(e) => setAuthTypeFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
+            >
+              <option value="all">Tất cả loại xác thực</option>
+              <option value="PHONE">📱 Điện thoại</option>
+              <option value="ZALO">💬 Zalo</option>
+              <option value="FACEBOOK">👥 Facebook</option>
+              <option value="GOOGLE">🔍 Google</option>
+              <option value="USER_ACCOUNT">🔐 Tài khoản</option>
+              <option value="GUEST">👤 Khách</option>
+            </select>
           </div>
         </div>
       </div>
@@ -322,10 +432,18 @@ export default function AdminChatDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-gray-900 truncate">
-                      {conversation.customerName || 'Khách hàng'}
-                    </h3>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-2 flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 truncate">
+                        {conversation.customerName || 'Khách hàng'}
+                      </h3>
+                      {conversation.authType && (
+                        <CustomerAuthBadge 
+                          authType={conversation.authType} 
+                          size="sm"
+                        />
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-1 flex-shrink-0">
                       {getPlatformIcon(conversation.platform)}
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(conversation.priority)}`}>
                         {conversation.priority}
@@ -367,9 +485,17 @@ export default function AdminChatDashboard() {
                     {selectedConversation.customerName?.[0]?.toUpperCase() || 'K'}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">
-                      {selectedConversation.customerName || 'Khách hàng'}
-                    </h3>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h3 className="font-semibold text-gray-900">
+                        {selectedConversation.customerName || 'Khách hàng'}
+                      </h3>
+                      {selectedConversation.authType && (
+                        <CustomerAuthBadge 
+                          authType={selectedConversation.authType} 
+                          showLabel 
+                        />
+                      )}
+                    </div>
                     <div className="flex items-center space-x-2 text-xs text-gray-500">
                       {selectedConversation.customerEmail && (
                         <span className="flex items-center space-x-1">
@@ -415,10 +541,24 @@ export default function AdminChatDashboard() {
                         : 'bg-white text-gray-900 rounded-bl-sm shadow-sm'
                     }`}
                   >
-                    {message.senderType !== 'AGENT' && message.isAIGenerated && (
-                      <div className="flex items-center space-x-1 mb-1">
-                        <Bot className="w-3 h-3 text-blue-500" />
-                        <span className="text-xs font-medium text-gray-600">AI</span>
+                    {message.senderType !== 'AGENT' && (
+                      <div className="flex items-center justify-between mb-1">
+                        {message.isAIGenerated ? (
+                          <div className="flex items-center space-x-1">
+                            <Bot className="w-3 h-3 text-blue-500" />
+                            <span className="text-xs font-medium text-gray-600">AI</span>
+                          </div>
+                        ) : (
+                          <span className="text-xs font-medium text-gray-600">
+                            {message.senderName || 'Khách hàng'}
+                          </span>
+                        )}
+                        {message.customerAuthType && (
+                          <CustomerAuthBadge 
+                            authType={message.customerAuthType} 
+                            size="sm"
+                          />
+                        )}
                       </div>
                     )}
                     <p className="text-sm leading-relaxed">{message.content}</p>
