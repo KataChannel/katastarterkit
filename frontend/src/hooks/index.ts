@@ -53,3 +53,7 @@ export type { WindowSize } from './useMounted';
 // Error notification hooks
 export { useErrorNotification, parseGraphQLError } from './useErrorNotification';
 export type { ErrorNotification } from './useErrorNotification';
+
+// Visitor stats hooks (Google Analytics)
+export { useVisitorStats, useRealtimeUsers } from './useVisitorStats';
+export type { VisitorStats } from './useVisitorStats';

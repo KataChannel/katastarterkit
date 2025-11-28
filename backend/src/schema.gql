@@ -4111,6 +4111,9 @@ type Query {
   hello: String!
   hrStatistics: HRStatistics!
   invoiceExists(idServer: String!, khmshdon: String!, nbmst: String!, shdon: String!): Boolean!
+
+  """Kiểm tra Analytics đã được cấu hình chưa"""
+  isAnalyticsConfigured: Boolean!
   latestSystemRelease: SystemRelease
 
   """Get list of all available Prisma models"""
@@ -4188,6 +4191,9 @@ type Query {
   quizAttempt(id: String!): QuizAttempt!
   quizAttempts(quizId: String!): [QuizAttempt!]!
   quizzesByLesson(lessonId: String!): [Quiz!]!
+
+  """Số người đang truy cập website"""
+  realtimeUsers: Int!
   relatedBlogs(blogId: ID!, limit: Int): [BlogType!]!
   review(id: ID!): ProductReviewType
   reviewStats(courseId: ID!): ReviewStats!
@@ -4276,6 +4282,9 @@ type Query {
 
   """Get API version"""
   version: String!
+
+  """Lấy thống kê lượt truy cập từ Google Analytics"""
+  visitorStats: VisitorStatsType!
   websiteSetting(key: String!): WebsiteSetting
   websiteSettings(category: SettingCategory, group: String, isActive: Boolean, isPublic: Boolean): [WebsiteSetting!]!
   websiteSettingsByCategory(category: String!): [WebsiteSetting!]!
@@ -6153,6 +6162,21 @@ type ValidateCartResponse {
 type VisibilityCount {
   count: Int!
   visibility: FileVisibility!
+}
+
+"""Thống kê lượt truy cập website"""
+type VisitorStatsType {
+  """Số người đang truy cập (realtime)"""
+  realtime: Int!
+
+  """Lượt truy cập tháng này"""
+  thisMonth: Int!
+
+  """Lượt truy cập hôm nay"""
+  today: Int!
+
+  """Tổng lượt truy cập"""
+  total: Int!
 }
 
 type WebsiteSetting {

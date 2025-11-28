@@ -2,23 +2,21 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
-import { BarChart3, ChevronDown } from 'lucide-react';
+import { BarChart3, ChevronDown, Activity } from 'lucide-react';
 import { useFooterSettings, useContactSettings, useSocialSettings, settingsToMap } from '@/hooks/useWebsiteSettings';
+import { useVisitorStats } from '@/hooks/useVisitorStats';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
-interface VisitorStats {
-  Hientai?: number;
-  Ngay?: number;
-  Thang?: number;
-  Tong?: number;
-}
-
 interface WebsiteFooterProps {
-  visitors?: VisitorStats;
   currentYear?: number;
 }
 
-export function WebsiteFooter({ visitors, currentYear = new Date().getFullYear() }: WebsiteFooterProps) {
+export function WebsiteFooter({ currentYear = new Date().getFullYear() }: WebsiteFooterProps) {
+  // ✅ Load Visitor Stats từ Google Analytics
+  const { stats: visitors, loading: visitorLoading } = useVisitorStats({ 
+    pollInterval: 60000 // Cập nhật mỗi 1 phút
+  });
+
   // ✅ Load Footer Settings
   const { data: footerSettingsRaw = [] } = useFooterSettings();
   const footerSettings = useMemo(() => settingsToMap(footerSettingsRaw), [footerSettingsRaw]);
@@ -128,24 +126,24 @@ export function WebsiteFooter({ visitors, currentYear = new Date().getFullYear()
                 <AccordionContent>
                   <div className="flex flex-col space-y-3 pt-2">
                     <div className="flex flex-row space-x-2 items-center text-sm">
-                      <BarChart3 className="w-4 h-4 text-[#65b009]" />
+                      <Activity className="w-4 h-4 text-[#65b009]" />
                       <span>Đang truy cập:</span>
-                      <span className="font-semibold">{formatNumber(visitors?.Hientai)}</span>
+                      <span className="font-semibold">{formatNumber(visitors?.realtime)}</span>
                     </div>
                     <div className="flex flex-row space-x-2 items-center text-sm">
                       <BarChart3 className="w-4 h-4 text-[#65b009]" />
                       <span>Hôm nay:</span>
-                      <span className="font-semibold">{formatNumber(visitors?.Ngay)}</span>
+                      <span className="font-semibold">{formatNumber(visitors?.today)}</span>
                     </div>
                     <div className="flex flex-row space-x-2 items-center text-sm">
                       <BarChart3 className="w-4 h-4 text-[#65b009]" />
                       <span>Trong tháng:</span>
-                      <span className="font-semibold">{formatNumber(visitors?.Thang)}</span>
+                      <span className="font-semibold">{formatNumber(visitors?.thisMonth)}</span>
                     </div>
                     <div className="flex flex-row space-x-2 items-center text-sm">
                       <BarChart3 className="w-4 h-4 text-[#65b009]" />
                       <span>Tổng truy cập:</span>
-                      <span className="font-semibold">{formatNumber(visitors?.Tong)}</span>
+                      <span className="font-semibold">{formatNumber(visitors?.total)}</span>
                     </div>
                   </div>
                 </AccordionContent>
@@ -261,24 +259,24 @@ export function WebsiteFooter({ visitors, currentYear = new Date().getFullYear()
               <div className="font-bold text-xl mb-5">THỐNG KÊ TRUY CẬP</div>
               <div className="flex flex-col space-y-3">
                 <div className="flex flex-row space-x-2 items-center">
-                  <BarChart3 className="w-5 h-5 text-[#65b009]" />
+                  <Activity className="w-5 h-5 text-[#65b009]" />
                   <span>Đang truy cập:</span>
-                  <span className="font-semibold">{formatNumber(visitors?.Hientai)}</span>
+                  <span className="font-semibold">{formatNumber(visitors?.realtime)}</span>
                 </div>
                 <div className="flex flex-row space-x-2 items-center">
                   <BarChart3 className="w-5 h-5 text-[#65b009]" />
                   <span>Hôm nay:</span>
-                  <span className="font-semibold">{formatNumber(visitors?.Ngay)}</span>
+                  <span className="font-semibold">{formatNumber(visitors?.today)}</span>
                 </div>
                 <div className="flex flex-row space-x-2 items-center">
                   <BarChart3 className="w-5 h-5 text-[#65b009]" />
                   <span>Trong tháng:</span>
-                  <span className="font-semibold">{formatNumber(visitors?.Thang)}</span>
+                  <span className="font-semibold">{formatNumber(visitors?.thisMonth)}</span>
                 </div>
                 <div className="flex flex-row space-x-2 items-center">
                   <BarChart3 className="w-5 h-5 text-[#65b009]" />
                   <span>Tổng truy cập:</span>
-                  <span className="font-semibold">{formatNumber(visitors?.Tong)}</span>
+                  <span className="font-semibold">{formatNumber(visitors?.total)}</span>
                 </div>
               </div>
             </div>

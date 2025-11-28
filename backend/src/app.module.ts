@@ -62,6 +62,7 @@ import { InputSanitizationInterceptor } from './common/interceptors/input-saniti
 import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-performance.interceptor';
 import { PerformanceInterceptor } from './interceptors/performance.interceptor';
 import { ProjectModule } from './project/project.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -161,6 +162,7 @@ import { ProjectModule } from './project/project.module';
     EcommerceModule,
     SupportChatModule,
     ReleaseHubModule,
+    AnalyticsModule,
   ],
   controllers: [
     LogController,

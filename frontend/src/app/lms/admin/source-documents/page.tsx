@@ -79,20 +79,26 @@ export default function SourceDocumentsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<any>(null);
 
-  // Pagination
+  // Pagination - Admin sees all documents
   const {
     currentPage,
     pageSize,
     handlePageChange,
     handlePageSizeChange,
     resetPagination,
-  } = usePagination(12);
+  } = usePagination(100); // High limit to show all documents for admin
 
   // GraphQL queries
   const { data: categoriesData } = useQuery(GET_SOURCE_DOCUMENT_CATEGORIES);
 
   const { data, loading, error, refetch } = useQuery(GET_SOURCE_DOCUMENTS, {
     variables: {
+      filter: {
+        search: searchQuery || undefined,
+        types: filterType !== 'all' ? [filterType] : undefined,
+        statuses: filterStatus !== 'all' ? [filterStatus] : undefined,
+        categoryId: filterCategory !== 'all' ? filterCategory : undefined,
+      },
       page: currentPage,
       limit: pageSize,
     },
@@ -121,29 +127,8 @@ export default function SourceDocumentsPage() {
   const documents = data?.sourceDocuments || [];
   const categories = categoriesData?.sourceDocumentCategories || [];
 
-  // Client-side filtering
-  const filteredDocuments = documents.filter((doc: any) => {
-    const matchesSearch =
-      doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (doc.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (doc.tags || []).some((tag: string) =>
-        tag.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-
-    const matchesType = filterType === 'all' || doc.type === filterType;
-    const matchesStatus = filterStatus === 'all' || doc.status === filterStatus;
-    const matchesCategory =
-      filterCategory === 'all' || doc.categoryId === filterCategory;
-
-    return matchesSearch && matchesType && matchesStatus && matchesCategory;
-  });
-
-  // Pagination calculations
-  const totalFilteredItems = filteredDocuments.length;
-  const totalPages = Math.ceil(totalFilteredItems / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedDocuments = filteredDocuments.slice(startIndex, endIndex);
+  // Use documents directly from backend (already filtered and paginated)
+  const paginatedDocuments = documents;
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -459,20 +444,8 @@ export default function SourceDocumentsPage() {
             })}
           </div>
 
-          {/* Pagination */}
-          {totalFilteredItems > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalFilteredItems}
-              pageSize={pageSize}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-              loading={loading}
-              showPageSize={true}
-              pageSizeOptions={[12, 24, 48]}
-            />
-          )}
+          {/* Note: Pagination UI removed - showing all documents with high limit */}
+          {/* TODO: Add proper pagination with total count from backend */}
         </>
       )}
 

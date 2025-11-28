@@ -104,6 +104,37 @@ const formatDuration = (seconds?: number | null): string => {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
+// Check if URL is YouTube
+const isYouTubeUrl = (url?: string): boolean => {
+  if (!url) return false;
+  return url.includes('youtube.com') || url.includes('youtu.be') || url.includes('youtube-nocookie.com');
+};
+
+// Extract YouTube video ID from various URL formats
+const getYouTubeVideoId = (url: string): string | null => {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/)([^&\n?#]+)/,
+    /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  return null;
+};
+
+// Get YouTube embed URL
+const getYouTubeEmbedUrl = (url: string): string | null => {
+  const videoId = getYouTubeVideoId(url);
+  if (videoId) {
+    return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+  }
+  return null;
+};
+
 // Get file icon based on mime type
 const getFileIcon = (mimeType?: string) => {
   if (!mimeType) return <File className="w-8 h-8 text-blue-500" />;
@@ -674,6 +705,116 @@ export default function DocumentDetailPage() {
                 </>
               ) : (
                 <>
+                  {/* Video Player - Supports both uploaded videos and YouTube */}
+                  {document.type === 'VIDEO' && document.url && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <Video className="w-4 h-4 text-purple-500" />
+                        Xem video
+                      </p>
+                      <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+                        {isYouTubeUrl(document.url) ? (
+                          // YouTube iframe embed
+                          <iframe
+                            src={getYouTubeEmbedUrl(document.url) || ''}
+                            title={document.title}
+                            className="w-full h-full"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                        ) : (
+                          // Native video player for uploaded files
+                          <video
+                            controls
+                            className="w-full h-full"
+                            poster={document.thumbnailUrl || undefined}
+                            preload="metadata"
+                            playsInline
+                            crossOrigin="anonymous"
+                            onError={(e) => {
+                              const video = e.target as HTMLVideoElement;
+                              console.error('Video error:', video.error);
+                              toast.error(`Lỗi phát video: ${video.error?.message || 'Unknown error'}`);
+                            }}
+                          >
+                            <source src={document.url} type={document.mimeType || 'video/mp4'} />
+                            Trình duyệt của bạn không hỗ trợ video.
+                          </video>
+                        )}
+                      </div>
+                      {isYouTubeUrl(document.url) && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <ExternalLink className="w-3 h-3" />
+                          Video từ YouTube
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Audio Player */}
+                  {document.type === 'AUDIO' && document.url && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <Music className="w-4 h-4 text-orange-500" />
+                        Nghe audio
+                      </p>
+                      <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 p-4 rounded-lg border">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
+                            {document.thumbnailUrl ? (
+                              <img
+                                src={document.thumbnailUrl}
+                                alt={document.title}
+                                className="w-full h-full object-cover rounded-lg"
+                              />
+                            ) : (
+                              <Music className="w-8 h-8 text-orange-500" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{document.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {document.fileName || 'Audio file'}
+                            </p>
+                            {document.duration && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Thời lượng: {formatDuration(document.duration)}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <audio
+                          src={document.url}
+                          controls
+                          className="w-full mt-3"
+                          preload="metadata"
+                        >
+                          <source src={document.url} type={document.mimeType || 'audio/mpeg'} />
+                          Trình duyệt của bạn không hỗ trợ audio.
+                        </audio>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Image Preview */}
+                  {document.type === 'IMAGE' && document.url && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4 text-green-500" />
+                        Xem hình ảnh
+                      </p>
+                      <div className="border rounded-lg overflow-hidden bg-muted/30">
+                        <img
+                          src={document.url}
+                          alt={document.title}
+                          className="w-full max-h-[600px] object-contain"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Text Content */}
                   {document.type === 'TEXT' && document.content && (
                     <div className="p-4 bg-muted rounded-lg max-h-96 overflow-y-auto">
                       <pre className="text-sm whitespace-pre-wrap font-mono">
@@ -701,7 +842,7 @@ export default function DocumentDetailPage() {
                     </div>
                   )}
 
-                  {document.thumbnailUrl && (
+                  {document.thumbnailUrl && document.type !== 'IMAGE' && document.type !== 'VIDEO' && document.type !== 'AUDIO' && (
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Hình thu nhỏ</p>
                       <img
