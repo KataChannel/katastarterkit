@@ -9,7 +9,7 @@ echo "🚀 Deploying RAUSACH to 116.118.49.243..."
 
 SERVER="116.118.49.243"
 SERVER_USER="root"
-REMOTE_PATH="/opt/rausach"
+REMOTE_PATH="/opt/shoprausach"
 DOCKER_IMAGES_PATH="./docker-images"
 
 # Colors
@@ -24,7 +24,7 @@ scp ${DOCKER_IMAGES_PATH}/rausach-frontend.tar.gz ${SERVER_USER}@${SERVER}:${REM
 
 echo -e "${BLUE}📦 Step 2: Loading Docker images on server...${NC}"
 ssh ${SERVER_USER}@${SERVER} << 'EOF'
-cd /opt/rausach
+cd /opt/shoprausach
 docker load < rausach-backend.tar.gz
 docker load < rausach-frontend.tar.gz
 rm -f rausach-backend.tar.gz rausach-frontend.tar.gz
@@ -32,28 +32,27 @@ EOF
 
 echo -e "${BLUE}🔄 Step 3: Stopping old containers...${NC}"
 ssh ${SERVER_USER}@${SERVER} << 'EOF'
-docker stop rausach-backend || true
-docker stop rausach-frontend || true
-docker rm rausach-backend || true
-docker rm rausach-frontend || true
+docker stop shopbackend || true
+docker stop shopfrontend || true
+docker rm shopbackend || true
+docker rm shopfrontend || true
 EOF
 
 echo -e "${BLUE}🚀 Step 4: Starting new containers...${NC}"
 ssh ${SERVER_USER}@${SERVER} << 'EOF'
-# Start Backend
+# Start Backend (using host network, listens on port 12001)
 docker run -d \
-  --name rausach-backend \
+  --name shopbackend \
   --restart unless-stopped \
-  -p 12001:12001 \
   --network host \
-  -v /opt/rausach/.env:/app/.env:ro \
+  -v /opt/shoprausach/.env:/app/.env:ro \
   rausach-backend:latest
 
-# Start Frontend
+# Start Frontend (using host network, listens on port 3000)
+# Nginx proxies shop.rausachtrangia.com to port 3000
 docker run -d \
-  --name rausach-frontend \
+  --name shopfrontend \
   --restart unless-stopped \
-  -p 12000:3000 \
   --network host \
   rausach-frontend:latest
 
@@ -61,7 +60,7 @@ docker run -d \
 sleep 5
 
 # Check container status
-docker ps | grep rausach
+docker ps | grep -E '(shopbackend|shopfrontend)'
 EOF
 
 echo -e "${BLUE}🧹 Step 5: Cleaning up old images...${NC}"

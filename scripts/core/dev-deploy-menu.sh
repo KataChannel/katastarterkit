@@ -34,6 +34,8 @@ show_menu() {
     echo "  8. Database Migrate"
     echo "  9. Database Push"
     echo "  10. Database Seed"
+    echo "  20. Database Backup (JSON)"
+    echo "  21. Database Restore (JSON)"
     echo ""
     echo "🛠️  UTILITIES:"
     echo "  11. Show Current Domain"
@@ -43,6 +45,8 @@ show_menu() {
     echo "  15. Clean node_modules"
     echo "  16. Git Auto Commit & Push"
     echo "  17. SSH Key Setup (Auto Deploy)"
+    echo "  18. Fix File Watchers (ENOSPC)"
+    echo "  19. Clean & Organize Docs"
     echo ""
     echo "  0. Exit"
     echo ""
@@ -342,6 +346,95 @@ run_ssh_setup() {
     read -p "Press Enter to continue..."
 }
 
+run_fix_file_watchers() {
+    echo ""
+    echo "🔧 Fixing File Watchers Limit..."
+    echo "─────────────────────────────────────────────────────"
+    cd ../..
+    bash scripts/dev/6fix-file-watchers.sh
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+run_docs_clean() {
+    echo ""
+    echo "🧹 Cleaning & Organizing Docs..."
+    echo "─────────────────────────────────────────────────────"
+    cd ../..
+    bash scripts/utils/4docsclean.sh
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+run_db_backup() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
+    fi
+    
+    echo ""
+    echo "💾 Backing up Database for $DOMAIN_NAME..."
+    echo "📡 Connecting to Production Server: 116.118.49.243"
+    echo "─────────────────────────────────────────────────────"
+    
+    case $CURRENT_DOMAIN in
+        "rausach")
+            echo "🔌 Database: 116.118.49.243:12003/rausachcore"
+            ;;
+        "tazagroup")
+            echo "🔌 Database: 116.118.49.243:13003/tazagroupcore"
+            ;;
+        "timona")
+            echo "🔌 Database: 116.118.49.243:15003/timonacore"
+            ;;
+    esac
+    
+    echo "─────────────────────────────────────────────────────"
+    cd ../..
+    bun run db:backup:$CURRENT_DOMAIN
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+run_db_restore() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
+    fi
+    
+    echo ""
+    echo "⚠️  WARNING: This will restore the database from the latest backup!"
+    echo "⚠️  All current data will be replaced!"
+    echo "📡 Target: Production Server 116.118.49.243"
+    
+    case $CURRENT_DOMAIN in
+        "rausach")
+            echo "🔌 Database: 116.118.49.243:12003/rausachcore"
+            ;;
+        "tazagroup")
+            echo "🔌 Database: 116.118.49.243:13003/tazagroupcore"
+            ;;
+        "timona")
+            echo "🔌 Database: 116.118.49.243:15003/timonacore"
+            ;;
+    esac
+    
+    echo ""
+    read -p "Are you sure you want to continue? (yes/no): " confirm
+    
+    if [ "$confirm" != "yes" ]; then
+        echo "❌ Restore cancelled"
+        sleep 2
+        return
+    fi
+    
+    echo ""
+    echo "🔄 Restoring Database for $DOMAIN_NAME..."
+    echo "─────────────────────────────────────────────────────"
+    cd ../..
+    bun run db:restore:$CURRENT_DOMAIN
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
 # Main loop
 CURRENT_DOMAIN=""
 DOMAIN_NAME=""
@@ -371,6 +464,10 @@ while true; do
         15) run_clean ;;
         16) run_git_auto ;;
         17) run_ssh_setup ;;
+        18) run_fix_file_watchers ;;
+        19) run_docs_clean ;;
+        20) run_db_backup ;;
+        21) run_db_restore ;;
         0) 
             echo ""
             echo "👋 Goodbye!"

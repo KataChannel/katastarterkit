@@ -7,6 +7,14 @@ set -e
 
 echo "🚀 Starting backend entrypoint..."
 
+# Load environment variables from .env file if it exists
+if [ -f /app/.env ]; then
+  echo "📄 Loading environment variables from .env..."
+  set -a
+  . /app/.env
+  set +a
+fi
+
 # Wait for Redis to be ready
 echo "⏳ Waiting for Redis to be ready..."
 REDIS_HOST=${DOCKER_REDIS_HOST:-redis}

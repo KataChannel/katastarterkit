@@ -4,7 +4,7 @@
 
 # Dependencies (already in .next/standalone)
 node_modules/
-bun.lockb
+# Keep bun.lockb for faster installs
 package-lock.json
 yarn.lock
 

@@ -16,7 +16,8 @@ function getEnvironmentName(): string {
 }
 
 const ENV_NAME = getEnvironmentName();
-const BACKUP_ROOT_DIR = `./backups/${ENV_NAME}`;
+// Use absolute path based on __dirname to ensure correct location
+const BACKUP_ROOT_DIR = path.join(__dirname, '../../backups', ENV_NAME);
 
 function getFormattedDate(): string {
   const now = new Date();
@@ -318,7 +319,7 @@ async function backupAllTablesToJson(): Promise<void> {
   }
 
   console.log(`🏷️  Environment: ${ENV_NAME.toUpperCase()}`);
-  console.log(`📂 Creating backup in directory: ${BACKUP_DIR}`);
+  console.log(`📂 Backup directory: ${BACKUP_DIR}`);
   console.log(`⏰ Backup started at: ${new Date().toLocaleString()}`);
   
   const tables: string[] = await getTables();

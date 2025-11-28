@@ -21,7 +21,8 @@ function getEnvironmentName(): string {
 }
 
 const ENV_NAME = getEnvironmentName();
-const BACKUP_ROOT_DIR = `./backups/${ENV_NAME}`;
+// Use absolute path based on __dirname to ensure correct location
+const BACKUP_ROOT_DIR = path.join(__dirname, '../../backups', ENV_NAME);
 const BATCH_SIZE = 1000; // Process records in batches of 1000
 const STREAM_BUFFER_SIZE = 50; // Keep 50 batches in memory
 

@@ -1,0 +1,119 @@
+# ============================================================================
+# Root .dockerignore - Exclude large files from Docker build context
+# This file is critical for fast Docker builds!
+# ============================================================================
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# ROOT node_modules (HUGE - 7.7GB!)
+node_modules/
+**/node_modules/
+
+# Dependencies caches
+npm-cache/
+.yarn-cache/
+.bun/
+
+# BACKEND - Database backups and exports (HUGE - 6.2GB!)
+backend/backups/
+backend/database-export/
+backend/data/
+backend/logs/
+backend/dist/
+backend/*.log
+backend/*.sql
+backend/*.dump
+backend/*.backup
+backend/*.db
+backend/*.sqlite
+
+# FRONTEND - Build outputs
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+
+# Build outputs (general)
+.next/
+dist/
+build/
+out/
+
+# Development files
+.env.local
+.env.development
+.env.test
+.env*.local
+.DS_Store
+*.pem
+
+# IDE & Editor
+.vscode
+.idea
+*.swp
+*.swo
+*.swn
+.editorconfig
+
+# Testing
+__tests__
+__coverage__
+.jest
+.nyc_output
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temp files
+tmp
+temp
+.cache
+
+# Documentation (not needed in build)
+docs/
+*.md
+!backend/README.md
+!frontend/README.md
+
+# External files
+external/
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.circleci
+
+# Docker files
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Source maps (not needed in production)
+*.map
+
+# Certificate files
+*.pem
+*.key
+*.cert
+
+# Docker images (saved tars)
+docker-images/
+*.tar.gz
+*.tar
+
+# Package manager files (keep lockfiles, exclude large ones)
+package-lock.json
+yarn.lock
+# Keep: bun.lockb (needed for fast install)
+
+# OS files
+Thumbs.db
+.DS_Store
+ehthumbs.db
