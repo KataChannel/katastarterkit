@@ -10,13 +10,34 @@ echo "🚀 Deploying TAZAGROUP to 116.118.49.243..."
 SERVER="116.118.49.243"
 SERVER_USER="root"
 REMOTE_PATH="/opt/tazagroup"
-DOCKER_IMAGES_PATH="./docker-images"
+
+# Get script directory and project root
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$( cd "${SCRIPT_DIR}/../.." && pwd )"
+DOCKER_IMAGES_PATH="${PROJECT_ROOT}/docker-images"
 
 # Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
+
+# Check if Docker images exist
+if [ ! -f "${DOCKER_IMAGES_PATH}/tazagroup-backend.tar.gz" ]; then
+  echo -e "${RED}❌ Error: Docker image not found: ${DOCKER_IMAGES_PATH}/tazagroup-backend.tar.gz${NC}"
+  echo -e "${BLUE}💡 Please build Docker images first:${NC}"
+  echo -e "   cd ${PROJECT_ROOT}"
+  echo -e "   bun run docker:build"
+  exit 1
+fi
+
+if [ ! -f "${DOCKER_IMAGES_PATH}/tazagroup-frontend.tar.gz" ]; then
+  echo -e "${RED}❌ Error: Docker image not found: ${DOCKER_IMAGES_PATH}/tazagroup-frontend.tar.gz${NC}"
+  echo -e "${BLUE}💡 Please build Docker images first:${NC}"
+  echo -e "   cd ${PROJECT_ROOT}"
+  echo -e "   bun run docker:build"
+  exit 1
+fi
 
 echo -e "${BLUE}📦 Step 1: Uploading Docker images...${NC}"
 scp ${DOCKER_IMAGES_PATH}/tazagroup-backend.tar.gz ${SERVER_USER}@${SERVER}:${REMOTE_PATH}/
