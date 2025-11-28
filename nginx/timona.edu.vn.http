@@ -1,0 +1,84 @@
+# =====================================================
+# TIMONA.EDU.VN - Nginx Configuration (HTTP only - for Certbot)
+# Server: 116.118.49.243
+# =====================================================
+
+# ===================
+# app.timona.edu.vn - Frontend (Next.js :15000)
+# ===================
+server {
+    listen 80;
+    server_name app.timona.edu.vn;
+
+    # Certbot ACME challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        try_files $uri $uri/ =404;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:15000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# ===================
+# appapi.timona.edu.vn - Backend GraphQL (NestJS :15001)
+# ===================
+server {
+    listen 80;
+    server_name appapi.timona.edu.vn;
+
+    # Certbot ACME challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        try_files $uri $uri/ =404;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:15001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        client_max_body_size 100M;
+    }
+}
+
+# ===================
+# storage.timona.edu.vn - MinIO Storage (:12007)
+# ===================
+server {
+    listen 80;
+    server_name storage.timona.edu.vn;
+
+    # Certbot ACME challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        try_files $uri $uri/ =404;
+    }
+
+    client_max_body_size 500M;
+
+    location / {
+        proxy_pass http://127.0.0.1:12007;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+}

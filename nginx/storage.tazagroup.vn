@@ -1,0 +1,80 @@
+# =====================================================
+# storage.tazagroup.vn - MinIO Storage
+# Server: 116.118.49.243
+# Bucket: tazagroup-uploads
+# =====================================================
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name storage.tazagroup.vn;
+
+    # Certbot ACME challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Redirect HTTP to HTTPS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name storage.tazagroup.vn;
+
+    # SSL Configuration (will be managed by Certbot)
+    ssl_certificate /etc/letsencrypt/live/storage.tazagroup.vn/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/storage.tazagroup.vn/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # Security headers
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Large file uploads for MinIO
+    client_max_body_size 500M;
+
+    location / {
+        proxy_pass http://127.0.0.1:12007;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Important for MinIO
+        proxy_buffering off;
+        proxy_request_buffering off;
+        
+        # Chunked transfer encoding
+        chunked_transfer_encoding on;
+
+        # Timeout for large files
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+    }
+
+    # MinIO bucket: tazagroup-uploads
+    location /tazagroup-uploads/ {
+        proxy_pass http://127.0.0.1:12007/tazagroup-uploads/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Cache static files
+        proxy_cache_valid 200 1d;
+        add_header Cache-Control "public, max-age=86400";
+
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+}

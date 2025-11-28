@@ -81,13 +81,55 @@ export class SourceDocumentCategoryService {
   }
 
   async getTree() {
-    // Get all root categories (no parent)
+    // Get all root categories (no parent) with their documents
     return this.prisma.sourceDocumentCategory.findMany({
       where: { parentId: null },
       include: {
+        sourceDocuments: {
+          orderBy: { title: 'asc' },
+          select: {
+            id: true,
+            title: true,
+            type: true,
+            status: true,
+            fileName: true,
+            url: true,
+            thumbnailUrl: true,
+            createdAt: true,
+          },
+        },
         children: {
           include: {
-            children: true,
+            sourceDocuments: {
+              orderBy: { title: 'asc' },
+              select: {
+                id: true,
+                title: true,
+                type: true,
+                status: true,
+                fileName: true,
+                url: true,
+                thumbnailUrl: true,
+                createdAt: true,
+              },
+            },
+            children: {
+              include: {
+                sourceDocuments: {
+                  orderBy: { title: 'asc' },
+                  select: {
+                    id: true,
+                    title: true,
+                    type: true,
+                    status: true,
+                    fileName: true,
+                    url: true,
+                    thumbnailUrl: true,
+                    createdAt: true,
+                  },
+                },
+              },
+            },
             _count: {
               select: {
                 sourceDocuments: true,

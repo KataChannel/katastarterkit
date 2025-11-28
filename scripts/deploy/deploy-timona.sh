@@ -39,7 +39,10 @@ if [ ! -f "${DOCKER_IMAGES_PATH}/timona-frontend.tar.gz" ]; then
   exit 1
 fi
 
-echo -e "${BLUE}📦 Step 1: Uploading Docker images...${NC}"
+echo -e "${BLUE}📁 Step 0: Creating remote directory...${NC}"
+ssh ${SERVER_USER}@${SERVER} "mkdir -p ${REMOTE_PATH}"
+
+echo -e "${BLUE}� Step 1: Uploading Docker images...${NC}"
 scp ${DOCKER_IMAGES_PATH}/timona-backend.tar.gz ${SERVER_USER}@${SERVER}:${REMOTE_PATH}/
 scp ${DOCKER_IMAGES_PATH}/timona-frontend.tar.gz ${SERVER_USER}@${SERVER}:${REMOTE_PATH}/
 

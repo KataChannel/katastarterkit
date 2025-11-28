@@ -25,8 +25,14 @@ import {
   FolderTree,
   ChevronRight,
   ChevronDown,
+  FileText,
+  FileVideo,
+  FileAudio,
+  Link as LinkIcon,
+  ExternalLink,
+  Eye,
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import {
   GET_SOURCE_DOCUMENT_CATEGORY_TREE,
   CREATE_SOURCE_DOCUMENT_CATEGORY,
@@ -54,6 +60,47 @@ const COLOR_OPTIONS = [
   '#6366F1', // indigo
 ];
 
+// Get icon for document type
+const getDocumentTypeIcon = (type: string) => {
+  switch (type) {
+    case 'VIDEO':
+      return <FileVideo className="w-4 h-4" />;
+    case 'AUDIO':
+      return <FileAudio className="w-4 h-4" />;
+    case 'LINK':
+      return <LinkIcon className="w-4 h-4" />;
+    default:
+      return <FileText className="w-4 h-4" />;
+  }
+};
+
+// Get status badge style
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'PUBLISHED':
+      return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Đã xuất bản</Badge>;
+    case 'DRAFT':
+      return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">Nháp</Badge>;
+    case 'PENDING':
+      return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">Chờ duyệt</Badge>;
+    case 'REJECTED':
+      return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">Từ chối</Badge>;
+    default:
+      return <Badge variant="secondary">{status}</Badge>;
+  }
+};
+
+interface SourceDocument {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  fileName?: string;
+  url?: string;
+  thumbnailUrl?: string;
+  createdAt: string;
+}
+
 interface Category {
   id: string;
   name: string;
@@ -63,11 +110,11 @@ interface Category {
   color?: string;
   parentId?: string;
   children?: Category[];
+  sourceDocuments?: SourceDocument[];
 }
 
 export default function CategoriesPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -91,37 +138,37 @@ export default function CategoriesPage() {
   // Mutations
   const [createCategory, { loading: creating }] = useMutation(CREATE_SOURCE_DOCUMENT_CATEGORY, {
     onCompleted: () => {
-      toast({ type: 'success', title: 'Thành công', description: 'Đã tạo danh mục mới' });
+      toast.success('Đã tạo danh mục mới');
       setCreateDialogOpen(false);
       resetForm();
       refetch();
     },
     onError: (error) => {
-      toast({ type: 'error', title: 'Lỗi', description: error.message });
+      toast.error(error.message);
     },
   });
 
   const [updateCategory, { loading: updating }] = useMutation(UPDATE_SOURCE_DOCUMENT_CATEGORY, {
     onCompleted: () => {
-      toast({ type: 'success', title: 'Thành công', description: 'Đã cập nhật danh mục' });
+      toast.success('Đã cập nhật danh mục');
       setEditDialogOpen(false);
       resetForm();
       refetch();
     },
     onError: (error) => {
-      toast({ type: 'error', title: 'Lỗi', description: error.message });
+      toast.error(error.message);
     },
   });
 
   const [deleteCategory, { loading: deleting }] = useMutation(DELETE_SOURCE_DOCUMENT_CATEGORY, {
     onCompleted: () => {
-      toast({ type: 'success', title: 'Thành công', description: 'Đã xóa danh mục' });
+      toast.success('Đã xóa danh mục');
       setDeleteDialogOpen(false);
       setSelectedCategory(null);
       refetch();
     },
     onError: (error) => {
-      toast({ type: 'error', title: 'Lỗi', description: error.message });
+      toast.error(error.message);
     },
   });
 
@@ -140,7 +187,7 @@ export default function CategoriesPage() {
 
   const handleCreate = () => {
     if (!formData.name.trim() || !formData.slug.trim()) {
-      toast({ type: 'error', title: 'Lỗi', description: 'Vui lòng nhập tên và slug' });
+      toast.error('Vui lòng nhập tên và slug');
       return;
     }
 
@@ -173,7 +220,7 @@ export default function CategoriesPage() {
 
   const handleUpdate = () => {
     if (!selectedCategory || !formData.name.trim() || !formData.slug.trim()) {
-      toast({ type: 'error', title: 'Lỗi', description: 'Vui lòng nhập tên và slug' });
+      toast.error('Vui lòng nhập tên và slug');
       return;
     }
 
@@ -213,28 +260,80 @@ export default function CategoriesPage() {
     setExpandedCategories(newExpanded);
   };
 
+  // Render a document item inside the tree
+  const renderDocument = (doc: SourceDocument, level: number) => {
+    return (
+      <div
+        key={doc.id}
+        className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
+        style={{ paddingLeft: `${(level + 1) * 24 + 12}px` }}
+        onClick={() => router.push(`/lms/admin/source-documents/${doc.id}`)}
+      >
+        {/* Empty space for alignment */}
+        <div className="w-6" />
+        
+        {/* Document type icon */}
+        <div className="w-8 h-8 rounded flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+          {getDocumentTypeIcon(doc.type)}
+        </div>
+
+        {/* Document info */}
+        <div className="flex-1 min-w-0">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+            {doc.title}
+          </h4>
+          {doc.fileName && (
+            <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
+              {doc.fileName}
+            </p>
+          )}
+        </div>
+
+        {/* Status badge */}
+        <div className="hidden sm:block">
+          {getStatusBadge(doc.status)}
+        </div>
+
+        {/* Action button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(`/lms/admin/source-documents/${doc.id}`);
+          }}
+        >
+          <Eye className="w-4 h-4" />
+        </Button>
+      </div>
+    );
+  };
+
   const renderCategory = (category: Category, level = 0) => {
     const hasChildren = category.children && category.children.length > 0;
+    const hasDocuments = category.sourceDocuments && category.sourceDocuments.length > 0;
+    const hasContent = hasChildren || hasDocuments;
     const isExpanded = expandedCategories.has(category.id);
 
     return (
       <div key={category.id}>
         <div
-          className={`flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50 transition-colors ${
+          className={`flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${
             level > 0 ? 'ml-6' : ''
           }`}
           style={{ paddingLeft: `${level * 24 + 12}px` }}
         >
           {/* Expand/Collapse button */}
-          {hasChildren ? (
+          {hasContent ? (
             <button
               onClick={() => toggleExpand(category.id)}
-              className="p-1 hover:bg-gray-200 rounded"
+              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
             >
               {isExpanded ? (
-                <ChevronDown className="w-4 h-4 text-gray-600" />
+                <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-gray-600" />
+                <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
               )}
             </button>
           ) : (
@@ -251,11 +350,18 @@ export default function CategoriesPage() {
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm sm:text-base text-gray-900">
-              {category.name}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100">
+                {category.name}
+              </h3>
+              {hasDocuments && (
+                <Badge variant="secondary" className="text-xs">
+                  {category.sourceDocuments!.length} tài liệu
+                </Badge>
+              )}
+            </div>
             {category.description && (
-              <p className="text-xs sm:text-sm text-gray-500 truncate">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
                 {category.description}
               </p>
             )}
@@ -280,10 +386,18 @@ export default function CategoriesPage() {
           </div>
         </div>
 
-        {/* Children */}
-        {hasChildren && isExpanded && (
-          <div className="mt-1">
-            {category.children!.map((child) => renderCategory(child, level + 1))}
+        {/* Children and Documents */}
+        {hasContent && isExpanded && (
+          <div className="mt-1 space-y-1">
+            {/* Child categories first */}
+            {hasChildren && category.children!.map((child) => renderCategory(child, level + 1))}
+            
+            {/* Then documents */}
+            {hasDocuments && (
+              <div className="border-l-2 border-gray-200 dark:border-gray-700 ml-6" style={{ marginLeft: `${(level + 1) * 24 + 6}px` }}>
+                {category.sourceDocuments!.map((doc) => renderDocument(doc, level))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -295,10 +409,10 @@ export default function CategoriesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Danh mục tài liệu nguồn
           </h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
             Quản lý danh mục phân loại tài liệu
           </p>
         </div>

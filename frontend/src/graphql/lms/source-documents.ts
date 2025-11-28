@@ -124,18 +124,48 @@ export const GET_SOURCE_DOCUMENT_CATEGORY_TREE = gql`
       icon
       color
       parentId
+      sourceDocuments {
+        id
+        title
+        type
+        status
+        fileName
+        url
+        thumbnailUrl
+        createdAt
+      }
       children {
         id
         name
         slug
         icon
         color
+        sourceDocuments {
+          id
+          title
+          type
+          status
+          fileName
+          url
+          thumbnailUrl
+          createdAt
+        }
         children {
           id
           name
           slug
           icon
           color
+          sourceDocuments {
+            id
+            title
+            type
+            status
+            fileName
+            url
+            thumbnailUrl
+            createdAt
+          }
         }
       }
       createdAt

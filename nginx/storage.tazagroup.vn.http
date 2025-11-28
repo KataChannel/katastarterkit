@@ -1,0 +1,26 @@
+# storage.tazagroup.vn - MinIO Storage (HTTP only for Certbot)
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name storage.tazagroup.vn;
+
+    # Certbot ACME challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        try_files $uri $uri/ =404;
+    }
+
+    client_max_body_size 500M;
+
+    location / {
+        proxy_pass http://127.0.0.1:12007;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+}
