@@ -9,11 +9,13 @@ import {
   UseGuards,
   Req,
   Body,
+  Logger,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { MinioService } from '../../minio/minio.service';
 import { SourceDocumentService } from './source-document.service';
+import { VideoProcessingService } from './video-processing.service';
 
 interface UploadedFile {
   buffer: Buffer;
@@ -50,9 +52,12 @@ function decodeFileName(filename: string): string {
 @Controller('api/lms/source-documents')
 @UseGuards(JwtAuthGuard)
 export class SourceDocumentUploadController {
+  private readonly logger = new Logger(SourceDocumentUploadController.name);
+
   constructor(
     private minioService: MinioService,
     private sourceDocumentService: SourceDocumentService,
+    private videoProcessingService: VideoProcessingService,
   ) {}
 
   /**
@@ -85,10 +90,44 @@ export class SourceDocumentUploadController {
       // Generate temporary document ID for file path
       const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`;
       
-      // Upload to MinIO
+      let finalBuffer = file.buffer;
+      let finalSize = file.size;
+      let duration: number | undefined;
+      let videoMetadata: any = {};
+
+      // Process video if it's a video file
+      if (this.isVideoFile(file.mimetype)) {
+        this.logger.log(`Processing video: ${originalFileName}`);
+        
+        const processResult = await this.videoProcessingService.processVideo(
+          file.buffer,
+          originalFileName,
+        );
+
+        if (processResult.success && processResult.processedBuffer) {
+          finalBuffer = processResult.processedBuffer;
+          finalSize = processResult.processedBuffer.length;
+          duration = processResult.duration;
+          videoMetadata = {
+            width: processResult.width,
+            height: processResult.height,
+            processed: true,
+          };
+          this.logger.log(`✅ Video processed: ${originalFileName}, duration: ${duration}s`);
+        } else {
+          this.logger.warn(`⚠️ Video processing skipped or failed: ${processResult.error || 'FFmpeg not available'}`);
+          videoMetadata = {
+            processed: false,
+            needsProcessing: processResult.needsProcessing,
+            error: processResult.error,
+          };
+        }
+      }
+      
+      // Upload to MinIO (processed or original)
       const url = await this.minioService.uploadSourceDocument(
         tempId,
-        file.buffer,
+        finalBuffer,
         originalFileName,
         file.mimetype,
       );
@@ -97,12 +136,14 @@ export class SourceDocumentUploadController {
         success: true,
         url,
         fileName: originalFileName,
-        fileSize: file.size,
+        fileSize: finalSize,
         mimeType: file.mimetype,
         tempId,
+        duration,
+        metadata: videoMetadata,
       };
     } catch (error) {
-      console.error('Upload error:', error);
+      this.logger.error(`Upload error: ${error.message}`, error.stack);
       throw new BadRequestException(`Upload thất bại: ${error.message}`);
     }
   }
@@ -135,32 +176,80 @@ export class SourceDocumentUploadController {
       // Decode tên file tiếng Việt
       const originalFileName = decodeFileName(file.originalname);
       
-      // Upload to MinIO with document ID
+      let finalBuffer = file.buffer;
+      let finalSize = file.size;
+      let duration: number | undefined;
+      let videoMetadata: any = {};
+
+      // Process video if it's a video file
+      if (this.isVideoFile(file.mimetype)) {
+        this.logger.log(`Processing video for document ${documentId}: ${originalFileName}`);
+        
+        const processResult = await this.videoProcessingService.processVideo(
+          file.buffer,
+          originalFileName,
+        );
+
+        if (processResult.success && processResult.processedBuffer) {
+          finalBuffer = processResult.processedBuffer;
+          finalSize = processResult.processedBuffer.length;
+          duration = processResult.duration;
+          videoMetadata = {
+            width: processResult.width,
+            height: processResult.height,
+            processed: true,
+          };
+          this.logger.log(`✅ Video processed for document ${documentId}: duration ${duration}s`);
+        } else {
+          this.logger.warn(`⚠️ Video processing failed: ${processResult.error || 'FFmpeg not available'}`);
+          videoMetadata = {
+            processed: false,
+            needsProcessing: processResult.needsProcessing,
+            error: processResult.error,
+          };
+        }
+      }
+      
+      // Upload to MinIO with document ID (processed or original)
       const url = await this.minioService.uploadSourceDocument(
         documentId,
-        file.buffer,
+        finalBuffer,
         originalFileName,
         file.mimetype,
       );
 
       // Update document with file info
-      await this.sourceDocumentService.update(documentId, {
+      const updateData: any = {
         url,
         fileName: originalFileName,
-        fileSize: file.size,
+        fileSize: finalSize,
         mimeType: file.mimetype,
-      });
+      };
+
+      // Add duration if it's a video
+      if (duration !== undefined) {
+        updateData.duration = Math.round(duration);
+      }
+
+      // Add metadata
+      if (Object.keys(videoMetadata).length > 0) {
+        updateData.metadata = videoMetadata;
+      }
+
+      await this.sourceDocumentService.update(documentId, updateData);
 
       return {
         success: true,
         url,
         fileName: originalFileName,
-        fileSize: file.size,
+        fileSize: finalSize,
         mimeType: file.mimetype,
         documentId,
+        duration,
+        metadata: videoMetadata,
       };
     } catch (error) {
-      console.error('Upload error:', error);
+      this.logger.error(`Upload error: ${error.message}`, error.stack);
       throw new BadRequestException(`Upload thất bại: ${error.message}`);
     }
   }
@@ -276,6 +365,13 @@ export class SourceDocumentUploadController {
       console.error('Thumbnail upload error:', error);
       throw new BadRequestException(`Upload thumbnail thất bại: ${error.message}`);
     }
+  }
+
+  /**
+   * Check if file is a video
+   */
+  private isVideoFile(mimeType: string): boolean {
+    return mimeType.startsWith('video/');
   }
 
   /**

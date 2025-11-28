@@ -4,6 +4,7 @@ import { SourceDocumentService } from './source-document.service';
 import { SourceDocumentCategoryResolver } from './source-document-category.resolver';
 import { SourceDocumentCategoryService } from './source-document-category.service';
 import { SourceDocumentUploadController } from './source-document-upload.controller';
+import { VideoProcessingService } from './video-processing.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MinioModule } from '../../minio/minio.module';
 import { AiModule } from '../../ai/ai.module';
@@ -22,6 +23,7 @@ import { RealTimeNotificationService } from '../../realtime/real-time-notificati
     SourceDocumentService,
     SourceDocumentCategoryResolver,
     SourceDocumentCategoryService,
+    VideoProcessingService,
     UserService,
     NotificationService,
     PushNotificationService,

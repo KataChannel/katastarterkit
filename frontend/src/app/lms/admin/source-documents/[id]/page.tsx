@@ -712,6 +712,7 @@ export default function DocumentDetailPage() {
                         <Video className="w-4 h-4 text-purple-500" />
                         Xem video
                       </p>
+                      
                       <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
                         {isYouTubeUrl(document.url) ? (
                           // YouTube iframe embed
@@ -735,7 +736,15 @@ export default function DocumentDetailPage() {
                             onError={(e) => {
                               const video = e.target as HTMLVideoElement;
                               console.error('Video error:', video.error);
-                              toast.error(`Lỗi phát video: ${video.error?.message || 'Unknown error'}`);
+                              const errorCode = video.error?.code;
+                              const errorMessages: Record<number, string> = {
+                                1: 'Quá trình tải video bị hủy',
+                                2: 'Lỗi mạng khi tải video',
+                                3: 'Video bị lỗi decode - cần re-encode',
+                                4: 'Định dạng video không được hỗ trợ',
+                              };
+                              const message = errorCode ? errorMessages[errorCode] || 'Lỗi không xác định' : 'Lỗi không xác định';
+                              toast.error(`Lỗi phát video: ${message}`);
                             }}
                           >
                             <source src={document.url} type={document.mimeType || 'video/mp4'} />
