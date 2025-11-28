@@ -66,7 +66,11 @@ export class SourceDocumentService {
       data.publishedAt = new Date();
     }
 
-    console.log('💾 Prisma create data:', JSON.stringify(data, null, 2));
+    // BigInt replacer for logging
+    const bigIntReplacer = (key: string, value: any) => 
+      typeof value === 'bigint' ? value.toString() : value;
+
+    console.log('💾 Prisma create data:', JSON.stringify(data, bigIntReplacer, 2));
 
     const document = await this.prisma.sourceDocument.create({
       data,

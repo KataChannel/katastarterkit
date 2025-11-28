@@ -2,6 +2,38 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 
+/**
+ * Bảng chuyển đổi tiếng Việt có dấu sang không dấu
+ */
+const VIETNAMESE_DIACRITICS_MAP: { [key: string]: string } = {
+  'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+  'ă': 'a', 'ằ': 'a', 'ắ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+  'â': 'a', 'ầ': 'a', 'ấ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+  'đ': 'd',
+  'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+  'ê': 'e', 'ề': 'e', 'ế': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+  'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+  'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+  'ô': 'o', 'ồ': 'o', 'ố': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+  'ơ': 'o', 'ờ': 'o', 'ớ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+  'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+  'ư': 'u', 'ừ': 'u', 'ứ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+  'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+  'À': 'A', 'Á': 'A', 'Ả': 'A', 'Ã': 'A', 'Ạ': 'A',
+  'Ă': 'A', 'Ằ': 'A', 'Ắ': 'A', 'Ẳ': 'A', 'Ẵ': 'A', 'Ặ': 'A',
+  'Â': 'A', 'Ầ': 'A', 'Ấ': 'A', 'Ẩ': 'A', 'Ẫ': 'A', 'Ậ': 'A',
+  'Đ': 'D',
+  'È': 'E', 'É': 'E', 'Ẻ': 'E', 'Ẽ': 'E', 'Ẹ': 'E',
+  'Ê': 'E', 'Ề': 'E', 'Ế': 'E', 'Ể': 'E', 'Ễ': 'E', 'Ệ': 'E',
+  'Ì': 'I', 'Í': 'I', 'Ỉ': 'I', 'Ĩ': 'I', 'Ị': 'I',
+  'Ò': 'O', 'Ó': 'O', 'Ỏ': 'O', 'Õ': 'O', 'Ọ': 'O',
+  'Ô': 'O', 'Ồ': 'O', 'Ố': 'O', 'Ổ': 'O', 'Ỗ': 'O', 'Ộ': 'O',
+  'Ơ': 'O', 'Ờ': 'O', 'Ớ': 'O', 'Ở': 'O', 'Ỡ': 'O', 'Ợ': 'O',
+  'Ù': 'U', 'Ú': 'U', 'Ủ': 'U', 'Ũ': 'U', 'Ụ': 'U',
+  'Ư': 'U', 'Ừ': 'U', 'Ứ': 'U', 'Ử': 'U', 'Ữ': 'U', 'Ự': 'U',
+  'Ỳ': 'Y', 'Ý': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y', 'Ỵ': 'Y',
+};
+
 @Injectable()
 export class MinioService implements OnModuleInit {
   private readonly logger = new Logger(MinioService.name);
@@ -203,13 +235,21 @@ export class MinioService implements OnModuleInit {
     return `${urlBase}/${bucket}/${fileName}`;
   }
 
-  async uploadAvatar(userId: string, buffer: Buffer, contentType: string): Promise<string> {
-    const fileName = `${userId}-${Date.now()}.${this.getFileExtension(contentType)}`;
+  async uploadAvatar(userId: string, buffer: Buffer, contentType: string, originalFileName?: string): Promise<string> {
+    const ext = this.getFileExtension(contentType);
+    const baseName = originalFileName 
+      ? this.createSlugFileName(originalFileName.replace(/\.[^/.]+$/, ''))
+      : userId;
+    const fileName = `${baseName}-${Date.now()}.${ext}`;
     return this.uploadFile('avatars', fileName, buffer, contentType);
   }
 
-  async uploadPostImage(postId: string, buffer: Buffer, contentType: string): Promise<string> {
-    const fileName = `${postId}-${Date.now()}.${this.getFileExtension(contentType)}`;
+  async uploadPostImage(postId: string, buffer: Buffer, contentType: string, originalFileName?: string): Promise<string> {
+    const ext = this.getFileExtension(contentType);
+    const baseName = originalFileName 
+      ? this.createSlugFileName(originalFileName.replace(/\.[^/.]+$/, ''))
+      : postId;
+    const fileName = `${baseName}-${Date.now()}.${ext}`;
     return this.uploadFile('posts', fileName, buffer, contentType);
   }
 
@@ -233,18 +273,23 @@ export class MinioService implements OnModuleInit {
     fileName: string,
     contentType: string,
   ): Promise<string> {
-    const sanitizedFileName = this.sanitizeFileName(fileName);
-    const uniqueFileName = `${documentId}/${Date.now()}-${sanitizedFileName}`;
-    return this.uploadFile('source-documents', uniqueFileName, buffer, contentType);
+    // Chuyển tên file sang slug tiếng Việt không dấu
+    const slugFileName = this.createSlugFileName(fileName);
+    // Không cần timestamp trong tên file, chỉ dùng slug
+    return this.uploadFile('source-documents', slugFileName, buffer, contentType);
   }
 
   async uploadDocumentThumbnail(
     documentId: string,
     buffer: Buffer,
     contentType: string,
+    originalFileName?: string,
   ): Promise<string> {
     const ext = this.getFileExtension(contentType);
-    const fileName = `${documentId}/thumbnail-${Date.now()}.${ext}`;
+    const baseName = originalFileName 
+      ? this.createSlugFileName(originalFileName.replace(/\.[^/.]+$/, ''))
+      : `thumbnail-${documentId}`;
+    const fileName = `${baseName}-thumb.${ext}`;
     return this.uploadFile('source-documents', fileName, buffer, contentType);
   }
 
@@ -259,6 +304,70 @@ export class MinioService implements OnModuleInit {
   private sanitizeFileName(fileName: string): string {
     // Remove special characters, keep only alphanumeric, dash, underscore, and dot
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+  }
+
+  /**
+   * Chuyển đổi tiếng Việt có dấu sang không dấu
+   * Ví dụ: "Hình ảnh số 1" -> "hinh-anh-so-1"
+   */
+  private removeVietnameseDiacritics(str: string): string {
+    return str
+      .split('')
+      .map(char => VIETNAMESE_DIACRITICS_MAP[char] || char)
+      .join('');
+  }
+
+  /**
+   * Tạo slug từ tên file tiếng Việt
+   * Ví dụ: "Hình ảnh số 1.png" -> "hinh-anh-so-1.png"
+   * Ví dụ: "Tài liệu số 1.docx" -> "tai-lieu-so-1.docx"
+   */
+  private createSlugFileName(fileName: string): string {
+    // Tách phần tên file và phần mở rộng
+    const lastDotIndex = fileName.lastIndexOf('.');
+    const hasExtension = lastDotIndex > 0;
+    
+    const name = hasExtension ? fileName.substring(0, lastDotIndex) : fileName;
+    const extension = hasExtension ? fileName.substring(lastDotIndex) : '';
+    
+    // Chuyển đổi phần tên file
+    const slugName = this.removeVietnameseDiacritics(name)
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')           // Thay khoảng trắng bằng dấu gạch ngang
+      .replace(/[^\w\-]/g, '')        // Xóa ký tự đặc biệt (giữ chữ, số, gạch ngang)
+      .replace(/\-\-+/g, '-')         // Thay nhiều gạch ngang liên tiếp bằng 1 gạch
+      .replace(/^-+/, '')             // Xóa gạch ngang ở đầu
+      .replace(/-+$/, '');            // Xóa gạch ngang ở cuối
+    
+    // Trả về slug + extension (giữ nguyên extension gốc, lowercase)
+    return slugName + extension.toLowerCase();
+  }
+
+  /**
+   * Upload file với tên slug tiếng Việt không dấu
+   * @param bucket - Tên bucket
+   * @param originalFileName - Tên file gốc (có thể có tiếng Việt có dấu)
+   * @param buffer - Nội dung file
+   * @param contentType - MIME type
+   * @param prefix - Prefix thư mục (optional)
+   * @returns URL public của file
+   */
+  async uploadFileWithSlug(
+    bucket: string,
+    originalFileName: string,
+    buffer: Buffer,
+    contentType: string,
+    prefix?: string,
+  ): Promise<string> {
+    const slugFileName = this.createSlugFileName(originalFileName);
+    const finalFileName = prefix 
+      ? `${prefix}/${slugFileName}` 
+      : slugFileName;
+    
+    this.logger.log(`📁 Upload file: "${originalFileName}" -> "${finalFileName}"`);
+    
+    return this.uploadFile(bucket, finalFileName, buffer, contentType);
   }
 
   async generateThumbnailFromVideo(videoBuffer: Buffer): Promise<Buffer> {

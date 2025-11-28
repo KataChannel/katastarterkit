@@ -201,10 +201,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         getCurrentUser();
         return { success: true, redirectUrl };
       } else {
-        return { success: false, error: 'Login failed' };
+        return { success: false, error: 'Đăng nhập thất bại. Vui lòng thử lại.' };
       }
     } catch (error: any) {
-      return { success: false, error: error.message || 'Login failed' };
+      // Extract meaningful error message from GraphQL error
+      let errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
+      
+      console.log('%c🔍 Login error details', 'color: #f39c12; font-weight: bold;', {
+        fullError: error,
+        graphQLErrors: error.graphQLErrors,
+        networkError: error.networkError,
+        message: error.message,
+      });
+      
+      if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+        // Get the first GraphQL error message (this is the message from backend)
+        errorMessage = error.graphQLErrors[0].message;
+        console.log('%c📝 GraphQL error message:', 'color: #e74c3c;', errorMessage);
+      } else if (error.networkError) {
+        // Check if network error contains GraphQL errors
+        const networkErrorResult = error.networkError?.result;
+        if (networkErrorResult?.errors && networkErrorResult.errors.length > 0) {
+          errorMessage = networkErrorResult.errors[0].message;
+          console.log('%c📝 Network error GraphQL message:', 'color: #e74c3c;', errorMessage);
+        } else {
+          errorMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet của bạn.';
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      console.error('%c❌ Login failed', 'color: #e74c3c; font-weight: bold;', { error: errorMessage });
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -239,10 +267,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         getCurrentUser();
         return { success: true, redirectUrl };
       } else {
-        return { success: false, error: 'Registration failed' };
+        return { success: false, error: 'Đăng ký thất bại. Vui lòng thử lại.' };
       }
     } catch (error: any) {
-      return { success: false, error: error.message || 'Registration failed' };
+      // Extract meaningful error message from GraphQL error
+      let errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
+      
+      if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+        // Get the first GraphQL error message (this is the message from backend)
+        errorMessage = error.graphQLErrors[0].message;
+      } else if (error.networkError) {
+        errorMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet của bạn.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      console.error('%c❌ Registration failed', 'color: #e74c3c; font-weight: bold;', { error: errorMessage });
+      return { success: false, error: errorMessage };
     }
   };
 

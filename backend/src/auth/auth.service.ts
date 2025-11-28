@@ -46,17 +46,21 @@ export class AuthService {
     });
     
     if (!user) {
-      throw new UnauthorizedException('Email hoặc tên người dùng không hợp lệ');
+      throw new UnauthorizedException('Tài khoản không tồn tại. Vui lòng kiểm tra lại email hoặc tên đăng nhập.');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException('Tài khoản này chưa thiết lập mật khẩu. Vui lòng đăng nhập bằng phương thức khác hoặc đặt lại mật khẩu.');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không hợp lệ');
+      throw new UnauthorizedException('Mật khẩu không chính xác. Vui lòng thử lại.');
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('Tài khoản đã bị khóa');
+      throw new UnauthorizedException('Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.');
     }
 
     return user;

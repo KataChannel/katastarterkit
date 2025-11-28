@@ -4,6 +4,38 @@ import { ConfigService } from '@nestjs/config';
 import { Readable } from 'stream';
 import sharp from 'sharp';
 
+/**
+ * Bảng chuyển đổi tiếng Việt có dấu sang không dấu
+ */
+const VIETNAMESE_DIACRITICS_MAP: { [key: string]: string } = {
+  'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+  'ă': 'a', 'ằ': 'a', 'ắ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+  'â': 'a', 'ầ': 'a', 'ấ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+  'đ': 'd',
+  'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+  'ê': 'e', 'ề': 'e', 'ế': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+  'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+  'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+  'ô': 'o', 'ồ': 'o', 'ố': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+  'ơ': 'o', 'ờ': 'o', 'ớ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+  'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+  'ư': 'u', 'ừ': 'u', 'ứ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+  'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+  'À': 'A', 'Á': 'A', 'Ả': 'A', 'Ã': 'A', 'Ạ': 'A',
+  'Ă': 'A', 'Ằ': 'A', 'Ắ': 'A', 'Ẳ': 'A', 'Ẵ': 'A', 'Ặ': 'A',
+  'Â': 'A', 'Ầ': 'A', 'Ấ': 'A', 'Ẩ': 'A', 'Ẫ': 'A', 'Ậ': 'A',
+  'Đ': 'D',
+  'È': 'E', 'É': 'E', 'Ẻ': 'E', 'Ẽ': 'E', 'Ẹ': 'E',
+  'Ê': 'E', 'Ề': 'E', 'Ế': 'E', 'Ể': 'E', 'Ễ': 'E', 'Ệ': 'E',
+  'Ì': 'I', 'Í': 'I', 'Ỉ': 'I', 'Ĩ': 'I', 'Ị': 'I',
+  'Ò': 'O', 'Ó': 'O', 'Ỏ': 'O', 'Õ': 'O', 'Ọ': 'O',
+  'Ô': 'O', 'Ồ': 'O', 'Ố': 'O', 'Ổ': 'O', 'Ỗ': 'O', 'Ộ': 'O',
+  'Ơ': 'O', 'Ờ': 'O', 'Ớ': 'O', 'Ở': 'O', 'Ỡ': 'O', 'Ợ': 'O',
+  'Ù': 'U', 'Ú': 'U', 'Ủ': 'U', 'Ũ': 'U', 'Ụ': 'U',
+  'Ư': 'U', 'Ừ': 'U', 'Ứ': 'U', 'Ử': 'U', 'Ữ': 'U', 'Ự': 'U',
+  'Ỳ': 'Y', 'Ý': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y', 'Ỵ': 'Y',
+};
+
 export interface UploadResult {
   filename: string;
   url: string;
@@ -82,6 +114,53 @@ export class MinioService implements OnModuleInit {
 
   async onModuleInit() {
     await this.ensureBucketExists();
+  }
+
+  /**
+   * Chuyển đổi tiếng Việt có dấu sang không dấu
+   */
+  private vietnameseToSlug(str: string): string {
+    let result = str;
+    
+    // Chuyển từng ký tự có dấu sang không dấu
+    for (const [diacritic, replacement] of Object.entries(VIETNAMESE_DIACRITICS_MAP)) {
+      result = result.replace(new RegExp(diacritic, 'g'), replacement);
+    }
+    
+    return result;
+  }
+
+  /**
+   * Chuyển tên file sang dạng slug
+   * Ví dụ: "Hình ảnh số 1.png" -> "hinh-anh-so-1.png"
+   */
+  private slugifyFileName(originalName: string): string {
+    // Tách phần tên và extension
+    const lastDotIndex = originalName.lastIndexOf('.');
+    let name = lastDotIndex !== -1 ? originalName.substring(0, lastDotIndex) : originalName;
+    let ext = lastDotIndex !== -1 ? originalName.substring(lastDotIndex + 1) : '';
+
+    // Chuyển tên sang không dấu
+    name = this.vietnameseToSlug(name);
+    
+    // Chuyển thành lowercase
+    name = name.toLowerCase();
+    
+    // Thay thế các ký tự đặc biệt bằng dấu gạch ngang
+    name = name
+      .replace(/[^a-z0-9]+/g, '-')  // Thay thế ký tự không phải chữ/số bằng -
+      .replace(/^-+|-+$/g, '')       // Xóa dấu - ở đầu và cuối
+      .replace(/-+/g, '-');          // Gộp nhiều dấu - liên tiếp thành 1
+    
+    // Giới hạn độ dài tên file
+    if (name.length > 100) {
+      name = name.substring(0, 100);
+    }
+    
+    // Thêm timestamp để đảm bảo unique
+    const timestamp = Date.now();
+    
+    return ext ? `${name}-${timestamp}.${ext.toLowerCase()}` : `${name}-${timestamp}`;
   }
 
   /**
@@ -171,11 +250,13 @@ export class MinioService implements OnModuleInit {
         }
       }
 
-      // Generate unique filename
-      const timestamp = Date.now();
-      const randomStr = Math.random().toString(36).substring(2, 15);
-      const filename = `${timestamp}-${randomStr}.${ext}`;
-      const objectPath = `${folder}/${filename}`;
+      // Generate unique filename với slug từ tên gốc
+      const slugName = this.slugifyFileName(file.originalname);
+      // Cập nhật extension nếu đã convert sang webp
+      const finalFilename = ext === 'webp' && !file.originalname.toLowerCase().endsWith('.webp')
+        ? slugName.replace(/\.[^.]+$/, '.webp')
+        : slugName;
+      const objectPath = `${folder}/${finalFilename}`;
 
       // Upload to MinIO
       const metaData = {
@@ -198,7 +279,7 @@ export class MinioService implements OnModuleInit {
       this.logger.log(`File uploaded: ${objectPath} (${processedSize} bytes)`);
 
       return {
-        filename,
+        filename: finalFilename,
         url,
         size: processedSize,
         mimeType: processedMimeType,
@@ -234,11 +315,9 @@ export class MinioService implements OnModuleInit {
     folder: string = 'general',
   ): Promise<UploadResult> {
     try {
-      const timestamp = Date.now();
-      const randomStr = Math.random().toString(36).substring(2, 15);
-      const ext = filename.split('.').pop();
-      const newFilename = `${timestamp}-${randomStr}.${ext}`;
-      const objectPath = `${folder}/${newFilename}`;
+      // Generate slug filename từ tên gốc
+      const slugFilename = this.slugifyFileName(filename);
+      const objectPath = `${folder}/${slugFilename}`;
 
       const metaData = {
         'Content-Type': mimeType,
@@ -258,7 +337,7 @@ export class MinioService implements OnModuleInit {
       this.logger.log(`Stream uploaded: ${objectPath} (${size} bytes)`);
 
       return {
-        filename: newFilename,
+        filename: slugFilename,
         url,
         size,
         mimeType,

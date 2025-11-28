@@ -1,34 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@apollo/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Loader2, ArrowLeft, Upload, Link as LinkIcon, FileText } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Combobox } from '@/components/ui/combobox';
+import { Loader2, ArrowLeft, Upload, Link as LinkIcon, FileText, X, File, Image, Video, Music, Archive } from 'lucide-react';
+import { toast } from 'sonner';
+import { useDropzone } from 'react-dropzone';
 import {
   CREATE_SOURCE_DOCUMENT,
   GET_SOURCE_DOCUMENT_CATEGORIES,
 } from '@/graphql/lms/source-documents';
+import { cn } from '@/lib/utils';
 
 const DOCUMENT_TYPES = [
-  { value: 'FILE', label: 'File (PDF, DOC, XLS...)', icon: '📄' },
-  { value: 'VIDEO', label: 'Video (MP4, YouTube...)', icon: '🎥' },
-  { value: 'TEXT', label: 'Text (Markdown, HTML)', icon: '📝' },
-  { value: 'AUDIO', label: 'Audio (MP3, Podcast)', icon: '🎵' },
-  { value: 'LINK', label: 'Link (External URL)', icon: '🔗' },
-  { value: 'IMAGE', label: 'Image (PNG, JPG)', icon: '🖼️' },
+  { value: 'FILE', label: '📄 File (PDF, DOC, XLS...)' },
+  { value: 'VIDEO', label: '🎥 Video (MP4, YouTube...)' },
+  { value: 'TEXT', label: '📝 Text (Markdown, HTML)' },
+  { value: 'AUDIO', label: '🎵 Audio (MP3, Podcast)' },
+  { value: 'LINK', label: '🔗 Link (External URL)' },
+  { value: 'IMAGE', label: '🖼️ Image (PNG, JPG)' },
 ];
 
 const DOCUMENT_STATUSES = [
@@ -37,9 +33,36 @@ const DOCUMENT_STATUSES = [
   { value: 'ARCHIVED', label: 'Lưu trữ' },
 ];
 
+// Utility to format file size
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+// Get file icon based on mime type
+const getFileIcon = (mimeType: string) => {
+  if (mimeType.startsWith('image/')) return <Image className="w-8 h-8 text-green-500" />;
+  if (mimeType.startsWith('video/')) return <Video className="w-8 h-8 text-purple-500" />;
+  if (mimeType.startsWith('audio/')) return <Music className="w-8 h-8 text-orange-500" />;
+  if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('7z')) {
+    return <Archive className="w-8 h-8 text-yellow-500" />;
+  }
+  return <File className="w-8 h-8 text-blue-500" />;
+};
+
+interface UploadedFileInfo {
+  url: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  tempId: string;
+}
+
 export default function NewSourceDocumentPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -53,6 +76,12 @@ export default function NewSourceDocumentPage() {
     tags: '',
   });
 
+  // Upload states
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   // Get categories
   const { data: categoriesData } = useQuery(GET_SOURCE_DOCUMENT_CATEGORIES);
   const categories = categoriesData?.sourceDocumentCategories || [];
@@ -62,19 +91,11 @@ export default function NewSourceDocumentPage() {
     refetchQueries: ['GetSourceDocuments'],
     awaitRefetchQueries: true,
     onCompleted: (data) => {
-      toast({
-        type: 'success',
-        title: 'Thành công',
-        description: 'Đã tạo tài liệu nguồn mới',
-      });
+      toast.success('Đã tạo tài liệu nguồn mới');
       router.push(`/lms/admin/source-documents/${data.createSourceDocument.id}`);
     },
     onError: (error) => {
-      toast({
-        type: 'error',
-        title: 'Lỗi',
-        description: error.message,
-      });
+      toast.error(error.message);
     },
   });
 
@@ -82,16 +103,116 @@ export default function NewSourceDocumentPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Upload file to MinIO
+  const uploadFileToMinio = async (file: File): Promise<UploadedFileInfo> => {
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
+
+    const token = localStorage.getItem('accessToken');
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+    
+    const response = await fetch(`${backendUrl}/api/lms/source-documents/upload`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formDataUpload,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Upload thất bại');
+    }
+
+    return response.json();
+  };
+
+  // Dropzone configuration
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) return;
+
+    const file = acceptedFiles[0];
+    setSelectedFile(file);
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      // Simulate progress (actual progress would need XHR/fetch progress API)
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => Math.min(prev + 10, 90));
+      }, 200);
+
+      const result = await uploadFileToMinio(file);
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      setUploadedFile(result);
+      
+      // Auto-fill form fields from upload result
+      handleChange('url', result.url);
+      handleChange('fileName', result.fileName);
+      
+      // Auto-detect type based on mime
+      if (result.mimeType.startsWith('image/')) {
+        handleChange('type', 'IMAGE');
+      } else if (result.mimeType.startsWith('video/')) {
+        handleChange('type', 'VIDEO');
+      } else if (result.mimeType.startsWith('audio/')) {
+        handleChange('type', 'AUDIO');
+      } else {
+        handleChange('type', 'FILE');
+      }
+
+      // Auto-set title from filename if empty
+      if (!formData.title) {
+        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
+        handleChange('title', nameWithoutExt);
+      }
+
+      toast.success('Upload thành công!');
+    } catch (error: any) {
+      toast.error(error.message || 'Upload thất bại');
+      setSelectedFile(null);
+    } finally {
+      setIsUploading(false);
+    }
+  }, [formData.title]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'],
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.ms-powerpoint': ['.ppt'],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+      'video/*': ['.mp4', '.avi', '.mov', '.webm'],
+      'audio/*': ['.mp3', '.wav', '.ogg'],
+      'application/zip': ['.zip'],
+      'text/*': ['.txt', '.md', '.html', '.css', '.js', '.json'],
+    },
+    maxSize: 100 * 1024 * 1024, // 100MB
+    disabled: isUploading,
+  });
+
+  const removeUploadedFile = () => {
+    setUploadedFile(null);
+    setSelectedFile(null);
+    handleChange('url', '');
+    handleChange('fileName', '');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate
     if (!formData.title.trim()) {
-      toast({
-        type: 'error',
-        title: 'Lỗi',
-        description: 'Vui lòng nhập tiêu đề',
-      });
+      toast.error('Vui lòng nhập tiêu đề');
       return;
     }
 
@@ -113,7 +234,12 @@ export default function NewSourceDocumentPage() {
       input.tags = formData.tags.split(',').map((t) => t.trim()).filter(Boolean);
     }
 
-    // User ID is automatically retrieved from JWT token by backend
+    // Add file size if uploaded
+    if (uploadedFile) {
+      input.fileSize = uploadedFile.fileSize;
+      input.mimeType = uploadedFile.mimeType;
+    }
+
     createDocument({
       variables: {
         input,
@@ -121,42 +247,50 @@ export default function NewSourceDocumentPage() {
     });
   };
 
+  // Category options for combobox
+  const categoryOptions = categories.map((cat: any) => ({
+    value: cat.id,
+    label: `${cat.icon || ''} ${cat.name}`.trim(),
+  }));
+
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         <Button
           variant="outline"
           size="sm"
           onClick={() => router.back()}
+          className="w-fit"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Quay lại
         </Button>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
             Tạo tài liệu nguồn mới
           </h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">
+          <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mt-1">
             Thêm file, video, hoặc nội dung text để sử dụng trong khóa học
           </p>
         </div>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        {/* Basic Info */}
         <Card>
-          <CardHeader>
-            <CardTitle>Thông tin cơ bản</CardTitle>
-            <CardDescription>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Thông tin cơ bản</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
               Điền thông tin về tài liệu nguồn
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Title */}
             <div className="space-y-2">
-              <Label htmlFor="title">
-                Tiêu đề <span className="text-red-500">*</span>
+              <Label htmlFor="title" className="text-sm">
+                Tiêu đề <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="title"
@@ -164,95 +298,80 @@ export default function NewSourceDocumentPage() {
                 onChange={(e) => handleChange('title', e.target.value)}
                 placeholder="Nhập tiêu đề tài liệu..."
                 required
+                className="h-10"
               />
             </div>
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description">Mô tả</Label>
+              <Label htmlFor="description" className="text-sm">Mô tả</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleChange('description', e.target.value)}
                 placeholder="Mô tả chi tiết về tài liệu..."
                 rows={3}
+                className="resize-none"
               />
             </div>
 
-            {/* Type */}
-            <div className="space-y-2">
-              <Label htmlFor="type">
-                Loại tài liệu <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) => handleChange('type', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DOCUMENT_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.icon} {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Type & Status - 2 columns on mobile */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Type */}
+              <div className="space-y-2">
+                <Label className="text-sm">
+                  Loại tài liệu <span className="text-destructive">*</span>
+                </Label>
+                <Combobox
+                  options={DOCUMENT_TYPES}
+                  value={formData.type}
+                  onChange={(value) => handleChange('type', value)}
+                  placeholder="Chọn loại tài liệu..."
+                  searchPlaceholder="Tìm kiếm..."
+                  emptyMessage="Không tìm thấy"
+                />
+              </div>
 
-            {/* Status */}
-            <div className="space-y-2">
-              <Label htmlFor="status">Trạng thái</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => handleChange('status', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DOCUMENT_STATUSES.map((status) => (
-                    <SelectItem key={status.value} value={status.value}>
-                      {status.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* Status */}
+              <div className="space-y-2">
+                <Label className="text-sm">Trạng thái</Label>
+                <Combobox
+                  options={DOCUMENT_STATUSES}
+                  value={formData.status}
+                  onChange={(value) => handleChange('status', value)}
+                  placeholder="Chọn trạng thái..."
+                  searchPlaceholder="Tìm kiếm..."
+                  emptyMessage="Không tìm thấy"
+                />
+              </div>
             </div>
 
             {/* Category */}
-            {categories.length > 0 && (
+            {categoryOptions.length > 0 && (
               <div className="space-y-2">
-                <Label htmlFor="category">Danh mục</Label>
-                <Select
+                <Label className="text-sm">Danh mục</Label>
+                <Combobox
+                  options={categoryOptions}
                   value={formData.categoryId}
-                  onValueChange={(value) => handleChange('categoryId', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn danh mục..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat: any) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.icon} {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(value) => handleChange('categoryId', value)}
+                  placeholder="Chọn danh mục..."
+                  searchPlaceholder="Tìm danh mục..."
+                  emptyMessage="Không có danh mục"
+                />
               </div>
             )}
 
             {/* Tags */}
             <div className="space-y-2">
-              <Label htmlFor="tags">Tags (phân cách bởi dấu phẩy)</Label>
+              <Label htmlFor="tags" className="text-sm">Tags (phân cách bởi dấu phẩy)</Label>
               <Input
                 id="tags"
                 value={formData.tags}
                 onChange={(e) => handleChange('tags', e.target.value)}
                 placeholder="react, javascript, tutorial"
+                className="h-10"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Ví dụ: react, javascript, tutorial
               </p>
             </div>
@@ -261,22 +380,22 @@ export default function NewSourceDocumentPage() {
 
         {/* Content Section */}
         <Card>
-          <CardHeader>
-            <CardTitle>Nội dung</CardTitle>
-            <CardDescription>
-              {formData.type === 'FILE' && 'Upload file hoặc nhập URL'}
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Nội dung</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
+              {formData.type === 'FILE' && 'URL file (tự động điền sau khi upload)'}
               {formData.type === 'VIDEO' && 'Nhập URL video (YouTube, Vimeo, MP4...)'}
               {formData.type === 'TEXT' && 'Nhập nội dung text/markdown'}
-              {formData.type === 'AUDIO' && 'Upload audio hoặc nhập URL'}
+              {formData.type === 'AUDIO' && 'URL audio (tự động điền sau khi upload)'}
               {formData.type === 'LINK' && 'Nhập URL liên kết'}
-              {formData.type === 'IMAGE' && 'Upload ảnh hoặc nhập URL'}
+              {formData.type === 'IMAGE' && 'URL ảnh (tự động điền sau khi upload)'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* URL (for FILE, VIDEO, AUDIO, LINK, IMAGE) */}
+            {/* URL (for all types except TEXT) */}
             {formData.type !== 'TEXT' && (
               <div className="space-y-2">
-                <Label htmlFor="url">
+                <Label htmlFor="url" className="text-sm">
                   <LinkIcon className="w-4 h-4 inline mr-1" />
                   URL
                 </Label>
@@ -292,19 +411,28 @@ export default function NewSourceDocumentPage() {
                       ? 'https://example.com'
                       : 'https://...'
                   }
+                  className="h-10"
+                  readOnly={['FILE', 'IMAGE', 'AUDIO'].includes(formData.type) && !!uploadedFile}
                 />
+                {uploadedFile && ['FILE', 'IMAGE', 'AUDIO'].includes(formData.type) && (
+                  <p className="text-xs text-muted-foreground">
+                    URL được tự động điền từ file đã upload
+                  </p>
+                )}
               </div>
             )}
 
             {/* File Name */}
-            {(formData.type === 'FILE' || formData.type === 'AUDIO' || formData.type === 'IMAGE') && (
+            {['FILE', 'AUDIO', 'IMAGE'].includes(formData.type) && (
               <div className="space-y-2">
-                <Label htmlFor="fileName">Tên file</Label>
+                <Label htmlFor="fileName" className="text-sm">Tên file</Label>
                 <Input
                   id="fileName"
                   value={formData.fileName}
                   onChange={(e) => handleChange('fileName', e.target.value)}
                   placeholder="document.pdf"
+                  className="h-10"
+                  readOnly={!!uploadedFile}
                 />
               </div>
             )}
@@ -312,7 +440,7 @@ export default function NewSourceDocumentPage() {
             {/* Text Content */}
             {formData.type === 'TEXT' && (
               <div className="space-y-2">
-                <Label htmlFor="content">
+                <Label htmlFor="content" className="text-sm">
                   <FileText className="w-4 h-4 inline mr-1" />
                   Nội dung (Markdown/HTML)
                 </Label>
@@ -322,20 +450,21 @@ export default function NewSourceDocumentPage() {
                   onChange={(e) => handleChange('content', e.target.value)}
                   placeholder="# Tiêu đề&#10;&#10;Nội dung..."
                   rows={10}
-                  className="font-mono text-sm"
+                  className="font-mono text-sm resize-none"
                 />
               </div>
             )}
 
             {/* Thumbnail URL */}
             <div className="space-y-2">
-              <Label htmlFor="thumbnailUrl">Thumbnail URL (tùy chọn)</Label>
+              <Label htmlFor="thumbnailUrl" className="text-sm">Thumbnail URL (tùy chọn)</Label>
               <Input
                 id="thumbnailUrl"
                 type="url"
                 value={formData.thumbnailUrl}
                 onChange={(e) => handleChange('thumbnailUrl', e.target.value)}
                 placeholder="https://..."
+                className="h-10"
               />
               {formData.thumbnailUrl && (
                 <div className="mt-2">
@@ -347,47 +476,120 @@ export default function NewSourceDocumentPage() {
                 </div>
               )}
             </div>
-
-            {/* File Upload Placeholder */}
-            {(formData.type === 'FILE' || formData.type === 'AUDIO' || formData.type === 'IMAGE') && (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600 mb-2">
-                  Drag & drop file hoặc click để chọn
-                </p>
-                <p className="text-xs text-gray-500">
-                  Chức năng upload file sẽ được thêm sau
-                </p>
-                <Button type="button" variant="outline" className="mt-4" disabled>
-                  <Upload className="w-4 h-4 mr-2" />
-                  Chọn file (Coming soon)
-                </Button>
-              </div>
-            )}
           </CardContent>
         </Card>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            disabled={loading}
-          >
-            Hủy
-          </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Đang tạo...
-              </>
-            ) : (
-              'Tạo tài liệu'
-            )}
-          </Button>
-        </div>
+        {/* Upload Section - Show for FILE, IMAGE, VIDEO, AUDIO types */}
+        {['FILE', 'IMAGE', 'VIDEO', 'AUDIO'].includes(formData.type) && (
+          <Card>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg">Upload tài liệu</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
+                Kéo thả file hoặc click để chọn từ máy tính (tối đa 100MB)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!uploadedFile ? (
+                <div
+                  {...getRootProps()}
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-6 sm:p-8 text-center cursor-pointer transition-colors",
+                    isDragActive 
+                      ? "border-primary bg-primary/5" 
+                      : "border-muted-foreground/25 hover:border-primary/50",
+                    isUploading && "pointer-events-none opacity-50"
+                  )}
+                >
+                  <input {...getInputProps()} />
+                  
+                  {isUploading ? (
+                    <div className="space-y-3">
+                      <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto animate-spin" />
+                      <p className="text-sm text-muted-foreground">
+                        Đang upload... {uploadProgress}%
+                      </p>
+                      <div className="w-full max-w-xs mx-auto bg-muted rounded-full h-2">
+                        <div
+                          className="bg-primary h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-sm sm:text-base text-foreground mb-1">
+                        {isDragActive ? 'Thả file vào đây...' : 'Kéo & thả file vào đây'}
+                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-3">
+                        hoặc click để chọn file
+                      </p>
+                      <Button type="button" variant="outline" size="sm">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Chọn file
+                      </Button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="border rounded-lg p-4 bg-muted/30">
+                  <div className="flex items-start gap-3">
+                    {getFileIcon(uploadedFile.mimeType)}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm sm:text-base truncate">
+                        {uploadedFile.fileName}
+                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {formatFileSize(uploadedFile.fileSize)} • {uploadedFile.mimeType}
+                      </p>
+                      <p className="text-xs text-green-600 mt-1">
+                        ✓ Đã upload thành công
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={removeUploadedFile}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Actions - Fixed footer on mobile */}
+        <Card className="sticky bottom-0 sm:relative border-t sm:border">
+          <CardFooter className="flex flex-col sm:flex-row justify-end gap-3 p-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              disabled={loading || isUploading}
+              className="w-full sm:w-auto"
+            >
+              Hủy
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={loading || isUploading}
+              className="w-full sm:w-auto"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Đang tạo...
+                </>
+              ) : (
+                'Tạo tài liệu'
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
       </form>
     </div>
   );

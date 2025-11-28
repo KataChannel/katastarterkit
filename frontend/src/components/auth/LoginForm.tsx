@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogIn, User, Lock, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export function LoginForm() {
   const { login, loading } = useAuth();
@@ -20,12 +21,20 @@ export function LoginForm() {
 
     try {
       const result = await login(formData.email, formData.password);
+      console.log('Login result:', result);
       
       if (!result.success) {
-        setError(result.error || 'Login failed');
+        const errorMessage = result.error || 'Đăng nhập thất bại';
+        setError(errorMessage);
+        // Hiển thị message lỗi chi tiết trong toast
+        toast.error(errorMessage);
+      } else {
+        toast.success('Đăng nhập thành công!');
       }
-    } catch (error) {
-      setError('Login failed. Please try again.');
+    } catch (error: any) {
+      const errorMessage = error.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -3,6 +3,7 @@ import { SourceDocumentResolver } from './source-document.resolver';
 import { SourceDocumentService } from './source-document.service';
 import { SourceDocumentCategoryResolver } from './source-document-category.resolver';
 import { SourceDocumentCategoryService } from './source-document-category.service';
+import { SourceDocumentUploadController } from './source-document-upload.controller';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MinioModule } from '../../minio/minio.module';
 import { AiModule } from '../../ai/ai.module';
@@ -14,6 +15,7 @@ import { RealTimeNotificationService } from '../../realtime/real-time-notificati
 
 @Module({
   imports: [MinioModule, AiModule, AuthModule],
+  controllers: [SourceDocumentUploadController],
   providers: [
     PrismaService,
     SourceDocumentResolver,
