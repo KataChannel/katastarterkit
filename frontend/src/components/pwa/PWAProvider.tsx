@@ -154,8 +154,8 @@ export function PWAProvider({
 
   const showUpdateNotification = async () => {
     if (capabilities.hasNotificationSupport) {
-      await showNotification('Update Available', {
-        body: 'A new version of the app is available. Refresh to update.',
+      await showNotification('Có bản cập nhật mới', {
+        body: 'Phiên bản mới đã sẵn sàng. Tải lại trang để cập nhật.',
         tag: 'app-update'
       });
     }
@@ -181,10 +181,10 @@ export function PWAProvider({
       <div className={className}>
         {children}
         
-        {/* PWA Install Prompt */}
-        {enableAutoPrompt && showPrompt && (
+        {/* PWA Install Prompt - Using Dialog pattern */}
+        {enableAutoPrompt && (
           <PWAInstallPrompt 
-            showDelay={0} // Already handled by provider
+            showDelay={installPromptDelay}
           />
         )}
         

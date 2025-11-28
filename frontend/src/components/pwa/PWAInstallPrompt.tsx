@@ -3,10 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import { usePWA } from '../../hooks/usePWA';
 import { useSiteName } from '@/hooks/useSiteName';
+import { useWebsiteSettingsMap } from '@/hooks/useWebsiteSettings';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Check, Smartphone, Zap, Bell, Download, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface PWAInstallPromptProps {
   className?: string;
-  showDelay?: number; // Delay in milliseconds before showing prompt
+  showDelay?: number;
   position?: 'top' | 'bottom' | 'center';
 }
 
@@ -19,6 +33,12 @@ export function PWAInstallPrompt({
   const [dismissed, setDismissed] = useState(false);
   const [installing, setInstalling] = useState(false);
   const { siteName } = useSiteName();
+  const { settings } = useWebsiteSettingsMap();
+  
+  // Get settings with fallbacks
+  const logo = settings['header.logo'] || '/icons/icon-192x192.png';
+  const primaryColor = settings['appearance.primary_color'] || '#2563eb';
+  const tagline = settings['site.tagline'] || 'Trải nghiệm tốt hơn với ứng dụng';
   
   const { 
     capabilities, 
@@ -63,8 +83,8 @@ export function PWAInstallPrompt({
       
       // Show success notification
       if (capabilities.hasNotificationSupport) {
-        await showNotification('App Installed Successfully!', {
-          body: `${siteName} has been installed to your device. You can now access it from your home screen.`,
+        await showNotification('Cài đặt thành công!', {
+          body: `${siteName} đã được cài đặt. Bạn có thể truy cập từ màn hình chính.`,
           tag: 'pwa-install-success'
         });
       }
@@ -93,115 +113,120 @@ export function PWAInstallPrompt({
     }, 3 * 24 * 60 * 60 * 1000);
   };
 
-  if (!showPrompt || !capabilities.canInstall || capabilities.isStandalone) {
+  if (!capabilities.canInstall || capabilities.isStandalone) {
     return null;
   }
 
-  const positionClasses = {
-    top: 'top-4 left-1/2 transform -translate-x-1/2',
-    bottom: 'bottom-4 left-1/2 transform -translate-x-1/2',
-    center: 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'
-  };
+  // Features list with Vietnamese text
+  const features = [
+    { icon: Zap, text: 'Tải nhanh hơn', color: 'text-yellow-500' },
+    { icon: Smartphone, text: 'Hoạt động offline', color: 'text-blue-500' },
+    { icon: Bell, text: 'Nhận thông báo', color: 'text-green-500' },
+  ];
 
   return (
-    <div className={`
-      fixed ${positionClasses[position]} z-50 max-w-sm mx-4
-      bg-white rounded-lg shadow-2xl border border-gray-200
-      animate-in slide-in-from-bottom-4 duration-300
-      ${className}
-    `}>
-      {/* Header */}
-      <div className="p-4 pb-2">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-            </div>
-            
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Install {siteName}
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Add to your home screen for quick access
-              </p>
-            </div>
+    <Dialog open={showPrompt} onOpenChange={(open) => !open && handleDismiss()}>
+      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
+        {/* Header - Fixed with brand color */}
+        <DialogHeader 
+          className="p-6 pb-4 text-white relative overflow-hidden"
+          style={{ backgroundColor: primaryColor }}
+        >
+          {/* Decorative background */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
+            <div className="absolute w-32 h-32 bg-white rounded-full -top-10 -right-10" />
+            <div className="absolute w-24 h-24 bg-white rounded-full -bottom-5 -left-5" />
           </div>
           
-          <button
-            onClick={handleDismiss}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Dismiss install prompt"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Features */}
-      <div className="px-4 pb-2">
-        <ul className="space-y-1 text-sm text-gray-600">
-          <li className="flex items-center space-x-2">
-            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Work offline</span>
-          </li>
-          <li className="flex items-center space-x-2">
-            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Faster loading</span>
-          </li>
-          <li className="flex items-center space-x-2">
-            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Push notifications</span>
-          </li>
-        </ul>
-      </div>
-
-      {/* Actions */}
-      <div className="p-4 pt-2 space-y-2">
-        <button
-          onClick={handleInstall}
-          disabled={installing}
-          className="
-            w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-medium
-            hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-            disabled:opacity-50 disabled:cursor-not-allowed
-            transition-colors duration-200
-          "
-        >
-          {installing ? (
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Installing...</span>
+          <div className="relative z-10 flex items-center gap-4">
+            {/* App Icon */}
+            <div className="flex-shrink-0 w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center overflow-hidden">
+              {logo ? (
+                <Image
+                  src={logo}
+                  alt={siteName}
+                  width={56}
+                  height={56}
+                  className="object-contain"
+                />
+              ) : (
+                <Download className="w-8 h-8" style={{ color: primaryColor }} />
+              )}
             </div>
-          ) : (
-            'Add to Home Screen'
-          )}
-        </button>
-        
-        <button
-          onClick={handleMaybeLater}
-          className="
-            w-full text-gray-600 py-2 px-4 rounded-lg font-medium
-            hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2
-            transition-colors duration-200
-          "
-        >
-          Maybe Later
-        </button>
-      </div>
-    </div>
+            
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-xl font-bold text-white truncate">
+                {siteName}
+              </DialogTitle>
+              <DialogDescription className="text-white/80 text-sm mt-1">
+                {tagline}
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        {/* Content - Scrollable */}
+        <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+          <p className="text-muted-foreground text-sm">
+            Cài đặt ứng dụng để có trải nghiệm tốt nhất:
+          </p>
+          
+          {/* Features Grid */}
+          <div className="grid gap-3">
+            {features.map((feature, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl"
+              >
+                <div className={`p-2 rounded-lg bg-background ${feature.color}`}>
+                  <feature.icon className="w-5 h-5" />
+                </div>
+                <span className="font-medium text-sm">{feature.text}</span>
+                <Check className="w-4 h-4 text-green-500 ml-auto" />
+              </motion.div>
+            ))}
+          </div>
+          
+          {/* Additional info */}
+          <p className="text-xs text-muted-foreground text-center">
+            Không chiếm nhiều dung lượng • Luôn cập nhật mới nhất
+          </p>
+        </div>
+
+        {/* Footer - Fixed */}
+        <DialogFooter className="p-6 pt-4 border-t bg-muted/30 flex-col gap-2 sm:flex-col">
+          <Button
+            onClick={handleInstall}
+            disabled={installing}
+            className="w-full h-12 text-base font-semibold"
+            style={{ backgroundColor: primaryColor }}
+          >
+            {installing ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Đang cài đặt...
+              </>
+            ) : (
+              <>
+                <Download className="w-5 h-5 mr-2" />
+                Cài đặt ứng dụng
+              </>
+            )}
+          </Button>
+          
+          <Button
+            variant="ghost"
+            onClick={handleMaybeLater}
+            className="w-full text-muted-foreground hover:text-foreground"
+          >
+            Để sau
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -217,6 +242,9 @@ export function PWAInstallButton({
 }) {
   const [installing, setInstalling] = useState(false);
   const { capabilities, install } = usePWA();
+  const { settings } = useWebsiteSettingsMap();
+  
+  const primaryColor = settings['appearance.primary_color'] || '#2563eb';
 
   const handleInstall = async () => {
     setInstalling(true);
@@ -233,67 +261,50 @@ export function PWAInstallButton({
     return null;
   }
 
-  const sizeClasses = {
-    small: 'px-2 py-1 text-sm',
-    medium: 'px-3 py-2 text-sm',
-    large: 'px-4 py-2 text-base'
-  };
-
-  const variantClasses = {
-    default: 'bg-blue-600 text-white hover:bg-blue-700',
-    minimal: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-    icon: 'p-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-full'
-  };
-
   if (variant === 'icon') {
     return (
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={handleInstall}
         disabled={installing}
-        className={`
-          ${variantClasses[variant]} ${className}
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-          disabled:opacity-50 disabled:cursor-not-allowed
-          transition-colors duration-200
-        `}
-        title="Install App"
-        aria-label="Install App"
+        className={className}
+        title="Cài đặt ứng dụng"
       >
         {installing ? (
-          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
+          <Download className="w-5 h-5" />
         )}
-      </button>
+      </Button>
     );
   }
 
+  const sizeClasses = {
+    small: 'h-8 px-3 text-sm',
+    medium: 'h-10 px-4 text-sm',
+    large: 'h-12 px-6 text-base'
+  };
+
   return (
-    <button
+    <Button
+      variant={variant === 'minimal' ? 'outline' : 'default'}
       onClick={handleInstall}
       disabled={installing}
-      className={`
-        ${variantClasses[variant]} ${sizeClasses[size]} ${className}
-        font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-        disabled:opacity-50 disabled:cursor-not-allowed
-        transition-colors duration-200
-      `}
+      className={`${sizeClasses[size]} ${className}`}
+      style={variant === 'default' ? { backgroundColor: primaryColor } : undefined}
     >
       {installing ? (
-        <div className="flex items-center justify-center space-x-2">
-          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          <span>Installing...</span>
-        </div>
+        <>
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          Đang cài đặt...
+        </>
       ) : (
         <>
-          <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
-          Install App
+          <Download className="w-4 h-4 mr-2" />
+          Cài đặt
         </>
       )}
-    </button>
+    </Button>
   );
 }
