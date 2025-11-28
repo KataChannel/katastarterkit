@@ -53,8 +53,8 @@ update_env_file() {
 # Update all relevant .env files
 update_env_file ".env"
 update_env_file ".env.rausach"
-update_env_file ".env.prod.rausach"
-update_env_file ".env.dev.rausach"
+update_env_file "env/.env.prod.rausach"
+update_env_file "env/.env.dev.rausach"
 update_env_file "backend/.env"
 update_env_file "backend/.env.rausach"
 update_env_file "frontend/.env"

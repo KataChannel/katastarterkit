@@ -162,11 +162,11 @@ else
 fi
 
 # Copy environment file
-if [ -f "../.env.prod.rausach" ]; then
+if [ -f "../env/.env.prod.rausach" ]; then
     echo -e "${BLUE}  → Copying production environment...${NC}"
-    cp ../.env.prod.rausach .env.local
+    cp ../env/.env.prod.rausach .env.local
 elif [ -f "../.env.rausach" ]; then
-    echo -e "${YELLOW}  ⚠️  .env.prod.rausach not found, using .env.rausach${NC}"
+    echo -e "${YELLOW}  ⚠️  env/.env.prod.rausach not found, using .env.rausach${NC}"
     cp ../.env.rausach .env.local
 else
     echo -e "${RED}❌ No environment file found!${NC}"
@@ -314,7 +314,7 @@ echo -e "${BLUE}  → Uploading frontend image...${NC}"
 rsync -avz --progress $IMAGE_TAR_DIR/frontend.tar.gz $SERVER:$REMOTE_DIR/docker-images/
 
 echo -e "${BLUE}  → Uploading configuration files...${NC}"
-rsync -avz $COMPOSE_APP $COMPOSE_INFRA .env.rausach .env.prod.rausach $SERVER:$REMOTE_DIR/
+rsync -avz $COMPOSE_APP $COMPOSE_INFRA .env.rausach env/.env.prod.rausach $SERVER:$REMOTE_DIR/
 
 # Check and warn about GOOGLE_GEMINI_API_KEY
 if ! grep -q "GOOGLE_GEMINI_API_KEY=" .env.rausach 2>/dev/null || grep -q "GOOGLE_GEMINI_API_KEY=$" .env.rausach 2>/dev/null; then

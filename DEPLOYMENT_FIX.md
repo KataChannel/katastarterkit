@@ -56,7 +56,7 @@ bunx prisma generate
 cd frontend
 rm -rf .next node_modules
 bun install
-cp ../.env.prod.rausach .env.local  # hoặc .env.rausach
+cp ../env/.env.prod.rausach .env.local  # hoặc ../.env.rausach
 bun run build
 ```
 
@@ -211,14 +211,14 @@ bun run build || bunx tsc
 **Step 2: Build Frontend**
 ```bash
 # Before
-cp ../.env.prod.rausach .env.local
+cp ../env/.env.prod.rausach .env.local
 bun run build
 
 # After
 rm -rf .next
 bun install --frozen-lockfile || bun install
 # Check .env file exists
-cp ../.env.prod.rausach .env.local || cp ../.env.rausach .env.local
+cp ../env/.env.prod.rausach .env.local || cp ../.env.rausach .env.local
 bun run build
 # Validate .next/BUILD_ID exists
 ```

@@ -32,13 +32,13 @@ echo -e "${BLUE}╚════════════════════�
 echo ""
 
 # Copy environment file
-if [ ! -f "../.env.prod.rausach" ]; then
-    echo -e "${RED}❌ Error: .env.prod.rausach not found!${NC}"
+if [ ! -f "../env/.env.prod.rausach" ]; then
+    echo -e "${RED}❌ Error: env/.env.prod.rausach not found!${NC}"
     exit 1
 fi
 
 echo -e "${BLUE}  → Copying production environment...${NC}"
-cp ../.env.prod.rausach .env.local
+cp ../env/.env.prod.rausach .env.local
 
 # Clean old build
 if [ -d ".next" ]; then
