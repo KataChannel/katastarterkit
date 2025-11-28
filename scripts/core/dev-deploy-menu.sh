@@ -97,11 +97,20 @@ run_dev_full() {
         select_domain || return
     fi
     
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        echo "❌ No domain selected"
+        sleep 2
+        return
+    fi
+    
     echo ""
     echo "🚀 Starting Full Development for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
-    bun run dev:$CURRENT_DOMAIN
+    
+    PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    cd "$PROJECT_ROOT"
+    
+    bun run "dev:$CURRENT_DOMAIN"
 }
 
 run_dev_backend() {
@@ -109,11 +118,20 @@ run_dev_backend() {
         select_domain || return
     fi
     
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        echo "❌ No domain selected"
+        sleep 2
+        return
+    fi
+    
     echo ""
     echo "🔧 Starting Backend Development for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
-    bun run dev:${CURRENT_DOMAIN}:backend
+    
+    PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    cd "$PROJECT_ROOT"
+    
+    bun run "dev:${CURRENT_DOMAIN}:backend"
 }
 
 run_dev_frontend() {
@@ -121,11 +139,20 @@ run_dev_frontend() {
         select_domain || return
     fi
     
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        echo "❌ No domain selected"
+        sleep 2
+        return
+    fi
+    
     echo ""
     echo "🎨 Starting Frontend Development for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
-    bun run dev:${CURRENT_DOMAIN}:frontend
+    
+    PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    cd "$PROJECT_ROOT"
+    
+    bun run "dev:${CURRENT_DOMAIN}:frontend"
 }
 
 run_deploy_full() {
@@ -133,11 +160,21 @@ run_deploy_full() {
         select_domain || return
     fi
     
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        echo "❌ No domain selected"
+        sleep 2
+        return
+    fi
+    
     echo ""
     echo "🚀 Building & Deploying $DOMAIN_NAME to Server..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
-    bun run deploy:$CURRENT_DOMAIN
+    
+    PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    cd "$PROJECT_ROOT"
+    
+    bun run "deploy:$CURRENT_DOMAIN"
+    
     echo ""
     read -p "Press Enter to continue..."
 }
@@ -147,11 +184,24 @@ run_build_images() {
         select_domain || return
     fi
     
+    # Double check domain is set after selection
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        echo "❌ No domain selected"
+        sleep 2
+        return
+    fi
+    
     echo ""
     echo "🏗️  Building Docker Images for $DOMAIN_NAME..."
+    echo "📦 Script: build:${CURRENT_DOMAIN}:image"
     echo "─────────────────────────────────────────────────────"
-    cd ../..
-    bun run build:${CURRENT_DOMAIN}:image
+    
+    # Change to project root and run build
+    PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    cd "$PROJECT_ROOT"
+    
+    bun run "build:${CURRENT_DOMAIN}:image"
+    
     echo ""
     read -p "Press Enter to continue..."
 }
@@ -161,10 +211,19 @@ run_deploy_only() {
         select_domain || return
     fi
     
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        echo "❌ No domain selected"
+        sleep 2
+        return
+    fi
+    
     echo ""
     echo "🚀 Deploying $DOMAIN_NAME to Server (using existing images)..."
     echo "─────────────────────────────────────────────────────"
-    ../deploy/deploy-${CURRENT_DOMAIN}.sh
+    
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    "$SCRIPT_DIR/../deploy/deploy-${CURRENT_DOMAIN}.sh"
+    
     echo ""
     read -p "Press Enter to continue..."
 }
