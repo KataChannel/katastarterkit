@@ -6,6 +6,7 @@
 # ============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$SCRIPT_DIR"
 
 show_menu() {
@@ -274,7 +275,7 @@ run_prisma_studio() {
     echo ""
     echo "🗄️  Opening Prisma Studio for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bun run db:studio:$CURRENT_DOMAIN
 }
 
@@ -286,7 +287,7 @@ run_db_migrate() {
     echo ""
     echo "🗄️  Running Database Migration for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bun run db:migrate:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
@@ -300,7 +301,7 @@ run_db_push() {
     echo ""
     echo "🗄️  Pushing Database Schema for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bun run db:push:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
@@ -314,7 +315,7 @@ run_db_seed() {
     echo ""
     echo "🗄️  Seeding Database for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bun run db:seed:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
@@ -324,7 +325,7 @@ run_clean() {
     echo ""
     echo "🧹 Cleaning node_modules..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bun run clean
     echo ""
     read -p "Press Enter to continue..."
@@ -369,7 +370,7 @@ run_git_auto() {
     echo ""
     echo "📦 Git Auto Commit & Push..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bash scripts/utils/autogit.sh
     echo ""
     read -p "Press Enter to continue..."
@@ -379,27 +380,7 @@ run_ssh_setup() {
     echo ""
     echo "🔑 SSH Key Setup (Auto Deploy)..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
-    bash scripts/utils/ssh-setup.sh
-    echo ""
-    read -p "Press Enter to continue..."
-}
-
-run_git_auto() {
-    echo ""
-    echo "📦 Git Auto Commit & Push..."
-    echo "─────────────────────────────────────────────────────"
-    cd ../..
-    bash scripts/utils/autogit.sh
-    echo ""
-    read -p "Press Enter to continue..."
-}
-
-run_ssh_setup() {
-    echo ""
-    echo "🔑 SSH Key Setup (Auto Deploy)..."
-    echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bash scripts/utils/ssh-setup.sh
     echo ""
     read -p "Press Enter to continue..."
@@ -409,7 +390,7 @@ run_fix_file_watchers() {
     echo ""
     echo "🔧 Fixing File Watchers Limit..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bash scripts/dev/6fix-file-watchers.sh
     echo ""
     read -p "Press Enter to continue..."
@@ -419,7 +400,7 @@ run_docs_clean() {
     echo ""
     echo "🧹 Cleaning & Organizing Docs..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bash scripts/utils/4docsclean.sh
     echo ""
     read -p "Press Enter to continue..."
@@ -448,7 +429,7 @@ run_db_backup() {
     esac
     
     echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bun run db:backup:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."
@@ -488,7 +469,7 @@ run_db_restore() {
     echo ""
     echo "🔄 Restoring Database for $DOMAIN_NAME..."
     echo "─────────────────────────────────────────────────────"
-    cd ../..
+    cd "$ROOT_DIR"
     bun run db:restore:$CURRENT_DOMAIN
     echo ""
     read -p "Press Enter to continue..."

@@ -34,6 +34,9 @@ import {
   X,
   FileIcon,
   Sparkles,
+  ChevronDown,
+  ChevronUp,
+  BarChart3,
 } from 'lucide-react';
 import {
   Dialog,
@@ -77,6 +80,22 @@ export default function FileManagerPage() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<UploadedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  
+  // State for overview visibility - default hidden (false)
+  const [showOverview, setShowOverview] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('filemanager_show_overview');
+      return saved === 'true' ? true : false;
+    }
+    return false;
+  });
+
+  // Save overview visibility state to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('filemanager_show_overview', String(showOverview));
+    }
+  }, [showOverview]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles: UploadedFile[] = acceptedFiles.map((file) => ({
@@ -262,6 +281,21 @@ export default function FileManagerPage() {
             <Button 
               variant="outline" 
               size="sm"
+              onClick={() => setShowOverview(!showOverview)}
+              className="flex-1 md:flex-none"
+              title={showOverview ? "Ẩn tổng quan" : "Hiện tổng quan"}
+            >
+              {showOverview ? (
+                <ChevronUp className="h-4 w-4 mr-2" />
+              ) : (
+                <ChevronDown className="h-4 w-4 mr-2" />
+              )}
+              <BarChart3 className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Tổng quan</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
               onClick={handleRefresh}
               disabled={loading}
               className="flex-1 md:flex-none"
@@ -281,8 +315,8 @@ export default function FileManagerPage() {
         </div>
       </div>
 
-      {!loading && stats && (
-        <div className="px-4 md:px-6 py-4 md:py-6">
+      {!loading && stats && showOverview && (
+        <div className="px-4 md:px-6 py-4 md:py-6 animate-in slide-in-from-top duration-300">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             <div className="lg:col-span-2 space-y-4 md:space-y-6">
               <StorageAnalytics
