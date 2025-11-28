@@ -45,20 +45,30 @@ const GET_PENDING_COURSES = gql`
 // Query để lấy danh sách documents pending approval
 const GET_PENDING_DOCUMENTS = gql`
   query GetPendingDocuments {
-    sourceDocuments(filter: { statuses: [DRAFT] }) {
+    sourceDocuments(filter: { approvalRequested: true }, limit: 100) {
       id
       title
       description
+      content
       type
       status
       approvalRequested
       approvalRequestedAt
       createdAt
+      url
+      thumbnailUrl
+      fileSize
+      duration
+      metadata
       user {
         id
         username
         firstName
         lastName
+      }
+      category {
+        id
+        name
       }
     }
   }
@@ -83,8 +93,8 @@ export default function ApprovalManagementPage() {
   const [rejectDocument] = useMutation(REJECT_DOCUMENT);
 
   const pendingCourses = coursesData?.courses?.data?.filter((c: any) => c.approvalRequested) || [];
-  const pendingDocuments = documentsData?.sourceDocuments?.filter((d: any) => d.approvalRequested) || [];
-
+  const pendingDocuments = documentsData?.sourceDocuments?.filter((d: any) => d.approvalRequested && d.status === 'DRAFT') || [];
+  
   const handleApprove = async (type: 'course' | 'document', id: string, title: string) => {
     try {
       if (type === 'course') {
@@ -189,66 +199,94 @@ export default function ApprovalManagementPage() {
           {coursesLoading ? (
             <div className="text-center py-12">Đang tải...</div>
           ) : pendingCourses.length === 0 ? (
-            <Card className="p-12 text-center">
+            <Card className="p-8 sm:p-12 text-center">
               <p className="text-muted-foreground">Không có khóa học nào chờ phê duyệt</p>
             </Card>
           ) : (
             <div className="grid gap-4">
               {pendingCourses.map((course: any) => (
-                <Card key={course.id} className="p-6">
-                  <div className="flex items-start gap-4">
+                <Card key={course.id} className="p-4 sm:p-6">
+                  {/* Header với thumbnail */}
+                  <div className="flex flex-col sm:flex-row items-start gap-4 mb-4">
                     {course.thumbnail && (
-                      <img
-                        src={course.thumbnail}
-                        alt={course.title}
-                        className="w-32 h-20 object-cover rounded"
-                      />
+                      <div className="w-full sm:w-48 flex-shrink-0">
+                        <img
+                          src={course.thumbnail}
+                          alt={course.title}
+                          className="w-full h-32 sm:h-28 object-cover rounded-lg"
+                        />
+                      </div>
                     )}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold mb-1">{course.title}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {course.description}
-                          </p>
-                        </div>
-                        <Badge variant="outline" className="ml-4">
-                          <Clock className="w-3 h-3 mr-1" />
-                          {formatDistanceToNow(new Date(course.approvalRequestedAt), {
-                            addSuffix: true,
-                            locale: vi,
-                          })}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-4 mt-4">
-                        <span className="text-sm text-muted-foreground">
-                          Giảng viên: {course.instructor.firstName} {course.instructor.lastName}
-                        </span>
-                        <div className="flex gap-2 ml-auto">
-                          <Link href={`/admin/lms/courses/${course.id}/edit`}>
-                            <Button variant="outline" size="sm">
-                              <Eye className="w-4 h-4 mr-2" />
-                              Xem chi tiết
-                            </Button>
-                          </Link>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => openRejectDialog(course)}
-                          >
-                            <XCircle className="w-4 h-4 mr-2" />
-                            Từ chối
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleApprove('course', course.id, course.title)}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Phê duyệt
-                          </Button>
+                    <div className="flex-1 min-w-0 w-full">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg sm:text-xl font-semibold mb-2">{course.title}</h3>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            <Badge variant="secondary">{course.status}</Badge>
+                            <Badge variant="outline" className="gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDistanceToNow(new Date(course.approvalRequestedAt), {
+                                addSuffix: true,
+                                locale: vi,
+                              })}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
+                      <div className="text-sm text-muted-foreground">
+                        <span className="font-medium">Giảng viên:</span> {course.instructor.firstName} {course.instructor.lastName} (@{course.instructor.username})
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Nội dung đầy đủ */}
+                  {course.description && (
+                    <div className="mb-4 p-4 bg-muted/50 rounded-lg">
+                      <h4 className="text-sm font-semibold mb-2 text-foreground">Mô tả khóa học:</h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                        {course.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Thông tin bổ sung */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-xs sm:text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="font-medium">Slug:</span>
+                      <code className="px-2 py-1 bg-muted rounded text-xs">{course.slug}</code>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="font-medium">Ngày tạo:</span>
+                      <span>{new Date(course.createdAt).toLocaleDateString('vi-VN')}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+                    <Link href={`/lms/admin/courses/${course.id}`} className="flex-1 sm:flex-none">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                        <Eye className="w-4 h-4 mr-2" />
+                        Xem chi tiết
+                      </Button>
+                    </Link>
+                    <div className="flex gap-2 sm:ml-auto">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 sm:flex-none text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => openRejectDialog(course)}
+                      >
+                        <XCircle className="w-4 h-4 mr-2" />
+                        Từ chối
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1 sm:flex-none"
+                        onClick={() => handleApprove('course', course.id, course.title)}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Phê duyệt
+                      </Button>
                     </div>
                   </div>
                 </Card>
@@ -261,60 +299,185 @@ export default function ApprovalManagementPage() {
           {documentsLoading ? (
             <div className="text-center py-12">Đang tải...</div>
           ) : pendingDocuments.length === 0 ? (
-            <Card className="p-12 text-center">
+            <Card className="p-8 sm:p-12 text-center">
               <p className="text-muted-foreground">Không có tài liệu nào chờ phê duyệt</p>
             </Card>
           ) : (
             <div className="grid gap-4">
-              {pendingDocuments.map((document: any) => (
-                <Card key={document.id} className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold mb-1">{document.title}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {document.description}
-                          </p>
+              {pendingDocuments.map((document: any) => {
+                const isVideo = document.type === 'VIDEO';
+                const isPDF = document.type === 'FILE' && document.url?.toLowerCase().endsWith('.pdf');
+                const isImage = document.type === 'FILE' && /\.(jpg|jpeg|png|gif|webp)$/i.test(document.url || '');
+                const isLink = document.type === 'LINK';
+                const isText = document.type === 'TEXT';
+                
+                return (
+                  <Card key={document.id} className="p-4 sm:p-6">
+                    {/* Header với thumbnail */}
+                    <div className="flex flex-col sm:flex-row items-start gap-4 mb-4">
+                      {document.thumbnailUrl && (
+                        <div className="w-full sm:w-48 flex-shrink-0">
+                          <img
+                            src={document.thumbnailUrl}
+                            alt={document.title}
+                            className="w-full h-32 sm:h-28 object-cover rounded-lg"
+                          />
                         </div>
-                        <div className="flex gap-2 ml-4">
-                          <Badge variant="secondary">{document.type}</Badge>
-                          <Badge variant="outline">
-                            <Clock className="w-3 h-3 mr-1" />
-                            {formatDistanceToNow(new Date(document.approvalRequestedAt), {
-                              addSuffix: true,
-                              locale: vi,
-                            })}
-                          </Badge>
+                      )}
+                      <div className="flex-1 min-w-0 w-full">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-lg sm:text-xl font-semibold mb-2">{document.title}</h3>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              <Badge variant="secondary">{document.type}</Badge>
+                              <Badge variant="outline">{document.status}</Badge>
+                              <Badge variant="outline" className="gap-1">
+                                <Clock className="w-3 h-3" />
+                                {formatDistanceToNow(new Date(document.approvalRequestedAt), {
+                                  addSuffix: true,
+                                  locale: vi,
+                                })}
+                              </Badge>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-4 mt-4">
-                        <span className="text-sm text-muted-foreground">
-                          Tác giả: {document.user.firstName} {document.user.lastName}
-                        </span>
-                        <div className="flex gap-2 ml-auto">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => openRejectDialog(document)}
-                          >
-                            <XCircle className="w-4 h-4 mr-2" />
-                            Từ chối
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleApprove('document', document.id, document.title)}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Phê duyệt
-                          </Button>
+                        <div className="text-sm text-muted-foreground">
+                          <span className="font-medium">Tác giả:</span> {document.user.firstName} {document.user.lastName} (@{document.user.username})
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Card>
-              ))}
+
+                    {/* Mô tả đầy đủ */}
+                    {document.description && (
+                      <div className="mb-4 p-4 bg-muted/50 rounded-lg">
+                        <h4 className="text-sm font-semibold mb-2 text-foreground">Mô tả:</h4>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                          {document.description}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Preview nội dung theo type */}
+                    {isVideo && document.url && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold mb-2">Xem trước Video:</h4>
+                        <video
+                          controls
+                          className="w-full rounded-lg max-h-[400px]"
+                          src={document.url}
+                        />
+                        {document.duration && (
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Thời lượng: {Math.floor(document.duration / 60)}:{String(Math.floor(document.duration % 60)).padStart(2, '0')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {isPDF && document.url && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold mb-2">Xem trước PDF:</h4>
+                        <div className="border rounded-lg overflow-hidden">
+                          <iframe
+                            src={`${document.url}#toolbar=0`}
+                            className="w-full h-[400px]"
+                            title={document.title}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {isImage && document.url && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold mb-2">Xem trước ảnh:</h4>
+                        <img
+                          src={document.url}
+                          alt={document.title}
+                          className="w-full rounded-lg max-h-[400px] object-contain bg-muted"
+                        />
+                      </div>
+                    )}
+
+                    {isLink && document.url && (
+                      <div className="mb-4 p-4 border rounded-lg bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20">
+                        <h4 className="text-sm font-semibold mb-2">Liên kết:</h4>
+                        <a
+                          href={document.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 dark:text-blue-400 hover:underline break-all"
+                        >
+                          {document.url}
+                        </a>
+                      </div>
+                    )}
+
+                    {isText && document.content && (
+                      <div className="mb-4 p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-lg">
+                        <h4 className="text-sm font-semibold mb-2">Nội dung văn bản:</h4>
+                        <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed max-h-[300px] overflow-y-auto">
+                          {document.content}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Metadata */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-xs sm:text-sm">
+                      {document.category && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span className="font-medium">Danh mục:</span>
+                          <span>{document.category.name}</span>
+                        </div>
+                      )}
+                      {document.fileSize && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span className="font-medium">Kích thước:</span>
+                          <span>{(document.fileSize / 1024 / 1024).toFixed(2)} MB</span>
+                        </div>
+                      )}
+                      {document.metadata?.width && document.metadata?.height && (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span className="font-medium">Kích thước:</span>
+                          <span>{document.metadata.width} × {document.metadata.height}px</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <span className="font-medium">Ngày tạo:</span>
+                        <span>{new Date(document.createdAt).toLocaleDateString('vi-VN')}</span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+                      <Link href={`/lms/admin/source-documents/${document.id}`} className="flex-1 sm:flex-none">
+                        <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                          <Eye className="w-4 h-4 mr-2" />
+                          Xem chi tiết
+                        </Button>
+                      </Link>
+                      <div className="flex gap-2 sm:ml-auto">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 sm:flex-none text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => openRejectDialog(document)}
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Từ chối
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="flex-1 sm:flex-none"
+                          onClick={() => handleApprove('document', document.id, document.title)}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Phê duyệt
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           )}
         </TabsContent>

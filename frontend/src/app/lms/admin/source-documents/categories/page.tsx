@@ -74,20 +74,41 @@ const getDocumentTypeIcon = (type: string) => {
   }
 };
 
-// Get status badge style
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case 'PUBLISHED':
-      return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Đã xuất bản</Badge>;
-    case 'DRAFT':
-      return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">Nháp</Badge>;
-    case 'PENDING':
-      return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">Chờ duyệt</Badge>;
-    case 'REJECTED':
-      return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">Từ chối</Badge>;
-    default:
-      return <Badge variant="secondary">{status}</Badge>;
+// Get status badge with approval state
+const getStatusBadge = (doc: SourceDocument) => {
+  // Determine approval state
+  let approvalBadge = null;
+  if (doc.rejectionReason) {
+    approvalBadge = <Badge className="text-xs bg-red-100 text-red-800 border border-red-300">✕ Từ chối</Badge>;
+  } else if (doc.approvedAt) {
+    approvalBadge = <Badge className="text-xs bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Đã duyệt</Badge>;
+  } else if (doc.approvalRequested) {
+    approvalBadge = <Badge className="text-xs bg-amber-100 text-amber-800 border border-amber-300">⏳ Chờ duyệt</Badge>;
   }
+
+  // Status badge
+  let statusBadge = null;
+  switch (doc.status) {
+    case 'PUBLISHED':
+      statusBadge = <Badge className="text-xs bg-green-100 text-green-800 border">Đã xuất bản</Badge>;
+      break;
+    case 'DRAFT':
+      statusBadge = <Badge className="text-xs bg-gray-100 text-gray-800 border">Nháp</Badge>;
+      break;
+    case 'PROCESSING':
+      statusBadge = <Badge className="text-xs bg-blue-100 text-blue-800 border">Đang xử lý</Badge>;
+      break;
+    case 'ARCHIVED':
+      statusBadge = <Badge className="text-xs bg-slate-100 text-slate-800 border">Lưu trữ</Badge>;
+      break;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {statusBadge}
+      {approvalBadge}
+    </div>
+  );
 };
 
 interface SourceDocument {
@@ -99,6 +120,9 @@ interface SourceDocument {
   url?: string;
   thumbnailUrl?: string;
   createdAt: string;
+  approvalRequested?: boolean;
+  approvedAt?: string;
+  rejectionReason?: string;
 }
 
 interface Category {
@@ -265,47 +289,73 @@ export default function CategoriesPage() {
     return (
       <div
         key={doc.id}
-        className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer group"
-        style={{ paddingLeft: `${(level + 1) * 24 + 12}px` }}
+        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-transparent dark:hover:from-blue-950/20 transition-all cursor-pointer group border-l-2 border-transparent hover:border-blue-400"
+        style={{ marginLeft: `${(level + 1) * 24}px` }}
         onClick={() => router.push(`/lms/admin/source-documents/${doc.id}`)}
       >
-        {/* Empty space for alignment */}
-        <div className="w-6" />
-        
-        {/* Document type icon */}
-        <div className="w-8 h-8 rounded flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
-          {getDocumentTypeIcon(doc.type)}
-        </div>
+        {/* Thumbnail or type icon */}
+        {doc.thumbnailUrl ? (
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-800">
+            <img
+              src={doc.thumbnailUrl}
+              alt={doc.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 text-blue-600 dark:text-blue-400 flex-shrink-0">
+            {getDocumentTypeIcon(doc.type)}
+          </div>
+        )}
 
         {/* Document info */}
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+          <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-gray-100 truncate mb-1">
             {doc.title}
           </h4>
           {doc.fileName && (
-            <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate mb-1">
               {doc.fileName}
             </p>
           )}
+          {/* Mobile badges */}
+          <div className="sm:hidden">
+            {getStatusBadge(doc)}
+          </div>
         </div>
 
-        {/* Status badge */}
-        <div className="hidden sm:block">
-          {getStatusBadge(doc.status)}
+        {/* Desktop badges */}
+        <div className="hidden sm:flex flex-col gap-1 items-end flex-shrink-0">
+          {getStatusBadge(doc)}
         </div>
 
-        {/* Action button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => {
-            e.stopPropagation();
-            router.push(`/lms/admin/source-documents/${doc.id}`);
-          }}
-        >
-          <Eye className="w-4 h-4" />
-        </Button>
+        {/* Action buttons */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 opacity-0 sm:opacity-100 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/lms/admin/source-documents/${doc.id}`);
+            }}
+          >
+            <Eye className="w-4 h-4" />
+          </Button>
+          {doc.url && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(doc.url, '_blank');
+              }}
+            >
+              <ExternalLink className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </div>
     );
   };
@@ -317,32 +367,32 @@ export default function CategoriesPage() {
     const isExpanded = expandedCategories.has(category.id);
 
     return (
-      <div key={category.id}>
+      <div key={category.id} className="mb-2">
         <div
-          className={`flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${
-            level > 0 ? 'ml-6' : ''
+          className={`flex items-center gap-3 p-3 sm:p-4 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent dark:hover:from-gray-800/50 transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700 ${
+            level > 0 ? '' : 'bg-white dark:bg-gray-900 shadow-sm'
           }`}
-          style={{ paddingLeft: `${level * 24 + 12}px` }}
+          style={{ marginLeft: `${level * 24}px` }}
         >
           {/* Expand/Collapse button */}
           {hasContent ? (
             <button
               onClick={() => toggleExpand(category.id)}
-              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
+              className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
             >
               {isExpanded ? (
-                <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
               )}
             </button>
           ) : (
-            <div className="w-6" />
+            <div className="w-7 sm:w-8" />
           )}
 
           {/* Icon */}
           <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-2xl sm:text-3xl shadow-sm flex-shrink-0"
             style={{ backgroundColor: `${category.color}20`, color: category.color }}
           >
             {category.icon}
@@ -350,28 +400,37 @@ export default function CategoriesPage() {
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+              <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-gray-100">
                 {category.name}
               </h3>
               {hasDocuments && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge 
+                  className="text-xs w-fit"
+                  style={{ 
+                    backgroundColor: `${category.color}15`,
+                    color: category.color,
+                    borderColor: `${category.color}40`,
+                    border: '1px solid'
+                  }}
+                >
                   {category.sourceDocuments!.length} tài liệu
                 </Badge>
               )}
             </div>
             {category.description && (
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
                 {category.description}
               </p>
             )}
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <Button
               variant="ghost"
               size="sm"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0"
               onClick={() => handleEdit(category)}
             >
               <Edit className="w-4 h-4" />
@@ -379,22 +438,23 @@ export default function CategoriesPage() {
             <Button
               variant="ghost"
               size="sm"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
               onClick={() => handleDelete(category)}
             >
-              <Trash2 className="w-4 h-4 text-red-600" />
+              <Trash2 className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
         {/* Children and Documents */}
         {hasContent && isExpanded && (
-          <div className="mt-1 space-y-1">
+          <div className="mt-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
             {/* Child categories first */}
             {hasChildren && category.children!.map((child) => renderCategory(child, level + 1))}
             
-            {/* Then documents */}
+            {/* Then documents with subtle divider */}
             {hasDocuments && (
-              <div className="border-l-2 border-gray-200 dark:border-gray-700 ml-6" style={{ marginLeft: `${(level + 1) * 24 + 6}px` }}>
+              <div className="space-y-1 pt-2" style={{ marginLeft: `${(level + 1) * 12}px` }}>
                 {category.sourceDocuments!.map((doc) => renderDocument(doc, level))}
               </div>
             )}

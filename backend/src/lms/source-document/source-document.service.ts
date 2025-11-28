@@ -119,6 +119,14 @@ export class SourceDocumentService {
       if (filter.isAiAnalyzed !== undefined) {
         where.isAiAnalyzed = filter.isAiAnalyzed;
       }
+      if (filter.approvalRequested !== undefined) {
+        where.approvalRequested = filter.approvalRequested;
+        // If filtering for pending approvals, exclude already approved/rejected
+        if (filter.approvalRequested === true) {
+          where.approvedAt = null;
+          where.rejectionReason = null;
+        }
+      }
     }
 
     const [items, total] = await Promise.all([
@@ -466,15 +474,28 @@ export class SourceDocumentService {
   // ============== Approval Workflow ==============
 
   /**
-   * Count pending approval requests
+   * Count pending approval requests (both SourceDocuments and Courses)
    */
   async countPendingApprovals(): Promise<number> {
-    return this.prisma.sourceDocument.count({
+    // Count pending source documents
+    const documentsCount = await this.prisma.sourceDocument.count({
       where: {
         approvalRequested: true,
-        status: 'DRAFT',
+        approvedAt: null,
+        rejectionReason: null,
       },
     });
+
+    // Count pending courses
+    const coursesCount = await this.prisma.course.count({
+      where: {
+        approvalRequested: true,
+        approvedAt: null,
+        rejectionReason: null,
+      },
+    });
+
+    return documentsCount + coursesCount;
   }
 
   /**
@@ -588,7 +609,7 @@ export class SourceDocumentService {
       throw new Error('Document is already published');
     }
 
-    // Update document to PUBLISHED
+    // Update document to PUBLISHED and reset approval request
     const updated = await this.prisma.sourceDocument.update({
       where: { id: documentId },
       data: {
@@ -596,6 +617,7 @@ export class SourceDocumentService {
         publishedAt: new Date(),
         approvedBy: adminUserId,
         approvedAt: new Date(),
+        approvalRequested: false, // Reset approval request flag
       },
       include: {
         user: {

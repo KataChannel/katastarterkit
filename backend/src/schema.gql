@@ -4704,6 +4704,7 @@ type SourceDocumentCategory {
 }
 
 input SourceDocumentFilterInput {
+  approvalRequested: Boolean
   categoryId: ID
   isAiAnalyzed: Boolean
   search: String

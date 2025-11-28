@@ -61,12 +61,52 @@ const TYPE_COLORS = {
   IMAGE: 'text-pink-600 bg-pink-50',
 };
 
-// Status badges
+// Status badges với approval state
 const STATUS_CONFIG = {
-  DRAFT: { variant: 'secondary' as const, label: 'Nháp' },
-  PROCESSING: { variant: 'default' as const, label: 'Đang xử lý' },
-  PUBLISHED: { variant: 'default' as const, label: 'Đã xuất bản' },
-  ARCHIVED: { variant: 'outline' as const, label: 'Lưu trữ' },
+  DRAFT: { 
+    variant: 'secondary' as const, 
+    label: 'Nháp',
+    color: 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+  },
+  PROCESSING: { 
+    variant: 'default' as const, 
+    label: 'Đang xử lý',
+    color: 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+  },
+  PUBLISHED: { 
+    variant: 'default' as const, 
+    label: 'Đã xuất bản',
+    color: 'bg-green-100 text-green-800 hover:bg-green-200'
+  },
+  ARCHIVED: { 
+    variant: 'outline' as const, 
+    label: 'Lưu trữ',
+    color: 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+  },
+};
+
+// Approval state badges
+const APPROVAL_CONFIG = {
+  pending: {
+    label: 'Chờ duyệt',
+    color: 'bg-amber-100 text-amber-800 border-amber-300',
+    icon: '⏳'
+  },
+  approved: {
+    label: 'Đã duyệt',
+    color: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    icon: '✓'
+  },
+  rejected: {
+    label: 'Từ chối',
+    color: 'bg-red-100 text-red-800 border-red-300',
+    icon: '✕'
+  },
+  none: {
+    label: 'Chưa gửi',
+    color: 'bg-gray-100 text-gray-600 border-gray-300',
+    icon: '○'
+  }
 };
 
 export default function SourceDocumentsPage() {
@@ -341,20 +381,49 @@ export default function SourceDocumentsPage() {
 
                     {/* Badges */}
                     <div className="flex flex-wrap gap-2 mt-2">
-                      <Badge variant={statusConfig.variant} className="text-xs">
+                      {/* Status Badge */}
+                      <Badge className={`text-xs ${statusConfig.color} border`}>
                         {statusConfig.label}
                       </Badge>
+
+                      {/* Approval State Badge */}
+                      {(() => {
+                        let approvalState = 'none';
+                        if (document.rejectionReason) {
+                          approvalState = 'rejected';
+                        } else if (document.approvedAt) {
+                          approvalState = 'approved';
+                        } else if (document.approvalRequested) {
+                          approvalState = 'pending';
+                        }
+                        const approvalConfig = APPROVAL_CONFIG[approvalState as keyof typeof APPROVAL_CONFIG];
+                        
+                        return (
+                          <Badge className={`text-xs ${approvalConfig.color} border`}>
+                            <span className="mr-1">{approvalConfig.icon}</span>
+                            {approvalConfig.label}
+                          </Badge>
+                        );
+                      })()}
+
+                      {/* AI Badge */}
                       {document.isAiAnalyzed && (
-                        <Badge variant="outline" className="text-xs gap-1">
+                        <Badge variant="outline" className="text-xs gap-1 bg-violet-50 text-violet-700 border-violet-300">
                           <Sparkles className="w-3 h-3" />
                           AI
                         </Badge>
                       )}
+
+                      {/* Category Badge */}
                       {document.category && (
                         <Badge
                           variant="outline"
                           className="text-xs"
-                          style={{ color: document.category.color }}
+                          style={{ 
+                            backgroundColor: `${document.category.color}15`,
+                            color: document.category.color,
+                            borderColor: `${document.category.color}50`
+                          }}
                         >
                           {document.category.name}
                         </Badge>

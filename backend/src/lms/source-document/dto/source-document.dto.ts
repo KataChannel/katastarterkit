@@ -241,6 +241,9 @@ export class SourceDocumentFilterInput {
 
   @Field({ nullable: true })
   isAiAnalyzed?: boolean;
+
+  @Field({ nullable: true })
+  approvalRequested?: boolean;
 }
 
 // ============== Course Link DTOs ==============

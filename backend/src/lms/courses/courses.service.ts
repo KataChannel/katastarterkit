@@ -464,7 +464,7 @@ export class CoursesService {
       throw new BadRequestException('Course is already published');
     }
 
-    // Update course to PUBLISHED
+    // Update course to PUBLISHED and reset approval request
     return this.prisma.course.update({
       where: { id: courseId },
       data: {
@@ -472,6 +472,7 @@ export class CoursesService {
         publishedAt: new Date(),
         approvedBy: adminUserId,
         approvedAt: new Date(),
+        approvalRequested: false, // Reset approval request flag
       },
     });
   }

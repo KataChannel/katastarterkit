@@ -823,16 +823,174 @@ export default function DocumentDetailPage() {
                     </div>
                   )}
 
-                  {/* Text Content */}
-                  {document.type === 'TEXT' && document.content && (
-                    <div className="p-4 bg-muted rounded-lg max-h-96 overflow-y-auto">
-                      <pre className="text-sm whitespace-pre-wrap font-mono">
-                        {document.content}
-                      </pre>
+                  {/* File Preview - Documents, PDFs */}
+                  {document.type === 'FILE' && document.url && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <File className="w-4 h-4 text-blue-500" />
+                        Tài liệu
+                      </p>
+                      
+                      {/* File Info Card */}
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-4 rounded-lg border">
+                        <div className="flex items-start gap-4">
+                          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
+                            {getFileIcon(document.mimeType)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{document.title}</p>
+                            {document.fileName && (
+                              <p className="text-xs text-muted-foreground truncate mt-1">
+                                {document.fileName}
+                              </p>
+                            )}
+                            <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
+                              {document.fileSize && (
+                                <span className="flex items-center gap-1">
+                                  📦 {formatFileSize(document.fileSize)}
+                                </span>
+                              )}
+                              {document.mimeType && (
+                                <span className="flex items-center gap-1">
+                                  📄 {document.mimeType.split('/')[1]?.toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap gap-2 mt-4">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="flex-1 sm:flex-none"
+                            onClick={() => window.open(document.url, '_blank')}
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Xem
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 sm:flex-none"
+                            onClick={handleDownload}
+                          >
+                            <Download className="w-3 h-3 mr-1" />
+                            Tải về
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* PDF Embed Preview */}
+                      {document.mimeType === 'application/pdf' && (
+                        <div className="border rounded-lg overflow-hidden bg-muted/30">
+                          <div className="aspect-[3/4] max-h-[600px]">
+                            <iframe
+                              src={`${document.url}#view=FitH`}
+                              className="w-full h-full"
+                              title={document.title}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {document.url && (
+                  {/* Link Preview */}
+                  {document.type === 'LINK' && document.url && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <LinkIcon className="w-4 h-4 text-cyan-500" />
+                        Liên kết
+                      </p>
+                      
+                      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 p-4 rounded-lg border">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 bg-cyan-100 dark:bg-cyan-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <LinkIcon className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm">{document.title}</p>
+                            {document.description && (
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                {document.description}
+                              </p>
+                            )}
+                            <a
+                              href={document.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline mt-2 inline-flex items-center gap-1 break-all"
+                            >
+                              <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                              {document.url}
+                            </a>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-4">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="w-full sm:w-auto"
+                            onClick={() => window.open(document.url, '_blank')}
+                          >
+                            <ExternalLink className="w-3 h-3 mr-1" />
+                            Mở liên kết
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Thumbnail if available */}
+                      {document.thumbnailUrl && (
+                        <div className="border rounded-lg overflow-hidden">
+                          <img
+                            src={document.thumbnailUrl}
+                            alt={document.title}
+                            className="w-full max-h-[300px] object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Text Content with Better Formatting */}
+                  {document.type === 'TEXT' && document.content && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-green-500" />
+                        Nội dung văn bản
+                      </p>
+                      
+                      <div className="border rounded-lg bg-muted/30 overflow-hidden">
+                        <div className="bg-muted/50 px-4 py-2 border-b flex items-center justify-between">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {document.content.split('\n').length} dòng
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-xs"
+                            onClick={() => {
+                              navigator.clipboard.writeText(document.content || '');
+                              toast.success('Đã copy nội dung');
+                            }}
+                          >
+                            Copy
+                          </Button>
+                        </div>
+                        <div className="p-4 max-h-96 overflow-y-auto">
+                          <pre className="text-sm whitespace-pre-wrap font-mono leading-relaxed">
+                            {document.content}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* URL Section - Only show for types without preview */}
+                  {document.url && !['VIDEO', 'AUDIO', 'IMAGE', 'FILE', 'LINK', 'TEXT'].includes(document.type) && (
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">URL</p>
                       <div className="flex items-center gap-2 flex-wrap">

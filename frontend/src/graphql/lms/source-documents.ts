@@ -20,6 +20,11 @@ export const GET_SOURCE_DOCUMENTS = gql`
       tags
       aiSummary
       isAiAnalyzed
+      approvalRequested
+      approvalRequestedAt
+      approvedAt
+      approvedBy
+      rejectionReason
       userId
       viewCount
       downloadCount
