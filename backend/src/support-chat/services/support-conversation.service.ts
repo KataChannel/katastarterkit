@@ -4,11 +4,16 @@ import {
   SupportConversationStatus,
   IntegrationPlatform,
   TicketPriority,
+  CustomerAuthType,
 } from '@prisma/client';
+import { SocialAuthService } from './social-auth.service';
 
 @Injectable()
 export class SupportConversationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private socialAuthService: SocialAuthService,
+  ) {}
 
   async createConversation(data: {
     customerId?: string;
@@ -24,6 +29,86 @@ export class SupportConversationService {
     return this.prisma.supportConversation.create({
       data: {
         ...data,
+        status: SupportConversationStatus.WAITING,
+        startedAt: new Date(),
+      },
+      include: {
+        customer: true,
+        assignedAgent: true,
+      },
+    });
+  }
+
+  /**
+   * Create conversation with authentication
+   */
+  async createConversationWithAuth(data: {
+    customerName?: string;
+    customerPhone?: string;
+    customerEmail?: string;
+    authType: CustomerAuthType;
+    socialAccessToken?: string;
+    platform?: IntegrationPlatform;
+    customerIp?: string;
+  }) {
+    let authData: any = {
+      authType: data.authType,
+      customerName: data.customerName,
+      customerPhone: data.customerPhone,
+      customerEmail: data.customerEmail,
+    };
+
+    // Handle social authentication
+    if (
+      data.socialAccessToken &&
+      ['ZALO', 'FACEBOOK', 'GOOGLE'].includes(data.authType)
+    ) {
+      let socialResult;
+      
+      if (data.authType === CustomerAuthType.ZALO) {
+        socialResult = await this.socialAuthService.verifyZaloAuth(
+          data.socialAccessToken,
+        );
+      } else if (data.authType === CustomerAuthType.FACEBOOK) {
+        socialResult = await this.socialAuthService.verifyFacebookAuth(
+          data.socialAccessToken,
+        );
+      } else if (data.authType === CustomerAuthType.GOOGLE) {
+        socialResult = await this.socialAuthService.verifyGoogleAuth(
+          data.socialAccessToken,
+        );
+      }
+
+      if (socialResult) {
+        authData = {
+          ...authData,
+          customerName: socialResult.name,
+          customerEmail: socialResult.email || data.customerEmail,
+          customerPhone: socialResult.phone || data.customerPhone,
+          socialAuthId: socialResult.socialId,
+          socialAuthToken: socialResult.accessToken,
+          socialAuthData: socialResult.profileData,
+          customerIdentifier: this.socialAuthService.generateCustomerIdentifier(
+            data.authType,
+            socialResult.socialId,
+          ),
+        };
+      }
+    } else if (data.authType === CustomerAuthType.PHONE && data.customerPhone) {
+      authData.customerIdentifier = this.socialAuthService.generateCustomerIdentifier(
+        'PHONE',
+        data.customerPhone,
+      );
+    } else {
+      // Guest user
+      authData.customerIdentifier = `guest_${Date.now()}`;
+    }
+
+    return this.prisma.supportConversation.create({
+      data: {
+        ...authData,
+        platform: data.platform || IntegrationPlatform.WEBSITE,
+        customerIp: data.customerIp,
         status: SupportConversationStatus.WAITING,
         startedAt: new Date(),
       },

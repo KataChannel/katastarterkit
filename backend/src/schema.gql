@@ -1172,6 +1172,15 @@ input CreateCommentInput {
   postId: String!
 }
 
+input CreateConversationWithAuthInput {
+  authType: String!
+  customerEmail: String
+  customerName: String
+  customerPhone: String
+  platform: String
+  socialAccessToken: String
+}
+
 input CreateCourseCategoryInput {
   description: String
   icon: String
@@ -2722,6 +2731,9 @@ type Mutation {
   createSourceDocumentCategory(input: CreateSourceDocumentCategoryInput!): SourceDocumentCategory!
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createSupportConversation(input: CreateSupportConversationInput!): SupportConversation!
+
+  """Create conversation with authentication (guest, phone, social login)"""
+  createSupportConversationWithAuth(input: CreateConversationWithAuthInput!): SupportConversation!
   createSystemGuide(input: CreateSystemGuideInput!): SystemGuide!
   createSystemRelease(input: CreateSystemReleaseInput!): SystemRelease!
   createTask(input: CreateTaskInput!): Task!

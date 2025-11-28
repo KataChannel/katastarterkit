@@ -84,6 +84,7 @@ export class SupportChatGateway implements OnGatewayConnection, OnGatewayDisconn
       senderId?: string;
       senderType: SupportSender;
       senderName?: string;
+      customerAuthType?: string;
     },
     @ConnectedSocket() client: Socket,
   ) {
@@ -117,6 +118,34 @@ export class SupportChatGateway implements OnGatewayConnection, OnGatewayDisconn
     }
 
     return { success: true, message };
+  }
+
+  @SubscribeMessage('update_customer_auth')
+  async handleUpdateCustomerAuth(
+    @MessageBody()
+    data: {
+      conversationId: string;
+      authType: string;
+      customerName?: string;
+      customerPhone?: string;
+      customerEmail?: string;
+      socialData?: any;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    // Update conversation with new auth info
+    const conversation = await this.supportConversationService.findOne(data.conversationId);
+    
+    // Notify all clients in conversation about auth update
+    this.server
+      .to(`conversation_${data.conversationId}`)
+      .emit('customer_auth_updated', {
+        conversationId: data.conversationId,
+        authType: data.authType,
+        customerName: data.customerName,
+      });
+
+    return { success: true };
   }
 
   @SubscribeMessage('typing_start')

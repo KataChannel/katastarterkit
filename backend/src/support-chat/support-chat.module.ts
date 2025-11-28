@@ -13,6 +13,7 @@ import { SupportAnalyticsService } from './services/support-analytics.service';
 import { AIAssistantService } from './services/ai-assistant.service';
 import { AIProviderService } from './services/ai-provider.service';
 import { AIResponseService } from './services/ai-response.service';
+import { SocialAuthService } from './services/social-auth.service';
 import { SupportConversationResolver } from './resolvers/support-conversation.resolver';
 import { SupportMessageResolver } from './resolvers/support-message.resolver';
 import { SupportTicketResolver } from './resolvers/support-ticket.resolver';
@@ -40,6 +41,7 @@ import { SupportChatGateway } from './gateways/support-chat.gateway';
     AIAssistantService,
     AIProviderService,
     AIResponseService,
+    SocialAuthService,
     // Resolvers
     SupportConversationResolver,
     SupportMessageResolver,
@@ -60,6 +62,7 @@ import { SupportChatGateway } from './gateways/support-chat.gateway';
     AIAssistantService,
     AIProviderService,
     AIResponseService,
+    SocialAuthService,
   ],
 })
 export class SupportChatModule {}

@@ -4685,6 +4685,15 @@ enum IntegrationPlatform {
   WHATSAPP
 }
 
+enum CustomerAuthType {
+  GUEST
+  PHONE
+  ZALO
+  FACEBOOK
+  GOOGLE
+  USER_ACCOUNT
+}
+
 enum TicketPriority {
   LOW
   MEDIUM
@@ -4759,6 +4768,13 @@ model SupportConversation {
   customerIp       String? // IP address
   customerLocation String? // Vị trí địa lý
 
+  // Customer Authentication Info
+  authType           CustomerAuthType @default(GUEST) // Loại xác thực
+  socialAuthId       String? // ID từ social platform (Zalo, FB, Google)
+  socialAuthToken    String? // Access token từ social
+  socialAuthData     Json? // Dữ liệu profile từ social
+  customerIdentifier String? // Unique identifier để tracking khách hàng
+  
   // Agent Assignment
   assignedAgentId String?
   assignedAgent   User?     @relation("SupportAgentConversations", fields: [assignedAgentId], references: [id], onDelete: SetNull)
@@ -4817,6 +4833,10 @@ model SupportMessage {
   senderId   String?
   sender     User?   @relation("SupportSentMessages", fields: [senderId], references: [id], onDelete: SetNull)
   senderName String? // Tên hiển thị
+  
+  // Customer Auth Tracking (tại thời điểm chat)
+  customerAuthType CustomerAuthType? // Loại khách hàng khi gửi message
+  customerAuthIcon String? // Icon để hiển thị (emoji hoặc icon name)
 
   // AI Features
   isAIGenerated Boolean @default(false)

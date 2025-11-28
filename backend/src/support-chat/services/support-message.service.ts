@@ -20,6 +20,7 @@ export class SupportMessageService {
       senderType: SupportSender;
       senderId?: string;
       senderName?: string;
+      customerAuthType?: string;
       isAIGenerated?: boolean;
       aiConfidence?: number;
       aiSuggestions?: any;
@@ -29,9 +30,24 @@ export class SupportMessageService {
       autoAIResponse?: boolean; // Tự động tạo AI response
     },
   ) {
+    // Get auth icon based on customer auth type
+    let customerAuthIcon: string | undefined;
+    if (data.customerAuthType && data.senderType === SupportSender.CUSTOMER) {
+      const authIcons = {
+        GUEST: '👤',
+        PHONE: '📱',
+        ZALO: '💬',
+        FACEBOOK: '👥',
+        GOOGLE: '🔍',
+        USER_ACCOUNT: '🔐',
+      };
+      customerAuthIcon = authIcons[data.customerAuthType];
+    }
+
     const message = await this.prisma.supportMessage.create({
       data: {
         ...data,
+        customerAuthIcon,
         sentAt: new Date(),
       },
       include: {

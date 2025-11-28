@@ -5,6 +5,7 @@ import {
   CreateSupportConversationInput, 
   SupportConversationWhereInput 
 } from '../dto/support-conversation.input';
+import { CreateConversationWithAuthInput } from '../dto/create-conversation-auth.input';
 
 @Resolver(() => SupportConversation)
 export class SupportConversationResolver {
@@ -34,6 +35,16 @@ export class SupportConversationResolver {
     input: CreateSupportConversationInput,
   ) {
     return this.conversationService.createConversation(input);
+  }
+
+  @Mutation(() => SupportConversation, { 
+    description: 'Create conversation with authentication (guest, phone, social login)' 
+  })
+  async createSupportConversationWithAuth(
+    @Args('input', { type: () => CreateConversationWithAuthInput }) 
+    input: CreateConversationWithAuthInput,
+  ) {
+    return this.conversationService.createConversationWithAuth(input as any);
   }
 
   @Mutation(() => SupportConversation)
