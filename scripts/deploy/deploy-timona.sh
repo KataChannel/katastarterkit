@@ -61,21 +61,33 @@ EOF
 
 echo -e "${BLUE}🚀 Step 4: Starting new containers...${NC}"
 ssh ${SERVER_USER}@${SERVER} << 'EOF'
-# Start Backend
+# Ensure .env is a file, not a directory
+if [ -d "/opt/timona/.env" ]; then
+  echo "⚠️  Warning: .env is a directory, removing..."
+  rm -rf /opt/timona/.env
+fi
+
+# Check if .env file exists
+if [ ! -f "/opt/timona/.env" ]; then
+  echo "❌ Error: /opt/timona/.env file not found!"
+  echo "💡 Please create the .env file on the server before deploying"
+  exit 1
+fi
+
+# Start Backend (using host network, listens on port 15001)
 docker run -d \
   --name timona-backend \
   --restart unless-stopped \
-  -p 15001:15001 \
   --network host \
   -v /opt/timona/.env:/app/.env:ro \
   timona-backend:latest
 
-# Start Frontend
+# Start Frontend (using host network, listens on port 15000)
 docker run -d \
   --name timona-frontend \
   --restart unless-stopped \
-  -p 15000:3000 \
   --network host \
+  -e PORT=15000 \
   timona-frontend:latest
 
 # Wait for containers to start

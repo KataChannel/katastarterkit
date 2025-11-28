@@ -61,21 +61,33 @@ EOF
 
 echo -e "${BLUE}🚀 Step 4: Starting new containers...${NC}"
 ssh ${SERVER_USER}@${SERVER} << 'EOF'
-# Start Backend
+# Ensure .env is a file, not a directory
+if [ -d "/opt/tazagroup/.env" ]; then
+  echo "⚠️  Warning: .env is a directory, removing..."
+  rm -rf /opt/tazagroup/.env
+fi
+
+# Check if .env file exists
+if [ ! -f "/opt/tazagroup/.env" ]; then
+  echo "❌ Error: /opt/tazagroup/.env file not found!"
+  echo "💡 Please create the .env file on the server before deploying"
+  exit 1
+fi
+
+# Start Backend (using host network)
 docker run -d \
   --name tazagroup-backend \
   --restart unless-stopped \
-  -p 13001:13001 \
   --network host \
   -v /opt/tazagroup/.env:/app/.env:ro \
   tazagroup-backend:latest
 
-# Start Frontend
+# Start Frontend (using host network, listening on port 13000)
 docker run -d \
   --name tazagroup-frontend \
   --restart unless-stopped \
-  -p 13000:3000 \
   --network host \
+  -e PORT=13000 \
   tazagroup-frontend:latest
 
 # Wait for containers to start

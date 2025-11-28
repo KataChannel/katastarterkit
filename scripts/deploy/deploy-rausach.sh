@@ -61,6 +61,19 @@ EOF
 
 echo -e "${BLUE}🚀 Step 4: Starting new containers...${NC}"
 ssh ${SERVER_USER}@${SERVER} << 'EOF'
+# Ensure .env is a file, not a directory
+if [ -d "/opt/shoprausach/.env" ]; then
+  echo "⚠️  Warning: .env is a directory, removing..."
+  rm -rf /opt/shoprausach/.env
+fi
+
+# Check if .env file exists
+if [ ! -f "/opt/shoprausach/.env" ]; then
+  echo "❌ Error: /opt/shoprausach/.env file not found!"
+  echo "💡 Please create the .env file on the server before deploying"
+  exit 1
+fi
+
 # Start Backend (using host network, listens on port 12001)
 docker run -d \
   --name shopbackend \
@@ -69,12 +82,12 @@ docker run -d \
   -v /opt/shoprausach/.env:/app/.env:ro \
   rausach-backend:latest
 
-# Start Frontend (using host network, listens on port 3000)
-# Nginx proxies shop.rausachtrangia.com to port 3000
+# Start Frontend (using host network, listens on port 12000)
 docker run -d \
   --name shopfrontend \
   --restart unless-stopped \
   --network host \
+  -e PORT=12000 \
   rausach-frontend:latest
 
 # Wait for containers to start
