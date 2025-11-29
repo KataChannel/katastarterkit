@@ -1,0 +1,72 @@
+# ============================================================================
+# OPTIMIZED Backend Dockerfile - Minimal build context
+# Build context: backend/ (not root!)
+# Usage: docker build -f backend/Dockerfile.optimized -t backend:latest backend/
+# ============================================================================
+
+# Stage 1: Dependencies
+FROM oven/bun:1.3-alpine AS deps
+WORKDIR /app
+
+# Copy only lockfile and package.json
+COPY package.json bun.lock* ./
+
+# Install dependencies with cache
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install
+
+# Stage 2: Builder
+FROM oven/bun:1.3-alpine AS builder
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json ./
+
+# Copy source code
+COPY . .
+
+# Generate Prisma client
+RUN bun prisma generate --schema=./prisma/schema.prisma
+
+# Build TypeScript
+RUN bun run build
+
+# Stage 3: Production
+FROM oven/bun:1.3-alpine AS production
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apk add --no-cache curl netcat-openbsd dumb-init
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+
+# Copy package files
+COPY package.json bun.lock* ./
+
+# Install production dependencies only
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --production
+
+# Copy built artifacts
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+# Copy entrypoint
+COPY entrypoint.sh ./entrypoint.sh
+
+# Set permissions
+RUN chown -R nestjs:nodejs /app && \
+    chmod +x ./entrypoint.sh
+
+USER nestjs
+EXPOSE 4000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:4000/health || exit 1
+
+ENTRYPOINT ["dumb-init", "./entrypoint.sh"]
+CMD ["bun", "run", "start:prod"]

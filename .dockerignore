@@ -23,6 +23,7 @@ backend/database-export/
 backend/data/
 backend/logs/
 backend/dist/
+backend/temp-images/
 backend/*.log
 backend/*.sql
 backend/*.dump

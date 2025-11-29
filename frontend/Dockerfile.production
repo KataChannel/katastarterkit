@@ -1,93 +1,46 @@
 # ============================================================================
-# Multi-Stage Frontend Dockerfile for Production Server Deployment
-# Build everything inside Docker - no local build required
+# PRODUCTION Frontend Dockerfile - Optimized for speed
 # ============================================================================
 
-# ============================================================================
-# Stage 1: Dependencies
-# ============================================================================
-FROM oven/bun:1.3-alpine AS deps
-WORKDIR /app
-
-# Copy package files
-COPY frontend/package.json ./
-
-# Install dependencies with bun
-# Use cache mount for faster installs
-# Note: No lockfile required - bun will resolve dependencies
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install
-
-# ============================================================================
-# Stage 2: Builder
-# ============================================================================
+# Stage 1: Build
 FROM oven/bun:1.3-alpine AS builder
 WORKDIR /app
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+# Copy package.json
+COPY frontend/package.json ./
 
-# Copy frontend source
+# Install dependencies
+RUN bun install
+
+# Copy source
 COPY frontend/ ./
 
-# Build arguments for environment variables
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_GRAPHQL_URL
-ARG NEXT_PUBLIC_UPLOAD_URL
-ARG NEXT_PUBLIC_WEBSITE_URL
-ARG NEXT_PUBLIC_WEBSITE_NAME
-
-# Set environment variables for build
-ENV NODE_ENV=production
+# Build Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-ENV NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL}
-ENV NEXT_PUBLIC_UPLOAD_URL=${NEXT_PUBLIC_UPLOAD_URL}
-ENV NEXT_PUBLIC_WEBSITE_URL=${NEXT_PUBLIC_WEBSITE_URL}
-ENV NEXT_PUBLIC_WEBSITE_NAME=${NEXT_PUBLIC_WEBSITE_NAME}
-
-# Build Next.js application with standalone output
 RUN bun run build
 
-# ============================================================================
-# Stage 3: Production Runtime
-# ============================================================================
-FROM node:22-alpine AS runtime
-
-# Install minimal runtime dependencies
-RUN apk add --no-cache curl dumb-init && \
-    rm -rf /var/cache/apk/* && \
-    addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs --ingroup nodejs
-
+# Stage 2: Production
+FROM node:22-alpine AS production
 WORKDIR /app
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+# Install runtime deps and create user in single layer
+RUN apk add --no-cache curl dumb-init && \
+    addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
 
-# Copy built application from builder
-# .next/standalone contains everything needed to run
+# Copy standalone build with --chown to avoid extra chown layer (~104MB savings!)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-
-# Copy static files
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copy public files
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# Switch to non-root user
 USER nextjs
-
-# Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Start the application
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "server.js"]
