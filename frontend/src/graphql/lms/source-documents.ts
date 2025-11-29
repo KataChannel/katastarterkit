@@ -317,6 +317,19 @@ export const UPLOAD_DOCUMENT_THUMBNAIL = gql`
   }
 `;
 
+export const UPLOAD_FROM_URL = gql`
+  mutation UploadFromUrl($url: String!, $documentId: ID) {
+    uploadFromUrl(url: $url, documentId: $documentId) {
+      id
+      url
+      filename
+      mimetype
+      size
+      bucket
+    }
+  }
+`;
+
 // ============== AI Analysis ==============
 
 export const ANALYZE_SOURCE_DOCUMENT = gql`

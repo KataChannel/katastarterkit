@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { GeminiService } from '../../ai/gemini.service';
 import { NotificationService } from '../../services/notification.service';
@@ -11,9 +11,13 @@ import {
   UpdateCourseDocumentLinkInput,
 } from './dto/source-document.dto';
 import { Prisma } from '@prisma/client';
+import axios from 'axios';
+import * as path from 'path';
 
 @Injectable()
 export class SourceDocumentService {
+  private readonly logger = new Logger(SourceDocumentService.name);
+
   constructor(
     private prisma: PrismaService,
     private geminiService: GeminiService,
@@ -648,6 +652,257 @@ export class SourceDocumentService {
     });
 
     return this.transformDocument(updated);
+  }
+
+  /**
+   * Download file from URL
+   * Supports: docs, xlsx, txt, md, pdf, images, videos, etc.
+   * Includes special handling for Google Drive, Sheets, Docs
+   */
+  async downloadFromUrl(url: string): Promise<{
+    buffer: Buffer;
+    fileName: string;
+    mimeType: string;
+    size: number;
+  }> {
+    try {
+      // Decode HTML entities (&#x2F; -> /, &amp; -> &, etc.)
+      let cleanUrl = url
+        .replace(/&#x2F;/g, '/')
+        .replace(/&#x3A;/g, ':')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+
+      this.logger.log(`📥 Downloading file from URL: ${cleanUrl}`);
+
+      // Convert Google URLs to direct download links
+      cleanUrl = this.convertGoogleUrlToDirectDownload(cleanUrl);
+
+      // Validate URL
+      const urlObj = new URL(cleanUrl);
+      if (!['http:', 'https:'].includes(urlObj.protocol)) {
+        throw new BadRequestException('Chỉ hỗ trợ HTTP/HTTPS URL');
+      }
+
+      // Download with axios (supports headers and better error handling)
+      const response = await axios.get(cleanUrl, {
+        responseType: 'arraybuffer',
+        maxContentLength: 100 * 1024 * 1024, // 100MB max
+        timeout: 60000, // 60s timeout
+        maxRedirects: 5, // Follow redirects
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; ShopRauSachBot/1.0)',
+        },
+      });
+
+      const buffer = Buffer.from(response.data);
+      const size = buffer.length;
+
+      // Get mime type from response header or file extension
+      let mimeType = response.headers['content-type']?.split(';')[0] || 'application/octet-stream';
+
+      // Get filename from Content-Disposition or URL
+      let fileName = 'downloaded-file';
+      const contentDisposition = response.headers['content-disposition'];
+      if (contentDisposition) {
+        // Try to extract filename from Content-Disposition
+        const filenameMatch = contentDisposition.match(/filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i);
+        if (filenameMatch && filenameMatch[1]) {
+          fileName = decodeURIComponent(filenameMatch[1]);
+        }
+      } else {
+        // Extract filename from URL
+        const urlPath = urlObj.pathname;
+        const urlFileName = path.basename(urlPath);
+        if (urlFileName && urlFileName.length > 0 && urlFileName !== '/' && !urlFileName.includes('export')) {
+          fileName = decodeURIComponent(urlFileName);
+        }
+      }
+
+      // Generate filename based on source if still generic
+      if (fileName === 'downloaded-file' || fileName === 'export') {
+        if (cleanUrl.includes('docs.google.com/spreadsheets')) {
+          fileName = 'google-sheet';
+        } else if (cleanUrl.includes('docs.google.com/document')) {
+          fileName = 'google-doc';
+        } else if (cleanUrl.includes('docs.google.com/presentation')) {
+          fileName = 'google-slides';
+        } else if (cleanUrl.includes('drive.google.com')) {
+          fileName = 'google-drive-file';
+        } else {
+          fileName = `file-${Date.now()}`;
+        }
+      }
+
+      // Add extension based on mime type if missing
+      if (!path.extname(fileName)) {
+        const ext = this.getExtensionFromMimeType(mimeType);
+        if (ext) {
+          fileName += ext;
+        }
+      }
+
+      this.logger.log(`✅ Downloaded: ${fileName} (${(size / 1024).toFixed(2)} KB, ${mimeType})`);
+
+      return {
+        buffer,
+        fileName,
+        mimeType,
+        size,
+      };
+    } catch (error: any) {
+      this.logger.error(`❌ Download failed: ${error.message}`, error.stack);
+      
+      if (error.response) {
+        throw new BadRequestException(
+          `Không thể tải file: HTTP ${error.response.status} ${error.response.statusText}`
+        );
+      } else if (error.code === 'ENOTFOUND') {
+        throw new BadRequestException('Không thể kết nối đến URL');
+      } else if (error.code === 'ETIMEDOUT') {
+        throw new BadRequestException('Timeout khi tải file');
+      } else {
+        throw new BadRequestException(`Lỗi tải file: ${error.message}`);
+      }
+    }
+  }
+
+  /**
+   * Convert Google Drive/Sheets/Docs URLs to direct download links
+   */
+  private convertGoogleUrlToDirectDownload(url: string): string {
+    try {
+      // Google Drive file: https://drive.google.com/file/d/FILE_ID/view
+      // -> https://drive.google.com/uc?export=download&id=FILE_ID
+      if (url.includes('drive.google.com/file/d/')) {
+        const match = url.match(/\/file\/d\/([^\/\?]+)/);
+        if (match && match[1]) {
+          const fileId = match[1];
+          this.logger.log(`🔄 Converting Google Drive URL (File ID: ${fileId})`);
+          return `https://drive.google.com/uc?export=download&id=${fileId}`;
+        }
+      }
+
+      // Google Drive open: https://drive.google.com/open?id=FILE_ID
+      // -> https://drive.google.com/uc?export=download&id=FILE_ID
+      if (url.includes('drive.google.com/open?id=')) {
+        const match = url.match(/[?&]id=([^&]+)/);
+        if (match && match[1]) {
+          const fileId = match[1];
+          this.logger.log(`🔄 Converting Google Drive URL (File ID: ${fileId})`);
+          return `https://drive.google.com/uc?export=download&id=${fileId}`;
+        }
+      }
+
+      // Google Sheets: https://docs.google.com/spreadsheets/d/SHEET_ID/edit
+      // -> https://docs.google.com/spreadsheets/d/SHEET_ID/export?format=xlsx
+      if (url.includes('docs.google.com/spreadsheets/d/')) {
+        const match = url.match(/\/spreadsheets\/d\/([^\/\?]+)/);
+        if (match && match[1]) {
+          const sheetId = match[1];
+          // Extract gid if present
+          const gidMatch = url.match(/[?#&]gid=(\d+)/);
+          const gid = gidMatch ? gidMatch[1] : '0';
+          this.logger.log(`🔄 Converting Google Sheets URL (Sheet ID: ${sheetId}, GID: ${gid})`);
+          return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=xlsx&gid=${gid}`;
+        }
+      }
+
+      // Google Docs: https://docs.google.com/document/d/DOC_ID/edit
+      // -> https://docs.google.com/document/d/DOC_ID/export?format=docx
+      if (url.includes('docs.google.com/document/d/')) {
+        const match = url.match(/\/document\/d\/([^\/\?]+)/);
+        if (match && match[1]) {
+          const docId = match[1];
+          this.logger.log(`🔄 Converting Google Docs URL (Doc ID: ${docId})`);
+          return `https://docs.google.com/document/d/${docId}/export?format=docx`;
+        }
+      }
+
+      // Google Slides: https://docs.google.com/presentation/d/SLIDE_ID/edit
+      // -> https://docs.google.com/presentation/d/SLIDE_ID/export?format=pptx
+      if (url.includes('docs.google.com/presentation/d/')) {
+        const match = url.match(/\/presentation\/d\/([^\/\?]+)/);
+        if (match && match[1]) {
+          const slideId = match[1];
+          this.logger.log(`🔄 Converting Google Slides URL (Slide ID: ${slideId})`);
+          return `https://docs.google.com/presentation/d/${slideId}/export?format=pptx`;
+        }
+      }
+
+      // Dropbox: https://www.dropbox.com/s/ABC/file.pdf?dl=0
+      // -> https://www.dropbox.com/s/ABC/file.pdf?dl=1
+      if (url.includes('dropbox.com') && url.includes('?dl=0')) {
+        this.logger.log(`🔄 Converting Dropbox URL to direct download`);
+        return url.replace('?dl=0', '?dl=1');
+      }
+
+      // OneDrive: Add download=1 parameter
+      if (url.includes('1drv.ms') || url.includes('onedrive.live.com')) {
+        this.logger.log(`🔄 Converting OneDrive URL to direct download`);
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}download=1`;
+      }
+
+      return url;
+    } catch (error) {
+      this.logger.warn(`⚠️ Failed to convert URL, using original: ${error.message}`);
+      return url;
+    }
+  }
+
+  /**
+   * Get file extension from MIME type
+   */
+  private getExtensionFromMimeType(mimeType: string): string | null {
+    const mimeMap: Record<string, string> = {
+      // Documents
+      'application/pdf': '.pdf',
+      'application/msword': '.doc',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+      'application/vnd.ms-excel': '.xls',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+      'application/vnd.ms-powerpoint': '.ppt',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
+      'text/plain': '.txt',
+      'text/markdown': '.md',
+      'text/html': '.html',
+      'text/csv': '.csv',
+      // Google export formats
+      'application/vnd.google-apps.spreadsheet': '.xlsx',
+      'application/vnd.google-apps.document': '.docx',
+      'application/vnd.google-apps.presentation': '.pptx',
+      // Binary/octet-stream (common for downloads)
+      'application/octet-stream': '.bin',
+      // Images
+      'image/jpeg': '.jpg',
+      'image/png': '.png',
+      'image/gif': '.gif',
+      'image/webp': '.webp',
+      'image/svg+xml': '.svg',
+      // Archives
+      'application/zip': '.zip',
+      'application/x-rar-compressed': '.rar',
+      'application/x-7z-compressed': '.7z',
+      // Videos
+      'video/mp4': '.mp4',
+      'video/mpeg': '.mpeg',
+      'video/quicktime': '.mov',
+      'video/webm': '.webm',
+      // Audio
+      'audio/mpeg': '.mp3',
+      'audio/wav': '.wav',
+      'audio/ogg': '.ogg',
+      // Code
+      'application/json': '.json',
+      'application/javascript': '.js',
+      'text/css': '.css',
+    };
+
+    return mimeMap[mimeType] || null;
   }
 
   /**

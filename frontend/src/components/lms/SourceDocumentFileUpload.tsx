@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { Upload, X, File, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Upload, X, File, Loader2, CheckCircle2, AlertCircle, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 
 interface FileUploadResult {
@@ -37,6 +40,8 @@ export default function SourceDocumentFileUpload({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+  const [fileUrl, setFileUrl] = useState('');
+  const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
 
   // Get accept attribute based on document type
   const getAcceptAttribute = useCallback(() => {
@@ -233,6 +238,100 @@ export default function SourceDocumentFileUpload({
     }
   };
 
+  // Upload from URL
+  const handleUploadFromUrl = async () => {
+    if (!fileUrl.trim()) {
+      toast({
+        type: 'error',
+        title: 'Lỗi',
+        description: 'Vui lòng nhập URL',
+      });
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(fileUrl);
+    } catch {
+      toast({
+        type: 'error',
+        title: 'Lỗi',
+        description: 'URL không hợp lệ',
+      });
+      return;
+    }
+
+    try {
+      setUploadStatus('uploading');
+      setUploadProgress(0);
+
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 300);
+
+      // Call backend to download and upload
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_ENDPOINT || 'http://localhost:13001'}/api/lms/source-documents/upload-from-url`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { authorization: `Bearer ${token}` }),
+          },
+          body: JSON.stringify({ url: fileUrl }),
+        }
+      );
+
+      clearInterval(progressInterval);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      setUploadStatus('success');
+      setUploadProgress(100);
+
+      toast({
+        type: 'success',
+        title: 'Tải thành công',
+        description: `File "${result.fileName}" đã được tải về và upload`,
+      });
+
+      onUploadComplete(result);
+
+      // Reset after 2 seconds
+      setTimeout(() => {
+        setFileUrl('');
+        setUploadStatus('idle');
+        setUploadProgress(0);
+      }, 2000);
+    } catch (error: any) {
+      setUploadStatus('error');
+
+      const errorMessage = error?.message || 'Không thể tải file từ URL';
+      toast({
+        type: 'error',
+        title: 'Lỗi tải file',
+        description: errorMessage,
+      });
+
+      if (onUploadError) {
+        onUploadError(error);
+      }
+    }
+  };
+
   // Format file size
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 B';
@@ -244,8 +343,23 @@ export default function SourceDocumentFileUpload({
 
   return (
     <div className="space-y-4">
-      {/* Drop Zone */}
-      {!selectedFile && (
+      {/* Upload Mode Tabs */}
+      <Tabs value={uploadMode} onValueChange={(value) => setUploadMode(value as 'file' | 'url')}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="file">
+            <Upload className="w-4 h-4 mr-2" />
+            Upload File
+          </TabsTrigger>
+          <TabsTrigger value="url">
+            <LinkIcon className="w-4 h-4 mr-2" />
+            Tải từ URL
+          </TabsTrigger>
+        </TabsList>
+
+        {/* File Upload Tab */}
+        <TabsContent value="file" className="space-y-4 mt-4">
+          {/* Drop Zone */}
+          {!selectedFile && (
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -388,6 +502,68 @@ export default function SourceDocumentFileUpload({
           )}
         </div>
       )}
+        </TabsContent>
+
+        {/* URL Upload Tab */}
+        <TabsContent value="url" className="space-y-4 mt-4">
+          <div className="space-y-3">
+            <Label htmlFor="fileUrl">
+              <LinkIcon className="w-4 h-4 inline mr-1" />
+              URL của file (docs, xlsx, txt, md, pdf, images...)
+            </Label>
+            <Input
+              id="fileUrl"
+              type="url"
+              value={fileUrl}
+              onChange={(e) => setFileUrl(e.target.value)}
+              placeholder="https://example.com/document.pdf"
+              disabled={uploadStatus === 'uploading'}
+            />
+            <p className="text-xs text-gray-500">
+              Hỗ trợ: PDF, DOC, DOCX, XLS, XLSX, TXT, MD, PPT, Images, Videos, Audio... (Tối đa {maxSize}MB)
+            </p>
+          </div>
+
+          {/* Progress Bar */}
+          {uploadStatus === 'uploading' && (
+            <div className="space-y-2">
+              <Progress value={uploadProgress} className="h-2" />
+              <p className="text-xs sm:text-sm text-gray-600 text-center">
+                Đang tải và upload... {uploadProgress}%
+              </p>
+            </div>
+          )}
+
+          {/* Success Status */}
+          {uploadStatus === 'success' && (
+            <div className="flex items-center justify-center gap-2 text-green-600 p-4 bg-green-50 rounded-lg">
+              <CheckCircle2 className="w-5 h-5" />
+              <span className="text-sm font-medium">Tải và upload thành công!</span>
+            </div>
+          )}
+
+          {/* Error Status */}
+          {uploadStatus === 'error' && (
+            <div className="flex items-center justify-center gap-2 text-red-600 p-4 bg-red-50 rounded-lg">
+              <AlertCircle className="w-5 h-5" />
+              <span className="text-sm font-medium">Tải file thất bại</span>
+            </div>
+          )}
+
+          {/* Upload Button */}
+          {uploadStatus !== 'uploading' && uploadStatus !== 'success' && (
+            <Button
+              type="button"
+              onClick={handleUploadFromUrl}
+              disabled={!fileUrl.trim()}
+              className="w-full"
+            >
+              <LinkIcon className="w-4 h-4 mr-2" />
+              Tải file từ URL
+            </Button>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

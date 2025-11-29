@@ -327,6 +327,49 @@ export class SourceDocumentResolver {
     });
   }
 
+  /**
+   * Upload file from URL
+   * Downloads file from provided URL and uploads to MinIO
+   */
+  @Mutation(() => FileUploadResult)
+  @UseGuards(JwtAuthGuard)
+  async uploadFromUrl(
+    @Args('url', { type: () => String }) url: string,
+    @Args('documentId', { type: () => ID, nullable: true }) documentId?: string,
+  ): Promise<FileUploadResult> {
+    // Download file from URL
+    const { buffer, fileName, mimeType, size } = 
+      await this.sourceDocumentService.downloadFromUrl(url);
+
+    // Upload to MinIO
+    const docId = documentId || `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const uploadedUrl = await this.minioService.uploadSourceDocument(
+      docId,
+      buffer,
+      fileName,
+      mimeType,
+    );
+
+    // Update document if documentId provided
+    if (documentId) {
+      await this.sourceDocumentService.update(documentId, {
+        url: uploadedUrl,
+        fileName,
+        fileSize: size,
+        mimeType,
+      });
+    }
+
+    return {
+      id: docId,
+      url: uploadedUrl,
+      filename: fileName,
+      mimetype: mimeType,
+      size,
+      bucket: 'source-documents',
+    };
+  }
+
   // ============== AI Analysis ==============
 
   @Mutation(() => SourceDocument)

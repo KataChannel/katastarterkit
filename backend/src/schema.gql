@@ -3124,6 +3124,7 @@ type Mutation {
   uploadCourseThumbnail(courseId: String, file: Upload!): FileUploadResult!
   uploadDocumentThumbnail(documentId: ID!, file: Upload!): String!
   uploadFile(bucket: String!, file: Upload!): FileUploadResult!
+  uploadFromUrl(documentId: ID, url: String!): FileUploadResult!
   uploadImage(bucket: String = "images", editOptions: JSON, file: Upload!): JSON!
   uploadLessonVideo(courseId: String!, file: Upload!): FileUploadResult!
   uploadMultipleImages(bucket: String = "images", editOptions: JSON, files: [Upload!]!): JSON!

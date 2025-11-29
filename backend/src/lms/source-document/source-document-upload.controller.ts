@@ -368,6 +368,110 @@ export class SourceDocumentUploadController {
   }
 
   /**
+   * Download file from URL and upload to MinIO
+   * POST /api/lms/source-documents/upload-from-url
+   * Body: { url: string, documentId?: string }
+   */
+  @Post('upload-from-url')
+  async uploadFromUrl(
+    @Body() body: { url: string; documentId?: string },
+    @Req() request: any,
+  ) {
+    const { url, documentId } = body;
+
+    if (!url) {
+      throw new BadRequestException('URL is required');
+    }
+
+    try {
+      // Download file from URL
+      const { buffer, fileName, mimeType, size } = 
+        await this.sourceDocumentService.downloadFromUrl(url);
+
+      this.logger.log(`📥 Downloaded: ${fileName} (${mimeType}, ${size} bytes)`);
+
+      // Validate file type
+      const tempFile: UploadedFile = {
+        buffer,
+        originalname: fileName,
+        mimetype: mimeType,
+        size,
+      };
+      this.validateFile(tempFile);
+
+      // Process video if applicable
+      let finalBuffer = buffer;
+      let finalSize = size;
+      let duration: number | undefined;
+      let videoMetadata: any = {};
+
+      if (this.isVideoFile(mimeType)) {
+        this.logger.log(`Processing video: ${fileName}`);
+        
+        const processResult = await this.videoProcessingService.processVideo(
+          buffer,
+          fileName,
+        );
+
+        if (processResult.success && processResult.processedBuffer) {
+          finalBuffer = processResult.processedBuffer;
+          finalSize = processResult.processedBuffer.length;
+          duration = processResult.duration;
+          videoMetadata = {
+            width: processResult.width,
+            height: processResult.height,
+            processed: true,
+          };
+          this.logger.log(`✅ Video processed: duration ${duration}s`);
+        }
+      }
+
+      // Upload to MinIO
+      const docId = documentId || `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      const uploadedUrl = await this.minioService.uploadSourceDocument(
+        docId,
+        finalBuffer,
+        fileName,
+        mimeType,
+      );
+
+      // Update document if documentId provided
+      if (documentId) {
+        const updateData: any = {
+          url: uploadedUrl,
+          fileName,
+          fileSize: finalSize,
+          mimeType,
+        };
+
+        if (duration !== undefined) {
+          updateData.duration = Math.round(duration);
+        }
+
+        if (Object.keys(videoMetadata).length > 0) {
+          updateData.metadata = videoMetadata;
+        }
+
+        await this.sourceDocumentService.update(documentId, updateData);
+      }
+
+      return {
+        success: true,
+        url: uploadedUrl,
+        fileName,
+        fileSize: finalSize,
+        mimeType,
+        documentId: docId,
+        duration,
+        metadata: videoMetadata,
+      };
+    } catch (error) {
+      this.logger.error(`Upload from URL error: ${error.message}`, error.stack);
+      throw new BadRequestException(`Upload từ URL thất bại: ${error.message}`);
+    }
+  }
+
+  /**
    * Check if file is a video
    */
   private isVideoFile(mimeType: string): boolean {
