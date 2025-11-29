@@ -1,0 +1,441 @@
+// ============================================
+// WORKFLOW SYSTEM - Add to schema.prisma
+// ============================================
+
+// Enums
+enum WorkflowStatus {
+  DRAFT           // Đang soạn thảo
+  ACTIVE          // Đang hoạt động
+  INACTIVE        // Tạm ngưng
+  ARCHIVED        // Lưu trữ
+}
+
+enum WorkflowInstanceStatus {
+  PENDING         // Chờ xử lý
+  IN_PROGRESS     // Đang thực hiện
+  WAITING_APPROVAL // Chờ phê duyệt
+  APPROVED        // Đã phê duyệt
+  REJECTED        // Từ chối
+  COMPLETED       // Hoàn thành
+  CANCELLED       // Hủy bỏ
+}
+
+enum StepType {
+  FORM            // Điền form thông tin
+  APPROVAL        // Phê duyệt
+  NOTIFICATION    // Thông báo
+  AUTOMATION      // Tự động (gọi API, tạo tài khoản...)
+  CONDITION       // Điều kiện rẽ nhánh
+}
+
+enum ApprovalStatus {
+  PENDING         // Chờ phê duyệt
+  APPROVED        // Đã phê duyệt
+  REJECTED        // Từ chối
+  DELEGATED       // Ủy quyền
+  CANCELLED       // Hủy
+}
+
+enum AccountType {
+  GMAIL           // Gmail công ty
+  FACEBOOK        // Facebook công ty
+  ZALO            // Zalo công ty
+  CRM             // CRM công ty
+  SLACK           // Slack
+  TEAMS           // Microsoft Teams
+  ZOOM            // Zoom
+  OTHER           // Khác
+}
+
+// ============================================
+// WORKFLOW TEMPLATE (Mẫu quy trình)
+// ============================================
+
+model WorkflowTemplate {
+  id          String         @id @default(cuid())
+  code        String         @unique // VD: "CHECKIN_NHANSU", "ONBOARDING_SALE"
+  name        String         // "Quy trình Checkin Nhân Sự"
+  description String?
+  category    String?        // "HR", "SALES", "FINANCE"...
+  icon        String?        // Icon cho giao diện
+  color       String?        // Màu sắc cho giao diện
+  
+  // Cấu hình
+  isActive    Boolean        @default(true)
+  version     Int            @default(1)
+  
+  // Metadata
+  createdBy   String
+  createdAt   DateTime       @default(now())
+  updatedBy   String?
+  updatedAt   DateTime       @updatedAt
+  
+  // Relations
+  creator     User           @relation("WorkflowTemplateCreator", fields: [createdBy], references: [id])
+  updater     User?          @relation("WorkflowTemplateUpdater", fields: [updatedBy], references: [id])
+  steps       WorkflowStep[]
+  instances   WorkflowInstance[]
+  
+  @@index([code])
+  @@index([category])
+  @@index([isActive])
+  @@map("workflow_templates")
+}
+
+// ============================================
+// WORKFLOW STEP (Bước trong quy trình)
+// ============================================
+
+model WorkflowStep {
+  id                String           @id @default(cuid())
+  workflowTemplateId String
+  workflowTemplate  WorkflowTemplate @relation(fields: [workflowTemplateId], references: [id], onDelete: Cascade)
+  
+  // Thông tin bước
+  stepNumber      Int              // Thứ tự bước: 1, 2, 3...
+  stepType        StepType
+  name            String           // "Tạo thông tin nhân sự"
+  description     String?
+  
+  // Cấu hình bước
+  config          Json?            // Cấu hình chi tiết (form fields, approval rules, automation script...)
+  /*
+  Ví dụ config cho FORM:
+  {
+    "fields": [
+      {"name": "fullName", "type": "text", "required": true, "label": "Họ và tên"},
+      {"name": "email", "type": "email", "required": true, "label": "Email"},
+      {"name": "phone", "type": "tel", "required": true, "label": "Số điện thoại"},
+      {"name": "position", "type": "select", "required": true, "label": "Vị trí", "options": ["Developer", "Designer", "Manager"]}
+    ]
+  }
+  
+  Ví dụ config cho APPROVAL:
+  {
+    "approvers": ["userId1", "userId2"],
+    "approvalType": "ANY" | "ALL" | "SEQUENTIAL",
+    "autoApproveAfterDays": 3
+  }
+  
+  Ví dụ config cho AUTOMATION:
+  {
+    "action": "CREATE_USER",
+    "params": {
+      "emailField": "email",
+      "usernameField": "email",
+      "sendWelcomeEmail": true
+    }
+  }
+  */
+  
+  // Điều kiện chuyển bước
+  nextStepCondition Json?          // Điều kiện để chuyển sang bước tiếp theo
+  
+  // Người thực hiện
+  assigneeType    String?          // "INITIATOR", "MANAGER", "SPECIFIC_USER", "ROLE", "DEPARTMENT"
+  assigneeIds     String[]         // User IDs hoặc Role IDs
+  
+  // Thời gian
+  estimatedDuration Int?           // Thời gian dự kiến (phút)
+  dueDateOffset     Int?           // Số ngày tính từ bước trước
+  
+  // Trạng thái
+  isRequired      Boolean          @default(true)
+  isActive        Boolean          @default(true)
+  
+  // Metadata
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  // Relations
+  executions      StepExecution[]
+  
+  @@unique([workflowTemplateId, stepNumber])
+  @@index([workflowTemplateId])
+  @@index([stepType])
+  @@map("workflow_steps")
+}
+
+// ============================================
+// WORKFLOW INSTANCE (Phiên thực hiện quy trình)
+// ============================================
+
+model WorkflowInstance {
+  id                  String                  @id @default(cuid())
+  workflowTemplateId  String
+  workflowTemplate    WorkflowTemplate        @relation(fields: [workflowTemplateId], references: [id])
+  
+  // Thông tin instance
+  instanceCode        String                  @unique // "CHECKIN-2025-001"
+  title               String                  // "Checkin nhân sự: Nguyễn Văn A"
+  description         String?
+  
+  // Trạng thái
+  status              WorkflowInstanceStatus  @default(PENDING)
+  currentStepNumber   Int                     @default(1)
+  
+  // Dữ liệu quy trình
+  formData            Json                    // Dữ liệu đã nhập từ các bước
+  metadata            Json?                   // Metadata bổ sung
+  
+  // Liên kết
+  relatedEntityType   String?                 // "EmployeeProfile", "User", "Order"...
+  relatedEntityId     String?                 // ID của entity liên quan
+  
+  // Người liên quan
+  initiatedBy         String                  // Người khởi tạo
+  assignedTo          String?                 // Người đang xử lý
+  
+  // Thời gian
+  startedAt           DateTime                @default(now())
+  completedAt         DateTime?
+  dueDate             DateTime?
+  
+  // Metadata
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  
+  // Relations
+  initiator           User                    @relation("WorkflowInstanceInitiator", fields: [initiatedBy], references: [id])
+  assignee            User?                   @relation("WorkflowInstanceAssignee", fields: [assignedTo], references: [id])
+  stepExecutions      StepExecution[]
+  approvals           WorkflowApproval[]
+  comments            WorkflowComment[]
+  activityLogs        WorkflowActivityLog[]
+  
+  @@index([workflowTemplateId])
+  @@index([status])
+  @@index([initiatedBy])
+  @@index([assignedTo])
+  @@index([relatedEntityType, relatedEntityId])
+  @@index([startedAt])
+  @@map("workflow_instances")
+}
+
+// ============================================
+// STEP EXECUTION (Thực hiện từng bước)
+// ============================================
+
+model StepExecution {
+  id                  String                  @id @default(cuid())
+  workflowInstanceId  String
+  workflowInstance    WorkflowInstance        @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+  
+  workflowStepId      String
+  workflowStep        WorkflowStep            @relation(fields: [workflowStepId], references: [id])
+  
+  // Trạng thái
+  status              WorkflowInstanceStatus  @default(PENDING)
+  stepNumber          Int
+  
+  // Dữ liệu bước
+  inputData           Json?                   // Dữ liệu đầu vào
+  outputData          Json?                   // Dữ liệu đầu ra
+  
+  // Người thực hiện
+  assignedTo          String?
+  completedBy         String?
+  
+  // Thời gian
+  startedAt           DateTime?
+  completedAt         DateTime?
+  dueDate             DateTime?
+  
+  // Kết quả
+  result              String?                 // "SUCCESS", "FAILED", "SKIPPED"
+  errorMessage        String?
+  
+  // Metadata
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  
+  // Relations
+  assignee            User?                   @relation("StepExecutionAssignee", fields: [assignedTo], references: [id])
+  completedUser       User?                   @relation("StepExecutionCompleter", fields: [completedBy], references: [id])
+  
+  @@index([workflowInstanceId])
+  @@index([workflowStepId])
+  @@index([status])
+  @@index([assignedTo])
+  @@map("step_executions")
+}
+
+// ============================================
+// WORKFLOW APPROVAL (Phê duyệt)
+// ============================================
+
+model WorkflowApproval {
+  id                  String           @id @default(cuid())
+  workflowInstanceId  String
+  workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+  
+  stepNumber          Int              // Bước phê duyệt
+  
+  // Người phê duyệt
+  approverId          String
+  approver            User             @relation("WorkflowApprover", fields: [approverId], references: [id])
+  
+  // Ủy quyền
+  delegatedFrom       String?          // User ID người ủy quyền
+  delegatedFromUser   User?            @relation("WorkflowApprovalDelegator", fields: [delegatedFrom], references: [id])
+  
+  // Trạng thái
+  status              ApprovalStatus   @default(PENDING)
+  
+  // Quyết định
+  decision            String?          // "APPROVED", "REJECTED"
+  comment             String?
+  attachmentIds       String[]         // File IDs đính kèm
+  
+  // Thời gian
+  requestedAt         DateTime         @default(now())
+  respondedAt         DateTime?
+  dueDate             DateTime?
+  
+  // Metadata
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  
+  @@index([workflowInstanceId])
+  @@index([approverId])
+  @@index([status])
+  @@index([stepNumber])
+  @@map("workflow_approvals")
+}
+
+// ============================================
+// WORKFLOW COMMENT (Bình luận trong quy trình)
+// ============================================
+
+model WorkflowComment {
+  id                  String           @id @default(cuid())
+  workflowInstanceId  String
+  workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+  
+  stepNumber          Int?             // Bước nào (null = comment chung)
+  
+  // Nội dung
+  content             String
+  attachmentIds       String[]         // File IDs
+  
+  // Người comment
+  authorId            String
+  author              User             @relation("WorkflowCommentAuthor", fields: [authorId], references: [id])
+  
+  // Mention
+  mentionedUserIds    String[]
+  
+  // Metadata
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  
+  @@index([workflowInstanceId])
+  @@index([authorId])
+  @@index([stepNumber])
+  @@map("workflow_comments")
+}
+
+// ============================================
+// WORKFLOW ACTIVITY LOG (Nhật ký hoạt động)
+// ============================================
+
+model WorkflowActivityLog {
+  id                  String           @id @default(cuid())
+  workflowInstanceId  String
+  workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+  
+  // Hoạt động
+  action              String           // "CREATED", "STEP_STARTED", "STEP_COMPLETED", "APPROVED", "REJECTED", "COMMENT_ADDED"...
+  stepNumber          Int?
+  
+  // Nội dung
+  description         String
+  details             Json?            // Chi tiết bổ sung
+  
+  // Người thực hiện
+  actorId             String?
+  actor               User?            @relation("WorkflowActivityActor", fields: [actorId], references: [id])
+  
+  // Thời gian
+  createdAt           DateTime         @default(now())
+  
+  @@index([workflowInstanceId])
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("workflow_activity_logs")
+}
+
+// ============================================
+// EMPLOYEE THIRD PARTY ACCOUNT (Tài khoản bên thứ 3)
+// ============================================
+
+model EmployeeThirdPartyAccount {
+  id                  String           @id @default(cuid())
+  employeeProfileId   String
+  employeeProfile     EmployeeProfile  @relation("EmployeeThirdPartyAccounts", fields: [employeeProfileId], references: [id], onDelete: Cascade)
+  
+  // Loại tài khoản
+  accountType         AccountType
+  accountName         String?          // Tên hiển thị
+  
+  // Thông tin tài khoản
+  username            String?
+  email               String?
+  phone               String?
+  accountId           String?          // ID trên hệ thống đó
+  
+  // Thông tin bổ sung
+  profileUrl          String?
+  department          String?
+  role                String?
+  
+  // Trạng thái
+  isActive            Boolean          @default(true)
+  isVerified          Boolean          @default(false)
+  verifiedAt          DateTime?
+  
+  // Ghi chú
+  notes               String?
+  metadata            Json?            // Dữ liệu bổ sung theo từng loại tài khoản
+  
+  // Thời gian
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  createdBy           String?
+  updatedBy           String?
+  
+  @@unique([employeeProfileId, accountType, username])
+  @@index([employeeProfileId])
+  @@index([accountType])
+  @@index([isActive])
+  @@map("employee_third_party_accounts")
+}
+
+// ============================================
+// Add relations to existing User model:
+// ============================================
+/*
+Add these lines to the User model:
+
+  // Workflow relations
+  workflowTemplatesCreated   WorkflowTemplate[]     @relation("WorkflowTemplateCreator")
+  workflowTemplatesUpdated   WorkflowTemplate[]     @relation("WorkflowTemplateUpdater")
+  workflowInstancesInitiated WorkflowInstance[]     @relation("WorkflowInstanceInitiator")
+  workflowInstancesAssigned  WorkflowInstance[]     @relation("WorkflowInstanceAssignee")
+  stepExecutionsAssigned     StepExecution[]        @relation("StepExecutionAssignee")
+  stepExecutionsCompleted    StepExecution[]        @relation("StepExecutionCompleter")
+  approvalsReceived          WorkflowApproval[]     @relation("WorkflowApprover")
+  approvalsDelegated         WorkflowApproval[]     @relation("WorkflowApprovalDelegator")
+  workflowComments           WorkflowComment[]      @relation("WorkflowCommentAuthor")
+  workflowActivities         WorkflowActivityLog[]  @relation("WorkflowActivityActor")
+*/
+
+// ============================================
+// Add relations to existing EmployeeProfile model:
+// ============================================
+/*
+Add this line to the EmployeeProfile model:
+
+  thirdPartyAccounts EmployeeThirdPartyAccount[] @relation("EmployeeThirdPartyAccounts")
+*/

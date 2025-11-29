@@ -51,6 +51,17 @@ enum AIProviderType {
   GROK
 }
 
+enum AccountType {
+  CRM
+  FACEBOOK
+  GMAIL
+  OTHER
+  SLACK
+  TEAMS
+  ZALO
+  ZOOM
+}
+
 input AddMemberInput {
   role: String = "member"
   userId: ID!
@@ -438,6 +449,14 @@ type ApplyCouponResponse {
   errors: [String!]
   message: String
   success: Boolean!
+}
+
+enum ApprovalStatus {
+  APPROVED
+  CANCELLED
+  DELEGATED
+  PENDING
+  REJECTED
 }
 
 input AssignRolePermissionInput {
@@ -884,6 +903,13 @@ type Comment {
   updatedAt: DateTime!
   user: User!
   userId: String!
+}
+
+input CompleteStepInput {
+  notes: String
+  outputData: JSON
+  stepNumber: Int!
+  workflowInstanceId: String!
 }
 
 """Employment contract types"""
@@ -1800,6 +1826,48 @@ input CreateWebsiteSettingInput {
   value: String
 }
 
+input CreateWorkflowCommentInput {
+  attachmentIds: [String!]! = []
+  content: String!
+  mentionedUserIds: [String!]! = []
+  stepNumber: Int
+  workflowInstanceId: String!
+}
+
+input CreateWorkflowInstanceInput {
+  description: String
+  formData: JSON!
+  metadata: JSON
+  relatedEntityId: String
+  relatedEntityType: String
+  title: String!
+  workflowTemplateId: String!
+}
+
+input CreateWorkflowStepInput {
+  assigneeIds: [String!]! = []
+  assigneeType: String
+  config: JSON
+  description: String
+  dueDateOffset: Int
+  estimatedDuration: Int
+  isRequired: Boolean! = true
+  name: String!
+  nextStepCondition: JSON
+  stepNumber: Int!
+  stepType: StepType!
+  workflowTemplateId: String!
+}
+
+input CreateWorkflowTemplateInput {
+  category: String
+  code: String!
+  color: String
+  description: String
+  icon: String
+  name: String!
+}
+
 type CustomTemplate {
   blocks: JSON!
   category: TemplateCategory!
@@ -1900,6 +1968,20 @@ type EmployeeListResponse {
   employees: [EmployeeProfile!]!
   hasMore: Boolean!
   total: Int!
+}
+
+input EmployeeOnboardingFormData {
+  address: String
+  bankAccountNumber: String
+  bankName: String
+  citizenId: String
+  department: String!
+  email: String!
+  fullName: String!
+  phone: String!
+  position: String!
+  startDate: String
+  thirdPartyAccounts: [ThirdPartyAccountData!]! = []
 }
 
 type EmployeeProfile {
@@ -2680,6 +2762,7 @@ type Mutation {
   bulkUpdateFiles(input: BulkUpdateFilesInput!): [File!]!
   bulkUserAction(input: BulkUserActionInput!): BulkUserActionResult!
   cancelOrder(input: CancelOrderInput!): CancelOrderResponse!
+  cancelWorkflowInstance(id: ID!, reason: String!): Boolean!
   changePassword(input: ChangePasswordInput!): Boolean!
 
   """Clear all cached data"""
@@ -2687,6 +2770,7 @@ type Mutation {
   clearCart(sessionId: String): ClearCartResponse!
   completeOffboarding(id: ID!): OffboardingProcess!
   completeOnboardingTask(checklistId: ID!, taskId: ID!): OnboardingChecklist!
+  completeStep(input: CompleteStepInput!): Boolean!
   copyImageFromUrl(bucket: String = "images", editOptions: JSON, filename: String!, imageUrl: String!): JSON!
 
   """Tạo AI provider mới"""
@@ -2751,6 +2835,10 @@ type Mutation {
   createTechnicalSupportMessage(input: CreateTechnicalSupportMessageInput!): TechnicalSupportMessage!
   createTechnicalSupportTicket(input: CreateTechnicalSupportTicketInput!): TechnicalSupportTicket!
   createWebsiteSetting(input: CreateWebsiteSettingInput!): WebsiteSetting!
+  createWorkflowComment(input: CreateWorkflowCommentInput!): WorkflowComment!
+  createWorkflowInstance(input: CreateWorkflowInstanceInput!): WorkflowInstance!
+  createWorkflowStep(input: CreateWorkflowStepInput!): WorkflowStep!
+  createWorkflowTemplate(input: CreateWorkflowTemplateInput!): WorkflowTemplate!
 
   """Create new ext_sanphamhoadon"""
   createext_sanphamhoadon(data: JSON!, options: JSON): JSON!
@@ -2808,6 +2896,8 @@ type Mutation {
   deleteTaskMedia(mediaId: String!): Boolean!
   deleteUser(id: String!): Boolean!
   deleteWebsiteSetting(key: String!): WebsiteSetting!
+  deleteWorkflowStep(id: ID!): Boolean!
+  deleteWorkflowTemplate(id: ID!): Boolean!
 
   """Delete ext_sanphamhoadon"""
   deleteext_sanphamhoadon(id: String!, options: JSON): JSON!
@@ -2912,6 +3002,7 @@ type Mutation {
   requestPhoneVerification(input: RequestPhoneVerificationInput!): OtpResponse!
   resetPasswordWithToken(email: String!, newPassword: String!, token: String!): OtpResponse!
   resolveTechnicalSupportTicket(resolution: String!, ticketId: String!): TechnicalSupportTicket!
+  respondToApproval(input: RespondToApprovalInput!): Boolean!
 
   """Restore archived project (owner/admin only)"""
   restoreProject(id: ID!): Project!
@@ -2921,8 +3012,10 @@ type Mutation {
   """Đặt AI provider làm mặc định"""
   setDefaultAIProvider(id: String!): AIProvider!
   setPassword(input: SetPasswordInput!): Boolean!
+  setupEmployeeOnboardingWorkflow: Boolean!
   shareTask(input: ShareTaskInput!): TaskShare!
   shareTemplate(input: ShareTemplateInput!): [TemplateShare!]!
+  startEmployeeOnboarding(input: StartEmployeeOnboardingInput!): WorkflowInstance!
   submitQuiz(input: SubmitQuizInput!): QuizAttempt!
   subscribeToPush(auth: String!, endpoint: String!, p256dh: String!): Boolean!
   syncCallCenterData(input: SyncCallCenterInput): SyncCallCenterResponse!
@@ -3017,6 +3110,9 @@ type Mutation {
   updateUser(id: String!, input: UpdateUserInput!): User!
   updateVideoProgress(enrollmentId: ID!, lessonId: ID!, timeSpent: Int!, videoProgress: Float!, watchTime: Int!): LessonProgress!
   updateWebsiteSetting(input: UpdateWebsiteSettingInput!, key: String!): WebsiteSetting!
+  updateWorkflowInstance(id: ID!, input: UpdateWorkflowInstanceInput!): WorkflowInstance!
+  updateWorkflowStep(id: ID!, input: UpdateWorkflowStepInput!): WorkflowStep!
+  updateWorkflowTemplate(id: ID!, input: UpdateWorkflowTemplateInput!): WorkflowTemplate!
 
   """Update ext_sanphamhoadon"""
   updateext_sanphamhoadon(data: JSON!, id: String!, options: JSON): JSON!
@@ -4058,6 +4154,7 @@ type Query {
   getCommentById(id: String!): Comment!
   getCommentsByPost(postId: String!): [Comment!]!
   getCustomTemplate(id: String!): CustomTemplate!
+  getEmployeeOnboardingStatus(employeeId: ID!): WorkflowInstance!
   getHomepage: Page
   getInvoice(id: ID!): ExtListhoadon!
   getInvoiceStats: InvoiceStats!
@@ -4156,12 +4253,14 @@ type Query {
   myCourses: [Course!]!
   myEnrollments: [Enrollment!]!
   myMenus(type: String): [MenuResponseDto!]!
+  myPendingApprovals: [WorkflowApproval!]!
   myPermissions: [PermissionType!]!
 
   """Lấy tất cả projects mà user là thành viên (dùng cho Sidebar)"""
   myProjects(includeArchived: Boolean! = false): [Project!]!
   myRoles: [UserRoleAssignmentType!]!
   myTechnicalSupportTickets(status: String): [TechnicalSupportTicket!]!
+  myWorkflowInstances: [WorkflowInstance!]!
 
   """Normalize a product name"""
   normalizeProductName(productName: String!, threshold: Float! = 0.6): String!
@@ -4310,6 +4409,10 @@ type Query {
   websiteSetting(key: String!): WebsiteSetting
   websiteSettings(category: SettingCategory, group: String, isActive: Boolean, isPublic: Boolean): [WebsiteSetting!]!
   websiteSettingsByCategory(category: String!): [WebsiteSetting!]!
+  workflowInstance(id: ID!): WorkflowInstance!
+  workflowInstances(initiatedBy: ID, status: String): [WorkflowInstance!]!
+  workflowTemplate(id: ID!): WorkflowTemplate!
+  workflowTemplates(category: String, isActive: Boolean): [WorkflowTemplate!]!
 }
 
 type Question {
@@ -4430,6 +4533,13 @@ input ReorderModulesInput {
 
 input RequestPhoneVerificationInput {
   phone: String!
+}
+
+input RespondToApprovalInput {
+  approvalId: String!
+  attachmentIds: [String!]! = []
+  comment: String
+  decision: String!
 }
 
 type Review {
@@ -4752,6 +4862,39 @@ enum SourceDocumentType {
   LINK
   TEXT
   VIDEO
+}
+
+input StartEmployeeOnboardingInput {
+  formData: EmployeeOnboardingFormData!
+  notes: String
+}
+
+type StepExecution {
+  assignedTo: String
+  completedAt: DateTime
+  completedBy: String
+  createdAt: DateTime!
+  dueDate: DateTime
+  errorMessage: String
+  id: ID!
+  inputData: JSON
+  outputData: JSON
+  result: String
+  startedAt: DateTime
+  status: WorkflowInstanceStatus!
+  stepNumber: Int!
+  updatedAt: DateTime!
+  workflowInstanceId: String!
+  workflowStep: WorkflowStep
+  workflowStepId: String!
+}
+
+enum StepType {
+  APPROVAL
+  AUTOMATION
+  CONDITION
+  FORM
+  NOTIFICATION
 }
 
 input SubmitQuizInput {
@@ -5200,6 +5343,13 @@ enum TerminationType {
 input TestAIProviderInput {
   providerId: String!
   testMessage: String = "Hello, how are you?"
+}
+
+input ThirdPartyAccountData {
+  accountType: AccountType!
+  email: String
+  notes: String
+  username: String
 }
 
 enum TicketPriority {
@@ -6038,6 +6188,38 @@ input UpdateWebsiteSettingInput {
   value: String
 }
 
+input UpdateWorkflowInstanceInput {
+  assignedTo: String
+  currentStepNumber: Int
+  description: String
+  formData: JSON
+  metadata: JSON
+  status: WorkflowInstanceStatus
+  title: String
+}
+
+input UpdateWorkflowStepInput {
+  assigneeIds: [String!]
+  assigneeType: String
+  config: JSON
+  description: String
+  dueDateOffset: Int
+  estimatedDuration: Int
+  isActive: Boolean
+  isRequired: Boolean
+  name: String
+  nextStepCondition: JSON
+}
+
+input UpdateWorkflowTemplateInput {
+  category: String
+  color: String
+  description: String
+  icon: String
+  isActive: Boolean
+  name: String
+}
+
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
 
@@ -6225,4 +6407,117 @@ type WebsiteSetting {
   updatedBy: String
   validation: JSON
   value: String
+}
+
+type WorkflowActivityLog {
+  action: String!
+  actorId: String
+  createdAt: DateTime!
+  description: String!
+  details: JSON
+  id: ID!
+  stepNumber: Int
+  workflowInstanceId: String!
+}
+
+type WorkflowApproval {
+  approverId: String!
+  attachmentIds: [String!]!
+  comment: String
+  createdAt: DateTime!
+  decision: String
+  delegatedFrom: String
+  dueDate: DateTime
+  id: ID!
+  requestedAt: DateTime!
+  respondedAt: DateTime
+  status: ApprovalStatus!
+  stepNumber: Int!
+  updatedAt: DateTime!
+  workflowInstanceId: String!
+}
+
+type WorkflowComment {
+  attachmentIds: [String!]!
+  authorId: String!
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  mentionedUserIds: [String!]!
+  stepNumber: Int
+  updatedAt: DateTime!
+  workflowInstanceId: String!
+}
+
+type WorkflowInstance {
+  activityLogs: [WorkflowActivityLog]
+  approvals: [WorkflowApproval]
+  assignedTo: String
+  comments: [WorkflowComment]
+  completedAt: DateTime
+  createdAt: DateTime!
+  currentStepNumber: Int!
+  description: String
+  dueDate: DateTime
+  formData: JSON!
+  id: ID!
+  initiatedBy: String!
+  instanceCode: String!
+  metadata: JSON
+  relatedEntityId: String
+  relatedEntityType: String
+  startedAt: DateTime!
+  status: WorkflowInstanceStatus!
+  stepExecutions: [StepExecution]
+  title: String!
+  updatedAt: DateTime!
+  workflowTemplate: WorkflowTemplate
+  workflowTemplateId: String!
+}
+
+enum WorkflowInstanceStatus {
+  APPROVED
+  CANCELLED
+  COMPLETED
+  IN_PROGRESS
+  PENDING
+  REJECTED
+  WAITING_APPROVAL
+}
+
+type WorkflowStep {
+  assigneeIds: [String!]!
+  assigneeType: String
+  config: JSON
+  createdAt: DateTime!
+  description: String
+  dueDateOffset: Int
+  estimatedDuration: Int
+  id: ID!
+  isActive: Boolean!
+  isRequired: Boolean!
+  name: String!
+  nextStepCondition: JSON
+  stepNumber: Int!
+  stepType: StepType!
+  updatedAt: DateTime!
+  workflowTemplateId: String!
+}
+
+type WorkflowTemplate {
+  category: String
+  code: String!
+  color: String
+  createdAt: DateTime!
+  createdBy: String!
+  description: String
+  icon: String
+  id: ID!
+  instances: [WorkflowInstance]
+  isActive: Boolean!
+  name: String!
+  steps: [WorkflowStep]
+  updatedAt: DateTime!
+  updatedBy: String
+  version: Int!
 }

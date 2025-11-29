@@ -63,6 +63,7 @@ import { GraphQLPerformanceInterceptor } from './common/interceptors/graphql-per
 import { PerformanceInterceptor } from './interceptors/performance.interceptor';
 import { ProjectModule } from './project/project.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { WorkflowModule } from './workflow/workflow.module';
 
 @Module({
   imports: [
@@ -163,6 +164,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     SupportChatModule,
     ReleaseHubModule,
     AnalyticsModule,
+    WorkflowModule,
   ],
   controllers: [
     LogController,
