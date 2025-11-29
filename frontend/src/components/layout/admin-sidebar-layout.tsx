@@ -19,6 +19,7 @@ import {
   Link as LinkIcon,
   DollarSign,
   CheckSquare,
+  Workflow,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -94,6 +95,30 @@ export function AdminSidebarLayout({ children }: AdminSidebarLayoutProps) {
       href: '/admin/tasks',
       icon: CheckSquare,
       requiredRoles: ['admin', 'super_admin', 'content_manager'],
+    },
+    {
+      name: 'Workflow',
+      href: '/workflow',
+      icon: Workflow,
+      requiredRoles: ['admin', 'super_admin', 'content_manager', 'hr_manager', 'manager'],
+      children: [
+        {
+          name: 'Dashboard',
+          href: '/workflow',
+        },
+        {
+          name: 'Workflows của tôi',
+          href: '/workflow/my-instances',
+        },
+        {
+          name: 'Chờ phê duyệt',
+          href: '/workflow/my-approvals',
+        },
+        {
+          name: 'Checkin nhân sự',
+          href: '/workflow/employee-onboarding/new',
+        },
+      ],
     },
     {
       name: 'Analytics',

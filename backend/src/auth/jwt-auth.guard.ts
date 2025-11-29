@@ -2,6 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Logge
 import { ConfigService } from '@nestjs/config';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
+import { Reflector } from '@nestjs/core';
 import { UserService } from '../services/user.service';
 
 @Injectable()
@@ -12,9 +13,20 @@ export class JwtAuthGuard implements CanActivate {
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
+    private readonly reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Check if route is marked as public
+    const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    
+    if (isPublic) {
+      this.logger.debug('Public route - skipping authentication');
+      return true;
+    }
     let request;
     let isGraphQL = false;
     

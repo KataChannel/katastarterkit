@@ -133,12 +133,12 @@ export default function WorkflowTemplateList() {
             </div>
 
             {/* Category Filter */}
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <Select value={categoryFilter || 'all'} onValueChange={(value) => setCategoryFilter(value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Tất cả danh mục" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tất cả danh mục</SelectItem>
+                <SelectItem value="all">Tất cả danh mục</SelectItem>
                 <SelectItem value="HR">Nhân sự (HR)</SelectItem>
                 <SelectItem value="Finance">Tài chính</SelectItem>
                 <SelectItem value="IT">Công nghệ (IT)</SelectItem>
@@ -150,16 +150,16 @@ export default function WorkflowTemplateList() {
 
             {/* Status Filter */}
             <Select
-              value={statusFilter === undefined ? '' : statusFilter.toString()}
+              value={statusFilter === undefined ? 'all' : statusFilter.toString()}
               onValueChange={(value) =>
-                setStatusFilter(value === '' ? undefined : value === 'true')
+                setStatusFilter(value === 'all' ? undefined : value === 'true')
               }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Tất cả trạng thái" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tất cả trạng thái</SelectItem>
+                <SelectItem value="all">Tất cả trạng thái</SelectItem>
                 <SelectItem value="true">Đang hoạt động</SelectItem>
                 <SelectItem value="false">Ngừng hoạt động</SelectItem>
               </SelectContent>

@@ -14,6 +14,7 @@ import {
   LinkDocumentToCourseInput,
   UpdateCourseDocumentLinkInput,
 } from './dto/source-document.dto';
+import { SourceDocumentPaginatedResult } from './dto/source-document-paginated.dto';
 import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CurrentUser } from '../../auth/current-user.decorator';
@@ -53,21 +54,41 @@ export class SourceDocumentResolver {
     return this.sourceDocumentService.create(user.id, input);
   }
 
-  @Query(() => [SourceDocument])
+  @Query(() => SourceDocumentPaginatedResult)
   async sourceDocuments(
-    @Args('filter', { nullable: true }) filter?: SourceDocumentFilterInput,
+    @Args('filter', { nullable: true, type: () => SourceDocumentFilterInput }) filter?: any,
     @Args('page', { type: () => Int, defaultValue: 1 }) page?: number,
     @Args('limit', { type: () => Int, defaultValue: 20 }) limit?: number,
   ) {
-    const result = await this.sourceDocumentService.findAll(filter, page, limit);
-    console.log('📄 Source documents query:', {
-      filter,
-      page,
-      limit,
+    // Convert filter to plain object to avoid class instance issues
+    const plainFilter = filter ? {
+      types: filter.types,
+      statuses: filter.statuses,
+      categoryId: filter.categoryId,
+      userId: filter.userId,
+      search: filter.search,
+      tags: filter.tags,
+      isAiAnalyzed: filter.isAiAnalyzed,
+      approvalRequested: filter.approvalRequested,
+    } : undefined;
+    
+    console.log('🔍 [Resolver] Filter received:', {
+      originalFilter: filter,
+      plainFilter,
+      types: plainFilter?.types,
+      userId: plainFilter?.userId,
+      categoryId: plainFilter?.categoryId,
+    });
+    
+    const result = await this.sourceDocumentService.findAll(plainFilter, page, limit);
+    
+    console.log('📄 [Resolver] Query result:', {
       totalItems: result.items.length,
       totalCount: result.total,
+      sampleTypes: result.items.slice(0, 3).map(i => i.type),
     });
-    return result.items;
+    
+    return result;
   }
 
   @Query(() => SourceDocument)

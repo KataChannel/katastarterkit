@@ -129,6 +129,15 @@ export class SourceDocumentService {
       }
     }
 
+    console.log('🔍 [SourceDocumentService] Filter conditions:', {
+      filter,
+      where: JSON.stringify(where, null, 2),
+      page,
+      limit,
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
     const [items, total] = await Promise.all([
       this.prisma.sourceDocument.findMany({
         where,
@@ -150,6 +159,13 @@ export class SourceDocumentService {
       }),
       this.prisma.sourceDocument.count({ where }),
     ]);
+
+    console.log('📊 [SourceDocumentService] Query results:', {
+      itemsCount: items.length,
+      total,
+      types: items.map(i => i.type),
+      userIds: [...new Set(items.map(i => i.userId))],
+    });
 
     return {
       items: items.map((item) => this.transformDocument(item)),

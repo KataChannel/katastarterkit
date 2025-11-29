@@ -95,19 +95,21 @@ export default function InstructorSourceDocumentsPage() {
     resetPagination,
   } = usePagination(12); // 12 items per page
 
-  // Queries - Get all documents, will filter by current user on client side
+  // Queries - Filter by current user on backend
   const { data, loading, error, refetch } = useQuery(GET_SOURCE_DOCUMENTS, {
     variables: {
       filter: {
-        title: searchQuery || undefined,
-        type: typeFilter !== 'ALL' ? typeFilter : undefined,
-        status: statusFilter !== 'ALL' ? statusFilter : undefined,
+        search: searchQuery || undefined,
+        types: typeFilter !== 'ALL' ? [typeFilter] : undefined,
+        statuses: statusFilter !== 'ALL' ? [statusFilter] : undefined,
         categoryId: categoryFilter !== 'ALL' ? categoryFilter : undefined,
+        userId: user?.id, // Filter by current instructor
       },
       page: currentPage,
       limit: pageSize,
     },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only', // Changed to network-only to avoid cache issues
+    skip: !user?.id, // Skip query if user not loaded
   });
 
   const { data: categoriesData } = useQuery(GET_SOURCE_DOCUMENT_CATEGORIES);
@@ -124,12 +126,10 @@ export default function InstructorSourceDocumentsPage() {
     },
   });
 
-  const allDocuments = data?.sourceDocuments || [];
+  const documents = data?.sourceDocuments?.items || [];
+  const total = data?.sourceDocuments?.total || 0;
+  const totalPages = data?.sourceDocuments?.totalPages || 0;
   const categories = categoriesData?.sourceDocumentCategories || [];
-
-  // Filter documents by current user (instructor can only see their own documents)
-  const documents = allDocuments.filter((doc: any) => doc.userId === user?.id);
-  const total = documents.length;
 
   // Auto-reset pagination when filters change
   useEffect(() => {
@@ -214,7 +214,7 @@ export default function InstructorSourceDocumentsPage() {
                 <SelectValue placeholder="Loại tài liệu" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">Tất cả</SelectItem>
+                <SelectItem value="ALL">Tất cả loại</SelectItem>
                 <SelectItem value="FILE">📄 File</SelectItem>
                 <SelectItem value="VIDEO">🎥 Video</SelectItem>
                 <SelectItem value="TEXT">📝 Văn bản</SelectItem>
@@ -230,7 +230,7 @@ export default function InstructorSourceDocumentsPage() {
                 <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">Tất cả</SelectItem>
+                <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
                 <SelectItem value="DRAFT">Nháp</SelectItem>
                 <SelectItem value="PROCESSING">Đang xử lý</SelectItem>
                 <SelectItem value="PUBLISHED">Đã xuất bản</SelectItem>
@@ -372,15 +372,17 @@ export default function InstructorSourceDocumentsPage() {
           </div>
 
           {/* Pagination */}
-          <Pagination
-            currentPage={currentPage}
-            pageSize={pageSize}
-            totalPages={Math.ceil(total / pageSize)}
-            totalItems={total}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            pageSizeOptions={[12, 24, 48]}
-          />
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalPages={totalPages}
+              totalItems={total}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={[12, 24, 48]}
+            />
+          )}
         </>
       )}
 

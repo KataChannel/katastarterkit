@@ -5,47 +5,53 @@ import { gql } from '@apollo/client';
 export const GET_SOURCE_DOCUMENTS = gql`
   query GetSourceDocuments($filter: SourceDocumentFilterInput, $page: Int, $limit: Int) {
     sourceDocuments(filter: $filter, page: $page, limit: $limit) {
-      id
-      title
-      description
-      type
-      status
-      url
-      fileName
-      fileSize
-      mimeType
-      duration
-      thumbnailUrl
-      categoryId
-      tags
-      aiSummary
-      isAiAnalyzed
-      approvalRequested
-      approvalRequestedAt
-      approvedAt
-      approvedBy
-      rejectionReason
-      userId
-      viewCount
-      downloadCount
-      usageCount
-      createdAt
-      updatedAt
-      publishedAt
-      category {
+      items {
         id
-        name
-        slug
-        icon
-        color
+        title
+        description
+        type
+        status
+        url
+        fileName
+        fileSize
+        mimeType
+        duration
+        thumbnailUrl
+        categoryId
+        tags
+        aiSummary
+        isAiAnalyzed
+        approvalRequested
+        approvalRequestedAt
+        approvedAt
+        approvedBy
+        rejectionReason
+        userId
+        viewCount
+        downloadCount
+        usageCount
+        createdAt
+        updatedAt
+        publishedAt
+        category {
+          id
+          name
+          slug
+          icon
+          color
+        }
+        user {
+          id
+          email
+          username
+          firstName
+          lastName
+        }
       }
-      user {
-        id
-        email
-        username
-        firstName
-        lastName
-      }
+      total
+      page
+      limit
+      totalPages
     }
   }
 `;

@@ -90,40 +90,18 @@ export const GET_WORKFLOW_INSTANCE = gql`
           ...WorkflowStepFields
         }
       }
-      initiator {
-        id
-        username
-        email
-        firstName
-        lastName
-      }
-      assignee {
-        id
-        username
-        email
-        firstName
-        lastName
-      }
       stepExecutions {
         id
         stepNumber
         status
         inputData
         outputData
+        assignedTo
+        completedBy
         startedAt
         completedAt
         workflowStep {
           ...WorkflowStepFields
-        }
-        assignee {
-          id
-          username
-          email
-        }
-        completedUser {
-          id
-          username
-          email
         }
       }
       approvals {
@@ -183,16 +161,6 @@ export const GET_WORKFLOW_INSTANCES = gql`
         icon
         color
       }
-      initiator {
-        id
-        username
-        email
-      }
-      assignee {
-        id
-        username
-        email
-      }
     }
   }
 `;
@@ -209,16 +177,6 @@ export const GET_MY_WORKFLOW_INSTANCES = gql`
         category
         icon
         color
-      }
-      initiator {
-        id
-        username
-        email
-      }
-      assignee {
-        id
-        username
-        email
       }
     }
   }

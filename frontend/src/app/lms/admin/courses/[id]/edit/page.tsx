@@ -150,7 +150,7 @@ export default function EditCoursePage() {
   // Source Documents queries
   const { data: availableDocsData } = useQuery(GET_SOURCE_DOCUMENTS, {
     variables: {
-      filter: { title: documentSearch || undefined },
+      filter: { search: documentSearch || undefined },
       page: 1,
       limit: 20,
     },

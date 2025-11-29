@@ -3012,7 +3012,7 @@ type Mutation {
   """Đặt AI provider làm mặc định"""
   setDefaultAIProvider(id: String!): AIProvider!
   setPassword(input: SetPasswordInput!): Boolean!
-  setupEmployeeOnboardingWorkflow: Boolean!
+  setupEmployeeOnboardingWorkflow: String!
   shareTask(input: ShareTaskInput!): TaskShare!
   shareTemplate(input: ShareTemplateInput!): [TemplateShare!]!
   startEmployeeOnboarding(input: StartEmployeeOnboardingInput!): WorkflowInstance!
@@ -4346,7 +4346,7 @@ type Query {
   sourceDocumentCategory(id: ID!): SourceDocumentCategory!
   sourceDocumentCategoryTree: [SourceDocumentCategory!]!
   sourceDocumentStats: String!
-  sourceDocuments(filter: SourceDocumentFilterInput, limit: Int! = 20, page: Int! = 1): [SourceDocument!]!
+  sourceDocuments(filter: SourceDocumentFilterInput, limit: Int! = 20, page: Int! = 1): SourceDocumentPaginatedResult!
   suggestMapping(modelName: String!, sourceFields: [String!]!): JSON!
   supportAnalytics: SupportAnalytics!
   supportConversation(id: String!): SupportConversation!
@@ -4844,6 +4844,14 @@ input SourceDocumentFilterInput {
   tags: [String!]
   types: [SourceDocumentType!]
   userId: ID
+}
+
+type SourceDocumentPaginatedResult {
+  items: [SourceDocument!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
 }
 
 """Status of source document"""

@@ -118,7 +118,7 @@ export function SourceDocumentSelector({
   // Fetch categories
   const { data: categoriesData } = useQuery(GET_SOURCE_DOCUMENT_CATEGORIES);
 
-  const documents: SourceDocument[] = documentsData?.sourceDocuments || [];
+  const documents: SourceDocument[] = documentsData?.sourceDocuments?.items || [];
   const categories: SourceDocumentCategory[] = categoriesData?.sourceDocumentCategories || [];
 
   // Filter documents based on search

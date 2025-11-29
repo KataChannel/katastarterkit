@@ -1,4 +1,4 @@
-import { InputType, Field, ID, Int } from '@nestjs/graphql';
+import { InputType, Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { SourceDocumentType, SourceDocumentStatus } from '@prisma/client';
 import GraphQLJSON from 'graphql-type-json';
 import { IsString, IsNotEmpty, IsEnum, IsOptional, IsInt, IsArray } from 'class-validator';
@@ -277,3 +277,6 @@ export class UpdateCourseDocumentLinkInput {
   @Field({ nullable: true })
   description?: string;
 }
+
+// Paginated Result moved to separate file to avoid circular dependency
+// See: ./source-document-paginated.dto.ts

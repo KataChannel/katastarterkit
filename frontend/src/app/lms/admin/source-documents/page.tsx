@@ -142,7 +142,7 @@ export default function SourceDocumentsPage() {
       page: currentPage,
       limit: pageSize,
     },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only', // Changed to network-only to avoid cache issues
   });
 
   const [deleteDocument, { loading: deleting }] = useMutation(DELETE_SOURCE_DOCUMENT, {
@@ -164,7 +164,9 @@ export default function SourceDocumentsPage() {
     },
   });
 
-  const documents = data?.sourceDocuments || [];
+  const documents = data?.sourceDocuments?.items || [];
+  const total = data?.sourceDocuments?.total || 0;
+  const totalPages = data?.sourceDocuments?.totalPages || 0;
   const categories = categoriesData?.sourceDocumentCategories || [];
 
   // Use documents directly from backend (already filtered and paginated)
@@ -275,6 +277,13 @@ export default function SourceDocumentsPage() {
 
           {/* Status filters */}
           <div className="flex items-center gap-2 border-l pl-2">
+            <Button
+              variant={filterStatus === 'all' ? 'default' : 'outline'}
+              onClick={() => setFilterStatus('all')}
+              size="sm"
+            >
+              Tất cả trạng thái
+            </Button>
             {Object.entries(STATUS_CONFIG).map(([status, config]) => (
               <Button
                 key={status}
@@ -513,8 +522,18 @@ export default function SourceDocumentsPage() {
             })}
           </div>
 
-          {/* Note: Pagination UI removed - showing all documents with high limit */}
-          {/* TODO: Add proper pagination with total count from backend */}
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalPages={totalPages}
+              totalItems={total}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              pageSizeOptions={[20, 50, 100]}
+            />
+          )}
         </>
       )}
 

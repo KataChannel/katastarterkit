@@ -1,8 +1,12 @@
 import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, SetMetadata } from '@nestjs/common';
 import { WorkflowService } from './workflow.service';
 import { EmployeeOnboardingService } from './employee-onboarding.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
+// Decorator to skip auth for specific mutations
+export const IS_PUBLIC_KEY = 'isPublic';
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 import {
   WorkflowTemplate,
   WorkflowStep,
@@ -236,10 +240,14 @@ export class WorkflowResolver {
     return result.workflowInstance;
   }
 
-  @Mutation(() => Boolean)
-  async setupEmployeeOnboardingWorkflow(@Context() context: any) {
-    await this.employeeOnboardingService.setupEmployeeOnboardingWorkflow(context.req.user.userId);
-    return true;
+  @Public()
+  @Mutation(() => String)
+  async setupEmployeeOnboardingWorkflow() {
+    // Public mutation for initial setup - no auth required
+    // Use a system user ID or make createdBy optional
+    const systemUserId = 'system';
+    await this.employeeOnboardingService.setupEmployeeOnboardingWorkflow(systemUserId);
+    return 'Employee Onboarding workflow template created successfully';
   }
 
   @Query(() => WorkflowInstance)
