@@ -25,6 +25,9 @@ show_menu() {
     echo "  2. Dev - Backend Only"
     echo "  3. Dev - Frontend Only"
     echo ""
+    echo "🏗️  BUILD (cho domain đã chọn):"
+    echo "  B. Build TypeScript (Backend + Frontend)"
+    echo ""
     echo "🐳 DEPLOYMENT (cho domain đã chọn):"
     echo "  4. Build & Deploy App to Server"
     echo "  5. Build Docker Images Only"
@@ -154,6 +157,34 @@ run_dev_frontend() {
     cd "$PROJECT_ROOT"
     
     bun run "dev:${CURRENT_DOMAIN}:frontend"
+}
+
+run_build_typescript() {
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        select_domain || return
+    fi
+    
+    if [ -z "$CURRENT_DOMAIN" ]; then
+        echo "❌ No domain selected"
+        sleep 2
+        return
+    fi
+    
+    echo ""
+    echo "🏗️  Building TypeScript for $DOMAIN_NAME..."
+    echo "📝 Backend: tsc"
+    echo "📝 Frontend: next build"
+    echo "─────────────────────────────────────────────────────"
+    
+    PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    cd "$PROJECT_ROOT"
+    
+    bun run "build:$CURRENT_DOMAIN"
+    
+    echo ""
+    echo "✅ Build completed!"
+    echo ""
+    read -p "Press Enter to continue..."
 }
 
 run_deploy_full() {
@@ -490,6 +521,7 @@ while true; do
         1) run_dev_full ;;
         2) run_dev_backend ;;
         3) run_dev_frontend ;;
+        [Bb]) run_build_typescript ;;
         4) run_deploy_full ;;
         5) run_build_images ;;
         6) run_deploy_only ;;

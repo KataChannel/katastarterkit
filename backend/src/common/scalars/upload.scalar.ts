@@ -15,7 +15,7 @@ export class UploadScalar implements CustomScalar<any, any> {
   }
 
   parseLiteral(ast: ValueNode) {
-    return GraphQLUpload.parseLiteral(ast, {});
+    return GraphQLUpload.parseLiteral(ast as any, {});
   }
 }
 

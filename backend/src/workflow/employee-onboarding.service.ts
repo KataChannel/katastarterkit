@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WorkflowService } from './workflow.service';
 import { StartEmployeeOnboardingInput } from './dto/workflow.dto';
-import { StepType, WorkflowStatus, AccountType } from '@prisma/client';
+import { StepType, AccountType } from '@prisma/client';
 
 /**
  * Employee Onboarding Service
@@ -41,7 +41,6 @@ export class EmployeeOnboardingService {
         category: 'HR',
         icon: 'UserPlus',
         color: '#10b981',
-        status: WorkflowStatus.ACTIVE,
         isActive: true,
         createdBy: creatorUserId,
         updatedBy: creatorUserId,
