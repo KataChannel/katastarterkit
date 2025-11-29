@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import OptimizedImage from '@/components/OptimizedImage';
 import { useProducts, useDeleteProduct } from '@/hooks/useProducts';
 import { Product, GetProductsInput } from '@/graphql/product.queries';
 import { DataImportComponent } from '@/components/DataImport';
@@ -99,7 +99,7 @@ export default function ProductsPage() {
         <div className="flex items-center justify-center p-1">
           {value ? (
             <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-md overflow-hidden border">
-              <Image
+              <OptimizedImage
                 src={getImageUrl(value)}
                 alt={data.name}
                 fill
@@ -487,7 +487,7 @@ export default function ProductsPage() {
               <div key={product.id} className="flex items-center gap-2 py-2 border-b last:border-0">
                 {product.thumbnail && (
                   <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0">
-                    <Image
+                    <OptimizedImage
                       src={getImageUrl(product.thumbnail)}
                       alt={product.name}
                       fill

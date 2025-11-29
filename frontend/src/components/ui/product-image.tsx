@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import OptimizedImage from '@/components/OptimizedImage';
 import { ImageIcon } from 'lucide-react';
 
 interface ProductImageProps {
@@ -66,8 +66,8 @@ export function ProductImage({
         />
       )}
 
-      {/* Next.js Image */}
-      <Image
+      {/* Optimized Next.js Image with HTTP→HTTPS normalization */}
+      <OptimizedImage
         src={src}
         alt={alt || 'Hình sản phẩm'}
         fill={fill}

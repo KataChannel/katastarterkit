@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatPrice } from '@/lib/format-utils';
-import Image from 'next/image';
+import OptimizedImage from '@/components/OptimizedImage';
 import Link from 'next/link';
 import { ShoppingCart, Eye } from 'lucide-react';
 
@@ -248,7 +248,7 @@ function ProductCard({
       <Link href={`/products/${product.slug}`}>
         <div className="relative aspect-square overflow-hidden bg-gray-100">
           {product.thumbnail ? (
-            <Image
+            <OptimizedImage
               src={product.thumbnail}
               alt={product.name}
               fill

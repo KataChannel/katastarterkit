@@ -19,7 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { formatPrice, calculateDiscount } from '@/lib/format-utils';
-import Image from 'next/image';
+import OptimizedImage from '@/components/OptimizedImage';
 import { useParams } from 'next/navigation';
 import { ShoppingCart, Star, Truck, Shield, RefreshCw } from 'lucide-react';
 
@@ -155,7 +155,7 @@ export function ProductDetailBlock({ block, isEditable = true, onUpdate, onDelet
             {/* Main Image */}
             <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
               {product.thumbnail ? (
-                <Image
+                <OptimizedImage
                   src={product.thumbnail}
                   alt={product.name}
                   fill
@@ -187,7 +187,7 @@ export function ProductDetailBlock({ block, isEditable = true, onUpdate, onDelet
               <div className="grid grid-cols-4 gap-2">
                 {product.images.map((img, idx) => (
                   <div key={idx} className="relative aspect-square rounded overflow-hidden bg-gray-100 cursor-pointer hover:ring-2 ring-primary">
-                    <Image src={img.url} alt={img.alt || ''} fill className="object-cover" />
+                    <OptimizedImage src={img.url} alt={img.alt || ''} fill className="object-cover" />
                   </div>
                 ))}
               </div>

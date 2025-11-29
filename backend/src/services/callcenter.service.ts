@@ -44,9 +44,20 @@ export class CallCenterService {
   // ============================================================================
 
   async getConfig() {
-    // Get first config or create default
-    let config = await this.prisma.callCenterConfig.findFirst();
+    // Get the most recently updated active config first
+    let config = await this.prisma.callCenterConfig.findFirst({
+      where: { isActive: true },
+      orderBy: { updatedAt: 'desc' },
+    });
 
+    // If no active config, get any config ordered by most recent
+    if (!config) {
+      config = await this.prisma.callCenterConfig.findFirst({
+        orderBy: { updatedAt: 'desc' },
+      });
+    }
+
+    // If still no config, create a new one with isActive: true
     if (!config) {
       this.logger.log('No config found, creating default config');
       config = await this.prisma.callCenterConfig.create({
@@ -54,7 +65,7 @@ export class CallCenterService {
           apiUrl: 'https://pbx01.onepos.vn:8080/api/v2/cdrs',
           domain: 'tazaspa102019',
           syncMode: 'MANUAL',
-          isActive: false,
+          isActive: true, // Changed to true by default
           defaultDaysBack: 30,
           batchSize: 200,
         },
@@ -117,7 +128,10 @@ export class CallCenterService {
     }
 
     if (!config.isActive) {
-      throw new HttpException('Config is not active', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Cấu hình Call Center chưa được kích hoạt. Vui lòng bật "Kích hoạt" trong phần Cài đặt.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // Calculate date range

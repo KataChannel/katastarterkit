@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useSubscription } from '@apollo/client';
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage from '@/components/OptimizedImage';
 import { formatDistanceToNow } from 'date-fns';
 import { 
   MessageCircle, 
@@ -250,7 +250,7 @@ export function PostList({
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="relative">
                     {post.author.avatar ? (
-                      <Image
+                      <OptimizedImage
                         src={post.author.avatar}
                         alt={post.author.username}
                         width={40}

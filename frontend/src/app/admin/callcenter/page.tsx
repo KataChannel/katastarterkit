@@ -44,13 +44,27 @@ import {
   Volume2,
   Pause,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ChevronDown,
+  BarChart3,
+  User
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { AdvancedTable } from '@/components/ui/advanced-table/AdvancedTable';
 import type { ColumnDef } from '@/components/ui/advanced-table/types';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 // ✅ MIGRATED: Import Dynamic GraphQL hooks
 import { 
@@ -425,6 +439,7 @@ export default function CallCenterPage() {
     fromDate: '',
     toDate: '',
   });
+  const [showSummary, setShowSummary] = useState(false);
 
   // ✅ MIGRATED: Query config với Dynamic GraphQL
   // Note: Lấy config đầu tiên (chỉ có 1 config)
@@ -476,6 +491,18 @@ export default function CallCenterPage() {
   const [createConfigMutation, { loading: creating }] = useCreateOne('callCenterConfig');
 
   const handleManualSync = async () => {
+    // Check if config is active before syncing
+    if (!config?.isActive) {
+      toast.error('Cấu hình chưa được kích hoạt', {
+        description: 'Vui lòng bật "Kích hoạt" trong phần Cài đặt trước khi đồng bộ.',
+        action: {
+          label: 'Mở Cài đặt',
+          onClick: () => setShowConfigDialog(true),
+        },
+      });
+      return;
+    }
+
     try {
       const result = await syncData({
         variables: {
@@ -508,6 +535,19 @@ export default function CallCenterPage() {
   const handleSyncWithDateRange = async () => {
     if (!dateRange.fromDate || !dateRange.toDate) {
       toast.error('Vui lòng chọn khoảng ngày');
+      return;
+    }
+
+    // Check if config is active before syncing
+    if (!config?.isActive) {
+      setShowDateRangeDialog(false);
+      toast.error('Cấu hình chưa được kích hoạt', {
+        description: 'Vui lòng bật "Kích hoạt" trong phần Cài đặt trước khi đồng bộ.',
+        action: {
+          label: 'Mở Cài đặt',
+          onClick: () => setShowConfigDialog(true),
+        },
+      });
       return;
     }
 
@@ -616,6 +656,53 @@ export default function CallCenterPage() {
     return <Badge variant={configVariant.variant}>{configVariant.label}</Badge>;
   };
 
+  // Calculate call duration summary by caller
+  const calculateSummary = () => {
+    if (!records?.items || records.items.length === 0) return [];
+
+    const summaryMap = new Map<string, {
+      callerNumber: string;
+      totalCalls: number;
+      totalDuration: number;
+      totalBillsec: number;
+      answeredCalls: number;
+      missedCalls: number;
+    }>();
+
+    records.items.forEach((record: CallCenterRecord) => {
+      const caller = record.callerIdNumber || 'Unknown';
+      const duration = parseInt(record.duration || '0');
+      const billsec = parseInt(record.billsec || '0');
+      const isAnswered = record.callStatus === 'ANSWER';
+
+      if (!summaryMap.has(caller)) {
+        summaryMap.set(caller, {
+          callerNumber: caller,
+          totalCalls: 0,
+          totalDuration: 0,
+          totalBillsec: 0,
+          answeredCalls: 0,
+          missedCalls: 0,
+        });
+      }
+
+      const summary = summaryMap.get(caller)!;
+      summary.totalCalls += 1;
+      summary.totalDuration += duration;
+      summary.totalBillsec += billsec;
+      if (isAnswered) {
+        summary.answeredCalls += 1;
+      } else {
+        summary.missedCalls += 1;
+      }
+    });
+
+    return Array.from(summaryMap.values())
+      .sort((a, b) => b.totalDuration - a.totalDuration);
+  };
+
+  const callSummary = calculateSummary();
+
   // Define columns for AdvancedTable
   const callRecordColumns: ColumnDef<any>[] = [
     {
@@ -695,18 +782,51 @@ export default function CallCenterPage() {
             <Settings className="mr-2 h-4 w-4" />
             Cấu hình
           </Button>
-          <Button variant="outline" onClick={() => setShowDateRangeDialog(true)} disabled={!config?.isActive}>
-            <Calendar className="mr-2 h-4 w-4" />
-            Chọn ngày sync
-          </Button>
-          <Button onClick={handleManualSync} disabled={syncing || !config?.isActive}>
-            {syncing ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="mr-2 h-4 w-4" />
-            )}
-            Sync Ngay
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowDateRangeDialog(true)} 
+                    disabled={!config?.isActive}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Chọn ngày sync
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!config?.isActive && (
+                <TooltipContent>
+                  <p>Vui lòng kích hoạt cấu hình trong phần Cài đặt</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button 
+                    onClick={handleManualSync} 
+                    disabled={syncing || !config?.isActive}
+                  >
+                    {syncing ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                    )}
+                    Sync Ngay
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!config?.isActive && !syncing && (
+                <TooltipContent>
+                  <p>Vui lòng kích hoạt cấu hình trong phần Cài đặt</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 
@@ -790,6 +910,123 @@ export default function CallCenterPage() {
 
         {/* Call Records Tab - ADVANCED TABLE */}
         <TabsContent value="records" className="space-y-4">
+          {/* Call Duration Summary - Collapsible */}
+          <Collapsible open={showSummary} onOpenChange={setShowSummary}>
+            <Card>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5 text-primary" />
+                      <CardTitle>Tổng hợp thời lượng cuộc gọi</CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">
+                        {callSummary.length} số điện thoại
+                      </Badge>
+                      <ChevronDown 
+                        className={`h-5 w-5 text-muted-foreground transition-transform ${
+                          showSummary ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </div>
+                  </div>
+                  <CardDescription>
+                    Thống kê theo số điện thoại gọi đi (mặc định ẩn)
+                  </CardDescription>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent>
+                  {recordsLoading ? (
+                    <div className="flex justify-center p-8">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : callSummary.length === 0 ? (
+                    <div className="text-center p-8 text-muted-foreground">
+                      Không có dữ liệu để hiển thị
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {/* Summary Header */}
+                      <div className="grid grid-cols-6 gap-2 p-3 bg-muted/50 rounded-md font-semibold text-sm">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4" />
+                          Số điện thoại
+                        </div>
+                        <div className="text-center">Tổng cuộc gọi</div>
+                        <div className="text-center">Đã trả lời</div>
+                        <div className="text-center">Nhớ máy</div>
+                        <div className="text-center">Tổng thời lượng</div>
+                        <div className="text-center">Thời gian nói</div>
+                      </div>
+
+                      {/* Summary Items */}
+                      <ScrollArea className="h-[400px] pr-4">
+                        <div className="space-y-2">
+                          {callSummary.map((summary, index) => (
+                            <div
+                              key={summary.callerNumber}
+                              className="grid grid-cols-6 gap-2 p-3 border rounded-md hover:bg-accent/50 transition-colors"
+                            >
+                              <div className="font-mono font-semibold text-sm flex items-center">
+                                <span className="text-muted-foreground mr-2">#{index + 1}</span>
+                                {summary.callerNumber}
+                              </div>
+                              <div className="text-center">
+                                <Badge variant="outline">{summary.totalCalls}</Badge>
+                              </div>
+                              <div className="text-center">
+                                <Badge variant="default" className="bg-green-600">
+                                  {summary.answeredCalls}
+                                </Badge>
+                              </div>
+                              <div className="text-center">
+                                <Badge variant="secondary">
+                                  {summary.missedCalls}
+                                </Badge>
+                              </div>
+                              <div className="text-center font-semibold">
+                                {formatDuration(summary.totalDuration.toString())}
+                              </div>
+                              <div className="text-center font-semibold text-green-600">
+                                {formatDuration(summary.totalBillsec.toString())}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+
+                      {/* Summary Footer - Total */}
+                      <div className="grid grid-cols-6 gap-2 p-3 bg-primary/10 rounded-md font-bold border-2 border-primary/20">
+                        <div>TỔNG CỘNG</div>
+                        <div className="text-center">
+                          {callSummary.reduce((sum, s) => sum + s.totalCalls, 0)}
+                        </div>
+                        <div className="text-center text-green-600">
+                          {callSummary.reduce((sum, s) => sum + s.answeredCalls, 0)}
+                        </div>
+                        <div className="text-center">
+                          {callSummary.reduce((sum, s) => sum + s.missedCalls, 0)}
+                        </div>
+                        <div className="text-center text-primary">
+                          {formatDuration(
+                            callSummary.reduce((sum, s) => sum + s.totalDuration, 0).toString()
+                          )}
+                        </div>
+                        <div className="text-center text-green-600">
+                          {formatDuration(
+                            callSummary.reduce((sum, s) => sum + s.totalBillsec, 0).toString()
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+
           <Card>
             <CardHeader>
               <CardTitle>Danh sách cuộc gọi</CardTitle>
@@ -1086,20 +1323,43 @@ function ConfigDialog({ open, onClose, config, onSave, loading }: any) {
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="isActive">Kích hoạt</Label>
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md border">
+            <div>
+              <Label htmlFor="isActive" className="font-semibold">Kích hoạt</Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Bật để cho phép đồng bộ dữ liệu Call Center
+              </p>
+            </div>
             <Switch
               id="isActive"
               checked={formData.isActive}
-              onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+              onCheckedChange={(checked) => {
+                if (!checked && config?.isActive) {
+                  // Confirm before deactivating
+                  if (window.confirm('Bạn có chắc muốn tắt kích hoạt? Điều này sẽ ngăn tất cả các thao tác đồng bộ.')) {
+                    setFormData({ ...formData, isActive: checked });
+                  }
+                } else {
+                  setFormData({ ...formData, isActive: checked });
+                }
+              }}
             />
           </div>
 
           {!formData.isActive && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm text-yellow-800">
-                ⚠️ Bật "Kích hoạt" để sử dụng tính năng đồng bộ
-              </p>
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-start gap-2">
+                <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-red-800">
+                    Cấu hình chưa được kích hoạt
+                  </p>
+                  <p className="text-xs text-red-700 mt-1">
+                    Bạn sẽ không thể đồng bộ dữ liệu cho đến khi bật "Kích hoạt". 
+                    Tất cả các nút đồng bộ sẽ bị vô hiệu hóa.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 

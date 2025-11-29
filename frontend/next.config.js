@@ -35,6 +35,19 @@ const nextConfig = {
   
   // Image optimization
   images: {
+    // Add domains for backward compatibility in production
+    domains: [
+      'localhost',
+      '116.118.49.243',
+      'rausachtrangia.com',
+      'www.rausachtrangia.com',
+      'storage.rausachtrangia.com',
+      'images.rausachtrangia.com',
+      'images.unsplash.com',
+      'picsum.photos',
+      'placehold.co',
+      '1drv.ms',
+    ],
     remotePatterns: [
       {
         protocol: 'http',
@@ -73,7 +86,13 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '*.rausachtrangia.com',
+        hostname: 'www.rausachtrangia.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'www.rausachtrangia.com',
+        pathname: '/**',
       },
       {
         protocol: 'https',
