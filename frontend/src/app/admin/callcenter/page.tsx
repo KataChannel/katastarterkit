@@ -255,20 +255,25 @@ function SyncProgressDialog({
   // ✅ MIGRATED: Use Dynamic GraphQL with Apollo polling (for real-time updates)
   const { data: syncLogData, startPolling, stopPolling } = useQuery(FIND_UNIQUE, {
     variables: {
-      model: 'callCenterSyncLog',
-      where: { id: syncLogId || '' },
+      modelName: 'callCenterSyncLog',
+      input: { 
+        id: syncLogId || '' 
+      },
     },
     skip: !syncLogId || !open,
     fetchPolicy: 'network-only', // Always fetch from network for real-time
   });
 
-  const syncLog = syncLogData?.findUnique as CallCenterSyncLog | undefined;
+  const syncLog = syncLogData?.findById as CallCenterSyncLog | undefined;
 
+  // Start/Stop polling based on dialog state
   useEffect(() => {
     if (open && syncLogId) {
-      // Start với initial message
+      // Start polling every 2 seconds for real-time updates
+      startPolling(2000);
       setLogs([`[${new Date().toLocaleTimeString('vi-VN')}] Bắt đầu đồng bộ dữ liệu...`]);
     } else {
+      stopPolling();
       setLogs([]);
       setStats({
         recordsFetched: 0,
@@ -278,7 +283,12 @@ function SyncProgressDialog({
         status: 'running',
       });
     }
-  }, [open, syncLogId]);
+
+    // Cleanup: stop polling when component unmounts or dialog closes
+    return () => {
+      stopPolling();
+    };
+  }, [open, syncLogId, startPolling, stopPolling]);
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -298,52 +308,58 @@ function SyncProgressDialog({
         status: syncLog.status || 'running',
       };
 
-      // Add logs khi có update
+      // Add logs khi có update đáng kể (mỗi 10, 50, 100 records hoặc khi hoàn thành)
       const prevFetched = stats.recordsFetched;
-      if (syncLog.recordsFetched > prevFetched) {
+      const fetchDiff = syncLog.recordsFetched - prevFetched;
+      if (fetchDiff > 0 && (fetchDiff >= 10 || syncLog.recordsFetched % 50 === 0)) {
         setLogs(prev => [
           ...prev,
-          `[${new Date().toLocaleTimeString('vi-VN')}] Đã tải ${syncLog.recordsFetched} records từ PBX API...`
+          `[${new Date().toLocaleTimeString('vi-VN')}] 📥 Đã tải ${syncLog.recordsFetched} records từ PBX API...`
         ]);
       }
 
-      if (syncLog.recordsCreated > stats.recordsCreated) {
+      const createdDiff = syncLog.recordsCreated - stats.recordsCreated;
+      if (createdDiff > 0 && (createdDiff >= 10 || syncLog.recordsCreated % 50 === 0)) {
         setLogs(prev => [
           ...prev,
-          `[${new Date().toLocaleTimeString('vi-VN')}] ✅ Tạo mới ${syncLog.recordsCreated} records...`
+          `[${new Date().toLocaleTimeString('vi-VN')}] ✅ Đã tạo mới ${syncLog.recordsCreated} records...`
         ]);
       }
 
-      if (syncLog.recordsUpdated > stats.recordsUpdated) {
+      const updatedDiff = syncLog.recordsUpdated - stats.recordsUpdated;
+      if (updatedDiff > 0 && (updatedDiff >= 5 || syncLog.recordsUpdated % 25 === 0)) {
         setLogs(prev => [
           ...prev,
-          `[${new Date().toLocaleTimeString('vi-VN')}] 🔄 Cập nhật ${syncLog.recordsUpdated} records...`
+          `[${new Date().toLocaleTimeString('vi-VN')}] 🔄 Đã cập nhật ${syncLog.recordsUpdated} records...`
         ]);
       }
 
       if (syncLog.status === 'success' && stats.status !== 'success') {
         setLogs(prev => [
           ...prev,
-          `[${new Date().toLocaleTimeString('vi-VN')}] ✨ Đồng bộ hoàn thành thành công!`
+          `[${new Date().toLocaleTimeString('vi-VN')}] ✨ Đồng bộ hoàn thành thành công!`,
+          `[${new Date().toLocaleTimeString('vi-VN')}] 📊 Tổng kết: ${syncLog.recordsCreated} tạo mới, ${syncLog.recordsUpdated} cập nhật, ${syncLog.recordsSkipped} bỏ qua`
         ]);
+        stopPolling();
       }
 
-      if (syncLog.status === 'failed' && stats.status !== 'failed') {
+      if (syncLog.status === 'error' && stats.status !== 'error') {
         setLogs(prev => [
           ...prev,
           `[${new Date().toLocaleTimeString('vi-VN')}] ❌ Đồng bộ thất bại: ${syncLog.errorMessage || 'Unknown error'}`
         ]);
+        stopPolling();
       }
 
       setStats(newStats);
     }
-  }, [syncLog]);
+  }, [syncLog, stats, stopPolling]);
 
   const progress = stats.recordsFetched > 0 
     ? ((stats.recordsCreated + stats.recordsUpdated) / stats.recordsFetched) * 100 
     : 0;
 
-  const isCompleted = stats.status === 'success' || stats.status === 'failed';
+  const isCompleted = stats.status === 'success' || stats.status === 'error';
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -352,17 +368,29 @@ function SyncProgressDialog({
           <DialogTitle className="flex items-center gap-2">
             {!isCompleted && <Loader2 className="h-4 w-4 animate-spin" />}
             {stats.status === 'success' && <CheckCircle className="h-4 w-4 text-green-600" />}
-            {stats.status === 'failed' && <XCircle className="h-4 w-4 text-red-600" />}
+            {stats.status === 'error' && <XCircle className="h-4 w-4 text-red-600" />}
             Tiến trình đồng bộ
           </DialogTitle>
           <DialogDescription>
             {stats.status === 'running' && 'Đang đồng bộ dữ liệu từ PBX API...'}
             {stats.status === 'success' && 'Đồng bộ hoàn thành thành công!'}
-            {stats.status === 'failed' && 'Đồng bộ thất bại!'}
+            {stats.status === 'error' && 'Đồng bộ thất bại!'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Sync Info */}
+          {syncLog && (
+            <div className="px-4 py-2 bg-muted/50 rounded-md text-xs text-muted-foreground">
+              <div className="flex justify-between items-center">
+                <span>Sync Log ID: {syncLogId?.slice(0, 8)}...</span>
+                <span>
+                  {syncLog.startedAt && format(new Date(syncLog.startedAt), 'HH:mm:ss', { locale: vi })}
+                  {syncLog.duration && ` • ${(syncLog.duration / 1000).toFixed(1)}s`}
+                </span>
+              </div>
+            </div>
+          )}
           {/* Progress Bar */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
@@ -374,16 +402,31 @@ function SyncProgressDialog({
 
           {/* Stats Grid - REAL-TIME UPDATE */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="text-2xl font-bold text-blue-700">{stats.recordsFetched}</div>
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 relative">
+              <div className="text-2xl font-bold text-blue-700">
+                {stats.recordsFetched}
+                {!isCompleted && stats.recordsFetched > 0 && (
+                  <span className="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                )}
+              </div>
               <div className="text-xs text-blue-600">Đã tải từ API</div>
             </div>
             <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-              <div className="text-2xl font-bold text-green-700">{stats.recordsCreated}</div>
+              <div className="text-2xl font-bold text-green-700">
+                {stats.recordsCreated}
+                {!isCompleted && stats.recordsCreated > 0 && (
+                  <span className="ml-2 inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                )}
+              </div>
               <div className="text-xs text-green-600">Tạo mới</div>
             </div>
             <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-              <div className="text-2xl font-bold text-yellow-700">{stats.recordsUpdated}</div>
+              <div className="text-2xl font-bold text-yellow-700">
+                {stats.recordsUpdated}
+                {!isCompleted && stats.recordsUpdated > 0 && (
+                  <span className="ml-2 inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                )}
+              </div>
               <div className="text-xs text-yellow-600">Cập nhật</div>
             </div>
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
