@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { SupportMessageType, SupportSender } from '@prisma/client';
+import { CustomerAuthType, SupportMessageType, SupportSender } from '@prisma/client';
 import { AIResponseService } from './ai-response.service';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class SupportMessageService {
       senderType: SupportSender;
       senderId?: string;
       senderName?: string;
-      customerAuthType?: string;
+      customerAuthType?: CustomerAuthType | string;
       isAIGenerated?: boolean;
       aiConfidence?: number;
       aiSuggestions?: any;
@@ -32,8 +32,10 @@ export class SupportMessageService {
   ) {
     // Get auth icon based on customer auth type
     let customerAuthIcon: string | undefined;
-    if (data.customerAuthType && data.senderType === SupportSender.CUSTOMER) {
-      const authIcons = {
+    const customerAuthTypeEnum = data.customerAuthType as CustomerAuthType | undefined;
+    
+    if (customerAuthTypeEnum && data.senderType === SupportSender.CUSTOMER) {
+      const authIcons: Record<CustomerAuthType, string> = {
         GUEST: '👤',
         PHONE: '📱',
         ZALO: '💬',
@@ -41,14 +43,26 @@ export class SupportMessageService {
         GOOGLE: '🔍',
         USER_ACCOUNT: '🔐',
       };
-      customerAuthIcon = authIcons[data.customerAuthType];
+      customerAuthIcon = authIcons[customerAuthTypeEnum];
     }
 
+    // Extract fields to use proper Prisma syntax
+    const { conversationId, senderId, customerAuthType, ...restData } = data;
+    
     const message = await this.prisma.supportMessage.create({
       data: {
-        ...data,
+        ...restData,
+        customerAuthType: customerAuthTypeEnum,
         customerAuthIcon,
         sentAt: new Date(),
+        conversation: {
+          connect: { id: conversationId },
+        },
+        ...(senderId && {
+          sender: {
+            connect: { id: senderId },
+          },
+        }),
       },
       include: {
         sender: {
@@ -118,7 +132,9 @@ export class SupportMessageService {
       // Lưu AI response vào database
       await this.prisma.supportMessage.create({
         data: {
-          conversationId,
+          conversation: {
+            connect: { id: conversationId },
+          },
           content: response,
           messageType: SupportMessageType.TEXT,
           senderType: SupportSender.BOT,

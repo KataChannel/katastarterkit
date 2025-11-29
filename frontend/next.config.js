@@ -64,10 +64,12 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'rausachtrangia.com',
+        pathname: '/**',
       },
       {
         protocol: 'http',
         hostname: 'rausachtrangia.com',
+        pathname: '/**',
       },
       {
         protocol: 'https',
