@@ -114,7 +114,7 @@ function transformRecord(record: any, tableName?: string): any {
   const dateFields = [
     'createdAt', 'updatedAt', 'publishedAt', 'completedAt',
     'dueDate', 'processedAt', 'expiresAt', 'lastLoginAt',
-    'lockedUntil', 'startEpoch', 'endEpoch', 'answerEpoch', 'timestamp',
+    'lockedUntil', 'timestamp', 'syncedAt',
   ];
 
   // Convert date strings
@@ -189,6 +189,48 @@ function transformRecord(record: any, tableName?: string): any {
     const unknownFields = ['_id'];
     for (const field of unknownFields) {
       delete transformed[field];
+    }
+  }
+
+  // Handle call_center_records specific transformations
+  if (tableName === 'call_center_records') {
+    // startEpoch, endEpoch, answerEpoch are String? in schema, NOT Date
+    // Remove them from dateFields conversion - they should stay as strings
+    const epochFields = ['startEpoch', 'endEpoch', 'answerEpoch'];
+    for (const field of epochFields) {
+      // If it was converted to Date, convert back to string
+      if (transformed[field] instanceof Date) {
+        transformed[field] = String(Math.floor(transformed[field].getTime() / 1000));
+      }
+      // Ensure it's a string or null
+      if (transformed[field] !== null && transformed[field] !== undefined) {
+        transformed[field] = String(transformed[field]);
+      }
+    }
+    
+    // Ensure rawData is an object (Json type)
+    if (transformed.rawData && typeof transformed.rawData === 'string') {
+      try {
+        transformed.rawData = JSON.parse(transformed.rawData);
+      } catch {
+        transformed.rawData = { raw: transformed.rawData };
+      }
+    }
+    
+    // Convert syncedAt and updatedAt to Date
+    if (transformed.syncedAt && typeof transformed.syncedAt === 'string') {
+      transformed.syncedAt = new Date(transformed.syncedAt);
+    }
+    if (transformed.updatedAt && typeof transformed.updatedAt === 'string') {
+      transformed.updatedAt = new Date(transformed.updatedAt);
+    }
+    
+    // Ensure required enum fields
+    if (!transformed.direction) {
+      transformed.direction = 'INBOUND';
+    }
+    if (!transformed.callStatus) {
+      transformed.callStatus = 'MISSED';
     }
   }
 
@@ -770,6 +812,42 @@ async function restoreWithRawSQL(table: string, records: any[]): Promise<void> {
               } else if (col === 'requiredPermissions' || col === 'requiredRoles') {
                 return `$${idx + 1}::text[]`;
               }
+            } else if (table === 'lessons') {
+              if (col === 'type') {
+                return `$${idx + 1}::"LessonType"`;
+              } else if (col === 'attachments') {
+                return `$${idx + 1}::jsonb`;
+              }
+            } else if (table === 'courses') {
+              if (col === 'level') {
+                return `$${idx + 1}::"CourseLevel"`;
+              } else if (col === 'status') {
+                return `$${idx + 1}::"CourseStatus"`;
+              } else if (col === 'whatYouWillLearn' || col === 'requirements' || col === 'targetAudience' || col === 'tags') {
+                return `$${idx + 1}::text[]`;
+              }
+            } else if (table === 'enrollments') {
+              if (col === 'status') {
+                return `$${idx + 1}::"EnrollmentStatus"`;
+              }
+            } else if (table === 'quizzes') {
+              if (col === 'type') {
+                return `$${idx + 1}::"QuizType"`;
+              }
+            } else if (table === 'questions') {
+              if (col === 'type') {
+                return `$${idx + 1}::"QuestionType"`;
+              } else if (col === 'options') {
+                return `$${idx + 1}::jsonb`;
+              }
+            } else if (table === 'call_center_records') {
+              if (col === 'direction') {
+                return `$${idx + 1}::"CallDirection"`;
+              } else if (col === 'callStatus') {
+                return `$${idx + 1}::"CallStatus"`;
+              } else if (col === 'rawData') {
+                return `$${idx + 1}::jsonb`;
+              }
             }
             
             return `$${idx + 1}`;
@@ -956,6 +1034,109 @@ async function cleanupBeforeRestore(): Promise<void> {
 }
 
 /**
+ * Create missing course modules that are referenced by lessons
+ * This fixes FK constraint violations during restore
+ */
+async function createMissingCourseModules(backupFolder: string): Promise<void> {
+  try {
+    console.log('🔍 Checking for missing course modules referenced by lessons...');
+    
+    const moduleIdsSet = new Set<string>();
+    
+    // Read lessons backup file
+    const lessonsFile = path.join(BACKUP_ROOT_DIR, backupFolder, 'lessons.json');
+    if (fs.existsSync(lessonsFile)) {
+      const lessons = JSON.parse(fs.readFileSync(lessonsFile, 'utf8'));
+      if (Array.isArray(lessons)) {
+        lessons.forEach((l: any) => {
+          if (l.moduleId) moduleIdsSet.add(l.moduleId);
+        });
+      }
+    }
+
+    const moduleIds = Array.from(moduleIdsSet);
+    if (moduleIds.length === 0) {
+      console.log('   ⏭️  No module references found in lessons - skipping\n');
+      return;
+    }
+
+    console.log(`   📋 Found ${moduleIds.length} unique module IDs in lessons`);
+
+    // Check which modules already exist
+    const existingModules = await prisma.courseModule.findMany({
+      where: { id: { in: moduleIds as string[] } },
+      select: { id: true },
+    });
+
+    const existingIds = new Set(existingModules.map(m => m.id));
+    const missingIds = moduleIds.filter(id => !existingIds.has(id as string));
+
+    if (missingIds.length === 0) {
+      console.log('   ✅ All course modules already exist\n');
+      return;
+    }
+
+    console.log(`   🔧 Creating ${missingIds.length} missing course modules...`);
+
+    // Get or create a course
+    let course = await prisma.course.findFirst({
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!course) {
+      // Get first admin user
+      const admin = await prisma.user.findFirst({ 
+        where: { roleType: 'ADMIN' } 
+      });
+      
+      if (!admin) {
+        console.log('   ⚠️  No admin user found - cannot create course. Skipping modules.\n');
+        return;
+      }
+
+      course = await prisma.course.create({
+        data: {
+          title: '[Restored] Default Course',
+          slug: 'restored-default-course-' + Date.now(),
+          description: 'Auto-created course for restored lesson data',
+          level: 'BEGINNER',
+          status: 'DRAFT',
+          instructorId: admin.id,
+        },
+      });
+      console.log(`   ✅ Created course: ${course.id}`);
+    }
+
+    // Create missing modules
+    let created = 0;
+    for (const moduleId of missingIds) {
+      try {
+        await prisma.courseModule.create({
+          data: {
+            id: moduleId as string,
+            title: `[Restored] Module ${(moduleId as string).substring(0, 8)}`,
+            description: 'Auto-created module to satisfy FK constraints during restore',
+            order: created + 1,
+            courseId: course.id,
+          },
+        });
+        created++;
+      } catch (error: any) {
+        // Skip if already exists (race condition)
+        if (!error.message?.includes('Unique constraint')) {
+          console.log(`   ⚠️  Failed to create module ${moduleId}: ${error.message}`);
+        }
+      }
+    }
+
+    console.log(`   ✅ Created ${created}/${missingIds.length} missing course modules\n`);
+  } catch (error) {
+    console.log(`   ⚠️  Error creating missing course modules: ${error}`);
+    console.log('   ⏭️  Continuing with restore...\n');
+  }
+}
+
+/**
  * Create missing lessons that are referenced by quizzes
  * This fixes FK constraint violations during restore
  */
@@ -1110,20 +1291,38 @@ function buildTableToModelMapping(): { [tableName: string]: string } {
     
     const mapping: { [tableName: string]: string } = {};
     
-    // Extract model blocks with their bodies
-    const modelBlockRegex = /^model\s+(\w+)\s*\{([^}]*?)\}/gm;
-    let match;
+    // Split by model definitions and parse each one
+    const lines = schemaContent.split('\n');
+    let currentModel: string | null = null;
+    let modelBody = '';
+    let braceCount = 0;
     
-    while ((match = modelBlockRegex.exec(schemaContent)) !== null) {
-      const modelName = match[1];
-      const modelBody = match[2];
+    for (const line of lines) {
+      // Check for model start
+      const modelStart = line.match(/^model\s+(\w+)\s*\{/);
+      if (modelStart) {
+        currentModel = modelStart[1];
+        modelBody = line;
+        braceCount = (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
+        continue;
+      }
       
-      // Look for @@map directive in the model body
-      const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
-      const tableName = mapMatch ? mapMatch[1] : camelToSnakeCase(modelName);
-      
-      // Store mapping: table_name → modelName (for Prisma model access)
-      mapping[tableName] = modelName;
+      // If inside a model, accumulate lines
+      if (currentModel) {
+        modelBody += '\n' + line;
+        braceCount += (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
+        
+        // Check if model ended
+        if (braceCount <= 0) {
+          // Parse the complete model body
+          const mapMatch = modelBody.match(/@@map\s*\(\s*["']([^"']+)["']\s*\)/);
+          const tableName = mapMatch ? mapMatch[1] : camelToSnakeCase(currentModel);
+          
+          mapping[tableName] = currentModel;
+          currentModel = null;
+          modelBody = '';
+        }
+      }
     }
     
     return mapping;
@@ -1568,6 +1767,11 @@ async function main(): Promise<void> {
     console.log(`🔄 Restoring ${tables.length} tables...\n`);
     for (let i = 0; i < tables.length; i++) {
       const table = tables[i];
+      
+      // Before restoring lessons, ensure course_modules exist
+      if (table === 'lessons') {
+        await createMissingCourseModules(backupFolder);
+      }
       
       // Before restoring quizzes or lesson_progress, ensure lessons exist
       if (table === 'quizzes' || table === 'lesson_progress') {

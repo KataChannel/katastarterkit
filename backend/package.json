@@ -34,6 +34,7 @@
     "seed:rbac": "ts-node prisma/seeds/rbac-roles-permissions.seed.ts",
     "seed:assign-roles": "ts-node prisma/seeds/assign-user-roles.seed.ts",
     "seed:source-documents": "ts-node prisma/seeds/seed-source-documents.ts",
+    "seed:workflow-onboarding": "ts-node prisma/seeds/seed-employee-onboarding-workflow.ts",
     "check:source-documents": "ts-node prisma/seeds/check-source-documents.ts",
     "migrate:assign-roles": "bun run scripts/assign-default-roles.ts",
     "cleanup:users-seed-perms": "ts-node scripts/cleanup-users-and-seed-permissions.ts",

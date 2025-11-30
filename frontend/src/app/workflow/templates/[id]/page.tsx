@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { use } from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_WORKFLOW_TEMPLATE } from '@/graphql/workflow';
 import { Button } from '@/components/ui/button';
@@ -10,9 +10,9 @@ import { Loader2, ArrowLeft, Edit, Play, CheckCircle2, Clock } from 'lucide-reac
 import { useRouter } from 'next/navigation';
 
 interface WorkflowTemplateDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const stepTypeLabels: Record<string, string> = {
@@ -33,8 +33,10 @@ const stepTypeColors: Record<string, string> = {
 
 export default function WorkflowTemplateDetailPage({ params }: WorkflowTemplateDetailPageProps) {
   const router = useRouter();
+  const { id } = use(params);
   const { data, loading, error } = useQuery(GET_WORKFLOW_TEMPLATE, {
-    variables: { id: params.id },
+    variables: { id },
+    skip: !id,
   });
 
   const template = data?.workflowTemplate;

@@ -2402,7 +2402,7 @@ enum ClearanceStatus {
 }
 
 model EmployeeProfile {
-  id     String @id @default(cuid())
+  id     String @id @default(uuid())
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -2500,7 +2500,7 @@ model EmployeeProfile {
 }
 
 model EmploymentHistory {
-  id                String          @id @default(cuid())
+  id                String          @id @default(uuid())
   employeeProfileId String
   employeeProfile   EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
 
@@ -2562,7 +2562,7 @@ model EmploymentHistory {
 }
 
 model EmployeeDocument {
-  id                String          @id @default(cuid())
+  id                String          @id @default(uuid())
   employeeProfileId String
   employeeProfile   EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
 
@@ -2609,7 +2609,7 @@ model EmployeeDocument {
 }
 
 model OnboardingChecklist {
-  id                String          @id @default(cuid())
+  id                String          @id @default(uuid())
   employeeProfileId String          @unique
   employeeProfile   EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
 
@@ -2666,7 +2666,7 @@ model OnboardingChecklist {
 }
 
 model OffboardingProcess {
-  id                String          @id @default(cuid())
+  id                String          @id @default(uuid())
   employeeProfileId String
   employeeProfile   EmployeeProfile @relation(fields: [employeeProfileId], references: [id], onDelete: Cascade)
 
@@ -4815,7 +4815,7 @@ model AIProvider {
 
 model SupportConversation {
   id               String @id @default(uuid())
-  conversationCode String @unique @default(cuid()) // Mã hội thoại duy nhất
+  conversationCode String @unique @default(uuid()) // Mã hội thoại duy nhất
 
   // Customer Info
   customerId       String?
@@ -4950,7 +4950,7 @@ model SupportAttachment {
 
 model SupportTicket {
   id           String @id @default(uuid())
-  ticketNumber String @unique @default(cuid())
+  ticketNumber String @unique @default(uuid())
 
   // Related Conversation
   conversationId String?
@@ -5498,7 +5498,7 @@ model TechnicalSupportMessage {
 
 // Workflow Template - Mẫu quy trình
 model WorkflowTemplate {
-  id          String         @id @default(cuid())
+  id          String         @id @default(uuid())
   code        String         @unique
   name        String
   description String?
@@ -5527,7 +5527,7 @@ model WorkflowTemplate {
 
 // Workflow Step - Bước trong quy trình
 model WorkflowStep {
-  id                String           @id @default(cuid())
+  id                String           @id @default(uuid())
   workflowTemplateId String
   workflowTemplate  WorkflowTemplate @relation(fields: [workflowTemplateId], references: [id], onDelete: Cascade)
   
@@ -5561,7 +5561,7 @@ model WorkflowStep {
 
 // Workflow Instance - Phiên thực hiện quy trình
 model WorkflowInstance {
-  id                  String                  @id @default(cuid())
+  id                  String                  @id @default(uuid())
   workflowTemplateId  String
   workflowTemplate    WorkflowTemplate        @relation(fields: [workflowTemplateId], references: [id])
   
@@ -5606,7 +5606,7 @@ model WorkflowInstance {
 
 // Step Execution - Thực hiện từng bước
 model StepExecution {
-  id                  String                  @id @default(cuid())
+  id                  String                  @id @default(uuid())
   workflowInstanceId  String
   workflowInstance    WorkflowInstance        @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   
@@ -5644,7 +5644,7 @@ model StepExecution {
 
 // Workflow Approval - Phê duyệt
 model WorkflowApproval {
-  id                  String           @id @default(cuid())
+  id                  String           @id @default(uuid())
   workflowInstanceId  String
   workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   
@@ -5678,7 +5678,7 @@ model WorkflowApproval {
 
 // Workflow Comment - Bình luận
 model WorkflowComment {
-  id                  String           @id @default(cuid())
+  id                  String           @id @default(uuid())
   workflowInstanceId  String
   workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   
@@ -5703,7 +5703,7 @@ model WorkflowComment {
 
 // Workflow Activity Log - Nhật ký
 model WorkflowActivityLog {
-  id                  String           @id @default(cuid())
+  id                  String           @id @default(uuid())
   workflowInstanceId  String
   workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   
@@ -5727,7 +5727,7 @@ model WorkflowActivityLog {
 
 // Employee Third Party Account - Tài khoản bên thứ 3
 model EmployeeThirdPartyAccount {
-  id                  String           @id @default(cuid())
+  id                  String           @id @default(uuid())
   employeeProfileId   String
   employeeProfile     EmployeeProfile  @relation("EmployeeThirdPartyAccounts", fields: [employeeProfileId], references: [id], onDelete: Cascade)
   

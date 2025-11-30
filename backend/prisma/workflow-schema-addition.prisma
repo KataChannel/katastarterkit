@@ -52,7 +52,7 @@ enum AccountType {
 // ============================================
 
 model WorkflowTemplate {
-  id          String         @id @default(cuid())
+  id          String         @id @default(uuid())
   code        String         @unique // VD: "CHECKIN_NHANSU", "ONBOARDING_SALE"
   name        String         // "Quy trình Checkin Nhân Sự"
   description String?
@@ -87,7 +87,7 @@ model WorkflowTemplate {
 // ============================================
 
 model WorkflowStep {
-  id                String           @id @default(cuid())
+  id                String           @id @default(uuid())
   workflowTemplateId String
   workflowTemplate  WorkflowTemplate @relation(fields: [workflowTemplateId], references: [id], onDelete: Cascade)
   
@@ -161,7 +161,7 @@ model WorkflowStep {
 // ============================================
 
 model WorkflowInstance {
-  id                  String                  @id @default(cuid())
+  id                  String                  @id @default(uuid())
   workflowTemplateId  String
   workflowTemplate    WorkflowTemplate        @relation(fields: [workflowTemplateId], references: [id])
   
@@ -217,7 +217,7 @@ model WorkflowInstance {
 // ============================================
 
 model StepExecution {
-  id                  String                  @id @default(cuid())
+  id                  String                  @id @default(uuid())
   workflowInstanceId  String
   workflowInstance    WorkflowInstance        @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   
@@ -265,7 +265,7 @@ model StepExecution {
 // ============================================
 
 model WorkflowApproval {
-  id                  String           @id @default(cuid())
+  id                  String           @id @default(uuid())
   workflowInstanceId  String
   workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   
@@ -308,7 +308,7 @@ model WorkflowApproval {
 // ============================================
 
 model WorkflowComment {
-  id                  String           @id @default(cuid())
+  id                  String           @id @default(uuid())
   workflowInstanceId  String
   workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   
@@ -340,7 +340,7 @@ model WorkflowComment {
 // ============================================
 
 model WorkflowActivityLog {
-  id                  String           @id @default(cuid())
+  id                  String           @id @default(uuid())
   workflowInstanceId  String
   workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
   
@@ -371,7 +371,7 @@ model WorkflowActivityLog {
 // ============================================
 
 model EmployeeThirdPartyAccount {
-  id                  String           @id @default(cuid())
+  id                  String           @id @default(uuid())
   employeeProfileId   String
   employeeProfile     EmployeeProfile  @relation("EmployeeThirdPartyAccounts", fields: [employeeProfileId], references: [id], onDelete: Cascade)
   
