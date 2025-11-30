@@ -7,6 +7,9 @@ set -e
 
 echo "🚀 Starting backend entrypoint..."
 
+# Create logs directory if it doesn't exist
+mkdir -p /app/logs 2>/dev/null || true
+
 # Load environment variables from .env file if it exists
 if [ -f /app/.env ]; then
   echo "📄 Loading environment variables from .env..."

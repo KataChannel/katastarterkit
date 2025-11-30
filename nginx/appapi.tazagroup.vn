@@ -30,20 +30,8 @@ server {
     client_max_body_size 500M;
 
     location / {
-        # Handle preflight (OPTIONS) requests
-        if ($request_method = 'OPTIONS') {
-            add_header 'Access-Control-Allow-Origin' $http_origin always;
-            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
-            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,authorization,apollo-require-preflight,x-apollo-operation-name,x-apollo-tracing,graphql-upload,x-request-id,x-correlation-id,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers' always;
-            add_header 'Access-Control-Allow-Credentials' 'true' always;
-            add_header 'Access-Control-Max-Age' 86400 always;
-            add_header 'Content-Type' 'text/plain; charset=utf-8' always;
-            add_header 'Content-Length' 0 always;
-            return 204;
-        }
-
-        # Proxy to backend container
-        proxy_pass http://127.0.0.1:12001;
+        # Proxy to backend container (CORS handled by NestJS backend)
+        proxy_pass http://127.0.0.1:13001;
         proxy_http_version 1.1;
         
         # WebSocket support
@@ -57,11 +45,6 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
 
-        # CORS headers for actual requests
-        add_header 'Access-Control-Allow-Origin' $http_origin always;
-        add_header 'Access-Control-Allow-Credentials' 'true' always;
-        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Type,Authorization' always;
-
         # Timeouts for GraphQL operations
         proxy_connect_timeout 60s;
         proxy_send_timeout 300s;
@@ -74,7 +57,7 @@ server {
 
     # Health check endpoint
     location /health {
-        proxy_pass http://127.0.0.1:12001/health;
+        proxy_pass http://127.0.0.1:13001/health;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
     }

@@ -41,6 +41,9 @@ COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
 COPY --chown=nestjs:nodejs backend/entrypoint.sh ./entrypoint.sh
 
+# Create logs directory with correct ownership
+RUN mkdir -p /app/logs /app/data /app/src && chown -R nestjs:nodejs /app/logs /app/data /app/src
+
 # Make entrypoint executable
 RUN chmod +x ./entrypoint.sh
 
