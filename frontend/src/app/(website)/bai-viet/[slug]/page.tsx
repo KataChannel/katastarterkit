@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GET_BLOG_BY_SLUG, GET_BLOG_CATEGORIES } from '@/graphql/blog.queries';
+import { normalizeImageUrl } from '@/utils/image-url';
 import {
   Calendar,
   User,
@@ -186,7 +187,7 @@ export default function BlogDetailPage() {
               {blog.featuredImage && (
                 <div className="relative h-64 sm:h-80 mb-6 rounded-lg overflow-hidden">
                   <Image
-                    src={blog.featuredImage}
+                    src={normalizeImageUrl(blog.featuredImage)}
                     alt={blog.title}
                     fill
                     className="object-cover"

@@ -5,6 +5,7 @@ import { useQuery } from '@apollo/client';
 import Link from 'next/link';
 import Image from 'next/image';
 import { GET_BLOGS, GET_BLOG_CATEGORIES } from '@/graphql/blog.queries';
+import { normalizeImageUrl } from '@/utils/image-url';
 import { Search, Calendar, User, Clock, TrendingUp, Filter, X, Home, ChevronRight, Check, ChevronsUpDown, BookOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -248,7 +249,7 @@ export default function BlogListByCategory({ category }: BlogListByCategoryProps
                           <div className="relative aspect-video bg-gray-100 overflow-hidden">
                             {blog.thumbnailUrl ? (
                               <Image
-                                src={blog.thumbnailUrl}
+                                src={normalizeImageUrl(blog.thumbnailUrl)}
                                 alt={blog.title}
                                 fill
                                 className="object-cover hover:scale-105 transition-transform duration-300"

@@ -9,6 +9,7 @@ import { Calendar, User, Eye, Share2, Heart } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { normalizeImageUrl } from '@/utils/image-url';
 
 interface BlogDetailProps {
   blog: {
@@ -126,7 +127,7 @@ export function BlogDetail({
       {blog.bannerUrl && (
         <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
           <img
-            src={blog.bannerUrl}
+            src={normalizeImageUrl(blog.bannerUrl)}
             alt={blog.title}
             className="w-full h-full object-cover"
           />
@@ -135,7 +136,7 @@ export function BlogDetail({
       {!blog.bannerUrl && blog.thumbnailUrl && (
         <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
           <img
-            src={blog.thumbnailUrl}
+            src={normalizeImageUrl(blog.thumbnailUrl)}
             alt={blog.title}
             className="w-full h-full object-cover"
           />

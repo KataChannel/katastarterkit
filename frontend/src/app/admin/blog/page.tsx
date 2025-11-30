@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { GET_BLOGS, DELETE_BLOG } from '@/graphql/blog.queries';
+import { normalizeImageUrl } from '@/utils/image-url';
 import { AdvancedTable, ColumnDef, TableConfig } from '@/components/ui/advanced-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -118,9 +119,10 @@ export default function AdminBlogPage() {
       console.log('Fixed malformed URL:', url);
     }
     
-    // Handle external URLs
+    // Handle external URLs - normalize HTTP to HTTPS for rausachtrangia.com
     if (url.startsWith('http')) {
-      return convertOneDriveLink(url);
+      const normalizedUrl = normalizeImageUrl(url);
+      return convertOneDriveLink(normalizedUrl);
     }
     
     // Handle relative URLs

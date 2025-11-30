@@ -7,6 +7,7 @@ import { Calendar, User, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { normalizeImageUrl } from '@/utils/image-url';
 
 interface BlogCardProps {
   blog: {
@@ -54,7 +55,7 @@ export function BlogCard({
       {/* Thumbnail */}
       <div className="relative overflow-hidden aspect-video bg-gray-100">
         <img
-          src={blog.thumbnailUrl || '/placeholder-blog.png'}
+          src={normalizeImageUrl(blog.thumbnailUrl) || '/placeholder-blog.png'}
           alt={blog.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />

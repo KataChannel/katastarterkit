@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@apollo/client';
 import { DELETE_PRODUCT } from '@/graphql/product.queries';
 import { DELETE_CATEGORY } from '@/graphql/category.queries';
+import { normalizeImageUrl } from '@/utils/image-url';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -133,7 +134,8 @@ export function ProductTreeView({
 
   const getImageUrl = (url?: string | null) => {
     if (!url) return null;
-    if (url.startsWith('http')) return url;
+    // Use normalizeImageUrl to handle HTTP → HTTPS conversion
+    if (url.startsWith('http')) return normalizeImageUrl(url);
     const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:12001';
     return `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
   };

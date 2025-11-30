@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { GET_BLOGS, GET_BLOG_CATEGORIES } from '@/graphql/blog.queries';
+import { normalizeImageUrl } from '@/utils/image-url';
 import { Calendar, User, Eye, Tag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -159,7 +160,7 @@ function PromotionsPageContent() {
                         {blog.featuredImage && (
                           <div className="relative h-48 overflow-hidden">
                             <Image
-                              src={blog.featuredImage}
+                              src={normalizeImageUrl(blog.featuredImage)}
                               alt={blog.title}
                               fill
                               className="object-cover group-hover:scale-105 transition-transform duration-300"
