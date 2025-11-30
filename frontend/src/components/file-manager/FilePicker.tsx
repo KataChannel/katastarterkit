@@ -71,19 +71,19 @@ export function FilePicker({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[80vh] flex flex-col">
+      <DialogContent className="max-w-5xl h-[80vh] max-h-[80vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>Select File</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <TabsList className="grid w-full grid-cols-2 flex-shrink-0">
             <TabsTrigger value="browse">Browse Files</TabsTrigger>
             {allowUrl && <TabsTrigger value="url">Enter URL</TabsTrigger>}
           </TabsList>
 
-          <TabsContent value="browse" className="flex-1 overflow-hidden">
-            <div className="h-full">
+          <TabsContent value="browse" className="flex-1 min-h-0 overflow-hidden mt-4">
+            <div className="h-full overflow-hidden">
               <FileManager
                 onSelect={handleFileSelection}
                 allowMultiple={allowMultiple}
@@ -93,7 +93,7 @@ export function FilePicker({
           </TabsContent>
 
           {allowUrl && (
-            <TabsContent value="url" className="flex-1">
+            <TabsContent value="url" className="flex-1 min-h-0 overflow-auto mt-4">
               <div className="space-y-4 p-4">
                 <div className="space-y-2">
                   <Label htmlFor="url-input">Image URL</Label>
@@ -135,7 +135,7 @@ export function FilePicker({
           )}
         </Tabs>
 
-        <DialogFooter>
+        <DialogFooter className="flex-shrink-0 border-t pt-4 mt-4">
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>

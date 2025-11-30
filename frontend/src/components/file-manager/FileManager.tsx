@@ -274,7 +274,7 @@ export function FileManager({
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col overflow-hidden">
       {/* Bulk Delete Button - Always show when files selected and not in picker mode */}
       {!onSelect && selectedFiles.size > 0 && (
         <div className="mb-3 flex justify-end">
@@ -291,7 +291,7 @@ export function FileManager({
       
       {/* Toolbar - only show if not controlled externally */}
       {externalViewMode === undefined && externalSearchQuery === undefined && (
-        <Card className="mb-4">
+        <Card className="mb-4 flex-shrink-0">
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-4">
               {/* Search */}
@@ -355,7 +355,7 @@ export function FileManager({
       <div
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 dark:bg-gray-900"
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 dark:bg-gray-900"
       >
         {loading ? (
           <div className="flex items-center justify-center h-full">
@@ -518,30 +518,6 @@ export function FileManager({
               </div>
             )}
 
-            {/* Pagination */}
-            {files.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-6">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!files.hasPreviousPage}
-                  onClick={() => setPage(page - 1)}
-                >
-                  Previous
-                </Button>
-                <span className="text-sm text-gray-600">
-                  Page {files.page} of {files.totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!files.hasNextPage}
-                  onClick={() => setPage(page + 1)}
-                >
-                  Next
-                </Button>
-              </div>
-            )}
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-gray-400">
@@ -551,6 +527,31 @@ export function FileManager({
           </div>
         )}
       </div>
+
+      {/* Pagination - Fixed at bottom */}
+      {files && files.totalPages > 1 && (
+        <div className="flex-shrink-0 flex items-center justify-center gap-2 py-3 px-4 border-t bg-white dark:bg-gray-950">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!files.hasPreviousPage}
+            onClick={() => setPage(page - 1)}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            Trang {files.page} / {files.totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!files.hasNextPage}
+            onClick={() => setPage(page + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
