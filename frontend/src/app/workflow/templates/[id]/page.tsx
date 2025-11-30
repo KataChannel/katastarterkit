@@ -6,7 +6,7 @@ import { GET_WORKFLOW_TEMPLATE } from '@/graphql/workflow';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, ArrowLeft, Edit, Play, CheckCircle2, Clock } from 'lucide-react';
+import { Loader2, ArrowLeft, Edit, Play, CheckCircle2, Clock, Users, FileText, Bell, Settings, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface WorkflowTemplateDetailPageProps {
@@ -30,6 +30,131 @@ const stepTypeColors: Record<string, string> = {
   AUTOMATION: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
   CONDITION: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
 };
+
+// Component hiển thị config theo từng loại step
+function StepConfigDisplay({ config, stepType }: { config: any; stepType: string }) {
+  // Parse config nếu là string
+  const parsedConfig = typeof config === 'string' ? JSON.parse(config || '{}') : config;
+  
+  if (!parsedConfig || Object.keys(parsedConfig).length === 0) {
+    return null;
+  }
+
+  // Hiển thị theo từng loại step
+  switch (stepType) {
+    case 'FORM':
+      return (
+        <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="flex items-center gap-2 text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">
+            <FileText className="h-4 w-4" />
+            Cấu hình Form
+          </div>
+          <div className="space-y-1 text-sm">
+            {parsedConfig.formType && (
+              <p><span className="text-gray-500">Loại form:</span> {parsedConfig.formType}</p>
+            )}
+            {parsedConfig.fields && (
+              <p><span className="text-gray-500">Số trường:</span> {Array.isArray(parsedConfig.fields) ? parsedConfig.fields.length : 'N/A'}</p>
+            )}
+            {parsedConfig.requiredFields && (
+              <p><span className="text-gray-500">Trường bắt buộc:</span> {parsedConfig.requiredFields.join(', ')}</p>
+            )}
+          </div>
+        </div>
+      );
+
+    case 'APPROVAL':
+      return (
+        <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+          <div className="flex items-center gap-2 text-sm font-medium text-yellow-700 dark:text-yellow-300 mb-2">
+            <Users className="h-4 w-4" />
+            Cấu hình Phê duyệt
+          </div>
+          <div className="space-y-1 text-sm">
+            {parsedConfig.approverRole && (
+              <p><span className="text-gray-500">Vai trò phê duyệt:</span> {parsedConfig.approverRole}</p>
+            )}
+            {parsedConfig.approverRoles && (
+              <p><span className="text-gray-500">Vai trò phê duyệt:</span> {parsedConfig.approverRoles.join(', ')}</p>
+            )}
+            {parsedConfig.minApprovers && (
+              <p><span className="text-gray-500">Số người phê duyệt tối thiểu:</span> {parsedConfig.minApprovers}</p>
+            )}
+            {parsedConfig.autoApprove !== undefined && (
+              <p><span className="text-gray-500">Tự động phê duyệt:</span> {parsedConfig.autoApprove ? 'Có' : 'Không'}</p>
+            )}
+          </div>
+        </div>
+      );
+
+    case 'NOTIFICATION':
+      return (
+        <div className="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+          <div className="flex items-center gap-2 text-sm font-medium text-purple-700 dark:text-purple-300 mb-2">
+            <Bell className="h-4 w-4" />
+            Cấu hình Thông báo
+          </div>
+          <div className="space-y-1 text-sm">
+            {parsedConfig.channels && (
+              <p><span className="text-gray-500">Kênh thông báo:</span> {parsedConfig.channels.join(', ')}</p>
+            )}
+            {parsedConfig.template && (
+              <p><span className="text-gray-500">Template:</span> {parsedConfig.template}</p>
+            )}
+            {parsedConfig.recipients && (
+              <p><span className="text-gray-500">Người nhận:</span> {Array.isArray(parsedConfig.recipients) ? parsedConfig.recipients.join(', ') : parsedConfig.recipients}</p>
+            )}
+            {parsedConfig.emailTemplate && (
+              <p><span className="text-gray-500">Email template:</span> {parsedConfig.emailTemplate}</p>
+            )}
+          </div>
+        </div>
+      );
+
+    case 'AUTOMATION':
+      return (
+        <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+          <div className="flex items-center gap-2 text-sm font-medium text-green-700 dark:text-green-300 mb-2">
+            <Settings className="h-4 w-4" />
+            Cấu hình Tự động
+          </div>
+          <div className="space-y-1 text-sm">
+            {parsedConfig.action && (
+              <p><span className="text-gray-500">Hành động:</span> {parsedConfig.action}</p>
+            )}
+            {parsedConfig.actions && (
+              <p><span className="text-gray-500">Các hành động:</span> {parsedConfig.actions.join(', ')}</p>
+            )}
+            {parsedConfig.trigger && (
+              <p><span className="text-gray-500">Trigger:</span> {parsedConfig.trigger}</p>
+            )}
+            {parsedConfig.autoComplete !== undefined && (
+              <p><span className="text-gray-500">Tự động hoàn thành:</span> {parsedConfig.autoComplete ? 'Có' : 'Không'}</p>
+            )}
+          </div>
+        </div>
+      );
+
+    default:
+      // Fallback: hiển thị các key-value một cách đẹp hơn
+      return (
+        <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Settings className="h-4 w-4" />
+            Cấu hình
+          </div>
+          <div className="space-y-1 text-sm">
+            {Object.entries(parsedConfig).map(([key, value]) => (
+              <p key={key}>
+                <span className="text-gray-500">{key}:</span>{' '}
+                {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+              </p>
+            ))}
+          </div>
+        </div>
+      );
+  }
+}
 
 export default function WorkflowTemplateDetailPage({ params }: WorkflowTemplateDetailPageProps) {
   const router = useRouter();
@@ -193,13 +318,9 @@ export default function WorkflowTemplateDetailPage({ params }: WorkflowTemplateD
                       </Badge>
                     </div>
 
-                    {/* Step Config (if any) */}
+                    {/* Step Config - Hiển thị thông tin cấu hình nếu có */}
                     {step.config && Object.keys(step.config).length > 0 && (
-                      <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-800 rounded text-xs">
-                        <pre className="overflow-auto">
-                          {JSON.stringify(step.config, null, 2)}
-                        </pre>
-                      </div>
+                      <StepConfigDisplay config={step.config} stepType={step.stepType} />
                     )}
                   </div>
 
