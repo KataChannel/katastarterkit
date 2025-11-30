@@ -860,7 +860,7 @@ export function HeaderActions({
         </Popover>
       )}
 
-      {/* 3. User Menu */}
+      {/* 3. User Menu - Only Icon with Dynamic Avatar */}
       {showUser && (
         <DropdownMenu>
           <TooltipProvider>
@@ -870,59 +870,129 @@ export function HeaderActions({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className={`h-9 gap-2 px-2 ${hoverBg}`}
+                    className={`h-9 w-9 p-0 ${hoverBg} relative`}
                   >
                     {isAuthenticated && user ? (
-                      <>
-                        <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      // Avatar động khi đã đăng nhập
+                      (user as any).avatar ? (
+                        <img 
+                          src={(user as any).avatar} 
+                          alt={user.username || 'User'}
+                          className="w-7 h-7 rounded-full object-cover ring-2 ring-offset-1 ring-purple-500/30"
+                        />
+                      ) : (
+                        <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-offset-1 ring-purple-500/30">
                           <span className="text-white text-xs font-semibold">
                             {user.username?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
                           </span>
                         </div>
-                        <span className={`hidden sm:inline text-sm font-medium ${textColor}`}>
-                          {user.username || user.email?.split('@')[0]}
-                        </span>
-                      </>
+                      )
                     ) : (
-                      <>
-                        <User className={`h-5 w-5 ${iconColor}`} />
-                        <span className={`hidden sm:inline text-sm ${textColor}`}>Đăng nhập</span>
-                      </>
+                      // Icon mặc định khi chưa đăng nhập
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                        <User className={`h-4 w-4 ${iconColor}`} />
+                      </div>
+                    )}
+                    {/* Online indicator khi đã đăng nhập */}
+                    {isAuthenticated && (
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
                     )}
                   </Button>
                 </DropdownMenuTrigger>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{isAuthenticated ? 'Tài khoản' : 'Đăng nhập'}</p>
+                <p>{isAuthenticated ? (user?.username || 'Tài khoản') : 'Đăng nhập'}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <DropdownMenuContent className="w-56" align="end">
+          <DropdownMenuContent className="w-64" align="end">
             {isAuthenticated && user ? (
               <>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.username || 'User'}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                    <Badge variant="secondary" className="w-fit mt-1 text-xs">
-                      {user.roleType || 'USER'}
-                    </Badge>
+                {/* User Info Header */}
+                <DropdownMenuLabel className="font-normal pb-3">
+                  <div className="flex items-center gap-3">
+                    {(user as any).avatar ? (
+                      <img 
+                        src={(user as any).avatar} 
+                        alt={user.username || 'User'}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm font-semibold">
+                          {user.username?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <p className="text-sm font-semibold leading-none truncate">{user.username || 'User'}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{user.email}</p>
+                      <Badge variant="secondary" className="w-fit mt-1.5 text-[10px] px-1.5 py-0">
+                        {user.roleType || 'USER'}
+                      </Badge>
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                
+                {/* Quick Actions - Notifications, Apps, Chat */}
+                {(showNotifications || showApps || showChat) && (
+                  <>
+                    <div className="px-2 py-2">
+                      <div className="flex items-center justify-around gap-1">
+                        {showNotifications && (
+                          <button
+                            onClick={() => router.push('/admin/notifications')}
+                            className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-1"
+                          >
+                            <Bell className="h-5 w-5 text-gray-600" />
+                            <span className="text-[10px] text-gray-500">Thông báo</span>
+                          </button>
+                        )}
+                        {showApps && availableModules.length > 0 && (
+                          <button
+                            onClick={() => {
+                              const event = new CustomEvent('openAppsPanel');
+                              window.dispatchEvent(event);
+                            }}
+                            className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-1"
+                          >
+                            <Grid3X3 className="h-5 w-5 text-gray-600" />
+                            <span className="text-[10px] text-gray-500">Ứng dụng</span>
+                          </button>
+                        )}
+                        {showChat && (
+                          <button
+                            onClick={handleChatClick}
+                            className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-1 relative"
+                          >
+                            <MessageCircle className="h-5 w-5 text-gray-600" />
+                            <span className="text-[10px] text-gray-500">Hỗ trợ</span>
+                            <span className="absolute top-1 right-3 w-2 h-2 bg-green-500 rounded-full" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                
+                {/* Menu Items */}
                 {filteredUserMenuItems.map((item) => {
                   if (item.isDivider) {
                     return <DropdownMenuSeparator key={item.id} />;
                   }
                   
                   const Icon = item.icon;
-                  const variantClass = item.variant === 'danger' ? 'text-red-600 focus:text-red-600' : '';
+                  const variantClass = item.variant === 'danger' 
+                    ? 'text-red-600 focus:text-red-600 focus:bg-red-50' 
+                    : '';
                   
                   return (
                     <DropdownMenuItem
                       key={item.id}
                       onClick={() => handleMenuItemClick(item)}
-                      className={variantClass}
+                      className={`cursor-pointer ${variantClass}`}
                     >
                       {Icon && <Icon className="mr-2 h-4 w-4" />}
                       {item.label}
@@ -932,6 +1002,19 @@ export function HeaderActions({
               </>
             ) : (
               <>
+                {/* Guest Header */}
+                <DropdownMenuLabel className="font-normal pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                      <User className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <div className="flex flex-col">
+                      <p className="text-sm font-semibold">Khách</p>
+                      <p className="text-xs text-muted-foreground">Chưa đăng nhập</p>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 {guestMenuItems.map((item) => {
                   if (item.isDivider) {
                     return <DropdownMenuSeparator key={item.id} />;
@@ -943,6 +1026,7 @@ export function HeaderActions({
                     <DropdownMenuItem
                       key={item.id}
                       onClick={() => handleMenuItemClick(item)}
+                      className="cursor-pointer"
                     >
                       {Icon && <Icon className="mr-2 h-4 w-4" />}
                       {item.label}

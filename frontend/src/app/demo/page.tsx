@@ -22,6 +22,21 @@ import Link from 'next/link';
 export default function DemoPage() {
   const demos = [
     {
+      id: 'header-actions',
+      title: 'HeaderActions Demo',
+      description: 'Component Header với Notifications, Apps Menu, User Menu và Chat Widget',
+      icon: Palette,
+      color: 'bg-purple-500',
+      path: '/demo/header-actions',
+      status: 'ready',
+      features: [
+        'Dynamic Avatar theo Auth',
+        'Apps Menu với phân quyền',
+        'User Dropdown với Quick Actions',
+        'Hỗ trợ Light/Dark Theme',
+      ],
+    },
+    {
       id: 'simple-templates',
       title: 'Simple Template Demo',
       description: 'Test basic template compilation với variable substitution và loops',
