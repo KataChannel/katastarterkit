@@ -88,6 +88,7 @@ docker run -d \
   --restart unless-stopped \
   --network host \
   -e PORT=13000 \
+  -e HOSTNAME=0.0.0.0 \
   tazagroup-frontend:latest
 
 # Wait for containers to start
