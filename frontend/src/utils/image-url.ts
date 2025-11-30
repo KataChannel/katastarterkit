@@ -47,6 +47,7 @@ export function normalizeImageUrl(url: string | null | undefined): string {
 /**
  * Check if URL needs unoptimized mode
  * Some old paths might still have issues even with HTTPS
+ * These paths often contain old/legacy images that may not exist
  * 
  * @param url - Image URL
  * @returns true if image should skip Next.js optimization
@@ -54,14 +55,39 @@ export function normalizeImageUrl(url: string | null | undefined): string {
 export function shouldDisableOptimization(url: string | null | undefined): boolean {
   if (!url) return false;
   
-  // Old paths that might have issues
+  // Old paths that might have issues or images may not exist
   const problematicPaths = [
     '/quanly/fileman/',
+    '/quanly/',
     '/old-site/',
     '/legacy/',
+    '/fileman/',
   ];
   
-  return problematicPaths.some(path => url.includes(path));
+  return problematicPaths.some(path => url.toLowerCase().includes(path.toLowerCase()));
+}
+
+/**
+ * Check if the URL is from a potentially broken/legacy source
+ * These URLs may return 404 and should use fallback
+ * 
+ * @param url - Image URL
+ * @returns true if URL is potentially broken
+ */
+export function isPotentiallyBrokenUrl(url: string | null | undefined): boolean {
+  if (!url) return true;
+  
+  // Legacy paths that often have missing images
+  const legacyPaths = [
+    '/quanly/fileman/',
+    '/quanly/',
+    '/old-site/',
+    '/legacy/',
+    '/fileman/',
+    'Uploads/Images/',  // Old file manager path
+  ];
+  
+  return legacyPaths.some(path => url.toLowerCase().includes(path.toLowerCase()));
 }
 
 /**
