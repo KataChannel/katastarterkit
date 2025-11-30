@@ -115,6 +115,11 @@ run_dev_full() {
     cd "$PROJECT_ROOT"
     
     bun run "dev:$CURRENT_DOMAIN"
+    
+    # Exit after dev server stops to prevent menu loop
+    echo ""
+    echo "👋 Dev server stopped. Exiting..."
+    exit 0
 }
 
 run_dev_backend() {
@@ -136,6 +141,11 @@ run_dev_backend() {
     cd "$PROJECT_ROOT"
     
     bun run "dev:${CURRENT_DOMAIN}:backend"
+    
+    # Exit after dev server stops to prevent menu loop
+    echo ""
+    echo "👋 Dev server stopped. Exiting..."
+    exit 0
 }
 
 run_dev_frontend() {
@@ -157,6 +167,11 @@ run_dev_frontend() {
     cd "$PROJECT_ROOT"
     
     bun run "dev:${CURRENT_DOMAIN}:frontend"
+    
+    # Exit after dev server stops to prevent menu loop
+    echo ""
+    echo "👋 Dev server stopped. Exiting..."
+    exit 0
 }
 
 run_build_typescript() {
@@ -380,18 +395,74 @@ run_docker_stop() {
 
 run_kill_ports() {
     echo ""
-    echo "🔪 Killing all application ports..."
+    echo "🔪 Killing ALL application ports (12000-15001)..."
     echo "─────────────────────────────────────────────────────"
     
-    for port in 12000 12001 13000 13001 15000 15001; do
-        PID=$(lsof -ti:$port 2>/dev/null)
-        if [ ! -z "$PID" ]; then
-            kill -9 $PID 2>/dev/null
-            echo "  ✓ Killed process on port $port (PID: $PID)"
-        else
-            echo "  • Port $port is free"
+    PORTS="12000 12001 13000 13001 15000 15001"
+    KILLED=0
+    MENU_PID=$$
+    
+    # Method 1: Kill by port using lsof
+    echo "📍 Method 1: Kill by port (lsof)..."
+    for port in $PORTS; do
+        PIDS=$(lsof -ti:$port 2>/dev/null)
+        if [ ! -z "$PIDS" ]; then
+            for PID in $PIDS; do
+                if [ "$PID" != "$MENU_PID" ] && [ "$PID" != "$PPID" ]; then
+                    kill -9 $PID 2>/dev/null && echo "  ✓ Killed PID $PID on port $port" && KILLED=$((KILLED+1))
+                fi
+            done
         fi
     done
+    
+    # Method 2: Kill by port using fuser (skip if would kill self)
+    echo "📍 Method 2: Kill by port (fuser)..."
+    for port in $PORTS; do
+        # Check if this port is used by our menu script
+        PORT_PID=$(lsof -ti:$port 2>/dev/null)
+        if [ ! -z "$PORT_PID" ] && [ "$PORT_PID" != "$MENU_PID" ] && [ "$PORT_PID" != "$PPID" ]; then
+            fuser -k $port/tcp 2>/dev/null && echo "  ✓ fuser killed port $port" && KILLED=$((KILLED+1))
+        fi
+    done
+    
+    # Method 3: Kill Node.js processes by name
+    echo "📍 Method 3: Kill Node.js dev processes..."
+    pkill -9 -f "next dev" 2>/dev/null && echo "  ✓ Killed next dev processes" && KILLED=$((KILLED+1))
+    pkill -9 -f "ts-node-dev" 2>/dev/null && echo "  ✓ Killed ts-node-dev processes" && KILLED=$((KILLED+1))
+    pkill -9 -f "node.*:1[2-5]00[01]" 2>/dev/null && echo "  ✓ Killed node processes on dev ports" && KILLED=$((KILLED+1))
+    
+    # Method 4: Kill concurrently processes
+    echo "📍 Method 4: Kill concurrently processes..."
+    pkill -9 -f "concurrently" 2>/dev/null && echo "  ✓ Killed concurrently processes" && KILLED=$((KILLED+1))
+    
+    # Method 5: Kill bun dev processes (EXCLUDE menu script)
+    echo "📍 Method 5: Kill bun dev processes..."
+    # Kill bun processes running dev:xxx but NOT dev-deploy-menu
+    pkill -9 -f "bun run dev:" 2>/dev/null && echo "  ✓ Killed bun dev:xxx processes" && KILLED=$((KILLED+1))
+    pkill -9 -f "bun.*dev:rausach" 2>/dev/null && echo "  ✓ Killed bun dev:rausach" && KILLED=$((KILLED+1))
+    pkill -9 -f "bun.*dev:tazagroup" 2>/dev/null && echo "  ✓ Killed bun dev:tazagroup" && KILLED=$((KILLED+1))
+    pkill -9 -f "bun.*dev:timona" 2>/dev/null && echo "  ✓ Killed bun dev:timona" && KILLED=$((KILLED+1))
+    
+    # Verify all ports are free
+    echo ""
+    echo "📊 Verifying ports are free..."
+    ALL_FREE=true
+    for port in $PORTS; do
+        if lsof -ti:$port >/dev/null 2>&1; then
+            echo "  ⚠️  Port $port still in use!"
+            ALL_FREE=false
+        else
+            echo "  ✓ Port $port is free"
+        fi
+    done
+    
+    echo ""
+    if [ "$ALL_FREE" = true ]; then
+        echo "✅ All ports successfully killed!"
+    else
+        echo "⚠️  Some ports may still be in use. Try running again or check manually:"
+        echo "   lsof -i :12000-15001"
+    fi
     
     echo ""
     read -p "Press Enter to continue..."

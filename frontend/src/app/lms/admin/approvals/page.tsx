@@ -46,30 +46,33 @@ const GET_PENDING_COURSES = gql`
 const GET_PENDING_DOCUMENTS = gql`
   query GetPendingDocuments {
     sourceDocuments(filter: { approvalRequested: true }, limit: 100) {
-      id
-      title
-      description
-      content
-      type
-      status
-      approvalRequested
-      approvalRequestedAt
-      createdAt
-      url
-      thumbnailUrl
-      fileSize
-      duration
-      metadata
-      user {
+      items {
         id
-        username
-        firstName
-        lastName
+        title
+        description
+        content
+        type
+        status
+        approvalRequested
+        approvalRequestedAt
+        createdAt
+        url
+        thumbnailUrl
+        fileSize
+        duration
+        metadata
+        user {
+          id
+          username
+          firstName
+          lastName
+        }
+        category {
+          id
+          name
+        }
       }
-      category {
-        id
-        name
-      }
+      total
     }
   }
 `;
@@ -93,7 +96,7 @@ export default function ApprovalManagementPage() {
   const [rejectDocument] = useMutation(REJECT_DOCUMENT);
 
   const pendingCourses = coursesData?.courses?.data?.filter((c: any) => c.approvalRequested) || [];
-  const pendingDocuments = documentsData?.sourceDocuments?.filter((d: any) => d.approvalRequested && d.status === 'DRAFT') || [];
+  const pendingDocuments = documentsData?.sourceDocuments?.items?.filter((d: any) => d.approvalRequested && d.status === 'DRAFT') || [];
   
   const handleApprove = async (type: 'course' | 'document', id: string, title: string) => {
     try {
