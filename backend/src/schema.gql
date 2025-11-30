@@ -1005,6 +1005,7 @@ type CourseAnalysisResult {
 }
 
 type CourseCategory {
+  children: [CourseCategory!]
   createdAt: DateTime!
   description: String
   icon: String

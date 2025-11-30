@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useQuery } from '@apollo/client';
 import { 
@@ -19,7 +19,9 @@ import {
   ShoppingBag,
   FileText,
   FolderTree,
-  CheckSquare
+  CheckSquare,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -97,6 +99,16 @@ export default function AdminLMSLayout({ children }: AdminLMSLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+
+  // Auto expand menu when navigating to child route
+  React.useEffect(() => {
+    menuItems.forEach(item => {
+      if (item.children && pathname?.startsWith(item.href)) {
+        setExpandedMenus(prev => prev.includes(item.href) ? prev : [...prev, item.href]);
+      }
+    });
+  }, [pathname]);
 
   // Query pending approvals count
   const { data: approvalsData } = useQuery(GET_PENDING_APPROVALS_COUNT, {
@@ -106,6 +118,14 @@ export default function AdminLMSLayout({ children }: AdminLMSLayoutProps) {
   const handleNavigation = (href: string) => {
     router.push(href);
     setSidebarOpen(false);
+  };
+
+  const toggleExpand = (href: string) => {
+    setExpandedMenus(prev => 
+      prev.includes(href) 
+        ? prev.filter(h => h !== href) 
+        : [...prev, href]
+    );
   };
 
   const pendingApprovalsCount = approvalsData?.getPendingApprovalsCount || 0;
@@ -129,30 +149,46 @@ export default function AdminLMSLayout({ children }: AdminLMSLayoutProps) {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+            const isExpanded = expandedMenus.includes(item.href);
             const showBadge = item.href === '/lms/admin/approvals' && pendingApprovalsCount > 0;
+            const hasChildren = item.children && item.children.length > 0;
+            
             return (
               <li key={item.href}>
-                <button
-                  onClick={() => handleNavigation(item.href)}
-                  className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-700 font-semibold'
-                      : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                  <span className="font-medium truncate">{item.title}</span>
-                  {showBadge && (
-                    <Badge variant="destructive" className="text-white ml-auto h-5 min-w-5 flex items-center justify-center px-1.5 text-xs">
-                      {pendingApprovalsCount > 99 ? '99+' : pendingApprovalsCount}
-                    </Badge>
-                  )}
-                </button>
+                <div className="flex items-center">
+                  <button
+                    onClick={() => {
+                      if (hasChildren) {
+                        toggleExpand(item.href);
+                      } else {
+                        handleNavigation(item.href);
+                      }
+                    }}
+                    className={`flex-1 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base ${
+                      isActive
+                        ? 'bg-blue-50 text-blue-700 font-semibold'
+                        : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="font-medium truncate flex-1 text-left">{item.title}</span>
+                    {showBadge && (
+                      <Badge variant="destructive" className="text-white h-5 min-w-5 flex items-center justify-center px-1.5 text-xs">
+                        {pendingApprovalsCount > 99 ? '99+' : pendingApprovalsCount}
+                      </Badge>
+                    )}
+                    {hasChildren && (
+                      isExpanded 
+                        ? <ChevronDown className="w-4 h-4 text-gray-400" />
+                        : <ChevronRight className="w-4 h-4 text-gray-400" />
+                    )}
+                  </button>
+                </div>
                 
                 {/* Submenu */}
-                {item.children && isActive && (
-                  <ul className="mt-1 ml-7 sm:ml-9 space-y-0.5">
-                    {item.children.map((child) => (
+                {hasChildren && isExpanded && (
+                  <ul className="mt-1 ml-7 sm:ml-9 space-y-0.5 border-l-2 border-gray-100 pl-2">
+                    {item.children!.map((child) => (
                       <li key={child.href}>
                         <button
                           onClick={(e) => {

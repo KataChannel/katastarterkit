@@ -188,14 +188,51 @@ export const GET_COURSE_CATEGORY_TREE = gql`
       id
       name
       slug
+      description
       icon
+      parentId
       children {
         id
         name
         slug
+        description
         icon
+        parentId
       }
     }
+  }
+`;
+
+// Course Category Mutations
+export const CREATE_COURSE_CATEGORY = gql`
+  mutation CreateCourseCategory($input: CreateCourseCategoryInput!) {
+    createCourseCategory(createCourseCategoryInput: $input) {
+      id
+      name
+      slug
+      description
+      icon
+      parentId
+    }
+  }
+`;
+
+export const UPDATE_COURSE_CATEGORY = gql`
+  mutation UpdateCourseCategory($input: UpdateCourseCategoryInput!) {
+    updateCourseCategory(updateCourseCategoryInput: $input) {
+      id
+      name
+      slug
+      description
+      icon
+      parentId
+    }
+  }
+`;
+
+export const DELETE_COURSE_CATEGORY = gql`
+  mutation DeleteCourseCategory($id: ID!) {
+    deleteCourseCategory(id: $id)
   }
 `;
 

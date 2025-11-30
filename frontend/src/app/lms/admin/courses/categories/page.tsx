@@ -1,21 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useFindMany, useDeleteOne, useCreateOne, useUpdateOne } from '@/hooks/useDynamicGraphQL';
+import { useRouter } from 'next/navigation';
+import { useQuery, useMutation } from '@apollo/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2,
-  Folder,
-  AlertCircle,
-  BookOpen,
-  FolderOpen
-} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -23,197 +16,344 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from '@/hooks/use-toast';
+  Plus,
+  Edit,
+  Trash2,
+  Loader2,
+  FolderTree,
+  ChevronRight,
+  ChevronDown,
+  BookOpen,
+  Search,
+  Eye,
+  FolderOpen,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  GET_COURSE_CATEGORY_TREE,
+  CREATE_COURSE_CATEGORY,
+  UPDATE_COURSE_CATEGORY,
+  DELETE_COURSE_CATEGORY,
+} from '@/graphql/lms/courses.graphql';
+
+// Icon picker (simplified - using emojis)
+const ICON_OPTIONS = [
+  '📁', '📂', '📚', '📖', '📝', '📄', '📃', '📑',
+  '🎥', '🎬', '🎞️', '📹', '🎵', '🎶', '🎧', '🔊',
+  '🖼️', '🖌️', '🎨', '🌈', '💡', '🔬', '🔭', '⚗️',
+  '💻', '⌨️', '🖥️', '📱', '🌐', '🔗', '📡', '🛰️',
+];
+
+// Default colors
+const DEFAULT_COLORS = [
+  '#3B82F6', // blue
+  '#8B5CF6', // purple
+  '#10B981', // green
+  '#F59E0B', // orange
+  '#EF4444', // red
+  '#EC4899', // pink
+  '#06B6D4', // cyan
+  '#6366F1', // indigo
+];
 
 interface Category {
   id: string;
   name: string;
   slug: string;
   description?: string;
+  icon?: string;
+  parentId?: string;
+  children?: Category[];
   _count?: {
     courses: number;
   };
 }
 
 export default function AdminCourseCategoriesPage() {
-  const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const router = useRouter();
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [formData, setFormData] = useState({
-    id: '',
     name: '',
-    slug: '',
     description: '',
+    icon: '📁',
+    parentId: '',
   });
 
-  const { data: categories, loading, error, refetch } = useFindMany('CourseCategory', {
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
+  // Query
+  const { data, loading, error, refetch } = useQuery(GET_COURSE_CATEGORY_TREE, {
+    fetchPolicy: 'cache-and-network',
+  });
+
+  // Mutations
+  const [createCategory, { loading: creating }] = useMutation(CREATE_COURSE_CATEGORY, {
+    onCompleted: () => {
+      toast.success('Đã tạo danh mục mới');
+      setCreateDialogOpen(false);
+      resetForm();
+      refetch();
     },
-    include: {
-      _count: {
-        select: {
-          courses: true,
-        },
-      },
-    },
-    orderBy: {
-      name: 'asc',
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
-  const [createCategory, { loading: createLoading }] = useCreateOne('CourseCategory');
-  const [updateCategory, { loading: updateLoading }] = useUpdateOne('CourseCategory');
-  const [deleteCategory, { loading: deleteLoading }] = useDeleteOne('CourseCategory');
+  const [updateCategory, { loading: updating }] = useMutation(UPDATE_COURSE_CATEGORY, {
+    onCompleted: () => {
+      toast.success('Đã cập nhật danh mục');
+      setEditDialogOpen(false);
+      resetForm();
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
-  // Filter categories
-  const filteredCategories = (categories || []).filter(category =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (category.description || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [deleteCategory, { loading: deleting }] = useMutation(DELETE_COURSE_CATEGORY, {
+    onCompleted: () => {
+      toast.success('Đã xóa danh mục');
+      setDeleteDialogOpen(false);
+      setSelectedCategory(null);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
-  // Handlers
+  const categories = data?.courseCategoryTree || [];
+
+  // Get a consistent color for category based on index
+  const getCategoryColor = (categoryId: string) => {
+    const index = categoryId.charCodeAt(0) % DEFAULT_COLORS.length;
+    return DEFAULT_COLORS[index];
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      icon: '📁',
+      parentId: '',
+    });
+  };
+
   const handleCreate = () => {
-    setEditMode(false);
-    setFormData({ id: '', name: '', slug: '', description: '' });
-    setDialogOpen(true);
-  };
-
-  const handleEdit = (category: Category) => {
-    setEditMode(true);
-    setFormData({
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-      description: category.description || '',
-    });
-    setDialogOpen(true);
-  };
-
-  const handleDeleteClick = (category: Category) => {
-    setCategoryToDelete(category);
-    setDeleteDialogOpen(true);
-  };
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/đ/g, 'd')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  };
-
-  const handleNameChange = (name: string) => {
-    setFormData({
-      ...formData,
-      name,
-      slug: generateSlug(name),
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
     if (!formData.name.trim()) {
-      toast({
-        title: 'Lỗi',
-        description: 'Vui lòng nhập tên danh mục',
-        type: 'error',
-      });
+      toast.error('Vui lòng nhập tên danh mục');
       return;
     }
 
-    try {
-      if (editMode) {
-        await updateCategory({
-          where: { id: formData.id },
-          data: {
-            name: formData.name,
-            slug: formData.slug,
-            description: formData.description || null,
-          },
-        });
+    createCategory({
+      variables: {
+        input: {
+          name: formData.name,
+          description: formData.description || null,
+          icon: formData.icon,
+          parentId: formData.parentId || null,
+        },
+      },
+    });
+  };
 
-        toast({
-          title: 'Thành công',
-          description: 'Đã cập nhật danh mục',
-          type: 'success',
-        });
-      } else {
-        await createCategory({
-          data: {
-            name: formData.name,
-            slug: formData.slug,
-            description: formData.description || null,
-          },
-        });
+  const handleEdit = (category: Category) => {
+    setSelectedCategory(category);
+    setFormData({
+      name: category.name,
+      description: category.description || '',
+      icon: category.icon || '📁',
+      parentId: category.parentId || '',
+    });
+    setEditDialogOpen(true);
+  };
 
-        toast({
-          title: 'Thành công',
-          description: 'Đã tạo danh mục mới',
-          type: 'success',
-        });
-      }
+  const handleUpdate = () => {
+    if (!selectedCategory || !formData.name.trim()) {
+      toast.error('Vui lòng nhập tên danh mục');
+      return;
+    }
 
-      setDialogOpen(false);
-      setFormData({ id: '', name: '', slug: '', description: '' });
-      refetch();
-    } catch (error: any) {
-      toast({
-        title: 'Lỗi',
-        description: error.message || 'Không thể lưu danh mục',
-        type: 'error',
-      });
+    updateCategory({
+      variables: {
+        input: {
+          id: selectedCategory.id,
+          name: formData.name,
+          description: formData.description || null,
+          icon: formData.icon,
+          parentId: formData.parentId || null,
+        },
+      },
+    });
+  };
+
+  const handleDelete = (category: Category) => {
+    setSelectedCategory(category);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedCategory) {
+      deleteCategory({ variables: { id: selectedCategory.id } });
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!categoryToDelete) return;
-
-    try {
-      await deleteCategory({
-        where: { id: categoryToDelete.id },
-      });
-
-      toast({
-        title: 'Thành công',
-        description: `Đã xóa danh mục "${categoryToDelete.name}"`,
-        type: 'success',
-      });
-
-      setDeleteDialogOpen(false);
-      setCategoryToDelete(null);
-      refetch();
-    } catch (error: any) {
-      toast({
-        title: 'Lỗi',
-        description: error.message || 'Không thể xóa danh mục',
-        type: 'error',
-      });
+  const toggleExpand = (categoryId: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(categoryId)) {
+      newExpanded.delete(categoryId);
+    } else {
+      newExpanded.add(categoryId);
     }
+    setExpandedCategories(newExpanded);
+  };
+
+  // Filter categories based on search
+  const filterCategories = (cats: Category[]): Category[] => {
+    if (!searchQuery) return cats;
+    
+    return cats.filter(cat => {
+      const matchesSearch = cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (cat.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+      const hasMatchingChildren = cat.children && filterCategories(cat.children).length > 0;
+      return matchesSearch || hasMatchingChildren;
+    }).map(cat => ({
+      ...cat,
+      children: cat.children ? filterCategories(cat.children) : []
+    }));
+  };
+
+  const filteredCategories = filterCategories(categories);
+
+  // Flatten categories for parent selection
+  const flattenCategories = (cats: Category[], excludeId?: string): { id: string; name: string; level: number }[] => {
+    const result: { id: string; name: string; level: number }[] = [];
+    const flatten = (items: Category[], level: number) => {
+      items.forEach(cat => {
+        if (cat.id !== excludeId) {
+          result.push({ id: cat.id, name: cat.name, level });
+          if (cat.children) {
+            flatten(cat.children, level + 1);
+          }
+        }
+      });
+    };
+    flatten(cats, 0);
+    return result;
+  };
+
+  const renderCategory = (category: Category, level = 0) => {
+    const hasChildren = category.children && category.children.length > 0;
+    const isExpanded = expandedCategories.has(category.id);
+    const color = getCategoryColor(category.id);
+    const icon = category.icon || '📁';
+
+    return (
+      <div key={category.id} className="mb-2">
+        <div
+          className={`flex items-center gap-3 p-3 sm:p-4 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent dark:hover:from-gray-800/50 transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700 ${
+            level > 0 ? '' : 'bg-white dark:bg-gray-900 shadow-sm'
+          }`}
+          style={{ marginLeft: `${level * 24}px` }}
+        >
+          {/* Expand/Collapse button */}
+          {hasChildren ? (
+            <button
+              onClick={() => toggleExpand(category.id)}
+              className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
+              ) : (
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
+              )}
+            </button>
+          ) : (
+            <div className="w-7 sm:w-8" />
+          )}
+
+          {/* Icon */}
+          <div
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-2xl sm:text-3xl shadow-sm flex-shrink-0"
+            style={{ backgroundColor: `${color}20`, color: color }}
+          >
+            {icon}
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+              <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-gray-100">
+                {category.name}
+              </h3>
+              {category._count && category._count.courses > 0 && (
+                <Badge 
+                  className="text-xs w-fit"
+                  style={{ 
+                    backgroundColor: `${color}15`,
+                    color: color,
+                    borderColor: `${color}40`,
+                    border: '1px solid'
+                  }}
+                >
+                  <BookOpen className="w-3 h-3 mr-1" />
+                  {category._count.courses} khóa học
+                </Badge>
+              )}
+            </div>
+            {category.description && (
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+                {category.description}
+              </p>
+            )}
+            <p className="text-xs text-gray-400 mt-1">/{category.slug}</p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+              onClick={() => router.push(`/lms/admin/courses?category=${category.slug}`)}
+              title="Xem khóa học trong danh mục"
+            >
+              <Eye className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+              onClick={() => handleEdit(category)}
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => handleDelete(category)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Children */}
+        {hasChildren && isExpanded && (
+          <div className="mt-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
+            {category.children!.map((child) => renderCategory(child, level + 1))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -221,12 +361,16 @@ export default function AdminCourseCategoriesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Quản lý danh mục khóa học</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Tổng cộng {categories?.length || 0} danh mục</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            Quản lý danh mục khóa học
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
+            Quản lý danh mục phân loại khóa học
+          </p>
         </div>
-        <Button onClick={handleCreate} className="gap-2 w-full sm:w-auto">
-          <Plus className="w-4 h-4" />
-          Tạo danh mục mới
+        <Button onClick={() => setCreateDialogOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Thêm danh mục
         </Button>
       </div>
 
@@ -241,188 +385,270 @@ export default function AdminCourseCategoriesPage() {
         />
       </div>
 
-      {/* Categories Grid */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Đang tải...</p>
-        </div>
-      ) : error ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <p className="text-red-600">Lỗi: {error.message}</p>
-          </CardContent>
-        </Card>
-      ) : filteredCategories.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <FolderOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 mb-4">Không tìm thấy danh mục nào</p>
-            <Button onClick={handleCreate}>
-              Tạo danh mục đầu tiên
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredCategories.map((category) => (
-            <Card key={category.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Folder className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-base truncate">{category.name}</CardTitle>
-                      <p className="text-xs text-gray-500 truncate">/{category.slug}</p>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Description */}
-                {category.description && (
-                  <CardDescription className="line-clamp-2 text-sm">
-                    {category.description}
-                  </CardDescription>
-                )}
+      {/* Categories Tree */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <FolderTree className="w-5 h-5 text-blue-600" />
+            <CardTitle>Cây danh mục</CardTitle>
+          </div>
+          <CardDescription>
+            Click vào mũi tên để mở rộng/thu gọn danh mục con
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">
+              <Loader2 className="w-8 h-8 text-blue-600 mx-auto animate-spin" />
+              <p className="text-gray-500 mt-4">Đang tải...</p>
+            </div>
+          ) : error ? (
+            <p className="text-red-600 text-center py-8">Lỗi: {error.message}</p>
+          ) : filteredCategories.length === 0 ? (
+            <div className="text-center py-12">
+              <FolderOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 mb-4">
+                {searchQuery ? 'Không tìm thấy danh mục phù hợp' : 'Chưa có danh mục nào'}
+              </p>
+              {!searchQuery && (
+                <Button onClick={() => setCreateDialogOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Tạo danh mục đầu tiên
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {filteredCategories.map((category: Category) => renderCategory(category))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-                {/* Stats */}
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <BookOpen className="w-4 h-4" />
-                  <span>{category._count?.courses || 0} khóa học</span>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 pt-2 border-t">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1 gap-2"
-                    onClick={() => handleEdit(category)}
-                  >
-                    <Edit className="w-4 h-4" />
-                    Sửa
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => handleDeleteClick(category)}
-                    disabled={(category._count?.courses || 0) > 0}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Create/Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
+      {/* Create Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editMode ? 'Sửa danh mục' : 'Tạo danh mục mới'}</DialogTitle>
+            <DialogTitle>Tạo danh mục mới</DialogTitle>
             <DialogDescription>
-              {editMode ? 'Cập nhật thông tin danh mục' : 'Nhập thông tin danh mục mới'}
+              Điền thông tin danh mục
             </DialogDescription>
           </DialogHeader>
-          
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Tên danh mục *</Label>
-                <Input
-                  id="name"
-                  placeholder="Ví dụ: Lập trình Web"
-                  value={formData.name}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  required
-                />
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug</Label>
-                <Input
-                  id="slug"
-                  placeholder="lap-trinh-web"
-                  value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                  disabled
-                  className="bg-gray-50"
-                />
-                <p className="text-xs text-gray-500">Tự động tạo từ tên danh mục</p>
-              </div>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Tên danh mục *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Nhập tên danh mục..."
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Mô tả</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Mô tả chi tiết về danh mục..."
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
-                />
+            <div className="space-y-2">
+              <Label htmlFor="description">Mô tả</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Mô tả danh mục..."
+                rows={2}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Icon</Label>
+              <div className="grid grid-cols-8 gap-2">
+                {ICON_OPTIONS.map((icon) => (
+                  <button
+                    key={icon}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, icon })}
+                    className={`p-2 text-xl rounded border-2 transition-colors ${
+                      formData.icon === icon
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
               </div>
             </div>
-          </form>
 
-          <DialogFooter className="border-t pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="parentId">Danh mục cha</Label>
+              <select
+                id="parentId"
+                value={formData.parentId}
+                onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="">-- Không có (danh mục gốc) --</option>
+                {flattenCategories(categories).map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {'─'.repeat(cat.level)} {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <DialogFooter>
             <Button
-              type="button"
               variant="outline"
-              onClick={() => setDialogOpen(false)}
-              disabled={createLoading || updateLoading}
+              onClick={() => {
+                setCreateDialogOpen(false);
+                resetForm();
+              }}
+              disabled={creating}
             >
               Hủy
             </Button>
-            <Button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={createLoading || updateLoading}
-            >
-              {createLoading || updateLoading ? 'Đang lưu...' : editMode ? 'Cập nhật' : 'Tạo mới'}
+            <Button onClick={handleCreate} disabled={creating}>
+              {creating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Đang tạo...
+                </>
+              ) : (
+                'Tạo danh mục'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa danh mục</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa danh mục <strong>&quot;{categoryToDelete?.name}&quot;</strong>?
-              <br />
-              <br />
-              {(categoryToDelete?._count?.courses || 0) > 0 ? (
-                <span className="text-red-600 font-semibold">
-                  Danh mục này có {categoryToDelete?._count?.courses} khóa học. Không thể xóa!
-                </span>
-              ) : (
-                <span className="text-gray-600">
-                  Hành động này không thể hoàn tác.
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={deleteLoading || (categoryToDelete?._count?.courses || 0) > 0}
-              className="bg-red-600 hover:bg-red-700"
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Chỉnh sửa danh mục</DialogTitle>
+            <DialogDescription>
+              Cập nhật thông tin danh mục
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Tên danh mục *</Label>
+              <Input
+                id="edit-name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Nhập tên danh mục..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Mô tả</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Mô tả danh mục..."
+                rows={2}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Icon</Label>
+              <div className="grid grid-cols-8 gap-2">
+                {ICON_OPTIONS.map((icon) => (
+                  <button
+                    key={icon}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, icon })}
+                    className={`p-2 text-xl rounded border-2 transition-colors ${
+                      formData.icon === icon
+                        ? 'border-blue-600 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-parentId">Danh mục cha</Label>
+              <select
+                id="edit-parentId"
+                value={formData.parentId}
+                onChange={(e) => setFormData({ ...formData, parentId: e.target.value })}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="">-- Không có (danh mục gốc) --</option>
+                {flattenCategories(categories, selectedCategory?.id).map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {'─'.repeat(cat.level)} {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditDialogOpen(false);
+                resetForm();
+              }}
+              disabled={updating}
             >
-              {deleteLoading ? 'Đang xóa...' : 'Xóa danh mục'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              Hủy
+            </Button>
+            <Button onClick={handleUpdate} disabled={updating}>
+              {updating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Đang cập nhật...
+                </>
+              ) : (
+                'Cập nhật'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc muốn xóa danh mục &quot;{selectedCategory?.name}&quot;?
+              <br />
+              <span className="text-red-600 font-medium">
+                Lưu ý: Không thể xóa danh mục có danh mục con hoặc có khóa học!
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deleting}
+            >
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} disabled={deleting}>
+              {deleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Đang xóa...
+                </>
+              ) : (
+                'Xóa'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

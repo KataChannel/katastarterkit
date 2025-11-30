@@ -20,14 +20,12 @@ export class CourseCategory {
   @Field(() => ID, { nullable: true })
   parentId?: string;
 
+  @Field(() => [CourseCategory], { nullable: true })
+  children?: CourseCategory[];
+
   @Field()
   createdAt: Date;
 
   @Field()
   updatedAt: Date;
-
-  // Relations (lazy loaded)
-  // parent?: CourseCategory;
-  // children?: CourseCategory[];
-  // courses?: Course[];
 }

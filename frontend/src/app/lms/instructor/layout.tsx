@@ -16,7 +16,9 @@ import {
   FileText,
   X,
   MessageSquare,
-  Award
+  Award,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -97,10 +99,28 @@ function SidebarContent({ onNavigate }: { onNavigate?: (href: string) => void })
   const router = useRouter();
   const pathname = usePathname();
   const [userRole, setUserRole] = useState({ isAdmin: false, userId: null });
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
 
   useEffect(() => {
     setUserRole(checkUserRole());
   }, []);
+
+  // Auto expand menu when navigating to child route
+  useEffect(() => {
+    menuItems.forEach(item => {
+      if (item.children && pathname?.startsWith(item.href)) {
+        setExpandedMenus(prev => prev.includes(item.href) ? prev : [...prev, item.href]);
+      }
+    });
+  }, [pathname]);
+
+  const toggleExpand = (href: string) => {
+    setExpandedMenus(prev => 
+      prev.includes(href) 
+        ? prev.filter(h => h !== href) 
+        : [...prev, href]
+    );
+  };
 
   const handleNavigation = (href: string) => {
     if (onNavigate) {
@@ -122,24 +142,40 @@ function SidebarContent({ onNavigate }: { onNavigate?: (href: string) => void })
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+            const isExpanded = expandedMenus.includes(item.href);
+            const hasChildren = item.children && item.children.length > 0;
+            
             return (
               <li key={item.href}>
-                <button
-                  onClick={() => handleNavigation(item.href)}
-                  className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base ${
-                    isActive
-                      ? 'bg-purple-50 text-purple-700 font-semibold'
-                      : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                  <span className="font-medium truncate">{item.title}</span>
-                </button>
+                <div className="flex items-center">
+                  <button
+                    onClick={() => {
+                      if (hasChildren) {
+                        toggleExpand(item.href);
+                      } else {
+                        handleNavigation(item.href);
+                      }
+                    }}
+                    className={`flex-1 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-colors text-sm sm:text-base ${
+                      isActive
+                        ? 'bg-purple-50 text-purple-700 font-semibold'
+                        : 'text-gray-700 hover:bg-purple-50 hover:text-purple-700'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="font-medium truncate flex-1 text-left">{item.title}</span>
+                    {hasChildren && (
+                      isExpanded 
+                        ? <ChevronDown className="w-4 h-4 text-gray-400" />
+                        : <ChevronRight className="w-4 h-4 text-gray-400" />
+                    )}
+                  </button>
+                </div>
                 
                 {/* Submenu */}
-                {item.children && isActive && (
-                  <ul className="mt-1 ml-7 sm:ml-9 space-y-0.5">
-                    {item.children.map((child) => (
+                {hasChildren && isExpanded && (
+                  <ul className="mt-1 ml-7 sm:ml-9 space-y-0.5 border-l-2 border-gray-100 pl-2">
+                    {item.children!.map((child) => (
                       <li key={child.href}>
                         <button
                           onClick={(e) => {
