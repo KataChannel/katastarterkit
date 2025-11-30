@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { SmartHeaderActions } from '@/components/layout/SmartHeaderActions';
+import { LMS_APP_MODULES } from '@/components/layout/HeaderActions';
 import {
   BookOpen,
   GraduationCap,
@@ -16,18 +18,8 @@ import {
   Library,
   Users,
   Settings,
-  ChevronDown,
-  LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface NavigationItem {
@@ -206,81 +198,12 @@ export function LMSNavigation({ user: propUser }: LMSNavigationProps) {
             )}
           </nav>
 
-          {/* User Menu */}
+          {/* User Menu - Sử dụng SmartHeaderActions */}
           <div className="flex items-center gap-2">
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src={getUserAvatar()} alt={getUserName() || user.email} />
-                      <AvatarFallback>
-                        {getUserName()?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1">
-                      {getUserName() && (
-                        <p className="text-sm font-medium">{getUserName()}</p>
-                      )}
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                    </div>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/lms/my-learning">
-                      <Library className="mr-2 h-4 w-4" />
-                      Học tập của tôi
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/lms/my-certificates">
-                      <Award className="mr-2 h-4 w-4" />
-                      Chứng chỉ của tôi
-                    </Link>
-                  </DropdownMenuItem>
-                  {(isAdmin() || isInstructor()) && (
-                    <>
-                      <DropdownMenuSeparator />
-                      {isAdmin() && (
-                        <DropdownMenuItem asChild>
-                          <Link href="/lms/admin">
-                            <Settings className="mr-2 h-4 w-4" />
-                            Quản trị LMS
-                          </Link>
-                        </DropdownMenuItem>
-                      )}
-                      {isInstructor() && !isAdmin() && (
-                        <DropdownMenuItem asChild>
-                          <Link href="/lms/instructor">
-                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                            Dashboard Giảng viên
-                          </Link>
-                        </DropdownMenuItem>
-                      )}
-                    </>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Cài đặt
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Đăng xuất
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button asChild variant="default" size="sm">
-                <Link href="/login">Đăng nhập</Link>
-              </Button>
-            )}
+            <SmartHeaderActions 
+              variant="light"
+              appModules={LMS_APP_MODULES}
+            />
 
             {/* Mobile Menu Toggle */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

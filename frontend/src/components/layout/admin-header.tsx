@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSiteName } from '@/hooks/useSiteName';
-import { HeaderActions } from './HeaderActions';
+import { SmartHeaderActions } from './SmartHeaderActions';
 import { 
   HomeIcon, 
   ClipboardDocumentListIcon, 
@@ -65,17 +65,8 @@ export function AdminHeader() {
             </nav>
           </div>
           
-          {/* Header Actions - User với dropdown chứa Notifications, Apps, Chat */}
-          <HeaderActions 
-            variant="dark"
-            showUser={true}
-            userConfig={{
-              showNotifications: true,
-              showApps: true,
-              showChat: true,
-              showQuickActions: true,
-            }}
-          />
+          {/* Header Actions - Tự động theo phân quyền của user */}
+          <SmartHeaderActions variant="dark" />
         </div>
       </div>
     </header>

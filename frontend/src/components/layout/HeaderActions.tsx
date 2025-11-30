@@ -53,9 +53,12 @@ import {
   Building,
   Headphones,
   Globe,
+  Download,
+  Smartphone,
   type LucideIcon,
 } from 'lucide-react';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { usePWA } from '@/hooks/usePWA';
 
 // ===================== TYPES =====================
 export interface AppModule {
@@ -630,10 +633,11 @@ export interface UserDropdownConfig {
   showNotifications?: boolean;  // Hiển thị nút Thông báo trong dropdown
   showApps?: boolean;           // Hiển thị nút Ứng dụng trong dropdown
   showChat?: boolean;           // Hiển thị nút Chat trong dropdown
-  showQuickActions?: boolean;   // Hiển thị row Quick Actions (Thông báo, Ứng dụng, Chat)
+  showPWAInstall?: boolean;     // Hiển thị nút Cài đặt PWA trong dropdown
+  showQuickActions?: boolean;   // Hiển thị row Quick Actions (Thông báo, Ứng dụng, Chat, PWA)
 }
 
-interface HeaderActionsProps {
+export interface HeaderActionsProps {
   variant?: 'light' | 'dark';
   // Icons hiển thị riêng biệt bên ngoài (trước User icon)
   showNotifications?: boolean;  // Icon Bell riêng
@@ -657,6 +661,7 @@ const DEFAULT_USER_CONFIG: UserDropdownConfig = {
   showNotifications: true,
   showApps: true,
   showChat: true,
+  showPWAInstall: true,
   showQuickActions: true,
 };
 
@@ -679,6 +684,7 @@ export function HeaderActions({
   const { hasRole, hasAnyRole } = useRole();
   const router = useRouter();
   const [appsPopoverOpen, setAppsPopoverOpen] = useState(false);
+  const { capabilities, install } = usePWA();
 
   // Merge user config với defaults
   const config = { ...DEFAULT_USER_CONFIG, ...userConfig };
@@ -1028,6 +1034,18 @@ export function HeaderActions({
                             <span className="absolute top-1 right-3 w-2 h-2 bg-green-500 rounded-full" />
                           </button>
                         )}
+                        {config.showPWAInstall && capabilities.canInstall && !capabilities.isStandalone && (
+                          <button
+                            onClick={() => install()}
+                            className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-1 relative group"
+                          >
+                            <div className="relative">
+                              <Smartphone className="h-5 w-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
+                              <Download className="h-2.5 w-2.5 text-blue-500 absolute -bottom-0.5 -right-0.5" />
+                            </div>
+                            <span className="text-[10px] text-gray-500 group-hover:text-blue-600 transition-colors">Cài App</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                     <DropdownMenuSeparator />
@@ -1072,6 +1090,28 @@ export function HeaderActions({
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                
+                {/* Quick Actions for Guest - PWA Install */}
+                {config.showQuickActions && config.showPWAInstall && capabilities.canInstall && !capabilities.isStandalone && (
+                  <>
+                    <div className="px-2 py-2">
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => install()}
+                          className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-1 relative group"
+                        >
+                          <div className="relative">
+                            <Smartphone className="h-5 w-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
+                            <Download className="h-2.5 w-2.5 text-blue-500 absolute -bottom-0.5 -right-0.5" />
+                          </div>
+                          <span className="text-[10px] text-gray-500 group-hover:text-blue-600 transition-colors">Cài đặt ứng dụng</span>
+                        </button>
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                
                 {guestMenuItems.map((item) => {
                   if (item.isDivider) {
                     return <DropdownMenuSeparator key={item.id} />;

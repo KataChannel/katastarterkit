@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSiteName } from '@/hooks/useSiteName';
-import { HeaderActions } from './HeaderActions';
+import { SmartHeaderActions } from './SmartHeaderActions';
 import { Menu } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -63,17 +63,8 @@ export function SiteHeader() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
-            {/* Header Actions - User với dropdown chứa Notifications, Apps, Chat */}
-            <HeaderActions 
-              variant="light"
-              showUser={true}
-              userConfig={{
-                showNotifications: isAuthenticated,
-                showApps: isAuthenticated,
-                showChat: true,
-                showQuickActions: isAuthenticated,
-              }}
-            />
+            {/* Header Actions - Tự động theo phân quyền của user */}
+            <SmartHeaderActions variant="light" />
 
             {/* Mobile Menu Button */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
