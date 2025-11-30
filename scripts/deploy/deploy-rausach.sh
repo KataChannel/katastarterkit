@@ -83,11 +83,13 @@ docker run -d \
   rausach-backend:latest
 
 # Start Frontend (using host network, listens on port 12000)
+# HOSTNAME=0.0.0.0 is required to bind to all interfaces
 docker run -d \
   --name shopfrontend \
   --restart unless-stopped \
   --network host \
   -e PORT=12000 \
+  -e HOSTNAME=0.0.0.0 \
   rausach-frontend:latest
 
 # Wait for containers to start
