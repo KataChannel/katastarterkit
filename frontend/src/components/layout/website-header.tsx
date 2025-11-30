@@ -37,12 +37,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package, Menu, ChevronRight, X, TrendingUp, ArrowRight, Grid3X3, MessageCircle } from 'lucide-react';
+import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package, Menu, ChevronRight, X, TrendingUp, ArrowRight, Grid3X3, MessageCircle, Download, Smartphone } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import React from 'react';
 import Image from 'next/image';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { usePWA } from '@/hooks/usePWA';
+import { HeaderActions, DEFAULT_APP_MODULES } from '@/components/layout/HeaderActions';
 
 export function WebsiteHeader() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -52,6 +54,9 @@ export function WebsiteHeader() {
   const [showSearchPopup, setShowSearchPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  
+  // PWA capabilities
+  const { capabilities, install } = usePWA();
 
   // ✅ Search Products Query
   const [searchProducts, { loading: searchLoading, data: searchData }] = useLazyQuery(GET_PRODUCTS, {
@@ -419,6 +424,30 @@ export function WebsiteHeader() {
 
           {/* Mobile Notifications & Cart */}
           <div className="flex items-center gap-1">
+            {/* PWA Install Button */}
+            {capabilities.canInstall && !capabilities.isStandalone && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:bg-white/10 relative"
+                      onClick={() => install()}
+                    >
+                      <div className="relative">
+                        <Smartphone className="w-5 h-5" />
+                        <Download className="w-2.5 h-2.5 text-yellow-300 absolute -bottom-0.5 -right-0.5" />
+                      </div>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Cài đặt ứng dụng</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+
             {/* Chat Support */}
             <Button
               variant="ghost"
@@ -673,6 +702,30 @@ export function WebsiteHeader() {
 
             {/* User Actions */}
             <div className="col-span-2 flex items-center justify-end space-x-3 text-white pr-4">
+              {/* PWA Install Button */}
+              {capabilities.canInstall && !capabilities.isStandalone && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all group"
+                        onClick={() => install()}
+                      >
+                        <div className="relative">
+                          <Smartphone className="w-5 h-5" />
+                          <Download className="w-2.5 h-2.5 text-yellow-300 absolute -bottom-0.5 -right-0.5 group-hover:animate-bounce" />
+                        </div>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Cài đặt ứng dụng</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+
               {/* More Apps */}
               {isAuthenticated && (
                 <Popover>
