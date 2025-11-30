@@ -9,7 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Combobox } from '@/components/ui/combobox';
-import { Loader2, ArrowLeft, Upload, Link as LinkIcon, FileText, X, File, Image, Video, Music, Archive } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Loader2, ArrowLeft, Upload, Link as LinkIcon, FileText, X, File, Image, Video, Music, Archive, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDropzone } from 'react-dropzone';
 import {
@@ -81,6 +83,9 @@ export default function NewSourceDocumentPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
+  const [fileUrl, setFileUrl] = useState('');
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
 
   // Get categories
   const { data: categoriesData } = useQuery(GET_SOURCE_DOCUMENT_CATEGORIES);
@@ -205,6 +210,112 @@ export default function NewSourceDocumentPage() {
     setSelectedFile(null);
     handleChange('url', '');
     handleChange('fileName', '');
+    setUploadStatus('idle');
+  };
+
+  // Upload from URL
+  const handleUploadFromUrl = async () => {
+    if (!fileUrl.trim()) {
+      toast.error('Vui lòng nhập URL');
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(fileUrl);
+    } catch {
+      toast.error('URL không hợp lệ');
+      return;
+    }
+
+    try {
+      setUploadStatus('uploading');
+      setIsUploading(true);
+      setUploadProgress(0);
+
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 300);
+
+      // Call backend to download and upload
+      const token = localStorage.getItem('accessToken');
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+      const response = await fetch(
+        `${backendUrl}/api/lms/source-documents/upload-from-url`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { authorization: `Bearer ${token}` }),
+          },
+          body: JSON.stringify({ url: fileUrl }),
+        }
+      );
+
+      clearInterval(progressInterval);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      setUploadProgress(100);
+      setUploadStatus('success');
+
+      // Set uploaded file info
+      setUploadedFile({
+        url: result.url,
+        fileName: result.fileName,
+        fileSize: result.fileSize || 0,
+        mimeType: result.mimeType || '',
+        tempId: result.tempId || `temp_${Date.now()}`,
+      });
+
+      // Auto-fill form fields
+      handleChange('url', result.url);
+      handleChange('fileName', result.fileName);
+
+      // Auto-detect type based on mime
+      if (result.mimeType?.startsWith('image/')) {
+        handleChange('type', 'IMAGE');
+      } else if (result.mimeType?.startsWith('video/')) {
+        handleChange('type', 'VIDEO');
+      } else if (result.mimeType?.startsWith('audio/')) {
+        handleChange('type', 'AUDIO');
+      } else {
+        handleChange('type', 'FILE');
+      }
+
+      // Auto-set title from filename if empty
+      if (!formData.title && result.fileName) {
+        const nameWithoutExt = result.fileName.replace(/\.[^/.]+$/, '');
+        handleChange('title', nameWithoutExt);
+      }
+
+      toast.success(`File "${result.fileName}" đã được tải về và upload`);
+
+      // Reset URL input after 2 seconds
+      setTimeout(() => {
+        setFileUrl('');
+        setUploadStatus('idle');
+      }, 2000);
+    } catch (error: any) {
+      setUploadStatus('error');
+
+      const errorMessage = error?.message || 'Không thể tải file từ URL';
+      toast.error(errorMessage);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -485,79 +596,187 @@ export default function NewSourceDocumentPage() {
             <CardHeader className="pb-3 sm:pb-6">
               <CardTitle className="text-base sm:text-lg">Upload tài liệu</CardTitle>
               <CardDescription className="text-xs sm:text-sm">
-                Kéo thả file hoặc click để chọn từ máy tính (tối đa 100MB)
+                Kéo thả file, chọn từ máy tính hoặc tải từ URL (tối đa 100MB)
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {!uploadedFile ? (
-                <div
-                  {...getRootProps()}
-                  className={cn(
-                    "border-2 border-dashed rounded-lg p-6 sm:p-8 text-center cursor-pointer transition-colors",
-                    isDragActive 
-                      ? "border-primary bg-primary/5" 
-                      : "border-muted-foreground/25 hover:border-primary/50",
-                    isUploading && "pointer-events-none opacity-50"
-                  )}
-                >
-                  <input {...getInputProps()} />
-                  
-                  {isUploading ? (
-                    <div className="space-y-3">
-                      <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto animate-spin" />
-                      <p className="text-sm text-muted-foreground">
-                        Đang upload... {uploadProgress}%
-                      </p>
-                      <div className="w-full max-w-xs mx-auto bg-muted rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${uploadProgress}%` }}
-                        />
-                      </div>
+              {/* Upload Mode Tabs */}
+              <Tabs value={uploadMode} onValueChange={(value) => setUploadMode(value as 'file' | 'url')}>
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="file">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload File
+                  </TabsTrigger>
+                  <TabsTrigger value="url">
+                    <LinkIcon className="w-4 h-4 mr-2" />
+                    Tải từ URL
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* File Upload Tab */}
+                <TabsContent value="file" className="space-y-4 mt-0">
+                  {!uploadedFile ? (
+                    <div
+                      {...getRootProps()}
+                      className={cn(
+                        "border-2 border-dashed rounded-lg p-6 sm:p-8 text-center cursor-pointer transition-colors",
+                        isDragActive 
+                          ? "border-primary bg-primary/5" 
+                          : "border-muted-foreground/25 hover:border-primary/50",
+                        isUploading && "pointer-events-none opacity-50"
+                      )}
+                    >
+                      <input {...getInputProps()} />
+                      
+                      {isUploading && uploadMode === 'file' ? (
+                        <div className="space-y-3">
+                          <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto animate-spin" />
+                          <p className="text-sm text-muted-foreground">
+                            Đang upload... {uploadProgress}%
+                          </p>
+                          <div className="w-full max-w-xs mx-auto bg-muted rounded-full h-2">
+                            <div
+                              className="bg-primary h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3" />
+                          <p className="text-sm sm:text-base text-foreground mb-1">
+                            {isDragActive ? 'Thả file vào đây...' : 'Kéo & thả file vào đây'}
+                          </p>
+                          <p className="text-xs sm:text-sm text-muted-foreground mb-3">
+                            hoặc click để chọn file
+                          </p>
+                          <Button type="button" variant="outline" size="sm">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Chọn file
+                          </Button>
+                        </>
+                      )}
                     </div>
                   ) : (
-                    <>
-                      <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-sm sm:text-base text-foreground mb-1">
-                        {isDragActive ? 'Thả file vào đây...' : 'Kéo & thả file vào đây'}
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground mb-3">
-                        hoặc click để chọn file
-                      </p>
-                      <Button type="button" variant="outline" size="sm">
-                        <Upload className="w-4 h-4 mr-2" />
-                        Chọn file
-                      </Button>
-                    </>
-                  )}
-                </div>
-              ) : (
-                <div className="border rounded-lg p-4 bg-muted/30">
-                  <div className="flex items-start gap-3">
-                    {getFileIcon(uploadedFile.mimeType)}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm sm:text-base truncate">
-                        {uploadedFile.fileName}
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        {formatFileSize(uploadedFile.fileSize)} • {uploadedFile.mimeType}
-                      </p>
-                      <p className="text-xs text-green-600 mt-1">
-                        ✓ Đã upload thành công
-                      </p>
+                    <div className="border rounded-lg p-4 bg-muted/30">
+                      <div className="flex items-start gap-3">
+                        {getFileIcon(uploadedFile.mimeType)}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm sm:text-base truncate">
+                            {uploadedFile.fileName}
+                          </p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            {formatFileSize(uploadedFile.fileSize)} • {uploadedFile.mimeType}
+                          </p>
+                          <p className="text-xs text-green-600 mt-1">
+                            ✓ Đã upload thành công
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={removeUploadedFile}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={removeUploadedFile}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
+                  )}
+                </TabsContent>
+
+                {/* URL Upload Tab */}
+                <TabsContent value="url" className="space-y-4 mt-0">
+                  {!uploadedFile ? (
+                    <div className="space-y-4">
+                      <div className="space-y-3">
+                        <Label htmlFor="fileUrl">
+                          <LinkIcon className="w-4 h-4 inline mr-1" />
+                          URL của file (docs, xlsx, txt, md, pdf, images...)
+                        </Label>
+                        <Input
+                          id="fileUrl"
+                          type="url"
+                          value={fileUrl}
+                          onChange={(e) => setFileUrl(e.target.value)}
+                          placeholder="https://example.com/document.pdf"
+                          disabled={isUploading}
+                          className="h-10"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Hỗ trợ: PDF, DOC, DOCX, XLS, XLSX, TXT, MD, PPT, Images, Videos, Audio... (Tối đa 100MB)
+                        </p>
+                      </div>
+
+                      {/* Progress Bar */}
+                      {uploadStatus === 'uploading' && (
+                        <div className="space-y-2">
+                          <Progress value={uploadProgress} className="h-2" />
+                          <p className="text-xs sm:text-sm text-muted-foreground text-center">
+                            Đang tải và upload... {uploadProgress}%
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Success Status */}
+                      {uploadStatus === 'success' && (
+                        <div className="flex items-center justify-center gap-2 text-green-600 p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                          <CheckCircle2 className="w-5 h-5" />
+                          <span className="text-sm font-medium">Tải và upload thành công!</span>
+                        </div>
+                      )}
+
+                      {/* Error Status */}
+                      {uploadStatus === 'error' && (
+                        <div className="flex items-center justify-center gap-2 text-red-600 p-4 bg-red-50 dark:bg-red-950/20 rounded-lg">
+                          <AlertCircle className="w-5 h-5" />
+                          <span className="text-sm font-medium">Tải file thất bại</span>
+                        </div>
+                      )}
+
+                      {/* Upload Button */}
+                      {uploadStatus !== 'uploading' && uploadStatus !== 'success' && (
+                        <Button
+                          type="button"
+                          onClick={handleUploadFromUrl}
+                          disabled={!fileUrl.trim() || isUploading}
+                          className="w-full"
+                        >
+                          <LinkIcon className="w-4 h-4 mr-2" />
+                          Tải file từ URL
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="border rounded-lg p-4 bg-muted/30">
+                      <div className="flex items-start gap-3">
+                        {getFileIcon(uploadedFile.mimeType)}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm sm:text-base truncate">
+                            {uploadedFile.fileName}
+                          </p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            {formatFileSize(uploadedFile.fileSize)} • {uploadedFile.mimeType}
+                          </p>
+                          <p className="text-xs text-green-600 mt-1">
+                            ✓ Đã tải và upload thành công
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={removeUploadedFile}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         )}

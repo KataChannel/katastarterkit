@@ -42,6 +42,7 @@ const menuItems = [
     children: [
       { title: 'Danh sách', href: '/lms/instructor/source-documents' },
       { title: 'Thêm mới', href: '/lms/instructor/source-documents/new' },
+      { title: 'Danh mục', href: '/lms/instructor/source-documents/categories' },
     ],
   },
   { 
