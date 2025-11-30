@@ -32,7 +32,7 @@ const menuItems = [
     href: '/lms/instructor/courses',
     children: [
       { title: 'Danh sách', href: '/lms/instructor/courses' },
-      { title: 'Tạo khóa học', href: '/lms/instructor/courses/create' },
+      { title: 'Danh mục', href: '/lms/instructor/courses/categories' },
     ],
   },
   { 
@@ -41,7 +41,6 @@ const menuItems = [
     href: '/lms/instructor/source-documents',
     children: [
       { title: 'Danh sách', href: '/lms/instructor/source-documents' },
-      { title: 'Thêm mới', href: '/lms/instructor/source-documents/new' },
       { title: 'Danh mục', href: '/lms/instructor/source-documents/categories' },
     ],
   },

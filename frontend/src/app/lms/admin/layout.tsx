@@ -44,13 +44,8 @@ const menuItems = [
     href: '/lms/admin/courses',
     children: [
       { title: 'Danh sách', href: '/lms/admin/courses' },
-      { title: 'Tạo khóa học', href: '/lms/admin/courses/create' },
+      { title: 'Danh mục', href: '/lms/admin/courses/categories' },
     ],
-  },
-  {
-    title: 'Danh mục',
-    icon: Folder,
-    href: '/lms/admin/categories',
   },
   {
     title: 'Tài liệu nguồn',
@@ -58,7 +53,6 @@ const menuItems = [
     href: '/lms/admin/source-documents',
     children: [
       { title: 'Danh sách', href: '/lms/admin/source-documents' },
-      { title: 'Thêm mới', href: '/lms/admin/source-documents/new' },
       { title: 'Danh mục', href: '/lms/admin/source-documents/categories' },
     ],
   },
