@@ -4,13 +4,12 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSiteName } from '@/hooks/useSiteName';
+import { HeaderActions } from './HeaderActions';
 import { 
   HomeIcon, 
   ClipboardDocumentListIcon, 
-  ShareIcon, 
   UserGroupIcon,
   Cog6ToothIcon,
-  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
 export function AdminHeader() {
@@ -27,7 +26,6 @@ export function AdminHeader() {
   const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
     { name: 'Todos', href: '/admin/todos', icon: ClipboardDocumentListIcon },
-    // Removed - Shared todos are now integrated into main todos page
     { name: 'Users', href: '/admin/users', icon: UserGroupIcon },
     { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
   ];
@@ -67,38 +65,14 @@ export function AdminHeader() {
             </nav>
           </div>
           
-          <div className="flex items-center space-x-4">
-            {/* Notifications */}
-            <button className="p-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5-5 5-5m-10 5l5-5-5-5" />
-              </svg>
-            </button>
-            
-            {/* User menu */}
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">
-                    {user?.username?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="hidden md:block">
-                  <p className="text-white text-sm font-medium">{user?.username}</p>
-                  <p className="text-gray-400 text-xs">{user?.roleType || 'User'}</p>
-                </div>
-              </div>
-              
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-2 px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
-                title="Logout"
-              >
-                <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                <span className="hidden md:block">Logout</span>
-              </button>
-            </div>
-          </div>
+          {/* Header Actions - Bell, Apps, User, Chat */}
+          <HeaderActions 
+            variant="dark"
+            showNotifications={true}
+            showApps={true}
+            showUser={true}
+            showChat={true}
+          />
         </div>
       </div>
     </header>

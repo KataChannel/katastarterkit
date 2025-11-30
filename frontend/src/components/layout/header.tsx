@@ -4,81 +4,121 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSiteName } from '@/hooks/useSiteName';
+import { HeaderActions } from './HeaderActions';
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const { siteName } = useSiteName();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     router.push('/');
   };
 
+  const navigation = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Todos', href: '/todos' },
+    { name: 'Documentation', href: '/docs' },
+  ];
+
+  const publicNavigation = [
+    { name: 'Features', href: '#features' },
+    { name: 'Tech Stack', href: '#tech-stack' },
+    { name: 'Documentation', href: '/docs' },
+  ];
+
   return (
-    <header className="bg-white border-b border-gray-200">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-6">
-          <div className="flex justify-start lg:w-0 lg:flex-1">
+        <div className="flex justify-between items-center py-4">
+          {/* Logo */}
+          <div className="flex items-center">
             <Link href="/" className="text-2xl font-bold text-gray-900">
               {siteName}
             </Link>
           </div>
           
-          {isAuthenticated ? (
-            <>
-              <nav className="hidden md:flex space-x-10">
-                <Link href="/dashboard" className="text-base font-medium text-gray-500 hover:text-gray-900">
-                  Dashboard
-                </Link>
-                <Link href="/todos" className="text-base font-medium text-gray-500 hover:text-gray-900">
-                  Todos
-                </Link>
-                {/* Removed - Shared todos integrated into main todos page */}
-                <a href="#" className="text-base font-medium text-gray-500 hover:text-gray-900">
-                  Documentation
-                </a>
-              </nav>
-              <div className="hidden md:flex items-center justify-end md:flex-1 lg:w-0 space-x-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">
-                      {user?.username?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <span className="text-gray-700 font-medium">{user?.username}</span>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="whitespace-nowrap inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-red-600 hover:bg-red-700"
-                >
-                  Logout
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <nav className="hidden md:flex space-x-10">
-                <a href="#features" className="text-base font-medium text-gray-500 hover:text-gray-900">
-                  Features
-                </a>
-                <a href="#tech-stack" className="text-base font-medium text-gray-500 hover:text-gray-900">
-                  Tech Stack
-                </a>
-                <a href="#" className="text-base font-medium text-gray-500 hover:text-gray-900">
-                  Documentation
-                </a>
-              </nav>
-              <div className="hidden md:flex items-center justify-end md:flex-1 lg:w-0">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-6">
+            {isAuthenticated ? (
+              navigation.map((item) => (
                 <Link
-                  href="/login"
-                  className="ml-8 whitespace-nowrap inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  key={item.name}
+                  href={item.href}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
                 >
-                  Login
+                  {item.name}
                 </Link>
-              </div>
-            </>
-          )}
+              ))
+            ) : (
+              publicNavigation.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  {item.name}
+                </Link>
+              ))
+            )}
+          </nav>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-2">
+            {/* Header Actions - Bell, Apps, User, Chat */}
+            <HeaderActions 
+              variant="light"
+              showNotifications={isAuthenticated}
+              showApps={isAuthenticated}
+              showUser={true}
+              showChat={true}
+            />
+
+            {/* Mobile Menu Button */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="md:hidden h-9 w-9 p-0">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-2 mt-6">
+                  {isAuthenticated ? (
+                    navigation.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className="text-sm font-medium text-gray-600 hover:text-gray-900 py-2 px-3 rounded-md hover:bg-gray-100 transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    ))
+                  ) : (
+                    publicNavigation.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className="text-sm font-medium text-gray-600 hover:text-gray-900 py-2 px-3 rounded-md hover:bg-gray-100 transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    ))
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>

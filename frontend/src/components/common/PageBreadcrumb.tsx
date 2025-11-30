@@ -55,12 +55,15 @@ export default function PageBreadcrumb({ items, className = '' }: PageBreadcrumb
                         <span className="truncate">{item.label}</span>
                       </BreadcrumbPage>
                     ) : (
-                      <Link href={item.href || '#'}>
-                        <BreadcrumbLink className="flex items-center gap-1.5 text-sm sm:text-base text-gray-600 hover:text-green-600 transition-colors max-w-[100px] sm:max-w-[200px] truncate">
+                      <BreadcrumbLink asChild>
+                        <Link 
+                          href={item.href || '#'}
+                          className="flex items-center gap-1.5 text-sm sm:text-base text-gray-600 hover:text-green-600 transition-colors max-w-[100px] sm:max-w-[200px] truncate"
+                        >
                           {item.icon && <span className="flex-shrink-0">{item.icon}</span>}
                           <span className="truncate">{item.label}</span>
-                        </BreadcrumbLink>
-                      </Link>
+                        </Link>
+                      </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
                   
