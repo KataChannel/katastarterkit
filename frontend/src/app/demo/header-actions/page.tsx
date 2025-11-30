@@ -102,39 +102,61 @@ const CONTENT_EDITOR_MODULES: AppModule[] = [
 
 // Code snippets for examples
 const CODE_SNIPPETS = {
-  basic: `<HeaderActions
+  basic: `// Cách 1: Tất cả tính năng nằm trong User dropdown (mặc định)
+<HeaderActions
   variant="light"
-  showNotifications={true}
-  showApps={true}
   showUser={true}
-  showChat={true}
+  userConfig={{
+    showNotifications: true,
+    showApps: true,
+    showChat: true,
+    showQuickActions: true,
+  }}
+/>`,
+  external: `// Cách 2: Icons hiển thị riêng bên ngoài User dropdown
+<HeaderActions
+  variant="light"
+  showNotifications={true}   // Icon Bell riêng
+  showApps={true}            // Icon Grid riêng
+  showChat={true}            // Icon Chat riêng
+  showUser={true}
+  userConfig={{
+    showQuickActions: false, // Ẩn Quick Actions trong dropdown
+  }}
 />`,
   dark: `<HeaderActions
   variant="dark"
-  showNotifications={true}
-  showApps={true}
   showUser={true}
-  showChat={true}
+  userConfig={{
+    showNotifications: true,
+    showApps: true,
+    showChat: true,
+    showQuickActions: true,
+  }}
 />`,
   admin: `import { ADMIN_APP_MODULES } from '@/components/layout/HeaderActions';
 
 <HeaderActions
   variant="dark"
-  appModules={ADMIN_APP_MODULES}
-  showNotifications={true}
-  showApps={true}
   showUser={true}
-  showChat={true}
+  appModules={ADMIN_APP_MODULES}
+  userConfig={{
+    showNotifications: true,
+    showApps: true,
+    showChat: true,
+  }}
 />`,
   lms: `import { LMS_APP_MODULES } from '@/components/layout/HeaderActions';
 
 <HeaderActions
   variant="light"
-  appModules={LMS_APP_MODULES}
-  showNotifications={true}
-  showApps={true}
   showUser={true}
-  showChat={true}
+  appModules={LMS_APP_MODULES}
+  userConfig={{
+    showNotifications: true,
+    showApps: true,
+    showChat: true,
+  }}
 />`,
   instructor: `import { 
   INSTRUCTOR_APP_MODULES, 
@@ -143,12 +165,14 @@ const CODE_SNIPPETS = {
 
 <HeaderActions
   variant="dark"
+  showUser={true}
   appModules={INSTRUCTOR_APP_MODULES}
   userMenuItems={INSTRUCTOR_USER_MENU}
-  showNotifications={true}
-  showApps={true}
-  showUser={true}
-  showChat={true}
+  userConfig={{
+    showNotifications: true,
+    showApps: true,
+    showChat: true,
+  }}
 />`,
   student: `import { 
   LMS_APP_MODULES, 
@@ -157,12 +181,14 @@ const CODE_SNIPPETS = {
 
 <HeaderActions
   variant="light"
+  showUser={true}
   appModules={LMS_APP_MODULES}
   userMenuItems={STUDENT_USER_MENU}
-  showNotifications={true}
-  showApps={true}
-  showUser={true}
-  showChat={true}
+  userConfig={{
+    showNotifications: true,
+    showApps: false, // Học viên không cần Apps
+    showChat: true,
+  }}
 />`,
   ecommerce: `const ECOMMERCE_MODULES: AppModule[] = [
   {
@@ -178,6 +204,7 @@ const CODE_SNIPPETS = {
 
 <HeaderActions
   variant="light"
+  showUser={true}
   appModules={ECOMMERCE_MODULES}
 />`,
   customLogout: `const handleCustomLogout = async () => {
@@ -189,6 +216,7 @@ const CODE_SNIPPETS = {
 
 <HeaderActions
   variant="light"
+  showUser={true}
   onLogout={handleCustomLogout}
 />`,
   customChat: `const handleChatClick = () => {
@@ -200,6 +228,7 @@ const CODE_SNIPPETS = {
 
 <HeaderActions
   variant="light"
+  showUser={true}
   onChatClick={handleChatClick}
 />`,
 };
@@ -270,10 +299,18 @@ function ExampleCard({
 export default function HeaderActionsDemo() {
   // Interactive playground state
   const [variant, setVariant] = useState<'light' | 'dark'>('light');
-  const [showNotifications, setShowNotifications] = useState(true);
-  const [showApps, setShowApps] = useState(true);
   const [showUser, setShowUser] = useState(true);
-  const [showChat, setShowChat] = useState(true);
+  
+  // External icons (hiển thị bên ngoài User dropdown)
+  const [extNotifications, setExtNotifications] = useState(false);
+  const [extApps, setExtApps] = useState(false);
+  const [extChat, setExtChat] = useState(false);
+  
+  // Dropdown features (hiển thị bên trong User dropdown)
+  const [dropNotifications, setDropNotifications] = useState(true);
+  const [dropApps, setDropApps] = useState(true);
+  const [dropChat, setDropChat] = useState(true);
+  const [dropQuickActions, setDropQuickActions] = useState(true);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -336,53 +373,106 @@ export default function HeaderActionsDemo() {
           <CardHeader>
             <CardTitle>🎮 Playground</CardTitle>
             <CardDescription>
-              Tùy chỉnh các props để xem component thay đổi
+              Tùy chỉnh External Icons và Dropdown Features độc lập
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               {/* Controls */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-gray-100 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="variant"
-                    checked={variant === 'dark'}
-                    onCheckedChange={(v) => setVariant(v ? 'dark' : 'light')}
-                  />
-                  <Label htmlFor="variant">Dark Mode</Label>
+              <div className="space-y-4">
+                {/* Row 1: Base config */}
+                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-100 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="variant"
+                      checked={variant === 'dark'}
+                      onCheckedChange={(v) => setVariant(v ? 'dark' : 'light')}
+                    />
+                    <Label htmlFor="variant">Dark Mode</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="user"
+                      checked={showUser}
+                      onCheckedChange={setShowUser}
+                    />
+                    <Label htmlFor="user">Show User</Label>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="notifications"
-                    checked={showNotifications}
-                    onCheckedChange={setShowNotifications}
-                  />
-                  <Label htmlFor="notifications">Notifications</Label>
+
+                {/* Row 2: External Icons */}
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="text-sm font-semibold text-blue-700 mb-3">⚡ External Icons (bên ngoài dropdown)</div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="extNotifications"
+                        checked={extNotifications}
+                        onCheckedChange={setExtNotifications}
+                      />
+                      <Label htmlFor="extNotifications">🔔 Notifications</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="extApps"
+                        checked={extApps}
+                        onCheckedChange={setExtApps}
+                      />
+                      <Label htmlFor="extApps">📱 Apps</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="extChat"
+                        checked={extChat}
+                        onCheckedChange={setExtChat}
+                      />
+                      <Label htmlFor="extChat">💬 Chat</Label>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="apps"
-                    checked={showApps}
-                    onCheckedChange={setShowApps}
-                  />
-                  <Label htmlFor="apps">Apps</Label>
+
+                {/* Row 3: Dropdown Features */}
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <div className="text-sm font-semibold text-green-700 mb-3">📦 Dropdown Features (bên trong User menu)</div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="dropNotifications"
+                        checked={dropNotifications}
+                        onCheckedChange={setDropNotifications}
+                      />
+                      <Label htmlFor="dropNotifications">Notifications</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="dropApps"
+                        checked={dropApps}
+                        onCheckedChange={setDropApps}
+                      />
+                      <Label htmlFor="dropApps">Apps</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="dropChat"
+                        checked={dropChat}
+                        onCheckedChange={setDropChat}
+                      />
+                      <Label htmlFor="dropChat">Chat</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="dropQuickActions"
+                        checked={dropQuickActions}
+                        onCheckedChange={setDropQuickActions}
+                      />
+                      <Label htmlFor="dropQuickActions">Quick Actions</Label>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="user"
-                    checked={showUser}
-                    onCheckedChange={setShowUser}
-                  />
-                  <Label htmlFor="user">User</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="chat"
-                    checked={showChat}
-                    onCheckedChange={setShowChat}
-                  />
-                  <Label htmlFor="chat">Chat</Label>
-                </div>
+
+                <p className="text-xs text-gray-500">
+                  💡 Có thể bật cả External Icons VÀ Dropdown Features cùng lúc để tối ưu UX theo nhu cầu
+                </p>
               </div>
 
               {/* Preview */}
@@ -390,10 +480,16 @@ export default function HeaderActionsDemo() {
                 <div className="flex justify-end">
                   <HeaderActions
                     variant={variant}
-                    showNotifications={showNotifications}
-                    showApps={showApps}
+                    showNotifications={extNotifications}
+                    showApps={extApps}
+                    showChat={extChat}
                     showUser={showUser}
-                    showChat={showChat}
+                    userConfig={{
+                      showNotifications: dropNotifications,
+                      showApps: dropApps,
+                      showChat: dropChat,
+                      showQuickActions: dropQuickActions,
+                    }}
                   />
                 </div>
               </div>
@@ -402,10 +498,19 @@ export default function HeaderActionsDemo() {
               <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
                 <code>{`<HeaderActions
   variant="${variant}"
-  showNotifications={${showNotifications}}
-  showApps={${showApps}}
+  // External Icons (hiển thị bên ngoài)
+  showNotifications={${extNotifications}}
+  showApps={${extApps}}
+  showChat={${extChat}}
+  // User Menu
   showUser={${showUser}}
-  showChat={${showChat}}
+  // Dropdown Features (hiển thị bên trong)
+  userConfig={{
+    showNotifications: ${dropNotifications},
+    showApps: ${dropApps},
+    showChat: ${dropChat},
+    showQuickActions: ${dropQuickActions},
+  }}
 />`}</code>
               </pre>
             </div>
@@ -431,10 +536,7 @@ export default function HeaderActionsDemo() {
             >
               <HeaderActions
                 variant="light"
-                showNotifications={true}
-                showApps={true}
                 showUser={true}
-                showChat={true}
               />
             </ExampleCard>
           </TabsContent>
@@ -446,7 +548,7 @@ export default function HeaderActionsDemo() {
               description="Sử dụng cho header sáng"
               code={CODE_SNIPPETS.basic}
             >
-              <HeaderActions variant="light" />
+              <HeaderActions variant="light" showUser={true} />
             </ExampleCard>
 
             <ExampleCard
@@ -455,7 +557,7 @@ export default function HeaderActionsDemo() {
               code={CODE_SNIPPETS.dark}
               isDark
             >
-              <HeaderActions variant="dark" />
+              <HeaderActions variant="dark" showUser={true} />
             </ExampleCard>
           </TabsContent>
 
@@ -467,7 +569,7 @@ export default function HeaderActionsDemo() {
               code={CODE_SNIPPETS.admin}
               isDark
             >
-              <HeaderActions variant="dark" appModules={ADMIN_APP_MODULES} />
+              <HeaderActions variant="dark" showUser={true} appModules={ADMIN_APP_MODULES} />
             </ExampleCard>
 
             <ExampleCard
@@ -475,7 +577,7 @@ export default function HeaderActionsDemo() {
               description="Preset cho nền tảng học tập"
               code={CODE_SNIPPETS.lms}
             >
-              <HeaderActions variant="light" appModules={LMS_APP_MODULES} />
+              <HeaderActions variant="light" showUser={true} appModules={LMS_APP_MODULES} />
             </ExampleCard>
 
             <ExampleCard
@@ -486,6 +588,7 @@ export default function HeaderActionsDemo() {
             >
               <HeaderActions
                 variant="dark"
+                showUser={true}
                 appModules={INSTRUCTOR_APP_MODULES}
                 userMenuItems={INSTRUCTOR_USER_MENU}
               />
@@ -498,8 +601,10 @@ export default function HeaderActionsDemo() {
             >
               <HeaderActions
                 variant="light"
+                showUser={true}
                 appModules={LMS_APP_MODULES}
                 userMenuItems={STUDENT_USER_MENU}
+                userConfig={{ showApps: false }}
               />
             </ExampleCard>
 
@@ -508,7 +613,7 @@ export default function HeaderActionsDemo() {
               description="Custom modules cho quản lý bán hàng"
               code={CODE_SNIPPETS.ecommerce}
             >
-              <HeaderActions variant="light" appModules={ECOMMERCE_MODULES} />
+              <HeaderActions variant="light" showUser={true} appModules={ECOMMERCE_MODULES} />
             </ExampleCard>
 
             <ExampleCard
@@ -516,7 +621,12 @@ export default function HeaderActionsDemo() {
               description="Custom modules cho biên tập viên"
               code={CODE_SNIPPETS.ecommerce}
             >
-              <HeaderActions variant="light" appModules={CONTENT_EDITOR_MODULES} showChat={false} />
+              <HeaderActions 
+                variant="light" 
+                showUser={true} 
+                appModules={CONTENT_EDITOR_MODULES} 
+                userConfig={{ showChat: false }}
+              />
             </ExampleCard>
           </TabsContent>
 
@@ -529,6 +639,7 @@ export default function HeaderActionsDemo() {
             >
               <HeaderActions
                 variant="light"
+                showUser={true}
                 onLogout={async () => {
                   alert('Custom logout handler!');
                 }}
@@ -542,6 +653,7 @@ export default function HeaderActionsDemo() {
             >
               <HeaderActions
                 variant="light"
+                showUser={true}
                 onChatClick={() => {
                   alert('Custom chat handler!');
                 }}
@@ -658,34 +770,46 @@ export default function HeaderActionsDemo() {
                     <td className="p-3">Theme của component</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="p-3"><code>showNotifications</code></td>
-                    <td className="p-3"><code>boolean</code></td>
-                    <td className="p-3"><code>true</code></td>
-                    <td className="p-3">Hiển thị icon thông báo</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="p-3"><code>showApps</code></td>
-                    <td className="p-3"><code>boolean</code></td>
-                    <td className="p-3"><code>true</code></td>
-                    <td className="p-3">Hiển thị menu ứng dụng</td>
-                  </tr>
-                  <tr className="border-b">
                     <td className="p-3"><code>showUser</code></td>
                     <td className="p-3"><code>boolean</code></td>
                     <td className="p-3"><code>true</code></td>
-                    <td className="p-3">Hiển thị user menu</td>
+                    <td className="p-3">Hiển thị User icon và dropdown</td>
                   </tr>
-                  <tr className="border-b">
-                    <td className="p-3"><code>showChat</code></td>
+                  <tr className="border-b bg-blue-50">
+                    <td className="p-3"><code>userConfig</code></td>
+                    <td className="p-3"><code>UserDropdownConfig</code></td>
+                    <td className="p-3"><code>{'{...}'}</code></td>
+                    <td className="p-3">Cấu hình các tính năng trong User dropdown</td>
+                  </tr>
+                  <tr className="border-b bg-blue-50/50">
+                    <td className="p-3 pl-6"><code>↳ showNotifications</code></td>
                     <td className="p-3"><code>boolean</code></td>
                     <td className="p-3"><code>true</code></td>
-                    <td className="p-3">Hiển thị chat widget</td>
+                    <td className="p-3">Hiển thị nút Thông báo trong dropdown</td>
+                  </tr>
+                  <tr className="border-b bg-blue-50/50">
+                    <td className="p-3 pl-6"><code>↳ showApps</code></td>
+                    <td className="p-3"><code>boolean</code></td>
+                    <td className="p-3"><code>true</code></td>
+                    <td className="p-3">Hiển thị nút Ứng dụng trong dropdown</td>
+                  </tr>
+                  <tr className="border-b bg-blue-50/50">
+                    <td className="p-3 pl-6"><code>↳ showChat</code></td>
+                    <td className="p-3"><code>boolean</code></td>
+                    <td className="p-3"><code>true</code></td>
+                    <td className="p-3">Hiển thị nút Chat trong dropdown</td>
+                  </tr>
+                  <tr className="border-b bg-blue-50/50">
+                    <td className="p-3 pl-6"><code>↳ showQuickActions</code></td>
+                    <td className="p-3"><code>boolean</code></td>
+                    <td className="p-3"><code>true</code></td>
+                    <td className="p-3">Hiển thị hàng Quick Actions</td>
                   </tr>
                   <tr className="border-b">
                     <td className="p-3"><code>appModules</code></td>
                     <td className="p-3"><code>AppModule[]</code></td>
                     <td className="p-3"><code>DEFAULT_APP_MODULES</code></td>
-                    <td className="p-3">Danh sách modules trong Apps menu</td>
+                    <td className="p-3">Danh sách modules trong Apps popover</td>
                   </tr>
                   <tr className="border-b">
                     <td className="p-3"><code>userMenuItems</code></td>
@@ -713,6 +837,77 @@ export default function HeaderActionsDemo() {
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Admin Icon Permission Feature */}
+        <Card className="mb-8 border-2 border-purple-200">
+          <CardHeader className="bg-purple-50">
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-purple-600" />
+              🆕 Phân quyền Icon theo Role
+            </CardTitle>
+            <CardDescription>
+              Admin có thể cấu hình hiển thị icon header theo từng nhóm quyền
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">✨ Tính năng mới</h4>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    Cấu hình icon cho từng role (ADMIN, giangvien, USER, v.v.)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    Chọn vị trí hiển thị: Bên ngoài, Trong dropdown, hoặc Cả hai
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    Áp dụng preset có sẵn hoặc tùy chỉnh chi tiết
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-green-500" />
+                    Xem trước giao diện trước khi lưu
+                  </li>
+                </ul>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg">
+                  <h5 className="font-medium mb-2">🔧 SmartHeaderActions</h5>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Component tự động áp dụng cấu hình theo role của user
+                  </p>
+                  <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+{`import { SmartHeaderActions } from '@/components/layout/SmartHeaderActions';
+
+// Tự động hiển thị icon theo role của user
+<SmartHeaderActions variant="light" />`}
+                  </pre>
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <h5 className="font-medium mb-2">⚙️ Trang quản lý</h5>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Admin có thể truy cập trang cài đặt để cấu hình
+                  </p>
+                  <Link
+                    href="/admin/settings/icon-permissions"
+                    className="inline-flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Mở trang phân quyền Icon
+                  </Link>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
+                <strong>📝 Ghi chú:</strong> Cấu hình được lưu trong localStorage và áp dụng realtime cho tất cả user theo role.
+              </div>
             </div>
           </CardContent>
         </Card>

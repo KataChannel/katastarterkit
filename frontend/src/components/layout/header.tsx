@@ -71,13 +71,16 @@ export function Header() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
-            {/* Header Actions - Bell, Apps, User, Chat */}
+            {/* Header Actions - User với dropdown chứa Notifications, Apps, Chat */}
             <HeaderActions 
               variant="light"
-              showNotifications={isAuthenticated}
-              showApps={isAuthenticated}
               showUser={true}
-              showChat={true}
+              userConfig={{
+                showNotifications: isAuthenticated,
+                showApps: isAuthenticated,
+                showChat: true,
+                showQuickActions: isAuthenticated,
+              }}
             />
 
             {/* Mobile Menu Button */}

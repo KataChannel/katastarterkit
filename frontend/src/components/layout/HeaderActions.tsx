@@ -626,13 +626,23 @@ export const INSTRUCTOR_USER_MENU: UserMenuItem[] = [
 ];
 
 // ===================== PROPS INTERFACE =====================
+export interface UserDropdownConfig {
+  showNotifications?: boolean;  // Hiển thị nút Thông báo trong dropdown
+  showApps?: boolean;           // Hiển thị nút Ứng dụng trong dropdown
+  showChat?: boolean;           // Hiển thị nút Chat trong dropdown
+  showQuickActions?: boolean;   // Hiển thị row Quick Actions (Thông báo, Ứng dụng, Chat)
+}
+
 interface HeaderActionsProps {
   variant?: 'light' | 'dark';
-  showNotifications?: boolean;
-  showApps?: boolean;
-  showUser?: boolean;
-  showChat?: boolean;
+  // Icons hiển thị riêng biệt bên ngoài (trước User icon)
+  showNotifications?: boolean;  // Icon Bell riêng
+  showApps?: boolean;           // Icon Grid riêng
+  showChat?: boolean;           // Icon Chat riêng
+  showUser?: boolean;           // User avatar/dropdown
   className?: string;
+  // User dropdown config - cấu hình bên trong dropdown
+  userConfig?: UserDropdownConfig;
   // Dynamic configurations
   appModules?: AppModule[];
   userMenuItems?: UserMenuItem[];
@@ -642,14 +652,23 @@ interface HeaderActionsProps {
   onChatClick?: () => void;
 }
 
+// Default user dropdown config
+const DEFAULT_USER_CONFIG: UserDropdownConfig = {
+  showNotifications: true,
+  showApps: true,
+  showChat: true,
+  showQuickActions: true,
+};
+
 // ===================== COMPONENT =====================
 export function HeaderActions({
   variant = 'light',
-  showNotifications = true,
-  showApps = true,
+  showNotifications = false,  // Mặc định ẩn icons bên ngoài
+  showApps = false,
+  showChat = false,
   showUser = true,
-  showChat = true,
   className = '',
+  userConfig = DEFAULT_USER_CONFIG,
   appModules = DEFAULT_APP_MODULES,
   userMenuItems = DEFAULT_USER_MENU_ITEMS,
   guestMenuItems = DEFAULT_GUEST_MENU_ITEMS,
@@ -659,6 +678,10 @@ export function HeaderActions({
   const { user, isAuthenticated, logout } = useAuth();
   const { hasRole, hasAnyRole } = useRole();
   const router = useRouter();
+  const [appsPopoverOpen, setAppsPopoverOpen] = useState(false);
+
+  // Merge user config với defaults
+  const config = { ...DEFAULT_USER_CONFIG, ...userConfig };
 
   const isDark = variant === 'dark';
   const textColor = isDark ? 'text-white' : 'text-gray-700';
@@ -782,7 +805,7 @@ export function HeaderActions({
 
   return (
     <div className={`flex items-center gap-1 sm:gap-2 ${className}`}>
-      {/* 1. Notifications Bell */}
+      {/* 1. Notifications Bell - Icon riêng bên ngoài */}
       {showNotifications && isAuthenticated && (
         <TooltipProvider>
           <Tooltip>
@@ -798,7 +821,7 @@ export function HeaderActions({
         </TooltipProvider>
       )}
 
-      {/* 2. More Apps */}
+      {/* 2. More Apps - Icon riêng bên ngoài */}
       {showApps && availableModules.length > 0 && (
         <Popover>
           <TooltipProvider>
@@ -840,20 +863,18 @@ export function HeaderActions({
                 ))}
               </div>
               {isAuthenticated && (
-                <>
-                  <div className="border-t pt-3">
-                    <Link
-                      href="/admin/settings"
-                      className="flex items-center justify-between text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Settings className="w-4 h-4" />
-                        Cài đặt chung
-                      </span>
-                      <ChevronRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </>
+                <div className="border-t pt-3">
+                  <Link
+                    href="/admin/settings"
+                    className="flex items-center justify-between text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Cài đặt chung
+                    </span>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
               )}
             </div>
           </PopoverContent>
@@ -936,11 +957,11 @@ export function HeaderActions({
                 <DropdownMenuSeparator />
                 
                 {/* Quick Actions - Notifications, Apps, Chat */}
-                {(showNotifications || showApps || showChat) && (
+                {config.showQuickActions && (config.showNotifications || config.showApps || config.showChat) && (
                   <>
                     <div className="px-2 py-2">
                       <div className="flex items-center justify-around gap-1">
-                        {showNotifications && (
+                        {config.showNotifications && (
                           <button
                             onClick={() => router.push('/admin/notifications')}
                             className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-1"
@@ -949,19 +970,55 @@ export function HeaderActions({
                             <span className="text-[10px] text-gray-500">Thông báo</span>
                           </button>
                         )}
-                        {showApps && availableModules.length > 0 && (
-                          <button
-                            onClick={() => {
-                              const event = new CustomEvent('openAppsPanel');
-                              window.dispatchEvent(event);
-                            }}
-                            className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-1"
-                          >
-                            <Grid3X3 className="h-5 w-5 text-gray-600" />
-                            <span className="text-[10px] text-gray-500">Ứng dụng</span>
-                          </button>
+                        {config.showApps && availableModules.length > 0 && (
+                          <Popover open={appsPopoverOpen} onOpenChange={setAppsPopoverOpen}>
+                            <PopoverTrigger asChild>
+                              <button
+                                className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-1"
+                              >
+                                <Grid3X3 className="h-5 w-5 text-gray-600" />
+                                <span className="text-[10px] text-gray-500">Ứng dụng</span>
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 p-4" align="end" side="left">
+                              <div className="space-y-3">
+                                <h4 className="font-semibold text-sm text-gray-900">Chuyển đổi ứng dụng</h4>
+                                <div className="grid grid-cols-3 gap-3">
+                                  {availableModules.map((module) => (
+                                    <Link
+                                      key={module.id}
+                                      href={module.href}
+                                      onClick={() => setAppsPopoverOpen(false)}
+                                      className="flex flex-col items-center p-3 rounded-lg hover:bg-gray-100 transition-colors group"
+                                      title={module.description}
+                                    >
+                                      <div className={`w-10 h-10 rounded-xl ${module.color || 'bg-gray-500'} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
+                                        {renderIcon(module.icon, 'w-5 h-5 text-white')}
+                                      </div>
+                                      <span className="text-xs font-medium text-gray-700 text-center line-clamp-2">
+                                        {module.name}
+                                      </span>
+                                    </Link>
+                                  ))}
+                                </div>
+                                <div className="border-t pt-3">
+                                  <Link
+                                    href="/admin/settings"
+                                    onClick={() => setAppsPopoverOpen(false)}
+                                    className="flex items-center justify-between text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                                  >
+                                    <span className="flex items-center gap-2">
+                                      <Settings className="w-4 h-4" />
+                                      Cài đặt chung
+                                    </span>
+                                    <ChevronRight className="w-4 h-4" />
+                                  </Link>
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         )}
-                        {showChat && (
+                        {config.showChat && (
                           <button
                             onClick={handleChatClick}
                             className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-1 relative"
@@ -1039,7 +1096,7 @@ export function HeaderActions({
         </DropdownMenu>
       )}
 
-      {/* 4. Support Chat Widget */}
+      {/* 4. Support Chat Widget - Icon riêng bên ngoài */}
       {showChat && (
         <TooltipProvider>
           <Tooltip>

@@ -65,13 +65,16 @@ export function AdminHeader() {
             </nav>
           </div>
           
-          {/* Header Actions - Bell, Apps, User, Chat */}
+          {/* Header Actions - User với dropdown chứa Notifications, Apps, Chat */}
           <HeaderActions 
             variant="dark"
-            showNotifications={true}
-            showApps={true}
             showUser={true}
-            showChat={true}
+            userConfig={{
+              showNotifications: true,
+              showApps: true,
+              showChat: true,
+              showQuickActions: true,
+            }}
           />
         </div>
       </div>
