@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, gql } from '@apollo/client';
-import SupportChatWidgetSimple from './SupportChatWidgetSimple';
+import SupportChatWidgetEnhanced from './SupportChatWidgetEnhanced';
 
 const GET_SUPPORT_CHAT_SETTINGS = gql`
   query GetSupportChatSettings {
@@ -28,6 +28,10 @@ interface SupportChatSettings {
   enable_emojis: boolean;
   sound_notification: boolean;
   desktop_notification: boolean;
+  // Enhanced features
+  enable_zalo_login: boolean;
+  enable_facebook_login: boolean;
+  enable_google_login: boolean;
 }
 
 export default function SupportChatWidgetWrapper() {
@@ -85,11 +89,20 @@ export default function SupportChatWidgetWrapper() {
                        "http://116.118.49.243:12001/support-chat";
 
   return (
-    <SupportChatWidgetSimple
+    <SupportChatWidgetEnhanced
       apiUrl={apiUrl}
       websocketUrl={websocketUrl}
       primaryColor={config.primary_color || '#16a34a'}
       position={(config.widget_position as 'bottom-right' | 'bottom-left') || 'bottom-right'}
+      enableZaloLogin={config.enable_zalo_login !== false}
+      enableFacebookLogin={config.enable_facebook_login !== false}
+      enableGoogleLogin={config.enable_google_login !== false}
+      enableSoundNotification={config.sound_notification !== false}
+      enableDesktopNotification={config.desktop_notification !== false}
+      enableFileUpload={config.enable_file_upload !== false}
+      enableEmojis={config.enable_emojis !== false}
+      welcomeMessage={config.welcome_message || 'Xin chào! Tôi có thể giúp gì cho bạn?'}
+      offlineMessage={config.offline_message || 'Xin lỗi, hiện không có nhân viên trực. Vui lòng để lại tin nhắn.'}
     />
   );
 }

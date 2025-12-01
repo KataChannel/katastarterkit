@@ -60,11 +60,11 @@ export class SyncCallCenterInput {
   @Field(() => String, { nullable: true })
   configId?: string;
 
-  @Field(() => Date, { nullable: true })
-  fromDate?: Date;
+  @Field(() => String, { nullable: true, description: 'ISO date string for fromDate' })
+  fromDate?: string;
 
-  @Field(() => Date, { nullable: true })
-  toDate?: Date;
+  @Field(() => String, { nullable: true, description: 'ISO date string for toDate' })
+  toDate?: string;
 
   @Field(() => Boolean, { defaultValue: false })
   fullSync?: boolean; // If true, sync all available data

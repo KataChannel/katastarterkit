@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
-import { useMutation } from '@apollo/client';
+import { useMutation, useLazyQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 import {
   MessageCircle,
@@ -18,6 +18,15 @@ import {
   Mail,
   Facebook,
   Chrome,
+  RotateCcw,
+  Volume2,
+  VolumeX,
+  Bell,
+  BellOff,
+  Image,
+  File,
+  Smile,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,6 +65,27 @@ const SEND_SUPPORT_MESSAGE = gql`
   }
 `;
 
+const GET_SUPPORT_CONVERSATION = gql`
+  query GetSupportConversation($id: String!) {
+    supportConversation(id: $id) {
+      id
+      conversationCode
+      customerName
+      authType
+      status
+      messages {
+        id
+        content
+        senderType
+        senderName
+        customerAuthIcon
+        sentAt
+        isRead
+      }
+    }
+  }
+`;
+
 interface Message {
   id: string;
   content: string;
@@ -66,6 +96,16 @@ interface Message {
   sentAt: string;
   isRead: boolean;
   isAIGenerated?: boolean;
+  attachments?: {
+    type: 'image' | 'file';
+    url: string;
+    name: string;
+  }[];
+}
+
+interface QuickReply {
+  icon: string;
+  text: string;
 }
 
 interface SupportChatWidgetEnhancedProps {
@@ -76,16 +116,36 @@ interface SupportChatWidgetEnhancedProps {
   enableZaloLogin?: boolean;
   enableFacebookLogin?: boolean;
   enableGoogleLogin?: boolean;
+  enableSoundNotification?: boolean;
+  enableDesktopNotification?: boolean;
+  enableFileUpload?: boolean;
+  enableEmojis?: boolean;
+  quickReplies?: QuickReply[];
+  welcomeMessage?: string;
+  offlineMessage?: string;
 }
 
 export default function SupportChatWidgetEnhanced({
-  apiUrl = 'http://localhost:3001',
-  websocketUrl = 'http://localhost:3001/support-chat',
+  apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:12001',
+  websocketUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:12001/support-chat',
   primaryColor = '#2563eb',
   position = 'bottom-right',
   enableZaloLogin = true,
   enableFacebookLogin = true,
   enableGoogleLogin = true,
+  enableSoundNotification = true,
+  enableDesktopNotification = true,
+  enableFileUpload = true,
+  enableEmojis = true,
+  quickReplies = [
+    { icon: '💰', text: 'Giá sản phẩm' },
+    { icon: '📦', text: 'Theo dõi đơn hàng' },
+    { icon: '🚚', text: 'Vận chuyển' },
+    { icon: '🔄', text: 'Đổi trả hàng' },
+    { icon: '💳', text: 'Thanh toán' },
+  ],
+  welcomeMessage = 'Xin chào! Tôi có thể giúp gì cho bạn?',
+  offlineMessage = 'Xin lỗi, hiện không có nhân viên trực. Vui lòng để lại tin nhắn.',
 }: SupportChatWidgetEnhancedProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -95,6 +155,13 @@ export default function SupportChatWidgetEnhanced({
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  
+  // Sound & Notification settings
+  const [soundEnabled, setSoundEnabled] = useState(enableSoundNotification);
+  const [notificationEnabled, setNotificationEnabled] = useState(enableDesktopNotification);
   
   // Authentication state
   const [authType, setAuthType] = useState<'GUEST' | 'PHONE' | 'ZALO' | 'FACEBOOK' | 'GOOGLE'>('GUEST');
@@ -103,12 +170,159 @@ export default function SupportChatWidgetEnhanced({
   const [showAuthInput, setShowAuthInput] = useState(true);
   const [agentInfo, setAgentInfo] = useState<any>(null);
   
+  // File upload state
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const notificationSoundRef = useRef<HTMLAudioElement | null>(null);
 
-  // Apollo mutations
+  // Storage key for persistence
+  const STORAGE_KEY = 'support_chat_enhanced_session';
+
+  // Initialize notification sound
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      notificationSoundRef.current = new Audio('/sounds/notification.mp3');
+      notificationSoundRef.current.volume = 0.5;
+    }
+  }, []);
+
+  // Play notification sound
+  const playNotificationSound = useCallback(() => {
+    if (soundEnabled && notificationSoundRef.current) {
+      notificationSoundRef.current.play().catch(() => {
+        // Ignore autoplay errors
+      });
+    }
+  }, [soundEnabled]);
+
+  // Show desktop notification
+  const showDesktopNotification = useCallback((title: string, body: string) => {
+    if (notificationEnabled && 'Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, {
+        body,
+        icon: '/icons/chat-icon.png',
+        badge: '/icons/chat-badge.png',
+      });
+    }
+  }, [notificationEnabled]);
+
+  // Request notification permission
+  useEffect(() => {
+    if (notificationEnabled && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, [notificationEnabled]);
+
+  // Clear session and start new conversation
+  const clearSession = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setCustomerName('');
+    setCustomerPhone('');
+    setConversationId(null);
+    setMessages([]);
+    setShowAuthInput(true);
+    setAuthType('GUEST');
+    if (socket) {
+      socket.disconnect();
+      setSocket(null);
+    }
+  }, [socket]);
+
+  // Apollo mutations and queries
   const [createConversationMutation] = useMutation(CREATE_CONVERSATION_WITH_AUTH);
   const [sendMessageMutation] = useMutation(SEND_SUPPORT_MESSAGE);
+  const [fetchConversation] = useLazyQuery(GET_SUPPORT_CONVERSATION, {
+    fetchPolicy: 'network-only',
+    onCompleted: (data) => {
+      if (data?.supportConversation?.messages) {
+        const serverMessages = data.supportConversation.messages.map((msg: any) => ({
+          id: msg.id,
+          content: msg.content,
+          senderType: msg.senderType,
+          senderName: msg.senderName,
+          customerAuthIcon: msg.customerAuthIcon || getAuthIcon(authType),
+          sentAt: msg.sentAt || msg.createdAt,
+          isRead: msg.isRead,
+        }));
+        setMessages(serverMessages);
+      }
+    },
+    onError: (error) => {
+      console.error('Error fetching conversation:', error);
+      if (error.message.includes('not found') || error.message.includes('Not found')) {
+        clearSession();
+      }
+    },
+  });
+
+  // Get auth icon based on type
+  const getAuthIcon = (type: string) => {
+    const icons: Record<string, string> = {
+      GUEST: '👤',
+      PHONE: '📱',
+      ZALO: '💬',
+      FACEBOOK: '👥',
+      GOOGLE: '🔍',
+      USER_ACCOUNT: '🔐',
+    };
+    return icons[type] || '👤';
+  };
+
+  // Load saved session from localStorage on mount
+  useEffect(() => {
+    let savedConvId: string | null = null;
+    try {
+      const savedSession = localStorage.getItem(STORAGE_KEY);
+      if (savedSession) {
+        const session = JSON.parse(savedSession);
+        if (session.customerName) setCustomerName(session.customerName);
+        if (session.customerPhone) setCustomerPhone(session.customerPhone);
+        if (session.authType) setAuthType(session.authType);
+        if (session.conversationId) {
+          savedConvId = session.conversationId;
+          setConversationId(session.conversationId);
+          setShowAuthInput(false);
+        }
+        if (session.messages?.length > 0) {
+          setMessages(session.messages);
+        }
+        if (session.soundEnabled !== undefined) setSoundEnabled(session.soundEnabled);
+        if (session.notificationEnabled !== undefined) setNotificationEnabled(session.notificationEnabled);
+      }
+    } catch (error) {
+      console.error('Error loading saved session:', error);
+    }
+    setIsLoading(false);
+    
+    if (savedConvId) {
+      fetchConversation({ variables: { id: savedConvId } });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Save session to localStorage when data changes
+  useEffect(() => {
+    if (!isLoading && (customerName || customerPhone || conversationId)) {
+      try {
+        const session = {
+          customerName,
+          customerPhone,
+          conversationId,
+          authType,
+          messages: messages.slice(-50),
+          soundEnabled,
+          notificationEnabled,
+          savedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+      } catch (error) {
+        console.error('Error saving session:', error);
+      }
+    }
+  }, [customerName, customerPhone, conversationId, authType, messages, soundEnabled, notificationEnabled, isLoading]);
 
   // Initialize Socket.IO connection
   useEffect(() => {
@@ -118,19 +332,40 @@ export default function SupportChatWidgetEnhanced({
       });
 
       newSocket.on('connect', () => {
-        console.log('Connected to support chat');
+        console.log('✅ Connected to support chat');
+        setIsOnline(true);
+        if (conversationId) {
+          newSocket.emit('join_conversation', { conversationId });
+        }
+      });
+
+      newSocket.on('disconnect', () => {
+        console.log('❌ Disconnected from support chat');
+        setIsOnline(false);
       });
 
       newSocket.on('new_message', (message: Message) => {
-        setMessages(prev => [...prev, message]);
+        console.log('📩 New message received:', message);
+        setMessages(prev => {
+          const exists = prev.some(m => m.id === message.id);
+          if (exists) return prev;
+          return [...prev, message];
+        });
         if (message.senderType !== 'CUSTOMER') {
           setUnreadCount(prev => prev + 1);
+          playNotificationSound();
+          if (!isOpen || document.hidden) {
+            showDesktopNotification(
+              agentInfo?.name || 'Hỗ trợ khách hàng',
+              message.content
+            );
+          }
         }
         scrollToBottom();
       });
 
       newSocket.on('ai_suggestion', (data: any) => {
-        console.log('AI Suggestion:', data);
+        console.log('🤖 AI Suggestion:', data);
       });
 
       newSocket.on('user_typing', () => {
@@ -142,11 +377,12 @@ export default function SupportChatWidgetEnhanced({
       });
 
       newSocket.on('agent_assigned', (data: any) => {
+        console.log('👤 Agent assigned:', data);
         setAgentInfo(data.agent);
       });
 
       newSocket.on('customer_auth_updated', (data: any) => {
-        console.log('Customer auth updated:', data);
+        console.log('🔐 Customer auth updated:', data);
       });
 
       setSocket(newSocket);
@@ -155,7 +391,7 @@ export default function SupportChatWidgetEnhanced({
         newSocket.disconnect();
       };
     }
-  }, [isOpen, websocketUrl]);
+  }, [isOpen, websocketUrl, conversationId, playNotificationSound, showDesktopNotification, agentInfo?.name]);
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -170,6 +406,7 @@ export default function SupportChatWidgetEnhanced({
   const startGuestConversation = async () => {
     if (!customerName.trim() || !customerPhone.trim()) return;
 
+    setIsSending(true);
     try {
       const { data } = await createConversationMutation({
         variables: {
@@ -203,7 +440,7 @@ export default function SupportChatWidgetEnhanced({
       setMessages([
         {
           id: '1',
-          content: `Xin chào ${customerName}! Tôi có thể giúp gì cho bạn?`,
+          content: welcomeMessage.replace('{name}', customerName),
           senderType: 'BOT',
           senderName: 'Trợ lý ảo',
           sentAt: new Date().toISOString(),
@@ -211,8 +448,16 @@ export default function SupportChatWidgetEnhanced({
           isAIGenerated: true,
         },
       ]);
+
+      // Focus input
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500);
     } catch (error) {
-      console.error('Error starting conversation:', error);
+      console.error('❌ Error starting conversation:', error);
+      alert('Không thể kết nối. Vui lòng thử lại.');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -261,6 +506,7 @@ export default function SupportChatWidgetEnhanced({
 
   // Start conversation with social auth
   const startSocialConversation = async (provider: 'ZALO' | 'FACEBOOK' | 'GOOGLE', accessToken: string) => {
+    setIsSending(true);
     try {
       const { data } = await createConversationMutation({
         variables: {
@@ -289,10 +535,16 @@ export default function SupportChatWidgetEnhanced({
         });
       }
 
+      const providerNames: Record<string, string> = {
+        ZALO: 'Zalo',
+        FACEBOOK: 'Facebook',
+        GOOGLE: 'Google',
+      };
+
       setMessages([
         {
           id: '1',
-          content: `Xin chào ${conversation.customerName}! Cảm ơn bạn đã đăng nhập qua ${provider}. Tôi có thể giúp gì cho bạn?`,
+          content: `Xin chào ${conversation.customerName}! Cảm ơn bạn đã đăng nhập qua ${providerNames[provider]}. ${welcomeMessage}`,
           senderType: 'BOT',
           senderName: 'Trợ lý ảo',
           sentAt: new Date().toISOString(),
@@ -300,17 +552,25 @@ export default function SupportChatWidgetEnhanced({
           isAIGenerated: true,
         },
       ]);
+
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 500);
     } catch (error) {
-      console.error('Error starting social conversation:', error);
+      console.error('❌ Error starting social conversation:', error);
+      alert('Không thể kết nối. Vui lòng thử lại.');
+    } finally {
+      setIsSending(false);
     }
   };
 
   // Send message
   const sendMessage = async () => {
-    if (!inputMessage.trim() || !conversationId) return;
+    if (!inputMessage.trim() || !conversationId || isSending) return;
 
     const messageContent = inputMessage;
     setInputMessage('');
+    setIsSending(true);
 
     try {
       const { data } = await sendMessageMutation({
@@ -325,31 +585,38 @@ export default function SupportChatWidgetEnhanced({
         },
       });
 
-      if (socket && data?.sendSupportMessage) {
-        socket.emit('send_message', {
-          conversationId,
-          messageId: data.sendSupportMessage.id,
-          content: messageContent,
-          senderType: 'CUSTOMER',
-          senderName: customerName,
-          customerAuthType: authType,
-        });
-      }
-
+      // Optimistic update
       setMessages(prev => [...prev, {
-        id: data?.sendSupportMessage?.id || Date.now().toString(),
+        id: data?.sendSupportMessage?.id || `temp-${Date.now()}`,
         content: messageContent,
         senderType: 'CUSTOMER',
         senderName: customerName,
         customerAuthType: authType,
-        customerAuthIcon: data?.sendSupportMessage?.customerAuthIcon,
+        customerAuthIcon: getAuthIcon(authType),
         sentAt: new Date().toISOString(),
         isRead: false,
       }]);
+
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('❌ Error sending message:', error);
       setInputMessage(messageContent);
+    } finally {
+      setIsSending(false);
     }
+  };
+
+  // Handle file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setSelectedFiles(Array.from(files));
+    }
+  };
+
+  // Handle quick reply click
+  const handleQuickReply = (text: string) => {
+    setInputMessage(text);
+    inputRef.current?.focus();
   };
 
   const handleTyping = () => {
@@ -372,9 +639,26 @@ export default function SupportChatWidgetEnhanced({
     ? 'right-4 sm:right-6' 
     : 'left-4 sm:left-6';
 
+  // Zalo icon component
+  const ZaloIcon = () => (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 mr-2" fill="#0068FF">
+      <path d="M12.49 10.272v-.45h1.347v6.322h-.678a.672.672 0 01-.669-.669v-.113a2.743 2.743 0 01-1.678.563 2.985 2.985 0 01-2.994-2.994 2.985 2.985 0 012.994-2.994 2.73 2.73 0 011.678.335zm-1.566.788a1.9 1.9 0 00-1.903 1.903 1.9 1.9 0 001.903 1.904 1.9 1.9 0 001.903-1.904 1.9 1.9 0 00-1.903-1.903zM17.715 15.044a.7.7 0 01.225.563v.337h-3.445v-.337c0-.225.075-.394.225-.563l2.322-3.107h-2.21v-.9h3.221v.45a.79.79 0 01-.225.563l-2.21 2.994h2.097zM4.477 16.053V7.947c0-.9.9-1.578 1.791-1.347l5.95 1.572a1.463 1.463 0 011.122 1.397v8.106c0 .9-.9 1.578-1.791 1.347l-5.95-1.572a1.464 1.464 0 01-1.122-1.397z"/>
+    </svg>
+  );
+
   return (
     <>
-      {/* Chat Button */}
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        multiple
+        accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+        onChange={handleFileUpload}
+      />
+
+      {/* Chat Button - Mobile First */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -410,7 +694,7 @@ export default function SupportChatWidgetEnhanced({
         )}
       </AnimatePresence>
 
-      {/* Chat Window */}
+      {/* Chat Window - Mobile Full Screen + Desktop Floating */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -419,22 +703,30 @@ export default function SupportChatWidgetEnhanced({
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={cn(
-              "fixed bottom-4 sm:bottom-6 z-50",
-              "w-[calc(100vw-2rem)] sm:w-96",
-              positionClasses
+              // Mobile: Full screen
+              "fixed inset-0 z-50",
+              // Desktop: Floating window
+              "sm:inset-auto sm:bottom-6 sm:w-[420px]",
+              // Position for desktop
+              position === 'bottom-right' ? 'sm:right-6' : 'sm:left-6'
             )}
             style={{
-              maxHeight: isMinimized ? '64px' : 'calc(100vh - 8rem)',
-              height: isMinimized ? 'auto' : '600px',
+              maxHeight: isMinimized ? '64px' : undefined,
+              height: isMinimized ? 'auto' : undefined,
             }}
           >
-            <Card className="h-full flex flex-col shadow-2xl border-0">
+            <Card className={cn(
+              "h-full flex flex-col shadow-2xl border-0",
+              "rounded-none sm:rounded-xl",
+              "sm:max-h-[650px]"
+            )}>
               {/* Header */}
               <CardHeader
-                className="p-4 text-white relative overflow-hidden cursor-pointer"
+                className="p-4 text-white relative overflow-hidden cursor-pointer flex-shrink-0 safe-area-inset-top"
                 style={{ backgroundColor: primaryColor }}
                 onClick={() => setIsMinimized(!isMinimized)}
               >
+                {/* Animated background */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none">
                   <div className="absolute w-32 h-32 bg-white rounded-full -top-10 -left-10 animate-pulse" />
                   <div className="absolute w-24 h-24 bg-white rounded-full -bottom-5 -right-5 animate-pulse" 
@@ -443,23 +735,74 @@ export default function SupportChatWidgetEnhanced({
 
                 <div className="flex items-center justify-between relative z-10">
                   <div className="flex items-center space-x-3">
-                    <Avatar className="h-10 w-10 border-2 border-white/20">
-                      <AvatarImage src={agentInfo?.avatar} alt={agentInfo?.name} />
-                      <AvatarFallback className="bg-white/20">
-                        <Bot className="h-5 w-5" />
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar className="h-10 w-10 border-2 border-white/20">
+                        <AvatarImage src={agentInfo?.avatar} alt={agentInfo?.name} />
+                        <AvatarFallback className="bg-white/20">
+                          <Bot className="h-5 w-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                      {/* Online indicator */}
+                      <span className={cn(
+                        "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white",
+                        isOnline ? "bg-green-500" : "bg-gray-400"
+                      )} />
+                    </div>
                     <div>
                       <h3 className="font-semibold text-sm leading-tight">
                         {agentInfo?.name || 'Hỗ trợ khách hàng'}
                       </h3>
                       <p className="text-xs opacity-90">
-                        {isTyping ? 'Đang nhập...' : 'Trực tuyến'}
+                        {isTyping ? 'Đang nhập...' : isOnline ? 'Trực tuyến' : 'Ngoại tuyến'}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-1">
+                    {/* Sound toggle */}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-white hover:bg-white/20"
+                      title={soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSoundEnabled(!soundEnabled);
+                      }}
+                    >
+                      {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                    </Button>
+                    
+                    {/* Notification toggle */}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-white hover:bg-white/20"
+                      title={notificationEnabled ? 'Tắt thông báo' : 'Bật thông báo'}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setNotificationEnabled(!notificationEnabled);
+                      }}
+                    >
+                      {notificationEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+                    </Button>
+
+                    {/* New conversation button */}
+                    {!showAuthInput && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                        title="Cuộc hội thoại mới"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          clearSession();
+                        }}
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    )}
+
                     <Button
                       size="icon"
                       variant="ghost"
@@ -495,7 +838,7 @@ export default function SupportChatWidgetEnhanced({
               {!isMinimized && (
                 <>
                   {/* Messages/Auth Area */}
-                  <CardContent className="flex-1 p-0">
+                  <CardContent className="flex-1 p-0 overflow-hidden">
                     <ScrollArea className="h-full px-4 py-4">
                       {showAuthInput ? (
                         <motion.div
@@ -528,6 +871,7 @@ export default function SupportChatWidgetEnhanced({
                                   value={customerName}
                                   onChange={(e) => setCustomerName(e.target.value)}
                                   placeholder="Tên của bạn..."
+                                  className="h-11"
                                 />
                                 <Input
                                   type="tel"
@@ -535,16 +879,22 @@ export default function SupportChatWidgetEnhanced({
                                   onChange={(e) => setCustomerPhone(e.target.value)}
                                   onKeyPress={(e) => e.key === 'Enter' && startGuestConversation()}
                                   placeholder="Số điện thoại..."
+                                  className="h-11"
                                 />
                                 <Button
                                   onClick={startGuestConversation}
-                                  disabled={!customerName.trim() || !customerPhone.trim()}
+                                  disabled={!customerName.trim() || !customerPhone.trim() || isSending}
                                   className={cn(
-                                    "w-full text-white border-0",
+                                    "w-full h-11 text-white border-0",
                                     "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90"
                                   )}
                                   style={{ '--chat-primary': primaryColor } as React.CSSProperties}
                                 >
+                                  {isSending ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <Phone className="h-4 w-4 mr-2" />
+                                  )}
                                   Bắt đầu chat
                                 </Button>
                               </TabsContent>
@@ -554,9 +904,10 @@ export default function SupportChatWidgetEnhanced({
                                   <Button
                                     onClick={handleZaloLogin}
                                     variant="outline"
-                                    className="w-full"
+                                    className="w-full h-11"
+                                    disabled={isSending}
                                   >
-                                    <MessageCircle className="h-4 w-4 mr-2 text-blue-600" />
+                                    <ZaloIcon />
                                     Đăng nhập với Zalo
                                   </Button>
                                 )}
@@ -564,7 +915,8 @@ export default function SupportChatWidgetEnhanced({
                                   <Button
                                     onClick={handleFacebookLogin}
                                     variant="outline"
-                                    className="w-full"
+                                    className="w-full h-11"
+                                    disabled={isSending}
                                   >
                                     <Facebook className="h-4 w-4 mr-2 text-blue-600" />
                                     Đăng nhập với Facebook
@@ -574,11 +926,17 @@ export default function SupportChatWidgetEnhanced({
                                   <Button
                                     onClick={handleGoogleLogin}
                                     variant="outline"
-                                    className="w-full"
+                                    className="w-full h-11"
+                                    disabled={isSending}
                                   >
                                     <Chrome className="h-4 w-4 mr-2 text-red-600" />
                                     Đăng nhập với Google
                                   </Button>
+                                )}
+                                {!enableZaloLogin && !enableFacebookLogin && !enableGoogleLogin && (
+                                  <p className="text-sm text-muted-foreground text-center py-4">
+                                    Đăng nhập mạng xã hội không khả dụng.
+                                  </p>
                                 )}
                               </TabsContent>
                             </Tabs>
@@ -671,18 +1029,52 @@ export default function SupportChatWidgetEnhanced({
                     </ScrollArea>
                   </CardContent>
 
-                  {/* Input Area */}
+                  {/* Input Area - Footer with safe area for mobile */}
                   {!showAuthInput && (
-                    <div className="p-4 border-t bg-background">
+                    <div className="p-4 border-t bg-background flex-shrink-0 pb-safe">
+                      {/* Quick Replies - Show only on first message or few messages */}
+                      {messages.length <= 2 && quickReplies.length > 0 && (
+                        <div className="mb-3 flex flex-wrap gap-2">
+                          {quickReplies.map((reply, idx) => (
+                            <Button
+                              key={idx}
+                              variant="secondary"
+                              size="sm"
+                              className="h-auto py-1.5 px-3 text-xs rounded-full"
+                              onClick={() => handleQuickReply(reply.text)}
+                            >
+                              <span className="mr-1">{reply.icon}</span>
+                              {reply.text}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+
                       <div className="flex items-end space-x-2">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="flex-shrink-0"
-                          title="Đính kèm file"
-                        >
-                          <Paperclip className="h-5 w-5" />
-                        </Button>
+                        {/* File upload button */}
+                        {enableFileUpload && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="flex-shrink-0 h-11 w-11"
+                            title="Đính kèm file"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            <Paperclip className="h-5 w-5" />
+                          </Button>
+                        )}
+
+                        {/* Emoji button */}
+                        {enableEmojis && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="flex-shrink-0 h-11 w-11 hidden sm:flex"
+                            title="Emoji"
+                          >
+                            <Smile className="h-5 w-5" />
+                          </Button>
+                        )}
 
                         <div className="flex-1">
                           <Input
@@ -695,23 +1087,50 @@ export default function SupportChatWidgetEnhanced({
                             }}
                             onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                             placeholder="Nhập tin nhắn..."
-                            className="rounded-xl"
+                            className="rounded-xl h-11"
+                            disabled={isSending}
                           />
                         </div>
 
                         <Button
                           size="icon"
                           onClick={sendMessage}
-                          disabled={!inputMessage.trim()}
+                          disabled={!inputMessage.trim() || isSending}
                           className={cn(
-                            "flex-shrink-0 rounded-xl text-white border-0",
+                            "flex-shrink-0 rounded-xl text-white border-0 h-11 w-11",
                             "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90"
                           )}
                           style={{ '--chat-primary': primaryColor } as React.CSSProperties}
                         >
-                          <Send className="h-5 w-5" />
+                          {isSending ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                          ) : (
+                            <Send className="h-5 w-5" />
+                          )}
                         </Button>
                       </div>
+
+                      {/* Selected files preview */}
+                      {selectedFiles.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {selectedFiles.map((file, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {file.type.startsWith('image/') ? (
+                                <Image className="h-3 w-3 mr-1" />
+                              ) : (
+                                <File className="h-3 w-3 mr-1" />
+                              )}
+                              {file.name.length > 15 ? file.name.slice(0, 15) + '...' : file.name}
+                              <button
+                                className="ml-1 text-muted-foreground hover:text-foreground"
+                                onClick={() => setSelectedFiles(files => files.filter((_, i) => i !== idx))}
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </>

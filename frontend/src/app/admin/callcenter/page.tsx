@@ -1108,14 +1108,14 @@ export default function CallCenterPage() {
       setShowDateRangeDialog(false);
       
       // Convert date strings to proper DateTime format for GraphQL
-      // fromDate: start of day, toDate: end of day
-      const fromDateTime = new Date(dateRange.fromDate);
-      fromDateTime.setHours(0, 0, 0, 0);
+      // Use UTC to avoid timezone issues
+      const [fromYear, fromMonth, fromDay] = dateRange.fromDate.split('-').map(Number);
+      const [toYear, toMonth, toDay] = dateRange.toDate.split('-').map(Number);
       
-      const toDateTime = new Date(dateRange.toDate);
-      toDateTime.setHours(23, 59, 59, 999);
+      const fromDateTime = new Date(Date.UTC(fromYear, fromMonth - 1, fromDay, 0, 0, 0, 0));
+      const toDateTime = new Date(Date.UTC(toYear, toMonth - 1, toDay, 23, 59, 59, 999));
       
-      console.log('Sync with date range:', {
+      console.log('🔄 Sync with date range (dialog):', {
         fromDate: dateRange.fromDate,
         toDate: dateRange.toDate,
         fromDateTime: fromDateTime.toISOString(),
@@ -2290,11 +2290,21 @@ export default function CallCenterPage() {
                       return;
                     }
                     
-                    // Convert to DateTime
-                    const fromDateTime = new Date(syncDateFrom);
-                    fromDateTime.setHours(0, 0, 0, 0);
-                    const toDateTime = new Date(syncDateTo);
-                    toDateTime.setHours(23, 59, 59, 999);
+                    // Convert to DateTime - Use UTC to avoid timezone issues
+                    // syncDateFrom format: "2025-01-11" (from date input)
+                    const [fromYear, fromMonth, fromDay] = syncDateFrom.split('-').map(Number);
+                    const [toYear, toMonth, toDay] = syncDateTo.split('-').map(Number);
+                    
+                    // Create dates in UTC to avoid timezone shifting
+                    const fromDateTime = new Date(Date.UTC(fromYear, fromMonth - 1, fromDay, 0, 0, 0, 0));
+                    const toDateTime = new Date(Date.UTC(toYear, toMonth - 1, toDay, 23, 59, 59, 999));
+                    
+                    console.log('🔄 Sync dates:', {
+                      syncDateFrom,
+                      syncDateTo,
+                      fromDateTime: fromDateTime.toISOString(),
+                      toDateTime: toDateTime.toISOString(),
+                    });
                     
                     try {
                       const result = await syncData({
@@ -2317,7 +2327,7 @@ export default function CallCenterPage() {
                         });
                         setShowSyncProgress(true);
                         toast.success('Bắt đầu đồng bộ', {
-                          description: `Từ ${syncDateFrom} đến ${syncDateTo}`,
+                          description: `Từ ${format(fromDateTime, 'dd/MM/yyyy', { locale: vi })} đến ${format(toDateTime, 'dd/MM/yyyy', { locale: vi })} (UTC)`,
                         });
                       } else {
                         toast.error('Sync thất bại', {

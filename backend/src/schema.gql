@@ -5031,9 +5031,13 @@ enum SupportTicketStatus {
 
 input SyncCallCenterInput {
   configId: String
-  fromDate: DateTime
+
+  """ISO date string for fromDate"""
+  fromDate: String
   fullSync: Boolean! = false
-  toDate: DateTime
+
+  """ISO date string for toDate"""
+  toDate: String
 }
 
 type SyncCallCenterResponse {

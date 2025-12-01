@@ -134,17 +134,23 @@ export class CallCenterService {
       );
     }
 
-    // Calculate date range - ensure Date objects
+    // Calculate date range - parse ISO strings to Date objects
+    // fromDate/toDate are now ISO strings from GraphQL input
     const toDate = input?.toDate 
-      ? (input.toDate instanceof Date ? input.toDate : new Date(input.toDate))
+      ? new Date(input.toDate)
       : new Date();
     const fromDate = input?.fromDate
-      ? (input.fromDate instanceof Date ? input.fromDate : new Date(input.fromDate))
+      ? new Date(input.fromDate)
       : new Date(Date.now() - config.defaultDaysBack * 24 * 60 * 60 * 1000);
 
     // Log the actual dates being used
     this.logger.log(`Sync input received - fromDate: ${input?.fromDate}, toDate: ${input?.toDate}`);
     this.logger.log(`Parsed dates - fromDate: ${fromDate.toISOString()}, toDate: ${toDate.toISOString()}`);
+
+    // Validate parsed dates
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+      throw new HttpException('Invalid date format. Please use ISO format (e.g., 2025-01-01T00:00:00.000Z)', HttpStatus.BAD_REQUEST);
+    }
 
     // Create sync log
     const syncLog = await this.prisma.callCenterSyncLog.create({
