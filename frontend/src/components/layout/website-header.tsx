@@ -227,12 +227,10 @@ export function WebsiteHeader() {
     const href = item.route || item.url || '#';
     const hasChildren = item.children && Array.isArray(item.children) && item.children.length > 0;
 
-    // Check if this menu item should show category dropdown (linkType PRODUCT_LIST or title contains "Sản Phẩm")
-    const isProductMenu = item.linkType === 'PRODUCT_LIST' || 
-                          item.title?.toLowerCase().includes('sản phẩm') ||
-                          item.slug?.includes('san-pham');
+    // Check if this menu item should show category dropdown (only linkType PRODUCT_LIST)
+    const isProductListMenu = item.linkType === 'PRODUCT_LIST';
 
-    if (isProductMenu) {
+    if (isProductListMenu) {
       // Render category list for product menu item in mobile
       return (
         <AccordionItem key={item.id} value={`item-${item.id}`}>
@@ -307,12 +305,10 @@ export function WebsiteHeader() {
     const href = item.route || item.url || '#';
     const hasChildren = item.children && Array.isArray(item.children) && item.children.length > 0;
 
-    // Check if this menu item should show category dropdown (linkType PRODUCT_LIST or title contains "Sản Phẩm")
-    const isProductMenu = item.linkType === 'PRODUCT_LIST' || 
-                          item.title?.toLowerCase().includes('sản phẩm') ||
-                          item.slug?.includes('san-pham');
+    // Check if this menu item should show category dropdown (only linkType PRODUCT_LIST)
+    const isProductListMenu = item.linkType === 'PRODUCT_LIST';
 
-    if (isProductMenu) {
+    if (isProductListMenu) {
       // Render category dropdown menu for product menu item
       return (
         <CategoryDropdownMenu 
