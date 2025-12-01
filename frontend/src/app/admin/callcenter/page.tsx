@@ -483,6 +483,14 @@ export default function CallCenterPage() {
     toDate: '',
   });
   const [showSummary, setShowSummary] = useState(false);
+  
+  // Filter state cho Call Records
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
+  const [filterExtension, setFilterExtension] = useState('');
+  const [filterDirection, setFilterDirection] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   // ✅ MIGRATED: Query config với Dynamic GraphQL
   // Note: Lấy config đầu tiên (chỉ có 1 config)
@@ -1070,11 +1078,180 @@ export default function CallCenterPage() {
             </Card>
           </Collapsible>
 
+          {/* Filter Panel - Collapsible */}
+          <Collapsible open={showFilters} onOpenChange={setShowFilters}>
+            <Card className="border-blue-200">
+              <CollapsibleTrigger asChild>
+                <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Filter className="h-5 w-5 text-blue-600" />
+                      <CardTitle className="text-base">Bộ lọc nâng cao</CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {(filterDateFrom || filterDateTo || filterExtension || filterDirection || filterStatus) && (
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                          Đang lọc
+                        </Badge>
+                      )}
+                      <ChevronDown 
+                        className={`h-5 w-5 text-muted-foreground transition-transform ${
+                          showFilters ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {/* Date From */}
+                    <div className="space-y-2">
+                      <Label htmlFor="filterDateFrom">Từ ngày</Label>
+                      <Input
+                        id="filterDateFrom"
+                        type="date"
+                        value={filterDateFrom}
+                        onChange={(e) => setFilterDateFrom(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Date To */}
+                    <div className="space-y-2">
+                      <Label htmlFor="filterDateTo">Đến ngày</Label>
+                      <Input
+                        id="filterDateTo"
+                        type="date"
+                        value={filterDateTo}
+                        onChange={(e) => setFilterDateTo(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Extension */}
+                    <div className="space-y-2">
+                      <Label htmlFor="filterExtension">Extension</Label>
+                      <Input
+                        id="filterExtension"
+                        type="text"
+                        placeholder="VD: 101, 102..."
+                        value={filterExtension}
+                        onChange={(e) => setFilterExtension(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Direction */}
+                    <div className="space-y-2">
+                      <Label>Hướng gọi</Label>
+                      <Select value={filterDirection} onValueChange={setFilterDirection}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tất cả" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tất cả</SelectItem>
+                          <SelectItem value="inbound">Gọi vào</SelectItem>
+                          <SelectItem value="outbound">Gọi ra</SelectItem>
+                          <SelectItem value="local">Nội bộ</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Status */}
+                    <div className="space-y-2">
+                      <Label>Trạng thái</Label>
+                      <Select value={filterStatus} onValueChange={setFilterStatus}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tất cả" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tất cả</SelectItem>
+                          <SelectItem value="ANSWER">Đã trả lời</SelectItem>
+                          <SelectItem value="NO_ANSWER">Không trả lời</SelectItem>
+                          <SelectItem value="BUSY">Máy bận</SelectItem>
+                          <SelectItem value="FAILED">Thất bại</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Filter Actions */}
+                  <div className="flex gap-2 mt-4 pt-4 border-t">
+                    <Button 
+                      onClick={() => {
+                        // Build filter object
+                        const newFilters: any = {};
+                        
+                        // Date range filter (convert to epoch STRING - startEpoch is String in DB)
+                        if (filterDateFrom) {
+                          const fromEpoch = Math.floor(new Date(filterDateFrom).getTime() / 1000);
+                          newFilters.startEpoch = { ...newFilters.startEpoch, gte: fromEpoch.toString() };
+                        }
+                        if (filterDateTo) {
+                          // Add 1 day to include the end date fully
+                          const toDate = new Date(filterDateTo);
+                          toDate.setDate(toDate.getDate() + 1);
+                          const toEpoch = Math.floor(toDate.getTime() / 1000);
+                          newFilters.startEpoch = { ...newFilters.startEpoch, lt: toEpoch.toString() };
+                        }
+                        
+                        // Extension filter - search in both caller and destination
+                        if (filterExtension) {
+                          newFilters.OR = [
+                            { callerIdNumber: { contains: filterExtension } },
+                            { destinationNumber: { contains: filterExtension } },
+                          ];
+                        }
+                        
+                        // Direction filter
+                        if (filterDirection && filterDirection !== 'all') {
+                          newFilters.direction = filterDirection;
+                        }
+                        
+                        // Status filter
+                        if (filterStatus && filterStatus !== 'all') {
+                          newFilters.callStatus = filterStatus;
+                        }
+                        
+                        setFilters(newFilters);
+                        setPagination({ ...pagination, page: 1 }); // Reset to first page
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Filter className="h-4 w-4 mr-2" />
+                      Áp dụng bộ lọc
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setFilterDateFrom('');
+                        setFilterDateTo('');
+                        setFilterExtension('');
+                        setFilterDirection('');
+                        setFilterStatus('');
+                        setFilters({});
+                        setPagination({ ...pagination, page: 1 });
+                      }}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Xóa bộ lọc
+                    </Button>
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+
           <Card>
             <CardHeader>
               <CardTitle>Danh sách cuộc gọi</CardTitle>
               <CardDescription>
                 Hiển thị {records?.pagination.totalItems || 0} cuộc gọi
+                {Object.keys(filters).length > 0 && (
+                  <span className="text-blue-600 ml-2">(đã lọc)</span>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
