@@ -2,10 +2,25 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
-import { BarChart3, ChevronDown, Activity } from 'lucide-react';
+import { BarChart3, ChevronDown, Activity, Wifi } from 'lucide-react';
 import { useFooterSettings, useContactSettings, useSocialSettings, settingsToMap } from '@/hooks/useWebsiteSettings';
 import { useVisitorStats } from '@/hooks/useVisitorStats';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
+// Component Icon Signal Realtime với animation
+function RealtimeSignalIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <div className={`relative ${className}`}>
+      {/* Icon Wifi/Signal */}
+      <Wifi className="w-full h-full text-[#65b009]" />
+      {/* Pulse animation dot */}
+      <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+      </span>
+    </div>
+  );
+}
 
 interface WebsiteFooterProps {
   currentYear?: number;
@@ -126,9 +141,9 @@ export function WebsiteFooter({ currentYear = new Date().getFullYear() }: Websit
                 <AccordionContent>
                   <div className="flex flex-col space-y-3 pt-2">
                     <div className="flex flex-row space-x-2 items-center text-sm">
-                      <Activity className="w-4 h-4 text-[#65b009]" />
+                      <RealtimeSignalIcon className="w-4 h-4" />
                       <span>Đang truy cập:</span>
-                      <span className="font-semibold">{formatNumber(visitors?.realtime)}</span>
+                      <span className="font-semibold text-[#65b009]">{formatNumber(visitors?.realtime)}</span>
                     </div>
                     <div className="flex flex-row space-x-2 items-center text-sm">
                       <BarChart3 className="w-4 h-4 text-[#65b009]" />
@@ -259,9 +274,9 @@ export function WebsiteFooter({ currentYear = new Date().getFullYear() }: Websit
               <div className="font-bold text-xl mb-5">THỐNG KÊ TRUY CẬP</div>
               <div className="flex flex-col space-y-3">
                 <div className="flex flex-row space-x-2 items-center">
-                  <Activity className="w-5 h-5 text-[#65b009]" />
+                  <RealtimeSignalIcon className="w-5 h-5" />
                   <span>Đang truy cập:</span>
-                  <span className="font-semibold">{formatNumber(visitors?.realtime)}</span>
+                  <span className="font-semibold text-[#65b009]">{formatNumber(visitors?.realtime)}</span>
                 </div>
                 <div className="flex flex-row space-x-2 items-center">
                   <BarChart3 className="w-5 h-5 text-[#65b009]" />
