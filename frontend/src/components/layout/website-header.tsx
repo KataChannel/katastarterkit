@@ -37,7 +37,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Phone, Search, ShoppingCart, User, LogIn, Heart, Package, Menu, ChevronRight, X, TrendingUp, ArrowRight, Grid3X3, MessageCircle, Download, Smartphone } from 'lucide-react';
+import { Phone, Search, ShoppingCart, User, LogIn, Package, Menu, ChevronRight, X, TrendingUp, ArrowRight, MessageCircle, Download, Smartphone } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import React from 'react';
@@ -739,153 +739,24 @@ export function WebsiteHeader() {
               )}
             </div>
 
-            {/* User Actions */}
-            <div className="col-span-2 flex items-center justify-end space-x-3 text-white pr-4">
-              {/* PWA Install Button */}
-              {capabilities.canInstall && !capabilities.isStandalone && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all group"
-                        onClick={() => install()}
-                      >
-                        <div className="relative">
-                          <Smartphone className="w-5 h-5" />
-                          <Download className="w-2.5 h-2.5 text-yellow-300 absolute -bottom-0.5 -right-0.5 group-hover:animate-bounce" />
-                        </div>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Cài đặt ứng dụng</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-
-              {/* More Apps */}
-              {isAuthenticated && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                    >
-                      <Grid3X3 className="w-5 h-5" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 p-4" align="end">
-                    <div className="grid grid-cols-3 gap-3">
-                      {[
-                        { name: 'Admin', href: '/admin', icon: '🔧', color: 'bg-blue-100 hover:bg-blue-200' },
-                        { name: 'LMS', href: '/lms', icon: '📚', color: 'bg-green-100 hover:bg-green-200' },
-                        { name: 'Kế Toán', href: '/ketoan', icon: '💰', color: 'bg-yellow-100 hover:bg-yellow-200' },
-                        { name: 'Workflow', href: '/workflow', icon: '⚡', color: 'bg-purple-100 hover:bg-purple-200' },
-                        { name: 'Website', href: '/website', icon: '🌐', color: 'bg-teal-100 hover:bg-teal-200' },
-                        { name: 'Shop', href: '/', icon: '🛒', color: 'bg-orange-100 hover:bg-orange-200' },
-                      ].map((app) => (
-                        <Link
-                          key={app.name}
-                          href={app.href}
-                          className={`flex flex-col items-center p-3 rounded-lg transition-colors ${app.color}`}
-                        >
-                          <span className="text-2xl mb-1">{app.icon}</span>
-                          <span className="text-xs font-medium text-gray-700">{app.name}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              )}
-
-              {/* Notifications */}
-              <div className="[&_button]:text-white [&_button:hover]:text-blue-200 [&_button:hover]:bg-white/10">
-                <NotificationBell />
-              </div>
-
-              {/* Chat Support */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                      onClick={() => {
-                        if (typeof window !== 'undefined') {
-                          window.dispatchEvent(new CustomEvent('open-support-chat'));
-                        }
-                      }}
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Hỗ trợ trực tuyến</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              {/* Orders */}
-              {isAuthenticated && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="relative p-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                        onClick={() => router.push('/don-hang')}
-                      >
-                        <Package className="w-5 h-5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Đơn hàng của tôi</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-
-              {/* User Profile */}
-              {headerSettings['header.show_user_menu'] && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center space-x-2">
-                        {isAuthenticated && user ? (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full p-0 text-white font-semibold"
-                            onClick={() => router.push('/admin')}
-                          >
-                            {user.email?.charAt(0).toUpperCase() || 'U'}
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="flex items-center space-x-1 px-3 py-2 text-white hover:text-blue-200 hover:bg-white/10 transition-all"
-                            onClick={() => router.push('/login?redirect=/')}
-                          >
-                            <LogIn className="w-4 h-4" />
-                            <span className="text-sm font-medium">Đăng nhập</span>
-                          </Button>
-                        )}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{isAuthenticated && user ? user.email : 'Đăng nhập để tiếp tục'}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
+            {/* User Actions - Using HeaderActions component */}
+            <div className="col-span-2 flex items-center justify-end space-x-2 text-white pr-4">
+              {/* HeaderActions with dark variant for website header */}
+              <HeaderActions
+                variant="dark"
+                showNotifications={true}
+                showApps={true}
+                showChat={true}
+                showUser={headerSettings['header.show_user_menu'] !== false}
+                onChatClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('open-support-chat'));
+                  }
+                }}
+                className="[&_button]:text-white [&_button:hover]:text-blue-200 [&_button:hover]:bg-white/10"
+              />
               
-              {/* Shopping Cart */}
+              {/* Shopping Cart - Keep separate for cart count badge */}
               {headerSettings['header.show_cart'] && (
                 <TooltipProvider>
                   <Tooltip>
