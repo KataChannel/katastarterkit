@@ -491,6 +491,86 @@ export default function CallCenterPage() {
   const [filterDirection, setFilterDirection] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [quickFilter, setQuickFilter] = useState(''); // 'today', '7days', '30days', ''
+
+  // Helper function to apply filters
+  const applyFilters = (dateFrom?: string, dateTo?: string, ext?: string, dir?: string, status?: string) => {
+    const newFilters: any = {};
+    
+    const fromDate = dateFrom ?? filterDateFrom;
+    const toDate = dateTo ?? filterDateTo;
+    const extension = ext ?? filterExtension;
+    const direction = dir ?? filterDirection;
+    const callStatus = status ?? filterStatus;
+    
+    // Date range filter (convert to epoch STRING)
+    if (fromDate) {
+      const fromEpoch = Math.floor(new Date(fromDate).getTime() / 1000);
+      newFilters.startEpoch = { ...newFilters.startEpoch, gte: fromEpoch.toString() };
+    }
+    if (toDate) {
+      const toDateObj = new Date(toDate);
+      toDateObj.setDate(toDateObj.getDate() + 1);
+      const toEpoch = Math.floor(toDateObj.getTime() / 1000);
+      newFilters.startEpoch = { ...newFilters.startEpoch, lt: toEpoch.toString() };
+    }
+    
+    // Extension filter
+    if (extension) {
+      newFilters.OR = [
+        { callerIdNumber: { contains: extension } },
+        { destinationNumber: { contains: extension } },
+      ];
+    }
+    
+    // Direction filter
+    if (direction && direction !== 'all') {
+      newFilters.direction = direction;
+    }
+    
+    // Status filter
+    if (callStatus && callStatus !== 'all') {
+      newFilters.callStatus = callStatus;
+    }
+    
+    setFilters(newFilters);
+    setPagination({ ...pagination, page: 1 });
+  };
+
+  // Quick filter handlers
+  const handleQuickFilter = (type: string) => {
+    const today = new Date();
+    let fromDate = '';
+    let toDate = today.toISOString().split('T')[0];
+    
+    if (type === 'today') {
+      fromDate = toDate;
+    } else if (type === '7days') {
+      const from = new Date();
+      from.setDate(from.getDate() - 7);
+      fromDate = from.toISOString().split('T')[0];
+    } else if (type === '30days') {
+      const from = new Date();
+      from.setDate(from.getDate() - 30);
+      fromDate = from.toISOString().split('T')[0];
+    }
+    
+    setQuickFilter(type);
+    setFilterDateFrom(fromDate);
+    setFilterDateTo(toDate);
+    applyFilters(fromDate, toDate);
+  };
+
+  const clearAllFilters = () => {
+    setFilterDateFrom('');
+    setFilterDateTo('');
+    setFilterExtension('');
+    setFilterDirection('');
+    setFilterStatus('');
+    setQuickFilter('');
+    setFilters({});
+    setPagination({ ...pagination, page: 1 });
+  };
 
   // ✅ MIGRATED: Query config với Dynamic GraphQL
   // Note: Lấy config đầu tiên (chỉ có 1 config)
@@ -821,16 +901,21 @@ export default function CallCenterPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+    <div className="p-4 space-y-4">
+      {/* Compact Header with Actions */}
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Call Center</h1>
-          <p className="text-muted-foreground">Quản lý dữ liệu cuộc gọi từ PBX</p>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Phone className="h-6 w-6" />
+            Call Center
+          </h1>
+          <p className="text-sm text-muted-foreground">Quản lý dữ liệu cuộc gọi từ PBX</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowConfigDialog(true)}>
-            <Settings className="mr-2 h-4 w-4" />
+        
+        {/* Action Buttons - Compact */}
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShowConfigDialog(true)}>
+            <Settings className="h-4 w-4 mr-1" />
             Cấu hình
           </Button>
           <TooltipProvider>
@@ -838,12 +923,13 @@ export default function CallCenterPage() {
               <TooltipTrigger asChild>
                 <span>
                   <Button 
-                    variant="outline" 
+                    variant="outline"
+                    size="sm"
                     onClick={() => setShowDateRangeDialog(true)} 
                     disabled={!config?.isActive}
                   >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Chọn ngày sync
+                    <Calendar className="h-4 w-4 mr-1" />
+                    Sync theo ngày
                   </Button>
                 </span>
               </TooltipTrigger>
@@ -859,13 +945,14 @@ export default function CallCenterPage() {
               <TooltipTrigger asChild>
                 <span>
                   <Button 
+                    size="sm"
                     onClick={handleManualSync} 
                     disabled={syncing || !config?.isActive}
                   >
                     {syncing ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                     ) : (
-                      <RefreshCw className="mr-2 h-4 w-4" />
+                      <RefreshCw className="h-4 w-4 mr-1" />
                     )}
                     Sync Ngay
                   </Button>
@@ -884,71 +971,50 @@ export default function CallCenterPage() {
       {/* Warning if config not active */}
       {config && !config.isActive && (
         <Card className="border-orange-200 bg-orange-50">
-          <CardHeader>
-            <CardTitle className="text-orange-800 flex items-center gap-2">
-              <XCircle className="h-5 w-5" />
+          <CardHeader className="py-3">
+            <CardTitle className="text-orange-800 flex items-center gap-2 text-base">
+              <XCircle className="h-4 w-4" />
               Chưa kích hoạt
             </CardTitle>
-            <CardDescription className="text-orange-700">
-              Call Center chưa được kích hoạt. Vui lòng bật trong phần cấu hình để sử dụng tính năng đồng bộ.
+            <CardDescription className="text-orange-700 text-sm">
+              Vui lòng bật trong phần Cấu hình để sử dụng tính năng đồng bộ.
             </CardDescription>
           </CardHeader>
         </Card>
       )}
 
-      {/* Stats Cards */}
+      {/* Compact Stats Bar */}
       {config && config.isActive && (
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tổng Records</CardTitle>
-              <Phone className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{config.totalRecordsSynced || 0}</div>
-              <p className="text-xs text-muted-foreground">Đã đồng bộ</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Sync Mode</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{config.syncMode}</div>
-              <p className="text-xs text-muted-foreground">
-                {config.isActive ? 'Active' : 'Inactive'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Last Sync</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm font-bold">
-                {config.lastSyncAt 
-                  ? formatDistanceToNow(new Date(config.lastSyncAt), { addSuffix: true, locale: vi })
-                  : 'Chưa sync'
-                }
-              </div>
-              <p className="text-xs text-muted-foreground">{config.lastSyncStatus}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Batch Size</CardTitle>
-              <Download className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{config.batchSize}</div>
-              <p className="text-xs text-muted-foreground">records/request</p>
-            </CardContent>
-          </Card>
+        <div className="flex flex-wrap items-center gap-4 p-3 bg-muted/50 rounded-lg text-sm">
+          <div className="flex items-center gap-2">
+            <Phone className="h-4 w-4 text-muted-foreground" />
+            <span className="font-semibold">{config.totalRecordsSynced || 0}</span>
+            <span className="text-muted-foreground">records</span>
+          </div>
+          <div className="h-4 w-px bg-border" />
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Badge variant="outline" className="font-normal">{config.syncMode}</Badge>
+          </div>
+          <div className="h-4 w-px bg-border" />
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Last:</span>
+            <span className="font-medium">
+              {config.lastSyncAt 
+                ? formatDistanceToNow(new Date(config.lastSyncAt), { addSuffix: true, locale: vi })
+                : 'Chưa sync'
+              }
+            </span>
+            {config.lastSyncStatus && (
+              <Badge 
+                variant={config.lastSyncStatus === 'success' ? 'default' : 'destructive'} 
+                className="text-xs"
+              >
+                {config.lastSyncStatus}
+              </Badge>
+            )}
+          </div>
         </div>
       )}
 
@@ -956,303 +1022,145 @@ export default function CallCenterPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="records">Call Records</TabsTrigger>
+          <TabsTrigger value="summary">Tổng hợp</TabsTrigger>
           <TabsTrigger value="logs">Sync Logs</TabsTrigger>
         </TabsList>
 
-        {/* Call Records Tab - ADVANCED TABLE */}
-        <TabsContent value="records" className="space-y-4">
-          {/* Call Duration Summary - Collapsible */}
-          <Collapsible open={showSummary} onOpenChange={setShowSummary}>
-            <Card>
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-primary" />
-                      <CardTitle>Tổng hợp thời lượng cuộc gọi</CardTitle>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">
-                        {callSummary.length} số điện thoại
-                      </Badge>
-                      <ChevronDown 
-                        className={`h-5 w-5 text-muted-foreground transition-transform ${
-                          showSummary ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </div>
+        {/* Call Records Tab */}
+        <TabsContent value="records" className="space-y-3 mt-3">
+          {/* Quick Filters + Filter Toggle */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">Lọc nhanh:</span>
+            <Button 
+              variant={quickFilter === 'today' ? 'default' : 'outline'} 
+              size="sm"
+              onClick={() => handleQuickFilter('today')}
+            >
+              Hôm nay
+            </Button>
+            <Button 
+              variant={quickFilter === '7days' ? 'default' : 'outline'} 
+              size="sm"
+              onClick={() => handleQuickFilter('7days')}
+            >
+              7 ngày
+            </Button>
+            <Button 
+              variant={quickFilter === '30days' ? 'default' : 'outline'} 
+              size="sm"
+              onClick={() => handleQuickFilter('30days')}
+            >
+              30 ngày
+            </Button>
+            <div className="h-4 w-px bg-border mx-1" />
+            <Button 
+              variant={showFilters ? 'secondary' : 'outline'} 
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4 mr-1" />
+              Lọc nâng cao
+              {(filterExtension || filterDirection || filterStatus) && (
+                <Badge variant="secondary" className="ml-1 h-5 px-1 bg-blue-100 text-blue-700">!</Badge>
+              )}
+            </Button>
+            {Object.keys(filters).length > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+                <XCircle className="h-4 w-4 mr-1" />
+                Xóa lọc
+              </Button>
+            )}
+          </div>
+
+          {/* Advanced Filters - Collapsible Inline */}
+          {showFilters && (
+            <Card className="border-blue-100 bg-blue-50/30">
+              <CardContent className="py-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 items-end">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Từ ngày</Label>
+                    <Input
+                      type="date"
+                      value={filterDateFrom}
+                      onChange={(e) => setFilterDateFrom(e.target.value)}
+                      className="h-8 text-sm"
+                    />
                   </div>
-                  <CardDescription>
-                    Thống kê theo số điện thoại gọi đi (mặc định ẩn)
-                  </CardDescription>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent>
-                  {recordsLoading ? (
-                    <div className="flex justify-center p-8">
-                      <Loader2 className="h-8 w-8 animate-spin" />
-                    </div>
-                  ) : callSummary.length === 0 ? (
-                    <div className="text-center p-8 text-muted-foreground">
-                      Không có dữ liệu để hiển thị
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {/* Summary Header */}
-                      <div className="grid grid-cols-6 gap-2 p-3 bg-muted/50 rounded-md font-semibold text-sm">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4" />
-                          Số điện thoại
-                        </div>
-                        <div className="text-center">Tổng cuộc gọi</div>
-                        <div className="text-center">Đã trả lời</div>
-                        <div className="text-center">Nhớ máy</div>
-                        <div className="text-center">Tổng thời lượng</div>
-                        <div className="text-center">Thời gian nói</div>
-                      </div>
-
-                      {/* Summary Items */}
-                      <ScrollArea className="h-[400px] pr-4">
-                        <div className="space-y-2">
-                          {callSummary.map((summary, index) => (
-                            <div
-                              key={summary.callerNumber}
-                              className="grid grid-cols-6 gap-2 p-3 border rounded-md hover:bg-accent/50 transition-colors"
-                            >
-                              <div className="font-mono font-semibold text-sm flex items-center">
-                                <span className="text-muted-foreground mr-2">#{index + 1}</span>
-                                {summary.callerNumber}
-                              </div>
-                              <div className="text-center">
-                                <Badge variant="outline">{summary.totalCalls}</Badge>
-                              </div>
-                              <div className="text-center">
-                                <Badge variant="default" className="bg-green-600">
-                                  {summary.answeredCalls}
-                                </Badge>
-                              </div>
-                              <div className="text-center">
-                                <Badge variant="secondary">
-                                  {summary.missedCalls}
-                                </Badge>
-                              </div>
-                              <div className="text-center font-semibold">
-                                {formatDuration(summary.totalDuration.toString())}
-                              </div>
-                              <div className="text-center font-semibold text-green-600">
-                                {formatDuration(summary.totalBillsec.toString())}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-
-                      {/* Summary Footer - Total */}
-                      <div className="grid grid-cols-6 gap-2 p-3 bg-primary/10 rounded-md font-bold border-2 border-primary/20">
-                        <div>TỔNG CỘNG</div>
-                        <div className="text-center">
-                          {callSummary.reduce((sum, s) => sum + s.totalCalls, 0)}
-                        </div>
-                        <div className="text-center text-green-600">
-                          {callSummary.reduce((sum, s) => sum + s.answeredCalls, 0)}
-                        </div>
-                        <div className="text-center">
-                          {callSummary.reduce((sum, s) => sum + s.missedCalls, 0)}
-                        </div>
-                        <div className="text-center text-primary">
-                          {formatDuration(
-                            callSummary.reduce((sum, s) => sum + s.totalDuration, 0).toString()
-                          )}
-                        </div>
-                        <div className="text-center text-green-600">
-                          {formatDuration(
-                            callSummary.reduce((sum, s) => sum + s.totalBillsec, 0).toString()
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </CollapsibleContent>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Đến ngày</Label>
+                    <Input
+                      type="date"
+                      value={filterDateTo}
+                      onChange={(e) => setFilterDateTo(e.target.value)}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Extension/SĐT</Label>
+                    <Input
+                      placeholder="VD: 101..."
+                      value={filterExtension}
+                      onChange={(e) => setFilterExtension(e.target.value)}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Hướng gọi</Label>
+                    <Select value={filterDirection} onValueChange={setFilterDirection}>
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue placeholder="Tất cả" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tất cả</SelectItem>
+                        <SelectItem value="inbound">Gọi vào</SelectItem>
+                        <SelectItem value="outbound">Gọi ra</SelectItem>
+                        <SelectItem value="local">Nội bộ</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Trạng thái</Label>
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue placeholder="Tất cả" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tất cả</SelectItem>
+                        <SelectItem value="ANSWER">Đã trả lời</SelectItem>
+                        <SelectItem value="NO_ANSWER">Không trả lời</SelectItem>
+                        <SelectItem value="BUSY">Máy bận</SelectItem>
+                        <SelectItem value="FAILED">Thất bại</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    className="h-8"
+                    onClick={() => {
+                      setQuickFilter('');
+                      applyFilters();
+                    }}
+                  >
+                    <Filter className="h-3 w-3 mr-1" />
+                    Áp dụng
+                  </Button>
+                </div>
+              </CardContent>
             </Card>
-          </Collapsible>
+          )}
 
-          {/* Filter Panel - Collapsible */}
-          <Collapsible open={showFilters} onOpenChange={setShowFilters}>
-            <Card className="border-blue-200">
-              <CollapsibleTrigger asChild>
-                <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-5 w-5 text-blue-600" />
-                      <CardTitle className="text-base">Bộ lọc nâng cao</CardTitle>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {(filterDateFrom || filterDateTo || filterExtension || filterDirection || filterStatus) && (
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                          Đang lọc
-                        </Badge>
-                      )}
-                      <ChevronDown 
-                        className={`h-5 w-5 text-muted-foreground transition-transform ${
-                          showFilters ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </div>
-                  </div>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="pt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    {/* Date From */}
-                    <div className="space-y-2">
-                      <Label htmlFor="filterDateFrom">Từ ngày</Label>
-                      <Input
-                        id="filterDateFrom"
-                        type="date"
-                        value={filterDateFrom}
-                        onChange={(e) => setFilterDateFrom(e.target.value)}
-                        className="w-full"
-                      />
-                    </div>
-
-                    {/* Date To */}
-                    <div className="space-y-2">
-                      <Label htmlFor="filterDateTo">Đến ngày</Label>
-                      <Input
-                        id="filterDateTo"
-                        type="date"
-                        value={filterDateTo}
-                        onChange={(e) => setFilterDateTo(e.target.value)}
-                        className="w-full"
-                      />
-                    </div>
-
-                    {/* Extension */}
-                    <div className="space-y-2">
-                      <Label htmlFor="filterExtension">Extension</Label>
-                      <Input
-                        id="filterExtension"
-                        type="text"
-                        placeholder="VD: 101, 102..."
-                        value={filterExtension}
-                        onChange={(e) => setFilterExtension(e.target.value)}
-                        className="w-full"
-                      />
-                    </div>
-
-                    {/* Direction */}
-                    <div className="space-y-2">
-                      <Label>Hướng gọi</Label>
-                      <Select value={filterDirection} onValueChange={setFilterDirection}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Tất cả" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Tất cả</SelectItem>
-                          <SelectItem value="inbound">Gọi vào</SelectItem>
-                          <SelectItem value="outbound">Gọi ra</SelectItem>
-                          <SelectItem value="local">Nội bộ</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Status */}
-                    <div className="space-y-2">
-                      <Label>Trạng thái</Label>
-                      <Select value={filterStatus} onValueChange={setFilterStatus}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Tất cả" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Tất cả</SelectItem>
-                          <SelectItem value="ANSWER">Đã trả lời</SelectItem>
-                          <SelectItem value="NO_ANSWER">Không trả lời</SelectItem>
-                          <SelectItem value="BUSY">Máy bận</SelectItem>
-                          <SelectItem value="FAILED">Thất bại</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Filter Actions */}
-                  <div className="flex gap-2 mt-4 pt-4 border-t">
-                    <Button 
-                      onClick={() => {
-                        // Build filter object
-                        const newFilters: any = {};
-                        
-                        // Date range filter (convert to epoch STRING - startEpoch is String in DB)
-                        if (filterDateFrom) {
-                          const fromEpoch = Math.floor(new Date(filterDateFrom).getTime() / 1000);
-                          newFilters.startEpoch = { ...newFilters.startEpoch, gte: fromEpoch.toString() };
-                        }
-                        if (filterDateTo) {
-                          // Add 1 day to include the end date fully
-                          const toDate = new Date(filterDateTo);
-                          toDate.setDate(toDate.getDate() + 1);
-                          const toEpoch = Math.floor(toDate.getTime() / 1000);
-                          newFilters.startEpoch = { ...newFilters.startEpoch, lt: toEpoch.toString() };
-                        }
-                        
-                        // Extension filter - search in both caller and destination
-                        if (filterExtension) {
-                          newFilters.OR = [
-                            { callerIdNumber: { contains: filterExtension } },
-                            { destinationNumber: { contains: filterExtension } },
-                          ];
-                        }
-                        
-                        // Direction filter
-                        if (filterDirection && filterDirection !== 'all') {
-                          newFilters.direction = filterDirection;
-                        }
-                        
-                        // Status filter
-                        if (filterStatus && filterStatus !== 'all') {
-                          newFilters.callStatus = filterStatus;
-                        }
-                        
-                        setFilters(newFilters);
-                        setPagination({ ...pagination, page: 1 }); // Reset to first page
-                      }}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Filter className="h-4 w-4 mr-2" />
-                      Áp dụng bộ lọc
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        setFilterDateFrom('');
-                        setFilterDateTo('');
-                        setFilterExtension('');
-                        setFilterDirection('');
-                        setFilterStatus('');
-                        setFilters({});
-                        setPagination({ ...pagination, page: 1 });
-                      }}
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Xóa bộ lọc
-                    </Button>
-                  </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
-
+          {/* Records Table */}
           <Card>
-            <CardHeader>
-              <CardTitle>Danh sách cuộc gọi</CardTitle>
-              <CardDescription>
-                Hiển thị {records?.pagination.totalItems || 0} cuộc gọi
-                {Object.keys(filters).length > 0 && (
-                  <span className="text-blue-600 ml-2">(đã lọc)</span>
-                )}
-              </CardDescription>
+            <CardHeader className="py-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Danh sách cuộc gọi</CardTitle>
+                <span className="text-sm text-muted-foreground">
+                  {records?.pagination.totalItems || 0} cuộc gọi
+                  {Object.keys(filters).length > 0 && (
+                    <Badge variant="secondary" className="ml-2 text-xs">đã lọc</Badge>
+                  )}
+                </span>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               {recordsLoading ? (
@@ -1275,19 +1183,19 @@ export default function CallCenterPage() {
                     showToolbar: true,
                     showPagination: false,
                   }}
-                  height={600}
+                  height={500}
                 />
               )}
             </CardContent>
           </Card>
 
-          {/* Custom Pagination (outside AdvancedTable) */}
+          {/* Compact Pagination */}
           {records?.pagination && (
-            <div className="flex items-center justify-between px-4">
-              <div className="text-sm text-muted-foreground">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
                 Trang {records.pagination.currentPage} / {records.pagination.totalPages}
-              </div>
-              <div className="flex gap-2">
+              </span>
+              <div className="flex gap-1">
                 <Button
                   variant="outline"
                   size="sm"
@@ -1295,7 +1203,6 @@ export default function CallCenterPage() {
                   disabled={!records.pagination.hasPreviousPage}
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  Trước
                 </Button>
                 <Button
                   variant="outline"
@@ -1303,7 +1210,6 @@ export default function CallCenterPage() {
                   onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
                   disabled={!records.pagination.hasNextPage}
                 >
-                  Sau
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -1311,11 +1217,98 @@ export default function CallCenterPage() {
           )}
         </TabsContent>
 
-        {/* Sync Logs Tab */}
-        <TabsContent value="logs" className="space-y-4">
+        {/* Summary Tab - Moved from main view */}
+        <TabsContent value="summary" className="space-y-3 mt-3">
           <Card>
-            <CardHeader>
-              <CardTitle>Lịch sử đồng bộ</CardTitle>
+            <CardHeader className="py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-base">Tổng hợp thời lượng cuộc gọi</CardTitle>
+                </div>
+                <Badge variant="secondary">{callSummary.length} số điện thoại</Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {recordsLoading ? (
+                <div className="flex justify-center p-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : callSummary.length === 0 ? (
+                <div className="text-center p-8 text-muted-foreground">
+                  Không có dữ liệu để hiển thị
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Summary Header */}
+                  <div className="grid grid-cols-6 gap-2 p-3 bg-muted/50 rounded-md font-semibold text-sm">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Số điện thoại
+                    </div>
+                    <div className="text-center">Tổng cuộc gọi</div>
+                    <div className="text-center">Đã trả lời</div>
+                    <div className="text-center">Nhỡ máy</div>
+                    <div className="text-center">Tổng thời lượng</div>
+                    <div className="text-center">Thời gian nói</div>
+                  </div>
+
+                  {/* Summary Items */}
+                  <ScrollArea className="h-[350px] pr-4">
+                    <div className="space-y-2">
+                      {callSummary.map((summary, index) => (
+                        <div
+                          key={summary.callerNumber}
+                          className="grid grid-cols-6 gap-2 p-2 border rounded-md hover:bg-accent/50 transition-colors text-sm"
+                        >
+                          <div className="font-mono font-semibold flex items-center">
+                            <span className="text-muted-foreground mr-2 text-xs">#{index + 1}</span>
+                            {summary.callerNumber}
+                          </div>
+                          <div className="text-center">
+                            <Badge variant="outline">{summary.totalCalls}</Badge>
+                          </div>
+                          <div className="text-center">
+                            <Badge variant="default" className="bg-green-600">{summary.answeredCalls}</Badge>
+                          </div>
+                          <div className="text-center">
+                            <Badge variant="secondary">{summary.missedCalls}</Badge>
+                          </div>
+                          <div className="text-center font-semibold">
+                            {formatDuration(summary.totalDuration.toString())}
+                          </div>
+                          <div className="text-center font-semibold text-green-600">
+                            {formatDuration(summary.totalBillsec.toString())}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+
+                  {/* Summary Footer - Total */}
+                  <div className="grid grid-cols-6 gap-2 p-3 bg-primary/10 rounded-md font-bold border-2 border-primary/20 text-sm">
+                    <div>TỔNG CỘNG</div>
+                    <div className="text-center">{callSummary.reduce((sum, s) => sum + s.totalCalls, 0)}</div>
+                    <div className="text-center text-green-600">{callSummary.reduce((sum, s) => sum + s.answeredCalls, 0)}</div>
+                    <div className="text-center">{callSummary.reduce((sum, s) => sum + s.missedCalls, 0)}</div>
+                    <div className="text-center text-primary">
+                      {formatDuration(callSummary.reduce((sum, s) => sum + s.totalDuration, 0).toString())}
+                    </div>
+                    <div className="text-center text-green-600">
+                      {formatDuration(callSummary.reduce((sum, s) => sum + s.totalBillsec, 0).toString())}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Sync Logs Tab */}
+        <TabsContent value="logs" className="space-y-3 mt-3">
+          <Card>
+            <CardHeader className="py-3">
+              <CardTitle className="text-base">Lịch sử đồng bộ</CardTitle>
             </CardHeader>
             <CardContent>
               {logsLoading ? (
@@ -1323,22 +1316,22 @@ export default function CallCenterPage() {
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {logs?.map((log: CallCenterSyncLog) => (
                     <Card key={log.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex justify-between items-start mb-4">
+                      <CardContent className="py-3">
+                        <div className="flex justify-between items-start mb-2">
                           <div>
-                            <div className="font-semibold">{log.syncType}</div>
-                            <div className="text-sm text-muted-foreground">
+                            <div className="font-semibold text-sm">{log.syncType}</div>
+                            <div className="text-xs text-muted-foreground">
                               {format(new Date(log.startedAt), 'dd/MM/yyyy HH:mm:ss', { locale: vi })}
                             </div>
                           </div>
-                          <Badge variant={log.status === 'success' ? 'default' : 'destructive'}>
+                          <Badge variant={log.status === 'success' ? 'default' : 'destructive'} className="text-xs">
                             {log.status}
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-4 gap-4 text-sm">
+                        <div className="grid grid-cols-4 gap-2 text-xs">
                           <div>
                             <div className="text-muted-foreground">Fetched</div>
                             <div className="font-semibold">{log.recordsFetched}</div>
@@ -1357,7 +1350,7 @@ export default function CallCenterPage() {
                           </div>
                         </div>
                         {log.duration && (
-                          <div className="mt-2 text-xs text-muted-foreground">
+                          <div className="mt-1 text-xs text-muted-foreground">
                             Duration: {(log.duration / 1000).toFixed(2)}s
                           </div>
                         )}
