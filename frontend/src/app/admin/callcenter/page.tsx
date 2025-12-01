@@ -484,9 +484,16 @@ export default function CallCenterPage() {
   const [syncStats, setSyncStats] = useState<any>(null);
   const [filters, setFilters] = useState<any>({});
   const [pagination, setPagination] = useState({ page: 1, limit: 20 });
+  
+  // Sync date range - mặc định là ngày hiện tại
+  const today = new Date().toISOString().split('T')[0];
+  const [syncDateFrom, setSyncDateFrom] = useState(today);
+  const [syncDateTo, setSyncDateTo] = useState(today);
+  
+  // Legacy dateRange for dialog (có thể loại bỏ sau)
   const [dateRange, setDateRange] = useState({
-    fromDate: '',
-    toDate: '',
+    fromDate: today,
+    toDate: today,
   });
   const [showSummary, setShowSummary] = useState(false);
   
@@ -656,10 +663,6 @@ export default function CallCenterPage() {
 
   // Apply comparison filters
   const applyComparisonFilters = () => {
-    if (!comparisonExtension) {
-      toast.error('Vui lòng nhập Extension/SĐT để so sánh');
-      return;
-    }
     if (comparisonPeriods.length < 1) {
       toast.error('Cần ít nhất 1 khoảng thời gian');
       return;
@@ -671,13 +674,17 @@ export default function CallCenterPage() {
       return;
     }
     
-    // Update filters for each period
+    // Update filters for each period (extension is optional - empty means all)
     const updatedPeriods = comparisonPeriods.map(p => ({
       ...p,
       filters: buildComparisonFilters(p, comparisonExtension),
     }));
     setComparisonPeriods(updatedPeriods);
-    toast.success(`Đang so sánh ${comparisonPeriods.length} khoảng thời gian`);
+    
+    const message = comparisonExtension 
+      ? `Đang so sánh ${comparisonPeriods.length} khoảng thời gian cho ${comparisonExtension}`
+      : `Đang so sánh ${comparisonPeriods.length} khoảng thời gian (tất cả)`;
+    toast.success(message);
   };
 
   // Clear comparison
@@ -888,7 +895,11 @@ export default function CallCenterPage() {
 
   // Fetch data for all comparison periods
   const fetchAllComparisonData = async () => {
-    if (comparisonPeriods.length === 0 || !comparisonExtension) return;
+    if (comparisonPeriods.length === 0) return;
+    
+    // Check if any period has valid filters
+    const hasValidFilters = comparisonPeriods.some(p => p.fromDate && p.toDate);
+    if (!hasValidFilters) return;
     
     setComparisonLoading(true);
     const newData = new Map<string, CallCenterRecord[]>();
@@ -896,12 +907,16 @@ export default function CallCenterPage() {
     try {
       for (const period of comparisonPeriods) {
         if (period.fromDate && period.toDate) {
-          const filters = buildComparisonFilters(period, comparisonExtension);
+          const filters = buildComparisonFilters(period, comparisonExtension); // comparisonExtension can be empty
+          console.log(`Fetching comparison data for ${period.label}:`, filters);
+          
           const result = await fetchComparisonData({
             where: filters,
             take: 5000,
             orderBy: { startEpoch: 'desc' },
           });
+          
+          console.log(`Result for ${period.label}:`, result);
           
           if (result.data && Array.isArray(result.data.findManyCallCenterRecord)) {
             newData.set(period.id, result.data.findManyCallCenterRecord);
@@ -909,6 +924,7 @@ export default function CallCenterPage() {
         }
       }
       setComparisonData(newData);
+      console.log('Comparison data loaded:', newData);
     } catch (error) {
       console.error('Error fetching comparison data:', error);
       toast.error('Lỗi khi tải dữ liệu so sánh');
@@ -994,7 +1010,7 @@ export default function CallCenterPage() {
 
   // Get comparison results
   const getComparisonResults = () => {
-    if (!enableComparison || comparisonPeriods.length < 2) return [];
+    if (!enableComparison || comparisonPeriods.length < 1) return [];
     
     return comparisonPeriods.map(period => {
       const records = comparisonData.get(period.id) || [];
@@ -1091,11 +1107,26 @@ export default function CallCenterPage() {
     try {
       setShowDateRangeDialog(false);
       
+      // Convert date strings to proper DateTime format for GraphQL
+      // fromDate: start of day, toDate: end of day
+      const fromDateTime = new Date(dateRange.fromDate);
+      fromDateTime.setHours(0, 0, 0, 0);
+      
+      const toDateTime = new Date(dateRange.toDate);
+      toDateTime.setHours(23, 59, 59, 999);
+      
+      console.log('Sync with date range:', {
+        fromDate: dateRange.fromDate,
+        toDate: dateRange.toDate,
+        fromDateTime: fromDateTime.toISOString(),
+        toDateTime: toDateTime.toISOString(),
+      });
+      
       const result = await syncData({
         variables: {
           input: {
-            fromDate: dateRange.fromDate,
-            toDate: dateRange.toDate,
+            fromDate: fromDateTime.toISOString(),
+            toDate: toDateTime.toISOString(),
           },
         },
       });
@@ -1331,42 +1362,20 @@ export default function CallCenterPage() {
               <TooltipTrigger asChild>
                 <span>
                   <Button 
-                    variant="outline"
                     size="sm"
-                    onClick={() => setShowDateRangeDialog(true)} 
+                    variant={showSyncProgress ? "default" : "outline"}
+                    onClick={() => setActiveTab('progress')} 
                     disabled={!config?.isActive}
                   >
-                    <Calendar className="h-4 w-4 mr-1" />
-                    Sync theo ngày
+                    <RefreshCw className={`h-4 w-4 mr-1 ${showSyncProgress ? 'animate-spin' : ''}`} />
+                    Đồng bộ
+                    {showSyncProgress && (
+                      <span className="ml-1 h-2 w-2 bg-green-400 rounded-full animate-pulse" />
+                    )}
                   </Button>
                 </span>
               </TooltipTrigger>
               {!config?.isActive && (
-                <TooltipContent>
-                  <p>Vui lòng kích hoạt cấu hình trong phần Cài đặt</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button 
-                    size="sm"
-                    onClick={handleManualSync} 
-                    disabled={syncing || !config?.isActive}
-                  >
-                    {syncing ? (
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4 mr-1" />
-                    )}
-                    Sync Ngay
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!config?.isActive && !syncing && (
                 <TooltipContent>
                   <p>Vui lòng kích hoạt cấu hình trong phần Cài đặt</p>
                 </TooltipContent>
@@ -1790,9 +1799,9 @@ export default function CallCenterPage() {
                   {/* Extension Input + Quick Actions */}
                   <div className="flex flex-wrap items-end gap-3 p-3 bg-orange-100/50 rounded-lg">
                     <div className="flex-1 min-w-[200px] space-y-1">
-                      <Label className="text-xs text-orange-700 font-medium">Extension/SĐT cần so sánh *</Label>
+                      <Label className="text-xs text-orange-700 font-medium">Extension/SĐT (để trống = tất cả)</Label>
                       <Input
-                        placeholder="VD: 101, 0912..."
+                        placeholder="Để trống để lấy tất cả..."
                         value={comparisonExtension}
                         onChange={(e) => setComparisonExtension(e.target.value)}
                         className="h-9 bg-white border-orange-200 focus:border-orange-400"
@@ -1882,7 +1891,7 @@ export default function CallCenterPage() {
                   {/* Apply Button */}
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">
-                      So sánh <span className="font-medium text-orange-600">{comparisonExtension || '...'}</span> qua {comparisonPeriods.length} khoảng thời gian liên tiếp
+                      So sánh <span className="font-medium text-orange-600">{comparisonExtension || 'tất cả'}</span> qua {comparisonPeriods.length} khoảng thời gian liên tiếp
                     </p>
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm" onClick={clearComparison}>
@@ -1910,13 +1919,13 @@ export default function CallCenterPage() {
           </Card>
 
           {/* ✅ Comparison Results */}
-          {enableComparison && comparisonResults.length >= 1 && comparisonResults.some(r => r.recordsCount > 0) && (
+          {enableComparison && comparisonPeriods.length >= 1 && comparisonPeriods.some(p => Object.keys(p.filters).length > 0) && (
             <Card className="border-orange-300 bg-gradient-to-br from-orange-50 to-amber-50">
               <CardHeader className="py-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-orange-600" />
-                    Kết quả so sánh: <span className="text-orange-600">{comparisonExtension}</span>
+                    Kết quả so sánh: <span className="text-orange-600">{comparisonExtension || 'Tất cả'}</span>
                   </CardTitle>
                   <Badge variant="secondary">
                     {comparisonResults.length} khoảng thời gian
@@ -1927,6 +1936,12 @@ export default function CallCenterPage() {
                 {comparisonLoading ? (
                   <div className="flex justify-center p-8">
                     <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+                    <span className="ml-2 text-orange-600">Đang tải dữ liệu so sánh...</span>
+                  </div>
+                ) : comparisonResults.length === 0 || !comparisonResults.some(r => r.recordsCount > 0) ? (
+                  <div className="text-center p-8 text-muted-foreground">
+                    <p>Không có dữ liệu cho các khoảng thời gian đã chọn</p>
+                    <p className="text-sm mt-1">Hãy kiểm tra lại khoảng ngày hoặc Extension</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -1938,9 +1953,10 @@ export default function CallCenterPage() {
                             <th className="text-left p-2 font-semibold">Khoảng thời gian</th>
                             <th className="text-center p-2 font-semibold">Tổng cuộc gọi</th>
                             <th className="text-center p-2 font-semibold">Đã trả lời</th>
-                            <th className="text-center p-2 font-semibold">Tỷ lệ trả lời</th>
+                            <th className="text-center p-2 font-semibold">Nhỡ máy</th>
+                            <th className="text-center p-2 font-semibold">Tỷ lệ TL</th>
                             <th className="text-center p-2 font-semibold">Tổng thời lượng</th>
-                            <th className="text-center p-2 font-semibold">TB/cuộc gọi</th>
+                            <th className="text-center p-2 font-semibold">Thời gian nói</th>
                             <th className="text-center p-2 font-semibold">Thay đổi</th>
                           </tr>
                         </thead>
@@ -1948,7 +1964,7 @@ export default function CallCenterPage() {
                           {comparisonResults.map((result, index) => {
                             const prevResult = index > 0 ? comparisonResults[index - 1] : null;
                             const callsChange = prevResult ? calculateChange(result.summary.totalCalls, prevResult.summary.totalCalls) : null;
-                            const durationChange = prevResult ? calculateChange(result.summary.totalDuration, prevResult.summary.totalDuration) : null;
+                            const durationChange = prevResult ? calculateChange(result.summary.totalBillsec, prevResult.summary.totalBillsec) : null;
                             
                             return (
                               <tr key={result.id} className="border-b border-orange-100 hover:bg-orange-50/50">
@@ -1967,6 +1983,11 @@ export default function CallCenterPage() {
                                   </Badge>
                                 </td>
                                 <td className="text-center p-2">
+                                  <Badge variant="secondary">
+                                    {result.summary.missedCalls}
+                                  </Badge>
+                                </td>
+                                <td className="text-center p-2">
                                   <span className={`font-semibold ${result.summary.answerRate >= 70 ? 'text-green-600' : result.summary.answerRate >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
                                     {result.summary.answerRate}%
                                   </span>
@@ -1974,25 +1995,25 @@ export default function CallCenterPage() {
                                 <td className="text-center p-2 font-semibold">
                                   {formatTotalDuration(result.summary.totalDuration)}
                                 </td>
-                                <td className="text-center p-2">
-                                  {formatTotalDuration(result.summary.avgDuration)}
+                                <td className="text-center p-2 font-semibold text-green-600">
+                                  {formatTotalDuration(result.summary.totalBillsec)}
                                 </td>
                                 <td className="text-center p-2">
-                                  {callsChange && (
+                                  {durationChange && (
                                     <div className="flex items-center justify-center gap-1">
-                                      {callsChange.type === 'up' && (
+                                      {durationChange.type === 'up' && (
                                         <span className="text-green-600 flex items-center text-xs">
                                           <TrendingUp className="h-3 w-3 mr-0.5" />
-                                          +{callsChange.value}%
+                                          +{durationChange.value}%
                                         </span>
                                       )}
-                                      {callsChange.type === 'down' && (
+                                      {durationChange.type === 'down' && (
                                         <span className="text-red-600 flex items-center text-xs">
                                           <TrendingDown className="h-3 w-3 mr-0.5" />
-                                          -{callsChange.value}%
+                                          -{durationChange.value}%
                                         </span>
                                       )}
-                                      {callsChange.type === 'same' && (
+                                      {durationChange.type === 'same' && (
                                         <span className="text-muted-foreground flex items-center text-xs">
                                           <Minus className="h-3 w-3 mr-0.5" />
                                           0%
@@ -2000,7 +2021,7 @@ export default function CallCenterPage() {
                                       )}
                                     </div>
                                   )}
-                                  {!callsChange && (
+                                  {!durationChange && (
                                     <span className="text-muted-foreground text-xs">Cơ sở</span>
                                   )}
                                 </td>
@@ -2012,7 +2033,7 @@ export default function CallCenterPage() {
                     </div>
 
                     {/* Summary Cards */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                       {/* Total Calls Card */}
                       <Card className="bg-blue-50 border-blue-200">
                         <CardContent className="p-3 text-center">
@@ -2046,13 +2067,23 @@ export default function CallCenterPage() {
                         </CardContent>
                       </Card>
 
+                      {/* Total Billsec Card */}
+                      <Card className="bg-emerald-50 border-emerald-200">
+                        <CardContent className="p-3 text-center">
+                          <div className="text-2xl font-bold text-emerald-600">
+                            {formatTotalDuration(comparisonResults.reduce((sum, r) => sum + r.summary.totalBillsec, 0))}
+                          </div>
+                          <div className="text-xs text-emerald-600/70">Thời gian nói</div>
+                        </CardContent>
+                      </Card>
+
                       {/* Trend Card */}
                       <Card className="bg-orange-50 border-orange-200">
                         <CardContent className="p-3 text-center">
                           {comparisonResults.length >= 2 && (() => {
                             const firstPeriod = comparisonResults[0];
                             const lastPeriod = comparisonResults[comparisonResults.length - 1];
-                            const trend = calculateChange(lastPeriod.summary.totalCalls, firstPeriod.summary.totalCalls);
+                            const trend = calculateChange(lastPeriod.summary.totalBillsec, firstPeriod.summary.totalBillsec);
                             return (
                               <>
                                 <div className={`text-2xl font-bold flex items-center justify-center gap-1 ${
@@ -2063,7 +2094,7 @@ export default function CallCenterPage() {
                                   {trend.type === 'same' && <Minus className="h-5 w-5" />}
                                   {trend.type === 'up' ? '+' : trend.type === 'down' ? '-' : ''}{trend.value}%
                                 </div>
-                                <div className="text-xs text-orange-600/70">Xu hướng</div>
+                                <div className="text-xs text-orange-600/70">Xu hướng TG nói</div>
                               </>
                             );
                           })()}
@@ -2168,6 +2199,161 @@ export default function CallCenterPage() {
 
         {/* Progress Tab - Chi tiết tiến trình đồng bộ */}
         <TabsContent value="progress" className="space-y-3 mt-3">
+          {/* Sync Control Panel */}
+          <Card className="border-blue-200 bg-blue-50/30">
+            <CardHeader className="py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="h-5 w-5 text-blue-600" />
+                  <CardTitle className="text-base text-blue-800">Đồng bộ dữ liệu Call Center</CardTitle>
+                </div>
+                {config?.isActive ? (
+                  <Badge variant="default" className="bg-green-500">Đã kích hoạt</Badge>
+                ) : (
+                  <Badge variant="secondary">Chưa kích hoạt</Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Quick Select Buttons */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium text-blue-700">Chọn nhanh:</span>
+                {[
+                  { label: 'Hôm nay', days: 0 },
+                  { label: 'Hôm qua', days: 1 },
+                  { label: '7 ngày', days: 7 },
+                  { label: '15 ngày', days: 15 },
+                  { label: '30 ngày', days: 30 },
+                ].map((item) => (
+                  <Button
+                    key={item.days}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const to = new Date();
+                      const from = new Date();
+                      if (item.days === 0) {
+                        // Hôm nay
+                        setSyncDateFrom(to.toISOString().split('T')[0]);
+                        setSyncDateTo(to.toISOString().split('T')[0]);
+                      } else if (item.days === 1) {
+                        // Hôm qua
+                        from.setDate(from.getDate() - 1);
+                        setSyncDateFrom(from.toISOString().split('T')[0]);
+                        setSyncDateTo(from.toISOString().split('T')[0]);
+                      } else {
+                        // X ngày trước
+                        from.setDate(from.getDate() - item.days);
+                        setSyncDateFrom(from.toISOString().split('T')[0]);
+                        setSyncDateTo(to.toISOString().split('T')[0]);
+                      }
+                    }}
+                    className="text-xs"
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Date Range Selection */}
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+                <div className="space-y-1">
+                  <Label className="text-xs text-blue-700">Từ ngày</Label>
+                  <Input
+                    type="date"
+                    value={syncDateFrom}
+                    onChange={(e) => setSyncDateFrom(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-blue-700">Đến ngày</Label>
+                  <Input
+                    type="date"
+                    value={syncDateTo}
+                    onChange={(e) => setSyncDateTo(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <Button 
+                  size="default"
+                  className="h-9 bg-blue-600 hover:bg-blue-700"
+                  onClick={async () => {
+                    if (!syncDateFrom || !syncDateTo) {
+                      toast.error('Vui lòng chọn khoảng ngày');
+                      return;
+                    }
+                    if (!config?.isActive) {
+                      toast.error('Cấu hình chưa được kích hoạt', {
+                        description: 'Vui lòng bật "Kích hoạt" trong phần Cài đặt.',
+                      });
+                      return;
+                    }
+                    
+                    // Convert to DateTime
+                    const fromDateTime = new Date(syncDateFrom);
+                    fromDateTime.setHours(0, 0, 0, 0);
+                    const toDateTime = new Date(syncDateTo);
+                    toDateTime.setHours(23, 59, 59, 999);
+                    
+                    try {
+                      const result = await syncData({
+                        variables: {
+                          input: {
+                            fromDate: fromDateTime.toISOString(),
+                            toDate: toDateTime.toISOString(),
+                          },
+                        },
+                      });
+
+                      if (result.data.syncCallCenterData.success) {
+                        setCurrentSyncLogId(result.data.syncCallCenterData.syncLogId);
+                        setSyncStats({
+                          recordsFetched: 0,
+                          recordsCreated: 0,
+                          recordsUpdated: 0,
+                          recordsSkipped: 0,
+                          status: 'running',
+                        });
+                        setShowSyncProgress(true);
+                        toast.success('Bắt đầu đồng bộ', {
+                          description: `Từ ${syncDateFrom} đến ${syncDateTo}`,
+                        });
+                      } else {
+                        toast.error('Sync thất bại', {
+                          description: result.data.syncCallCenterData.error,
+                        });
+                      }
+                    } catch (error: any) {
+                      toast.error('Sync error', {
+                        description: error.message,
+                      });
+                    }
+                  }}
+                  disabled={syncing || !config?.isActive || !syncDateFrom || !syncDateTo}
+                >
+                  {syncing ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <Play className="h-4 w-4 mr-1" />
+                  )}
+                  Bắt đầu Sync
+                </Button>
+              </div>
+
+              {/* Selected Range Info */}
+              {syncDateFrom && syncDateTo && (
+                <div className="flex items-center gap-2 text-xs text-blue-700 bg-blue-100 px-3 py-2 rounded">
+                  <Calendar className="h-3 w-3" />
+                  <span>
+                    Sẽ đồng bộ dữ liệu từ <strong>{format(new Date(syncDateFrom), 'dd/MM/yyyy', { locale: vi })}</strong> đến <strong>{format(new Date(syncDateTo), 'dd/MM/yyyy', { locale: vi })}</strong>
+                    {' '}({Math.ceil((new Date(syncDateTo).getTime() - new Date(syncDateFrom).getTime()) / (1000 * 60 * 60 * 24)) + 1} ngày)
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Live Sync Progress */}
           {showSyncProgress && currentSyncLogId && syncStats ? (
             <Card className="border-green-300 bg-gradient-to-br from-green-50 to-emerald-50 overflow-hidden relative">
