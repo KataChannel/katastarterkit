@@ -10,6 +10,7 @@ export const GET_VISITOR_STATS = gql`
       today
       thisMonth
       total
+      isRealData
     }
   }
 `;
@@ -40,6 +41,7 @@ export interface VisitorStats {
   today: number;
   thisMonth: number;
   total: number;
+  isRealData: boolean;
 }
 
 export interface GetVisitorStatsResponse {

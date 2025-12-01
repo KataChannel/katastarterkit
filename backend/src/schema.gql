@@ -6386,6 +6386,9 @@ type VisibilityCount {
 
 """Thống kê lượt truy cập website"""
 type VisitorStatsType {
+  """True nếu dữ liệu từ GA4, false nếu là mockdata"""
+  isRealData: Boolean!
+
   """Số người đang truy cập (realtime)"""
   realtime: Int!
 

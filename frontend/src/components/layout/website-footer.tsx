@@ -2,23 +2,59 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
-import { BarChart3, ChevronDown, Activity, Wifi } from 'lucide-react';
+import { BarChart3, ChevronDown, Activity, Wifi, WifiOff } from 'lucide-react';
 import { useFooterSettings, useContactSettings, useSocialSettings, settingsToMap } from '@/hooks/useWebsiteSettings';
 import { useVisitorStats } from '@/hooks/useVisitorStats';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-// Component Icon Signal Realtime với animation
-function RealtimeSignalIcon({ className = "w-5 h-5" }: { className?: string }) {
+// Component Icon Signal Realtime với animation - phân biệt giữa real data và mock data
+function RealtimeSignalIcon({ 
+  className = "w-5 h-5", 
+  isRealData = false 
+}: { 
+  className?: string;
+  isRealData?: boolean;
+}) {
+  if (isRealData) {
+    // GA4 Real Data - Màu xanh lá với pulse animation
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className={`relative ${className}`}>
+              <Wifi className="w-full h-full text-[#65b009]" />
+              <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+              </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>🟢 Dữ liệu thực từ Google Analytics</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  // Mock Data - Màu vàng cam, không có pulse
   return (
-    <div className={`relative ${className}`}>
-      {/* Icon Wifi/Signal */}
-      <Wifi className="w-full h-full text-[#65b009]" />
-      {/* Pulse animation dot */}
-      <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-      </span>
-    </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className={`relative ${className}`}>
+            <WifiOff className="w-full h-full text-yellow-500" />
+            <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+            </span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>🟡 Dữ liệu mẫu (GA4 chưa cấu hình)</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
@@ -28,7 +64,7 @@ interface WebsiteFooterProps {
 
 export function WebsiteFooter({ currentYear = new Date().getFullYear() }: WebsiteFooterProps) {
   // ✅ Load Visitor Stats từ Google Analytics
-  const { stats: visitors, loading: visitorLoading } = useVisitorStats({ 
+  const { stats: visitors, loading: visitorLoading, isRealData } = useVisitorStats({ 
     pollInterval: 60000 // Cập nhật mỗi 1 phút
   });
 
@@ -141,24 +177,32 @@ export function WebsiteFooter({ currentYear = new Date().getFullYear() }: Websit
                 <AccordionContent>
                   <div className="flex flex-col space-y-3 pt-2">
                     <div className="flex flex-row space-x-2 items-center text-sm">
-                      <RealtimeSignalIcon className="w-4 h-4" />
+                      <RealtimeSignalIcon className="w-4 h-4" isRealData={isRealData} />
                       <span>Đang truy cập:</span>
-                      <span className="font-semibold text-[#65b009]">{formatNumber(visitors?.realtime)}</span>
+                      <span className={`font-semibold ${isRealData ? 'text-[#65b009]' : 'text-yellow-500'}`}>
+                        {formatNumber(visitors?.realtime)}
+                      </span>
                     </div>
                     <div className="flex flex-row space-x-2 items-center text-sm">
-                      <BarChart3 className="w-4 h-4 text-[#65b009]" />
+                      <BarChart3 className={`w-4 h-4 ${isRealData ? 'text-[#65b009]' : 'text-yellow-500'}`} />
                       <span>Hôm nay:</span>
-                      <span className="font-semibold">{formatNumber(visitors?.today)}</span>
+                      <span className={`font-semibold ${isRealData ? 'text-white' : 'text-yellow-500/80'}`}>
+                        {formatNumber(visitors?.today)}
+                      </span>
                     </div>
                     <div className="flex flex-row space-x-2 items-center text-sm">
-                      <BarChart3 className="w-4 h-4 text-[#65b009]" />
+                      <BarChart3 className={`w-4 h-4 ${isRealData ? 'text-[#65b009]' : 'text-yellow-500'}`} />
                       <span>Trong tháng:</span>
-                      <span className="font-semibold">{formatNumber(visitors?.thisMonth)}</span>
+                      <span className={`font-semibold ${isRealData ? 'text-white' : 'text-yellow-500/80'}`}>
+                        {formatNumber(visitors?.thisMonth)}
+                      </span>
                     </div>
                     <div className="flex flex-row space-x-2 items-center text-sm">
-                      <BarChart3 className="w-4 h-4 text-[#65b009]" />
+                      <BarChart3 className={`w-4 h-4 ${isRealData ? 'text-[#65b009]' : 'text-yellow-500'}`} />
                       <span>Tổng truy cập:</span>
-                      <span className="font-semibold">{formatNumber(visitors?.total)}</span>
+                      <span className={`font-semibold ${isRealData ? 'text-white' : 'text-yellow-500/80'}`}>
+                        {formatNumber(visitors?.total)}
+                      </span>
                     </div>
                   </div>
                 </AccordionContent>
@@ -274,24 +318,32 @@ export function WebsiteFooter({ currentYear = new Date().getFullYear() }: Websit
               <div className="font-bold text-xl mb-5">THỐNG KÊ TRUY CẬP</div>
               <div className="flex flex-col space-y-3">
                 <div className="flex flex-row space-x-2 items-center">
-                  <RealtimeSignalIcon className="w-5 h-5" />
+                  <RealtimeSignalIcon className="w-5 h-5" isRealData={isRealData} />
                   <span>Đang truy cập:</span>
-                  <span className="font-semibold text-[#65b009]">{formatNumber(visitors?.realtime)}</span>
+                  <span className={`font-semibold ${isRealData ? 'text-[#65b009]' : 'text-yellow-500'}`}>
+                    {formatNumber(visitors?.realtime)}
+                  </span>
                 </div>
                 <div className="flex flex-row space-x-2 items-center">
-                  <BarChart3 className="w-5 h-5 text-[#65b009]" />
+                  <BarChart3 className={`w-5 h-5 ${isRealData ? 'text-[#65b009]' : 'text-yellow-500'}`} />
                   <span>Hôm nay:</span>
-                  <span className="font-semibold">{formatNumber(visitors?.today)}</span>
+                  <span className={`font-semibold ${isRealData ? 'text-white' : 'text-yellow-500/80'}`}>
+                    {formatNumber(visitors?.today)}
+                  </span>
                 </div>
                 <div className="flex flex-row space-x-2 items-center">
-                  <BarChart3 className="w-5 h-5 text-[#65b009]" />
+                  <BarChart3 className={`w-5 h-5 ${isRealData ? 'text-[#65b009]' : 'text-yellow-500'}`} />
                   <span>Trong tháng:</span>
-                  <span className="font-semibold">{formatNumber(visitors?.thisMonth)}</span>
+                  <span className={`font-semibold ${isRealData ? 'text-white' : 'text-yellow-500/80'}`}>
+                    {formatNumber(visitors?.thisMonth)}
+                  </span>
                 </div>
                 <div className="flex flex-row space-x-2 items-center">
-                  <BarChart3 className="w-5 h-5 text-[#65b009]" />
+                  <BarChart3 className={`w-5 h-5 ${isRealData ? 'text-[#65b009]' : 'text-yellow-500'}`} />
                   <span>Tổng truy cập:</span>
-                  <span className="font-semibold">{formatNumber(visitors?.total)}</span>
+                  <span className={`font-semibold ${isRealData ? 'text-white' : 'text-yellow-500/80'}`}>
+                    {formatNumber(visitors?.total)}
+                  </span>
                 </div>
               </div>
             </div>

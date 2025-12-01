@@ -14,6 +14,9 @@ export class VisitorStatsType {
 
   @Field(() => Int, { description: 'Tổng lượt truy cập' })
   total: number;
+
+  @Field(() => Boolean, { description: 'True nếu dữ liệu từ GA4, false nếu là mockdata' })
+  isRealData: boolean;
 }
 
 @Resolver()
@@ -26,11 +29,13 @@ export class AnalyticsResolver {
   })
   async getVisitorStats(): Promise<VisitorStatsType> {
     const stats = await this.analyticsService.getVisitorStats();
+    const isRealData = this.analyticsService.isAnalyticsConfigured();
     return {
       realtime: stats.realtime,
       today: stats.today,
       thisMonth: stats.thisMonth,
       total: stats.total,
+      isRealData,
     };
   }
 

@@ -50,6 +50,7 @@ export function useVisitorStats(options?: {
     today: 0,
     thisMonth: 0,
     total: 0,
+    isRealData: false,
   };
 
   return {
@@ -58,6 +59,7 @@ export function useVisitorStats(options?: {
     today: stats.today,
     thisMonth: stats.thisMonth,
     total: stats.total,
+    isRealData: stats.isRealData,
     loading,
     error,
     refetch,
