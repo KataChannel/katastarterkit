@@ -53,6 +53,13 @@ backend/.env*
 !backend/.env.template
 backend/kata_json
 
+# Google Service Account credentials (sensitive)
+env/*.json
+env/**/*.json
+
+# Sensitive setup scripts
+scripts/setup-google-credentials.sh
+
 # ==========================================
 # Database
 # ==========================================
