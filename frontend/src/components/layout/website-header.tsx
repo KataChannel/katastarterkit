@@ -45,6 +45,7 @@ import Image from 'next/image';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { usePWA } from '@/hooks/usePWA';
 import { HeaderActions, DEFAULT_APP_MODULES } from '@/components/layout/HeaderActions';
+import { CategoryDropdownMenu, CategorySimpleDropdown } from '@/components/layout/CategoryDropdownMenu';
 
 export function WebsiteHeader() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -366,6 +367,14 @@ export function WebsiteHeader() {
 
               <Separator className="my-4" />
 
+              {/* Mobile Category Menu */}
+              <CategoryDropdownMenu 
+                variant="mobile" 
+                showProductCount={true}
+              />
+
+              <Separator className="my-4" />
+
               {/* Mobile User Actions */}
               <div className="flex flex-col space-y-2">
                 {isAuthenticated && user ? (
@@ -630,6 +639,12 @@ export function WebsiteHeader() {
             )}>
               {/* Menu */}
               <nav className="flex items-center justify-center space-x-1">
+                {/* Category Dropdown Menu - Always show first */}
+                <CategoryDropdownMenu 
+                  variant="desktop" 
+                  showProductCount={true}
+                />
+                
                 {menuLoading ? (
                   <div className="text-white text-sm">Đang tải menu...</div>
                 ) : menuError ? (

@@ -208,8 +208,8 @@ bun run scripts/upload-crawled-images-to-minio.ts
 ### Cải thiện dài hạn:
 
 1. **Frontend Menu:**
-   - Cập nhật hiển thị danh mục mới
-   - Tạo mega menu theo cấu trúc
+   - ✅ Cập nhật hiển thị danh mục mới
+   - ✅ Tạo mega menu theo cấu trúc
 
 2. **SEO:**
    - Thêm meta title/description cho danh mục
@@ -238,4 +238,87 @@ Backend Port: 12001
 
 ---
 
+## 🎨 9. CẬP NHẬT FRONTEND MENU (ĐÃ HOÀN THÀNH)
+
+### Components đã tạo:
+
+#### A. CategoryDropdownMenu.tsx
+
+**Đường dẫn:** `frontend/src/components/layout/CategoryDropdownMenu.tsx`
+
+**Tính năng:**
+- Mega menu dropdown hiển thị tất cả danh mục
+- Hỗ trợ cả Desktop và Mobile variants
+- Icon tự động theo tên danh mục (Leaf, Apple, Carrot...)
+- Hiển thị số lượng sản phẩm mỗi danh mục
+- Hover effect và animation
+
+**Cách sử dụng:**
+```tsx
+// Desktop variant (trong header)
+<CategoryDropdownMenu 
+  variant="desktop" 
+  showProductCount={true}
+/>
+
+// Mobile variant (trong sidebar menu)
+<CategoryDropdownMenu 
+  variant="mobile" 
+  showProductCount={true}
+/>
+
+// Simple dropdown variant
+<CategorySimpleDropdown />
+```
+
+#### B. Trang Danh Mục
+
+**Đường dẫn:** `frontend/src/app/(website)/danh-muc/[slug]/page.tsx`
+
+**URL Pattern:** `/danh-muc/{category-slug}`
+
+**Tính năng:**
+- ✅ SEO-friendly URL với slug
+- ✅ Breadcrumb navigation
+- ✅ Responsive design (mobile first)
+- ✅ Category header với info
+- ✅ Sidebar danh mục (desktop)
+- ✅ Toolbar: sort, filter, view mode
+- ✅ Product grid/list view
+- ✅ Pagination
+- ✅ Empty state khi không có sản phẩm
+- ✅ Error state khi danh mục không tồn tại
+
+**Ví dụ URLs:**
+- `/danh-muc/cac-loai-cu`
+- `/danh-muc/trai-cay-cac-loai`
+- `/danh-muc/rau-gia-vi-rau-song`
+
+### Tích hợp vào WebsiteHeader:
+
+**File:** `frontend/src/components/layout/website-header.tsx`
+
+**Thay đổi:**
+1. Import `CategoryDropdownMenu` component
+2. Thêm dropdown menu danh mục vào desktop navigation (vị trí đầu tiên)
+3. Thêm danh sách danh mục vào mobile menu sidebar
+
+### Cấu trúc file mới:
+
+```
+frontend/src/
+├── app/(website)/
+│   └── danh-muc/
+│       └── [slug]/
+│           └── page.tsx              # 🆕 Trang hiển thị SP theo danh mục
+├── components/layout/
+│   ├── CategoryDropdownMenu.tsx      # 🆕 Component dropdown menu
+│   └── website-header.tsx            # ✏️ Đã tích hợp CategoryDropdownMenu
+└── graphql/
+    └── category.queries.ts           # GraphQL queries cho danh mục
+```
+
+---
+
 *Report generated: 01/12/2025*
+*Frontend menu integration completed*
