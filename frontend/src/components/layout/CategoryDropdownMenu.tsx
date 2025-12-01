@@ -55,6 +55,8 @@ interface CategoryDropdownMenuProps {
   buttonClassName?: string;
   showProductCount?: boolean;
   maxItems?: number;
+  menuTitle?: string;
+  menuBadge?: string;
 }
 
 export function CategoryDropdownMenu({
@@ -63,6 +65,8 @@ export function CategoryDropdownMenu({
   buttonClassName,
   showProductCount = true,
   maxItems,
+  menuTitle,
+  menuBadge,
 }: CategoryDropdownMenuProps) {
   const { data, loading, error } = useQuery(GET_ACTIVE_CATEGORIES, {
     fetchPolicy: 'cache-and-network',
@@ -135,7 +139,10 @@ export function CategoryDropdownMenu({
           )}
         >
           <Layers className="w-4 h-4" />
-          <span>Danh mục</span>
+          <span>{menuTitle || 'Danh mục'}</span>
+          {menuBadge && (
+            <Badge className="ml-1 text-xs bg-red-500 text-white">{menuBadge}</Badge>
+          )}
           <ChevronDown className="w-4 h-4" />
         </Button>
       </PopoverTrigger>

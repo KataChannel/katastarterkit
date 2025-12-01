@@ -227,6 +227,30 @@ export function WebsiteHeader() {
     const href = item.route || item.url || '#';
     const hasChildren = item.children && Array.isArray(item.children) && item.children.length > 0;
 
+    // Check if this menu item should show category dropdown (linkType PRODUCT_LIST or title contains "Sản Phẩm")
+    const isProductMenu = item.linkType === 'PRODUCT_LIST' || 
+                          item.title?.toLowerCase().includes('sản phẩm') ||
+                          item.slug?.includes('san-pham');
+
+    if (isProductMenu) {
+      // Render category list for product menu item in mobile
+      return (
+        <AccordionItem key={item.id} value={`item-${item.id}`}>
+          <AccordionTrigger className="text-sm font-medium hover:text-primary">
+            {item.icon && <span className="mr-2">{item.icon}</span>}
+            {item.title}
+            {item.badge && <Badge className="ml-2 text-xs">{item.badge}</Badge>}
+          </AccordionTrigger>
+          <AccordionContent>
+            <CategoryDropdownMenu 
+              variant="mobile" 
+              showProductCount={true}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      );
+    }
+
     if (hasChildren) {
       return (
         <AccordionItem key={item.id} value={`item-${item.id}`}>
@@ -282,6 +306,24 @@ export function WebsiteHeader() {
 
     const href = item.route || item.url || '#';
     const hasChildren = item.children && Array.isArray(item.children) && item.children.length > 0;
+
+    // Check if this menu item should show category dropdown (linkType PRODUCT_LIST or title contains "Sản Phẩm")
+    const isProductMenu = item.linkType === 'PRODUCT_LIST' || 
+                          item.title?.toLowerCase().includes('sản phẩm') ||
+                          item.slug?.includes('san-pham');
+
+    if (isProductMenu) {
+      // Render category dropdown menu for product menu item
+      return (
+        <CategoryDropdownMenu 
+          key={item.id}
+          variant="desktop" 
+          showProductCount={true}
+          menuTitle={item.title}
+          menuBadge={item.badge}
+        />
+      );
+    }
 
     if (hasChildren) {
       return (
@@ -364,14 +406,6 @@ export function WebsiteHeader() {
                     .map((item: any) => renderMobileMenuItem(item))
                 )}
               </Accordion>
-
-              <Separator className="my-4" />
-
-              {/* Mobile Category Menu */}
-              <CategoryDropdownMenu 
-                variant="mobile" 
-                showProductCount={true}
-              />
 
               <Separator className="my-4" />
 
@@ -639,12 +673,6 @@ export function WebsiteHeader() {
             )}>
               {/* Menu */}
               <nav className="flex items-center justify-center space-x-1">
-                {/* Category Dropdown Menu - Always show first */}
-                <CategoryDropdownMenu 
-                  variant="desktop" 
-                  showProductCount={true}
-                />
-                
                 {menuLoading ? (
                   <div className="text-white text-sm">Đang tải menu...</div>
                 ) : menuError ? (
