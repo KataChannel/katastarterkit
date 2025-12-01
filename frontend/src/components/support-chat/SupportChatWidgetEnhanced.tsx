@@ -658,7 +658,7 @@ export default function SupportChatWidgetEnhanced({
         onChange={handleFileUpload}
       />
 
-      {/* Chat Button - Mobile First */}
+      {/* Chat Button - Mobile First with Pulse Animation */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -670,26 +670,44 @@ export default function SupportChatWidgetEnhanced({
               positionClasses
             )}
           >
-            <Button
-              size="lg"
-              className={cn(
-                "relative h-14 w-14 sm:h-16 sm:w-16 rounded-full shadow-2xl text-white border-0",
-                "hover:scale-110 active:scale-95 transition-transform hover:opacity-90",
-                "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)]"
+            <div className="relative">
+              {/* Pulse effect */}
+              <div className={cn(
+                "absolute inset-0 rounded-full animate-ping opacity-20",
+                "bg-[var(--chat-primary)]"
               )}
               style={{ '--chat-primary': primaryColor } as React.CSSProperties}
-              onClick={() => setIsOpen(true)}
-            >
-              <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8" />
-              {unreadCount > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs font-bold"
-                >
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </Badge>
-              )}
-            </Button>
+              />
+              
+              <Button
+                size="lg"
+                className={cn(
+                  "relative h-16 w-16 sm:h-[72px] sm:w-[72px] rounded-full",
+                  "shadow-2xl text-white border-0",
+                  "hover:scale-110 active:scale-95",
+                  "transition-all duration-300",
+                  "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)]",
+                  "hover:shadow-[0_10px_40px_rgba(0,0,0,0.25)]"
+                )}
+                style={{ '--chat-primary': primaryColor } as React.CSSProperties}
+                onClick={() => setIsOpen(true)}
+                title="Bắt đầu trò chuyện"
+              >
+                <MessageCircle className="h-7 w-7 sm:h-9 sm:w-9" />
+                {unreadCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className={cn(
+                      "absolute -top-1 -right-1 h-7 w-7 rounded-full p-0",
+                      "flex items-center justify-center text-xs font-bold",
+                      "shadow-lg animate-bounce"
+                    )}
+                  >
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </Badge>
+                )}
+              </Button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -720,71 +738,102 @@ export default function SupportChatWidgetEnhanced({
               "rounded-none sm:rounded-xl",
               "sm:max-h-[650px]"
             )}>
-              {/* Header */}
+              {/* Header - Fixed with better design */}
               <CardHeader
-                className="p-4 text-white relative overflow-hidden cursor-pointer flex-shrink-0 safe-area-inset-top"
+                className={cn(
+                  "!p-4 text-white relative overflow-hidden flex-shrink-0",
+                  "border-b border-white/10 safe-area-inset-top rounded-t-xl"
+                )}
                 style={{ backgroundColor: primaryColor }}
-                onClick={() => setIsMinimized(!isMinimized)}
               >
-                {/* Animated background */}
-                <div className="absolute inset-0 opacity-10 pointer-events-none">
-                  <div className="absolute w-32 h-32 bg-white rounded-full -top-10 -left-10 animate-pulse" />
-                  <div className="absolute w-24 h-24 bg-white rounded-full -bottom-5 -right-5 animate-pulse" 
-                       style={{ animationDelay: '300ms' }} />
-                </div>
+                {/* Animated gradient background */}
+                {/* <div className="absolute inset-0 opacity-10 pointer-events-none">
+                  <div className="absolute w-40 h-40 bg-white rounded-full -top-12 -left-12 animate-pulse" />
+                  <div className="absolute w-32 h-32 bg-white rounded-full -bottom-8 -right-8 animate-pulse" 
+                       style={{ animationDelay: '400ms' }} />
+                </div> */}
 
                 <div className="flex items-center justify-between relative z-10">
-                  <div className="flex items-center space-x-3">
+                  <div 
+                    className="flex items-center space-x-3 flex-1 cursor-pointer"
+                    onClick={() => setIsMinimized(!isMinimized)}
+                  >
                     <div className="relative">
-                      <Avatar className="h-10 w-10 border-2 border-white/20">
+                      <Avatar className="h-11 w-11 border-2 border-white/30 shadow-lg">
                         <AvatarImage src={agentInfo?.avatar} alt={agentInfo?.name} />
-                        <AvatarFallback className="bg-white/20">
-                          <Bot className="h-5 w-5" />
+                        <AvatarFallback className="bg-white/20 text-white font-semibold">
+                          <Bot className="h-6 w-6" />
                         </AvatarFallback>
                       </Avatar>
-                      {/* Online indicator */}
+                      {/* Online indicator with animation */}
                       <span className={cn(
-                        "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white",
-                        isOnline ? "bg-green-500" : "bg-gray-400"
+                        "absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white",
+                        "transition-all duration-300",
+                        isOnline ? "bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]" : "bg-gray-400"
                       )} />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-sm leading-tight">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-base leading-tight truncate">
                         {agentInfo?.name || 'Hỗ trợ khách hàng'}
                       </h3>
-                      <p className="text-xs opacity-90">
-                        {isTyping ? 'Đang nhập...' : isOnline ? 'Trực tuyến' : 'Ngoại tuyến'}
+                      <p className="text-xs opacity-95 flex items-center gap-1.5">
+                        {isTyping ? (
+                          <>
+                            <span className="inline-flex gap-1">
+                              <span className="w-1 h-1 bg-white rounded-full animate-bounce" />
+                              <span className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                              <span className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                            </span>
+                            <span>Đang nhập</span>
+                          </>
+                        ) : (
+                          <span>{isOnline ? '● Trực tuyến' : '○ Ngoại tuyến'}</span>
+                        )}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center gap-1">
                     {/* Sound toggle */}
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-white hover:bg-white/20"
+                      className={cn(
+                        "h-9 w-9 text-white hover:bg-white/20 rounded-lg",
+                        "transition-all active:scale-95"
+                      )}
                       title={soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSoundEnabled(!soundEnabled);
                       }}
                     >
-                      {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                      {soundEnabled ? (
+                        <Volume2 className="h-4.5 w-4.5" />
+                      ) : (
+                        <VolumeX className="h-4.5 w-4.5" />
+                      )}
                     </Button>
                     
                     {/* Notification toggle */}
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-white hover:bg-white/20"
+                      className={cn(
+                        "h-9 w-9 text-white hover:bg-white/20 rounded-lg",
+                        "transition-all active:scale-95"
+                      )}
                       title={notificationEnabled ? 'Tắt thông báo' : 'Bật thông báo'}
                       onClick={(e) => {
                         e.stopPropagation();
                         setNotificationEnabled(!notificationEnabled);
                       }}
                     >
-                      {notificationEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+                      {notificationEnabled ? (
+                        <Bell className="h-4.5 w-4.5" />
+                      ) : (
+                        <BellOff className="h-4.5 w-4.5" />
+                      )}
                     </Button>
 
                     {/* New conversation button */}
@@ -792,21 +841,30 @@ export default function SupportChatWidgetEnhanced({
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-8 w-8 text-white hover:bg-white/20"
+                        className={cn(
+                          "h-9 w-9 text-white hover:bg-white/20 rounded-lg",
+                          "transition-all active:scale-95"
+                        )}
                         title="Cuộc hội thoại mới"
                         onClick={(e) => {
                           e.stopPropagation();
-                          clearSession();
+                          if (confirm('Bạn có muốn bắt đầu cuộc hội thoại mới?')) {
+                            clearSession();
+                          }
                         }}
                       >
-                        <RotateCcw className="h-4 w-4" />
+                        <RotateCcw className="h-4.5 w-4.5" />
                       </Button>
                     )}
 
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-white hover:bg-white/20"
+                      className={cn(
+                        "h-9 w-9 text-white hover:bg-white/20 rounded-lg",
+                        "transition-all active:scale-95"
+                      )}
+                      title={isMinimized ? 'Mở rộng' : 'Thu nhỏ'}
                       onClick={(e) => {
                         e.stopPropagation();
                         setIsMinimized(!isMinimized);
@@ -814,15 +872,20 @@ export default function SupportChatWidgetEnhanced({
                     >
                       <ChevronDown 
                         className={cn(
-                          "h-5 w-5 transition-transform",
+                          "h-5 w-5 transition-transform duration-300",
                           isMinimized && "rotate-180"
                         )} 
                       />
                     </Button>
+                    
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-white hover:bg-white/20"
+                      className={cn(
+                        "h-9 w-9 text-white hover:bg-red-500/30 rounded-lg",
+                        "transition-all active:scale-95"
+                      )}
+                      title="Đóng"
                       onClick={(e) => {
                         e.stopPropagation();
                         setIsOpen(false);
@@ -844,103 +907,152 @@ export default function SupportChatWidgetEnhanced({
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
+                          className="h-full"
                         >
-                          <Card className="p-6 border-0 shadow-sm">
-                            <h4 className="font-semibold mb-2 text-foreground">
-                              Chào mừng bạn! 👋
-                            </h4>
-                            <p className="text-sm text-muted-foreground mb-4">
-                              Chọn cách bắt đầu cuộc trò chuyện:
-                            </p>
+                          <div className="flex flex-col h-full">
+                            {/* Header - Welcome Message */}
+                            <div className="p-6 pb-4">
+                              <h3 className="text-xl font-bold mb-1 text-foreground">
+                                Chào mừng bạn! 👋
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                Chúng tôi luôn sẵn sàng hỗ trợ bạn
+                              </p>
+                            </div>
 
-                            <Tabs defaultValue="phone" className="w-full">
-                              <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="phone">
-                                  <Phone className="h-4 w-4 mr-2" />
-                                  Số điện thoại
-                                </TabsTrigger>
-                                <TabsTrigger value="social">
-                                  <User className="h-4 w-4 mr-2" />
-                                  Đăng nhập
-                                </TabsTrigger>
-                              </TabsList>
-
-                              <TabsContent value="phone" className="space-y-3 mt-4">
-                                <Input
-                                  type="text"
-                                  value={customerName}
-                                  onChange={(e) => setCustomerName(e.target.value)}
-                                  placeholder="Tên của bạn..."
-                                  className="h-11"
-                                />
-                                <Input
-                                  type="tel"
-                                  value={customerPhone}
-                                  onChange={(e) => setCustomerPhone(e.target.value)}
-                                  onKeyPress={(e) => e.key === 'Enter' && startGuestConversation()}
-                                  placeholder="Số điện thoại..."
-                                  className="h-11"
-                                />
-                                <Button
-                                  onClick={startGuestConversation}
-                                  disabled={!customerName.trim() || !customerPhone.trim() || isSending}
-                                  className={cn(
-                                    "w-full h-11 text-white border-0",
-                                    "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90"
-                                  )}
-                                  style={{ '--chat-primary': primaryColor } as React.CSSProperties}
-                                >
-                                  {isSending ? (
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  ) : (
+                            {/* Content - Scrollable Form */}
+                            <ScrollArea className="flex-1 p-6">
+                              <Tabs defaultValue="phone" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2 mb-6">
+                                  <TabsTrigger value="phone" className="h-11">
                                     <Phone className="h-4 w-4 mr-2" />
-                                  )}
-                                  Bắt đầu chat
-                                </Button>
-                              </TabsContent>
+                                    Số điện thoại
+                                  </TabsTrigger>
+                                  <TabsTrigger value="social" className="h-11">
+                                    <User className="h-4 w-4 mr-2" />
+                                    Đăng nhập
+                                  </TabsTrigger>
+                                </TabsList>
 
-                              <TabsContent value="social" className="space-y-3 mt-4">
-                                {enableZaloLogin && (
-                                  <Button
-                                    onClick={handleZaloLogin}
-                                    variant="outline"
-                                    className="w-full h-11"
-                                    disabled={isSending}
-                                  >
-                                    <ZaloIcon />
-                                    Đăng nhập với Zalo
-                                  </Button>
-                                )}
-                                {enableFacebookLogin && (
-                                  <Button
-                                    onClick={handleFacebookLogin}
-                                    variant="outline"
-                                    className="w-full h-11"
-                                    disabled={isSending}
-                                  >
-                                    <Facebook className="h-4 w-4 mr-2 text-blue-600" />
-                                    Đăng nhập với Facebook
-                                  </Button>
-                                )}
-                                {enableGoogleLogin && (
-                                  <Button
-                                    onClick={handleGoogleLogin}
-                                    variant="outline"
-                                    className="w-full h-11"
-                                    disabled={isSending}
-                                  >
-                                    <Chrome className="h-4 w-4 mr-2 text-red-600" />
-                                    Đăng nhập với Google
-                                  </Button>
-                                )}
-                                {!enableZaloLogin && !enableFacebookLogin && !enableGoogleLogin && (
-                                  <p className="text-sm text-muted-foreground text-center py-4">
-                                    Đăng nhập mạng xã hội không khả dụng.
+                                <TabsContent value="phone" className="space-y-4 mt-0 p-4">
+                                  <div className="space-y-2">
+                                    <label className="text-sm font-medium text-foreground">
+                                      Tên của bạn
+                                    </label>
+                                    <Input
+                                      type="text"
+                                      value={customerName}
+                                      onChange={(e) => setCustomerName(e.target.value)}
+                                      placeholder="Nhập tên của bạn..."
+                                      className="h-12 text-base"
+                                      autoFocus
+                                    />
+                                  </div>
+                                  
+                                  <div className="space-y-2">
+                                    <label className="text-sm font-medium text-foreground">
+                                      Số điện thoại
+                                    </label>
+                                    <Input
+                                      type="tel"
+                                      value={customerPhone}
+                                      onChange={(e) => setCustomerPhone(e.target.value)}
+                                      onKeyPress={(e) => e.key === 'Enter' && startGuestConversation()}
+                                      placeholder="Nhập số điện thoại..."
+                                      className="h-12 text-base"
+                                    />
+                                  </div>
+
+                                  <div className="pt-2">
+                                    <Button
+                                      onClick={startGuestConversation}
+                                      disabled={!customerName.trim() || !customerPhone.trim() || isSending}
+                                      size="lg"
+                                      className={cn(
+                                        "w-full h-12 text-base font-semibold text-white border-0",
+                                        "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90",
+                                        "shadow-lg hover:shadow-xl transition-all"
+                                      )}
+                                      style={{ '--chat-primary': primaryColor } as React.CSSProperties}
+                                    >
+                                      {isSending ? (
+                                        <>
+                                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                                          Đang kết nối...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Phone className="h-5 w-5 mr-2" />
+                                          Bắt đầu trò chuyện
+                                        </>
+                                      )}
+                                    </Button>
+                                  </div>
+
+                                  <p className="text-xs text-muted-foreground text-center pt-2">
+                                    Chúng tôi sẽ bảo mật thông tin của bạn
                                   </p>
-                                )}
-                              </TabsContent>
-                            </Tabs>
-                          </Card>
+                                </TabsContent>
+
+                                <TabsContent value="social" className="space-y-3 mt-0">
+                                  <p className="text-sm text-muted-foreground mb-4">
+                                    Đăng nhập nhanh chóng với tài khoản mạng xã hội
+                                  </p>
+
+                                  {enableZaloLogin && (
+                                    <Button
+                                      onClick={handleZaloLogin}
+                                      variant="outline"
+                                      size="lg"
+                                      className="w-full h-12 text-base font-medium hover:bg-blue-50 hover:border-blue-300"
+                                      disabled={isSending}
+                                    >
+                                      <ZaloIcon />
+                                      Tiếp tục với Zalo
+                                    </Button>
+                                  )}
+                                  
+                                  {enableFacebookLogin && (
+                                    <Button
+                                      onClick={handleFacebookLogin}
+                                      variant="outline"
+                                      size="lg"
+                                      className="w-full h-12 text-base font-medium hover:bg-blue-50 hover:border-blue-300"
+                                      disabled={isSending}
+                                    >
+                                      <Facebook className="h-5 w-5 mr-2 text-blue-600" />
+                                      Tiếp tục với Facebook
+                                    </Button>
+                                  )}
+                                  
+                                  {enableGoogleLogin && (
+                                    <Button
+                                      onClick={handleGoogleLogin}
+                                      variant="outline"
+                                      size="lg"
+                                      className="w-full h-12 text-base font-medium hover:bg-red-50 hover:border-red-300"
+                                      disabled={isSending}
+                                    >
+                                      <Chrome className="h-5 w-5 mr-2 text-red-600" />
+                                      Tiếp tục với Google
+                                    </Button>
+                                  )}
+
+                                  {!enableZaloLogin && !enableFacebookLogin && !enableGoogleLogin && (
+                                    <div className="text-center py-8">
+                                      <p className="text-sm text-muted-foreground">
+                                        Đăng nhập mạng xã hội không khả dụng
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  <p className="text-xs text-muted-foreground text-center pt-4">
+                                    Bằng việc đăng nhập, bạn đồng ý với điều khoản sử dụng
+                                  </p>
+                                </TabsContent>
+                              </Tabs>
+                            </ScrollArea>
+                          </div>
                         </motion.div>
                       ) : (
                         <div className="space-y-4">
@@ -1034,33 +1146,45 @@ export default function SupportChatWidgetEnhanced({
                     <div className="p-4 border-t bg-background flex-shrink-0 pb-safe">
                       {/* Quick Replies - Show only on first message or few messages */}
                       {messages.length <= 2 && quickReplies.length > 0 && (
-                        <div className="mb-3 flex flex-wrap gap-2">
-                          {quickReplies.map((reply, idx) => (
-                            <Button
-                              key={idx}
-                              variant="secondary"
-                              size="sm"
-                              className="h-auto py-1.5 px-3 text-xs rounded-full"
-                              onClick={() => handleQuickReply(reply.text)}
-                            >
-                              <span className="mr-1">{reply.icon}</span>
-                              {reply.text}
-                            </Button>
-                          ))}
+                        <div className="mb-4">
+                          <p className="text-xs font-medium text-muted-foreground mb-2 px-1">
+                            💡 Câu hỏi thường gặp:
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {quickReplies.map((reply, idx) => (
+                              <Button
+                                key={idx}
+                                variant="secondary"
+                                size="sm"
+                                className={cn(
+                                  "h-auto py-2 px-4 text-sm rounded-full font-medium",
+                                  "hover:scale-105 active:scale-95 transition-all",
+                                  "shadow-sm hover:shadow"
+                                )}
+                                onClick={() => handleQuickReply(reply.text)}
+                              >
+                                <span className="mr-1.5 text-base">{reply.icon}</span>
+                                {reply.text}
+                              </Button>
+                            ))}
+                          </div>
                         </div>
                       )}
 
-                      <div className="flex items-end space-x-2">
+                      <div className="flex items-end gap-2">
                         {/* File upload button */}
                         {enableFileUpload && (
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="flex-shrink-0 h-11 w-11"
+                            className={cn(
+                              "flex-shrink-0 h-12 w-12 rounded-xl",
+                              "hover:bg-accent active:scale-95 transition-all"
+                            )}
                             title="Đính kèm file"
                             onClick={() => fileInputRef.current?.click()}
                           >
-                            <Paperclip className="h-5 w-5" />
+                            <Paperclip className="h-5 w-5 text-muted-foreground" />
                           </Button>
                         )}
 
@@ -1069,14 +1193,17 @@ export default function SupportChatWidgetEnhanced({
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="flex-shrink-0 h-11 w-11 hidden sm:flex"
-                            title="Emoji"
+                            className={cn(
+                              "flex-shrink-0 h-12 w-12 rounded-xl hidden sm:flex",
+                              "hover:bg-accent active:scale-95 transition-all"
+                            )}
+                            title="Chọn emoji"
                           >
-                            <Smile className="h-5 w-5" />
+                            <Smile className="h-5 w-5 text-muted-foreground" />
                           </Button>
                         )}
 
-                        <div className="flex-1">
+                        <div className="flex-1 relative">
                           <Input
                             ref={inputRef}
                             type="text"
@@ -1085,9 +1212,13 @@ export default function SupportChatWidgetEnhanced({
                               setInputMessage(e.target.value);
                               handleTyping();
                             }}
-                            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                            placeholder="Nhập tin nhắn..."
-                            className="rounded-xl h-11"
+                            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                            placeholder="Nhập tin nhắn của bạn..."
+                            className={cn(
+                              "rounded-2xl h-12 pr-4 text-base",
+                              "border-2 focus-visible:ring-2 focus-visible:ring-offset-0",
+                              "placeholder:text-muted-foreground/60"
+                            )}
                             disabled={isSending}
                           />
                         </div>
@@ -1097,10 +1228,14 @@ export default function SupportChatWidgetEnhanced({
                           onClick={sendMessage}
                           disabled={!inputMessage.trim() || isSending}
                           className={cn(
-                            "flex-shrink-0 rounded-xl text-white border-0 h-11 w-11",
-                            "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90"
+                            "flex-shrink-0 rounded-2xl text-white border-0 h-12 w-12",
+                            "bg-[var(--chat-primary)] hover:bg-[var(--chat-primary)] hover:opacity-90",
+                            "shadow-lg hover:shadow-xl active:scale-95",
+                            "transition-all duration-200",
+                            "disabled:opacity-50 disabled:cursor-not-allowed"
                           )}
                           style={{ '--chat-primary': primaryColor } as React.CSSProperties}
+                          title={isSending ? "Đang gửi..." : "Gửi tin nhắn"}
                         >
                           {isSending ? (
                             <Loader2 className="h-5 w-5 animate-spin" />
@@ -1112,23 +1247,43 @@ export default function SupportChatWidgetEnhanced({
 
                       {/* Selected files preview */}
                       {selectedFiles.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {selectedFiles.map((file, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
-                              {file.type.startsWith('image/') ? (
-                                <Image className="h-3 w-3 mr-1" />
-                              ) : (
-                                <File className="h-3 w-3 mr-1" />
-                              )}
-                              {file.name.length > 15 ? file.name.slice(0, 15) + '...' : file.name}
-                              <button
-                                className="ml-1 text-muted-foreground hover:text-foreground"
-                                onClick={() => setSelectedFiles(files => files.filter((_, i) => i !== idx))}
+                        <div className="mt-3 space-y-2">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            📎 File đã chọn:
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedFiles.map((file, idx) => (
+                              <Badge 
+                                key={idx} 
+                                variant="secondary" 
+                                className={cn(
+                                  "text-xs py-1.5 px-3 rounded-lg",
+                                  "flex items-center gap-1.5",
+                                  "hover:bg-secondary/80"
+                                )}
                               >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
+                                {file.type.startsWith('image/') ? (
+                                  <Image className="h-3.5 w-3.5 text-blue-600" />
+                                ) : (
+                                  <File className="h-3.5 w-3.5 text-gray-600" />
+                                )}
+                                <span className="max-w-[120px] truncate">
+                                  {file.name}
+                                </span>
+                                <button
+                                  className={cn(
+                                    "ml-1 text-muted-foreground hover:text-destructive",
+                                    "rounded-full p-0.5 hover:bg-destructive/10",
+                                    "transition-colors"
+                                  )}
+                                  onClick={() => setSelectedFiles(files => files.filter((_, i) => i !== idx))}
+                                  title="Xóa file"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
