@@ -47,7 +47,13 @@ import {
   ChevronRight,
   ChevronDown,
   BarChart3,
-  User
+  User,
+  Plus,
+  Trash2,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  GitCompare
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -493,6 +499,265 @@ export default function CallCenterPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [quickFilter, setQuickFilter] = useState(''); // 'today', '7days', '30days', ''
 
+  // Filter state riêng cho Summary Tab
+  const [summaryDateFrom, setSummaryDateFrom] = useState('');
+  const [summaryDateTo, setSummaryDateTo] = useState('');
+  const [summaryExtension, setSummaryExtension] = useState('');
+  const [summaryQuickFilter, setSummaryQuickFilter] = useState('');
+  const [summaryFilters, setSummaryFilters] = useState<any>({});
+
+  // ✅ Comparison state - So sánh giữa các khoảng thời gian
+  interface ComparisonPeriod {
+    id: string;
+    label: string;
+    fromDate: string;
+    toDate: string;
+    filters: any;
+  }
+  const [enableComparison, setEnableComparison] = useState(false);
+  const [comparisonPeriods, setComparisonPeriods] = useState<ComparisonPeriod[]>([]);
+  const [comparisonExtension, setComparisonExtension] = useState('');
+
+  // Helper to generate unique ID
+  const generatePeriodId = () => `period_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  // Calculate days between two dates
+  const daysBetween = (from: string, to: string): number => {
+    if (!from || !to) return 0;
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    return Math.ceil((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  };
+
+  // Generate comparison periods based on current filter range
+  const generateComparisonPeriods = (periodsCount: number = 2): ComparisonPeriod[] => {
+    const periods: ComparisonPeriod[] = [];
+    
+    // Use summary filter dates or default to last 7 days
+    let baseToDate = summaryDateTo || new Date().toISOString().split('T')[0];
+    let baseFromDate = summaryDateFrom;
+    
+    if (!baseFromDate) {
+      const from = new Date();
+      from.setDate(from.getDate() - 7);
+      baseFromDate = from.toISOString().split('T')[0];
+    }
+    
+    const periodDays = daysBetween(baseFromDate, baseToDate);
+    
+    for (let i = 0; i < periodsCount; i++) {
+      let toDate: Date;
+      let fromDate: Date;
+      
+      if (i === 0) {
+        // First period: current filter range
+        fromDate = new Date(baseFromDate);
+        toDate = new Date(baseToDate);
+      } else {
+        // Previous periods: go back by periodDays each time
+        const prevPeriod = periods[i - 1];
+        toDate = new Date(prevPeriod.fromDate);
+        toDate.setDate(toDate.getDate() - 1);
+        fromDate = new Date(toDate);
+        fromDate.setDate(fromDate.getDate() - periodDays + 1);
+      }
+      
+      periods.push({
+        id: generatePeriodId(),
+        label: i === 0 ? 'Hiện tại' : `Khoảng ${i + 1}`,
+        fromDate: fromDate.toISOString().split('T')[0],
+        toDate: toDate.toISOString().split('T')[0],
+        filters: {},
+      });
+    }
+    
+    return periods;
+  };
+
+  // Add a new comparison period (goes back from the earliest period)
+  const addComparisonPeriod = () => {
+    if (comparisonPeriods.length >= 10) {
+      toast.warning('Tối đa 10 khoảng thời gian so sánh');
+      return;
+    }
+    
+    if (comparisonPeriods.length === 0) {
+      // If no periods, generate 2 default
+      setComparisonPeriods(generateComparisonPeriods(2));
+      return;
+    }
+    
+    // Calculate period length from first period
+    const firstPeriod = comparisonPeriods[0];
+    const periodDays = daysBetween(firstPeriod.fromDate, firstPeriod.toDate);
+    
+    // Get the earliest (last) period
+    const lastPeriod = comparisonPeriods[comparisonPeriods.length - 1];
+    
+    // Calculate new period going back
+    const newToDate = new Date(lastPeriod.fromDate);
+    newToDate.setDate(newToDate.getDate() - 1);
+    const newFromDate = new Date(newToDate);
+    newFromDate.setDate(newFromDate.getDate() - periodDays + 1);
+    
+    const newPeriod: ComparisonPeriod = {
+      id: generatePeriodId(),
+      label: `Khoảng ${comparisonPeriods.length + 1}`,
+      fromDate: newFromDate.toISOString().split('T')[0],
+      toDate: newToDate.toISOString().split('T')[0],
+      filters: {},
+    };
+    
+    setComparisonPeriods([...comparisonPeriods, newPeriod]);
+  };
+
+  // Remove a comparison period
+  const removeComparisonPeriod = (id: string) => {
+    const newPeriods = comparisonPeriods.filter(p => p.id !== id);
+    // Re-label remaining periods
+    const relabeledPeriods = newPeriods.map((p, index) => ({
+      ...p,
+      label: index === 0 ? 'Hiện tại' : `Khoảng ${index + 1}`,
+    }));
+    setComparisonPeriods(relabeledPeriods);
+  };
+
+  // Update a comparison period
+  const updateComparisonPeriod = (id: string, field: keyof ComparisonPeriod, value: string) => {
+    setComparisonPeriods(comparisonPeriods.map(p => 
+      p.id === id ? { ...p, [field]: value } : p
+    ));
+  };
+
+  // Build filters for comparison period
+  const buildComparisonFilters = (period: ComparisonPeriod, extension: string): any => {
+    const filters: any = {};
+    
+    if (period.fromDate) {
+      const fromEpoch = Math.floor(new Date(period.fromDate).getTime() / 1000);
+      filters.startEpoch = { ...filters.startEpoch, gte: fromEpoch.toString() };
+    }
+    if (period.toDate) {
+      const toDateObj = new Date(period.toDate);
+      toDateObj.setDate(toDateObj.getDate() + 1);
+      const toEpoch = Math.floor(toDateObj.getTime() / 1000);
+      filters.startEpoch = { ...filters.startEpoch, lt: toEpoch.toString() };
+    }
+    
+    if (extension) {
+      filters.OR = [
+        { callerIdNumber: { contains: extension } },
+        { destinationNumber: { contains: extension } },
+      ];
+    }
+    
+    return filters;
+  };
+
+  // Apply comparison filters
+  const applyComparisonFilters = () => {
+    if (!comparisonExtension) {
+      toast.error('Vui lòng nhập Extension/SĐT để so sánh');
+      return;
+    }
+    if (comparisonPeriods.length < 1) {
+      toast.error('Cần ít nhất 1 khoảng thời gian');
+      return;
+    }
+    
+    const invalidPeriods = comparisonPeriods.filter(p => !p.fromDate || !p.toDate);
+    if (invalidPeriods.length > 0) {
+      toast.error('Vui lòng điền đầy đủ ngày cho tất cả các khoảng thời gian');
+      return;
+    }
+    
+    // Update filters for each period
+    const updatedPeriods = comparisonPeriods.map(p => ({
+      ...p,
+      filters: buildComparisonFilters(p, comparisonExtension),
+    }));
+    setComparisonPeriods(updatedPeriods);
+    toast.success(`Đang so sánh ${comparisonPeriods.length} khoảng thời gian`);
+  };
+
+  // Clear comparison
+  const clearComparison = () => {
+    setComparisonPeriods([]);
+    setComparisonExtension('');
+    setEnableComparison(false);
+  };
+
+  // Helper function to apply summary filters
+  const applySummaryFilters = (dateFrom?: string, dateTo?: string, ext?: string) => {
+    const newFilters: any = {};
+    
+    const fromDate = dateFrom ?? summaryDateFrom;
+    const toDate = dateTo ?? summaryDateTo;
+    const extension = ext ?? summaryExtension;
+    
+    // Date range filter (convert to epoch STRING)
+    if (fromDate) {
+      const fromEpoch = Math.floor(new Date(fromDate).getTime() / 1000);
+      newFilters.startEpoch = { ...newFilters.startEpoch, gte: fromEpoch.toString() };
+    }
+    if (toDate) {
+      const toDateObj = new Date(toDate);
+      toDateObj.setDate(toDateObj.getDate() + 1);
+      const toEpoch = Math.floor(toDateObj.getTime() / 1000);
+      newFilters.startEpoch = { ...newFilters.startEpoch, lt: toEpoch.toString() };
+    }
+    
+    // Extension filter
+    if (extension) {
+      newFilters.OR = [
+        { callerIdNumber: { contains: extension } },
+        { destinationNumber: { contains: extension } },
+      ];
+    }
+    
+    setSummaryFilters(newFilters);
+  };
+
+  // Summary quick filter handlers
+  const handleSummaryQuickFilter = (type: string) => {
+    const today = new Date();
+    let fromDate = '';
+    let toDate = today.toISOString().split('T')[0];
+    
+    if (type === 'today') {
+      fromDate = toDate;
+    } else if (type === '7days') {
+      const from = new Date();
+      from.setDate(from.getDate() - 7);
+      fromDate = from.toISOString().split('T')[0];
+    } else if (type === '30days') {
+      const from = new Date();
+      from.setDate(from.getDate() - 30);
+      fromDate = from.toISOString().split('T')[0];
+    } else if (type === 'thisMonth') {
+      const from = new Date(today.getFullYear(), today.getMonth(), 1);
+      fromDate = from.toISOString().split('T')[0];
+    } else if (type === 'lastMonth') {
+      const from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const to = new Date(today.getFullYear(), today.getMonth(), 0);
+      fromDate = from.toISOString().split('T')[0];
+      toDate = to.toISOString().split('T')[0];
+    }
+    
+    setSummaryQuickFilter(type);
+    setSummaryDateFrom(fromDate);
+    setSummaryDateTo(toDate);
+    applySummaryFilters(fromDate, toDate);
+  };
+
+  const clearSummaryFilters = () => {
+    setSummaryDateFrom('');
+    setSummaryDateTo('');
+    setSummaryExtension('');
+    setSummaryQuickFilter('');
+    setSummaryFilters({});
+  };
+
   // Helper function to apply filters
   const applyFilters = (dateFrom?: string, dateTo?: string, ext?: string, dir?: string, status?: string) => {
     const newFilters: any = {};
@@ -602,6 +867,147 @@ export default function CallCenterPage() {
       hasPreviousPage: pagination.page > 1,
     }
   } : null;
+
+  // ✅ Query riêng cho Summary tab - lấy nhiều records hơn để thống kê chính xác
+  const { 
+    data: summaryRecordsResponse = [], 
+    loading: summaryLoading, 
+    refetch: refetchSummary 
+  } = useFindMany<CallCenterRecord>('callCenterRecord', {
+    where: summaryFilters,
+    take: 5000, // Lấy nhiều hơn để tính tổng chính xác
+    orderBy: { startEpoch: 'desc' },
+  });
+
+  // ✅ Query cho Comparison Periods - Sử dụng useEffect để fetch thủ công
+  const [comparisonData, setComparisonData] = useState<Map<string, CallCenterRecord[]>>(new Map());
+  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const { refetch: fetchComparisonData } = useFindMany<CallCenterRecord>('callCenterRecord', {
+    take: 0, // Không fetch tự động
+  });
+
+  // Fetch data for all comparison periods
+  const fetchAllComparisonData = async () => {
+    if (comparisonPeriods.length === 0 || !comparisonExtension) return;
+    
+    setComparisonLoading(true);
+    const newData = new Map<string, CallCenterRecord[]>();
+    
+    try {
+      for (const period of comparisonPeriods) {
+        if (period.fromDate && period.toDate) {
+          const filters = buildComparisonFilters(period, comparisonExtension);
+          const result = await fetchComparisonData({
+            where: filters,
+            take: 5000,
+            orderBy: { startEpoch: 'desc' },
+          });
+          
+          if (result.data && Array.isArray(result.data.findManyCallCenterRecord)) {
+            newData.set(period.id, result.data.findManyCallCenterRecord);
+          }
+        }
+      }
+      setComparisonData(newData);
+    } catch (error) {
+      console.error('Error fetching comparison data:', error);
+      toast.error('Lỗi khi tải dữ liệu so sánh');
+    } finally {
+      setComparisonLoading(false);
+    }
+  };
+
+  // Trigger fetch when comparison filters are applied
+  useEffect(() => {
+    if (enableComparison && comparisonPeriods.some(p => Object.keys(p.filters).length > 0)) {
+      fetchAllComparisonData();
+    }
+  }, [comparisonPeriods.map(p => JSON.stringify(p.filters)).join(','), enableComparison]);
+
+  // Calculate summary for comparison period data
+  const calculateComparisonSummary = (records: CallCenterRecord[]) => {
+    if (!records || records.length === 0) {
+      return {
+        totalCalls: 0,
+        totalDuration: 0,
+        totalBillsec: 0,
+        answeredCalls: 0,
+        missedCalls: 0,
+        avgDuration: 0,
+        answerRate: 0,
+      };
+    }
+
+    let totalCalls = 0;
+    let totalDuration = 0;
+    let totalBillsec = 0;
+    let answeredCalls = 0;
+    let missedCalls = 0;
+
+    records.forEach((record: CallCenterRecord) => {
+      const duration = parseInt(record.duration || '0');
+      const billsec = parseInt(record.billsec || '0');
+      const isAnswered = record.callStatus === 'ANSWER';
+
+      totalCalls += 1;
+      totalDuration += duration;
+      totalBillsec += billsec;
+      if (isAnswered) {
+        answeredCalls += 1;
+      } else {
+        missedCalls += 1;
+      }
+    });
+
+    return {
+      totalCalls,
+      totalDuration,
+      totalBillsec,
+      answeredCalls,
+      missedCalls,
+      avgDuration: totalCalls > 0 ? Math.round(totalDuration / totalCalls) : 0,
+      answerRate: totalCalls > 0 ? Math.round((answeredCalls / totalCalls) * 100) : 0,
+    };
+  };
+
+  // Format duration in hh:mm:ss
+  const formatTotalDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hours > 0) return `${hours}h ${mins}m ${secs}s`;
+    if (mins > 0) return `${mins}m ${secs}s`;
+    return `${secs}s`;
+  };
+
+  // Calculate percentage change
+  const calculateChange = (current: number, previous: number): { value: number; type: 'up' | 'down' | 'same' } => {
+    if (previous === 0) {
+      return current > 0 ? { value: 100, type: 'up' } : { value: 0, type: 'same' };
+    }
+    const change = ((current - previous) / previous) * 100;
+    return {
+      value: Math.abs(Math.round(change)),
+      type: change > 0 ? 'up' : change < 0 ? 'down' : 'same',
+    };
+  };
+
+  // Get comparison results
+  const getComparisonResults = () => {
+    if (!enableComparison || comparisonPeriods.length < 2) return [];
+    
+    return comparisonPeriods.map(period => {
+      const records = comparisonData.get(period.id) || [];
+      const summary = calculateComparisonSummary(records);
+      return {
+        ...period,
+        summary,
+        recordsCount: records.length,
+      };
+    });
+  };
+
+  const comparisonResults = getComparisonResults();
 
   // ✅ MIGRATED: Query sync logs
   const { 
@@ -787,9 +1193,10 @@ export default function CallCenterPage() {
     return <Badge variant={configVariant.variant}>{configVariant.label}</Badge>;
   };
 
-  // Calculate call duration summary by caller
+  // Calculate call duration summary by caller - dùng dữ liệu từ summaryRecordsResponse
   const calculateSummary = () => {
-    if (!records?.items || records.items.length === 0) return [];
+    const dataToProcess = Array.isArray(summaryRecordsResponse) ? summaryRecordsResponse : [];
+    if (dataToProcess.length === 0) return [];
 
     const summaryMap = new Map<string, {
       callerNumber: string;
@@ -800,7 +1207,7 @@ export default function CallCenterPage() {
       missedCalls: number;
     }>();
 
-    records.items.forEach((record: CallCenterRecord) => {
+    dataToProcess.forEach((record: CallCenterRecord) => {
       const caller = record.callerIdNumber || 'Unknown';
       const duration = parseInt(record.duration || '0');
       const billsec = parseInt(record.billsec || '0');
@@ -833,6 +1240,7 @@ export default function CallCenterPage() {
   };
 
   const callSummary = calculateSummary();
+  const summaryTotalRecords = Array.isArray(summaryRecordsResponse) ? summaryRecordsResponse.length : 0;
 
   // Define columns for AdvancedTable
   const callRecordColumns: ColumnDef<any>[] = [
@@ -1023,6 +1431,12 @@ export default function CallCenterPage() {
         <TabsList>
           <TabsTrigger value="records">Call Records</TabsTrigger>
           <TabsTrigger value="summary">Tổng hợp</TabsTrigger>
+          <TabsTrigger value="progress" className="relative">
+            Tiến trình
+            {showSyncProgress && (
+              <span className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+            )}
+          </TabsTrigger>
           <TabsTrigger value="logs">Sync Logs</TabsTrigger>
         </TabsList>
 
@@ -1217,8 +1631,452 @@ export default function CallCenterPage() {
           )}
         </TabsContent>
 
-        {/* Summary Tab - Moved from main view */}
+        {/* Summary Tab - Với filter riêng */}
         <TabsContent value="summary" className="space-y-3 mt-3">
+          {/* Filter Section cho Summary */}
+          <Card className="border-purple-200 bg-purple-50/30">
+            <CardContent className="py-3">
+              <div className="space-y-3">
+                {/* Quick Filters */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-medium text-purple-700">Lọc theo:</span>
+                  <Button 
+                    variant={summaryQuickFilter === 'today' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => handleSummaryQuickFilter('today')}
+                    className={summaryQuickFilter === 'today' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+                  >
+                    Hôm nay
+                  </Button>
+                  <Button 
+                    variant={summaryQuickFilter === '7days' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => handleSummaryQuickFilter('7days')}
+                    className={summaryQuickFilter === '7days' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+                  >
+                    7 ngày
+                  </Button>
+                  <Button 
+                    variant={summaryQuickFilter === '30days' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => handleSummaryQuickFilter('30days')}
+                    className={summaryQuickFilter === '30days' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+                  >
+                    30 ngày
+                  </Button>
+                  <Button 
+                    variant={summaryQuickFilter === 'thisMonth' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => handleSummaryQuickFilter('thisMonth')}
+                    className={summaryQuickFilter === 'thisMonth' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+                  >
+                    Tháng này
+                  </Button>
+                  <Button 
+                    variant={summaryQuickFilter === 'lastMonth' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => handleSummaryQuickFilter('lastMonth')}
+                    className={summaryQuickFilter === 'lastMonth' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+                  >
+                    Tháng trước
+                  </Button>
+                  {Object.keys(summaryFilters).length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearSummaryFilters}>
+                      <XCircle className="h-4 w-4 mr-1" />
+                      Xóa lọc
+                    </Button>
+                  )}
+                </div>
+
+                {/* Custom Date Range + Extension */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-end">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-purple-700">Từ ngày</Label>
+                    <Input
+                      type="date"
+                      value={summaryDateFrom}
+                      onChange={(e) => setSummaryDateFrom(e.target.value)}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-purple-700">Đến ngày</Label>
+                    <Input
+                      type="date"
+                      value={summaryDateTo}
+                      onChange={(e) => setSummaryDateTo(e.target.value)}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-purple-700">Extension/SĐT</Label>
+                    <Input
+                      placeholder="VD: 101, 0912..."
+                      value={summaryExtension}
+                      onChange={(e) => setSummaryExtension(e.target.value)}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <Button 
+                    size="sm" 
+                    className="h-8 bg-purple-600 hover:bg-purple-700"
+                    onClick={() => {
+                      setSummaryQuickFilter('');
+                      applySummaryFilters();
+                    }}
+                  >
+                    <Filter className="h-3 w-3 mr-1" />
+                    Áp dụng
+                  </Button>
+                </div>
+
+                {/* Filter Info */}
+                {Object.keys(summaryFilters).length > 0 && (
+                  <div className="flex items-center gap-2 text-xs text-purple-700 bg-purple-100 px-3 py-1.5 rounded">
+                    <Calendar className="h-3 w-3" />
+                    <span>
+                      Đang lọc: 
+                      {summaryDateFrom && ` từ ${summaryDateFrom}`}
+                      {summaryDateTo && ` đến ${summaryDateTo}`}
+                      {summaryExtension && ` | Extension: ${summaryExtension}`}
+                    </span>
+                    <span className="ml-auto font-medium">{summaryTotalRecords} cuộc gọi</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ✅ Comparison Section - So sánh khoảng thời gian */}
+          <Card className="border-orange-200 bg-orange-50/30">
+            <CardHeader className="py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <GitCompare className="h-5 w-5 text-orange-600" />
+                  <CardTitle className="text-base text-orange-800">So sánh các khoảng thời gian</CardTitle>
+                  {enableComparison && comparisonPeriods.length > 0 && (
+                    <Badge variant="outline" className="text-orange-600 border-orange-300">
+                      {comparisonPeriods.length} khoảng • {daysBetween(comparisonPeriods[0]?.fromDate, comparisonPeriods[0]?.toDate)} ngày/khoảng
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="enable-comparison" className="text-sm text-orange-700">Bật so sánh</Label>
+                  <Switch 
+                    id="enable-comparison"
+                    checked={enableComparison}
+                    onCheckedChange={(checked) => {
+                      setEnableComparison(checked);
+                      if (!checked) {
+                        clearComparison();
+                      } else {
+                        // Generate periods based on current summary filter or default 7 days
+                        const periods = generateComparisonPeriods(2);
+                        setComparisonPeriods(periods);
+                        // Auto-fill extension from summary filter
+                        if (summaryExtension) {
+                          setComparisonExtension(summaryExtension);
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </CardHeader>
+            
+            {enableComparison && (
+              <CardContent className="pt-0">
+                <div className="space-y-4">
+                  {/* Extension Input + Quick Actions */}
+                  <div className="flex flex-wrap items-end gap-3 p-3 bg-orange-100/50 rounded-lg">
+                    <div className="flex-1 min-w-[200px] space-y-1">
+                      <Label className="text-xs text-orange-700 font-medium">Extension/SĐT cần so sánh *</Label>
+                      <Input
+                        placeholder="VD: 101, 0912..."
+                        value={comparisonExtension}
+                        onChange={(e) => setComparisonExtension(e.target.value)}
+                        className="h-9 bg-white border-orange-200 focus:border-orange-400"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        size="sm"
+                        variant="outline"
+                        onClick={addComparisonPeriod}
+                        disabled={comparisonPeriods.length >= 10}
+                        className="h-9 border-orange-300 hover:bg-orange-100"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Thêm khoảng trước
+                      </Button>
+                      {comparisonPeriods.length > 2 && (
+                        <Button 
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setComparisonPeriods(generateComparisonPeriods(2))}
+                          className="h-9 text-orange-600 hover:bg-orange-100"
+                        >
+                          <RefreshCw className="h-4 w-4 mr-1" />
+                          Reset
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Comparison Periods */}
+                  <div className="space-y-2">
+                    {comparisonPeriods.map((period, index) => (
+                      <div 
+                        key={period.id} 
+                        className={`grid grid-cols-[auto_1fr_auto_auto] gap-2 items-center p-2 border rounded-lg transition-colors ${
+                          index === 0 
+                            ? 'bg-orange-100/50 border-orange-300' 
+                            : 'bg-white border-orange-200 hover:bg-orange-50/50'
+                        }`}
+                      >
+                        <div className="w-24">
+                          <Input
+                            placeholder="Nhãn"
+                            value={period.label}
+                            onChange={(e) => updateComparisonPeriod(period.id, 'label', e.target.value)}
+                            className={`h-8 text-xs font-medium border-none text-center ${
+                              index === 0 ? 'bg-orange-200/50 text-orange-800' : 'bg-orange-50 text-orange-700'
+                            }`}
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="date"
+                            value={period.fromDate}
+                            onChange={(e) => updateComparisonPeriod(period.id, 'fromDate', e.target.value)}
+                            className="h-8 text-sm"
+                          />
+                          <span className="text-muted-foreground">→</span>
+                          <Input
+                            type="date"
+                            value={period.toDate}
+                            onChange={(e) => updateComparisonPeriod(period.id, 'toDate', e.target.value)}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                        <div className="text-xs text-muted-foreground min-w-[60px] text-center">
+                          {period.fromDate && period.toDate && (
+                            <Badge variant="secondary" className="text-xs">
+                              {daysBetween(period.fromDate, period.toDate)} ngày
+                            </Badge>
+                          )}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeComparisonPeriod(period.id)}
+                          disabled={comparisonPeriods.length <= 1}
+                          className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Apply Button */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      So sánh <span className="font-medium text-orange-600">{comparisonExtension || '...'}</span> qua {comparisonPeriods.length} khoảng thời gian liên tiếp
+                    </p>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={clearComparison}>
+                        <XCircle className="h-4 w-4 mr-1" />
+                        Xóa
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="bg-orange-600 hover:bg-orange-700"
+                        onClick={applyComparisonFilters}
+                        disabled={comparisonLoading || comparisonPeriods.length < 1}
+                      >
+                        {comparisonLoading ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <GitCompare className="h-4 w-4 mr-1" />
+                        )}
+                        So sánh
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            )}
+          </Card>
+
+          {/* ✅ Comparison Results */}
+          {enableComparison && comparisonResults.length >= 1 && comparisonResults.some(r => r.recordsCount > 0) && (
+            <Card className="border-orange-300 bg-gradient-to-br from-orange-50 to-amber-50">
+              <CardHeader className="py-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-orange-600" />
+                    Kết quả so sánh: <span className="text-orange-600">{comparisonExtension}</span>
+                  </CardTitle>
+                  <Badge variant="secondary">
+                    {comparisonResults.length} khoảng thời gian
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {comparisonLoading ? (
+                  <div className="flex justify-center p-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Comparison Table */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-orange-100/50">
+                            <th className="text-left p-2 font-semibold">Khoảng thời gian</th>
+                            <th className="text-center p-2 font-semibold">Tổng cuộc gọi</th>
+                            <th className="text-center p-2 font-semibold">Đã trả lời</th>
+                            <th className="text-center p-2 font-semibold">Tỷ lệ trả lời</th>
+                            <th className="text-center p-2 font-semibold">Tổng thời lượng</th>
+                            <th className="text-center p-2 font-semibold">TB/cuộc gọi</th>
+                            <th className="text-center p-2 font-semibold">Thay đổi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {comparisonResults.map((result, index) => {
+                            const prevResult = index > 0 ? comparisonResults[index - 1] : null;
+                            const callsChange = prevResult ? calculateChange(result.summary.totalCalls, prevResult.summary.totalCalls) : null;
+                            const durationChange = prevResult ? calculateChange(result.summary.totalDuration, prevResult.summary.totalDuration) : null;
+                            
+                            return (
+                              <tr key={result.id} className="border-b border-orange-100 hover:bg-orange-50/50">
+                                <td className="p-2">
+                                  <div className="font-medium text-orange-700">{result.label}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {result.fromDate} → {result.toDate}
+                                  </div>
+                                </td>
+                                <td className="text-center p-2">
+                                  <span className="font-semibold">{result.summary.totalCalls}</span>
+                                </td>
+                                <td className="text-center p-2">
+                                  <Badge variant="default" className="bg-green-600">
+                                    {result.summary.answeredCalls}
+                                  </Badge>
+                                </td>
+                                <td className="text-center p-2">
+                                  <span className={`font-semibold ${result.summary.answerRate >= 70 ? 'text-green-600' : result.summary.answerRate >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                                    {result.summary.answerRate}%
+                                  </span>
+                                </td>
+                                <td className="text-center p-2 font-semibold">
+                                  {formatTotalDuration(result.summary.totalDuration)}
+                                </td>
+                                <td className="text-center p-2">
+                                  {formatTotalDuration(result.summary.avgDuration)}
+                                </td>
+                                <td className="text-center p-2">
+                                  {callsChange && (
+                                    <div className="flex items-center justify-center gap-1">
+                                      {callsChange.type === 'up' && (
+                                        <span className="text-green-600 flex items-center text-xs">
+                                          <TrendingUp className="h-3 w-3 mr-0.5" />
+                                          +{callsChange.value}%
+                                        </span>
+                                      )}
+                                      {callsChange.type === 'down' && (
+                                        <span className="text-red-600 flex items-center text-xs">
+                                          <TrendingDown className="h-3 w-3 mr-0.5" />
+                                          -{callsChange.value}%
+                                        </span>
+                                      )}
+                                      {callsChange.type === 'same' && (
+                                        <span className="text-muted-foreground flex items-center text-xs">
+                                          <Minus className="h-3 w-3 mr-0.5" />
+                                          0%
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                  {!callsChange && (
+                                    <span className="text-muted-foreground text-xs">Cơ sở</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {/* Total Calls Card */}
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-3 text-center">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {comparisonResults.reduce((sum, r) => sum + r.summary.totalCalls, 0)}
+                          </div>
+                          <div className="text-xs text-blue-600/70">Tổng cuộc gọi</div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Answered Rate Card */}
+                      <Card className="bg-green-50 border-green-200">
+                        <CardContent className="p-3 text-center">
+                          <div className="text-2xl font-bold text-green-600">
+                            {Math.round(
+                              (comparisonResults.reduce((sum, r) => sum + r.summary.answeredCalls, 0) /
+                              Math.max(comparisonResults.reduce((sum, r) => sum + r.summary.totalCalls, 0), 1)) * 100
+                            )}%
+                          </div>
+                          <div className="text-xs text-green-600/70">Tỷ lệ trả lời TB</div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Total Duration Card */}
+                      <Card className="bg-purple-50 border-purple-200">
+                        <CardContent className="p-3 text-center">
+                          <div className="text-2xl font-bold text-purple-600">
+                            {formatTotalDuration(comparisonResults.reduce((sum, r) => sum + r.summary.totalDuration, 0))}
+                          </div>
+                          <div className="text-xs text-purple-600/70">Tổng thời lượng</div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Trend Card */}
+                      <Card className="bg-orange-50 border-orange-200">
+                        <CardContent className="p-3 text-center">
+                          {comparisonResults.length >= 2 && (() => {
+                            const firstPeriod = comparisonResults[0];
+                            const lastPeriod = comparisonResults[comparisonResults.length - 1];
+                            const trend = calculateChange(lastPeriod.summary.totalCalls, firstPeriod.summary.totalCalls);
+                            return (
+                              <>
+                                <div className={`text-2xl font-bold flex items-center justify-center gap-1 ${
+                                  trend.type === 'up' ? 'text-green-600' : trend.type === 'down' ? 'text-red-600' : 'text-gray-600'
+                                }`}>
+                                  {trend.type === 'up' && <TrendingUp className="h-5 w-5" />}
+                                  {trend.type === 'down' && <TrendingDown className="h-5 w-5" />}
+                                  {trend.type === 'same' && <Minus className="h-5 w-5" />}
+                                  {trend.type === 'up' ? '+' : trend.type === 'down' ? '-' : ''}{trend.value}%
+                                </div>
+                                <div className="text-xs text-orange-600/70">Xu hướng</div>
+                              </>
+                            );
+                          })()}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Summary Data Card */}
           <Card>
             <CardHeader className="py-3">
               <div className="flex items-center justify-between">
@@ -1226,17 +2084,21 @@ export default function CallCenterPage() {
                   <BarChart3 className="h-5 w-5 text-primary" />
                   <CardTitle className="text-base">Tổng hợp thời lượng cuộc gọi</CardTitle>
                 </div>
-                <Badge variant="secondary">{callSummary.length} số điện thoại</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">{callSummary.length} số điện thoại</Badge>
+                  <Badge variant="outline">{summaryTotalRecords} cuộc gọi</Badge>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
-              {recordsLoading ? (
+              {summaryLoading ? (
                 <div className="flex justify-center p-8">
                   <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : callSummary.length === 0 ? (
                 <div className="text-center p-8 text-muted-foreground">
-                  Không có dữ liệu để hiển thị
+                  <p>Không có dữ liệu để hiển thị</p>
+                  <p className="text-sm mt-1">Hãy chọn khoảng ngày để xem thống kê</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -1298,6 +2160,320 @@ export default function CallCenterPage() {
                       {formatDuration(callSummary.reduce((sum, s) => sum + s.totalBillsec, 0).toString())}
                     </div>
                   </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Progress Tab - Chi tiết tiến trình đồng bộ */}
+        <TabsContent value="progress" className="space-y-3 mt-3">
+          {/* Live Sync Progress */}
+          {showSyncProgress && currentSyncLogId && syncStats ? (
+            <Card className="border-green-300 bg-gradient-to-br from-green-50 to-emerald-50 overflow-hidden relative">
+              {/* Animated background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-green-200/20 via-emerald-200/20 to-green-200/20 animate-pulse" />
+              
+              <CardHeader className="py-4 relative">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {/* Animated sync icon */}
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-25" />
+                      <div className="relative p-2 bg-green-100 rounded-full">
+                        <RefreshCw className="h-5 w-5 text-green-600 animate-spin" />
+                      </div>
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg text-green-800 flex items-center gap-2">
+                        Đang đồng bộ dữ liệu
+                        <span className="flex gap-1">
+                          <span className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <span className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <span className="w-1.5 h-1.5 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </span>
+                      </CardTitle>
+                      <p className="text-xs text-green-600/80 mt-0.5">Đang tải dữ liệu từ PBX API</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-green-500 text-white border-0 animate-pulse">
+                      🔴 LIVE
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-5 relative">
+                {/* Main Progress */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-green-800">Tiến độ xử lý</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl font-bold text-green-700">
+                        {syncStats.recordsFetched > 0 
+                          ? Math.round(((syncStats.recordsCreated + syncStats.recordsUpdated + syncStats.recordsSkipped) / syncStats.recordsFetched) * 100)
+                          : 0}%
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Custom animated progress bar */}
+                  <div className="relative h-4 bg-green-100 rounded-full overflow-hidden">
+                    <div 
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-500 via-emerald-500 to-green-400 rounded-full transition-all duration-500 ease-out"
+                      style={{ 
+                        width: `${syncStats.recordsFetched > 0 
+                          ? ((syncStats.recordsCreated + syncStats.recordsUpdated + syncStats.recordsSkipped) / syncStats.recordsFetched) * 100
+                          : 0}%` 
+                      }}
+                    >
+                      {/* Shimmer effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
+                    </div>
+                    {/* Progress stripes animation */}
+                    <div className="absolute inset-0 bg-stripes opacity-20" />
+                  </div>
+                  
+                  {/* Records processed text */}
+                  <div className="text-center text-xs text-green-700">
+                    Đã xử lý <span className="font-bold">{(syncStats.recordsCreated || 0) + (syncStats.recordsUpdated || 0) + (syncStats.recordsSkipped || 0)}</span> / <span className="font-bold">{syncStats.recordsFetched || 0}</span> records
+                  </div>
+                </div>
+
+                {/* Live Stats Cards với animation */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {/* Fetched */}
+                  <div className="p-4 bg-white/80 backdrop-blur rounded-xl border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="p-1.5 bg-blue-100 rounded-lg">
+                        <Download className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div className="flex gap-0.5">
+                        <div className="w-1 h-3 bg-blue-300 rounded animate-pulse" />
+                        <div className="w-1 h-4 bg-blue-400 rounded animate-pulse" style={{ animationDelay: '100ms' }} />
+                        <div className="w-1 h-2 bg-blue-300 rounded animate-pulse" style={{ animationDelay: '200ms' }} />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600 tabular-nums">
+                      {syncStats.recordsFetched || 0}
+                    </div>
+                    <div className="text-xs text-blue-600/70 font-medium">Đã tải về</div>
+                  </div>
+
+                  {/* Created */}
+                  <div className="p-4 bg-white/80 backdrop-blur rounded-xl border border-green-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="p-1.5 bg-green-100 rounded-lg">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      </div>
+                      {(syncStats.recordsCreated || 0) > 0 && (
+                        <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full animate-pulse">
+                          +{syncStats.recordsCreated}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-2xl font-bold text-green-600 tabular-nums">
+                      {syncStats.recordsCreated || 0}
+                    </div>
+                    <div className="text-xs text-green-600/70 font-medium">Tạo mới</div>
+                  </div>
+
+                  {/* Updated */}
+                  <div className="p-4 bg-white/80 backdrop-blur rounded-xl border border-orange-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="p-1.5 bg-orange-100 rounded-lg">
+                        <RefreshCw className="h-4 w-4 text-orange-600" />
+                      </div>
+                      {(syncStats.recordsUpdated || 0) > 0 && (
+                        <span className="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full animate-pulse">
+                          ↻{syncStats.recordsUpdated}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-2xl font-bold text-orange-600 tabular-nums">
+                      {syncStats.recordsUpdated || 0}
+                    </div>
+                    <div className="text-xs text-orange-600/70 font-medium">Cập nhật</div>
+                  </div>
+
+                  {/* Skipped */}
+                  <div className="p-4 bg-white/80 backdrop-blur rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="p-1.5 bg-gray-100 rounded-lg">
+                        <XCircle className="h-4 w-4 text-gray-500" />
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-500 tabular-nums">
+                      {syncStats.recordsSkipped || 0}
+                    </div>
+                    <div className="text-xs text-gray-500/70 font-medium">Bỏ qua</div>
+                  </div>
+                </div>
+
+                {/* Speed indicator */}
+                <div className="flex items-center justify-center gap-4 py-2 px-4 bg-white/50 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <div className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </div>
+                    <span>Đang xử lý...</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-between items-center pt-2 border-t border-green-200">
+                  <p className="text-xs text-green-600/70">
+                    Sync ID: <code className="bg-green-100 px-1 rounded">{currentSyncLogId?.slice(0, 8)}...</code>
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-green-300 text-green-700 hover:bg-green-100"
+                    onClick={() => {
+                      setShowSyncProgress(false);
+                      refetchRecords();
+                      refetchLogs();
+                      refetchConfig();
+                    }}
+                  >
+                    <Play className="h-3 w-3 mr-1" />
+                    Chạy nền
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-dashed">
+              <CardContent className="py-8 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="p-3 bg-muted rounded-full">
+                    <Play className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium">Không có đồng bộ nào đang chạy</p>
+                    <p className="text-sm text-muted-foreground">Nhấn "Sync Ngay" hoặc "Sync theo ngày" để bắt đầu</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recent Sync Details */}
+          <Card>
+            <CardHeader className="py-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Chi tiết đồng bộ gần đây</CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => refetchLogs()}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {logsLoading ? (
+                <div className="flex justify-center p-8">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : !logs || logs.length === 0 ? (
+                <div className="text-center p-8 text-muted-foreground">
+                  Chưa có lịch sử đồng bộ
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {logs?.slice(0, 5).map((log: CallCenterSyncLog, index: number) => (
+                    <div key={log.id} className={`${index === 0 ? 'border-2 border-primary/30 bg-primary/5' : 'border'} rounded-lg p-4`}>
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-full ${
+                            log.status === 'success' ? 'bg-green-100' : 
+                            log.status === 'error' ? 'bg-red-100' : 
+                            'bg-yellow-100'
+                          }`}>
+                            {log.status === 'success' && <CheckCircle className="h-4 w-4 text-green-600" />}
+                            {log.status === 'error' && <XCircle className="h-4 w-4 text-red-600" />}
+                            {log.status === 'running' && <Loader2 className="h-4 w-4 text-yellow-600 animate-spin" />}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-sm flex items-center gap-2">
+                              {log.syncType}
+                              {index === 0 && <Badge variant="secondary" className="text-xs">Mới nhất</Badge>}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {format(new Date(log.startedAt), 'EEEE, dd/MM/yyyy HH:mm:ss', { locale: vi })}
+                            </div>
+                          </div>
+                        </div>
+                        <Badge 
+                          variant={log.status === 'success' ? 'default' : log.status === 'error' ? 'destructive' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {log.status === 'success' ? 'Thành công' : log.status === 'error' ? 'Thất bại' : 'Đang chạy'}
+                        </Badge>
+                      </div>
+
+                      {/* Date Range if available */}
+                      {(log.fromDate || log.toDate) && (
+                        <div className="flex items-center gap-2 mb-3 text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                          <Calendar className="h-3 w-3" />
+                          <span>Khoảng thời gian:</span>
+                          <span className="font-medium text-foreground">
+                            {log.fromDate && format(new Date(log.fromDate), 'dd/MM/yyyy', { locale: vi })}
+                            {log.fromDate && log.toDate && ' → '}
+                            {log.toDate && format(new Date(log.toDate), 'dd/MM/yyyy', { locale: vi })}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-4 gap-2 mb-3">
+                        <div className="text-center p-2 bg-blue-50 rounded">
+                          <div className="text-lg font-bold text-blue-600">{log.recordsFetched}</div>
+                          <div className="text-xs text-blue-600/70">Đã tải</div>
+                        </div>
+                        <div className="text-center p-2 bg-green-50 rounded">
+                          <div className="text-lg font-bold text-green-600">{log.recordsCreated}</div>
+                          <div className="text-xs text-green-600/70">Tạo mới</div>
+                        </div>
+                        <div className="text-center p-2 bg-orange-50 rounded">
+                          <div className="text-lg font-bold text-orange-600">{log.recordsUpdated}</div>
+                          <div className="text-xs text-orange-600/70">Cập nhật</div>
+                        </div>
+                        <div className="text-center p-2 bg-gray-50 rounded">
+                          <div className="text-lg font-bold text-gray-600">{log.recordsSkipped}</div>
+                          <div className="text-xs text-gray-600/70">Bỏ qua</div>
+                        </div>
+                      </div>
+
+                      {/* Footer Info */}
+                      <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-2">
+                        <div className="flex items-center gap-4">
+                          {log.duration && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {(log.duration / 1000).toFixed(2)}s
+                            </span>
+                          )}
+                          {log.completedAt && (
+                            <span>
+                              Hoàn thành: {format(new Date(log.completedAt), 'HH:mm:ss', { locale: vi })}
+                            </span>
+                          )}
+                        </div>
+                        {log.offset !== undefined && log.offset !== null && (
+                          <span>Offset: {log.offset}</span>
+                        )}
+                      </div>
+
+                      {/* Error Message */}
+                      {log.errorMessage && (
+                        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+                          <strong>Lỗi:</strong> {log.errorMessage}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>
