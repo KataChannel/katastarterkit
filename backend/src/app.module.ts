@@ -42,6 +42,7 @@ import { LmsModule } from './lms/lms.module';
 import { EcommerceModule } from './ecommerce/ecommerce.module';
 import { SupportChatModule } from './support-chat/support-chat.module';
 import { ReleaseHubModule } from './release-hub/release-hub.module';
+import { AcademyModule } from './modules/academy/academy.module';
 
 // Configuration
 import { validationSchema } from './config/validation';
@@ -165,6 +166,7 @@ import { WorkflowModule } from './workflow/workflow.module';
     ReleaseHubModule,
     AnalyticsModule,
     WorkflowModule,
+    AcademyModule,
   ],
   controllers: [
     LogController,

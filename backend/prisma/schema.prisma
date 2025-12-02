@@ -233,18 +233,18 @@ model User {
   offboardingProcesses OffboardingProcess[]
 
   // LMS Relations
-  coursesInstructed Course[]          @relation("InstructorCourses")
-  enrollments       Enrollment[]      @relation("UserEnrollments")
+  coursesInstructed Course[]      @relation("InstructorCourses")
+  enrollments       Enrollment[]  @relation("UserEnrollments")
   quizAttempts      QuizAttempt[]
-  courseReviews     Review[]          @relation("UserReviews")
-  certificates      Certificate[]     @relation("UserCertificates")
+  courseReviews     Review[]      @relation("UserReviews")
+  certificates      Certificate[] @relation("UserCertificates")
 
   // Push Notification Relations
   pushSubscriptions PushSubscription[] @relation("UserPushSubscriptions")
-  discussions       Discussion[]      @relation("UserDiscussions")
-  discussionReplies DiscussionReply[] @relation("UserDiscussionReplies")
-  sourceDocuments   SourceDocument[]  @relation("UserSourceDocuments")
-  department        Department?       @relation("DepartmentUsers", fields: [departmentId], references: [id])
+  discussions       Discussion[]       @relation("UserDiscussions")
+  discussionReplies DiscussionReply[]  @relation("UserDiscussionReplies")
+  sourceDocuments   SourceDocument[]   @relation("UserSourceDocuments")
+  department        Department?        @relation("DepartmentUsers", fields: [departmentId], references: [id])
   departmentId      String?
 
   // Page Builder - Custom Templates Relations
@@ -282,27 +282,27 @@ model User {
   aiProvidersCreated AIProvider[] @relation("AIProviderCreator")
 
   // Release Hub & Support Center Relations
-  releasesCreated              SystemRelease[]            @relation("ReleaseCreatedBy")
-  releasesUpdated              SystemRelease[]            @relation("ReleaseUpdatedBy")
-  changelogsAuthored           Changelog[]                @relation("ChangelogAuthor")
-  guidesAuthored               SystemGuide[]              @relation("GuideAuthor")
-  guidesUpdated                SystemGuide[]              @relation("GuideUpdatedBy")
-  technicalSupportTickets      TechnicalSupportTicket[]   @relation("SupportCustomer")
+  releasesCreated         SystemRelease[]          @relation("ReleaseCreatedBy")
+  releasesUpdated         SystemRelease[]          @relation("ReleaseUpdatedBy")
+  changelogsAuthored      Changelog[]              @relation("ChangelogAuthor")
+  guidesAuthored          SystemGuide[]            @relation("GuideAuthor")
+  guidesUpdated           SystemGuide[]            @relation("GuideUpdatedBy")
+  technicalSupportTickets TechnicalSupportTicket[] @relation("SupportCustomer")
 
   // Workflow Relations
-  workflowTemplatesCreated   WorkflowTemplate[]     @relation("WorkflowTemplateCreator")
-  workflowTemplatesUpdated   WorkflowTemplate[]     @relation("WorkflowTemplateUpdater")
-  workflowInstancesInitiated WorkflowInstance[]     @relation("WorkflowInstanceInitiator")
-  workflowInstancesAssigned  WorkflowInstance[]     @relation("WorkflowInstanceAssignee")
-  stepExecutionsAssigned     StepExecution[]        @relation("StepExecutionAssignee")
-  stepExecutionsCompleted    StepExecution[]        @relation("StepExecutionCompleter")
-  approvalsReceived          WorkflowApproval[]     @relation("WorkflowApprover")
-  approvalsDelegated         WorkflowApproval[]     @relation("WorkflowApprovalDelegator")
-  workflowComments           WorkflowComment[]      @relation("WorkflowCommentAuthor")
-  workflowActivities         WorkflowActivityLog[]  @relation("WorkflowActivityActor")
-  technicalSupportAssigned     TechnicalSupportTicket[]   @relation("SupportAssignedTo")
-  technicalSupportResolved     TechnicalSupportTicket[]   @relation("SupportResolvedBy")
-  technicalSupportMessages     TechnicalSupportMessage[]  @relation("SupportMessageAuthor")
+  workflowTemplatesCreated   WorkflowTemplate[]        @relation("WorkflowTemplateCreator")
+  workflowTemplatesUpdated   WorkflowTemplate[]        @relation("WorkflowTemplateUpdater")
+  workflowInstancesInitiated WorkflowInstance[]        @relation("WorkflowInstanceInitiator")
+  workflowInstancesAssigned  WorkflowInstance[]        @relation("WorkflowInstanceAssignee")
+  stepExecutionsAssigned     StepExecution[]           @relation("StepExecutionAssignee")
+  stepExecutionsCompleted    StepExecution[]           @relation("StepExecutionCompleter")
+  approvalsReceived          WorkflowApproval[]        @relation("WorkflowApprover")
+  approvalsDelegated         WorkflowApproval[]        @relation("WorkflowApprovalDelegator")
+  workflowComments           WorkflowComment[]         @relation("WorkflowCommentAuthor")
+  workflowActivities         WorkflowActivityLog[]     @relation("WorkflowActivityActor")
+  technicalSupportAssigned   TechnicalSupportTicket[]  @relation("SupportAssignedTo")
+  technicalSupportResolved   TechnicalSupportTicket[]  @relation("SupportResolvedBy")
+  technicalSupportMessages   TechnicalSupportMessage[] @relation("SupportMessageAuthor")
 
   // Performance indexes for GIAI ĐOẠN 1 optimization
   @@index([isActive])
@@ -1097,7 +1097,7 @@ enum BlockType {
   PRODUCT_LIST
   PRODUCT_DETAIL
   PRODUCT_CAROUSEL
-  
+
   // Blog Blocks
   BLOG_CAROUSEL
 }
@@ -3462,14 +3462,14 @@ model Enrollment {
 }
 
 model LessonProgress {
-  id               String  @id @default(uuid())
-  enrollmentId     String
-  lessonId         String
-  completed        Boolean @default(false)
-  watchTime        Int?    @default(0) // Seconds watched for video lessons
-  videoProgress    Float?  @default(0) // Percentage watched (0-100) for video lessons
-  timeSpent        Int?    @default(0) // Total time spent in seconds (includes pauses, rewinds)
-  lastWatchedAt    DateTime? // Last time user watched this lesson
+  id            String    @id @default(uuid())
+  enrollmentId  String
+  lessonId      String
+  completed     Boolean   @default(false)
+  watchTime     Int?      @default(0) // Seconds watched for video lessons
+  videoProgress Float?    @default(0) // Percentage watched (0-100) for video lessons
+  timeSpent     Int?      @default(0) // Total time spent in seconds (includes pauses, rewinds)
+  lastWatchedAt DateTime? // Last time user watched this lesson
 
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   lesson     Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -4832,7 +4832,7 @@ model SupportConversation {
   socialAuthToken    String? // Access token từ social
   socialAuthData     Json? // Dữ liệu profile từ social
   customerIdentifier String? // Unique identifier để tracking khách hàng
-  
+
   // Agent Assignment
   assignedAgentId String?
   assignedAgent   User?     @relation("SupportAgentConversations", fields: [assignedAgentId], references: [id], onDelete: SetNull)
@@ -4891,7 +4891,7 @@ model SupportMessage {
   senderId   String?
   sender     User?   @relation("SupportSentMessages", fields: [senderId], references: [id], onDelete: SetNull)
   senderName String? // Tên hiển thị
-  
+
   // Customer Auth Tracking (tại thời điểm chat)
   customerAuthType CustomerAuthType? // Loại khách hàng khi gửi message
   customerAuthIcon String? // Icon để hiển thị (emoji hoặc icon name)
@@ -5212,55 +5212,55 @@ model SystemRelease {
   versionNumber String // 1.0.0 (without 'v')
   releaseType   ReleaseType
   status        ReleaseStatus @default(DRAFT)
-  
-  title         String
-  description   String?       @db.Text
-  summary       String?       @db.Text
-  
+
+  title       String
+  description String? @db.Text
+  summary     String? @db.Text
+
   // Release details
-  features      String[]      @default([]) // Danh sách tính năng mới
-  improvements  String[]      @default([]) // Cải tiến
-  bugfixes      String[]      @default([]) // Sửa lỗi
-  breakingChanges String[]    @default([]) // Thay đổi phá vỡ tương thích
-  
+  features        String[] @default([]) // Danh sách tính năng mới
+  improvements    String[] @default([]) // Cải tiến
+  bugfixes        String[] @default([]) // Sửa lỗi
+  breakingChanges String[] @default([]) // Thay đổi phá vỡ tương thích
+
   // Release notes
-  releaseNotes  String?       @db.Text
-  upgradeGuide  String?       @db.Text
-  deprecations  String[]      @default([])
-  
+  releaseNotes String?  @db.Text
+  upgradeGuide String?  @db.Text
+  deprecations String[] @default([])
+
   // Technical info
   deploymentDate DateTime?
   releaseDate    DateTime?
-  
+
   // Media
   thumbnailUrl   String?
   videoUrl       String?
-  screenshotUrls String[]      @default([])
-  
+  screenshotUrls String[] @default([])
+
   // SEO
-  slug           String        @unique
-  metaTitle      String?
+  slug            String   @unique
+  metaTitle       String?
   metaDescription String?
-  keywords       String[]      @default([])
-  
+  keywords        String[] @default([])
+
   // Relations
-  changelogs     Changelog[]
-  
+  changelogs Changelog[]
+
   // Stats
-  viewCount      Int           @default(0)
-  downloadCount  Int           @default(0)
-  
+  viewCount     Int @default(0)
+  downloadCount Int @default(0)
+
   // Timestamps
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  publishedAt    DateTime?
-  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
   // Audit
-  createdById    String?
-  createdBy      User?         @relation("ReleaseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  updatedById    String?
-  updatedBy      User?         @relation("ReleaseUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
-  
+  createdById String?
+  createdBy   User?   @relation("ReleaseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?   @relation("ReleaseUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
   @@index([version])
   @@index([status])
   @@index([releaseType])
@@ -5271,42 +5271,42 @@ model SystemRelease {
 
 // Changelog - Chi tiết thay đổi
 model Changelog {
-  id          String         @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Basic info
   title       String
-  description String         @db.Text
+  description String        @db.Text
   type        ChangelogType
-  
+
   // Categorization
-  component   String?        // Backend, Frontend, Database, etc.
-  module      String?        // Auth, E-commerce, LMS, etc.
-  
+  component String? // Backend, Frontend, Database, etc.
+  module    String? // Auth, E-commerce, LMS, etc.
+
   // Links
-  prUrl       String?        // Pull request URL
-  issueUrl    String?        // Issue URL
-  commitHash  String?
-  
+  prUrl      String? // Pull request URL
+  issueUrl   String? // Issue URL
+  commitHash String?
+
   // Technical details
-  affectedFiles String[]      @default([])
-  apiChanges    Json?         // API changes details
-  
+  affectedFiles String[] @default([])
+  apiChanges    Json? // API changes details
+
   // Impact
-  impact      String?        // User impact description
-  migration   String?        @db.Text // Migration guide if needed
-  
+  impact    String? // User impact description
+  migration String? @db.Text // Migration guide if needed
+
   // Release relation
-  releaseId   String?
-  release     SystemRelease? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
-  
+  releaseId String?
+  release   SystemRelease? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+
   // Timestamps
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Audit
-  authorId    String?
-  author      User?          @relation("ChangelogAuthor", fields: [authorId], references: [id], onDelete: SetNull)
-  
+  authorId String?
+  author   User?   @relation("ChangelogAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
   @@index([releaseId])
   @@index([type])
   @@index([component])
@@ -5316,62 +5316,62 @@ model Changelog {
 
 // System Guide - Hướng dẫn sử dụng
 model SystemGuide {
-  id              String        @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Basic info
-  title           String
-  description     String?       @db.Text
-  content         String        @db.Text // Markdown content
-  type            GuideType
-  
+  title       String
+  description String?   @db.Text
+  content     String    @db.Text // Markdown content
+  type        GuideType
+
   // Categorization
-  category        String?       // E-commerce, LMS, CMS, etc.
-  tags            String[]      @default([])
-  difficulty      String?       // Beginner, Intermediate, Advanced
-  
+  category   String? // E-commerce, LMS, CMS, etc.
+  tags       String[] @default([])
+  difficulty String? // Beginner, Intermediate, Advanced
+
   // Media
-  thumbnailUrl    String?
-  videoUrl        String?
-  attachmentUrls  String[]      @default([])
-  icon            String?       // Icon name or emoji
-  
+  thumbnailUrl   String?
+  videoUrl       String?
+  attachmentUrls String[] @default([])
+  icon           String? // Icon name or emoji
+
   // Structure
-  orderIndex      Int           @default(0)
-  parentId        String?
-  parent          SystemGuide?  @relation("GuideHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children        SystemGuide[] @relation("GuideHierarchy")
-  
+  orderIndex Int           @default(0)
+  parentId   String?
+  parent     SystemGuide?  @relation("GuideHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children   SystemGuide[] @relation("GuideHierarchy")
+
   // Related guides
-  relatedGuideIds String[]      @default([])
-  
+  relatedGuideIds String[] @default([])
+
   // SEO
-  slug            String        @unique
+  slug            String   @unique
   metaTitle       String?
   metaDescription String?
-  keywords        String[]      @default([])
-  
+  keywords        String[] @default([])
+
   // Publishing
-  isPublished     Boolean       @default(false)
-  publishedAt     DateTime?
-  
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+
   // Stats
-  viewCount       Int           @default(0)
-  helpfulCount    Int           @default(0)
-  notHelpfulCount Int           @default(0)
-  
+  viewCount       Int @default(0)
+  helpfulCount    Int @default(0)
+  notHelpfulCount Int @default(0)
+
   // Estimated reading time (minutes)
-  readingTime     Int?
-  
+  readingTime Int?
+
   // Timestamps
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Audit
-  authorId        String?
-  author          User?         @relation("GuideAuthor", fields: [authorId], references: [id], onDelete: SetNull)
-  updatedById     String?
-  updatedBy       User?         @relation("GuideUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
-  
+  authorId    String?
+  author      User?   @relation("GuideAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?   @relation("GuideUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
   @@index([type])
   @@index([category])
   @@index([isPublished])
@@ -5383,69 +5383,69 @@ model SystemGuide {
 
 // Technical Support Ticket - Ticket hỗ trợ kỹ thuật
 model TechnicalSupportTicket {
-  id              String                    @id @default(uuid())
-  ticketNumber    String                    @unique // AUTO-GENERATED: SUP-2024-001
-  
+  id           String @id @default(uuid())
+  ticketNumber String @unique // AUTO-GENERATED: SUP-2024-001
+
   // Basic info
-  subject         String
-  description     String                    @db.Text
-  category        SupportTicketCategory
-  priority        SupportTicketPriority     @default(MEDIUM)
-  status          SupportTicketStatus       @default(OPEN)
-  
+  subject     String
+  description String                @db.Text
+  category    SupportTicketCategory
+  priority    SupportTicketPriority @default(MEDIUM)
+  status      SupportTicketStatus   @default(OPEN)
+
   // Customer info
-  customerId      String?
-  customer        User?                     @relation("SupportCustomer", fields: [customerId], references: [id], onDelete: SetNull)
-  customerEmail   String?
-  customerName    String?
-  customerPhone   String?
-  
+  customerId    String?
+  customer      User?   @relation("SupportCustomer", fields: [customerId], references: [id], onDelete: SetNull)
+  customerEmail String?
+  customerName  String?
+  customerPhone String?
+
   // Assignment
-  assignedToId    String?
-  assignedTo      User?                     @relation("SupportAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
-  assignedAt      DateTime?
-  
+  assignedToId String?
+  assignedTo   User?     @relation("SupportAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  assignedAt   DateTime?
+
   // Technical details
-  environment     String?                   // Production, Staging, Development
-  browserInfo     String?
-  osInfo          String?
-  deviceInfo      String?
-  errorLogs       String?                   @db.Text
-  
+  environment String? // Production, Staging, Development
+  browserInfo String?
+  osInfo      String?
+  deviceInfo  String?
+  errorLogs   String? @db.Text
+
   // Attachments
-  attachmentUrls  String[]                  @default([])
-  screenshotUrls  String[]                  @default([])
-  
+  attachmentUrls String[] @default([])
+  screenshotUrls String[] @default([])
+
   // Related information
-  relatedUrl      String?                   // URL where issue occurred
-  relatedOrderId  String?
-  relatedOrder    Order?                    @relation(fields: [relatedOrderId], references: [id], onDelete: SetNull)
-  
+  relatedUrl     String? // URL where issue occurred
+  relatedOrderId String?
+  relatedOrder   Order?  @relation(fields: [relatedOrderId], references: [id], onDelete: SetNull)
+
   // Resolution
-  resolution      String?                   @db.Text
-  resolvedAt      DateTime?
-  resolvedById    String?
-  resolvedBy      User?                     @relation("SupportResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
-  
+  resolution   String?   @db.Text
+  resolvedAt   DateTime?
+  resolvedById String?
+  resolvedBy   User?     @relation("SupportResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+
   // Feedback
-  customerRating  Int?                      // 1-5 stars
-  customerFeedback String?                  @db.Text
-  
+  customerRating   Int? // 1-5 stars
+  customerFeedback String? @db.Text
+
   // Messages
-  messages        TechnicalSupportMessage[]
-  
+  messages TechnicalSupportMessage[]
+
   // Tags for better organization
-  tags            String[]                  @default([])
-  
+  tags String[] @default([])
+
   // Timestamps
-  createdAt       DateTime                  @default(now())
-  updatedAt       DateTime                  @updatedAt
-  closedAt        DateTime?
-  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  closedAt  DateTime?
+
   // Response time tracking
   firstResponseAt DateTime?
   lastResponseAt  DateTime?
-  
+
   @@index([ticketNumber])
   @@index([customerId])
   @@index([assignedToId])
@@ -5458,33 +5458,33 @@ model TechnicalSupportTicket {
 
 // Technical Support Message - Tin nhắn trong ticket
 model TechnicalSupportMessage {
-  id          String                   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Content
-  content     String                   @db.Text
-  isInternal  Boolean                  @default(false) // Internal note for staff only
-  
+  content    String  @db.Text
+  isInternal Boolean @default(false) // Internal note for staff only
+
   // Attachments
-  attachmentUrls String[]              @default([])
-  
+  attachmentUrls String[] @default([])
+
   // Ticket relation
-  ticketId    String
-  ticket      TechnicalSupportTicket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  
+  ticketId String
+  ticket   TechnicalSupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
   // Author
   authorId    String?
-  author      User?                    @relation("SupportMessageAuthor", fields: [authorId], references: [id], onDelete: SetNull)
-  authorName  String?                  // For guest messages
-  authorEmail String?                  // For guest messages
-  
+  author      User?   @relation("SupportMessageAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  authorName  String? // For guest messages
+  authorEmail String? // For guest messages
+
   // Status tracking
-  isRead      Boolean                  @default(false)
-  readAt      DateTime?
-  
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
   // Timestamps
-  createdAt   DateTime                 @default(now())
-  updatedAt   DateTime                 @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([ticketId])
   @@index([authorId])
   @@index([createdAt])
@@ -5498,27 +5498,27 @@ model TechnicalSupportMessage {
 
 // Workflow Template - Mẫu quy trình
 model WorkflowTemplate {
-  id          String         @id @default(uuid())
-  code        String         @unique
+  id          String  @id @default(uuid())
+  code        String  @unique
   name        String
   description String?
   category    String?
   icon        String?
   color       String?
-  
-  isActive    Boolean        @default(true)
-  version     Int            @default(1)
-  
-  createdBy   String
-  createdAt   DateTime       @default(now())
-  updatedBy   String?
-  updatedAt   DateTime       @updatedAt
-  
-  creator     User           @relation("WorkflowTemplateCreator", fields: [createdBy], references: [id])
-  updater     User?          @relation("WorkflowTemplateUpdater", fields: [updatedBy], references: [id])
-  steps       WorkflowStep[]
-  instances   WorkflowInstance[]
-  
+
+  isActive Boolean @default(true)
+  version  Int     @default(1)
+
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+
+  creator   User               @relation("WorkflowTemplateCreator", fields: [createdBy], references: [id])
+  updater   User?              @relation("WorkflowTemplateUpdater", fields: [updatedBy], references: [id])
+  steps     WorkflowStep[]
+  instances WorkflowInstance[]
+
   @@index([code])
   @@index([category])
   @@index([isActive])
@@ -5527,32 +5527,32 @@ model WorkflowTemplate {
 
 // Workflow Step - Bước trong quy trình
 model WorkflowStep {
-  id                String           @id @default(uuid())
+  id                 String           @id @default(uuid())
   workflowTemplateId String
-  workflowTemplate  WorkflowTemplate @relation(fields: [workflowTemplateId], references: [id], onDelete: Cascade)
-  
-  stepNumber      Int
-  stepType        StepType
-  name            String
-  description     String?
-  
-  config          Json?
+  workflowTemplate   WorkflowTemplate @relation(fields: [workflowTemplateId], references: [id], onDelete: Cascade)
+
+  stepNumber  Int
+  stepType    StepType
+  name        String
+  description String?
+
+  config            Json?
   nextStepCondition Json?
-  
-  assigneeType    String?
-  assigneeIds     String[]
-  
+
+  assigneeType String?
+  assigneeIds  String[]
+
   estimatedDuration Int?
   dueDateOffset     Int?
-  
-  isRequired      Boolean          @default(true)
-  isActive        Boolean          @default(true)
-  
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  
-  executions      StepExecution[]
-  
+
+  isRequired Boolean @default(true)
+  isActive   Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  executions StepExecution[]
+
   @@unique([workflowTemplateId, stepNumber])
   @@index([workflowTemplateId])
   @@index([stepType])
@@ -5561,40 +5561,40 @@ model WorkflowStep {
 
 // Workflow Instance - Phiên thực hiện quy trình
 model WorkflowInstance {
-  id                  String                  @id @default(uuid())
-  workflowTemplateId  String
-  workflowTemplate    WorkflowTemplate        @relation(fields: [workflowTemplateId], references: [id])
-  
-  instanceCode        String                  @unique
-  title               String
-  description         String?
-  
-  status              WorkflowInstanceStatus  @default(PENDING)
-  currentStepNumber   Int                     @default(1)
-  
-  formData            Json
-  metadata            Json?
-  
-  relatedEntityType   String?
-  relatedEntityId     String?
-  
-  initiatedBy         String
-  assignedTo          String?
-  
-  startedAt           DateTime                @default(now())
-  completedAt         DateTime?
-  dueDate             DateTime?
-  
-  createdAt           DateTime                @default(now())
-  updatedAt           DateTime                @updatedAt
-  
-  initiator           User                    @relation("WorkflowInstanceInitiator", fields: [initiatedBy], references: [id])
-  assignee            User?                   @relation("WorkflowInstanceAssignee", fields: [assignedTo], references: [id])
-  stepExecutions      StepExecution[]
-  approvals           WorkflowApproval[]
-  comments            WorkflowComment[]
-  activityLogs        WorkflowActivityLog[]
-  
+  id                 String           @id @default(uuid())
+  workflowTemplateId String
+  workflowTemplate   WorkflowTemplate @relation(fields: [workflowTemplateId], references: [id])
+
+  instanceCode String  @unique
+  title        String
+  description  String?
+
+  status            WorkflowInstanceStatus @default(PENDING)
+  currentStepNumber Int                    @default(1)
+
+  formData Json
+  metadata Json?
+
+  relatedEntityType String?
+  relatedEntityId   String?
+
+  initiatedBy String
+  assignedTo  String?
+
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  dueDate     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  initiator      User                  @relation("WorkflowInstanceInitiator", fields: [initiatedBy], references: [id])
+  assignee       User?                 @relation("WorkflowInstanceAssignee", fields: [assignedTo], references: [id])
+  stepExecutions StepExecution[]
+  approvals      WorkflowApproval[]
+  comments       WorkflowComment[]
+  activityLogs   WorkflowActivityLog[]
+
   @@index([workflowTemplateId])
   @@index([status])
   @@index([initiatedBy])
@@ -5606,35 +5606,35 @@ model WorkflowInstance {
 
 // Step Execution - Thực hiện từng bước
 model StepExecution {
-  id                  String                  @id @default(uuid())
-  workflowInstanceId  String
-  workflowInstance    WorkflowInstance        @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
-  
-  workflowStepId      String
-  workflowStep        WorkflowStep            @relation(fields: [workflowStepId], references: [id])
-  
-  status              WorkflowInstanceStatus  @default(PENDING)
-  stepNumber          Int
-  
-  inputData           Json?
-  outputData          Json?
-  
-  assignedTo          String?
-  completedBy         String?
-  
-  startedAt           DateTime?
-  completedAt         DateTime?
-  dueDate             DateTime?
-  
-  result              String?
-  errorMessage        String?
-  
-  createdAt           DateTime                @default(now())
-  updatedAt           DateTime                @updatedAt
-  
-  assignee            User?                   @relation("StepExecutionAssignee", fields: [assignedTo], references: [id])
-  completedUser       User?                   @relation("StepExecutionCompleter", fields: [completedBy], references: [id])
-  
+  id                 String           @id @default(uuid())
+  workflowInstanceId String
+  workflowInstance   WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+
+  workflowStepId String
+  workflowStep   WorkflowStep @relation(fields: [workflowStepId], references: [id])
+
+  status     WorkflowInstanceStatus @default(PENDING)
+  stepNumber Int
+
+  inputData  Json?
+  outputData Json?
+
+  assignedTo  String?
+  completedBy String?
+
+  startedAt   DateTime?
+  completedAt DateTime?
+  dueDate     DateTime?
+
+  result       String?
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignee      User? @relation("StepExecutionAssignee", fields: [assignedTo], references: [id])
+  completedUser User? @relation("StepExecutionCompleter", fields: [completedBy], references: [id])
+
   @@index([workflowInstanceId])
   @@index([workflowStepId])
   @@index([status])
@@ -5644,31 +5644,31 @@ model StepExecution {
 
 // Workflow Approval - Phê duyệt
 model WorkflowApproval {
-  id                  String           @id @default(uuid())
-  workflowInstanceId  String
-  workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
-  
-  stepNumber          Int
-  
-  approverId          String
-  approver            User             @relation("WorkflowApprover", fields: [approverId], references: [id])
-  
-  delegatedFrom       String?
-  delegatedFromUser   User?            @relation("WorkflowApprovalDelegator", fields: [delegatedFrom], references: [id])
-  
-  status              ApprovalStatus   @default(PENDING)
-  
-  decision            String?
-  comment             String?
-  attachmentIds       String[]
-  
-  requestedAt         DateTime         @default(now())
-  respondedAt         DateTime?
-  dueDate             DateTime?
-  
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
-  
+  id                 String           @id @default(uuid())
+  workflowInstanceId String
+  workflowInstance   WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+
+  stepNumber Int
+
+  approverId String
+  approver   User   @relation("WorkflowApprover", fields: [approverId], references: [id])
+
+  delegatedFrom     String?
+  delegatedFromUser User?   @relation("WorkflowApprovalDelegator", fields: [delegatedFrom], references: [id])
+
+  status ApprovalStatus @default(PENDING)
+
+  decision      String?
+  comment       String?
+  attachmentIds String[]
+
+  requestedAt DateTime  @default(now())
+  respondedAt DateTime?
+  dueDate     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([workflowInstanceId])
   @@index([approverId])
   @@index([status])
@@ -5678,23 +5678,23 @@ model WorkflowApproval {
 
 // Workflow Comment - Bình luận
 model WorkflowComment {
-  id                  String           @id @default(uuid())
-  workflowInstanceId  String
-  workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
-  
-  stepNumber          Int?
-  
-  content             String
-  attachmentIds       String[]
-  
-  authorId            String
-  author              User             @relation("WorkflowCommentAuthor", fields: [authorId], references: [id])
-  
-  mentionedUserIds    String[]
-  
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
-  
+  id                 String           @id @default(uuid())
+  workflowInstanceId String
+  workflowInstance   WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+
+  stepNumber Int?
+
+  content       String
+  attachmentIds String[]
+
+  authorId String
+  author   User   @relation("WorkflowCommentAuthor", fields: [authorId], references: [id])
+
+  mentionedUserIds String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([workflowInstanceId])
   @@index([authorId])
   @@index([stepNumber])
@@ -5703,21 +5703,21 @@ model WorkflowComment {
 
 // Workflow Activity Log - Nhật ký
 model WorkflowActivityLog {
-  id                  String           @id @default(uuid())
-  workflowInstanceId  String
-  workflowInstance    WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
-  
-  action              String
-  stepNumber          Int?
-  
-  description         String
-  details             Json?
-  
-  actorId             String?
-  actor               User?            @relation("WorkflowActivityActor", fields: [actorId], references: [id])
-  
-  createdAt           DateTime         @default(now())
-  
+  id                 String           @id @default(uuid())
+  workflowInstanceId String
+  workflowInstance   WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+
+  action     String
+  stepNumber Int?
+
+  description String
+  details     Json?
+
+  actorId String?
+  actor   User?   @relation("WorkflowActivityActor", fields: [actorId], references: [id])
+
+  createdAt DateTime @default(now())
+
   @@index([workflowInstanceId])
   @@index([actorId])
   @@index([action])
@@ -5727,37 +5727,442 @@ model WorkflowActivityLog {
 
 // Employee Third Party Account - Tài khoản bên thứ 3
 model EmployeeThirdPartyAccount {
-  id                  String           @id @default(uuid())
-  employeeProfileId   String
-  employeeProfile     EmployeeProfile  @relation("EmployeeThirdPartyAccounts", fields: [employeeProfileId], references: [id], onDelete: Cascade)
-  
-  accountType         AccountType
-  accountName         String?
-  
-  username            String?
-  email               String?
-  phone               String?
-  accountId           String?
-  
-  profileUrl          String?
-  department          String?
-  role                String?
-  
-  isActive            Boolean          @default(true)
-  isVerified          Boolean          @default(false)
-  verifiedAt          DateTime?
-  
-  notes               String?
-  metadata            Json?
-  
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
-  createdBy           String?
-  updatedBy           String?
-  
+  id                String          @id @default(uuid())
+  employeeProfileId String
+  employeeProfile   EmployeeProfile @relation("EmployeeThirdPartyAccounts", fields: [employeeProfileId], references: [id], onDelete: Cascade)
+
+  accountType AccountType
+  accountName String?
+
+  username  String?
+  email     String?
+  phone     String?
+  accountId String?
+
+  profileUrl String?
+  department String?
+  role       String?
+
+  isActive   Boolean   @default(true)
+  isVerified Boolean   @default(false)
+  verifiedAt DateTime?
+
+  notes    String?
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  updatedBy String?
+
   @@unique([employeeProfileId, accountType, username])
   @@index([employeeProfileId])
   @@index([accountType])
   @@index([isActive])
   @@map("employee_third_party_accounts")
+}
+
+// =====================================================
+// TIMONA ACADEMY - EDUCATION & COURSE MANAGEMENT
+// =====================================================
+
+// Branch - Chi nhánh học viện
+model Branch {
+  id      String  @id @default(uuid())
+  name    String
+  slug    String  @unique
+  address String?
+  phone   String?
+  email   String?
+
+  // Social Media
+  facebookUrl    String?
+  facebookPageId String?
+  zaloUrl        String?
+  zaloOaId       String?
+
+  // Contact
+  hotline      String?
+  workingHours String?
+
+  // Content
+  description      String? @db.Text
+  shortDescription String?
+  featuredImage    String?
+
+  // Location
+  latitude    Float?
+  longitude   Float?
+  mapEmbedUrl String?
+
+  // Settings
+  isActive     Boolean @default(true)
+  isFeatured   Boolean @default(false)
+  displayOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  courseRegistrations AcademyCourseRegistration[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@index([displayOrder])
+  @@map("academy_branches")
+}
+
+// Academy Course Category - Danh mục khóa học
+model AcademyCourseCategory {
+  id            String  @id @default(uuid())
+  name          String
+  slug          String  @unique
+  description   String? @db.Text
+  featuredImage String?
+  icon          String?
+  color         String?
+
+  // Hierarchy
+  parentId String?
+  parent   AcademyCourseCategory?  @relation("CourseCategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children AcademyCourseCategory[] @relation("CourseCategoryHierarchy")
+
+  // Settings
+  isActive     Boolean @default(true)
+  displayOrder Int     @default(0)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  courses AcademyCourse[]
+
+  @@index([slug])
+  @@index([parentId])
+  @@index([isActive])
+  @@index([displayOrder])
+  @@map("academy_course_categories")
+}
+
+// Academy Course - Khóa học
+model AcademyCourse {
+  id    String @id @default(uuid())
+  title String
+  slug  String @unique
+
+  // Content
+  description      String? @db.Text
+  shortDescription String?
+  content          String? @db.Text
+  featuredImage    String?
+  gallery          Json? // Array of image URLs
+  videoUrl         String?
+
+  // Pricing
+  price           Decimal? @db.Decimal(12, 0)
+  discountPrice   Decimal? @db.Decimal(12, 0)
+  discountPercent Int?
+  currency        String   @default("VND")
+
+  // Course Info
+  duration        String? // "3 tháng", "6 tuần"
+  durationHours   Int? // Total hours
+  schedule        String? // "Thứ 2-4-6, 18h-21h"
+  maxStudents     Int?
+  currentStudents Int     @default(0)
+
+  // Benefits & Curriculum
+  benefits       Json? // Array of benefits
+  curriculum     Json? // Course outline/chapters
+  requirements   Json? // Prerequisites
+  targetAudience Json? // Who should attend
+
+  // Instructors
+  instructors Json? // Array of instructor info
+
+  // Settings
+  isActive     Boolean @default(true)
+  isFeatured   Boolean @default(false)
+  isPopular    Boolean @default(false)
+  isNew        Boolean @default(false)
+  displayOrder Int     @default(0)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  focusKeyword    String?
+
+  // Stats
+  views       Int    @default(0)
+  enrollments Int    @default(0)
+  rating      Float? @default(0)
+  reviewCount Int    @default(0)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  // Relations
+  categoryId    String?
+  category      AcademyCourseCategory?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  registrations AcademyCourseRegistration[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([isPopular])
+  @@index([displayOrder])
+  @@index([publishedAt])
+  @@map("academy_courses")
+}
+
+// Academy Course Registration Status
+enum AcademyRegistrationStatus {
+  NEW // Mới đăng ký
+  CONTACTED // Đã liên hệ
+  CONFIRMED // Đã xác nhận
+  ENROLLED // Đã nhập học
+  CANCELLED // Đã hủy
+  COMPLETED // Hoàn thành
+}
+
+// Academy Course Registration - Đăng ký khóa học
+model AcademyCourseRegistration {
+  id String @id @default(uuid())
+
+  // Contact Info
+  fullName String
+  phone    String
+  email    String?
+  address  String?
+
+  // Additional Info
+  birthDate  DateTime?
+  gender     String?
+  occupation String?
+  education  String?
+
+  // Registration Details
+  note         String? @db.Text
+  source       String? // facebook, zalo, website, referral
+  referralCode String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+
+  // Status
+  status      AcademyRegistrationStatus @default(NEW)
+  statusNote  String?
+  contactedAt DateTime?
+  confirmedAt DateTime?
+  enrolledAt  DateTime?
+
+  // Tracking
+  ipAddress String?
+  userAgent String?
+  pageUrl   String?
+
+  // Admin
+  assignedTo String? // Staff handling this registration
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  courseId String
+  course   AcademyCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  branchId String?
+  branch   Branch?       @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  @@index([courseId])
+  @@index([branchId])
+  @@index([status])
+  @@index([phone])
+  @@index([email])
+  @@index([createdAt])
+  @@index([source])
+  @@map("academy_course_registrations")
+}
+
+// Academy Instructor - Giảng viên
+model AcademyInstructor {
+  id   String @id @default(uuid())
+  name String
+  slug String @unique
+
+  // Info
+  title    String? // "Thạc sĩ", "Tiến sĩ", "Chuyên gia"
+  position String? // "Giảng viên chính", "Trưởng khoa"
+  bio      String? @db.Text
+  shortBio String?
+
+  // Media
+  avatar     String?
+  coverImage String?
+  videoIntro String?
+
+  // Contact
+  email String?
+  phone String?
+
+  // Social
+  facebookUrl String?
+  linkedinUrl String?
+  youtubeUrl  String?
+  websiteUrl  String?
+
+  // Experience
+  experience     Json? // Array of experience items
+  education      Json? // Array of education items
+  certifications Json? // Array of certifications
+  achievements   Json? // Array of achievements
+  specialties    Json? // Array of specialties
+
+  // Settings
+  isActive     Boolean @default(true)
+  isFeatured   Boolean @default(false)
+  displayOrder Int     @default(0)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([displayOrder])
+  @@map("academy_instructors")
+}
+
+// Academy Testimonial - Đánh giá học viên
+model AcademyTestimonial {
+  id String @id @default(uuid())
+
+  // Student Info
+  studentName   String
+  studentAvatar String?
+  studentTitle  String? // "Học viên khóa Spa", "Cựu học viên"
+
+  // Content
+  content String @db.Text
+  rating  Int    @default(5) // 1-5
+
+  // Media
+  videoUrl String?
+  images   Json? // Array of image URLs
+
+  // Course reference
+  courseName    String?
+  completedDate DateTime?
+
+  // Settings
+  isActive     Boolean @default(true)
+  isFeatured   Boolean @default(false)
+  displayOrder Int     @default(0)
+
+  // Verification
+  isVerified Boolean   @default(false)
+  verifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([rating])
+  @@index([displayOrder])
+  @@map("academy_testimonials")
+}
+
+// Academy FAQ - Câu hỏi thường gặp
+model AcademyFAQ {
+  id       String @id @default(uuid())
+  question String
+  answer   String @db.Text
+
+  // Grouping
+  category String? // "Học phí", "Tuyển sinh", "Khóa học"
+
+  // Settings
+  isActive     Boolean @default(true)
+  displayOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+  @@index([displayOrder])
+  @@map("academy_faqs")
+}
+
+// Academy Student Work - Tác phẩm học viên
+model AcademyStudentWork {
+  id    String @id @default(uuid())
+  title String
+
+  // Student Info
+  studentName String?
+  courseName  String?
+
+  // Media
+  imageUrl     String
+  thumbnailUrl String?
+  videoUrl     String?
+  description  String?
+
+  // Category
+  category String? // "Spa", "Phun xăm", "Nối mi"
+
+  // Settings
+  isActive     Boolean @default(true)
+  isFeatured   Boolean @default(false)
+  displayOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([displayOrder])
+  @@map("academy_student_works")
+}
+
+// Academy Media Coverage - Báo chí
+model AcademyMediaCoverage {
+  id    String @id @default(uuid())
+  title String
+
+  // Source
+  sourceName String // "VTV", "Báo Tuổi Trẻ"
+  sourceLogo String?
+  sourceUrl  String?
+
+  // Content
+  excerpt       String?
+  publishedDate DateTime?
+
+  // Media
+  thumbnailUrl String?
+
+  // Settings
+  isActive     Boolean @default(true)
+  displayOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([displayOrder])
+  @@index([publishedDate])
+  @@map("academy_media_coverages")
 }
