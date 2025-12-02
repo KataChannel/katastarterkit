@@ -15,15 +15,15 @@ export interface GoogleDriveUploadResult {
 
 /**
  * Service để upload file lên Google Drive của công ty
- * Folder chung: https://drive.google.com/drive/folders/1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG
+ * Folder chung: https://drive.google.com/drive/folders/1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4
  */
 @Injectable()
 export class GoogleDriveService {
   private readonly logger = new Logger(GoogleDriveService.name);
   private drive: drive_v3.Drive | null = null;
 
-  // Folder ID của công ty từ URL: 1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG
-  private readonly COMPANY_FOLDER_ID = '1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG';
+  // Folder ID của công ty từ URL: 1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4
+  private readonly COMPANY_FOLDER_ID = '1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4';
   
   // Sub-folder IDs theo loại file (sẽ được tạo tự động nếu chưa có)
   private folderCache: Map<string, string> = new Map();
@@ -83,6 +83,8 @@ export class GoogleDriveService {
       const response = await this.drive.files.list({
         q: `name='${folderName}' and '${this.COMPANY_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
         fields: 'files(id, name)',
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
       });
 
       if (response.data.files && response.data.files.length > 0) {
@@ -99,6 +101,7 @@ export class GoogleDriveService {
           parents: [this.COMPANY_FOLDER_ID],
         },
         fields: 'id',
+        supportsAllDrives: true,
       });
 
       const newFolderId = createResponse.data.id!;
@@ -159,6 +162,7 @@ export class GoogleDriveService {
           body: stream,
         },
         fields: 'id, name, mimeType, size, webViewLink, webContentLink, thumbnailLink',
+        supportsAllDrives: true,
       });
 
       const file = response.data;
@@ -170,6 +174,7 @@ export class GoogleDriveService {
           role: 'reader',
           type: 'anyone',
         },
+        supportsAllDrives: true,
       });
 
       this.logger.log(`✅ Uploaded to Google Drive: ${fileName} -> ${folderName}`);
