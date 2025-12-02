@@ -197,55 +197,102 @@ export function usePWA(): PWAHookReturn {
 
   // Subscribe to push notifications
   const subscribeToPush = useCallback(async (vapidPublicKey: string): Promise<PushSubscription | null> => {
-    if (!serviceWorkerRegistration) {
-      throw new Error('Service worker not registered');
-    }
-
     if (!capabilities.hasPushSupport) {
-      throw new Error('Push notifications not supported');
+      console.warn('Push notifications not supported in this browser');
+      return null;
     }
 
     try {
       // Request notification permission first
       const permission = await requestNotificationPermission();
       if (permission !== 'granted') {
-        throw new Error('Notification permission denied');
+        console.warn('Notification permission denied');
+        return null;
       }
 
-      // Wait for service worker to be active
-      if (serviceWorkerRegistration.active) {
-        // Service worker is already active, proceed
-      } else {
-        // Wait for service worker to become active
-        await new Promise<void>((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            reject(new Error('Service worker activation timeout'));
-          }, 10000); // 10 second timeout
-
-          if (serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting) {
-            const worker = serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting;
-            worker!.addEventListener('statechange', function onStateChange() {
-              if (worker!.state === 'activated') {
-                clearTimeout(timeout);
-                worker!.removeEventListener('statechange', onStateChange);
-                resolve();
-              }
-            });
-          } else {
-            // Try to get the active worker from navigator
-            if (navigator.serviceWorker.controller) {
-              clearTimeout(timeout);
-              resolve();
-            } else {
-              clearTimeout(timeout);
-              reject(new Error('No active service worker found'));
+      // Wait for service worker registration if not ready
+      let registration = serviceWorkerRegistration;
+      
+      if (!registration) {
+        // Try to get existing registration
+        if ('serviceWorker' in navigator) {
+          registration = await navigator.serviceWorker.getRegistration('/');
+          
+          // If still no registration, wait for it to be ready
+          if (!registration) {
+            try {
+              registration = await navigator.serviceWorker.ready;
+            } catch (err) {
+              console.warn('Service worker not ready:', err);
+              return null;
             }
           }
+        }
+      }
+
+      if (!registration) {
+        console.warn('Service worker registration not available');
+        return null;
+      }
+
+      // Wait for service worker to be active with better handling
+      const waitForActive = async (): Promise<boolean> => {
+        // If already active, we're good
+        if (registration!.active) {
+          return true;
+        }
+
+        // If there's an installing or waiting worker, wait for it
+        const worker = registration!.installing || registration!.waiting;
+        if (worker) {
+          return new Promise<boolean>((resolve) => {
+            const timeout = setTimeout(() => {
+              console.warn('Service worker activation timeout');
+              resolve(false);
+            }, 10000);
+
+            const handleStateChange = () => {
+              if (worker.state === 'activated' || worker.state === 'active') {
+                clearTimeout(timeout);
+                worker.removeEventListener('statechange', handleStateChange);
+                resolve(true);
+              } else if (worker.state === 'redundant') {
+                clearTimeout(timeout);
+                worker.removeEventListener('statechange', handleStateChange);
+                resolve(false);
+              }
+            };
+
+            worker.addEventListener('statechange', handleStateChange);
+          });
+        }
+
+        // Check navigator.serviceWorker.controller as fallback
+        if (navigator.serviceWorker.controller) {
+          return true;
+        }
+
+        // Last resort: wait for controllerchange event
+        return new Promise<boolean>((resolve) => {
+          const timeout = setTimeout(() => {
+            resolve(false);
+          }, 5000);
+
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            clearTimeout(timeout);
+            resolve(true);
+          }, { once: true });
         });
+      };
+
+      const isActive = await waitForActive();
+      if (!isActive) {
+        console.warn('Service worker could not be activated, push subscription skipped');
+        return null;
       }
 
       // Check if already subscribed
-      let subscription = await serviceWorkerRegistration.pushManager.getSubscription();
+      let subscription = await registration.pushManager.getSubscription();
       
       if (subscription) {
         console.log('Already subscribed to push notifications');
@@ -254,7 +301,7 @@ export function usePWA(): PWAHookReturn {
 
       // Subscribe to push service
       const convertedKey = urlBase64ToUint8Array(vapidPublicKey);
-      subscription = await serviceWorkerRegistration.pushManager.subscribe({
+      subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: convertedKey as BufferSource,
       });
@@ -263,7 +310,8 @@ export function usePWA(): PWAHookReturn {
       return subscription;
     } catch (error) {
       console.error('Failed to subscribe to push notifications:', error);
-      throw error;
+      // Don't throw, just return null to allow graceful degradation
+      return null;
     }
   }, [serviceWorkerRegistration, capabilities.hasPushSupport, requestNotificationPermission]);
 
