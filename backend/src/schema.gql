@@ -51,6 +51,195 @@ enum AIProviderType {
   GROK
 }
 
+input AcademyCourseCategoryFilterInput {
+  isActive: Boolean
+  search: String
+}
+
+type AcademyCourseCategoryModel {
+  courseCount: Int!
+  createdAt: DateTime!
+  description: String
+  displayOrder: Int!
+  icon: String
+  id: ID!
+  image: String
+  isActive: Boolean!
+  name: String!
+  slug: String!
+  updatedAt: DateTime!
+}
+
+input AcademyCourseFilterInput {
+  categoryId: String
+  categorySlug: String
+  isActive: Boolean
+  isFeatured: Boolean
+  isNew: Boolean
+  isPopular: Boolean
+  limit: Int
+  offset: Int
+  search: String
+}
+
+type AcademyCourseModel {
+  benefits: JSON
+  category: AcademyCourseCategoryModel
+  categoryId: String
+  content: String
+  createdAt: DateTime!
+  currency: String!
+  currentStudents: Int!
+  curriculum: JSON
+  description: String
+  discountPercent: Int
+  discountPrice: Float
+  displayOrder: Int!
+  duration: String
+  durationHours: Int
+  enrollments: Int!
+  featuredImage: String
+  focusKeyword: String
+  gallery: JSON
+  id: ID!
+  instructors: JSON
+  isActive: Boolean!
+  isFeatured: Boolean!
+  isNew: Boolean!
+  isPopular: Boolean!
+  maxStudents: Int
+  metaDescription: String
+  metaTitle: String
+  price: Float
+  publishedAt: DateTime
+  rating: Float
+  requirements: JSON
+  reviewCount: Int!
+  schedule: String
+  shortDescription: String
+  slug: String!
+  targetAudience: JSON
+  title: String!
+  updatedAt: DateTime!
+  videoUrl: String
+  views: Int!
+}
+
+type AcademyCourseRegistrationModel {
+  address: String
+  assignedTo: String
+  birthDate: DateTime
+  branchId: String
+  confirmedAt: DateTime
+  contactedAt: DateTime
+  courseId: String!
+  createdAt: DateTime!
+  education: String
+  email: String
+  enrolledAt: DateTime
+  fullName: String!
+  gender: String
+  id: ID!
+  note: String
+  occupation: String
+  phone: String!
+  referralCode: String
+  source: String
+  status: AcademyRegistrationStatus!
+  statusNote: String
+  updatedAt: DateTime!
+}
+
+input AcademyFAQFilterInput {
+  category: String
+  isActive: Boolean
+  search: String
+}
+
+type AcademyFAQModel {
+  answer: String!
+  category: String
+  createdAt: DateTime!
+  displayOrder: Int!
+  id: ID!
+  isActive: Boolean!
+  question: String!
+  updatedAt: DateTime!
+}
+
+input AcademyInstructorFilterInput {
+  isActive: Boolean
+  isFeatured: Boolean
+  search: String
+}
+
+type AcademyInstructorModel {
+  avatar: String
+  bio: String
+  certifications: String
+  createdAt: DateTime!
+  displayOrder: Int!
+  education: String
+  email: String
+  experience: String
+  facebook: String
+  id: ID!
+  isActive: Boolean!
+  isFeatured: Boolean!
+  linkedIn: String
+  name: String!
+  phone: String
+  slug: String!
+  specialization: String
+  title: String
+  updatedAt: DateTime!
+  website: String
+}
+
+input AcademyRegistrationFilterInput {
+  branchId: String
+  courseId: String
+  search: String
+  source: String
+  status: AcademyRegistrationStatus
+}
+
+"""Status of academy course registration"""
+enum AcademyRegistrationStatus {
+  CANCELLED
+  COMPLETED
+  CONFIRMED
+  CONTACTED
+  ENROLLED
+  NEW
+}
+
+input AcademyTestimonialFilterInput {
+  isActive: Boolean
+  isFeatured: Boolean
+  isVerified: Boolean
+  search: String
+}
+
+type AcademyTestimonialModel {
+  completedDate: DateTime
+  content: String!
+  courseName: String
+  createdAt: DateTime!
+  displayOrder: Int!
+  id: ID!
+  isActive: Boolean!
+  isFeatured: Boolean!
+  isVerified: Boolean!
+  rating: Int!
+  studentAvatar: String
+  studentName: String!
+  studentTitle: String
+  updatedAt: DateTime!
+  verifiedAt: DateTime
+  videoUrl: String
+}
+
 enum AccountType {
   CRM
   FACEBOOK
@@ -587,6 +776,38 @@ type BlogType {
   visibility: String!
 }
 
+input BranchFilterInput {
+  isActive: Boolean
+  isFeatured: Boolean
+  search: String
+}
+
+type BranchModel {
+  address: String
+  createdAt: DateTime!
+  description: String
+  displayOrder: Int!
+  email: String
+  facebookPageId: String
+  facebookUrl: String
+  featuredImage: String
+  hotline: String
+  id: ID!
+  isActive: Boolean!
+  isFeatured: Boolean!
+  latitude: Float
+  longitude: Float
+  mapEmbedUrl: String
+  name: String!
+  phone: String
+  shortDescription: String
+  slug: String!
+  updatedAt: DateTime!
+  workingHours: String
+  zaloOaId: String
+  zaloUrl: String
+}
+
 input BulkDeleteFilesInput {
   fileIds: [ID!]!
 }
@@ -1084,6 +1305,108 @@ input CreateAIProviderInput {
   temperature: Float = 0.7
 }
 
+input CreateAcademyCourseCategoryInput {
+  description: String
+  displayOrder: Int = 0
+  icon: String
+  image: String
+  isActive: Boolean = true
+  name: String!
+  slug: String
+}
+
+input CreateAcademyCourseInput {
+  benefits: JSON
+  categoryId: String
+  content: String
+  currency: String = "VND"
+  curriculum: JSON
+  description: String
+  discountPercent: Int
+  discountPrice: Float
+  displayOrder: Int = 0
+  duration: String
+  durationHours: Int
+  featuredImage: String
+  focusKeyword: String
+  gallery: JSON
+  instructors: JSON
+  isActive: Boolean = true
+  isFeatured: Boolean = false
+  isNew: Boolean = false
+  isPopular: Boolean = false
+  maxStudents: Int
+  metaDescription: String
+  metaTitle: String
+  price: Float
+  publishedAt: DateTime
+  requirements: JSON
+  schedule: String
+  shortDescription: String
+  slug: String
+  targetAudience: JSON
+  title: String!
+  videoUrl: String
+}
+
+input CreateAcademyFAQInput {
+  answer: String!
+  category: String
+  displayOrder: Int = 0
+  isActive: Boolean = true
+  question: String!
+}
+
+input CreateAcademyInstructorInput {
+  avatar: String
+  bio: String
+  certifications: String
+  displayOrder: Int = 0
+  education: String
+  email: String
+  experience: String
+  facebook: String
+  isActive: Boolean = true
+  isFeatured: Boolean = false
+  linkedIn: String
+  name: String!
+  phone: String
+  slug: String
+  specialization: String
+  title: String
+  website: String
+}
+
+input CreateAcademyRegistrationInput {
+  address: String
+  birthDate: String
+  branchId: String
+  courseId: String!
+  education: String
+  email: String
+  fullName: String!
+  gender: String
+  note: String
+  occupation: String
+  phone: String!
+  referralCode: String
+  source: String
+}
+
+input CreateAcademyTestimonialInput {
+  completedDate: String
+  content: String!
+  courseName: String
+  displayOrder: Int = 0
+  isActive: Boolean = true
+  isFeatured: Boolean = false
+  rating: Int = 5
+  studentAvatar: String
+  studentName: String!
+  studentTitle: String
+  videoUrl: String
+}
+
 input CreateAffLinkInput {
   campaignId: String!
   customAlias: String
@@ -1150,6 +1473,29 @@ input CreateBlogInput {
 input CreateBlogTagInput {
   name: String!
   slug: String
+}
+
+input CreateBranchInput {
+  address: String
+  description: String
+  displayOrder: Int = 0
+  email: String
+  facebookPageId: String
+  facebookUrl: String
+  featuredImage: String
+  hotline: String
+  isActive: Boolean = true
+  isFeatured: Boolean = false
+  latitude: Float
+  longitude: Float
+  mapEmbedUrl: String
+  name: String!
+  phone: String
+  shortDescription: String
+  slug: String
+  workingHours: String
+  zaloOaId: String
+  zaloUrl: String
 }
 
 input CreateCallCenterConfigInput {
@@ -2776,12 +3122,23 @@ type Mutation {
 
   """Tạo AI provider mới"""
   createAIProvider(input: CreateAIProviderInput!): AIProvider!
+
+  """Tạo khóa học mới"""
+  createAcademyCourse(input: CreateAcademyCourseInput!): AcademyCourseModel!
+  createAcademyCourseCategory(input: CreateAcademyCourseCategoryInput!): AcademyCourseCategoryModel!
+  createAcademyFAQ(input: CreateAcademyFAQInput!): AcademyFAQModel!
+  createAcademyInstructor(input: CreateAcademyInstructorInput!): AcademyInstructorModel!
+  createAcademyRegistration(input: CreateAcademyRegistrationInput!): AcademyCourseRegistrationModel!
+  createAcademyTestimonial(input: CreateAcademyTestimonialInput!): AcademyTestimonialModel!
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
   createAffiliateLink(input: CreateAffLinkInput!): AffLink!
   createAffiliateUser(input: CreateAffUserInput!): AffUser!
   createBlog(input: CreateBlogInput!): BlogType!
   createBlogCategory(input: CreateBlogCategoryInput!): BlogCategoryType!
   createBlogTag(input: CreateBlogTagInput!): BlogTagType!
+
+  """Tạo chi nhánh mới"""
+  createBranch(input: CreateBranchInput!): BranchModel!
   createCallCenterConfig(input: CreateCallCenterConfigInput!): CallCenterConfig!
   createCategory(input: CreateCategoryInput!): CategoryType!
   createComment(input: CreateCommentInput!): Comment!
@@ -2846,11 +3203,22 @@ type Mutation {
 
   """Xóa AI provider"""
   deleteAIProvider(id: String!): Boolean!
+
+  """Xóa khóa học"""
+  deleteAcademyCourse(id: ID!): Boolean!
+  deleteAcademyCourseCategory(id: ID!): AcademyCourseCategoryModel!
+  deleteAcademyFAQ(id: ID!): AcademyFAQModel!
+  deleteAcademyInstructor(id: ID!): AcademyInstructorModel!
+  deleteAcademyRegistration(id: ID!): AcademyCourseRegistrationModel!
+  deleteAcademyTestimonial(id: ID!): AcademyTestimonialModel!
   deleteAffiliateCampaign(id: String!): Boolean!
   deleteAllReadNotifications: Boolean!
   deleteBlog(id: ID!): Boolean!
   deleteBlogCategory(id: ID!): Boolean!
   deleteBlogTag(id: ID!): Boolean!
+
+  """Xóa chi nhánh"""
+  deleteBranch(id: ID!): Boolean!
   deleteCallCenterConfig(id: String!): CallCenterConfig!
   deleteCategory(deleteProducts: Boolean! = false, id: ID!): CategoryType!
   deleteComment(id: String!): Boolean!
@@ -3027,6 +3395,24 @@ type Mutation {
 
   """Bật/tắt AI provider"""
   toggleAIProviderStatus(id: String!, isActive: Boolean!): AIProvider!
+
+  """Bật/tắt trạng thái hoạt động"""
+  toggleAcademyCourseActive(id: ID!): AcademyCourseModel!
+  toggleAcademyCourseCategoryActive(id: ID!): AcademyCourseCategoryModel!
+
+  """Bật/tắt trạng thái nổi bật"""
+  toggleAcademyCourseFeatured(id: ID!): AcademyCourseModel!
+  toggleAcademyFAQActive(id: ID!): AcademyFAQModel!
+  toggleAcademyInstructorActive(id: ID!): AcademyInstructorModel!
+  toggleAcademyInstructorFeatured(id: ID!): AcademyInstructorModel!
+  toggleAcademyTestimonialActive(id: ID!): AcademyTestimonialModel!
+  toggleAcademyTestimonialFeatured(id: ID!): AcademyTestimonialModel!
+
+  """Bật/tắt trạng thái hoạt động"""
+  toggleBranchActive(id: ID!): BranchModel!
+
+  """Bật/tắt trạng thái nổi bật"""
+  toggleBranchFeatured(id: ID!): BranchModel!
   toggleDiscussionPin(id: ID!): Discussion!
   toggleMenuActive(id: ID!): MenuResponseDto!
   toggleMenuVisibility(id: ID!): MenuResponseDto!
@@ -3040,11 +3426,27 @@ type Mutation {
 
   """Cập nhật AI provider"""
   updateAIProvider(id: String!, input: UpdateAIProviderInput!): AIProvider!
+
+  """Cập nhật khóa học"""
+  updateAcademyCourse(id: ID!, input: UpdateAcademyCourseInput!): AcademyCourseModel!
+  updateAcademyCourseCategory(id: ID!, input: UpdateAcademyCourseCategoryInput!): AcademyCourseCategoryModel!
+  updateAcademyCourseCategoryDisplayOrder(displayOrder: Int!, id: ID!): AcademyCourseCategoryModel!
+  updateAcademyFAQ(id: ID!, input: UpdateAcademyFAQInput!): AcademyFAQModel!
+  updateAcademyInstructor(id: ID!, input: UpdateAcademyInstructorInput!): AcademyInstructorModel!
+  updateAcademyRegistration(id: ID!, input: UpdateAcademyRegistrationInput!): AcademyCourseRegistrationModel!
+  updateAcademyRegistrationStatus(id: ID!, status: AcademyRegistrationStatus!, statusNote: String): AcademyCourseRegistrationModel!
+  updateAcademyTestimonial(id: ID!, input: UpdateAcademyTestimonialInput!): AcademyTestimonialModel!
   updateAffiliateCampaign(id: String!, input: UpdateCampaignInput!): AffCampaign!
   updateAffiliateUser(input: UpdateAffUserInput!): AffUser!
   updateBlog(input: UpdateBlogInput!): BlogType!
   updateBlogCategory(id: ID!, input: UpdateBlogCategoryInput!): BlogCategoryType!
   updateBlogTag(input: UpdateBlogTagInput!): BlogTagType!
+
+  """Cập nhật chi nhánh"""
+  updateBranch(id: ID!, input: UpdateBranchInput!): BranchModel!
+
+  """Cập nhật thứ tự hiển thị"""
+  updateBranchDisplayOrder(displayOrder: Float!, id: ID!): BranchModel!
   updateCallCenterConfig(id: String!, input: UpdateCallCenterConfigInput!): CallCenterConfig!
   updateCartItem(input: UpdateCartItemInput!, sessionId: String): UpdateCartResponse!
   updateCategory(input: UpdateCategoryInput!): CategoryType!
@@ -3990,6 +4392,17 @@ type ProjectUser {
 }
 
 type Query {
+  """Lấy chi tiết khóa học theo ID"""
+  academyCourse(id: ID!): AcademyCourseModel!
+
+  """Lấy chi tiết khóa học theo slug"""
+  academyCourseBySlug(slug: String!): AcademyCourseModel!
+
+  """Lấy danh sách khóa học"""
+  academyCourses(filter: AcademyCourseFilterInput): [AcademyCourseModel!]!
+
+  """Đếm số khóa học"""
+  academyCoursesCount(filter: AcademyCourseFilterInput): Int!
   affiliateCampaign(id: String!): AffCampaign
   affiliateCampaigns(search: CampaignSearchInput): [AffCampaign!]!
   affiliateConversions(search: AffConversionSearchInput): AffConversionsResponse!
@@ -4009,6 +4422,15 @@ type Query {
   blogTags: [BlogTagType!]!
   blogs(categoryId: ID, limit: Int, page: Int, search: String, sort: String, statusFilter: String): PaginatedBlogs!
   blogsByCategory(categoryId: ID!, limit: Int, page: Int): PaginatedBlogs!
+
+  """Lấy chi tiết chi nhánh theo ID"""
+  branch(id: ID!): BranchModel!
+
+  """Lấy chi tiết chi nhánh theo slug"""
+  branchBySlug(slug: String!): BranchModel!
+
+  """Lấy danh sách chi nhánh"""
+  branches(filter: BranchFilterInput): [BranchModel!]!
 
   """Get month view for calendar"""
   calendarMonthView(month: Float!, projectId: ID, year: Float!): String!
@@ -4073,6 +4495,9 @@ type Query {
 
   """Export tasks as iCal format (.ics file)"""
   exportICalendar(projectId: ID): String!
+
+  """Lấy khóa học nổi bật"""
+  featuredAcademyCourses(limit: Int = 6): [AcademyCourseModel!]!
   featuredBlogs(limit: Int): [BlogType!]!
   file(id: ID!): File!
   fileStorageStats: FileStorageStats!
@@ -4141,9 +4566,29 @@ type Query {
 
   """Lấy danh sách tất cả AI providers"""
   getAIProviders: [AIProvider!]!
+  getAcademyCourseCategories(filter: AcademyCourseCategoryFilterInput): [AcademyCourseCategoryModel!]!
+  getAcademyCourseCategory(id: ID!): AcademyCourseCategoryModel!
+  getAcademyCourseCategoryBySlug(slug: String!): AcademyCourseCategoryModel!
+  getAcademyFAQ(id: ID!): AcademyFAQModel!
+  getAcademyFAQCategories: [String!]!
+  getAcademyFAQs(filter: AcademyFAQFilterInput): [AcademyFAQModel!]!
+  getAcademyFAQsByCategory(category: String!): [AcademyFAQModel!]!
+  getAcademyInstructor(id: ID!): AcademyInstructorModel!
+  getAcademyInstructorBySlug(slug: String!): AcademyInstructorModel!
+  getAcademyInstructors(filter: AcademyInstructorFilterInput): [AcademyInstructorModel!]!
+  getAcademyRegistration(id: ID!): AcademyCourseRegistrationModel!
+  getAcademyRegistrations(filter: AcademyRegistrationFilterInput): [AcademyCourseRegistrationModel!]!
+  getAcademyRegistrationsByCourse(courseId: ID!): [AcademyCourseRegistrationModel!]!
+  getAcademyRegistrationsByPhone(phone: String!): [AcademyCourseRegistrationModel!]!
+  getAcademyTestimonial(id: ID!): AcademyTestimonialModel!
+  getAcademyTestimonials(filter: AcademyTestimonialFilterInput): [AcademyTestimonialModel!]!
 
   """Lấy AI provider đang active"""
   getActiveAIProvider(providerType: AIProviderType): AIProvider
+  getActiveAcademyCourseCategories: [AcademyCourseCategoryModel!]!
+  getActiveAcademyFAQs: [AcademyFAQModel!]!
+  getActiveAcademyInstructors: [AcademyInstructorModel!]!
+  getActiveAcademyTestimonials: [AcademyTestimonialModel!]!
   getAllModels: [String!]!
 
   """Get list of all available Prisma models"""
@@ -4157,6 +4602,8 @@ type Query {
   getCommentsByPost(postId: String!): [Comment!]!
   getCustomTemplate(id: String!): CustomTemplate!
   getEmployeeOnboardingStatus(employeeId: ID!): WorkflowInstance!
+  getFeaturedAcademyInstructors: [AcademyInstructorModel!]!
+  getFeaturedAcademyTestimonials: [AcademyTestimonialModel!]!
   getHomepage: Page
   getInvoice(id: ID!): ExtListhoadon!
   getInvoiceStats: InvoiceStats!
@@ -4264,6 +4711,9 @@ type Query {
   myTechnicalSupportTickets(status: String): [TechnicalSupportTicket!]!
   myWorkflowInstances: [WorkflowInstance!]!
 
+  """Lấy khóa học mới"""
+  newAcademyCourses(limit: Int = 6): [AcademyCourseModel!]!
+
   """Normalize a product name"""
   normalizeProductName(productName: String!, threshold: Float! = 0.6): String!
 
@@ -4279,6 +4729,9 @@ type Query {
   """Get overdue tasks"""
   overdueTasks(projectId: ID!): String!
   permissions: PermissionsByCategoryType!
+
+  """Lấy khóa học phổ biến"""
+  popularAcademyCourses(limit: Int = 6): [AcademyCourseModel!]!
   product(id: ID!): ProductType!
   productBySlug(slug: String!): ProductType!
   productRatingSummary(productId: ID!): ProductRatingSummaryType!
@@ -4317,6 +4770,9 @@ type Query {
 
   """Số người đang truy cập website"""
   realtimeUsers: Int!
+
+  """Lấy khóa học liên quan"""
+  relatedAcademyCourses(courseId: ID!, limit: Int = 4): [AcademyCourseModel!]!
   relatedBlogs(blogId: ID!, limit: Int): [BlogType!]!
   review(id: ID!): ProductReviewType
   reviewStats(courseId: ID!): ReviewStats!
@@ -5535,6 +5991,108 @@ input UpdateAIProviderInput {
   temperature: Float
 }
 
+input UpdateAcademyCourseCategoryInput {
+  description: String
+  displayOrder: Int
+  icon: String
+  image: String
+  isActive: Boolean
+  name: String
+  slug: String
+}
+
+input UpdateAcademyCourseInput {
+  benefits: JSON
+  categoryId: String
+  content: String
+  currency: String
+  curriculum: JSON
+  description: String
+  discountPercent: Int
+  discountPrice: Float
+  displayOrder: Int
+  duration: String
+  durationHours: Int
+  featuredImage: String
+  focusKeyword: String
+  gallery: JSON
+  instructors: JSON
+  isActive: Boolean
+  isFeatured: Boolean
+  isNew: Boolean
+  isPopular: Boolean
+  maxStudents: Int
+  metaDescription: String
+  metaTitle: String
+  price: Float
+  publishedAt: DateTime
+  requirements: JSON
+  schedule: String
+  shortDescription: String
+  slug: String
+  targetAudience: JSON
+  title: String
+  videoUrl: String
+}
+
+input UpdateAcademyFAQInput {
+  answer: String
+  category: String
+  displayOrder: Int
+  isActive: Boolean
+  question: String
+}
+
+input UpdateAcademyInstructorInput {
+  avatar: String
+  bio: String
+  certifications: String
+  displayOrder: Int
+  education: String
+  email: String
+  experience: String
+  facebook: String
+  isActive: Boolean
+  isFeatured: Boolean
+  linkedIn: String
+  name: String
+  phone: String
+  slug: String
+  specialization: String
+  title: String
+  website: String
+}
+
+input UpdateAcademyRegistrationInput {
+  address: String
+  assignedTo: String
+  birthDate: String
+  education: String
+  email: String
+  fullName: String
+  gender: String
+  note: String
+  occupation: String
+  phone: String
+  status: AcademyRegistrationStatus
+  statusNote: String
+}
+
+input UpdateAcademyTestimonialInput {
+  completedDate: String
+  content: String
+  courseName: String
+  displayOrder: Int
+  isActive: Boolean
+  isFeatured: Boolean
+  isVerified: Boolean
+  rating: Int
+  studentAvatar: String
+  studentName: String
+  studentTitle: String
+  videoUrl: String
+}
+
 input UpdateAffUserInput {
   bankAccount: String
   businessType: String
@@ -5584,6 +6142,29 @@ input UpdateBlogTagInput {
   id: ID!
   name: String
   slug: String
+}
+
+input UpdateBranchInput {
+  address: String
+  description: String
+  displayOrder: Int
+  email: String
+  facebookPageId: String
+  facebookUrl: String
+  featuredImage: String
+  hotline: String
+  isActive: Boolean
+  isFeatured: Boolean
+  latitude: Float
+  longitude: Float
+  mapEmbedUrl: String
+  name: String
+  phone: String
+  shortDescription: String
+  slug: String
+  workingHours: String
+  zaloOaId: String
+  zaloUrl: String
 }
 
 input UpdateCallCenterConfigInput {

@@ -1,60 +1,10 @@
 import { ObjectType, Field, ID, Int, Float, registerEnumType } from '@nestjs/graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { Decimal } from '@prisma/client/runtime/library';
+import { AcademyCourseCategoryModel } from '../../course-category/models/course-category.model';
 
-@ObjectType()
-export class AcademyCourseCategoryModel {
-  @Field(() => ID)
-  id: string;
-
-  @Field()
-  name: string;
-
-  @Field()
-  slug: string;
-
-  @Field({ nullable: true })
-  description?: string;
-
-  @Field({ nullable: true })
-  featuredImage?: string;
-
-  @Field({ nullable: true })
-  icon?: string;
-
-  @Field({ nullable: true })
-  color?: string;
-
-  @Field({ nullable: true })
-  parentId?: string;
-
-  @Field(() => AcademyCourseCategoryModel, { nullable: true })
-  parent?: AcademyCourseCategoryModel;
-
-  @Field(() => [AcademyCourseCategoryModel], { nullable: true })
-  children?: AcademyCourseCategoryModel[];
-
-  @Field()
-  isActive: boolean;
-
-  @Field(() => Int)
-  displayOrder: number;
-
-  @Field({ nullable: true })
-  metaTitle?: string;
-
-  @Field({ nullable: true })
-  metaDescription?: string;
-
-  @Field()
-  createdAt: Date;
-
-  @Field()
-  updatedAt: Date;
-
-  @Field(() => [AcademyCourseModel], { nullable: true })
-  courses?: AcademyCourseModel[];
-}
+// Re-export for convenience
+export { AcademyCourseCategoryModel };
 
 @ObjectType()
 export class AcademyCourseModel {
