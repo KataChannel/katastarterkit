@@ -601,7 +601,7 @@ export class SourceDocumentService {
         await this.pushNotificationService.sendToUser(admin.id, {
           title: 'Yêu cầu phê duyệt tài liệu',
           message: `${instructorName} đã gửi yêu cầu phê duyệt tài liệu "${updated.title}"`,
-          url: `/admin/lms/documents/approvals`,
+          url: `/lms/admin/approvals`,
           data: {
             documentId: updated.id,
             type: 'document_approval_request',

@@ -182,7 +182,7 @@ export function NotificationBell() {
     }
 
     // Navigate based on notification type
-    if (notification.data?.type === 'document_approval_request') {
+    if (notification.data?.type === 'document_approval_request' || notification.data?.type === 'course_approval_request') {
       router.push('/lms/admin/approvals');
     } else if (notification.data?.orderId) {
       router.push(`/orders/${notification.data.orderId}`);
@@ -195,9 +195,12 @@ export function NotificationBell() {
   };
 
   const getNotificationIcon = (type: string, data?: any) => {
-    // Check if it's a document approval notification
+    // Check if it's a document or course approval notification
     if (data?.type === 'document_approval_request') {
       return '📝';
+    }
+    if (data?.type === 'course_approval_request') {
+      return '📚';
     }
     
     switch (type) {
@@ -244,7 +247,7 @@ export function NotificationBell() {
             <h3 className="font-semibold text-base">Thông báo</h3>
             {pendingApprovalsCount > 0 && (
               <p className="text-xs text-orange-600 mt-0.5">
-                {pendingApprovalsCount} tài liệu chờ phê duyệt
+                {pendingApprovalsCount} khóa học/tài liệu chờ phê duyệt
               </p>
             )}
           </div>
@@ -279,13 +282,13 @@ export function NotificationBell() {
                   }}
                 >
                   <div className="flex gap-3">
-                    <div className="flex-shrink-0 text-2xl">📝</div>
+                    <div className="flex-shrink-0 text-2xl">📋</div>
                     <div className="flex-1">
                       <h4 className="font-medium text-sm leading-tight text-orange-900">
-                        Tài liệu chờ phê duyệt
+                        Khóa học / Tài liệu chờ phê duyệt
                       </h4>
                       <p className="text-sm text-orange-700 mt-1">
-                        Có {pendingApprovalsCount} tài liệu đang chờ phê duyệt
+                        Có {pendingApprovalsCount} yêu cầu đang chờ phê duyệt
                       </p>
                       <p className="text-xs text-orange-600 mt-2">
                         Nhấn để xem danh sách →

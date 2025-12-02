@@ -430,7 +430,7 @@ export class CoursesService {
         await this.pushNotificationService.sendToUser(admin.id, {
           title: 'Yêu cầu phê duyệt khóa học',
           message: `${instructorName} đã gửi yêu cầu phê duyệt khóa học "${updated.title}"`,
-          url: `/admin/lms/courses/approvals`,
+          url: `/lms/admin/approvals`,
           data: {
             courseId: updated.id,
             type: 'course_approval_request',

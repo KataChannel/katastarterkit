@@ -413,6 +413,11 @@ export class NotificationService {
    * Helper: Get URL for notification type
    */
   private getUrlForNotificationType(type: string, data: any): string {
+    // Check for approval request notifications
+    if (data?.type === 'course_approval_request' || data?.type === 'document_approval_request') {
+      return '/lms/admin/approvals';
+    }
+
     switch (type) {
       case 'ORDER':
         return data?.orderId ? `/orders/${data.orderId}` : '/orders';
