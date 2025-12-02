@@ -4,7 +4,7 @@
 
 Đã thêm tính năng upload tài liệu nguồn (source documents) lên Google Drive công ty song song với MinIO server.
 
-**Folder Google Drive công ty:** https://drive.google.com/drive/folders/1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4
+**Folder Google Drive công ty:** https://drive.google.com/drive/folders/1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG
 
 ## Các file được thêm/sửa
 

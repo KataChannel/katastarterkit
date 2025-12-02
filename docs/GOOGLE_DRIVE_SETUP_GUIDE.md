@@ -4,7 +4,7 @@
 
 Hệ thống hỗ trợ upload tài liệu nguồn lên **Google Drive công ty** thay vì MinIO server. Để sử dụng tính năng này, bạn cần cấu hình Service Account của Google Cloud.
 
-**Folder Google Drive công ty:** https://drive.google.com/drive/folders/1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4
+**Folder Google Drive công ty:** https://drive.google.com/drive/folders/1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG
 
 ## Bước 1: Tạo Google Cloud Project
 
@@ -59,7 +59,7 @@ Hệ thống hỗ trợ upload tài liệu nguồn lên **Google Drive công ty*
 1. Mở file JSON vừa download, tìm field `"client_email"`
    - Email có dạng: `lms-gdrive-uploader@project-id.iam.gserviceaccount.com`
 2. Copy email này
-3. Mở folder Google Drive công ty: https://drive.google.com/drive/folders/1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4
+3. Mở folder Google Drive công ty: https://drive.google.com/drive/folders/1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG
 4. Click phải vào folder → **"Share"** (hoặc click biểu tượng 👤+)
 5. Paste email service account vào ô "Add people and groups"
 6. Chọn quyền: **"Editor"** (để có thể upload và tạo sub-folder)
@@ -111,7 +111,7 @@ docker-compose restart backend
 Hệ thống tự động tạo sub-folder theo loại file:
 
 ```
-📁 Folder công ty (1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4)
+📁 Folder công ty (1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG)
 ├── 📁 Images (ảnh: jpg, png, gif, webp...)
 ├── 📁 Videos (video: mp4, avi, mov...)
 ├── 📁 Audio (âm thanh: mp3, wav, ogg...)
@@ -172,7 +172,7 @@ Hệ thống tự động tạo sub-folder theo loại file:
 **Nguyên nhân:** File được upload vào sub-folder tự động tạo
 
 **Giải pháp:**
-1. Mở folder công ty: https://drive.google.com/drive/folders/1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4
+1. Mở folder công ty: https://drive.google.com/drive/folders/1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG
 2. Tìm sub-folder tương ứng (Images, Videos, Documents...)
 3. File sẽ nằm trong sub-folder đó
 

@@ -15,15 +15,15 @@ export interface GoogleDriveUploadResult {
 
 /**
  * Service để upload file lên Google Drive của công ty
- * Folder chung: https://drive.google.com/drive/folders/1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4
+ * Folder chung: https://drive.google.com/drive/folders/1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG
  */
 @Injectable()
 export class GoogleDriveService {
   private readonly logger = new Logger(GoogleDriveService.name);
   private drive: drive_v3.Drive | null = null;
 
-  // Folder ID của công ty từ URL: 1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4
-  private readonly COMPANY_FOLDER_ID = '1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4';
+  // Folder ID của công ty từ URL: 1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG
+  private readonly COMPANY_FOLDER_ID = '1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG';
   
   // Sub-folder IDs theo loại file (sẽ được tạo tự động nếu chưa có)
   private folderCache: Map<string, string> = new Map();
@@ -48,7 +48,7 @@ export class GoogleDriveService {
       
       const auth = new google.auth.GoogleAuth({
         credentials,
-        scopes: ['https://www.googleapis.com/auth/drive.file'],
+        scopes: ['https://www.googleapis.com/auth/drive'],
       });
 
       this.drive = google.drive({ version: 'v3', auth });

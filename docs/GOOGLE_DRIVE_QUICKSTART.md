@@ -20,7 +20,7 @@
 
 ### Phần 2: Share Folder (1 phút)
 - [ ] Copy email service account (trong file JSON)
-- [ ] Vào [Folder công ty](https://drive.google.com/drive/folders/1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4)
+- [ ] Vào [Folder công ty](https://drive.google.com/drive/folders/1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG)
 - [ ] Share với email service account (quyền **Editor**)
 
 ### Phần 3: Backend (2 phút)

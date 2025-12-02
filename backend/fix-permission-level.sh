@@ -1,0 +1,66 @@
+#!/bin/bash
+
+echo ""
+echo "🔍 PHÁT HIỆN VẤN ĐỀ!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "✅ Service Account ĐÃ ĐƯỢC SHARE folder"
+echo "❌ NHƯNG có thể quyền là 'Người xem' thay vì 'Người chỉnh sửa'"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔧 CÁCH SỬA (3 BƯỚC):"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "1. Click nút 'Quản lý quyền truy cập' trong panel bên phải"
+echo ""
+echo "2. Tìm dòng Service Account:"
+echo "   app-taza-group-drive-tazagroup@tazagroup-480011.iam.gserviceaccount.com"
+echo ""
+echo "3. Click vào dropdown quyền (bên phải email)"
+echo "   → Đổi từ 'Người xem' thành 'Người chỉnh sửa' / 'Editor'"
+echo "   → Click 'Xong' / 'Done'"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Sau khi đổi quyền xong, nhấn Enter để test..."
+read
+
+echo ""
+echo "⏳ Đợi 5 giây để Google đồng bộ..."
+sleep 5
+
+echo ""
+echo "🧪 Testing..."
+echo ""
+
+node test-google-drive-direct.js
+
+if [ $? -eq 0 ]; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "✅ THÀNH CÔNG! Google Drive đã sẵn sàng!"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "Bây giờ bạn có thể:"
+  echo "1. Upload file lên Google Drive từ LMS"
+  echo "2. File sẽ tự động được tổ chức vào các folder:"
+  echo "   - Images/"
+  echo "   - Videos/"
+  echo "   - PDFs/"
+  echo "   - Documents/"
+  echo "   - etc."
+  echo ""
+else
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "❌ VẪN CHƯA KẾT NỐI ĐƯỢC"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "Có thể do:"
+  echo "1. Quyền vẫn là 'Người xem' - hãy kiểm tra lại"
+  echo "2. Google chưa đồng bộ - đợi thêm 1-2 phút"
+  echo "3. Folder bị khóa bởi tổ chức (Organization policy)"
+  echo ""
+  echo "Thử chạy lại script này sau 2 phút..."
+  echo ""
+fi

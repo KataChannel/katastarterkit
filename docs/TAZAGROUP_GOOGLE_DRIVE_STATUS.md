@@ -33,7 +33,7 @@
    ```
 
 2. **Mở folder Google Drive công ty:**
-   - URL: https://drive.google.com/drive/folders/1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4
+   - URL: https://drive.google.com/drive/folders/1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG
    - Hoặc folder bạn muốn sử dụng cho TazaGroup
 
 3. **Share folder:**

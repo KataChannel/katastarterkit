@@ -1,4 +1,5 @@
 // Test Google Drive API directly with Node.js
+require('dotenv').config();
 const { google } = require('googleapis');
 
 async function testGoogleDrive() {
@@ -20,14 +21,14 @@ async function testGoogleDrive() {
     // Initialize auth
     const auth = new google.auth.GoogleAuth({
       credentials,
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
+      scopes: ['https://www.googleapis.com/auth/drive'],
     });
-    
+
     const drive = google.drive({ version: 'v3', auth });
     console.log('✅ Google Drive API initialized\n');
     
     // Test accessing the folder
-    const folderId = '1JR8q5xZ8vCWJgDEXMdEjwYinte4IXPE4';
+    const folderId = '1kSEvP8QlhhZoOjtemtLuKA_LkuWr2OTG';
     console.log(`🔍 Testing access to folder: ${folderId}`);
     
     try {
