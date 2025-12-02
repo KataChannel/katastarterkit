@@ -72,12 +72,6 @@ export class AcademyInstructorService {
   async findOne(id: string) {
     const instructor = await this.prisma.academyInstructor.findUnique({
       where: { id },
-      include: {
-        courses: {
-          take: 10,
-          orderBy: { createdAt: 'desc' },
-        },
-      },
     });
 
     if (!instructor) {
@@ -90,11 +84,6 @@ export class AcademyInstructorService {
   async findBySlug(slug: string) {
     const instructor = await this.prisma.academyInstructor.findUnique({
       where: { slug },
-      include: {
-        courses: {
-          orderBy: { displayOrder: 'asc' },
-        },
-      },
     });
 
     if (!instructor) {

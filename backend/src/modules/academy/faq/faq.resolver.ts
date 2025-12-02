@@ -45,12 +45,6 @@ export class AcademyFAQResolver {
     return this.faqService.findByCategory(category);
   }
 
-  @Query(() => [AcademyFAQModel], { name: 'getAcademyFAQsByCourse' })
-  @Public()
-  async getFAQsByCourse(@Args('courseId', { type: () => ID }) courseId: string) {
-    return this.faqService.findByCourse(courseId);
-  }
-
   @Query(() => [String], { name: 'getAcademyFAQCategories' })
   @Public()
   async getFAQCategories() {

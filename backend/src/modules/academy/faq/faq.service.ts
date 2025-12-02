@@ -28,15 +28,8 @@ export class AcademyFAQService {
       where.category = filter.category;
     }
 
-    if (filter?.courseId) {
-      where.courseId = filter.courseId;
-    }
-
     return this.prisma.academyFAQ.findMany({
       where,
-      include: {
-        course: true,
-      },
       orderBy: { displayOrder: 'asc' },
     });
   }
@@ -44,9 +37,6 @@ export class AcademyFAQService {
   async findOne(id: string) {
     const faq = await this.prisma.academyFAQ.findUnique({
       where: { id },
-      include: {
-        course: true,
-      },
     });
 
     if (!faq) {
@@ -59,9 +49,6 @@ export class AcademyFAQService {
   async findActive() {
     return this.prisma.academyFAQ.findMany({
       where: { isActive: true },
-      include: {
-        course: true,
-      },
       orderBy: { displayOrder: 'asc' },
     });
   }
@@ -70,16 +57,6 @@ export class AcademyFAQService {
     return this.prisma.academyFAQ.findMany({
       where: { 
         category,
-        isActive: true,
-      },
-      orderBy: { displayOrder: 'asc' },
-    });
-  }
-
-  async findByCourse(courseId: string) {
-    return this.prisma.academyFAQ.findMany({
-      where: { 
-        courseId,
         isActive: true,
       },
       orderBy: { displayOrder: 'asc' },
@@ -102,9 +79,6 @@ export class AcademyFAQService {
   async create(input: CreateAcademyFAQInput) {
     return this.prisma.academyFAQ.create({
       data: input,
-      include: {
-        course: true,
-      },
     });
   }
 
@@ -120,9 +94,6 @@ export class AcademyFAQService {
     return this.prisma.academyFAQ.update({
       where: { id },
       data: input,
-      include: {
-        course: true,
-      },
     });
   }
 
