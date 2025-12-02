@@ -17,7 +17,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { MinioService } from '../../minio/minio.service';
 import { SourceDocumentService } from './source-document.service';
 import { VideoProcessingService } from './video-processing.service';
-import { GoogleDriveService } from '../../services/google-drive.service';
+import { GoogleDriveService, decodeHtmlEntities } from '../../services/google-drive.service';
 
 interface UploadedFile {
   buffer: Buffer;
@@ -556,11 +556,23 @@ export class SourceDocumentUploadController {
     @Body() body: { url: string },
     @Req() request: any,
   ) {
-    const { url } = body;
+    let { url } = body;
+
+    this.logger.log(`📥 Received body: ${JSON.stringify(body)}`);
+    this.logger.log(`📥 Raw URL: "${url}"`);
 
     if (!url) {
       throw new BadRequestException('URL is required');
     }
+
+    if (typeof url !== 'string') {
+      throw new BadRequestException('URL must be a string');
+    }
+
+    // Decode HTML entities that might come from frontend
+    url = decodeHtmlEntities(url.trim());
+
+    this.logger.log(`📥 Decoded URL: "${url}"`);
 
     try {
       this.logger.log(`📤 Uploading from URL to Google Drive: ${url}`);

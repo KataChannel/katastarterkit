@@ -3,6 +3,23 @@ import { google, drive_v3 } from 'googleapis';
 import { Readable } from 'stream';
 import axios from 'axios';
 
+/**
+ * Decode HTML entities from URL
+ */
+export function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#x2F;/g, '/')
+    .replace(/&#x3A;/g, ':')
+    .replace(/&#x3F;/g, '?')
+    .replace(/&#x3D;/g, '=')
+    .replace(/&#x26;/g, '&')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'");
+}
+
 export interface GoogleDriveUploadResult {
   id: string;
   name: string;
@@ -167,15 +184,24 @@ export class GoogleDriveService {
 
       const file = response.data;
 
-      // Make file publicly accessible
-      await this.drive.permissions.create({
-        fileId: file.id!,
-        requestBody: {
-          role: 'reader',
-          type: 'anyone',
-        },
-        supportsAllDrives: true,
-      });
+      // Skip setting permissions for Shared Drive files
+      // They inherit permissions from the parent folder
+      // Only set permissions if this is in My Drive (not Shared Drive)
+      try {
+        // Try to set public permission, but ignore errors for Shared Drives
+        await this.drive.permissions.create({
+          fileId: file.id!,
+          requestBody: {
+            role: 'reader',
+            type: 'anyone',
+          },
+          supportsAllDrives: true,
+        });
+        this.logger.log(`✅ Set public permission for: ${fileName}`);
+      } catch (permError) {
+        // Ignore permission errors for Shared Drives
+        this.logger.log(`ℹ️ Skipped permission setting (inherited from parent): ${fileName}`);
+      }
 
       this.logger.log(`✅ Uploaded to Google Drive: ${fileName} -> ${folderName}`);
 
@@ -203,10 +229,19 @@ export class GoogleDriveService {
     }
 
     try {
-      this.logger.log(`📥 Downloading from URL: ${url}`);
+      // Validate and clean URL
+      if (!url || typeof url !== 'string') {
+        throw new BadRequestException('URL không hợp lệ');
+      }
+
+      // Decode HTML entities (&#x2F; -> /, etc.)
+      const cleanUrl = decodeHtmlEntities(url.trim());
+
+      this.logger.log(`📥 Original URL: ${url}`);
+      this.logger.log(`📥 Cleaned URL: ${cleanUrl}`);
 
       // Convert Google Drive/Sheets/Docs URLs to direct download links
-      const downloadUrl = this.convertToDirectDownloadUrl(url);
+      const downloadUrl = this.convertToDirectDownloadUrl(cleanUrl);
 
       // Download file
       const response = await axios.get(downloadUrl, {
@@ -386,10 +421,11 @@ export class GoogleDriveService {
     }
 
     try {
-      // Try to access the company folder
+      // Try to access the company folder (Shared Drive)
       await this.drive.files.get({
         fileId: this.COMPANY_FOLDER_ID,
         fields: 'id, name',
+        supportsAllDrives: true,
       });
 
       return {

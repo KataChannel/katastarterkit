@@ -212,6 +212,38 @@ export function usePWA(): PWAHookReturn {
         throw new Error('Notification permission denied');
       }
 
+      // Wait for service worker to be active
+      if (serviceWorkerRegistration.active) {
+        // Service worker is already active, proceed
+      } else {
+        // Wait for service worker to become active
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Service worker activation timeout'));
+          }, 10000); // 10 second timeout
+
+          if (serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting) {
+            const worker = serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting;
+            worker!.addEventListener('statechange', function onStateChange() {
+              if (worker!.state === 'activated') {
+                clearTimeout(timeout);
+                worker!.removeEventListener('statechange', onStateChange);
+                resolve();
+              }
+            });
+          } else {
+            // Try to get the active worker from navigator
+            if (navigator.serviceWorker.controller) {
+              clearTimeout(timeout);
+              resolve();
+            } else {
+              clearTimeout(timeout);
+              reject(new Error('No active service worker found'));
+            }
+          }
+        });
+      }
+
       // Check if already subscribed
       let subscription = await serviceWorkerRegistration.pushManager.getSubscription();
       
