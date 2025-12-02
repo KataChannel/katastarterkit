@@ -147,6 +147,49 @@ const getFileIcon = (mimeType?: string) => {
   return <File className="w-8 h-8 text-blue-500" />;
 };
 
+// Check if file can be previewed
+const canPreviewFile = (mimeType?: string, url?: string): boolean => {
+  if (!mimeType && !url) return false;
+  
+  // PDF
+  if (mimeType === 'application/pdf' || url?.toLowerCase().endsWith('.pdf')) return true;
+  
+  // Office documents (via Google Docs Viewer or Office Online)
+  const officeTypes = [
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  ];
+  if (mimeType && officeTypes.includes(mimeType)) return true;
+  
+  // Check by extension
+  const previewExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'];
+  if (url) {
+    const lowerUrl = url.toLowerCase();
+    return previewExtensions.some(ext => lowerUrl.endsWith(ext));
+  }
+  
+  return false;
+};
+
+// Get preview URL for office documents (using Google Docs Viewer)
+const getOfficePreviewUrl = (url: string): string => {
+  // Use Google Docs Viewer for office files
+  return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+};
+
+// Get file type for display
+const getFileTypeLabel = (mimeType?: string, url?: string): string => {
+  if (mimeType?.includes('pdf') || url?.toLowerCase().endsWith('.pdf')) return 'PDF';
+  if (mimeType?.includes('word') || url?.toLowerCase().match(/\.docx?$/)) return 'Word';
+  if (mimeType?.includes('excel') || mimeType?.includes('spreadsheet') || url?.toLowerCase().match(/\.xlsx?$/)) return 'Excel';
+  if (mimeType?.includes('powerpoint') || mimeType?.includes('presentation') || url?.toLowerCase().match(/\.pptx?$/)) return 'PowerPoint';
+  return 'File';
+};
+
 interface UploadedFileInfo {
   url: string;
   fileName: string;
@@ -863,15 +906,6 @@ export default function DocumentDetailPage() {
                         <div className="flex flex-wrap gap-2 mt-4">
                           <Button
                             size="sm"
-                            variant="default"
-                            className="flex-1 sm:flex-none"
-                            onClick={() => window.open(document.url, '_blank')}
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            Xem
-                          </Button>
-                          <Button
-                            size="sm"
                             variant="outline"
                             className="flex-1 sm:flex-none"
                             onClick={handleDownload}
@@ -882,16 +916,55 @@ export default function DocumentDetailPage() {
                         </div>
                       </div>
 
-                      {/* PDF Embed Preview */}
-                      {document.mimeType === 'application/pdf' && (
+                      {/* Document Preview */}
+                      {canPreviewFile(document.mimeType, document.url) ? (
                         <div className="border rounded-lg overflow-hidden bg-muted/30">
-                          <div className="aspect-[3/4] max-h-[600px]">
-                            <iframe
-                              src={`${document.url}#view=FitH`}
-                              className="w-full h-full"
-                              title={document.title}
-                            />
+                          <div className="bg-muted/50 px-4 py-2 border-b flex items-center justify-between">
+                            <span className="text-xs font-medium text-muted-foreground flex items-center gap-2">
+                              <Eye className="w-3 h-3" />
+                              Xem trước {getFileTypeLabel(document.mimeType, document.url)}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 text-xs"
+                              onClick={() => window.open(document.url, '_blank')}
+                            >
+                              <ExternalLink className="w-3 h-3 mr-1" />
+                              Mở tab mới
+                            </Button>
                           </div>
+                          <div className="aspect-[3/4] max-h-[700px]">
+                            {document.mimeType === 'application/pdf' || document.url?.toLowerCase().endsWith('.pdf') ? (
+                              <iframe
+                                src={`${document.url}#view=FitH`}
+                                className="w-full h-full"
+                                title={document.title}
+                              />
+                            ) : (
+                              <iframe
+                                src={getOfficePreviewUrl(document.url)}
+                                className="w-full h-full"
+                                title={document.title}
+                                sandbox="allow-scripts allow-same-origin allow-popups"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border rounded-lg p-6 bg-muted/30 text-center">
+                          <File className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Định dạng file này không hỗ trợ xem trước trực tuyến
+                          </p>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={handleDownload}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Tải về để xem
+                          </Button>
                         </div>
                       )}
                     </div>
