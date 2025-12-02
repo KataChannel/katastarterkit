@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00256e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a5f7a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="200" fill="#ffffff" opacity="0.1"/>
+  <circle cx="1100" cy="530" r="300" fill="#ffffff" opacity="0.1"/>
+  
+  <!-- Logo placeholder -->
+  <rect x="50" y="50" width="200" height="60" rx="5" fill="#ffffff"/>
+  <text x="150" y="90" font-family="Arial, sans-serif" font-size="28" fill="#00256e" text-anchor="middle" font-weight="bold">TIMONA</text>
+  
+  <!-- Main Title -->
+  <text x="600" y="250" font-family="Arial, sans-serif" font-size="72" fill="#ffffff" text-anchor="middle" font-weight="bold">Timona Academy</text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="330" font-family="Arial, sans-serif" font-size="36" fill="#ffffff" text-anchor="middle" opacity="0.9">Học viện Đào tạo Thẩm mỹ Quốc tế</text>
+  
+  <!-- Features -->
+  <text x="600" y="420" font-family="Arial, sans-serif" font-size="24" fill="#ffffff" text-anchor="middle" opacity="0.8">🎓 Chăm sóc da • Phun xăm • Nối mi • Nail • Makeup</text>
+  
+  <!-- Contact -->
+  <rect x="450" y="480" width="300" height="50" rx="25" fill="#ffffff"/>
+  <text x="600" y="515" font-family="Arial, sans-serif" font-size="24" fill="#00256e" text-anchor="middle" font-weight="bold">📞 Hotline: 1900 2109</text>
+  
+  <!-- Website -->
+  <text x="600" y="590" font-family="Arial, sans-serif" font-size="20" fill="#ffffff" text-anchor="middle" opacity="0.7">timona.edu.vn</text>
+</svg>

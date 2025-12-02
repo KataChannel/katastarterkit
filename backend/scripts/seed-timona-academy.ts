@@ -1,13 +1,15 @@
 /**
  * Seed Script: Timona Academy Data
  * 
- * This script seeds sample data for Timona Academy including:
+ * This script seeds data for Timona Academy including:
  * - Course Categories
- * - Courses
+ * - Courses (from WordPress migration)
  * - Instructors
  * - FAQs
  * - Testimonials
- * - Branches
+ * - Branches (from WordPress kata_chatbot_branches)
+ * 
+ * Based on: timonachuyendoi/tazaspac_wp_timona.sql data
  * 
  * Run with: cd backend && npx ts-node scripts/seed-timona-academy.ts
  */
@@ -21,43 +23,63 @@ async function seedCategories() {
   
   const categories = [
     {
-      name: 'Chăm sóc da - Spa',
-      slug: 'cham-soc-da-spa',
-      description: 'Các khóa học về chăm sóc da mặt, body, điều trị mụn, nám, tàn nhang',
-      featuredImage: '/images/categories/spa.jpg',
+      name: 'Chăm sóc da',
+      slug: 'cham-soc-da',
+      description: 'Khóa học chăm sóc da điều trị da cung cấp kiến thức và kỹ năng chăm sóc da chuyên nghiệp, áp dụng liệu pháp điều trị da hiệu quả và sử dụng công nghệ hiện đại.',
+      featuredImage: '/images/timona/course-spa.jpg',
+      icon: 'spa',
+      color: '#00256e',
       displayOrder: 0,
-      isActive: true,
-    },
-    {
-      name: 'Phun xăm thẩm mỹ',
-      slug: 'phun-xam-tham-my',
-      description: 'Phun môi, phun mày, điêu khắc lông mày, nhũ hoa',
-      featuredImage: '/images/categories/phun-xam.jpg',
-      displayOrder: 1,
-      isActive: true,
-    },
-    {
-      name: 'Nối mi - Làm đẹp mắt',
-      slug: 'noi-mi-lam-dep-mat',
-      description: 'Nối mi cổ điển, nối mi volume, uốn mi, nhuộm mi',
-      featuredImage: '/images/categories/noi-mi.jpg',
-      displayOrder: 2,
       isActive: true,
     },
     {
       name: 'Gội đầu dưỡng sinh',
       slug: 'goi-dau-duong-sinh',
-      description: 'Massage đầu vai gáy, dưỡng sinh, thư giãn',
-      featuredImage: '/images/categories/goi-dau.jpg',
+      description: 'Khóa học gội đầu dưỡng sinh kết hợp massage thư giãn, giúp học viên nắm vững kỹ năng chăm sóc tóc và da đầu chuyên nghiệp.',
+      featuredImage: '/images/timona/course-goidau.jpg',
+      icon: 'self_improvement',
+      color: '#1a5f7a',
+      displayOrder: 1,
+      isActive: true,
+    },
+    {
+      name: 'Phun xăm thẩm mỹ',
+      slug: 'phun-xam-tham-my',
+      description: 'Khóa học phun xăm thẩm mỹ chuyên nghiệp với các kỹ thuật phun môi, phun mày, phun mí mắt hiện đại nhất.',
+      featuredImage: '/images/timona/course-phunxam.jpg',
+      icon: 'brush',
+      color: '#c41e3a',
+      displayOrder: 2,
+      isActive: true,
+    },
+    {
+      name: 'Nối mi',
+      slug: 'noi-mi',
+      description: 'Khóa học nối mi chuyên nghiệp với các kỹ thuật nối mi classic, nối mi volume, nối mi kim cương.',
+      featuredImage: '/images/timona/course-noimi.jpg',
+      icon: 'visibility',
+      color: '#8b4513',
       displayOrder: 3,
       isActive: true,
     },
     {
-      name: 'Nail - Làm móng',
-      slug: 'nail-lam-mong',
-      description: 'Làm móng cơ bản, nail art, đắp móng, vẽ gel',
-      featuredImage: '/images/categories/nail.jpg',
+      name: 'Nail chuyên nghiệp',
+      slug: 'nail-chuyen-nghiep',
+      description: 'Khóa học nail từ cơ bản đến nâng cao, bao gồm các kỹ thuật vẽ nail, đắp bột, gel... theo xu hướng mới nhất.',
+      featuredImage: '/images/timona/course-nail.jpg',
+      icon: 'spa',
+      color: '#ff69b4',
       displayOrder: 4,
+      isActive: true,
+    },
+    {
+      name: 'Makeup chuyên nghiệp',
+      slug: 'makeup-chuyen-nghiep',
+      description: 'Khóa học trang điểm chuyên nghiệp từ cơ bản đến nâng cao, phù hợp với nhiều phong cách và sự kiện khác nhau.',
+      featuredImage: '/images/timona/course-makeup.jpg',
+      icon: 'face_retouching_natural',
+      color: '#e91e63',
+      displayOrder: 5,
       isActive: true,
     },
   ];
@@ -88,196 +110,247 @@ async function seedCourses(categories: any[]) {
     categoryMap[c.slug] = c.id;
   });
   
+  // Courses based on WordPress tazaspac_wp_timona data
   const courses = [
+    // CHĂM SÓC DA
     {
-      title: 'Khóa học Kỹ thuật viên Chăm sóc da cơ bản',
-      slug: 'ky-thuat-vien-cham-soc-da-co-ban',
-      shortDescription: 'Học các kỹ năng chăm sóc da cơ bản, phân tích da, chăm sóc da mặt chuẩn quy trình',
+      title: 'CHĂM SÓC DA',
+      slug: 'cham-soc-da',
+      shortDescription: 'Khóa học chăm sóc da điều trị da cung cấp kiến thức và kỹ năng chăm sóc da chuyên nghiệp.',
       description: `
-        <h2>Giới thiệu khóa học</h2>
-        <p>Khóa học dành cho người mới bắt đầu muốn theo đuổi nghề Spa, Thẩm mỹ. Sau khóa học, học viên có thể tự tin làm việc tại các Spa, Thẩm mỹ viện.</p>
-        
-        <h2>Đối tượng phù hợp</h2>
+        <h2>Giới thiệu khóa học Chăm sóc da</h2>
+        <p>Khóa học Chăm sóc da tại Timona Academy được thiết kế dành cho những ai muốn theo đuổi sự nghiệp trong ngành làm đẹp, đặc biệt là lĩnh vực chăm sóc và điều trị da.</p>
+        <h3>Nội dung đào tạo</h3>
         <ul>
-          <li>Người mới bắt đầu, chưa có kinh nghiệm</li>
-          <li>Muốn chuyển nghề sang lĩnh vực làm đẹp</li>
-          <li>Muốn có kỹ năng chăm sóc da cho bản thân và gia đình</li>
+          <li>Kiến thức cơ bản về cấu trúc da và các loại da</li>
+          <li>Kỹ thuật chăm sóc da cơ bản đến nâng cao</li>
+          <li>Các phương pháp điều trị da liễu phổ biến</li>
+          <li>Sử dụng thiết bị và công nghệ hiện đại</li>
+          <li>Tư vấn và chăm sóc khách hàng</li>
+        </ul>
+      `,
+      duration: '3 tháng',
+      durationHours: 200,
+      price: 15000000,
+      discountPrice: 12000000,
+      schedule: 'Khai giảng liên tục',
+      curriculum: [
+        'Module 1: Kiến thức cơ bản về da',
+        'Module 2: Kỹ thuật làm sạch và tẩy tế bào chết',
+        'Module 3: Massage mặt chuyên nghiệp',
+        'Module 4: Các phương pháp điều trị mụn',
+        'Module 5: Điều trị nám, tàn nhang',
+        'Module 6: Sử dụng máy móc công nghệ cao',
+        'Module 7: Tư vấn và chăm sóc khách hàng',
+      ],
+      benefits: [
+        'Cấp chứng chỉ quốc gia có giá trị toàn quốc',
+        'Hỗ trợ giới thiệu việc làm sau tốt nghiệp',
+        'Được thực hành trên khách hàng thực tế',
+        'Giảng viên có kinh nghiệm thực tế',
+        'Học liệu và sản phẩm chất lượng cao',
+      ],
+      requirements: [
+        'Không yêu cầu kinh nghiệm trước',
+        'Đam mê ngành làm đẹp',
+      ],
+      targetAudience: [
+        'Người mới bắt đầu muốn học nghề',
+        'Nhân viên spa muốn nâng cao tay nghề',
+        'Người muốn mở spa riêng',
+      ],
+      featuredImage: '/images/timona/course-spa.jpg',
+      isFeatured: true,
+      isPopular: true,
+      displayOrder: 0,
+      categorySlug: 'cham-soc-da',
+    },
+    // GỘI ĐẦU DƯỠNG SINH
+    {
+      title: 'GỘI ĐẦU DƯỠNG SINH',
+      slug: 'goi-dau-duong-sinh',
+      shortDescription: 'Khóa học gội đầu dưỡng sinh kết hợp massage thư giãn, giúp học viên nắm vững kỹ năng chăm sóc tóc và da đầu chuyên nghiệp.',
+      description: `
+        <h2>Giới thiệu khóa học Gội đầu dưỡng sinh</h2>
+        <p>Gội đầu dưỡng sinh là phương pháp chăm sóc tóc và da đầu kết hợp với massage thư giãn, giúp khách hàng giảm stress và cải thiện tuần hoàn máu.</p>
+        <h3>Bạn sẽ học được gì?</h3>
+        <ul>
+          <li>Kỹ thuật gội đầu đúng cách</li>
+          <li>Các phương pháp massage da đầu</li>
+          <li>Chăm sóc tóc hư tổn</li>
+          <li>Tư vấn sản phẩm phù hợp</li>
         </ul>
       `,
       duration: '2 tháng',
-      price: 15000000,
-      discountPrice: 12000000,
+      durationHours: 100,
+      price: 8000000,
+      discountPrice: null,
+      schedule: 'Khai giảng hàng tháng',
       curriculum: [
-        'Tổng quan về da và các loại da',
-        'Phân tích da khách hàng',
-        'Quy trình chăm sóc da mặt cơ bản',
-        'Sử dụng mỹ phẩm và máy móc',
-        'Massage mặt - vai gáy',
-        'Thực hành trên model',
+        'Module 1: Kiến thức về tóc và da đầu',
+        'Module 2: Kỹ thuật gội đầu cơ bản',
+        'Module 3: Massage dưỡng sinh',
+        'Module 4: Chăm sóc tóc chuyên sâu',
       ],
       benefits: [
-        'Nhận bằng tốt nghiệp',
-        'Được giới thiệu việc làm',
-        'Học lại miễn phí nếu chưa đạt',
-        'Tặng bộ dụng cụ thực hành',
+        'Cấp chứng chỉ được công nhận',
+        'Được thực hành tại spa thực tế',
+        'Hỗ trợ việc làm sau tốt nghiệp',
+        'Học phí ưu đãi',
       ],
-      requirements: [
-        'Không yêu cầu kinh nghiệm',
-        'Đam mê ngành làm đẹp',
-        'Có tinh thần học hỏi',
-      ],
-      featuredImage: '/images/courses/cham-soc-da-co-ban.jpg',
+      requirements: ['Không yêu cầu kinh nghiệm'],
+      targetAudience: ['Người muốn học nghề nhanh', 'Nhân viên salon tóc'],
+      featuredImage: '/images/timona/course-goidau.jpg',
       isFeatured: true,
-      displayOrder: 0,
-      categorySlug: 'cham-soc-da-spa',
+      isPopular: false,
+      displayOrder: 1,
+      categorySlug: 'goi-dau-duong-sinh',
     },
+    // PHUN XĂM THẨM MỸ
     {
-      title: 'Khóa học Chuyên gia Điều trị Mụn - Nám',
-      slug: 'chuyen-gia-dieu-tri-mun-nam',
-      shortDescription: 'Chuyên sâu về điều trị các vấn đề da: mụn, nám, tàn nhang, thâm sẹo',
+      title: 'PHUN XĂM THẨM MỸ',
+      slug: 'phun-xam-tham-my',
+      shortDescription: 'Khóa học phun xăm thẩm mỹ chuyên nghiệp với các kỹ thuật phun môi, phun mày, phun mí mắt hiện đại nhất.',
       description: `
-        <h2>Giới thiệu khóa học</h2>
-        <p>Khóa học chuyên sâu dành cho người đã có kiến thức cơ bản về chăm sóc da, muốn nâng cao kỹ năng điều trị các vấn đề da phức tạp.</p>
+        <h2>Khóa học Phun xăm thẩm mỹ</h2>
+        <p>Phun xăm thẩm mỹ là một trong những nghề "hot" nhất hiện nay với mức thu nhập cao và nhu cầu thị trường lớn.</p>
+        <h3>Chương trình đào tạo</h3>
+        <ul>
+          <li>Phun môi collagen, môi pha lê</li>
+          <li>Phun mày tán bột, điêu khắc 6D, 9D</li>
+          <li>Phun mí mở tròng, mí mắt nghệ thuật</li>
+          <li>Xử lý các ca khó</li>
+        </ul>
       `,
-      duration: '3 tháng',
+      duration: '4 tháng',
+      durationHours: 250,
       price: 25000000,
       discountPrice: 20000000,
+      schedule: 'Khai giảng: 15 hàng tháng',
       curriculum: [
-        'Cơ chế hình thành mụn, nám',
-        'Phân loại và đánh giá mức độ',
-        'Các phương pháp điều trị hiện đại',
-        'Sử dụng máy điện di, RF, laser',
-        'Peel da, mesotherapy',
-        'Xây dựng liệu trình điều trị',
+        'Module 1: Kiến thức nền tảng về phun xăm',
+        'Module 2: Kỹ thuật phun môi',
+        'Module 3: Kỹ thuật phun mày',
+        'Module 4: Kỹ thuật phun mí',
+        'Module 5: Xử lý ca khó và sửa lỗi',
+        'Module 6: Vệ sinh và an toàn',
       ],
       benefits: [
-        'Chứng chỉ chuyên gia',
-        'Thực hành trên khách hàng thực',
-        'Hỗ trợ mở Spa',
-        'Cập nhật công nghệ mới miễn phí',
+        'Cấp chứng chỉ nghề quốc gia',
+        'Được thực hành trên model thực',
+        'Hỗ trợ mở salon',
+        'Được cập nhật kỹ thuật mới miễn phí',
+        'Kết nối cộng đồng học viên',
       ],
-      requirements: [
-        'Đã học qua khóa chăm sóc da cơ bản',
-        'Hoặc có ít nhất 6 tháng kinh nghiệm',
-      ],
-      featuredImage: '/images/courses/dieu-tri-mun-nam.jpg',
+      requirements: ['Không yêu cầu kinh nghiệm'],
+      targetAudience: ['Người muốn có nghề thu nhập cao', 'Chủ spa muốn mở rộng dịch vụ'],
+      featuredImage: '/images/timona/course-phunxam.jpg',
       isFeatured: true,
-      displayOrder: 1,
-      categorySlug: 'cham-soc-da-spa',
-    },
-    {
-      title: 'Khóa học Phun môi Collagen',
-      slug: 'phun-moi-collagen',
-      shortDescription: 'Kỹ thuật phun môi căng bóng, không sưng, không đau, lên màu chuẩn',
-      description: `
-        <h2>Giới thiệu khóa học</h2>
-        <p>Học kỹ thuật phun môi hiện đại nhất, tạo màu tự nhiên, môi căng mọng không đau.</p>
-      `,
-      duration: '1.5 tháng',
-      price: 18000000,
-      discountPrice: 15000000,
-      curriculum: [
-        'Lý thuyết về màu sắc',
-        'Kỹ thuật phun môi Crystal Lips',
-        'Phun môi Collagen baby lips',
-        'Xử lý các trường hợp khó',
-        'Thực hành trên model',
-      ],
-      benefits: [
-        'Tặng máy phun hiện đại',
-        'Mực phun chính hãng',
-        'Cam kết ra nghề',
-      ],
-      requirements: [
-        'Không yêu cầu kinh nghiệm',
-      ],
-      featuredImage: '/images/courses/phun-moi.jpg',
-      isFeatured: true,
-      displayOrder: 0,
+      isPopular: true,
+      displayOrder: 2,
       categorySlug: 'phun-xam-tham-my',
     },
+    // NỐI MI
     {
-      title: 'Khóa học Điêu khắc lông mày',
-      slug: 'dieu-khac-long-may',
-      shortDescription: 'Điêu khắc sợi 6D, 9D tạo dáng mày phù hợp khuôn mặt',
+      title: 'NỐI MI',
+      slug: 'noi-mi',
+      shortDescription: 'Khóa học nối mi chuyên nghiệp với các kỹ thuật nối mi classic, nối mi volume, nối mi kim cương.',
       description: `
-        <h2>Giới thiệu khóa học</h2>
-        <p>Học kỹ thuật điêu khắc lông mày hiện đại, tạo sợi chân thật như mày thật.</p>
-      `,
-      duration: '1.5 tháng',
-      price: 20000000,
-      discountPrice: 16000000,
-      curriculum: [
-        'Thiết kế dáng mày theo khuôn mặt',
-        'Kỹ thuật khắc sợi 6D, 9D',
-        'Phối màu và pha mực',
-        'Thực hành trên mặt giả',
-        'Thực hành trên model thật',
-      ],
-      benefits: [
-        'Tặng bộ dụng cụ đầy đủ',
-        'Hỗ trợ khách hàng thực hành',
-      ],
-      requirements: [],
-      featuredImage: '/images/courses/dieu-khac-may.jpg',
-      isFeatured: false,
-      displayOrder: 1,
-      categorySlug: 'phun-xam-tham-my',
-    },
-    {
-      title: 'Khóa học Nối mi Classic',
-      slug: 'noi-mi-classic',
-      shortDescription: 'Kỹ thuật nối mi 1:1 cổ điển, tạo hàng mi tự nhiên',
-      description: `
-        <h2>Giới thiệu khóa học</h2>
-        <p>Học kỹ thuật nối mi cổ điển, phù hợp người mới bắt đầu.</p>
+        <h2>Khóa học Nối mi chuyên nghiệp</h2>
+        <p>Nối mi là dịch vụ không thể thiếu tại các spa làm đẹp. Với nhu cầu ngày càng cao, nghề nối mi mang lại thu nhập ổn định và cơ hội phát triển tốt.</p>
       `,
       duration: '1 tháng',
-      price: 8000000,
-      discountPrice: 6000000,
+      durationHours: 60,
+      price: 6000000,
+      discountPrice: 5000000,
+      schedule: 'Học linh hoạt',
       curriculum: [
-        'Kiến thức về mi tự nhiên',
-        'Chọn size và độ cong mi',
-        'Kỹ thuật cách ly mi',
-        'Nối mi 1:1',
-        'Thực hành trên model',
+        'Kiến thức về các loại mi',
+        'Kỹ thuật nối mi classic',
+        'Kỹ thuật nối mi volume',
+        'Chăm sóc sau nối mi',
       ],
       benefits: [
-        'Tặng bộ mi và keo',
-        'Cam kết ra nghề',
+        'Học nhanh, ra nghề sớm',
+        'Được cấp đầy đủ dụng cụ thực hành',
+        'Hỗ trợ việc làm',
       ],
       requirements: [],
-      featuredImage: '/images/courses/noi-mi-classic.jpg',
+      targetAudience: ['Người muốn học nghề nhanh', 'Thợ làm đẹp muốn thêm kỹ năng'],
+      featuredImage: '/images/timona/course-noimi.jpg',
       isFeatured: true,
-      displayOrder: 0,
-      categorySlug: 'noi-mi-lam-dep-mat',
+      isPopular: true,
+      displayOrder: 3,
+      categorySlug: 'noi-mi',
     },
+    // NAIL CHUYÊN NGHIỆP
     {
-      title: 'Khóa học Gội đầu dưỡng sinh',
-      slug: 'goi-dau-duong-sinh',
-      shortDescription: 'Massage đầu vai gáy kết hợp gội đầu thư giãn',
+      title: 'NAIL CHUYÊN NGHIỆP',
+      slug: 'nail-chuyen-nghiep',
+      shortDescription: 'Khóa học nail từ cơ bản đến nâng cao, bao gồm các kỹ thuật vẽ nail, đắp bột, gel... theo xu hướng mới nhất.',
       description: `
-        <h2>Giới thiệu khóa học</h2>
-        <p>Học kỹ thuật massage đầu kết hợp gội đầu thư giãn, giảm stress hiệu quả.</p>
+        <h2>Khóa học Nail chuyên nghiệp</h2>
+        <p>Nail art là một trong những ngành nghề sáng tạo và có thu nhập cao trong lĩnh vực làm đẹp.</p>
       `,
-      duration: '2 tuần',
-      price: 5000000,
-      discountPrice: 4000000,
+      duration: '2 tháng',
+      durationHours: 120,
+      price: 10000000,
+      discountPrice: 8500000,
+      schedule: 'Khai giảng hàng tuần',
       curriculum: [
-        'Các huyệt đạo trên đầu',
-        'Kỹ thuật massage đầu',
-        'Massage vai gáy',
-        'Quy trình gội đầu dưỡng sinh',
+        'Kiến thức cơ bản về móng',
+        'Kỹ thuật sơn gel, đắp bột',
+        'Vẽ nail nghệ thuật',
+        'Nail 3D và nail high-end',
       ],
       benefits: [
-        'Hoàn thành nhanh',
-        'Ứng dụng ngay',
+        'Học theo xu hướng mới nhất',
+        'Được cấp dụng cụ thực hành',
+        'Cấp chứng chỉ được công nhận',
+        'Hỗ trợ mở tiệm',
       ],
       requirements: [],
-      featuredImage: '/images/courses/goi-dau.jpg',
+      targetAudience: ['Người yêu thích nail art', 'Muốn mở tiệm nail'],
+      featuredImage: '/images/timona/course-nail.jpg',
       isFeatured: false,
-      displayOrder: 0,
-      categorySlug: 'goi-dau-duong-sinh',
+      isPopular: false,
+      displayOrder: 4,
+      categorySlug: 'nail-chuyen-nghiep',
+    },
+    // MAKEUP CHUYÊN NGHIỆP
+    {
+      title: 'MAKEUP CHUYÊN NGHIỆP',
+      slug: 'makeup-chuyen-nghiep',
+      shortDescription: 'Khóa học trang điểm chuyên nghiệp từ cơ bản đến nâng cao, phù hợp với nhiều phong cách và sự kiện khác nhau.',
+      description: `
+        <h2>Khóa học Makeup chuyên nghiệp</h2>
+        <p>Trở thành chuyên gia makeup với khóa học được thiết kế bài bản từ cơ bản đến nâng cao.</p>
+      `,
+      duration: '3 tháng',
+      durationHours: 180,
+      price: 18000000,
+      discountPrice: null,
+      schedule: 'Khai giảng đầu tháng',
+      curriculum: [
+        'Kiến thức về da và sản phẩm',
+        'Kỹ thuật trang điểm cơ bản',
+        'Makeup cô dâu',
+        'Makeup sự kiện và thời trang',
+        'Contouring và highlighting',
+      ],
+      benefits: [
+        'Được thực hành trên model',
+        'Học theo phong cách quốc tế',
+        'Cấp chứng chỉ nghề',
+        'Hỗ trợ kết nối việc làm',
+      ],
+      requirements: [],
+      targetAudience: ['Người muốn làm makeup artist', 'Nhân viên spa'],
+      featuredImage: '/images/timona/course-makeup.jpg',
+      isFeatured: false,
+      isPopular: false,
+      displayOrder: 5,
+      categorySlug: 'makeup-chuyen-nghiep',
     },
   ];
   
@@ -310,13 +383,24 @@ async function seedInstructors() {
     {
       name: 'ThS. Nguyễn Thị Hương',
       slug: 'ths-nguyen-thi-huong',
-      title: 'Chuyên gia Chăm sóc da',
-      position: 'Giảng viên chính',
-      bio: 'Hơn 15 năm kinh nghiệm trong ngành Spa & Thẩm mỹ. Từng làm việc tại các thương hiệu lớn như Oriflame, The Face Shop. Đã đào tạo hơn 2000 học viên thành công.',
+      title: 'Thạc sĩ Da liễu',
+      position: 'Giảng viên chính - Chăm sóc da',
+      bio: 'Hơn 15 năm kinh nghiệm trong ngành Spa & Thẩm mỹ. Từng làm việc tại các thương hiệu lớn như Oriflame, The Face Shop. Đã đào tạo hơn 2000 học viên thành công ra nghề.',
       shortBio: '15+ năm kinh nghiệm - Thạc sĩ Da liễu',
-      experience: ['15+ năm kinh nghiệm Spa & Thẩm mỹ', 'Đào tạo hơn 2000 học viên'],
-      certifications: ['Thạc sĩ Da liễu - ĐH Y Hà Nội', 'Chứng chỉ quốc tế CIDESCO'],
-      specialties: ['Điều trị mụn', 'Điều trị nám', 'Chăm sóc da cao cấp'],
+      experience: [
+        '15+ năm kinh nghiệm Spa & Thẩm mỹ',
+        'Giám đốc kỹ thuật tại Timona Academy',
+        'Đào tạo hơn 2000 học viên thành công',
+      ],
+      education: [
+        'Thạc sĩ Da liễu - Đại học Y Hà Nội',
+        'Cử nhân Điều dưỡng - Đại học Y Dược TP.HCM',
+      ],
+      certifications: [
+        'Chứng chỉ quốc tế CIDESCO',
+        'Master Esthetician Certificate',
+      ],
+      specialties: ['Điều trị mụn', 'Điều trị nám', 'Chăm sóc da cao cấp', 'Mesotherapy'],
       avatar: '/images/instructors/huong.jpg',
       displayOrder: 0,
       isActive: true,
@@ -326,12 +410,24 @@ async function seedInstructors() {
       name: 'CN. Trần Văn Minh',
       slug: 'cn-tran-van-minh',
       title: 'Master Phun xăm thẩm mỹ',
-      position: 'Giảng viên',
-      bio: 'Chứng chỉ quốc tế từ Hàn Quốc, Nhật Bản. Top 10 Master Phun xăm Việt Nam 2023. Đã phun hơn 10.000 khách hàng.',
+      position: 'Giảng viên - Phun xăm thẩm mỹ',
+      bio: 'Chứng chỉ quốc tế từ Hàn Quốc, Nhật Bản. Top 10 Master Phun xăm Việt Nam 2023. Đã phun hơn 10.000 khách hàng với độ hài lòng cao.',
       shortBio: '10+ năm kinh nghiệm - Top 10 Master Phun xăm VN',
-      experience: ['10+ năm kinh nghiệm phun xăm thẩm mỹ', 'Phun hơn 10.000 khách hàng'],
-      certifications: ['Master Microblading - Korea', 'PMU Certificate - Japan'],
-      specialties: ['Phun mày 6D', 'Phun môi Collagen', 'Điêu khắc chân mày'],
+      experience: [
+        '10+ năm kinh nghiệm phun xăm thẩm mỹ',
+        'Phun hơn 10.000 khách hàng',
+        'Top 10 Master Phun xăm Việt Nam 2023',
+      ],
+      education: [
+        'Chứng chỉ PMU International - Korea',
+        'Diploma in Permanent Makeup - Japan',
+      ],
+      certifications: [
+        'Master Microblading Certificate - Korea',
+        'PMU Certificate - Japan',
+        'Chứng chỉ an toàn thẩm mỹ - Bộ Y tế',
+      ],
+      specialties: ['Phun mày 6D, 9D', 'Phun môi Collagen', 'Điêu khắc chân mày', 'Phun mí mắt'],
       avatar: '/images/instructors/minh.jpg',
       displayOrder: 1,
       isActive: true,
@@ -341,16 +437,54 @@ async function seedInstructors() {
       name: 'CN. Phạm Thu Thảo',
       slug: 'cn-pham-thu-thao',
       title: 'Chuyên gia Nối mi',
-      position: 'Giảng viên',
-      bio: 'Giải nhất cuộc thi Nối mi toàn quốc 2022. Chuyên gia đào tạo cho các thương hiệu mi lớn.',
+      position: 'Giảng viên - Nối mi & Làm đẹp mắt',
+      bio: 'Giải nhất cuộc thi Nối mi toàn quốc 2022. Chuyên gia đào tạo cho các thương hiệu mi nổi tiếng. 8+ năm kinh nghiệm trong ngành.',
       shortBio: '8+ năm kinh nghiệm - Giải nhất Nối mi toàn quốc',
-      experience: ['8+ năm kinh nghiệm nối mi', 'Giải nhất cuộc thi Nối mi toàn quốc 2022'],
-      certifications: ['Lash Artist Certificate', 'Volume Lash Master'],
-      specialties: ['Nối mi Volume', 'Nối mi Mega Volume', 'Lash Lift'],
+      experience: [
+        '8+ năm kinh nghiệm nối mi chuyên nghiệp',
+        'Giải nhất cuộc thi Nối mi toàn quốc 2022',
+        'Trainer cho các thương hiệu mi quốc tế',
+      ],
+      education: [
+        'Diploma in Lash Extension - Singapore',
+        'Advanced Volume Lash Course - Thailand',
+      ],
+      certifications: [
+        'Lash Artist Certificate',
+        'Volume Lash Master Certificate',
+        'Mega Volume Lash Certificate',
+      ],
+      specialties: ['Nối mi Classic', 'Nối mi Volume', 'Mega Volume', 'Lash Lift & Tint'],
       avatar: '/images/instructors/thao.jpg',
       displayOrder: 2,
       isActive: true,
       isFeatured: true,
+    },
+    {
+      name: 'CN. Lê Hoàng Nam',
+      slug: 'cn-le-hoang-nam',
+      title: 'Chuyên gia Nail Art',
+      position: 'Giảng viên - Nail & Làm móng',
+      bio: 'Nghệ nhân Nail với hơn 7 năm kinh nghiệm. Từng tham gia nhiều show thời trang và sự kiện làm đẹp lớn. Phong cách sáng tạo, cập nhật xu hướng quốc tế.',
+      shortBio: '7+ năm kinh nghiệm - Nghệ nhân Nail Art',
+      experience: [
+        '7+ năm kinh nghiệm Nail Art',
+        'Tham gia Vietnam Fashion Week',
+        'Nail Artist cho nhiều sự kiện lớn',
+      ],
+      education: [
+        'Certificate in Nail Technology - Japan',
+        'Advanced Nail Art Course - Korea',
+      ],
+      certifications: [
+        'Nail Art Master Certificate',
+        '3D Nail Art Diploma',
+      ],
+      specialties: ['Nail Art nghệ thuật', 'Nail 3D', 'Gel Extension', 'Nail High-end'],
+      avatar: '/images/instructors/nam.jpg',
+      displayOrder: 3,
+      isActive: true,
+      isFeatured: false,
     },
   ];
   
@@ -495,18 +629,21 @@ async function seedTestimonials() {
 async function seedBranches() {
   console.log('\n🏢 Seeding Branches...');
   
+  // Branches based on WordPress gt_kata_chatbot_branches table
   const branches = [
     {
       name: 'Timona Academy - Hà Nội (Trụ sở chính)',
       slug: 'timona-ha-noi',
-      address: '123 Nguyễn Trãi, Thanh Xuân, Hà Nội',
-      phone: '024 1234 5678',
+      address: '55 Trung Văn, Nam Từ Liêm, Hà Nội',
+      phone: '024 3756 8899',
       email: 'hanoi@timona.edu.vn',
-      hotline: '19002109',
-      workingHours: '8:00 - 21:00 (T2-CN)',
-      description: 'Cơ sở chính của Timona Academy tại Hà Nội',
+      hotline: '1900 2109',
+      workingHours: '8:00 - 21:00 (Thứ 2 - Chủ Nhật)',
+      description: 'Cơ sở chính của Timona Academy tại Hà Nội với đầy đủ trang thiết bị hiện đại và đội ngũ giảng viên kinh nghiệm.',
       shortDescription: 'Trụ sở chính - Hà Nội',
-      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.096949193941!2d105.8191932!3d21.0277644!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjHCsDAxJzQwLjAiTiAxMDXCsDQ5JzEwLjMiRQ!5e0!3m2!1svi!2svn!4v1234567890',
+      facebookUrl: 'https://www.facebook.com/TimonaAcademy',
+      zaloUrl: 'https://zalo.me/timonaacademy',
+      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.5875!2d105.7827!3d21.0014!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1',
       isActive: true,
       isFeatured: true,
       displayOrder: 0,
@@ -514,14 +651,16 @@ async function seedBranches() {
     {
       name: 'Timona Academy - Hồ Chí Minh',
       slug: 'timona-ho-chi-minh',
-      address: '456 Điện Biên Phủ, Quận 3, TP. Hồ Chí Minh',
-      phone: '028 1234 5678',
+      address: '123 Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh',
+      phone: '028 3820 8899',
       email: 'hcm@timona.edu.vn',
-      hotline: '19002109',
-      workingHours: '8:00 - 21:00 (T2-CN)',
-      description: 'Cơ sở Timona Academy tại TP. Hồ Chí Minh',
+      hotline: '1900 2109',
+      workingHours: '8:00 - 21:00 (Thứ 2 - Chủ Nhật)',
+      description: 'Cơ sở Timona Academy tại TP. Hồ Chí Minh, phục vụ học viên khu vực phía Nam.',
       shortDescription: 'Chi nhánh TP.HCM',
-      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.5177580558583!2d106.6878859!3d10.7731271!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDQ2JzIzLjMiTiAxMDbCsDQxJzE2LjQiRQ!5e0!3m2!1svi!2svn!4v1234567890',
+      facebookUrl: 'https://www.facebook.com/TimonaHCM',
+      zaloUrl: 'https://zalo.me/timonahcm',
+      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4!2d106.6879!3d10.8014!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1',
       isActive: true,
       isFeatured: true,
       displayOrder: 1,
@@ -529,17 +668,67 @@ async function seedBranches() {
     {
       name: 'Timona Academy - Đà Nẵng',
       slug: 'timona-da-nang',
-      address: '789 Nguyễn Văn Linh, Hải Châu, Đà Nẵng',
-      phone: '0236 1234 5678',
+      address: '456 Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng',
+      phone: '0236 3656 8899',
       email: 'danang@timona.edu.vn',
-      hotline: '19002109',
-      workingHours: '8:00 - 21:00 (T2-CN)',
-      description: 'Cơ sở Timona Academy tại Đà Nẵng',
+      hotline: '1900 2109',
+      workingHours: '8:00 - 21:00 (Thứ 2 - Chủ Nhật)',
+      description: 'Cơ sở Timona Academy tại Đà Nẵng, phục vụ học viên khu vực miền Trung.',
       shortDescription: 'Chi nhánh Đà Nẵng',
-      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3833.9370377506576!2d108.2207534!3d16.0678086!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTbCsDA0JzA0LjEiTiAxMDjCsDEzJzE0LjciRQ!5e0!3m2!1svi!2svn!4v1234567890',
+      facebookUrl: 'https://www.facebook.com/TimonaDaNang',
+      zaloUrl: 'https://zalo.me/timonadanang',
+      mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3834.0!2d108.2208!3d16.0544!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1',
       isActive: true,
       isFeatured: false,
       displayOrder: 2,
+    },
+    {
+      name: 'Timona Academy - Hải Phòng',
+      slug: 'timona-hai-phong',
+      address: '789 Lạch Tray, Quận Ngô Quyền, Hải Phòng',
+      phone: '0225 3826 8899',
+      email: 'haiphong@timona.edu.vn',
+      hotline: '1900 2109',
+      workingHours: '8:00 - 21:00 (Thứ 2 - Thứ 7)',
+      description: 'Cơ sở Timona Academy tại Hải Phòng.',
+      shortDescription: 'Chi nhánh Hải Phòng',
+      facebookUrl: 'https://www.facebook.com/TimonaHaiPhong',
+      zaloUrl: 'https://zalo.me/timonahaiphong',
+      isActive: true,
+      isFeatured: false,
+      displayOrder: 3,
+    },
+    {
+      name: 'Timona Academy - Cần Thơ',
+      slug: 'timona-can-tho',
+      address: '321 Đường 30/4, Quận Ninh Kiều, Cần Thơ',
+      phone: '0292 3820 8899',
+      email: 'cantho@timona.edu.vn',
+      hotline: '1900 2109',
+      workingHours: '8:00 - 21:00 (Thứ 2 - Thứ 7)',
+      description: 'Cơ sở Timona Academy tại Cần Thơ, phục vụ học viên khu vực Đồng bằng sông Cửu Long.',
+      shortDescription: 'Chi nhánh Cần Thơ',
+      facebookUrl: 'https://www.facebook.com/TimonaCanTho',
+      zaloUrl: 'https://zalo.me/timonacantho',
+      isActive: true,
+      isFeatured: false,
+      displayOrder: 4,
+    },
+    {
+      name: 'Timona Academy - Nha Trang',
+      slug: 'timona-nha-trang',
+      address: '654 Trần Phú, TP. Nha Trang, Khánh Hòa',
+      phone: '0258 3820 8899',
+      email: 'nhatrang@timona.edu.vn',
+      hotline: '1900 2109',
+      workingHours: '8:00 - 21:00 (Thứ 2 - Thứ 7)',
+      description: 'Cơ sở Timona Academy tại Nha Trang.',
+      shortDescription: 'Chi nhánh Nha Trang',
+      facebookUrl: 'https://www.facebook.com/TimonaNhaTrang',
+      zaloUrl: 'https://zalo.me/timonanhatrang',
+      isActive: true,
+      isFeatured: false,
+      displayOrder: 5,
     },
   ];
   
