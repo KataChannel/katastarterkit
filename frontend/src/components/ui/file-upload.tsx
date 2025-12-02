@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
