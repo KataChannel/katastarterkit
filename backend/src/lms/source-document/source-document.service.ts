@@ -566,16 +566,11 @@ export class SourceDocumentService {
       ? `${instructor.firstName} ${instructor.lastName}`
       : instructor?.username || 'Giảng viên';
 
-    // Send notification to all admins
+    // Send notification to all admins (using roleType field)
     const admins = await this.prisma.user.findMany({
       where: {
-        userRoles: {
-          some: {
-            role: {
-              name: 'ADMIN',
-            },
-          },
-        },
+        roleType: 'ADMIN',
+        isActive: true,
       },
       select: { id: true },
     });
