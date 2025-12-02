@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   UseInterceptors,
   UploadedFile,
   UploadedFiles,
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { MinioService } from '../../minio/minio.service';
 import { SourceDocumentService } from './source-document.service';
 import { VideoProcessingService } from './video-processing.service';
+import { GoogleDriveService } from '../../services/google-drive.service';
 
 interface UploadedFile {
   buffer: Buffer;
@@ -58,6 +60,7 @@ export class SourceDocumentUploadController {
     private minioService: MinioService,
     private sourceDocumentService: SourceDocumentService,
     private videoProcessingService: VideoProcessingService,
+    private googleDriveService: GoogleDriveService,
   ) {}
 
   /**
@@ -476,6 +479,111 @@ export class SourceDocumentUploadController {
    */
   private isVideoFile(mimeType: string): boolean {
     return mimeType.startsWith('video/');
+  }
+
+  // ============== Google Drive Upload Endpoints ==============
+
+  /**
+   * Kiểm tra trạng thái kết nối Google Drive
+   * GET /api/lms/source-documents/google-drive/status
+   */
+  @Get('google-drive/status')
+  async checkGoogleDriveStatus() {
+    return await this.googleDriveService.checkConnection();
+  }
+
+  /**
+   * Upload file trực tiếp lên Google Drive
+   * POST /api/lms/source-documents/upload-to-google-drive
+   */
+  @Post('upload-to-google-drive')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 100 * 1024 * 1024, // 100MB
+      },
+    }),
+  )
+  async uploadToGoogleDrive(
+    @UploadedFile() file: UploadedFile,
+    @Req() request: any,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Không có file được gửi lên');
+    }
+
+    // Validate file type
+    this.validateFile(file);
+
+    try {
+      // Decode tên file tiếng Việt
+      const originalFileName = decodeFileName(file.originalname);
+
+      this.logger.log(`📤 Uploading to Google Drive: ${originalFileName}`);
+
+      // Upload to Google Drive
+      const result = await this.googleDriveService.uploadFile(
+        file.buffer,
+        originalFileName,
+        file.mimetype,
+      );
+
+      return {
+        success: true,
+        storage: 'google-drive',
+        url: result.webViewLink,
+        downloadUrl: result.webContentLink,
+        fileName: result.name,
+        fileSize: result.size || file.size,
+        mimeType: result.mimeType,
+        googleDriveId: result.id,
+        thumbnailUrl: result.thumbnailLink,
+        tempId: `gdrive_${result.id}`,
+      };
+    } catch (error) {
+      this.logger.error(`Google Drive upload error: ${error.message}`, error.stack);
+      throw new BadRequestException(`Upload lên Google Drive thất bại: ${error.message}`);
+    }
+  }
+
+  /**
+   * Tải file từ URL và upload lên Google Drive
+   * POST /api/lms/source-documents/upload-to-google-drive-from-url
+   * Body: { url: string }
+   */
+  @Post('upload-to-google-drive-from-url')
+  async uploadToGoogleDriveFromUrl(
+    @Body() body: { url: string },
+    @Req() request: any,
+  ) {
+    const { url } = body;
+
+    if (!url) {
+      throw new BadRequestException('URL is required');
+    }
+
+    try {
+      this.logger.log(`📤 Uploading from URL to Google Drive: ${url}`);
+
+      // Upload từ URL lên Google Drive
+      const result = await this.googleDriveService.uploadFromUrl(url);
+
+      return {
+        success: true,
+        storage: 'google-drive',
+        url: result.webViewLink,
+        downloadUrl: result.webContentLink,
+        fileName: result.name,
+        fileSize: result.size,
+        mimeType: result.mimeType,
+        googleDriveId: result.id,
+        thumbnailUrl: result.thumbnailLink,
+        tempId: `gdrive_${result.id}`,
+      };
+    } catch (error) {
+      this.logger.error(`Google Drive upload from URL error: ${error.message}`, error.stack);
+      throw new BadRequestException(`Upload từ URL lên Google Drive thất bại: ${error.message}`);
+    }
   }
 
   /**

@@ -13,6 +13,7 @@ import { UserService } from '../../services/user.service';
 import { NotificationService } from '../../services/notification.service';
 import { PushNotificationService } from '../../services/push-notification.service';
 import { RealTimeNotificationService } from '../../realtime/real-time-notification.service';
+import { GoogleDriveService } from '../../services/google-drive.service';
 
 @Module({
   imports: [MinioModule, AiModule, AuthModule],
@@ -28,7 +29,8 @@ import { RealTimeNotificationService } from '../../realtime/real-time-notificati
     NotificationService,
     PushNotificationService,
     RealTimeNotificationService,
+    GoogleDriveService,
   ],
-  exports: [SourceDocumentService, SourceDocumentCategoryService],
+  exports: [SourceDocumentService, SourceDocumentCategoryService, GoogleDriveService],
 })
 export class SourceDocumentModule {}

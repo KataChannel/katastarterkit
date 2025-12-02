@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@apollo/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -11,7 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Combobox } from '@/components/ui/combobox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Loader2, ArrowLeft, Upload, Link as LinkIcon, FileText, X, File, Image, Video, Music, Archive, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, ArrowLeft, Upload, Link as LinkIcon, FileText, X, File, Image, Video, Music, Archive, CheckCircle2, AlertCircle, HardDrive, Cloud } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDropzone } from 'react-dropzone';
 import {
@@ -61,6 +62,9 @@ interface UploadedFileInfo {
   fileSize: number;
   mimeType: string;
   tempId: string;
+  storage?: 'minio' | 'google-drive';
+  googleDriveId?: string;
+  downloadUrl?: string;
 }
 
 export default function NewSourceDocumentPage() {
@@ -83,13 +87,37 @@ export default function NewSourceDocumentPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
+  const [uploadMode, setUploadMode] = useState<'file' | 'url' | 'gdrive-file' | 'gdrive-url'>('file');
   const [fileUrl, setFileUrl] = useState('');
+  const [gdriveUrl, setGdriveUrl] = useState('');
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+  const [gdriveStatus, setGdriveStatus] = useState<{ connected: boolean; message: string } | null>(null);
+  const [storageType, setStorageType] = useState<'minio' | 'google-drive'>('minio');
 
   // Get categories
   const { data: categoriesData } = useQuery(GET_SOURCE_DOCUMENT_CATEGORIES);
   const categories = categoriesData?.sourceDocumentCategories || [];
+
+  // Check Google Drive status on mount
+  useEffect(() => {
+    checkGoogleDriveStatus();
+  }, []);
+
+  const checkGoogleDriveStatus = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+      const response = await fetch(`${backendUrl}/api/lms/source-documents/google-drive/status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setGdriveStatus(data);
+    } catch (error) {
+      setGdriveStatus({ connected: false, message: 'Không thể kiểm tra trạng thái Google Drive' });
+    }
+  };
 
   // Create mutation
   const [createDocument, { loading }] = useMutation(CREATE_SOURCE_DOCUMENT, {
@@ -129,7 +157,74 @@ export default function NewSourceDocumentPage() {
       throw new Error(error.message || 'Upload thất bại');
     }
 
-    return response.json();
+    const result = await response.json();
+    return { ...result, storage: 'minio' };
+  };
+
+  // Upload file to Google Drive
+  const uploadFileToGoogleDrive = async (file: File): Promise<UploadedFileInfo> => {
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
+
+    const token = localStorage.getItem('accessToken');
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+    
+    const response = await fetch(`${backendUrl}/api/lms/source-documents/upload-to-google-drive`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formDataUpload,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Upload lên Google Drive thất bại');
+    }
+
+    const result = await response.json();
+    return {
+      url: result.url,
+      fileName: result.fileName,
+      fileSize: result.fileSize,
+      mimeType: result.mimeType,
+      tempId: result.tempId,
+      storage: 'google-drive',
+      googleDriveId: result.googleDriveId,
+      downloadUrl: result.downloadUrl,
+    };
+  };
+
+  // Upload from URL to Google Drive
+  const uploadFromUrlToGoogleDrive = async (url: string): Promise<UploadedFileInfo> => {
+    const token = localStorage.getItem('accessToken');
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:13001';
+    
+    const response = await fetch(`${backendUrl}/api/lms/source-documents/upload-to-google-drive-from-url`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ url }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Upload từ URL lên Google Drive thất bại');
+    }
+
+    const result = await response.json();
+    return {
+      url: result.url,
+      fileName: result.fileName,
+      fileSize: result.fileSize,
+      mimeType: result.mimeType,
+      tempId: result.tempId,
+      storage: 'google-drive',
+      googleDriveId: result.googleDriveId,
+      downloadUrl: result.downloadUrl,
+    };
   };
 
   // Dropzone configuration
@@ -147,7 +242,10 @@ export default function NewSourceDocumentPage() {
         setUploadProgress((prev) => Math.min(prev + 10, 90));
       }, 200);
 
-      const result = await uploadFileToMinio(file);
+      // Upload based on storage type
+      const result = storageType === 'google-drive' 
+        ? await uploadFileToGoogleDrive(file)
+        : await uploadFileToMinio(file);
       
       clearInterval(progressInterval);
       setUploadProgress(100);
@@ -175,14 +273,17 @@ export default function NewSourceDocumentPage() {
         handleChange('title', nameWithoutExt);
       }
 
-      toast.success('Upload thành công!');
+      const successMsg = storageType === 'google-drive' 
+        ? 'Upload lên Google Drive thành công!' 
+        : 'Upload thành công!';
+      toast.success(successMsg);
     } catch (error: any) {
       toast.error(error.message || 'Upload thất bại');
       setSelectedFile(null);
     } finally {
       setIsUploading(false);
     }
-  }, [formData.title]);
+  }, [formData.title, storageType]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -312,6 +413,82 @@ export default function NewSourceDocumentPage() {
       setUploadStatus('error');
 
       const errorMessage = error?.message || 'Không thể tải file từ URL';
+      toast.error(errorMessage);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Upload from URL to Google Drive
+  const handleUploadFromUrlToGoogleDrive = async () => {
+    if (!gdriveUrl.trim()) {
+      toast.error('Vui lòng nhập URL');
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(gdriveUrl);
+    } catch {
+      toast.error('URL không hợp lệ');
+      return;
+    }
+
+    try {
+      setUploadStatus('uploading');
+      setIsUploading(true);
+      setUploadProgress(0);
+
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 300);
+
+      const result = await uploadFromUrlToGoogleDrive(gdriveUrl);
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      setUploadStatus('success');
+
+      setUploadedFile(result);
+
+      // Auto-fill form fields
+      handleChange('url', result.url);
+      handleChange('fileName', result.fileName);
+
+      // Auto-detect type based on mime
+      if (result.mimeType?.startsWith('image/')) {
+        handleChange('type', 'IMAGE');
+      } else if (result.mimeType?.startsWith('video/')) {
+        handleChange('type', 'VIDEO');
+      } else if (result.mimeType?.startsWith('audio/')) {
+        handleChange('type', 'AUDIO');
+      } else {
+        handleChange('type', 'FILE');
+      }
+
+      // Auto-set title from filename if empty
+      if (!formData.title && result.fileName) {
+        const nameWithoutExt = result.fileName.replace(/\.[^/.]+$/, '');
+        handleChange('title', nameWithoutExt);
+      }
+
+      toast.success(`File "${result.fileName}" đã được upload lên Google Drive`);
+
+      // Reset URL input after 2 seconds
+      setTimeout(() => {
+        setGdriveUrl('');
+        setUploadStatus('idle');
+      }, 2000);
+    } catch (error: any) {
+      setUploadStatus('error');
+      const errorMessage = error?.message || 'Không thể upload lên Google Drive';
       toast.error(errorMessage);
     } finally {
       setIsUploading(false);
@@ -594,22 +771,93 @@ export default function NewSourceDocumentPage() {
         {['FILE', 'IMAGE', 'VIDEO', 'AUDIO'].includes(formData.type) && (
           <Card>
             <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="text-base sm:text-lg">Upload tài liệu</CardTitle>
+              <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                Upload tài liệu
+                {uploadedFile?.storage === 'google-drive' && (
+                  <Badge variant="secondary" className="gap-1">
+                    <Cloud className="w-3 h-3" />
+                    Google Drive
+                  </Badge>
+                )}
+              </CardTitle>
               <CardDescription className="text-xs sm:text-sm">
-                Kéo thả file, chọn từ máy tính hoặc tải từ URL (tối đa 100MB)
+                Chọn nơi lưu trữ: MinIO (server) hoặc Google Drive công ty (tối đa 100MB)
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              {/* Storage Type Selection */}
+              {!uploadedFile && (
+                <div className="flex flex-col sm:flex-row gap-2 p-3 bg-muted/30 rounded-lg">
+                  <Button
+                    type="button"
+                    variant={storageType === 'minio' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStorageType('minio')}
+                    className="flex-1 gap-2"
+                    disabled={isUploading}
+                  >
+                    <HardDrive className="w-4 h-4" />
+                    MinIO Server
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={storageType === 'google-drive' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStorageType('google-drive')}
+                    className="flex-1 gap-2"
+                    disabled={isUploading || !gdriveStatus?.connected}
+                    title={!gdriveStatus?.connected ? 'Cần cấu hình GOOGLE_DRIVE_CREDENTIALS_JSON trong backend/.env' : 'Upload lên Google Drive công ty'}
+                  >
+                    <Cloud className="w-4 h-4" />
+                    Google Drive
+                    {!gdriveStatus?.connected && (
+                      <span className="text-xs text-muted-foreground">⚠️</span>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {/* Google Drive Status */}
+              {storageType === 'google-drive' && gdriveStatus && !gdriveStatus.connected && (
+                <div className="space-y-2 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <div className="flex items-start gap-2 text-amber-700 dark:text-amber-400">
+                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm">Google Drive chưa được cấu hình</p>
+                      <p className="text-xs mt-1">{gdriveStatus.message}</p>
+                    </div>
+                  </div>
+                  <div className="pl-7 space-y-1 text-xs text-amber-700/80 dark:text-amber-400/80">
+                    <p>📋 Để sử dụng Google Drive, cần:</p>
+                    <ol className="list-decimal list-inside space-y-0.5 ml-2">
+                      <li>Tạo Service Account trên Google Cloud Console</li>
+                      <li>Enable Google Drive API</li>
+                      <li>Tạo key JSON và cấu hình trong backend/.env</li>
+                      <li>Share folder với email service account</li>
+                    </ol>
+                    <p className="mt-2 font-medium">
+                      📖 Xem hướng dẫn chi tiết: <code className="bg-amber-100 dark:bg-amber-900/30 px-1 py-0.5 rounded">docs/GOOGLE_DRIVE_SETUP_GUIDE.md</code>
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Upload Mode Tabs */}
-              <Tabs value={uploadMode} onValueChange={(value) => setUploadMode(value as 'file' | 'url')}>
-                <TabsList className="grid w-full grid-cols-2 mb-4">
-                  <TabsTrigger value="file">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload File
+              <Tabs 
+                value={uploadMode} 
+                onValueChange={(value) => setUploadMode(value as 'file' | 'url' | 'gdrive-file' | 'gdrive-url')}
+              >
+                <TabsList className={cn(
+                  "grid w-full mb-4",
+                  storageType === 'google-drive' ? "grid-cols-2" : "grid-cols-2"
+                )}>
+                  <TabsTrigger value="file" className="gap-1 text-xs sm:text-sm">
+                    <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Upload</span> File
                   </TabsTrigger>
-                  <TabsTrigger value="url">
-                    <LinkIcon className="w-4 h-4 mr-2" />
-                    Tải từ URL
+                  <TabsTrigger value="url" className="gap-1 text-xs sm:text-sm">
+                    <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Tải từ</span> URL
                   </TabsTrigger>
                 </TabsList>
 
@@ -622,7 +870,9 @@ export default function NewSourceDocumentPage() {
                         "border-2 border-dashed rounded-lg p-6 sm:p-8 text-center cursor-pointer transition-colors",
                         isDragActive 
                           ? "border-primary bg-primary/5" 
-                          : "border-muted-foreground/25 hover:border-primary/50",
+                          : storageType === 'google-drive'
+                            ? "border-blue-400/50 hover:border-blue-500"
+                            : "border-muted-foreground/25 hover:border-primary/50",
                         isUploading && "pointer-events-none opacity-50"
                       )}
                     >
@@ -632,35 +882,67 @@ export default function NewSourceDocumentPage() {
                         <div className="space-y-3">
                           <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 text-primary mx-auto animate-spin" />
                           <p className="text-sm text-muted-foreground">
-                            Đang upload... {uploadProgress}%
+                            Đang upload{storageType === 'google-drive' ? ' lên Google Drive' : ''}... {uploadProgress}%
                           </p>
                           <div className="w-full max-w-xs mx-auto bg-muted rounded-full h-2">
                             <div
-                              className="bg-primary h-2 rounded-full transition-all duration-300"
+                              className={cn(
+                                "h-2 rounded-full transition-all duration-300",
+                                storageType === 'google-drive' ? "bg-blue-500" : "bg-primary"
+                              )}
                               style={{ width: `${uploadProgress}%` }}
                             />
                           </div>
                         </div>
                       ) : (
                         <>
-                          <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3" />
+                          {storageType === 'google-drive' ? (
+                            <Cloud className="w-10 h-10 sm:w-12 sm:h-12 text-blue-500 mx-auto mb-3" />
+                          ) : (
+                            <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-muted-foreground mx-auto mb-3" />
+                          )}
                           <p className="text-sm sm:text-base text-foreground mb-1">
                             {isDragActive ? 'Thả file vào đây...' : 'Kéo & thả file vào đây'}
                           </p>
                           <p className="text-xs sm:text-sm text-muted-foreground mb-3">
-                            hoặc click để chọn file
+                            {storageType === 'google-drive' 
+                              ? 'File sẽ được upload lên Google Drive công ty' 
+                              : 'hoặc click để chọn file'}
                           </p>
-                          <Button type="button" variant="outline" size="sm">
-                            <Upload className="w-4 h-4 mr-2" />
-                            Chọn file
+                          <Button 
+                            type="button" 
+                            variant={storageType === 'google-drive' ? 'default' : 'outline'} 
+                            size="sm"
+                            className={storageType === 'google-drive' ? 'bg-blue-500 hover:bg-blue-600' : ''}
+                          >
+                            {storageType === 'google-drive' ? (
+                              <>
+                                <Cloud className="w-4 h-4 mr-2" />
+                                Chọn file → Google Drive
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-4 h-4 mr-2" />
+                                Chọn file
+                              </>
+                            )}
                           </Button>
                         </>
                       )}
                     </div>
                   ) : (
-                    <div className="border rounded-lg p-4 bg-muted/30">
+                    <div className={cn(
+                      "border rounded-lg p-4",
+                      uploadedFile.storage === 'google-drive' 
+                        ? "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800" 
+                        : "bg-muted/30"
+                    )}>
                       <div className="flex items-start gap-3">
-                        {getFileIcon(uploadedFile.mimeType)}
+                        {uploadedFile.storage === 'google-drive' ? (
+                          <Cloud className="w-8 h-8 text-blue-500" />
+                        ) : (
+                          getFileIcon(uploadedFile.mimeType)
+                        )}
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm sm:text-base truncate">
                             {uploadedFile.fileName}
@@ -668,8 +950,11 @@ export default function NewSourceDocumentPage() {
                           <p className="text-xs sm:text-sm text-muted-foreground">
                             {formatFileSize(uploadedFile.fileSize)} • {uploadedFile.mimeType}
                           </p>
-                          <p className="text-xs text-green-600 mt-1">
-                            ✓ Đã upload thành công
+                          <p className={cn(
+                            "text-xs mt-1",
+                            uploadedFile.storage === 'google-drive' ? "text-blue-600" : "text-green-600"
+                          )}>
+                            ✓ Đã upload {uploadedFile.storage === 'google-drive' ? 'lên Google Drive' : 'thành công'}
                           </p>
                         </div>
                         <Button
@@ -698,14 +983,22 @@ export default function NewSourceDocumentPage() {
                         <Input
                           id="fileUrl"
                           type="url"
-                          value={fileUrl}
-                          onChange={(e) => setFileUrl(e.target.value)}
-                          placeholder="https://example.com/document.pdf"
+                          value={storageType === 'google-drive' ? gdriveUrl : fileUrl}
+                          onChange={(e) => storageType === 'google-drive' 
+                            ? setGdriveUrl(e.target.value) 
+                            : setFileUrl(e.target.value)
+                          }
+                          placeholder={storageType === 'google-drive' 
+                            ? "https://drive.google.com/file/d/... hoặc URL bất kỳ"
+                            : "https://example.com/document.pdf"
+                          }
                           disabled={isUploading}
                           className="h-10"
                         />
                         <p className="text-xs text-muted-foreground">
-                          Hỗ trợ: PDF, DOC, DOCX, XLS, XLSX, TXT, MD, PPT, Images, Videos, Audio... (Tối đa 100MB)
+                          {storageType === 'google-drive'
+                            ? 'File sẽ được tải và upload lên Google Drive công ty. Hỗ trợ: Google Drive, Sheets, Docs, Dropbox...'
+                            : 'Hỗ trợ: PDF, DOC, DOCX, XLS, XLSX, TXT, MD, PPT, Images, Videos, Audio... (Tối đa 100MB)'}
                         </p>
                       </div>
 
@@ -714,16 +1007,27 @@ export default function NewSourceDocumentPage() {
                         <div className="space-y-2">
                           <Progress value={uploadProgress} className="h-2" />
                           <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                            Đang tải và upload... {uploadProgress}%
+                            {storageType === 'google-drive' 
+                              ? `Đang tải và upload lên Google Drive... ${uploadProgress}%`
+                              : `Đang tải và upload... ${uploadProgress}%`}
                           </p>
                         </div>
                       )}
 
                       {/* Success Status */}
                       {uploadStatus === 'success' && (
-                        <div className="flex items-center justify-center gap-2 text-green-600 p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                        <div className={cn(
+                          "flex items-center justify-center gap-2 p-4 rounded-lg",
+                          storageType === 'google-drive' 
+                            ? "text-blue-600 bg-blue-50 dark:bg-blue-950/20"
+                            : "text-green-600 bg-green-50 dark:bg-green-950/20"
+                        )}>
                           <CheckCircle2 className="w-5 h-5" />
-                          <span className="text-sm font-medium">Tải và upload thành công!</span>
+                          <span className="text-sm font-medium">
+                            {storageType === 'google-drive' 
+                              ? 'Đã upload lên Google Drive!'
+                              : 'Tải và upload thành công!'}
+                          </span>
                         </div>
                       )}
 
@@ -739,19 +1043,47 @@ export default function NewSourceDocumentPage() {
                       {uploadStatus !== 'uploading' && uploadStatus !== 'success' && (
                         <Button
                           type="button"
-                          onClick={handleUploadFromUrl}
-                          disabled={!fileUrl.trim() || isUploading}
-                          className="w-full"
+                          onClick={storageType === 'google-drive' 
+                            ? handleUploadFromUrlToGoogleDrive 
+                            : handleUploadFromUrl
+                          }
+                          disabled={
+                            storageType === 'google-drive' 
+                              ? !gdriveUrl.trim() || isUploading
+                              : !fileUrl.trim() || isUploading
+                          }
+                          className={cn(
+                            "w-full",
+                            storageType === 'google-drive' && "bg-blue-500 hover:bg-blue-600"
+                          )}
                         >
-                          <LinkIcon className="w-4 h-4 mr-2" />
-                          Tải file từ URL
+                          {storageType === 'google-drive' ? (
+                            <>
+                              <Cloud className="w-4 h-4 mr-2" />
+                              Tải từ URL → Google Drive
+                            </>
+                          ) : (
+                            <>
+                              <LinkIcon className="w-4 h-4 mr-2" />
+                              Tải file từ URL
+                            </>
+                          )}
                         </Button>
                       )}
                     </div>
                   ) : (
-                    <div className="border rounded-lg p-4 bg-muted/30">
+                    <div className={cn(
+                      "border rounded-lg p-4",
+                      uploadedFile.storage === 'google-drive' 
+                        ? "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800" 
+                        : "bg-muted/30"
+                    )}>
                       <div className="flex items-start gap-3">
-                        {getFileIcon(uploadedFile.mimeType)}
+                        {uploadedFile.storage === 'google-drive' ? (
+                          <Cloud className="w-8 h-8 text-blue-500" />
+                        ) : (
+                          getFileIcon(uploadedFile.mimeType)
+                        )}
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm sm:text-base truncate">
                             {uploadedFile.fileName}
@@ -759,8 +1091,13 @@ export default function NewSourceDocumentPage() {
                           <p className="text-xs sm:text-sm text-muted-foreground">
                             {formatFileSize(uploadedFile.fileSize)} • {uploadedFile.mimeType}
                           </p>
-                          <p className="text-xs text-green-600 mt-1">
-                            ✓ Đã tải và upload thành công
+                          <p className={cn(
+                            "text-xs mt-1",
+                            uploadedFile.storage === 'google-drive' ? "text-blue-600" : "text-green-600"
+                          )}>
+                            ✓ {uploadedFile.storage === 'google-drive' 
+                              ? 'Đã tải và upload lên Google Drive' 
+                              : 'Đã tải và upload thành công'}
                           </p>
                         </div>
                         <Button
