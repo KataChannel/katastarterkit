@@ -182,8 +182,10 @@ export function NotificationBell() {
     }
 
     // Navigate based on notification type
-    if (notification.data?.type === 'document_approval_request' || notification.data?.type === 'course_approval_request') {
-      router.push('/lms/admin/approvals');
+    if (notification.data?.type === 'document_approval_request') {
+      router.push('/lms/admin/approvals?tab=documents');
+    } else if (notification.data?.type === 'course_approval_request') {
+      router.push('/lms/admin/approvals?tab=courses');
     } else if (notification.data?.orderId) {
       router.push(`/orders/${notification.data.orderId}`);
     } else if (notification.data?.taskId) {

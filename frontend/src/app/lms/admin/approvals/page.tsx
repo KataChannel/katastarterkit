@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { APPROVE_DOCUMENT, REJECT_DOCUMENT } from '@/graphql/lms/source-document
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 // Query để lấy danh sách courses pending approval
 const GET_PENDING_COURSES = gql`
@@ -79,11 +80,14 @@ const GET_PENDING_DOCUMENTS = gql`
 
 export default function ApprovalManagementPage() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('courses');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam === 'documents' ? 'documents' : 'courses');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionType, setActionType] = useState<'approve' | 'reject'>('approve');
+  const [hasAutoSwitched, setHasAutoSwitched] = useState(false);
 
   // Queries
   const { data: coursesData, loading: coursesLoading, refetch: refetchCourses } = useQuery(GET_PENDING_COURSES);
@@ -97,6 +101,16 @@ export default function ApprovalManagementPage() {
 
   const pendingCourses = coursesData?.courses?.data?.filter((c: any) => c.approvalRequested) || [];
   const pendingDocuments = documentsData?.sourceDocuments?.items?.filter((d: any) => d.approvalRequested && d.status === 'DRAFT') || [];
+
+  // Auto-switch to documents tab if no courses but has documents
+  useEffect(() => {
+    if (!coursesLoading && !documentsLoading && !hasAutoSwitched && !tabParam) {
+      if (pendingCourses.length === 0 && pendingDocuments.length > 0) {
+        setActiveTab('documents');
+        setHasAutoSwitched(true);
+      }
+    }
+  }, [coursesLoading, documentsLoading, pendingCourses.length, pendingDocuments.length, hasAutoSwitched, tabParam]);
   
   const handleApprove = async (type: 'course' | 'document', id: string, title: string) => {
     try {

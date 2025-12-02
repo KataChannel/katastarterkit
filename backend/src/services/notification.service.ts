@@ -414,8 +414,11 @@ export class NotificationService {
    */
   private getUrlForNotificationType(type: string, data: any): string {
     // Check for approval request notifications
-    if (data?.type === 'course_approval_request' || data?.type === 'document_approval_request') {
-      return '/lms/admin/approvals';
+    if (data?.type === 'course_approval_request') {
+      return '/lms/admin/approvals?tab=courses';
+    }
+    if (data?.type === 'document_approval_request') {
+      return '/lms/admin/approvals?tab=documents';
     }
 
     switch (type) {
