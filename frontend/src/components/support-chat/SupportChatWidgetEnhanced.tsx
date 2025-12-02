@@ -741,7 +741,7 @@ export default function SupportChatWidgetEnhanced({
               {/* Header - Fixed with better design */}
               <CardHeader
                 className={cn(
-                  "!p-4 text-white relative overflow-hidden flex-shrink-0",
+                  "!p-6 text-white relative overflow-hidden flex-shrink-0",
                   "border-b border-white/10 safe-area-inset-top rounded-t-xl"
                 )}
                 style={{ backgroundColor: primaryColor }}
@@ -1143,7 +1143,7 @@ export default function SupportChatWidgetEnhanced({
 
                   {/* Input Area - Footer with safe area for mobile */}
                   {!showAuthInput && (
-                    <div className="p-4 border-t bg-background flex-shrink-0 pb-safe">
+                    <div className="p-4 border-t bg-background flex-shrink-0 pb-safe rounded-xl">
                       {/* Quick Replies - Show only on first message or few messages */}
                       {messages.length <= 2 && quickReplies.length > 0 && (
                         <div className="mb-4">

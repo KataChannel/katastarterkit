@@ -204,13 +204,29 @@ export class CallCenterService {
         // Process each record
         for (const record of records) {
           try {
+            // Validate required fields
+            if (!record.uuid) {
+              this.logger.warn('Skipping record without UUID');
+              totalSkipped++;
+              continue;
+            }
+
+            // Skip records with missing critical fields
+            if (!record.direction || !record.call_status) {
+              this.logger.warn(
+                `Skipping record ${record.uuid}: missing direction or call_status`,
+              );
+              totalSkipped++;
+              continue;
+            }
+
             const existing = await this.prisma.callCenterRecord.findUnique({
               where: { externalUuid: record.uuid },
             });
 
             const data = {
               externalUuid: record.uuid,
-              direction: record.direction.toUpperCase() as any,
+              direction: record.direction?.toUpperCase() as any,
               callerIdNumber: record.caller_id_number,
               outboundCallerIdNumber: record.outbound_caller_id_number,
               destinationNumber: record.destination_number,
@@ -220,7 +236,7 @@ export class CallCenterService {
               duration: record.duration,
               billsec: record.billsec,
               sipHangupDisposition: record.sip_hangup_disposition,
-              callStatus: record.call_status.toUpperCase() as any,
+              callStatus: record.call_status?.toUpperCase() as any,
               recordPath: record.record_path,
               domain: config.domain,
               rawData: record as any,
