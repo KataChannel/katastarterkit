@@ -51,7 +51,7 @@ const CREATE_CONVERSATION_WITH_AUTH = gql`
 `;
 
 const SEND_SUPPORT_MESSAGE = gql`
-  mutation SendSupportMessage($input: SendSupportMessageInput!) {
+  mutation SendSupportMessage($input: CreateSupportMessageInput!) {
     sendSupportMessage(input: $input) {
       id
       content
