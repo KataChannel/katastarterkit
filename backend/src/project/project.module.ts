@@ -9,6 +9,12 @@ import { ProjectAnalyticsResolver } from './project-analytics.resolver';
 import { EmailService } from './email.service';
 import { CalendarService } from './calendar.service';
 import { CalendarResolver } from './calendar.resolver';
+import { SprintService } from './sprint.service';
+import { SprintResolver } from './sprint.resolver';
+import { RoadmapService } from './roadmap.service';
+import { RoadmapResolver } from './roadmap.resolver';
+import { ViewConfigService } from './view-config.service';
+import { ViewConfigResolver } from './view-config.resolver';
 import { ProjectUploadController } from './upload.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
@@ -33,6 +39,12 @@ import { MinioModule } from '../minio/minio.module';
     EmailService,
     CalendarService,
     CalendarResolver,
+    SprintService,
+    SprintResolver,
+    RoadmapService,
+    RoadmapResolver,
+    ViewConfigService,
+    ViewConfigResolver,
     UserService, // Needed by JwtAuthGuard
   ],
   exports: [
@@ -42,6 +54,9 @@ import { MinioModule } from '../minio/minio.module';
     ProjectAnalyticsService,
     EmailService,
     CalendarService,
+    SprintService,
+    RoadmapService,
+    ViewConfigService,
   ],
 })
 export class ProjectModule {}

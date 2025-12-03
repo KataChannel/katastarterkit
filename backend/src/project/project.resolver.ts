@@ -37,7 +37,7 @@ export class ProjectResolver {
   })
   async getProject(
     @CurrentUser('id') userId: string,
-    @Args('id') projectId: string,
+    @Args('id', { type: () => ID }) projectId: string,
   ): Promise<ProjectType> {
     return this.projectService.getProjectById(projectId, userId) as any;
   }

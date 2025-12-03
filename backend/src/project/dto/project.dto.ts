@@ -1,5 +1,35 @@
-import { ObjectType, Field, ID, Int, InputType } from '@nestjs/graphql';
-import { IsString, IsOptional, MinLength, MaxLength, IsUrl } from 'class-validator';
+import { ObjectType, Field, ID, Int, InputType, registerEnumType } from '@nestjs/graphql';
+import { IsString, IsOptional, MinLength, MaxLength, IsUrl, IsEnum } from 'class-validator';
+
+// ==================== Enums ====================
+
+export enum ProjectMethodology {
+  WATERFALL = 'WATERFALL',
+  AGILE = 'AGILE',
+  SCRUM = 'SCRUM',
+  KANBAN = 'KANBAN',
+  HYBRID = 'HYBRID',
+  LEAN = 'LEAN',
+  XP = 'XP',
+  CUSTOM = 'CUSTOM',
+}
+
+export enum ProjectStatus {
+  ACTIVE = 'ACTIVE',
+  ON_HOLD = 'ON_HOLD',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
+
+registerEnumType(ProjectMethodology, {
+  name: 'ProjectMethodology',
+  description: 'Phương pháp luận quản lý dự án',
+});
+
+registerEnumType(ProjectStatus, {
+  name: 'ProjectStatus',
+  description: 'Trạng thái dự án',
+});
 
 // ==================== User Type (Simple) ====================
 
@@ -50,6 +80,15 @@ export class ProjectType {
 
   @Field({ nullable: true })
   avatar?: string;
+
+  @Field(() => ProjectMethodology, { defaultValue: ProjectMethodology.CUSTOM })
+  methodology: ProjectMethodology;
+
+  @Field(() => ProjectStatus, { defaultValue: ProjectStatus.ACTIVE })
+  status: ProjectStatus;
+
+  @Field(() => [String], { nullable: true })
+  enabledViews?: string[];
 
   @Field()
   isArchived: boolean;
@@ -115,6 +154,15 @@ export class CreateProjectInput {
   @IsString()
   @IsUrl({}, { message: 'Avatar must be a valid URL' })
   avatar?: string;
+
+  @Field(() => ProjectMethodology, { nullable: true, defaultValue: ProjectMethodology.CUSTOM })
+  @IsOptional()
+  @IsEnum(ProjectMethodology)
+  methodology?: ProjectMethodology;
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  enabledViews?: string[];
 }
 
 @InputType('UpdateProjectInput')
@@ -130,6 +178,20 @@ export class UpdateProjectInput {
 
   @Field({ nullable: true })
   isArchived?: boolean;
+
+  @Field(() => ProjectMethodology, { nullable: true })
+  @IsOptional()
+  @IsEnum(ProjectMethodology)
+  methodology?: ProjectMethodology;
+
+  @Field(() => ProjectStatus, { nullable: true })
+  @IsOptional()
+  @IsEnum(ProjectStatus)
+  status?: ProjectStatus;
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  enabledViews?: string[];
 }
 
 @InputType('AddMemberInput')

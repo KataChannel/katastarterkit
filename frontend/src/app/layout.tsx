@@ -4,7 +4,7 @@ import { Providers } from '@/components/providers';
 import { Navigation } from '@/components/Navigation';
 import { PWAProvider } from '@/components/pwa';
 import SupportChatWidgetWrapper from '@/components/support-chat/SupportChatWidgetWrapper';
-import { Toaster } from '@/components/ui/sonner';
+import { ToasterProvider } from '@/components/ui/toaster-provider';
 import { generateMetadata as getMetadata } from '@/lib/metadata';
 import { ApiConfigDebug } from '@/components/ApiConfigDebug';
 import { AnalyticsWrapper } from '@/components/analytics';
@@ -43,7 +43,7 @@ export default function RootLayout({
               </main>
             </div>
             <SupportChatWidgetWrapper />
-            <Toaster />
+            <ToasterProvider />
           </PWAProvider>
         </Providers>
       </body>

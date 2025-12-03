@@ -211,12 +211,13 @@ export function usePWA(): PWAHookReturn {
       }
 
       // Wait for service worker registration if not ready
-      let registration = serviceWorkerRegistration;
+      let registration: ServiceWorkerRegistration | null = serviceWorkerRegistration;
       
       if (!registration) {
         // Try to get existing registration
         if ('serviceWorker' in navigator) {
-          registration = await navigator.serviceWorker.getRegistration('/');
+          const existingReg = await navigator.serviceWorker.getRegistration('/');
+          registration = existingReg || null;
           
           // If still no registration, wait for it to be ready
           if (!registration) {
@@ -252,7 +253,7 @@ export function usePWA(): PWAHookReturn {
             }, 10000);
 
             const handleStateChange = () => {
-              if (worker.state === 'activated' || worker.state === 'active') {
+              if (worker.state === 'activated') {
                 clearTimeout(timeout);
                 worker.removeEventListener('statechange', handleStateChange);
                 resolve(true);

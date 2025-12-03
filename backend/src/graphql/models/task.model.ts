@@ -92,6 +92,9 @@ export class Task {
   @Field({ nullable: true })
   projectId?: string;
 
+  @Field({ nullable: true })
+  sprintId?: string;
+
   @Field(() => [ID], { nullable: true })
   assignedTo?: string[];
 
@@ -103,6 +106,14 @@ export class Task {
 
   @Field(() => Int, { nullable: true })
   order?: number;
+
+  // Story points for Scrum
+  @Field(() => Int, { nullable: true })
+  storyPoints?: number;
+
+  // Kanban column
+  @Field({ nullable: true })
+  kanbanColumn?: string;
 
   @Field(() => TaskCount, { nullable: true })
   _count?: TaskCount;

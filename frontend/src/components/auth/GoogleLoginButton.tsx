@@ -66,12 +66,17 @@ export default function GoogleLoginButton() {
         // Store user data
         localStorage.setItem('user', JSON.stringify(user));
         
-        // Show success message
+        // Show success message with shorter duration
         const isNewUser = user.createdAt && new Date(user.createdAt) > new Date(Date.now() - 5000);
+        let toastId;
         if (isNewUser) {
-          toast.success(`Welcome to rausachcore, ${user.firstName || user.username}! Your account has been created.`);
+          toastId = toast.success(`Welcome to rausachcore, ${user.firstName || user.username}! Your account has been created.`, {
+            duration: 2000,
+          });
         } else {
-          toast.success(`Welcome back, ${user.firstName || user.username}!`);
+          toastId = toast.success(`Welcome back, ${user.firstName || user.username}!`, {
+            duration: 2000,
+          });
         }
         
         // Small delay to ensure toast is shown, then redirect
@@ -79,6 +84,7 @@ export default function GoogleLoginButton() {
           // Use redirectUrl from backend settings or fallback to /dashboard
           const targetUrl = redirectUrl || '/dashboard';
           window.location.href = targetUrl;
+          // Toast will be auto-dismissed on page unload
         }, 500);
       } else {
         toast.error('Google login failed. Please try again.');

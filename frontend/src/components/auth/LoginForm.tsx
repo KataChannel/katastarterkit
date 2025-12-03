@@ -29,7 +29,11 @@ export function LoginForm() {
         // Hiển thị message lỗi chi tiết trong toast
         toast.error(errorMessage);
       } else {
-        toast.success('Đăng nhập thành công!');
+        // Show success toast with auto-dismiss
+        toast.success('Đăng nhập thành công!', {
+          duration: 2000,
+        });
+        // Note: redirect is handled by AuthContext/navigation logic
       }
     } catch (error: any) {
       const errorMessage = error.message || 'Đăng nhập thất bại. Vui lòng thử lại.';

@@ -198,10 +198,12 @@ model User {
   tasksSharedWith TaskShare[] @relation("TaskSharedWith")
 
   // 🆕 Project Management Relations
-  projectsOwned          Project[]       @relation("ProjectOwner")
-  projectMemberships     ProjectMember[] @relation("ProjectMembers")
-  chatMessagesSent       ChatMessagePM[] @relation("ChatSender")
-  notificationsMentioned Notification[]  @relation("NotificationMentioner")
+  projectsOwned          Project[]            @relation("ProjectOwner")
+  projectMemberships     ProjectMember[]      @relation("ProjectMembers")
+  chatMessagesSent       ChatMessagePM[]      @relation("ChatSender")
+  notificationsMentioned Notification[]       @relation("NotificationMentioner")
+  roadmapItemsOwned      RoadmapItem[]        @relation("RoadmapOwner")
+  projectViewConfigs     ProjectViewConfig[]  @relation("UserViewConfigs")
 
   // AI Training relations
   chatbotModels     ChatbotModel[]
@@ -611,10 +613,18 @@ model Task {
   // 🆕 Project Management Fields
   projectId  String?
   project    Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  sprintId   String?
+  sprint     Sprint?  @relation(fields: [sprintId], references: [id], onDelete: SetNull)
   assignedTo String[] // Array of user IDs
   mentions   String[] // Array of user IDs mentioned
   order      Int      @default(0) // For drag & drop ordering
   tags       String[] // Quick tags
+  
+  // Story points for Scrum
+  storyPoints Int?
+  
+  // Kanban column
+  kanbanColumn String? // todo, in_progress, done, etc.
 
   // Hierarchical relations
   parentId String?
@@ -644,6 +654,9 @@ model Task {
   @@index([projectId, priority])
   @@index([projectId, order])
   @@index([projectId, dueDate])
+  @@index([sprintId])
+  @@index([kanbanColumn])
+  @@index([projectId, kanbanColumn])
   @@map("tasks")
 }
 
@@ -3892,13 +3905,51 @@ model TemplateShare {
 // PROJECT MANAGEMENT SYSTEM
 // =====================================================
 
+// Methodology Enum
+enum ProjectMethodology {
+  WATERFALL    // Waterfall traditional
+  AGILE        // Agile general
+  SCRUM        // Scrum framework
+  KANBAN       // Kanban method
+  HYBRID       // Hybrid approach
+  LEAN         // Lean methodology
+  XP           // Extreme Programming
+  CUSTOM       // Custom methodology
+}
+
+enum ProjectStatus {
+  ACTIVE       // Đang hoạt động
+  ON_HOLD      // Tạm dừng
+  COMPLETED    // Hoàn thành
+  CANCELLED    // Đã hủy
+}
+
+// View Type Enum
+enum ProjectViewType {
+  LIST         // Chi tiết, báo cáo, export - Tất cả phương pháp
+  KANBAN       // Theo dõi luồng công việc - Kanban
+  TIMELINE     // Gantt chart - Waterfall, Hybrid
+  CALENDAR     // Deadline, sự kiện - Tất cả phương pháp
+  BACKLOG      // Grooming, prioritization - Scrum
+  SPRINT       // Quản lý sprint - Scrum
+  DASHBOARD    // Tổng quan nhanh - Tất cả phương pháp
+  ROADMAP      // Chiến lược dài hạn - Product Management
+}
+
 // Project Model (Like Facebook Group)
 model Project {
-  id          String  @id @default(uuid())
+  id          String              @id @default(uuid())
   name        String
   description String?
-  avatar      String? // Project icon/color
-  isArchived  Boolean @default(false)
+  avatar      String?             // Project icon/color
+  isArchived  Boolean             @default(false)
+  
+  // Methodology & Status
+  methodology ProjectMethodology  @default(KANBAN)
+  status      ProjectStatus       @default(ACTIVE)
+  
+  // Enabled views (JSON array of view types)
+  enabledViews Json?              // ["LIST", "KANBAN", "CALENDAR"] etc.
 
   // Owner
   ownerId String
@@ -3908,6 +3959,9 @@ model Project {
   members      ProjectMember[]
   tasks        Task[]
   chatMessages ChatMessagePM[]
+  sprints      Sprint[]
+  roadmapItems RoadmapItem[]
+  viewConfigs  ProjectViewConfig[]
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -3916,6 +3970,8 @@ model Project {
   @@index([ownerId])
   @@index([isArchived])
   @@index([createdAt])
+  @@index([methodology])
+  @@index([status])
   @@map("projects")
 }
 
@@ -3977,6 +4033,134 @@ model ChatMessagePM {
   @@index([projectId, createdAt])
   @@index([replyToId])
   @@map("project_chat_messages")
+}
+
+// Sprint Model (Scrum)
+enum SprintStatus {
+  PLANNED    // Đã lên kế hoạch
+  ACTIVE     // Đang hoạt động
+  COMPLETED  // Đã hoàn thành
+  CANCELLED  // Đã hủy
+}
+
+model Sprint {
+  id          String       @id @default(uuid())
+  name        String
+  goal        String?      // Sprint goal
+  status      SprintStatus @default(PLANNED)
+  
+  // Duration
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  // Velocity tracking
+  capacity    Int          @default(0) // Story points capacity
+  committed   Int          @default(0) // Committed story points
+  completed   Int          @default(0) // Completed story points
+  velocity    Int?         // Actual velocity (completed story points) - calculated on sprint close
+  
+  // Relations
+  projectId   String
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  
+  // Timestamps
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  @@index([projectId])
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([projectId, status])
+  @@map("sprints")
+}
+
+// Roadmap Item (Product Management)
+enum RoadmapStatus {
+  IDEA       // Ý tưởng
+  PLANNED    // Đã lên kế hoạch
+  IN_PROGRESS // Đang thực hiện
+  COMPLETED  // Đã hoàn thành
+  CANCELLED  // Đã hủy
+  ON_HOLD    // Tạm dừng
+}
+
+enum RoadmapPriority {
+  CRITICAL   // Quan trọng nhất
+  HIGH       // Cao
+  MEDIUM     // Trung bình
+  LOW        // Thấp
+}
+
+model RoadmapItem {
+  id          String           @id @default(uuid())
+  title       String
+  description String?
+  status      RoadmapStatus    @default(PLANNED)
+  priority    RoadmapPriority  @default(MEDIUM)
+  
+  // Timeline
+  startDate   DateTime?
+  endDate     DateTime?
+  quarter     String?          // Q1 2024, Q2 2024, etc.
+  
+  // Progress
+  progress    Int              @default(0) // 0-100
+  
+  // Metrics
+  estimatedValue String?       // Business value estimate
+  dependencies   String[]      // IDs of dependent roadmap items
+  
+  // Relations
+  projectId   String
+  project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  ownerId     String?
+  owner       User?            @relation("RoadmapOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  
+  // Timestamps
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  @@index([projectId])
+  @@index([status])
+  @@index([priority])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([quarter])
+  @@index([projectId, status])
+  @@map("roadmap_items")
+}
+
+// Project View Configuration
+model ProjectViewConfig {
+  id          String          @id @default(uuid())
+  viewType    ProjectViewType
+  
+  // Configuration (JSON)
+  config      Json?           // View-specific settings
+  
+  // Layout preferences
+  isDefault   Boolean         @default(false)
+  order       Int             @default(0)
+  
+  // Relations
+  projectId   String
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  userId      String?         // User-specific config
+  user        User?           @relation("UserViewConfigs", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  
+  @@unique([projectId, viewType, userId])
+  @@index([projectId])
+  @@index([viewType])
+  @@index([userId])
+  @@map("project_view_configs")
 }
 
 // ============================================================================

@@ -33,7 +33,10 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
       // Store the token
       localStorage.setItem('authToken', token);
       
-      toast.success(`Welcome ${user.name || user.email}!`);
+      // Show success toast with shorter duration
+      const toastId = toast.success(`Welcome ${user.name || user.email}!`, {
+        duration: 2000,
+      });
       
       if (onSuccess) {
         onSuccess(data.loginWithFacebook);
@@ -41,7 +44,15 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
       
       // Use redirectUrl from backend settings or fallback to /dashboard
       const targetUrl = redirectUrl || '/dashboard';
-      router.push(targetUrl);
+      
+      // Small delay to ensure toast is shown before redirect
+      setTimeout(() => {
+        router.push(targetUrl);
+        // Dismiss toast after navigation starts
+        setTimeout(() => {
+          toast.dismiss(toastId);
+        }, 100);
+      }, 500);
     },
     onError: (error) => {
       console.error('Facebook login error:', error);

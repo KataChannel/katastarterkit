@@ -1,0 +1,12 @@
+1/View,Phương pháp luận phù hợp,Mục đích chính
+2/List,Tất cả,"Chi tiết, báo cáo, export"
+3/Kanban Board,Kanban,Theo dõi luồng công việc hàng ngày
+4/Timeline/Gantt,"Waterfall, Hybrid","Quản lý thời gian, phụ thuộc"
+5/Calendar,Tất cả,"Deadline, sự kiện"
+6/Backlog,Scrum,"Grooming, prioritization"
+7/Sprint,Scrum,Quản lý sprint
+8/Dashboard,Tất cả,Tổng quan nhanh
+9/Roadmap,Product Management,Chiến lược dài hạn
+
+Khi làm dự án thực tế, mình thường đề xuất triển khai theo thứ tự ưu tiên:
+Board → List → Timeline → Dashboard → Calendar → Backlog/Sprint

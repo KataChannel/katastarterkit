@@ -1,337 +1,309 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useApolloClient, gql } from '@apollo/client';
-import ProjectSidebar from '@/components/project-management/ProjectSidebar';
-import TaskFeed from '@/components/project-management/TaskFeed';
-import ChatPanel from '@/components/project-management/ChatPanel';
-import { InviteMemberDialog } from '@/components/team/InviteMemberDialog';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useQuery, gql } from '@apollo/client';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  PanelLeftClose, 
-  PanelLeftOpen, 
-  PanelRightClose, 
-  PanelRightOpen,
+  Loader2,
+  LayoutDashboard,
+  List,
+  Kanban,
+  Calendar,
+  Target,
+  Zap,
+  GanttChart,
+  Map,
   FolderKanban,
-  ListTodo,
-  MessageSquare,
-  Loader2
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAddMember } from '@/hooks/useProjects';
-import { useToast } from '@/hooks/use-toast';
 
-function ProjectsPage() {
+// Import all view components
+import {
+  SprintView,
+  RoadmapView,
+  BacklogView,
+  KanbanView,
+  TimelineView,
+  CalendarView,
+  ListView,
+  DashboardView,
+} from '@/components/project-management/views';
+
+// GraphQL Query
+const GET_USER_PROJECTS = gql`
+  query GetUserProjects {
+    myProjects {
+      id
+      name
+      methodology
+      status
+    }
+  }
+`;
+
+type ViewType = 'dashboard' | 'list' | 'kanban' | 'timeline' | 'calendar' | 'backlog' | 'sprint' | 'roadmap';
+
+const viewConfig: Record<ViewType, { 
+  icon: any; 
+  label: string; 
+  methodologies: string[];
+  description: string;
+}> = {
+  dashboard: {
+    icon: LayoutDashboard,
+    label: 'Dashboard',
+    methodologies: ['ALL'],
+    description: 'Tổng quan nhanh',
+  },
+  list: {
+    icon: List,
+    label: 'Danh sách',
+    methodologies: ['ALL'],
+    description: 'Chi tiết, báo cáo, export',
+  },
+  kanban: {
+    icon: Kanban,
+    label: 'Kanban',
+    methodologies: ['KANBAN', 'AGILE', 'HYBRID', 'LEAN'],
+    description: 'Theo dõi luồng công việc',
+  },
+  timeline: {
+    icon: GanttChart,
+    label: 'Timeline',
+    methodologies: ['WATERFALL', 'HYBRID'],
+    description: 'Gantt chart, phụ thuộc',
+  },
+  calendar: {
+    icon: Calendar,
+    label: 'Lịch',
+    methodologies: ['ALL'],
+    description: 'Deadline, sự kiện',
+  },
+  backlog: {
+    icon: Target,
+    label: 'Backlog',
+    methodologies: ['SCRUM', 'AGILE', 'XP'],
+    description: 'Grooming, prioritization',
+  },
+  sprint: {
+    icon: Zap,
+    label: 'Sprint',
+    methodologies: ['SCRUM', 'AGILE', 'XP'],
+    description: 'Quản lý sprint',
+  },
+  roadmap: {
+    icon: Map,
+    label: 'Roadmap',
+    methodologies: ['ALL'],
+    description: 'Chiến lược dài hạn',
+  },
+};
+
+function ProjectViewsPage() {
   const router = useRouter();
-  const { toast } = useToast();
-  const apolloClient = useApolloClient();
+  const searchParams = useSearchParams();
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [showSidebar, setShowSidebar] = useState(true);
-  const [showChat, setShowChat] = useState(true);
-  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<ViewType>('dashboard');
 
-  // Add member hook
-  const [addMember, { loading: addMemberLoading }] = useAddMember();
+  // Get projects
+  const { data: projectsData, loading: projectsLoading } = useQuery(GET_USER_PROJECTS, {
+    skip: !isAuthenticated,
+    fetchPolicy: 'network-only',
+  });
 
-  // Check authentication on mount
+  const projects = projectsData?.myProjects || [];
+  const selectedProject = projects.find((p: any) => p.id === selectedProjectId);
+
+  // Check authentication
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem('accessToken');
-      const userStr = localStorage.getItem('user');
       
       if (!token) {
-        console.log('[ProjectsPage] No access token found, redirecting to login');
         router.push('/login');
         return;
       }
 
-      try {
-        const user = JSON.parse(userStr || '{}');
-        setUserId(user.id);
-        setIsAuthenticated(true);
-        console.log('[ProjectsPage] User authenticated:', user.id);
-      } catch (error) {
-        console.error('[ProjectsPage] Error parsing user:', error);
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
+      setIsAuthenticated(true);
+      setIsLoading(false);
     };
 
     checkAuth();
   }, [router]);
 
-  // Handle invite member
-  const handleInviteMember = async (email: string, role: string, projectId?: string, validatedUserId?: string) => {
-    try {
-      console.log('[ProjectsPage] Inviting member:', { email, role, projectId, validatedUserId });
+  // Set initial project from URL or first project
+  useEffect(() => {
+    const projectIdFromUrl = searchParams.get('project');
+    const viewFromUrl = searchParams.get('view') as ViewType;
+    
+    if (projectIdFromUrl) {
+      setSelectedProjectId(projectIdFromUrl);
+    } else if (projects.length > 0 && !selectedProjectId) {
+      setSelectedProjectId(projects[0].id);
+    }
 
-      // Determine which project to add to
-      const targetProjectId = projectId || selectedProjectId;
-      
-      if (!targetProjectId) {
-        toast({
-          title: '❌ Lỗi',
-          description: 'Vui lòng chọn dự án trước khi mời thành viên',
-          type: 'error',
-          variant: 'destructive',
-        });
-        return;
-      }
+    if (viewFromUrl && viewConfig[viewFromUrl]) {
+      setActiveView(viewFromUrl);
+    }
+  }, [projects, searchParams, selectedProjectId]);
 
-      // If userId is provided from validation, use it directly
-      let userIdToAdd = validatedUserId;
+  // Get available views based on project methodology
+  const getAvailableViews = () => {
+    const methodology = selectedProject?.methodology || 'CUSTOM';
+    
+    return (Object.entries(viewConfig) as [ViewType, typeof viewConfig[ViewType]][])
+      .filter(([_, config]) => 
+        config.methodologies.includes('ALL') || 
+        config.methodologies.includes(methodology)
+      );
+  };
 
-      // Otherwise, query to find user by email
-      if (!userIdToAdd) {
-        const { data: userData } = await apolloClient.query({
-          query: gql`
-            query FindUserByEmail($input: UnifiedFindManyInput, $modelName: String!) {
-              findMany(modelName: $modelName, input: $input)
-            }
-          `,
-          variables: {
-            modelName: 'user',
-            input: {
-              where: {
-                email: {
-                  equals: email.trim().toLowerCase(),
-                },
-              },
-              select: {
-                id: true,
-                email: true,
-              },
-            },
-          },
-          fetchPolicy: 'network-only',
-        });
+  // Render active view
+  const renderView = () => {
+    if (!selectedProjectId) {
+      return (
+        <div className="flex items-center justify-center h-64 text-muted-foreground">
+          <div className="text-center">
+            <FolderKanban className="w-12 h-12 mx-auto mb-2 opacity-50" />
+            <p>Chọn dự án để xem</p>
+          </div>
+        </div>
+      );
+    }
 
-        let users = userData?.findMany;
-        if (typeof users === 'string') {
-          users = JSON.parse(users);
-        }
-
-        if (!users || !Array.isArray(users) || users.length === 0) {
-          toast({
-            title: '❌ Người dùng không tồn tại',
-            description: `Email "${email}" chưa được đăng ký trong hệ thống`,
-            type: 'error',
-            variant: 'destructive',
-          });
-          return;
-        }
-
-        userIdToAdd = users[0].id;
-      }
-
-      // Add member to project
-      await addMember({
-        variables: {
-          projectId: targetProjectId,
-          input: {
-            userId: userIdToAdd,
-            role: role.toLowerCase(),
-          },
-        },
-      });
-
-      toast({
-        title: '✅ Thành công',
-        description: `Đã thêm thành viên vào dự án`,
-        type: 'success',
-        variant: 'default',
-      });
-
-      setIsInviteDialogOpen(false);
-
-    } catch (error: any) {
-      console.error('[ProjectsPage] Error inviting member:', error);
-      
-      const errorMessage = error.message || 'Không thể thêm thành viên';
-      
-      toast({
-        title: '❌ Lỗi',
-        description: errorMessage,
-        type: 'error',
-        variant: 'destructive',
-      });
+    switch (activeView) {
+      case 'dashboard':
+        return <DashboardView projectId={selectedProjectId} />;
+      case 'list':
+        return <ListView projectId={selectedProjectId} />;
+      case 'kanban':
+        return <KanbanView projectId={selectedProjectId} />;
+      case 'timeline':
+        return <TimelineView projectId={selectedProjectId} />;
+      case 'calendar':
+        return <CalendarView projectId={selectedProjectId} />;
+      case 'backlog':
+        return <BacklogView projectId={selectedProjectId} />;
+      case 'sprint':
+        return <SprintView projectId={selectedProjectId} />;
+      case 'roadmap':
+        return <RoadmapView projectId={selectedProjectId} />;
+      default:
+        return <DashboardView projectId={selectedProjectId} />;
     }
   };
 
-  // Handle open invite dialog
-  const handleOpenInviteDialog = (projectId?: string) => {
-    if (projectId) {
-      setSelectedProjectId(projectId);
-    }
-    setIsInviteDialogOpen(true);
-  };
-
-  // Show loading state - Mobile First
-  if (isLoading) {
+  if (isLoading || projectsLoading) {
     return (
       <div className="h-full flex items-center justify-center bg-background p-4">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-10 w-10 animate-spin text-primary sm:h-12 sm:w-12" />
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">Đang tải...</p>
         </div>
       </div>
     );
   }
 
-  // Don't render if not authenticated (will redirect)
   if (!isAuthenticated) {
     return null;
   }
 
+  const availableViews = getAvailableViews();
+
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-background md:flex-row">
-      {/* Mobile: Tabs View, Desktop: 3-Panel Layout */}
-      <div className="flex-1 flex flex-col md:hidden">
-        {/* Mobile Tabs */}
-        <Tabs defaultValue="tasks" className="h-full flex flex-col">
-          <TabsList className="grid w-full grid-cols-3 rounded-none border-b h-auto">
-            <TabsTrigger value="projects" className="gap-2 text-xs py-3">
-              <FolderKanban className="h-4 w-4" />
-              <span>Dự án</span>
-            </TabsTrigger>
-            <TabsTrigger value="tasks" className="gap-2 text-xs py-3">
-              <ListTodo className="h-4 w-4" />
-              <span>Công việc</span>
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="gap-2 text-xs py-3">
-              <MessageSquare className="h-4 w-4" />
-              <span>Trò chuyện</span>
-            </TabsTrigger>
+    <div className="h-full flex flex-col overflow-hidden bg-background">
+      {/* Header */}
+      <div className="border-b bg-muted/30 p-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Project Selector */}
+          <div className="flex items-center gap-3">
+            <FolderKanban className="w-5 h-5 text-muted-foreground" />
+            <Select
+              value={selectedProjectId || ''}
+              onValueChange={setSelectedProjectId}
+            >
+              <SelectTrigger className="w-[200px] lg:w-[250px]">
+                <SelectValue placeholder="Chọn dự án" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((project: any) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    <div className="flex items-center gap-2">
+                      <span>{project.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({project.methodology})
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Methodology Badge */}
+          {selectedProject && (
+            <div className="text-sm text-muted-foreground">
+              Phương pháp: <span className="font-medium">{selectedProject.methodology}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* View Tabs - Mobile Horizontal Scroll, Desktop Full */}
+      <div className="border-b">
+        <Tabs
+          value={activeView}
+          onValueChange={(v) => setActiveView(v as ViewType)}
+          className="w-full"
+        >
+          <TabsList className="w-full justify-start h-auto p-1 overflow-x-auto flex-nowrap">
+            {availableViews.map(([viewKey, config]) => {
+              const Icon = config.icon;
+              return (
+                <TabsTrigger
+                  key={viewKey}
+                  value={viewKey}
+                  className="gap-2 px-3 py-2 whitespace-nowrap flex-shrink-0"
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{config.label}</span>
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
-          
-          <TabsContent value="projects" className="flex-1 overflow-hidden mt-0 data-[state=active]:flex">
-            <ProjectSidebar
-              selectedProjectId={selectedProjectId}
-              onSelectProject={setSelectedProjectId}
-              onInviteClick={handleOpenInviteDialog}
-            />
-          </TabsContent>
-          
-          <TabsContent value="tasks" className="flex-1 overflow-hidden mt-0 data-[state=active]:flex">
-            <TaskFeed projectId={selectedProjectId} />
-          </TabsContent>
-          
-          <TabsContent value="chat" className="flex-1 overflow-hidden mt-0 data-[state=active]:flex">
-            <ChatPanel projectId={selectedProjectId} />
-          </TabsContent>
         </Tabs>
       </div>
 
-      {/* Desktop: 3-Panel Layout */}
-      <div className="hidden md:flex md:flex-1 md:overflow-hidden">
-        {/* Left Sidebar - Projects List */}
-        <div 
-          className={cn(
-            "transition-all duration-300 ease-in-out border-r",
-            showSidebar 
-              ? "w-80 lg:w-[320px]" 
-              : "w-0"
-          )}
-        >
-          <div className={cn(
-            "h-full overflow-hidden",
-            !showSidebar && "hidden"
-          )}>
-            <ProjectSidebar
-              selectedProjectId={selectedProjectId}
-              onSelectProject={setSelectedProjectId}
-              onInviteClick={handleOpenInviteDialog}
-            />
-          </div>
-        </div>
-
-        {/* Center - Task Feed */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Feed Header with Toggle Buttons */}
-          <div className="h-11 border-b flex items-center justify-between px-3 bg-muted/30 lg:h-12 lg:px-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowSidebar(!showSidebar)}
-              className="gap-2 h-8"
-            >
-              {showSidebar ? (
-                <>
-                  <PanelLeftClose className="h-4 w-4" />
-                  <span className="text-xs lg:text-sm">Ẩn dự án</span>
-                </>
-              ) : (
-                <>
-                  <PanelLeftOpen className="h-4 w-4" />
-                  <span className="text-xs lg:text-sm">Hiện dự án</span>
-                </>
-              )}
-            </Button>
-
-            <div className="text-xs font-medium text-muted-foreground lg:text-sm">
-              {selectedProjectId ? 'Công việc dự án' : 'Tất cả công việc'}
-            </div>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowChat(!showChat)}
-              className="gap-2 h-8"
-            >
-              {showChat ? (
-                <>
-                  <span className="text-xs lg:text-sm">Ẩn chat</span>
-                  <PanelRightClose className="h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  <span className="text-xs lg:text-sm">Hiện chat</span>
-                  <PanelRightOpen className="h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Task Feed Content */}
-          <div className="flex-1 overflow-hidden">
-            <TaskFeed projectId={selectedProjectId} />
-          </div>
-        </div>
-
-        {/* Right Panel - Chat */}
-        <div 
-          className={cn(
-            "transition-all duration-300 ease-in-out border-l",
-            showChat 
-              ? "w-80 lg:w-[320px]" 
-              : "w-0"
-          )}
-        >
-          <div className={cn(
-            "h-full overflow-hidden",
-            !showChat && "hidden"
-          )}>
-            <ChatPanel projectId={selectedProjectId} />
-          </div>
-        </div>
+      {/* View Content */}
+      <div className="flex-1 overflow-auto p-4 lg:p-6">
+        {renderView()}
       </div>
-
-      {/* Invite Member Dialog */}
-      <InviteMemberDialog 
-        open={isInviteDialogOpen}
-        onOpenChange={setIsInviteDialogOpen}
-        onInvite={handleInviteMember}
-        loading={addMemberLoading}
-        selectedProjectId={selectedProjectId}
-      />
     </div>
   );
 }
 
-export default ProjectsPage;
+// Wrapper with Suspense for useSearchParams
+export default function ProjectViewsPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="h-full flex items-center justify-center bg-background p-4">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Đang tải...</p>
+        </div>
+      </div>
+    }>
+      <ProjectViewsPage />
+    </Suspense>
+  );
+}

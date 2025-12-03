@@ -65,10 +65,22 @@ function LoginPageContent() {
       const result = await login(data.email, data.password);
 
       if (result.success) {
-        toast.success("Chào mừng bạn quay lại!");
+        // Show success toast with shorter duration
+        const toastId = toast.success("Chào mừng bạn quay lại!", {
+          duration: 2000, // 2 seconds
+        });
+        
         // Priority: 1. redirectUrl from backend settings, 2. returnUrl param, 3. default /dashboard
         const redirectUrl = result.redirectUrl || searchParams?.get("returnUrl") || "/dashboard";
-        router.push(redirectUrl);
+        
+        // Small delay to allow toast to be visible, then redirect and dismiss
+        setTimeout(() => {
+          router.push(redirectUrl);
+          // Dismiss toast after navigation starts
+          setTimeout(() => {
+            toast.dismiss(toastId);
+          }, 100);
+        }, 500);
       } else {
         toast.error(result.error || "Đăng nhập thất bại. Vui lòng thử lại.");
       }

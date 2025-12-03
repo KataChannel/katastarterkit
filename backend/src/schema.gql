@@ -1112,6 +1112,11 @@ enum ClearanceStatus {
   PENDING
 }
 
+input CloseSprintInput {
+  id: ID!
+  moveUnfinishedToSprintId: ID
+}
+
 type Comment {
   content: String!
   createdAt: DateTime!
@@ -1977,6 +1982,8 @@ input CreateProductVariantInput {
 input CreateProjectInput {
   avatar: String
   description: String
+  enabledViews: [String!]
+  methodology: ProjectMethodology = CUSTOM
   name: String!
 }
 
@@ -2008,6 +2015,20 @@ input CreateReviewInput {
   comment: String
   courseId: ID!
   rating: Int!
+}
+
+input CreateRoadmapItemInput {
+  description: String
+  endDate: DateTime
+  estimatedValue: String
+  ownerId: ID
+  priority: RoadmapPriority! = MEDIUM
+  progress: Int! = 0
+  projectId: ID!
+  quarter: String
+  startDate: DateTime
+  status: RoadmapStatus! = IDEA
+  title: String!
 }
 
 input CreateRoleInput {
@@ -2044,6 +2065,15 @@ input CreateSourceDocumentInput {
   title: String!
   type: SourceDocumentType!
   url: String
+}
+
+input CreateSprintInput {
+  capacity: Int! = 0
+  endDate: DateTime
+  goal: String
+  name: String!
+  projectId: ID!
+  startDate: DateTime
 }
 
 input CreateSupportConversationInput {
@@ -2743,6 +2773,11 @@ input GetProductsInput {
   sortOrder: String = "desc"
 }
 
+input GetProjectViewConfigsInput {
+  projectId: ID!
+  userId: ID
+}
+
 input GetReviewsInput {
   courseId: ID!
   filterByRating: Int
@@ -3115,6 +3150,9 @@ type Mutation {
   """Clear all cached data"""
   clearCache: Boolean!
   clearCart(sessionId: String): ClearCartResponse!
+
+  """Đóng sprint và tính velocity"""
+  closeSprint(input: CloseSprintInput!): Sprint!
   completeOffboarding(id: ID!): OffboardingProcess!
   completeOnboardingTask(checklistId: ID!, taskId: ID!): OnboardingChecklist!
   completeStep(input: CompleteStepInput!): Boolean!
@@ -3178,9 +3216,15 @@ type Mutation {
   createQuiz(input: CreateQuizInput!): Quiz!
   createReply(input: CreateReplyInput!): DiscussionReply!
   createReview(input: CreateReviewInput!): Review!
+
+  """Tạo roadmap item mới"""
+  createRoadmapItem(input: CreateRoadmapItemInput!): RoadmapItem!
   createRole(input: CreateRoleInput!): Role!
   createSourceDocument(input: CreateSourceDocumentInput!): SourceDocument!
   createSourceDocumentCategory(input: CreateSourceDocumentCategoryInput!): SourceDocumentCategory!
+
+  """Tạo sprint mới"""
+  createSprint(input: CreateSprintInput!): Sprint!
   createSubtask(input: CreateTaskInput!, parentId: String!): Task!
   createSupportConversation(input: CreateSupportConversationInput!): SupportConversation!
 
@@ -3254,11 +3298,20 @@ type Mutation {
 
   """Delete a project/task/chat file"""
   deleteProjectFile(fileId: ID!, type: String!): Boolean!
+
+  """Xóa view config"""
+  deleteProjectViewConfig(id: ID!): Boolean!
   deleteQuiz(id: String!): Boolean!
   deleteReview(reviewId: ID!): Boolean!
+
+  """Xóa roadmap item"""
+  deleteRoadmapItem(id: ID!): Boolean!
   deleteRole(id: String!): Boolean!
   deleteSourceDocument(id: ID!): SourceDocument!
   deleteSourceDocumentCategory(id: ID!): SourceDocumentCategory!
+
+  """Xóa sprint"""
+  deleteSprint(id: ID!): Boolean!
   deleteSystemGuide(id: String!): Boolean!
   deleteSystemRelease(id: String!): Boolean!
   deleteTask(id: String!): Boolean!
@@ -3376,6 +3429,9 @@ type Mutation {
   """Restore archived project (owner/admin only)"""
   restoreProject(id: ID!): Project!
   reviewCampaignApplication(input: ReviewCampaignApplicationInput!): String!
+
+  """Lưu hoặc cập nhật view config"""
+  saveProjectViewConfig(input: SaveProjectViewConfigInput!): ProjectViewConfig!
   sendSupportMessage(input: CreateSupportMessageInput!): SupportMessage!
 
   """Đặt AI provider làm mặc định"""
@@ -3499,9 +3555,15 @@ type Mutation {
   updateProjectMemberRole(input: UpdateMemberRoleInput!, projectId: ID!): ProjectMember!
   updateQuiz(id: String!, input: UpdateQuizInput!): Quiz!
   updateReview(input: UpdateReviewInput!): Review!
+
+  """Cập nhật roadmap item"""
+  updateRoadmapItem(input: UpdateRoadmapItemInput!): RoadmapItem!
   updateRole(id: String!, input: UpdateRoleInput!): Role!
   updateSourceDocument(id: ID!, input: UpdateSourceDocumentInput!): SourceDocument!
   updateSourceDocumentCategory(id: ID!, input: UpdateSourceDocumentCategoryInput!): SourceDocumentCategory!
+
+  """Cập nhật sprint"""
+  updateSprint(input: UpdateSprintInput!): Sprint!
   updateSystemGuide(input: UpdateSystemGuideInput!): SystemGuide!
   updateSystemRelease(id: String!, input: UpdateSystemReleaseInput!): SystemRelease!
   updateTask(input: UpdateTaskInput!): Task!
@@ -4344,12 +4406,15 @@ type Project {
   avatar: String
   createdAt: DateTime!
   description: String
+  enabledViews: [String!]
   id: ID!
   isArchived: Boolean!
   members: [ProjectMember!]!
+  methodology: ProjectMethodology!
   name: String!
   owner: ProjectUser!
   ownerId: ID!
+  status: ProjectStatus!
   updatedAt: DateTime!
 }
 
@@ -4377,10 +4442,30 @@ type ProjectMember {
   userId: ID!
 }
 
+"""Phương pháp luận quản lý dự án"""
+enum ProjectMethodology {
+  AGILE
+  CUSTOM
+  HYBRID
+  KANBAN
+  LEAN
+  SCRUM
+  WATERFALL
+  XP
+}
+
 type ProjectStats {
   chatMessages: Int!
   members: Int!
   tasks: Int!
+}
+
+"""Trạng thái dự án"""
+enum ProjectStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+  ON_HOLD
 }
 
 type ProjectUser {
@@ -4389,6 +4474,30 @@ type ProjectUser {
   firstName: String
   id: ID!
   lastName: String
+}
+
+type ProjectViewConfig {
+  config: JSON
+  createdAt: DateTime!
+  id: ID!
+  isDefault: Boolean!
+  order: Int!
+  projectId: ID!
+  updatedAt: DateTime!
+  userId: ID
+  viewType: ProjectViewType!
+}
+
+"""Loại view cho project"""
+enum ProjectViewType {
+  BACKLOG
+  CALENDAR
+  DASHBOARD
+  KANBAN
+  LIST
+  ROADMAP
+  SPRINT
+  TIMELINE
 }
 
 type Query {
@@ -4403,6 +4512,9 @@ type Query {
 
   """Đếm số khóa học"""
   academyCoursesCount(filter: AcademyCourseFilterInput): Int!
+
+  """Lấy sprint đang active của project"""
+  activeSprint(projectId: ID!): Sprint
   affiliateCampaign(id: String!): AffCampaign
   affiliateCampaigns(search: CampaignSearchInput): [AffCampaign!]!
   affiliateConversions(search: AffConversionSearchInput): AffConversionsResponse!
@@ -4465,6 +4577,9 @@ type Query {
   courseEnrollments(courseId: ID!): [Enrollment!]!
   coursePromptTemplates: JSON!
   courses(filters: CourseFiltersInput): PaginatedCourses!
+
+  """Lấy default view config của project"""
+  defaultProjectView(projectId: ID!, userId: ID): ProjectViewConfig
   discussion(id: ID!): Discussion!
 
   """Compute aggregations (sum, avg, min, max, count)"""
@@ -4740,7 +4855,7 @@ type Query {
   productsByCategory(categoryId: ID!, input: GetProductsInput): PaginatedProducts!
 
   """Lấy chi tiết 1 project"""
-  project(id: String!): Project!
+  project(id: ID!): Project!
 
   """Get comprehensive project analytics (returned as JSON string)"""
   projectAnalytics(endDate: DateTime, projectId: ID!, startDate: DateTime): String!
@@ -4756,6 +4871,9 @@ type Query {
 
   """Get tasks by project ID (for TaskFeed)"""
   projectTasks(filters: TaskFilterInput, projectId: ID!): [Task!]!
+
+  """Lấy danh sách view configs của project"""
+  projectViewConfigs(input: GetProjectViewConfigsInput!): [ProjectViewConfig!]!
 
   """Get a specific public menu item by ID (no authentication required)"""
   publicMenuById(id: String!, includeChildren: Boolean = true): JSON
@@ -4777,6 +4895,15 @@ type Query {
   review(id: ID!): ProductReviewType
   reviewStats(courseId: ID!): ReviewStats!
   reviews(input: GetReviewsInput!): ReviewsWithStats!
+
+  """Lấy roadmap items theo quarter"""
+  roadmapByQuarter(projectId: ID!, quarter: String!): [RoadmapItem!]!
+
+  """Lấy chi tiết roadmap item"""
+  roadmapItem(id: ID!): RoadmapItem!
+
+  """Lấy danh sách roadmap items của project"""
+  roadmapItems(projectId: ID!): [RoadmapItem!]!
   role(id: String!): RoleType!
   roles: [RoleType!]!
   sampleCoursePrompts: [String!]!
@@ -4805,6 +4932,12 @@ type Query {
   sourceDocumentCategoryTree: [SourceDocumentCategory!]!
   sourceDocumentStats: String!
   sourceDocuments(filter: SourceDocumentFilterInput, limit: Int! = 20, page: Int! = 1): SourceDocumentPaginatedResult!
+
+  """Lấy chi tiết sprint"""
+  sprint(id: ID!): Sprint!
+
+  """Lấy danh sách sprints của project"""
+  sprints(projectId: ID!): [Sprint!]!
   suggestMapping(modelName: String!, sourceFields: [String!]!): JSON!
   supportAnalytics: SupportAnalytics!
   supportConversation(id: String!): SupportConversation!
@@ -5075,6 +5208,49 @@ type ReviewsWithStats {
   total: Int!
 }
 
+type RoadmapItem {
+  createdAt: DateTime!
+  description: String
+  endDate: DateTime
+  estimatedValue: String
+  id: ID!
+  owner: RoadmapOwner
+  ownerId: ID
+  priority: RoadmapPriority!
+  progress: Int!
+  projectId: ID!
+  quarter: String
+  startDate: DateTime
+  status: RoadmapStatus!
+  title: String!
+  updatedAt: DateTime!
+}
+
+type RoadmapOwner {
+  avatar: String
+  email: String
+  firstName: String
+  id: ID!
+  lastName: String
+}
+
+"""Độ ưu tiên của roadmap item"""
+enum RoadmapPriority {
+  CRITICAL
+  HIGH
+  LOW
+  MEDIUM
+}
+
+"""Trạng thái của roadmap item"""
+enum RoadmapStatus {
+  CANCELLED
+  COMPLETED
+  IDEA
+  IN_PROGRESS
+  PLANNED
+}
+
 type Role {
   children: [Role!]!
   createdAt: DateTime!
@@ -5149,6 +5325,16 @@ type RoleType {
   updatedAt: DateTime!
   userCount: Int
   userRoles: [UserRoleAssignmentType!]
+}
+
+input SaveProjectViewConfigInput {
+  config: JSON
+  id: ID
+  isDefault: Boolean! = false
+  order: Int! = 0
+  projectId: ID!
+  userId: ID
+  viewType: ProjectViewType!
 }
 
 input SetPasswordInput {
@@ -5328,6 +5514,41 @@ enum SourceDocumentType {
   LINK
   TEXT
   VIDEO
+}
+
+type Sprint {
+  capacity: Int!
+  committed: Int!
+  completed: Int!
+  createdAt: DateTime!
+  endDate: DateTime
+  goal: String
+  id: ID!
+  name: String!
+  projectId: ID!
+  startDate: DateTime
+  status: SprintStatus!
+  tasks: [SprintTask!]
+  updatedAt: DateTime!
+  velocity: Int
+}
+
+"""Trạng thái của sprint"""
+enum SprintStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+  PLANNED
+}
+
+type SprintTask {
+  completedAt: DateTime
+  description: String
+  id: ID!
+  priority: String!
+  status: String!
+  storyPoints: Int
+  title: String!
 }
 
 input StartEmployeeOnboardingInput {
@@ -5610,6 +5831,7 @@ type Task {
   description: String
   dueDate: DateTime
   id: ID!
+  kanbanColumn: String
   media: [TaskMedia!]
   mediaCount: Float!
   mentions: [ID!]
@@ -5620,7 +5842,9 @@ type Task {
   progress: Float
   projectId: String
   shares: [TaskShare!]
+  sprintId: String
   status: TaskStatus!
+  storyPoints: Int
   subtaskCount: Float!
   subtasks: [Task!]
   tags: [String!]
@@ -6644,8 +6868,11 @@ input UpdateProfileInput {
 input UpdateProjectInput {
   avatar: String
   description: String
+  enabledViews: [String!]
   isArchived: Boolean
+  methodology: ProjectMethodology
   name: String
+  status: ProjectStatus
 }
 
 input UpdateQuizInput {
@@ -6659,6 +6886,20 @@ input UpdateReviewInput {
   comment: String
   rating: Int
   reviewId: ID!
+}
+
+input UpdateRoadmapItemInput {
+  description: String
+  endDate: DateTime
+  estimatedValue: String
+  id: ID!
+  ownerId: ID
+  priority: RoadmapPriority
+  progress: Int
+  quarter: String
+  startDate: DateTime
+  status: RoadmapStatus
+  title: String
 }
 
 input UpdateRoleInput {
@@ -6694,6 +6935,18 @@ input UpdateSourceDocumentInput {
   title: String
   type: SourceDocumentType
   url: String
+}
+
+input UpdateSprintInput {
+  capacity: Int
+  committed: Int
+  completed: Int
+  endDate: DateTime
+  goal: String
+  id: ID!
+  name: String
+  startDate: DateTime
+  status: SprintStatus
 }
 
 input UpdateSystemGuideInput {
