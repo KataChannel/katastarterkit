@@ -175,6 +175,7 @@ export default function SupportChatWidgetEnhanced({
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const notificationSoundRef = useRef<HTMLAudioElement | null>(null);
 
@@ -394,13 +395,27 @@ export default function SupportChatWidgetEnhanced({
   }, [isOpen, websocketUrl, conversationId, playNotificationSound, showDesktopNotification, agentInfo?.name]);
 
   // Auto-scroll to bottom
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const scrollToBottom = useCallback(() => {
+    // Use setTimeout to ensure DOM is updated
+    setTimeout(() => {
+      if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      }
+      // Fallback to scrollIntoView
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
+
+  // Scroll to bottom when chat opens
+  useEffect(() => {
+    if (isOpen && !showAuthInput) {
+      scrollToBottom();
+    }
+  }, [isOpen, showAuthInput, scrollToBottom]);
 
   // Start conversation với guest (phone + name)
   const startGuestConversation = async () => {
@@ -799,13 +814,14 @@ export default function SupportChatWidgetEnhanced({
                   </div>
 
                   <div className="flex items-center gap-1">
-                    {/* Sound toggle */}
+                    {/* Sound toggle - hidden on mobile */}
                     <Button
                       size="icon"
                       variant="ghost"
                       className={cn(
                         "h-9 w-9 text-white hover:bg-white/20 rounded-lg",
-                        "transition-all active:scale-95"
+                        "transition-all active:scale-95",
+                        "hidden sm:flex"
                       )}
                       title={soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
                       onClick={(e) => {
@@ -820,13 +836,14 @@ export default function SupportChatWidgetEnhanced({
                       )}
                     </Button>
                     
-                    {/* Notification toggle */}
+                    {/* Notification toggle - hidden on mobile */}
                     <Button
                       size="icon"
                       variant="ghost"
                       className={cn(
                         "h-9 w-9 text-white hover:bg-white/20 rounded-lg",
-                        "transition-all active:scale-95"
+                        "transition-all active:scale-95",
+                        "hidden sm:flex"
                       )}
                       title={notificationEnabled ? 'Tắt thông báo' : 'Bật thông báo'}
                       onClick={(e) => {
@@ -841,7 +858,7 @@ export default function SupportChatWidgetEnhanced({
                       )}
                     </Button>
 
-                    {/* New conversation button */}
+                    {/* New conversation button - visible on all devices */}
                     {!showAuthInput && (
                       <Button
                         size="icon"
@@ -867,7 +884,8 @@ export default function SupportChatWidgetEnhanced({
                       variant="ghost"
                       className={cn(
                         "h-9 w-9 text-white hover:bg-white/20 rounded-lg",
-                        "transition-all active:scale-95"
+                        "transition-all active:scale-95",
+                        "hidden sm:flex"
                       )}
                       title={isMinimized ? 'Mở rộng' : 'Thu nhỏ'}
                       onClick={(e) => {
@@ -906,8 +924,8 @@ export default function SupportChatWidgetEnhanced({
               {!isMinimized && (
                 <>
                   {/* Messages/Auth Area */}
-                  <CardContent className="flex-1 p-0 overflow-hidden">
-                    <ScrollArea className="h-full px-4 py-4">
+                  <CardContent className="flex-1 p-0 min-h-0 overflow-y-auto">
+                    <div ref={scrollAreaRef} className="h-full px-4 py-4 overflow-y-auto">
                       {showAuthInput ? (
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
@@ -1143,7 +1161,7 @@ export default function SupportChatWidgetEnhanced({
                           <div ref={messagesEndRef} />
                         </div>
                       )}
-                    </ScrollArea>
+                    </div>
                   </CardContent>
 
                   {/* Input Area - Footer with safe area for mobile */}
