@@ -37,7 +37,109 @@ interface ExternalCDRRecord {
 export class CallCenterService {
   private readonly logger = new Logger(CallCenterService.name);
 
+  // Map để track các sync đang chạy: syncLogId -> AbortController
+  private runningSyncs: Map<string, { aborted: boolean; signal: AbortController }> = new Map();
+
   constructor(private readonly prisma: PrismaService) {}
+
+  // ============================================================================
+  // STOP SYNC FUNCTIONALITY
+  // ============================================================================
+
+  /**
+   * Lấy danh sách các sync đang chạy
+   */
+  getRunningSyncs(): string[] {
+    return Array.from(this.runningSyncs.keys());
+  }
+
+  /**
+   * Kiểm tra xem sync có đang chạy không
+   */
+  isSyncRunning(syncLogId: string): boolean {
+    return this.runningSyncs.has(syncLogId);
+  }
+
+  /**
+   * Dừng tiến trình sync đang chạy
+   */
+  async stopSyncProcess(syncLogId: string): Promise<{
+    success: boolean;
+    message: string;
+    syncLogId: string;
+    recordsProcessed?: number;
+  }> {
+    this.logger.log(`Attempting to stop sync process: ${syncLogId}`);
+
+    // Kiểm tra sync có đang chạy không
+    const runningSync = this.runningSyncs.get(syncLogId);
+    if (!runningSync) {
+      // Kiểm tra trong database xem có phải là sync running không
+      const syncLog = await this.prisma.callCenterSyncLog.findUnique({
+        where: { id: syncLogId },
+      });
+
+      if (!syncLog) {
+        return {
+          success: false,
+          message: 'Không tìm thấy tiến trình đồng bộ',
+          syncLogId,
+        };
+      }
+
+      if (syncLog.status !== 'running') {
+        return {
+          success: false,
+          message: `Tiến trình đã kết thúc với trạng thái: ${syncLog.status}`,
+          syncLogId,
+          recordsProcessed: syncLog.recordsFetched,
+        };
+      }
+
+      // Sync không còn trong memory nhưng vẫn running trong DB - force stop
+      await this.prisma.callCenterSyncLog.update({
+        where: { id: syncLogId },
+        data: {
+          status: 'stopped',
+          errorMessage: 'Đã dừng bởi người dùng (force stop)',
+          completedAt: new Date(),
+        },
+      });
+
+      return {
+        success: true,
+        message: 'Đã dừng tiến trình đồng bộ (force stop)',
+        syncLogId,
+        recordsProcessed: syncLog.recordsFetched,
+      };
+    }
+
+    // Đánh dấu sync bị abort
+    runningSync.aborted = true;
+    runningSync.signal.abort();
+
+    // Cập nhật trạng thái trong database
+    const updatedLog = await this.prisma.callCenterSyncLog.update({
+      where: { id: syncLogId },
+      data: {
+        status: 'stopped',
+        errorMessage: 'Đã dừng bởi người dùng',
+        completedAt: new Date(),
+      },
+    });
+
+    // Xóa khỏi map sau khi đã stop
+    this.runningSyncs.delete(syncLogId);
+
+    this.logger.log(`Successfully stopped sync process: ${syncLogId}`);
+
+    return {
+      success: true,
+      message: 'Đã dừng tiến trình đồng bộ thành công',
+      syncLogId,
+      recordsProcessed: updatedLog.recordsFetched,
+    };
+  }
 
   // ============================================================================
   // CONFIG MANAGEMENT
@@ -164,6 +266,13 @@ export class CallCenterService {
       },
     });
 
+    // Tạo AbortController để hỗ trợ stop
+    const abortController = new AbortController();
+    this.runningSyncs.set(syncLog.id, { 
+      aborted: false, 
+      signal: abortController 
+    });
+
     try {
       this.logger.log(
         `Starting sync from ${fromDate.toISOString()} to ${toDate.toISOString()}`,
@@ -177,12 +286,34 @@ export class CallCenterService {
       let hasMore = true;
 
       while (hasMore) {
+        // Kiểm tra xem có bị abort không
+        const runningSync = this.runningSyncs.get(syncLog.id);
+        if (runningSync?.aborted) {
+          this.logger.log(`Sync ${syncLog.id} was stopped by user`);
+          
+          // Cleanup và throw để trigger catch block
+          this.runningSyncs.delete(syncLog.id);
+          
+          return {
+            success: true,
+            message: 'Đồng bộ đã bị dừng bởi người dùng',
+            syncLogId: syncLog.id,
+            recordsFetched: totalFetched,
+            recordsCreated: totalCreated,
+            recordsUpdated: totalUpdated,
+          };
+        }
+
         // Build API URL
         const apiUrl = this.buildApiUrl(config, fromDate, toDate, offset);
         this.logger.log(`Fetching from: ${apiUrl}`);
+        this.logger.log(`Date range in UTC: ${fromDate.toISOString()} to ${toDate.toISOString()}`);
+        this.logger.log(`Formatted for API: from=${this.formatDate(fromDate)} to=${this.formatDate(toDate)}`);
 
-        // Fetch data from external API
-        const response = await fetch(apiUrl);
+        // Fetch data from external API với abort signal
+        const response = await fetch(apiUrl, {
+          signal: abortController.signal,
+        });
         
         if (!response.ok) {
           throw new Error(`API request failed: ${response.statusText}`);
@@ -203,6 +334,22 @@ export class CallCenterService {
 
         // Process each record
         for (const record of records) {
+          // Kiểm tra abort trước mỗi record để response nhanh hơn
+          const currentSync = this.runningSyncs.get(syncLog.id);
+          if (currentSync?.aborted) {
+            this.logger.log(`Sync ${syncLog.id} was stopped during record processing`);
+            this.runningSyncs.delete(syncLog.id);
+            
+            return {
+              success: true,
+              message: 'Đồng bộ đã bị dừng bởi người dùng',
+              syncLogId: syncLog.id,
+              recordsFetched: totalFetched,
+              recordsCreated: totalCreated,
+              recordsUpdated: totalUpdated,
+            };
+          }
+
           try {
             // Validate required fields
             if (!record.uuid) {
@@ -282,6 +429,9 @@ export class CallCenterService {
         });
       }
 
+      // Xóa khỏi running syncs khi hoàn thành
+      this.runningSyncs.delete(syncLog.id);
+
       // Mark sync as completed
       const duration = Date.now() - startTime;
       await this.prisma.callCenterSyncLog.update({
@@ -317,6 +467,22 @@ export class CallCenterService {
         recordsUpdated: totalUpdated,
       };
     } catch (error) {
+      // Xóa khỏi running syncs khi có lỗi
+      this.runningSyncs.delete(syncLog.id);
+
+      // Kiểm tra nếu là AbortError (bị stop)
+      if (error.name === 'AbortError') {
+        this.logger.log(`Sync ${syncLog.id} aborted via AbortController`);
+        return {
+          success: true,
+          message: 'Đồng bộ đã bị dừng bởi người dùng',
+          syncLogId: syncLog.id,
+          recordsFetched: 0,
+          recordsCreated: 0,
+          recordsUpdated: 0,
+        };
+      }
+
       this.logger.error(`Sync failed: ${error.message}`);
 
       // Mark sync as failed
@@ -366,12 +532,14 @@ export class CallCenterService {
 
   private formatDate(date: Date): string {
     // Format: 2025-09-01 00:00:00
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
+    // IMPORTANT: Use UTC methods to avoid timezone conversion issues
+    // Frontend sends UTC dates, API expects UTC dates
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }

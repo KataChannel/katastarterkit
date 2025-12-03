@@ -3441,6 +3441,7 @@ type Mutation {
   shareTask(input: ShareTaskInput!): TaskShare!
   shareTemplate(input: ShareTemplateInput!): [TemplateShare!]!
   startEmployeeOnboarding(input: StartEmployeeOnboardingInput!): WorkflowInstance!
+  stopSyncProcess(syncLogId: String!): StopSyncResponse!
   submitQuiz(input: SubmitQuizInput!): QuizAttempt!
   subscribeToPush(auth: String!, endpoint: String!, p256dh: String!): Boolean!
   syncCallCenterData(input: SyncCallCenterInput): SyncCallCenterResponse!
@@ -5584,6 +5585,13 @@ enum StepType {
   NOTIFICATION
 }
 
+type StopSyncResponse {
+  message: String!
+  recordsProcessed: Int
+  success: Boolean!
+  syncLogId: String!
+}
+
 input SubmitQuizInput {
   answers: [QuizAnswerInput!]!
   enrollmentId: String!
@@ -5711,7 +5719,7 @@ input SyncCallCenterInput {
 
   """ISO date string for fromDate"""
   fromDate: String
-  fullSync: Boolean! = false
+  fullSync: Boolean = false
 
   """ISO date string for toDate"""
   toDate: String

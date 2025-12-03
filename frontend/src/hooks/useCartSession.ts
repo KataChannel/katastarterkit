@@ -19,7 +19,6 @@ export function useCartSession() {
   const [mergeCarts] = useMutation(MERGE_CARTS, {
     onCompleted: (data) => {
       if (data.mergeCarts.success) {
-        console.log('[CartSession] Carts merged successfully');
         clearSessionId();
         setSessionId(''); // Clear but don't set to undefined
       }
@@ -36,7 +35,6 @@ export function useCartSession() {
       const id = getSessionId();
       setSessionId(id);
       setIsInitialized(true);
-      console.log('[CartSession] Initialized with session ID:', id);
     }
   }, [isInitialized]);
 
@@ -48,13 +46,6 @@ export function useCartSession() {
     // 3. Has a valid sessionId (guest cart exists)
     // 4. Session is initialized
     if (isAuthenticated && user?.id && sessionId && sessionId.trim() !== '' && isInitialized) {
-      console.log('[CartSession] User logged in, merging carts...', {
-        userId: user.id,
-        sessionId,
-        isAuthenticated,
-        isInitialized,
-      });
-      
       // Don't pass userId in input - backend will get it from context
       // This avoids "User ID is required" error when context is not ready
       mergeCarts({
@@ -63,10 +54,6 @@ export function useCartSession() {
             sessionId,
           },
         },
-      }).then((result) => {
-        if (result.data?.mergeCarts?.success) {
-          console.log('[CartSession] Merge successful, clearing session');
-        }
       }).catch((error) => {
         console.error('[CartSession] Merge failed:', error);
         // Don't clear sessionId on error - keep guest cart
@@ -90,13 +77,6 @@ export function useCartSession() {
   }, [isAuthenticated, sessionId]);
 
   const effectiveSessionId = getEffectiveSessionId();
-
-  console.log('[CartSession] Returning:', { 
-    effectiveSessionId, 
-    isAuthenticated, 
-    isInitialized,
-    rawSessionId: sessionId 
-  });
 
   return {
     sessionId: effectiveSessionId,

@@ -7,6 +7,7 @@ import {
   CallCenterSyncLog,
   PaginatedCallCenterRecords,
   SyncCallCenterResponse,
+  StopSyncResponse,
 } from '../models/callcenter.model';
 import {
   CreateCallCenterConfigInput,
@@ -61,9 +62,17 @@ export class CallCenterResolver {
   @Mutation(() => SyncCallCenterResponse, { name: 'syncCallCenterData' })
   @UseGuards(JwtAuthGuard)
   async syncData(
-    @Args('input', { nullable: true }) input?: SyncCallCenterInput,
+    @Args('input', { type: () => SyncCallCenterInput, nullable: true }) input?: SyncCallCenterInput,
   ): Promise<SyncCallCenterResponse> {
     return this.callCenterService.syncCallCenterData(input);
+  }
+
+  @Mutation(() => StopSyncResponse, { name: 'stopSyncProcess' })
+  @UseGuards(JwtAuthGuard)
+  async stopSyncProcess(
+    @Args('syncLogId') syncLogId: string,
+  ): Promise<StopSyncResponse> {
+    return this.callCenterService.stopSyncProcess(syncLogId);
   }
 
   // ============================================================================

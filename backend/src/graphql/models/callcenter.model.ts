@@ -247,3 +247,19 @@ export class SyncCallCenterResponse {
   @Field(() => String, { nullable: true })
   error?: string;
 }
+
+// Stop sync response
+@ObjectType()
+export class StopSyncResponse {
+  @Field(() => Boolean)
+  success: boolean;
+
+  @Field(() => String)
+  message: string;
+
+  @Field(() => String)
+  syncLogId: string;
+
+  @Field(() => Int, { nullable: true })
+  recordsProcessed?: number;
+}
