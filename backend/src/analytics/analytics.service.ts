@@ -17,6 +17,7 @@ export class AnalyticsService implements OnModuleInit {
   private client: BetaAnalyticsDataClient | null = null;
   private propertyId: string | null = null;
   private isConfigured = false;
+  private permissionDenied = false; // Flag để tránh gọi API liên tục khi không có quyền
 
   // Cache keys
   private readonly CACHE_KEY_REALTIME = 'analytics:realtime';
@@ -82,7 +83,7 @@ export class AnalyticsService implements OnModuleInit {
       return cached;
     }
 
-    if (!this.isConfigured || !this.client) {
+    if (!this.isConfigured || !this.client || this.permissionDenied) {
       return this.getMockData('realtime');
     }
 
@@ -96,7 +97,7 @@ export class AnalyticsService implements OnModuleInit {
       await this.cacheManager.set(this.CACHE_KEY_REALTIME, count, this.CACHE_TTL_REALTIME * 1000);
       return count;
     } catch (error) {
-      this.logger.error('Lỗi lấy realtime users:', error);
+      this.handleAnalyticsError(error, 'getRealtimeUsers');
       return this.getMockData('realtime');
     }
   }
@@ -110,7 +111,7 @@ export class AnalyticsService implements OnModuleInit {
       return cached;
     }
 
-    if (!this.isConfigured || !this.client) {
+    if (!this.isConfigured || !this.client || this.permissionDenied) {
       return this.getMockData('today');
     }
 
@@ -126,7 +127,7 @@ export class AnalyticsService implements OnModuleInit {
       await this.cacheManager.set(this.CACHE_KEY_TODAY, count, this.CACHE_TTL_TODAY * 1000);
       return count;
     } catch (error) {
-      this.logger.error('Lỗi lấy today visits:', error);
+      this.handleAnalyticsError(error, 'getTodayVisits');
       return this.getMockData('today');
     }
   }
@@ -140,7 +141,7 @@ export class AnalyticsService implements OnModuleInit {
       return cached;
     }
 
-    if (!this.isConfigured || !this.client) {
+    if (!this.isConfigured || !this.client || this.permissionDenied) {
       return this.getMockData('month');
     }
 
@@ -160,7 +161,7 @@ export class AnalyticsService implements OnModuleInit {
       await this.cacheManager.set(this.CACHE_KEY_MONTH, count, this.CACHE_TTL_MONTH * 1000);
       return count;
     } catch (error) {
-      this.logger.error('Lỗi lấy this month visits:', error);
+      this.handleAnalyticsError(error, 'getThisMonthVisits');
       return this.getMockData('month');
     }
   }
@@ -174,7 +175,7 @@ export class AnalyticsService implements OnModuleInit {
       return cached;
     }
 
-    if (!this.isConfigured || !this.client) {
+    if (!this.isConfigured || !this.client || this.permissionDenied) {
       return this.getMockData('total');
     }
 
@@ -194,7 +195,7 @@ export class AnalyticsService implements OnModuleInit {
       await this.cacheManager.set(this.CACHE_KEY_TOTAL, count, this.CACHE_TTL_TOTAL * 1000);
       return count;
     } catch (error) {
-      this.logger.error('Lỗi lấy total visits:', error);
+      this.handleAnalyticsError(error, 'getTotalVisits');
       return this.getMockData('total');
     }
   }
@@ -229,6 +230,43 @@ export class AnalyticsService implements OnModuleInit {
       total: Math.floor(Math.random() * 100000) + 50000, // 50000-150000 lượt
     };
     return mockData[type];
+  }
+
+  /**
+   * Xử lý lỗi từ Google Analytics API
+   * Phát hiện PERMISSION_DENIED và các lỗi khác
+   */
+  private handleAnalyticsError(error: any, methodName: string): void {
+    const errorCode = error?.code;
+    const errorMessage = error?.message || '';
+    
+    // Kiểm tra lỗi PERMISSION_DENIED (gRPC code 7)
+    if (errorCode === 7 || errorMessage.includes('PERMISSION_DENIED') || errorMessage.includes('permission')) {
+      if (!this.permissionDenied) {
+        this.permissionDenied = true;
+        this.logger.warn(
+          `[${methodName}] Google Analytics PERMISSION_DENIED - Service account không có quyền truy cập GA4 property ${this.propertyId}. ` +
+          'Vui lòng thêm service account email vào property trong Google Analytics Admin. ' +
+          'Sử dụng dữ liệu mẫu cho đến khi được cấu hình.'
+        );
+      }
+      return;
+    }
+
+    // Kiểm tra lỗi NOT_FOUND (property không tồn tại)
+    if (errorCode === 5 || errorMessage.includes('NOT_FOUND')) {
+      if (!this.permissionDenied) {
+        this.permissionDenied = true;
+        this.logger.warn(
+          `[${methodName}] GA4 property ${this.propertyId} không tồn tại hoặc không khả dụng. ` +
+          'Vui lòng kiểm tra GA4_PROPERTY_ID trong cấu hình. Sử dụng dữ liệu mẫu.'
+        );
+      }
+      return;
+    }
+
+    // Log các lỗi khác
+    this.logger.error(`[${methodName}] Lỗi Google Analytics:`, error);
   }
 
   /**
