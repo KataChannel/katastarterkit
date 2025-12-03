@@ -27,6 +27,11 @@ export class CreateConversationWithAuthInput {
   @IsOptional()
   socialAccessToken?: string;
 
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  codeVerifier?: string; // For Zalo PKCE flow
+
   @Field(() => String, { nullable: true })
   @IsEnum(['WEBSITE', 'ZALO', 'FACEBOOK', 'TELEGRAM', 'WHATSAPP'])
   @IsOptional()

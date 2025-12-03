@@ -48,6 +48,7 @@ export class SupportConversationService {
     customerEmail?: string;
     authType: CustomerAuthType;
     socialAccessToken?: string;
+    codeVerifier?: string; // For Zalo PKCE flow
     platform?: IntegrationPlatform;
     customerIp?: string;
   }) {
@@ -68,6 +69,7 @@ export class SupportConversationService {
       if (data.authType === CustomerAuthType.ZALO) {
         socialResult = await this.socialAuthService.verifyZaloAuth(
           data.socialAccessToken,
+          data.codeVerifier, // Pass code verifier for PKCE
         );
       } else if (data.authType === CustomerAuthType.FACEBOOK) {
         socialResult = await this.socialAuthService.verifyFacebookAuth(

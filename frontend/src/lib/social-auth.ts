@@ -6,8 +6,55 @@
 export interface SocialAuthResult {
   success: boolean;
   accessToken?: string;
+  codeVerifier?: string; // For Zalo PKCE flow
   provider: 'ZALO' | 'FACEBOOK' | 'GOOGLE';
   error?: string;
+}
+
+// PKCE helpers for Zalo OAuth v4
+const ZALO_CODE_VERIFIER_KEY = 'zalo_code_verifier';
+
+function generateCodeVerifier(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return btoa(String.fromCharCode.apply(null, Array.from(array)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+async function generateCodeChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(digest))))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+function saveCodeVerifier(verifier: string): void {
+  try {
+    sessionStorage.setItem(ZALO_CODE_VERIFIER_KEY, verifier);
+  } catch (e) {
+    console.warn('Failed to save code verifier to sessionStorage');
+  }
+}
+
+function getCodeVerifier(): string | null {
+  try {
+    return sessionStorage.getItem(ZALO_CODE_VERIFIER_KEY);
+  } catch (e) {
+    return null;
+  }
+}
+
+function clearCodeVerifier(): void {
+  try {
+    sessionStorage.removeItem(ZALO_CODE_VERIFIER_KEY);
+  } catch (e) {
+    // Ignore
+  }
 }
 
 /**
@@ -38,25 +85,33 @@ const GOOGLE_CONFIG = {
 };
 
 /**
- * Initialize Zalo OAuth Flow
+ * Initialize Zalo OAuth Flow with PKCE
  */
-export function initZaloAuth(): Promise<SocialAuthResult> {
+export async function initZaloAuth(): Promise<SocialAuthResult> {
+  // Validate Zalo App ID
+  if (!ZALO_CONFIG.appId || ZALO_CONFIG.appId.trim() === '') {
+    console.error('❌ Zalo App ID is not configured');
+    throw { 
+      success: false, 
+      provider: 'ZALO', 
+      error: 'Zalo App ID chưa được cấu hình. Vui lòng liên hệ quản trị viên.' 
+    };
+  }
+
+  console.log('🔐 Initializing Zalo OAuth with PKCE...');
+  console.log('📱 Zalo App ID:', ZALO_CONFIG.appId.substring(0, 10) + '...');
+  console.log('🔗 Redirect URI:', ZALO_CONFIG.redirectUri);
+
+  // Generate PKCE code verifier and challenge
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+  
+  console.log('🔑 Generated PKCE code verifier');
+  
+  // Save code verifier for later use in callback
+  saveCodeVerifier(codeVerifier);
+
   return new Promise((resolve, reject) => {
-    // Validate Zalo App ID
-    if (!ZALO_CONFIG.appId || ZALO_CONFIG.appId.trim() === '') {
-      console.error('❌ Zalo App ID is not configured');
-      reject({ 
-        success: false, 
-        provider: 'ZALO', 
-        error: 'Zalo App ID chưa được cấu hình. Vui lòng liên hệ quản trị viên.' 
-      });
-      return;
-    }
-
-    console.log('🔐 Initializing Zalo OAuth...');
-    console.log('📱 Zalo App ID:', ZALO_CONFIG.appId.substring(0, 10) + '...');
-    console.log('🔗 Redirect URI:', ZALO_CONFIG.redirectUri);
-
     const width = 500;
     const height = 600;
     const left = (window.screen.width - width) / 2;
@@ -65,9 +120,10 @@ export function initZaloAuth(): Promise<SocialAuthResult> {
     // Generate state for CSRF protection
     const state = `support_chat_${Date.now()}`;
     
-    const authUrl = `https://oauth.zaloapp.com/v4/permission?app_id=${ZALO_CONFIG.appId}&redirect_uri=${encodeURIComponent(ZALO_CONFIG.redirectUri)}&state=${state}`;
+    // Zalo OAuth v4 with PKCE
+    const authUrl = `https://oauth.zaloapp.com/v4/permission?app_id=${ZALO_CONFIG.appId}&redirect_uri=${encodeURIComponent(ZALO_CONFIG.redirectUri)}&state=${state}&code_challenge=${codeChallenge}`;
 
-    console.log('🚀 Opening Zalo login popup...');
+    console.log('🚀 Opening Zalo login popup with PKCE...');
 
     const popup = window.open(
       authUrl,
@@ -102,10 +158,16 @@ export function initZaloAuth(): Promise<SocialAuthResult> {
         clearInterval(checkClosed);
         window.removeEventListener('message', handleMessage);
         console.log('✅ Zalo authentication successful');
+        
+        // Include code verifier for PKCE token exchange
+        const savedCodeVerifier = getCodeVerifier();
+        clearCodeVerifier();
+        
         resolve({
           success: true,
           provider: 'ZALO',
           accessToken: event.data.accessToken,
+          codeVerifier: savedCodeVerifier || undefined,
         });
       } else if (event.data.type === 'ZALO_AUTH_ERROR') {
         messageReceived = true;

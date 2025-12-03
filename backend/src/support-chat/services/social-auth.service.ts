@@ -21,9 +21,9 @@ export class SocialAuthService {
 
   /**
    * Exchange Zalo authorization code for access token
-   * Zalo OAuth v4 requires code exchange
+   * Zalo OAuth v4 requires PKCE with code_verifier
    */
-  private async exchangeZaloCodeForToken(code: string): Promise<string> {
+  private async exchangeZaloCodeForToken(code: string, codeVerifier?: string): Promise<string> {
     try {
       const appId = this.configService.get('ZALO_APP_ID');
       const appSecret = this.configService.get('ZALO_APP_SECRET');
@@ -31,25 +31,36 @@ export class SocialAuthService {
         `${this.configService.get('FRONTEND_URL')}/oauth-callback/zalo/callback`;
 
       if (!appId || !appSecret) {
-        this.logger.warn('Zalo App ID or Secret not configured, trying to use code as token directly');
-        return code; // Fallback: try using code as token (won't work but will give better error)
+        this.logger.warn('Zalo App ID or Secret not configured');
+        throw new BadRequestException('Zalo chưa được cấu hình. Vui lòng liên hệ quản trị viên.');
       }
 
-      this.logger.log(`Exchanging Zalo code for token...`);
+      this.logger.log(`Exchanging Zalo code for token with PKCE...`);
+      this.logger.log(`App ID: ${appId.substring(0, 10)}...`);
+      this.logger.log(`Redirect URI: ${redirectUri}`);
+      this.logger.log(`Code Verifier provided: ${!!codeVerifier}`);
 
-      // Zalo OAuth v4 token exchange
+      // Zalo OAuth v4 token exchange with PKCE
+      const params: any = {
+        app_id: appId,
+        code: code,
+        grant_type: 'authorization_code',
+      };
+
+      // Add code_verifier for PKCE flow (required by Zalo v4)
+      if (codeVerifier) {
+        params.code_verifier = codeVerifier;
+      }
+
+      // Note: Zalo uses secret_key in header, not in params
       const response = await axios.post(
         'https://oauth.zaloapp.com/v4/access_token',
         null,
         {
-          params: {
-            app_id: appId,
-            app_secret: appSecret,
-            code: code,
-            grant_type: 'authorization_code',
-          },
+          params,
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
+            'secret_key': appSecret,
           },
         },
       );
@@ -58,44 +69,48 @@ export class SocialAuthService {
       this.logger.log(`Zalo token exchange response: ${JSON.stringify(data)}`);
 
       if (data.error) {
-        this.logger.error(`Zalo token exchange error: ${data.error} - ${data.error_description}`);
-        throw new BadRequestException(data.error_description || 'Failed to exchange Zalo code');
+        this.logger.error(`Zalo token exchange error: ${data.error} - ${data.error_description || data.error_name}`);
+        throw new BadRequestException(data.error_description || data.error_name || 'Không thể xác thực Zalo. Vui lòng thử lại.');
       }
 
       if (!data.access_token) {
-        throw new BadRequestException('No access token received from Zalo');
+        this.logger.error('No access token in Zalo response');
+        throw new BadRequestException('Không nhận được access token từ Zalo');
       }
 
+      this.logger.log('✅ Successfully exchanged Zalo code for access token');
       return data.access_token;
     } catch (error: any) {
       this.logger.error(`Failed to exchange Zalo code: ${error.message}`);
+      if (error.response?.data) {
+        this.logger.error(`Zalo API response: ${JSON.stringify(error.response.data)}`);
+      }
       if (error instanceof BadRequestException) {
         throw error;
       }
-      // If token exchange fails, the code might already be an access token (for backward compatibility)
-      this.logger.warn('Token exchange failed, trying to use code as access token directly');
-      return code;
+      throw new BadRequestException('Đăng nhập Zalo thất bại. Vui lòng thử lại.');
     }
   }
 
   /**
    * Verify Zalo OAuth token and get user info
-   * Handles both authorization code and access token
+   * Handles both authorization code (with PKCE) and access token
    */
-  async verifyZaloAuth(codeOrToken: string): Promise<SocialAuthResult> {
+  async verifyZaloAuth(codeOrToken: string, codeVerifier?: string): Promise<SocialAuthResult> {
     try {
       this.logger.log('Verifying Zalo authentication...');
+      this.logger.log(`Input length: ${codeOrToken.length}, Code verifier provided: ${!!codeVerifier}`);
       
       // First, try to exchange code for token (if it's a code)
       let accessToken = codeOrToken;
       
-      // Zalo authorization codes are typically shorter and don't contain dots
-      // Access tokens from Zalo are longer JWT-like strings
-      const isLikelyCode = codeOrToken.length < 100 && !codeOrToken.includes('.');
+      // If code_verifier is provided, it means this is definitely an authorization code
+      // Otherwise, try to detect based on format
+      const isAuthorizationCode = codeVerifier || (codeOrToken.length < 200 && !codeOrToken.includes('.'));
       
-      if (isLikelyCode) {
-        this.logger.log('Input appears to be an authorization code, attempting exchange...');
-        accessToken = await this.exchangeZaloCodeForToken(codeOrToken);
+      if (isAuthorizationCode) {
+        this.logger.log('Input is an authorization code, exchanging for access token...');
+        accessToken = await this.exchangeZaloCodeForToken(codeOrToken, codeVerifier);
       }
 
       // Get Zalo user info with the access token

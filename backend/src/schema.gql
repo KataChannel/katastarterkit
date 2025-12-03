@@ -1552,6 +1552,7 @@ input CreateCommentInput {
 
 input CreateConversationWithAuthInput {
   authType: String!
+  codeVerifier: String
   customerEmail: String
   customerName: String
   customerPhone: String

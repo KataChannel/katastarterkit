@@ -468,11 +468,11 @@ export default function SupportChatWidgetEnhanced({
       const result = await initZaloAuth();
       
       if (result.success && result.accessToken) {
-        await startSocialConversation('ZALO', result.accessToken);
+        await startSocialConversation('ZALO', result.accessToken, result.codeVerifier);
       }
     } catch (error: any) {
       console.error('Zalo login error:', error);
-      alert('Đăng nhập Zalo thất bại. Vui lòng thử lại.');
+      alert(error?.error || 'Đăng nhập Zalo thất bại. Vui lòng thử lại.');
     }
   };
 
@@ -505,17 +505,22 @@ export default function SupportChatWidgetEnhanced({
   };
 
   // Start conversation with social auth
-  const startSocialConversation = async (provider: 'ZALO' | 'FACEBOOK' | 'GOOGLE', accessToken: string) => {
+  const startSocialConversation = async (provider: 'ZALO' | 'FACEBOOK' | 'GOOGLE', accessToken: string, codeVerifier?: string) => {
     setIsSending(true);
     try {
+      const input: any = {
+        authType: provider,
+        socialAccessToken: accessToken,
+        platform: 'WEBSITE',
+      };
+      
+      // Include code verifier for Zalo PKCE flow
+      if (provider === 'ZALO' && codeVerifier) {
+        input.codeVerifier = codeVerifier;
+      }
+      
       const { data } = await createConversationMutation({
-        variables: {
-          input: {
-            authType: provider,
-            socialAccessToken: accessToken,
-            platform: 'WEBSITE',
-          },
-        },
+        variables: { input },
       });
 
       if (!data?.createSupportConversationWithAuth) {
