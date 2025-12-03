@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -13,9 +12,6 @@ import {
   List,
   Kanban,
   Calendar,
-  Target,
-  Zap,
-  GanttChart,
   Map,
   FolderKanban,
   Plus,
@@ -178,17 +174,6 @@ function ProjectViewsPage() {
     }
   }, [projects, searchParams, selectedProjectId]);
 
-  // Get available views based on project methodology
-  const getAvailableViews = () => {
-    const methodology = selectedProject?.methodology || 'CUSTOM';
-    
-    return (Object.entries(viewConfig) as [ViewType, typeof viewConfig[ViewType]][])
-      .filter(([_, config]) => 
-        config.methodologies.includes('ALL') || 
-        config.methodologies.includes(methodology)
-      );
-  };
-
   // Render active view
   const renderView = () => {
     if (!selectedProjectId) {
@@ -233,8 +218,6 @@ function ProjectViewsPage() {
   if (!isAuthenticated) {
     return null;
   }
-
-  const availableViews = getAvailableViews();
 
   return (
     <div className="h-full flex overflow-hidden bg-background">
@@ -398,32 +381,7 @@ function ProjectViewsPage() {
           </div>
         )}
 
-        {/* View Tabs */}
-        <div className="border-b px-2 lg:px-4">
-          <Tabs
-            value={activeView}
-            onValueChange={(v) => setActiveView(v as ViewType)}
-            className="w-full"
-          >
-            <TabsList className="w-full justify-start h-auto p-1 bg-transparent overflow-x-auto flex-nowrap">
-              {availableViews.map(([viewKey, config]) => {
-                const Icon = config.icon;
-                return (
-                  <TabsTrigger
-                    key={viewKey}
-                    value={viewKey}
-                    className="gap-2 px-3 py-2 whitespace-nowrap flex-shrink-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="hidden sm:inline">{config.label}</span>
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
-          </Tabs>
-        </div>
-
-        {/* View Content */}
+        {/* View Content - Tabs đã chuyển lên header layout */}
         <div className="flex-1 overflow-auto p-3 lg:p-6">
           {renderView()}
         </div>
