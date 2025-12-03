@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, useMutation, gql } from '@apollo/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -15,6 +17,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -22,6 +33,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   List, 
   Loader2, 
@@ -38,10 +56,12 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 // GraphQL Query
 const GET_LIST_TASKS = gql`
@@ -66,6 +86,34 @@ const GET_LIST_TASKS = gql`
   }
 `;
 
+const CREATE_PROJECT_TASK = gql`
+  mutation CreateProjectTask($projectId: ID!, $input: CreateTaskInput!) {
+    createProjectTask(projectId: $projectId, input: $input) {
+      id
+      title
+      status
+      priority
+    }
+  }
+`;
+
+const DELETE_TASK = gql`
+  mutation DeleteTask($id: ID!) {
+    deleteTask(id: $id)
+  }
+`;
+
+const UPDATE_TASK = gql`
+  mutation UpdateTask($id: ID!, $input: UpdateTaskInput!) {
+    updateTask(id: $id, input: $input) {
+      id
+      title
+      status
+      priority
+    }
+  }
+`;
+
 interface ListViewProps {
   projectId: string;
 }
@@ -80,12 +128,95 @@ export function ListView({ projectId }: ListViewProps) {
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   
-  const { data, loading } = useQuery(GET_LIST_TASKS, {
+  // Dialog states
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    priority: 'MEDIUM',
+    category: 'OTHER',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { data, loading, error, refetch } = useQuery(GET_LIST_TASKS, {
     variables: { projectId },
     fetchPolicy: 'network-only',
   });
 
+  const [createTask] = useMutation(CREATE_PROJECT_TASK, {
+    onCompleted: () => {
+      toast.success('Tạo task thành công!');
+      setIsCreateOpen(false);
+      setNewTask({ title: '', description: '', priority: 'MEDIUM', category: 'OTHER' });
+      refetch();
+    },
+    onError: (err) => {
+      toast.error('Lỗi: ' + err.message);
+    },
+  });
+
+  const [deleteTask] = useMutation(DELETE_TASK, {
+    onCompleted: () => {
+      toast.success('Xóa task thành công!');
+      refetch();
+    },
+    onError: (err) => {
+      toast.error('Lỗi: ' + err.message);
+    },
+  });
+
+  const [updateTask] = useMutation(UPDATE_TASK, {
+    onCompleted: () => {
+      toast.success('Cập nhật task thành công!');
+      refetch();
+    },
+    onError: (err) => {
+      toast.error('Lỗi: ' + err.message);
+    },
+  });
+
   const tasks = data?.projectTasks || [];
+
+  // Handle create task
+  const handleCreateTask = async () => {
+    if (!newTask.title.trim()) {
+      toast.error('Vui lòng nhập tiêu đề task');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await createTask({
+        variables: {
+          projectId,
+          input: {
+            title: newTask.title,
+            description: newTask.description || undefined,
+            priority: newTask.priority,
+            category: newTask.category,
+          },
+        },
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle delete task
+  const handleDeleteTask = async (taskId: string) => {
+    if (confirm('Bạn có chắc muốn xóa task này?')) {
+      await deleteTask({ variables: { id: taskId } });
+    }
+  };
+
+  // Handle quick status change
+  const handleStatusChange = async (taskId: string, newStatus: string) => {
+    await updateTask({
+      variables: {
+        id: taskId,
+        input: { status: newStatus },
+      },
+    });
+  };
 
   // Filter and sort tasks
   const filteredTasks = useMemo(() => {
@@ -212,6 +343,23 @@ export function ListView({ projectId }: ListViewProps) {
     );
   }
 
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="py-8">
+          <div className="text-center text-muted-foreground">
+            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+            <p className="font-medium">Không thể tải danh sách tasks</p>
+            <p className="text-sm mt-1">{error.message}</p>
+            <Button variant="outline" className="mt-4" onClick={() => refetch()}>
+              Thử lại
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -227,6 +375,96 @@ export function ListView({ projectId }: ListViewProps) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* Add Task Button */}
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Thêm Task
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Tạo Task mới</DialogTitle>
+                <DialogDescription>
+                  Thêm công việc mới vào dự án
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Tiêu đề *</Label>
+                  <Input
+                    id="title"
+                    placeholder="Nhập tiêu đề task..."
+                    value={newTask.title}
+                    onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="description">Mô tả</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Nhập mô tả chi tiết..."
+                    rows={3}
+                    value={newTask.description}
+                    onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Mức ưu tiên</Label>
+                    <Select
+                      value={newTask.priority}
+                      onValueChange={(value) => setNewTask({ ...newTask, priority: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="LOW">Thấp</SelectItem>
+                        <SelectItem value="MEDIUM">Trung bình</SelectItem>
+                        <SelectItem value="HIGH">Cao</SelectItem>
+                        <SelectItem value="URGENT">Khẩn cấp</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Danh mục</Label>
+                    <Select
+                      value={newTask.category}
+                      onValueChange={(value) => setNewTask({ ...newTask, category: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="OTHER">Khác</SelectItem>
+                        <SelectItem value="WORK">Công việc</SelectItem>
+                        <SelectItem value="PERSONAL">Cá nhân</SelectItem>
+                        <SelectItem value="SHOPPING">Mua sắm</SelectItem>
+                        <SelectItem value="HEALTH">Sức khỏe</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+                  Hủy
+                </Button>
+                <Button onClick={handleCreateTask} disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  Tạo Task
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           {/* Search */}
           <div className="relative flex-1 lg:flex-none lg:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -420,16 +658,18 @@ export function ListView({ projectId }: ListViewProps) {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="w-4 h-4 mr-2" />
-                              Xem chi tiết
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="w-4 h-4 mr-2" />
-                              Chỉnh sửa
-                            </DropdownMenuItem>
+                            <DropdownMenuLabel>Đổi trạng thái</DropdownMenuLabel>
+                            {Object.entries(statusLabels).map(([value, label]) => (
+                              <DropdownMenuItem 
+                                key={value} 
+                                onClick={() => handleStatusChange(task.id, value)}
+                                disabled={task.status === value}
+                              >
+                                {label}
+                              </DropdownMenuItem>
+                            ))}
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteTask(task.id)}>
                               <Trash2 className="w-4 h-4 mr-2" />
                               Xóa
                             </DropdownMenuItem>

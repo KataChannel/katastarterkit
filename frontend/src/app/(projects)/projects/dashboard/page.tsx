@@ -89,6 +89,13 @@ export default function DashboardPage() {
     requireAuth: true 
   });
 
+  // Debug: Log projects
+  useEffect(() => {
+    if (projectsData && projectsData.length > 0) {
+      console.log('[Dashboard] Projects loaded:', projectsData.length, projectsData.map((p: any) => p.name));
+    }
+  }, [projectsData]);
+
   // Fetch Tasks
   const { 
     data: tasksData, 
