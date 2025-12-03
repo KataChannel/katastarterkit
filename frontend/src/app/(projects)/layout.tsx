@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -14,6 +14,7 @@ import {
   Kanban,
   Calendar,
   Map,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -38,15 +39,16 @@ const viewTabs: { id: ViewType; name: string; icon: any }[] = [
   { id: 'roadmap', name: 'Roadmap', icon: Map },
 ];
 
-export default function ProjectsLayout({
-  children,
-}: {
-  children: React.ReactNode;
+// Component sử dụng useSearchParams - cần được wrap trong Suspense
+function ProjectsNavigation({ 
+  isMobileMenuOpen, 
+  setIsMobileMenuOpen 
+}: { 
+  isMobileMenuOpen: boolean; 
+  setIsMobileMenuOpen: (open: boolean) => void;
 }) {
-  const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeView, setActiveView] = useState<ViewType>('list');
 
   // Get active view from URL
@@ -68,8 +70,106 @@ export default function ProjectsLayout({
     setIsMobileMenuOpen(false);
   };
 
-  // Check if we're on the views page
-  const isViewsPage = pathname?.startsWith('/projects/views');
+  return (
+    <>
+      {/* Desktop Navigation */}
+      <nav className="hidden lg:flex items-center gap-1">
+        {viewTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeView === tab.id;
+          
+          return (
+            <button
+              key={tab.id}
+              onClick={() => handleViewChange(tab.id)}
+              className={`
+                flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium
+                transition-colors
+                ${isActive 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                }
+              `}
+            >
+              <Icon className="h-4 w-4" />
+              {tab.name}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Mobile Navigation Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden border-t absolute top-14 left-0 right-0 bg-background z-50">
+          <nav className="grid gap-1 p-2">
+            {viewTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeView === tab.id;
+              
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleViewChange(tab.id)}
+                  className={`
+                    flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium
+                    transition-colors w-full text-left
+                    ${isActive 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    }
+                  `}
+                >
+                  <Icon className="h-4 w-4" />
+                  {tab.name}
+                </button>
+              );
+            })}
+          </nav>
+          
+          {/* Mobile Search */}
+          <div className="p-2 border-t">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Tìm kiếm..."
+                className="w-full pl-8"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// Loading fallback cho navigation
+function NavigationFallback() {
+  return (
+    <nav className="hidden lg:flex items-center gap-1">
+      {viewTabs.map((tab) => {
+        const Icon = tab.icon;
+        return (
+          <div
+            key={tab.id}
+            className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground"
+          >
+            <Icon className="h-4 w-4" />
+            {tab.name}
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
+
+export default function ProjectsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -101,31 +201,13 @@ export default function ProjectsLayout({
             </Link>
           </div>
 
-          {/* Center: View Tabs Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {viewTabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeView === tab.id;
-              
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleViewChange(tab.id)}
-                  className={`
-                    flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium
-                    transition-colors
-                    ${isActive 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                    }
-                  `}
-                >
-                  <Icon className="h-4 w-4" />
-                  {tab.name}
-                </button>
-              );
-            })}
-          </nav>
+          {/* Center: View Tabs Navigation - Wrapped in Suspense */}
+          <Suspense fallback={<NavigationFallback />}>
+            <ProjectsNavigation 
+              isMobileMenuOpen={isMobileMenuOpen} 
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
+            />
+          </Suspense>
 
           {/* Right: Search, Notifications, Profile */}
           <div className="flex items-center gap-2">
@@ -174,48 +256,6 @@ export default function ProjectsLayout({
             </DropdownMenu>
           </div>
         </div>
-
-        {/* Mobile Navigation Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden border-t">
-            <nav className="grid gap-1 p-2">
-              {viewTabs.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeView === tab.id;
-                
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleViewChange(tab.id)}
-                    className={`
-                      flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium
-                      transition-colors w-full text-left
-                      ${isActive 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                      }
-                    `}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {tab.name}
-                  </button>
-                );
-              })}
-            </nav>
-            
-            {/* Mobile Search */}
-            <div className="p-2 border-t">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Tìm kiếm..."
-                  className="w-full pl-8"
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </header>
 
       {/* Main Content - Full Height */}
