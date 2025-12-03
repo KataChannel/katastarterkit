@@ -27,11 +27,20 @@ export class SocialAuthService {
     try {
       const appId = this.configService.get('ZALO_APP_ID');
       const appSecret = this.configService.get('ZALO_APP_SECRET');
+      const frontendUrl = this.configService.get('FRONTEND_URL') || this.configService.get('NEXT_PUBLIC_FRONTEND_URL');
       const redirectUri = this.configService.get('ZALO_REDIRECT_URI') || 
-        `${this.configService.get('FRONTEND_URL')}/oauth-callback/zalo/callback`;
+        `${frontendUrl}/oauth-callback/zalo/callback`;
+
+      // Log env status for debugging
+      this.logger.log(`Zalo Config Status:`);
+      this.logger.log(`  - ZALO_APP_ID: ${appId ? `${appId.substring(0, 10)}...` : '❌ NOT SET'}`);
+      this.logger.log(`  - ZALO_APP_SECRET: ${appSecret ? '✅ SET' : '❌ NOT SET'}`);
+      this.logger.log(`  - FRONTEND_URL: ${frontendUrl || '❌ NOT SET'}`);
+      this.logger.log(`  - Redirect URI: ${redirectUri}`);
 
       if (!appId || !appSecret) {
-        this.logger.warn('Zalo App ID or Secret not configured');
+        this.logger.error('❌ Zalo credentials not configured in environment variables');
+        this.logger.error('Please add ZALO_APP_ID and ZALO_APP_SECRET to .env file');
         throw new BadRequestException('Zalo chưa được cấu hình. Vui lòng liên hệ quản trị viên.');
       }
 
