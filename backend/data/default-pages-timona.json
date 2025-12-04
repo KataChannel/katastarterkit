@@ -1,0 +1,572 @@
+{
+  "domain": "timona",
+  "description": "Cấu hình trang chủ mặc định cho Timona Academy",
+  "pages": [
+    {
+      "id": "page-home-timona",
+      "title": "Trang Chủ - Timona Academy",
+      "slug": "trang-chu",
+      "isHomepage": true,
+      "content": {
+        "sections": [
+          {
+            "id": "hero-slider",
+            "type": "HERO_SLIDER",
+            "order": 1,
+            "data": {
+              "autoPlayInterval": 5000,
+              "slides": [
+                {
+                  "id": "slide-1",
+                  "title": "HỌC VIỆN ĐÀO TẠO THẨM MỸ QUỐC TẾ",
+                  "subtitle": "Timona Academy - Nơi ươm mầm những chuyên gia làm đẹp hàng đầu",
+                  "image": "/images/timona/hero-1.jpg",
+                  "link": "/timona/khoa-hoc",
+                  "buttonText": "XEM KHÓA HỌC"
+                },
+                {
+                  "id": "slide-2",
+                  "title": "ĐÀO TẠO CHUYÊN GIA SPA",
+                  "subtitle": "Chương trình đào tạo chuẩn quốc tế - Bằng cấp được công nhận toàn cầu",
+                  "image": "/images/timona/hero-2.jpg",
+                  "link": "/timona/khoa-hoc/spa",
+                  "buttonText": "ĐĂNG KÝ NGAY"
+                },
+                {
+                  "id": "slide-3",
+                  "title": "PHUN XĂM THẨM MỸ CHUYÊN NGHIỆP",
+                  "subtitle": "Học từ những chuyên gia hàng đầu - Cam kết việc làm 100%",
+                  "image": "/images/timona/hero-3.jpg",
+                  "link": "/timona/khoa-hoc/phun-xam",
+                  "buttonText": "TÌM HIỂU THÊM"
+                }
+              ]
+            }
+          },
+          {
+            "id": "stats-section",
+            "type": "STATS",
+            "order": 2,
+            "data": {
+              "backgroundColor": "#00256e",
+              "stats": [
+                {
+                  "value": "10+",
+                  "label": "Năm kinh nghiệm",
+                  "icon": "📅"
+                },
+                {
+                  "value": "5000+",
+                  "label": "Học viên tốt nghiệp",
+                  "icon": "🎓"
+                },
+                {
+                  "value": "500+",
+                  "label": "Đối tác việc làm",
+                  "icon": "🤝"
+                },
+                {
+                  "value": "100%",
+                  "label": "Cam kết việc làm",
+                  "icon": "💼"
+                }
+              ]
+            }
+          },
+          {
+            "id": "courses-section",
+            "type": "COURSES_GRID",
+            "order": 3,
+            "data": {
+              "title": "KHÓA HỌC ĐÀO TẠO",
+              "subtitle": "Các khóa học được thiết kế bài bản, chuẩn quốc tế với đội ngũ giảng viên giàu kinh nghiệm",
+              "showCategoryFilter": true,
+              "viewAllLink": "/timona/khoa-hoc",
+              "viewAllText": "XEM TẤT CẢ KHÓA HỌC"
+            }
+          },
+          {
+            "id": "commitments-section",
+            "type": "FAQ",
+            "order": 4,
+            "data": {
+              "title": "CAM KẾT ĐÀO TẠO",
+              "style": "accordion",
+              "columns": 2,
+              "items": [
+                {
+                  "id": 1,
+                  "icon": "🏢",
+                  "question": "1. Hệ thống đào tạo thẩm mỹ chính quy",
+                  "answer": "Timona Academy là hệ thống đào tạo thẩm mỹ chính quy được cấp phép bởi Sở Lao động - Thương binh và Xã hội. Với cơ sở vật chất hiện đại, đội ngũ giảng viên giàu kinh nghiệm và chương trình đào tạo bài bản, chúng tôi cam kết mang đến cho học viên một môi trường học tập chuyên nghiệp nhất."
+                },
+                {
+                  "id": 2,
+                  "icon": "🤝",
+                  "question": "2. Cấp bằng chính quy sở giáo dục & đào tạo",
+                  "answer": "Sau khi hoàn thành khóa học, học viên sẽ được cấp bằng chính quy do Sở Giáo dục & Đào tạo công nhận. Bằng cấp có giá trị toàn quốc, giúp học viên có thêm lợi thế trong quá trình xin việc và phát triển sự nghiệp."
+                },
+                {
+                  "id": 3,
+                  "icon": "👨‍⚕️",
+                  "question": "3. Đội ngũ bác sĩ da liễu đầu ngành",
+                  "answer": "Đội ngũ giảng viên của Timona Academy bao gồm các bác sĩ da liễu đầu ngành, có chứng chỉ chuyên môn cao và nhiều năm kinh nghiệm thực tế. Họ sẽ trực tiếp hướng dẫn và truyền đạt kiến thức, kỹ năng chuyên môn cho học viên một cách tận tâm nhất."
+                },
+                {
+                  "id": 4,
+                  "icon": "🏛️",
+                  "question": "4. Cấp bằng quốc tế ITEC",
+                  "answer": "Bên cạnh bằng trong nước, Timona Academy còn cấp chứng chỉ ITEC - chứng chỉ quốc tế được công nhận tại hơn 30 quốc gia trên thế giới. Đây là tấm vé giúp học viên có cơ hội làm việc tại các spa, thẩm mỹ viện quốc tế."
+                },
+                {
+                  "id": 5,
+                  "icon": "🎓",
+                  "question": "5. Giáo trình chuẩn quốc tế",
+                  "answer": "Chương trình đào tạo được xây dựng theo chuẩn quốc tế, kết hợp lý thuyết và thực hành với tỷ lệ hợp lý. Nội dung giảng dạy được cập nhật liên tục theo xu hướng và công nghệ mới nhất trong ngành làm đẹp."
+                },
+                {
+                  "id": 6,
+                  "icon": "🏥",
+                  "question": "6. Hệ thống 25 bệnh viện hàng đầu Hàn Quốc",
+                  "answer": "Timona Academy có mối quan hệ hợp tác chiến lược với hệ thống 25 bệnh viện thẩm mỹ hàng đầu Hàn Quốc. Học viên có cơ hội được tham quan, học tập và thực hành tại các cơ sở y tế hiện đại này."
+                },
+                {
+                  "id": 7,
+                  "icon": "🎯",
+                  "question": "7. Phương pháp đào tạo độc quyền",
+                  "answer": "Phương pháp giảng dạy độc quyền của Timona kết hợp giữa lý thuyết và thực hành, với tỷ lệ thực hành lên đến 70%. Học viên được thực hành trên người mẫu thật ngay từ những buổi học đầu tiên."
+                },
+                {
+                  "id": 8,
+                  "icon": "📋",
+                  "question": "8. Thành viên hội đồng bảo cáo khoa học",
+                  "answer": "Timona Academy là thành viên tích cực của hội đồng bảo cáo khoa học tại các bệnh viện da liễu tuyến đầu Việt Nam. Đây là minh chứng cho uy tín và chất lượng đào tạo của học viện."
+                },
+                {
+                  "id": 9,
+                  "icon": "💼",
+                  "question": "9. Hỗ trợ 100% việc làm",
+                  "answer": "Cam kết hỗ trợ 100% việc làm cho học viên sau khi tốt nghiệp. Timona có mạng lưới hợp tác với hơn 500 spa, thẩm mỹ viện trên toàn quốc, sẵn sàng tiếp nhận học viên vào làm việc ngay."
+                },
+                {
+                  "id": 10,
+                  "icon": "🇰🇷",
+                  "question": "10. Đi đầu cập nhật xu hướng từ Hàn Quốc",
+                  "answer": "Timona Academy luôn đi đầu trong việc cập nhật xu hướng và công nghệ làm đẹp mới nhất từ Hàn Quốc. Định kỳ, học viện tổ chức các buổi workshop, hội thảo với chuyên gia quốc tế."
+                },
+                {
+                  "id": 11,
+                  "icon": "💰",
+                  "question": "11. Hỗ trợ toàn diện",
+                  "answer": "Hỗ trợ toàn diện cho học viên từ tư vấn chọn khóa học, hỗ trợ học phí, đến hỗ trợ việc làm sau tốt nghiệp. Đội ngũ tư vấn luôn sẵn sàng đồng hành cùng học viên trong suốt quá trình học tập."
+                },
+                {
+                  "id": 12,
+                  "icon": "✈️",
+                  "question": "12. Cơ hội tu nghiệp Hàn Quốc",
+                  "answer": "Học viên xuất sắc có cơ hội được tài trợ chi phí để sang Hàn Quốc tu nghiệp, học tập và làm việc tại các spa, bệnh viện thẩm mỹ hàng đầu. Đây là cơ hội quý giá để nâng cao trình độ chuyên môn."
+                }
+              ],
+              "ctaText": "ĐĂNG KÝ TƯ VẤN NGAY",
+              "ctaLink": "#register"
+            }
+          },
+          {
+            "id": "instructors-section",
+            "type": "TEAM",
+            "order": 5,
+            "data": {
+              "title": "ĐỘI NGŨ GIẢNG VIÊN",
+              "subtitle": "Các chuyên gia hàng đầu với nhiều năm kinh nghiệm trong lĩnh vực đào tạo thẩm mỹ",
+              "layout": "carousel",
+              "showViewAll": true,
+              "viewAllLink": "/timona/giang-vien"
+            }
+          },
+          {
+            "id": "testimonials-section",
+            "type": "TESTIMONIAL",
+            "order": 6,
+            "data": {
+              "title": "HỌC VIÊN NÓI GÌ VỀ TIMONA",
+              "subtitle": "Những chia sẻ chân thực từ các học viên đã và đang học tập tại Timona Academy",
+              "layout": "carousel",
+              "autoplay": true
+            }
+          },
+          {
+            "id": "faq-section",
+            "type": "FAQ",
+            "order": 7,
+            "data": {
+              "title": "CÂU HỎI THƯỜNG GẶP",
+              "style": "accordion",
+              "items": [
+                {
+                  "question": "Timona Academy có những khóa học nào?",
+                  "answer": "Timona Academy cung cấp đa dạng các khóa học thẩm mỹ bao gồm: Chuyên gia Spa & Chăm sóc da, Phun xăm thẩm mỹ, Nối mi chuyên nghiệp, Gội đầu dưỡng sinh, Nail Art và nhiều khóa học khác."
+                },
+                {
+                  "question": "Thời gian học mỗi khóa là bao lâu?",
+                  "answer": "Thời gian học tùy thuộc vào từng khóa học, dao động từ 1 tháng đến 6 tháng. Khóa học ngắn hạn khoảng 1-2 tháng, khóa học chuyên sâu từ 3-6 tháng."
+                },
+                {
+                  "question": "Có hỗ trợ việc làm sau khi tốt nghiệp không?",
+                  "answer": "Có. Timona cam kết hỗ trợ 100% việc làm cho học viên sau khi tốt nghiệp. Học viện có mạng lưới hợp tác với hơn 500 spa, thẩm mỹ viện trên toàn quốc."
+                },
+                {
+                  "question": "Học phí có thể trả góp không?",
+                  "answer": "Có. Timona hỗ trợ trả góp học phí qua nhiều ngân hàng và tổ chức tài chính uy tín với lãi suất ưu đãi. Học viên cũng có thể đăng ký học bổng lên đến 50%."
+                },
+                {
+                  "question": "Bằng cấp của Timona có giá trị như thế nào?",
+                  "answer": "Bằng cấp của Timona được Sở Giáo dục & Đào tạo công nhận, có giá trị toàn quốc. Ngoài ra, học viên còn được cấp chứng chỉ ITEC quốc tế, được công nhận tại hơn 30 quốc gia."
+                }
+              ]
+            }
+          },
+          {
+            "id": "registration-section",
+            "type": "CONTACT_FORM",
+            "order": 8,
+            "data": {
+              "title": "ĐĂNG KÝ TƯ VẤN",
+              "subtitle": "Để lại thông tin để nhận tư vấn miễn phí về khóa học phù hợp với bạn",
+              "backgroundColor": "#f3f4f6",
+              "fields": [
+                {
+                  "name": "fullName",
+                  "label": "Họ và tên",
+                  "type": "text",
+                  "required": true,
+                  "placeholder": "Nhập họ và tên"
+                },
+                {
+                  "name": "phone",
+                  "label": "Số điện thoại",
+                  "type": "tel",
+                  "required": true,
+                  "placeholder": "Nhập số điện thoại"
+                },
+                {
+                  "name": "email",
+                  "label": "Email",
+                  "type": "email",
+                  "required": false,
+                  "placeholder": "Nhập email"
+                },
+                {
+                  "name": "course",
+                  "label": "Khóa học quan tâm",
+                  "type": "select",
+                  "required": true,
+                  "options": [
+                    "Chuyên gia Spa & Chăm sóc da",
+                    "Phun xăm thẩm mỹ",
+                    "Nối mi chuyên nghiệp",
+                    "Gội đầu dưỡng sinh",
+                    "Nail Art",
+                    "Khác"
+                  ]
+                },
+                {
+                  "name": "message",
+                  "label": "Ghi chú",
+                  "type": "textarea",
+                  "required": false,
+                  "placeholder": "Nhập ghi chú hoặc câu hỏi"
+                }
+              ],
+              "submitText": "ĐĂNG KÝ NGAY",
+              "successMessage": "Cảm ơn bạn đã đăng ký! Chúng tôi sẽ liên hệ trong thời gian sớm nhất."
+            }
+          },
+          {
+            "id": "branches-section",
+            "type": "BRANCHES",
+            "order": 9,
+            "data": {
+              "title": "HỆ THỐNG CHI NHÁNH",
+              "subtitle": "Timona Academy có mặt tại các thành phố lớn trên cả nước",
+              "showMap": true
+            }
+          }
+        ],
+        "floatingContacts": {
+          "enabled": true,
+          "buttons": [
+            {
+              "type": "phone",
+              "value": "19002109",
+              "label": "Gọi điện",
+              "color": "#00256e"
+            },
+            {
+              "type": "zalo",
+              "value": "https://zalo.me/timonaacademy",
+              "label": "Chat Zalo",
+              "color": "#0068ff"
+            },
+            {
+              "type": "messenger",
+              "value": "https://m.me/timonaacademy",
+              "label": "Messenger",
+              "color": "gradient-to-r from-blue-500 to-purple-500"
+            }
+          ]
+        }
+      },
+      "seoTitle": "Timona Academy - Học viện Đào tạo Thẩm mỹ Quốc tế",
+      "seoDescription": "Timona Academy - Hệ thống đào tạo nghề thẩm mỹ hàng đầu Việt Nam. Cam kết 100% việc làm, bằng cấp quốc tế ITEC. Hotline: 19002109",
+      "seoKeywords": "timona academy, đào tạo thẩm mỹ, học spa, phun xăm, nối mi, khóa học làm đẹp, việc làm spa",
+      "status": "PUBLISHED",
+      "layoutSettings": {
+        "hasHeader": true,
+        "hasFooter": true,
+        "headerVariant": "timona",
+        "headerStyle": "fixed",
+        "footerVariant": "timona",
+        "footerStyle": "default",
+        "headerConfig": {
+          "variant": "timona",
+          "brand": {
+            "name": "TIMONA ACADEMY",
+            "logo": "/images/timona/logo.png",
+            "tagline": "Học viện đào tạo thẩm mỹ quốc tế"
+          },
+          "topBar": {
+            "enabled": true,
+            "backgroundColor": "#00256e",
+            "hotline": "19002109",
+            "hotlineText": "(24/7 - Miễn phí)",
+            "promoText": "Học bổng đến 50% học phí",
+            "ctaText": "ĐĂNG KÝ NGAY",
+            "ctaLink": "#register"
+          },
+          "menuItems": [
+            {
+              "label": "Trang chủ",
+              "href": "/timona"
+            },
+            {
+              "label": "Khóa học",
+              "href": "/timona/khoa-hoc",
+              "children": [
+                {
+                  "label": "Chuyên gia Spa & Chăm sóc da",
+                  "href": "/timona/khoa-hoc?category=spa"
+                },
+                {
+                  "label": "Phun xăm thẩm mỹ",
+                  "href": "/timona/khoa-hoc?category=phun-xam"
+                },
+                {
+                  "label": "Nối mi chuyên nghiệp",
+                  "href": "/timona/khoa-hoc?category=noi-mi"
+                },
+                {
+                  "label": "Gội đầu dưỡng sinh",
+                  "href": "/timona/khoa-hoc?category=goi-dau"
+                }
+              ]
+            },
+            {
+              "label": "Giảng viên",
+              "href": "/timona/giang-vien"
+            },
+            {
+              "label": "Tin tức",
+              "href": "/timona/tin-tuc"
+            },
+            {
+              "label": "Cơ hội việc làm",
+              "href": "/timona/tuyen-dung"
+            },
+            {
+              "label": "Liên hệ",
+              "href": "/timona/lien-he"
+            }
+          ],
+          "colors": {
+            "primary": "#00256e",
+            "secondary": "#fbbf24",
+            "background": "#ffffff",
+            "text": "#374151"
+          },
+          "ctaButton": {
+            "text": "ĐĂNG KÝ TƯ VẤN",
+            "href": "#register",
+            "variant": "primary"
+          }
+        },
+        "footerConfig": {
+          "variant": "timona",
+          "brand": {
+            "name": "TIMONA ACADEMY",
+            "logo": "/images/timona/logo-white.png",
+            "tagline": "Học viện đào tạo thẩm mỹ quốc tế",
+            "description": "Timona Academy là hệ thống đào tạo nghề thẩm mỹ hàng đầu Việt Nam, được cấp phép bởi Sở Lao động - Thương binh và Xã hội."
+          },
+          "columns": [
+            {
+              "title": "Liên kết nhanh",
+              "links": [
+                { "label": "Về Timona Academy", "href": "/timona/gioi-thieu" },
+                { "label": "Các khóa học", "href": "/timona/khoa-hoc" },
+                { "label": "Đội ngũ giảng viên", "href": "/timona/giang-vien" },
+                { "label": "Cơ hội việc làm", "href": "/timona/tuyen-dung" },
+                { "label": "Tin tức & Sự kiện", "href": "/timona/tin-tuc" },
+                { "label": "Liên hệ", "href": "/timona/lien-he" }
+              ]
+            },
+            {
+              "title": "Khóa học",
+              "links": [
+                { "label": "Chuyên gia Spa & Chăm sóc da", "href": "/timona/khoa-hoc/spa" },
+                { "label": "Phun xăm thẩm mỹ", "href": "/timona/khoa-hoc/phun-xam" },
+                { "label": "Nối mi chuyên nghiệp", "href": "/timona/khoa-hoc/noi-mi" },
+                { "label": "Gội đầu dưỡng sinh", "href": "/timona/khoa-hoc/goi-dau" },
+                { "label": "Nail Art chuyên nghiệp", "href": "/timona/khoa-hoc/nail" }
+              ]
+            },
+            {
+              "title": "Liên hệ",
+              "contacts": [
+                { "type": "phone", "value": "19002109", "label": "(24/7 - Miễn phí)" },
+                { "type": "email", "value": "info@timona.edu.vn" },
+                { "type": "address", "value": "1012-1014 Quang Trung, P.8, Q. Gò Vấp, TP.HCM" }
+              ]
+            }
+          ],
+          "socialLinks": [
+            { "platform": "facebook", "url": "https://facebook.com/timonaacademy" },
+            { "platform": "youtube", "url": "https://youtube.com/@timonaacademy" },
+            { "platform": "zalo", "url": "https://zalo.me/timonaacademy" }
+          ],
+          "colors": {
+            "background": "#00256e",
+            "text": "#ffffff"
+          },
+          "copyright": "© 2025 Timona Academy. All rights reserved.",
+          "legalLinks": [
+            { "label": "Chính sách bảo mật", "href": "/timona/chinh-sach-bao-mat" },
+            { "label": "Điều khoản sử dụng", "href": "/timona/dieu-khoan-su-dung" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "page-about-timona",
+      "title": "Giới Thiệu - Timona Academy",
+      "slug": "gioi-thieu",
+      "content": {
+        "sections": [
+          {
+            "id": "about-hero",
+            "type": "HERO",
+            "order": 1,
+            "data": {
+              "title": "VỀ TIMONA ACADEMY",
+              "subtitle": "Hệ thống đào tạo thẩm mỹ chính quy hàng đầu Việt Nam",
+              "backgroundImage": "/images/timona/about-hero.jpg"
+            }
+          },
+          {
+            "id": "about-content",
+            "type": "RICH_TEXT",
+            "order": 2,
+            "data": {
+              "title": "Câu chuyện của chúng tôi",
+              "content": "<p>Timona Academy được thành lập với sứ mệnh đào tạo đội ngũ chuyên gia thẩm mỹ chuyên nghiệp, đáp ứng nhu cầu ngày càng cao của ngành làm đẹp tại Việt Nam và quốc tế.</p><p>Với hơn 10 năm kinh nghiệm, chúng tôi tự hào đã đào tạo hơn 5000 học viên, trong đó nhiều người đã trở thành những chuyên gia hàng đầu trong ngành.</p>"
+            }
+          }
+        ]
+      },
+      "seoTitle": "Giới Thiệu - Timona Academy | Học viện Đào tạo Thẩm mỹ Quốc tế",
+      "seoDescription": "Tìm hiểu về Timona Academy - Hệ thống đào tạo thẩm mỹ chính quy với hơn 10 năm kinh nghiệm, đào tạo hơn 5000 học viên thành công.",
+      "seoKeywords": "timona academy, giới thiệu, đào tạo thẩm mỹ, học viện làm đẹp",
+      "status": "PUBLISHED",
+      "layoutSettings": {
+        "hasHeader": true,
+        "hasFooter": true,
+        "headerVariant": "timona",
+        "footerVariant": "timona"
+      }
+    },
+    {
+      "id": "page-contact-timona",
+      "title": "Liên Hệ - Timona Academy",
+      "slug": "lien-he",
+      "content": {
+        "sections": [
+          {
+            "id": "contact-hero",
+            "type": "HERO",
+            "order": 1,
+            "data": {
+              "title": "LIÊN HỆ VỚI CHÚNG TÔI",
+              "subtitle": "Chúng tôi luôn sẵn sàng hỗ trợ và giải đáp mọi thắc mắc của bạn",
+              "backgroundImage": "/images/timona/contact-hero.jpg"
+            }
+          },
+          {
+            "id": "contact-info",
+            "type": "CONTACT_INFO",
+            "order": 2,
+            "data": {
+              "title": "Thông tin liên hệ",
+              "contacts": [
+                {
+                  "type": "phone",
+                  "label": "Hotline",
+                  "value": "19002109",
+                  "description": "24/7 - Miễn phí cước gọi"
+                },
+                {
+                  "type": "email",
+                  "label": "Email",
+                  "value": "info@timona.edu.vn",
+                  "description": "Phản hồi trong 24 giờ"
+                },
+                {
+                  "type": "address",
+                  "label": "Địa chỉ",
+                  "value": "1012-1014 Quang Trung, P.8, Q. Gò Vấp, TP.HCM",
+                  "description": "Giờ làm việc: 8:00 - 21:00"
+                }
+              ],
+              "showMap": true,
+              "mapEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.8545697741953!2d106.64318051471!3d10.82689829228!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDQ5JzM2LjgiTiAxMDbCsDM4JzQzLjkiRQ!5e0!3m2!1sen!2s!4v1234567890"
+            }
+          },
+          {
+            "id": "contact-form",
+            "type": "CONTACT_FORM",
+            "order": 3,
+            "data": {
+              "title": "Gửi tin nhắn cho chúng tôi",
+              "fields": [
+                { "name": "fullName", "label": "Họ và tên", "type": "text", "required": true },
+                { "name": "phone", "label": "Số điện thoại", "type": "tel", "required": true },
+                { "name": "email", "label": "Email", "type": "email", "required": true },
+                { "name": "subject", "label": "Chủ đề", "type": "text", "required": true },
+                { "name": "message", "label": "Nội dung", "type": "textarea", "required": true }
+              ],
+              "submitText": "GỬI TIN NHẮN"
+            }
+          }
+        ]
+      },
+      "seoTitle": "Liên Hệ - Timona Academy | Hotline 19002109",
+      "seoDescription": "Liên hệ Timona Academy qua Hotline 19002109 (miễn phí 24/7), Email info@timona.edu.vn hoặc đến trực tiếp cơ sở tại TP.HCM.",
+      "seoKeywords": "liên hệ timona, hotline timona, địa chỉ timona academy",
+      "status": "PUBLISHED",
+      "layoutSettings": {
+        "hasHeader": true,
+        "hasFooter": true,
+        "headerVariant": "timona",
+        "footerVariant": "timona"
+      }
+    }
+  ]
+}
