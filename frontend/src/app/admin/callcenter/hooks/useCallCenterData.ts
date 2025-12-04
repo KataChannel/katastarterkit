@@ -12,7 +12,7 @@ import {
   useCreateOne,
   useUpdateOne,
 } from '@/hooks/useDynamicGraphQL';
-import { SYNC_CALLCENTER_DATA, STOP_SYNC_PROCESS, GET_CALLCENTER_RECORDS, GET_CALLCENTER_RECORDS_STATS, DEFAULT_PAGINATION, MAX_SUMMARY_RECORDS } from '../constants';
+import { SYNC_CALLCENTER_DATA, STOP_SYNC_PROCESS, GET_CALLCENTER_RECORDS, GET_CALLCENTER_RECORDS_STATS, GET_CALLCENTER_COMPARISON_STATS, DEFAULT_PAGINATION, MAX_SUMMARY_RECORDS } from '../constants';
 import { toUTCDateTime, buildGraphQLFilters } from '../utils';
 import type { 
   CallCenterConfig, 
@@ -66,11 +66,17 @@ interface UseCallCenterDataReturn {
   recordsStats: CallCenterRecordsStats | null;
   statsLoading: boolean;
 
-  // Summary Records
-  summaryRecords: CallCenterRecord[];
-  summaryLoading: boolean;
+  // Summary Stats (for Summary Tab)
+  summaryStats: CallCenterRecordsStats | null;
+  summaryStatsLoading: boolean;
   summaryFilters: RecordFilters;
   setSummaryFilters: (filters: RecordFilters) => void;
+
+  // Comparison Stats
+  comparisonStats: CallCenterRecordsStats | null;
+  comparisonStatsLoading: boolean;
+  comparisonFilters: RecordFilters;
+  setComparisonFilters: (filters: RecordFilters) => void;
 
   // Sync Logs
   syncLogs: CallCenterSyncLog[];
@@ -95,6 +101,7 @@ export function useCallCenterData(): UseCallCenterDataReturn {
   const [pagination, setPagination] = useState<Pagination>(DEFAULT_PAGINATION);
   const [filters, setFilters] = useState<RecordFilters>({});
   const [summaryFilters, setSummaryFilters] = useState<RecordFilters>({});
+  const [comparisonFilters, setComparisonFilters] = useState<RecordFilters>({});
 
   // Sync state
   const [currentSyncLogId, setCurrentSyncLogId] = useState<string | null>(null);
@@ -253,19 +260,41 @@ export function useCallCenterData(): UseCallCenterDataReturn {
   const recordsStats: CallCenterRecordsStats | null = statsData?.getCallCenterRecordsStats || null;
 
   // ============================================================================
-  // Summary Records Query
+  // Summary Stats Query - For Summary Tab with separate filters
   // ============================================================================
 
-  const { 
-    data: summaryRecordsResponse = [], 
-    loading: summaryLoading, 
-  } = useFindMany<CallCenterRecord>('callCenterRecord', {
-    where: summaryFilters,
-    take: MAX_SUMMARY_RECORDS,
-    orderBy: { startEpoch: 'desc' },
+  const summaryGqlFilters = buildGraphQLFilters(summaryFilters);
+
+  const {
+    data: summaryStatsData,
+    loading: summaryStatsLoading,
+  } = useQuery(GET_CALLCENTER_RECORDS_STATS, {
+    variables: {
+      filters: Object.keys(summaryGqlFilters).length > 0 ? summaryGqlFilters : null,
+    },
+    fetchPolicy: 'cache-and-network',
   });
 
-  const summaryRecords = Array.isArray(summaryRecordsResponse) ? summaryRecordsResponse : [];
+  const summaryStats: CallCenterRecordsStats | null = summaryStatsData?.getCallCenterRecordsStats || null;
+
+  // ============================================================================
+  // Comparison Stats Query - For comparing periods
+  // ============================================================================
+
+  const comparisonGqlFilters = buildGraphQLFilters(comparisonFilters);
+
+  const {
+    data: comparisonStatsData,
+    loading: comparisonStatsLoading,
+  } = useQuery(GET_CALLCENTER_RECORDS_STATS, {
+    variables: {
+      filters: Object.keys(comparisonGqlFilters).length > 0 ? comparisonGqlFilters : null,
+    },
+    skip: Object.keys(comparisonGqlFilters).length === 0, // Skip if no comparison filters
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const comparisonStats: CallCenterRecordsStats | null = comparisonStatsData?.getCallCenterRecordsStats || null;
 
   // ============================================================================
   // Sync Logs Query
@@ -399,11 +428,17 @@ export function useCallCenterData(): UseCallCenterDataReturn {
     recordsStats,
     statsLoading,
 
-    // Summary Records
-    summaryRecords,
-    summaryLoading,
+    // Summary Stats
+    summaryStats,
+    summaryStatsLoading,
     summaryFilters,
     setSummaryFilters,
+
+    // Comparison Stats
+    comparisonStats,
+    comparisonStatsLoading,
+    comparisonFilters,
+    setComparisonFilters,
 
     // Sync Logs
     syncLogs,

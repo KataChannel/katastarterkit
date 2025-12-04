@@ -93,6 +93,34 @@ export const GET_CALLCENTER_RECORDS_STATS = gql`
   }
 `;
 
+/**
+ * Query để lấy thống kê cho so sánh (comparison)
+ */
+export const GET_CALLCENTER_COMPARISON_STATS = gql`
+  query GetCallCenterComparisonStats($currentFilters: CallCenterRecordFiltersInput, $comparisonFilters: CallCenterRecordFiltersInput) {
+    current: getCallCenterRecordsStats(filters: $currentFilters) {
+      total
+      inbound
+      outbound
+      local
+      answered
+      missed
+      totalDuration
+      avgDuration
+    }
+    comparison: getCallCenterRecordsStats(filters: $comparisonFilters) {
+      total
+      inbound
+      outbound
+      local
+      answered
+      missed
+      totalDuration
+      avgDuration
+    }
+  }
+`;
+
 // ============================================================================
 // Quick Select Options
 // ============================================================================

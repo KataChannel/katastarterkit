@@ -33,32 +33,32 @@ import {
   Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatTotalDuration, calculateSummary, calculateComparisonSummary, calculateChange, getQuickFilterDateRange } from '../utils';
+import { formatTotalDuration, calculateChange, getQuickFilterDateRange } from '../utils';
 import { QUICK_FILTER_OPTIONS } from '../constants';
-import type { CallCenterRecord, ComparisonPeriodType, CallCenterFilters, QuickFilterType } from '../types';
+import type { CallCenterRecordsStats, ComparisonPeriodType, CallCenterFilters, QuickFilterType } from '../types';
 
 interface SummaryTabProps {
-  records: CallCenterRecord[];
+  stats: CallCenterRecordsStats | null;
   loading: boolean;
   filters: CallCenterFilters;
   onFiltersChange: (filters: CallCenterFilters) => void;
   // Comparison feature
   comparisonEnabled: boolean;
   comparisonPeriod: ComparisonPeriodType;
-  comparisonRecords: CallCenterRecord[];
+  comparisonStats: CallCenterRecordsStats | null;
   comparisonLoading: boolean;
   onToggleComparison: () => void;
   onComparisonPeriodChange: (period: ComparisonPeriodType) => void;
 }
 
 export function SummaryTab({
-  records,
+  stats,
   loading,
   filters,
   onFiltersChange,
   comparisonEnabled,
   comparisonPeriod,
-  comparisonRecords,
+  comparisonStats,
   comparisonLoading,
   onToggleComparison,
   onComparisonPeriodChange,
@@ -66,9 +66,17 @@ export function SummaryTab({
   const [fromOpen, setFromOpen] = useState(false);
   const [toOpen, setToOpen] = useState(false);
 
-  // Calculate summaries
-  const currentSummary = calculateSummary(records);
-  const comparisonSummaryData = comparisonEnabled ? calculateComparisonSummary(comparisonRecords) : null;
+  // Use stats from GraphQL query
+  const currentSummary = stats || {
+    total: 0,
+    inbound: 0,
+    outbound: 0,
+    local: 0,
+    answered: 0,
+    missed: 0,
+    totalDuration: 0,
+    avgDuration: 0,
+  };
 
   // Render change indicator
   const renderChange = (current: number, previous: number | null, formatType: 'number' | 'duration' = 'number') => {
@@ -95,7 +103,7 @@ export function SummaryTab({
         )}
         <span>{change.percentage}%</span>
         <span className="text-muted-foreground">
-          (vs {formatType === 'duration' ? formatTotalDuration(previous) : previous})
+          (vs {formatType === 'duration' ? formatTotalDuration(previous) : previous.toLocaleString('vi-VN')})
         </span>
       </div>
     );
@@ -246,11 +254,11 @@ export function SummaryTab({
               </CardTitle>
             </CardHeader>
             <CardContent className="py-2">
-              <p className="text-2xl font-bold">{currentSummary.total}</p>
+              <p className="text-2xl font-bold">{currentSummary.total.toLocaleString('vi-VN')}</p>
               {comparisonLoading ? (
                 <Loader2 className="h-3 w-3 animate-spin mt-1" />
               ) : (
-                renderChange(currentSummary.total, comparisonSummaryData?.totalCalls ?? null)
+                renderChange(currentSummary.total, comparisonStats?.total ?? null)
               )}
             </CardContent>
           </Card>
@@ -264,11 +272,11 @@ export function SummaryTab({
               </CardTitle>
             </CardHeader>
             <CardContent className="py-2">
-              <p className="text-2xl font-bold text-blue-600">{currentSummary.inbound}</p>
+              <p className="text-2xl font-bold text-blue-600">{currentSummary.inbound.toLocaleString('vi-VN')}</p>
               {comparisonLoading ? (
                 <Loader2 className="h-3 w-3 animate-spin mt-1" />
               ) : (
-                renderChange(currentSummary.inbound, comparisonSummaryData?.answeredCalls ?? null)
+                renderChange(currentSummary.inbound, comparisonStats?.inbound ?? null)
               )}
             </CardContent>
           </Card>
@@ -282,11 +290,11 @@ export function SummaryTab({
               </CardTitle>
             </CardHeader>
             <CardContent className="py-2">
-              <p className="text-2xl font-bold text-green-600">{currentSummary.outbound}</p>
+              <p className="text-2xl font-bold text-green-600">{currentSummary.outbound.toLocaleString('vi-VN')}</p>
               {comparisonLoading ? (
                 <Loader2 className="h-3 w-3 animate-spin mt-1" />
               ) : (
-                renderChange(currentSummary.outbound, null)
+                renderChange(currentSummary.outbound, comparisonStats?.outbound ?? null)
               )}
             </CardContent>
           </Card>
@@ -300,11 +308,11 @@ export function SummaryTab({
               </CardTitle>
             </CardHeader>
             <CardContent className="py-2">
-              <p className="text-2xl font-bold text-red-600">{currentSummary.missed}</p>
+              <p className="text-2xl font-bold text-red-600">{currentSummary.missed.toLocaleString('vi-VN')}</p>
               {comparisonLoading ? (
                 <Loader2 className="h-3 w-3 animate-spin mt-1" />
               ) : (
-                renderChange(currentSummary.missed, comparisonSummaryData?.missedCalls ?? null)
+                renderChange(currentSummary.missed, comparisonStats?.missed ?? null)
               )}
             </CardContent>
           </Card>
@@ -324,7 +332,7 @@ export function SummaryTab({
               {comparisonLoading ? (
                 <Loader2 className="h-3 w-3 animate-spin mt-1" />
               ) : (
-                renderChange(currentSummary.totalDuration, comparisonSummaryData?.totalDuration ?? null, 'duration')
+                renderChange(currentSummary.totalDuration, comparisonStats?.totalDuration ?? null, 'duration')
               )}
             </CardContent>
           </Card>
@@ -344,7 +352,7 @@ export function SummaryTab({
               {comparisonLoading ? (
                 <Loader2 className="h-3 w-3 animate-spin mt-1" />
               ) : (
-                renderChange(currentSummary.avgDuration, comparisonSummaryData?.avgDuration ?? null, 'duration')
+                renderChange(currentSummary.avgDuration, comparisonStats?.avgDuration ?? null, 'duration')
               )}
             </CardContent>
           </Card>
@@ -352,13 +360,13 @@ export function SummaryTab({
       )}
 
       {/* Comparison Period Info */}
-      {comparisonEnabled && comparisonSummaryData && !comparisonLoading && (
+      {comparisonEnabled && comparisonStats && !comparisonLoading && (
         <Card className="bg-muted/50">
           <CardContent className="py-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <GitCompare className="h-4 w-4" />
               <span>
-                So sánh với: <strong>{comparisonSummaryData.totalCalls}</strong> cuộc gọi
+                So sánh với: <strong>{comparisonStats.total.toLocaleString('vi-VN')}</strong> cuộc gọi
                 {comparisonPeriod === 'previousPeriod' && ' (kỳ trước)'}
                 {comparisonPeriod === 'previousMonth' && ' (tháng trước)'}
                 {comparisonPeriod === 'previousWeek' && ' (tuần trước)'}
