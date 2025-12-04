@@ -87,6 +87,7 @@ export default function AdminCoursesPage() {
       });
 
       toast({
+        type: 'success',
         title: 'Thành công',
         description: `Đã xóa khóa học "${courseToDelete.title}"`,
       });
@@ -96,6 +97,7 @@ export default function AdminCoursesPage() {
       refetch();
     } catch (error: any) {
       toast({
+        type: 'error',
         title: 'Lỗi',
         description: error.message || 'Không thể xóa khóa học',
         variant: 'destructive',

@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useQuery } from '@apollo/client';
@@ -53,7 +53,9 @@ import {
   ArrowUp,
   ArrowDown,
   Filter,
+  Download,
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { cn } from '@/lib/utils';
 import { formatTotalDuration, calculateChange, getQuickFilterDateRange, buildGraphQLFilters } from '../utils';
 import { QUICK_FILTER_OPTIONS, GET_CALLCENTER_RECORDS_STATS, GET_CALLCENTER_STATS_BY_CALLER } from '../constants';
@@ -576,6 +578,145 @@ export function SummaryTab({
     return callerSortOrder === 'asc' ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
   };
 
+  // Export caller details to Excel
+  const exportCallerDetailsToExcel = useCallback(() => {
+    if (allCallerNumbers.length === 0) return;
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Prepare data for Excel
+    const excelData: (string | number)[][] = [];
+    
+    // Title rows
+    excelData.push(['BÁO CÁO CHI TIẾT CUỘC GỌI THEO SỐ ĐIỆN THOẠI']);
+    if (filters.summaryFrom && filters.summaryTo) {
+      excelData.push([`Kỳ hiện tại: ${format(filters.summaryFrom, 'dd/MM/yyyy', { locale: vi })} - ${format(filters.summaryTo, 'dd/MM/yyyy', { locale: vi })}`]);
+    }
+    excelData.push([`Xuất ngày: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: vi })}`]);
+    excelData.push([]); // Empty row
+    
+    // Build header row
+    const headerRow: string[] = ['Số điện thoại'];
+    
+    // Current period headers
+    headerRow.push('Tổng (HT)', 'Đến (HT)', 'Đi (HT)', 'Nhỡ (HT)', 'TG (HT)');
+    
+    // Comparison period headers
+    comparisonTableData.forEach((period) => {
+      const shortLabel = period.label.replace('Kỳ ', 'K');
+      headerRow.push(
+        `Tổng (${shortLabel})`,
+        `Đến (${shortLabel})`,
+        `Đi (${shortLabel})`,
+        `Nhỡ (${shortLabel})`,
+        `TG (${shortLabel})`
+      );
+    });
+    
+    excelData.push(headerRow);
+    
+    // Data rows
+    allCallerNumbers.forEach((callerNumber) => {
+      const currentStats = currentCallerStats.find(c => c.callerIdNumber === callerNumber);
+      const row: (string | number)[] = [callerNumber];
+      
+      // Current period stats
+      row.push(
+        currentStats?.totalCalls ?? 0,
+        currentStats?.inboundCalls ?? 0,
+        currentStats?.outboundCalls ?? 0,
+        currentStats?.missedCalls ?? 0,
+        currentStats?.totalDuration != null ? formatTotalDuration(currentStats.totalDuration) : '0:00'
+      );
+      
+      // Comparison period stats
+      comparisonTableData.forEach((period) => {
+        const periodCallerStat = period.callerStats?.find(c => c.callerIdNumber === callerNumber);
+        row.push(
+          periodCallerStat?.totalCalls ?? 0,
+          periodCallerStat?.inboundCalls ?? 0,
+          periodCallerStat?.outboundCalls ?? 0,
+          periodCallerStat?.missedCalls ?? 0,
+          periodCallerStat?.totalDuration != null ? formatTotalDuration(periodCallerStat.totalDuration) : '0:00'
+        );
+      });
+      
+      excelData.push(row);
+    });
+    
+    // Summary row
+    excelData.push([]); // Empty row
+    const summaryRow: (string | number)[] = ['TỔNG CỘNG'];
+    
+    // Current period totals
+    const currentTotals = {
+      total: currentCallerStats.reduce((sum, c) => sum + c.totalCalls, 0),
+      inbound: currentCallerStats.reduce((sum, c) => sum + c.inboundCalls, 0),
+      outbound: currentCallerStats.reduce((sum, c) => sum + c.outboundCalls, 0),
+      missed: currentCallerStats.reduce((sum, c) => sum + c.missedCalls, 0),
+      duration: currentCallerStats.reduce((sum, c) => sum + c.totalDuration, 0),
+    };
+    summaryRow.push(
+      currentTotals.total,
+      currentTotals.inbound,
+      currentTotals.outbound,
+      currentTotals.missed,
+      formatTotalDuration(currentTotals.duration)
+    );
+    
+    // Comparison period totals
+    comparisonTableData.forEach((period) => {
+      const periodTotals = {
+        total: period.callerStats?.reduce((sum, c) => sum + c.totalCalls, 0) ?? 0,
+        inbound: period.callerStats?.reduce((sum, c) => sum + c.inboundCalls, 0) ?? 0,
+        outbound: period.callerStats?.reduce((sum, c) => sum + c.outboundCalls, 0) ?? 0,
+        missed: period.callerStats?.reduce((sum, c) => sum + c.missedCalls, 0) ?? 0,
+        duration: period.callerStats?.reduce((sum, c) => sum + c.totalDuration, 0) ?? 0,
+      };
+      summaryRow.push(
+        periodTotals.total,
+        periodTotals.inbound,
+        periodTotals.outbound,
+        periodTotals.missed,
+        formatTotalDuration(periodTotals.duration)
+      );
+    });
+    
+    excelData.push(summaryRow);
+    
+    // Create worksheet
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    
+    // Set column widths
+    const colWidths: { wch: number }[] = [{ wch: 15 }]; // Phone number
+    // Current period columns
+    for (let i = 0; i < 5; i++) colWidths.push({ wch: 10 });
+    // Comparison period columns
+    comparisonTableData.forEach(() => {
+      for (let i = 0; i < 5; i++) colWidths.push({ wch: 10 });
+    });
+    ws['!cols'] = colWidths;
+    
+    // Merge cells for title
+    const totalCols = 1 + 5 + comparisonTableData.length * 5;
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } }, // Title
+      { s: { r: 1, c: 0 }, e: { r: 1, c: totalCols - 1 } }, // Date range
+      { s: { r: 2, c: 0 }, e: { r: 2, c: totalCols - 1 } }, // Export date
+    ];
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Chi tiết số điện thoại');
+    
+    // Generate filename
+    const timestamp = format(new Date(), 'yyyyMMdd_HHmm');
+    const filename = `ChiTietCuocGoi_${timestamp}.xlsx`;
+    
+    // Save file
+    XLSX.writeFile(wb, filename);
+  }, [allCallerNumbers, currentCallerStats, comparisonTableData, filters.summaryFrom, filters.summaryTo]);
+
   return (
     <div className="space-y-3 mt-3">
       {/* Render comparison period queries */}
@@ -1011,11 +1152,21 @@ export function SummaryTab({
                     </Button>
                   </div>
                   
-                  {/* Results count */}
-                  <div className="ml-auto">
+                  {/* Results count & Export */}
+                  <div className="ml-auto flex items-center gap-2">
                     <Badge variant="secondary">
                       {allCallerNumbers.length} số
                     </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8"
+                      onClick={exportCallerDetailsToExcel}
+                      disabled={allCallerNumbers.length === 0 || currentCallerLoading}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Xuất Excel
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -1104,13 +1255,13 @@ export function SummaryTab({
                       </TableHead>
                       {/* Comparison Period Sub-Headers */}
                       {comparisonTableData.map((period) => (
-                        <>
-                          <TableHead key={`${period.id}-total`} className="text-center text-xs">Tổng</TableHead>
-                          <TableHead key={`${period.id}-in`} className="text-center text-xs">Đến</TableHead>
-                          <TableHead key={`${period.id}-out`} className="text-center text-xs">Đi</TableHead>
-                          <TableHead key={`${period.id}-missed`} className="text-center text-xs">Nhỡ</TableHead>
-                          <TableHead key={`${period.id}-duration`} className="text-center text-xs">TG</TableHead>
-                        </>
+                        <React.Fragment key={`${period.id}-subheaders`}>
+                          <TableHead className="text-center text-xs">Tổng</TableHead>
+                          <TableHead className="text-center text-xs">Đến</TableHead>
+                          <TableHead className="text-center text-xs">Đi</TableHead>
+                          <TableHead className="text-center text-xs">Nhỡ</TableHead>
+                          <TableHead className="text-center text-xs">TG</TableHead>
+                        </React.Fragment>
                       ))}
                     </TableRow>
                   </TableHeader>
@@ -1153,23 +1304,23 @@ export function SummaryTab({
                             <TableCell className="text-center text-purple-600 bg-primary/5">
                               {currentStats?.totalDuration != null ? formatTotalDuration(currentStats.totalDuration) : '-'}
                             </TableCell>
-                            {/* Comparison Period Stats */
+                            {/* Comparison Period Stats */}
                             {comparisonTableData.map((period) => {
                               const periodCallerStat = period.callerStats?.find(c => c.callerIdNumber === callerNumber);
                               
                               if (period.callerLoading) {
                                 return (
-                                  <>
-                                    <TableCell key={`${period.id}-${callerNumber}-total`} colSpan={5} className="text-center">
+                                  <React.Fragment key={`${period.id}-${callerNumber}-loading`}>
+                                    <TableCell colSpan={5} className="text-center">
                                       <Loader2 className="h-3 w-3 animate-spin inline-block" />
                                     </TableCell>
-                                  </>
+                                  </React.Fragment>
                                 );
                               }
                               
                               return (
-                                <>
-                                  <TableCell key={`${period.id}-${callerNumber}-total`} className="text-center">
+                                <React.Fragment key={`${period.id}-${callerNumber}-data`}>
+                                  <TableCell className="text-center">
                                     <div className="flex flex-col items-center">
                                       <span>{periodCallerStat?.totalCalls?.toLocaleString('vi-VN') ?? '-'}</span>
                                       {currentStats && periodCallerStat && (
@@ -1179,19 +1330,19 @@ export function SummaryTab({
                                       )}
                                     </div>
                                   </TableCell>
-                                  <TableCell key={`${period.id}-${callerNumber}-in`} className="text-center">
+                                  <TableCell className="text-center">
                                     {periodCallerStat?.inboundCalls?.toLocaleString('vi-VN') ?? '-'}
                                   </TableCell>
-                                  <TableCell key={`${period.id}-${callerNumber}-out`} className="text-center">
+                                  <TableCell className="text-center">
                                     {periodCallerStat?.outboundCalls?.toLocaleString('vi-VN') ?? '-'}
                                   </TableCell>
-                                  <TableCell key={`${period.id}-${callerNumber}-missed`} className="text-center">
+                                  <TableCell className="text-center">
                                     {periodCallerStat?.missedCalls?.toLocaleString('vi-VN') ?? '-'}
                                   </TableCell>
-                                  <TableCell key={`${period.id}-${callerNumber}-duration`} className="text-center text-purple-600">
+                                  <TableCell className="text-center text-purple-600">
                                     {periodCallerStat?.totalDuration != null ? formatTotalDuration(periodCallerStat.totalDuration) : '-'}
                                   </TableCell>
-                                </>
+                                </React.Fragment>
                               );
                             })}
                           </TableRow>
