@@ -75,6 +75,24 @@ export const GET_CALLCENTER_RECORDS = gql`
   }
 `;
 
+/**
+ * Query để lấy thống kê tổng hợp của records đã lọc
+ */
+export const GET_CALLCENTER_RECORDS_STATS = gql`
+  query GetCallCenterRecordsStats($filters: CallCenterRecordFiltersInput) {
+    getCallCenterRecordsStats(filters: $filters) {
+      total
+      inbound
+      outbound
+      local
+      answered
+      missed
+      totalDuration
+      avgDuration
+    }
+  }
+`;
+
 // ============================================================================
 // Quick Select Options
 // ============================================================================

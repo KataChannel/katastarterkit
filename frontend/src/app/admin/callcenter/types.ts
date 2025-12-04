@@ -115,6 +115,21 @@ export interface PaginationInfo {
 }
 
 // ============================================================================
+// Stats Types
+// ============================================================================
+
+export interface CallCenterRecordsStats {
+  total: number;
+  inbound: number;
+  outbound: number;
+  local: number;
+  answered: number;
+  missed: number;
+  totalDuration: number;
+  avgDuration: number;
+}
+
+// ============================================================================
 // Comparison Types
 // ============================================================================
 

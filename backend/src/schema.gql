@@ -953,6 +953,17 @@ type CallCenterRecordPaginationInfo {
   totalPages: Int!
 }
 
+type CallCenterRecordsStats {
+  answered: Int!
+  avgDuration: Int!
+  inbound: Int!
+  local: Int!
+  missed: Int!
+  outbound: Int!
+  total: Int!
+  totalDuration: Int!
+}
+
 type CallCenterSyncLog {
   completedAt: DateTime
   configId: String
@@ -4770,6 +4781,7 @@ type Query {
   getCallCenterConfig: CallCenterConfig!
   getCallCenterRecordById(id: String!): CallCenterRecord!
   getCallCenterRecords(filters: CallCenterRecordFiltersInput, pagination: PaginationInput! = {limit: 20, page: 1}): PaginatedCallCenterRecords!
+  getCallCenterRecordsStats(filters: CallCenterRecordFiltersInput): CallCenterRecordsStats!
   getCallCenterSyncLogs(pagination: PaginationInput! = {limit: 20, page: 1}): [CallCenterSyncLog!]!
   getCart(sessionId: String): CartType
   getCommentById(id: String!): Comment!

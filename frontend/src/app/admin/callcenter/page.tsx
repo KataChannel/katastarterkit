@@ -80,6 +80,10 @@ export default function CallCenterPage() {
     filters: recordFilters,
     setFilters: setRecordFilters,
 
+    // Records Stats
+    recordsStats,
+    statsLoading,
+
     // Summary
     summaryRecords,
     summaryLoading,
@@ -259,7 +263,7 @@ export default function CallCenterPage() {
       />
 
       {/* Stats Bar (compact) */}
-      <StatsBar records={records} />
+      <StatsBar stats={recordsStats} loading={statsLoading} />
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>

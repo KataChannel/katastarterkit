@@ -8,6 +8,7 @@ import {
   PaginatedCallCenterRecords,
   SyncCallCenterResponse,
   StopSyncResponse,
+  CallCenterRecordsStats,
 } from '../models/callcenter.model';
 import {
   CreateCallCenterConfigInput,
@@ -94,6 +95,15 @@ export class CallCenterResolver {
   @UseGuards(JwtAuthGuard)
   async getRecordById(@Args('id') id: string): Promise<CallCenterRecord> {
     return this.callCenterService.getRecordById(id) as any;
+  }
+
+  @Query(() => CallCenterRecordsStats, { name: 'getCallCenterRecordsStats' })
+  @UseGuards(JwtAuthGuard)
+  async getRecordsStats(
+    @Args('filters', { nullable: true })
+    filters?: CallCenterRecordFiltersInput,
+  ): Promise<CallCenterRecordsStats> {
+    return this.callCenterService.getRecordsStats(filters) as any;
   }
 
   // ============================================================================

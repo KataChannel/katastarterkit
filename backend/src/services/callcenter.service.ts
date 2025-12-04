@@ -596,12 +596,14 @@ export class CallCenterService {
         where.domain = filters.domain;
       }
       if (filters.startDateFrom || filters.startDateTo) {
-        where.syncedAt = {};
+        // Convert dates to epoch timestamps for filtering by startEpoch
         if (filters.startDateFrom) {
-          where.syncedAt.gte = filters.startDateFrom;
+          const fromEpoch = Math.floor(new Date(filters.startDateFrom).getTime() / 1000).toString();
+          where.startEpoch = { ...where.startEpoch, gte: fromEpoch };
         }
         if (filters.startDateTo) {
-          where.syncedAt.lte = filters.startDateTo;
+          const toEpoch = Math.floor(new Date(filters.startDateTo).getTime() / 1000).toString();
+          where.startEpoch = { ...where.startEpoch, lte: toEpoch };
         }
       }
       if (filters.search) {
@@ -618,7 +620,7 @@ export class CallCenterService {
         where,
         skip,
         take: limit,
-        orderBy: { syncedAt: 'desc' },
+        orderBy: { startEpoch: 'desc' },
       }),
       this.prisma.callCenterRecord.count({ where }),
     ]);
@@ -659,6 +661,95 @@ export class CallCenterService {
     return {
       items,
       total: totalItems,
+    };
+  }
+
+  // ============================================================================
+  // STATS QUERY - Get aggregated statistics for filtered records
+  // ============================================================================
+
+  async getRecordsStats(filters?: CallCenterRecordFiltersInput) {
+    const where: any = {};
+
+    if (filters) {
+      if (filters.direction) {
+        where.direction = filters.direction;
+      }
+      if (filters.callStatus) {
+        where.callStatus = filters.callStatus;
+      }
+      if (filters.callerIdNumber) {
+        where.callerIdNumber = { contains: filters.callerIdNumber };
+      }
+      if (filters.destinationNumber) {
+        where.destinationNumber = { contains: filters.destinationNumber };
+      }
+      if (filters.domain) {
+        where.domain = filters.domain;
+      }
+      if (filters.startDateFrom || filters.startDateTo) {
+        // Convert dates to epoch timestamps for filtering by startEpoch
+        if (filters.startDateFrom) {
+          const fromEpoch = Math.floor(new Date(filters.startDateFrom).getTime() / 1000).toString();
+          where.startEpoch = { ...where.startEpoch, gte: fromEpoch };
+        }
+        if (filters.startDateTo) {
+          const toEpoch = Math.floor(new Date(filters.startDateTo).getTime() / 1000).toString();
+          where.startEpoch = { ...where.startEpoch, lte: toEpoch };
+        }
+      }
+      if (filters.search) {
+        where.OR = [
+          { callerIdNumber: { contains: filters.search } },
+          { destinationNumber: { contains: filters.search } },
+          { outboundCallerIdNumber: { contains: filters.search } },
+        ];
+      }
+    }
+
+    // Get counts by direction and status
+    const [
+      total,
+      inbound,
+      outbound,
+      local,
+      answered,
+      missed,
+      allRecords,
+    ] = await Promise.all([
+      this.prisma.callCenterRecord.count({ where }),
+      this.prisma.callCenterRecord.count({ where: { ...where, direction: 'INBOUND' } }),
+      this.prisma.callCenterRecord.count({ where: { ...where, direction: 'OUTBOUND' } }),
+      this.prisma.callCenterRecord.count({ where: { ...where, direction: 'LOCAL' } }),
+      this.prisma.callCenterRecord.count({ where: { ...where, callStatus: 'ANSWER' } }),
+      this.prisma.callCenterRecord.count({ 
+        where: { 
+          ...where, 
+          callStatus: { not: 'ANSWER' } 
+        } 
+      }),
+      // Get all records to calculate total duration (limited for performance)
+      this.prisma.callCenterRecord.findMany({
+        where,
+        select: { billsec: true },
+        take: 100000, // Limit to prevent memory issues
+      }),
+    ]);
+
+    // Calculate total duration from billsec
+    const totalDuration = allRecords.reduce((sum, record) => {
+      return sum + (parseInt(record.billsec || '0', 10) || 0);
+    }, 0);
+
+    return {
+      total,
+      inbound,
+      outbound,
+      local,
+      answered,
+      missed,
+      totalDuration,
+      avgDuration: total > 0 ? Math.round(totalDuration / total) : 0,
     };
   }
 }

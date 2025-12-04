@@ -263,3 +263,31 @@ export class StopSyncResponse {
   @Field(() => Int, { nullable: true })
   recordsProcessed?: number;
 }
+
+// Call center records stats
+@ObjectType()
+export class CallCenterRecordsStats {
+  @Field(() => Int)
+  total: number;
+
+  @Field(() => Int)
+  inbound: number;
+
+  @Field(() => Int)
+  outbound: number;
+
+  @Field(() => Int)
+  local: number;
+
+  @Field(() => Int)
+  answered: number;
+
+  @Field(() => Int)
+  missed: number;
+
+  @Field(() => Int)
+  totalDuration: number;
+
+  @Field(() => Int)
+  avgDuration: number;
+}

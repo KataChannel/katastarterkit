@@ -12,7 +12,7 @@ import {
   useCreateOne,
   useUpdateOne,
 } from '@/hooks/useDynamicGraphQL';
-import { SYNC_CALLCENTER_DATA, STOP_SYNC_PROCESS, GET_CALLCENTER_RECORDS, DEFAULT_PAGINATION, MAX_SUMMARY_RECORDS } from '../constants';
+import { SYNC_CALLCENTER_DATA, STOP_SYNC_PROCESS, GET_CALLCENTER_RECORDS, GET_CALLCENTER_RECORDS_STATS, DEFAULT_PAGINATION, MAX_SUMMARY_RECORDS } from '../constants';
 import { toUTCDateTime, buildGraphQLFilters } from '../utils';
 import type { 
   CallCenterConfig, 
@@ -22,6 +22,7 @@ import type {
   RecordFilters,
   Pagination,
   PaginationInfo,
+  CallCenterRecordsStats,
 } from '../types';
 
 // Query để lấy sync log theo ID
@@ -60,6 +61,10 @@ interface UseCallCenterDataReturn {
   paginationInfo: PaginationInfo | null;
   filters: RecordFilters;
   setFilters: (filters: RecordFilters) => void;
+
+  // Records Stats
+  recordsStats: CallCenterRecordsStats | null;
+  statsLoading: boolean;
 
   // Summary Records
   summaryRecords: CallCenterRecord[];
@@ -232,6 +237,22 @@ export function useCallCenterData(): UseCallCenterDataReturn {
   }, [refetchRecordsQuery]);
 
   // ============================================================================
+  // Records Stats Query - Get aggregated stats for filtered records
+  // ============================================================================
+
+  const {
+    data: statsData,
+    loading: statsLoading,
+  } = useQuery(GET_CALLCENTER_RECORDS_STATS, {
+    variables: {
+      filters: Object.keys(gqlFilters).length > 0 ? gqlFilters : null,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const recordsStats: CallCenterRecordsStats | null = statsData?.getCallCenterRecordsStats || null;
+
+  // ============================================================================
   // Summary Records Query
   // ============================================================================
 
@@ -373,6 +394,10 @@ export function useCallCenterData(): UseCallCenterDataReturn {
     paginationInfo,
     filters,
     setFilters,
+
+    // Records Stats
+    recordsStats,
+    statsLoading,
 
     // Summary Records
     summaryRecords,
