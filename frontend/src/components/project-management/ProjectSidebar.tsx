@@ -21,7 +21,7 @@ export default function ProjectSidebar({
   onSelectProject,
   onInviteClick,
 }: ProjectSidebarProps) {
-  const { data, loading, error } = useMyProjects(false);
+  const { data, loading, error, refetch } = useMyProjects(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -121,6 +121,7 @@ export default function ProjectSidebar({
                 isSelected={project.id === selectedProjectId}
                 onClick={() => onSelectProject(project.id)}
                 onInviteClick={onInviteClick}
+                onRefresh={() => refetch?.()}
               />
             ))
           )}
@@ -143,9 +144,10 @@ interface ProjectItemProps {
   isSelected: boolean;
   onClick: () => void;
   onInviteClick?: (projectId: string) => void;
+  onRefresh?: () => void;
 }
 
-function ProjectItem({ project, isSelected, onClick, onInviteClick }: ProjectItemProps) {
+function ProjectItem({ project, isSelected, onClick, onInviteClick, onRefresh }: ProjectItemProps) {
   const getInitials = (firstName?: string, lastName?: string) => {
     return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || 'P';
   };
@@ -209,6 +211,8 @@ function ProjectItem({ project, isSelected, onClick, onInviteClick }: ProjectIte
           )}
           <DeleteProjectMenu
             project={project}
+            onDelete={onRefresh}
+            onUpdate={onRefresh}
             className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
           />
         </div>

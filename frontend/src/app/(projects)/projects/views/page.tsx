@@ -38,6 +38,7 @@ import {
 } from '@/components/project-management/views';
 import CreateProjectModal from '@/components/project-management/CreateProjectModal';
 import ChatPanel from '@/components/project-management/ChatPanel';
+import { DeleteProjectMenu } from '@/components/project-management/DeleteProjectMenu';
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
 
 type ViewType = 'dashboard' | 'list' | 'kanban' | 'timeline' | 'calendar' | 'roadmap';
@@ -316,7 +317,7 @@ function ProjectViewsPage() {
                     key={project.id}
                     onClick={() => setSelectedProjectId(project.id)}
                     className={`
-                      rounded-lg cursor-pointer transition-all
+                      rounded-lg cursor-pointer transition-all group relative
                       ${selectedProjectId === project.id 
                         ? 'bg-primary/10 border border-primary shadow-sm' 
                         : 'hover:bg-accent border border-transparent'
@@ -346,6 +347,13 @@ function ProjectViewsPage() {
                               {project.methodology}
                             </Badge>
                           </div>
+                          {/* Action Menu */}
+                          <DeleteProjectMenu
+                            project={project}
+                            onDelete={() => refetch?.()}
+                            onUpdate={() => refetch?.()}
+                            className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0"
+                          />
                         </div>
                         
                         {/* Stats */}
