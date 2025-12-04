@@ -22,6 +22,8 @@ import {
   XCircle, 
   ChevronLeft, 
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Loader2,
   Phone,
   PhoneIncoming,
@@ -296,14 +298,16 @@ export function RecordsTab({
         <CardHeader className="py-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">Danh sách cuộc gọi</CardTitle>
-            <span className="text-sm text-muted-foreground">
-              {paginationInfo?.totalItems || 0} cuộc gọi
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-foreground">
+                {paginationInfo?.totalItems?.toLocaleString('vi-VN') || 0} cuộc gọi
+              </span>
               {hasActiveFilters && (
-                <Badge variant="secondary" className="ml-2 text-xs">
+                <Badge variant="secondary" className="text-xs">
                   đã lọc
                 </Badge>
               )}
-            </span>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -333,28 +337,130 @@ export function RecordsTab({
         </CardContent>
       </Card>
 
-      {/* Compact Pagination */}
+      {/* Pagination */}
       {paginationInfo && (
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
-            Trang {paginationInfo.currentPage} / {paginationInfo.totalPages}
-          </span>
-          <div className="flex gap-1">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-2">
+          {/* Left - Page size selector and info */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Hiển thị</span>
+              <Select
+                value={pagination.limit.toString()}
+                onValueChange={(val) => onPaginationChange({ page: 1, limit: parseInt(val) })}
+              >
+                <SelectTrigger className="h-8 w-[70px] text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-sm text-muted-foreground">/ trang</span>
+            </div>
+            <div className="hidden sm:block h-4 w-px bg-border" />
+            <span className="text-sm text-muted-foreground">
+              Hiển thị {Math.min((paginationInfo.currentPage - 1) * pagination.limit + 1, paginationInfo.totalItems)} -{' '}
+              {Math.min(paginationInfo.currentPage * pagination.limit, paginationInfo.totalItems)} trong{' '}
+              <span className="font-medium text-foreground">{paginationInfo.totalItems.toLocaleString('vi-VN')}</span> cuộc gọi
+            </span>
+          </div>
+
+          {/* Right - Pagination controls */}
+          <div className="flex items-center gap-1">
+            {/* First page */}
             <Button
               variant="outline"
               size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => onPaginationChange({ ...pagination, page: 1 })}
+              disabled={!paginationInfo.hasPreviousPage}
+              title="Trang đầu"
+            >
+              <ChevronsLeft className="h-4 w-4" />
+            </Button>
+            {/* Previous page */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0"
               onClick={() => onPaginationChange({ ...pagination, page: pagination.page - 1 })}
               disabled={!paginationInfo.hasPreviousPage}
+              title="Trang trước"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
+
+            {/* Page numbers */}
+            <div className="flex items-center gap-1 mx-1">
+              {(() => {
+                const totalPages = paginationInfo.totalPages;
+                const currentPage = paginationInfo.currentPage;
+                const pages: (number | string)[] = [];
+                
+                // Logic: show first, last, current, and 1 page before/after current
+                const showPages = new Set<number>();
+                showPages.add(1);
+                showPages.add(totalPages);
+                for (let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) {
+                  showPages.add(i);
+                }
+                
+                const sortedPages = Array.from(showPages).sort((a, b) => a - b);
+                
+                sortedPages.forEach((page, idx) => {
+                  if (idx > 0 && page - sortedPages[idx - 1] > 1) {
+                    pages.push('...');
+                  }
+                  pages.push(page);
+                });
+                
+                return pages.map((page, idx) => {
+                  if (page === '...') {
+                    return (
+                      <span key={`ellipsis-${idx}`} className="px-2 text-muted-foreground">
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
+                    <Button
+                      key={page}
+                      variant={page === currentPage ? 'default' : 'outline'}
+                      size="sm"
+                      className="h-8 min-w-8 px-2"
+                      onClick={() => onPaginationChange({ ...pagination, page: page as number })}
+                    >
+                      {page}
+                    </Button>
+                  );
+                });
+              })()}
+            </div>
+
+            {/* Next page */}
             <Button
               variant="outline"
               size="sm"
+              className="h-8 w-8 p-0"
               onClick={() => onPaginationChange({ ...pagination, page: pagination.page + 1 })}
               disabled={!paginationInfo.hasNextPage}
+              title="Trang sau"
             >
               <ChevronRight className="h-4 w-4" />
+            </Button>
+            {/* Last page */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => onPaginationChange({ ...pagination, page: paginationInfo.totalPages })}
+              disabled={!paginationInfo.hasNextPage}
+              title="Trang cuối"
+            >
+              <ChevronsRight className="h-4 w-4" />
             </Button>
           </div>
         </div>

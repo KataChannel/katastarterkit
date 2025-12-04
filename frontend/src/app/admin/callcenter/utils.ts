@@ -50,6 +50,52 @@ export const formatTotalDuration = (seconds: number): string => {
   return `${secs}s`;
 };
 
+// ============================================================================
+// GraphQL Filter Conversion
+// ============================================================================
+
+/**
+ * Build GraphQL filters from RecordFilters
+ * Converts local filter format to CallCenterRecordFiltersInput format
+ */
+export const buildGraphQLFilters = (filters: RecordFilters): Record<string, any> => {
+  const gqlFilters: Record<string, any> = {};
+
+  // Date range filter
+  if (filters.startEpoch) {
+    if (filters.startEpoch.gte) {
+      // Convert epoch to Date
+      gqlFilters.startDateFrom = new Date(parseInt(filters.startEpoch.gte) * 1000).toISOString();
+    }
+    if (filters.startEpoch.lt) {
+      gqlFilters.startDateTo = new Date(parseInt(filters.startEpoch.lt) * 1000).toISOString();
+    }
+  }
+
+  // Direction filter
+  if (filters.direction && filters.direction !== 'all') {
+    gqlFilters.direction = filters.direction.toUpperCase();
+  }
+
+  // Call status filter
+  if (filters.callStatus && filters.callStatus !== 'all') {
+    gqlFilters.callStatus = filters.callStatus;
+  }
+
+  // Search (extension) - combine OR conditions into search
+  if (filters.OR && filters.OR.length > 0) {
+    // Extract the search term from the first OR condition
+    const firstCondition = filters.OR[0];
+    if (firstCondition.callerIdNumber?.contains) {
+      gqlFilters.search = firstCondition.callerIdNumber.contains;
+    } else if (firstCondition.destinationNumber?.contains) {
+      gqlFilters.search = firstCondition.destinationNumber.contains;
+    }
+  }
+
+  return gqlFilters;
+};
+
 /**
  * Format time for audio player display
  */

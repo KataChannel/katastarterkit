@@ -76,6 +76,7 @@ export default function CallCenterPage() {
     refetchRecords,
     pagination,
     setPagination,
+    paginationInfo,
     filters: recordFilters,
     setFilters: setRecordFilters,
 
@@ -275,7 +276,7 @@ export default function CallCenterPage() {
             records={records}
             loading={recordsLoading}
             pagination={pagination}
-            paginationInfo={null}
+            paginationInfo={paginationInfo}
             filterState={filterState}
             setFilterState={setFilterState}
             quickFilter={quickFilter}

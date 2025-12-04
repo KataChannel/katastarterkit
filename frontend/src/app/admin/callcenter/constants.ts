@@ -40,6 +40,41 @@ export const STOP_SYNC_PROCESS = gql`
   }
 `;
 
+/**
+ * Query để lấy danh sách records với pagination
+ */
+export const GET_CALLCENTER_RECORDS = gql`
+  query GetCallCenterRecords($pagination: PaginationInput!, $filters: CallCenterRecordFiltersInput) {
+    getCallCenterRecords(pagination: $pagination, filters: $filters) {
+      items {
+        id
+        externalUuid
+        direction
+        callerIdNumber
+        outboundCallerIdNumber
+        destinationNumber
+        startEpoch
+        endEpoch
+        answerEpoch
+        duration
+        billsec
+        sipHangupDisposition
+        callStatus
+        recordPath
+        domain
+        syncedAt
+      }
+      pagination {
+        currentPage
+        totalPages
+        totalItems
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+`;
+
 // ============================================================================
 // Quick Select Options
 // ============================================================================

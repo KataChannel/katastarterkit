@@ -12,8 +12,8 @@ import {
   useCreateOne,
   useUpdateOne,
 } from '@/hooks/useDynamicGraphQL';
-import { SYNC_CALLCENTER_DATA, STOP_SYNC_PROCESS, DEFAULT_PAGINATION, MAX_SUMMARY_RECORDS } from '../constants';
-import { toUTCDateTime } from '../utils';
+import { SYNC_CALLCENTER_DATA, STOP_SYNC_PROCESS, GET_CALLCENTER_RECORDS, DEFAULT_PAGINATION, MAX_SUMMARY_RECORDS } from '../constants';
+import { toUTCDateTime, buildGraphQLFilters } from '../utils';
 import type { 
   CallCenterConfig, 
   CallCenterRecord, 
@@ -21,6 +21,7 @@ import type {
   SyncStats,
   RecordFilters,
   Pagination,
+  PaginationInfo,
 } from '../types';
 
 // Query để lấy sync log theo ID
@@ -56,6 +57,7 @@ interface UseCallCenterDataReturn {
   refetchRecords: () => void;
   pagination: Pagination;
   setPagination: (pagination: Pagination) => void;
+  paginationInfo: PaginationInfo | null;
   filters: RecordFilters;
   setFilters: (filters: RecordFilters) => void;
 
@@ -202,21 +204,32 @@ export function useCallCenterData(): UseCallCenterDataReturn {
   }, [createConfigMutation, refetchConfig]);
 
   // ============================================================================
-  // Records Query
+  // Records Query - Using GraphQL with pagination
   // ============================================================================
 
+  const gqlFilters = buildGraphQLFilters(filters);
+  
   const { 
-    data: recordsResponse = [], 
+    data: recordsData, 
     loading: recordsLoading, 
-    refetch: refetchRecords 
-  } = useFindMany<CallCenterRecord>('callCenterRecord', {
-    where: filters,
-    skip: (pagination.page - 1) * pagination.limit,
-    take: pagination.limit,
-    orderBy: { startEpoch: 'desc' },
+    refetch: refetchRecordsQuery 
+  } = useQuery(GET_CALLCENTER_RECORDS, {
+    variables: {
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+      },
+      filters: Object.keys(gqlFilters).length > 0 ? gqlFilters : null,
+    },
+    fetchPolicy: 'cache-and-network',
   });
 
-  const records = Array.isArray(recordsResponse) ? recordsResponse : [];
+  const records = recordsData?.getCallCenterRecords?.items || [];
+  const paginationInfo: PaginationInfo | null = recordsData?.getCallCenterRecords?.pagination || null;
+
+  const refetchRecords = useCallback(() => {
+    refetchRecordsQuery();
+  }, [refetchRecordsQuery]);
 
   // ============================================================================
   // Summary Records Query
@@ -357,6 +370,7 @@ export function useCallCenterData(): UseCallCenterDataReturn {
     refetchRecords,
     pagination,
     setPagination,
+    paginationInfo,
     filters,
     setFilters,
 
