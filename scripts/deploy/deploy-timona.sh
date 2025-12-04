@@ -39,10 +39,19 @@ if [ ! -f "${DOCKER_IMAGES_PATH}/timona-frontend.tar.gz" ]; then
   exit 1
 fi
 
-echo -e "${BLUE}📁 Step 0: Creating remote directory...${NC}"
-ssh ${SERVER_USER}@${SERVER} "mkdir -p ${REMOTE_PATH}"
+# Check if env file exists locally
+ENV_FILE="${PROJECT_ROOT}/env/.env.prod.timona"
+if [ ! -f "${ENV_FILE}" ]; then
+  echo -e "${RED}❌ Error: Environment file not found: ${ENV_FILE}${NC}"
+  exit 1
+fi
 
-echo -e "${BLUE}� Step 1: Uploading Docker images...${NC}"
+echo -e "${BLUE}📤 Step 0: Uploading environment file...${NC}"
+ssh ${SERVER_USER}@${SERVER} "mkdir -p ${REMOTE_PATH}"
+scp ${ENV_FILE} ${SERVER_USER}@${SERVER}:${REMOTE_PATH}/.env
+echo -e "${GREEN}✅ Environment file uploaded${NC}"
+
+echo -e "${BLUE}📦 Step 1: Uploading Docker images...${NC}"
 scp ${DOCKER_IMAGES_PATH}/timona-backend.tar.gz ${SERVER_USER}@${SERVER}:${REMOTE_PATH}/
 scp ${DOCKER_IMAGES_PATH}/timona-frontend.tar.gz ${SERVER_USER}@${SERVER}:${REMOTE_PATH}/
 
