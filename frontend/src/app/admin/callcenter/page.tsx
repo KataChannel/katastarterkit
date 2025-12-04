@@ -11,7 +11,7 @@
 
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
@@ -21,14 +21,12 @@ import type {
   RecordFilters, 
   Pagination, 
   DateRange,
-  ComparisonPeriodType,
   SyncStats,
 } from './types';
 
 // Hooks
 import { useCallCenterData } from './hooks/useCallCenterData';
 import { useCallCenterFilters } from './hooks/useCallCenterFilters';
-import { useComparison } from './hooks/useComparison';
 
 // Components
 import {
@@ -64,7 +62,6 @@ export default function CallCenterPage() {
   const {
     // Config
     config,
-    configLoading,
     configMutationLoading,
     refetchConfig,
     updateConfig,
@@ -87,14 +84,7 @@ export default function CallCenterPage() {
     // Summary Stats
     summaryStats,
     summaryStatsLoading,
-    summaryFilters,
     setSummaryFilters,
-
-    // Comparison Stats
-    comparisonStats,
-    comparisonStatsLoading,
-    comparisonFilters,
-    setComparisonFilters,
 
     // Sync Logs
     syncLogs,
@@ -110,7 +100,6 @@ export default function CallCenterPage() {
     startSync,
     stopSync,
     setShowSyncProgress,
-    resetSyncState,
   } = useCallCenterData();
 
   // =========================================================================
@@ -136,25 +125,6 @@ export default function CallCenterPage() {
     handleSummaryQuickFilter,
     clearSummaryFilters,
   } = useCallCenterFilters(setRecordFilters, setSummaryFilters, handlePaginationReset);
-
-  // =========================================================================
-  // Comparison Hook
-  // =========================================================================
-  const {
-    enableComparison,
-    comparisonPeriods,
-    comparisonExtension,
-    comparisonLoading,
-    comparisonResults,
-    setEnableComparison,
-    setComparisonExtension,
-    addComparisonPeriod,
-    removeComparisonPeriod,
-    updateComparisonPeriod,
-    applyComparisonFilters,
-    clearComparison,
-    initializeComparison,
-  } = useComparison();
 
   // =========================================================================
   // Sync Date Range
@@ -217,90 +187,22 @@ export default function CallCenterPage() {
 
   // Handle summary filters change  
   const handleSummaryFiltersChange = (newFilters: CallCenterFilters) => {
-    // Convert CallCenterFilters to RecordFilters
+    // Update summaryFilterState directly 
+    setSummaryFilterState({
+      dateFrom: newFilters.summaryFrom?.toISOString().split('T')[0] || '',
+      dateTo: newFilters.summaryTo?.toISOString().split('T')[0] || '',
+      extension: newFilters.extension || '',
+      direction: newFilters.direction || '',
+      status: newFilters.callStatus || '',
+    });
+    
+    // Also apply filters for GraphQL query
     applySummaryFilters(
       newFilters.summaryFrom?.toISOString().split('T')[0],
       newFilters.summaryTo?.toISOString().split('T')[0],
       newFilters.extension
     );
   };
-
-  // Handle comparison toggle
-  const handleToggleComparison = () => {
-    if (!enableComparison) {
-      // Calculate comparison period based on current summary filters
-      updateComparisonPeriodFilters(comparisonPeriodType);
-    } else {
-      // Clear comparison filters when disabling
-      setComparisonFilters({});
-    }
-    setEnableComparison(!enableComparison);
-  };
-
-  // Handle comparison period change
-  const [comparisonPeriodType, setComparisonPeriodType] = useState<ComparisonPeriodType>('previousPeriod');
-  
-  // Update comparison filters based on period type
-  const updateComparisonPeriodFilters = useCallback((period: ComparisonPeriodType) => {
-    if (!summaryFilterState.dateFrom || !summaryFilterState.dateTo) {
-      return;
-    }
-
-    const currentFrom = new Date(summaryFilterState.dateFrom);
-    const currentTo = new Date(summaryFilterState.dateTo);
-    const daysDiff = Math.ceil((currentTo.getTime() - currentFrom.getTime()) / (1000 * 60 * 60 * 24));
-
-    let compFrom: Date;
-    let compTo: Date;
-
-    switch (period) {
-      case 'previousPeriod':
-        // Same duration, immediately before current period
-        compTo = new Date(currentFrom);
-        compTo.setDate(compTo.getDate() - 1);
-        compFrom = new Date(compTo);
-        compFrom.setDate(compFrom.getDate() - daysDiff);
-        break;
-      case 'previousMonth':
-        // Same dates but previous month
-        compFrom = new Date(currentFrom);
-        compFrom.setMonth(compFrom.getMonth() - 1);
-        compTo = new Date(currentTo);
-        compTo.setMonth(compTo.getMonth() - 1);
-        break;
-      case 'previousWeek':
-        // Same days but previous week
-        compFrom = new Date(currentFrom);
-        compFrom.setDate(compFrom.getDate() - 7);
-        compTo = new Date(currentTo);
-        compTo.setDate(compTo.getDate() - 7);
-        break;
-      default:
-        return;
-    }
-
-    // Build comparison filters
-    const fromEpoch = Math.floor(compFrom.getTime() / 1000).toString();
-    const toEpoch = Math.floor(compTo.getTime() / 1000).toString();
-    
-    setComparisonFilters({
-      startEpoch: { gte: fromEpoch, lt: toEpoch },
-    });
-  }, [summaryFilterState.dateFrom, summaryFilterState.dateTo, setComparisonFilters]);
-
-  const handleComparisonPeriodChange = (period: ComparisonPeriodType) => {
-    setComparisonPeriodType(period);
-    if (enableComparison) {
-      updateComparisonPeriodFilters(period);
-    }
-  };
-
-  // Update comparison filters when summary filters change
-  useEffect(() => {
-    if (enableComparison) {
-      updateComparisonPeriodFilters(comparisonPeriodType);
-    }
-  }, [enableComparison, summaryFilterState.dateFrom, summaryFilterState.dateTo, comparisonPeriodType, updateComparisonPeriodFilters]);
 
   // =========================================================================
   // Render
@@ -360,12 +262,6 @@ export default function CallCenterPage() {
               extension: summaryFilterState.extension,
             }}
             onFiltersChange={handleSummaryFiltersChange}
-            comparisonEnabled={enableComparison}
-            comparisonPeriod={comparisonPeriodType}
-            comparisonStats={comparisonStats}
-            comparisonLoading={comparisonStatsLoading}
-            onToggleComparison={handleToggleComparison}
-            onComparisonPeriodChange={handleComparisonPeriodChange}
           />
         </TabsContent>
 

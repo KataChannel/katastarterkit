@@ -141,6 +141,11 @@ export interface ComparisonPeriod {
   filters: RecordFilters;
 }
 
+export interface ComparisonPeriodWithStats extends ComparisonPeriod {
+  stats: CallCenterRecordsStats | null;
+  loading: boolean;
+}
+
 export interface ComparisonSummary {
   total: number;
   inbound: number;
