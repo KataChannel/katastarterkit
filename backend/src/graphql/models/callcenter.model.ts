@@ -291,3 +291,41 @@ export class CallCenterRecordsStats {
   @Field(() => Int)
   avgDuration: number;
 }
+
+// Call center stats by caller ID
+@ObjectType()
+export class CallCenterCallerStats {
+  @Field(() => String)
+  callerIdNumber: string;
+
+  @Field(() => Int)
+  totalCalls: number;
+
+  @Field(() => Int)
+  inboundCalls: number;
+
+  @Field(() => Int)
+  outboundCalls: number;
+
+  @Field(() => Int)
+  answeredCalls: number;
+
+  @Field(() => Int)
+  missedCalls: number;
+
+  @Field(() => Int)
+  totalDuration: number;
+
+  @Field(() => Int)
+  avgDuration: number;
+}
+
+// Paginated caller stats
+@ObjectType()
+export class PaginatedCallCenterCallerStats {
+  @Field(() => [CallCenterCallerStats])
+  items: CallCenterCallerStats[];
+
+  @Field(() => Int)
+  total: number;
+}

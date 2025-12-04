@@ -37,15 +37,19 @@ import {
   Plus,
   X,
   Trash2,
+  Users,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatTotalDuration, calculateChange, getQuickFilterDateRange, buildGraphQLFilters } from '../utils';
-import { QUICK_FILTER_OPTIONS, GET_CALLCENTER_RECORDS_STATS } from '../constants';
+import { QUICK_FILTER_OPTIONS, GET_CALLCENTER_RECORDS_STATS, GET_CALLCENTER_STATS_BY_CALLER } from '../constants';
 import type { 
   CallCenterRecordsStats, 
   CallCenterFilters, 
   QuickFilterType,
   RecordFilters,
+  CallCenterCallerStats,
 } from '../types';
 
 interface ComparisonPeriodData {
@@ -114,6 +118,56 @@ function ComparisonPeriodStats({
   return null;
 }
 
+// Component to fetch caller stats for a comparison period
+function ComparisonPeriodCallerStats({
+  period,
+  extension,
+  onCallerStatsLoaded,
+}: {
+  period: ComparisonPeriodData;
+  extension?: string;
+  onCallerStatsLoaded: (id: string, stats: CallCenterCallerStats[] | null, loading: boolean) => void;
+}) {
+  const filters: RecordFilters = useMemo(() => {
+    const fromDate = new Date(period.fromDate);
+    const toDate = new Date(period.toDate);
+    
+    const fromEpoch = Math.floor(new Date(fromDate).setHours(0, 0, 0, 0) / 1000).toString();
+    const toEndOfDay = new Date(toDate);
+    toEndOfDay.setHours(23, 59, 59, 999);
+    const toEpoch = Math.floor(toEndOfDay.getTime() / 1000 + 1).toString();
+    
+    const f: RecordFilters = {
+      startEpoch: { gte: fromEpoch, lt: toEpoch },
+    };
+    
+    if (extension) {
+      f.OR = [
+        { callerIdNumber: { contains: extension } },
+        { destinationNumber: { contains: extension } },
+      ];
+    }
+    
+    return f;
+  }, [period.fromDate, period.toDate, extension]);
+  
+  const gqlFilters = buildGraphQLFilters(filters);
+  
+  const { data, loading } = useQuery(GET_CALLCENTER_STATS_BY_CALLER, {
+    variables: {
+      filters: Object.keys(gqlFilters).length > 0 ? gqlFilters : null,
+      limit: 50,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
+  
+  useEffect(() => {
+    onCallerStatsLoaded(period.id, data?.getCallCenterStatsByCaller?.items ?? null, loading);
+  }, [period.id, data, loading, onCallerStatsLoaded]);
+  
+  return null;
+}
+
 export function SummaryTab({
   stats,
   loading,
@@ -127,6 +181,44 @@ export function SummaryTab({
   const [comparisonEnabled, setComparisonEnabled] = useState(false);
   const [comparisonPeriods, setComparisonPeriods] = useState<ComparisonPeriodData[]>([]);
   const [periodStats, setPeriodStats] = useState<Map<string, { stats: CallCenterRecordsStats | null; loading: boolean }>>(new Map());
+  
+  // Caller stats state
+  const [periodCallerStats, setPeriodCallerStats] = useState<Map<string, { stats: CallCenterCallerStats[] | null; loading: boolean }>>(new Map());
+  const [showCallerDetails, setShowCallerDetails] = useState(false);
+  
+  // Current period caller stats
+  const currentCallerFilters = useMemo(() => {
+    if (!filters.summaryFrom || !filters.summaryTo) return null;
+    
+    const fromEpoch = Math.floor(new Date(filters.summaryFrom).setHours(0, 0, 0, 0) / 1000).toString();
+    const toEndOfDay = new Date(filters.summaryTo);
+    toEndOfDay.setHours(23, 59, 59, 999);
+    const toEpoch = Math.floor(toEndOfDay.getTime() / 1000 + 1).toString();
+    
+    const f: RecordFilters = {
+      startEpoch: { gte: fromEpoch, lt: toEpoch },
+    };
+    
+    if (filters.extension) {
+      f.OR = [
+        { callerIdNumber: { contains: filters.extension } },
+        { destinationNumber: { contains: filters.extension } },
+      ];
+    }
+    
+    return buildGraphQLFilters(f);
+  }, [filters.summaryFrom, filters.summaryTo, filters.extension]);
+  
+  const { data: currentCallerData, loading: currentCallerLoading } = useQuery(GET_CALLCENTER_STATS_BY_CALLER, {
+    variables: {
+      filters: currentCallerFilters && Object.keys(currentCallerFilters).length > 0 ? currentCallerFilters : null,
+      limit: 50,
+    },
+    fetchPolicy: 'cache-and-network',
+    skip: !showCallerDetails || !filters.summaryFrom || !filters.summaryTo,
+  });
+  
+  const currentCallerStats: CallCenterCallerStats[] = currentCallerData?.getCallCenterStatsByCaller?.items ?? [];
 
   // Use stats from GraphQL query
   const currentSummary = stats || {
@@ -209,18 +301,33 @@ export function SummaryTab({
       newMap.delete(idToRemove);
       return newMap;
     });
+    setPeriodCallerStats(prev => {
+      const newMap = new Map(prev);
+      newMap.delete(idToRemove);
+      return newMap;
+    });
   }, [calculateComparisonDates]);
   
   // Clear all comparison periods
   const clearAllPeriods = useCallback(() => {
     setComparisonPeriods([]);
     setPeriodStats(new Map());
+    setPeriodCallerStats(new Map());
     setComparisonEnabled(false);
   }, []);
   
   // Handle stats loaded from child components
   const handleStatsLoaded = useCallback((id: string, stats: CallCenterRecordsStats | null, loading: boolean) => {
     setPeriodStats(prev => {
+      const newMap = new Map(prev);
+      newMap.set(id, { stats, loading });
+      return newMap;
+    });
+  }, []);
+  
+  // Handle caller stats loaded from child components
+  const handleCallerStatsLoaded = useCallback((id: string, stats: CallCenterCallerStats[] | null, loading: boolean) => {
+    setPeriodCallerStats(prev => {
       const newMap = new Map(prev);
       newMap.set(id, { stats, loading });
       return newMap;
@@ -324,13 +431,26 @@ export function SummaryTab({
   const comparisonTableData = useMemo(() => {
     return comparisonPeriods.map(period => {
       const statsData = periodStats.get(period.id);
+      const callerStatsData = periodCallerStats.get(period.id);
       return {
         ...period,
         stats: statsData?.stats ?? null,
         loading: statsData?.loading ?? true,
+        callerStats: callerStatsData?.stats ?? null,
+        callerLoading: callerStatsData?.loading ?? true,
       };
     });
-  }, [comparisonPeriods, periodStats]);
+  }, [comparisonPeriods, periodStats, periodCallerStats]);
+  
+  // Get unique callers across all periods
+  const allCallerNumbers = useMemo(() => {
+    const callers = new Set<string>();
+    currentCallerStats.forEach(c => callers.add(c.callerIdNumber));
+    comparisonTableData.forEach(period => {
+      period.callerStats?.forEach(c => callers.add(c.callerIdNumber));
+    });
+    return Array.from(callers).sort();
+  }, [currentCallerStats, comparisonTableData]);
 
   return (
     <div className="space-y-3 mt-3">
@@ -341,6 +461,16 @@ export function SummaryTab({
           period={period}
           extension={filters.extension}
           onStatsLoaded={handleStatsLoaded}
+        />
+      ))}
+      
+      {/* Render comparison period caller stats queries */}
+      {showCallerDetails && comparisonPeriods.map(period => (
+        <ComparisonPeriodCallerStats
+          key={`caller_${period.id}`}
+          period={period}
+          extension={filters.extension}
+          onCallerStatsLoaded={handleCallerStatsLoaded}
         />
       ))}
       
@@ -667,6 +797,174 @@ export function SummaryTab({
               </span>
             </div>
           </CardContent>
+        </Card>
+      )}
+      
+      {/* Caller Details Toggle & Table */}
+      {comparisonEnabled && comparisonTableData.length > 0 && filters.summaryFrom && filters.summaryTo && (
+        <Card>
+          <CardHeader className="py-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Chi tiết theo số điện thoại
+              </CardTitle>
+              <Button
+                variant={showCallerDetails ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowCallerDetails(!showCallerDetails)}
+              >
+                {showCallerDetails ? (
+                  <>
+                    <ChevronUp className="h-4 w-4 mr-1" />
+                    Ẩn chi tiết
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-4 w-4 mr-1" />
+                    Hiện chi tiết
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardHeader>
+          
+          {showCallerDetails && (
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="sticky left-0 bg-background z-10">Số điện thoại</TableHead>
+                      {/* Current Period Header */}
+                      <TableHead className="text-center bg-primary/5" colSpan={4}>
+                        <div className="flex flex-col items-center">
+                          <Badge variant="default" className="text-xs mb-1">Hiện tại</Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {format(filters.summaryFrom, 'dd/MM', { locale: vi })} - {format(filters.summaryTo, 'dd/MM', { locale: vi })}
+                          </span>
+                        </div>
+                      </TableHead>
+                      {/* Comparison Period Headers */}
+                      {comparisonTableData.map((period) => (
+                        <TableHead key={period.id} className="text-center" colSpan={4}>
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs font-medium">{period.label}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(period.fromDate), 'dd/MM', { locale: vi })} - {format(new Date(period.toDate), 'dd/MM', { locale: vi })}
+                            </span>
+                          </div>
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                    <TableRow>
+                      <TableHead className="sticky left-0 bg-background z-10"></TableHead>
+                      {/* Current Period Sub-Headers */}
+                      <TableHead className="text-center text-xs bg-primary/5">Tổng</TableHead>
+                      <TableHead className="text-center text-xs bg-primary/5">Đến</TableHead>
+                      <TableHead className="text-center text-xs bg-primary/5">Đi</TableHead>
+                      <TableHead className="text-center text-xs bg-primary/5">Nhỡ</TableHead>
+                      {/* Comparison Period Sub-Headers */}
+                      {comparisonTableData.map((period) => (
+                        <>
+                          <TableHead key={`${period.id}-total`} className="text-center text-xs">Tổng</TableHead>
+                          <TableHead key={`${period.id}-in`} className="text-center text-xs">Đến</TableHead>
+                          <TableHead key={`${period.id}-out`} className="text-center text-xs">Đi</TableHead>
+                          <TableHead key={`${period.id}-missed`} className="text-center text-xs">Nhỡ</TableHead>
+                        </>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {currentCallerLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={5 + comparisonTableData.length * 4} className="text-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin inline-block" />
+                          <span className="ml-2 text-muted-foreground">Đang tải...</span>
+                        </TableCell>
+                      </TableRow>
+                    ) : allCallerNumbers.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5 + comparisonTableData.length * 4} className="text-center py-8 text-muted-foreground">
+                          Không có dữ liệu
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      allCallerNumbers.map((callerNumber) => {
+                        const currentStats = currentCallerStats.find(c => c.callerIdNumber === callerNumber);
+                        
+                        return (
+                          <TableRow key={callerNumber}>
+                            <TableCell className="sticky left-0 bg-background z-10 font-mono text-sm">
+                              {callerNumber}
+                            </TableCell>
+                            {/* Current Period Stats */}
+                            <TableCell className="text-center bg-primary/5">
+                              {currentStats?.totalCalls?.toLocaleString('vi-VN') ?? '-'}
+                            </TableCell>
+                            <TableCell className="text-center text-blue-600 bg-primary/5">
+                              {currentStats?.inboundCalls?.toLocaleString('vi-VN') ?? '-'}
+                            </TableCell>
+                            <TableCell className="text-center text-green-600 bg-primary/5">
+                              {currentStats?.outboundCalls?.toLocaleString('vi-VN') ?? '-'}
+                            </TableCell>
+                            <TableCell className="text-center text-red-600 bg-primary/5">
+                              {currentStats?.missedCalls?.toLocaleString('vi-VN') ?? '-'}
+                            </TableCell>
+                            {/* Comparison Period Stats */}
+                            {comparisonTableData.map((period) => {
+                              const periodCallerStat = period.callerStats?.find(c => c.callerIdNumber === callerNumber);
+                              
+                              if (period.callerLoading) {
+                                return (
+                                  <>
+                                    <TableCell key={`${period.id}-${callerNumber}-total`} colSpan={4} className="text-center">
+                                      <Loader2 className="h-3 w-3 animate-spin inline-block" />
+                                    </TableCell>
+                                  </>
+                                );
+                              }
+                              
+                              return (
+                                <>
+                                  <TableCell key={`${period.id}-${callerNumber}-total`} className="text-center">
+                                    <div className="flex flex-col items-center">
+                                      <span>{periodCallerStat?.totalCalls?.toLocaleString('vi-VN') ?? '-'}</span>
+                                      {currentStats && periodCallerStat && (
+                                        <span className="text-xs">
+                                          {renderChange(currentStats.totalCalls, periodCallerStat.totalCalls)}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell key={`${period.id}-${callerNumber}-in`} className="text-center">
+                                    {periodCallerStat?.inboundCalls?.toLocaleString('vi-VN') ?? '-'}
+                                  </TableCell>
+                                  <TableCell key={`${period.id}-${callerNumber}-out`} className="text-center">
+                                    {periodCallerStat?.outboundCalls?.toLocaleString('vi-VN') ?? '-'}
+                                  </TableCell>
+                                  <TableCell key={`${period.id}-${callerNumber}-missed`} className="text-center">
+                                    {periodCallerStat?.missedCalls?.toLocaleString('vi-VN') ?? '-'}
+                                  </TableCell>
+                                </>
+                              );
+                            })}
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              {/* Total callers info */}
+              <div className="p-3 border-t bg-muted/30">
+                <span className="text-sm text-muted-foreground">
+                  Tổng: <strong>{allCallerNumbers.length}</strong> số điện thoại
+                </span>
+              </div>
+            </CardContent>
+          )}
         </Card>
       )}
     </div>

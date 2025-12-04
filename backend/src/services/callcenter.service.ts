@@ -752,4 +752,132 @@ export class CallCenterService {
       avgDuration: total > 0 ? Math.round(totalDuration / total) : 0,
     };
   }
+
+  // ============================================================================
+  // STATS BY CALLER - Get aggregated statistics grouped by callerIdNumber
+  // ============================================================================
+
+  async getStatsByCaller(
+    filters?: CallCenterRecordFiltersInput,
+    limit: number = 50,
+  ): Promise<{
+    items: Array<{
+      callerIdNumber: string;
+      totalCalls: number;
+      inboundCalls: number;
+      outboundCalls: number;
+      answeredCalls: number;
+      missedCalls: number;
+      totalDuration: number;
+      avgDuration: number;
+    }>;
+    total: number;
+  }> {
+    const where: any = {};
+
+    if (filters) {
+      if (filters.direction) {
+        where.direction = filters.direction;
+      }
+      if (filters.callStatus) {
+        where.callStatus = filters.callStatus;
+      }
+      if (filters.callerIdNumber) {
+        where.callerIdNumber = { contains: filters.callerIdNumber };
+      }
+      if (filters.destinationNumber) {
+        where.destinationNumber = { contains: filters.destinationNumber };
+      }
+      if (filters.domain) {
+        where.domain = filters.domain;
+      }
+      if (filters.startDateFrom || filters.startDateTo) {
+        if (filters.startDateFrom) {
+          const fromEpoch = Math.floor(new Date(filters.startDateFrom).getTime() / 1000).toString();
+          where.startEpoch = { ...where.startEpoch, gte: fromEpoch };
+        }
+        if (filters.startDateTo) {
+          const toEpoch = Math.floor(new Date(filters.startDateTo).getTime() / 1000).toString();
+          where.startEpoch = { ...where.startEpoch, lte: toEpoch };
+        }
+      }
+      if (filters.search) {
+        where.OR = [
+          { callerIdNumber: { contains: filters.search } },
+          { destinationNumber: { contains: filters.search } },
+          { outboundCallerIdNumber: { contains: filters.search } },
+        ];
+      }
+    }
+
+    // Use raw SQL for grouping by callerIdNumber since Prisma doesn't support groupBy with aggregation well
+    // First get all matching records
+    const records = await this.prisma.callCenterRecord.findMany({
+      where,
+      select: {
+        callerIdNumber: true,
+        direction: true,
+        callStatus: true,
+        billsec: true,
+      },
+    });
+
+    // Group and aggregate in memory
+    const callerStatsMap = new Map<string, {
+      callerIdNumber: string;
+      totalCalls: number;
+      inboundCalls: number;
+      outboundCalls: number;
+      answeredCalls: number;
+      missedCalls: number;
+      totalDuration: number;
+    }>();
+
+    for (const record of records) {
+      const caller = record.callerIdNumber || 'Unknown';
+      
+      if (!callerStatsMap.has(caller)) {
+        callerStatsMap.set(caller, {
+          callerIdNumber: caller,
+          totalCalls: 0,
+          inboundCalls: 0,
+          outboundCalls: 0,
+          answeredCalls: 0,
+          missedCalls: 0,
+          totalDuration: 0,
+        });
+      }
+
+      const stats = callerStatsMap.get(caller)!;
+      stats.totalCalls++;
+      
+      if (record.direction === 'INBOUND') {
+        stats.inboundCalls++;
+      } else if (record.direction === 'OUTBOUND') {
+        stats.outboundCalls++;
+      }
+      
+      if (record.callStatus === 'ANSWER') {
+        stats.answeredCalls++;
+      } else {
+        stats.missedCalls++;
+      }
+      
+      stats.totalDuration += parseInt(record.billsec || '0', 10) || 0;
+    }
+
+    // Convert to array and sort by totalCalls desc
+    const items = Array.from(callerStatsMap.values())
+      .map(stat => ({
+        ...stat,
+        avgDuration: stat.totalCalls > 0 ? Math.round(stat.totalDuration / stat.totalCalls) : 0,
+      }))
+      .sort((a, b) => b.totalCalls - a.totalCalls)
+      .slice(0, limit);
+
+    return {
+      items,
+      total: callerStatsMap.size,
+    };
+  }
 }

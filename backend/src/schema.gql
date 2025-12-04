@@ -895,6 +895,17 @@ type BulkUserActionResult {
   success: Boolean!
 }
 
+type CallCenterCallerStats {
+  answeredCalls: Int!
+  avgDuration: Int!
+  callerIdNumber: String!
+  inboundCalls: Int!
+  missedCalls: Int!
+  outboundCalls: Int!
+  totalCalls: Int!
+  totalDuration: Int!
+}
+
 type CallCenterConfig {
   apiKey: String
   apiUrl: String!
@@ -4054,6 +4065,11 @@ type PaginatedBlogs {
   totalPages: Int!
 }
 
+type PaginatedCallCenterCallerStats {
+  items: [CallCenterCallerStats!]!
+  total: Int!
+}
+
 type PaginatedCallCenterRecords {
   items: [CallCenterRecord!]!
   pagination: CallCenterRecordPaginationInfo!
@@ -4782,6 +4798,7 @@ type Query {
   getCallCenterRecordById(id: String!): CallCenterRecord!
   getCallCenterRecords(filters: CallCenterRecordFiltersInput, pagination: PaginationInput! = {limit: 20, page: 1}): PaginatedCallCenterRecords!
   getCallCenterRecordsStats(filters: CallCenterRecordFiltersInput): CallCenterRecordsStats!
+  getCallCenterStatsByCaller(filters: CallCenterRecordFiltersInput, limit: Int = 50): PaginatedCallCenterCallerStats!
   getCallCenterSyncLogs(pagination: PaginationInput! = {limit: 20, page: 1}): [CallCenterSyncLog!]!
   getCart(sessionId: String): CartType
   getCommentById(id: String!): Comment!

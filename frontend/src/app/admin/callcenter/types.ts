@@ -178,6 +178,23 @@ export interface CallerSummary {
   missedCalls: number;
 }
 
+// Stats by caller ID
+export interface CallCenterCallerStats {
+  callerIdNumber: string;
+  totalCalls: number;
+  inboundCalls: number;
+  outboundCalls: number;
+  answeredCalls: number;
+  missedCalls: number;
+  totalDuration: number;
+  avgDuration: number;
+}
+
+export interface PaginatedCallCenterCallerStats {
+  items: CallCenterCallerStats[];
+  total: number;
+}
+
 // ============================================================================
 // Date Range Types
 // ============================================================================

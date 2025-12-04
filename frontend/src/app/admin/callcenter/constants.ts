@@ -121,6 +121,27 @@ export const GET_CALLCENTER_COMPARISON_STATS = gql`
   }
 `;
 
+/**
+ * Query để lấy thống kê theo callerIdNumber
+ */
+export const GET_CALLCENTER_STATS_BY_CALLER = gql`
+  query GetCallCenterStatsByCaller($filters: CallCenterRecordFiltersInput, $limit: Int) {
+    getCallCenterStatsByCaller(filters: $filters, limit: $limit) {
+      items {
+        callerIdNumber
+        totalCalls
+        inboundCalls
+        outboundCalls
+        answeredCalls
+        missedCalls
+        totalDuration
+        avgDuration
+      }
+      total
+    }
+  }
+`;
+
 // ============================================================================
 // Quick Select Options
 // ============================================================================

@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import {
@@ -9,6 +9,7 @@ import {
   SyncCallCenterResponse,
   StopSyncResponse,
   CallCenterRecordsStats,
+  PaginatedCallCenterCallerStats,
 } from '../models/callcenter.model';
 import {
   CreateCallCenterConfigInput,
@@ -104,6 +105,17 @@ export class CallCenterResolver {
     filters?: CallCenterRecordFiltersInput,
   ): Promise<CallCenterRecordsStats> {
     return this.callCenterService.getRecordsStats(filters) as any;
+  }
+
+  @Query(() => PaginatedCallCenterCallerStats, { name: 'getCallCenterStatsByCaller' })
+  @UseGuards(JwtAuthGuard)
+  async getStatsByCaller(
+    @Args('filters', { nullable: true })
+    filters?: CallCenterRecordFiltersInput,
+    @Args('limit', { type: () => Int, nullable: true, defaultValue: 50 })
+    limit?: number,
+  ): Promise<PaginatedCallCenterCallerStats> {
+    return this.callCenterService.getStatsByCaller(filters, limit) as any;
   }
 
   // ============================================================================
