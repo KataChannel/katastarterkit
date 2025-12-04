@@ -140,12 +140,12 @@ export function RecordsTab({
     {
       field: 'duration',
       headerName: 'Thời lượng',
-      width: 120,
+      width: 130,
       sortable: true,
       cellRenderer: (params) => (
-        <div className="flex flex-col gap-1 text-sm">
-          <span>Tổng: {formatDuration(params.value)}</span>
-          <span className="text-xs text-muted-foreground">
+        <div className="flex flex-col text-xs leading-tight py-1">
+          <span className="font-medium">Tong: {formatDuration(params.value)}</span>
+          <span className="text-muted-foreground">
             Nói: {formatDuration(params.data.billsec)}
           </span>
         </div>
@@ -161,7 +161,8 @@ export function RecordsTab({
     {
       field: 'recordPath',
       headerName: 'Ghi âm',
-      width: 200,
+      minWidth: 220,
+      flex: 1,
       cellRenderer: (params) => (
         <AudioPlayer 
           recordPath={params.value} 
