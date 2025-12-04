@@ -201,7 +201,7 @@ export function SummaryTab({
   
   // Caller details search, filter, sort state
   const [callerSearch, setCallerSearch] = useState('');
-  const [callerSortField, setCallerSortField] = useState<'callerIdNumber' | 'totalCalls' | 'inboundCalls' | 'outboundCalls' | 'missedCalls'>('totalCalls');
+  const [callerSortField, setCallerSortField] = useState<'callerIdNumber' | 'totalCalls' | 'inboundCalls' | 'outboundCalls' | 'missedCalls' | 'totalDuration'>('totalCalls');
   const [callerSortOrder, setCallerSortOrder] = useState<'asc' | 'desc'>('desc');
   const [callerFilter, setCallerFilter] = useState<'all' | 'hasInbound' | 'hasOutbound' | 'hasMissed'>('all');
   
@@ -538,6 +538,10 @@ export function SummaryTab({
         case 'missedCalls':
           aValue = aStats.missedCalls;
           bValue = bStats.missedCalls;
+          break;
+        case 'totalDuration':
+          aValue = aStats.totalDuration;
+          bValue = bStats.totalDuration;
           break;
         default:
           aValue = aStats.totalCalls;
@@ -985,7 +989,7 @@ export function SummaryTab({
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">Sắp xếp:</span>
                     <Select value={callerSortField} onValueChange={(val) => setCallerSortField(val as typeof callerSortField)}>
-                      <SelectTrigger className="h-8 w-[130px] text-sm">
+                      <SelectTrigger className="h-8 w-[140px] text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -994,6 +998,7 @@ export function SummaryTab({
                         <SelectItem value="inboundCalls">Cuộc gọi đến</SelectItem>
                         <SelectItem value="outboundCalls">Cuộc gọi đi</SelectItem>
                         <SelectItem value="missedCalls">Cuộc nhỡ</SelectItem>
+                        <SelectItem value="totalDuration">Tổng thời gian</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button
@@ -1029,7 +1034,7 @@ export function SummaryTab({
                         </div>
                       </TableHead>
                       {/* Current Period Header */}
-                      <TableHead className="text-center bg-primary/5" colSpan={4}>
+                      <TableHead className="text-center bg-primary/5" colSpan={5}>
                         <div className="flex flex-col items-center">
                           <Badge variant="default" className="text-xs mb-1">Hiện tại</Badge>
                           <span className="text-xs text-muted-foreground">
@@ -1039,7 +1044,7 @@ export function SummaryTab({
                       </TableHead>
                       {/* Comparison Period Headers */}
                       {comparisonTableData.map((period) => (
-                        <TableHead key={period.id} className="text-center" colSpan={4}>
+                        <TableHead key={period.id} className="text-center" colSpan={5}>
                           <div className="flex flex-col items-center">
                             <span className="text-xs font-medium">{period.label}</span>
                             <span className="text-xs text-muted-foreground">
@@ -1088,6 +1093,15 @@ export function SummaryTab({
                           {getSortIcon('missedCalls')}
                         </div>
                       </TableHead>
+                      <TableHead 
+                        className="text-center text-xs bg-primary/5 cursor-pointer hover:bg-primary/10"
+                        onClick={() => toggleSort('totalDuration')}
+                      >
+                        <div className="flex items-center justify-center">
+                          TG
+                          {getSortIcon('totalDuration')}
+                        </div>
+                      </TableHead>
                       {/* Comparison Period Sub-Headers */}
                       {comparisonTableData.map((period) => (
                         <>
@@ -1095,6 +1109,7 @@ export function SummaryTab({
                           <TableHead key={`${period.id}-in`} className="text-center text-xs">Đến</TableHead>
                           <TableHead key={`${period.id}-out`} className="text-center text-xs">Đi</TableHead>
                           <TableHead key={`${period.id}-missed`} className="text-center text-xs">Nhỡ</TableHead>
+                          <TableHead key={`${period.id}-duration`} className="text-center text-xs">TG</TableHead>
                         </>
                       ))}
                     </TableRow>
@@ -1102,14 +1117,14 @@ export function SummaryTab({
                   <TableBody>
                     {currentCallerLoading ? (
                       <TableRow>
-                        <TableCell colSpan={5 + comparisonTableData.length * 4} className="text-center py-8">
+                        <TableCell colSpan={6 + comparisonTableData.length * 5} className="text-center py-8">
                           <Loader2 className="h-6 w-6 animate-spin inline-block" />
                           <span className="ml-2 text-muted-foreground">Đang tải...</span>
                         </TableCell>
                       </TableRow>
                     ) : allCallerNumbers.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5 + comparisonTableData.length * 4} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={6 + comparisonTableData.length * 5} className="text-center py-8 text-muted-foreground">
                           Không có dữ liệu
                         </TableCell>
                       </TableRow>
@@ -1135,14 +1150,17 @@ export function SummaryTab({
                             <TableCell className="text-center text-red-600 bg-primary/5">
                               {currentStats?.missedCalls?.toLocaleString('vi-VN') ?? '-'}
                             </TableCell>
-                            {/* Comparison Period Stats */}
+                            <TableCell className="text-center text-purple-600 bg-primary/5">
+                              {currentStats?.totalDuration != null ? formatTotalDuration(currentStats.totalDuration) : '-'}
+                            </TableCell>
+                            {/* Comparison Period Stats */
                             {comparisonTableData.map((period) => {
                               const periodCallerStat = period.callerStats?.find(c => c.callerIdNumber === callerNumber);
                               
                               if (period.callerLoading) {
                                 return (
                                   <>
-                                    <TableCell key={`${period.id}-${callerNumber}-total`} colSpan={4} className="text-center">
+                                    <TableCell key={`${period.id}-${callerNumber}-total`} colSpan={5} className="text-center">
                                       <Loader2 className="h-3 w-3 animate-spin inline-block" />
                                     </TableCell>
                                   </>
@@ -1169,6 +1187,9 @@ export function SummaryTab({
                                   </TableCell>
                                   <TableCell key={`${period.id}-${callerNumber}-missed`} className="text-center">
                                     {periodCallerStat?.missedCalls?.toLocaleString('vi-VN') ?? '-'}
+                                  </TableCell>
+                                  <TableCell key={`${period.id}-${callerNumber}-duration`} className="text-center text-purple-600">
+                                    {periodCallerStat?.totalDuration != null ? formatTotalDuration(periodCallerStat.totalDuration) : '-'}
                                   </TableCell>
                                 </>
                               );
