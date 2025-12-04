@@ -16,6 +16,7 @@ import { ExtModelsResolver } from './resolvers/ext-models.resolver';
 import { CustomTemplateResolver } from './resolvers/custom-template.resolver';
 import { WebsiteSettingResolver } from './resolvers/website-setting.resolver';
 import { MenuPublicResolver } from './resolvers/menu-public.resolver';
+import { BackupResolver } from './resolvers/backup.resolver';
 
 // 🚀 NEW: Universal Dynamic GraphQL Resolver
 import { UniversalDynamicResolver } from './resolvers/universal-dynamic.resolver';
@@ -141,6 +142,9 @@ import { AffiliateUserResolver, AffiliateCampaignResolver, AffiliateTrackingReso
     
     // Menu public resolver (MenuResolver được import từ MenuModule)
     MenuPublicResolver,
+    
+    // Backup resolver
+    BackupResolver,
     
     // Services
     UserService,
