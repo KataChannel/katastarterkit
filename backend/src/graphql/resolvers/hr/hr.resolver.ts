@@ -1,12 +1,14 @@
-import { Resolver, Query, Mutation, Args, ID, Int, ObjectType, Field } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Int, ObjectType, Field, ResolveField, Parent } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/roles.guard';
 import { Roles } from '../../../auth/roles.decorator';
 import { GetUser } from '../../../auth/get-user.decorator';
 import { HRService } from '../../../services/hr.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { OnboardingChecklist } from '../../models/hr/onboarding-checklist.model';
 import { OffboardingProcess } from '../../models/hr/offboarding-process.model';
+import { EmployeeProfile } from '../../models/hr/employee-profile.model';
 import { EmploymentHistory } from '../../models/hr/employment-history.model';
 import {
   CreateOnboardingChecklistInput,
@@ -99,7 +101,20 @@ class OffboardingListResponse {
 @Resolver(() => OnboardingChecklist)
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class OnboardingResolver {
-  constructor(private hrService: HRService) {}
+  constructor(
+    private hrService: HRService,
+    private prisma: PrismaService,
+  ) {}
+
+  // Field resolver for employeeProfile
+  @ResolveField(() => EmployeeProfile, { nullable: true })
+  async employeeProfile(@Parent() checklist: OnboardingChecklist) {
+    if (!checklist.employeeProfileId) return null;
+    return this.prisma.employeeProfile.findUnique({
+      where: { id: checklist.employeeProfileId },
+      include: { user: true },
+    });
+  }
 
   @Mutation(() => OnboardingChecklist)
   @Roles('ADMIN')
@@ -162,7 +177,20 @@ export class OnboardingResolver {
 @Resolver(() => OffboardingProcess)
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class OffboardingResolver {
-  constructor(private hrService: HRService) {}
+  constructor(
+    private hrService: HRService,
+    private prisma: PrismaService,
+  ) {}
+
+  // Field resolver for employeeProfile
+  @ResolveField(() => EmployeeProfile, { nullable: true })
+  async employeeProfile(@Parent() process: OffboardingProcess) {
+    if (!process.employeeProfileId) return null;
+    return this.prisma.employeeProfile.findUnique({
+      where: { id: process.employeeProfileId },
+      include: { user: true },
+    });
+  }
 
   @Mutation(() => OffboardingProcess)
   @Roles('ADMIN')

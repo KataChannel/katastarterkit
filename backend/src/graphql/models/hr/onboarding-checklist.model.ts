@@ -1,5 +1,6 @@
 import { ObjectType, Field, ID, Float, Int } from '@nestjs/graphql';
 import { OnboardingStatus } from './enums.model';
+import { EmployeeProfile } from './employee-profile.model';
 import GraphQLJSON from 'graphql-type-json';
 
 @ObjectType()
@@ -12,6 +13,10 @@ export class OnboardingChecklist {
 
   @Field()
   userId: string;
+
+  // Relation to EmployeeProfile
+  @Field(() => EmployeeProfile, { nullable: true })
+  employeeProfile?: EmployeeProfile;
 
   // Checklist Configuration
   @Field({ nullable: true })

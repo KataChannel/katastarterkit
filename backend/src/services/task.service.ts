@@ -387,10 +387,21 @@ export class TaskService {
   // ==================== PROJECT TASK METHODS (NEW) ====================
 
   /**
-   * Lấy tasks của project (dùng cho TaskFeed)
-   * Sắp xếp theo: priority + dueDate + order
+   * Helper: Kiểm tra quyền truy cập project
+   * - Owner của project (project.ownerId)
+   * - Thành viên của project (projectMember)
    */
-  async findByProjectId(projectId: string, userId: string, filters?: TaskFilterInput) {
+  private async checkProjectAccess(projectId: string, userId: string): Promise<boolean> {
+    // Check if user is owner of project
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { ownerId: true },
+    });
+
+    if (project?.ownerId === userId) {
+      return true;
+    }
+
     // Check if user is member of project
     const member = await this.prisma.projectMember.findUnique({
       where: {
@@ -401,7 +412,18 @@ export class TaskService {
       },
     });
 
-    if (!member) {
+    return !!member;
+  }
+
+  /**
+   * Lấy tasks của project (dùng cho TaskFeed)
+   * Sắp xếp theo: priority + dueDate + order
+   */
+  async findByProjectId(projectId: string, userId: string, filters?: TaskFilterInput) {
+    // Check if user has access to project (owner or member)
+    const hasAccess = await this.checkProjectAccess(projectId, userId);
+
+    if (!hasAccess) {
       throw new ForbiddenException('You are not a member of this project');
     }
 
@@ -464,17 +486,10 @@ export class TaskService {
       order?: number;
     },
   ) {
-    // Check if user is member
-    const member = await this.prisma.projectMember.findUnique({
-      where: {
-        projectId_userId: {
-          projectId,
-          userId,
-        },
-      },
-    });
+    // Check if user has access to project (owner or member)
+    const hasAccess = await this.checkProjectAccess(projectId, userId);
 
-    if (!member) {
+    if (!hasAccess) {
       throw new ForbiddenException('You are not a member of this project');
     }
 
@@ -533,17 +548,10 @@ export class TaskService {
       throw new NotFoundException('Task not found');
     }
 
-    // Check permission (project member or task owner)
+    // Check permission (project owner, member or task owner)
     if (task.projectId) {
-      const member = await this.prisma.projectMember.findUnique({
-        where: {
-          projectId_userId: {
-            projectId: task.projectId,
-            userId,
-          },
-        },
-      });
-      if (!member && task.userId !== userId) {
+      const hasAccess = await this.checkProjectAccess(task.projectId, userId);
+      if (!hasAccess && task.userId !== userId) {
         throw new ForbiddenException('You do not have permission to reorder this task');
       }
     } else if (task.userId !== userId) {
@@ -569,17 +577,10 @@ export class TaskService {
       throw new NotFoundException('Task not found');
     }
 
-    // Check permission
+    // Check permission (project owner, member or task owner)
     if (task.projectId) {
-      const member = await this.prisma.projectMember.findUnique({
-        where: {
-          projectId_userId: {
-            projectId: task.projectId,
-            userId,
-          },
-        },
-      });
-      if (!member) {
+      const hasAccess = await this.checkProjectAccess(task.projectId, userId);
+      if (!hasAccess) {
         throw new ForbiddenException('You are not a member of this project');
       }
     } else if (task.userId !== userId) {

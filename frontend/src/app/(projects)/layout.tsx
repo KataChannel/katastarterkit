@@ -15,6 +15,7 @@ import {
   Calendar,
   Map,
   Loader2,
+  GanttChart,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -29,12 +30,13 @@ import {
 import { Input } from '@/components/ui/input';
 
 // View types for project management
-type ViewType = 'dashboard' | 'list' | 'kanban' | 'calendar' | 'roadmap';
+type ViewType = 'dashboard' | 'list' | 'kanban' | 'timeline' | 'calendar' | 'roadmap';
 
 const viewTabs: { id: ViewType; name: string; icon: any }[] = [
   { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
   { id: 'list', name: 'Danh sách', icon: List },
   { id: 'kanban', name: 'Kanban', icon: Kanban },
+  { id: 'timeline', name: 'Timeline', icon: GanttChart },
   { id: 'calendar', name: 'Lịch', icon: Calendar },
   { id: 'roadmap', name: 'Roadmap', icon: Map },
 ];

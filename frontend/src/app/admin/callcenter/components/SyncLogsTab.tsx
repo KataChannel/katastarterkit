@@ -41,7 +41,7 @@ export function SyncLogsTab({ logs, loading, onRefresh, onStopSync, stoppingSync
         <CardHeader className="py-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">Lịch sử đồng bộ</CardTitle>
-            <Button variant="ghost" size="sm" onClick={onRefresh}>
+            <Button variant="ghost" size="sm" onClick={() => onRefresh()}>
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>

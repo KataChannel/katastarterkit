@@ -3736,6 +3736,7 @@ type OffboardingProcess {
   effectiveDate: DateTime
   eligibleForRehire: Boolean
   employeeComments: String
+  employeeProfile: EmployeeProfile
   employeeProfileId: String!
   exitInterviewBy: String
   exitInterviewDate: DateTime
@@ -3798,6 +3799,7 @@ type OnboardingChecklist {
   createdAt: DateTime!
   createdBy: String
   employeeFeedback: String
+  employeeProfile: EmployeeProfile
   employeeProfileId: String!
   hrNotes: String
   id: ID!

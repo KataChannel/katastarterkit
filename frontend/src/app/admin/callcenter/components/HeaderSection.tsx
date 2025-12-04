@@ -40,7 +40,7 @@ export function HeaderSection({
 
       <div className="flex items-center gap-2">
         {/* Refresh Button */}
-        <Button variant="outline" size="sm" onClick={onRefresh} disabled={refreshing}>
+        <Button variant="outline" size="sm" onClick={() => onRefresh()} disabled={refreshing}>
           {refreshing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -49,7 +49,7 @@ export function HeaderSection({
         </Button>
 
         {/* Sync Date Range */}
-        <Button variant="outline" size="sm" onClick={onOpenDateRange}>
+        <Button variant="outline" size="sm" onClick={() => onOpenDateRange()}>
           <Calendar className="h-4 w-4 mr-1" />
           Đồng bộ theo ngày
         </Button>
@@ -62,7 +62,7 @@ export function HeaderSection({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onOpenConfig}>
+            <DropdownMenuItem onClick={() => onOpenConfig()}>
               <Settings className="h-4 w-4 mr-2" />
               Cấu hình API
             </DropdownMenuItem>

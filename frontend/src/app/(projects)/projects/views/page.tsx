@@ -22,7 +22,10 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
+  GanttChart,
+  Search,
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 // Import all view components
 import {
@@ -31,12 +34,13 @@ import {
   CalendarView,
   ListView,
   DashboardView,
+  TimelineView,
 } from '@/components/project-management/views';
 import CreateProjectModal from '@/components/project-management/CreateProjectModal';
 import ChatPanel from '@/components/project-management/ChatPanel';
 import { useFindMany } from '@/hooks/useDynamicGraphQL';
 
-type ViewType = 'dashboard' | 'list' | 'kanban' | 'calendar' | 'roadmap';
+type ViewType = 'dashboard' | 'list' | 'kanban' | 'timeline' | 'calendar' | 'roadmap';
 
 const viewConfig: Record<ViewType, { 
   icon: any; 
@@ -61,6 +65,12 @@ const viewConfig: Record<ViewType, {
     label: 'Kanban',
     methodologies: ['KANBAN', 'AGILE', 'HYBRID', 'LEAN'],
     description: 'Theo dõi luồng công việc',
+  },
+  timeline: {
+    icon: GanttChart,
+    label: 'Timeline',
+    methodologies: ['WATERFALL', 'HYBRID'],
+    description: 'Quản lý thời gian, phụ thuộc',
   },
   calendar: {
     icon: Calendar,
@@ -88,6 +98,7 @@ function ProjectViewsPage() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(''); // Thêm state search
 
   // Check authentication first
   useEffect(() => {
@@ -195,6 +206,8 @@ function ProjectViewsPage() {
         return <ListView projectId={selectedProjectId} />;
       case 'kanban':
         return <KanbanView projectId={selectedProjectId} />;
+      case 'timeline':
+        return <TimelineView projectId={selectedProjectId} />;
       case 'calendar':
         return <CalendarView projectId={selectedProjectId} />;
       case 'roadmap':
@@ -225,7 +238,7 @@ function ProjectViewsPage() {
       <aside 
         className={`
           flex-shrink-0 border-r bg-muted/20 transition-all duration-300
-          ${isSidebarCollapsed ? 'w-0 lg:w-16' : 'w-full lg:w-72'}
+          ${isSidebarCollapsed ? 'w-0 lg:w-16' : 'w-full lg:w-80'}
           ${isSidebarCollapsed ? 'overflow-hidden' : ''}
           fixed lg:relative inset-y-0 left-0 z-40 lg:z-0
           ${!isSidebarCollapsed ? 'block' : 'hidden lg:block'}
@@ -258,6 +271,22 @@ function ProjectViewsPage() {
             </Button>
           </div>
 
+          {/* Search Box */}
+          {!isSidebarCollapsed && (
+            <div className="p-2 border-b">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Tìm dự án..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 h-9 text-sm"
+                />
+              </div>
+            </div>
+          )}
+
           {/* Projects List */}
           <ScrollArea className="flex-1">
             <div className={`p-2 space-y-1 ${isSidebarCollapsed ? 'items-center' : ''}`}>
@@ -277,7 +306,12 @@ function ProjectViewsPage() {
                   </div>
                 )
               ) : (
-                projects.map((project: any) => (
+                projects
+                  .filter((project: any) => 
+                    searchQuery === '' || 
+                    project.name.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map((project: any) => (
                   <div
                     key={project.id}
                     onClick={() => setSelectedProjectId(project.id)}
@@ -299,15 +333,15 @@ function ProjectViewsPage() {
                       </Avatar>
                     ) : (
                       <>
-                        <div className="flex items-start gap-3 mb-2">
-                          <Avatar className="h-10 w-10 flex-shrink-0">
+                        <div className="flex items-start gap-2 mb-2">
+                          <Avatar className="h-9 w-9 flex-shrink-0">
                             <AvatarImage src={project.avatar} />
                             <AvatarFallback className="bg-primary/20 text-primary text-xs">
                               {project.name.substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-sm truncate">{project.name}</h3>
+                            <h3 className="font-medium text-sm leading-tight line-clamp-2">{project.name}</h3>
                             <Badge variant="secondary" className="text-xs mt-1">
                               {project.methodology}
                             </Badge>

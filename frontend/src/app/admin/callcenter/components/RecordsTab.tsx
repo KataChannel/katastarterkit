@@ -162,7 +162,6 @@ export function RecordsTab({
       field: 'recordPath',
       headerName: 'Ghi âm',
       minWidth: 220,
-      flex: 1,
       cellRenderer: (params) => (
         <AudioPlayer 
           recordPath={params.value} 
@@ -214,7 +213,7 @@ export function RecordsTab({
           )}
         </Button>
         {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={onClearFilters}>
+          <Button variant="ghost" size="sm" onClick={() => onClearFilters()}>
             <XCircle className="h-4 w-4 mr-1" />
             Xóa lọc
           </Button>
@@ -289,7 +288,7 @@ export function RecordsTab({
                   </SelectContent>
                 </Select>
               </div>
-              <Button size="sm" className="h-8" onClick={onApplyFilters}>
+              <Button size="sm" className="h-8" onClick={() => onApplyFilters()}>
                 <Filter className="h-3 w-3 mr-1" />
                 Áp dụng
               </Button>

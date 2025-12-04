@@ -97,17 +97,17 @@ export function ProgressTab({
             </CardTitle>
             <div className="flex items-center gap-2">
               {isSyncing ? (
-                <Button variant="destructive" size="sm" onClick={onStopSync} className="gap-1">
+                <Button variant="destructive" size="sm" onClick={() => onStopSync()} className="gap-1">
                   <StopCircle className="h-4 w-4" />
                   Dừng
                 </Button>
               ) : (
-                <Button variant="default" size="sm" onClick={onSync} className="gap-1">
+                <Button variant="default" size="sm" onClick={() => onSync()} className="gap-1">
                   <Play className="h-4 w-4" />
                   Đồng bộ
                 </Button>
               )}
-              <Button variant="ghost" size="sm" onClick={onRefresh}>
+              <Button variant="ghost" size="sm" onClick={() => onRefresh()}>
                 <RefreshCw className="h-4 w-4" />
               </Button>
             </div>
