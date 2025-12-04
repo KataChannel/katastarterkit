@@ -168,8 +168,10 @@ export default function CallCenterPage() {
 
   // Handle sync
   const handleSync = async () => {
-    await startSync(dateRange.fromDate, dateRange.toDate);
     setShowDateRangeDialog(false);
+    // Chuyển sang tab tiến độ đồng bộ ngay lập tức
+    setActiveTab('progress');
+    await startSync(dateRange.fromDate, dateRange.toDate);
   };
 
   // Handle stop sync
@@ -331,6 +333,8 @@ export default function CallCenterPage() {
             logs={syncLogs}
             loading={logsLoading}
             onRefresh={refetchLogs}
+            onStopSync={handleStopSync}
+            stoppingSyncId={stopping ? currentSyncLogId : null}
           />
         </TabsContent>
       </Tabs>

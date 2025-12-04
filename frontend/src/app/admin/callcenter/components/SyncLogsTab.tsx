@@ -10,7 +10,7 @@ import { vi } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, RefreshCw, Calendar, Clock, Download, Plus, ArrowUpDown, XCircle } from 'lucide-react';
+import { Loader2, RefreshCw, Calendar, Clock, Download, Plus, ArrowUpDown, XCircle, StopCircle } from 'lucide-react';
 import { SYNC_STATUS_VARIANTS } from '../constants';
 import type { CallCenterSyncLog } from '../types';
 
@@ -18,9 +18,11 @@ interface SyncLogsTabProps {
   logs: CallCenterSyncLog[];
   loading: boolean;
   onRefresh: () => void;
+  onStopSync?: (syncLogId: string) => void;
+  stoppingSyncId?: string | null;
 }
 
-export function SyncLogsTab({ logs, loading, onRefresh }: SyncLogsTabProps) {
+export function SyncLogsTab({ logs, loading, onRefresh, onStopSync, stoppingSyncId }: SyncLogsTabProps) {
   const getStatusBadge = (status: string) => {
     const config = SYNC_STATUS_VARIANTS[status] || {
       variant: 'outline' as const,
@@ -54,21 +56,43 @@ export function SyncLogsTab({ logs, loading, onRefresh }: SyncLogsTabProps) {
           ) : (
             <div className="space-y-3">
               {logs.map((log) => (
-                <Card key={log.id}>
+                <Card key={log.id} className={log.status === 'running' ? 'ring-2 ring-blue-500/30' : ''}>
                   <CardContent className="py-3">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {getStatusBadge(log.status)}
                         <Badge variant="outline">{log.syncType}</Badge>
+                        {log.status === 'running' && (
+                          <Loader2 className="h-3 w-3 animate-spin text-blue-500" />
+                        )}
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {log.startedAt &&
-                          formatDistanceToNow(new Date(log.startedAt), {
-                            addSuffix: true,
-                            locale: vi,
-                          })}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {/* Nút dừng cho sync đang chạy */}
+                        {log.status === 'running' && onStopSync && (
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => onStopSync(log.id)}
+                            disabled={stoppingSyncId === log.id}
+                            className="h-7 px-2 text-xs"
+                          >
+                            {stoppingSyncId === log.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                            ) : (
+                              <StopCircle className="h-3 w-3 mr-1" />
+                            )}
+                            Dừng
+                          </Button>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {log.startedAt &&
+                            formatDistanceToNow(new Date(log.startedAt), {
+                              addSuffix: true,
+                              locale: vi,
+                            })}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Date Range */}

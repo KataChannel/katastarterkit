@@ -3,8 +3,9 @@
  * Bao gồm: config, records, sync logs
  */
 
-import { useState, useCallback } from 'react';
-import { useMutation } from '@apollo/client';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { useMutation, useQuery } from '@apollo/client';
+import { gql } from '@apollo/client';
 import { toast } from 'sonner';
 import { 
   useFindMany,
@@ -21,6 +22,24 @@ import type {
   RecordFilters,
   Pagination,
 } from '../types';
+
+// Query để lấy sync log theo ID
+const GET_SYNC_LOG_BY_ID = gql`
+  query GetSyncLogById($id: String!) {
+    findFirstCallCenterSyncLog(where: { id: { equals: $id } }) {
+      id
+      status
+      recordsFetched
+      recordsCreated
+      recordsUpdated
+      recordsSkipped
+      offset
+      errorMessage
+      fromDate
+      toDate
+    }
+  }
+`;
 
 interface UseCallCenterDataReturn {
   // Config
@@ -54,6 +73,7 @@ interface UseCallCenterDataReturn {
   // Sync Operations
   syncing: boolean;
   stopping: boolean;
+  stoppingSyncId: string | null;
   currentSyncLogId: string | null;
   syncStats: SyncStats | null;
   showSyncProgress: boolean;
@@ -71,8 +91,77 @@ export function useCallCenterData(): UseCallCenterDataReturn {
 
   // Sync state
   const [currentSyncLogId, setCurrentSyncLogId] = useState<string | null>(null);
+  const [stoppingSyncId, setStoppingSyncId] = useState<string | null>(null);
   const [syncStats, setSyncStats] = useState<SyncStats | null>(null);
   const [showSyncProgress, setShowSyncProgress] = useState(false);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // ============================================================================
+  // Sync Log Polling - Poll để cập nhật tiến độ khi đang sync
+  // ============================================================================
+  
+  const { refetch: refetchSyncLog } = useQuery(GET_SYNC_LOG_BY_ID, {
+    variables: { id: currentSyncLogId || '' },
+    skip: !currentSyncLogId,
+    fetchPolicy: 'network-only',
+  });
+
+  // Polling effect để cập nhật syncStats real-time
+  useEffect(() => {
+    if (currentSyncLogId && syncStats?.status === 'running') {
+      // Bắt đầu polling
+      pollingIntervalRef.current = setInterval(async () => {
+        try {
+          const result = await refetchSyncLog({ id: currentSyncLogId });
+          const log = result.data?.findFirstCallCenterSyncLog;
+          
+          if (log) {
+            setSyncStats(prev => ({
+              ...prev,
+              recordsFetched: log.recordsFetched || 0,
+              recordsCreated: log.recordsCreated || 0,
+              recordsUpdated: log.recordsUpdated || 0,
+              recordsSkipped: log.recordsSkipped || 0,
+              status: log.status as 'running' | 'success' | 'error' | 'stopped',
+              message: log.status === 'running' 
+                ? `Đã xử lý ${log.recordsFetched || 0} bản ghi...` 
+                : undefined,
+              error: log.errorMessage || undefined,
+            }));
+
+            // Nếu hoàn thành, dừng polling
+            if (log.status !== 'running') {
+              if (pollingIntervalRef.current) {
+                clearInterval(pollingIntervalRef.current);
+                pollingIntervalRef.current = null;
+              }
+              
+              if (log.status === 'success') {
+                toast.success('Đồng bộ hoàn tất!', {
+                  description: `Đã tải ${log.recordsFetched} bản ghi, tạo mới ${log.recordsCreated}, cập nhật ${log.recordsUpdated}`,
+                });
+              } else if (log.status === 'error') {
+                toast.error('Đồng bộ thất bại', {
+                  description: log.errorMessage,
+                });
+              } else if (log.status === 'stopped') {
+                toast.info('Đã dừng đồng bộ');
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error polling sync log:', error);
+        }
+      }, 1000); // Poll mỗi 1 giây
+    }
+
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [currentSyncLogId, syncStats?.status, refetchSyncLog]);
 
   // ============================================================================
   // Config Queries & Mutations
@@ -210,6 +299,7 @@ export function useCallCenterData(): UseCallCenterDataReturn {
   }, [config?.isActive, syncDataMutation]);
 
   const stopSync = useCallback(async (syncLogId: string) => {
+    setStoppingSyncId(syncLogId);
     try {
       const result = await stopSyncMutation({
         variables: { syncLogId },
@@ -219,10 +309,12 @@ export function useCallCenterData(): UseCallCenterDataReturn {
         toast.success('Đã dừng đồng bộ', {
           description: result.data.stopSyncProcess.message,
         });
-        // Reset sync state
-        setShowSyncProgress(false);
-        setCurrentSyncLogId(null);
-        setSyncStats(null);
+        // Reset sync state nếu đang stop sync hiện tại
+        if (syncLogId === currentSyncLogId) {
+          setShowSyncProgress(false);
+          setCurrentSyncLogId(null);
+          setSyncStats(null);
+        }
         // Refresh data
         refetchLogs();
         refetchRecords();
@@ -236,8 +328,10 @@ export function useCallCenterData(): UseCallCenterDataReturn {
       toast.error('Lỗi khi dừng đồng bộ', {
         description: error.message,
       });
+    } finally {
+      setStoppingSyncId(null);
     }
-  }, [stopSyncMutation, refetchLogs, refetchRecords, refetchConfig]);
+  }, [stopSyncMutation, refetchLogs, refetchRecords, refetchConfig, currentSyncLogId]);
 
   const resetSyncState = useCallback(() => {
     setShowSyncProgress(false);
@@ -280,6 +374,7 @@ export function useCallCenterData(): UseCallCenterDataReturn {
     // Sync Operations
     syncing,
     stopping,
+    stoppingSyncId,
     currentSyncLogId,
     syncStats,
     showSyncProgress,
