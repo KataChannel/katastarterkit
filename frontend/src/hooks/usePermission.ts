@@ -6,8 +6,18 @@
 'use client';
 
 import { useQuery } from '@apollo/client';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { GET_MY_PERMISSIONS, GET_MY_ROLES } from '@/graphql/rbac.queries';
+
+/**
+ * Helper function để check xem có token trong localStorage không
+ * Dùng cho client-side check trước khi gọi API
+ */
+function hasAuthToken(): boolean {
+  if (typeof window === 'undefined') return false;
+  const token = localStorage.getItem('token');
+  return !!token && token.length > 0;
+}
 
 interface Permission {
   id: string;
@@ -33,7 +43,15 @@ interface UsePermissionResult {
 }
 
 export function usePermission(): UsePermissionResult {
+  // Check token on client side để skip query khi chưa đăng nhập
+  const [isReady, setIsReady] = useState(false);
+  
+  useEffect(() => {
+    setIsReady(hasAuthToken());
+  }, []);
+
   const { data, loading, error } = useQuery(GET_MY_PERMISSIONS, {
+    skip: !isReady, // Skip query khi chưa có token
     fetchPolicy: 'cache-and-network',
   });
 
@@ -84,7 +102,7 @@ export function usePermission(): UsePermissionResult {
 
   return {
     permissions,
-    loading,
+    loading: !isReady || loading,
     error,
     hasPermission,
     hasAnyPermission,
@@ -99,9 +117,20 @@ export function usePermission(): UsePermissionResult {
 /**
  * useRole Hook
  * Hook để check roles
+ * Chỉ gọi API khi đã có token xác thực
  */
 export function useRole() {
-  const { data, loading, error } = useQuery(GET_MY_ROLES);
+  // Check token on client side để skip query khi chưa đăng nhập
+  const [isReady, setIsReady] = useState(false);
+  
+  useEffect(() => {
+    setIsReady(hasAuthToken());
+  }, []);
+
+  const { data, loading, error, refetch } = useQuery(GET_MY_ROLES, {
+    skip: !isReady, // Skip query khi chưa có token
+    fetchPolicy: 'cache-and-network',
+  });
 
   const roles = useMemo(() => {
     return data?.myRoles || [];
@@ -121,10 +150,11 @@ export function useRole() {
 
   return {
     roles,
-    loading,
+    loading: !isReady || loading,
     error,
     hasRole,
     hasAnyRole,
     hasAllRoles,
+    refetch,
   };
 }

@@ -449,7 +449,34 @@ export class CallCenterService {
               where: { externalUuid: record.uuid },
             });
 
-            // Chuẩn bị dữ liệu cơ bản
+            // SKIP record đã tồn tại - chỉ upload Google Drive nếu chưa có
+            if (existing) {
+              // Nếu record cũ chưa có Google Drive URL và có file ghi âm → upload
+              if (record.record_path && !existing.googleDriveUrl) {
+                const driveResult = await this.uploadRecordingToGoogleDrive(
+                  record.record_path,
+                  record.uuid,
+                );
+                
+                if (driveResult) {
+                  await this.prisma.callCenterRecord.update({
+                    where: { id: existing.id },
+                    data: {
+                      googleDriveUrl: driveResult.url,
+                      googleDriveFileId: driveResult.fileId,
+                    },
+                  });
+                  totalUpdated++; // Track Google Drive uploads cho existing records
+                  this.logger.log(`Uploaded Google Drive for existing record ${record.uuid}`);
+                }
+              }
+              
+              // Skip - không update các field khác
+              totalSkipped++;
+              continue;
+            }
+
+            // Tạo record mới
             const data: any = {
               externalUuid: record.uuid,
               direction: record.direction?.toUpperCase() as any,
@@ -468,40 +495,23 @@ export class CallCenterService {
               rawData: record as any,
             };
 
-            // Upload recording lên Google Drive nếu có file ghi âm và chưa được upload
+            // Upload recording lên Google Drive cho record mới
             if (record.record_path) {
-              // Chỉ upload nếu là record mới hoặc record cũ chưa có googleDriveUrl
-              const shouldUpload = !existing || !existing.googleDriveUrl;
+              const driveResult = await this.uploadRecordingToGoogleDrive(
+                record.record_path,
+                record.uuid,
+              );
               
-              if (shouldUpload) {
-                const driveResult = await this.uploadRecordingToGoogleDrive(
-                  record.record_path,
-                  record.uuid,
-                );
-                
-                if (driveResult) {
-                  data.googleDriveUrl = driveResult.url;
-                  data.googleDriveFileId = driveResult.fileId;
-                }
-              } else {
-                // Giữ nguyên Google Drive URL cũ nếu đã có
-                data.googleDriveUrl = existing.googleDriveUrl;
-                data.googleDriveFileId = existing.googleDriveFileId;
+              if (driveResult) {
+                data.googleDriveUrl = driveResult.url;
+                data.googleDriveFileId = driveResult.fileId;
               }
             }
 
-            if (existing) {
-              await this.prisma.callCenterRecord.update({
-                where: { id: existing.id },
-                data,
-              });
-              totalUpdated++;
-            } else {
-              await this.prisma.callCenterRecord.create({
-                data,
-              });
-              totalCreated++;
-            }
+            await this.prisma.callCenterRecord.create({
+              data,
+            });
+            totalCreated++;
           } catch (error) {
             this.logger.error(
               `Error processing record ${record.uuid}: ${error.message}`,
@@ -556,7 +566,7 @@ export class CallCenterService {
       });
 
       this.logger.log(
-        `Sync completed: ${totalCreated} created, ${totalUpdated} updated, ${totalSkipped} skipped`,
+        `Sync completed: ${totalCreated} created, ${totalUpdated} Google Drive uploads, ${totalSkipped} skipped (existing)`,
       );
 
       return {
