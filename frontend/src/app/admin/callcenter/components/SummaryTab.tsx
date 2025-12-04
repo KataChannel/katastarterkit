@@ -14,6 +14,14 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -40,6 +48,11 @@ import {
   Users,
   ChevronDown,
   ChevronUp,
+  Search,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Filter,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatTotalDuration, calculateChange, getQuickFilterDateRange, buildGraphQLFilters } from '../utils';
@@ -185,6 +198,12 @@ export function SummaryTab({
   // Caller stats state
   const [periodCallerStats, setPeriodCallerStats] = useState<Map<string, { stats: CallCenterCallerStats[] | null; loading: boolean }>>(new Map());
   const [showCallerDetails, setShowCallerDetails] = useState(false);
+  
+  // Caller details search, filter, sort state
+  const [callerSearch, setCallerSearch] = useState('');
+  const [callerSortField, setCallerSortField] = useState<'callerIdNumber' | 'totalCalls' | 'inboundCalls' | 'outboundCalls' | 'missedCalls'>('totalCalls');
+  const [callerSortOrder, setCallerSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [callerFilter, setCallerFilter] = useState<'all' | 'hasInbound' | 'hasOutbound' | 'hasMissed'>('all');
   
   // Current period caller stats
   const currentCallerFilters = useMemo(() => {
@@ -442,15 +461,116 @@ export function SummaryTab({
     });
   }, [comparisonPeriods, periodStats, periodCallerStats]);
   
-  // Get unique callers across all periods
+  // Get unique callers across all periods with search, filter, sort
   const allCallerNumbers = useMemo(() => {
-    const callers = new Set<string>();
-    currentCallerStats.forEach(c => callers.add(c.callerIdNumber));
-    comparisonTableData.forEach(period => {
-      period.callerStats?.forEach(c => callers.add(c.callerIdNumber));
+    // Build caller data map with stats from current period
+    const callerDataMap = new Map<string, CallCenterCallerStats>();
+    
+    currentCallerStats.forEach(c => {
+      callerDataMap.set(c.callerIdNumber, c);
     });
-    return Array.from(callers).sort();
-  }, [currentCallerStats, comparisonTableData]);
+    
+    // Add callers from comparison periods that might not be in current
+    comparisonTableData.forEach(period => {
+      period.callerStats?.forEach(c => {
+        if (!callerDataMap.has(c.callerIdNumber)) {
+          // Add with zeroed current stats
+          callerDataMap.set(c.callerIdNumber, {
+            callerIdNumber: c.callerIdNumber,
+            totalCalls: 0,
+            inboundCalls: 0,
+            outboundCalls: 0,
+            answeredCalls: 0,
+            missedCalls: 0,
+            totalDuration: 0,
+            avgDuration: 0,
+          });
+        }
+      });
+    });
+    
+    let callers = Array.from(callerDataMap.entries());
+    
+    // Apply search filter
+    if (callerSearch.trim()) {
+      const searchLower = callerSearch.toLowerCase().trim();
+      callers = callers.filter(([number]) => number.toLowerCase().includes(searchLower));
+    }
+    
+    // Apply category filter
+    if (callerFilter !== 'all') {
+      callers = callers.filter(([_, stats]) => {
+        switch (callerFilter) {
+          case 'hasInbound':
+            return stats.inboundCalls > 0;
+          case 'hasOutbound':
+            return stats.outboundCalls > 0;
+          case 'hasMissed':
+            return stats.missedCalls > 0;
+          default:
+            return true;
+        }
+      });
+    }
+    
+    // Apply sort
+    callers.sort(([aNumber, aStats], [bNumber, bStats]) => {
+      let aValue: string | number;
+      let bValue: string | number;
+      
+      switch (callerSortField) {
+        case 'callerIdNumber':
+          aValue = aNumber;
+          bValue = bNumber;
+          break;
+        case 'totalCalls':
+          aValue = aStats.totalCalls;
+          bValue = bStats.totalCalls;
+          break;
+        case 'inboundCalls':
+          aValue = aStats.inboundCalls;
+          bValue = bStats.inboundCalls;
+          break;
+        case 'outboundCalls':
+          aValue = aStats.outboundCalls;
+          bValue = bStats.outboundCalls;
+          break;
+        case 'missedCalls':
+          aValue = aStats.missedCalls;
+          bValue = bStats.missedCalls;
+          break;
+        default:
+          aValue = aStats.totalCalls;
+          bValue = bStats.totalCalls;
+      }
+      
+      if (typeof aValue === 'string') {
+        const cmp = aValue.localeCompare(bValue as string);
+        return callerSortOrder === 'asc' ? cmp : -cmp;
+      } else {
+        const diff = (aValue as number) - (bValue as number);
+        return callerSortOrder === 'asc' ? diff : -diff;
+      }
+    });
+    
+    return callers.map(([number]) => number);
+  }, [currentCallerStats, comparisonTableData, callerSearch, callerFilter, callerSortField, callerSortOrder]);
+  
+  // Toggle sort
+  const toggleSort = (field: typeof callerSortField) => {
+    if (callerSortField === field) {
+      setCallerSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setCallerSortField(field);
+      setCallerSortOrder('desc');
+    }
+  };
+  
+  // Get sort icon
+  const getSortIcon = (field: typeof callerSortField) => {
+    if (callerSortField !== field) return <ArrowUpDown className="h-3 w-3 ml-1" />;
+    return callerSortOrder === 'asc' ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
 
   return (
     <div className="space-y-3 mt-3">
@@ -831,11 +951,83 @@ export function SummaryTab({
           
           {showCallerDetails && (
             <CardContent className="p-0">
+              {/* Search, Filter, Sort Controls */}
+              <div className="p-3 border-b bg-muted/30">
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Search */}
+                  <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Tìm số điện thoại..."
+                      value={callerSearch}
+                      onChange={(e) => setCallerSearch(e.target.value)}
+                      className="pl-8 h-8 text-sm"
+                    />
+                  </div>
+                  
+                  {/* Filter */}
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" />
+                    <Select value={callerFilter} onValueChange={(val) => setCallerFilter(val as typeof callerFilter)}>
+                      <SelectTrigger className="h-8 w-[140px] text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tất cả</SelectItem>
+                        <SelectItem value="hasInbound">Có gọi đến</SelectItem>
+                        <SelectItem value="hasOutbound">Có gọi đi</SelectItem>
+                        <SelectItem value="hasMissed">Có cuộc nhỡ</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Sort */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Sắp xếp:</span>
+                    <Select value={callerSortField} onValueChange={(val) => setCallerSortField(val as typeof callerSortField)}>
+                      <SelectTrigger className="h-8 w-[130px] text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="totalCalls">Tổng cuộc gọi</SelectItem>
+                        <SelectItem value="callerIdNumber">Số điện thoại</SelectItem>
+                        <SelectItem value="inboundCalls">Cuộc gọi đến</SelectItem>
+                        <SelectItem value="outboundCalls">Cuộc gọi đi</SelectItem>
+                        <SelectItem value="missedCalls">Cuộc nhỡ</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-2"
+                      onClick={() => setCallerSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                    >
+                      {callerSortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  
+                  {/* Results count */}
+                  <div className="ml-auto">
+                    <Badge variant="secondary">
+                      {allCallerNumbers.length} số
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="sticky left-0 bg-background z-10">Số điện thoại</TableHead>
+                      <TableHead 
+                        className="sticky left-0 bg-background z-10 cursor-pointer hover:bg-muted/50"
+                        onClick={() => toggleSort('callerIdNumber')}
+                      >
+                        <div className="flex items-center">
+                          Số điện thoại
+                          {getSortIcon('callerIdNumber')}
+                        </div>
+                      </TableHead>
                       {/* Current Period Header */}
                       <TableHead className="text-center bg-primary/5" colSpan={4}>
                         <div className="flex flex-col items-center">
@@ -859,11 +1051,43 @@ export function SummaryTab({
                     </TableRow>
                     <TableRow>
                       <TableHead className="sticky left-0 bg-background z-10"></TableHead>
-                      {/* Current Period Sub-Headers */}
-                      <TableHead className="text-center text-xs bg-primary/5">Tổng</TableHead>
-                      <TableHead className="text-center text-xs bg-primary/5">Đến</TableHead>
-                      <TableHead className="text-center text-xs bg-primary/5">Đi</TableHead>
-                      <TableHead className="text-center text-xs bg-primary/5">Nhỡ</TableHead>
+                      {/* Current Period Sub-Headers - Clickable for sort */}
+                      <TableHead 
+                        className="text-center text-xs bg-primary/5 cursor-pointer hover:bg-primary/10"
+                        onClick={() => toggleSort('totalCalls')}
+                      >
+                        <div className="flex items-center justify-center">
+                          Tổng
+                          {getSortIcon('totalCalls')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="text-center text-xs bg-primary/5 cursor-pointer hover:bg-primary/10"
+                        onClick={() => toggleSort('inboundCalls')}
+                      >
+                        <div className="flex items-center justify-center">
+                          Đến
+                          {getSortIcon('inboundCalls')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="text-center text-xs bg-primary/5 cursor-pointer hover:bg-primary/10"
+                        onClick={() => toggleSort('outboundCalls')}
+                      >
+                        <div className="flex items-center justify-center">
+                          Đi
+                          {getSortIcon('outboundCalls')}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="text-center text-xs bg-primary/5 cursor-pointer hover:bg-primary/10"
+                        onClick={() => toggleSort('missedCalls')}
+                      >
+                        <div className="flex items-center justify-center">
+                          Nhỡ
+                          {getSortIcon('missedCalls')}
+                        </div>
+                      </TableHead>
                       {/* Comparison Period Sub-Headers */}
                       {comparisonTableData.map((period) => (
                         <>
@@ -958,10 +1182,30 @@ export function SummaryTab({
               </div>
               
               {/* Total callers info */}
-              <div className="p-3 border-t bg-muted/30">
+              <div className="p-3 border-t bg-muted/30 flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  Tổng: <strong>{allCallerNumbers.length}</strong> số điện thoại
+                  Hiển thị: <strong>{allCallerNumbers.length}</strong> số điện thoại
+                  {callerSearch && ` (đang tìm: "${callerSearch}")`}
+                  {callerFilter !== 'all' && ` (lọc: ${
+                    callerFilter === 'hasInbound' ? 'có gọi đến' : 
+                    callerFilter === 'hasOutbound' ? 'có gọi đi' : 
+                    'có cuộc nhỡ'
+                  })`}
                 </span>
+                {(callerSearch || callerFilter !== 'all') && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      setCallerSearch('');
+                      setCallerFilter('all');
+                    }}
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Xóa bộ lọc
+                  </Button>
+                )}
               </div>
             </CardContent>
           )}
