@@ -84,6 +84,12 @@ export class CallCenterRecord {
   recordPath?: string;
 
   @Field(() => String, { nullable: true })
+  googleDriveUrl?: string;
+
+  @Field(() => String, { nullable: true })
+  googleDriveFileId?: string;
+
+  @Field(() => String, { nullable: true })
   domain?: string;
 
   @Field(() => GraphQLJSONObject, { nullable: true })

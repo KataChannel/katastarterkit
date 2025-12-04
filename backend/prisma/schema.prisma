@@ -3172,6 +3172,10 @@ model CallCenterRecord {
   // Recording
   recordPath String?
 
+  // Google Drive Recording Backup
+  googleDriveUrl    String? // URL to recording file on Google Drive
+  googleDriveFileId String? // Google Drive file ID
+
   // Metadata
   domain  String? // PBX domain
   rawData Json? // Full raw response for debugging

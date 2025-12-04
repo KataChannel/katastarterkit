@@ -221,6 +221,74 @@ export class GoogleDriveService {
   }
 
   /**
+   * Upload file buffer lên Google Drive vào folder cụ thể
+   * Sử dụng cho việc upload recording call center
+   */
+  async uploadFileToFolder(
+    buffer: Buffer,
+    fileName: string,
+    mimeType: string,
+    folderId: string,
+  ): Promise<GoogleDriveUploadResult> {
+    if (!this.drive) {
+      throw new BadRequestException('Google Drive chưa được cấu hình. Vui lòng liên hệ admin.');
+    }
+
+    try {
+      // Create readable stream from buffer
+      const stream = Readable.from(buffer);
+
+      // Upload file to specified folder
+      const response = await this.drive.files.create({
+        requestBody: {
+          name: fileName,
+          mimeType,
+          parents: [folderId],
+        },
+        media: {
+          mimeType,
+          body: stream,
+        },
+        fields: 'id, name, mimeType, size, webViewLink, webContentLink, thumbnailLink',
+        supportsAllDrives: true,
+      });
+
+      const file = response.data;
+
+      // Try to set public permission (may fail for Shared Drives)
+      try {
+        await this.drive.permissions.create({
+          fileId: file.id!,
+          requestBody: {
+            role: 'reader',
+            type: 'anyone',
+          },
+          supportsAllDrives: true,
+        });
+        this.logger.log(`✅ Set public permission for: ${fileName}`);
+      } catch (permError) {
+        // Ignore permission errors for Shared Drives - inherit from parent
+        this.logger.log(`ℹ️ Skipped permission setting (inherited from parent): ${fileName}`);
+      }
+
+      this.logger.log(`✅ Uploaded to Google Drive folder ${folderId}: ${fileName}`);
+
+      return {
+        id: file.id!,
+        name: file.name!,
+        mimeType: file.mimeType!,
+        size: parseInt(file.size || '0'),
+        webViewLink: file.webViewLink || `https://drive.google.com/file/d/${file.id}/view`,
+        webContentLink: file.webContentLink || `https://drive.google.com/uc?export=download&id=${file.id}`,
+        thumbnailLink: file.thumbnailLink || undefined,
+      };
+    } catch (error) {
+      this.logger.error(`❌ Upload to Google Drive folder failed: ${error.message}`, error.stack);
+      throw new BadRequestException(`Upload lên Google Drive thất bại: ${error.message}`);
+    }
+  }
+
+  /**
    * Download file từ URL và upload lên Google Drive
    */
   async uploadFromUrl(url: string): Promise<GoogleDriveUploadResult> {

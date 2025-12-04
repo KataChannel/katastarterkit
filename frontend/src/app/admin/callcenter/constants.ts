@@ -61,6 +61,8 @@ export const GET_CALLCENTER_RECORDS = gql`
         sipHangupDisposition
         callStatus
         recordPath
+        googleDriveUrl
+        googleDriveFileId
         domain
         syncedAt
       }

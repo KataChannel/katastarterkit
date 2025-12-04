@@ -41,6 +41,8 @@ export interface CallCenterRecord {
   sipHangupDisposition: string;
   callStatus: string;
   recordPath: string | null;
+  googleDriveUrl: string | null;
+  googleDriveFileId: string | null;
   domain: string;
   syncedAt: string;
 }
@@ -261,6 +263,7 @@ export interface DateRangeDialogProps {
 
 export interface AudioPlayerProps {
   recordPath: string | null;
+  googleDriveUrl: string | null;
   domain: string;
 }
 

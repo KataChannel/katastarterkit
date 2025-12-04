@@ -21,12 +21,18 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import { 
   Loader2, 
   CheckCircle, 
   XCircle, 
   Square,
   StopCircle,
+  Download,
+  Plus,
+  RefreshCw,
+  Ban,
+  Zap,
 } from 'lucide-react';
 import { FIND_UNIQUE } from '@/graphql/dynamic/operations';
 import { SYNC_POLLING_INTERVAL } from '../constants';
@@ -162,26 +168,52 @@ export function SyncProgressDialog({
     }
   }, [syncLog, stats, stopPolling]);
 
+  const totalProcessed = stats.recordsCreated + stats.recordsUpdated + stats.recordsSkipped;
   const progress =
     stats.recordsFetched > 0
-      ? ((stats.recordsCreated + stats.recordsUpdated) / stats.recordsFetched) * 100
+      ? Math.min((totalProcessed / stats.recordsFetched) * 100, 100)
       : 0;
 
   const isCompleted = stats.status === 'success' || stats.status === 'error' || stats.status === 'stopped';
+
+  // Format số với dấu phẩy
+  const formatNumber = (num: number) => num.toLocaleString('vi-VN');
+
+  // Tính tốc độ xử lý (records/giây)
+  const getProcessingRate = () => {
+    if (syncLog?.startedAt && totalProcessed > 0) {
+      const elapsed = (Date.now() - new Date(syncLog.startedAt).getTime()) / 1000;
+      if (elapsed > 0) {
+        return Math.round(totalProcessed / elapsed * 10) / 10;
+      }
+    }
+    return 0;
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {!isCompleted && <Loader2 className="h-4 w-4 animate-spin" />}
-            {stats.status === 'success' && <CheckCircle className="h-4 w-4 text-green-600" />}
-            {stats.status === 'error' && <XCircle className="h-4 w-4 text-red-600" />}
-            {stats.status === 'stopped' && <StopCircle className="h-4 w-4 text-orange-600" />}
-            Tiến trình đồng bộ
+            {!isCompleted && <Loader2 className="h-5 w-5 animate-spin text-blue-600" />}
+            {stats.status === 'success' && <CheckCircle className="h-5 w-5 text-green-600" />}
+            {stats.status === 'error' && <XCircle className="h-5 w-5 text-red-600" />}
+            {stats.status === 'stopped' && <StopCircle className="h-5 w-5 text-orange-600" />}
+            Đang đồng bộ dữ liệu
+            {!isCompleted && (
+              <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-300 animate-pulse">
+                <Zap className="h-3 w-3 mr-1" />
+                Live
+              </Badge>
+            )}
           </DialogTitle>
-          <DialogDescription>
-            {stats.status === 'running' && 'Đang đồng bộ dữ liệu từ PBX API...'}
+          <DialogDescription className="flex items-center gap-2">
+            {stats.status === 'running' && (
+              <>
+                <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                Vui lòng đợi trong giây lát, không đóng trang này
+              </>
+            )}
             {stats.status === 'success' && 'Đồng bộ hoàn thành thành công!'}
             {stats.status === 'error' && 'Đồng bộ thất bại!'}
             {stats.status === 'stopped' && 'Đồng bộ đã bị dừng!'}
@@ -191,13 +223,31 @@ export function SyncProgressDialog({
         <div className="flex-1 overflow-y-auto space-y-4 py-4">
           {/* Sync Info */}
           {syncLog && (
-            <div className="px-4 py-2 bg-muted/50 rounded-md text-xs text-muted-foreground">
-              <div className="flex justify-between items-center">
-                <span>Sync Log ID: {syncLogId?.slice(0, 8)}...</span>
-                <span>
-                  {syncLog.startedAt && format(new Date(syncLog.startedAt), 'HH:mm:ss', { locale: vi })}
-                  {syncLog.duration && ` • ${(syncLog.duration / 1000).toFixed(1)}s`}
-                </span>
+            <div className="px-4 py-3 bg-muted/50 rounded-lg text-sm">
+              <div className="flex flex-wrap justify-between items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="font-mono text-xs">
+                    ID: {syncLogId?.slice(0, 8)}
+                  </Badge>
+                  {syncLog.startedAt && (
+                    <span className="text-muted-foreground">
+                      Bắt đầu: {format(new Date(syncLog.startedAt), 'HH:mm:ss dd/MM', { locale: vi })}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {syncLog.duration ? (
+                    <Badge variant="secondary">
+                      ⏱️ {(syncLog.duration / 1000).toFixed(1)}s
+                    </Badge>
+                  ) : (
+                    syncLog.startedAt && (
+                      <Badge variant="secondary" className="animate-pulse">
+                        ⏱️ {Math.round((Date.now() - new Date(syncLog.startedAt).getTime()) / 1000)}s
+                      </Badge>
+                    )
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -205,44 +255,73 @@ export function SyncProgressDialog({
           {/* Progress Bar */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Tiến trình</span>
-              <span className="font-semibold">{Math.round(progress)}%</span>
+              <span className="flex items-center gap-2">
+                Tiến trình
+                {!isCompleted && getProcessingRate() > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    <Zap className="h-3 w-3 mr-1" />
+                    {getProcessingRate()} rec/s
+                  </Badge>
+                )}
+              </span>
+              <span className="font-bold text-lg">{Math.round(progress)}%</span>
             </div>
-            <Progress value={progress} />
+            <Progress value={progress} className="h-3" />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Đã xử lý: {formatNumber(totalProcessed)}</span>
+              <span>Tổng: {formatNumber(stats.recordsFetched)}</span>
+            </div>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 relative">
-              <div className="text-2xl font-bold text-blue-700">
-                {stats.recordsFetched}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <Download className="h-8 w-8 text-blue-400 opacity-50" />
                 {!isCompleted && stats.recordsFetched > 0 && (
-                  <span className="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
                 )}
               </div>
-              <div className="text-xs text-blue-600">Đã tải từ API</div>
+              <div className="text-3xl font-bold text-blue-700 mt-2">
+                {formatNumber(stats.recordsFetched)}
+              </div>
+              <div className="text-xs text-blue-600 font-medium">Đã tải từ API</div>
             </div>
-            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-              <div className="text-2xl font-bold text-green-700">
-                {stats.recordsCreated}
+            
+            <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <Plus className="h-8 w-8 text-green-400 opacity-50" />
                 {!isCompleted && stats.recordsCreated > 0 && (
-                  <span className="ml-2 inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 )}
               </div>
-              <div className="text-xs text-green-600">Tạo mới</div>
+              <div className="text-3xl font-bold text-green-700 mt-2">
+                {formatNumber(stats.recordsCreated)}
+              </div>
+              <div className="text-xs text-green-600 font-medium">Tạo mới</div>
             </div>
-            <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-              <div className="text-2xl font-bold text-yellow-700">
-                {stats.recordsUpdated}
+            
+            <div className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border border-yellow-200 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <RefreshCw className="h-8 w-8 text-yellow-400 opacity-50" />
                 {!isCompleted && stats.recordsUpdated > 0 && (
-                  <span className="ml-2 inline-block w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
                 )}
               </div>
-              <div className="text-xs text-yellow-600">Cập nhật</div>
+              <div className="text-3xl font-bold text-yellow-700 mt-2">
+                {formatNumber(stats.recordsUpdated)}
+              </div>
+              <div className="text-xs text-yellow-600 font-medium">Cập nhật</div>
             </div>
-            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="text-2xl font-bold text-gray-700">{stats.recordsSkipped}</div>
-              <div className="text-xs text-gray-600">Bỏ qua</div>
+            
+            <div className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 relative overflow-hidden">
+              <div className="flex items-center justify-between">
+                <Ban className="h-8 w-8 text-gray-400 opacity-50" />
+              </div>
+              <div className="text-3xl font-bold text-gray-700 mt-2">
+                {formatNumber(stats.recordsSkipped)}
+              </div>
+              <div className="text-xs text-gray-600 font-medium">Bỏ qua</div>
             </div>
           </div>
 

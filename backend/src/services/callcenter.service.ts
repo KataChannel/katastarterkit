@@ -8,6 +8,7 @@ import {
   CallCenterRecordFiltersInput,
 } from '../graphql/inputs/callcenter.input';
 import { PaginationInput } from '../graphql/models/pagination.model';
+import { GoogleDriveService } from './google-drive.service';
 
 interface ExternalCDRResponse {
   status: string;
@@ -40,7 +41,16 @@ export class CallCenterService {
   // Map để track các sync đang chạy: syncLogId -> AbortController
   private runningSyncs: Map<string, { aborted: boolean; signal: AbortController }> = new Map();
 
-  constructor(private readonly prisma: PrismaService) {}
+  // Google Drive folder ID for call recordings
+  private readonly CALL_RECORDINGS_FOLDER_ID = '1sqxPHnJmHCwyVD9vghPe-i8nbKonmjHT';
+
+  // PBX Recording base URL
+  private readonly PBX_RECORDING_BASE_URL = 'https://pbx01.onepos.vn:8080/recordings';
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly googleDriveService: GoogleDriveService,
+  ) {}
 
   // ============================================================================
   // STOP SYNC FUNCTIONALITY
@@ -139,6 +149,74 @@ export class CallCenterService {
       syncLogId,
       recordsProcessed: updatedLog.recordsFetched,
     };
+  }
+
+  // ============================================================================
+  // GOOGLE DRIVE RECORDING UPLOAD
+  // ============================================================================
+
+  /**
+   * Upload call recording từ PBX server lên Google Drive
+   * @param recordPath - đường dẫn recording từ API PBX
+   * @param recordId - ID của record để tạo tên file
+   * @returns Google Drive URL hoặc null nếu lỗi
+   */
+  private async uploadRecordingToGoogleDrive(
+    recordPath: string,
+    recordId: string,
+  ): Promise<{ url: string; fileId: string } | null> {
+    if (!recordPath) {
+      return null;
+    }
+
+    // Kiểm tra Google Drive đã được cấu hình chưa
+    if (!this.googleDriveService.isConfigured()) {
+      this.logger.warn('Google Drive chưa được cấu hình - bỏ qua upload recording');
+      return null;
+    }
+
+    try {
+      const recordingUrl = `${this.PBX_RECORDING_BASE_URL}${recordPath}`;
+      this.logger.log(`📞 Đang tải recording từ: ${recordingUrl}`);
+
+      // Tải file từ PBX server
+      const response = await fetch(recordingUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+      });
+
+      if (!response.ok) {
+        this.logger.warn(`Không thể tải recording: ${response.status} ${response.statusText}`);
+        return null;
+      }
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const contentType = response.headers.get('content-type') || 'audio/wav';
+      
+      // Tạo tên file từ recordPath
+      const pathParts = recordPath.split('/');
+      const originalFileName = pathParts[pathParts.length - 1] || `recording_${recordId}.wav`;
+      
+      // Upload lên Google Drive với folder ID chỉ định
+      const result = await this.googleDriveService.uploadFileToFolder(
+        buffer,
+        originalFileName,
+        contentType,
+        this.CALL_RECORDINGS_FOLDER_ID,
+      );
+
+      this.logger.log(`✅ Đã upload recording lên Google Drive: ${result.webViewLink}`);
+
+      return {
+        url: result.webViewLink,
+        fileId: result.id,
+      };
+    } catch (error) {
+      this.logger.error(`❌ Lỗi upload recording lên Google Drive: ${error.message}`);
+      return null;
+    }
   }
 
   // ============================================================================
@@ -371,7 +449,8 @@ export class CallCenterService {
               where: { externalUuid: record.uuid },
             });
 
-            const data = {
+            // Chuẩn bị dữ liệu cơ bản
+            const data: any = {
               externalUuid: record.uuid,
               direction: record.direction?.toUpperCase() as any,
               callerIdNumber: record.caller_id_number,
@@ -388,6 +467,28 @@ export class CallCenterService {
               domain: config.domain,
               rawData: record as any,
             };
+
+            // Upload recording lên Google Drive nếu có file ghi âm và chưa được upload
+            if (record.record_path) {
+              // Chỉ upload nếu là record mới hoặc record cũ chưa có googleDriveUrl
+              const shouldUpload = !existing || !existing.googleDriveUrl;
+              
+              if (shouldUpload) {
+                const driveResult = await this.uploadRecordingToGoogleDrive(
+                  record.record_path,
+                  record.uuid,
+                );
+                
+                if (driveResult) {
+                  data.googleDriveUrl = driveResult.url;
+                  data.googleDriveFileId = driveResult.fileId;
+                }
+              } else {
+                // Giữ nguyên Google Drive URL cũ nếu đã có
+                data.googleDriveUrl = existing.googleDriveUrl;
+                data.googleDriveFileId = existing.googleDriveFileId;
+              }
+            }
 
             if (existing) {
               await this.prisma.callCenterRecord.update({

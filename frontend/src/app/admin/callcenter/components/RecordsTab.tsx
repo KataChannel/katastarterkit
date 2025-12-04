@@ -161,9 +161,13 @@ export function RecordsTab({
     {
       field: 'recordPath',
       headerName: 'Ghi âm',
-      width: 180,
+      width: 200,
       cellRenderer: (params) => (
-        <AudioPlayer recordPath={params.value} domain={params.data.domain} />
+        <AudioPlayer 
+          recordPath={params.value} 
+          googleDriveUrl={params.data.googleDriveUrl}
+          domain={params.data.domain} 
+        />
       ),
     },
   ];

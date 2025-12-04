@@ -935,6 +935,8 @@ type CallCenterRecord {
   duration: String
   endEpoch: String
   externalUuid: String!
+  googleDriveFileId: String
+  googleDriveUrl: String
   id: ID!
   outboundCallerIdNumber: String
   rawData: JSONObject
