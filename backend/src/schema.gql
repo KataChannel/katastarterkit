@@ -680,6 +680,56 @@ type AuthResponse {
   user: User!
 }
 
+type BackupInfo {
+  createdAt: String!
+  domain: String!
+  folder: String!
+  hasManifest: Boolean!
+  tableCount: Int!
+  tables: [BackupTableInfo!]
+  totalRecords: Int!
+  totalSize: String!
+}
+
+type BackupOperation {
+  error: String
+  folder: String
+  id: String!
+  message: String!
+  progress: Int
+  status: BackupStatus!
+}
+
+type BackupStats {
+  backups: [BackupInfo!]!
+  domain: String!
+  latestBackup: String
+  oldestBackup: String
+  totalBackups: Int!
+  totalSize: String!
+}
+
+"""Status of backup operation"""
+enum BackupStatus {
+  FAILED
+  IN_PROGRESS
+  PENDING
+  SUCCESS
+}
+
+type BackupTableInfo {
+  compressed: Boolean!
+  name: String!
+  records: Int!
+  size: String!
+}
+
+"""Type of backup"""
+enum BackupType {
+  FULL
+  SMART
+}
+
 """The type of a page block"""
 enum BlockType {
   BLOG_CAROUSEL
@@ -3147,6 +3197,7 @@ type Mutation {
   cancelOrder(input: CancelOrderInput!): CancelOrderResponse!
   cancelWorkflowInstance(id: ID!, reason: String!): Boolean!
   changePassword(input: ChangePasswordInput!): Boolean!
+  cleanupOldBackups(domain: String, keepCount: Int! = 5): Int!
 
   """Clear all cached data"""
   clearCache: Boolean!
@@ -3172,6 +3223,7 @@ type Mutation {
   createAffiliateCampaign(input: CreateCampaignInput!): AffCampaign!
   createAffiliateLink(input: CreateAffLinkInput!): AffLink!
   createAffiliateUser(input: CreateAffUserInput!): AffUser!
+  createBackup(domain: String, type: BackupType! = SMART): BackupOperation!
   createBlog(input: CreateBlogInput!): BlogType!
   createBlogCategory(input: CreateBlogCategoryInput!): BlogCategoryType!
   createBlogTag(input: CreateBlogTagInput!): BlogTagType!
@@ -3258,6 +3310,7 @@ type Mutation {
   deleteAcademyTestimonial(id: ID!): AcademyTestimonialModel!
   deleteAffiliateCampaign(id: String!): Boolean!
   deleteAllReadNotifications: Boolean!
+  deleteBackup(domain: String, folder: String!): Boolean!
   deleteBlog(id: ID!): Boolean!
   deleteBlogCategory(id: ID!): Boolean!
   deleteBlogTag(id: ID!): Boolean!
@@ -3426,6 +3479,7 @@ type Mutation {
   resetPasswordWithToken(email: String!, newPassword: String!, token: String!): OtpResponse!
   resolveTechnicalSupportTicket(resolution: String!, ticketId: String!): TechnicalSupportTicket!
   respondToApproval(input: RespondToApprovalInput!): Boolean!
+  restoreBackup(domain: String, folder: String!): BackupOperation!
 
   """Restore archived project (owner/admin only)"""
   restoreProject(id: ID!): Project!
@@ -4710,6 +4764,9 @@ type Query {
 
   """Get list of all available Prisma models"""
   getAvailableModels: [String!]!
+  getBackupDetails(domain: String, folder: String!): BackupInfo
+  getBackupOperationStatus(operationId: String!): BackupOperation
+  getBackupStats(domain: String): BackupStats!
   getCallCenterConfig: CallCenterConfig!
   getCallCenterRecordById(id: String!): CallCenterRecord!
   getCallCenterRecords(filters: CallCenterRecordFiltersInput, pagination: PaginationInput! = {limit: 20, page: 1}): PaginatedCallCenterRecords!

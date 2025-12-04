@@ -353,15 +353,32 @@ export class BackupResolver {
         });
 
         let output = '';
+        let lastProgressUpdate = 0;
 
         child.stdout.on('data', (data) => {
-          output += data.toString();
-          // Update progress based on output
-          const progressMatch = output.match(/\[(\d+)\/(\d+)\]/);
-          if (progressMatch) {
-            const current = parseInt(progressMatch[1]);
-            const total = parseInt(progressMatch[2]);
-            operation.progress = Math.round((current / total) * 100);
+          const chunk = data.toString();
+          output += chunk;
+          
+          // Parse progress from [PROGRESS:x/y] format
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            const progressMatch = line.match(/\[PROGRESS:(\d+)\/(\d+)\]\s*(\d+)%/);
+            if (progressMatch) {
+              const current = parseInt(progressMatch[1]);
+              const total = parseInt(progressMatch[2]);
+              const percent = parseInt(progressMatch[3]);
+              
+              // Update operation progress
+              operation.progress = percent;
+              operation.message = `Backing up table ${current}/${total}...`;
+              
+              // Log for debugging (throttled)
+              const now = Date.now();
+              if (now - lastProgressUpdate > 500) {
+                console.log(`Backup progress: ${percent}% (${current}/${total})`);
+                lastProgressUpdate = now;
+              }
+            }
           }
         });
 
@@ -436,15 +453,32 @@ export class BackupResolver {
         });
 
         let output = '';
+        let lastProgressUpdate = 0;
 
         child.stdout.on('data', (data) => {
-          output += data.toString();
-          // Update progress
-          const progressMatch = output.match(/\[(\d+)\/(\d+)\]/);
-          if (progressMatch) {
-            const current = parseInt(progressMatch[1]);
-            const total = parseInt(progressMatch[2]);
-            operation.progress = Math.round((current / total) * 100);
+          const chunk = data.toString();
+          output += chunk;
+          
+          // Parse progress from [PROGRESS:x/y] format
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            const progressMatch = line.match(/\[PROGRESS:(\d+)\/(\d+)\]\s*(\d+)%/);
+            if (progressMatch) {
+              const current = parseInt(progressMatch[1]);
+              const total = parseInt(progressMatch[2]);
+              const percent = parseInt(progressMatch[3]);
+              
+              // Update operation progress
+              operation.progress = percent;
+              operation.message = `Restoring table ${current}/${total}...`;
+              
+              // Log for debugging (throttled)
+              const now = Date.now();
+              if (now - lastProgressUpdate > 500) {
+                console.log(`Restore progress: ${percent}% (${current}/${total})`);
+                lastProgressUpdate = now;
+              }
+            }
           }
         });
 

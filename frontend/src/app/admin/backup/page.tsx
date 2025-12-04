@@ -21,6 +21,17 @@ import {
   TableCellsIcon,
 } from '@heroicons/react/24/outline';
 
+// Shimmer animation styles
+const shimmerStyles = `
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+`;
+
 // GraphQL Queries & Mutations
 const GET_BACKUP_STATS = gql`
   query GetBackupStats($domain: String) {
@@ -174,11 +185,15 @@ const StatusBadge: React.FC<{ status: BackupStatus }> = ({ status }) => {
 };
 
 const ProgressBar: React.FC<{ progress: number }> = ({ progress }) => (
-  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
     <div 
-      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-      style={{ width: `${progress}%` }}
-    />
+      className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 ease-out relative"
+      style={{ width: `${Math.max(progress, 2)}%` }}
+    >
+      {progress > 5 && (
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+      )}
+    </div>
   </div>
 );
 
@@ -411,6 +426,9 @@ export default function BackupManagerPage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
+      {/* Inject shimmer animation styles */}
+      <style dangerouslySetInnerHTML={{ __html: shimmerStyles }} />
+      
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -424,19 +442,33 @@ export default function BackupManagerPage() {
 
       {/* Current Operation Progress */}
       {currentOperation && currentOperation.status === 'IN_PROGRESS' && (
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <ArrowPathIcon className="w-5 h-5 text-blue-600 animate-spin" />
-              <span className="font-medium text-blue-900 dark:text-blue-100">
-                {currentOperation.message}
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <ArrowPathIcon className="w-6 h-6 text-blue-600 animate-spin" />
+                <div className="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-25" />
+              </div>
+              <div>
+                <span className="font-semibold text-blue-900 dark:text-blue-100 block">
+                  {currentOperation.message}
+                </span>
+                <span className="text-xs text-blue-600 dark:text-blue-400">
+                  Đang xử lý...
+                </span>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                {currentOperation.progress || 0}%
               </span>
             </div>
-            <span className="text-sm text-blue-700 dark:text-blue-300">
-              {currentOperation.progress || 0}%
-            </span>
           </div>
           <ProgressBar progress={currentOperation.progress || 0} />
+          <div className="mt-2 flex justify-between text-xs text-blue-600 dark:text-blue-400">
+            <span>Tiến độ</span>
+            <span>{currentOperation.progress || 0}/100</span>
+          </div>
         </div>
       )}
 

@@ -203,9 +203,8 @@ async function runSmartBackup(): Promise<void> {
     processedTables++;
     const percent = (processedTables / tables.length) * 100;
     
-    if (options.showProgress) {
-      process.stdout.write(`\r   ${progressBar(percent)} ${table.padEnd(30)}`);
-    }
+    // Output progress in parseable format for API tracking
+    console.log(`[PROGRESS:${processedTables}/${tables.length}] ${Math.round(percent)}% - ${table}`);
     
     const result = await backupTable(table, BACKUP_DIR, options.compress);
     
@@ -218,11 +217,6 @@ async function runSmartBackup(): Promise<void> {
       });
       totalRecords += result.records;
     }
-  }
-  
-  // Clear progress line
-  if (options.showProgress) {
-    process.stdout.write('\r' + ' '.repeat(80) + '\r');
   }
   
   // Calculate totals

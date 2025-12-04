@@ -509,16 +509,10 @@ async function runQuickRestore(): Promise<void> {
     processed++;
     const percent = (processed / tablesToRestore.length) * 100;
     
-    if (options.showProgress) {
-      process.stdout.write(`\r   ${progressBar(percent)} [${processed}/${tablesToRestore.length}] ${table.padEnd(25)}`);
-    }
+    // Output progress in parseable format for API tracking
+    console.log(`[PROGRESS:${processed}/${tablesToRestore.length}] ${Math.round(percent)}% - ${table}`);
     
     await restoreTable(table, backupPath, stats);
-  }
-  
-  // Clear progress line
-  if (options.showProgress) {
-    process.stdout.write('\r' + ' '.repeat(80) + '\r');
   }
   
   // Calculate totals
