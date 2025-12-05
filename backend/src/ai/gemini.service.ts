@@ -264,4 +264,104 @@ Format as JSON array:
       throw new Error('Failed to generate quiz questions');
     }
   }
+
+  // ============== E-commerce Content Generation ==============
+
+  /**
+   * Tạo mô tả cho danh mục sản phẩm
+   */
+  async generateCategoryDescription(categoryName: string, context?: string): Promise<string> {
+    if (!this.model) {
+      throw new Error('Gemini AI not configured');
+    }
+
+    try {
+      const prompt = `Bạn là chuyên gia marketing cho cửa hàng rau sạch. Hãy viết một mô tả ngắn gọn, hấp dẫn cho danh mục "${categoryName}" trong tiếng Việt.
+
+${context ? `Thông tin thêm: ${context}` : ''}
+
+Yêu cầu:
+- Mô tả từ 50-100 từ
+- Nhấn mạnh tính tươi ngon, sạch, an toàn
+- Phù hợp cho cửa hàng rau sạch
+- Không dùng các cụm từ quá phóng đại
+- Giọng văn thân thiện, gần gũi
+
+Chỉ trả về đoạn mô tả, không giải thích thêm.`;
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text().trim();
+    } catch (error) {
+      this.logger.error('Error generating category description:', error);
+      throw new Error('Không thể tạo mô tả. Vui lòng thử lại.');
+    }
+  }
+
+  /**
+   * Tạo mô tả cho sản phẩm
+   */
+  async generateProductDescription(productName: string, categoryName?: string, context?: string): Promise<string> {
+    if (!this.model) {
+      throw new Error('Gemini AI not configured');
+    }
+
+    try {
+      const prompt = `Bạn là chuyên gia marketing cho cửa hàng rau sạch. Hãy viết mô tả sản phẩm "${productName}"${categoryName ? ` thuộc danh mục "${categoryName}"` : ''} bằng tiếng Việt.
+
+${context ? `Thông tin thêm: ${context}` : ''}
+
+Yêu cầu:
+- Mô tả từ 80-150 từ
+- Nêu bật đặc điểm, lợi ích sức khỏe
+- Nhấn mạnh tính tươi ngon, sạch, an toàn
+- Gợi ý cách sử dụng/chế biến nếu phù hợp
+- Giọng văn thân thiện, gần gũi
+
+Chỉ trả về đoạn mô tả, không giải thích thêm.`;
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text().trim();
+    } catch (error) {
+      this.logger.error('Error generating product description:', error);
+      throw new Error('Không thể tạo mô tả. Vui lòng thử lại.');
+    }
+  }
+
+  /**
+   * Tạo prompt để generate hình ảnh từ tên danh mục/sản phẩm
+   */
+  async generateImagePrompt(name: string, type: 'category' | 'product' = 'product'): Promise<string> {
+    if (!this.model) {
+      throw new Error('Gemini AI not configured');
+    }
+
+    try {
+      const prompt = `Tạo một prompt bằng tiếng Anh để generate hình ảnh cho ${type === 'category' ? 'danh mục' : 'sản phẩm'} "${name}" của cửa hàng rau sạch.
+
+Yêu cầu cho prompt:
+- Phong cách: ảnh chụp sản phẩm chuyên nghiệp, nền trắng hoặc tự nhiên
+- Ánh sáng: sáng, tự nhiên
+- Chất lượng: cao, chi tiết
+- Màu sắc: tươi sáng, tự nhiên
+- Không có chữ, logo, watermark
+
+Chỉ trả về prompt bằng tiếng Anh, không giải thích thêm. Prompt nên ngắn gọn (dưới 100 từ).`;
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text().trim();
+    } catch (error) {
+      this.logger.error('Error generating image prompt:', error);
+      throw new Error('Không thể tạo prompt. Vui lòng thử lại.');
+    }
+  }
+
+  /**
+   * Kiểm tra xem service đã được cấu hình chưa
+   */
+  isConfigured(): boolean {
+    return !!this.model;
+  }
 }

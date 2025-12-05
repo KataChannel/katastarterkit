@@ -164,6 +164,10 @@ export default function IconPermissionSettingsPage() {
     setSaving(true);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      
+      // Dispatch custom event để các component khác biết config đã thay đổi
+      window.dispatchEvent(new CustomEvent('icon_permissions_config_changed', { detail: config }));
+      
       setHasChanges(false);
       toast.success('Đã lưu cấu hình thành công');
     } catch (err) {

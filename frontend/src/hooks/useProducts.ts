@@ -30,10 +30,12 @@ import {
 // ============================================================================
 
 export function useProducts(input?: GetProductsInput) {
-  const { data, loading, error, refetch } = useQuery<{
+  const { data, loading, error, refetch, networkStatus } = useQuery<{
     products: PaginatedProducts;
   }>(GET_PRODUCTS, {
     variables: { input },
+    fetchPolicy: 'network-only', // Luôn fetch từ server, không dùng cache
+    notifyOnNetworkStatusChange: true, // Cập nhật loading state khi refetch
   });
 
   return {
@@ -41,10 +43,10 @@ export function useProducts(input?: GetProductsInput) {
     pagination: {
       total: data?.products.total || 0,
       page: data?.products.page || 1,
-      limit: data?.products.limit || 10,
+      limit: data?.products.limit || 50,
       totalPages: data?.products.totalPages || 0,
     },
-    loading,
+    loading: loading || networkStatus === 4, // networkStatus 4 = refetching
     error,
     refetch,
   };

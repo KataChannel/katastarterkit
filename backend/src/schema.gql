@@ -2843,7 +2843,7 @@ input GetFilesInput {
 
 input GetProductsInput {
   filters: ProductFiltersInput
-  limit: Int = 20
+  limit: Int = 50
   page: Int = 1
   sortBy: String = "createdAt"
   sortOrder: String = "desc"

@@ -20,6 +20,9 @@ import {
 // Storage key cho localStorage
 const STORAGE_KEY = 'icon_permissions_config';
 
+// Custom event name for config changes
+const CONFIG_CHANGE_EVENT = 'icon_permissions_config_changed';
+
 // Hook để quản lý icon permissions
 export function useIconPermissions() {
   const { user, isAuthenticated } = useAuth();
@@ -59,6 +62,9 @@ export function useIconPermissions() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newConfig));
       setConfig(newConfig);
+      
+      // Dispatch custom event để các component khác biết config đã thay đổi
+      window.dispatchEvent(new CustomEvent(CONFIG_CHANGE_EVENT, { detail: newConfig }));
       
       // TODO: Save to API
       // await fetch('/api/settings/icon-permissions', {
@@ -196,6 +202,34 @@ export function useIconPermissions() {
   useEffect(() => {
     loadConfig();
   }, [loadConfig]);
+
+  // Listen for config changes from other tabs/windows or custom events
+  useEffect(() => {
+    // Handler for localStorage changes (cross-tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          const newConfig = JSON.parse(e.newValue) as IconPermissionConfig;
+          setConfig(newConfig);
+        } catch (err) {
+          console.error('Failed to parse updated config:', err);
+        }
+      }
+    };
+
+    // Handler for custom event (same tab)
+    const handleConfigChange = (e: CustomEvent<IconPermissionConfig>) => {
+      setConfig(e.detail);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener(CONFIG_CHANGE_EVENT, handleConfigChange as EventListener);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener(CONFIG_CHANGE_EVENT, handleConfigChange as EventListener);
+    };
+  }, []);
 
   return {
     // State

@@ -302,7 +302,7 @@ export class GetProductsInput {
   @Field(() => Int, { nullable: true, defaultValue: 1 })
   page?: number;
 
-  @Field(() => Int, { nullable: true, defaultValue: 20 })
+  @Field(() => Int, { nullable: true, defaultValue: 50 })
   limit?: number;
 
   @Field({ nullable: true, defaultValue: 'createdAt' })

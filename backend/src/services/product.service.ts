@@ -18,7 +18,7 @@ export class ProductService {
 
   // Get Products with pagination and filters
   async getProducts(input: GetProductsInput) {
-    const { page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc', filters } = input;
+    const { page = 1, limit = 50, sortBy = 'createdAt', sortOrder = 'desc', filters } = input;
     const skip = (page - 1) * limit;
 
     console.log('[ProductService] getProducts input:', JSON.stringify(input, null, 2));

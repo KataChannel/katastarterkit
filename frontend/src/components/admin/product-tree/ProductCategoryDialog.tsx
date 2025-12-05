@@ -14,8 +14,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles, ImageIcon, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 interface CategoryDialogProps {
   open: boolean;
@@ -48,6 +49,10 @@ export function ProductCategoryDialog({ open, onOpenChange, category, onSuccess 
 
   const loading = creating || updating;
   const isEdit = !!category;
+  
+  // AI loading states
+  const [generatingDescription, setGeneratingDescription] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
 
   // Reset form when dialog opens/closes or category changes
   useEffect(() => {
@@ -89,6 +94,73 @@ export function ProductCategoryDialog({ open, onOpenChange, category, onSuccess 
         .replace(/-+/g, '-')
         .trim(),
     });
+  };
+
+  // Generate description with AI
+  const handleGenerateDescription = async () => {
+    if (!formData.name.trim()) {
+      toast.error('Vui lòng nhập tên danh mục trước');
+      return;
+    }
+    
+    setGeneratingDescription(true);
+    try {
+      const response = await fetch('/api/ai/ecommerce/generate-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          type: 'category',
+          context: 'Danh mục sách cũ, sách đã qua sử dụng',
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Không thể tạo mô tả');
+      }
+      
+      setFormData({ ...formData, description: data.description });
+      toast.success('Đã tạo mô tả bằng AI');
+    } catch (error: any) {
+      toast.error(error.message || 'Lỗi khi tạo mô tả');
+    } finally {
+      setGeneratingDescription(false);
+    }
+  };
+
+  // Generate image with AI
+  const handleGenerateImage = async () => {
+    if (!formData.name.trim()) {
+      toast.error('Vui lòng nhập tên danh mục trước');
+      return;
+    }
+    
+    setGeneratingImage(true);
+    try {
+      const response = await fetch('/api/ai/ecommerce/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          type: 'category',
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Không thể tạo hình ảnh');
+      }
+      
+      setFormData({ ...formData, image: data.imageUrl });
+      toast.success('Đã tạo hình ảnh bằng AI');
+    } catch (error: any) {
+      toast.error(error.message || 'Lỗi khi tạo hình ảnh');
+    } finally {
+      setGeneratingImage(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -183,7 +255,24 @@ export function ProductCategoryDialog({ open, onOpenChange, category, onSuccess 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Mô tả</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="description">Mô tả</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateDescription}
+                  disabled={generatingDescription || !formData.name.trim()}
+                  className="h-7 text-xs gap-1"
+                >
+                  {generatingDescription ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3 w-3" />
+                  )}
+                  Tạo bằng AI
+                </Button>
+              </div>
               <Textarea
                 id="description"
                 value={formData.description}
@@ -194,13 +283,43 @@ export function ProductCategoryDialog({ open, onOpenChange, category, onSuccess 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image">URL hình ảnh</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="image">URL hình ảnh</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateImage}
+                  disabled={generatingImage || !formData.name.trim()}
+                  className="h-7 text-xs gap-1"
+                >
+                  {generatingImage ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <ImageIcon className="h-3 w-3" />
+                  )}
+                  Tạo hình AI
+                </Button>
+              </div>
               <Input
                 id="image"
                 value={formData.image}
                 onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                 placeholder="https://example.com/image.jpg"
               />
+              {formData.image && (
+                <div className="mt-2 relative w-full h-32 rounded-md overflow-hidden border">
+                  <Image
+                    src={formData.image}
+                    alt="Preview"
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

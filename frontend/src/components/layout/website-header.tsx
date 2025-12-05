@@ -45,6 +45,8 @@ import Image from 'next/image';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { usePWA } from '@/hooks/usePWA';
 import { HeaderActions, DEFAULT_APP_MODULES } from '@/components/layout/HeaderActions';
+import { SmartHeaderActions } from '@/components/layout/SmartHeaderActions';
+import { useIconPermissions } from '@/hooks/useIconPermissions';
 import { CategoryDropdownMenu, CategorySimpleDropdown } from '@/components/layout/CategoryDropdownMenu';
 
 export function WebsiteHeader() {
@@ -58,6 +60,9 @@ export function WebsiteHeader() {
   
   // PWA capabilities
   const { capabilities, install } = usePWA();
+  
+  // ✅ Icon Permissions - respects role-based icon display settings
+  const { headerActionsConfig, checkIconPermission, isIconEnabled } = useIconPermissions();
 
   // ✅ Search Products Query
   const [searchProducts, { loading: searchLoading, data: searchData }] = useLazyQuery(GET_PRODUCTS, {
@@ -487,21 +492,26 @@ export function WebsiteHeader() {
               </TooltipProvider>
             )}
 
-            {/* Chat Support */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/10"
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.dispatchEvent(new CustomEvent('open-support-chat'));
-                }
-              }}
-            >
-              <MessageCircle className="w-5 h-5" />
-            </Button>
+            {/* Chat Support - respects icon permissions */}
+            {(headerActionsConfig.showChat || checkIconPermission('chat', 'external')) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/10"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('open-support-chat'));
+                  }
+                }}
+              >
+                <MessageCircle className="w-5 h-5" />
+              </Button>
+            )}
 
-            <NotificationBell />
+            {/* Notification Bell - respects icon permissions */}
+            {(headerActionsConfig.showNotifications || checkIconPermission('notifications', 'external')) && (
+              <NotificationBell />
+            )}
             
             {headerSettings['header.show_cart'] && (
               <Button
@@ -739,14 +749,11 @@ export function WebsiteHeader() {
               )}
             </div>
 
-            {/* User Actions - Using HeaderActions component */}
+            {/* User Actions - Using SmartHeaderActions component with icon permissions */}
             <div className="col-span-2 flex items-center justify-end space-x-2 text-white pr-4">
-              {/* HeaderActions with dark variant for website header */}
-              <HeaderActions
+              {/* SmartHeaderActions - automatically respects icon permissions by role */}
+              <SmartHeaderActions
                 variant="dark"
-                showNotifications={true}
-                showApps={true}
-                showChat={true}
                 showUser={headerSettings['header.show_user_menu'] !== false}
                 onChatClick={() => {
                   if (typeof window !== 'undefined') {
@@ -754,6 +761,7 @@ export function WebsiteHeader() {
                   }
                 }}
                 className="[&_button]:text-white [&_button:hover]:text-blue-200 [&_button:hover]:bg-white/10"
+                debug={false}
               />
               
               {/* Shopping Cart - Keep separate for cart count badge */}

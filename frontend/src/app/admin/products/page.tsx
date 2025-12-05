@@ -320,7 +320,8 @@ export default function ProductsPage() {
   }, []);
 
   const handlePageSizeChange = useCallback((newLimit: string) => {
-    setFilters(prev => ({ ...prev, limit: parseInt(newLimit), page: 1 }));
+    const limitNum = parseInt(newLimit, 10);
+    setFilters(prev => ({ ...prev, limit: limitNum, page: 1 }));
   }, []);
 
   // Handle advanced table sorting
@@ -513,7 +514,7 @@ export default function ProductsPage() {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Hiển thị</span>
             <Select
-              value={String(filters.limit)}
+              value={String(filters.limit || 50)}
               onValueChange={handlePageSizeChange}
             >
               <SelectTrigger className="w-[70px] h-8">
@@ -533,8 +534,8 @@ export default function ProductsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handlePageChange(pagination.page - 1)}
-              disabled={pagination.page <= 1 || loading}
+              onClick={() => handlePageChange((filters.page || 1) - 1)}
+              disabled={(filters.page || 1) <= 1 || loading}
             >
               <ChevronLeft className="w-4 h-4" />
               <span className="hidden sm:inline ml-1">Trước</span>
@@ -542,15 +543,15 @@ export default function ProductsPage() {
             
             <div className="flex items-center gap-1 px-2">
               <span className="text-sm font-medium">
-                Trang {pagination.page} / {pagination.totalPages || 1}
+                Trang {filters.page || 1} / {pagination.totalPages || 1}
               </span>
             </div>
             
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={pagination.page >= pagination.totalPages || loading}
+              onClick={() => handlePageChange((filters.page || 1) + 1)}
+              disabled={(filters.page || 1) >= (pagination.totalPages || 1) || loading}
             >
               <span className="hidden sm:inline mr-1">Sau</span>
               <ChevronRight className="w-4 h-4" />
