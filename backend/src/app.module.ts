@@ -65,6 +65,7 @@ import { PerformanceInterceptor } from './interceptors/performance.interceptor';
 import { ProjectModule } from './project/project.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { WorkflowModule } from './workflow/workflow.module';
+import { RagChatbotModule } from './rag-chatbot/rag-chatbot.module';
 
 @Module({
   imports: [
@@ -167,6 +168,7 @@ import { WorkflowModule } from './workflow/workflow.module';
     AnalyticsModule,
     WorkflowModule,
     AcademyModule,
+    RagChatbotModule, // RAG Chatbot for Rausach domain
   ],
   controllers: [
     LogController,
